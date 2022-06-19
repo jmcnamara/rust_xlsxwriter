@@ -1,11 +1,13 @@
 mod app;
 mod shared_strings;
 mod shared_strings_table;
+mod theme;
 mod xmlwriter;
 
 use crate::app::App;
 use crate::shared_strings::SharedStrings;
 use crate::shared_strings_table::SharedStringsTable;
+use crate::theme::Theme;
 use crate::xmlwriter::XMLWriter;
 use tempfile::tempfile;
 
@@ -24,6 +26,10 @@ pub fn assemble_all() {
     app.add_heading_pair("Worksheets", 1);
     app.add_part_name("Sheet1");
     app.assemble_xml_file();
+
+    let mut writer = XMLWriter::new(&tempfile);
+    let mut theme = Theme::new(&mut writer);
+    theme.assemble_xml_file();
 }
 
 #[cfg(test)]

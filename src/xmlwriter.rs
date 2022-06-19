@@ -115,6 +115,11 @@ impl<'a> XMLWriter<'a> {
                 .expect("Couldn't write to file");
         }
     }
+
+    // Write the theme string to the theme file.
+    pub fn write_theme(&mut self, theme: &str) {
+        writeln!(&mut self.xmlfile, "{}", theme).expect("Couldn't write to file");
+    }
 }
 
 // Escape XML characters in attributes.
