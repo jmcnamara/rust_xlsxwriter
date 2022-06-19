@@ -12,7 +12,7 @@ pub struct SharedStrings<'a> {
 }
 
 impl<'a> SharedStrings<'a> {
-    // Create a new struct to to track Excel shared strings between worksheets.
+    // Create a new SharedStrings struct.
     pub fn new(writer: &'a mut XMLWriter<'a>) -> SharedStrings<'a> {
         SharedStrings { writer }
     }

@@ -14,7 +14,7 @@ pub struct Core<'a> {
 }
 
 impl<'a> Core<'a> {
-    // Create a new struct to to track Excel shared strings between worksheets.
+    // Create a new Core struct.
     pub fn new(writer: &'a mut XMLWriter<'a>) -> Core<'a> {
         Core {
             writer,

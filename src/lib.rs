@@ -1,5 +1,6 @@
 mod app;
 mod core;
+mod relationship;
 mod shared_strings;
 mod shared_strings_table;
 mod theme;
@@ -7,6 +8,7 @@ mod xmlwriter;
 
 use crate::app::App;
 use crate::core::Core;
+use crate::relationship::Relationship;
 use crate::shared_strings::SharedStrings;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::theme::Theme;
@@ -36,6 +38,11 @@ pub fn assemble_all() {
     let mut writer = XMLWriter::new(&tempfile);
     let mut core = Core::new(&mut writer);
     core.assemble_xml_file();
+
+    let mut writer = XMLWriter::new(&tempfile);
+    let mut rels = Relationship::new(&mut writer);
+    rels.add_document_relationship("/worksheet", "worksheets/sheet1.xml");
+    rels.assemble_xml_file();
 }
 
 #[cfg(test)]

@@ -10,7 +10,7 @@ pub struct Theme<'a> {
 }
 
 impl<'a> Theme<'a> {
-    // Create a new struct to to track Excel shared strings between worksheets.
+    // Create a new Theme struct.
     pub fn new(writer: &'a mut XMLWriter<'a>) -> Theme<'a> {
         Theme { writer }
     }
