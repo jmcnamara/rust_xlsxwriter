@@ -4,7 +4,7 @@
 // it stores them in a hash table with an index number, based on the order of
 // writing and writes the index to the worksheet instead.
 //
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 use std::collections::HashMap;

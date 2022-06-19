@@ -26,8 +26,14 @@ impl<'a> XMLWriter<'a> {
         .expect("Couldn't write to file");
     }
 
+    // Write an XML start tag without attributes.
+    #[allow(dead_code)]
+    pub fn xml_start_tag(&mut self, tag: &str) {
+        write!(&mut self.xmlfile, r"<{}>", tag).expect("Couldn't write to file");
+    }
+
     // Write an XML start tag with attributes.
-    pub fn xml_start_tag(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
+    pub fn xml_start_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
         let mut attribute_str = String::from("");
 
         for attribute in attributes {
@@ -43,9 +49,15 @@ impl<'a> XMLWriter<'a> {
         write!(&mut self.xmlfile, r"</{}>", tag).expect("Couldn't write to file");
     }
 
+    // Write an empty XML tag without attributes.
+    #[allow(dead_code)]
+    pub fn xml_empty_tag(&mut self, tag: &str) {
+        write!(&mut self.xmlfile, r"<{}/>", tag).expect("Couldn't write to file");
+    }
+
     // Write an empty XML tag with attributes.
     #[allow(dead_code)]
-    pub fn xml_empty_tag(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
+    pub fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
         let mut attribute_str = String::from("");
 
         for attribute in attributes {
@@ -56,9 +68,21 @@ impl<'a> XMLWriter<'a> {
         write!(&mut self.xmlfile, r"<{}{}/>", tag, attribute_str).expect("Couldn't write to file");
     }
 
-    // Write an XML element containing data with optional attributes.
+    // Write an XML element containing data without attributes.
     #[allow(dead_code)]
-    pub fn xml_data_element(&mut self, tag: &str, data: &str, attributes: &Vec<(&str, &str)>) {
+    pub fn xml_data_element(&mut self, tag: &str, data: &str) {
+        write!(
+            &mut self.xmlfile,
+            r"<{}>{}</{}>",
+            tag,
+            escape_data(data),
+            tag
+        )
+        .expect("Couldn't write to file");
+    }
+    // Write an XML element containing data with attributes.
+    #[allow(dead_code)]
+    pub fn xml_data_element_attr(&mut self, tag: &str, data: &str, attributes: &Vec<(&str, &str)>) {
         let mut attribute_str = String::from("");
 
         for attribute in attributes {
@@ -143,14 +167,26 @@ mod tests {
     }
 
     #[test]
-    fn test_xml_start_tag() {
+    fn test_xml_start_tag_without_attributes() {
+        let expected = "<foo>";
+
+        let mut tempfile = tempfile().unwrap();
+        let mut writer = XMLWriter::new(&tempfile);
+
+        writer.xml_start_tag("foo");
+
+        let got = read_xmlfile_data(&mut tempfile);
+        assert_eq!(got, expected);
+    }
+    #[test]
+    fn test_xml_start_tag_without_attributes_implicit() {
         let expected = "<foo>";
         let attributes = vec![];
 
         let mut tempfile = tempfile().unwrap();
         let mut writer = XMLWriter::new(&tempfile);
 
-        writer.xml_start_tag("foo", &attributes);
+        writer.xml_start_tag_attr("foo", &attributes);
 
         let got = read_xmlfile_data(&mut tempfile);
         assert_eq!(got, expected);
@@ -164,7 +200,7 @@ mod tests {
         let mut tempfile = tempfile().unwrap();
         let mut writer = XMLWriter::new(&tempfile);
 
-        writer.xml_start_tag("foo", &attributes);
+        writer.xml_start_tag_attr("foo", &attributes);
 
         let got = read_xmlfile_data(&mut tempfile);
         assert_eq!(got, expected);
@@ -186,12 +222,11 @@ mod tests {
     #[test]
     fn test_xml_empty_tag() {
         let expected = "<foo/>";
-        let attributes = vec![];
 
         let mut tempfile = tempfile().unwrap();
         let mut writer = XMLWriter::new(&tempfile);
 
-        writer.xml_empty_tag("foo", &attributes);
+        writer.xml_empty_tag("foo");
 
         let got = read_xmlfile_data(&mut tempfile);
         assert_eq!(got, expected);
@@ -205,7 +240,7 @@ mod tests {
         let mut tempfile = tempfile().unwrap();
         let mut writer = XMLWriter::new(&tempfile);
 
-        writer.xml_empty_tag("foo", &attributes);
+        writer.xml_empty_tag_attr("foo", &attributes);
 
         let got = read_xmlfile_data(&mut tempfile);
         assert_eq!(got, expected);
@@ -214,12 +249,11 @@ mod tests {
     #[test]
     fn test_xml_data_element() {
         let expected = r#"<foo>bar</foo>"#;
-        let attributes = vec![];
 
         let mut tempfile = tempfile().unwrap();
         let mut writer = XMLWriter::new(&tempfile);
 
-        writer.xml_data_element("foo", "bar", &attributes);
+        writer.xml_data_element("foo", "bar");
 
         let got = read_xmlfile_data(&mut tempfile);
         assert_eq!(got, expected);
@@ -233,7 +267,7 @@ mod tests {
         let mut tempfile = tempfile().unwrap();
         let mut writer = XMLWriter::new(&tempfile);
 
-        writer.xml_data_element("foo", "bar", &attributes);
+        writer.xml_data_element_attr("foo", "bar", &attributes);
 
         let got = read_xmlfile_data(&mut tempfile);
         assert_eq!(got, expected);
@@ -247,7 +281,7 @@ mod tests {
         let mut tempfile = tempfile().unwrap();
         let mut writer = XMLWriter::new(&tempfile);
 
-        writer.xml_data_element("foo", "&<>\"", &attributes);
+        writer.xml_data_element_attr("foo", "&<>\"", &attributes);
 
         let got = read_xmlfile_data(&mut tempfile);
         assert_eq!(got, expected);
