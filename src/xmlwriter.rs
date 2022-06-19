@@ -27,7 +27,6 @@ impl<'a> XMLWriter<'a> {
     }
 
     // Write an XML start tag without attributes.
-    #[allow(dead_code)]
     pub fn xml_start_tag(&mut self, tag: &str) {
         write!(&mut self.xmlfile, r"<{}>", tag).expect("Couldn't write to file");
     }
@@ -69,7 +68,6 @@ impl<'a> XMLWriter<'a> {
     }
 
     // Write an XML element containing data without attributes.
-    #[allow(dead_code)]
     pub fn xml_data_element(&mut self, tag: &str, data: &str) {
         write!(
             &mut self.xmlfile,
@@ -81,7 +79,6 @@ impl<'a> XMLWriter<'a> {
         .expect("Couldn't write to file");
     }
     // Write an XML element containing data with attributes.
-    #[allow(dead_code)]
     pub fn xml_data_element_attr(&mut self, tag: &str, data: &str, attributes: &Vec<(&str, &str)>) {
         let mut attribute_str = String::from("");
 

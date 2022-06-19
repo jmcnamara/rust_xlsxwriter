@@ -1,10 +1,12 @@
 mod app;
+mod core;
 mod shared_strings;
 mod shared_strings_table;
 mod theme;
 mod xmlwriter;
 
 use crate::app::App;
+use crate::core::Core;
 use crate::shared_strings::SharedStrings;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::theme::Theme;
@@ -30,6 +32,10 @@ pub fn assemble_all() {
     let mut writer = XMLWriter::new(&tempfile);
     let mut theme = Theme::new(&mut writer);
     theme.assemble_xml_file();
+
+    let mut writer = XMLWriter::new(&tempfile);
+    let mut core = Core::new(&mut writer);
+    core.assemble_xml_file();
 }
 
 #[cfg(test)]
