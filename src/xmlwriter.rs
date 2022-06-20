@@ -55,7 +55,6 @@ impl<'a> XMLWriter<'a> {
     }
 
     // Write an empty XML tag with attributes.
-    #[allow(dead_code)]
     pub fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
         let mut attribute_str = String::from("");
 

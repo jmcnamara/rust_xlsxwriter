@@ -34,7 +34,7 @@ impl<'a> Core<'a> {
     // handling later.
     #[allow(dead_code)]
     pub fn set_create_time(&mut self, create_time: DateTime<Utc>) {
-        self.create_time = create_time.clone();
+        self.create_time = create_time;
     }
 
     //  Assemble and write the XML file.
