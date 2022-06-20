@@ -49,7 +49,6 @@ impl<'a> XMLWriter<'a> {
     }
 
     // Write an empty XML tag without attributes.
-    #[allow(dead_code)]
     pub fn xml_empty_tag(&mut self, tag: &str) {
         write!(&mut self.xmlfile, r"<{}/>", tag).expect("Couldn't write to file");
     }

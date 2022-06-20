@@ -6,6 +6,7 @@ mod shared_strings;
 mod shared_strings_table;
 mod styles;
 mod theme;
+mod workbook;
 mod xmlwriter;
 
 use crate::app::App;
@@ -16,6 +17,7 @@ use crate::shared_strings::SharedStrings;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::theme::Theme;
+use crate::workbook::Workbook;
 use crate::xmlwriter::XMLWriter;
 use tempfile::tempfile;
 
@@ -58,6 +60,10 @@ pub fn assemble_all() {
     let mut writer = XMLWriter::new(&tempfile);
     let mut styles = Styles::new(&mut writer);
     styles.assemble_xml_file();
+
+    let mut writer = XMLWriter::new(&tempfile);
+    let mut workbook = Workbook::new(&mut writer);
+    workbook.assemble_xml_file();
 }
 
 #[cfg(test)]
