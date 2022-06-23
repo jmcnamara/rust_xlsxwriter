@@ -14,7 +14,9 @@ edition = "2021"
 chrono = "0.4"
 itertools = "0.10.0"
 tempfile = "3.3.0"
+regex = "1.5.6"
 
 [dev-dependencies]
 pretty_assertions = "1"
 regex = "1.5.6"
+tempfile = "3.3.0"
