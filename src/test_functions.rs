@@ -4,7 +4,7 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Read, Seek};
 
 #[cfg(test)]
 // Convert XML string/doc into a vector for comparison testing.
@@ -33,7 +33,7 @@ pub fn xml_to_vec(xml_string: &str) -> Vec<String> {
 #[allow(dead_code)]
 pub fn read_xmlfile_data(tempfile: &mut File) -> String {
     let mut got = String::new();
-    tempfile.seek(SeekFrom::Start(0)).unwrap();
+    tempfile.rewind().unwrap();
     tempfile.read_to_string(&mut got).unwrap();
     got
 }
