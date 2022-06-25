@@ -5,15 +5,17 @@
 
 use crate::xmlwriter::XMLWriter;
 
-pub struct Relationship<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+pub struct Relationship {
+    pub writer: XMLWriter,
     relationships: Vec<(String, String, String)>,
     id_num: u16,
 }
 
-impl<'a> Relationship<'a> {
+impl Relationship {
     // Create a new struct to to track Excel shared strings between worksheets.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> Relationship<'a> {
+    pub fn new() -> Relationship {
+        let writer = XMLWriter::new();
+
         Relationship {
             writer,
             relationships: vec![],
@@ -81,19 +83,12 @@ impl<'a> Relationship<'a> {
 mod tests {
 
     use super::Relationship;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_assemble() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut rels = Relationship::new(&mut writer);
+        let mut rels = Relationship::new();
 
         rels.add_document_relationship("/worksheet", "worksheets/sheet1.xml");
         rels.add_document_relationship("/theme", "theme/theme1.xml");
@@ -103,7 +98,7 @@ mod tests {
 
         rels.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = rels.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

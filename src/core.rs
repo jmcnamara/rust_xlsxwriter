@@ -7,15 +7,17 @@ use crate::xmlwriter::XMLWriter;
 use chrono::DateTime;
 use chrono::Utc;
 
-pub struct Core<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+pub struct Core {
+    pub writer: XMLWriter,
     author: String,
     create_time: DateTime<Utc>,
 }
 
-impl<'a> Core<'a> {
+impl Core {
     // Create a new Core struct.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> Core<'a> {
+    pub fn new() -> Core {
+        let writer = XMLWriter::new();
+
         Core {
             writer,
             author: String::from(""),
@@ -119,28 +121,21 @@ impl<'a> Core<'a> {
 mod tests {
 
     use super::Core;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use chrono::TimeZone;
     use chrono::Utc;
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_assemble() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut core = Core::new(&mut writer);
+        let mut core = Core::new();
 
         core.set_author("A User");
         core.set_create_time(Utc.ymd(2010, 1, 1).and_hms(0, 0, 0));
 
         core.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = core.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

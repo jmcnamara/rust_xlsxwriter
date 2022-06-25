@@ -5,16 +5,18 @@
 
 use crate::xmlwriter::XMLWriter;
 
-pub struct App<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+pub struct App {
+    pub writer: XMLWriter,
     heading_pairs: Vec<(String, u16)>,
     table_parts: Vec<String>,
     doc_security: u8,
 }
 
-impl<'a> App<'a> {
+impl App {
     // Create a new App struct.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> App<'a> {
+    pub fn new() -> App {
+        let writer = XMLWriter::new();
+
         App {
             writer,
             heading_pairs: vec![],
@@ -194,26 +196,19 @@ impl<'a> App<'a> {
 mod tests {
 
     use super::App;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_assemble1() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut app = App::new(&mut writer);
+        let mut app = App::new();
 
         app.add_heading_pair("Worksheets", 1);
         app.add_part_name("Sheet1");
 
         app.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = app.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(
@@ -253,10 +248,7 @@ mod tests {
 
     #[test]
     fn test_assemble2() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut app = App::new(&mut writer);
+        let mut app = App::new();
 
         app.add_heading_pair("Worksheets", 2);
         app.add_part_name("Sheet1");
@@ -264,7 +256,7 @@ mod tests {
 
         app.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = app.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(
@@ -305,10 +297,7 @@ mod tests {
 
     #[test]
     fn test_assemble3() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut app = App::new(&mut writer);
+        let mut app = App::new();
 
         app.add_heading_pair("Worksheets", 1);
         app.add_heading_pair("Named Ranges", 1);
@@ -317,7 +306,7 @@ mod tests {
 
         app.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = app.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

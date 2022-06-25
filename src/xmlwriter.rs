@@ -5,16 +5,29 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 use std::fs::File;
+use std::io::Read;
+use std::io::Seek;
 use std::io::Write;
+use tempfile::tempfile;
 
-pub struct XMLWriter<'a> {
-    xmlfile: &'a File,
+pub struct XMLWriter {
+    pub xmlfile: File,
 }
 
-impl<'a> XMLWriter<'a> {
+impl<'a> XMLWriter {
     // Create a new XMLWriter struct to write XML to a given filehandle.
-    pub fn new(xmlfile: &File) -> XMLWriter {
+    pub fn new() -> XMLWriter {
+        let xmlfile = tempfile().unwrap();
         XMLWriter { xmlfile }
+    }
+
+    // Helper function for tests to read xml data back from the xml filehandle.
+    #[allow(dead_code)]
+    pub fn read_to_string(&mut self) -> String {
+        let mut got = String::new();
+        self.xmlfile.rewind().unwrap();
+        self.xmlfile.read_to_string(&mut got).unwrap();
+        got
     }
 
     // Write an XML file declaration.
@@ -142,27 +155,15 @@ mod tests {
 
     use super::XMLWriter;
     use pretty_assertions::assert_eq;
-    use std::fs::File;
-    use std::io::{Read, Seek, SeekFrom};
-    use tempfile::tempfile;
-
-    fn read_xmlfile_data(tempfile: &mut File) -> String {
-        let mut got = String::new();
-        tempfile.seek(SeekFrom::Start(0)).unwrap();
-        tempfile.read_to_string(&mut got).unwrap();
-        got
-    }
 
     #[test]
     fn test_xml_declaration() {
         let expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
+        let mut writer = XMLWriter::new();
         writer.xml_declaration();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
@@ -170,12 +171,10 @@ mod tests {
     fn test_xml_start_tag_without_attributes() {
         let expected = "<foo>";
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
+        let mut writer = XMLWriter::new();
         writer.xml_start_tag("foo");
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
     #[test]
@@ -183,12 +182,10 @@ mod tests {
         let expected = "<foo>";
         let attributes = vec![];
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
+        let mut writer = XMLWriter::new();
         writer.xml_start_tag_attr("foo", &attributes);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
@@ -197,12 +194,10 @@ mod tests {
         let expected = r#"<foo span="8" baz="7">"#;
         let attributes = vec![("span", "8"), ("baz", "7")];
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
+        let mut writer = XMLWriter::new();
         writer.xml_start_tag_attr("foo", &attributes);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
@@ -210,12 +205,11 @@ mod tests {
     fn test_xml_end_tag() {
         let expected = "</foo>";
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
+        let mut writer = XMLWriter::new();
 
         writer.xml_end_tag("foo");
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
@@ -223,12 +217,11 @@ mod tests {
     fn test_xml_empty_tag() {
         let expected = "<foo/>";
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
+        let mut writer = XMLWriter::new();
 
         writer.xml_empty_tag("foo");
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
@@ -237,12 +230,11 @@ mod tests {
         let expected = r#"<foo span="8"/>"#;
         let attributes = vec![("span", "8")];
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
+        let mut writer = XMLWriter::new();
 
         writer.xml_empty_tag_attr("foo", &attributes);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
@@ -250,12 +242,10 @@ mod tests {
     fn test_xml_data_element() {
         let expected = r#"<foo>bar</foo>"#;
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
+        let mut writer = XMLWriter::new();
         writer.xml_data_element("foo", "bar");
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
@@ -264,12 +254,10 @@ mod tests {
         let expected = r#"<foo span="8">bar</foo>"#;
         let attributes = vec![("span", "8")];
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
+        let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "bar", &attributes);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
@@ -278,36 +266,32 @@ mod tests {
         let expected = r#"<foo span="8">&amp;&lt;&gt;"</foo>"#;
         let attributes = vec![("span", "8")];
 
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
+        let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "&<>\"", &attributes);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
     #[test]
     fn test_xml_si_element() {
         let expected = "<si><t>foo</t></si>";
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
 
+        let mut writer = XMLWriter::new();
         writer.xml_si_element("foo", false);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 
     #[test]
     fn test_xml_si_element_whitespace() {
         let expected = r#"<si><t xml:space="preserve">    foo</t></si>"#;
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
 
+        let mut writer = XMLWriter::new();
         writer.xml_si_element("    foo", true);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = writer.read_to_string();
         assert_eq!(got, expected);
     }
 }

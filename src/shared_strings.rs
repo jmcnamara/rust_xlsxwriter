@@ -7,13 +7,15 @@ use crate::shared_strings_table::SharedStringsTable;
 use crate::xmlwriter::XMLWriter;
 use itertools::Itertools;
 
-pub struct SharedStrings<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+pub struct SharedStrings {
+    pub writer: XMLWriter,
 }
 
-impl<'a> SharedStrings<'a> {
+impl SharedStrings {
     // Create a new SharedStrings struct.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> SharedStrings<'a> {
+    pub fn new() -> SharedStrings {
+        let writer = XMLWriter::new();
+
         SharedStrings { writer }
     }
 
@@ -57,20 +59,14 @@ mod tests {
 
     use super::SharedStrings;
     use super::SharedStringsTable;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_shared_string_table() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
         let mut string_table = SharedStringsTable::new();
 
-        let mut shared_strings = SharedStrings::new(&mut writer);
+        let mut shared_strings = SharedStrings::new();
 
         string_table.get_shared_string_index("neptune");
         string_table.get_shared_string_index("neptune");
@@ -82,7 +78,7 @@ mod tests {
 
         shared_strings.assemble_xml_file(&string_table);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = shared_strings.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(
@@ -107,11 +103,9 @@ mod tests {
 
     #[test]
     fn test_shared_string_table_with_preserve() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
         let mut string_table = SharedStringsTable::new();
 
-        let mut shared_strings = SharedStrings::new(&mut writer);
+        let mut shared_strings = SharedStrings::new();
 
         string_table.get_shared_string_index("abcdefg");
         string_table.get_shared_string_index("   abcdefg");
@@ -119,7 +113,7 @@ mod tests {
 
         shared_strings.assemble_xml_file(&string_table);
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = shared_strings.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

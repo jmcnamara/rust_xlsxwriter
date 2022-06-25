@@ -5,13 +5,15 @@
 
 use crate::xmlwriter::XMLWriter;
 
-pub struct Theme<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+pub struct Theme {
+    pub writer: XMLWriter,
 }
 
-impl<'a> Theme<'a> {
+impl Theme {
     // Create a new Theme struct.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> Theme<'a> {
+    pub fn new() -> Theme {
+        let writer = XMLWriter::new();
+
         Theme { writer }
     }
 
@@ -283,23 +285,16 @@ impl<'a> Theme<'a> {
 mod tests {
 
     use super::Theme;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_assemble() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut theme = Theme::new(&mut writer);
+        let mut theme = Theme::new();
 
         theme.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = theme.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

@@ -3,16 +3,27 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
+use crate::packager::Packager;
 use crate::xmlwriter::XMLWriter;
 
 pub struct Workbook<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+    pub writer: XMLWriter,
+    filename: &'a str,
 }
 
 impl<'a> Workbook<'a> {
     // Create a new Workbook struct.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> Workbook<'a> {
-        Workbook { writer }
+    pub fn new(filename: &'a str) -> Workbook {
+        let writer = XMLWriter::new();
+
+        Workbook { writer, filename }
+    }
+
+    // Assemble the xlsx file and close it.
+    pub fn close(&mut self) {
+        let mut packager = Packager::new(self.filename);
+
+        packager.create_xlsx();
     }
 
     //  Assemble and write the XML file.
@@ -121,23 +132,16 @@ impl<'a> Workbook<'a> {
 mod tests {
 
     use super::Workbook;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_assemble() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut workbook = Workbook::new(&mut writer);
+        let mut workbook = Workbook::new("test.xlsx");
 
         workbook.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = workbook.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

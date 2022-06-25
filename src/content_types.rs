@@ -5,15 +5,17 @@
 
 use crate::xmlwriter::XMLWriter;
 
-pub struct ContentTypes<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+pub struct ContentTypes {
+    pub writer: XMLWriter,
     defaults: Vec<(String, String)>,
     overrides: Vec<(String, String)>,
 }
 
-impl<'a> ContentTypes<'a> {
+impl ContentTypes {
     // Create a new ContentTypes struct.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> ContentTypes<'a> {
+    pub fn new() -> ContentTypes {
+        let writer = XMLWriter::new();
+
         ContentTypes {
             writer,
             defaults: vec![
@@ -145,26 +147,19 @@ impl<'a> ContentTypes<'a> {
 mod tests {
 
     use super::ContentTypes;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_assemble() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut content_types = ContentTypes::new(&mut writer);
+        let mut content_types = ContentTypes::new();
 
         content_types.add_default("jpeg", "image/jpeg");
         content_types.add_worksheet_name("sheet1");
         content_types.add_share_strings();
         content_types.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = content_types.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

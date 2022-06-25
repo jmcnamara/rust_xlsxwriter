@@ -5,13 +5,15 @@
 
 use crate::xmlwriter::XMLWriter;
 
-pub struct Styles<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+pub struct Styles {
+    pub writer: XMLWriter,
 }
 
-impl<'a> Styles<'a> {
+impl Styles {
     // Create a new Styles struct.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> Styles<'a> {
+    pub fn new() -> Styles {
+        let writer = XMLWriter::new();
+
         Styles { writer }
     }
 
@@ -298,23 +300,16 @@ impl<'a> Styles<'a> {
 mod tests {
 
     use super::Styles;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_assemble() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut styles = Styles::new(&mut writer);
+        let mut styles = Styles::new();
 
         styles.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = styles.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

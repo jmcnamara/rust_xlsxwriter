@@ -3,9 +3,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
-use std::fs::File;
-use std::io::{Read, Seek};
-
 #[cfg(test)]
 // Convert XML string/doc into a vector for comparison testing.
 pub fn xml_to_vec(xml_string: &str) -> Vec<String> {
@@ -27,13 +24,4 @@ pub fn xml_to_vec(xml_string: &str) -> Vec<String> {
         xml_elements.push(element);
     }
     xml_elements
-}
-
-// Test helper to read xml data back from a filehandle.
-#[allow(dead_code)]
-pub fn read_xmlfile_data(tempfile: &mut File) -> String {
-    let mut got = String::new();
-    tempfile.rewind().unwrap();
-    tempfile.read_to_string(&mut got).unwrap();
-    got
 }

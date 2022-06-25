@@ -5,13 +5,15 @@
 
 use crate::xmlwriter::XMLWriter;
 
-pub struct Worksheet<'a> {
-    pub writer: &'a mut XMLWriter<'a>,
+pub struct Worksheet {
+    pub writer: XMLWriter,
 }
 
-impl<'a> Worksheet<'a> {
+impl Worksheet {
     // Create a new Worksheet struct.
-    pub fn new(writer: &'a mut XMLWriter<'a>) -> Worksheet<'a> {
+    pub fn new() -> Worksheet {
+        let writer = XMLWriter::new();
+
         Worksheet { writer }
     }
 
@@ -106,23 +108,16 @@ impl<'a> Worksheet<'a> {
 mod tests {
 
     use super::Worksheet;
-    use super::XMLWriter;
-    use crate::test_functions::read_xmlfile_data;
     use crate::test_functions::xml_to_vec;
-
     use pretty_assertions::assert_eq;
-    use tempfile::tempfile;
 
     #[test]
     fn test_assemble() {
-        let mut tempfile = tempfile().unwrap();
-        let mut writer = XMLWriter::new(&tempfile);
-
-        let mut worksheet = Worksheet::new(&mut writer);
+        let mut worksheet = Worksheet::new();
 
         worksheet.assemble_xml_file();
 
-        let got = read_xmlfile_data(&mut tempfile);
+        let got = worksheet.writer.read_to_string();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(
