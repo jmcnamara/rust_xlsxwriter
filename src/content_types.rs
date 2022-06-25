@@ -56,6 +56,7 @@ impl ContentTypes {
     }
 
     // Add elements to the ContentTypes defaults.
+    #[allow(dead_code)]
     pub fn add_default(&mut self, extension: &str, content_type: &str) {
         self.defaults
             .push((extension.to_string(), content_type.to_string()));

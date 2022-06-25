@@ -34,6 +34,17 @@ impl Relationship {
         ));
     }
 
+    // Add container relationship to XLSX .rels xml files.
+    pub fn add_package_relationship(&mut self, rel_type: &str, target: &str) {
+        let package_schema = "http://schemas.openxmlformats.org/package/2006/relationships";
+
+        self.relationships.push((
+            format!("{}{}", package_schema, rel_type),
+            target.to_string(),
+            String::from(""),
+        ));
+    }
+
     //  Assemble and write the XML file.
     pub fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();

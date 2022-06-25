@@ -5,13 +5,17 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 use std::fs::File;
-use std::io::Read;
-use std::io::Seek;
-use std::io::Write;
+use std::io::{Read, Seek, Write};
 use tempfile::tempfile;
 
 pub struct XMLWriter {
     pub xmlfile: File,
+}
+
+impl<'a> Default for XMLWriter {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<'a> XMLWriter {
@@ -24,10 +28,18 @@ impl<'a> XMLWriter {
     // Helper function for tests to read xml data back from the xml filehandle.
     #[allow(dead_code)]
     pub fn read_to_string(&mut self) -> String {
-        let mut got = String::new();
+        let mut xml_string = String::new();
         self.xmlfile.rewind().unwrap();
-        self.xmlfile.read_to_string(&mut got).unwrap();
-        got
+        self.xmlfile.read_to_string(&mut xml_string).unwrap();
+        xml_string
+    }
+
+    // Return data to write to xlsx/zip file member.
+    pub fn read_to_buffer(&mut self) -> Vec<u8> {
+        let mut buffer = Vec::new();
+        self.xmlfile.rewind().unwrap();
+        self.xmlfile.read_to_end(&mut buffer).unwrap();
+        buffer
     }
 
     // Write an XML file declaration.
