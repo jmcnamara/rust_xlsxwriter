@@ -76,7 +76,7 @@ impl Packager {
         Packager { zip, zip_options }
     }
 
-    // Create the component xml files and add them to the zip/xlsx containter.
+    // Create the component xml files and add them to the zip/xlsx container.
     pub fn create_xlsx(&mut self) {
         self.write_content_types_file();
         self.write_root_rels_file();

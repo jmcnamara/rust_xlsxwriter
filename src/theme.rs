@@ -276,7 +276,7 @@ impl Theme {
              </a:themeElements>\
              <a:objectDefaults/>\
              <a:extraClrSchemeLst/>\
-             </a:theme>\n"
+             </a:theme>"
         );
     }
 }

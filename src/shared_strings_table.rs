@@ -10,7 +10,7 @@
 use std::collections::HashMap;
 
 //
-// A metadata stuct to store Excel unique strings between worksheets.
+// A metadata struct to store Excel unique strings between worksheets.
 //
 pub struct SharedStringsTable {
     pub count: u32,

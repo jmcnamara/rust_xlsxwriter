@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) {
 
 #[test]
 fn compare_against_excel() {
-    let testcase = "simple01";
+    let testcase = "simple00";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
     create_new_xlsx_file(&xlsxwriter_file);
