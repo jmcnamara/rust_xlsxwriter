@@ -8,6 +8,7 @@
 use pretty_assertions::assert_eq;
 use regex::Regex;
 use std::collections::HashMap;
+use std::fs;
 use std::fs::File;
 use std::io::Read;
 
@@ -25,6 +26,11 @@ pub fn assert_eq(expected_file: &str, got_file: &str) {
     let (exp, got) = compare_xlsx_files(&expected_file, &got_file);
 
     assert_eq!(exp, got);
+}
+
+// Removed xlsx file(s) created during tests.
+pub fn remove_test_xlsx_file(filename: &str) {
+    fs::remove_file(filename).unwrap();
 }
 
 // Unzip 2 xlsx files and compare whether they have the same filenames and

@@ -4,11 +4,14 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 use crate::packager::Packager;
+use crate::packager::PackagerOptions;
+use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 
 pub struct Workbook<'a> {
     pub writer: XMLWriter,
     filename: &'a str,
+    worksheets: Vec<Worksheet>,
 }
 
 impl<'a> Workbook<'a> {
@@ -16,14 +19,64 @@ impl<'a> Workbook<'a> {
     pub fn new(filename: &'a str) -> Workbook {
         let writer = XMLWriter::new();
 
-        Workbook { writer, filename }
+        Workbook {
+            writer,
+            filename,
+            worksheets: vec![],
+        }
     }
+
+    // Prototype function for adding worksheets.
+    pub fn add_worksheet(&mut self) -> &mut Worksheet {
+        let sheet_name = format!("Sheet{}", self.worksheets.len() + 1);
+
+        let worksheet = Worksheet::new(sheet_name);
+        self.worksheets.push(worksheet);
+        let worksheet = self.worksheets.last_mut().unwrap();
+
+        worksheet
+    }
+
+    //
+    //
+    //
 
     // Assemble the xlsx file and close it.
     pub fn close(&mut self) {
-        let mut packager = Packager::new(self.filename);
+        // Ensure that there is at least one worksheet in the workbook.
+        if self.worksheets.is_empty() {
+            self.add_worksheet();
+        }
 
-        packager.create_xlsx();
+        // Create the Packager object that will assemble the zip/xlsx file.
+        let mut packager = Packager::new(self.filename);
+        let mut package_options = PackagerOptions::new();
+
+        package_options.num_worksheets = self.worksheets.len() as u16;
+
+        for worksheet in self.worksheets.iter() {
+            package_options.worksheet_names.push(worksheet.name.clone())
+        }
+
+        // Ensure one sheet is selected.
+        self.worksheets[0].selected = true;
+
+        // Start the zip/xlsx container.
+        packager.create_root_files(&package_options);
+
+        // Write the workbook to the zip/xlsx container.
+        packager.write_workbook_file(self);
+
+        // Write the worksheets to the zip/xlsx container.
+        for (index, worksheet) in self.worksheets.iter_mut().enumerate() {
+            packager.write_worksheet_file(worksheet, index + 1);
+        }
+
+        // Write the docProp files to the zip/xlsx container.
+        packager.create_doc_prop_files(&package_options);
+
+        // Close and write the final zip/xlsx container.
+        packager.close();
     }
 
     //  Assemble and write the XML file.
@@ -107,15 +160,30 @@ impl<'a> Workbook<'a> {
     fn write_sheets(&mut self) {
         self.writer.xml_start_tag("sheets");
 
-        // Write the sheet element.
-        self.write_sheet();
+        let mut worksheet_names = vec![];
+        for worksheet in self.worksheets.iter() {
+            worksheet_names.push(worksheet.name.clone());
+        }
+
+        for (index, name) in worksheet_names.iter().enumerate() {
+            // Write the sheet element.
+            self.write_sheet(name, (index + 1) as u16);
+        }
 
         self.writer.xml_end_tag("sheets");
     }
 
     // Write the <sheet> element.
-    fn write_sheet(&mut self) {
-        let attributes = vec![("name", "Sheet1"), ("sheetId", "1"), ("r:id", "rId1")];
+    fn write_sheet(&mut self, name: &str, index: u16) {
+        //let name = name;
+        let sheet_id = format!("{}", index);
+        let ref_id = format!("rId{}", index);
+
+        let attributes = vec![
+            ("name", name),
+            ("sheetId", sheet_id.as_str()),
+            ("r:id", ref_id.as_str()),
+        ];
 
         self.writer.xml_empty_tag_attr("sheet", &attributes);
     }
@@ -138,6 +206,7 @@ mod tests {
     #[test]
     fn test_assemble() {
         let mut workbook = Workbook::new("test.xlsx");
+        workbook.add_worksheet();
 
         workbook.assemble_xml_file();
 

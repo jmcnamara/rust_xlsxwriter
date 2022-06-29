@@ -7,14 +7,20 @@ use crate::xmlwriter::XMLWriter;
 
 pub struct Worksheet {
     pub writer: XMLWriter,
+    pub name: String,
+    pub selected: bool,
 }
 
-impl Worksheet {
+impl<'a> Worksheet {
     // Create a new Worksheet struct.
-    pub fn new() -> Worksheet {
+    pub fn new(name: String) -> Worksheet {
         let writer = XMLWriter::new();
 
-        Worksheet { writer }
+        Worksheet {
+            writer,
+            name,
+            selected: false,
+        }
     }
 
     //  Assemble and write the XML file.
@@ -72,7 +78,13 @@ impl Worksheet {
 
     // Write the <sheetView> element.
     fn write_sheet_view(&mut self) {
-        let attributes = vec![("tabSelected", "1"), ("workbookViewId", "0")];
+        let mut attributes = vec![];
+
+        if self.selected {
+            attributes.push(("tabSelected", "1"));
+        }
+
+        attributes.push(("workbookViewId", "0"));
 
         self.writer.xml_empty_tag_attr("sheetView", &attributes);
     }
@@ -113,7 +125,9 @@ mod tests {
 
     #[test]
     fn test_assemble() {
-        let mut worksheet = Worksheet::new();
+        let mut worksheet = Worksheet::new("".to_string());
+
+        worksheet.selected = true;
 
         worksheet.assemble_xml_file();
 

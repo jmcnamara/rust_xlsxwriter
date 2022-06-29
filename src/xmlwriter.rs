@@ -12,7 +12,7 @@ pub struct XMLWriter {
     pub xmlfile: File,
 }
 
-impl<'a> Default for XMLWriter {
+impl Default for XMLWriter {
     fn default() -> Self {
         Self::new()
     }

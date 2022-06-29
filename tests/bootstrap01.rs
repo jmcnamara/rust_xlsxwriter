@@ -8,17 +8,37 @@ use rust_xlsxwriter::Workbook;
 
 mod common;
 
-// Test case to demonstrate XXX
-fn create_new_xlsx_file(filename: &str) {
+// Test case to demonstrate creating a basic file with 1 worksheet and no data.
+fn create_new_xlsx_file1(filename: &str) {
     let mut workbook = Workbook::new(filename);
+    let _ = workbook.add_worksheet();
+
+    workbook.close();
+}
+
+// Test case to demonstrate creating a basic file with 1 worksheet and no data.
+// Has an implicit add_worksheet.
+fn create_new_xlsx_file2(filename: &str) {
+    let mut workbook = Workbook::new(filename);
+
     workbook.close();
 }
 
 #[test]
-fn compare_against_excel() {
-    let testcase = "simple00";
+fn compare_against_excel1() {
+    let testcase = "bootstrap01";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
-    create_new_xlsx_file(&xlsxwriter_file);
+    create_new_xlsx_file1(&xlsxwriter_file);
     common::assert_eq(&excel_file, &xlsxwriter_file);
+}
+
+#[test]
+fn compare_against_excel2() {
+    let testcase = "bootstrap01";
+
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
+    create_new_xlsx_file2(&xlsxwriter_file);
+    common::assert_eq(&excel_file, &xlsxwriter_file);
+    common::remove_test_xlsx_file(&xlsxwriter_file);
 }
