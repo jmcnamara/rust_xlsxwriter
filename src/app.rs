@@ -13,8 +13,12 @@ pub struct App {
 }
 
 impl App {
+    //
+    // Crate public methods.
+    //
+
     // Create a new App struct.
-    pub fn new() -> App {
+    pub(crate) fn new() -> App {
         let writer = XMLWriter::new();
 
         App {
@@ -25,16 +29,22 @@ impl App {
         }
     }
 
-    pub fn add_heading_pair(&mut self, key: &str, value: u16) {
+    // Add a non-default heading pair to the file.
+    pub(crate) fn add_heading_pair(&mut self, key: &str, value: u16) {
         self.heading_pairs.push((key.to_string(), value));
     }
 
-    pub fn add_part_name(&mut self, part_name: &str) {
+    // Add a non-default part name to the file.
+    pub(crate) fn add_part_name(&mut self, part_name: &str) {
         self.table_parts.push(part_name.to_string());
     }
 
+    //
+    // XML assembly methods.
+    //
+
     //  Assemble and write the XML file.
-    pub fn assemble_xml_file(&mut self) {
+    pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
         // Write the Properties element.

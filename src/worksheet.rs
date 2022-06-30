@@ -12,8 +12,12 @@ pub struct Worksheet {
 }
 
 impl<'a> Worksheet {
+    //
+    // Public (and crate public) methods.
+    //
+
     // Create a new Worksheet struct.
-    pub fn new(name: String) -> Worksheet {
+    pub(crate) fn new(name: String) -> Worksheet {
         let writer = XMLWriter::new();
 
         Worksheet {
@@ -33,8 +37,12 @@ impl<'a> Worksheet {
     // XML assembly methods.
     //
 
+    //
+    // XML assembly methods.
+    //
+
     //  Assemble and write the XML file.
-    pub fn assemble_xml_file(&mut self) {
+    pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
         // Write the worksheet element.

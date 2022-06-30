@@ -12,8 +12,12 @@ pub struct ContentTypes {
 }
 
 impl ContentTypes {
+    //
+    // Crate public methods.
+    //
+
     // Create a new ContentTypes struct.
-    pub fn new() -> ContentTypes {
+    pub(crate) fn new() -> ContentTypes {
         let writer = XMLWriter::new();
 
         ContentTypes {
@@ -57,7 +61,7 @@ impl ContentTypes {
 
     // Add elements to the ContentTypes defaults.
     #[allow(dead_code)]
-    pub fn add_default(&mut self, extension: &str, content_type: &str) {
+    pub(crate) fn add_default(&mut self, extension: &str, content_type: &str) {
         self.defaults
             .push((extension.to_string(), content_type.to_string()));
     }
@@ -69,7 +73,7 @@ impl ContentTypes {
     }
 
     // Add the name of a worksheet to the ContentTypes overrides.
-    pub fn add_worksheet_name(&mut self, worksheet_name: &str) {
+    pub(crate) fn add_worksheet_name(&mut self, worksheet_name: &str) {
         let content_type =
             "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml";
         let part_name = format!("/xl/worksheets/{}.xml", worksheet_name);
@@ -78,15 +82,19 @@ impl ContentTypes {
     }
 
     // Add the sharedStrings link to the ContentTypes overrides.
-    pub fn add_share_strings(&mut self) {
+    pub(crate) fn add_share_strings(&mut self) {
         self.add_override(
             "/xl/sharedStrings.xml",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml",
         );
     }
 
+    //
+    // XML assembly methods.
+    //
+
     //  Assemble and write the XML file.
-    pub fn assemble_xml_file(&mut self) {
+    pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
         // Write the Types element.

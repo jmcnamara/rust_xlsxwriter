@@ -14,8 +14,12 @@ pub struct Core {
 }
 
 impl Core {
+    //
+    // Crate public methods.
+    //
+
     // Create a new Core struct.
-    pub fn new() -> Core {
+    pub(crate) fn new() -> Core {
         let writer = XMLWriter::new();
 
         Core {
@@ -28,19 +32,23 @@ impl Core {
     // Temporary function for testing. This will be replaced with full property
     // handling later.
     #[allow(dead_code)]
-    pub fn set_author(&mut self, author: &str) {
+    pub(crate) fn set_author(&mut self, author: &str) {
         self.author = author.to_string();
     }
 
     // Temporary function for testing. This will be replaced with full property
     // handling later.
     #[allow(dead_code)]
-    pub fn set_create_time(&mut self, create_time: DateTime<Utc>) {
+    pub(crate) fn set_create_time(&mut self, create_time: DateTime<Utc>) {
         self.create_time = create_time;
     }
 
+    //
+    // XML assembly methods.
+    //
+
     //  Assemble and write the XML file.
-    pub fn assemble_xml_file(&mut self) {
+    pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
         // Write the cp:coreProperties element.

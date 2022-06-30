@@ -12,8 +12,12 @@ pub struct Relationship {
 }
 
 impl Relationship {
+    //
+    // Crate public methods.
+    //
+
     // Create a new struct to to track Excel shared strings between worksheets.
-    pub fn new() -> Relationship {
+    pub(crate) fn new() -> Relationship {
         let writer = XMLWriter::new();
 
         Relationship {
@@ -24,7 +28,7 @@ impl Relationship {
     }
 
     // Add container relationship to XLSX .rels xml files.
-    pub fn add_document_relationship(&mut self, rel_type: &str, target: &str) {
+    pub(crate) fn add_document_relationship(&mut self, rel_type: &str, target: &str) {
         let document_schema = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 
         self.relationships.push((
@@ -35,7 +39,7 @@ impl Relationship {
     }
 
     // Add container relationship to XLSX .rels xml files.
-    pub fn add_package_relationship(&mut self, rel_type: &str, target: &str) {
+    pub(crate) fn add_package_relationship(&mut self, rel_type: &str, target: &str) {
         let package_schema = "http://schemas.openxmlformats.org/package/2006/relationships";
 
         self.relationships.push((
@@ -45,8 +49,12 @@ impl Relationship {
         ));
     }
 
+    //
+    // XML assembly methods.
+    //
+
     //  Assemble and write the XML file.
-    pub fn assemble_xml_file(&mut self) {
+    pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
         // Write the Relationships element.

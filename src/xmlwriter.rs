@@ -20,14 +20,14 @@ impl Default for XMLWriter {
 
 impl<'a> XMLWriter {
     // Create a new XMLWriter struct to write XML to a given filehandle.
-    pub fn new() -> XMLWriter {
+    pub(crate) fn new() -> XMLWriter {
         let xmlfile = tempfile().unwrap();
         XMLWriter { xmlfile }
     }
 
     // Helper function for tests to read xml data back from the xml filehandle.
     #[allow(dead_code)]
-    pub fn read_to_string(&mut self) -> String {
+    pub(crate) fn read_to_string(&mut self) -> String {
         let mut xml_string = String::new();
         self.xmlfile.rewind().unwrap();
         self.xmlfile.read_to_string(&mut xml_string).unwrap();
@@ -35,7 +35,7 @@ impl<'a> XMLWriter {
     }
 
     // Return data to write to xlsx/zip file member.
-    pub fn read_to_buffer(&mut self) -> Vec<u8> {
+    pub(crate) fn read_to_buffer(&mut self) -> Vec<u8> {
         let mut buffer = Vec::new();
         self.xmlfile.rewind().unwrap();
         self.xmlfile.read_to_end(&mut buffer).unwrap();
@@ -43,7 +43,7 @@ impl<'a> XMLWriter {
     }
 
     // Write an XML file declaration.
-    pub fn xml_declaration(&mut self) {
+    pub(crate) fn xml_declaration(&mut self) {
         writeln!(
             &mut self.xmlfile,
             r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>"#
@@ -52,12 +52,12 @@ impl<'a> XMLWriter {
     }
 
     // Write an XML start tag without attributes.
-    pub fn xml_start_tag(&mut self, tag: &str) {
+    pub(crate) fn xml_start_tag(&mut self, tag: &str) {
         write!(&mut self.xmlfile, r"<{}>", tag).expect("Couldn't write to file");
     }
 
     // Write an XML start tag with attributes.
-    pub fn xml_start_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
+    pub(crate) fn xml_start_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
         let mut attribute_str = String::from("");
 
         for attribute in attributes {
@@ -69,17 +69,17 @@ impl<'a> XMLWriter {
     }
 
     // Write an XML end tag.
-    pub fn xml_end_tag(&mut self, tag: &str) {
+    pub(crate) fn xml_end_tag(&mut self, tag: &str) {
         write!(&mut self.xmlfile, r"</{}>", tag).expect("Couldn't write to file");
     }
 
     // Write an empty XML tag without attributes.
-    pub fn xml_empty_tag(&mut self, tag: &str) {
+    pub(crate) fn xml_empty_tag(&mut self, tag: &str) {
         write!(&mut self.xmlfile, r"<{}/>", tag).expect("Couldn't write to file");
     }
 
     // Write an empty XML tag with attributes.
-    pub fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
+    pub(crate) fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
         let mut attribute_str = String::from("");
 
         for attribute in attributes {
@@ -91,7 +91,7 @@ impl<'a> XMLWriter {
     }
 
     // Write an XML element containing data without attributes.
-    pub fn xml_data_element(&mut self, tag: &str, data: &str) {
+    pub(crate) fn xml_data_element(&mut self, tag: &str, data: &str) {
         write!(
             &mut self.xmlfile,
             r"<{}>{}</{}>",
@@ -102,7 +102,12 @@ impl<'a> XMLWriter {
         .expect("Couldn't write to file");
     }
     // Write an XML element containing data with attributes.
-    pub fn xml_data_element_attr(&mut self, tag: &str, data: &str, attributes: &Vec<(&str, &str)>) {
+    pub(crate) fn xml_data_element_attr(
+        &mut self,
+        tag: &str,
+        data: &str,
+        attributes: &Vec<(&str, &str)>,
+    ) {
         let mut attribute_str = String::from("");
 
         for attribute in attributes {
@@ -122,7 +127,7 @@ impl<'a> XMLWriter {
     }
 
     // Optimized tag writer for shared strings `<si>` elements.
-    pub fn xml_si_element(&mut self, string: &str, preserve_whitespace: bool) {
+    pub(crate) fn xml_si_element(&mut self, string: &str, preserve_whitespace: bool) {
         if preserve_whitespace {
             write!(
                 &mut self.xmlfile,
@@ -137,7 +142,7 @@ impl<'a> XMLWriter {
     }
 
     // Write the theme string to the theme file.
-    pub fn write_theme(&mut self, theme: &str) {
+    pub(crate) fn write_theme(&mut self, theme: &str) {
         writeln!(&mut self.xmlfile, "{}", theme).expect("Couldn't write to file");
     }
 }

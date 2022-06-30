@@ -19,8 +19,12 @@ pub struct SharedStringsTable {
 }
 
 impl SharedStringsTable {
+    //
+    // Crate public methods.
+    //
+
     // Create a new struct to to track Excel shared strings between worksheets.
-    pub fn new() -> SharedStringsTable {
+    pub(crate) fn new() -> SharedStringsTable {
         SharedStringsTable {
             count: 0,
             unique_count: 0,
@@ -29,7 +33,7 @@ impl SharedStringsTable {
     }
 
     // Get the index of the string in the Shared String table.
-    pub fn get_shared_string_index(&mut self, key: &str) -> u32 {
+    pub(crate) fn get_shared_string_index(&mut self, key: &str) -> u32 {
         match self.strings.get(key) {
             Some(value) => {
                 self.count += 1;

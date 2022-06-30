@@ -54,24 +54,6 @@ use std::io::Write;
 use zip::write::FileOptions;
 use zip::{DateTime, ZipWriter};
 
-// Internal struct to pass options to the Packager struct.
-pub struct PackagerOptions {
-    pub has_sst_table: bool,
-    pub num_worksheets: u16,
-    pub worksheet_names: Vec<String>,
-}
-
-impl PackagerOptions {
-    // Create a new PackagerOptions struct.
-    pub fn new() -> PackagerOptions {
-        PackagerOptions {
-            has_sst_table: false,
-            num_worksheets: 0,
-            worksheet_names: vec![],
-        }
-    }
-}
-
 // Packager struct to assembler the xlsx file.
 pub struct Packager {
     zip: ZipWriter<std::fs::File>,
@@ -79,8 +61,12 @@ pub struct Packager {
 }
 
 impl Packager {
+    //
+    // Crate public methods.
+    //
+
     // Create a new Packager struct.
-    pub fn new(filename: &str) -> Packager {
+    pub(crate) fn new(filename: &str) -> Packager {
         let path = std::path::Path::new(filename);
         let file = std::fs::File::create(&path).unwrap();
 
@@ -97,7 +83,7 @@ impl Packager {
 
     // Create the root and xl/ component xml files and add them to the zip/xlsx
     // container.
-    pub fn create_root_files(&mut self, options: &PackagerOptions) {
+    pub(crate) fn create_root_files(&mut self, options: &PackagerOptions) {
         self.write_content_types_file(options);
         self.write_root_rels_file();
         self.write_workbook_rels_file(options);
@@ -111,13 +97,13 @@ impl Packager {
 
     // Create the docProps component xml files and add them to the zip/xlsx
     // container.
-    pub fn create_doc_prop_files(&mut self, options: &PackagerOptions) {
+    pub(crate) fn create_doc_prop_files(&mut self, options: &PackagerOptions) {
         self.write_core_file();
         self.write_app_file(options);
     }
 
     // Close the zip file.
-    pub fn close(&mut self) {
+    pub(crate) fn close(&mut self) {
         self.zip.finish().unwrap();
     }
 
@@ -187,7 +173,7 @@ impl Packager {
     }
 
     // Write a worksheet xml file.
-    pub fn write_worksheet_file(&mut self, worksheet: &mut Worksheet, index: usize) {
+    pub(crate) fn write_worksheet_file(&mut self, worksheet: &mut Worksheet, index: usize) {
         let filename = format!("xl/worksheets/sheet{}.xml", index);
 
         self.zip.start_file(filename, self.zip_options).unwrap();
@@ -198,7 +184,7 @@ impl Packager {
     }
 
     // Write the workbook.xml file.
-    pub fn write_workbook_file(&mut self, workbook: &mut Workbook) {
+    pub(crate) fn write_workbook_file(&mut self, workbook: &mut Workbook) {
         self.zip
             .start_file("xl/workbook.xml", self.zip_options)
             .unwrap();
@@ -279,5 +265,23 @@ impl Packager {
         app.assemble_xml_file();
         let buffer = app.writer.read_to_buffer();
         self.zip.write_all(&*buffer).unwrap();
+    }
+}
+
+// Internal struct to pass options to the Packager struct.
+pub struct PackagerOptions {
+    pub has_sst_table: bool,
+    pub num_worksheets: u16,
+    pub worksheet_names: Vec<String>,
+}
+
+impl PackagerOptions {
+    // Create a new PackagerOptions struct.
+    pub(crate) fn new() -> PackagerOptions {
+        PackagerOptions {
+            has_sst_table: false,
+            num_worksheets: 0,
+            worksheet_names: vec![],
+        }
     }
 }

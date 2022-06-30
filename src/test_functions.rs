@@ -5,7 +5,7 @@
 
 #[cfg(test)]
 // Convert XML string/doc into a vector for comparison testing.
-pub fn xml_to_vec(xml_string: &str) -> Vec<String> {
+pub(crate) fn xml_to_vec(xml_string: &str) -> Vec<String> {
     let mut xml_elements: Vec<String> = Vec::new();
     let re = regex::Regex::new(r">\s*<").unwrap();
     let tokens: Vec<&str> = re.split(xml_string).collect();

@@ -15,6 +15,10 @@ pub struct Workbook<'a> {
 }
 
 impl<'a> Workbook<'a> {
+    //
+    // Public (and crate public) methods.
+    //
+
     // Create a new Workbook struct.
     pub fn new(filename: &'a str) -> Workbook {
         let writer = XMLWriter::new();
@@ -80,7 +84,7 @@ impl<'a> Workbook<'a> {
     //
 
     //  Assemble and write the XML file.
-    pub fn assemble_xml_file(&mut self) {
+    pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
         // Write the workbook element.

@@ -10,15 +10,23 @@ pub struct Styles {
 }
 
 impl Styles {
+    //
+    // Crate public methods.
+    //
+
     // Create a new Styles struct.
-    pub fn new() -> Styles {
+    pub(crate) fn new() -> Styles {
         let writer = XMLWriter::new();
 
         Styles { writer }
     }
 
+    //
+    // XML assembly methods.
+    //
+
     //  Assemble and write the XML file.
-    pub fn assemble_xml_file(&mut self) {
+    pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
         // Write the styleSheet element.
