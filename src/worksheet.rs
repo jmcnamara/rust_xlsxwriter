@@ -23,6 +23,16 @@ impl<'a> Worksheet {
         }
     }
 
+    // Set the worksheet name instead of the default Sheet1, Sheet2, etc.
+    pub fn set_name(&mut self, name: &str) -> &mut Worksheet {
+        self.name = name.to_string();
+        self
+    }
+
+    //
+    // XML assembly methods.
+    //
+
     //  Assemble and write the XML file.
     pub fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();

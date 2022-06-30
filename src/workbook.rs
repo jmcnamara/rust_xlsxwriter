@@ -37,10 +37,6 @@ impl<'a> Workbook<'a> {
         worksheet
     }
 
-    //
-    //
-    //
-
     // Assemble the xlsx file and close it.
     pub fn close(&mut self) {
         // Ensure that there is at least one worksheet in the workbook.
@@ -78,6 +74,10 @@ impl<'a> Workbook<'a> {
         // Close and write the final zip/xlsx container.
         packager.close();
     }
+
+    //
+    // XML assembly methods.
+    //
 
     //  Assemble and write the XML file.
     pub fn assemble_xml_file(&mut self) {
