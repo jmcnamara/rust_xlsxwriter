@@ -13,9 +13,11 @@ mod shared_strings_table;
 mod styles;
 mod test_functions;
 mod theme;
+mod utility;
 mod workbook;
 mod worksheet;
 mod xmlwriter;
 
 // Re-export the public APIs.
 pub use workbook::*;
+pub use worksheet::*;
