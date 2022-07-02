@@ -203,7 +203,7 @@ impl<'a> Worksheet {
             self.writer.xml_empty_tag("sheetData");
         } else {
             self.writer.xml_start_tag("sheetData");
-            self.writer_data_table();
+            self.write_data_table();
             self.writer.xml_end_tag("sheetData");
         }
     }
@@ -223,7 +223,9 @@ impl<'a> Worksheet {
     }
 
     // Write out all the row and cell data in the worksheet data table.
-    fn writer_data_table(&mut self) {
+    fn write_data_table(&mut self) {
+        let spans = self.calculate_spans();
+
         // Swap out the worksheet data table so we can iterate over it and still
         // call self.write_xml() methods.
         // TODO. check efficiency of this and/or alternatives.
@@ -231,9 +233,12 @@ impl<'a> Worksheet {
         mem::swap(&mut temp_table, &mut self.table);
 
         for row_num in self.dimensions.row_min..=self.dimensions.row_max {
+            let span_index = row_num / 16;
+            let span = spans.get(&span_index);
+
             match temp_table.get(&row_num) {
                 Some(columns) => {
-                    self.write_row(row_num);
+                    self.write_row(row_num, span);
 
                     for col_num in self.dimensions.col_min..=self.dimensions.col_max {
                         match columns.get(&col_num) {
@@ -253,10 +258,54 @@ impl<'a> Worksheet {
         }
     }
 
+    // Calculate the "spans" attribute of the <row> tag. This is an XLSX
+    // optimization and isn't strictly required. However, it makes comparing
+    // files easier. The span is the same for each block of 16 rows.
+    fn calculate_spans(&mut self) -> HashMap<u32, String> {
+        let mut spans: HashMap<RowNum, String> = HashMap::new();
+        let mut span_min = COL_MAX;
+        let mut span_max = 0;
+
+        for row_num in self.dimensions.row_min..=self.dimensions.row_max {
+            if let Some(columns) = self.table.get(&row_num) {
+                for col_num in self.dimensions.col_min..=self.dimensions.col_max {
+                    match columns.get(&col_num) {
+                        Some(_) => {
+                            if span_min == COL_MAX {
+                                span_min = col_num;
+                                span_max = col_num;
+                            } else {
+                                span_min = cmp::min(span_min, col_num);
+                                span_max = cmp::max(span_max, col_num);
+                            }
+                        }
+                        _ => continue,
+                    }
+                }
+            }
+
+            // Store the span range for each block or 16 rows.
+            if (row_num + 1) % 16 == 0 || row_num == self.dimensions.row_max {
+                let span_index = row_num / 16;
+                span_min += 1;
+                span_max += 1;
+                let span_range = format!("{}:{}", span_min, span_max);
+                spans.insert(span_index, span_range);
+                span_min = COL_MAX;
+            }
+        }
+
+        spans
+    }
+
     // Write the <row> element.
-    fn write_row(&mut self, row_num: RowNum) {
+    fn write_row(&mut self, row_num: RowNum, span: Option<&String>) {
         let row_num = format!("{}", row_num + 1);
-        let attributes = vec![("r", row_num.as_str()), ("spans", "1:3")];
+        let mut attributes = vec![("r", row_num.as_str())];
+
+        if let Some(span_range) = span {
+            attributes.push(("spans", span_range))
+        }
 
         self.writer.xml_start_tag_attr("row", &attributes);
     }
@@ -301,10 +350,11 @@ mod tests {
     use super::Worksheet;
     use crate::test_functions::xml_to_vec;
     use pretty_assertions::assert_eq;
+    use std::collections::HashMap;
 
     #[test]
     fn test_assemble() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new(String::from(""));
 
         worksheet.selected = true;
 
@@ -327,6 +377,258 @@ mod tests {
             </worksheet>
             "#,
         );
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_1() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (0..17).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:16")), (1, String::from("17:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_2() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (1..18).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:15")), (1, String::from("16:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_3() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (2..19).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:14")), (1, String::from("15:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_4() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (3..20).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:13")), (1, String::from("14:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_5() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (4..21).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:12")), (1, String::from("13:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_6() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (5..22).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:11")), (1, String::from("12:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_7() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (6..23).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:10")), (1, String::from("11:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_8() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (7..24).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:9")), (1, String::from("10:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_9() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (8..25).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:8")), (1, String::from("9:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_10() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (9..26).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:7")), (1, String::from("8:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_11() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (10..27).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:6")), (1, String::from("7:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_12() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (11..28).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:5")), (1, String::from("6:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_13() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (12..29).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:4")), (1, String::from("5:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_14() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (13..30).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:3")), (1, String::from("4:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_15() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (14..31).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:2")), (1, String::from("3:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_16() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (15..32).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(0, String::from("1:1")), (1, String::from("2:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_17() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (16..33).enumerate() {
+            worksheet.write_number(row_num, col_num as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(1, String::from("1:16")), (2, String::from("17:17"))]);
+        let got = worksheet.calculate_spans();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_calculate_spans_18() {
+        let mut worksheet = Worksheet::new(String::from(""));
+
+        for (col_num, row_num) in (16..33).enumerate() {
+            worksheet.write_number(row_num, (col_num + 1) as u16, 1.0);
+        }
+
+        let expected = HashMap::from([(1, String::from("2:17")), (2, String::from("18:18"))]);
+        let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
     }

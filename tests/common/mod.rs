@@ -23,7 +23,7 @@ pub fn get_xlsx_filenames(test_case: &str) -> (String, String) {
 // Test the vectors from compare_xlsx_files using pretty_assertions for clearer
 // differentiation.
 pub fn assert_eq(expected_file: &str, got_file: &str) {
-    let (exp, got) = compare_xlsx_files(&expected_file, &got_file);
+    let (exp, got) = compare_xlsx_files(expected_file, got_file);
 
     assert_eq!(exp, got);
 }
