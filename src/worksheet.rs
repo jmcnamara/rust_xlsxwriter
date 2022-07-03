@@ -7,6 +7,7 @@ use std::cmp;
 use std::collections::HashMap;
 use std::mem;
 
+use crate::shared_strings_table::SharedStringsTable;
 use crate::utility;
 use crate::xmlwriter::XMLWriter;
 
@@ -64,6 +65,21 @@ impl<'a> Worksheet {
         }
 
         let cell = CellType::Number { number };
+
+        self.insert_cell(row, col, cell)
+    }
+
+    // Writer a number to a cell.
+    pub fn write_string(&mut self, row: RowNum, col: ColNum, string: &str) {
+        if !self.check_dimensions(row, col) {
+            return;
+        }
+
+        let cell = CellType::String {
+            string: string.to_string(),
+            string_index: 0,
+        };
+
         self.insert_cell(row, col, cell)
     }
 
@@ -106,6 +122,32 @@ impl<'a> Worksheet {
         self.dimensions.col_max = cmp::max(self.dimensions.col_max, col);
 
         true
+    }
+
+    // Iterate through the worksheet data table an convert each string into a
+    // unique string table index.
+    pub(crate) fn update_shared_strings(&mut self, string_table: &mut SharedStringsTable) {
+        for row_num in self.dimensions.row_min..=self.dimensions.row_max {
+            match self.table.get_mut(&row_num) {
+                Some(columns) => {
+                    for col_num in self.dimensions.col_min..=self.dimensions.col_max {
+                        match columns.get_mut(&col_num) {
+                            Some(cell) => {
+                                if let CellType::String {
+                                    string,
+                                    string_index,
+                                } = cell
+                                {
+                                    *string_index = string_table.get_shared_string_index(string);
+                                }
+                            }
+                            _ => continue,
+                        }
+                    }
+                }
+                _ => continue,
+            }
+        }
     }
 
     //
@@ -246,6 +288,12 @@ impl<'a> Worksheet {
                                 CellType::Number { number } => {
                                     self.write_number_cell(row_num, col_num, number)
                                 }
+                                CellType::String {
+                                    string: _,
+                                    string_index,
+                                } => {
+                                    self.write_string_cell(row_num, col_num, string_index);
+                                }
                             },
                             _ => continue,
                         }
@@ -316,13 +364,22 @@ impl<'a> Worksheet {
         let attributes = vec![("r", range.as_str())];
 
         self.writer.xml_start_tag_attr("c", &attributes);
+        self.write_value(format!("{}", number).as_str());
+        self.writer.xml_end_tag("c");
+    }
 
-        self.write_number_value(format!("{}", number).as_str());
+    // Write the <c> element for a string.
+    fn write_string_cell(&mut self, row: RowNum, col: ColNum, string_index: &u32) {
+        let range = utility::rowcol_to_cell(row, col);
+        let attributes = vec![("r", range.as_str()), ("t", "s")];
+
+        self.writer.xml_start_tag_attr("c", &attributes);
+        self.write_value(format!("{}", string_index).as_str());
         self.writer.xml_end_tag("c");
     }
 
     // Write the <v> element.
-    fn write_number_value(&mut self, value: &str) {
+    fn write_value(&mut self, value: &str) {
         self.writer.xml_data_element("v", value);
     }
 }
@@ -339,6 +396,7 @@ struct WorksheetDimensions {
 }
 enum CellType {
     Number { number: f64 },
+    String { string: String, string_index: u32 },
 }
 
 //

@@ -88,9 +88,6 @@ impl Packager {
         self.write_root_rels_file();
         self.write_workbook_rels_file(options);
 
-        if options.has_sst_table {
-            self.write_shared_strings_file();
-        }
         self.write_styles_file();
         self.write_theme_file();
     }
@@ -195,10 +192,8 @@ impl Packager {
     }
 
     // Write the sharedStrings.xml file.
-    fn write_shared_strings_file(&mut self) {
-        let mut string_table = SharedStringsTable::new();
+    pub fn write_shared_strings_file(&mut self, string_table: SharedStringsTable) {
         let mut shared_strings = SharedStrings::new();
-        string_table.get_shared_string_index("Hello");
 
         self.zip
             .start_file("xl/sharedStrings.xml", self.zip_options)

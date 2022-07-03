@@ -5,6 +5,7 @@
 
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
+use crate::shared_strings_table::SharedStringsTable;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 
@@ -47,19 +48,25 @@ impl<'a> Workbook<'a> {
         if self.worksheets.is_empty() {
             self.add_worksheet();
         }
+        // Ensure one sheet is selected.
+        self.worksheets[0].selected = true;
 
         // Create the Packager object that will assemble the zip/xlsx file.
         let mut packager = Packager::new(self.filename);
         let mut package_options = PackagerOptions::new();
 
+        // Set some of the packager options.
         package_options.num_worksheets = self.worksheets.len() as u16;
-
         for worksheet in self.worksheets.iter() {
             package_options.worksheet_names.push(worksheet.name.clone())
         }
 
-        // Ensure one sheet is selected.
-        self.worksheets[0].selected = true;
+        // Update and write the share string table.
+        let string_table = self.update_shared_strings();
+        if string_table.unique_count > 0 {
+            packager.write_shared_strings_file(string_table);
+            package_options.has_sst_table = true;
+        }
 
         // Start the zip/xlsx container.
         packager.create_root_files(&package_options);
@@ -77,6 +84,17 @@ impl<'a> Workbook<'a> {
 
         // Close and write the final zip/xlsx container.
         packager.close();
+    }
+
+    // Iterate through the worksheets and assign a string index for each unique string.
+    fn update_shared_strings(&mut self) -> SharedStringsTable {
+        let mut string_table = SharedStringsTable::new();
+
+        for worksheet in self.worksheets.iter_mut() {
+            worksheet.update_shared_strings(&mut string_table);
+        }
+
+        string_table
     }
 
     //
