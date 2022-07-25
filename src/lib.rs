@@ -6,6 +6,7 @@
 mod app;
 mod content_types;
 mod core;
+mod format;
 mod packager;
 mod relationship;
 mod shared_strings;
@@ -19,5 +20,6 @@ mod worksheet;
 mod xmlwriter;
 
 // Re-export the public APIs.
+pub use format::*;
 pub use workbook::*;
 pub use worksheet::*;

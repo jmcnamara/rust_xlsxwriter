@@ -13,9 +13,9 @@ pub struct App {
 }
 
 impl App {
-    //
+    // -----------------------------------------------------------------------
     // Crate public methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Create a new App struct.
     pub(crate) fn new() -> App {
@@ -39,9 +39,9 @@ impl App {
         self.table_parts.push(part_name.to_string());
     }
 
-    //
+    // -----------------------------------------------------------------------
     // XML assembly methods.
-    //
+    // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
@@ -86,8 +86,10 @@ impl App {
 
     // Write the <Properties> element.
     fn write_properties(&mut self) {
-        let xmlns = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties";
-        let xmlns_vt = "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes";
+        let xmlns =
+            "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties".to_string();
+        let xmlns_vt =
+            "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes".to_string();
 
         let attributes = vec![("xmlns", xmlns), ("xmlns:vt", xmlns_vt)];
 
@@ -125,7 +127,7 @@ impl App {
     fn write_heading_vector(&mut self) {
         let size = self.heading_pairs.len() * 2;
         let size = size.to_string();
-        let attributes = vec![("size", size.as_str()), ("baseType", "variant")];
+        let attributes = vec![("size", size), ("baseType", "variant".to_string())];
 
         self.writer.xml_start_tag_attr("vt:vector", &attributes);
 
@@ -155,7 +157,7 @@ impl App {
     fn write_title_parts_vector(&mut self) {
         let size = self.table_parts.len();
         let size = size.to_string();
-        let attributes = vec![("size", size.as_str()), ("baseType", "lpstr")];
+        let attributes = vec![("size", size), ("baseType", String::from("lpstr"))];
 
         self.writer.xml_start_tag_attr("vt:vector", &attributes);
 

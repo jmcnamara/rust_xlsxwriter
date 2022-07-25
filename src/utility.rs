@@ -8,7 +8,7 @@ use crate::worksheet::RowNum;
 
 // Convert a zero indexed column cell reference to a string.
 pub fn col_to_name(col_num: ColNum) -> String {
-    let mut col_name = String::from("");
+    let mut col_name = "".to_string();
 
     let mut col_num = col_num + 1;
 

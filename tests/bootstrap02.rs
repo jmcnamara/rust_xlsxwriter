@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) {
 }
 
 #[test]
-fn compare_against_excel1() {
+fn bootstrap02_multiple_worksheets() {
     let testcase = "bootstrap02";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);

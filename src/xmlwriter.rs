@@ -57,11 +57,11 @@ impl<'a> XMLWriter {
     }
 
     // Write an XML start tag with attributes.
-    pub(crate) fn xml_start_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
-        let mut attribute_str = String::from("");
+    pub(crate) fn xml_start_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, String)>) {
+        let mut attribute_str = "".to_string();
 
         for attribute in attributes {
-            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(attribute.1));
+            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));
             attribute_str.push_str(&pair);
         }
 
@@ -79,11 +79,11 @@ impl<'a> XMLWriter {
     }
 
     // Write an empty XML tag with attributes.
-    pub(crate) fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, &str)>) {
-        let mut attribute_str = String::from("");
+    pub(crate) fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, String)>) {
+        let mut attribute_str = "".to_string();
 
         for attribute in attributes {
-            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(attribute.1));
+            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));
             attribute_str.push_str(&pair);
         }
 
@@ -106,12 +106,12 @@ impl<'a> XMLWriter {
         &mut self,
         tag: &str,
         data: &str,
-        attributes: &Vec<(&str, &str)>,
+        attributes: &Vec<(&str, String)>,
     ) {
-        let mut attribute_str = String::from("");
+        let mut attribute_str = "".to_string();
 
         for attribute in attributes {
-            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(attribute.1));
+            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));
             attribute_str.push_str(&pair);
         }
 
@@ -209,7 +209,7 @@ mod tests {
     #[test]
     fn test_xml_start_tag_with_attributes() {
         let expected = r#"<foo span="8" baz="7">"#;
-        let attributes = vec![("span", "8"), ("baz", "7")];
+        let attributes = vec![("span", "8".to_string()), ("baz", "7".to_string())];
 
         let mut writer = XMLWriter::new();
         writer.xml_start_tag_attr("foo", &attributes);
@@ -245,7 +245,7 @@ mod tests {
     #[test]
     fn test_xml_empty_tag_with_attributes() {
         let expected = r#"<foo span="8"/>"#;
-        let attributes = vec![("span", "8")];
+        let attributes = vec![("span", "8".to_string())];
 
         let mut writer = XMLWriter::new();
 
@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn test_xml_data_element_with_attributes() {
         let expected = r#"<foo span="8">bar</foo>"#;
-        let attributes = vec![("span", "8")];
+        let attributes = vec![("span", "8".to_string())];
 
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "bar", &attributes);
@@ -281,7 +281,7 @@ mod tests {
     #[test]
     fn test_xml_data_element_with_escapes() {
         let expected = r#"<foo span="8">&amp;&lt;&gt;"</foo>"#;
-        let attributes = vec![("span", "8")];
+        let attributes = vec![("span", "8".to_string())];
 
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "&<>\"", &attributes);

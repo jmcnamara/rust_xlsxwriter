@@ -12,9 +12,9 @@ pub struct Relationship {
 }
 
 impl Relationship {
-    //
+    // -----------------------------------------------------------------------
     // Crate public methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Create a new struct to to track Excel shared strings between worksheets.
     pub(crate) fn new() -> Relationship {
@@ -34,7 +34,7 @@ impl Relationship {
         self.relationships.push((
             format!("{}{}", document_schema, rel_type),
             target.to_string(),
-            String::from(""),
+            "".to_string(),
         ));
     }
 
@@ -45,13 +45,13 @@ impl Relationship {
         self.relationships.push((
             format!("{}{}", package_schema, rel_type),
             target.to_string(),
-            String::from(""),
+            "".to_string(),
         ));
     }
 
-    //
+    // -----------------------------------------------------------------------
     // XML assembly methods.
-    //
+    // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
@@ -66,7 +66,7 @@ impl Relationship {
 
     // Write the <Relationships> element.
     fn write_relationships(&mut self) {
-        let xmlns = "http://schemas.openxmlformats.org/package/2006/relationships";
+        let xmlns = "http://schemas.openxmlformats.org/package/2006/relationships".to_string();
         let attributes = vec![("xmlns", xmlns)];
 
         self.writer.xml_start_tag_attr("Relationships", &attributes);
@@ -84,14 +84,10 @@ impl Relationship {
 
         self.id_num += 1;
 
-        let mut attributes = vec![
-            ("Id", r_id.as_str()),
-            ("Type", rel_type.as_str()),
-            ("Target", target.as_str()),
-        ];
+        let mut attributes = vec![("Id", r_id), ("Type", rel_type), ("Target", target)];
 
         if !target_mode.is_empty() {
-            attributes.push(("TargetMode", target_mode.as_str()));
+            attributes.push(("TargetMode", target_mode));
         }
 
         self.writer.xml_empty_tag_attr("Relationship", &attributes);

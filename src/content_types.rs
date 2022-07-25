@@ -12,9 +12,9 @@ pub struct ContentTypes {
 }
 
 impl ContentTypes {
-    //
+    // -----------------------------------------------------------------------
     // Crate public methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Create a new ContentTypes struct.
     pub(crate) fn new() -> ContentTypes {
@@ -24,36 +24,35 @@ impl ContentTypes {
             writer,
             defaults: vec![
                 (
-                    String::from("rels"),
-                    String::from("application/vnd.openxmlformats-package.relationships+xml"),
+                    "rels".to_string(),
+                    "application/vnd.openxmlformats-package.relationships+xml".to_string(),
                 ),
-                (String::from("xml"), String::from("application/xml")),
+                ("xml".to_string(), "application/xml".to_string()),
             ],
 
             overrides: vec![
                 (
-                    String::from("/docProps/app.xml"),
-                    String::from(
-                        "application/vnd.openxmlformats-officedocument.extended-properties+xml",
-                    ),
+                    "/docProps/app.xml".to_string(),
+                    "application/vnd.openxmlformats-officedocument.extended-properties+xml"
+                        .to_string(),
                 ),
                 (
-                    String::from("/docProps/core.xml"),
-                    String::from("application/vnd.openxmlformats-package.core-properties+xml"),
+                    "/docProps/core.xml".to_string(),
+                    "application/vnd.openxmlformats-package.core-properties+xml".to_string(),
                 ),
                 (
-                    String::from("/xl/styles.xml"),
-                    String::from(
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml",
-                    ),
+                    "/xl/styles.xml".to_string(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"
+                        .to_string(),
                 ),
                 (
-                    String::from("/xl/theme/theme1.xml"),
-                    String::from("application/vnd.openxmlformats-officedocument.theme+xml"),
+                    "/xl/theme/theme1.xml".to_string(),
+                    "application/vnd.openxmlformats-officedocument.theme+xml".to_string(),
                 ),
                 (
-                    String::from("/xl/workbook.xml"),
-                    String::from("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"),
+                    "/xl/workbook.xml".to_string(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
+                        .to_string(),
                 ),
             ],
         }
@@ -89,9 +88,9 @@ impl ContentTypes {
         );
     }
 
-    //
+    // -----------------------------------------------------------------------
     // XML assembly methods.
-    //
+    // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
@@ -112,7 +111,7 @@ impl ContentTypes {
 
     // Write the <Types> element.
     fn write_types(&mut self) {
-        let xmlns = "http://schemas.openxmlformats.org/package/2006/content-types";
+        let xmlns = "http://schemas.openxmlformats.org/package/2006/content-types".to_string();
         let attributes = vec![("xmlns", xmlns)];
 
         self.writer.xml_start_tag_attr("Types", &attributes);
@@ -126,10 +125,7 @@ impl ContentTypes {
 
     // Write the <Default> element.
     fn write_default(&mut self, extension: String, content_type: String) {
-        let attributes = vec![
-            ("Extension", extension.as_str()),
-            ("ContentType", content_type.as_str()),
-        ];
+        let attributes = vec![("Extension", extension), ("ContentType", content_type)];
 
         self.writer.xml_empty_tag_attr("Default", &attributes);
     }
@@ -143,10 +139,7 @@ impl ContentTypes {
 
     // Write the <Override> element.
     fn write_override(&mut self, part_name: String, content_type: String) {
-        let attributes = vec![
-            ("PartName", part_name.as_str()),
-            ("ContentType", content_type.as_str()),
-        ];
+        let attributes = vec![("PartName", part_name), ("ContentType", content_type)];
 
         self.writer.xml_empty_tag_attr("Override", &attributes);
     }

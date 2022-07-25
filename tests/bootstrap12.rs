@@ -11,19 +11,27 @@ mod common;
 // Test case to demonstrate creating a basic file with some string cell data.
 fn create_new_xlsx_file(filename: &str) {
     let mut workbook = Workbook::new(filename);
-    let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "Hello");
-    worksheet.write_string_only(1, 0, "World");
-    worksheet.write_string_only(2, 0, "Hello");
-    worksheet.write_string_only(3, 0, "World");
+    let mut format1 = workbook.add_format();
+    format1.set_bold().register_with(&mut workbook);
+
+    let mut format2 = workbook.add_format();
+    format2.set_italic().register_with(&mut workbook);
+
+    let mut format3 = workbook.add_format();
+    format3.set_bold().set_italic().register_with(&mut workbook);
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.write_string(0, 0, "Hello", &format1);
+    worksheet.write_string(1, 0, "Hello", &format2);
+    worksheet.write_string(2, 0, "Hello", &format3);
 
     workbook.close();
 }
 
 #[test]
-fn bootstrap07_write_repeated_strings() {
-    let testcase = "bootstrap07";
+fn bootstrap12_bold_and_italic_text_mixed() {
+    let testcase = "bootstrap12";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
     create_new_xlsx_file(&xlsxwriter_file);

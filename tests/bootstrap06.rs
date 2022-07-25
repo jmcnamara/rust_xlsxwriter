@@ -13,13 +13,13 @@ fn create_new_xlsx_file(filename: &str) {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string(0, 0, "Hello");
+    worksheet.write_string_only(0, 0, "Hello");
 
     workbook.close();
 }
 
 #[test]
-fn compare_against_excel1() {
+fn bootstrap06_write_string() {
     let testcase = "bootstrap06";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);

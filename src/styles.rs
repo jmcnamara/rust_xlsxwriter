@@ -3,27 +3,34 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
+use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
 
-pub struct Styles {
+pub struct Styles<'a> {
     pub writer: XMLWriter,
+    xf_formats: &'a Vec<Format>,
+    font_count: u32,
 }
 
-impl Styles {
-    //
+impl<'a> Styles<'a> {
+    // -----------------------------------------------------------------------
     // Crate public methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Create a new Styles struct.
-    pub(crate) fn new() -> Styles {
+    pub(crate) fn new(xf_formats: &Vec<Format>, font_count: u32) -> Styles {
         let writer = XMLWriter::new();
 
-        Styles { writer }
+        Styles {
+            writer,
+            xf_formats,
+            font_count,
+        }
     }
 
-    //
+    // -----------------------------------------------------------------------
     // XML assembly methods.
-    //
+    // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
@@ -64,7 +71,7 @@ impl Styles {
     fn write_style_sheet(&mut self) {
         let attributes = vec![(
             "xmlns",
-            "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+            "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string(),
         )];
 
         self.writer.xml_start_tag_attr("styleSheet", &attributes);
@@ -72,18 +79,33 @@ impl Styles {
 
     // Write the <fonts> element.
     fn write_fonts(&mut self) {
-        let attributes = vec![("count", "1")];
+        let attributes = vec![("count", self.font_count.to_string())];
 
         self.writer.xml_start_tag_attr("fonts", &attributes);
-        // Write the font element.
-        self.write_font();
+
+        // Write the cell xf element.
+        for xf_format in self.xf_formats {
+            // Write the font element.
+            if xf_format.has_font() {
+                self.write_font(xf_format);
+            }
+        }
 
         self.writer.xml_end_tag("fonts");
     }
 
     // Write the <font> element.
-    fn write_font(&mut self) {
+    fn write_font(&mut self, xf_format: &Format) {
         self.writer.xml_start_tag("font");
+
+        if xf_format.bold() {
+            self.writer.xml_empty_tag("b");
+        }
+
+        if xf_format.italic() {
+            self.writer.xml_empty_tag("i");
+        }
+
         // Write the sz element.
         self.write_sz();
 
@@ -104,54 +126,54 @@ impl Styles {
 
     // Write the <sz> element.
     fn write_sz(&mut self) {
-        let attributes = vec![("val", "11")];
+        let attributes = vec![("val", "11".to_string())];
 
         self.writer.xml_empty_tag_attr("sz", &attributes);
     }
 
     // Write the <color> element.
     fn write_color(&mut self) {
-        let attributes = vec![("theme", "1")];
+        let attributes = vec![("theme", "1".to_string())];
 
         self.writer.xml_empty_tag_attr("color", &attributes);
     }
 
     // Write the <name> element.
     fn write_name(&mut self) {
-        let attributes = vec![("val", "Calibri")];
+        let attributes = vec![("val", "Calibri".to_string())];
 
         self.writer.xml_empty_tag_attr("name", &attributes);
     }
 
     // Write the <family> element.
     fn write_family(&mut self) {
-        let attributes = vec![("val", "2")];
+        let attributes = vec![("val", "2".to_string())];
 
         self.writer.xml_empty_tag_attr("family", &attributes);
     }
 
     // Write the <scheme> element.
     fn write_scheme(&mut self) {
-        let attributes = vec![("val", "minor")];
+        let attributes = vec![("val", "minor".to_string())];
 
         self.writer.xml_empty_tag_attr("scheme", &attributes);
     }
 
     // Write the <fills> element.
     fn write_fills(&mut self) {
-        let attributes = vec![("count", "2")];
+        let attributes = vec![("count", "2".to_string())];
 
         self.writer.xml_start_tag_attr("fills", &attributes);
 
         // Write the default fill elements.
-        self.write_default_fill("none");
-        self.write_default_fill("gray125");
+        self.write_default_fill("none".to_string());
+        self.write_default_fill("gray125".to_string());
 
         self.writer.xml_end_tag("fills");
     }
 
     // Write the default <fill> element.
-    fn write_default_fill(&mut self, pattern: &str) {
+    fn write_default_fill(&mut self, pattern: String) {
         let attributes = vec![("patternType", pattern)];
 
         self.writer.xml_start_tag("fill");
@@ -161,7 +183,7 @@ impl Styles {
 
     // Write the <borders> element.
     fn write_borders(&mut self) {
-        let attributes = vec![("count", "1")];
+        let attributes = vec![("count", "1".to_string())];
 
         self.writer.xml_start_tag_attr("borders", &attributes);
 
@@ -219,7 +241,7 @@ impl Styles {
 
     // Write the <cellStyleXfs> element.
     fn write_cell_style_xfs(&mut self) {
-        let attributes = vec![("count", "1")];
+        let attributes = vec![("count", "1".to_string())];
 
         self.writer.xml_start_tag_attr("cellStyleXfs", &attributes);
 
@@ -232,10 +254,10 @@ impl Styles {
     // Write the style <xf> element.
     fn write_style_xf(&mut self) {
         let attributes = vec![
-            ("numFmtId", "0"),
-            ("fontId", "0"),
-            ("fillId", "0"),
-            ("borderId", "0"),
+            ("numFmtId", "0".to_string()),
+            ("fontId", "0".to_string()),
+            ("fillId", "0".to_string()),
+            ("borderId", "0".to_string()),
         ];
 
         self.writer.xml_empty_tag_attr("xf", &attributes);
@@ -243,32 +265,39 @@ impl Styles {
 
     // Write the <cellXfs> element.
     fn write_cell_xfs(&mut self) {
-        let attributes = vec![("count", "1")];
+        let xf_count = format!("{}", self.xf_formats.len());
+        let attributes = vec![("count", xf_count)];
 
         self.writer.xml_start_tag_attr("cellXfs", &attributes);
 
         // Write the cell xf element.
-        self.write_cell_xf();
+        for xf_format in self.xf_formats {
+            self.write_cell_xf(xf_format);
+        }
 
         self.writer.xml_end_tag("cellXfs");
     }
 
     // Write the cell <xf> element.
-    fn write_cell_xf(&mut self) {
-        let attributes = vec![
-            ("numFmtId", "0"),
-            ("fontId", "0"),
-            ("fillId", "0"),
-            ("borderId", "0"),
-            ("xfId", "0"),
+    fn write_cell_xf(&mut self, xf_format: &Format) {
+        let mut attributes = vec![
+            ("numFmtId", "0".to_string()),
+            ("fontId", xf_format.get_font_index().to_string()),
+            ("fillId", "0".to_string()),
+            ("borderId", "0".to_string()),
+            ("xfId", "0".to_string()),
         ];
+
+        if xf_format.get_font_index() > 0 {
+            attributes.push(("applyFont", "1".to_string()));
+        }
 
         self.writer.xml_empty_tag_attr("xf", &attributes);
     }
 
     // Write the <cellStyles> element.
     fn write_cell_styles(&mut self) {
-        let attributes = vec![("count", "1")];
+        let attributes = vec![("count", "1".to_string())];
 
         self.writer.xml_start_tag_attr("cellStyles", &attributes);
 
@@ -280,14 +309,18 @@ impl Styles {
 
     // Write the <cellStyle> element.
     fn write_cell_style(&mut self) {
-        let attributes = vec![("name", "Normal"), ("xfId", "0"), ("builtinId", "0")];
+        let attributes = vec![
+            ("name", "Normal".to_string()),
+            ("xfId", "0".to_string()),
+            ("builtinId", "0".to_string()),
+        ];
 
         self.writer.xml_empty_tag_attr("cellStyle", &attributes);
     }
 
     // Write the <dxfs> element.
     fn write_dxfs(&mut self) {
-        let attributes = vec![("count", "0")];
+        let attributes = vec![("count", "0".to_string())];
 
         self.writer.xml_empty_tag_attr("dxfs", &attributes);
     }
@@ -295,9 +328,9 @@ impl Styles {
     // Write the <tableStyles> element.
     fn write_table_styles(&mut self) {
         let attributes = vec![
-            ("count", "0"),
-            ("defaultTableStyle", "TableStyleMedium9"),
-            ("defaultPivotStyle", "PivotStyleLight16"),
+            ("count", "0".to_string()),
+            ("defaultTableStyle", "TableStyleMedium9".to_string()),
+            ("defaultPivotStyle", "PivotStyleLight16".to_string()),
         ];
 
         self.writer.xml_empty_tag_attr("tableStyles", &attributes);
@@ -307,13 +340,18 @@ impl Styles {
 #[cfg(test)]
 mod tests {
 
+    use super::Format;
     use super::Styles;
     use crate::test_functions::xml_to_vec;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_assemble() {
-        let mut styles = Styles::new();
+        let mut xf_format = Format::new();
+        xf_format.set_font_index(0, true);
+
+        let xf_formats = vec![xf_format];
+        let mut styles = Styles::new(&xf_formats, 1);
 
         styles.assemble_xml_file();
 

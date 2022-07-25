@@ -11,25 +11,26 @@ mod common;
 // Test case to demonstrate creating a basic file with some string cell data.
 fn create_new_xlsx_file(filename: &str) {
     let mut workbook = Workbook::new(filename);
+
     let worksheet1 = workbook.add_worksheet();
 
-    worksheet1.write_string(0, 0, "Hello");
-    worksheet1.write_string(1, 0, "World");
-    worksheet1.write_string(2, 0, "Hello");
-    worksheet1.write_string(3, 0, "World");
+    worksheet1.write_string_only(0, 0, "Hello");
+    worksheet1.write_string_only(1, 0, "World");
+    worksheet1.write_string_only(2, 0, "Hello");
+    worksheet1.write_string_only(3, 0, "World");
 
     let worksheet2 = workbook.add_worksheet();
 
-    worksheet2.write_string(0, 0, "World");
-    worksheet2.write_string(1, 0, "Hello");
-    worksheet2.write_string(2, 0, "World");
-    worksheet2.write_string(3, 0, "Hello");
+    worksheet2.write_string_only(0, 0, "World");
+    worksheet2.write_string_only(1, 0, "Hello");
+    worksheet2.write_string_only(2, 0, "World");
+    worksheet2.write_string_only(3, 0, "Hello");
 
     workbook.close();
 }
 
 #[test]
-fn compare_against_excel1() {
+fn bootstrap08_write_repeated_strings_on_different_worksheets() {
     let testcase = "bootstrap08";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);

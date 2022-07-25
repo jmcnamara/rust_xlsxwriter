@@ -12,9 +12,9 @@ pub struct SharedStrings {
 }
 
 impl SharedStrings {
-    //
+    // -----------------------------------------------------------------------
     // Crate public methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Create a new SharedStrings struct.
     pub(crate) fn new() -> SharedStrings {
@@ -23,9 +23,9 @@ impl SharedStrings {
         SharedStrings { writer }
     }
 
-    //
+    // -----------------------------------------------------------------------
     // XML assembly methods.
-    //
+    // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self, string_table: &SharedStringsTable) {
@@ -43,10 +43,10 @@ impl SharedStrings {
 
     // Write the <sst> element.
     fn write_sst(&mut self, string_table: &SharedStringsTable) {
-        let xmls = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+        let xmls = "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string();
         let count = string_table.count.to_string();
         let unique = string_table.unique_count.to_string();
-        let attributes = vec![("xmlns", xmls), ("count", &count), ("uniqueCount", &unique)];
+        let attributes = vec![("xmlns", xmls), ("count", count), ("uniqueCount", unique)];
 
         self.writer.xml_start_tag_attr("sst", &attributes);
     }

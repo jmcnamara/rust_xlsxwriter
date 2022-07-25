@@ -8,21 +8,26 @@ use rust_xlsxwriter::Workbook;
 
 mod common;
 
-// Test case to demonstrate creating a basic file with some numeric cell data.
+// Test case to demonstrate creating a basic file with some string cell data.
 fn create_new_xlsx_file(filename: &str) {
     let mut workbook = Workbook::new(filename);
-    let worksheet = workbook.add_worksheet();
 
-    worksheet.write_number_only(0, 0, 1.0);
-    worksheet.write_number_only(1, 1, 2.0);
-    worksheet.write_number_only(2, 2, 3.0);
+    let mut format1 = workbook.add_format();
+    format1.set_bold().register_with(&mut workbook);
+
+    let mut format2 = workbook.add_format();
+    format2.set_italic().register_with(&mut workbook);
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.write_string(0, 0, "Hello", &format1);
+    worksheet.write_string(1, 0, "Hello", &format2);
 
     workbook.close();
 }
 
 #[test]
-fn bootstrap04_write_numbers() {
-    let testcase = "bootstrap04";
+fn bootstrap11_bold_and_italic_text() {
+    let testcase = "bootstrap11";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
     create_new_xlsx_file(&xlsxwriter_file);

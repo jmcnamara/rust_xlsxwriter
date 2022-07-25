@@ -14,9 +14,9 @@ pub struct Core {
 }
 
 impl Core {
-    //
+    // -----------------------------------------------------------------------
     // Crate public methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Create a new Core struct.
     pub(crate) fn new() -> Core {
@@ -24,7 +24,7 @@ impl Core {
 
         Core {
             writer,
-            author: String::from(""),
+            author: "".to_string(),
             create_time: Utc::now(),
         }
     }
@@ -43,9 +43,9 @@ impl Core {
         self.create_time = create_time;
     }
 
-    //
+    // -----------------------------------------------------------------------
     // XML assembly methods.
-    //
+    // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
@@ -72,11 +72,12 @@ impl Core {
 
     // Write the <cp:coreProperties> element.
     fn write_cp_core_properties(&mut self) {
-        let xmlns_cp = "http://schemas.openxmlformats.org/package/2006/metadata/core-properties";
-        let xmlns_dc = "http://purl.org/dc/elements/1.1/";
-        let xmlns_dcterms = "http://purl.org/dc/terms/";
-        let xmlns_dcmitype = "http://purl.org/dc/dcmitype/";
-        let xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance";
+        let xmlns_cp =
+            "http://schemas.openxmlformats.org/package/2006/metadata/core-properties".to_string();
+        let xmlns_dc = "http://purl.org/dc/elements/1.1/".to_string();
+        let xmlns_dcterms = "http://purl.org/dc/terms/".to_string();
+        let xmlns_dcmitype = "http://purl.org/dc/dcmitype/".to_string();
+        let xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance".to_string();
 
         let attributes = vec![
             ("xmlns:cp", xmlns_cp),
@@ -103,7 +104,7 @@ impl Core {
 
     // Write the <dcterms:created> element.
     fn write_dcterms_created(&mut self) {
-        let attributes = vec![("xsi:type", "dcterms:W3CDTF")];
+        let attributes = vec![("xsi:type", "dcterms:W3CDTF".to_string())];
         let datetime = self
             .create_time
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
@@ -114,7 +115,7 @@ impl Core {
 
     // Write the <dcterms:modified> element.
     fn write_dcterms_modified(&mut self) {
-        let attributes = vec![("xsi:type", "dcterms:W3CDTF")];
+        let attributes = vec![("xsi:type", "dcterms:W3CDTF".to_string())];
 
         let datetime = self
             .create_time

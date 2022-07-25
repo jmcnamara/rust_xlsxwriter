@@ -25,7 +25,7 @@ fn create_new_xlsx_file2(filename: &str) {
 }
 
 #[test]
-fn compare_against_excel1() {
+fn bootstrap01_single_worksheet() {
     let testcase = "bootstrap01";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
@@ -34,7 +34,7 @@ fn compare_against_excel1() {
 }
 
 #[test]
-fn compare_against_excel2() {
+fn bootstrap01_add_default_worksheet() {
     let testcase = "bootstrap01";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);

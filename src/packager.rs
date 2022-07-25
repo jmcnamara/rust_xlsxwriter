@@ -42,6 +42,7 @@
 use crate::app::App;
 use crate::content_types::ContentTypes;
 use crate::core::Core;
+use crate::format::Format;
 use crate::relationship::Relationship;
 use crate::shared_strings::SharedStrings;
 use crate::shared_strings_table::SharedStringsTable;
@@ -61,9 +62,9 @@ pub struct Packager {
 }
 
 impl Packager {
-    //
+    // -----------------------------------------------------------------------
     // Crate public methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Create a new Packager struct.
     pub(crate) fn new(filename: &str) -> Packager {
@@ -87,9 +88,12 @@ impl Packager {
         self.write_content_types_file(options);
         self.write_root_rels_file();
         self.write_workbook_rels_file(options);
-
-        self.write_styles_file();
         self.write_theme_file();
+    }
+
+    // Create the styles.xml file and add it to the zip/xlsx container.
+    pub(crate) fn create_styles_file(&mut self, xf_formats: &Vec<Format>, font_count: u32) {
+        self.write_styles_file(xf_formats, font_count);
     }
 
     // Create the docProps component xml files and add them to the zip/xlsx
@@ -205,8 +209,8 @@ impl Packager {
     }
 
     // Write the styles.xml file.
-    fn write_styles_file(&mut self) {
-        let mut styles = Styles::new();
+    fn write_styles_file(&mut self, xf_formats: &Vec<Format>, font_count: u32) {
+        let mut styles = Styles::new(xf_formats, font_count);
 
         self.zip
             .start_file("xl/styles.xml", self.zip_options)

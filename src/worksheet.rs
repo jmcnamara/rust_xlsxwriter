@@ -7,6 +7,7 @@ use std::cmp;
 use std::collections::HashMap;
 use std::mem;
 
+use crate::format::Format;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::utility;
 use crate::xmlwriter::XMLWriter;
@@ -26,9 +27,9 @@ pub struct Worksheet {
 }
 
 impl<'a> Worksheet {
-    //
+    // -----------------------------------------------------------------------
     // Public (and crate public) methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Create a new Worksheet struct.
     pub(crate) fn new(name: String) -> Worksheet {
@@ -59,18 +60,21 @@ impl<'a> Worksheet {
     }
 
     // Writer a number to a cell.
-    pub fn write_number(&mut self, row: RowNum, col: ColNum, number: f64) {
+    pub fn write_number_only(&mut self, row: RowNum, col: ColNum, number: f64) {
         if !self.check_dimensions(row, col) {
             return;
         }
 
-        let cell = CellType::Number { number };
+        let cell = CellType::Number {
+            number,
+            xf_index: 0,
+        };
 
         self.insert_cell(row, col, cell)
     }
 
-    // Writer a number to a cell.
-    pub fn write_string(&mut self, row: RowNum, col: ColNum, string: &str) {
+    // Writer a unformatted string to a cell.
+    pub fn write_string(&mut self, row: RowNum, col: ColNum, string: &str, format: &Format) {
         if !self.check_dimensions(row, col) {
             return;
         }
@@ -78,14 +82,30 @@ impl<'a> Worksheet {
         let cell = CellType::String {
             string: string.to_string(),
             string_index: 0,
+            xf_index: format.xf_index(),
         };
 
         self.insert_cell(row, col, cell)
     }
 
-    //
+    // Writer a unformatted string to a cell.
+    pub fn write_string_only(&mut self, row: RowNum, col: ColNum, string: &str) {
+        if !self.check_dimensions(row, col) {
+            return;
+        }
+
+        let cell = CellType::String {
+            string: string.to_string(),
+            string_index: 0,
+            xf_index: 0,
+        };
+
+        self.insert_cell(row, col, cell)
+    }
+
+    // -----------------------------------------------------------------------
     // Crate level helper methods.
-    //
+    // -----------------------------------------------------------------------
 
     // Insert a cell value into the worksheet table data structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
@@ -136,6 +156,7 @@ impl<'a> Worksheet {
                                 if let CellType::String {
                                     string,
                                     string_index,
+                                    xf_index: _,
                                 } = cell
                                 {
                                     *string_index = string_table.get_shared_string_index(string);
@@ -150,9 +171,9 @@ impl<'a> Worksheet {
         }
     }
 
-    //
+    // -----------------------------------------------------------------------
     // XML assembly methods.
-    //
+    // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
@@ -182,8 +203,9 @@ impl<'a> Worksheet {
 
     // Write the <worksheet> element.
     fn write_worksheet(&mut self) {
-        let xmlns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
-        let xmlns_r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+        let xmlns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string();
+        let xmlns_r =
+            "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string();
 
         let attributes = vec![("xmlns", xmlns), ("xmlns:r", xmlns_r)];
 
@@ -193,7 +215,7 @@ impl<'a> Worksheet {
     // Write the <dimension> element.
     fn write_dimension(&mut self) {
         let mut attributes = vec![];
-        let mut range = String::from("A1");
+        let mut range = "A1".to_string();
 
         if !self.table.is_empty() {
             range = utility::cell_range(
@@ -204,7 +226,7 @@ impl<'a> Worksheet {
             );
         }
 
-        attributes.push(("ref", range.as_str()));
+        attributes.push(("ref", range));
 
         self.writer.xml_empty_tag_attr("dimension", &attributes);
     }
@@ -224,17 +246,17 @@ impl<'a> Worksheet {
         let mut attributes = vec![];
 
         if self.selected {
-            attributes.push(("tabSelected", "1"));
+            attributes.push(("tabSelected", "1".to_string()));
         }
 
-        attributes.push(("workbookViewId", "0"));
+        attributes.push(("workbookViewId", "0".to_string()));
 
         self.writer.xml_empty_tag_attr("sheetView", &attributes);
     }
 
     // Write the <sheetFormatPr> element.
     fn write_sheet_format_pr(&mut self) {
-        let attributes = vec![("defaultRowHeight", "15")];
+        let attributes = vec![("defaultRowHeight", "15".to_string())];
 
         self.writer.xml_empty_tag_attr("sheetFormatPr", &attributes);
     }
@@ -253,12 +275,12 @@ impl<'a> Worksheet {
     // Write the <pageMargins> element.
     fn write_page_margins(&mut self) {
         let attributes = vec![
-            ("left", "0.7"),
-            ("right", "0.7"),
-            ("top", "0.75"),
-            ("bottom", "0.75"),
-            ("header", "0.3"),
-            ("footer", "0.3"),
+            ("left", "0.7".to_string()),
+            ("right", "0.7".to_string()),
+            ("top", "0.75".to_string()),
+            ("bottom", "0.75".to_string()),
+            ("header", "0.3".to_string()),
+            ("footer", "0.3".to_string()),
         ];
 
         self.writer.xml_empty_tag_attr("pageMargins", &attributes);
@@ -285,14 +307,20 @@ impl<'a> Worksheet {
                     for col_num in self.dimensions.col_min..=self.dimensions.col_max {
                         match columns.get(&col_num) {
                             Some(cell) => match cell {
-                                CellType::Number { number } => {
-                                    self.write_number_cell(row_num, col_num, number)
+                                CellType::Number { number, xf_index } => {
+                                    self.write_number_cell(row_num, col_num, number, xf_index)
                                 }
                                 CellType::String {
                                     string: _,
                                     string_index,
+                                    xf_index,
                                 } => {
-                                    self.write_string_cell(row_num, col_num, string_index);
+                                    self.write_string_cell(
+                                        row_num,
+                                        col_num,
+                                        string_index,
+                                        xf_index,
+                                    );
                                 }
                             },
                             _ => continue,
@@ -349,19 +377,26 @@ impl<'a> Worksheet {
     // Write the <row> element.
     fn write_row(&mut self, row_num: RowNum, span: Option<&String>) {
         let row_num = format!("{}", row_num + 1);
-        let mut attributes = vec![("r", row_num.as_str())];
+        let mut attributes = vec![("r", row_num)];
 
         if let Some(span_range) = span {
-            attributes.push(("spans", span_range))
+            attributes.push(("spans", span_range.clone()))
         }
 
         self.writer.xml_start_tag_attr("row", &attributes);
     }
 
     // Write the <c> element for a number.
-    fn write_number_cell(&mut self, row: RowNum, col: ColNum, number: &f64) {
+    fn write_number_cell(&mut self, row: RowNum, col: ColNum, number: &f64, xf_index: &u32) {
         let range = utility::rowcol_to_cell(row, col);
-        let attributes = vec![("r", range.as_str())];
+        let mut attributes = vec![("r", range)];
+
+        let style = *xf_index;
+        let style = style.to_string();
+
+        if *xf_index > 0 {
+            attributes.push(("s", style));
+        }
 
         self.writer.xml_start_tag_attr("c", &attributes);
         self.write_value(format!("{}", number).as_str());
@@ -369,9 +404,18 @@ impl<'a> Worksheet {
     }
 
     // Write the <c> element for a string.
-    fn write_string_cell(&mut self, row: RowNum, col: ColNum, string_index: &u32) {
+    fn write_string_cell(&mut self, row: RowNum, col: ColNum, string_index: &u32, xf_index: &u32) {
         let range = utility::rowcol_to_cell(row, col);
-        let attributes = vec![("r", range.as_str()), ("t", "s")];
+        let mut attributes = vec![("r", range)];
+
+        let style = *xf_index;
+        let style = style.to_string();
+
+        if *xf_index > 0 {
+            attributes.push(("s", style));
+        }
+
+        attributes.push(("t", "s".to_string()));
 
         self.writer.xml_start_tag_attr("c", &attributes);
         self.write_value(format!("{}", string_index).as_str());
@@ -384,9 +428,9 @@ impl<'a> Worksheet {
     }
 }
 
-//
+// -----------------------------------------------------------------------
 // Helper enums/structs
-//
+// -----------------------------------------------------------------------
 
 struct WorksheetDimensions {
     row_min: RowNum,
@@ -395,13 +439,20 @@ struct WorksheetDimensions {
     col_max: ColNum,
 }
 enum CellType {
-    Number { number: f64 },
-    String { string: String, string_index: u32 },
+    Number {
+        number: f64,
+        xf_index: u32,
+    },
+    String {
+        string: String,
+        string_index: u32,
+        xf_index: u32,
+    },
 }
 
-//
+// -----------------------------------------------------------------------
 // Tests.
-//
+// -----------------------------------------------------------------------
 #[cfg(test)]
 mod tests {
 
@@ -412,7 +463,7 @@ mod tests {
 
     #[test]
     fn test_assemble() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         worksheet.selected = true;
 
@@ -441,13 +492,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_1() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (0..17).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:16")), (1, String::from("17:17"))]);
+        let expected = HashMap::from([(0, "1:16".to_string()), (1, "17:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -455,13 +506,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_2() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (1..18).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:15")), (1, String::from("16:17"))]);
+        let expected = HashMap::from([(0, "1:15".to_string()), (1, "16:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -469,13 +520,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_3() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (2..19).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:14")), (1, String::from("15:17"))]);
+        let expected = HashMap::from([(0, "1:14".to_string()), (1, "15:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -483,13 +534,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_4() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (3..20).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:13")), (1, String::from("14:17"))]);
+        let expected = HashMap::from([(0, "1:13".to_string()), (1, "14:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -497,13 +548,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_5() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (4..21).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:12")), (1, String::from("13:17"))]);
+        let expected = HashMap::from([(0, "1:12".to_string()), (1, "13:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -511,13 +562,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_6() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (5..22).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:11")), (1, String::from("12:17"))]);
+        let expected = HashMap::from([(0, "1:11".to_string()), (1, "12:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -525,13 +576,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_7() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (6..23).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:10")), (1, String::from("11:17"))]);
+        let expected = HashMap::from([(0, "1:10".to_string()), (1, "11:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -539,13 +590,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_8() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (7..24).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:9")), (1, String::from("10:17"))]);
+        let expected = HashMap::from([(0, "1:9".to_string()), (1, "10:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -553,13 +604,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_9() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (8..25).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:8")), (1, String::from("9:17"))]);
+        let expected = HashMap::from([(0, "1:8".to_string()), (1, "9:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -567,13 +618,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_10() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (9..26).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:7")), (1, String::from("8:17"))]);
+        let expected = HashMap::from([(0, "1:7".to_string()), (1, "8:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -581,13 +632,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_11() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (10..27).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:6")), (1, String::from("7:17"))]);
+        let expected = HashMap::from([(0, "1:6".to_string()), (1, "7:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -595,13 +646,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_12() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (11..28).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:5")), (1, String::from("6:17"))]);
+        let expected = HashMap::from([(0, "1:5".to_string()), (1, "6:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -609,13 +660,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_13() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (12..29).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:4")), (1, String::from("5:17"))]);
+        let expected = HashMap::from([(0, "1:4".to_string()), (1, "5:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -623,13 +674,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_14() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (13..30).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:3")), (1, String::from("4:17"))]);
+        let expected = HashMap::from([(0, "1:3".to_string()), (1, "4:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -637,13 +688,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_15() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (14..31).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:2")), (1, String::from("3:17"))]);
+        let expected = HashMap::from([(0, "1:2".to_string()), (1, "3:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -651,13 +702,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_16() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (15..32).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(0, String::from("1:1")), (1, String::from("2:17"))]);
+        let expected = HashMap::from([(0, "1:1".to_string()), (1, "2:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -665,13 +716,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_17() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (16..33).enumerate() {
-            worksheet.write_number(row_num, col_num as u16, 1.0);
+            worksheet.write_number_only(row_num, col_num as u16, 1.0);
         }
 
-        let expected = HashMap::from([(1, String::from("1:16")), (2, String::from("17:17"))]);
+        let expected = HashMap::from([(1, "1:16".to_string()), (2, "17:17".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
@@ -679,13 +730,13 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_18() {
-        let mut worksheet = Worksheet::new(String::from(""));
+        let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (16..33).enumerate() {
-            worksheet.write_number(row_num, (col_num + 1) as u16, 1.0);
+            worksheet.write_number_only(row_num, (col_num + 1) as u16, 1.0);
         }
 
-        let expected = HashMap::from([(1, String::from("2:17")), (2, String::from("18:18"))]);
+        let expected = HashMap::from([(1, "2:17".to_string()), (2, "18:18".to_string())]);
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
