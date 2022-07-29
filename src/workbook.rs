@@ -94,14 +94,10 @@ impl<'a> Workbook<'a> {
         // Set some of the packager options.
         package_options.num_worksheets = self.worksheets.len() as u16;
         for worksheet in self.worksheets.iter() {
-            package_options.worksheet_names.push(worksheet.name.clone())
-        }
-
-        // Update and write the share string table.
-        let string_table = self.update_shared_strings();
-        if string_table.unique_count > 0 {
-            packager.write_shared_strings_file(string_table);
-            package_options.has_sst_table = true;
+            package_options.worksheet_names.push(worksheet.name.clone());
+            if worksheet.uses_string_table() {
+                package_options.has_sst_table = true;
+            }
         }
 
         // Start the zip/xlsx container.
@@ -115,8 +111,14 @@ impl<'a> Workbook<'a> {
         packager.write_workbook_file(self);
 
         // Write the worksheets to the zip/xlsx container.
+        let mut string_table = SharedStringsTable::new();
         for (index, worksheet) in self.worksheets.iter_mut().enumerate() {
-            packager.write_worksheet_file(worksheet, index + 1);
+            packager.write_worksheet_file(worksheet, index + 1, &mut string_table);
+        }
+
+        // Write the share string table.
+        if package_options.has_sst_table {
+            packager.write_shared_strings_file(&string_table);
         }
 
         // Write the docProp files to the zip/xlsx container.
@@ -129,17 +131,6 @@ impl<'a> Workbook<'a> {
     // -----------------------------------------------------------------------
     // Internal function/methods.
     // -----------------------------------------------------------------------
-
-    // Iterate through the worksheets and assign a string index for each unique string.
-    fn update_shared_strings(&mut self) -> SharedStringsTable {
-        let mut string_table = SharedStringsTable::new();
-
-        for worksheet in self.worksheets.iter_mut() {
-            worksheet.update_shared_strings(&mut string_table);
-        }
-
-        string_table
-    }
 
     // Prepare all Format properties prior to passing them to styles.rs.
     fn prepare_format_properties(&mut self) {

@@ -5,6 +5,7 @@
 
 use std::cmp;
 use std::collections::HashMap;
+use std::io::Write;
 use std::mem;
 
 use crate::format::Format;
@@ -23,10 +24,12 @@ pub struct Worksheet {
     pub name: String,
     pub selected: bool,
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
+    col_names: HashMap<ColNum, String>,
     dimensions: WorksheetDimensions,
+    uses_string_table: bool,
 }
 
-impl<'a> Worksheet {
+impl Worksheet {
     // -----------------------------------------------------------------------
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
@@ -35,6 +38,7 @@ impl<'a> Worksheet {
     pub(crate) fn new(name: String) -> Worksheet {
         let writer = XMLWriter::new();
         let table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
+        let col_names: HashMap<ColNum, String> = HashMap::new();
 
         // Initialize the min and max dimensions with their opposite value.
         let dimensions = WorksheetDimensions {
@@ -49,7 +53,9 @@ impl<'a> Worksheet {
             name,
             selected: false,
             table,
+            col_names,
             dimensions,
+            uses_string_table: false,
         }
     }
 
@@ -81,11 +87,12 @@ impl<'a> Worksheet {
 
         let cell = CellType::String {
             string: string.to_string(),
-            string_index: 0,
             xf_index: format.xf_index(),
         };
 
-        self.insert_cell(row, col, cell)
+        self.insert_cell(row, col, cell);
+
+        self.uses_string_table = true;
     }
 
     // Writer a unformatted string to a cell.
@@ -96,11 +103,20 @@ impl<'a> Worksheet {
 
         let cell = CellType::String {
             string: string.to_string(),
-            string_index: 0,
             xf_index: 0,
         };
 
-        self.insert_cell(row, col, cell)
+        self.insert_cell(row, col, cell);
+
+        self.uses_string_table = true;
+    }
+
+    // -----------------------------------------------------------------------
+    // Property getters.
+    // -----------------------------------------------------------------------
+
+    pub(crate) fn uses_string_table(&self) -> bool {
+        self.uses_string_table
     }
 
     // -----------------------------------------------------------------------
@@ -144,30 +160,14 @@ impl<'a> Worksheet {
         true
     }
 
-    // Iterate through the worksheet data table an convert each string into a
-    // unique string table index.
-    pub(crate) fn update_shared_strings(&mut self, string_table: &mut SharedStringsTable) {
-        for row_num in self.dimensions.row_min..=self.dimensions.row_max {
-            match self.table.get_mut(&row_num) {
-                Some(columns) => {
-                    for col_num in self.dimensions.col_min..=self.dimensions.col_max {
-                        match columns.get_mut(&col_num) {
-                            Some(cell) => {
-                                if let CellType::String {
-                                    string,
-                                    string_index,
-                                    xf_index: _,
-                                } = cell
-                                {
-                                    *string_index = string_table.get_shared_string_index(string);
-                                }
-                            }
-                            _ => continue,
-                        }
-                    }
-                }
-                _ => continue,
-            }
+    // Cached/faster version of utility.col_to_name() to use in the inner loop.
+    fn col_to_name(&mut self, col_num: ColNum) -> String {
+        if let Some(col_name) = self.col_names.get(&col_num) {
+            col_name.clone()
+        } else {
+            let col_name = utility::col_to_name(col_num);
+            self.col_names.insert(col_num, col_name.clone());
+            col_name
         }
     }
 
@@ -176,13 +176,14 @@ impl<'a> Worksheet {
     // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
-    pub(crate) fn assemble_xml_file(&mut self) {
+    pub(crate) fn assemble_xml_file(&mut self, string_table: &mut SharedStringsTable) {
         self.writer.xml_declaration();
 
         // Write the worksheet element.
         self.write_worksheet();
 
         // Write the dimension element.
+
         self.write_dimension();
 
         // Write the sheetViews element.
@@ -192,7 +193,7 @@ impl<'a> Worksheet {
         self.write_sheet_format_pr();
 
         // Write the sheetData element.
-        self.write_sheet_data();
+        self.write_sheet_data(string_table);
 
         // Write the pageMargins element.
         self.write_page_margins();
@@ -262,12 +263,12 @@ impl<'a> Worksheet {
     }
 
     // Write the <sheetData> element.
-    fn write_sheet_data(&mut self) {
+    fn write_sheet_data(&mut self, string_table: &mut SharedStringsTable) {
         if self.table.is_empty() {
             self.writer.xml_empty_tag("sheetData");
         } else {
             self.writer.xml_start_tag("sheetData");
-            self.write_data_table();
+            self.write_data_table(string_table);
             self.writer.xml_end_tag("sheetData");
         }
     }
@@ -287,7 +288,7 @@ impl<'a> Worksheet {
     }
 
     // Write out all the row and cell data in the worksheet data table.
-    fn write_data_table(&mut self) {
+    fn write_data_table(&mut self, string_table: &mut SharedStringsTable) {
         let spans = self.calculate_spans();
 
         // Swap out the worksheet data table so we can iterate over it and still
@@ -310,15 +311,12 @@ impl<'a> Worksheet {
                                 CellType::Number { number, xf_index } => {
                                     self.write_number_cell(row_num, col_num, number, xf_index)
                                 }
-                                CellType::String {
-                                    string: _,
-                                    string_index,
-                                    xf_index,
-                                } => {
+                                CellType::String { string, xf_index } => {
+                                    let string_index = string_table.get_shared_string_index(string);
                                     self.write_string_cell(
                                         row_num,
                                         col_num,
-                                        string_index,
+                                        &string_index,
                                         xf_index,
                                     );
                                 }
@@ -388,43 +386,42 @@ impl<'a> Worksheet {
 
     // Write the <c> element for a number.
     fn write_number_cell(&mut self, row: RowNum, col: ColNum, number: &f64, xf_index: &u32) {
-        let range = utility::rowcol_to_cell(row, col);
-        let mut attributes = vec![("r", range)];
-
-        let style = *xf_index;
-        let style = style.to_string();
+        let col_name = self.col_to_name(col);
+        let mut style = String::from("");
 
         if *xf_index > 0 {
-            attributes.push(("s", style));
+            style = format!(r#" s="{}""#, *xf_index);
         }
 
-        self.writer.xml_start_tag_attr("c", &attributes);
-        self.write_value(format!("{}", number).as_str());
-        self.writer.xml_end_tag("c");
+        write!(
+            &mut self.writer.xmlfile,
+            r#"<c r="{}{}"{}><v>{}</v></c>"#,
+            col_name,
+            row + 1,
+            style,
+            number
+        )
+        .expect("Couldn't write to file");
     }
 
     // Write the <c> element for a string.
     fn write_string_cell(&mut self, row: RowNum, col: ColNum, string_index: &u32, xf_index: &u32) {
-        let range = utility::rowcol_to_cell(row, col);
-        let mut attributes = vec![("r", range)];
-
-        let style = *xf_index;
-        let style = style.to_string();
+        let col_name = self.col_to_name(col);
+        let mut style = String::from("");
 
         if *xf_index > 0 {
-            attributes.push(("s", style));
+            style = format!(r#" s="{}""#, *xf_index);
         }
 
-        attributes.push(("t", "s".to_string()));
-
-        self.writer.xml_start_tag_attr("c", &attributes);
-        self.write_value(format!("{}", string_index).as_str());
-        self.writer.xml_end_tag("c");
-    }
-
-    // Write the <v> element.
-    fn write_value(&mut self, value: &str) {
-        self.writer.xml_data_element("v", value);
+        write!(
+            &mut self.writer.xmlfile,
+            r#"<c r="{}{}"{} t="s"><v>{}</v></c>"#,
+            col_name,
+            row + 1,
+            style,
+            string_index
+        )
+        .expect("Couldn't write to file");
     }
 }
 
@@ -439,15 +436,8 @@ struct WorksheetDimensions {
     col_max: ColNum,
 }
 enum CellType {
-    Number {
-        number: f64,
-        xf_index: u32,
-    },
-    String {
-        string: String,
-        string_index: u32,
-        xf_index: u32,
-    },
+    Number { number: f64, xf_index: u32 },
+    String { string: String, xf_index: u32 },
 }
 
 // -----------------------------------------------------------------------
@@ -456,6 +446,7 @@ enum CellType {
 #[cfg(test)]
 mod tests {
 
+    use super::SharedStringsTable;
     use super::Worksheet;
     use crate::test_functions::xml_to_vec;
     use pretty_assertions::assert_eq;
@@ -464,10 +455,11 @@ mod tests {
     #[test]
     fn test_assemble() {
         let mut worksheet = Worksheet::new("".to_string());
+        let mut string_table = SharedStringsTable::new();
 
         worksheet.selected = true;
 
-        worksheet.assemble_xml_file();
+        worksheet.assemble_xml_file(&mut string_table);
 
         let got = worksheet.writer.read_to_string();
         let got = xml_to_vec(&got);

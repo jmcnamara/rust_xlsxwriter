@@ -174,12 +174,17 @@ impl Packager {
     }
 
     // Write a worksheet xml file.
-    pub(crate) fn write_worksheet_file(&mut self, worksheet: &mut Worksheet, index: usize) {
+    pub(crate) fn write_worksheet_file(
+        &mut self,
+        worksheet: &mut Worksheet,
+        index: usize,
+        string_table: &mut SharedStringsTable,
+    ) {
         let filename = format!("xl/worksheets/sheet{}.xml", index);
 
         self.zip.start_file(filename, self.zip_options).unwrap();
 
-        worksheet.assemble_xml_file();
+        worksheet.assemble_xml_file(string_table);
         let buffer = worksheet.writer.read_to_buffer();
         self.zip.write_all(&*buffer).unwrap();
     }
@@ -196,14 +201,14 @@ impl Packager {
     }
 
     // Write the sharedStrings.xml file.
-    pub fn write_shared_strings_file(&mut self, string_table: SharedStringsTable) {
+    pub fn write_shared_strings_file(&mut self, string_table: &SharedStringsTable) {
         let mut shared_strings = SharedStrings::new();
 
         self.zip
             .start_file("xl/sharedStrings.xml", self.zip_options)
             .unwrap();
 
-        shared_strings.assemble_xml_file(&string_table);
+        shared_strings.assemble_xml_file(string_table);
         let buffer = shared_strings.writer.read_to_buffer();
         self.zip.write_all(&*buffer).unwrap();
     }
