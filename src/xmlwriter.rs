@@ -5,11 +5,12 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 use std::fs::File;
-use std::io::{Read, Seek, Write};
+use std::io::{BufWriter, Read, Seek, Write};
+
 use tempfile::tempfile;
 
 pub struct XMLWriter {
-    pub xmlfile: File,
+    pub xmlfile: BufWriter<File>,
 }
 
 impl Default for XMLWriter {
@@ -18,10 +19,11 @@ impl Default for XMLWriter {
     }
 }
 
-impl<'a> XMLWriter {
+impl XMLWriter {
     // Create a new XMLWriter struct to write XML to a given filehandle.
     pub(crate) fn new() -> XMLWriter {
         let xmlfile = tempfile().unwrap();
+        let xmlfile = BufWriter::new(xmlfile);
         XMLWriter { xmlfile }
     }
 
@@ -30,7 +32,10 @@ impl<'a> XMLWriter {
     pub(crate) fn read_to_string(&mut self) -> String {
         let mut xml_string = String::new();
         self.xmlfile.rewind().unwrap();
-        self.xmlfile.read_to_string(&mut xml_string).unwrap();
+        self.xmlfile
+            .get_ref()
+            .read_to_string(&mut xml_string)
+            .unwrap();
         xml_string
     }
 
@@ -38,7 +43,7 @@ impl<'a> XMLWriter {
     pub(crate) fn read_to_buffer(&mut self) -> Vec<u8> {
         let mut buffer = Vec::new();
         self.xmlfile.rewind().unwrap();
-        self.xmlfile.read_to_end(&mut buffer).unwrap();
+        self.xmlfile.get_ref().read_to_end(&mut buffer).unwrap();
         buffer
     }
 
