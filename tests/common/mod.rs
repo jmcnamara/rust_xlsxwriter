@@ -35,7 +35,7 @@ pub fn remove_test_xlsx_file(filename: &str) {
 
 // Unzip 2 xlsx files and compare whether they have the same filenames and
 // structure. If they are the same then we compare each xml file to ensure that
-// files created by rust_xlsxwriter are the same as test files created in Excel.
+// files created by excelwriter are the same as test files created in Excel.
 // Returns two String vectors for comparison testing.
 fn compare_xlsx_files(exp_file: &str, got_file: &str) -> (Vec<String>, Vec<String>) {
     // Open the xlsx files.

@@ -1,6 +1,6 @@
 // packager - A library for assembling xml files into an Excel XLSX file.
 //
-// This module is used in conjunction by rust_xlsxwriter to create an Excel XLSX
+// This module is used in conjunction by excelwriter to create an Excel XLSX
 // container file.
 //
 // From Wikipedia: The Open Packaging Conventions (OPC) is a container-file

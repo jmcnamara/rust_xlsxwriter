@@ -1,9 +1,9 @@
 [package]
-name = "rust_xlsxwriter"
+name = "excelwriter"
 description = "A Rust module for writing files in the Excel 2007+ XLSX file format"
 authors = ["John McNamara <jmcnamara@cpan.org>"]
-homepage = "https://github.com/jmcnamara/rust_xlsxwriter"
-repository = "https://github.com/jmcnamara/rust_xlsxwriter"
+homepage = "https://github.com/jmcnamara/excelwriter-rs"
+repository = "https://github.com/jmcnamara/excelwriter-rs"
 keywords = ["excel", "xlsx"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"

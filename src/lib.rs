@@ -1,4 +1,4 @@
-// Entry point for rust_xlsxwriter library.
+// Entry point for excelwriter library.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org

@@ -1,9 +1,9 @@
-// Simple performance test for rust_xlsxwriter.
+// Simple performance test for excelwriter.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
-use rust_xlsxwriter::Workbook;
+use excelwriter::Workbook;
 
 fn main() {
     let mut workbook = Workbook::new("rust_perf_test.xlsx");
