@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::io::Write;
 use std::mem;
 
+use crate::error::XlsxError;
 use crate::format::Format;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::utility;
@@ -16,8 +17,8 @@ use crate::xmlwriter::XMLWriter;
 pub type RowNum = u32;
 pub type ColNum = u16;
 
-const ROW_MAX: RowNum = 1048576;
-const COL_MAX: ColNum = 16384;
+const ROW_MAX: RowNum = 1_048_576;
+const COL_MAX: ColNum = 16_384;
 
 pub struct Worksheet {
     pub writer: XMLWriter,
@@ -66,9 +67,14 @@ impl Worksheet {
     }
 
     // Writer a number to a cell.
-    pub fn write_number_only(&mut self, row: RowNum, col: ColNum, number: f64) {
+    pub fn write_number_only(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        number: f64,
+    ) -> Result<(), XlsxError> {
         if !self.check_dimensions(row, col) {
-            return;
+            return Err(XlsxError::RowColRange);
         }
 
         let cell = CellType::Number {
@@ -76,13 +82,21 @@ impl Worksheet {
             xf_index: 0,
         };
 
-        self.insert_cell(row, col, cell)
+        self.insert_cell(row, col, cell);
+
+        Ok(())
     }
 
     // Writer a unformatted string to a cell.
-    pub fn write_string(&mut self, row: RowNum, col: ColNum, string: &str, format: &Format) {
+    pub fn write_string(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        string: &str,
+        format: &Format,
+    ) -> Result<(), XlsxError> {
         if !self.check_dimensions(row, col) {
-            return;
+            return Err(XlsxError::RowColRange);
         }
 
         let cell = CellType::String {
@@ -91,14 +105,20 @@ impl Worksheet {
         };
 
         self.insert_cell(row, col, cell);
-
         self.uses_string_table = true;
+
+        Ok(())
     }
 
     // Writer a unformatted string to a cell.
-    pub fn write_string_only(&mut self, row: RowNum, col: ColNum, string: &str) {
+    pub fn write_string_only(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        string: &str,
+    ) -> Result<(), XlsxError> {
         if !self.check_dimensions(row, col) {
-            return;
+            return Err(XlsxError::RowColRange);
         }
 
         let cell = CellType::String {
@@ -109,6 +129,8 @@ impl Worksheet {
         self.insert_cell(row, col, cell);
 
         self.uses_string_table = true;
+
+        Ok(())
     }
 
     // -----------------------------------------------------------------------
@@ -487,7 +509,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (0..17).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:16".to_string()), (1, "17:17".to_string())]);
@@ -501,7 +525,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (1..18).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:15".to_string()), (1, "16:17".to_string())]);
@@ -515,7 +541,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (2..19).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:14".to_string()), (1, "15:17".to_string())]);
@@ -529,7 +557,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (3..20).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:13".to_string()), (1, "14:17".to_string())]);
@@ -543,7 +573,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (4..21).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:12".to_string()), (1, "13:17".to_string())]);
@@ -557,7 +589,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (5..22).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:11".to_string()), (1, "12:17".to_string())]);
@@ -571,7 +605,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (6..23).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:10".to_string()), (1, "11:17".to_string())]);
@@ -585,7 +621,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (7..24).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:9".to_string()), (1, "10:17".to_string())]);
@@ -599,7 +637,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (8..25).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:8".to_string()), (1, "9:17".to_string())]);
@@ -613,7 +653,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (9..26).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:7".to_string()), (1, "8:17".to_string())]);
@@ -627,7 +669,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (10..27).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:6".to_string()), (1, "7:17".to_string())]);
@@ -641,7 +685,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (11..28).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:5".to_string()), (1, "6:17".to_string())]);
@@ -655,7 +701,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (12..29).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:4".to_string()), (1, "5:17".to_string())]);
@@ -669,7 +717,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (13..30).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:3".to_string()), (1, "4:17".to_string())]);
@@ -683,7 +733,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (14..31).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:2".to_string()), (1, "3:17".to_string())]);
@@ -697,7 +749,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (15..32).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(0, "1:1".to_string()), (1, "2:17".to_string())]);
@@ -711,7 +765,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (16..33).enumerate() {
-            worksheet.write_number_only(row_num, col_num as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, col_num as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(1, "1:16".to_string()), (2, "17:17".to_string())]);
@@ -725,7 +781,9 @@ mod tests {
         let mut worksheet = Worksheet::new("".to_string());
 
         for (col_num, row_num) in (16..33).enumerate() {
-            worksheet.write_number_only(row_num, (col_num + 1) as u16, 1.0);
+            worksheet
+                .write_number_only(row_num, (col_num + 1) as u16, 1.0)
+                .unwrap();
         }
 
         let expected = HashMap::from([(1, "2:17".to_string()), (2, "18:18".to_string())]);

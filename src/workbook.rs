@@ -5,6 +5,7 @@
 
 use std::collections::HashMap;
 
+use crate::error::XlsxError;
 use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
@@ -76,7 +77,7 @@ impl<'a> Workbook<'a> {
     }
 
     // Assemble the xlsx file and close it.
-    pub fn close(&mut self) {
+    pub fn close(&mut self) -> Result<(), XlsxError> {
         // Ensure that there is at least one worksheet in the workbook.
         if self.worksheets.is_empty() {
             self.add_worksheet();
@@ -126,6 +127,8 @@ impl<'a> Workbook<'a> {
 
         // Close and write the final zip/xlsx container.
         packager.close();
+
+        Ok(())
     }
 
     // -----------------------------------------------------------------------

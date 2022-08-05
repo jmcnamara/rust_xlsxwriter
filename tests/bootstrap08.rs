@@ -4,29 +4,31 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
-use rust_xlsxwriter::Workbook;
+use rust_xlsxwriter::{Workbook, XlsxError};
 
 mod common;
 
 // Test case to demonstrate creating a basic file with some string cell data.
-fn create_new_xlsx_file(filename: &str) {
+fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
     let worksheet1 = workbook.add_worksheet();
 
-    worksheet1.write_string_only(0, 0, "Hello");
-    worksheet1.write_string_only(1, 0, "World");
-    worksheet1.write_string_only(2, 0, "Hello");
-    worksheet1.write_string_only(3, 0, "World");
+    worksheet1.write_string_only(0, 0, "Hello")?;
+    worksheet1.write_string_only(1, 0, "World")?;
+    worksheet1.write_string_only(2, 0, "Hello")?;
+    worksheet1.write_string_only(3, 0, "World")?;
 
     let worksheet2 = workbook.add_worksheet();
 
-    worksheet2.write_string_only(0, 0, "World");
-    worksheet2.write_string_only(1, 0, "Hello");
-    worksheet2.write_string_only(2, 0, "World");
-    worksheet2.write_string_only(3, 0, "Hello");
+    worksheet2.write_string_only(0, 0, "World")?;
+    worksheet2.write_string_only(1, 0, "Hello")?;
+    worksheet2.write_string_only(2, 0, "World")?;
+    worksheet2.write_string_only(3, 0, "Hello")?;
 
-    workbook.close();
+    workbook.close()?;
+
+    Ok(())
 }
 
 #[test]
@@ -34,7 +36,7 @@ fn bootstrap08_write_repeated_strings_on_different_worksheets() {
     let testcase = "bootstrap08";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
-    create_new_xlsx_file(&xlsxwriter_file);
+    _ = create_new_xlsx_file(&xlsxwriter_file);
     common::assert_eq(&excel_file, &xlsxwriter_file);
     common::remove_test_xlsx_file(&xlsxwriter_file);
 }
