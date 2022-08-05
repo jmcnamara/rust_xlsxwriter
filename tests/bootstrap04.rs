@@ -13,9 +13,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_number_only(0, 0, 1.0)?;
-    worksheet.write_number_only(1, 1, 2.0)?;
-    worksheet.write_number_only(2, 2, 3.0)?;
+    worksheet.write_number_only(0, 0, 1 as u32)?;
+    worksheet.write_number_only(1, 1, 2 as f32)?;
+    worksheet.write_number_only(2, 2, 3)?;
 
     workbook.close()?;
 

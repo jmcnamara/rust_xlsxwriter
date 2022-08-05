@@ -66,28 +66,21 @@ impl Worksheet {
         self
     }
 
-    // Writer a number to a cell.
-    pub fn write_number_only(
+    // Write a number to a cell.
+    pub fn write_number_only<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        number: f64,
-    ) -> Result<(), XlsxError> {
-        if !self.check_dimensions(row, col) {
-            return Err(XlsxError::RowColRange);
-        }
-
-        let cell = CellType::Number {
-            number,
-            xf_index: 0,
-        };
-
-        self.insert_cell(row, col, cell);
-
+        number: T,
+    ) -> Result<(), XlsxError>
+    where
+        T: Into<f64>,
+    {
+        self.store_number(row, col, number.into())?;
         Ok(())
     }
 
-    // Writer a unformatted string to a cell.
+    // Write a unformatted string to a cell.
     pub fn write_string(
         &mut self,
         row: RowNum,
@@ -95,6 +88,7 @@ impl Worksheet {
         string: &str,
         format: &Format,
     ) -> Result<(), XlsxError> {
+        // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColRange);
         }
@@ -117,6 +111,7 @@ impl Worksheet {
         col: ColNum,
         string: &str,
     ) -> Result<(), XlsxError> {
+        // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColRange);
         }
@@ -144,6 +139,23 @@ impl Worksheet {
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
+
+    // Write a number to a cell.
+    fn store_number(&mut self, row: RowNum, col: ColNum, number: f64) -> Result<(), XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColRange);
+        }
+
+        let cell = CellType::Number {
+            number,
+            xf_index: 0,
+        };
+
+        self.insert_cell(row, col, cell);
+
+        Ok(())
+    }
 
     // Insert a cell value into the worksheet table data structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
