@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 mod common;
 
@@ -12,11 +12,9 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
-    let mut format1 = workbook.add_format();
-    format1.set_bold().register_with(&mut workbook);
+    let format1 = Format::new().set_bold().register_with(&mut workbook);
 
-    let mut format2 = workbook.add_format();
-    format2.set_italic().register_with(&mut workbook);
+    let format2 = Format::new().set_italic().register_with(&mut workbook);
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string(0, 0, "Hello", &format1)?;

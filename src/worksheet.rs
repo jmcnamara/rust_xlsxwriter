@@ -66,7 +66,24 @@ impl Worksheet {
         self
     }
 
-    // Write a number to a cell.
+    // Write a formatted number to a cell.
+    pub fn write_number<T>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        number: T,
+        format: &Format,
+    ) -> Result<(), XlsxError>
+    where
+        T: Into<f64>,
+    {
+        // Store the cell data.
+        self.store_number(row, col, number.into(), Some(format))?;
+
+        Ok(())
+    }
+
+    // Write an unformatted number to a cell.
     pub fn write_number_only<T>(
         &mut self,
         row: RowNum,
@@ -76,11 +93,13 @@ impl Worksheet {
     where
         T: Into<f64>,
     {
-        self.store_number(row, col, number.into())?;
+        // Store the cell data.
+        self.store_number(row, col, number.into(), None)?;
+
         Ok(())
     }
 
-    // Write a unformatted string to a cell.
+    // Write a formatted string to a cell.
     pub fn write_string(
         &mut self,
         row: RowNum,
@@ -88,42 +107,21 @@ impl Worksheet {
         string: &str,
         format: &Format,
     ) -> Result<(), XlsxError> {
-        // Check row and col are in the allowed range.
-        if !self.check_dimensions(row, col) {
-            return Err(XlsxError::RowColRange);
-        }
-
-        let cell = CellType::String {
-            string: string.to_string(),
-            xf_index: format.xf_index(),
-        };
-
-        self.insert_cell(row, col, cell);
-        self.uses_string_table = true;
+        // Store the cell data.
+        self.store_string(row, col, string, Some(format))?;
 
         Ok(())
     }
 
-    // Writer a unformatted string to a cell.
+    // Write a unformatted string to a cell.
     pub fn write_string_only(
         &mut self,
         row: RowNum,
         col: ColNum,
         string: &str,
     ) -> Result<(), XlsxError> {
-        // Check row and col are in the allowed range.
-        if !self.check_dimensions(row, col) {
-            return Err(XlsxError::RowColRange);
-        }
-
-        let cell = CellType::String {
-            string: string.to_string(),
-            xf_index: 0,
-        };
-
-        self.insert_cell(row, col, cell);
-
-        self.uses_string_table = true;
+        // Store the cell data.
+        self.store_string(row, col, string, None)?;
 
         Ok(())
     }
@@ -140,19 +138,60 @@ impl Worksheet {
     // Crate level helper methods.
     // -----------------------------------------------------------------------
 
-    // Write a number to a cell.
-    fn store_number(&mut self, row: RowNum, col: ColNum, number: f64) -> Result<(), XlsxError> {
+    // Store a number cell.
+    fn store_number(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        number: f64,
+        format: Option<&Format>,
+    ) -> Result<(), XlsxError> {
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColRange);
         }
 
-        let cell = CellType::Number {
-            number,
-            xf_index: 0,
+        // Get the index of the format object, if any.
+        let xf_index = match format {
+            Some(format) => format.xf_index(),
+            None => 0,
+        };
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::Number { number, xf_index };
+
+        self.insert_cell(row, col, cell);
+
+        Ok(())
+    }
+
+    // Writer a unformatted string to a cell.
+    pub fn store_string(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        string: &str,
+        format: Option<&Format>,
+    ) -> Result<(), XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColRange);
+        }
+
+        // Get the index of the format object, if any.
+        let xf_index = match format {
+            Some(format) => format.xf_index(),
+            None => 0,
+        };
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::String {
+            string: string.to_string(),
+            xf_index,
         };
 
         self.insert_cell(row, col, cell);
+        self.uses_string_table = true;
 
         Ok(())
     }

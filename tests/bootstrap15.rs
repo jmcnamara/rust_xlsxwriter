@@ -12,19 +12,22 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
-    let format1 = Format::new().set_bold().register_with(&mut workbook);
+    let format1 = Format::new()
+        .set_num_format_index(2)
+        .register_with(&mut workbook);
 
-    let format2 = Format::new().set_italic().register_with(&mut workbook);
+    let format2 = Format::new()
+        .set_num_format_index(10)
+        .register_with(&mut workbook);
 
     let format3 = Format::new()
-        .set_bold()
-        .set_italic()
+        .set_num_format_index(49)
         .register_with(&mut workbook);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string(0, 0, "Hello", &format1)?;
-    worksheet.write_string(1, 0, "Hello", &format2)?;
-    worksheet.write_string(2, 0, "Hello", &format3)?;
+    worksheet.write_number(0, 0, 1, &format1)?;
+    worksheet.write_number(1, 1, 2, &format2)?;
+    worksheet.write_number(2, 2, 3, &format3)?;
 
     workbook.close()?;
 
@@ -32,8 +35,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn bootstrap12_bold_and_italic_text_mixed() {
-    let testcase = "bootstrap12";
+fn bootstrap14_number_format_via_legacy_index() {
+    let testcase = "bootstrap15";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
     _ = create_new_xlsx_file(&xlsxwriter_file);

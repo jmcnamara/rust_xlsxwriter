@@ -19,7 +19,8 @@ pub struct Workbook<'a> {
     worksheets: Vec<Worksheet>,
     xf_formats: Vec<Format>,
     xf_indices: HashMap<String, u32>,
-    font_count: u32,
+    font_count: u16,
+    num_format_count: u16,
 }
 
 impl<'a> Workbook<'a> {
@@ -40,6 +41,7 @@ impl<'a> Workbook<'a> {
             xf_formats: vec![default_format],
             xf_indices,
             font_count: 0,
+            num_format_count: 0,
         }
     }
 
@@ -54,9 +56,9 @@ impl<'a> Workbook<'a> {
         worksheet
     }
 
-    pub fn add_format(&mut self) -> Format {
-        Format::new()
-    }
+    //pub fn add_format(&mut self) -> Format {
+    //    Format::new()
+    //}
 
     // Set the index for the format.
     pub fn register_format(&mut self, format: &mut Format) {
@@ -106,7 +108,7 @@ impl<'a> Workbook<'a> {
 
         // Write the styles.xml file to the zip/xlsx container.
 
-        packager.create_styles_file(&self.xf_formats, self.font_count);
+        packager.create_styles_file(&self.xf_formats, self.font_count, self.num_format_count);
 
         // Write the workbook to the zip/xlsx container.
         packager.write_workbook_file(self);
@@ -139,12 +141,15 @@ impl<'a> Workbook<'a> {
     fn prepare_format_properties(&mut self) {
         // Set the font index for the format objects.
         self.prepare_fonts();
+
+        // Set the number format index for the format objects.
+        self.prepare_num_formats();
     }
 
     // Set the font index for the format objects.
     fn prepare_fonts(&mut self) {
-        let mut font_count = 0;
-        let mut font_indices: HashMap<String, u32> = HashMap::new();
+        let mut font_count: u16 = 0;
+        let mut font_indices: HashMap<String, u16> = HashMap::new();
 
         for xf_format in &mut self.xf_formats {
             let font_key = xf_format.get_font_key();
@@ -161,6 +166,37 @@ impl<'a> Workbook<'a> {
             }
         }
         self.font_count = font_count;
+    }
+
+    // Set the number format index for the format objects.
+    fn prepare_num_formats(&mut self) {
+        let mut num_formats: HashMap<String, u16> = HashMap::new();
+        // User defined number formats in Excel start from index 164.
+        let mut index = 164;
+
+        for xf_format in &mut self.xf_formats {
+            if xf_format.num_format_index() > 0 {
+                continue;
+            }
+
+            if xf_format.num_format() == "" {
+                continue;
+            }
+
+            let num_format_string = xf_format.num_format().clone();
+
+            match num_formats.get(&num_format_string) {
+                Some(index) => {
+                    xf_format.set_num_format_index_u16(*index);
+                }
+                None => {
+                    num_formats.insert(num_format_string, index);
+                    xf_format.set_num_format_index_u16(index);
+                    index += 1;
+                    self.num_format_count += 1;
+                }
+            }
+        }
     }
 
     // -----------------------------------------------------------------------

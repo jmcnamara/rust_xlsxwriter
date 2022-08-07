@@ -9,10 +9,11 @@ use crate::workbook::Workbook;
 pub struct Format {
     is_changed: bool,
     xf_index: u32,
-    font_index: u32,
+    font_index: u16,
     has_font: bool,
 
     num_format: String,
+    num_format_index: u16,
     bold: bool,
     italic: bool,
     underline: u8,
@@ -55,6 +56,12 @@ pub struct Format {
     reading_order: u8,
 }
 
+impl Default for Format {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Format {
     // Create a new Format struct.
     pub fn new() -> Format {
@@ -65,6 +72,7 @@ impl Format {
             has_font: false,
 
             num_format: "".to_string(),
+            num_format_index: 0,
             bold: false,
             italic: false,
             underline: 0,
@@ -120,8 +128,16 @@ impl Format {
         self.has_font
     }
 
-    pub(crate) fn get_font_index(&self) -> u32 {
+    pub(crate) fn get_font_index(&self) -> u16 {
         self.font_index
+    }
+
+    pub(crate) fn num_format(&self) -> &String {
+        &self.num_format
+    }
+
+    pub(crate) fn num_format_index(&self) -> u16 {
+        self.num_format_index
     }
 
     pub(crate) fn bold(&self) -> bool {
@@ -141,14 +157,14 @@ impl Format {
         self.is_changed = false;
     }
 
-    pub(crate) fn set_font_index(&mut self, font_index: u32, has_font: bool) {
+    pub(crate) fn set_font_index(&mut self, font_index: u16, has_font: bool) {
         self.font_index = font_index;
         self.has_font = has_font;
     }
 
     pub(crate) fn get_format_key(&self) -> String {
         format!(
-            "{}:{}:{}:{}:{}:{}:{}",
+            "{}:{}:{}:{}:{}:{}:{}:{}",
             self.get_alignment_key(),
             self.get_border_key(),
             self.get_fill_key(),
@@ -156,6 +172,7 @@ impl Format {
             self.hidden,
             self.locked,
             self.num_format,
+            self.num_format_index,
         )
     }
 
@@ -219,27 +236,47 @@ impl Format {
         )
     }
 
+    pub(crate) fn set_num_format_index_u16(&mut self, num_format_index: u16) {
+        self.num_format_index = num_format_index;
+    }
+
     // -----------------------------------------------------------------------
     // Public methods.
     // -----------------------------------------------------------------------
 
-    pub fn register_with(&mut self, workbook: &mut Workbook) {
-        workbook.register_format(self);
+    pub fn register_with(mut self, workbook: &mut Workbook) -> Format {
+        workbook.register_format(&mut self);
+        self
     }
 
-    pub fn set_bold(&mut self) -> &mut Format {
-        if !self.bold {
-            self.bold = true;
+    pub fn set_num_format(mut self, num_format: &str) -> Format {
+        if self.num_format != num_format {
+            self.num_format = num_format.to_string();
             self.is_changed = true;
         }
         self
     }
 
-    pub fn set_italic(&mut self) -> &mut Format {
-        if !self.italic {
-            self.italic = true;
+    pub fn set_num_format_index(mut self, num_format_index: u8) -> Format {
+        let num_format_index = num_format_index as u16;
+        if self.num_format_index != num_format_index {
+            self.num_format_index = num_format_index;
             self.is_changed = true;
         }
+        self
+    }
+
+    pub fn set_bold(mut self) -> Format {
+        self.bold = true;
+        self.is_changed = true;
+
+        self
+    }
+
+    pub fn set_italic(mut self) -> Format {
+        self.italic = true;
+        self.is_changed = true;
+
         self
     }
 }

@@ -9,7 +9,8 @@ use crate::xmlwriter::XMLWriter;
 pub struct Styles<'a> {
     pub writer: XMLWriter,
     xf_formats: &'a Vec<Format>,
-    font_count: u32,
+    font_count: u16,
+    num_format_count: u16,
 }
 
 impl<'a> Styles<'a> {
@@ -18,13 +19,14 @@ impl<'a> Styles<'a> {
     // -----------------------------------------------------------------------
 
     // Create a new Styles struct.
-    pub(crate) fn new(xf_formats: &Vec<Format>, font_count: u32) -> Styles {
+    pub(crate) fn new(xf_formats: &Vec<Format>, font_count: u16, num_format_count: u16) -> Styles {
         let writer = XMLWriter::new();
 
         Styles {
             writer,
             xf_formats,
             font_count,
+            num_format_count,
         }
     }
 
@@ -38,6 +40,9 @@ impl<'a> Styles<'a> {
 
         // Write the styleSheet element.
         self.write_style_sheet();
+
+        // Write the numFmts element.
+        self.write_num_fmts();
 
         // Write the fonts element.
         self.write_fonts();
@@ -281,12 +286,16 @@ impl<'a> Styles<'a> {
     // Write the cell <xf> element.
     fn write_cell_xf(&mut self, xf_format: &Format) {
         let mut attributes = vec![
-            ("numFmtId", "0".to_string()),
+            ("numFmtId", xf_format.num_format_index().to_string()),
             ("fontId", xf_format.get_font_index().to_string()),
             ("fillId", "0".to_string()),
             ("borderId", "0".to_string()),
             ("xfId", "0".to_string()),
         ];
+
+        if xf_format.num_format_index() > 0 {
+            attributes.push(("applyNumberFormat", "1".to_string()));
+        }
 
         if xf_format.get_font_index() > 0 {
             attributes.push(("applyFont", "1".to_string()));
@@ -335,6 +344,35 @@ impl<'a> Styles<'a> {
 
         self.writer.xml_empty_tag_attr("tableStyles", &attributes);
     }
+
+    // Write the <numFmts> element.
+    fn write_num_fmts(&mut self) {
+        if self.num_format_count == 0 {
+            return;
+        }
+
+        let attributes = vec![("count", self.num_format_count.to_string())];
+        self.writer.xml_start_tag_attr("numFmts", &attributes);
+
+        // Write the numFmt elements.
+        for xf_format in self.xf_formats {
+            if xf_format.num_format_index() >= 164 {
+                self.write_num_fmt(xf_format.num_format_index(), xf_format.num_format());
+            }
+        }
+
+        self.writer.xml_end_tag("numFmts");
+    }
+
+    // Write the <numFmt> element.
+    fn write_num_fmt(&mut self, num_format_index: u16, num_format: &str) {
+        let attributes = vec![
+            ("numFmtId", num_format_index.to_string()),
+            ("formatCode", num_format.to_string()),
+        ];
+
+        self.writer.xml_empty_tag_attr("numFmt", &attributes);
+    }
 }
 
 #[cfg(test)]
@@ -351,7 +389,7 @@ mod tests {
         xf_format.set_font_index(0, true);
 
         let xf_formats = vec![xf_format];
-        let mut styles = Styles::new(&xf_formats, 1);
+        let mut styles = Styles::new(&xf_formats, 1, 0);
 
         styles.assemble_xml_file();
 
