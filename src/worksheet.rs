@@ -559,15 +559,12 @@ impl Worksheet {
 
         // Excel doesn't have a NAN type/value so write a string instead.
         if number.is_nan() {
-            return self.store_string(row, col, "NAN", None);
+            return self.store_string(row, col, "#NUM!", None);
         }
 
-        // Excel doesn't have a +/-Infinity type/value so write a string instead.
-        if number == f64::INFINITY {
-            self.store_string(row, col, "INF", None)?;
-        }
-        if number == f64::NEG_INFINITY {
-            self.store_string(row, col, "-INF", None)?;
+        // Excel doesn't have an Infinity type/value so write a string instead.
+        if number.is_infinite() {
+            self.store_string(row, col, "#DIV/0", None)?;
         }
 
         // Get the index of the format object, if any.
@@ -798,33 +795,24 @@ impl Worksheet {
             let span_index = row_num / 16;
             let span = spans.get(&span_index);
 
-            match temp_table.get(&row_num) {
-                Some(columns) => {
-                    self.write_row(row_num, span);
+            if let Some(columns) = temp_table.get(&row_num) {
+                self.write_row(row_num, span);
 
-                    for col_num in self.dimensions.col_min..=self.dimensions.col_max {
-                        match columns.get(&col_num) {
-                            Some(cell) => match cell {
-                                CellType::Number { number, xf_index } => {
-                                    self.write_number_cell(row_num, col_num, number, xf_index)
-                                }
-                                CellType::String { string, xf_index } => {
-                                    let string_index = string_table.get_shared_string_index(string);
-                                    self.write_string_cell(
-                                        row_num,
-                                        col_num,
-                                        &string_index,
-                                        xf_index,
-                                    );
-                                }
-                            },
-                            _ => continue,
+                for col_num in self.dimensions.col_min..=self.dimensions.col_max {
+                    if let Some(cell) = columns.get(&col_num) {
+                        match cell {
+                            CellType::Number { number, xf_index } => {
+                                self.write_number_cell(row_num, col_num, number, xf_index)
+                            }
+                            CellType::String { string, xf_index } => {
+                                let string_index = string_table.get_shared_string_index(string);
+                                self.write_string_cell(row_num, col_num, &string_index, xf_index);
+                            }
                         }
                     }
-
-                    self.writer.xml_end_tag("row");
                 }
-                _ => continue,
+
+                self.writer.xml_end_tag("row");
             }
         }
     }
@@ -944,8 +932,8 @@ enum CellType {
 mod tests {
 
     use super::SharedStringsTable;
-    use super::Worksheet;
     use crate::test_functions::xml_to_vec;
+    use crate::worksheet::*;
     use crate::XlsxError;
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
@@ -1325,6 +1313,47 @@ mod tests {
         match worksheet.set_name("end with apostrophe'") {
             Ok(_) => assert!(false),
             Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe),
+        };
+    }
+
+    #[test]
+    fn check_dimensions() {
+        let mut worksheet = Worksheet::new("".to_string());
+        let format = Format::default();
+
+        assert_eq!(worksheet.check_dimensions(ROW_MAX, 0), false);
+        assert_eq!(worksheet.check_dimensions(0, COL_MAX), false);
+
+        match worksheet.write_string(ROW_MAX, 0, "", &format) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.write_string_only(ROW_MAX, 0, "") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.write_number(ROW_MAX, 0, 0, &format) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.write_number_only(ROW_MAX, 0, 0) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+    }
+
+    #[test]
+    fn long_string() {
+        let mut worksheet = Worksheet::new("".to_string());
+        let chars: [u8; 32_768] = [64; 32_768];
+        let long_string = std::str::from_utf8(&chars);
+
+        match worksheet.write_string_only(0, 0, long_string.unwrap()) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::MaxStringLengthExceeded),
         };
     }
 }
