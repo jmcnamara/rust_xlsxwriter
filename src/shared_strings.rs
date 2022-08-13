@@ -8,7 +8,7 @@ use crate::xmlwriter::XMLWriter;
 use itertools::Itertools;
 
 pub struct SharedStrings {
-    pub writer: XMLWriter,
+    pub(crate) writer: XMLWriter,
 }
 
 impl SharedStrings {

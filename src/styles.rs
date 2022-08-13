@@ -7,7 +7,7 @@ use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
 
 pub struct Styles<'a> {
-    pub writer: XMLWriter,
+    pub(crate) writer: XMLWriter,
     xf_formats: &'a Vec<Format>,
     font_count: u16,
     num_format_count: u16,

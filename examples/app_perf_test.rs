@@ -1,7 +1,7 @@
-// Simple performance test for rust_xlsxwriter.
-//
-// SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
-// jmcnamara@cpan.org
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright 2022, John McNamara, jmcnamara@cpan.org
+
+//! Simple performance test for rust_xlsxwriter.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 

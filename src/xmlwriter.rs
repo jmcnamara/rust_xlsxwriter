@@ -10,7 +10,7 @@ use std::io::{BufWriter, Read, Seek, Write};
 use tempfile::tempfile;
 
 pub struct XMLWriter {
-    pub xmlfile: BufWriter<File>,
+    pub(crate) xmlfile: BufWriter<File>,
 }
 
 impl Default for XMLWriter {

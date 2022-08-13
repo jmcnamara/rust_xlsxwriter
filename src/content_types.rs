@@ -6,7 +6,7 @@
 use crate::xmlwriter::XMLWriter;
 
 pub struct ContentTypes {
-    pub writer: XMLWriter,
+    pub(crate) writer: XMLWriter,
     defaults: Vec<(String, String)>,
     overrides: Vec<(String, String)>,
 }

@@ -8,7 +8,7 @@ use chrono::DateTime;
 use chrono::Utc;
 
 pub struct Core {
-    pub writer: XMLWriter,
+    pub(crate) writer: XMLWriter,
     author: String,
     create_time: DateTime<Utc>,
 }

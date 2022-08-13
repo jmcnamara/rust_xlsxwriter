@@ -2,4 +2,5 @@
 /Cargo.lock
 .DS_Store
 .vscode
-
+*.xlsx
+!tests/input/*.xlsx

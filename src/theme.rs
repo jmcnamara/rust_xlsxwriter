@@ -6,7 +6,7 @@
 use crate::xmlwriter::XMLWriter;
 
 pub struct Theme {
-    pub writer: XMLWriter,
+    pub(crate) writer: XMLWriter,
 }
 
 impl Theme {

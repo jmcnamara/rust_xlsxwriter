@@ -21,3 +21,25 @@ zip = "0.6.2"
 pretty_assertions = "0.6.1"
 regex = "1.5.6"
 tempfile = "3.3.0"
+
+# Some local package management and release check commands.
+# Uses Cargo Commander.
+[package.metadata.commands]
+spellcheck = {cmd = [
+    "for f in src/*.rs; do aspell --lang=en_US --check $f; done",
+    "for f in examples/*.rs; do aspell --lang=en_US --check $f; done",
+    "aspell --lang=en_US --check examples/README.md",
+    "aspell --lang=en_US --check README.md"
+]}
+
+coverage = { cmd = [
+    "mkdir -p target/coverage",
+    "CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='target/coverage/rust_xlsxwriter-%p-%m.profraw' cargo test",
+    "grcov target/coverage/ --binary-path ./target/debug/deps/ -s src -t lcov --branch -o target/coverage/lcov.info",
+    "grcov target/coverage/ --binary-path ./target/debug/deps/ -s src -t html --branch -o target/coverage/html",
+    "rm target/coverage/*.profraw",
+    "open target/coverage/html/index.html"
+] }
+
+# Profile
+# cargo instruments -t time --example app_perf_test

@@ -6,7 +6,7 @@
 use crate::xmlwriter::XMLWriter;
 
 pub struct Relationship {
-    pub writer: XMLWriter,
+    pub(crate) writer: XMLWriter,
     relationships: Vec<(String, String, String)>,
     id_num: u16,
 }

@@ -13,8 +13,13 @@ use crate::shared_strings_table::SharedStringsTable;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 
+/// The workbook struct represents an Excel file in it's entirety. It is the
+/// starting point for creating a new Excel xlsx file.
+///
+/// The Workbook class represents the entire spreadsheet as you see it in Excel
+/// and internally it represents the Excel file as it is written on disk.
 pub struct Workbook<'a> {
-    pub writer: XMLWriter,
+    pub(crate) writer: XMLWriter,
     filename: &'a str,
     worksheets: Vec<Worksheet>,
     xf_formats: Vec<Format>,
@@ -98,7 +103,7 @@ impl<'a> Workbook<'a> {
         package_options.num_worksheets = self.worksheets.len() as u16;
         for worksheet in self.worksheets.iter() {
             package_options.worksheet_names.push(worksheet.name.clone());
-            if worksheet.uses_string_table() {
+            if worksheet.uses_string_table {
                 package_options.has_sst_table = true;
             }
         }

@@ -3,10 +3,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
+#![warn(missing_docs)]
 use std::cmp;
 use std::collections::HashMap;
 use std::io::Write;
 use std::mem;
+
+use regex::Regex;
 
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -14,20 +17,72 @@ use crate::shared_strings_table::SharedStringsTable;
 use crate::utility;
 use crate::xmlwriter::XMLWriter;
 
+/// Integer type to represent a zero indexed row number. Excel's limit for rows
+/// in a worksheet is 1,048,576.
 pub type RowNum = u32;
+
+/// Integer type to represent a zero indexed column number. Excel's limit for
+/// columns in a worksheet is 16,384.
 pub type ColNum = u16;
 
 const ROW_MAX: RowNum = 1_048_576;
 const COL_MAX: ColNum = 16_384;
+const MAX_STRING_LEN: u16 = 32_767;
 
+/// The worksheet struct represents an Excel worksheet. It handles operations
+/// such as writing data to cells or formatting worksheet layout.
+///
+/// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
+///
+/// # Examples
+///
+/// Sample code to generate the Excel file shown above.
+///
+/// ```rust
+/// use rust_xlsxwriter::{Format, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file.
+///     let mut workbook = Workbook::new("demo.xlsx");
+///
+///     // Create some formats to use in the worksheet.
+///     let bold_format = Format::new()
+///         .set_bold()
+///         .register_with(&mut workbook);
+///     let decimal_format = Format::new()
+///         .set_num_format("0.000")
+///         .register_with(&mut workbook);
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Write a string without formatting.
+///     worksheet.write_string_only(0, 0, "Hello")?;
+///
+///     // Write a string with the bold format defined above.
+///     worksheet.write_string(1, 0, "World", &bold_format)?;
+///
+///     // Write some numbers.
+///     worksheet.write_number_only(2, 0, 1)?;
+///     worksheet.write_number_only(3, 0, 2.34)?;
+///
+///     // Write a number with formatting.
+///     worksheet.write_number(4, 0, 3.00, &decimal_format)?;
+///
+///     workbook.close()?;
+///
+///     Ok(())
+/// }
+///
+/// ```
 pub struct Worksheet {
-    pub writer: XMLWriter,
-    pub name: String,
-    pub selected: bool,
+    pub(crate) writer: XMLWriter,
+    pub(crate) name: String,
+    pub(crate) selected: bool,
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     col_names: HashMap<ColNum, String>,
     dimensions: WorksheetDimensions,
-    uses_string_table: bool,
+    pub(crate) uses_string_table: bool,
 }
 
 impl Worksheet {
@@ -60,13 +115,181 @@ impl Worksheet {
         }
     }
 
-    // Set the worksheet name instead of the default Sheet1, Sheet2, etc.
-    pub fn set_name(&mut self, name: &str) -> &mut Worksheet {
+    /// Set the worksheet name.
+    ///
+    /// Set the worksheet name. If no name is set the default Excel convention
+    /// will be followed (Sheet1, Sheet2, etc.) in the order the worksheets are
+    /// created.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The worksheet name. It must follow the Excel rules, shown
+    ///   below.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name cannot be
+    ///   blank.
+    /// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name exceeds
+    ///   Excel's limit of 31 characters.
+    /// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name
+    ///   cannot contain invalid characters: `[ ] : * ? / \`
+    /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name
+    ///   cannot start or end with an apostrophe.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting user defined worksheet names
+    /// and the default values when a name isn't set.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new("worksheets.xlsx");
+    ///
+    ///     _ = workbook.add_worksheet();                     // Sheet1
+    ///     _ = workbook.add_worksheet().set_name("Foglio2"); // Foglio2
+    ///     _ = workbook.add_worksheet().set_name("Data");    // Data
+    ///     _ = workbook.add_worksheet();                     // Sheet4
+    ///
+    /// #    workbook.close()?;
+    /// #
+    /// #    Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_name.png">
+    ///
+    /// The worksheet name must be a valid Excel worksheet name, i.e:
+    ///
+    /// * The name is less than 32 characters.
+    /// * The name isn't blank.
+    /// * The name doesn't contain any of the characters: `[ ] : * ? / \`.
+    /// * The name doesn't start or end with an apostrophe.
+    /// * The name shouldn't be "History" (case-insensitive) since that is
+    ///   reserved by Excel.
+    /// * It must not be a duplicate of another worksheet name used in the
+    ///   workbook.
+    ///
+    /// The rules for worksheet names in Excel are explained in the [Microsoft
+    /// Office documentation].
+    ///
+    /// [Microsoft Office documentation]:
+    ///     https://support.office.com/en-ie/article/rename-a-worksheet-3f1f7148-ee83-404d-8ef0-9ff99fbad1f9
+    ///
+    pub fn set_name(&mut self, name: &str) -> Result<&mut Worksheet, XlsxError> {
+        // Check that the sheet name isn't blank.
+        if name.is_empty() {
+            return Err(XlsxError::SheetnameCannotBeBlank);
+        }
+
+        // Check that sheet sheetname is <= 31, an Excel limit.
+        if name.len() > 31 {
+            return Err(XlsxError::SheetnameLengthExceeded);
+        }
+
+        // Check that sheetname doesn't contain any invalid characters.
+        let re = Regex::new(r"[\[\]:*?/\\]").unwrap();
+        if re.is_match(name) {
+            return Err(XlsxError::SheetnameContainsInvalidCharacter);
+        }
+
+        // Check that sheetname doesn't start or end with an apostrophe.
+        if name.starts_with('\'') || name.ends_with('\'') {
+            return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe);
+        }
+
         self.name = name.to_string();
-        self
+
+        Ok(self)
     }
 
-    // Write a formatted number to a cell.
+    /// Write a formatted number to a worksheet cell.
+    ///
+    /// Write a number with formatting to a worksheet cell. The format is set
+    /// via a [`Format`] struct which can control the numerical formatting of
+    /// the number, for example as a currency or a percentage value, or the
+    /// visual format, such as bold and italic text.
+    ///
+    /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
+    /// the equivalent of rust's [`f64`] type. This function will accept any
+    /// rust type that will convert [`Into`] a f64. These include i8, u8, i16,
+    /// u16, i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
+    /// around 15 digits of precision. Anything beyond that cannot be stored by
+    /// Excel as a number without loss of precision and may need to be stored as
+    /// a string instead.
+    ///
+    /// [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_754
+    ///
+    ///  Excel doesn't have handling for NaN or INF floating point numbers.
+    ///  These will be stored as the strings "Nan", "INF", and "-INF" strings
+    ///  instead.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `number` - The number to write to the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting different formatting for
+    /// numbers in an Excel worksheet.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new("numbers.xlsx");
+    ///
+    ///     // Create some formats to use with the numbers below.
+    ///     let number_format = Format::new()
+    ///         .set_num_format("#,##0.00")
+    ///         .register_with(&mut workbook);
+    ///
+    ///     let currency_format = Format::new()
+    ///         .set_num_format("€#,##0.00")
+    ///         .register_with(&mut workbook);
+    ///
+    ///     let percentage_format = Format::new()
+    ///         .set_num_format("0.0%")
+    ///         .register_with(&mut workbook);
+    ///
+    ///     let bold_italic_format = Format::new()
+    ///         .set_bold()
+    ///         .set_italic()
+    ///         .register_with(&mut workbook);
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.write_number(0, 0, 1234.5, &number_format)?;
+    ///     worksheet.write_number(1, 0, 1234.5, &currency_format)?;
+    ///     worksheet.write_number(2, 0, 0.3300, &percentage_format)?;
+    ///     worksheet.write_number(3, 0, 1234.5, &bold_italic_format)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_number.png">
+    ///
+    ///
     pub fn write_number<T>(
         &mut self,
         row: RowNum,
@@ -78,12 +301,82 @@ impl Worksheet {
         T: Into<f64>,
     {
         // Store the cell data.
-        self.store_number(row, col, number.into(), Some(format))?;
-
-        Ok(())
+        self.store_number(row, col, number.into(), Some(format))
     }
 
-    // Write an unformatted number to a cell.
+    /// Write an unformatted number to a cell.
+    ///
+    /// Write an unformatted number to a worksheet cell. This is similar to
+    /// [`write_number()`](Worksheet::write_number()) except you don' have to
+    /// supply a [`Format`] so it is useful for writing raw data.
+    ///
+    /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
+    /// the equivalent of rust's [`f64`] type. This function will accept any
+    /// rust type that will convert [`Into`] a f64. These include i8, u8, i16,
+    /// u16, i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
+    /// around 15 digits of precision. Anything beyond that cannot be stored by
+    /// Excel as a number without loss of precision and may need to be stored as
+    /// a string instead.
+    ///
+    /// [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_754
+    ///
+    ///  Excel doesn't have handling for NaN or INF floating point numbers.
+    ///  These will be stored as the strings "Nan", "INF", and "-INF" strings
+    ///  instead.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `number` - The number to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing unformatted numbers to an
+    /// Excel worksheet. Any numeric type that will convert [`Into`] f64 can be
+    /// transferred to Excel.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new("numbers.xlsx");
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some different rust number types to a worksheet.
+    ///     // Note, u64 isn't supported by Excel.
+    ///     worksheet.write_number_only(0, 0, 1_u8)?;
+    ///     worksheet.write_number_only(1, 0, 2_i16)?;
+    ///     worksheet.write_number_only(2, 0, 3_u32)?;
+    ///     worksheet.write_number_only(3, 0, 4_f32)?;
+    ///     worksheet.write_number_only(4, 0, 5_f64)?;
+    ///
+    ///     // Write some numbers with implicit types.
+    ///     worksheet.write_number_only(5, 0, 1234)?;
+    ///     worksheet.write_number_only(6, 0, 1234.5)?;
+    ///
+    ///     // Note Excel normally ignores trailing decimal zeros
+    ///     // when the number is unformatted.
+    ///     worksheet.write_number_only(7, 0, 1234.50000)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_number_only.png">
+    ///
     pub fn write_number_only<T>(
         &mut self,
         row: RowNum,
@@ -94,12 +387,74 @@ impl Worksheet {
         T: Into<f64>,
     {
         // Store the cell data.
-        self.store_number(row, col, number.into(), None)?;
-
-        Ok(())
+        self.store_number(row, col, number.into(), None)
     }
 
-    // Write a formatted string to a cell.
+    /// Write a formatted string to a worksheet cell.
+    ///
+    /// Write a string with formatting to a worksheet cell. The format is set
+    /// via a [`Format`] struct which can control the font or color or
+    /// properties such as bold and italic.
+    ///
+    /// Excel only supports UTF-8 text in the xlsx file format. Any rust UTF-8
+    /// encoded string can be written with this function. The maximum string
+    /// size supported by Excel is 32,767 characters.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `string` - The string to write to the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting different formatting for
+    /// numbers in an Excel worksheet.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file.
+    ///     let mut workbook = Workbook::new("strings.xlsx");
+    ///
+    ///     // Create some formats to use in the worksheet.
+    ///     let bold_format = Format::new()
+    ///         .set_bold()
+    ///         .register_with(&mut workbook);
+    ///
+    ///     let italic_format = Format::new()
+    ///         .set_italic()
+    ///         .register_with(&mut workbook);
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some strings with formatting.
+    ///     worksheet.write_string(0, 0, "Hello",     &bold_format)?;
+    ///     worksheet.write_string(1, 0, "שָׁלוֹם",      &bold_format)?;
+    ///     worksheet.write_string(2, 0, "नमस्ते",      &italic_format)?;
+    ///     worksheet.write_string(3, 0, "こんにちは", &italic_format)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_string.png">
+    ///
     pub fn write_string(
         &mut self,
         row: RowNum,
@@ -108,12 +463,73 @@ impl Worksheet {
         format: &Format,
     ) -> Result<(), XlsxError> {
         // Store the cell data.
-        self.store_string(row, col, string, Some(format))?;
-
-        Ok(())
+        self.store_string(row, col, string, Some(format))
     }
 
-    // Write a unformatted string to a cell.
+    /// Write an unformatted string to a worksheet cell.
+    ///
+    /// Write an unformatted string to a worksheet cell. This is similar to
+    /// [`write_string()`](Worksheet::write_string()) except you don't have to
+    /// supply a [`Format`] so it is useful for writing raw data.
+    ///
+    /// Excel only supports UTF-8 text in the xlsx file format. Any rust UTF-8
+    /// encoded string can be written with this function. The maximum string
+    /// size supported by Excel is 32,767 characters.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `string` - The string to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing some strings to a worksheet. The
+    /// UTF-8 strings are taken from the UTF-8 example in the [Rust Programming
+    /// Language] book.
+    ///
+    /// [Rust Programming Language]:  https://doc.rust-lang.org/book/ch08-02-strings.html#creating-a-new-string
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #   // Create a new Excel file.
+    /// #   let mut workbook = Workbook::new("strings.xlsx");
+    /// #
+    /// #   // Add a worksheet to the workbook.
+    /// #   let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write some strings to the worksheet.
+    ///     worksheet.write_string_only(0,  0, "السلام عليكم")?;
+    ///     worksheet.write_string_only(1,  0, "Dobrý den")?;
+    ///     worksheet.write_string_only(2,  0, "Hello")?;
+    ///     worksheet.write_string_only(3,  0, "שָׁלוֹם")?;
+    ///     worksheet.write_string_only(4,  0, "नमस्ते")?;
+    ///     worksheet.write_string_only(5,  0, "こんにちは")?;
+    ///     worksheet.write_string_only(6,  0, "안녕하세요")?;
+    ///     worksheet.write_string_only(7,  0, "你好")?;
+    ///     worksheet.write_string_only(8,  0, "Olá")?;
+    ///     worksheet.write_string_only(9,  0, "Здравствуйте")?;
+    ///     worksheet.write_string_only(10, 0, "Hola")?;
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_string_only.png">
+    ///
     pub fn write_string_only(
         &mut self,
         row: RowNum,
@@ -121,17 +537,7 @@ impl Worksheet {
         string: &str,
     ) -> Result<(), XlsxError> {
         // Store the cell data.
-        self.store_string(row, col, string, None)?;
-
-        Ok(())
-    }
-
-    // -----------------------------------------------------------------------
-    // Property getters.
-    // -----------------------------------------------------------------------
-
-    pub(crate) fn uses_string_table(&self) -> bool {
-        self.uses_string_table
+        self.store_string(row, col, string, None)
     }
 
     // -----------------------------------------------------------------------
@@ -148,7 +554,20 @@ impl Worksheet {
     ) -> Result<(), XlsxError> {
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
-            return Err(XlsxError::RowColRange);
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Excel doesn't have a NAN type/value so write a string instead.
+        if number.is_nan() {
+            return self.store_string(row, col, "NAN", None);
+        }
+
+        // Excel doesn't have a +/-Infinity type/value so write a string instead.
+        if number == f64::INFINITY {
+            self.store_string(row, col, "INF", None)?;
+        }
+        if number == f64::NEG_INFINITY {
+            self.store_string(row, col, "-INF", None)?;
         }
 
         // Get the index of the format object, if any.
@@ -166,7 +585,7 @@ impl Worksheet {
     }
 
     // Writer a unformatted string to a cell.
-    pub fn store_string(
+    fn store_string(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -175,7 +594,12 @@ impl Worksheet {
     ) -> Result<(), XlsxError> {
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
-            return Err(XlsxError::RowColRange);
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        //  Check that the string is < Excel limit of 32767 chars.
+        if string.len() as u16 > MAX_STRING_LEN {
+            return Err(XlsxError::MaxStringLengthExceeded);
         }
 
         // Get the index of the format object, if any.
@@ -522,6 +946,7 @@ mod tests {
     use super::SharedStringsTable;
     use super::Worksheet;
     use crate::test_functions::xml_to_vec;
+    use crate::XlsxError;
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
 
@@ -841,5 +1266,65 @@ mod tests {
         let got = worksheet.calculate_spans();
 
         assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn check_invalid_worksheet_names() {
+        let mut worksheet = Worksheet::new("".to_string());
+
+        match worksheet.set_name("") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameCannotBeBlank),
+        };
+
+        match worksheet.set_name("name_that_is_longer_than_thirty_one_characters") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameLengthExceeded),
+        };
+
+        match worksheet.set_name("name_with_special_character_[") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+        };
+
+        match worksheet.set_name("name_with_special_character_]") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+        };
+
+        match worksheet.set_name("name_with_special_character_:") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+        };
+
+        match worksheet.set_name("name_with_special_character_*") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+        };
+
+        match worksheet.set_name("name_with_special_character_?") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+        };
+
+        match worksheet.set_name("name_with_special_character_/") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+        };
+
+        match worksheet.set_name("name_with_special_character_\\") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+        };
+
+        match worksheet.set_name("'start with apostrophe") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe),
+        };
+
+        match worksheet.set_name("end with apostrophe'") {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe),
+        };
     }
 }
