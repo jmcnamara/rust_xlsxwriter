@@ -12,13 +12,9 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
-    let format1 = Format::new().set_bold().register_with(&mut workbook);
-
-    let format2 = Format::new().set_italic().register_with(&mut workbook);
-
-    let format3 = Format::new()
-        .set_num_format("0.0")
-        .register_with(&mut workbook);
+    let format1 = Format::new().set_bold();
+    let format2 = Format::new().set_italic();
+    let format3 = Format::new().set_num_format("0.0");
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_number(0, 0, 1, &format1)?;

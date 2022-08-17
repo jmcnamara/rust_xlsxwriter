@@ -11,9 +11,8 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new("strings.xlsx");
 
     // Create some formats to use in the worksheet.
-    let bold_format = Format::new().set_bold().register_with(&mut workbook);
-
-    let italic_format = Format::new().set_italic().register_with(&mut workbook);
+    let bold_format = Format::new().set_bold();
+    let italic_format = Format::new().set_italic();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();

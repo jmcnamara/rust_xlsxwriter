@@ -4,22 +4,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 
 mod common;
 
-// Test case to demonstrate creating a basic file with some string cell data.
+// Test case to demonstrate creating a basic file with a font color.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
-    let format1 = Format::new().set_num_format_index(2);
-    let format2 = Format::new().set_num_format_index(10);
-    let format3 = Format::new().set_num_format_index(49);
+    let format = Format::new().set_font_color(XlsxColor::RGB(0xFF0000));
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_number(0, 0, 1, &format1)?;
-    worksheet.write_number(1, 1, 2, &format2)?;
-    worksheet.write_number(2, 2, 3, &format3)?;
+    worksheet.write_string(0, 0, "Hello", &format)?;
 
     workbook.close()?;
 
@@ -27,8 +23,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn bootstrap14_number_format_via_legacy_index() {
-    let testcase = "bootstrap15";
+fn bootstrap17_color_font() {
+    let testcase = "bootstrap17";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
     _ = create_new_xlsx_file(&xlsxwriter_file);

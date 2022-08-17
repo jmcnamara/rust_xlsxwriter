@@ -10,22 +10,10 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new("numbers.xlsx");
 
     // Create some formats to use with the numbers below.
-    let number_format = Format::new()
-        .set_num_format("#,##0.00")
-        .register_with(&mut workbook);
-
-    let currency_format = Format::new()
-        .set_num_format("€#,##0.00")
-        .register_with(&mut workbook);
-
-    let percentage_format = Format::new()
-        .set_num_format("0.0%")
-        .register_with(&mut workbook);
-
-    let bold_italic_format = Format::new()
-        .set_bold()
-        .set_italic()
-        .register_with(&mut workbook);
+    let number_format = Format::new().set_num_format("#,##0.00");
+    let currency_format = Format::new().set_num_format("€#,##0.00");
+    let percentage_format = Format::new().set_num_format("0.0%");
+    let bold_italic_format = Format::new().set_bold().set_italic();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();

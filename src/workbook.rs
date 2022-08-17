@@ -92,6 +92,27 @@ impl<'a> Workbook<'a> {
         // Ensure one sheet is selected.
         self.worksheets[0].selected = true;
 
+        // Convert any local formats to workbook/global formats.
+        let mut worksheet_formats: Vec<Vec<Format>> = vec![];
+        for worksheet in self.worksheets.iter() {
+            let formats = worksheet.xf_formats.clone();
+            worksheet_formats.push(formats);
+        }
+
+        let mut worksheet_indices: Vec<Vec<u32>> = vec![];
+        for formats in &mut worksheet_formats {
+            let mut indices = vec![];
+            for format in formats {
+                let index = self.get_format_index(format);
+                indices.push(index);
+            }
+            worksheet_indices.push(indices);
+        }
+
+        for (i, worksheet) in self.worksheets.iter_mut().enumerate() {
+            worksheet.set_global_xf_indices(&worksheet_indices[i]);
+        }
+
         // Prepare the formats for writing with styles.rs.
         self.prepare_format_properties();
 
@@ -142,6 +163,23 @@ impl<'a> Workbook<'a> {
     // Internal function/methods.
     // -----------------------------------------------------------------------
 
+    // Evaluate and clone formats from worksheets into a workbook level vector
+    // of unique format. Also return the index for use in remapping worksheet
+    // format indices.
+    fn get_format_index(&mut self, format: &Format) -> u32 {
+        let format_key = format.get_format_key();
+
+        match self.xf_indices.get_mut(&format_key) {
+            Some(xf_index) => *xf_index,
+            None => {
+                let xf_index = self.xf_formats.len() as u32;
+                self.xf_formats.push(format.clone());
+                self.xf_indices.insert(format_key, xf_index);
+                xf_index
+            }
+        }
+    }
+
     // Prepare all Format properties prior to passing them to styles.rs.
     fn prepare_format_properties(&mut self) {
         // Set the font index for the format objects.
@@ -180,15 +218,15 @@ impl<'a> Workbook<'a> {
         let mut index = 164;
 
         for xf_format in &mut self.xf_formats {
-            if xf_format.num_format_index() > 0 {
+            if xf_format.num_format_index > 0 {
                 continue;
             }
 
-            if xf_format.num_format() == "" {
+            if xf_format.num_format.is_empty() {
                 continue;
             }
 
-            let num_format_string = xf_format.num_format().clone();
+            let num_format_string = xf_format.num_format.clone();
 
             match num_formats.get(&num_format_string) {
                 Some(index) => {

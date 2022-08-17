@@ -11,10 +11,8 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new("demo.xlsx");
 
     // Create some formats to use in the worksheet.
-    let bold_format = Format::new().set_bold().register_with(&mut workbook);
-    let decimal_format = Format::new()
-        .set_num_format("0.000")
-        .register_with(&mut workbook);
+    let bold_format = Format::new().set_bold();
+    let decimal_format = Format::new().set_num_format("0.000");
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();

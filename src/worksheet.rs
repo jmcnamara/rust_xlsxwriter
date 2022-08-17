@@ -46,12 +46,8 @@ const MAX_STRING_LEN: u16 = 32_767;
 ///     let mut workbook = Workbook::new("demo.xlsx");
 ///
 ///     // Create some formats to use in the worksheet.
-///     let bold_format = Format::new()
-///         .set_bold()
-///         .register_with(&mut workbook);
-///     let decimal_format = Format::new()
-///         .set_num_format("0.000")
-///         .register_with(&mut workbook);
+///     let bold_format = Format::new().set_bold();
+///     let decimal_format = Format::new().set_num_format("0.000");
 ///
 ///     // Add a worksheet to the workbook.
 ///     let worksheet = workbook.add_worksheet();
@@ -79,10 +75,13 @@ pub struct Worksheet {
     pub(crate) writer: XMLWriter,
     pub(crate) name: String,
     pub(crate) selected: bool,
+    pub(crate) uses_string_table: bool,
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     col_names: HashMap<ColNum, String>,
     dimensions: WorksheetDimensions,
-    pub(crate) uses_string_table: bool,
+    pub(crate) xf_formats: Vec<Format>,
+    xf_indices: HashMap<String, u32>,
+    global_xf_indices: Vec<u32>,
 }
 
 impl Worksheet {
@@ -95,6 +94,8 @@ impl Worksheet {
         let writer = XMLWriter::new();
         let table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
         let col_names: HashMap<ColNum, String> = HashMap::new();
+        let default_format = Format::new();
+        let xf_indices = HashMap::from([(default_format.get_format_key(), 0)]);
 
         // Initialize the min and max dimensions with their opposite value.
         let dimensions = WorksheetDimensions {
@@ -108,10 +109,13 @@ impl Worksheet {
             writer,
             name,
             selected: false,
+            uses_string_table: false,
             table,
             col_names,
             dimensions,
-            uses_string_table: false,
+            xf_formats: vec![default_format],
+            xf_indices,
+            global_xf_indices: vec![],
         }
     }
 
@@ -253,22 +257,10 @@ impl Worksheet {
     ///     let mut workbook = Workbook::new("numbers.xlsx");
     ///
     ///     // Create some formats to use with the numbers below.
-    ///     let number_format = Format::new()
-    ///         .set_num_format("#,##0.00")
-    ///         .register_with(&mut workbook);
-    ///
-    ///     let currency_format = Format::new()
-    ///         .set_num_format("€#,##0.00")
-    ///         .register_with(&mut workbook);
-    ///
-    ///     let percentage_format = Format::new()
-    ///         .set_num_format("0.0%")
-    ///         .register_with(&mut workbook);
-    ///
-    ///     let bold_italic_format = Format::new()
-    ///         .set_bold()
-    ///         .set_italic()
-    ///         .register_with(&mut workbook);
+    ///     let number_format = Format::new().set_num_format("#,##0.00");
+    ///     let currency_format = Format::new().set_num_format("€#,##0.00");
+    ///     let percentage_format = Format::new().set_num_format("0.0%");
+    ///     let bold_italic_format = Format::new().set_bold().set_italic();
     ///
     ///     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -427,13 +419,8 @@ impl Worksheet {
     ///     let mut workbook = Workbook::new("strings.xlsx");
     ///
     ///     // Create some formats to use in the worksheet.
-    ///     let bold_format = Format::new()
-    ///         .set_bold()
-    ///         .register_with(&mut workbook);
-    ///
-    ///     let italic_format = Format::new()
-    ///         .set_italic()
-    ///         .register_with(&mut workbook);
+    ///     let bold_format = Format::new().set_bold();
+    ///     let italic_format = Format::new().set_italic();
     ///
     ///     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -569,7 +556,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => format.xf_index(),
+            Some(format) => self.get_format_index(format),
             None => 0,
         };
 
@@ -601,7 +588,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => format.xf_index(),
+            Some(format) => self.get_format_index(format),
             None => 0,
         };
 
@@ -663,6 +650,29 @@ impl Worksheet {
             self.col_names.insert(col_num, col_name.clone());
             col_name
         }
+    }
+
+    // Store local copies of unique formats passed to the write methods. These
+    // indexes will be replaced by global/worksheet indices before the worksheet
+    // is saved.
+    fn get_format_index(&mut self, format: &Format) -> u32 {
+        let format_key = format.get_format_key();
+
+        match self.xf_indices.get_mut(&format_key) {
+            Some(xf_index) => *xf_index,
+            None => {
+                let xf_index = self.xf_formats.len() as u32;
+                self.xf_formats.push(format.clone());
+                self.xf_indices.insert(format_key, xf_index);
+                xf_index
+            }
+        }
+    }
+
+    // Set the mapping between the local format indices and the global/worksheet
+    // indices.
+    pub(crate) fn set_global_xf_indices(&mut self, workbook_indices: &Vec<u32>) {
+        self.global_xf_indices = workbook_indices.clone();
     }
 
     // -----------------------------------------------------------------------
@@ -802,11 +812,13 @@ impl Worksheet {
                     if let Some(cell) = columns.get(&col_num) {
                         match cell {
                             CellType::Number { number, xf_index } => {
-                                self.write_number_cell(row_num, col_num, number, xf_index)
+                                let xf_index = self.global_xf_indices[*xf_index as usize];
+                                self.write_number_cell(row_num, col_num, number, &xf_index)
                             }
                             CellType::String { string, xf_index } => {
+                                let xf_index = self.global_xf_indices[*xf_index as usize];
                                 let string_index = string_table.get_shared_string_index(string);
-                                self.write_string_cell(row_num, col_num, &string_index, xf_index);
+                                self.write_string_cell(row_num, col_num, &string_index, &xf_index);
                             }
                         }
                     }

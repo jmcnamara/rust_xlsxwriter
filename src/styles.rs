@@ -5,6 +5,7 @@
 
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
+use crate::XlsxColor;
 
 pub struct Styles<'a> {
     pub(crate) writer: XMLWriter,
@@ -91,7 +92,7 @@ impl<'a> Styles<'a> {
         // Write the cell xf element.
         for xf_format in self.xf_formats {
             // Write the font element.
-            if xf_format.has_font() {
+            if xf_format.has_font {
                 self.write_font(xf_format);
             }
         }
@@ -103,11 +104,11 @@ impl<'a> Styles<'a> {
     fn write_font(&mut self, xf_format: &Format) {
         self.writer.xml_start_tag("font");
 
-        if xf_format.bold() {
+        if xf_format.bold {
             self.writer.xml_empty_tag("b");
         }
 
-        if xf_format.italic() {
+        if xf_format.italic {
             self.writer.xml_empty_tag("i");
         }
 
@@ -115,7 +116,7 @@ impl<'a> Styles<'a> {
         self.write_sz();
 
         // Write the color element.
-        self.write_color();
+        self.write_color(xf_format);
 
         // Write the name element.
         self.write_name();
@@ -137,8 +138,17 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <color> element.
-    fn write_color(&mut self) {
-        let attributes = vec![("theme", "1".to_string())];
+    fn write_color(&mut self, xf_format: &Format) {
+        let mut attributes = vec![];
+
+        match xf_format.font_color {
+            XlsxColor::Automatic => {
+                attributes.push(("theme", "1".to_string()));
+            }
+            _ => {
+                attributes.push(("rgb", format!("FF{:06X}", xf_format.font_color.value())));
+            }
+        }
 
         self.writer.xml_empty_tag_attr("color", &attributes);
     }
@@ -286,18 +296,18 @@ impl<'a> Styles<'a> {
     // Write the cell <xf> element.
     fn write_cell_xf(&mut self, xf_format: &Format) {
         let mut attributes = vec![
-            ("numFmtId", xf_format.num_format_index().to_string()),
-            ("fontId", xf_format.get_font_index().to_string()),
+            ("numFmtId", xf_format.num_format_index.to_string()),
+            ("fontId", xf_format.font_index.to_string()),
             ("fillId", "0".to_string()),
             ("borderId", "0".to_string()),
             ("xfId", "0".to_string()),
         ];
 
-        if xf_format.num_format_index() > 0 {
+        if xf_format.num_format_index > 0 {
             attributes.push(("applyNumberFormat", "1".to_string()));
         }
 
-        if xf_format.get_font_index() > 0 {
+        if xf_format.font_index > 0 {
             attributes.push(("applyFont", "1".to_string()));
         }
 
@@ -356,8 +366,8 @@ impl<'a> Styles<'a> {
 
         // Write the numFmt elements.
         for xf_format in self.xf_formats {
-            if xf_format.num_format_index() >= 164 {
-                self.write_num_fmt(xf_format.num_format_index(), xf_format.num_format());
+            if xf_format.num_format_index >= 164 {
+                self.write_num_fmt(xf_format.num_format_index, &xf_format.num_format);
             }
         }
 
