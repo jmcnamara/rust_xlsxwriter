@@ -4,3 +4,5 @@
 .vscode
 *.xlsx
 !tests/input/*.xlsx
+*.bak
+

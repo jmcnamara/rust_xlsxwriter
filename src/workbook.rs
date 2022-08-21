@@ -37,7 +37,7 @@ impl<'a> Workbook<'a> {
     pub fn new(filename: &'a str) -> Workbook {
         let writer = XMLWriter::new();
         let default_format = Format::new();
-        let xf_indices = HashMap::from([(default_format.get_format_key(), 0)]);
+        let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
         Workbook {
             writer,
@@ -67,7 +67,7 @@ impl<'a> Workbook<'a> {
 
     // Set the index for the format.
     pub fn register_format(&mut self, format: &mut Format) {
-        let format_key = format.get_format_key();
+        let format_key = format.format_key();
 
         match self.xf_indices.get_mut(&format_key) {
             Some(xf_index) => {
@@ -103,7 +103,7 @@ impl<'a> Workbook<'a> {
         for formats in &mut worksheet_formats {
             let mut indices = vec![];
             for format in formats {
-                let index = self.get_format_index(format);
+                let index = self.format_index(format);
                 indices.push(index);
             }
             worksheet_indices.push(indices);
@@ -166,8 +166,8 @@ impl<'a> Workbook<'a> {
     // Evaluate and clone formats from worksheets into a workbook level vector
     // of unique format. Also return the index for use in remapping worksheet
     // format indices.
-    fn get_format_index(&mut self, format: &Format) -> u32 {
-        let format_key = format.get_format_key();
+    fn format_index(&mut self, format: &Format) -> u32 {
+        let format_key = format.format_key();
 
         match self.xf_indices.get_mut(&format_key) {
             Some(xf_index) => *xf_index,
@@ -195,7 +195,7 @@ impl<'a> Workbook<'a> {
         let mut font_indices: HashMap<String, u16> = HashMap::new();
 
         for xf_format in &mut self.xf_formats {
-            let font_key = xf_format.get_font_key();
+            let font_key = xf_format.font_key();
 
             match font_indices.get(&font_key) {
                 Some(font_index) => {

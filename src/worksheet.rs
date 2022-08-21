@@ -95,7 +95,7 @@ impl Worksheet {
         let table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
         let col_names: HashMap<ColNum, String> = HashMap::new();
         let default_format = Format::new();
-        let xf_indices = HashMap::from([(default_format.get_format_key(), 0)]);
+        let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
         // Initialize the min and max dimensions with their opposite value.
         let dimensions = WorksheetDimensions {
@@ -220,7 +220,7 @@ impl Worksheet {
     /// visual format, such as bold and italic text.
     ///
     /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
-    /// the equivalent of rust's [`f64`] type. This function will accept any
+    /// the equivalent of rust's [`f64`] type. This method will accept any
     /// rust type that will convert [`Into`] a f64. These include i8, u8, i16,
     /// u16, i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
     /// around 15 digits of precision. Anything beyond that cannot be stored by
@@ -303,7 +303,7 @@ impl Worksheet {
     /// supply a [`Format`] so it is useful for writing raw data.
     ///
     /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
-    /// the equivalent of rust's [`f64`] type. This function will accept any
+    /// the equivalent of rust's [`f64`] type. This method will accept any
     /// rust type that will convert [`Into`] a f64. These include i8, u8, i16,
     /// u16, i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
     /// around 15 digits of precision. Anything beyond that cannot be stored by
@@ -389,7 +389,7 @@ impl Worksheet {
     /// properties such as bold and italic.
     ///
     /// Excel only supports UTF-8 text in the xlsx file format. Any rust UTF-8
-    /// encoded string can be written with this function. The maximum string
+    /// encoded string can be written with this method. The maximum string
     /// size supported by Excel is 32,767 characters.
     ///
     /// # Arguments
@@ -460,7 +460,7 @@ impl Worksheet {
     /// supply a [`Format`] so it is useful for writing raw data.
     ///
     /// Excel only supports UTF-8 text in the xlsx file format. Any rust UTF-8
-    /// encoded string can be written with this function. The maximum string
+    /// encoded string can be written with this method. The maximum string
     /// size supported by Excel is 32,767 characters.
     ///
     /// # Arguments
@@ -556,7 +556,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => self.get_format_index(format),
+            Some(format) => self.format_index(format),
             None => 0,
         };
 
@@ -588,7 +588,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => self.get_format_index(format),
+            Some(format) => self.format_index(format),
             None => 0,
         };
 
@@ -655,8 +655,8 @@ impl Worksheet {
     // Store local copies of unique formats passed to the write methods. These
     // indexes will be replaced by global/worksheet indices before the worksheet
     // is saved.
-    fn get_format_index(&mut self, format: &Format) -> u32 {
-        let format_key = format.get_format_key();
+    fn format_index(&mut self, format: &Format) -> u32 {
+        let format_key = format.format_key();
 
         match self.xf_indices.get_mut(&format_key) {
             Some(xf_index) => *xf_index,
@@ -817,7 +817,7 @@ impl Worksheet {
                             }
                             CellType::String { string, xf_index } => {
                                 let xf_index = self.global_xf_indices[*xf_index as usize];
-                                let string_index = string_table.get_shared_string_index(string);
+                                let string_index = string_table.shared_string_index(string);
                                 self.write_string_cell(row_num, col_num, &string_index, &xf_index);
                             }
                         }

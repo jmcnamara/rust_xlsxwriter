@@ -33,7 +33,7 @@ impl SharedStringsTable {
     }
 
     // Get the index of the string in the Shared String table.
-    pub(crate) fn get_shared_string_index(&mut self, key: &str) -> u32 {
+    pub(crate) fn shared_string_index(&mut self, key: &str) -> u32 {
         match self.strings.get(key) {
             Some(value) => {
                 self.count += 1;
@@ -59,26 +59,26 @@ mod tests {
     fn test_shared_string_table() {
         let mut string_table = SharedStringsTable::new();
 
-        let index = string_table.get_shared_string_index("neptune");
+        let index = string_table.shared_string_index("neptune");
         assert_eq!(index, 0);
 
-        let index = string_table.get_shared_string_index("neptune");
+        let index = string_table.shared_string_index("neptune");
         assert_eq!(index, 0);
 
-        let index = string_table.get_shared_string_index("neptune");
+        let index = string_table.shared_string_index("neptune");
         assert_eq!(index, 0);
 
-        let index = string_table.get_shared_string_index("mars");
+        let index = string_table.shared_string_index("mars");
         assert_eq!(index, 1);
 
-        let index = string_table.get_shared_string_index("venus");
+        let index = string_table.shared_string_index("venus");
         assert_eq!(index, 2);
 
-        let index = string_table.get_shared_string_index("mars");
+        let index = string_table.shared_string_index("mars");
 
         assert_eq!(index, 1);
 
-        let index = string_table.get_shared_string_index("venus");
+        let index = string_table.shared_string_index("venus");
         assert_eq!(index, 2);
     }
 }
