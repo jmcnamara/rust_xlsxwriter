@@ -293,8 +293,8 @@
 /// # Number Formats in different locales
 ///
 /// As shown in the previous section the `format_set_num_format()` method is
-/// used to set the number format for libxlsxwriter formats. A common use case
-/// is to set a number format with a "grouping/thousands" separator and a
+/// used to set the number format for `rust_xlsxwriter` formats. A common use
+/// case is to set a number format with a "grouping/thousands" separator and a
 /// "decimal" point:
 ///
 /// ```
@@ -358,7 +358,7 @@ pub struct Format {
     pub(crate) italic: bool,
     pub(crate) underline: u8,
     pub(crate) font_name: String,
-    pub(crate) font_size: u8,
+    pub(crate) font_size: f64,
     pub(crate) font_color: XlsxColor,
     pub(crate) font_strikeout: bool,
     pub(crate) font_outline: bool,
@@ -435,7 +435,7 @@ impl Format {
             italic: false,
             underline: 0,
             font_name: "Calibri".to_string(),
-            font_size: 11,
+            font_size: 11.0,
             font_color: XlsxColor::Automatic,
             font_strikeout: false,
             font_outline: false,
@@ -443,7 +443,7 @@ impl Format {
             font_script: 0,
             font_family: 2,
             font_charset: 0,
-            font_scheme: "minor".to_string(),
+            font_scheme: "".to_string(),
             font_condense: false,
             font_extend: false,
             theme: 0,
@@ -846,6 +846,118 @@ impl Format {
         }
 
         self.font_color = font_color;
+        self
+    }
+
+    /// Set the Format font name property.
+    ///
+    /// Set the font for a cell format. Excel can only display fonts that are
+    /// installed on the system that it is running on. Therefore it is generally
+    /// best to use standard Excel fonts.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_name` - The font name property.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the font name/type for a
+    /// format.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format = Format::new().set_font_name("Avenir Black Oblique");
+    ///
+    ///     worksheet.write_string(0, 0, "Avenir Black Oblique", &format)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_font_name.png">
+    ///
+    pub fn set_font_name(mut self, font_name: &str) -> Format {
+        self.font_name = font_name.to_string();
+        self
+    }
+
+    /// Set the Format font size property.
+    ///
+    /// Set the font size of the cell format. The size is generally an integer
+    /// value but Excel allows x.5 values (hence the property is a f64 or
+    /// types that can convert will convert [`Into`] a f64).
+    ///
+    /// Excel adjusts the height of a row to accommodate the largest font size
+    /// in the row.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_size` - The font size property.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the font size for a format.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format = Format::new().set_font_size(30);
+    ///
+    ///     worksheet.write_string(0, 0, "Font Size 30", &format)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_font_size.png">
+    ///
+    pub fn set_font_size<T>(mut self, font_size: T) -> Format
+    where
+        T: Into<f64>,
+    {
+        self.font_size = font_size.into();
+        self
+    }
+
+    /// Set the Format font scheme property.
+    ///
+    /// This function is implemented for completeness but is rarely used in
+    /// practice.
+    pub fn set_font_scheme(mut self, font_scheme: &str) -> Format {
+        self.font_scheme = font_scheme.to_string();
+        self
+    }
+
+    /// Set the Format font family property.
+    ///
+    /// Set the font family. This is usually an integer in the range 1-4. This
+    /// function is implemented for completeness but is rarely used in practice.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_family` - The font family property.
+    ///
+    pub fn set_font_family(mut self, font_family: u8) -> Format {
+        self.font_family = font_family;
         self
     }
 }

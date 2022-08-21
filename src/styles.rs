@@ -113,32 +113,32 @@ impl<'a> Styles<'a> {
         }
 
         // Write the sz element.
-        self.write_sz();
+        self.write_font_size(xf_format);
 
         // Write the color element.
-        self.write_color(xf_format);
+        self.write_font_color(xf_format);
 
         // Write the name element.
-        self.write_name();
+        self.write_font_name(xf_format);
 
         // Write the family element.
-        self.write_family();
+        self.write_font_family(xf_format);
 
         // Write the scheme element.
-        self.write_scheme();
+        self.write_font_scheme(xf_format);
 
         self.writer.xml_end_tag("font");
     }
 
     // Write the <sz> element.
-    fn write_sz(&mut self) {
-        let attributes = vec![("val", "11".to_string())];
+    fn write_font_size(&mut self, xf_format: &Format) {
+        let attributes = vec![("val", xf_format.font_size.to_string())];
 
         self.writer.xml_empty_tag_attr("sz", &attributes);
     }
 
     // Write the <color> element.
-    fn write_color(&mut self, xf_format: &Format) {
+    fn write_font_color(&mut self, xf_format: &Format) {
         let mut attributes = vec![];
 
         match xf_format.font_color {
@@ -154,22 +154,30 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <name> element.
-    fn write_name(&mut self) {
-        let attributes = vec![("val", "Calibri".to_string())];
+    fn write_font_name(&mut self, xf_format: &Format) {
+        let attributes = vec![("val", xf_format.font_name.clone())];
 
         self.writer.xml_empty_tag_attr("name", &attributes);
     }
 
     // Write the <family> element.
-    fn write_family(&mut self) {
-        let attributes = vec![("val", "2".to_string())];
+    fn write_font_family(&mut self, xf_format: &Format) {
+        let attributes = vec![("val", xf_format.font_family.to_string())];
 
         self.writer.xml_empty_tag_attr("family", &attributes);
     }
 
     // Write the <scheme> element.
-    fn write_scheme(&mut self) {
-        let attributes = vec![("val", "minor".to_string())];
+    fn write_font_scheme(&mut self, xf_format: &Format) {
+        let mut attributes = vec![];
+
+        if xf_format.font_name == "Calibri" {
+            attributes.push(("val", "minor".to_string()));
+        } else if !xf_format.font_scheme.is_empty() {
+            attributes.push(("val", xf_format.font_scheme.clone()));
+        } else {
+            return;
+        }
 
         self.writer.xml_empty_tag_attr("scheme", &attributes);
     }
