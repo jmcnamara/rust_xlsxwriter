@@ -8,7 +8,7 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 mod common;
 
-// Test case to demonstrate creating a basic file with some string cell data.
+// Test case to demonstrate creating a basic file with number formatting.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 

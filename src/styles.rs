@@ -5,7 +5,7 @@
 
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
-use crate::XlsxColor;
+use crate::{XlsxColor, XlsxUnderline};
 
 pub struct Styles<'a> {
     pub(crate) writer: XMLWriter,
@@ -112,6 +112,10 @@ impl<'a> Styles<'a> {
             self.writer.xml_empty_tag("i");
         }
 
+        if xf_format.underline != XlsxUnderline::None {
+            self.write_font_underline(xf_format);
+        }
+
         // Write the sz element.
         self.write_font_size(xf_format);
 
@@ -180,6 +184,26 @@ impl<'a> Styles<'a> {
         }
 
         self.writer.xml_empty_tag_attr("scheme", &attributes);
+    }
+
+    // Write the <u> underline element.
+    fn write_font_underline(&mut self, xf_format: &Format) {
+        let mut attributes = vec![];
+
+        match xf_format.underline {
+            XlsxUnderline::Double => {
+                attributes.push(("val", "double".to_string()));
+            }
+            XlsxUnderline::SingleAccounting => {
+                attributes.push(("val", "singleAccounting".to_string()));
+            }
+            XlsxUnderline::DoubleAccounting => {
+                attributes.push(("val", "doubleAccounting".to_string()));
+            }
+            _ => {}
+        }
+
+        self.writer.xml_empty_tag_attr("u", &attributes);
     }
 
     // Write the <fills> element.

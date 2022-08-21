@@ -356,7 +356,7 @@ pub struct Format {
     pub(crate) num_format_index: u16,
     pub(crate) bold: bool,
     pub(crate) italic: bool,
-    pub(crate) underline: u8,
+    pub(crate) underline: XlsxUnderline,
     pub(crate) font_name: String,
     pub(crate) font_size: f64,
     pub(crate) font_color: XlsxColor,
@@ -433,7 +433,7 @@ impl Format {
             num_format_index: 0,
             bold: false,
             italic: false,
-            underline: 0,
+            underline: XlsxUnderline::None,
             font_name: "Calibri".to_string(),
             font_size: 11.0,
             font_color: XlsxColor::Automatic,
@@ -519,7 +519,7 @@ impl Format {
             self.font_strikeout,
             self.italic,
             self.theme,
-            self.underline,
+            self.underline as u8,
         )
     }
 
@@ -895,7 +895,7 @@ impl Format {
     ///
     /// Set the font size of the cell format. The size is generally an integer
     /// value but Excel allows x.5 values (hence the property is a f64 or
-    /// types that can convert will convert [`Into`] a f64).
+    /// types that can convert [`Into`] a f64).
     ///
     /// Excel adjusts the height of a row to accommodate the largest font size
     /// in the row.
@@ -958,6 +958,58 @@ impl Format {
     ///
     pub fn set_font_family(mut self, font_family: u8) -> Format {
         self.font_family = font_family;
+        self
+    }
+
+    /// Set the underline properties for a format.
+    ///
+    /// The difference between a normal underline and an "accounting" underline
+    /// is that a normal underline only underlines the text/number in a cell
+    /// whereas an accounting underline underlines the entire cell width.
+    ///
+    /// # Arguments
+    ///
+    /// * `underline` - The underline type defined by a [`XlsxUnderline`] enum
+    ///   value.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting underline properties for a
+    /// format.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new().set_underline(XlsxUnderline::None);
+    ///     let format2 = Format::new().set_underline(XlsxUnderline::Single);
+    ///     let format3 = Format::new().set_underline(XlsxUnderline::Double);
+    ///     let format4 = Format::new().set_underline(XlsxUnderline::SingleAccounting);
+    ///     let format5 = Format::new().set_underline(XlsxUnderline::DoubleAccounting);
+    ///
+    ///     worksheet.write_string(0, 0, "None",              &format1)?;
+    ///     worksheet.write_string(1, 0, "Single",            &format2)?;
+    ///     worksheet.write_string(2, 0, "Double",            &format3)?;
+    ///     worksheet.write_string(3, 0, "Single Accounting", &format4)?;
+    ///     worksheet.write_string(4, 0, "Double Accounting", &format5)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_underline.png">
+    ///
+    pub fn set_underline(mut self, underline: XlsxUnderline) -> Format {
+        self.underline = underline;
         self
     }
 }
@@ -1107,6 +1159,66 @@ impl XlsxColor {
 
         true
     }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+/// The XlsxUnderline enum defines the font underline type in a format.
+///
+/// The difference between a normal underline and an "accounting" underline is
+/// that a normal underline only underlines the text/number in a cell whereas an
+/// accounting underline underlines the entire cell width.
+///
+/// # Examples
+///
+/// The following example demonstrates setting underline properties for a
+/// format.
+///
+/// ```
+/// # use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file.
+/// #     let mut workbook = Workbook::new("formats.xlsx");
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+///     let format1 = Format::new().set_underline(XlsxUnderline::None);
+///     let format2 = Format::new().set_underline(XlsxUnderline::Single);
+///     let format3 = Format::new().set_underline(XlsxUnderline::Double);
+///     let format4 = Format::new().set_underline(XlsxUnderline::SingleAccounting);
+///     let format5 = Format::new().set_underline(XlsxUnderline::DoubleAccounting);
+///
+///     worksheet.write_string(0, 0, "None",              &format1)?;
+///     worksheet.write_string(1, 0, "Single",            &format2)?;
+///     worksheet.write_string(2, 0, "Double",            &format3)?;
+///     worksheet.write_string(3, 0, "Single Accounting", &format4)?;
+///     worksheet.write_string(4, 0, "Double Accounting", &format5)?;
+///
+/// #     workbook.close()?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_underline.png">
+///
+pub enum XlsxUnderline {
+    /// The default/automatic underline for an Excel font.
+    None,
+
+    /// A single underline under the text/number in a cell.
+    Single,
+
+    /// A double underline under the text/number in a cell.
+    Double,
+
+    /// A single accounting style underline under the entire cell.
+    SingleAccounting,
+
+    /// A double accounting style underline under the entire cell.
+    DoubleAccounting,
 }
 
 // -----------------------------------------------------------------------

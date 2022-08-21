@@ -671,8 +671,8 @@ impl Worksheet {
 
     // Set the mapping between the local format indices and the global/worksheet
     // indices.
-    pub(crate) fn set_global_xf_indices(&mut self, workbook_indices: &Vec<u32>) {
-        self.global_xf_indices = workbook_indices.clone();
+    pub(crate) fn set_global_xf_indices(&mut self, workbook_indices: &[u32]) {
+        self.global_xf_indices = workbook_indices.to_owned();
     }
 
     // -----------------------------------------------------------------------
