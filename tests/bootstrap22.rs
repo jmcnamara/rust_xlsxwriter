@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxScript};
 
 mod common;
 
@@ -12,21 +12,14 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
-    let mut format1 = Format::new().set_font_scheme("");
-    let format2 = Format::new().set_font_name("Arial");
-    let format3 = Format::new().set_font_name("Consolas").set_font_family(3);
-    let format4 = Format::new().set_font_size(10);
-    let format5 = Format::new().set_font_size(9.5);
+    let format1 = Format::new().set_font_script(XlsxScript::None);
+    let format2 = Format::new().set_font_script(XlsxScript::Superscript);
+    let format3 = Format::new().set_font_script(XlsxScript::Subscript);
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string(0, 0, "Rust", &format1)?;
     worksheet.write_string(1, 0, "Rust", &format2)?;
     worksheet.write_string(2, 0, "Rust", &format3)?;
-    worksheet.write_string(3, 0, "Rust", &format4)?;
-    worksheet.write_string(4, 0, "Rust", &format5)?;
-
-    // Secondary test for default format.
-    workbook.register_format(&mut format1);
 
     workbook.close()?;
 
@@ -34,8 +27,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn bootstrap19_font_name_and_size() {
-    let testcase = "bootstrap19";
+fn bootstrap22_super_sub_script() {
+    let testcase = "bootstrap22";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
     _ = create_new_xlsx_file(&xlsxwriter_file);

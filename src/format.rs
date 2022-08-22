@@ -352,8 +352,11 @@ pub struct Format {
     pub(crate) font_index: u16,
     pub(crate) has_font: bool,
 
+    // Number properties.
     pub(crate) num_format: String,
     pub(crate) num_format_index: u16,
+
+    // Font properties.
     pub(crate) bold: bool,
     pub(crate) italic: bool,
     pub(crate) underline: XlsxUnderline,
@@ -361,25 +364,25 @@ pub struct Format {
     pub(crate) font_size: f64,
     pub(crate) font_color: XlsxColor,
     pub(crate) font_strikeout: bool,
-    pub(crate) font_outline: bool,
-    pub(crate) font_shadow: bool,
-    pub(crate) font_script: u8,
+    pub(crate) font_script: XlsxScript,
     pub(crate) font_family: u8,
     pub(crate) font_charset: u8,
     pub(crate) font_scheme: String,
     pub(crate) font_condense: bool,
     pub(crate) font_extend: bool,
     pub(crate) theme: u8,
-    pub(crate) hidden: bool,
-    pub(crate) locked: bool,
+
+    // Alignment properties.
     pub(crate) text_horizontal_align: u8,
     pub(crate) text_wrap: bool,
     pub(crate) text_vertical_align: u8,
     pub(crate) text_justify_last: bool,
     pub(crate) rotation: u16,
-    pub(crate) foreground_color: XlsxColor,
-    pub(crate) background_color: XlsxColor,
-    pub(crate) pattern: u8,
+    pub(crate) indent: u8,
+    pub(crate) shrink: bool,
+    pub(crate) reading_order: u8,
+
+    // Border properties.
     pub(crate) bottom: u8,
     pub(crate) top: u8,
     pub(crate) left: u8,
@@ -391,9 +394,15 @@ pub struct Format {
     pub(crate) left_color: XlsxColor,
     pub(crate) right_color: XlsxColor,
     pub(crate) diagonal_color: XlsxColor,
-    pub(crate) indent: u8,
-    pub(crate) shrink: bool,
-    pub(crate) reading_order: u8,
+
+    // Fill properties.
+    pub(crate) foreground_color: XlsxColor,
+    pub(crate) background_color: XlsxColor,
+    pub(crate) pattern: u8,
+
+    // Protection properties.
+    pub(crate) hidden: bool,
+    pub(crate) locked: bool,
 }
 
 impl Default for Format {
@@ -438,9 +447,7 @@ impl Format {
             font_size: 11.0,
             font_color: XlsxColor::Automatic,
             font_strikeout: false,
-            font_outline: false,
-            font_shadow: false,
-            font_script: 0,
+            font_script: XlsxScript::None,
             font_family: 2,
             font_charset: 0,
             font_scheme: "".to_string(),
@@ -503,7 +510,7 @@ impl Format {
 
     pub(crate) fn font_key(&self) -> String {
         format!(
-            "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
+            "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
             self.bold,
             self.font_charset,
             self.font_color.hex_value(),
@@ -511,10 +518,8 @@ impl Format {
             self.font_extend,
             self.font_family,
             self.font_name,
-            self.font_outline,
             self.font_scheme,
-            self.font_script,
-            self.font_shadow,
+            self.font_script as u8,
             self.font_size,
             self.font_strikeout,
             self.italic,
@@ -961,6 +966,20 @@ impl Format {
         self
     }
 
+    /// Set the Format font character set property.
+    ///
+    /// Set the font character. This function is implemented for completeness
+    /// but is rarely used in practice.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_charset` - The font character set property.
+    ///
+    pub fn set_font_charset(mut self, font_charset: u8) -> Format {
+        self.font_charset = font_charset;
+        self
+    }
+
     /// Set the underline properties for a format.
     ///
     /// The difference between a normal underline and an "accounting" underline
@@ -1010,6 +1029,56 @@ impl Format {
     ///
     pub fn set_underline(mut self, underline: XlsxUnderline) -> Format {
         self.underline = underline;
+        self
+    }
+
+    /// Set the Format font strikeout property.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the text strikeout/strikethrough
+    /// property for a format.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format = Format::new().set_font_strikeout();
+    ///
+    ///     worksheet.write_string(0, 0, "Strikeout Text", &format)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_font_strikeout.png">
+    ///
+    pub fn set_font_strikeout(mut self) -> Format {
+        self.font_strikeout = true;
+        self
+    }
+
+    /// Set the Format font super/subscript property.
+    ///
+    /// Note, this method is currently of limited use until the library
+    /// implements multi-format "rich" strings.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_script` - The font superscript or subscript property via a
+    ///   [`XlsxScript`] enum.
+    ///
+    ///
+    pub fn set_font_script(mut self, font_script: XlsxScript) -> Format {
+        self.font_script = font_script;
         self
     }
 }
@@ -1219,6 +1288,21 @@ pub enum XlsxUnderline {
 
     /// A double accounting style underline under the entire cell.
     DoubleAccounting,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+/// The XlsxScript enum defines the Format font superscript and subscript
+/// properties.
+///
+pub enum XlsxScript {
+    /// The default/automatic format for an Excel font.
+    None,
+
+    /// The cell text is superscripted.
+    Superscript,
+
+    /// The cell text is subscripted.
+    Subscript,
 }
 
 // -----------------------------------------------------------------------

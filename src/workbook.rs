@@ -61,10 +61,6 @@ impl<'a> Workbook<'a> {
         worksheet
     }
 
-    //pub fn add_format(&mut self) -> Format {
-    //    Format::new()
-    //}
-
     // Set the index for the format.
     pub fn register_format(&mut self, format: &mut Format) {
         let format_key = format.format_key();

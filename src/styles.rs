@@ -5,7 +5,7 @@
 
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
-use crate::{XlsxColor, XlsxUnderline};
+use crate::{XlsxColor, XlsxScript, XlsxUnderline};
 
 pub struct Styles<'a> {
     pub(crate) writer: XMLWriter,
@@ -112,10 +112,17 @@ impl<'a> Styles<'a> {
             self.writer.xml_empty_tag("i");
         }
 
+        if xf_format.font_strikeout {
+            self.writer.xml_empty_tag("strike");
+        }
+
         if xf_format.underline != XlsxUnderline::None {
             self.write_font_underline(xf_format);
         }
 
+        if xf_format.font_script != XlsxScript::None {
+            self.write_vert_align(xf_format);
+        }
         // Write the sz element.
         self.write_font_size(xf_format);
 
@@ -126,7 +133,14 @@ impl<'a> Styles<'a> {
         self.write_font_name(xf_format);
 
         // Write the family element.
-        self.write_font_family(xf_format);
+        if xf_format.font_family > 0 {
+            self.write_font_family(xf_format);
+        }
+
+        // Write the charset element.
+        if xf_format.font_charset > 0 {
+            self.write_font_charset(xf_format);
+        }
 
         // Write the scheme element.
         self.write_font_scheme(xf_format);
@@ -171,6 +185,13 @@ impl<'a> Styles<'a> {
         self.writer.xml_empty_tag_attr("family", &attributes);
     }
 
+    // Write the <charset> element.
+    fn write_font_charset(&mut self, xf_format: &Format) {
+        let attributes = vec![("val", xf_format.font_charset.to_string())];
+
+        self.writer.xml_empty_tag_attr("charset", &attributes);
+    }
+
     // Write the <scheme> element.
     fn write_font_scheme(&mut self, xf_format: &Format) {
         let mut attributes = vec![];
@@ -204,6 +225,23 @@ impl<'a> Styles<'a> {
         }
 
         self.writer.xml_empty_tag_attr("u", &attributes);
+    }
+
+    // Write the <vertAlign> element.
+    fn write_vert_align(&mut self, xf_format: &Format) {
+        let mut attributes = vec![];
+
+        match xf_format.font_script {
+            XlsxScript::Superscript => {
+                attributes.push(("val", "superscript".to_string()));
+            }
+            XlsxScript::Subscript => {
+                attributes.push(("val", "subscript".to_string()));
+            }
+            _ => {}
+        }
+
+        self.writer.xml_empty_tag_attr("vertAlign", &attributes);
     }
 
     // Write the <fills> element.
