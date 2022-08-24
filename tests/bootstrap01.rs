@@ -5,6 +5,7 @@
 // jmcnamara@cpan.org
 
 use rust_xlsxwriter::{Workbook, XlsxError};
+use serial_test::serial;
 
 mod common;
 
@@ -29,6 +30,7 @@ fn create_new_xlsx_file2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
+#[serial]
 fn bootstrap01_single_worksheet() {
     let testcase = "bootstrap01";
 
@@ -38,6 +40,7 @@ fn bootstrap01_single_worksheet() {
 }
 
 #[test]
+#[serial]
 fn bootstrap01_add_default_worksheet() {
     let testcase = "bootstrap01";
 

@@ -28,6 +28,7 @@ pub type ColNum = u16;
 const ROW_MAX: RowNum = 1_048_576;
 const COL_MAX: ColNum = 16_384;
 const MAX_STRING_LEN: u16 = 32_767;
+const DEFAULT_ROW_HEIGHT: f64 = 15.0;
 
 /// The worksheet struct represents an Excel worksheet. It handles operations
 /// such as writing data to cells or formatting worksheet layout.
@@ -82,6 +83,7 @@ pub struct Worksheet {
     pub(crate) xf_formats: Vec<Format>,
     xf_indices: HashMap<String, u32>,
     global_xf_indices: Vec<u32>,
+    changed_rows: HashMap<RowNum, RowOptions>,
 }
 
 impl Worksheet {
@@ -94,6 +96,7 @@ impl Worksheet {
         let writer = XMLWriter::new();
         let table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
         let col_names: HashMap<ColNum, String> = HashMap::new();
+        let changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
         let default_format = Format::new();
         let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
@@ -116,6 +119,7 @@ impl Worksheet {
             xf_formats: vec![default_format],
             xf_indices,
             global_xf_indices: vec![],
+            changed_rows,
         }
     }
 
@@ -527,6 +531,76 @@ impl Worksheet {
         self.store_string(row, col, string, None)
     }
 
+    /// TODO
+    pub fn set_row_height<T>(&mut self, row: RowNum, height: T) -> Result<(), XlsxError>
+    where
+        T: Into<f64>,
+    {
+        let min_col = if self.dimensions.col_min != COL_MAX {
+            self.dimensions.col_min
+        } else {
+            0
+        };
+
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, min_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Update an existing row metadata object or create a new one.
+        let height = height.into();
+        match self.changed_rows.get_mut(&row) {
+            Some(row_options) => row_options.height = height,
+            None => {
+                let row_options = RowOptions {
+                    height,
+                    xf_index: 0,
+                };
+                self.changed_rows.insert(row, row_options);
+            }
+        }
+
+        Ok(())
+    }
+
+    /// TODO
+    pub fn set_row_height_pixels(&mut self, row: RowNum, height: u16) -> Result<(), XlsxError> {
+        let height = 0.75 * height as f64;
+
+        self.set_row_height(row, height)
+    }
+
+    /// TODO
+    pub fn set_row_format(&mut self, row: RowNum, format: &Format) -> Result<(), XlsxError> {
+        let min_col = if self.dimensions.col_min != COL_MAX {
+            self.dimensions.col_min
+        } else {
+            0
+        };
+
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, min_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Get the index of the format object.
+        let xf_index = self.format_index(format);
+
+        // Update an existing row metadata object or create a new one.
+        match self.changed_rows.get_mut(&row) {
+            Some(row_options) => row_options.xf_index = xf_index,
+            None => {
+                let row_options = RowOptions {
+                    height: DEFAULT_ROW_HEIGHT,
+                    xf_index,
+                };
+                self.changed_rows.insert(row, row_options);
+            }
+        }
+
+        Ok(())
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -795,36 +869,49 @@ impl Worksheet {
     fn write_data_table(&mut self, string_table: &mut SharedStringsTable) {
         let spans = self.calculate_spans();
 
-        // Swap out the worksheet data table so we can iterate over it and still
-        // call self.write_xml() methods.
+        // Swap out the worksheet data structures so we can iterate over it and
+        // still call self.write_xml() methods.
+        //
         // TODO. check efficiency of this and/or alternatives.
         let mut temp_table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
+        let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
         mem::swap(&mut temp_table, &mut self.table);
+        mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
 
         for row_num in self.dimensions.row_min..=self.dimensions.row_max {
             let span_index = row_num / 16;
             let span = spans.get(&span_index);
 
-            if let Some(columns) = temp_table.get(&row_num) {
-                self.write_row(row_num, span);
+            let columns = temp_table.get(&row_num);
+            let row_options = temp_changed_rows.get(&row_num);
 
-                for col_num in self.dimensions.col_min..=self.dimensions.col_max {
-                    if let Some(cell) = columns.get(&col_num) {
-                        match cell {
-                            CellType::Number { number, xf_index } => {
-                                let xf_index = self.global_xf_indices[*xf_index as usize];
-                                self.write_number_cell(row_num, col_num, number, &xf_index)
-                            }
-                            CellType::String { string, xf_index } => {
-                                let xf_index = self.global_xf_indices[*xf_index as usize];
-                                let string_index = string_table.shared_string_index(string);
-                                self.write_string_cell(row_num, col_num, &string_index, &xf_index);
+            if columns.is_some() || row_options.is_some() {
+                if let Some(columns) = columns {
+                    self.write_row(row_num, span, row_options, true);
+                    for col_num in self.dimensions.col_min..=self.dimensions.col_max {
+                        if let Some(cell) = columns.get(&col_num) {
+                            match cell {
+                                CellType::Number { number, xf_index } => {
+                                    let xf_index = self.global_xf_indices[*xf_index as usize];
+                                    self.write_number_cell(row_num, col_num, number, &xf_index)
+                                }
+                                CellType::String { string, xf_index } => {
+                                    let xf_index = self.global_xf_indices[*xf_index as usize];
+                                    let string_index = string_table.shared_string_index(string);
+                                    self.write_string_cell(
+                                        row_num,
+                                        col_num,
+                                        &string_index,
+                                        &xf_index,
+                                    );
+                                }
                             }
                         }
                     }
+                    self.writer.xml_end_tag("row");
+                } else {
+                    self.write_row(row_num, span, row_options, false);
                 }
-
-                self.writer.xml_end_tag("row");
             }
         }
     }
@@ -870,15 +957,36 @@ impl Worksheet {
     }
 
     // Write the <row> element.
-    fn write_row(&mut self, row_num: RowNum, span: Option<&String>) {
+    fn write_row(
+        &mut self,
+        row_num: RowNum,
+        span: Option<&String>,
+        row_options: Option<&RowOptions>,
+        has_data: bool,
+    ) {
         let row_num = format!("{}", row_num + 1);
         let mut attributes = vec![("r", row_num)];
 
         if let Some(span_range) = span {
-            attributes.push(("spans", span_range.clone()))
+            attributes.push(("spans", span_range.clone()));
         }
 
-        self.writer.xml_start_tag_attr("row", &attributes);
+        if let Some(row_options) = row_options {
+            if row_options.xf_index != 0 {
+                attributes.push(("s", row_options.xf_index.to_string()));
+                attributes.push(("customFormat", "1".to_string()));
+            }
+            if row_options.height != DEFAULT_ROW_HEIGHT {
+                attributes.push(("ht", row_options.height.to_string()));
+                attributes.push(("customHeight", "1".to_string()));
+            }
+        }
+
+        if has_data {
+            self.writer.xml_start_tag_attr("row", &attributes);
+        } else {
+            self.writer.xml_empty_tag_attr("row", &attributes);
+        }
     }
 
     // Write the <c> element for a number.
@@ -932,6 +1040,12 @@ struct WorksheetDimensions {
     row_max: RowNum,
     col_max: ColNum,
 }
+
+struct RowOptions {
+    height: f64,
+    xf_index: u32,
+}
+
 enum CellType {
     Number { number: f64, xf_index: u32 },
     String { string: String, xf_index: u32 },

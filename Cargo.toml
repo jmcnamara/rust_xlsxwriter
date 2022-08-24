@@ -20,6 +20,7 @@ zip = "0.6.2"
 [dev-dependencies]
 pretty_assertions = "0.6.1"
 regex = "1.5.6"
+serial_test = "0.4.0"
 tempfile = "3.3.0"
 
 # Some local package management and release check commands.
