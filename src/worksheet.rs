@@ -531,11 +531,61 @@ impl Worksheet {
         self.store_string(row, col, string, None)
     }
 
-    /// TODO
+    /// Set the height for a row of cells.
+    ///
+    /// The `set_row_height()` method is used to change the default height of a
+    /// row. The height is specified in character units, where the default
+    /// height is 15. Excel allows height values in increments of 0.25.
+    ///
+    /// To specify the height in pixels use the
+    /// [`set_row_height_pixels()`](Worksheet::set_row_height_pixels()) method.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `height` - The row height in character units.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the height for a row in
+    /// Excel.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some text.
+    ///     worksheet.write_string_only(0, 0, "Normal")?;
+    ///     worksheet.write_string_only(2, 0, "Taller")?;
+    ///
+    ///     // Set the row height in Excel character units.
+    ///     worksheet.set_row_height(2, 30)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_height.png">
+    ///
     pub fn set_row_height<T>(&mut self, row: RowNum, height: T) -> Result<(), XlsxError>
     where
         T: Into<f64>,
     {
+        // Set a suitable column range for the row dimension check/set.
         let min_col = if self.dimensions.col_min != COL_MAX {
             self.dimensions.col_min
         } else {
@@ -563,14 +613,119 @@ impl Worksheet {
         Ok(())
     }
 
-    /// TODO
+    /// Set the height for a row of cells, in pixels.
+    ///
+    /// The `set_row_height_pixels()` method is used to change the default height of a
+    /// row. The height is specified in pixels, where the default
+    /// height is 20.
+    ///
+    /// To specify the height in Excel's character units use the
+    /// [`set_row_height()`](Worksheet::set_row_height()) method.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `height` - The row height in pixels.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the height for a row in Excel.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some text.
+    ///     worksheet.write_string_only(0, 0, "Normal")?;
+    ///     worksheet.write_string_only(2, 0, "Taller")?;
+    ///
+    ///     // Set the row height in pixels.
+    ///     worksheet.set_row_height_pixels(2, 40)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+     /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_height.png">
+    ///
     pub fn set_row_height_pixels(&mut self, row: RowNum, height: u16) -> Result<(), XlsxError> {
         let height = 0.75 * height as f64;
 
         self.set_row_height(row, height)
     }
 
-    /// TODO
+    /// Set the format for a row of cells.
+    ///
+    /// The `set_row_format()` method is used to change the default format of a
+    /// row. Any unformatted data written to that row will then adopt that
+    /// format. Formatted data written to the row will maintain its own cell
+    /// format. See the example below.
+    ///
+    /// A future version of this library may support automatic merging of
+    /// explicit cell formatting with the row formatting but that isn't
+    /// currently supported.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the format for a row in Excel.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add for formats.
+    ///     let bold_format = Format::new().set_bold();
+    ///     let red_format = Format::new().set_font_color(XlsxColor::Red);
+    ///
+    ///     // Set the row format.
+    ///     worksheet.set_row_format(1, &red_format)?;
+    ///
+    ///     // Add some unformatted text that adopts the row format.
+    ///     worksheet.write_string_only(1, 0, "Hello")?;
+    ///
+    ///     // Add some formatted text that overrides the row format.
+    ///     worksheet.write_string(1, 2, "Hello", &bold_format)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_format.png">
+    ///
     pub fn set_row_format(&mut self, row: RowNum, format: &Format) -> Result<(), XlsxError> {
         let min_col = if self.dimensions.col_min != COL_MAX {
             self.dimensions.col_min
@@ -892,11 +1047,19 @@ impl Worksheet {
                         if let Some(cell) = columns.get(&col_num) {
                             match cell {
                                 CellType::Number { number, xf_index } => {
-                                    let xf_index = self.global_xf_indices[*xf_index as usize];
+                                    let mut xf_index = self.global_xf_indices[*xf_index as usize];
+                                    if xf_index == 0 && row_options.is_some() {
+                                        let row_xf_index = row_options.unwrap().xf_index;
+                                        xf_index = self.global_xf_indices[row_xf_index as usize];
+                                    }
                                     self.write_number_cell(row_num, col_num, number, &xf_index)
                                 }
                                 CellType::String { string, xf_index } => {
-                                    let xf_index = self.global_xf_indices[*xf_index as usize];
+                                    let mut xf_index = self.global_xf_indices[*xf_index as usize];
+                                    if xf_index == 0 && row_options.is_some() {
+                                        let row_xf_index = row_options.unwrap().xf_index;
+                                        xf_index = self.global_xf_indices[row_xf_index as usize];
+                                    }
                                     let string_index = string_table.shared_string_index(string);
                                     self.write_string_cell(
                                         row_num,
