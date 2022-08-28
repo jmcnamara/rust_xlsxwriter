@@ -37,22 +37,57 @@ impl fmt::Display for XlsxError {
         match self {
             XlsxError::RowColumnLimitError => write!(
                 f,
-                "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)"
+                "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)."
             ),
-            XlsxError::SheetnameCannotBeBlank => write!(f, "Worksheet name cannot be blank. "),
+            XlsxError::SheetnameCannotBeBlank => write!(f, "Worksheet name cannot be blank."),
             XlsxError::SheetnameLengthExceeded => {
-                write!(f, "Worksheet name exceeds Excel's limit of 31 characters. ")
+                write!(f, "Worksheet name exceeds Excel's limit of 31 characters.")
             }
             XlsxError::SheetnameContainsInvalidCharacter => write!(
                 f,
-                "Worksheet name cannot contain invalid characters: '[ ] : * ? / \\' "
+                "Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'."
             ),
             XlsxError::SheetnameStartsOrEndsWithApostrophe => {
-                write!(f, "Worksheet name cannot start or end with an apostrophe. ")
+                write!(f, "Worksheet name cannot start or end with an apostrophe.")
             }
             XlsxError::MaxStringLengthExceeded => {
-                write!(f, "String exceeds Excel's limit of 32,767 characters. ")
+                write!(f, "String exceeds Excel's limit of 32,767 characters.")
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::XlsxError;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_error_display() {
+        assert_eq!(
+            XlsxError::RowColumnLimitError.to_string(),
+            "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)."
+        );
+        assert_eq!(
+            XlsxError::SheetnameCannotBeBlank.to_string(),
+            "Worksheet name cannot be blank."
+        );
+        assert_eq!(
+            XlsxError::SheetnameLengthExceeded.to_string(),
+            "Worksheet name exceeds Excel's limit of 31 characters."
+        );
+        assert_eq!(
+            XlsxError::SheetnameContainsInvalidCharacter.to_string(),
+            "Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'."
+        );
+        assert_eq!(
+            XlsxError::SheetnameStartsOrEndsWithApostrophe.to_string(),
+            "Worksheet name cannot start or end with an apostrophe."
+        );
+        assert_eq!(
+            XlsxError::MaxStringLengthExceeded.to_string(),
+            "String exceeds Excel's limit of 32,767 characters."
+        );
     }
 }

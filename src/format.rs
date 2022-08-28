@@ -1193,7 +1193,7 @@ impl XlsxColor {
         match self {
             XlsxColor::RGB(color) => color,
             XlsxColor::Automatic => 0xFFFFFFFF,
-            XlsxColor::Black => 0x1000000,
+            XlsxColor::Black => 0x000000,
             XlsxColor::Blue => 0x0000FF,
             XlsxColor::Brown => 0x800000,
             XlsxColor::Cyan => 0x00FFFF,
@@ -1316,8 +1316,22 @@ mod tests {
     #[test]
     fn test_hex_value() {
         assert_eq!("FFFFFFFF", XlsxColor::Automatic.hex_value());
+        assert_eq!("000000", XlsxColor::Black.hex_value());
         assert_eq!("0000FF", XlsxColor::Blue.hex_value());
+        assert_eq!("800000", XlsxColor::Brown.hex_value());
+        assert_eq!("00FFFF", XlsxColor::Cyan.hex_value());
+        assert_eq!("808080", XlsxColor::Gray.hex_value());
+        assert_eq!("008000", XlsxColor::Green.hex_value());
+        assert_eq!("00FF00", XlsxColor::Lime.hex_value());
+        assert_eq!("FF00FF", XlsxColor::Magenta.hex_value());
+        assert_eq!("000080", XlsxColor::Navy.hex_value());
+        assert_eq!("FF6600", XlsxColor::Orange.hex_value());
+        assert_eq!("FF00FF", XlsxColor::Pink.hex_value());
+        assert_eq!("800080", XlsxColor::Purple.hex_value());
+        assert_eq!("FF0000", XlsxColor::Red.hex_value());
         assert_eq!("C0C0C0", XlsxColor::Silver.hex_value());
+        assert_eq!("FFFFFF", XlsxColor::White.hex_value());
+        assert_eq!("FFFF00", XlsxColor::Yellow.hex_value());
         assert_eq!("ABCDEF", XlsxColor::RGB(0xABCDEF).hex_value());
     }
 }

@@ -27,6 +27,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     // Secondary test for default format.
     workbook.register_format(&mut format1);
+    workbook.register_format(&mut format1);
 
     workbook.close()?;
 

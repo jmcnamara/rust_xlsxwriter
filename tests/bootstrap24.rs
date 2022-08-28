@@ -11,21 +11,25 @@ mod common;
 // Test case to demonstrate creating a basic file with user defined row.
 // This variant handles unformatted data in a formatted row.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+    // The order of the code is arranged to test various code branches.
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_italic();
 
+    worksheet.set_row_height(0, 24)?;
+    worksheet.set_row_height(0, 24)?; // Test overwriting an existing row.
+    worksheet.set_row_format(10, &format1)?;
+    worksheet.set_row_format(10, &format1)?; // Test overwriting an existing row.
+
     worksheet.write_string_only(0, 0, "Rust")?;
     worksheet.write_string_only(2, 0, "Rust")?;
     worksheet.write_string(6, 0, "Rust", &format1)?; // Explicit format.
 
-    worksheet.set_row_height(0, 24)?;
     worksheet.set_row_height(4, 39)?;
     worksheet.set_row_format(8, &format2)?; // Explicit format.
 
     worksheet.set_row_height(10, 23.25)?;
-    worksheet.set_row_format(10, &format1)?;
     worksheet.write_string_only(10, 2, "Rust")?; // Implicit format.
 
     workbook.close()?;

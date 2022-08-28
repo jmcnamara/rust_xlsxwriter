@@ -1029,8 +1029,18 @@ impl Worksheet {
             (first_col, last_col) = (last_col, first_col);
         }
 
-        // Check columns are in the allowed range without updating dimensions.
-        if first_col >= COL_MAX || last_col >= COL_MAX {
+        // Set a suitable row range for the dimension check/set.
+        let min_row = if self.dimensions.row_min != ROW_MAX {
+            self.dimensions.row_min
+        } else {
+            0
+        };
+
+        // Check columns are in the allowed range.
+        if !self.check_dimensions(min_row, first_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+        if !self.check_dimensions(min_row, last_col) {
             return Err(XlsxError::RowColumnLimitError);
         }
 
@@ -2039,6 +2049,36 @@ mod tests {
         };
 
         match worksheet.write_number_only(ROW_MAX, 0, 0) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.set_row_height(ROW_MAX, 20) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.set_row_height_pixels(ROW_MAX, 20) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.set_row_format(ROW_MAX, &format) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.set_column_width(COL_MAX, 0, 20) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.set_column_width_pixels(0, COL_MAX, 20) {
+            Ok(_) => assert!(false),
+            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
+        };
+
+        match worksheet.set_column_format(COL_MAX, COL_MAX, &format) {
             Ok(_) => assert!(false),
             Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
         };

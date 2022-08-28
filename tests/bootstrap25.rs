@@ -16,6 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_column_width(2, 1, 6.86)?; // Reversed first/last col.
     worksheet.set_column_width(0, 0, 14)?; // Unsorted order.
+    worksheet.set_column_width(0, 0, 14)?; // Overwrite existing value.
     worksheet.set_column_width(3, 5, 0.92)?;
 
     worksheet.write_number_only(8, 0, 123)?; // A cell to test dimensions.

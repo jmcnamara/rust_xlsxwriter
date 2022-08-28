@@ -12,7 +12,11 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
-    let format = Format::new().set_font_color(XlsxColor::RGB(0xFF0000));
+    // Add an error color and duplicate to the test.
+    let format = Format::new()
+        .set_font_color(XlsxColor::RGB(0xFFEEEEEE)) // Error color.
+        .set_font_color(XlsxColor::RGB(0xFF0000))
+        .set_font_color(XlsxColor::RGB(0xFF0000)); // Duplicate.
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string(0, 0, "Hello", &format)?;
