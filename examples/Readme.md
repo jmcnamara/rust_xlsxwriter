@@ -13,8 +13,76 @@ examples are usually repeated in the documentation.
 
 * app_perf_test.rs - Simple performance test for rust_xlsxwriter.
 
+* doc_enum_xlsxcolor.rs - Demonstrates using different XlsxColor enum
+  values to set the color of some text in a worksheet.
+
+* doc_format_clone.rs - Demonstrates cloning a format and setting the
+  properties.
+
+* doc_format_create.rs - Demonstrates create a new format and setting the
+  properties.
+
+* doc_format_currency1.rs - Demonstrates setting a currency format for a
+  worksheet cell. This example doesn't actually set a currency format, for
+  that see the followup example in doc_format_currency2.rs.
+
+* doc_format_currency2.rs - Demonstrates setting a currency format for a
+  worksheet cell.
+
+* doc_format_default.rs - Demonstrates creating a default format.
+
+* doc_format_locale.rs - Demonstrates setting a number format that appears
+  differently in different locales.
+
+* doc_format_new.rs - Demonstrates creating a new format.
+
+* doc_format_set_bold.rs - Demonstrates setting the bold property for a
+  format.
+
+* doc_format_set_font_color.rs - Demonstrates setting the italic property
+  for a format.
+
+* doc_format_set_font_name.rs - Demonstrates setting the font name/type for
+  a format.
+
+* doc_format_set_font_size.rs - Demonstrates setting the font size for a
+  format.
+
+* doc_format_set_font_strikeout.rs - Demonstrates setting the text
+  strikeout/strikethrough property for a format.
+
+* doc_format_set_italic.rs - Demonstrates setting the italic property for a
+  format.
+
+* doc_format_set_num_format.rs - Demonstrates setting different types of
+  Excel number formatting.
+
+* doc_format_set_num_format_index.rs - Demonstrates setting one of the
+  inbuilt format indices for a format.
+
+* doc_format_set_underline.rs - Demonstrates setting underline properties
+  for a format.
+
+* doc_worksheet_set_column_format.rs - Demonstrates setting the format for
+  a column in Excel.
+
+* doc_worksheet_set_column_width.rs - Demonstrates setting the width of
+  columns in Excel.
+
+* doc_worksheet_set_column_width_pixels.rs - Demonstrates setting the width
+  of columns in Excel in pixels.
+
 * doc_worksheet_set_name.rs - Demonstrates setting user defined worksheet
   names and the default values when a name isn't set.
+
+* doc_worksheet_set_row_format.rs - Demonstrates setting the format for a
+  row in Excel.
+
+* doc_worksheet_set_row_height.rs - Demonstrates setting the height for a
+  row in Excel.
+
+* doc_worksheet_set_row_height_pixels.rs - Demonstrates setting the height
+  for a row in Excel.
 
 * doc_worksheet_write_number.rs - Demonstrates setting different formatting
   for numbers in an Excel worksheet.
