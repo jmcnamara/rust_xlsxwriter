@@ -8,25 +8,14 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 mod common;
 
-// Test case to demonstrate creating a basic file with user defined row.
-// This variant handles unformatted data in a formatted row.
+// Test case to demonstrate creating a basic file with user defined column.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
     let format1 = Format::new().set_bold();
-    let format2 = Format::new().set_italic();
 
-    worksheet.write_string_only(0, 0, "Rust")?;
-    worksheet.write_string_only(2, 0, "Rust")?;
-    worksheet.write_string(6, 0, "Rust", &format1)?; // Explicit format.
-
-    worksheet.set_row_height(0, 24)?;
-    worksheet.set_row_height(4, 39)?;
-    worksheet.set_row_format(8, &format2)?; // Explicit format.
-
-    worksheet.set_row_height(10, 23.25)?;
-    worksheet.set_row_format(10, &format1)?;
-    worksheet.write_string_only(10, 2, "Rust")?; // Implicit format.
+    worksheet.set_column_format(2, 2, &format1)?;
+    worksheet.write_string_only(2, 2, "Rust")?;
 
     workbook.close()?;
 
@@ -34,8 +23,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn bootstrap24_set_row() {
-    let testcase = "bootstrap24";
+fn bootstrap25_set_column_with_format() {
+    let testcase = "bootstrap26";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
     _ = create_new_xlsx_file(&xlsxwriter_file);

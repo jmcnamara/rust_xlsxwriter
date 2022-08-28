@@ -9,7 +9,7 @@ use serial_test::serial;
 
 mod common;
 
-// Test case to demonstrate creating a basic file user defined row.
+// Test case to demonstrate creating a basic file with user defined row.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
@@ -32,7 +32,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case to demonstrate creating a basic file user defined row.
+// Test case to demonstrate creating a basic file with user defined row.
 fn create_new_xlsx_file_pixels(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();

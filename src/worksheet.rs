@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::io::Write;
 use std::mem;
 
+use itertools::Itertools;
 use regex::Regex;
 
 use crate::error::XlsxError;
@@ -29,6 +30,7 @@ const ROW_MAX: RowNum = 1_048_576;
 const COL_MAX: ColNum = 16_384;
 const MAX_STRING_LEN: u16 = 32_767;
 const DEFAULT_ROW_HEIGHT: f64 = 15.0;
+const DEFAULT_COL_WIDTH: f64 = 8.43;
 
 /// The worksheet struct represents an Excel worksheet. It handles operations
 /// such as writing data to cells or formatting worksheet layout.
@@ -84,6 +86,8 @@ pub struct Worksheet {
     xf_indices: HashMap<String, u32>,
     global_xf_indices: Vec<u32>,
     changed_rows: HashMap<RowNum, RowOptions>,
+    changed_cols: HashMap<ColNum, ColOptions>,
+    col_formats: HashMap<ColNum, u32>,
 }
 
 impl Worksheet {
@@ -97,6 +101,8 @@ impl Worksheet {
         let table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
         let col_names: HashMap<ColNum, String> = HashMap::new();
         let changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
+        let changed_cols: HashMap<ColNum, ColOptions> = HashMap::new();
+        let col_formats: HashMap<ColNum, u32> = HashMap::new();
         let default_format = Format::new();
         let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
@@ -120,6 +126,8 @@ impl Worksheet {
             xf_indices,
             global_xf_indices: vec![],
             changed_rows,
+            changed_cols,
+            col_formats,
         }
     }
 
@@ -592,7 +600,7 @@ impl Worksheet {
             0
         };
 
-        // Check row and col are in the allowed range.
+        // Check row is in the allowed range.
         if !self.check_dimensions(row, min_col) {
             return Err(XlsxError::RowColumnLimitError);
         }
@@ -657,7 +665,7 @@ impl Worksheet {
     /// #     Ok(())
     /// # }
     /// ```
-     /// Output file:
+    /// Output file:
     ///
     /// <img
     /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_height.png">
@@ -727,13 +735,14 @@ impl Worksheet {
     /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_format.png">
     ///
     pub fn set_row_format(&mut self, row: RowNum, format: &Format) -> Result<(), XlsxError> {
+        // Set a suitable column range for the row dimension check/set.
         let min_col = if self.dimensions.col_min != COL_MAX {
             self.dimensions.col_min
         } else {
             0
         };
 
-        // Check row and col are in the allowed range.
+        // Check row is in the allowed range.
         if !self.check_dimensions(row, min_col) {
             return Err(XlsxError::RowColumnLimitError);
         }
@@ -751,6 +760,300 @@ impl Worksheet {
                 };
                 self.changed_rows.insert(row, row_options);
             }
+        }
+
+        Ok(())
+    }
+
+    /// Set the width for worksheet columns.
+    ///
+    /// The `set_column_width()` method is used to change the default width of a
+    /// column or a range of columns.
+    ///
+    /// The ``width`` parameter sets the column width in the same units used by
+    /// Excel which is: the number of characters in the default font. The
+    /// default width is 8.43 in the default font of Calibri 11. The actual
+    /// relationship between a string width and a column width in Excel is
+    /// complex. See the [following explanation of column
+    /// widths](https://support.microsoft.com/en-us/kb/214123) from the
+    /// Microsoft support documentation for more details. To set the width in
+    /// pixels use the
+    /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels())
+    /// method.
+    ///
+    /// There is no way to specify "AutoFit" for a column in the Excel file
+    /// format. This feature is only available at runtime from within Excel. It
+    /// is possible to simulate "AutoFit" in your application by tracking the
+    /// maximum width of the data in the column as your write it and then
+    /// adjusting the column width at the end.
+    ///
+    /// # Arguments
+    ///
+    /// * `first_col` - The zero indexed column number of the first column in
+    ///   the range.
+    /// * `last_col` - The zero indexed column number of the last column in the
+    ///   range. Set this value to the same as `first_col` for a single column.
+    /// * `width` - The row width in character units.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - First or last column exceeds
+    ///   Excel's worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the width of columns in Excel.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some text.
+    ///     worksheet.write_string_only(0, 0, "Normal")?;
+    ///     worksheet.write_string_only(0, 2, "Wider")?;
+    ///     worksheet.write_string_only(0, 4, "Narrower")?;
+    ///
+    ///     // Set the column width in Excel character units.
+    ///     worksheet.set_column_width(2, 2, 16)?; // Single column.
+    ///     worksheet.set_column_width(4, 5, 4)?;  // Column range.
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_width.png">
+    ///
+    pub fn set_column_width<T>(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+        width: T,
+    ) -> Result<(), XlsxError>
+    where
+        T: Into<f64>,
+    {
+        let mut first_col = first_col;
+        let mut last_col = last_col;
+
+        // Ensure columns are in the right order.
+        if first_col > last_col {
+            (first_col, last_col) = (last_col, first_col);
+        }
+
+        // Check columns are in the allowed range without updating dimensions.
+        if first_col >= COL_MAX || last_col >= COL_MAX {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Update an existing col metadata object or create a new one.
+        let width = width.into();
+        match self.changed_cols.get_mut(&first_col) {
+            Some(col_options) => col_options.width = width,
+            None => {
+                let col_options = ColOptions {
+                    first_col,
+                    last_col,
+                    width,
+                    xf_index: 0,
+                };
+                self.changed_cols.insert(first_col, col_options);
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Set the width for worksheet columns in pixels.
+    ///
+    /// The `set_column_width()` method is used to change the default width of a
+    /// column or a range of columns.
+    ///
+    /// To set the width in Excel character units use the
+    /// [`set_column_width()`](Worksheet::set_column_width()) method.
+    ///
+    /// There is no way to specify "AutoFit" for a column in the Excel file
+    /// format. This feature is only available at runtime from within Excel. It
+    /// is possible to simulate "AutoFit" in your application by tracking the
+    /// maximum width of the data in the column as your write it and then
+    /// adjusting the column width at the end.
+    ///
+    /// # Arguments
+    ///
+    /// * `first_col` - The zero indexed column number of the first column in
+    ///   the range.
+    /// * `last_col` - The zero indexed column number of the last column in the
+    ///   range. Set this value to the same as `first_col` for a single column.
+    /// * `width` - The row width in pixels.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - First or last column exceeds
+    ///   Excel's worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the width of columns in Excel in
+    /// pixels.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some text.
+    ///     worksheet.write_string_only(0, 0, "Normal")?;
+    ///     worksheet.write_string_only(0, 2, "Wider")?;
+    ///     worksheet.write_string_only(0, 4, "Narrower")?;
+    ///
+    ///     // Set the column width in pixels.
+    ///     worksheet.set_column_width_pixels(2, 2, 117)?; // Single column.
+    ///     worksheet.set_column_width_pixels(4, 5, 33)?;  // Column range.
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_width.png">
+    ///
+    pub fn set_column_width_pixels(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+        width: u16,
+    ) -> Result<(), XlsxError> {
+        // Properties for Calibri 11.
+        let max_digit_width = 7.0_f64;
+        let padding = 5.0_f64;
+        let mut width = width as f64;
+
+        if width < 12.0 {
+            width /= max_digit_width + padding;
+        } else {
+            width = (width - padding) / max_digit_width
+        }
+
+        self.set_column_width(first_col, last_col, width)
+    }
+
+    /// Set the format for a column of cells.
+    ///
+    /// The `set_column_format()` method is used to change the default format of a
+    /// column. Any unformatted data written to that column will then adopt that
+    /// format. Formatted data written to the column will maintain its own cell
+    /// format. See the example below.
+    ///
+    /// A future version of this library may support automatic merging of
+    /// explicit cell formatting with the column formatting but that isn't
+    /// currently supported.
+    ///
+    /// # Arguments
+    ///
+    /// * `first_col` - The zero indexed column number of the first column in
+    ///   the range.
+    /// * `last_col` - The zero indexed column number of the last column in the
+    ///   range. Set this value to the same as `first_col` for a single column.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the format for a column in Excel.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add for formats.
+    ///     let bold_format = Format::new().set_bold();
+    ///     let red_format = Format::new().set_font_color(XlsxColor::Red);
+    ///
+    ///     // Set the column format.
+    ///     worksheet.set_column_format(1, 1, &red_format)?;
+    ///
+    ///     // Add some unformatted text that adopts the column format.
+    ///     worksheet.write_string_only(0, 1, "Hello")?;
+    ///
+    ///     // Add some formatted text that overrides the column format.
+    ///     worksheet.write_string(2, 1, "Hello", &bold_format)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_format.png">
+    ///
+    pub fn set_column_format(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+        format: &Format,
+    ) -> Result<(), XlsxError> {
+        let mut first_col = first_col;
+        let mut last_col = last_col;
+
+        // Ensure columns are in the right order.
+        if first_col > last_col {
+            (first_col, last_col) = (last_col, first_col);
+        }
+
+        // Check columns are in the allowed range without updating dimensions.
+        if first_col >= COL_MAX || last_col >= COL_MAX {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Get the index of the format object.
+        let xf_index = self.format_index(format);
+
+        // Update an existing col metadata object or create a new one.
+        match self.changed_cols.get_mut(&first_col) {
+            Some(col_options) => col_options.xf_index = xf_index,
+            None => {
+                let col_options = ColOptions {
+                    first_col,
+                    last_col,
+                    width: DEFAULT_COL_WIDTH,
+                    xf_index,
+                };
+                self.changed_cols.insert(first_col, col_options);
+            }
+        }
+
+        // Store the col format index to help set implicit formats for cells.
+        for col_num in first_col..=last_col {
+            self.col_formats.insert(col_num, xf_index);
         }
 
         Ok(())
@@ -904,6 +1207,42 @@ impl Worksheet {
         self.global_xf_indices = workbook_indices.to_owned();
     }
 
+    // Translate the cell xf_index into a global/workbook format index. We also
+    // need to make sure that an unformatted cell (xf_index == 0) takes the row
+    // format (if it exists) or, failing that, the column format (if that
+    // exists).
+    fn get_cell_xf_index(
+        &mut self,
+        xf_index: &u32,
+        row_options: Option<&RowOptions>,
+        col_num: ColNum,
+    ) -> u32 {
+        // The local cell format index.
+        let mut xf_index = *xf_index;
+
+        // If it is zero the cell is unformatted and we check for a row format.
+        if xf_index == 0 {
+            if let Some(row_options) = row_options {
+                xf_index = row_options.xf_index;
+            }
+        }
+
+        // If it is still zero the row was unformatted so we check for a column
+        // format.
+        if xf_index == 0 {
+            if let Some(col_xf_index) = self.col_formats.get(&col_num) {
+                xf_index = *col_xf_index;
+            }
+        }
+
+        // Finally convert the local format index into a global/workbook index.
+        if xf_index != 0 {
+            xf_index = self.global_xf_indices[xf_index as usize];
+        }
+
+        xf_index
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -924,6 +1263,9 @@ impl Worksheet {
 
         // Write the sheetFormatPr element.
         self.write_sheet_format_pr();
+
+        // Write the cols element.
+        self.write_cols();
 
         // Write the sheetData element.
         self.write_sheet_data(string_table);
@@ -951,7 +1293,7 @@ impl Worksheet {
         let mut attributes = vec![];
         let mut range = "A1".to_string();
 
-        if !self.table.is_empty() {
+        if !self.table.is_empty() || !self.changed_rows.is_empty() {
             range = utility::cell_range(
                 self.dimensions.row_min,
                 self.dimensions.col_min,
@@ -997,7 +1339,7 @@ impl Worksheet {
 
     // Write the <sheetData> element.
     fn write_sheet_data(&mut self, string_table: &mut SharedStringsTable) {
-        if self.table.is_empty() {
+        if self.table.is_empty() && self.changed_rows.is_empty() {
             self.writer.xml_empty_tag("sheetData");
         } else {
             self.writer.xml_start_tag("sheetData");
@@ -1047,19 +1389,13 @@ impl Worksheet {
                         if let Some(cell) = columns.get(&col_num) {
                             match cell {
                                 CellType::Number { number, xf_index } => {
-                                    let mut xf_index = self.global_xf_indices[*xf_index as usize];
-                                    if xf_index == 0 && row_options.is_some() {
-                                        let row_xf_index = row_options.unwrap().xf_index;
-                                        xf_index = self.global_xf_indices[row_xf_index as usize];
-                                    }
+                                    let xf_index =
+                                        self.get_cell_xf_index(xf_index, row_options, col_num);
                                     self.write_number_cell(row_num, col_num, number, &xf_index)
                                 }
                                 CellType::String { string, xf_index } => {
-                                    let mut xf_index = self.global_xf_indices[*xf_index as usize];
-                                    if xf_index == 0 && row_options.is_some() {
-                                        let row_xf_index = row_options.unwrap().xf_index;
-                                        xf_index = self.global_xf_indices[row_xf_index as usize];
-                                    }
+                                    let xf_index =
+                                        self.get_cell_xf_index(xf_index, row_options, col_num);
                                     let string_index = string_table.shared_string_index(string);
                                     self.write_string_cell(
                                         row_num,
@@ -1108,11 +1444,13 @@ impl Worksheet {
             // Store the span range for each block or 16 rows.
             if (row_num + 1) % 16 == 0 || row_num == self.dimensions.row_max {
                 let span_index = row_num / 16;
-                span_min += 1;
-                span_max += 1;
-                let span_range = format!("{}:{}", span_min, span_max);
-                spans.insert(span_index, span_range);
-                span_min = COL_MAX;
+                if span_min != COL_MAX {
+                    span_min += 1;
+                    span_max += 1;
+                    let span_range = format!("{}:{}", span_min, span_max);
+                    spans.insert(span_index, span_range);
+                    span_min = COL_MAX;
+                }
             }
         }
 
@@ -1135,8 +1473,11 @@ impl Worksheet {
         }
 
         if let Some(row_options) = row_options {
-            if row_options.xf_index != 0 {
-                attributes.push(("s", row_options.xf_index.to_string()));
+            let mut xf_index = row_options.xf_index;
+
+            if xf_index != 0 {
+                xf_index = self.global_xf_indices[xf_index as usize];
+                attributes.push(("s", xf_index.to_string()));
                 attributes.push(("customFormat", "1".to_string()));
             }
             if row_options.height != DEFAULT_ROW_HEIGHT {
@@ -1191,12 +1532,71 @@ impl Worksheet {
         )
         .expect("Couldn't write to file");
     }
+
+    // Write the <cols> element.
+    fn write_cols(&mut self) {
+        if self.changed_cols.is_empty() {
+            return;
+        }
+
+        self.writer.xml_start_tag("cols");
+
+        for (_, col_options) in self.changed_cols.clone().iter().sorted_by_key(|x| x.0) {
+            // Write the col element.
+            self.write_col(col_options);
+        }
+
+        self.writer.xml_end_tag("cols");
+    }
+
+    // Write the <col> element.
+    fn write_col(&mut self, col_options: &ColOptions) {
+        let mut attributes = vec![];
+        let mut width = col_options.width;
+        let mut xf_index = col_options.xf_index;
+        let first_col = col_options.first_col + 1;
+        let last_col = col_options.last_col + 1;
+        let has_custom_width = width != 8.43;
+
+        // Convert column width from user units to character width.
+        if width > 0.0 {
+            // Properties for Calibri 11.
+            let max_digit_width = 7.0_f64;
+            let padding = 5.0_f64;
+
+            if width < 1.0 {
+                width = ((width * (max_digit_width + padding)).round() / max_digit_width * 256.0)
+                    .floor()
+                    / 256.0;
+            } else {
+                width = (((width * max_digit_width).round() + padding) / max_digit_width * 256.0)
+                    .floor()
+                    / 256.0;
+            }
+        }
+
+        attributes.push(("min", first_col.to_string()));
+        attributes.push(("max", last_col.to_string()));
+        attributes.push(("width", width.to_string()));
+
+        if xf_index > 0 {
+            xf_index = self.global_xf_indices[xf_index as usize];
+            attributes.push(("style", xf_index.to_string()));
+        }
+
+        if has_custom_width {
+            attributes.push(("customWidth", "1".to_string()));
+        }
+
+        self.writer.xml_empty_tag_attr("col", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
 // Helper enums/structs
 // -----------------------------------------------------------------------
 
+#[derive(Clone)]
 struct WorksheetDimensions {
     row_min: RowNum,
     col_min: ColNum,
@@ -1204,11 +1604,21 @@ struct WorksheetDimensions {
     col_max: ColNum,
 }
 
+#[derive(Clone)]
 struct RowOptions {
     height: f64,
     xf_index: u32,
 }
 
+#[derive(Clone)]
+struct ColOptions {
+    first_col: ColNum,
+    last_col: ColNum,
+    width: f64,
+    xf_index: u32,
+}
+
+#[derive(Clone)]
 enum CellType {
     Number { number: f64, xf_index: u32 },
     String { string: String, xf_index: u32 },
