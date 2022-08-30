@@ -9,7 +9,6 @@ use std::collections::HashMap;
 use std::io::Write;
 use std::mem;
 
-use itertools::Itertools;
 use regex::Regex;
 
 use crate::error::XlsxError;
@@ -87,7 +86,6 @@ pub struct Worksheet {
     global_xf_indices: Vec<u32>,
     changed_rows: HashMap<RowNum, RowOptions>,
     changed_cols: HashMap<ColNum, ColOptions>,
-    col_formats: HashMap<ColNum, u32>,
 }
 
 impl Worksheet {
@@ -102,7 +100,6 @@ impl Worksheet {
         let col_names: HashMap<ColNum, String> = HashMap::new();
         let changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
         let changed_cols: HashMap<ColNum, ColOptions> = HashMap::new();
-        let col_formats: HashMap<ColNum, u32> = HashMap::new();
         let default_format = Format::new();
         let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
@@ -127,7 +124,6 @@ impl Worksheet {
             global_xf_indices: vec![],
             changed_rows,
             changed_cols,
-            col_formats,
         }
     }
 
@@ -844,6 +840,7 @@ impl Worksheet {
     {
         let mut first_col = first_col;
         let mut last_col = last_col;
+        let width = width.into();
 
         // Ensure columns are in the right order.
         if first_col > last_col {
@@ -856,20 +853,15 @@ impl Worksheet {
         }
 
         // Update an existing col metadata object or create a new one.
-        let width = width.into();
-        match self.changed_cols.get_mut(&first_col) {
-            Some(col_options) => col_options.width = width,
-            None => {
-                let col_options = ColOptions {
-                    first_col,
-                    last_col,
-                    width,
-                    xf_index: 0,
-                };
-                self.changed_cols.insert(first_col, col_options);
+        for col_num in first_col..=last_col {
+            match self.changed_cols.get_mut(&col_num) {
+                Some(col_options) => col_options.width = width,
+                None => {
+                    let col_options = ColOptions { width, xf_index: 0 };
+                    self.changed_cols.insert(col_num, col_options);
+                }
             }
         }
-
         Ok(())
     }
 
@@ -1048,22 +1040,17 @@ impl Worksheet {
         let xf_index = self.format_index(format);
 
         // Update an existing col metadata object or create a new one.
-        match self.changed_cols.get_mut(&first_col) {
-            Some(col_options) => col_options.xf_index = xf_index,
-            None => {
-                let col_options = ColOptions {
-                    first_col,
-                    last_col,
-                    width: DEFAULT_COL_WIDTH,
-                    xf_index,
-                };
-                self.changed_cols.insert(first_col, col_options);
-            }
-        }
-
-        // Store the col format index to help set implicit formats for cells.
         for col_num in first_col..=last_col {
-            self.col_formats.insert(col_num, xf_index);
+            match self.changed_cols.get_mut(&col_num) {
+                Some(col_options) => col_options.xf_index = xf_index,
+                None => {
+                    let col_options = ColOptions {
+                        width: DEFAULT_COL_WIDTH,
+                        xf_index,
+                    };
+                    self.changed_cols.insert(col_num, col_options);
+                }
+            }
         }
 
         Ok(())
@@ -1240,8 +1227,8 @@ impl Worksheet {
         // If it is still zero the row was unformatted so we check for a column
         // format.
         if xf_index == 0 {
-            if let Some(col_xf_index) = self.col_formats.get(&col_num) {
-                xf_index = *col_xf_index;
+            if let Some(col_options) = self.changed_cols.get(&col_num) {
+                xf_index = col_options.xf_index;
             }
         }
 
@@ -1303,7 +1290,8 @@ impl Worksheet {
         let mut attributes = vec![];
         let mut range = "A1".to_string();
 
-        if !self.table.is_empty() || !self.changed_rows.is_empty() {
+        if !self.table.is_empty() || !self.changed_rows.is_empty() || !self.changed_cols.is_empty()
+        {
             range = utility::cell_range(
                 self.dimensions.row_min,
                 self.dimensions.col_min,
@@ -1551,21 +1539,47 @@ impl Worksheet {
 
         self.writer.xml_start_tag("cols");
 
-        for (_, col_options) in self.changed_cols.clone().iter().sorted_by_key(|x| x.0) {
-            // Write the col element.
-            self.write_col(col_options);
+        // We need to write contiguous equivalent columns as a range with first
+        // and last columns, so we convert the hashmap to a sorted vector and
+        // iterate over that.
+        let changed_cols = self.changed_cols.clone();
+        let mut col_options: Vec<_> = changed_cols.iter().collect();
+        col_options.sort_by_key(|x| x.0);
+
+        // Remove the first (key, value) tuple in the vector and use it to set
+        // the initial/previous properties.
+        let first_col_options = col_options.remove(0);
+        let mut first_col = first_col_options.0;
+        let mut prev_col_options = first_col_options.1;
+        let mut last_col = first_col;
+
+        for (col_num, col_options) in col_options.iter() {
+            // Check if the column number is contiguous with the previous column
+            // and if the format is the same.
+            if **col_num == *last_col + 1 && col_options == &prev_col_options {
+                last_col = col_num;
+            } else {
+                // If not write out the current range of columns and start again.
+                self.write_col(first_col, last_col, prev_col_options);
+                first_col = *col_num;
+                last_col = first_col;
+                prev_col_options = *col_options;
+            }
         }
+
+        // We will exit the previous loop with one unhandled column range.
+        self.write_col(first_col, last_col, prev_col_options);
 
         self.writer.xml_end_tag("cols");
     }
 
     // Write the <col> element.
-    fn write_col(&mut self, col_options: &ColOptions) {
+    fn write_col(&mut self, first_col: &ColNum, last_col: &ColNum, col_options: &ColOptions) {
         let mut attributes = vec![];
+        let first_col = *first_col + 1;
+        let last_col = *last_col + 1;
         let mut width = col_options.width;
         let mut xf_index = col_options.xf_index;
-        let first_col = col_options.first_col + 1;
-        let last_col = col_options.last_col + 1;
         let has_custom_width = width != 8.43;
 
         // Convert column width from user units to character width.
@@ -1620,10 +1634,8 @@ struct RowOptions {
     xf_index: u32,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 struct ColOptions {
-    first_col: ColNum,
-    last_col: ColNum,
     width: f64,
     xf_index: u32,
 }
