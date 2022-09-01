@@ -5,7 +5,7 @@
 
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
-use crate::{XlsxColor, XlsxScript, XlsxUnderline};
+use crate::{XlsxAlign, XlsxColor, XlsxScript, XlsxUnderline};
 
 pub struct Styles<'a> {
     pub(crate) writer: XMLWriter,
@@ -373,6 +373,9 @@ impl<'a> Styles<'a> {
             ("xfId", "0".to_string()),
         ];
 
+        let has_alignment = xf_format.has_alignment();
+        let apply_alignment = xf_format.apply_alignment();
+
         if xf_format.num_format_index > 0 {
             attributes.push(("applyNumberFormat", "1".to_string()));
         }
@@ -381,7 +384,68 @@ impl<'a> Styles<'a> {
             attributes.push(("applyFont", "1".to_string()));
         }
 
-        self.writer.xml_empty_tag_attr("xf", &attributes);
+        if apply_alignment {
+            attributes.push(("applyAlignment", "1".to_string()));
+        }
+
+        if has_alignment {
+            self.writer.xml_start_tag_attr("xf", &attributes);
+
+            // Write the alignment element.
+            self.write_alignment(xf_format);
+
+            self.writer.xml_end_tag("xf");
+        } else {
+            self.writer.xml_empty_tag_attr("xf", &attributes);
+        }
+    }
+
+    // Write the <alignment> element.
+    fn write_alignment(&mut self, xf_format: &Format) {
+        let mut attributes = vec![];
+
+        match xf_format.horizontal_align {
+            XlsxAlign::Center => {
+                attributes.push(("horizontal", "center".to_string()));
+            }
+            XlsxAlign::CenterAcross => {
+                attributes.push(("horizontal", "centerContinuous".to_string()));
+            }
+            XlsxAlign::Distributed => {
+                attributes.push(("horizontal", "distributed".to_string()));
+            }
+            XlsxAlign::Fill => {
+                attributes.push(("horizontal", "fill".to_string()));
+            }
+            XlsxAlign::Justify => {
+                attributes.push(("horizontal", "justify".to_string()));
+            }
+            XlsxAlign::Left => {
+                attributes.push(("horizontal", "left".to_string()));
+            }
+            XlsxAlign::Right => {
+                attributes.push(("horizontal", "right".to_string()));
+            }
+            _ => {}
+        }
+
+        match xf_format.vertical_align {
+            XlsxAlign::VerticalCenter => {
+                attributes.push(("vertical", "center".to_string()));
+            }
+            XlsxAlign::VerticalDistributed => {
+                attributes.push(("vertical", "distributed".to_string()));
+            }
+            XlsxAlign::VerticalJustify => {
+                attributes.push(("vertical", "justify".to_string()));
+            }
+            XlsxAlign::Top => {
+                attributes.push(("vertical", "top".to_string()));
+            }
+            _ => {}
+        }
+
+        self.writer.xml_empty_tag_attr("alignment", &attributes);
     }
 
     // Write the <cellStyles> element.

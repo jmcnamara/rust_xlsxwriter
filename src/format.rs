@@ -89,38 +89,38 @@
 /// The following table shows the Excel format categories and the equivalent
 /// `rust_xlsxwriter` Format method:
 ///
-/// | Category        | Description          |  Method Name                               |
-/// | :-------------- | :------------------- |  :---------------------------------------- |
-/// | **Font**        | Font type            |  format_set_font_name()                    |
-/// |                 | Font size            |  format_set_font_size()                    |
-/// |                 | Font color           |  format_set_font_color()                   |
-/// |                 | Bold                 |  [`set_bold()`](Format::set_bold())        |
-/// |                 | Italic               |  format_set_italic()                       |
-/// |                 | Underline            |  format_set_underline()                    |
-/// |                 | Strikeout            |  format_set_font_strikeout()               |
-/// |                 | Super/Subscript      |  format_set_font_script()                  |
-/// | **Number**      | Numeric format       |  format_set_num_format()                   |
-/// | **Protection**  | Unlock cells         |  format_set_unlocked()                     |
-/// |                 | Hide formulas        |  format_set_hidden()                       |
-/// | **Alignment**   | Horizontal align     |  format_set_align()                        |
-/// |                 | Vertical align       |  format_set_align()                        |
-/// |                 | Rotation             |  format_set_rotation()                     |
-/// |                 | Text wrap            |  format_set_text_wrap()                    |
-/// |                 | Indentation          |  format_set_indent()                       |
-/// |                 | Shrink to fit        |  format_set_shrink()                       |
-/// | **Pattern**     | Cell pattern         |  format_set_pattern()                      |
-/// |                 | Background color     |  format_set_bg_color()                     |
-/// |                 | Foreground color     |  format_set_fg_color()                     |
-/// | **Border**      | Cell border          |  format_set_border()                       |
-/// |                 | Bottom border        |  format_set_bottom()                       |
-/// |                 | Top border           |  format_set_top()                          |
-/// |                 | Left border          |  format_set_left()                         |
-/// |                 | Right border         |  format_set_right()                        |
-/// |                 | Border color         |  format_set_border_color()                 |
-/// |                 | Bottom color         |  format_set_bottom_color()                 |
-/// |                 | Top color            |  format_set_top_color()                    |
-/// |                 | Left color           |  format_set_left_color()                   |
-/// |                 | Right color          |  format_set_right_color()                  |
+/// | Category        | Description          |  Method Name                                            |
+/// | :-------------- | :------------------- |  :----------------------------------------------------- |
+/// | **Font**        | Font type            |  [`set_font_name()`](Format::set_font_name())           |
+/// |                 | Font size            |  [`set_font_size()`](Format::set_font_size())           |
+/// |                 | Font color           |  [`set_font_color()`](Format::set_font_color())         |
+/// |                 | Bold                 |  [`set_bold()`](Format::set_bold())                     |
+/// |                 | Italic               |  [`set_italic()`](Format::set_italic())                 |
+/// |                 | Underline            |  [`set_underline()`](Format::set_underline())           |
+/// |                 | Strikeout            |  [`set_font_strikeout()`](Format::set_font_strikeout()) |
+/// |                 | Super/Subscript      |  [`set_font_script()`](Format::set_font_script())       |
+/// | **Number**      | Numeric format       |  [`set_num_format()`](Format::set_num_format())         |
+/// | **Protection**  | Unlock cells         |  format_set_unlocked()                                  |
+/// |                 | Hide formulas        |  format_set_hidden()                                    |
+/// | **Alignment**   | Horizontal align     |  [`set_align()`](Format::set_align())                   |
+/// |                 | Vertical align       |  [`set_align()`](Format::set_align())                   |
+/// |                 | Rotation             |  format_set_rotation()                                  |
+/// |                 | Text wrap            |  format_set_text_wrap()                                 |
+/// |                 | Indentation          |  format_set_indent()                                    |
+/// |                 | Shrink to fit        |  format_set_shrink()                                    |
+/// | **Pattern**     | Cell pattern         |  format_set_pattern()                                   |
+/// |                 | Background color     |  format_set_bg_color()                                  |
+/// |                 | Foreground color     |  format_set_fg_color()                                  |
+/// | **Border**      | Cell border          |  format_set_border()                                    |
+/// |                 | Bottom border        |  format_set_bottom()                                    |
+/// |                 | Top border           |  format_set_top()                                       |
+/// |                 | Left border          |  format_set_left()                                      |
+/// |                 | Right border         |  format_set_right()                                     |
+/// |                 | Border color         |  format_set_border_color()                              |
+/// |                 | Bottom color         |  format_set_bottom_color()                              |
+/// |                 | Top color            |  format_set_top_color()                                 |
+/// |                 | Left color           |  format_set_left_color()                                |
+/// |                 | Right color          |  format_set_right_color()                               |
 ///
 /// # Format Colors
 ///
@@ -373,10 +373,10 @@ pub struct Format {
     pub(crate) theme: u8,
 
     // Alignment properties.
-    pub(crate) text_horizontal_align: u8,
+    pub(crate) horizontal_align: XlsxAlign,
+    pub(crate) vertical_align: XlsxAlign,
     pub(crate) text_wrap: bool,
-    pub(crate) text_vertical_align: u8,
-    pub(crate) text_justify_last: bool,
+    pub(crate) justify_last: bool,
     pub(crate) rotation: u16,
     pub(crate) indent: u8,
     pub(crate) shrink: bool,
@@ -456,10 +456,10 @@ impl Format {
             theme: 0,
             hidden: false,
             locked: true,
-            text_horizontal_align: 0,
+            horizontal_align: XlsxAlign::General,
+            vertical_align: XlsxAlign::General,
             text_wrap: false,
-            text_vertical_align: 0,
-            text_justify_last: false,
+            justify_last: false,
             rotation: 0,
             foreground_color: XlsxColor::Automatic,
             background_color: XlsxColor::Automatic,
@@ -561,15 +561,30 @@ impl Format {
             self.reading_order,
             self.rotation,
             self.shrink,
-            self.text_horizontal_align,
-            self.text_vertical_align,
-            self.text_justify_last,
+            self.horizontal_align as u8,
+            self.vertical_align as u8,
+            self.justify_last,
             self.text_wrap,
         )
     }
 
     pub(crate) fn set_num_format_index_u16(&mut self, num_format_index: u16) {
         self.num_format_index = num_format_index;
+    }
+
+    // Check if the format has an alignment property set and requires a Styles
+    // <alignment> element. This handles a special case where Excel ignore
+    // Bottom as a default.
+    pub(crate) fn has_alignment(&self) -> bool {
+        self.horizontal_align != XlsxAlign::General
+            || !(self.vertical_align == XlsxAlign::General
+                || self.vertical_align == XlsxAlign::Bottom)
+    }
+
+    // Check if the format has an alignment property set and requires a Styles
+    // "applyAlignment" attribute.
+    pub(crate) fn apply_alignment(&self) -> bool {
+        self.horizontal_align != XlsxAlign::General || self.vertical_align != XlsxAlign::General
     }
 
     // -----------------------------------------------------------------------
@@ -580,8 +595,8 @@ impl Format {
     ///
     /// This method is used to define the numerical format of a number in Excel.
     /// It controls whether a number is displayed as an integer, a floating
-    /// point number, a date, a currency value or some other user defined
-    /// format.
+    /// point
+    /// t.
     ///
     /// See also [Number Format Categories] and [Number Formats in different locales].
     ///
@@ -1081,13 +1096,96 @@ impl Format {
         self.font_script = font_script;
         self
     }
+
+    /// Set the Format alignment properties.
+    ///
+    /// This method is used to set the horizontal and vertical data alignment
+    /// within a cell.
+    ///
+    /// # Arguments
+    ///
+    /// * `align` - The vertical and or horizontal alignment direction as
+    ///   defined by the [`XlsxAlign`] enum.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting various cell alignment
+    /// properties.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Widen the rows/column for clarity.
+    /// #     worksheet.set_row_height(1, 30)?;
+    /// #     worksheet.set_row_height(2, 30)?;
+    /// #     worksheet.set_row_height(3, 30)?;
+    /// #     worksheet.set_column_width(0, 0, 18)?;
+    /// #
+    /// #     // Create some alignment formats.
+    ///     let format1 = Format::new()
+    ///         .set_align(XlsxAlign::Center);
+    ///     let format2 = Format::new()
+    ///         .set_align(XlsxAlign::Top)
+    ///         .set_align(XlsxAlign::Left);
+    ///     let format3 = Format::new()
+    ///         .set_align(XlsxAlign::VerticalCenter)
+    ///         .set_align(XlsxAlign::Center);
+    ///     let format4 = Format::new()
+    ///         .set_align(XlsxAlign::Bottom)
+    ///         .set_align(XlsxAlign::Right);
+    ///
+    ///     worksheet.write_string(0, 0, "Center", &format1)?;
+    ///     worksheet.write_string(1, 0, "Top - Left", &format2)?;
+    ///     worksheet.write_string(2, 0, "Center - Center", &format3)?;
+    ///     worksheet.write_string(3, 0, "Bottom - Right", &format4)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    /// Output file:
+    ///
+    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_align.png">
+    ///
+    pub fn set_align(mut self, align: XlsxAlign) -> Format {
+        match align {
+            XlsxAlign::General => {
+                self.horizontal_align = XlsxAlign::General;
+                self.vertical_align = XlsxAlign::General;
+            }
+            XlsxAlign::Center
+            | XlsxAlign::CenterAcross
+            | XlsxAlign::Distributed
+            | XlsxAlign::Fill
+            | XlsxAlign::Justify
+            | XlsxAlign::Left
+            | XlsxAlign::Right => {
+                self.horizontal_align = align;
+            }
+            XlsxAlign::Bottom
+            | XlsxAlign::Top
+            | XlsxAlign::VerticalCenter
+            | XlsxAlign::VerticalDistributed
+            | XlsxAlign::VerticalJustify => {
+                self.vertical_align = align;
+            }
+        }
+
+        self
+    }
 }
 
 // -----------------------------------------------------------------------
 // Helper enums/structs
 // -----------------------------------------------------------------------
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 /// The XlsxColor enum defines an RGB color the can be used in rust_xlsxwriter
 /// formatting.
 ///
@@ -1230,7 +1328,7 @@ impl XlsxColor {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 /// The XlsxUnderline enum defines the font underline type in a format.
 ///
 /// The difference between a normal underline and an "accounting" underline is
@@ -1290,7 +1388,7 @@ pub enum XlsxUnderline {
     DoubleAccounting,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 /// The XlsxScript enum defines the Format font superscript and subscript
 /// properties.
 ///
@@ -1303,6 +1401,51 @@ pub enum XlsxScript {
 
     /// The cell text is subscripted.
     Subscript,
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+/// The XlsxAlign enum defines the vertical and horizontal alignment properties
+/// for a [`Format`].
+///
+pub enum XlsxAlign {
+    /// General/default alignment. Cell will use Excel's default for the data type.
+    General,
+
+    /// Horizontal left alignment.
+    Left,
+
+    /// Horizontal center alignment.
+    Center,
+
+    /// Horizontal right alignment.
+    Right,
+
+    /// Horizontal fill alignment.
+    Fill,
+
+    /// Horizontal justify alignment.
+    Justify,
+
+    /// Horizontal Center Across alignment.
+    CenterAcross,
+
+    /// Horizontal left alignment.
+    Distributed,
+
+    /// Vertical top alignment.
+    Top,
+
+    /// Vertical bottom alignment.
+    Bottom,
+
+    /// Vertical center alignment.
+    VerticalCenter,
+
+    /// Vertical justify alignment.
+    VerticalJustify,
+
+    /// Vertical distributed alignment.
+    VerticalDistributed,
 }
 
 // -----------------------------------------------------------------------

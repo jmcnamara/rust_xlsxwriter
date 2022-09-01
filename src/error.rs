@@ -7,7 +7,7 @@
 use std::error::Error;
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 /// Error values for the `rust_xlsxwriter` library.
 pub enum XlsxError {
     /// Error returned when a row or column argument exceeds Excel's limits of
