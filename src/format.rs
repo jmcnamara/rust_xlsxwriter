@@ -24,6 +24,8 @@
 /// together:
 ///
 /// ```
+/// # // This code is available in examples/doc_format_create.rs
+/// #
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -53,6 +55,8 @@
 /// Formats can be cloned in the usual way:
 ///
 /// ```
+/// # // This code is available in examples/doc_format_clone.rs
+/// #
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -89,38 +93,39 @@
 /// The following table shows the Excel format categories and the equivalent
 /// `rust_xlsxwriter` Format method:
 ///
-/// | Category        | Description          |  Method Name                                            |
-/// | :-------------- | :------------------- |  :----------------------------------------------------- |
-/// | **Font**        | Font type            |  [`set_font_name()`](Format::set_font_name())           |
-/// |                 | Font size            |  [`set_font_size()`](Format::set_font_size())           |
-/// |                 | Font color           |  [`set_font_color()`](Format::set_font_color())         |
-/// |                 | Bold                 |  [`set_bold()`](Format::set_bold())                     |
-/// |                 | Italic               |  [`set_italic()`](Format::set_italic())                 |
-/// |                 | Underline            |  [`set_underline()`](Format::set_underline())           |
-/// |                 | Strikeout            |  [`set_font_strikeout()`](Format::set_font_strikeout()) |
-/// |                 | Super/Subscript      |  [`set_font_script()`](Format::set_font_script())       |
-/// | **Number**      | Numeric format       |  [`set_num_format()`](Format::set_num_format())         |
-/// | **Protection**  | Unlock cells         |  format_set_unlocked()                                  |
-/// |                 | Hide formulas        |  format_set_hidden()                                    |
-/// | **Alignment**   | Horizontal align     |  [`set_align()`](Format::set_align())                   |
-/// |                 | Vertical align       |  [`set_align()`](Format::set_align())                   |
-/// |                 | Rotation             |  format_set_rotation()                                  |
-/// |                 | Text wrap            |  format_set_text_wrap()                                 |
-/// |                 | Indentation          |  format_set_indent()                                    |
-/// |                 | Shrink to fit        |  format_set_shrink()                                    |
-/// | **Pattern**     | Cell pattern         |  format_set_pattern()                                   |
-/// |                 | Background color     |  format_set_bg_color()                                  |
-/// |                 | Foreground color     |  format_set_fg_color()                                  |
-/// | **Border**      | Cell border          |  format_set_border()                                    |
-/// |                 | Bottom border        |  format_set_bottom()                                    |
-/// |                 | Top border           |  format_set_top()                                       |
-/// |                 | Left border          |  format_set_left()                                      |
-/// |                 | Right border         |  format_set_right()                                     |
-/// |                 | Border color         |  format_set_border_color()                              |
-/// |                 | Bottom color         |  format_set_bottom_color()                              |
-/// |                 | Top color            |  format_set_top_color()                                 |
-/// |                 | Left color           |  format_set_left_color()                                |
-/// |                 | Right color          |  format_set_right_color()                               |
+/// | Category        | Description          |  Method Name                                                  |
+/// | :-------------- | :------------------- |  :----------------------------------------------------------- |
+/// | **Font**        | Font type            |  [`set_font_name()`](Format::set_font_name())                 |
+/// |                 | Font size            |  [`set_font_size()`](Format::set_font_size())                 |
+/// |                 | Font color           |  [`set_font_color()`](Format::set_font_color())               |
+/// |                 | Bold                 |  [`set_bold()`](Format::set_bold())                           |
+/// |                 | Italic               |  [`set_italic()`](Format::set_italic())                       |
+/// |                 | Underline            |  [`set_underline()`](Format::set_underline())                 |
+/// |                 | Strikeout            |  [`set_font_strikeout()`](Format::set_font_strikeout())       |
+/// |                 | Super/Subscript      |  [`set_font_script()`](Format::set_font_script())             |
+/// | **Number**      | Numeric format       |  [`set_num_format()`](Format::set_num_format())               |
+/// | **Protection**  | Unlock cells         |  format_set_unlocked()                                        |
+/// |                 | Hide formulas        |  format_set_hidden()                                          |
+/// | **Alignment**   | Horizontal align     |  [`set_align()`](Format::set_align())                         |
+/// |                 | Vertical align       |  [`set_align()`](Format::set_align())                         |
+/// |                 | Rotation             |  [`set_rotation()`](Format::set_rotation())                   |
+/// |                 | Text wrap            |  [`set_text_wrap()`](Format::set_text_wrap())                 |
+/// |                 | Indentation          |  [`set_indent()`](Format::set_indent())                       |
+/// |                 | Reading direction    |  [`set_reading_direction()`](Format::set_reading_direction()) |
+/// |                 | Shrink to fit        |  [`set_shrink()`](Format::set_shrink())                       |
+/// | **Pattern**     | Cell pattern         |  format_set_pattern()                                         |
+/// |                 | Background color     |  format_set_bg_color()                                        |
+/// |                 | Foreground color     |  format_set_fg_color()                                        |
+/// | **Border**      | Cell border          |  format_set_border()                                          |
+/// |                 | Bottom border        |  format_set_bottom()                                          |
+/// |                 | Top border           |  format_set_top()                                             |
+/// |                 | Left border          |  format_set_left()                                            |
+/// |                 | Right border         |  format_set_right()                                           |
+/// |                 | Border color         |  format_set_border_color()                                    |
+/// |                 | Bottom color         |  format_set_bottom_color()                                    |
+/// |                 | Top color            |  format_set_top_color()                                       |
+/// |                 | Left color           |  format_set_left_color()                                      |
+/// |                 | Right color          |  format_set_right_color()                                     |
 ///
 /// # Format Colors
 ///
@@ -128,6 +133,8 @@
 /// style RGB integer value or a limited number of defined colors:
 ///
 /// ```
+/// # // This code is available in examples/doc_enum_xlsxcolor.rs
+/// #
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -168,6 +175,8 @@
 /// formatting.
 ///
 /// ```
+/// # // This code is available in examples/doc_format_default.rs
+/// #
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -201,6 +210,8 @@
 /// [`write_number()`](super::Worksheet::write_number()):
 ///
 /// ```
+/// # // This code is available in examples/doc_format_currency1.rs
+///
 /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
@@ -261,6 +272,8 @@
 /// example and rerun it we will get a number format in the Currency category:
 ///
 /// ```
+/// # // This code is available in examples/doc_format_currency2.rs
+/// #
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -298,6 +311,8 @@
 /// "decimal" point:
 ///
 /// ```
+/// # // This code is available in examples/doc_format_locale.rs
+/// #
 /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
@@ -329,7 +344,7 @@
 /// In other locales these values may be reversed or different. They are
 /// generally set in the "Region" settings of Windows or Mac OS. Excel handles
 /// this by storing the number format in the file format in the US locale, in
-/// this case `#,##0.00`, but renders it according to the regional settings of
+/// this case `#,
 /// the host OS. For example, here is the same, unmodified, output file shown
 /// above in a German locale:
 ///
@@ -377,10 +392,10 @@ pub struct Format {
     pub(crate) vertical_align: XlsxAlign,
     pub(crate) text_wrap: bool,
     pub(crate) justify_last: bool,
-    pub(crate) rotation: u16,
+    pub(crate) rotation: i16,
     pub(crate) indent: u8,
     pub(crate) shrink: bool,
-    pub(crate) reading_order: u8,
+    pub(crate) reading_direction: u8,
 
     // Border properties.
     pub(crate) bottom: u8,
@@ -423,6 +438,7 @@ impl Format {
     ///
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_new.rs
     /// use rust_xlsxwriter::Format;
     ///
     /// # #[allow(unused_variables)]
@@ -477,7 +493,7 @@ impl Format {
             diagonal_color: XlsxColor::Automatic,
             indent: 0,
             shrink: false,
-            reading_order: 0,
+            reading_direction: 0,
         }
     }
 
@@ -558,7 +574,7 @@ impl Format {
         format!(
             "{}:{}:{}:{}:{}:{}:{}:{}",
             self.indent,
-            self.reading_order,
+            self.reading_direction,
             self.rotation,
             self.shrink,
             self.horizontal_align as u8,
@@ -579,12 +595,23 @@ impl Format {
         self.horizontal_align != XlsxAlign::General
             || !(self.vertical_align == XlsxAlign::General
                 || self.vertical_align == XlsxAlign::Bottom)
+            || self.indent != 0
+            || self.rotation != 0
+            || self.text_wrap
+            || self.shrink
+            || self.reading_direction != 0
     }
 
     // Check if the format has an alignment property set and requires a Styles
     // "applyAlignment" attribute.
     pub(crate) fn apply_alignment(&self) -> bool {
-        self.horizontal_align != XlsxAlign::General || self.vertical_align != XlsxAlign::General
+        self.horizontal_align != XlsxAlign::General
+            || self.vertical_align != XlsxAlign::General
+            || self.indent != 0
+            || self.rotation != 0
+            || self.text_wrap
+            || self.shrink
+            || self.reading_direction != 0
     }
 
     // -----------------------------------------------------------------------
@@ -613,6 +640,8 @@ impl Format {
     /// number formatting.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_num_format.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -728,6 +757,8 @@ impl Format {
     /// format.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_num_format_index.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -762,6 +793,8 @@ impl Format {
     /// The following example demonstrates setting the bold property for a format.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_set_bold.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -795,6 +828,8 @@ impl Format {
     /// The following example demonstrates setting the italic property for a format.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_italic.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -838,6 +873,8 @@ impl Format {
     /// format.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_font_color.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -885,6 +922,8 @@ impl Format {
     /// format.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_font_name.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -929,6 +968,8 @@ impl Format {
     /// The following example demonstrates setting the font size for a format.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_font_size.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -1012,6 +1053,8 @@ impl Format {
     /// format.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_underline.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -1055,6 +1098,8 @@ impl Format {
     /// property for a format.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_font_strikeout.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -1113,6 +1158,8 @@ impl Format {
     /// properties.
     ///
     /// ```
+    /// # // This code is available in examples/doc_format_set_align.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -1179,6 +1226,264 @@ impl Format {
 
         self
     }
+
+    /// Set the Format text wrap property.
+    ///
+    /// This method is used to turn on automatic text wrapping for text in a
+    /// cell. If you wish to control where the string is wrapped you can add
+    /// newlines to the text (see the example below).
+    ///
+    /// Excel generally adjusts the height of the cell to fit the wrapped text
+    /// unless a explicit row height has be set via
+    /// [`worksheet.set_row_height()`](super::Worksheet::set_row_height()).
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting an implicit (without newline)
+    /// text wrap and a user defined text wrap (with newlines).
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_text_wrap.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new().set_text_wrap();
+    ///
+    ///     worksheet.write_string_only(0, 0, "Some text that isn't wrapped")?;
+    ///     worksheet.write_string(1, 0, "Some text that is wrapped", &format1)?;
+    ///     worksheet.write_string(2, 0, "Some text\nthat is\nwrapped\nat newlines", &format1)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_text_wrap.png">
+    ///
+    pub fn set_text_wrap(mut self) -> Format {
+        self.text_wrap = true;
+        self
+    }
+
+    /// Set the Format indent property.
+    ///
+    /// This method can be used to indent text in a cell.
+    ///
+    /// Indentation is a horizontal alignment property. It can be used in Excel
+    /// in conjunction with the [Left](XlsxAlign::Left),
+    /// [Right](XlsxAlign::Right) and [Distributed](XlsxAlign::Distributed)
+    /// alignments. It will override any other horizontal properties that don't
+    /// support indentation.
+    ///
+    /// # Arguments
+    ///
+    /// * `indent` - The indentation level for the cell.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the indentation level for
+    /// cell text.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_indent.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new().set_indent(1);
+    ///     let format2 = Format::new().set_indent(2);
+    ///
+    ///     worksheet.write_string_only(0, 0, "Indent 0")?;
+    ///     worksheet.write_string(1, 0, "Indent 1", &format1)?;
+    ///     worksheet.write_string(2, 0, "Indent 2", &format2)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_indent.png">
+    ///
+    pub fn set_indent(mut self, indent: u8) -> Format {
+        self.indent = indent;
+        self
+    }
+
+    /// Set the Format rotation property.
+    ///
+    /// Set the rotation angle of the text in a cell. The rotation can be any
+    /// angle in the range -90 to 90 degrees, or 270 to indicate text where the
+    /// letters run from top to bottom.
+    ///
+    /// # Arguments
+    ///
+    /// * `rotation` - The rotation angle.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting text rotation for a cell.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_rotation.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Widen the rows/column for clarity.
+    /// #     worksheet.set_row_height(0, 30)?;
+    /// #     worksheet.set_row_height(1, 30)?;
+    /// #     worksheet.set_row_height(2, 60)?;
+    /// #
+    /// #     // Create some alignment formats.
+    ///     let format1 = Format::new().set_rotation(30);
+    ///     let format2 = Format::new().set_rotation(-30);
+    ///     let format3 = Format::new().set_rotation(270);
+    ///
+    ///     worksheet.write_string(0, 0, "Rust", &format1)?;
+    ///     worksheet.write_string(1, 0, "Rust", &format2)?;
+    ///     worksheet.write_string(2, 0, "Rust", &format3)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_rotation.png">
+    ///
+    pub fn set_rotation(mut self, rotation: i16) -> Format {
+        match rotation {
+            270 => self.rotation = 255,
+            -90..=-1 => self.rotation = -rotation + 90,
+            0..=90 => self.rotation = rotation,
+            _ => eprintln!("Rotation rotation outside range: -90 <= angle <= 90."),
+        }
+
+        self
+    }
+
+    /// Set the Format text reading order property.
+    ///
+    /// Set the text reading direction. This is useful when creating Arabic,
+    /// Hebrew or other near or far eastern worksheets. It can be used in
+    /// conjunction with the Worksheet `right_to_left` method which changes the
+    /// cell display direction of the worksheet.
+    ///
+    /// # Arguments
+    ///
+    /// * `reading_direction` - The reading order property, should be 0, 1, or 2,
+    ///   where these values refer to:
+    ///
+    ///   0. The reading direction is determined heuristically by Excel
+    ///      depending on the text. This is the default option.
+    ///   1. The text is displayed Left-to-Right, like English.
+    ///   2. The text is displayed Right-to-Left, like Hebrew or Arabic.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the text reading direction.
+    /// This is useful when creating Arabic, Hebrew or other near or far eastern
+    /// worksheets.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_reading_direction.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     worksheet.set_column_width(0, 0, 25)?;
+    /// #
+    ///     let format1 = Format::new().set_reading_direction(1);
+    ///     let format2 = Format::new().set_reading_direction(2);
+    ///
+    ///     worksheet.write_string_only(0, 0, "نص عربي / English text")?;
+    ///     worksheet.write_string(1, 0, "نص عربي / English text", &format1)?;
+    ///     worksheet.write_string(2, 0, "نص عربي / English text", &format2)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_reading_direction.png">
+    ///
+    pub fn set_reading_direction(mut self, reading_direction: u8) -> Format {
+        if reading_direction > 2 {
+            eprintln!("Reading direction must be 0, 1 or 2.");
+            return self;
+        }
+
+        self.reading_direction = reading_direction;
+        self
+    }
+
+    /// Set the Format shrink property.
+    ///
+    /// This method can be used to shrink text so that it fits in a cell
+    ///
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the text shrink format.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_shrink.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new().set_shrink();
+    ///
+    ///     worksheet.write_string(0, 0, "Shrink text to fit", &format1)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_shrink.png">
+    ///
+    pub fn set_shrink(mut self) -> Format {
+        self.shrink = true;
+        self
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1197,6 +1502,8 @@ impl Format {
 /// set the color of some text in a worksheet.
 ///
 /// ```
+/// # // This code is available in examples/doc_enum_xlsxcolor.rs
+/// #
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -1319,7 +1626,7 @@ impl XlsxColor {
     pub(crate) fn is_valid(self) -> bool {
         if let XlsxColor::RGB(color) = self {
             if color > 0xFFFFFF {
-                eprintln!("RGB color must be in the the range 0x000000 - 0xFFFFFF");
+                eprintln!("RGB color must be in the the range 0x000000 - 0xFFFFFF.");
                 return false;
             }
         }
@@ -1341,6 +1648,8 @@ impl XlsxColor {
 /// format.
 ///
 /// ```
+/// # // This code is available in examples/doc_format_set_align.rs
+/// #
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -1408,43 +1717,47 @@ pub enum XlsxScript {
 /// for a [`Format`].
 ///
 pub enum XlsxAlign {
-    /// General/default alignment. Cell will use Excel's default for the data type.
+    /// General/default alignment. The cell will use Excel's default for the
+    /// data type, for example Left for text and Right for numbers.
     General,
 
-    /// Horizontal left alignment.
+    /// Align text to the left.
     Left,
 
-    /// Horizontal center alignment.
+    /// Center text horizontally.
     Center,
 
-    /// Horizontal right alignment.
+    /// Align text to the right.
     Right,
 
-    /// Horizontal fill alignment.
+    /// Fill (repeat) the text horizontally across the cell.
     Fill,
 
-    /// Horizontal justify alignment.
+    /// Aligns the text to the left and right of the cell, if the text exceeds
+    /// the width of the cell.
     Justify,
 
-    /// Horizontal Center Across alignment.
+    /// Center the text across the cell or cells that have this alignment. This
+    /// is an older form of merged cells.
     CenterAcross,
 
-    /// Horizontal left alignment.
+    /// Distribute the words in the text evenly across the cell.
     Distributed,
 
-    /// Vertical top alignment.
+    /// Align text to the top.
     Top,
 
-    /// Vertical bottom alignment.
+    /// Align text to the bottom.
     Bottom,
 
-    /// Vertical center alignment.
+    /// Center text vertically.
     VerticalCenter,
 
-    /// Vertical justify alignment.
+    /// Aligns the text to the top and bottom of the cell, if the text exceeds
+    /// the height of the cell.
     VerticalJustify,
 
-    /// Vertical distributed alignment.
+    /// Distribute the words in the text evenly from top to bottom in the cell.
     VerticalDistributed,
 }
 

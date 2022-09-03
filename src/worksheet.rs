@@ -86,6 +86,8 @@ pub struct Worksheet {
     global_xf_indices: Vec<u32>,
     changed_rows: HashMap<RowNum, RowOptions>,
     changed_cols: HashMap<ColNum, ColOptions>,
+    page_setup_changed: bool,
+    paper_size: u8,
 }
 
 impl Worksheet {
@@ -124,6 +126,8 @@ impl Worksheet {
             global_xf_indices: vec![],
             changed_rows,
             changed_cols,
+            page_setup_changed: false,
+            paper_size: 0,
         }
     }
 
@@ -1056,6 +1060,13 @@ impl Worksheet {
         Ok(())
     }
 
+    #[allow(missing_docs)]
+    pub fn set_paper(&mut self, paper_size: u8) -> &mut Worksheet {
+        self.paper_size = paper_size;
+        self.page_setup_changed = true;
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -1270,6 +1281,11 @@ impl Worksheet {
         // Write the pageMargins element.
         self.write_page_margins();
 
+        // Write the pageSetup element.
+        if self.page_setup_changed {
+            self.write_page_setup();
+        }
+
         // Close the worksheet tag.
         self.writer.xml_end_tag("worksheet");
     }
@@ -1358,6 +1374,21 @@ impl Worksheet {
         ];
 
         self.writer.xml_empty_tag_attr("pageMargins", &attributes);
+    }
+
+    // Write the <pageSetup> element.
+    fn write_page_setup(&mut self) {
+        let mut attributes = vec![];
+
+        if self.paper_size > 0 {
+            attributes.push(("paperSize", self.paper_size.to_string()));
+        }
+
+        attributes.push(("orientation", "portrait".to_string()));
+        attributes.push(("horizontalDpi", "200".to_string()));
+        attributes.push(("verticalDpi", "200".to_string()));
+
+        self.writer.xml_empty_tag_attr("pageSetup", &attributes);
     }
 
     // Write out all the row and cell data in the worksheet data table.
@@ -1540,7 +1571,7 @@ impl Worksheet {
         self.writer.xml_start_tag("cols");
 
         // We need to write contiguous equivalent columns as a range with first
-        // and last columns, so we convert the hashmap to a sorted vector and
+        // and last columns, so we convert the HashMap to a sorted vector and
         // iterate over that.
         let changed_cols = self.changed_cols.clone();
         let mut col_options: Vec<_> = changed_cols.iter().collect();

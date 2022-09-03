@@ -8,7 +8,7 @@ use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
 
 mod common;
 
-// Test case to demonstrate creating a basic file with user defined column.
+// Test case to demonstrate creating a basic file with alignment formatting.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();

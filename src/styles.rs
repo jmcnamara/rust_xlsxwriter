@@ -403,8 +403,31 @@ impl<'a> Styles<'a> {
     // Write the <alignment> element.
     fn write_alignment(&mut self, xf_format: &Format) {
         let mut attributes = vec![];
+        let mut horizontal_align = xf_format.horizontal_align;
+        let mut shrink = xf_format.shrink;
 
-        match xf_format.horizontal_align {
+        // Indent is only allowed for horizontal "left", "right" and
+        // "distributed". If it is defined for any other alignment or no
+        // alignment has been set then default to left alignment.
+        if xf_format.indent > 0
+            && horizontal_align != XlsxAlign::Left
+            && horizontal_align != XlsxAlign::Right
+            && horizontal_align != XlsxAlign::Distributed
+        {
+            horizontal_align = XlsxAlign::Left;
+        }
+
+        // Check for properties that are mutually exclusive with "shrink".
+        if xf_format.text_wrap
+            || horizontal_align == XlsxAlign::Fill
+            || horizontal_align == XlsxAlign::Justify
+            || horizontal_align == XlsxAlign::Distributed
+        {
+            shrink = false;
+        }
+
+        // Set the various attributes for horizontal alignment.
+        match horizontal_align {
             XlsxAlign::Center => {
                 attributes.push(("horizontal", "center".to_string()));
             }
@@ -429,6 +452,7 @@ impl<'a> Styles<'a> {
             _ => {}
         }
 
+        // Set the various attributes for vertical alignment.
         match xf_format.vertical_align {
             XlsxAlign::VerticalCenter => {
                 attributes.push(("vertical", "center".to_string()));
@@ -443,6 +467,27 @@ impl<'a> Styles<'a> {
                 attributes.push(("vertical", "top".to_string()));
             }
             _ => {}
+        }
+
+        // Set other alignment properties.
+        if xf_format.indent != 0 {
+            attributes.push(("indent", xf_format.indent.to_string()));
+        }
+
+        if xf_format.rotation != 0 {
+            attributes.push(("textRotation", xf_format.rotation.to_string()));
+        }
+
+        if xf_format.text_wrap {
+            attributes.push(("wrapText", "1".to_string()));
+        }
+
+        if shrink {
+            attributes.push(("shrinkToFit", "1".to_string()));
+        }
+
+        if xf_format.reading_direction > 0 && xf_format.reading_direction <= 2 {
+            attributes.push(("readingOrder", xf_format.reading_direction.to_string()));
         }
 
         self.writer.xml_empty_tag_attr("alignment", &attributes);
