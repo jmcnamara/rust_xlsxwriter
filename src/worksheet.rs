@@ -1089,7 +1089,7 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("worksheets.xlsx");
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
     /// #
     ///     // Add the cell formats.
     ///     let format_left_to_right = Format::new().set_reading_direction(1);
@@ -1134,7 +1134,99 @@ impl Worksheet {
         self
     }
 
-    #[allow(missing_docs)]
+    /// Set the paper type when printing.
+    ///
+    /// This method is used to set the paper format for the printed output of a
+    /// worksheet. The following paper styles are available:
+    ///
+    /// | Index    | Paper format            | Paper size           |
+    /// | :------- | :---------------------- | :------------------- |
+    /// | 0        | Printer default         | Printer default      |
+    /// | 1        | Letter                  | 8 1/2 x 11 in        |
+    /// | 2        | Letter Small            | 8 1/2 x 11 in        |
+    /// | 3        | Tabloid                 | 11 x 17 in           |
+    /// | 4        | Ledger                  | 17 x 11 in           |
+    /// | 5        | Legal                   | 8 1/2 x 14 in        |
+    /// | 6        | Statement               | 5 1/2 x 8 1/2 in     |
+    /// | 7        | Executive               | 7 1/4 x 10 1/2 in    |
+    /// | 8        | A3                      | 297 x 420 mm         |
+    /// | 9        | A4                      | 210 x 297 mm         |
+    /// | 10       | A4 Small                | 210 x 297 mm         |
+    /// | 11       | A5                      | 148 x 210 mm         |
+    /// | 12       | B4                      | 250 x 354 mm         |
+    /// | 13       | B5                      | 182 x 257 mm         |
+    /// | 14       | Folio                   | 8 1/2 x 13 in        |
+    /// | 15       | Quarto                  | 215 x 275 mm         |
+    /// | 16       | ---                     | 10x14 in             |
+    /// | 17       | ---                     | 11x17 in             |
+    /// | 18       | Note                    | 8 1/2 x 11 in        |
+    /// | 19       | Envelope 9              | 3 7/8 x 8 7/8        |
+    /// | 20       | Envelope 10             | 4 1/8 x 9 1/2        |
+    /// | 21       | Envelope 11             | 4 1/2 x 10 3/8       |
+    /// | 22       | Envelope 12             | 4 3/4 x 11           |
+    /// | 23       | Envelope 14             | 5 x 11 1/2           |
+    /// | 24       | C size sheet            | ---                  |
+    /// | 25       | D size sheet            | ---                  |
+    /// | 26       | E size sheet            | ---                  |
+    /// | 27       | Envelope DL             | 110 x 220 mm         |
+    /// | 28       | Envelope C3             | 324 x 458 mm         |
+    /// | 29       | Envelope C4             | 229 x 324 mm         |
+    /// | 30       | Envelope C5             | 162 x 229 mm         |
+    /// | 31       | Envelope C6             | 114 x 162 mm         |
+    /// | 32       | Envelope C65            | 114 x 229 mm         |
+    /// | 33       | Envelope B4             | 250 x 353 mm         |
+    /// | 34       | Envelope B5             | 176 x 250 mm         |
+    /// | 35       | Envelope B6             | 176 x 125 mm         |
+    /// | 36       | Envelope                | 110 x 230 mm         |
+    /// | 37       | Monarch                 | 3.875 x 7.5 in       |
+    /// | 38       | Envelope                | 3 5/8 x 6 1/2 in     |
+    /// | 39       | Fanfold                 | 14 7/8 x 11 in       |
+    /// | 40       | German Std Fanfold      | 8 1/2 x 12 in        |
+    /// | 41       | German Legal Fanfold    | 8 1/2 x 13 in        |
+    ///
+    /// Note, it is likely that not all of these paper types will be available
+    /// to the end user since it will depend on the paper formats that the
+    /// user's printer supports. Therefore, it is best to stick to standard
+    /// paper types of 1 for US Letter and 9 for A4.
+    ///
+    /// If you do not specify a paper type the worksheet will print using the
+    /// printer's default paper style.
+
+    ///
+    /// # Arguments
+    ///
+    /// * `paper_size` - The paper size index from the list above .
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet paper size/type for
+    /// the printed output.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_paper.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Set the printer paper size.
+    ///     worksheet.set_paper(9); // A4 paper size.
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_name.png">
+    ///
     pub fn set_paper(&mut self, paper_size: u8) -> &mut Worksheet {
         self.paper_size = paper_size;
         self.page_setup_changed = true;

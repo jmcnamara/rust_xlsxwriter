@@ -98,6 +98,9 @@ examples are usually repeated in the documentation.
 * doc_worksheet_set_name.rs - Demonstrates setting user defined worksheet
   names and the default values when a name isn't set.
 
+* doc_worksheet_set_paper.rs - Demonstrates setting the worksheet paper
+  size/type for the printed output.
+
 * doc_worksheet_set_right_to_left.rs - Demonstrates changing the default
   worksheet and cell text direction changed from left-to-right to
   right-to-left, as required by some middle eastern versions of Excel.

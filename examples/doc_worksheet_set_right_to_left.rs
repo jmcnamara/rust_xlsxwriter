@@ -9,7 +9,7 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file.
-    let mut workbook = Workbook::new("worksheets.xlsx");
+    let mut workbook = Workbook::new("worksheet.xlsx");
 
     // Add the cell formats.
     let format_left_to_right = Format::new().set_reading_direction(1);
