@@ -1389,13 +1389,14 @@ impl Format {
     ///
     /// Set the text reading direction. This is useful when creating Arabic,
     /// Hebrew or other near or far eastern worksheets. It can be used in
-    /// conjunction with the Worksheet `right_to_left` method which changes the
-    /// cell display direction of the worksheet.
+    /// conjunction with the Worksheet
+    /// [`set_right_to_left`](super::Worksheet::set_right_to_left()) method
+    /// which changes the cell display direction of the worksheet.
     ///
     /// # Arguments
     ///
-    /// * `reading_direction` - The reading order property, should be 0, 1, or 2,
-    ///   where these values refer to:
+    /// * `reading_direction` - The reading order property, should be 0, 1, or
+    ///   2, where these values refer to:
     ///
     ///   0. The reading direction is determined heuristically by Excel
     ///      depending on the text. This is the default option.

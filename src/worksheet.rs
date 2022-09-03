@@ -88,6 +88,7 @@ pub struct Worksheet {
     changed_cols: HashMap<ColNum, ColOptions>,
     page_setup_changed: bool,
     paper_size: u8,
+    right_to_left: bool,
 }
 
 impl Worksheet {
@@ -128,6 +129,7 @@ impl Worksheet {
             changed_cols,
             page_setup_changed: false,
             paper_size: 0,
+            right_to_left: false,
         }
     }
 
@@ -1060,6 +1062,78 @@ impl Worksheet {
         Ok(())
     }
 
+    /// Display the worksheet cells from right to left for some versions of
+    /// Excel.
+    ///
+    /// The `set_right_to_left()` method is used to change the default direction
+    /// of the worksheet from left-to-right, with the A1 cell in the top left,
+    /// to right-to-left, with the A1 cell in the top right.
+    ///
+    /// This is useful when creating Arabic, Hebrew or other near or far eastern
+    /// worksheets that use right-to-left as the default direction.
+    ///
+    /// Depending on your use case, and text, you may also need to use the
+    /// [`Format::set_reading_direction()`](super::Format::set_reading_direction)
+    /// method to set the direction of the text within the cells.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates changing the default worksheet and
+    /// cell text direction changed from left-to-right to right-to-left, as
+    /// required by some middle eastern versions of Excel.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_right_to_left.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("worksheets.xlsx");
+    /// #
+    ///     // Add the cell formats.
+    ///     let format_left_to_right = Format::new().set_reading_direction(1);
+    ///     let format_right_to_left = Format::new().set_reading_direction(2);
+    ///
+    ///     // Add a worksheet in the standard left to right direction.
+    ///     let worksheet1 = workbook.add_worksheet();
+    ///
+    ///     // Make the column wider for clarity.
+    ///     worksheet1.set_column_width(0, 0, 25)?;
+    ///
+    ///     // Standard direction:         | A1 | B1 | C1 | ...
+    ///     worksheet1.write_string_only(0, 0, "نص عربي / English text")?;
+    ///     worksheet1.write_string(1, 0, "نص عربي / English text", &format_left_to_right)?;
+    ///     worksheet1.write_string(2, 0, "نص عربي / English text", &format_right_to_left)?;
+    ///
+    ///     // Add a worksheet and change it to right to left direction.
+    ///     let worksheet2 = workbook.add_worksheet();
+    ///     worksheet2.set_right_to_left();
+    ///
+    ///     // Make the column wider for clarity.
+    ///     worksheet2.set_column_width(0, 0, 25)?;
+    ///
+    ///     // Right to left direction:    ... | C1 | B1 | A1 |
+    ///     worksheet2.write_string_only(0, 0, "نص عربي / English text")?;
+    ///     worksheet2.write_string(1, 0, "نص عربي / English text", &format_left_to_right)?;
+    ///     worksheet2.write_string(2, 0, "نص عربي / English text", &format_right_to_left)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_right_to_left.png">
+    ///
+    pub fn set_right_to_left(&mut self) -> &mut Worksheet {
+        self.right_to_left = true;
+        self
+    }
+
     #[allow(missing_docs)]
     pub fn set_paper(&mut self, paper_size: u8) -> &mut Worksheet {
         self.paper_size = paper_size;
@@ -1334,6 +1408,10 @@ impl Worksheet {
     // Write the <sheetView> element.
     fn write_sheet_view(&mut self) {
         let mut attributes = vec![];
+
+        if self.right_to_left {
+            attributes.push(("rightToLeft", "1".to_string()));
+        }
 
         if self.selected {
             attributes.push(("tabSelected", "1".to_string()));
