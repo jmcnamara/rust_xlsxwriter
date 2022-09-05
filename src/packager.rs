@@ -96,9 +96,10 @@ impl Packager {
         &mut self,
         xf_formats: &Vec<Format>,
         font_count: u16,
+        fill_count: u16,
         num_format_count: u16,
     ) {
-        self.write_styles_file(xf_formats, font_count, num_format_count);
+        self.write_styles_file(xf_formats, font_count, fill_count, num_format_count);
     }
 
     // Create the docProps component xml files and add them to the zip/xlsx
@@ -223,9 +224,10 @@ impl Packager {
         &mut self,
         xf_formats: &Vec<Format>,
         font_count: u16,
+        fill_count: u16,
         num_format_count: u16,
     ) {
-        let mut styles = Styles::new(xf_formats, font_count, num_format_count);
+        let mut styles = Styles::new(xf_formats, font_count, fill_count, num_format_count);
 
         self.zip
             .start_file("xl/styles.xml", self.zip_options)

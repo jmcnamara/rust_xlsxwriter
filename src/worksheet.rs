@@ -541,6 +541,17 @@ impl Worksheet {
         self.store_string(row, col, string, None)
     }
 
+    /// TODO
+    pub fn write_blank(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<(), XlsxError> {
+        // Store the cell data.
+        self.store_blank(row, col, format)
+    }
+
     /// Set the height for a row of cells.
     ///
     /// The `set_row_height()` method is used to change the default height of a
@@ -1191,7 +1202,6 @@ impl Worksheet {
     ///
     /// If you do not specify a paper type the worksheet will print using the
     /// printer's default paper style.
-
     ///
     /// # Arguments
     ///
@@ -1274,7 +1284,7 @@ impl Worksheet {
         Ok(())
     }
 
-    // Writer a unformatted string to a cell.
+    // Store a string cell.
     fn store_string(
         &mut self,
         row: RowNum,
@@ -1306,6 +1316,24 @@ impl Worksheet {
 
         self.insert_cell(row, col, cell);
         self.uses_string_table = true;
+
+        Ok(())
+    }
+
+    // Store a string cell.
+    fn store_blank(&mut self, row: RowNum, col: ColNum, format: &Format) -> Result<(), XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Get the index of the format object.
+        let xf_index = self.format_index(format);
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::Blank { xf_index };
+
+        self.insert_cell(row, col, cell);
 
         Ok(())
     }
@@ -1603,6 +1631,11 @@ impl Worksheet {
                                         &xf_index,
                                     );
                                 }
+                                CellType::Blank { xf_index } => {
+                                    let xf_index =
+                                        self.get_cell_xf_index(xf_index, row_options, col_num);
+                                    self.write_blank_cell(row_num, col_num, &xf_index);
+                                }
                             }
                         }
                     }
@@ -1732,6 +1765,26 @@ impl Worksheet {
         .expect("Couldn't write to file");
     }
 
+    // Write the <c> element for a blank cell.
+    fn write_blank_cell(&mut self, row: RowNum, col: ColNum, xf_index: &u32) {
+        let col_name = self.col_to_name(col);
+
+        // Write formatted blank cells and ignore unformatted blank cells (like
+        // Excel does).
+        if *xf_index > 0 {
+            let style = format!(r#" s="{}""#, *xf_index);
+
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}"{}/>"#,
+                col_name,
+                row + 1,
+                style
+            )
+            .expect("Couldn't write to file");
+        }
+    }
+
     // Write the <cols> element.
     fn write_cols(&mut self) {
         if self.changed_cols.is_empty() {
@@ -1843,6 +1896,7 @@ struct ColOptions {
 
 #[derive(Clone)]
 enum CellType {
+    Blank { xf_index: u32 },
     Number { number: f64, xf_index: u32 },
     String { string: String, xf_index: u32 },
 }

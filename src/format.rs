@@ -365,7 +365,9 @@
 pub struct Format {
     pub(crate) xf_index: u32,
     pub(crate) font_index: u16,
+    pub(crate) fill_index: u16,
     pub(crate) has_font: bool,
+    pub(crate) has_fill: bool,
 
     // Number properties.
     pub(crate) num_format: String,
@@ -413,7 +415,7 @@ pub struct Format {
     // Fill properties.
     pub(crate) foreground_color: XlsxColor,
     pub(crate) background_color: XlsxColor,
-    pub(crate) pattern: u8,
+    pub(crate) pattern: XlsxPattern,
 
     // Protection properties.
     pub(crate) hidden: bool,
@@ -452,7 +454,9 @@ impl Format {
         Format {
             xf_index: 0,
             font_index: 0,
+            fill_index: 0,
             has_font: false,
+            has_fill: false,
 
             num_format: "".to_string(),
             num_format_index: 0,
@@ -479,7 +483,7 @@ impl Format {
             rotation: 0,
             foreground_color: XlsxColor::Automatic,
             background_color: XlsxColor::Automatic,
-            pattern: 0,
+            pattern: XlsxPattern::None,
             bottom: 0,
             top: 0,
             left: 0,
@@ -508,6 +512,11 @@ impl Format {
     pub(crate) fn set_font_index(&mut self, font_index: u16, has_font: bool) {
         self.font_index = font_index;
         self.has_font = has_font;
+    }
+
+    pub(crate) fn set_fill_index(&mut self, fill_index: u16, has_fill: bool) {
+        self.fill_index = fill_index;
+        self.has_fill = has_fill;
     }
 
     pub(crate) fn format_key(&self) -> String {
@@ -566,7 +575,7 @@ impl Format {
             "{}:{}:{}",
             self.background_color.hex_value(),
             self.foreground_color.hex_value(),
-            self.pattern,
+            self.pattern as u8,
         )
     }
 
@@ -1485,6 +1494,176 @@ impl Format {
         self.shrink = true;
         self
     }
+
+    /// Set the Format pattern property.
+    ///
+    /// Set the pattern for a cell. The most commonly used pattern is
+    /// [`XlsxPattern::Solid`].
+    ///
+    /// To set the pattern colors see
+    /// [`set_background_color()`](Format::set_background_color()) and
+    /// [`set_foreground_color()`](Format::set_foreground_color()).
+    ///
+    /// # Arguments
+    ///
+    /// * `pattern` - The pattern property defined by a [`XlsxPattern`] enum
+    ///   value.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the cell pattern (with
+    /// colors).
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_pattern.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #
+    /// #     // Add a worksheet.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new()
+    ///         .set_background_color(XlsxColor::Green)
+    ///         .set_pattern(XlsxPattern::Solid);
+    ///
+    ///     let format2 = Format::new()
+    ///         .set_background_color(XlsxColor::Yellow)
+    ///         .set_foreground_color(XlsxColor::Red)
+    ///         .set_pattern(XlsxPattern::DarkVertical);
+    ///
+    ///     worksheet.write_string(0, 0, "Rust", &format1)?;
+    ///     worksheet.write_blank(1, 0, &format2)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_pattern.png">
+    ///
+    pub fn set_pattern(mut self, pattern: XlsxPattern) -> Format {
+        self.pattern = pattern;
+        self
+    }
+
+    /// Set the Format background color property.
+    ///
+    /// The `set_background_color` method can be used to set the background
+    /// color of a pattern. Patterns are defined via the
+    /// [`set_pattern`](Format::set_pattern()) method. If a pattern hasn't been
+    /// defined then a solid fill pattern is used as the default.
+    ///
+    /// # Arguments
+    ///
+    /// * `background_color` - The background color property defined by a
+    ///   [`XlsxColor`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the cell background color,
+    /// with a default solid pattern.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_background_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #
+    /// #     // Add a worksheet.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new().set_background_color(XlsxColor::Green);
+    ///
+    ///     worksheet.write_string(0, 0, "Rust", &format1)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_background_color.png">
+    ///
+    ///
+    ///
+    pub fn set_background_color(mut self, background_color: XlsxColor) -> Format {
+        if !background_color.is_valid() {
+            return self;
+        }
+
+        self.background_color = background_color;
+        self
+    }
+
+    /// Set the Format foreground color property.
+    ///
+    /// The `set_foreground_color` method can be used to set the
+    /// foreground/pattern color of a pattern. Patterns are defined via the
+    /// [`set_pattern`](Format::set_pattern()) method.
+    ///
+    /// # Arguments
+    ///
+    /// * `foreground_color` - The foreground color property defined by a
+    ///   [`XlsxColor`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the foreground/pattern color.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_foreground_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #
+    /// #     // Add a worksheet.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new()
+    ///         .set_background_color(XlsxColor::Yellow)
+    ///         .set_foreground_color(XlsxColor::Red)
+    ///         .set_pattern(XlsxPattern::DarkVertical);
+    ///
+    ///     worksheet.write_blank(0, 0, &format1)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_foreground_color.png">
+    ///
+    ///
+    ///
+    pub fn set_foreground_color(mut self, foreground_color: XlsxColor) -> Format {
+        if !foreground_color.is_valid() {
+            return self;
+        }
+
+        self.foreground_color = foreground_color;
+        self
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1637,7 +1816,96 @@ impl XlsxColor {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxUnderline enum defines the font underline type in a format.
+/// The XlsxPattern enum defines the Excel patterns values that can be added to
+/// a Format  pattern.
+pub enum XlsxPattern {
+    /// Automatic or Empty pattern.
+    None,
+
+    /// Solid pattern.
+    Solid,
+
+    /// Medium gray pattern.
+    MediumGray,
+
+    /// Dark gray pattern.
+    DarkGray,
+
+    /// Light gray pattern.
+    LightGray,
+
+    /// Dark horizontal line pattern.
+    DarkHorizontal,
+
+    /// Dark vertical line pattern.
+    DarkVertical,
+
+    /// Dark diagonal stripe pattern.
+    DarkDown,
+
+    /// Reverse dark diagonal stripe pattern.
+    DarkUp,
+
+    /// Dark grid pattern.
+    DarkGrid,
+
+    /// Dark trellis pattern.
+    DarkTrellis,
+
+    /// Light horizontal Line pattern.
+    LightHorizontal,
+
+    /// Light vertical line pattern.
+    LightVertical,
+
+    /// Light diagonal stripe pattern.
+    LightDown,
+
+    /// Reverse light diagonal stripe pattern.
+    LightUp,
+
+    /// Light grid pattern.
+    LightGrid,
+
+    /// Light trellis pattern.
+    LightTrellis,
+
+    /// 12.5% gray pattern.
+    Gray125,
+
+    /// 6.25% gray pattern.
+    Gray0625,
+}
+
+impl XlsxPattern {
+    // Get the Excel string value for the pattern type.
+    pub(crate) fn value(&self) -> &str {
+        match self {
+            XlsxPattern::None => "none",
+            XlsxPattern::Solid => "solid",
+            XlsxPattern::MediumGray => "mediumGray",
+            XlsxPattern::DarkGray => "darkGray",
+            XlsxPattern::LightGray => "lightGray",
+            XlsxPattern::DarkHorizontal => "darkHorizontal",
+            XlsxPattern::DarkVertical => "darkVertical",
+            XlsxPattern::DarkDown => "darkDown",
+            XlsxPattern::DarkUp => "darkUp",
+            XlsxPattern::DarkGrid => "darkGrid",
+            XlsxPattern::DarkTrellis => "darkTrellis",
+            XlsxPattern::LightHorizontal => "lightHorizontal",
+            XlsxPattern::LightVertical => "lightVertical",
+            XlsxPattern::LightDown => "lightDown",
+            XlsxPattern::LightUp => "lightUp",
+            XlsxPattern::LightGrid => "lightGrid",
+            XlsxPattern::LightTrellis => "lightTrellis",
+            XlsxPattern::Gray125 => "gray125",
+            XlsxPattern::Gray0625 => "gray0625",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+/// The XlsxUnderline enum defines the font underline type in a [`Format`].
 ///
 /// The difference between a normal underline and an "accounting" underline is
 /// that a normal underline only underlines the text/number in a cell whereas an
@@ -1699,7 +1967,7 @@ pub enum XlsxUnderline {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxScript enum defines the Format font superscript and subscript
+/// The XlsxScript enum defines the [`Format`] font superscript and subscript
 /// properties.
 ///
 pub enum XlsxScript {

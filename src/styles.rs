@@ -5,12 +5,13 @@
 
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
-use crate::{XlsxAlign, XlsxColor, XlsxScript, XlsxUnderline};
+use crate::{XlsxAlign, XlsxColor, XlsxPattern, XlsxScript, XlsxUnderline};
 
 pub struct Styles<'a> {
     pub(crate) writer: XMLWriter,
     xf_formats: &'a Vec<Format>,
     font_count: u16,
+    fill_count: u16,
     num_format_count: u16,
 }
 
@@ -20,13 +21,19 @@ impl<'a> Styles<'a> {
     // -----------------------------------------------------------------------
 
     // Create a new Styles struct.
-    pub(crate) fn new(xf_formats: &Vec<Format>, font_count: u16, num_format_count: u16) -> Styles {
+    pub(crate) fn new(
+        xf_formats: &Vec<Format>,
+        font_count: u16,
+        fill_count: u16,
+        num_format_count: u16,
+    ) -> Styles {
         let writer = XMLWriter::new();
 
         Styles {
             writer,
             xf_formats,
             font_count,
+            fill_count,
             num_format_count,
         }
     }
@@ -89,7 +96,7 @@ impl<'a> Styles<'a> {
 
         self.writer.xml_start_tag_attr("fonts", &attributes);
 
-        // Write the cell xf element.
+        // Write the cell font elements.
         for xf_format in self.xf_formats {
             // Write the font element.
             if xf_format.has_font {
@@ -246,13 +253,21 @@ impl<'a> Styles<'a> {
 
     // Write the <fills> element.
     fn write_fills(&mut self) {
-        let attributes = vec![("count", "2".to_string())];
+        let attributes = vec![("count", self.fill_count.to_string())];
 
         self.writer.xml_start_tag_attr("fills", &attributes);
 
         // Write the default fill elements.
         self.write_default_fill("none".to_string());
         self.write_default_fill("gray125".to_string());
+
+        // Write the cell fill elements.
+        for xf_format in self.xf_formats {
+            // Write the font element.
+            if xf_format.has_fill {
+                self.write_fill(xf_format);
+            }
+        }
 
         self.writer.xml_end_tag("fills");
     }
@@ -263,6 +278,49 @@ impl<'a> Styles<'a> {
 
         self.writer.xml_start_tag("fill");
         self.writer.xml_empty_tag_attr("patternFill", &attributes);
+        self.writer.xml_end_tag("fill");
+    }
+
+    // Write the user defined <fill> element.
+    fn write_fill(&mut self, xf_format: &Format) {
+        // Special handling for pattern only case.
+        if xf_format.pattern != XlsxPattern::None
+            && xf_format.background_color == XlsxColor::Automatic
+            && xf_format.foreground_color == XlsxColor::Automatic
+        {
+            self.write_default_fill(xf_format.pattern.value().to_string());
+            return;
+        }
+
+        // Start the "fill" element.
+        self.writer.xml_start_tag("fill");
+
+        // Write the fill pattern.
+        let attributes = vec![("patternType", xf_format.pattern.value().to_string())];
+        self.writer.xml_start_tag_attr("patternFill", &attributes);
+
+        // Write the foreground color.
+        if xf_format.foreground_color != XlsxColor::Automatic {
+            let attributes = vec![(
+                "rgb",
+                format!("FF{}", xf_format.foreground_color.hex_value()),
+            )];
+            self.writer.xml_empty_tag_attr("fgColor", &attributes);
+        }
+
+        // Write the background color.
+        if xf_format.background_color != XlsxColor::Automatic {
+            let attributes = vec![(
+                "rgb",
+                format!("FF{}", xf_format.background_color.hex_value()),
+            )];
+            self.writer.xml_empty_tag_attr("bgColor", &attributes);
+        } else {
+            let attributes = vec![("indexed", "64".to_string())];
+            self.writer.xml_empty_tag_attr("bgColor", &attributes);
+        }
+
+        self.writer.xml_end_tag("patternFill");
         self.writer.xml_end_tag("fill");
     }
 
@@ -368,7 +426,7 @@ impl<'a> Styles<'a> {
         let mut attributes = vec![
             ("numFmtId", xf_format.num_format_index.to_string()),
             ("fontId", xf_format.font_index.to_string()),
-            ("fillId", "0".to_string()),
+            ("fillId", xf_format.fill_index.to_string()),
             ("borderId", "0".to_string()),
             ("xfId", "0".to_string()),
         ];
@@ -382,6 +440,10 @@ impl<'a> Styles<'a> {
 
         if xf_format.font_index > 0 {
             attributes.push(("applyFont", "1".to_string()));
+        }
+
+        if xf_format.fill_index > 0 {
+            attributes.push(("applyFill", "1".to_string()));
         }
 
         if apply_alignment {
@@ -578,7 +640,7 @@ mod tests {
         xf_format.set_font_index(0, true);
 
         let xf_formats = vec![xf_format];
-        let mut styles = Styles::new(&xf_formats, 1, 0);
+        let mut styles = Styles::new(&xf_formats, 1, 2, 0);
 
         styles.assemble_xml_file();
 

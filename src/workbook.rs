@@ -4,6 +4,7 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 use std::collections::HashMap;
+use std::mem;
 
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -12,6 +13,7 @@ use crate::packager::PackagerOptions;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
+use crate::{XlsxColor, XlsxPattern};
 
 /// The workbook struct represents an Excel file in it's entirety. It is the
 /// starting point for creating a new Excel xlsx file.
@@ -25,6 +27,7 @@ pub struct Workbook<'a> {
     xf_formats: Vec<Format>,
     xf_indices: HashMap<String, u32>,
     font_count: u16,
+    fill_count: u16,
     num_format_count: u16,
 }
 
@@ -46,6 +49,7 @@ impl<'a> Workbook<'a> {
             xf_formats: vec![default_format],
             xf_indices,
             font_count: 0,
+            fill_count: 0,
             num_format_count: 0,
         }
     }
@@ -130,7 +134,12 @@ impl<'a> Workbook<'a> {
 
         // Write the styles.xml file to the zip/xlsx container.
 
-        packager.create_styles_file(&self.xf_formats, self.font_count, self.num_format_count);
+        packager.create_styles_file(
+            &self.xf_formats,
+            self.font_count,
+            self.fill_count,
+            self.num_format_count,
+        );
 
         // Write the workbook to the zip/xlsx container.
         packager.write_workbook_file(self);
@@ -181,6 +190,9 @@ impl<'a> Workbook<'a> {
         // Set the font index for the format objects.
         self.prepare_fonts();
 
+        // Set the fill index for the format objects.
+        self.prepare_fills();
+
         // Set the number format index for the format objects.
         self.prepare_num_formats();
     }
@@ -205,6 +217,79 @@ impl<'a> Workbook<'a> {
             }
         }
         self.font_count = font_count;
+    }
+
+    // Set the fill index for the format objects.
+    fn prepare_fills(&mut self) {
+        let mut fill_indices: HashMap<String, u16> = HashMap::new();
+
+        // The user defined fill properties start from 2 since there are 2
+        // default fills: patternType="none" and patternType="gray125". The
+        // following code adds these 2 default fills.
+        let mut fill_count: u16 = 2;
+
+        let temp_format = Format::new();
+        let mut fill_key = temp_format.fill_key();
+        fill_indices.insert(fill_key, 0);
+        fill_key = temp_format
+            .set_pattern(crate::XlsxPattern::Gray125)
+            .fill_key();
+        fill_indices.insert(fill_key, 1);
+
+        for xf_format in &mut self.xf_formats {
+            // The following logical statements take care of special cases in
+            // relation to cell colors and patterns:
+            //
+            // 1. For a solid fill (pattern == "solid") Excel reverses the role
+            //    of foreground and background colors, and
+            //
+            // 2 and 3. If the user specifies a foreground or background color
+            //          without a pattern they probably wanted a solid fill, so
+            //          we fill in the defaults.
+            //
+            if xf_format.pattern == XlsxPattern::Solid
+                && xf_format.background_color != XlsxColor::Automatic
+                && xf_format.foreground_color != XlsxColor::Automatic
+            {
+                mem::swap(
+                    &mut xf_format.foreground_color,
+                    &mut xf_format.background_color,
+                );
+            }
+
+            if (xf_format.pattern == XlsxPattern::None || xf_format.pattern == XlsxPattern::Solid)
+                && xf_format.background_color != XlsxColor::Automatic
+                && xf_format.foreground_color == XlsxColor::Automatic
+            {
+                xf_format.foreground_color = xf_format.background_color;
+                xf_format.background_color = XlsxColor::Automatic;
+                xf_format.pattern = XlsxPattern::Solid;
+            }
+
+            if (xf_format.pattern == XlsxPattern::None || xf_format.pattern == XlsxPattern::Solid)
+                && xf_format.background_color == XlsxColor::Automatic
+                && xf_format.foreground_color != XlsxColor::Automatic
+            {
+                xf_format.background_color = XlsxColor::Automatic;
+                xf_format.pattern = XlsxPattern::Solid;
+            }
+
+            // Get a unique fill identifier.
+            let fill_key = xf_format.fill_key();
+
+            // Find unique or repeated fill ids.
+            match fill_indices.get(&fill_key) {
+                Some(fill_index) => {
+                    xf_format.set_fill_index(*fill_index, false);
+                }
+                None => {
+                    fill_indices.insert(fill_key, fill_count);
+                    xf_format.set_fill_index(fill_count, true);
+                    fill_count += 1;
+                }
+            }
+        }
+        self.fill_count = fill_count;
     }
 
     // Set the number format index for the format objects.
