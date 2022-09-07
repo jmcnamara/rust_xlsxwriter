@@ -44,8 +44,16 @@ examples are usually repeated in the documentation.
 * doc_format_set_align.rs - Demonstrates setting various cell alignment
   properties.
 
+* doc_format_set_background_color.rs - Demonstrates setting the cell
+  background color, with a default solid pattern.
+
 * doc_format_set_bold.rs - Demonstrates setting the bold property for a
   format.
+
+* doc_format_set_border.rs - Demonstrates setting a cell border.
+
+* doc_format_set_border_color.rs - Demonstrates setting a cell border and
+  color.
 
 * doc_format_set_font_color.rs - Demonstrates setting the italic property
   for a format.
@@ -59,6 +67,9 @@ examples are usually repeated in the documentation.
 * doc_format_set_font_strikeout.rs - Demonstrates setting the text
   strikeout/strikethrough property for a format.
 
+* doc_format_set_foreground_color.rs - Demonstrates setting the
+  foreground/pattern color.
+
 * doc_format_set_indent.rs - Demonstrates setting the indentation level for
   cell text.
 
@@ -70,6 +81,9 @@ examples are usually repeated in the documentation.
 
 * doc_format_set_num_format_index.rs - Demonstrates setting one of the
   inbuilt format indices for a format.
+
+* doc_format_set_pattern.rs - Demonstrates setting the cell pattern (with
+  colors).
 
 * doc_format_set_reading_direction.rs - Demonstrates setting the text
   reading direction. This is useful when creating Arabic, Hebrew or other

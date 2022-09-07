@@ -28,6 +28,7 @@ pub struct Workbook<'a> {
     xf_indices: HashMap<String, u32>,
     font_count: u16,
     fill_count: u16,
+    border_count: u16,
     num_format_count: u16,
 }
 
@@ -50,6 +51,7 @@ impl<'a> Workbook<'a> {
             xf_indices,
             font_count: 0,
             fill_count: 0,
+            border_count: 0,
             num_format_count: 0,
         }
     }
@@ -138,6 +140,7 @@ impl<'a> Workbook<'a> {
             &self.xf_formats,
             self.font_count,
             self.fill_count,
+            self.border_count,
             self.num_format_count,
         );
 
@@ -193,6 +196,9 @@ impl<'a> Workbook<'a> {
         // Set the fill index for the format objects.
         self.prepare_fills();
 
+        // Set the border index for the format objects.
+        self.prepare_borders();
+
         // Set the number format index for the format objects.
         self.prepare_num_formats();
     }
@@ -237,16 +243,8 @@ impl<'a> Workbook<'a> {
         fill_indices.insert(fill_key, 1);
 
         for xf_format in &mut self.xf_formats {
-            // The following logical statements take care of special cases in
-            // relation to cell colors and patterns:
-            //
-            // 1. For a solid fill (pattern == "solid") Excel reverses the role
-            //    of foreground and background colors, and
-            //
-            // 2 and 3. If the user specifies a foreground or background color
-            //          without a pattern they probably wanted a solid fill, so
-            //          we fill in the defaults.
-            //
+            // For a solid fill (pattern == "solid") Excel reverses the role of
+            // foreground and background colors, and
             if xf_format.pattern == XlsxPattern::Solid
                 && xf_format.background_color != XlsxColor::Automatic
                 && xf_format.foreground_color != XlsxColor::Automatic
@@ -257,6 +255,10 @@ impl<'a> Workbook<'a> {
                 );
             }
 
+            // If the user specifies a foreground or background color without a
+            // pattern they probably wanted a solid fill, so we fill in the
+            // defaults.
+            //
             if (xf_format.pattern == XlsxPattern::None || xf_format.pattern == XlsxPattern::Solid)
                 && xf_format.background_color != XlsxColor::Automatic
                 && xf_format.foreground_color == XlsxColor::Automatic
@@ -290,6 +292,28 @@ impl<'a> Workbook<'a> {
             }
         }
         self.fill_count = fill_count;
+    }
+
+    // Set the border index for the format objects.
+    fn prepare_borders(&mut self) {
+        let mut border_count: u16 = 0;
+        let mut border_indices: HashMap<String, u16> = HashMap::new();
+
+        for xf_format in &mut self.xf_formats {
+            let border_key = xf_format.border_key();
+
+            match border_indices.get(&border_key) {
+                Some(border_index) => {
+                    xf_format.set_border_index(*border_index, false);
+                }
+                None => {
+                    border_indices.insert(border_key, border_count);
+                    xf_format.set_border_index(border_count, true);
+                    border_count += 1;
+                }
+            }
+        }
+        self.border_count = border_count;
     }
 
     // Set the number format index for the format objects.

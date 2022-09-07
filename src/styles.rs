@@ -5,13 +5,14 @@
 
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
-use crate::{XlsxAlign, XlsxColor, XlsxPattern, XlsxScript, XlsxUnderline};
+use crate::{XlsxAlign, XlsxBorder, XlsxColor, XlsxPattern, XlsxScript, XlsxUnderline};
 
 pub struct Styles<'a> {
     pub(crate) writer: XMLWriter,
     xf_formats: &'a Vec<Format>,
     font_count: u16,
     fill_count: u16,
+    border_count: u16,
     num_format_count: u16,
 }
 
@@ -25,6 +26,7 @@ impl<'a> Styles<'a> {
         xf_formats: &Vec<Format>,
         font_count: u16,
         fill_count: u16,
+        border_count: u16,
         num_format_count: u16,
     ) -> Styles {
         let writer = XMLWriter::new();
@@ -34,6 +36,7 @@ impl<'a> Styles<'a> {
             xf_formats,
             font_count,
             fill_count,
+            border_count,
             num_format_count,
         }
     }
@@ -263,7 +266,7 @@ impl<'a> Styles<'a> {
 
         // Write the cell fill elements.
         for xf_format in self.xf_formats {
-            // Write the font element.
+            // Write the fill element.
             if xf_format.has_fill {
                 self.write_fill(xf_format);
             }
@@ -326,30 +329,38 @@ impl<'a> Styles<'a> {
 
     // Write the <borders> element.
     fn write_borders(&mut self) {
-        let attributes = vec![("count", "1".to_string())];
+        let attributes = vec![("count", self.border_count.to_string())];
 
         self.writer.xml_start_tag_attr("borders", &attributes);
 
-        // Write the border element.
-        self.write_border();
+        // Write the cell border elements.
+        for xf_format in self.xf_formats {
+            // Write the border element.
+            if xf_format.has_border {
+                self.write_border(xf_format);
+            }
+        }
 
         self.writer.xml_end_tag("borders");
     }
 
     // Write the <border> element.
-    fn write_border(&mut self) {
+    fn write_border(&mut self, xf_format: &Format) {
         self.writer.xml_start_tag("border");
-        // Write the left element.
-        self.write_left();
 
-        // Write the right element.
-        self.write_right();
-
-        // Write the top element.
-        self.write_top();
-
-        // Write the bottom element.
-        self.write_bottom();
+        // Write the four border elements.
+        self.write_sub_border("left", xf_format.border_left, xf_format.border_left_color);
+        self.write_sub_border(
+            "right",
+            xf_format.border_right,
+            xf_format.border_right_color,
+        );
+        self.write_sub_border("top", xf_format.border_top, xf_format.border_top_color);
+        self.write_sub_border(
+            "bottom",
+            xf_format.border_bottom,
+            xf_format.border_bottom_color,
+        );
 
         // Write the diagonal element.
         self.write_diagonal();
@@ -357,24 +368,30 @@ impl<'a> Styles<'a> {
         self.writer.xml_end_tag("border");
     }
 
-    // Write the <left> element.
-    fn write_left(&mut self) {
-        self.writer.xml_empty_tag("left");
-    }
+    // Write the <border> sub elements such as <right>, <top>, etc.
+    fn write_sub_border(
+        &mut self,
+        border_type: &str,
+        border_style: XlsxBorder,
+        border_color: XlsxColor,
+    ) {
+        if border_style == XlsxBorder::None {
+            self.writer.xml_empty_tag(border_type);
+            return;
+        }
 
-    // Write the <right> element.
-    fn write_right(&mut self) {
-        self.writer.xml_empty_tag("right");
-    }
+        let mut attributes = vec![("style", border_style.value().to_string())];
+        self.writer.xml_start_tag_attr(border_type, &attributes);
 
-    // Write the <top> element.
-    fn write_top(&mut self) {
-        self.writer.xml_empty_tag("top");
-    }
+        if border_color != XlsxColor::Automatic {
+            attributes = vec![("rgb", format!("FF{}", border_color.hex_value()))];
+        } else {
+            attributes = vec![("auto", "1".to_string())];
+        }
 
-    // Write the <bottom> element.
-    fn write_bottom(&mut self) {
-        self.writer.xml_empty_tag("bottom");
+        self.writer.xml_empty_tag_attr("color", &attributes);
+
+        self.writer.xml_end_tag(border_type);
     }
 
     // Write the <diagonal> element.
@@ -427,7 +444,7 @@ impl<'a> Styles<'a> {
             ("numFmtId", xf_format.num_format_index.to_string()),
             ("fontId", xf_format.font_index.to_string()),
             ("fillId", xf_format.fill_index.to_string()),
-            ("borderId", "0".to_string()),
+            ("borderId", xf_format.border_index.to_string()),
             ("xfId", "0".to_string()),
         ];
 
@@ -444,6 +461,10 @@ impl<'a> Styles<'a> {
 
         if xf_format.fill_index > 0 {
             attributes.push(("applyFill", "1".to_string()));
+        }
+
+        if xf_format.border_index > 0 {
+            attributes.push(("applyBorder", "1".to_string()));
         }
 
         if apply_alignment {
@@ -638,9 +659,10 @@ mod tests {
     fn test_assemble() {
         let mut xf_format = Format::new();
         xf_format.set_font_index(0, true);
+        xf_format.set_border_index(0, true);
 
         let xf_formats = vec![xf_format];
-        let mut styles = Styles::new(&xf_formats, 1, 2, 0);
+        let mut styles = Styles::new(&xf_formats, 1, 2, 1, 0);
 
         styles.assemble_xml_file();
 

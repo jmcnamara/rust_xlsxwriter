@@ -93,39 +93,39 @@
 /// The following table shows the Excel format categories and the equivalent
 /// `rust_xlsxwriter` Format method:
 ///
-/// | Category        | Description          |  Method Name                                                  |
-/// | :-------------- | :------------------- |  :----------------------------------------------------------- |
-/// | **Font**        | Font type            |  [`set_font_name()`](Format::set_font_name())                 |
-/// |                 | Font size            |  [`set_font_size()`](Format::set_font_size())                 |
-/// |                 | Font color           |  [`set_font_color()`](Format::set_font_color())               |
-/// |                 | Bold                 |  [`set_bold()`](Format::set_bold())                           |
-/// |                 | Italic               |  [`set_italic()`](Format::set_italic())                       |
-/// |                 | Underline            |  [`set_underline()`](Format::set_underline())                 |
-/// |                 | Strikeout            |  [`set_font_strikeout()`](Format::set_font_strikeout())       |
-/// |                 | Super/Subscript      |  [`set_font_script()`](Format::set_font_script())             |
-/// | **Number**      | Numeric format       |  [`set_num_format()`](Format::set_num_format())               |
-/// | **Protection**  | Unlock cells         |  format_set_unlocked()                                        |
-/// |                 | Hide formulas        |  format_set_hidden()                                          |
-/// | **Alignment**   | Horizontal align     |  [`set_align()`](Format::set_align())                         |
-/// |                 | Vertical align       |  [`set_align()`](Format::set_align())                         |
-/// |                 | Rotation             |  [`set_rotation()`](Format::set_rotation())                   |
-/// |                 | Text wrap            |  [`set_text_wrap()`](Format::set_text_wrap())                 |
-/// |                 | Indentation          |  [`set_indent()`](Format::set_indent())                       |
-/// |                 | Reading direction    |  [`set_reading_direction()`](Format::set_reading_direction()) |
-/// |                 | Shrink to fit        |  [`set_shrink()`](Format::set_shrink())                       |
-/// | **Pattern**     | Cell pattern         |  format_set_pattern()                                         |
-/// |                 | Background color     |  format_set_bg_color()                                        |
-/// |                 | Foreground color     |  format_set_fg_color()                                        |
-/// | **Border**      | Cell border          |  format_set_border()                                          |
-/// |                 | Bottom border        |  format_set_bottom()                                          |
-/// |                 | Top border           |  format_set_top()                                             |
-/// |                 | Left border          |  format_set_left()                                            |
-/// |                 | Right border         |  format_set_right()                                           |
-/// |                 | Border color         |  format_set_border_color()                                    |
-/// |                 | Bottom color         |  format_set_bottom_color()                                    |
-/// |                 | Top color            |  format_set_top_color()                                       |
-/// |                 | Left color           |  format_set_left_color()                                      |
-/// |                 | Right color          |  format_set_right_color()                                     |
+/// | Category        | Description          |  Method Name                                                          |
+/// | :-------------- | :------------------- |  :------------------------------------------------------------------- |
+/// | **Font**        | Font type            |  [`set_font_name()`](Format::set_font_name())                         |
+/// |                 | Font size            |  [`set_font_size()`](Format::set_font_size())                         |
+/// |                 | Font color           |  [`set_font_color()`](Format::set_font_color())                       |
+/// |                 | Bold                 |  [`set_bold()`](Format::set_bold())                                   |
+/// |                 | Italic               |  [`set_italic()`](Format::set_italic())                               |
+/// |                 | Underline            |  [`set_underline()`](Format::set_underline())                         |
+/// |                 | Strikeout            |  [`set_font_strikeout()`](Format::set_font_strikeout())               |
+/// |                 | Super/Subscript      |  [`set_font_script()`](Format::set_font_script())                     |
+/// | **Number**      | Numeric format       |  [`set_num_format()`](Format::set_num_format())                       |
+/// | **Protection**  | Unlock cells         |  format_set_unlocked()                                                |
+/// |                 | Hide formulas        |  format_set_hidden()                                                  |
+/// | **Alignment**   | Horizontal align     |  [`set_align()`](Format::set_align())                                 |
+/// |                 | Vertical align       |  [`set_align()`](Format::set_align())                                 |
+/// |                 | Rotation             |  [`set_rotation()`](Format::set_rotation())                           |
+/// |                 | Text wrap            |  [`set_text_wrap()`](Format::set_text_wrap())                         |
+/// |                 | Indentation          |  [`set_indent()`](Format::set_indent())                               |
+/// |                 | Reading direction    |  [`set_reading_direction()`](Format::set_reading_direction())         |
+/// |                 | Shrink to fit        |  [`set_shrink()`](Format::set_shrink())                               |
+/// | **Pattern**     | Cell pattern         |  [`set_pattern()`](Format::set_pattern())                             |
+/// |                 | Background color     |  [`set_bg_color()`](Format::set_bg_color())                           |
+/// |                 | Foreground color     |  [`set_fg_color()`](Format::set_fg_color())                           |
+/// | **Border**      | Cell border          |  [`set_border()`](Format::set_border())                               |
+/// |                 | Bottom border        |  [`set_border_bottom()`](Format::set_border_bottom())                 |
+/// |                 | Top border           |  [`set_border_top()`](Format::set_border_top())                       |
+/// |                 | Left border          |  [`set_border_left()`](Format::set_border_left())                     |
+/// |                 | Right border         |  [`set_border_right()`](Format::set_border_right())                   |
+/// |                 | Border color         |  [`set_border_color()`](Format::set_border_color())                   |
+/// |                 | Bottom color         |  [`set_border_bottom_color()`](Format::set_border_bottom_color())     |
+/// |                 | Top color            |  [`set_border_top_color()`](Format::set_border_top_color())           |
+/// |                 | Left color           |  [`set_border_left_color()`](Format::set_border_left_color())         |
+/// |                 | Right color          |  [`set_border_right_color()`](Format::set_border_right_color())       |
 ///
 /// # Format Colors
 ///
@@ -366,8 +366,10 @@ pub struct Format {
     pub(crate) xf_index: u32,
     pub(crate) font_index: u16,
     pub(crate) fill_index: u16,
+    pub(crate) border_index: u16,
     pub(crate) has_font: bool,
     pub(crate) has_fill: bool,
+    pub(crate) has_border: bool,
 
     // Number properties.
     pub(crate) num_format: String,
@@ -400,17 +402,17 @@ pub struct Format {
     pub(crate) reading_direction: u8,
 
     // Border properties.
-    pub(crate) bottom: u8,
-    pub(crate) top: u8,
-    pub(crate) left: u8,
-    pub(crate) right: u8,
-    pub(crate) diagonal_border: u8,
-    pub(crate) diagonal_type: u8,
-    pub(crate) bottom_color: XlsxColor,
-    pub(crate) top_color: XlsxColor,
-    pub(crate) left_color: XlsxColor,
-    pub(crate) right_color: XlsxColor,
-    pub(crate) diagonal_color: XlsxColor,
+    pub(crate) border_bottom: XlsxBorder,
+    pub(crate) border_top: XlsxBorder,
+    pub(crate) border_left: XlsxBorder,
+    pub(crate) border_right: XlsxBorder,
+    pub(crate) border_bottom_color: XlsxColor,
+    pub(crate) border_top_color: XlsxColor,
+    pub(crate) border_left_color: XlsxColor,
+    pub(crate) border_right_color: XlsxColor,
+    pub(crate) border_diagonal: XlsxBorder,
+    pub(crate) border_diagonal_color: XlsxColor,
+    pub(crate) border_diagonal_type: u8,
 
     // Fill properties.
     pub(crate) foreground_color: XlsxColor,
@@ -455,8 +457,10 @@ impl Format {
             xf_index: 0,
             font_index: 0,
             fill_index: 0,
+            border_index: 0,
             has_font: false,
             has_fill: false,
+            has_border: false,
 
             num_format: "".to_string(),
             num_format_index: 0,
@@ -484,17 +488,17 @@ impl Format {
             foreground_color: XlsxColor::Automatic,
             background_color: XlsxColor::Automatic,
             pattern: XlsxPattern::None,
-            bottom: 0,
-            top: 0,
-            left: 0,
-            right: 0,
-            diagonal_border: 0,
-            diagonal_type: 0,
-            bottom_color: XlsxColor::Automatic,
-            top_color: XlsxColor::Automatic,
-            left_color: XlsxColor::Automatic,
-            right_color: XlsxColor::Automatic,
-            diagonal_color: XlsxColor::Automatic,
+            border_bottom: XlsxBorder::None,
+            border_top: XlsxBorder::None,
+            border_left: XlsxBorder::None,
+            border_right: XlsxBorder::None,
+            border_diagonal: XlsxBorder::None,
+            border_diagonal_type: 0,
+            border_bottom_color: XlsxColor::Automatic,
+            border_top_color: XlsxColor::Automatic,
+            border_left_color: XlsxColor::Automatic,
+            border_right_color: XlsxColor::Automatic,
+            border_diagonal_color: XlsxColor::Automatic,
             indent: 0,
             shrink: false,
             reading_direction: 0,
@@ -517,6 +521,11 @@ impl Format {
     pub(crate) fn set_fill_index(&mut self, fill_index: u16, has_fill: bool) {
         self.fill_index = fill_index;
         self.has_fill = has_fill;
+    }
+
+    pub(crate) fn set_border_index(&mut self, border_index: u16, has_border: bool) {
+        self.border_index = border_index;
+        self.has_border = has_border;
     }
 
     pub(crate) fn format_key(&self) -> String {
@@ -556,26 +565,26 @@ impl Format {
     pub(crate) fn border_key(&self) -> String {
         format!(
             "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
-            self.bottom,
-            self.bottom_color.hex_value(),
-            self.diagonal_border,
-            self.diagonal_color.hex_value(),
-            self.diagonal_type,
-            self.left,
-            self.left_color.hex_value(),
-            self.right,
-            self.right_color.hex_value(),
-            self.top,
-            self.top_color.hex_value(),
+            self.border_bottom.value(),
+            self.border_bottom_color.hex_value(),
+            self.border_diagonal.value(),
+            self.border_diagonal_color.hex_value(),
+            self.border_diagonal_type,
+            self.border_left.value(),
+            self.border_left_color.hex_value(),
+            self.border_right.value(),
+            self.border_right_color.hex_value(),
+            self.border_top.value(),
+            self.border_top_color.hex_value(),
         )
     }
 
     pub(crate) fn fill_key(&self) -> String {
         format!(
             "{}:{}:{}",
+            self.pattern.value(),
             self.background_color.hex_value(),
             self.foreground_color.hex_value(),
-            self.pattern as u8,
         )
     }
 
@@ -1664,6 +1673,252 @@ impl Format {
         self.foreground_color = foreground_color;
         self
     }
+
+    /// Set the Format border property.
+    ///
+    /// Set the cell border style. Individual border elements can be configured
+    /// using the following methods with the same parameters:
+    ///
+    /// - [`set_border_top()`](Format::set_border_top())
+    /// - [`set_border_left()`](Format::set_border_left())
+    /// - [`set_border_right()`](Format::set_border_right())
+    /// - [`set_border_color()`](Format::set_border_color())
+    ///
+    /// # Arguments
+    ///
+    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    ///   value.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting a cell border.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_border.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new().set_border(XlsxBorder::Thin);
+    ///     let format2 = Format::new().set_border(XlsxBorder::Dotted);
+    ///     let format3 = Format::new().set_border(XlsxBorder::Double);
+    ///
+    ///     worksheet.write_blank(1, 1, &format1)?;
+    ///     worksheet.write_blank(3, 1, &format2)?;
+    ///     worksheet.write_blank(5, 1, &format3)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_border.png">
+    ///
+    pub fn set_border(mut self, border: XlsxBorder) -> Format {
+        self.border_top = border;
+        self.border_left = border;
+        self.border_right = border;
+        self.border_bottom = border;
+
+        self
+    }
+
+    /// Set the Format border color property.
+    ///
+    /// Set the cell border color. Individual border elements can be configured
+    /// using the following methods with the same parameters:
+    ///
+    /// - [`set_border_top_color()`](Format::set_border_top_color())
+    /// - [`set_border_left_color()`](Format::set_border_left_color())
+    /// - [`set_border_right_color()`](Format::set_border_right_color())
+    /// - [`set_border_color_color()`](Format::set_border_color())
+    ///
+    /// Note: it is only, currently possible to set a border around a single
+    /// cell. To set a border around a range of cells you will need to create
+    /// 4-8 individual border formats and apply them to the cells around the
+    /// required border. A later version of this library will provide helper
+    /// functions to do this more easily.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting a cell border and color.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_border_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format1 = Format::new()
+    ///         .set_border(XlsxBorder::Thin)
+    ///         .set_border_color(XlsxColor::Blue);
+    ///
+    ///     let format2 = Format::new()
+    ///         .set_border(XlsxBorder::Dotted)
+    ///         .set_border_color(XlsxColor::Red);
+    ///
+    ///     let format3 = Format::new()
+    ///         .set_border(XlsxBorder::Double)
+    ///         .set_border_color(XlsxColor::Green);
+    ///
+    ///     worksheet.write_blank(1, 1, &format1)?;
+    ///     worksheet.write_blank(3, 1, &format2)?;
+    ///     worksheet.write_blank(5, 1, &format3)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_border_color.png">
+    ///
+    pub fn set_border_color(mut self, color: XlsxColor) -> Format {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.border_top_color = color;
+        self.border_left_color = color;
+        self.border_right_color = color;
+        self.border_bottom_color = color;
+        self
+    }
+
+    /// Set the cell top border style. See
+    /// [`set_border()`](Format::set_border()) for details.
+    ///
+    /// # Arguments
+    ///
+    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    ///   value.
+    ///
+    pub fn set_border_top(mut self, border: XlsxBorder) -> Format {
+        self.border_top = border;
+        self
+    }
+
+    /// Set the cell top border color. See
+    /// [`set_border_color()`](Format::set_border_color()) for details.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    ///
+    pub fn set_border_top_color(mut self, color: XlsxColor) -> Format {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.border_top_color = color;
+        self
+    }
+
+    /// Set the cell bottom border style. See
+    /// [`set_border()`](Format::set_border()) for details.
+    ///
+    /// # Arguments
+    ///
+    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    ///   value.
+    ///
+    pub fn set_border_bottom(mut self, border: XlsxBorder) -> Format {
+        self.border_bottom = border;
+        self
+    }
+
+    /// Set the cell bottom border color. See
+    /// [`set_border_color()`](Format::set_border_color()) for details.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    ///
+    pub fn set_border_bottom_color(mut self, color: XlsxColor) -> Format {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.border_bottom_color = color;
+        self
+    }
+
+    /// Set the cell left border style. See
+    /// [`set_border()`](Format::set_border()) for details.
+    ///
+    /// # Arguments
+    ///
+    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    ///   value.
+    ///
+    pub fn set_border_left(mut self, border: XlsxBorder) -> Format {
+        self.border_left = border;
+        self
+    }
+
+    /// Set the cell left border color. See
+    /// [`set_border_color()`](Format::set_border_color()) for details.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    ///
+    pub fn set_border_left_color(mut self, color: XlsxColor) -> Format {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.border_left_color = color;
+        self
+    }
+
+    /// Set the cell right border style. See
+    /// [`set_border()`](Format::set_border()) for details.
+    ///
+    /// # Arguments
+    ///
+    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    ///   value.
+    ///
+    pub fn set_border_right(mut self, border: XlsxBorder) -> Format {
+        self.border_right = border;
+        self
+    }
+
+    /// Set the cell right border color. See
+    /// [`set_border_color()`](Format::set_border_color()) for details.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    ///
+    pub fn set_border_right_color(mut self, color: XlsxColor) -> Format {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.border_right_color = color;
+        self
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1817,7 +2072,7 @@ impl XlsxColor {
 
 #[derive(Clone, Copy, Eq, PartialEq)]
 /// The XlsxPattern enum defines the Excel patterns values that can be added to
-/// a Format  pattern.
+/// a Format pattern.
 pub enum XlsxPattern {
     /// Automatic or Empty pattern.
     None,
@@ -1900,6 +2155,75 @@ impl XlsxPattern {
             XlsxPattern::LightTrellis => "lightTrellis",
             XlsxPattern::Gray125 => "gray125",
             XlsxPattern::Gray0625 => "gray0625",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+/// The XlsxBorder enum defines the Excel border types that can be added to
+/// a Format pattern.
+pub enum XlsxBorder {
+    /// No border.
+    None,
+
+    /// Thin border style.
+    Thin,
+
+    /// Medium border style.
+    Medium,
+
+    /// Dashed border style.
+    Dashed,
+
+    /// Dotted border style.
+    Dotted,
+
+    /// Thick border style.
+    Thick,
+
+    /// Double border style.
+    Double,
+
+    /// Hair border style.
+    Hair,
+
+    /// Medium dashed border style.
+    MediumDashed,
+
+    /// Dash-dot border style.
+    DashDot,
+
+    /// Medium dash-dot border style.
+    MediumDashDot,
+
+    /// Dash-dot-dot border style.
+    DashDotDot,
+
+    /// Medium dash-dot-dot border style.
+    MediumDashDotDot,
+
+    /// Slant dash-dot border style.
+    SlantDashDot,
+}
+
+impl XlsxBorder {
+    // Get the Excel string value for the border type.
+    pub(crate) fn value(&self) -> &str {
+        match self {
+            XlsxBorder::None => "none",
+            XlsxBorder::Thin => "thin",
+            XlsxBorder::Medium => "medium",
+            XlsxBorder::Dashed => "dashed",
+            XlsxBorder::Dotted => "dotted",
+            XlsxBorder::Thick => "thick",
+            XlsxBorder::Double => "double",
+            XlsxBorder::Hair => "hair",
+            XlsxBorder::MediumDashed => "mediumDashed",
+            XlsxBorder::DashDot => "dashDot",
+            XlsxBorder::MediumDashDot => "mediumDashDot",
+            XlsxBorder::DashDotDot => "dashDotDot",
+            XlsxBorder::MediumDashDotDot => "mediumDashDotDot",
+            XlsxBorder::SlantDashDot => "slantDashDot",
         }
     }
 }
