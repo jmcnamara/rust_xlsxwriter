@@ -55,6 +55,9 @@ examples are usually repeated in the documentation.
 * doc_format_set_border_color.rs - Demonstrates setting a cell border and
   color.
 
+* doc_format_set_border_diagonal.rs - Demonstrates setting cell diagonal
+  borders.
+
 * doc_format_set_font_color.rs - Demonstrates setting the italic property
   for a format.
 

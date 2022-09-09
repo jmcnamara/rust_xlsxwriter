@@ -5,7 +5,9 @@
 
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
-use crate::{XlsxAlign, XlsxBorder, XlsxColor, XlsxPattern, XlsxScript, XlsxUnderline};
+use crate::{
+    XlsxAlign, XlsxBorder, XlsxColor, XlsxDiagonalBorder, XlsxPattern, XlsxScript, XlsxUnderline,
+};
 
 pub struct Styles<'a> {
     pub(crate) writer: XMLWriter,
@@ -346,7 +348,26 @@ impl<'a> Styles<'a> {
 
     // Write the <border> element.
     fn write_border(&mut self, xf_format: &Format) {
-        self.writer.xml_start_tag("border");
+        match xf_format.border_diagonal_type {
+            XlsxDiagonalBorder::None => {
+                self.writer.xml_start_tag("border");
+            }
+            XlsxDiagonalBorder::BorderUp => {
+                let attributes = vec![("diagonalUp", "1".to_string())];
+                self.writer.xml_start_tag_attr("border", &attributes);
+            }
+            XlsxDiagonalBorder::BorderDown => {
+                let attributes = vec![("diagonalDown", "1".to_string())];
+                self.writer.xml_start_tag_attr("border", &attributes);
+            }
+            XlsxDiagonalBorder::BorderUpDown => {
+                let attributes = vec![
+                    ("diagonalUp", "1".to_string()),
+                    ("diagonalDown", "1".to_string()),
+                ];
+                self.writer.xml_start_tag_attr("border", &attributes);
+            }
+        }
 
         // Write the four border elements.
         self.write_sub_border("left", xf_format.border_left, xf_format.border_left_color);
@@ -361,9 +382,11 @@ impl<'a> Styles<'a> {
             xf_format.border_bottom,
             xf_format.border_bottom_color,
         );
-
-        // Write the diagonal element.
-        self.write_diagonal();
+        self.write_sub_border(
+            "diagonal",
+            xf_format.border_diagonal,
+            xf_format.border_diagonal_color,
+        );
 
         self.writer.xml_end_tag("border");
     }
@@ -392,11 +415,6 @@ impl<'a> Styles<'a> {
         self.writer.xml_empty_tag_attr("color", &attributes);
 
         self.writer.xml_end_tag(border_type);
-    }
-
-    // Write the <diagonal> element.
-    fn write_diagonal(&mut self) {
-        self.writer.xml_empty_tag("diagonal");
     }
 
     // Write the <cellStyleXfs> element.
