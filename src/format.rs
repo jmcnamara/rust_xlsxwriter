@@ -90,8 +90,9 @@
 ///
 /// # Format methods and Format properties
 ///
-/// The following table shows the Excel format categories, in the order shown on
-/// the "Format Cell" dialog, and the equivalent `rust_xlsxwriter` Format method:
+/// The following table shows the Excel format categories, in the order shown in
+/// the Excel "Format Cell" dialog, and the equivalent `rust_xlsxwriter` Format
+/// method:
 ///
 /// | Category        | Description           |  Method Name                                                          |
 /// | :-------------- | :-------------------- |  :------------------------------------------------------------------- |
@@ -632,6 +633,11 @@ impl Format {
             || self.text_wrap
             || self.shrink
             || self.reading_direction != 0
+    }
+
+    // Check if the format has protection properties set.
+    pub(crate) fn has_protection(&self) -> bool {
+        self.locked == false || self.hidden
     }
 
     // -----------------------------------------------------------------------
@@ -2014,6 +2020,80 @@ impl Format {
         self.border_diagonal_type = border_type;
         self
     }
+
+    /// Set the Format cell unlocked state.
+    ///
+    /// This method can be used to allow modification of a cell in a protected
+    /// worksheet. In Excel, cell locking is turned on by default for all cells.
+    /// However, it only has an effect if the worksheet has been protected using
+    /// the `worksheet.protect()` method (not implemented yet).
+    ///
+    pub fn set_unlocked(mut self) -> Format {
+        self.locked = false;
+        self
+    }
+
+    /// Set the Format property to hide formulas in a cell.
+    ///
+    /// This method can be used to hide a formula while still displaying its
+    /// result. This is generally used to hide complex calculations from end
+    /// users who are only interested in the result. It only has an effect if
+    /// the worksheet has been protected using the `worksheet.protect()` method
+    /// (not implemented yet).
+    ///
+    pub fn set_hidden(mut self) -> Format {
+        self.hidden = true;
+        self
+    }
+
+    /// Unset the bold Format property back to its default "off" state.
+    /// The opposite of [`set_bold()`](Format::set_bold()).
+    pub fn unset_bold(mut self) -> Format {
+        self.bold = false;
+        self
+    }
+
+    /// Unset the italic Format property back to its default "off" state.
+    /// The opposite of [`set_italic()`](Format::set_italic()).
+    pub fn unset_italic(mut self) -> Format {
+        self.italic = false;
+        self
+    }
+
+    /// Unset the font strikeout Format property back to its default "off" state.
+    /// The opposite of [`set_font_strikeout()`](Format::set_font_strikeout()).
+    pub fn unset_font_strikeout(mut self) -> Format {
+        self.font_strikeout = false;
+        self
+    }
+
+    /// Unset the text wrap Format property back to its default "off" state.
+    /// The opposite of [`set_text_wrap()`](Format::set_text_wrap()).
+    pub fn unset_text_wrap(mut self) -> Format {
+        self.text_wrap = false;
+        self
+    }
+
+    /// Unset the shrink Format property back to its default "off" state.
+    /// The opposite of [`set_shrink()`](Format::set_shrink()).
+    pub fn unset_shrink(mut self) -> Format {
+        self.shrink = false;
+        self
+    }
+
+    /// Set the locked Format property back to its default "on" state.
+    /// The opposite of [`set_unlocked()`](Format::set_unlocked()).
+    pub fn set_locked(mut self) -> Format {
+        self.locked = true;
+        self
+    }
+
+    /// Unset the hidden Format property back to its default "off" state.
+    /// The opposite of [`set_hidden()`](Format::set_hidden()).
+    pub fn unset_hidden(mut self) -> Format {
+        self.hidden = false;
+        self
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -2473,6 +2553,7 @@ pub enum XlsxAlign {
 #[cfg(test)]
 mod tests {
 
+    use super::Format;
     use super::XlsxColor;
 
     #[test]
@@ -2495,5 +2576,27 @@ mod tests {
         assert_eq!("FFFFFF", XlsxColor::White.hex_value());
         assert_eq!("FFFF00", XlsxColor::Yellow.hex_value());
         assert_eq!("ABCDEF", XlsxColor::RGB(0xABCDEF).hex_value());
+    }
+
+    #[test]
+    fn test_unset() {
+        let format1 = Format::default();
+        let format2 = Format::new()
+            .set_bold()
+            .set_italic()
+            .set_font_strikeout()
+            .set_text_wrap()
+            .set_shrink()
+            .set_unlocked()
+            .set_hidden()
+            .unset_bold()
+            .unset_italic()
+            .unset_font_strikeout()
+            .unset_text_wrap()
+            .unset_shrink()
+            .set_locked()
+            .unset_hidden();
+
+        assert_eq!(format1.format_key(), format2.format_key());
     }
 }

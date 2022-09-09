@@ -466,6 +466,7 @@ impl<'a> Styles<'a> {
             ("xfId", "0".to_string()),
         ];
 
+        let has_protection = xf_format.has_protection();
         let has_alignment = xf_format.has_alignment();
         let apply_alignment = xf_format.apply_alignment();
 
@@ -489,16 +490,42 @@ impl<'a> Styles<'a> {
             attributes.push(("applyAlignment", "1".to_string()));
         }
 
-        if has_alignment {
+        if has_protection {
+            attributes.push(("applyProtection", "1".to_string()));
+        }
+
+        if has_alignment || has_protection {
             self.writer.xml_start_tag_attr("xf", &attributes);
 
-            // Write the alignment element.
-            self.write_alignment(xf_format);
+            if has_alignment {
+                // Write the alignment element.
+                self.write_alignment(xf_format);
+            }
+
+            if has_protection {
+                // Write the protection element.
+                self.write_protection(xf_format);
+            }
 
             self.writer.xml_end_tag("xf");
         } else {
             self.writer.xml_empty_tag_attr("xf", &attributes);
         }
+    }
+
+    // Write the <protection> element.
+    fn write_protection(&mut self, xf_format: &Format) {
+        let mut attributes = vec![];
+
+        if xf_format.locked == false {
+            attributes.push(("locked", "0".to_string()));
+        }
+
+        if xf_format.hidden == true {
+            attributes.push(("hidden", "1".to_string()));
+        }
+
+        self.writer.xml_empty_tag_attr("protection", &attributes);
     }
 
     // Write the <alignment> element.
