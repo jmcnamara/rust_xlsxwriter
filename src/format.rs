@@ -11,9 +11,62 @@
 /// The properties of a cell that can be formatted include: fonts, colors,
 /// patterns, borders, alignment and number formatting.
 ///
-/// TODO: add image
+/// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_intro.png">
 ///
-/// TODO: add code
+/// The output file above was created with the following code:
+///
+/// ```
+/// # // This code is available in examples/doc_format_intro.rs
+/// #
+/// use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file.
+///     let mut workbook = Workbook::new("formats.xlsx");
+///
+///     // Add a worksheet.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Make the first column wider for clarity.
+///     worksheet.set_column_width(0, 0, 14)?;
+///
+///     // Create some sample formats to display
+///     let format1 = Format::new().set_font_name("Arial");
+///     worksheet.write_string(0, 0, "Fonts", &format1)?;
+///
+///     let format2 = Format::new().set_font_name("Algerian").set_font_size(14);
+///     worksheet.write_string(1, 0, "Fonts", &format2)?;
+///
+///     let format3 = Format::new().set_font_name("Comic Sans MS");
+///     worksheet.write_string(2, 0, "Fonts", &format3)?;
+///
+///     let format4 = Format::new().set_font_name("Edwardian Script ITC");
+///     worksheet.write_string(3, 0, "Fonts", &format4)?;
+///
+///     let format5 = Format::new().set_font_color(XlsxColor::Red);
+///     worksheet.write_string(4, 0, "Font color", &format5)?;
+///
+///     let format6 = Format::new().set_background_color(XlsxColor::RGB(0xDAA520));
+///     worksheet.write_string(5, 0, "Fills", &format6)?;
+///
+///     let format7 = Format::new().set_border(XlsxBorder::Thin);
+///     worksheet.write_string(6, 0, "Borders", &format7)?;
+///
+///     let format8 = Format::new().set_bold();
+///     worksheet.write_string(7, 0, "Bold", &format8)?;
+///
+///     let format9 = Format::new().set_italic();
+///     worksheet.write_string(8, 0, "Italic", &format9)?;
+///
+///     let format10 = Format::new().set_bold().set_italic();
+///     worksheet.write_string(9, 0, "Bold and Italic", &format10)?;
+///
+///      workbook.close()?;
+///
+///      Ok(())
+///  }
+/// ```
+///
 ///
 /// # Creating and using a Format object
 ///
@@ -127,8 +180,8 @@
 /// | **Fill**        | Cell pattern          |  [`set_pattern()`](Format::set_pattern())                             |
 /// |                 | Background color      |  [`set_background_color()`](Format::set_background_color())           |
 /// |                 | Foreground color      |  [`set_foreground_color()`](Format::set_foreground_color())           |
-/// | **Protection**  | Unlock cells          |  format_set_unlocked()                                                |
-/// |                 | Hide formulas         |  format_set_hidden()                                                  |
+/// | **Protection**  | Unlock cells          |  [`set_unlocked()`](Format::set_unlocked())                           |
+/// |                 | Hide formulas         |  [`set_hidden()`](Format::set_hidden())                               |
 ///
 /// # Format Colors
 ///
