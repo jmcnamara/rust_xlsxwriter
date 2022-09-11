@@ -124,7 +124,7 @@ impl<'a> Styles<'a> {
             self.writer.xml_empty_tag("i");
         }
 
-        if xf_format.font_strikeout {
+        if xf_format.font_strikethrough {
             self.writer.xml_empty_tag("strike");
         }
 
@@ -517,11 +517,11 @@ impl<'a> Styles<'a> {
     fn write_protection(&mut self, xf_format: &Format) {
         let mut attributes = vec![];
 
-        if xf_format.locked == false {
+        if !xf_format.locked {
             attributes.push(("locked", "0".to_string()));
         }
 
-        if xf_format.hidden == true {
+        if xf_format.hidden {
             attributes.push(("hidden", "1".to_string()));
         }
 

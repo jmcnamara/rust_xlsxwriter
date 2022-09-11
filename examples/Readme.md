@@ -11,6 +11,11 @@ examples are usually repeated in the documentation.
 * app_demo.rs - A simple, getting started, example of some of the features
   of the rust_xlsxwriter library.
 
+* app_formatting.rs - An example of the various cell formatting options
+  that are available in the rust_xlsxwriter library. These are laid out on
+  worksheets that correspond to the sections of the Excel "Format Cells"
+  dialog.
+
 * app_perf_test.rs - Simple performance test for rust_xlsxwriter.
 
 * app_right_to_left.rs - Example of using rust_xlsxwriter to create a
@@ -67,8 +72,8 @@ examples are usually repeated in the documentation.
 * doc_format_set_font_size.rs - Demonstrates setting the font size for a
   format.
 
-* doc_format_set_font_strikeout.rs - Demonstrates setting the text
-  strikeout/strikethrough property for a format.
+* doc_format_set_font_strikethrough.rs - Demonstrates setting the text
+  strikethrough property for a format.
 
 * doc_format_set_foreground_color.rs - Demonstrates setting the
   foreground/pattern color.

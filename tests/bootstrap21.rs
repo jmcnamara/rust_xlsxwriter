@@ -12,7 +12,7 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
-    let format = Format::new().set_font_strikeout();
+    let format = Format::new().set_font_strikethrough();
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string(0, 0, "Strikeout Text", &format)?;
@@ -23,7 +23,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn bootstrap21_strikeout_text() {
+fn bootstrap21_strikethrough_text() {
     let testcase = "bootstrap21";
 
     let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);

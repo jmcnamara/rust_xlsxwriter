@@ -86,7 +86,6 @@
 /// <img
 /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_clone.png">
 ///
-/// TODO: Merging
 ///
 /// # Format methods and Format properties
 ///
@@ -110,7 +109,7 @@
 /// |                 | Bold                  |  [`set_bold()`](Format::set_bold())                                   |
 /// |                 | Italic                |  [`set_italic()`](Format::set_italic())                               |
 /// |                 | Underline             |  [`set_underline()`](Format::set_underline())                         |
-/// |                 | Strikeout             |  [`set_font_strikeout()`](Format::set_font_strikeout())               |
+/// |                 | Strikethrough         |  [`set_font_strikethrough()`](Format::set_font_strikethrough())       |
 /// |                 | Super/Subscript       |  [`set_font_script()`](Format::set_font_script())                     |
 /// | **Border**      | Cell border           |  [`set_border()`](Format::set_border())                               |
 /// |                 | Bottom border         |  [`set_border_bottom()`](Format::set_border_bottom())                 |
@@ -385,7 +384,7 @@ pub struct Format {
     pub(crate) font_name: String,
     pub(crate) font_size: f64,
     pub(crate) font_color: XlsxColor,
-    pub(crate) font_strikeout: bool,
+    pub(crate) font_strikethrough: bool,
     pub(crate) font_script: XlsxScript,
     pub(crate) font_family: u8,
     pub(crate) font_charset: u8,
@@ -473,7 +472,7 @@ impl Format {
             font_name: "Calibri".to_string(),
             font_size: 11.0,
             font_color: XlsxColor::Automatic,
-            font_strikeout: false,
+            font_strikethrough: false,
             font_script: XlsxScript::None,
             font_family: 2,
             font_charset: 0,
@@ -558,7 +557,7 @@ impl Format {
             self.font_scheme,
             self.font_script as u8,
             self.font_size,
-            self.font_strikeout,
+            self.font_strikethrough,
             self.italic,
             self.theme,
             self.underline as u8,
@@ -637,7 +636,7 @@ impl Format {
 
     // Check if the format has protection properties set.
     pub(crate) fn has_protection(&self) -> bool {
-        self.locked == false || self.hidden
+        self.hidden || !self.locked
     }
 
     // -----------------------------------------------------------------------
@@ -1116,15 +1115,15 @@ impl Format {
         self
     }
 
-    /// Set the Format font strikeout property.
+    /// Set the Format font strikethrough property.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates setting the text strikeout/strikethrough
+    /// The following example demonstrates setting the text strikethrough
     /// property for a format.
     ///
     /// ```
-    /// # // This code is available in examples/doc_format_set_font_strikeout.rs
+    /// # // This code is available in examples/doc_format_set_font_strikethrough.rs
     /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
@@ -1133,9 +1132,9 @@ impl Format {
     /// #     let mut workbook = Workbook::new("formats.xlsx");
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     let format = Format::new().set_font_strikeout();
+    ///     let format = Format::new().set_font_strikethrough();
     ///
-    ///     worksheet.write_string(0, 0, "Strikeout Text", &format)?;
+    ///     worksheet.write_string(0, 0, "Strikethrough Text", &format)?;
     ///
     /// #     workbook.close()?;
     /// #
@@ -1145,10 +1144,11 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_font_strikeout.png">
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/format_set_font_strikethrough.png">
     ///
-    pub fn set_font_strikeout(mut self) -> Format {
-        self.font_strikeout = true;
+    pub fn set_font_strikethrough(mut self) -> Format {
+        self.font_strikethrough = true;
         self
     }
 
@@ -2060,10 +2060,10 @@ impl Format {
         self
     }
 
-    /// Unset the font strikeout Format property back to its default "off" state.
-    /// The opposite of [`set_font_strikeout()`](Format::set_font_strikeout()).
-    pub fn unset_font_strikeout(mut self) -> Format {
-        self.font_strikeout = false;
+    /// Unset the font strikethrough Format property back to its default "off" state.
+    /// The opposite of [`set_font_strikethrough()`](Format::set_font_strikethrough()).
+    pub fn unset_font_strikethrough(mut self) -> Format {
+        self.font_strikethrough = false;
         self
     }
 
@@ -2584,14 +2584,14 @@ mod tests {
         let format2 = Format::new()
             .set_bold()
             .set_italic()
-            .set_font_strikeout()
+            .set_font_strikethrough()
             .set_text_wrap()
             .set_shrink()
             .set_unlocked()
             .set_hidden()
             .unset_bold()
             .unset_italic()
-            .unset_font_strikeout()
+            .unset_font_strikethrough()
             .unset_text_wrap()
             .unset_shrink()
             .set_locked()
