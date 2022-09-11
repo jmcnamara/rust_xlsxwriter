@@ -4,9 +4,13 @@ This directory contains working examples showing different features of the
 rust_xlsxwriter library.
 
 The `app_{name}.rs` examples are small complete programs showing a feature or
-collection of features. The `doc_{struct}_{function}.rs` examples are more
-specific and generally show how an individual function works. The `doc_*.rs`
-examples are usually repeated in the documentation.
+collection of features.
+
+The `doc_{struct}_{function}.rs` examples are more specific examples from the
+documentation and generally show how an individual function works.
+
+* app_colors.rs - A sample palette of the the defined colors and user
+  defined RGB colors available in the rust_xlsxwriter library.
 
 * app_demo.rs - A simple, getting started, example of some of the features
   of the rust_xlsxwriter library.
