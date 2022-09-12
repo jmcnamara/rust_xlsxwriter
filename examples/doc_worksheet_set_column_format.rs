@@ -15,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
     let red_format = Format::new().set_font_color(XlsxColor::Red);
 
     // Set the column format.
-    worksheet.set_column_format(1, 1, &red_format)?;
+    worksheet.set_column_format(1, &red_format)?;
 
     // Add some unformatted text that adopts the column format.
     worksheet.write_string_only(0, 1, "Hello")?;

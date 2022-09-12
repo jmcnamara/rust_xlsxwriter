@@ -14,7 +14,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Make the first column wider for clarity.
-    worksheet.set_column_width(0, 0, 14)?;
+    worksheet.set_column_width(0, 14)?;
 
     // Create some sample formats to display
     let format1 = Format::new().set_font_name("Arial");

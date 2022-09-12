@@ -24,7 +24,8 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet().set_name("Number")?;
 
     // Make the header row and columns taller and wider for clarity.
-    worksheet.set_column_width(0, 1, 18)?;
+    worksheet.set_column_width(0, 18)?;
+    worksheet.set_column_width(1, 18)?;
     worksheet.set_row_height(0, 25)?;
 
     // Add some descriptive text and the formatted numbers.
@@ -86,7 +87,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet().set_name("Alignment")?;
 
     // Make some rows and columns taller and wider for clarity.
-    worksheet.set_column_width(0, 0, 18)?;
+    worksheet.set_column_width(0, 18)?;
     for row_num in 0..5 {
         worksheet.set_row_height(row_num, 30)?;
     }
@@ -145,7 +146,8 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet().set_name("Font")?;
 
     // Make the header row and columns taller and wider for clarity.
-    worksheet.set_column_width(0, 1, 18)?;
+    worksheet.set_column_width(0, 18)?;
+    worksheet.set_column_width(1, 18)?;
     worksheet.set_row_height(0, 25)?;
 
     // Add some descriptive text at the top of the worksheet.
@@ -195,7 +197,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet().set_name("Border")?;
 
     // Make the header row and columns taller and wider for clarity.
-    worksheet.set_column_width(2, 2, 18)?;
+    worksheet.set_column_width(2, 18)?;
     worksheet.set_row_height(0, 25)?;
 
     // Add some descriptive text at the top of the worksheet.
@@ -222,7 +224,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet().set_name("Fill")?;
 
     // Make the header row and columns taller and wider for clarity.
-    worksheet.set_column_width(1, 1, 18)?;
+    worksheet.set_column_width(1, 18)?;
     worksheet.set_row_height(0, 25)?;
 
     // Add some descriptive text at the top of the worksheet.

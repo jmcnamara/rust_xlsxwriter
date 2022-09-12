@@ -14,10 +14,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
 
-    worksheet.set_column_width(2, 1, 6.86)?; // Reversed first/last col.
-    worksheet.set_column_width(0, 0, 14)?; // Unsorted order.
-    worksheet.set_column_width(0, 0, 14)?; // Overwrite existing value.
-    worksheet.set_column_width(3, 5, 0.92)?;
+    worksheet.set_column_width(2, 6.86)?;
+    worksheet.set_column_width(1, 6.86)?;
+    worksheet.set_column_width(0, 14)?; // Unsorted order.
+    worksheet.set_column_width(0, 14)?; // Overwrite existing value.
+    worksheet.set_column_width(3, 0.92)?;
+    worksheet.set_column_width(4, 0.92)?;
+    worksheet.set_column_width(5, 0.92)?;
 
     worksheet.write_number_only(8, 0, 123)?; // A cell to test dimensions.
 
@@ -31,9 +34,12 @@ fn create_new_xlsx_file_pixels(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
 
-    worksheet.set_column_width_pixels(2, 1, 53)?; // Reversed first/last col.
-    worksheet.set_column_width_pixels(0, 0, 103)?; // Unsorted order.
-    worksheet.set_column_width_pixels(3, 5, 11)?;
+    worksheet.set_column_width_pixels(2, 53)?;
+    worksheet.set_column_width_pixels(1, 53)?;
+    worksheet.set_column_width_pixels(0, 103)?; // Unsorted order.
+    worksheet.set_column_width_pixels(3, 11)?;
+    worksheet.set_column_width_pixels(4, 11)?;
+    worksheet.set_column_width_pixels(5, 11)?;
 
     worksheet.write_number_only(8, 0, 123)?; // A cell to test dimensions.
 

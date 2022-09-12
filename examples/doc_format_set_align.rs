@@ -15,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_row_height(1, 30)?;
     worksheet.set_row_height(2, 30)?;
     worksheet.set_row_height(3, 30)?;
-    worksheet.set_column_width(0, 0, 18)?;
+    worksheet.set_column_width(0, 18)?;
 
     // Create some alignment formats.
     let format1 = Format::new().set_align(XlsxAlign::Center);

@@ -17,8 +17,9 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string_only(0, 4, "Narrower")?;
 
     // Set the column width in pixels.
-    worksheet.set_column_width_pixels(2, 2, 117)?; // Single column.
-    worksheet.set_column_width_pixels(4, 5, 33)?; // Column range.
+    worksheet.set_column_width_pixels(2, 117)?;
+    worksheet.set_column_width_pixels(4, 33)?;
+    worksheet.set_column_width_pixels(5, 33)?;
 
     workbook.close()?;
 

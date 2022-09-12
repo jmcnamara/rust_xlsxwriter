@@ -15,8 +15,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format1 = Format::new().set_bold();
 
     worksheet.write_string_only(2, 2, "Rust")?;
-    worksheet.set_column_format(3, 2, &format1)?; // Reversed first/last col.
-    worksheet.set_column_format(2, 3, &format1)?; // Overwrite format.
+    worksheet.set_column_format(3, &format1)?;
+    worksheet.set_column_format(2, &format1)?;
+    worksheet.set_column_format(2, &format1)?; // Overwrite format.
+    worksheet.set_column_format(3, &format1)?; // Overwrite format.
 
     workbook.close()?;
 

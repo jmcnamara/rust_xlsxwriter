@@ -16,8 +16,9 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string_only(0, 4, "Narrower")?;
 
     // Set the column width in Excel character units.
-    worksheet.set_column_width(2, 2, 16)?; // Single column.
-    worksheet.set_column_width(4, 5, 4)?; // Column range.
+    worksheet.set_column_width(2, 16)?;
+    worksheet.set_column_width(4, 4)?;
+    worksheet.set_column_width(5, 4)?;
 
     workbook.close()?;
 

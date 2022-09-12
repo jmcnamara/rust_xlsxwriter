@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet1 = workbook.add_worksheet();
 
     // Make the column wider for clarity.
-    worksheet1.set_column_width(0, 0, 25)?;
+    worksheet1.set_column_width(0, 25)?;
 
     // Standard direction:         | A1 | B1 | C1 | ...
     worksheet1.write_string_only(0, 0, "نص عربي / English text")?;
@@ -31,7 +31,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet2.set_right_to_left();
 
     // Make the column wider for clarity.
-    worksheet2.set_column_width(0, 0, 25)?;
+    worksheet2.set_column_width(0, 25)?;
 
     // Right to left direction:    ... | C1 | B1 | A1 |
     worksheet2.write_string_only(0, 0, "نص عربي / English text")?;

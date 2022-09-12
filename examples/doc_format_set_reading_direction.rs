@@ -11,7 +11,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a new Excel file.
     let mut workbook = Workbook::new("formats.xlsx");
     let worksheet = workbook.add_worksheet();
-    worksheet.set_column_width(0, 0, 25)?;
+    worksheet.set_column_width(0, 25)?;
 
     let format1 = Format::new().set_reading_direction(1);
     let format2 = Format::new().set_reading_direction(2);

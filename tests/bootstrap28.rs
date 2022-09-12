@@ -16,19 +16,24 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format2 = Format::new().set_italic();
     let format3 = Format::new().set_bold().set_italic();
 
-    worksheet.set_column_format(0, 0, &format1)?;
-    worksheet.set_column_format(1, 1, &format2)?;
-    worksheet.set_column_format(2, 2, &format1)?;
+    worksheet.set_column_format(0, &format1)?;
+    worksheet.set_column_format(1, &format2)?;
+    worksheet.set_column_format(2, &format1)?;
 
-    worksheet.set_column_format(3, 3, &format1)?;
-    worksheet.set_column_width(3, 3, 5.86)?;
+    worksheet.set_column_format(3, &format1)?;
+    worksheet.set_column_width(3, 5.86)?;
 
-    worksheet.set_column_format(4, 7, &format1)?;
-    worksheet.set_column_width(4, 7, 6.43)?;
+    worksheet.set_column_format(4, &format1)?;
+    worksheet.set_column_format(5, &format1)?;
+    worksheet.set_column_format(6, &format1)?;
+    worksheet.set_column_format(7, &format1)?;
+    worksheet.set_column_width(4, 6.43)?;
+    worksheet.set_column_width(5, 6.43)?;
+    worksheet.set_column_width(6, 6.43)?;
+    worksheet.set_column_width(7, 6.43)?;
 
-    worksheet.set_column_format(8, 8, &format2)?;
-
-    worksheet.set_column_format(5, 5, &format3)?;
+    worksheet.set_column_format(8, &format2)?;
+    worksheet.set_column_format(5, &format3)?;
 
     workbook.close()?;
 

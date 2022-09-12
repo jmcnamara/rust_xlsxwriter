@@ -28,7 +28,7 @@
 ///     let worksheet = workbook.add_worksheet();
 ///
 ///     // Make the first column wider for clarity.
-///     worksheet.set_column_width(0, 0, 14)?;
+///     worksheet.set_column_width(0, 14)?;
 ///
 ///     // Create some sample formats to display
 ///     let format1 = Format::new().set_font_name("Arial");
@@ -1250,7 +1250,7 @@ impl Format {
     /// #     worksheet.set_row_height(1, 30)?;
     /// #     worksheet.set_row_height(2, 30)?;
     /// #     worksheet.set_row_height(3, 30)?;
-    /// #     worksheet.set_column_width(0, 0, 18)?;
+    /// #     worksheet.set_column_width(0, 18)?;
     /// #
     /// #     // Create some alignment formats.
     ///     let format1 = Format::new()
@@ -1497,7 +1497,7 @@ impl Format {
     /// #     // Create a new Excel file.
     /// #     let mut workbook = Workbook::new("formats.xlsx");
     /// #     let worksheet = workbook.add_worksheet();
-    /// #     worksheet.set_column_width(0, 0, 25)?;
+    /// #     worksheet.set_column_width(0, 25)?;
     /// #
     ///     let format1 = Format::new().set_reading_direction(1);
     ///     let format2 = Format::new().set_reading_direction(2);
