@@ -41,6 +41,9 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 /// Sample code to generate the Excel file shown above.
 ///
 /// ```rust
+///
+/// # // This code is available in examples/app_demo.rs
+/// #
 /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
@@ -67,11 +70,13 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 ///     // Write a number with formatting.
 ///     worksheet.write_number(4, 0, 3.00, &decimal_format)?;
 ///
+///     // Write a formula.
+///     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+///
 ///     workbook.close()?;
 ///
 ///     Ok(())
 /// }
-///
 /// ```
 pub struct Worksheet {
     pub(crate) writer: XMLWriter,
@@ -89,6 +94,7 @@ pub struct Worksheet {
     page_setup_changed: bool,
     paper_size: u8,
     right_to_left: bool,
+    default_result: String,
 }
 
 impl Worksheet {
@@ -130,6 +136,7 @@ impl Worksheet {
             page_setup_changed: false,
             paper_size: 0,
             right_to_left: false,
+            default_result: "0".to_string(),
         }
     }
 
@@ -302,7 +309,7 @@ impl Worksheet {
         col: ColNum,
         number: T,
         format: &Format,
-    ) -> Result<(), XlsxError>
+    ) -> Result<&mut Worksheet, XlsxError>
     where
         T: Into<f64>,
     {
@@ -388,7 +395,7 @@ impl Worksheet {
         row: RowNum,
         col: ColNum,
         number: T,
-    ) -> Result<(), XlsxError>
+    ) -> Result<&mut Worksheet, XlsxError>
     where
         T: Into<f64>,
     {
@@ -462,7 +469,7 @@ impl Worksheet {
         col: ColNum,
         string: &str,
         format: &Format,
-    ) -> Result<(), XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_string(row, col, string, Some(format))
     }
@@ -536,18 +543,208 @@ impl Worksheet {
         row: RowNum,
         col: ColNum,
         string: &str,
-    ) -> Result<(), XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_string(row, col, string, None)
     }
 
-    /// TODO
+    /// Write a formatted formula to a worksheet cell.
+    ///
+    /// Write a formula with formatting to a worksheet cell. The format is set
+    /// via a [`Format`] struct which can control the font or color or
+    /// properties such as bold and italic.
+    ///
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `formula` - The formula to write to the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formulas with formatting to a
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_formula.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formulas.xlsx");
+    /// #
+    ///     // Create some formats to use in the worksheet.
+    ///     let bold_format = Format::new().set_bold();
+    ///     let italic_format = Format::new().set_italic();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some formulas with formatting.
+    ///     worksheet.write_formula(0, 0, "=1+2+3", &bold_format)?;
+    ///     worksheet.write_formula(1, 0, "=A1*2", &bold_format)?;
+    ///     worksheet.write_formula(2, 0, "=SIN(PI()/4)", &italic_format)?;
+    ///     worksheet.write_formula(3, 0, "=AVERAGE(1, 2, 3, 4)", &italic_format)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_formula.png">
+    ///
+    pub fn write_formula(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        formula: &str,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_formula(row, col, formula, Some(format), None)
+    }
+
+    /// Write an unformatted formula to a worksheet cell.
+    ///
+    /// Write an unformatted formula to a worksheet cell. This is similar to
+    /// [`write_formula()`](Worksheet::write_formula()) except you don't have to
+    /// supply a [`Format`] so it is useful for writing raw data.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `formula` - The formula to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formulas with formatting to a
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_formula_only.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formulas.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some formulas to the worksheet.
+    ///     worksheet.write_formula_only(0, 0, "=B3 + B4")?;
+    ///     worksheet.write_formula_only(1, 0, "=SIN(PI()/4)")?;
+    ///     worksheet.write_formula_only(2, 0, "=SUM(B1:B5)")?;
+    ///     worksheet.write_formula_only(3, 0, r#"=IF(A3>1,"Yes", "No")"#)?;
+    ///     worksheet.write_formula_only(4, 0, "=AVERAGE(1, 2, 3, 4)")?;
+    ///     worksheet.write_formula_only(5, 0, r#"=DATEVALUE("1-Jan-2023")"#)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_formula_only.png">
+    ///
+    pub fn write_formula_only(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        formula: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_formula(row, col, formula, None, None)
+    }
+
+    /// Write a blank formatted worksheet cell.
+    ///
+    /// Write a blank cell with formatting to a worksheet cell. The format is
+    /// set via a [`Format`] struct.
+    ///
+    /// Excel differentiates between an “Empty” cell and a “Blank” cell. An
+    /// “Empty” cell is a cell which doesn’t contain data or formatting whilst a
+    /// “Blank” cell doesn’t contain data but does contain formatting. Excel
+    /// stores “Blank” cells but ignores “Empty” cells.
+    ///
+    /// The most common case for a formatted blank cell is to write a background
+    /// or a border, see the example below.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing a blank cell with formatting,
+    /// i.e., a cell that has no data but does have formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_blank.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     let format1 = Format::new().set_background_color(XlsxColor::Yellow);
+    ///
+    ///     let format2 = Format::new()
+    ///         .set_background_color(XlsxColor::Yellow)
+    ///         .set_border(XlsxBorder::Thin);
+    ///
+    ///     worksheet.write_blank(1, 1, &format1)?;
+    ///     worksheet.write_blank(3, 1, &format2)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_blank.png">
+    ///
     pub fn write_blank(
         &mut self,
         row: RowNum,
         col: ColNum,
         format: &Format,
-    ) -> Result<(), XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_blank(row, col, format)
     }
@@ -602,7 +799,7 @@ impl Worksheet {
     /// <img
     /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_height.png">
     ///
-    pub fn set_row_height<T>(&mut self, row: RowNum, height: T) -> Result<(), XlsxError>
+    pub fn set_row_height<T>(&mut self, row: RowNum, height: T) -> Result<&mut Worksheet, XlsxError>
     where
         T: Into<f64>,
     {
@@ -631,7 +828,7 @@ impl Worksheet {
             }
         }
 
-        Ok(())
+        Ok(self)
     }
 
     /// Set the height for a row of cells, in pixels.
@@ -683,7 +880,11 @@ impl Worksheet {
     /// <img
     /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_height.png">
     ///
-    pub fn set_row_height_pixels(&mut self, row: RowNum, height: u16) -> Result<(), XlsxError> {
+    pub fn set_row_height_pixels(
+        &mut self,
+        row: RowNum,
+        height: u16,
+    ) -> Result<&mut Worksheet, XlsxError> {
         let height = 0.75 * height as f64;
 
         self.set_row_height(row, height)
@@ -747,7 +948,11 @@ impl Worksheet {
     /// <img
     /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_format.png">
     ///
-    pub fn set_row_format(&mut self, row: RowNum, format: &Format) -> Result<(), XlsxError> {
+    pub fn set_row_format(
+        &mut self,
+        row: RowNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Set a suitable column range for the row dimension check/set.
         let min_col = if self.dimensions.col_min != COL_MAX {
             self.dimensions.col_min
@@ -775,7 +980,7 @@ impl Worksheet {
             }
         }
 
-        Ok(())
+        Ok(self)
     }
 
     /// Set the width for a worksheet column.
@@ -847,7 +1052,11 @@ impl Worksheet {
     /// <img
     /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_width.png">
     ///
-    pub fn set_column_width<T>(&mut self, col: ColNum, width: T) -> Result<(), XlsxError>
+    pub fn set_column_width<T>(
+        &mut self,
+        col: ColNum,
+        width: T,
+    ) -> Result<&mut Worksheet, XlsxError>
     where
         T: Into<f64>,
     {
@@ -867,7 +1076,7 @@ impl Worksheet {
             }
         }
 
-        Ok(())
+        Ok(self)
     }
 
     /// Set the width for a worksheet column in pixels.
@@ -931,7 +1140,11 @@ impl Worksheet {
     /// <img
     /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_width.png">
     ///
-    pub fn set_column_width_pixels(&mut self, col: ColNum, width: u16) -> Result<(), XlsxError> {
+    pub fn set_column_width_pixels(
+        &mut self,
+        col: ColNum,
+        width: u16,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Properties for Calibri 11.
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
@@ -1006,7 +1219,11 @@ impl Worksheet {
     /// <img
     /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_format.png">
     ///
-    pub fn set_column_format(&mut self, col: ColNum, format: &Format) -> Result<(), XlsxError> {
+    pub fn set_column_format(
+        &mut self,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Set a suitable row range for the dimension check/set.
         let min_row = if self.dimensions.row_min != ROW_MAX {
             self.dimensions.row_min
@@ -1034,8 +1251,134 @@ impl Worksheet {
             }
         }
 
-        Ok(())
+        Ok(self)
     }
+
+    /// Write a user defined result to a worksheet formula cell.
+    ///
+    /// The `rust_xlsxwriter` library doesn’t calculate the result of a formula
+    /// written using [`write_formula()`](Worksheet::write_formula()) or
+    /// [`write_formula_only()`](Worksheet::write_formula_only()). Instead it
+    /// stores the value 0 as the formula result. It then sets a global flag in
+    /// the XLSX file to say that all formulas and functions should be
+    /// recalculated when the file is opened.
+    ///
+    /// This works fine with Excel and other spreadsheet applications. However,
+    /// applications that don’t have a facility to calculate formulas will only
+    /// display the 0 results.
+    ///
+    /// If required, it is possible to specify the calculated result of a
+    /// formula using the `set_formula_result()` method.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `result` - The formula result to write to the cell.
+    ///
+    /// # Warnings
+    ///
+    /// You will get a warning if you try to set a formula result for a cell
+    /// that doesn't have a formula.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates manually setting the result of a
+    /// formula.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_formula_result.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formulas.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet
+    ///         .write_formula_only(0, 0, "1+1")?
+    ///         .set_formula_result(0, 0, "2");
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn set_formula_result(&mut self, row: RowNum, col: ColNum, result: &str) -> &mut Worksheet {
+        let mut cell_exists = false;
+
+        if let Some(columns) = self.table.get_mut(&row) {
+            if let Some(CellType::Formula {
+                formula: _,
+                xf_index: _,
+                result: cell_result,
+            }) = columns.get_mut(&col)
+            {
+                *cell_result = result.to_string();
+                cell_exists = true;
+            }
+        }
+
+        if !cell_exists {
+            eprintln!("Cell ({}, {}) doesn't contain a formula.", row, col);
+        }
+
+        self
+    }
+
+    /// Write the default formula result for worksheet formulas.
+    ///
+    /// The `rust_xlsxwriter` library doesn’t calculate the result of a formula
+    /// written using [`write_formula()`](Worksheet::write_formula()) or
+    /// [`write_formula_only()`](Worksheet::write_formula_only()). Instead it
+    /// stores the value 0 as the formula result. It then sets a global flag in
+    /// the XLSX file to say that all formulas and functions should be
+    /// recalculated when the file is opened.
+    ///
+    /// However, for LibreOffice the default formula result should be set to the
+    /// empty string literal `""`, via the `set_formula_result_default()`
+    /// method, to force calculation of the result.
+    ///
+    /// # Arguments
+    ///
+    /// * `result` - The default formula result to write to the cell.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates manually setting the default result
+    /// for all non-calculated formulas in a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_formula_result_default.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("formulas.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.set_formula_result_default("");
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    ///
+    pub fn set_formula_result_default(&mut self, result: &str) -> &mut Worksheet {
+        self.default_result = result.to_string();
+        self
+    }
+
+    // -----------------------------------------------------------------------
+    // Worksheet page setup methods.
+    // -----------------------------------------------------------------------
 
     /// Display the worksheet cells from right to left for some versions of
     /// Excel.
@@ -1212,7 +1555,7 @@ impl Worksheet {
         col: ColNum,
         number: f64,
         format: Option<&Format>,
-    ) -> Result<(), XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -1239,7 +1582,7 @@ impl Worksheet {
 
         self.insert_cell(row, col, cell);
 
-        Ok(())
+        Ok(self)
     }
 
     // Store a string cell.
@@ -1249,7 +1592,7 @@ impl Worksheet {
         col: ColNum,
         string: &str,
         format: Option<&Format>,
-    ) -> Result<(), XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -1275,11 +1618,61 @@ impl Worksheet {
         self.insert_cell(row, col, cell);
         self.uses_string_table = true;
 
-        Ok(())
+        Ok(self)
+    }
+
+    // Store a formula cell.
+    fn store_formula(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        formula: &str,
+        format: Option<&Format>,
+        result: Option<&str>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Get the index of the format object, if any.
+        let xf_index = match format {
+            Some(format) => self.format_index(format),
+            None => 0,
+        };
+
+        let mut formula = formula.to_string();
+
+        // Strip the leading = if it exists.
+        if formula.starts_with('=') {
+            formula.remove(0);
+        }
+
+        // Set the formula result to the user defined value or the default.
+        let result = match result {
+            Some(result) => result.to_string(),
+            None => self.default_result.clone(),
+        };
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::Formula {
+            formula,
+            xf_index,
+            result,
+        };
+
+        self.insert_cell(row, col, cell);
+
+        Ok(self)
     }
 
     // Store a string cell.
-    fn store_blank(&mut self, row: RowNum, col: ColNum, format: &Format) -> Result<(), XlsxError> {
+    fn store_blank(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -1293,7 +1686,7 @@ impl Worksheet {
 
         self.insert_cell(row, col, cell);
 
-        Ok(())
+        Ok(self)
     }
 
     // Insert a cell value into the worksheet table data structure.
@@ -1589,6 +1982,17 @@ impl Worksheet {
                                         &xf_index,
                                     );
                                 }
+                                CellType::Formula {
+                                    formula,
+                                    xf_index,
+                                    result,
+                                } => {
+                                    let xf_index =
+                                        self.get_cell_xf_index(xf_index, row_options, col_num);
+                                    self.write_formula_cell(
+                                        row_num, col_num, formula, &xf_index, result,
+                                    )
+                                }
                                 CellType::Blank { xf_index } => {
                                     let xf_index =
                                         self.get_cell_xf_index(xf_index, row_options, col_num);
@@ -1719,6 +2123,34 @@ impl Worksheet {
             row + 1,
             style,
             string_index
+        )
+        .expect("Couldn't write to file");
+    }
+
+    // Write the <c> element for a string.
+    fn write_formula_cell(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        formula: &str,
+        xf_index: &u32,
+        result: &str,
+    ) {
+        let col_name = self.col_to_name(col);
+        let mut style = String::from("");
+
+        if *xf_index > 0 {
+            style = format!(r#" s="{}""#, *xf_index);
+        }
+
+        write!(
+            &mut self.writer.xmlfile,
+            r#"<c r="{}{}"{}><f>{}</f><v>{}</v></c>"#,
+            col_name,
+            row + 1,
+            style,
+            formula,
+            result
         )
         .expect("Couldn't write to file");
     }
@@ -1854,9 +2286,22 @@ struct ColOptions {
 
 #[derive(Clone)]
 enum CellType {
-    Blank { xf_index: u32 },
-    Number { number: f64, xf_index: u32 },
-    String { string: String, xf_index: u32 },
+    Blank {
+        xf_index: u32,
+    },
+    Number {
+        number: f64,
+        xf_index: u32,
+    },
+    String {
+        string: String,
+        xf_index: u32,
+    },
+    Formula {
+        formula: String,
+        xf_index: u32,
+        result: String,
+    },
 }
 
 // -----------------------------------------------------------------------

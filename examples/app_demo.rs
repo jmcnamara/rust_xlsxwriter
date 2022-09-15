@@ -30,6 +30,9 @@ fn main() -> Result<(), XlsxError> {
     // Write a number with formatting.
     worksheet.write_number(4, 0, 3.00, &decimal_format)?;
 
+    // Write a formula.
+    worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+
     workbook.close()?;
 
     Ok(())

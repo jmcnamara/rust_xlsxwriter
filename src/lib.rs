@@ -18,6 +18,8 @@
 //! Sample code to generate the Excel file shown above.
 //!
 //! ```rust
+//! # // This code is available in examples/app_demo.rs
+//! #
 //! use rust_xlsxwriter::{Format, Workbook, XlsxError};
 //!
 //! fn main() -> Result<(), XlsxError> {
@@ -44,11 +46,13 @@
 //!     // Write a number with formatting.
 //!     worksheet.write_number(4, 0, 3.00, &decimal_format)?;
 //!
+//!     // Write a formula.
+//!     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+//!
 //!     workbook.close()?;
 //!
 //!     Ok(())
 //! }
-//!
 //! ```
 //!
 //! Rust_xlsxwriter is a port of the [XlsxWriter] Python module by the same

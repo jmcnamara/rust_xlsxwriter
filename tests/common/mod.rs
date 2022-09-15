@@ -8,6 +8,7 @@
 use pretty_assertions::assert_eq;
 use regex::Regex;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
 use std::io::Read;
@@ -22,8 +23,21 @@ pub fn get_xlsx_filenames(test_case: &str) -> (String, String) {
 
 // Test the vectors from compare_xlsx_files using pretty_assertions for clearer
 // differentiation.
+#[allow(dead_code)]
 pub fn assert_eq(expected_file: &str, got_file: &str) {
-    let (exp, got) = compare_xlsx_files(expected_file, got_file);
+    let ignore_files: HashSet<&str> = HashSet::new();
+
+    let (exp, got) = compare_xlsx_files(expected_file, got_file, &ignore_files);
+
+    assert_eq!(exp, got);
+}
+
+// Test the vectors from compare_xlsx_files with option to ignore some file or
+// elements. For example "xl/calcChain.xml" and associated metadata, which we
+// don't/can't generate and isn't strictly required by Excel.
+#[allow(dead_code)]
+pub fn assert_eq_most(expected_file: &str, got_file: &str, ignore_files: &HashSet<&str>) {
+    let (exp, got) = compare_xlsx_files(expected_file, got_file, ignore_files);
 
     assert_eq!(exp, got);
 }
@@ -37,7 +51,11 @@ pub fn remove_test_xlsx_file(filename: &str) {
 // structure. If they are the same then we compare each xml file to ensure that
 // files created by rust_xlsxwriter are the same as test files created in Excel.
 // Returns two String vectors for comparison testing.
-fn compare_xlsx_files(exp_file: &str, got_file: &str) -> (Vec<String>, Vec<String>) {
+fn compare_xlsx_files(
+    exp_file: &str,
+    got_file: &str,
+    ignore_files: &HashSet<&str>,
+) -> (Vec<String>, Vec<String>) {
     // Open the xlsx files.
     let exp_fh = match File::open(exp_file) {
         Ok(fh) => fh,
@@ -96,7 +114,10 @@ fn compare_xlsx_files(exp_file: &str, got_file: &str) -> (Vec<String>, Vec<Strin
             }
         };
 
-        exp_filenames.push(file.name().to_string());
+        // Ignore any test specific files like "xl/calcChain.xml".
+        if !ignore_files.contains(file.name()) {
+            exp_filenames.push(file.name().to_string());
+        }
 
         let mut xml_data = String::new();
         file.read_to_string(&mut xml_data).unwrap();
@@ -114,7 +135,10 @@ fn compare_xlsx_files(exp_file: &str, got_file: &str) -> (Vec<String>, Vec<Strin
             }
         };
 
-        got_filenames.push(file.name().to_string());
+        // Ignore any test specific files like "xl/calcChain.xml".
+        if !ignore_files.contains(file.name()) {
+            got_filenames.push(file.name().to_string());
+        }
 
         let mut xml_data = String::new();
         file.read_to_string(&mut xml_data).unwrap();
