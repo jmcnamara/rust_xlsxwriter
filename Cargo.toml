@@ -22,6 +22,7 @@ pretty_assertions = "0.6.1"
 regex = "1.5.6"
 serial_test = "0.4.0"
 tempfile = "3.3.0"
+assert_float_eq = "1"
 
 # Some local package management and release check commands.
 # Uses Cargo Commander.

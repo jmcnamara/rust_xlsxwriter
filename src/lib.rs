@@ -20,6 +20,7 @@
 //! ```rust
 //! # // This code is available in examples/app_demo.rs
 //! #
+//! use chrono::NaiveDate;
 //! use rust_xlsxwriter::{Format, Workbook, XlsxError};
 //!
 //! fn main() -> Result<(), XlsxError> {
@@ -29,9 +30,13 @@
 //!     // Create some formats to use in the worksheet.
 //!     let bold_format = Format::new().set_bold();
 //!     let decimal_format = Format::new().set_num_format("0.000");
+//!     let date_format = Format::new().set_num_format("yyyy-mm-dd");
 //!
 //!     // Add a worksheet to the workbook.
 //!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Set the column width for clarity.
+//!     worksheet.set_column_width(0, 15)?;
 //!
 //!     // Write a string without formatting.
 //!     worksheet.write_string_only(0, 0, "Hello")?;
@@ -48,6 +53,10 @@
 //!
 //!     // Write a formula.
 //!     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+//!
+//!     // Write the date .
+//!     let date = NaiveDate::from_ymd(2023, 1, 25);
+//!     worksheet.write_date(6, 0, date, &date_format)?;
 //!
 //!     workbook.close()?;
 //!

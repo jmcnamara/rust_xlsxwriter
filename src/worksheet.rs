@@ -4,12 +4,12 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 #![warn(missing_docs)]
+use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
+use regex::Regex;
 use std::cmp;
 use std::collections::HashMap;
 use std::io::Write;
 use std::mem;
-
-use regex::Regex;
 
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -41,9 +41,9 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 /// Sample code to generate the Excel file shown above.
 ///
 /// ```rust
-///
 /// # // This code is available in examples/app_demo.rs
 /// #
+/// use chrono::NaiveDate;
 /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
@@ -53,9 +53,13 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 ///     // Create some formats to use in the worksheet.
 ///     let bold_format = Format::new().set_bold();
 ///     let decimal_format = Format::new().set_num_format("0.000");
+///     let date_format = Format::new().set_num_format("yyyy-mm-dd");
 ///
 ///     // Add a worksheet to the workbook.
 ///     let worksheet = workbook.add_worksheet();
+///
+///     // Set the column width for clarity.
+///     worksheet.set_column_width(0, 15)?;
 ///
 ///     // Write a string without formatting.
 ///     worksheet.write_string_only(0, 0, "Hello")?;
@@ -72,6 +76,10 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 ///
 ///     // Write a formula.
 ///     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+///
+///     // Write the date .
+///     let date = NaiveDate::from_ymd(2023, 1, 25);
+///     worksheet.write_date(6, 0, date, &date_format)?;
 ///
 ///     workbook.close()?;
 ///
@@ -747,6 +755,279 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_blank(row, col, format)
+    }
+
+    /// Write a formatted date and time to a worksheet cell.
+    ///
+    /// Write a [`chrono::NaiveDateTime`] instance as an Excel datetime to a
+    /// worksheet cell. The [chrono] framework provides a comprehensive range of
+    /// functions and types for dealing with times and dates. The serial
+    /// dates/times used by Excel don't support timezones so the `Naive` chrono
+    /// variants are used.
+    ///
+    /// Excel stores dates and times as a floating point number with a number
+    /// format to defined how it is displayed. The number format is set via a
+    /// [`Format`] struct which can also control visual formatting such as bold
+    /// and italic text.
+    ///
+    /// [`chrono::NaiveDateTime`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    ///
+    /// [chrono]: https://docs.rs/chrono/latest/chrono/index.html
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `datetime` - A [`chrono::NaiveDateTime`] instance.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted datetimes in an
+    /// Excel worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_datetime.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// # use chrono::NaiveDate;
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create some formats to use with the datetimes below.
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-ddThh::mm:ss");
+    ///     let format4 = Format::new().set_num_format("ddd dd mmm yyyy hh::mm");
+    ///     let format5 = Format::new().set_num_format("dddd, mmmm dd, yyyy hh::mm");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a datetime object.
+    ///     let datetime = NaiveDate::from_ymd(2023, 1, 25).and_hms(12, 30, 0);
+    ///
+    ///     // Write the datetime with different Excel formats.
+    ///     worksheet.write_datetime(0, 0, datetime, &format1)?;
+    ///     worksheet.write_datetime(1, 0, datetime, &format2)?;
+    ///     worksheet.write_datetime(2, 0, datetime, &format3)?;
+    ///     worksheet.write_datetime(3, 0, datetime, &format4)?;
+    ///     worksheet.write_datetime(4, 0, datetime, &format5)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_datetime.png">
+    ///
+    pub fn write_datetime(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        datetime: NaiveDateTime,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = self.datetime_to_excel(datetime);
+
+        // Store the cell data.
+        self.store_number(row, col, number, Some(format))
+    }
+
+    /// Write a formatted date to a worksheet cell.
+    ///
+    /// Write a [`chrono::NaiveDateTime`] instance as an Excel datetime to a
+    /// worksheet cell. The [chrono] framework provides a comprehensive range of
+    /// functions and types for dealing with times and dates. The serial
+    /// dates/times used by Excel don't support timezones so the `Naive` chrono
+    /// variants are used.
+    ///
+    /// Excel stores dates and times as a floating point number with a number
+    /// format to defined how it is displayed. The number format is set via a
+    /// [`Format`] struct which can also control visual formatting such as bold
+    /// and italic text.
+    ///
+    /// [`chrono::NaiveDate`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    ///
+    /// [chrono]: https://docs.rs/chrono/latest/chrono/index.html
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `date` - A [`chrono::NaiveDate`] instance.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted dates in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_date.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// # use chrono::NaiveDate;
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create some formats to use with the dates below.
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd");
+    ///     let format4 = Format::new().set_num_format("ddd dd mmm yyyy");
+    ///     let format5 = Format::new().set_num_format("dddd, mmmm dd, yyyy");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a date object.
+    ///     let date = NaiveDate::from_ymd(2023, 1, 25);
+    ///
+    ///     // Write the date with different Excel formats.
+    ///     worksheet.write_date(0, 0, date, &format1)?;
+    ///     worksheet.write_date(1, 0, date, &format2)?;
+    ///     worksheet.write_date(2, 0, date, &format3)?;
+    ///     worksheet.write_date(3, 0, date, &format4)?;
+    ///     worksheet.write_date(4, 0, date, &format5)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_date.png">
+    ///
+    pub fn write_date(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        date: NaiveDate,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = self.date_to_excel(date);
+
+        // Store the cell data.
+        self.store_number(row, col, number, Some(format))
+    }
+
+    /// Write a formatted time to a worksheet cell.
+    ///
+    /// Write a [`chrono::NaiveDateTime`] instance as an Excel datetime to a
+    /// worksheet cell. The [chrono] framework provides a comprehensive range of
+    /// functions and types for dealing with times and dates. The serial
+    /// dates/times used by Excel don't support timezones so the `Naive` chrono
+    /// variants are used.
+    ///
+    /// Excel stores dates and times as a floating point number with a number
+    /// format to defined how it is displayed. The number format is set via a
+    /// [`Format`] struct which can also control visual formatting such as bold
+    /// and italic text.
+    ///
+    /// [`chrono::NaiveTime`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    ///
+    /// [chrono]: https://docs.rs/chrono/latest/chrono/index.html
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `time` - A [`chrono::NaiveTime`] instance.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted times in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_time.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// # use chrono::NaiveTime;
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create some formats to use with the times below.
+    ///     let format1 = Format::new().set_num_format("h::mm");
+    ///     let format2 = Format::new().set_num_format("hh::mm");
+    ///     let format3 = Format::new().set_num_format("hh::mm:ss");
+    ///     let format4 = Format::new().set_num_format("hh::mm:ss.000");
+    ///     let format5 = Format::new().set_num_format("h::mm AM/PM");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a time object.
+    ///     let time = NaiveTime::from_hms_milli(2, 59, 3, 456);
+    ///
+    ///     // Write the time with different Excel formats.
+    ///     worksheet.write_time(0, 0, time, &format1)?;
+    ///     worksheet.write_time(1, 0, time, &format2)?;
+    ///     worksheet.write_time(2, 0, time, &format3)?;
+    ///     worksheet.write_time(3, 0, time, &format4)?;
+    ///     worksheet.write_time(4, 0, time, &format5)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_time.png">
+    ///
+    pub fn write_time(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        time: NaiveTime,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = self.time_to_excel(time);
+
+        // Store the cell data.
+        self.store_number(row, col, number, Some(format))
     }
 
     /// Set the height for a row of cells.
@@ -1796,6 +2077,57 @@ impl Worksheet {
         xf_index
     }
 
+    // Notes for the date/time handling functions below.
+    //
+    // * Datetimes in Excel are a serial date with days counted from an epoch
+    //   (generally 1899-12-31) and the time as a percentage/decimal of the
+    //   milliseconds in the day.
+    //
+    // * Both are stored in the same f64 value, for example, 2023/01/01 12:00:00 is
+    //   stored as 44927.5 with a separate numeric format like yyyy/mm/dd hh:mm.
+    //
+    // * Excel can also save dates in a text ISO 8601 format in "Strict Open XML
+    //   Spreadsheet" format but this is rarely used in practice.
+    //
+    // * Excel also doesn't use timezones or try to convert or encode timezone
+    //   information in any way.
+
+    // Convert a chrono::NaiveTime to an Excel serial datetime.
+    fn datetime_to_excel(&mut self, datetime: NaiveDateTime) -> f64 {
+        let excel_date = self.date_to_excel(datetime.date());
+        let excel_time = self.time_to_excel(datetime.time());
+
+        excel_date + excel_time
+    }
+
+    // Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
+    // is the number of days since the epoch, which is either 1899-12-31 or
+    // 1904-01-01.
+    fn date_to_excel(&mut self, date: NaiveDate) -> f64 {
+        let epoch = NaiveDate::from_ymd(1899, 12, 31);
+
+        let duration = date - epoch;
+        let mut excel_date = duration.num_days() as f64;
+
+        // For legacy reasons Excel treats 1900 as a leap year. We add an additional
+        // day for dates after the leapday in the 1899 epoch.
+        if epoch.year() == 1899 && excel_date > 59.0 {
+            excel_date += 1.0;
+        }
+
+        excel_date
+    }
+
+    // Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
+    // datetime is the number of milliseconds divided by the total number of
+    // milliseconds in the day.
+    fn time_to_excel(&mut self, time: NaiveTime) -> f64 {
+        let midnight = NaiveTime::from_hms_milli(0, 0, 0, 0);
+        let duration = time - midnight;
+
+        duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -2314,6 +2646,7 @@ mod tests {
     use crate::test_functions::xml_to_vec;
     use crate::worksheet::*;
     use crate::XlsxError;
+    use assert_float_eq::{afe_is_f64_near, afe_near_error_msg, assert_f64_near};
     use pretty_assertions::assert_eq;
     use std::collections::HashMap;
 
@@ -2764,5 +3097,1195 @@ mod tests {
             Ok(_) => assert!(false),
             Err(err) => assert_eq!(err, XlsxError::MaxStringLengthExceeded),
         };
+    }
+
+    #[test]
+    fn date_times() {
+        let mut worksheet = Worksheet::new("".to_string());
+
+        // Test date and time
+        let datetime = NaiveDate::from_ymd(1899, 12, 31).and_hms_milli(0, 0, 0, 0);
+        assert_eq!(0.0, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(1982, 8, 25).and_hms_milli(0, 15, 20, 213);
+        assert_eq!(30188.010650613425, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2065, 4, 19).and_hms_milli(0, 16, 48, 290);
+        assert_eq!(60376.011670023145, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2147, 12, 15).and_hms_milli(0, 55, 25, 446);
+        assert_eq!(90565.038488958337, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2230, 8, 10).and_hms_milli(1, 2, 46, 891);
+        assert_eq!(120753.04359827546, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2313, 4, 6).and_hms_milli(1, 4, 15, 597);
+        assert_eq!(150942.04462496529, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2395, 11, 30).and_hms_milli(1, 9, 40, 889);
+        assert_eq!(181130.04838991899, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2478, 7, 25).and_hms_milli(1, 11, 32, 560);
+        assert_eq!(211318.04968240741, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2561, 3, 21).and_hms_milli(1, 30, 19, 169);
+        assert_eq!(241507.06272186342, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2643, 11, 15).and_hms_milli(1, 48, 25, 580);
+        assert_eq!(271695.07529606484, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2726, 7, 12).and_hms_milli(2, 3, 31, 919);
+        assert_eq!(301884.08578609955, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2809, 3, 6).and_hms_milli(2, 11, 11, 986);
+        assert_eq!(332072.09111094906, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2891, 10, 31).and_hms_milli(2, 24, 37, 95);
+        assert_eq!(362261.10042934027, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(2974, 6, 26).and_hms_milli(2, 35, 7, 220);
+        assert_eq!(392449.10772245371, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3057, 2, 19).and_hms_milli(2, 45, 12, 109);
+        assert_eq!(422637.1147234838, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3139, 10, 17).and_hms_milli(3, 6, 39, 990);
+        assert_eq!(452826.12962951389, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3222, 6, 11).and_hms_milli(3, 8, 8, 251);
+        assert_eq!(483014.13065105322, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3305, 2, 5).and_hms_milli(3, 19, 12, 576);
+        assert_eq!(513203.13834, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3387, 10, 1).and_hms_milli(3, 29, 42, 574);
+        assert_eq!(543391.14563164348, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3470, 5, 27).and_hms_milli(3, 37, 30, 813);
+        assert_eq!(573579.15105107636, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3553, 1, 21).and_hms_milli(4, 14, 38, 231);
+        assert_eq!(603768.17683137732, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3635, 9, 16).and_hms_milli(4, 16, 28, 559);
+        assert_eq!(633956.17810832174, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3718, 5, 13).and_hms_milli(4, 17, 58, 222);
+        assert_eq!(664145.17914608796, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3801, 1, 6).and_hms_milli(4, 21, 41, 794);
+        assert_eq!(694333.18173372687, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3883, 9, 2).and_hms_milli(4, 56, 35, 792);
+        assert_eq!(724522.20596981479, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(3966, 4, 28).and_hms_milli(5, 25, 14, 885);
+        assert_eq!(754710.2258667245, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4048, 12, 21).and_hms_milli(5, 26, 5, 724);
+        assert_eq!(784898.22645513888, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4131, 8, 18).and_hms_milli(5, 46, 44, 68);
+        assert_eq!(815087.24078782403, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4214, 4, 13).and_hms_milli(5, 48, 1, 141);
+        assert_eq!(845275.24167987274, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4296, 12, 7).and_hms_milli(5, 53, 52, 315);
+        assert_eq!(875464.24574438657, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4379, 8, 3).and_hms_milli(6, 14, 48, 580);
+        assert_eq!(905652.26028449077, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4462, 3, 28).and_hms_milli(6, 46, 15, 738);
+        assert_eq!(935840.28212659725, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4544, 11, 22).and_hms_milli(7, 31, 20, 407);
+        assert_eq!(966029.31343063654, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4627, 7, 19).and_hms_milli(7, 58, 33, 754);
+        assert_eq!(996217.33233511576, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4710, 3, 15).and_hms_milli(8, 7, 43, 130);
+        assert_eq!(1026406.3386936343, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4792, 11, 7).and_hms_milli(8, 29, 11, 91);
+        assert_eq!(1056594.3536005903, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4875, 7, 4).and_hms_milli(9, 8, 15, 328);
+        assert_eq!(1086783.3807329629, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(4958, 2, 27).and_hms_milli(9, 30, 41, 781);
+        assert_eq!(1116971.3963169097, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5040, 10, 23).and_hms_milli(9, 34, 4, 462);
+        assert_eq!(1147159.3986627546, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5123, 6, 20).and_hms_milli(9, 37, 23, 945);
+        assert_eq!(1177348.4009715857, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5206, 2, 12).and_hms_milli(9, 37, 56, 655);
+        assert_eq!(1207536.4013501736, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5288, 10, 8).and_hms_milli(9, 45, 12, 230);
+        assert_eq!(1237725.406391551, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5371, 6, 4).and_hms_milli(9, 54, 14, 782);
+        assert_eq!(1267913.412671088, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5454, 1, 28).and_hms_milli(9, 54, 22, 108);
+        assert_eq!(1298101.4127558796, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5536, 9, 24).and_hms_milli(10, 1, 36, 151);
+        assert_eq!(1328290.4177795255, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5619, 5, 20).and_hms_milli(12, 9, 48, 602);
+        assert_eq!(1358478.5068125231, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5702, 1, 14).and_hms_milli(12, 34, 8, 549);
+        assert_eq!(1388667.5237100578, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5784, 9, 8).and_hms_milli(12, 56, 6, 495);
+        assert_eq!(1418855.5389640625, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5867, 5, 6).and_hms_milli(12, 58, 58, 217);
+        assert_eq!(1449044.5409515856, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(5949, 12, 30).and_hms_milli(12, 59, 54, 263);
+        assert_eq!(1479232.5416002662, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6032, 8, 24).and_hms_milli(13, 34, 41, 331);
+        assert_eq!(1509420.5657561459, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6115, 4, 21).and_hms_milli(13, 58, 28, 601);
+        assert_eq!(1539609.5822754744, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6197, 12, 14).and_hms_milli(14, 2, 16, 899);
+        assert_eq!(1569797.5849178126, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6280, 8, 10).and_hms_milli(14, 36, 17, 444);
+        assert_eq!(1599986.6085352316, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6363, 4, 6).and_hms_milli(14, 37, 57, 451);
+        assert_eq!(1630174.60969272, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6445, 11, 30).and_hms_milli(14, 57, 42, 757);
+        assert_eq!(1660363.6234115392, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6528, 7, 26).and_hms_milli(15, 10, 48, 307);
+        assert_eq!(1690551.6325035533, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6611, 3, 22).and_hms_milli(15, 14, 39, 890);
+        assert_eq!(1720739.635183912, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6693, 11, 15).and_hms_milli(15, 19, 47, 988);
+        assert_eq!(1750928.6387498612, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6776, 7, 11).and_hms_milli(16, 4, 24, 344);
+        assert_eq!(1781116.6697262037, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6859, 3, 7).and_hms_milli(16, 22, 23, 952);
+        assert_eq!(1811305.6822216667, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(6941, 10, 31).and_hms_milli(16, 29, 55, 999);
+        assert_eq!(1841493.6874536921, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7024, 6, 26).and_hms_milli(16, 58, 20, 259);
+        assert_eq!(1871681.7071789235, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7107, 2, 21).and_hms_milli(17, 4, 2, 415);
+        assert_eq!(1901870.7111390624, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7189, 10, 16).and_hms_milli(17, 18, 29, 630);
+        assert_eq!(1932058.7211762732, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7272, 6, 11).and_hms_milli(17, 47, 21, 323);
+        assert_eq!(1962247.7412190163, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7355, 2, 5).and_hms_milli(17, 53, 29, 866);
+        assert_eq!(1992435.7454845603, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7437, 10, 2).and_hms_milli(17, 53, 41, 76);
+        assert_eq!(2022624.7456143056, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7520, 5, 28).and_hms_milli(17, 55, 6, 44);
+        assert_eq!(2052812.7465977315, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7603, 1, 21).and_hms_milli(18, 14, 49, 151);
+        assert_eq!(2083000.7602910995, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7685, 9, 16).and_hms_milli(18, 17, 45, 738);
+        assert_eq!(2113189.7623349307, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7768, 5, 12).and_hms_milli(18, 29, 59, 700);
+        assert_eq!(2143377.7708298611, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7851, 1, 7).and_hms_milli(18, 33, 21, 233);
+        assert_eq!(2173566.773162419, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(7933, 9, 2).and_hms_milli(19, 14, 24, 673);
+        assert_eq!(2203754.8016744559, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8016, 4, 27).and_hms_milli(19, 17, 12, 816);
+        assert_eq!(2233942.8036205554, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8098, 12, 22).and_hms_milli(19, 23, 36, 418);
+        assert_eq!(2264131.8080603937, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8181, 8, 17).and_hms_milli(19, 46, 25, 908);
+        assert_eq!(2294319.8239109721, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8264, 4, 13).and_hms_milli(20, 7, 47, 314);
+        assert_eq!(2324508.8387420601, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8346, 12, 8).and_hms_milli(20, 31, 37, 603);
+        assert_eq!(2354696.855296331, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8429, 8, 3).and_hms_milli(20, 39, 57, 770);
+        assert_eq!(2384885.8610853008, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8512, 3, 29).and_hms_milli(20, 50, 17, 67);
+        assert_eq!(2415073.8682530904, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8594, 11, 22).and_hms_milli(21, 2, 57, 827);
+        assert_eq!(2445261.8770581828, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8677, 7, 19).and_hms_milli(21, 23, 5, 519);
+        assert_eq!(2475450.8910360998, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8760, 3, 14).and_hms_milli(21, 34, 49, 572);
+        assert_eq!(2505638.8991848612, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8842, 11, 8).and_hms_milli(21, 39, 5, 944);
+        assert_eq!(2535827.9021521294, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(8925, 7, 4).and_hms_milli(21, 39, 18, 426);
+        assert_eq!(2566015.9022965971, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9008, 2, 28).and_hms_milli(21, 46, 7, 769);
+        assert_eq!(2596203.9070343636, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9090, 10, 24).and_hms_milli(21, 57, 55, 662);
+        assert_eq!(2626392.9152275696, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9173, 6, 19).and_hms_milli(22, 19, 11, 732);
+        assert_eq!(2656580.9299968979, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9256, 2, 13).and_hms_milli(22, 23, 51, 376);
+        assert_eq!(2686769.9332335186, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9338, 10, 9).and_hms_milli(22, 27, 58, 771);
+        assert_eq!(2716957.9360968866, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9421, 6, 5).and_hms_milli(22, 43, 30, 392);
+        assert_eq!(2747146.9468795368, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9504, 1, 30).and_hms_milli(22, 48, 25, 834);
+        assert_eq!(2777334.9502990046, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9586, 9, 24).and_hms_milli(22, 53, 51, 727);
+        assert_eq!(2807522.9540709145, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9669, 5, 20).and_hms_milli(23, 12, 56, 536);
+        assert_eq!(2837711.9673210187, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9752, 1, 14).and_hms_milli(23, 15, 54, 109);
+        assert_eq!(2867899.9693762613, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9834, 9, 10).and_hms_milli(23, 17, 12, 632);
+        assert_eq!(2898088.9702850925, worksheet.datetime_to_excel(datetime));
+
+        let datetime = NaiveDate::from_ymd(9999, 12, 31).and_hms_milli(23, 59, 59, 0);
+        assert_eq!(2958465.999988426, worksheet.datetime_to_excel(datetime));
+
+        // Test date only.
+        let date = NaiveDate::from_ymd(1899, 12, 31);
+        assert_eq!(0.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1900, 1, 1);
+        assert_eq!(1.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1900, 2, 27);
+        assert_eq!(58.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1900, 2, 28);
+        assert_eq!(59.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1900, 3, 1);
+        assert_eq!(61.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1900, 3, 2);
+        assert_eq!(62.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1900, 3, 11);
+        assert_eq!(71.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1900, 4, 8);
+        assert_eq!(99.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1900, 9, 12);
+        assert_eq!(256.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1901, 5, 3);
+        assert_eq!(489.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1901, 10, 13);
+        assert_eq!(652.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1902, 2, 15);
+        assert_eq!(777.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1902, 6, 6);
+        assert_eq!(888.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1902, 9, 25);
+        assert_eq!(999.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1902, 9, 27);
+        assert_eq!(1001.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1903, 4, 26);
+        assert_eq!(1212.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1903, 8, 5);
+        assert_eq!(1313.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1903, 12, 31);
+        assert_eq!(1461.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1904, 1, 1);
+        assert_eq!(1462.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1904, 2, 28);
+        assert_eq!(1520.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1904, 2, 29);
+        assert_eq!(1521.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1904, 3, 1);
+        assert_eq!(1522.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1907, 2, 27);
+        assert_eq!(2615.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1907, 2, 28);
+        assert_eq!(2616.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1907, 3, 1);
+        assert_eq!(2617.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1907, 3, 2);
+        assert_eq!(2618.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1907, 3, 3);
+        assert_eq!(2619.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1907, 3, 4);
+        assert_eq!(2620.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1907, 3, 5);
+        assert_eq!(2621.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1907, 3, 6);
+        assert_eq!(2622.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 1, 1);
+        assert_eq!(36161.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 1, 31);
+        assert_eq!(36191.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 2, 1);
+        assert_eq!(36192.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 2, 28);
+        assert_eq!(36219.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 3, 1);
+        assert_eq!(36220.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 3, 31);
+        assert_eq!(36250.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 4, 1);
+        assert_eq!(36251.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 4, 30);
+        assert_eq!(36280.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 5, 1);
+        assert_eq!(36281.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 5, 31);
+        assert_eq!(36311.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 6, 1);
+        assert_eq!(36312.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 6, 30);
+        assert_eq!(36341.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 7, 1);
+        assert_eq!(36342.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 7, 31);
+        assert_eq!(36372.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 8, 1);
+        assert_eq!(36373.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 8, 31);
+        assert_eq!(36403.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 9, 1);
+        assert_eq!(36404.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 9, 30);
+        assert_eq!(36433.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 10, 1);
+        assert_eq!(36434.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 10, 31);
+        assert_eq!(36464.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 11, 1);
+        assert_eq!(36465.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 11, 30);
+        assert_eq!(36494.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 12, 1);
+        assert_eq!(36495.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(1999, 12, 31);
+        assert_eq!(36525.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 1, 1);
+        assert_eq!(36526.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 1, 31);
+        assert_eq!(36556.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 2, 1);
+        assert_eq!(36557.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 2, 29);
+        assert_eq!(36585.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 3, 1);
+        assert_eq!(36586.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 3, 31);
+        assert_eq!(36616.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 4, 1);
+        assert_eq!(36617.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 4, 30);
+        assert_eq!(36646.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 5, 1);
+        assert_eq!(36647.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 5, 31);
+        assert_eq!(36677.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 6, 1);
+        assert_eq!(36678.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 6, 30);
+        assert_eq!(36707.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 7, 1);
+        assert_eq!(36708.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 7, 31);
+        assert_eq!(36738.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 8, 1);
+        assert_eq!(36739.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 8, 31);
+        assert_eq!(36769.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 9, 1);
+        assert_eq!(36770.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 9, 30);
+        assert_eq!(36799.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 10, 1);
+        assert_eq!(36800.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 10, 31);
+        assert_eq!(36830.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 11, 1);
+        assert_eq!(36831.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 11, 30);
+        assert_eq!(36860.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 12, 1);
+        assert_eq!(36861.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2000, 12, 31);
+        assert_eq!(36891.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 1, 1);
+        assert_eq!(36892.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 1, 31);
+        assert_eq!(36922.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 2, 1);
+        assert_eq!(36923.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 2, 28);
+        assert_eq!(36950.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 3, 1);
+        assert_eq!(36951.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 3, 31);
+        assert_eq!(36981.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 4, 1);
+        assert_eq!(36982.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 4, 30);
+        assert_eq!(37011.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 5, 1);
+        assert_eq!(37012.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 5, 31);
+        assert_eq!(37042.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 6, 1);
+        assert_eq!(37043.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 6, 30);
+        assert_eq!(37072.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 7, 1);
+        assert_eq!(37073.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 7, 31);
+        assert_eq!(37103.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 8, 1);
+        assert_eq!(37104.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 8, 31);
+        assert_eq!(37134.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 9, 1);
+        assert_eq!(37135.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 9, 30);
+        assert_eq!(37164.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 10, 1);
+        assert_eq!(37165.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 10, 31);
+        assert_eq!(37195.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 11, 1);
+        assert_eq!(37196.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 11, 30);
+        assert_eq!(37225.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 12, 1);
+        assert_eq!(37226.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2001, 12, 31);
+        assert_eq!(37256.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 1, 1);
+        assert_eq!(182623.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 1, 31);
+        assert_eq!(182653.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 2, 1);
+        assert_eq!(182654.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 2, 29);
+        assert_eq!(182682.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 3, 1);
+        assert_eq!(182683.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 3, 31);
+        assert_eq!(182713.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 4, 1);
+        assert_eq!(182714.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 4, 30);
+        assert_eq!(182743.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 5, 1);
+        assert_eq!(182744.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 5, 31);
+        assert_eq!(182774.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 6, 1);
+        assert_eq!(182775.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 6, 30);
+        assert_eq!(182804.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 7, 1);
+        assert_eq!(182805.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 7, 31);
+        assert_eq!(182835.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 8, 1);
+        assert_eq!(182836.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 8, 31);
+        assert_eq!(182866.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 9, 1);
+        assert_eq!(182867.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 9, 30);
+        assert_eq!(182896.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 10, 1);
+        assert_eq!(182897.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 10, 31);
+        assert_eq!(182927.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 11, 1);
+        assert_eq!(182928.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 11, 30);
+        assert_eq!(182957.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 12, 1);
+        assert_eq!(182958.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(2400, 12, 31);
+        assert_eq!(182988.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 1, 1);
+        assert_eq!(767011.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 1, 31);
+        assert_eq!(767041.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 2, 1);
+        assert_eq!(767042.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 2, 29);
+        assert_eq!(767070.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 3, 1);
+        assert_eq!(767071.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 3, 31);
+        assert_eq!(767101.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 4, 1);
+        assert_eq!(767102.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 4, 30);
+        assert_eq!(767131.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 5, 1);
+        assert_eq!(767132.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 5, 31);
+        assert_eq!(767162.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 6, 1);
+        assert_eq!(767163.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 6, 30);
+        assert_eq!(767192.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 7, 1);
+        assert_eq!(767193.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 7, 31);
+        assert_eq!(767223.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 8, 1);
+        assert_eq!(767224.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 8, 31);
+        assert_eq!(767254.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 9, 1);
+        assert_eq!(767255.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 9, 30);
+        assert_eq!(767284.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 10, 1);
+        assert_eq!(767285.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 10, 31);
+        assert_eq!(767315.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 11, 1);
+        assert_eq!(767316.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 11, 30);
+        assert_eq!(767345.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 12, 1);
+        assert_eq!(767346.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4000, 12, 31);
+        assert_eq!(767376.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 1, 1);
+        assert_eq!(884254.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 1, 31);
+        assert_eq!(884284.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 2, 1);
+        assert_eq!(884285.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 2, 28);
+        assert_eq!(884312.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 3, 1);
+        assert_eq!(884313.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 3, 31);
+        assert_eq!(884343.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 4, 1);
+        assert_eq!(884344.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 4, 30);
+        assert_eq!(884373.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 5, 1);
+        assert_eq!(884374.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 5, 31);
+        assert_eq!(884404.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 6, 1);
+        assert_eq!(884405.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 6, 30);
+        assert_eq!(884434.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 7, 1);
+        assert_eq!(884435.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 7, 31);
+        assert_eq!(884465.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 8, 1);
+        assert_eq!(884466.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 8, 31);
+        assert_eq!(884496.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 9, 1);
+        assert_eq!(884497.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 9, 30);
+        assert_eq!(884526.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 10, 1);
+        assert_eq!(884527.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 10, 31);
+        assert_eq!(884557.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 11, 1);
+        assert_eq!(884558.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 11, 30);
+        assert_eq!(884587.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 12, 1);
+        assert_eq!(884588.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(4321, 12, 31);
+        assert_eq!(884618.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 1, 1);
+        assert_eq!(2958101.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 1, 31);
+        assert_eq!(2958131.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 2, 1);
+        assert_eq!(2958132.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 2, 28);
+        assert_eq!(2958159.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 3, 1);
+        assert_eq!(2958160.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 3, 31);
+        assert_eq!(2958190.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 4, 1);
+        assert_eq!(2958191.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 4, 30);
+        assert_eq!(2958220.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 5, 1);
+        assert_eq!(2958221.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 5, 31);
+        assert_eq!(2958251.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 6, 1);
+        assert_eq!(2958252.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 6, 30);
+        assert_eq!(2958281.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 7, 1);
+        assert_eq!(2958282.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 7, 31);
+        assert_eq!(2958312.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 8, 1);
+        assert_eq!(2958313.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 8, 31);
+        assert_eq!(2958343.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 9, 1);
+        assert_eq!(2958344.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 9, 30);
+        assert_eq!(2958373.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 10, 1);
+        assert_eq!(2958374.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 10, 31);
+        assert_eq!(2958404.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 11, 1);
+        assert_eq!(2958405.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 11, 30);
+        assert_eq!(2958434.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 12, 1);
+        assert_eq!(2958435.0, worksheet.date_to_excel(date));
+
+        let date = NaiveDate::from_ymd(9999, 12, 31);
+        assert_eq!(2958465.0, worksheet.date_to_excel(date));
+
+        // Test time only.
+        let time = NaiveTime::from_hms_milli(0, 0, 0, 0);
+        assert_f64_near!(0.0, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(0, 15, 20, 213);
+        assert_f64_near!(1.0650613425925924E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(0, 16, 48, 290);
+        assert_f64_near!(1.1670023148148148E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(0, 55, 25, 446);
+        assert_f64_near!(3.8488958333333337E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(1, 2, 46, 891);
+        assert_f64_near!(4.3598275462962965E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(1, 4, 15, 597);
+        assert_f64_near!(4.4624965277777782E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(1, 9, 40, 889);
+        assert_f64_near!(4.8389918981481483E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(1, 11, 32, 560);
+        assert_f64_near!(4.9682407407407404E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(1, 30, 19, 169);
+        assert_f64_near!(6.2721863425925936E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(1, 48, 25, 580);
+        assert_f64_near!(7.5296064814814809E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(2, 3, 31, 919);
+        assert_f64_near!(8.5786099537037031E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(2, 11, 11, 986);
+        assert_f64_near!(9.1110949074074077E-2, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(2, 24, 37, 95);
+        assert_f64_near!(0.10042934027777778, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(2, 35, 7, 220);
+        assert_f64_near!(0.1077224537037037, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(2, 45, 12, 109);
+        assert_f64_near!(0.11472348379629631, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(3, 6, 39, 990);
+        assert_f64_near!(0.12962951388888888, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(3, 8, 8, 251);
+        assert_f64_near!(0.13065105324074075, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(3, 19, 12, 576);
+        assert_f64_near!(0.13833999999999999, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(3, 29, 42, 574);
+        assert_f64_near!(0.14563164351851851, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(3, 37, 30, 813);
+        assert_f64_near!(0.1510510763888889, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(4, 14, 38, 231);
+        assert_f64_near!(0.1768313773148148, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(4, 16, 28, 559);
+        assert_f64_near!(0.17810832175925925, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(4, 17, 58, 222);
+        assert_f64_near!(0.17914608796296297, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(4, 21, 41, 794);
+        assert_f64_near!(0.18173372685185185, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(4, 56, 35, 792);
+        assert_f64_near!(0.2059698148148148, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(5, 25, 14, 885);
+        assert_f64_near!(0.22586672453703704, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(5, 26, 5, 724);
+        assert_f64_near!(0.22645513888888891, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(5, 46, 44, 68);
+        assert_f64_near!(0.24078782407407406, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(5, 48, 1, 141);
+        assert_f64_near!(0.2416798726851852, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(5, 53, 52, 315);
+        assert_f64_near!(0.24574438657407408, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(6, 14, 48, 580);
+        assert_f64_near!(0.26028449074074073, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(6, 46, 15, 738);
+        assert_f64_near!(0.28212659722222222, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(7, 31, 20, 407);
+        assert_f64_near!(0.31343063657407405, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(7, 58, 33, 754);
+        assert_f64_near!(0.33233511574074076, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(8, 7, 43, 130);
+        assert_f64_near!(0.33869363425925925, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(8, 29, 11, 91);
+        assert_f64_near!(0.35360059027777774, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(9, 8, 15, 328);
+        assert_f64_near!(0.380732962962963, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(9, 30, 41, 781);
+        assert_f64_near!(0.39631690972222228, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(9, 34, 4, 462);
+        assert_f64_near!(0.39866275462962958, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(9, 37, 23, 945);
+        assert_f64_near!(0.40097158564814817, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(9, 37, 56, 655);
+        assert_f64_near!(0.40135017361111114, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(9, 45, 12, 230);
+        assert_f64_near!(0.40639155092592594, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(9, 54, 14, 782);
+        assert_f64_near!(0.41267108796296298, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(9, 54, 22, 108);
+        assert_f64_near!(0.41275587962962962, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(10, 1, 36, 151);
+        assert_f64_near!(0.41777952546296299, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(12, 9, 48, 602);
+        assert_f64_near!(0.50681252314814818, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(12, 34, 8, 549);
+        assert_f64_near!(0.52371005787037039, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(12, 56, 6, 495);
+        assert_f64_near!(0.53896406249999995, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(12, 58, 58, 217);
+        assert_f64_near!(0.54095158564814816, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(12, 59, 54, 263);
+        assert_f64_near!(0.54160026620370372, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(13, 34, 41, 331);
+        assert_f64_near!(0.56575614583333333, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(13, 58, 28, 601);
+        assert_f64_near!(0.58227547453703699, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(14, 2, 16, 899);
+        assert_f64_near!(0.58491781249999997, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(14, 36, 17, 444);
+        assert_f64_near!(0.60853523148148148, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(14, 37, 57, 451);
+        assert_f64_near!(0.60969271990740748, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(14, 57, 42, 757);
+        assert_f64_near!(0.6234115393518519, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(15, 10, 48, 307);
+        assert_f64_near!(0.6325035532407407, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(15, 14, 39, 890);
+        assert_f64_near!(0.63518391203703706, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(15, 19, 47, 988);
+        assert_f64_near!(0.63874986111111109, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(16, 4, 24, 344);
+        assert_f64_near!(0.66972620370370362, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(16, 22, 23, 952);
+        assert_f64_near!(0.68222166666666662, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(16, 29, 55, 999);
+        assert_f64_near!(0.6874536921296297, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(16, 58, 20, 259);
+        assert_f64_near!(0.70717892361111112, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(17, 4, 2, 415);
+        assert_f64_near!(0.71113906250000003, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(17, 18, 29, 630);
+        assert_f64_near!(0.72117627314814825, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(17, 47, 21, 323);
+        assert_f64_near!(0.74121901620370367, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(17, 53, 29, 866);
+        assert_f64_near!(0.74548456018518516, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(17, 53, 41, 76);
+        assert_f64_near!(0.74561430555555563, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(17, 55, 6, 44);
+        assert_f64_near!(0.74659773148148145, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(18, 14, 49, 151);
+        assert_f64_near!(0.760291099537037, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(18, 17, 45, 738);
+        assert_f64_near!(0.76233493055555546, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(18, 29, 59, 700);
+        assert_f64_near!(0.77082986111111118, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(18, 33, 21, 233);
+        assert_f64_near!(0.77316241898148153, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(19, 14, 24, 673);
+        assert_f64_near!(0.80167445601851861, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(19, 17, 12, 816);
+        assert_f64_near!(0.80362055555555545, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(19, 23, 36, 418);
+        assert_f64_near!(0.80806039351851855, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(19, 46, 25, 908);
+        assert_f64_near!(0.82391097222222232, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(20, 7, 47, 314);
+        assert_f64_near!(0.83874206018518516, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(20, 31, 37, 603);
+        assert_f64_near!(0.85529633101851854, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(20, 39, 57, 770);
+        assert_f64_near!(0.86108530092592594, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(20, 50, 17, 67);
+        assert_f64_near!(0.86825309027777775, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(21, 2, 57, 827);
+        assert_f64_near!(0.87705818287037041, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(21, 23, 5, 519);
+        assert_f64_near!(0.891036099537037, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(21, 34, 49, 572);
+        assert_f64_near!(0.89918486111111118, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(21, 39, 5, 944);
+        assert_f64_near!(0.90215212962962965, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(21, 39, 18, 426);
+        assert_f64_near!(0.90229659722222222, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(21, 46, 7, 769);
+        assert_f64_near!(0.90703436342592603, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(21, 57, 55, 662);
+        assert_f64_near!(0.91522756944444439, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(22, 19, 11, 732);
+        assert_f64_near!(0.92999689814814823, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(22, 23, 51, 376);
+        assert_f64_near!(0.93323351851851843, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(22, 27, 58, 771);
+        assert_f64_near!(0.93609688657407408, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(22, 43, 30, 392);
+        assert_f64_near!(0.94687953703703709, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(22, 48, 25, 834);
+        assert_f64_near!(0.95029900462962968, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(22, 53, 51, 727);
+        assert_f64_near!(0.95407091435185187, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(23, 12, 56, 536);
+        assert_f64_near!(0.96732101851851848, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(23, 15, 54, 109);
+        assert_f64_near!(0.96937626157407408, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(23, 17, 12, 632);
+        assert_f64_near!(0.97028509259259266, worksheet.time_to_excel(time));
+
+        let time = NaiveTime::from_hms_milli(23, 59, 59, 999);
+        assert_f64_near!(0.99999998842592586, worksheet.time_to_excel(time));
     }
 }

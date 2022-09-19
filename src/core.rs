@@ -4,13 +4,12 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 use crate::xmlwriter::XMLWriter;
-use chrono::DateTime;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 
 pub struct Core {
     pub(crate) writer: XMLWriter,
     author: String,
-    create_time: DateTime<Utc>,
+    creation_time: DateTime<Utc>,
 }
 
 impl Core {
@@ -25,7 +24,7 @@ impl Core {
         Core {
             writer,
             author: "".to_string(),
-            create_time: Utc::now(),
+            creation_time: Utc::now(),
         }
     }
 
@@ -39,8 +38,8 @@ impl Core {
     // Temporary function for testing. This will be replaced with full property
     // handling later.
     #[allow(dead_code)]
-    pub(crate) fn set_create_time(&mut self, create_time: DateTime<Utc>) {
-        self.create_time = create_time;
+    pub(crate) fn set_creation_time(&mut self, create_time: DateTime<Utc>) {
+        self.creation_time = create_time;
     }
 
     // -----------------------------------------------------------------------
@@ -106,7 +105,7 @@ impl Core {
     fn write_dcterms_created(&mut self) {
         let attributes = vec![("xsi:type", "dcterms:W3CDTF".to_string())];
         let datetime = self
-            .create_time
+            .creation_time
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
         self.writer
@@ -118,7 +117,7 @@ impl Core {
         let attributes = vec![("xsi:type", "dcterms:W3CDTF".to_string())];
 
         let datetime = self
-            .create_time
+            .creation_time
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
         self.writer
@@ -131,8 +130,8 @@ mod tests {
 
     use super::Core;
     use crate::test_functions::xml_to_vec;
-    use chrono::TimeZone;
-    use chrono::Utc;
+    use chrono::{TimeZone, Utc};
+
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -140,7 +139,7 @@ mod tests {
         let mut core = Core::new();
 
         core.set_author("A User");
-        core.set_create_time(Utc.ymd(2010, 1, 1).and_hms(0, 0, 0));
+        core.set_creation_time(Utc.ymd(2010, 1, 1).and_hms(0, 0, 0));
 
         core.assemble_xml_file();
 
