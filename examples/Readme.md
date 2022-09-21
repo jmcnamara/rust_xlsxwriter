@@ -20,6 +20,9 @@ documentation and generally show how an individual function works.
   worksheets that correspond to the sections of the Excel "Format Cells"
   dialog.
 
+* app_hello_world.rs - Create a simple Hello World style Excel spreadsheet
+  using the rust_xlsxwriter library.
+
 * app_perf_test.rs - Simple performance test for rust_xlsxwriter.
 
 * app_right_to_left.rs - Example of using rust_xlsxwriter to create a
@@ -44,6 +47,9 @@ documentation and generally show how an individual function works.
   worksheet cell.
 
 * doc_format_default.rs - Demonstrates creating a default format.
+
+* doc_format_intro.rs - Demonstrates some of the available formatting
+  properties.
 
 * doc_format_locale.rs - Demonstrates setting a number format that appears
   differently in different locales.
@@ -121,6 +127,14 @@ documentation and generally show how an individual function works.
 * doc_worksheet_set_column_width_pixels.rs - Demonstrates setting the width
   of columns in Excel in pixels.
 
+* doc_worksheet_set_formula_result.rs - Demonstrates manually setting the
+  result of a formula. Note, this is only required for non-Excel
+  applications that don't calculate formula results.
+
+* doc_worksheet_set_formula_result_default.rs - Demonstrates manually
+  setting the default result for all non-calculated formulas in a
+  worksheet.
+
 * doc_worksheet_set_name.rs - Demonstrates setting user defined worksheet
   names and the default values when a name isn't set.
 
@@ -140,6 +154,21 @@ documentation and generally show how an individual function works.
 * doc_worksheet_set_row_height_pixels.rs - Demonstrates setting the height
   for a row in Excel.
 
+* doc_worksheet_write_blank.rs - Demonstrates writing a blank cell with
+  formatting, i.e., a cell that has no data but does have formatting.
+
+* doc_worksheet_write_date.rs - Demonstrates writing formatted dates in an
+  Excel worksheet.
+
+* doc_worksheet_write_datetime.rs - Demonstrates writing formatted
+  datetimes in an Excel worksheet.
+
+* doc_worksheet_write_formula.rs - Demonstrates writing formulas with
+  formatting to a worksheet.
+
+* doc_worksheet_write_formula_only.rs - Demonstrates writing formulas with
+  formatting to a worksheet.
+
 * doc_worksheet_write_number.rs - Demonstrates setting different formatting
   for numbers in an Excel worksheet.
 
@@ -153,4 +182,7 @@ documentation and generally show how an individual function works.
 * doc_worksheet_write_string_only.rs - Demonstrates writing some UTF-8
   strings to a worksheet. The UTF-8 encoding is the only encoding supported
   by the Excel file format.
+
+* doc_worksheet_write_time.rs - Demonstrates writing formatted times in an
+  Excel worksheet.
 

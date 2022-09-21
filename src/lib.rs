@@ -4,9 +4,10 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 //! The `rust_xlsxwriter` library is a rust library for writing Excel files in
-//! the XL format.
+//! the XLSX format.
 //!
-//! <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
+//! <img
+//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
 //!
 //! Rust_xlsxwriter is a rust library that can be used to write text, numbers,
 //! dates and formulas to multiple worksheets in a new Excel 2007+ XLSX file. It
@@ -68,11 +69,83 @@
 //! author. Feature porting is a work in progress. The currently supported
 //! features are:
 //!
-//! - Support for writing all basic Excel data type.
+//! - Support for writing all basic Excel data types.
 //! - Full cell formatting support.
 //!
 //! [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
-
+//!
+//!
+//! # Getting started.
+//!
+//! Create a new rust command-line application as follows:
+//!
+//! ```bash
+//! cargo new hello-xlsx
+//! ```
+//!
+//! This will create a directory like the following:
+//!
+//! ```bash
+//! hello-xlsx/
+//! ├── Cargo.toml
+//! └── src
+//!     └── main.rs
+//! ```
+//!
+//! Edit the Cargo.toml file and add the following `rust_xlsxwriter` dependency
+//! so the file looks like below. Note, `rust_xlsxwriter` adds new features
+//! regularly do make sure you use the latest version.
+//!
+//!
+//! ```yaml
+//! [package]
+//! name = "hello-xlsx"
+//! version = "0.1.0"
+//! edition = "2021"
+//!
+//! [dependencies]
+//! rust_xlsxwriter = "0.2.0"
+//! ```
+//!
+//! Modify the main.rs file so it looks like this:
+//!
+//! ```rust
+//! # // This code is available in examples/app_hello_world.rs
+//! #
+//! use rust_xlsxwriter::{Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Create a new Excel file.
+//!     let mut workbook = Workbook::new("hello.xlsx");
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Write a string to cell (0, 0) = A1.
+//!     worksheet.write_string_only(0, 0, "Hello")?;
+//!
+//!     // Write a number to cell (1, 0) = A2.
+//!     worksheet.write_number_only(1, 0, 12345)?;
+//!
+//!     // Close the file.
+//!     workbook.close()?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! The run the application as follows:
+//!
+//! ```bash
+//! cargo run
+//! ```
+//!
+//! This will create an output file called `hello.xlsx` which should look something like this:
+//!
+//! <img
+//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/hello.png">
+//!
+//!
 mod app;
 mod content_types;
 mod core;
