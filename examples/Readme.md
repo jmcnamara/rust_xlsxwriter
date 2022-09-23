@@ -30,6 +30,15 @@ documentation and generally show how an individual function works.
   left-to-right to right-to-left, as required by some middle eastern
   versions of Excel.
 
+* app_tutorial1.rs - A simple program to write some data to an Excel
+  spreadsheet using rust_xlsxwriter. Part 1 of a tutorial.
+
+* app_tutorial2.rs - A simple program to write some data to an Excel
+  spreadsheet using rust_xlsxwriter. Part 2 of a tutorial.
+
+* app_tutorial3.rs - A simple program to write some data to an Excel
+  spreadsheet using rust_xlsxwriter. Part 3 of a tutorial.
+
 * doc_enum_xlsxcolor.rs - Demonstrates using different XlsxColor enum
   values to set the color of some text in a worksheet.
 

@@ -140,11 +140,307 @@
 //! cargo run
 //! ```
 //!
-//! This will create an output file called `hello.xlsx` which should look something like this:
+//! This will create an output file called `hello.xlsx` which should look
+//! something like this:
 //!
 //! <img
 //! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/hello.png">
 //!
+//! # Tutorial
+//!
+//! For something more ambitious than a hello world application we will use
+//! `rust_xlsxwriter` to create a spreadsheet and add some monthly expenses.
+//!
+//! ```ignore
+//!     let expenses = vec![
+//!         ("Rent", 2000),
+//!         ("Gas", 200),
+//!         ("Food", 500),
+//!         ("Gym", 100),
+//!     ];
+//! ```
+//!
+//! To do that we might start with a simple program like the following:
+//!
+//! ```
+//! # // This code is available in examples/app_tutorial1.rs
+//! #
+//! use rust_xlsxwriter::{Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Some sample data we want to write to a spreadsheet.
+//!     let expenses = vec![("Rent", 2000), ("Gas", 200), ("Food", 500), ("Gym", 100)];
+//!
+//!     // Create a new Excel file.
+//!     let mut workbook = Workbook::new("tutorial1.xlsx");
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Iterate over the data and write it out row by row.
+//!     let mut row = 0;
+//!     for expense in expenses.iter() {
+//!         worksheet.write_string_only(row, 0, expense.0)?;
+//!         worksheet.write_number_only(row, 1, expense.1)?;
+//!         row += 1;
+//!     }
+//!
+//!     // Write a total using a formula.
+//!     worksheet.write_string_only(row, 0, "Total")?;
+//!     worksheet.write_formula_only(row, 1, "=SUM(B1:B4)")?;
+//!
+//!     // Close the file.
+//!     workbook.close()?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! If we run this program we should get a spreadsheet that looks like this:
+//!
+//! <img
+//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/tutorial1.png">
+//!
+//! The first step is to create a new workbook object using the
+//! [`Workbook`](Workbook) constructor. [`Workbook::new`](Workbook::new) takes
+//! one argument which is the filename that we want to create:
+//!
+//! ```ignore
+//!     let mut workbook = Workbook::new("tutorial1.xlsx");
+//! ```
+//!
+//! **Note**, `rust_xlsxwriter` can only create new files. It cannot read or
+//! modify existing files.
+//!
+//! The workbook object is then used to add a new worksheet via the
+//! [`add_worksheet`](Workbook::add_worksheet) method:
+//!
+//! ```ignore
+//!     let worksheet = workbook.add_worksheet();
+//! ```
+//! The worksheet will have a standard Excel name, in this case "Sheet1". You
+//! can specify the worksheet name using the
+//! [`worksheet.set_name()`](Worksheet::set_name) method.
+//!
+//! We then iterate over the data and use some the
+//! [`worksheet.write_string_only()`](Worksheet::write_string_only) and
+//! [`worksheet.write_number_only()`](Worksheet::write_number_only) methods to
+//! write each row of our data:
+//!
+//! ```ignore
+//!         worksheet.write_string_only(row, 0, expense.0)?;
+//!         worksheet.write_number_only(row, 1, expense.1)?;
+//! ```
+//!
+//! The `_only` part of the method names refers to the fact that the data type
+//! is written without any formatting. We will see how to add formatting
+//! shortly.
+//!
+//! Throughout `rust_xlsxwriter`, rows and columns are zero indexed. So, for
+//! example, the first cell in a worksheet, `A1`, is `(0, 0)`.
+//!
+//! We then add a formula to calculate the total of the items in the second
+//! column:
+//!
+//! ```ignore
+//!     worksheet.write_formula_only(row, 1, "=SUM(B1:B4)")?;
+//! ```
+//!
+//! Finally, we close the Excel file via the
+//! [`workbook.close()`](Workbook::close) method:
+//!
+//! ```ignore
+//!     workbook.close()?;
+//! ```
+//!
+//! The previous program converted the required data into an Excel file but it
+//! looked a little bare. In order to make the information clearer we can add
+//! some simple formatting, like this:
+//!
+//! <img
+//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/tutorial2.png">
+//!
+//! The differences here are that we have added "Item" and "Cost" column headers
+//! in a bold font, we have formatted the currency in the second column and we
+//! have made the "Total" string bold.
+//!
+//! To do this programmatically we can extend our code as follows:
+//!
+//! ```
+//! # // This code is available in examples/app_tutorial2.rs
+//! #
+//! use rust_xlsxwriter::{Format, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Some sample data we want to write to a spreadsheet.
+//!     let expenses = vec![("Rent", 2000), ("Gas", 200), ("Food", 500), ("Gym", 100)];
+//!
+//!     // Create a new Excel file.
+//!     let mut workbook = Workbook::new("tutorial2.xlsx");
+//!
+//!     // Add a bold format to use to highlight cells.
+//!     let bold = Format::new().set_bold();
+//!
+//!     // Add a number format for cells with money values.
+//!     let money_format = Format::new().set_num_format("$#,##0");
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Write some column headers.
+//!     worksheet.write_string(0, 0, "Item", &bold)?;
+//!     worksheet.write_string(0, 1, "Cost", &bold)?;
+//!
+//!     // Iterate over the data and write it out row by row.
+//!     let mut row = 1;
+//!     for expense in expenses.iter() {
+//!         worksheet.write_string_only(row, 0, expense.0)?;
+//!         worksheet.write_number(row, 1, expense.1, &money_format)?;
+//!         row += 1;
+//!     }
+//!
+//!     // Write a total using a formula.
+//!     worksheet.write_string(row, 0, "Total", &bold)?;
+//!     worksheet.write_formula(row, 1, "=SUM(B2:B5)", &money_format)?;
+//!
+//!     // Close the file.
+//!     workbook.close()?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! The main difference between this and the previous program is that we have
+//! added two [Format](Format) objects that we can use to format cells in the
+//! spreadsheet.
+//!
+//! Format objects represent all of the formatting properties that can be
+//! applied to a cell in Excel such as fonts, number formatting, colors and
+//! borders. This is explained in more detail in the [Format](Format) struct
+//! documentation.
+//!
+//! For now we will avoid getting into the details of Format and just use a
+//! limited amount of the its functionality to add some simple formatting:
+//!
+//! ```ignore
+//!     // Add a bold format to use to highlight cells.
+//!     let bold = Format::new().set_bold();
+//!
+//!     // Add a number format for cells with money values.
+//!     let money_format = Format::new().set_num_format("$#,##0");
+//! ```
+//!
+//! We can use these formats in worksheet methods that support formatting such
+//! as the [`worksheet.write_string()`](Worksheet::write_string) and
+//! [`worksheet.write_number()`](Worksheet::write_number) methods which can
+//! write data and formatting together.
+//!
+//! Let's extend the program a little bit more to add some dates to the data:
+//!
+//! ```ignore
+//!     let expenses = vec![
+//!         ("Rent", 2000, "2022-09-01"),
+//!         ("Gas", 200, "2022-09-05"),
+//!         ("Food", 500, "2022-09-21"),
+//!         ("Gym", 100, "2022-09-28"),
+//!     ];
+//! ```
+//!
+//! The corresponding spreadsheet will look like this:
+//!
+//! <img
+//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/tutorial3.png">
+//!
+//! The differences here are that we have added a "Date" column with formatting
+//! and made that column a little wider to accommodate the dates.
+//!
+//! To do this we can extend our program as follows:
+//!
+//! ```
+//! # // This code is available in examples/app_tutorial3.rs
+//! #
+//! use chrono::NaiveDate;
+//! use rust_xlsxwriter::{Format, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Some sample data we want to write to a spreadsheet.
+//!     let expenses = vec![
+//!         ("Rent", 2000, "2022-09-01"),
+//!         ("Gas", 200, "2022-09-05"),
+//!         ("Food", 500, "2022-09-21"),
+//!         ("Gym", 100, "2022-09-28"),
+//!     ];
+//!
+//!     // Create a new Excel file.
+//!     let mut workbook = Workbook::new("tutorial3.xlsx");
+//!
+//!     // Add a bold format to use to highlight cells.
+//!     let bold = Format::new().set_bold();
+//!
+//!     // Add a number format for cells with money values.
+//!     let money_format = Format::new().set_num_format("$#,##0");
+//!
+//!     // Add a number format for cells with dates.
+//!     let date_format = Format::new().set_num_format("d mmm yyyy");
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Write some column headers.
+//!     worksheet.write_string(0, 0, "Item", &bold)?;
+//!     worksheet.write_string(0, 1, "Cost", &bold)?;
+//!     worksheet.write_string(0, 2, "Date", &bold)?;
+//!
+//!     // Adjust the date column width for clarity.
+//!     worksheet.set_column_width(2, 15)?;
+//!
+//!     // Iterate over the data and write it out row by row.
+//!     let mut row = 1;
+//!     for expense in expenses.iter() {
+//!         worksheet.write_string_only(row, 0, expense.0)?;
+//!         worksheet.write_number(row, 1, expense.1, &money_format)?;
+//!
+//!         let date = NaiveDate::parse_from_str(expense.2, "%Y-%m-%d").unwrap();
+//!         worksheet.write_date(row, 2, date, &date_format)?;
+//!
+//!         row += 1;
+//!     }
+//!
+//!     // Write a total using a formula.
+//!     worksheet.write_string(row, 0, "Total", &bold)?;
+//!     worksheet.write_formula(row, 1, "=SUM(B2:B5)", &money_format)?;
+//!
+//!     // Close the file.
+//!     workbook.close()?;
+//!
+//!     Ok(())
+//! }
+//!```
+//!
+//! The main difference between this and the previous program is that we have
+//! added handling for dates.
+//!
+//! Dates and times in Excel are floating point numbers that have a number
+//! format applied to display them in the correct format. In order to handle
+//! dates and times with `rust_xlsxwriter` we create them as
+//! [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or [`chrono::NaiveTime`]
+//! instances and format them with an Excel number format.
+//!
+//! In the example above we create the NaiveDates from the date strings in our
+//! input data and then format it, in Excel, with a number format.
+//!
+//! ```ignore
+//!     // Add a number format for cells with dates.
+//!     let date_format = Format::new().set_num_format("d mmm yyyy");
+//! ```
+//!
+//! The final addition to our program is the make the "Date" column wider for
+//! clarity using the
+//! [`worksheet.set_column_width()`](Worksheet::set_column_width) method.
+//!
+//! That completes the tutorial section. For more information about the
+//! available Structs and associated methods see the documentation for
+//! [`Workbook`], [`Worksheet`] and [`Format`].
 //!
 mod app;
 mod content_types;
