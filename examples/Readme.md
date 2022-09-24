@@ -127,6 +127,12 @@ documentation and generally show how an individual function works.
 * doc_format_set_underline.rs - Demonstrates setting underline properties
   for a format.
 
+* doc_workbook_add_worksheet.rs - Demonstrates creating adding worksheets
+  to a workbook.
+
+* doc_workbook_new.rs - Demonstrates creating a simple workbook, with one
+  unused worksheet.
+
 * doc_worksheet_set_column_format.rs - Demonstrates setting the format for
   a column in Excel.
 

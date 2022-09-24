@@ -222,18 +222,22 @@ impl Worksheet {
 
         // Check that sheet sheetname is <= 31, an Excel limit.
         if name.len() > 31 {
-            return Err(XlsxError::SheetnameLengthExceeded);
+            return Err(XlsxError::SheetnameLengthExceeded(name.to_string()));
         }
 
         // Check that sheetname doesn't contain any invalid characters.
         let re = Regex::new(r"[\[\]:*?/\\]").unwrap();
         if re.is_match(name) {
-            return Err(XlsxError::SheetnameContainsInvalidCharacter);
+            return Err(XlsxError::SheetnameContainsInvalidCharacter(
+                name.to_string(),
+            ));
         }
 
         // Check that sheetname doesn't start or end with an apostrophe.
         if name.starts_with('\'') || name.ends_with('\'') {
-            return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe);
+            return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(
+                name.to_string(),
+            ));
         }
 
         self.name = name.to_string();
@@ -2977,54 +2981,64 @@ mod tests {
             Err(err) => assert_eq!(err, XlsxError::SheetnameCannotBeBlank),
         };
 
-        match worksheet.set_name("name_that_is_longer_than_thirty_one_characters") {
+        let name = "name_that_is_longer_than_thirty_one_characters".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameLengthExceeded),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameLengthExceeded(name)),
         };
 
-        match worksheet.set_name("name_with_special_character_[") {
+        let name = "name_with_special_character_[".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
         };
 
-        match worksheet.set_name("name_with_special_character_]") {
+        let name = "name_with_special_character_]".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
         };
 
-        match worksheet.set_name("name_with_special_character_:") {
+        let name = "name_with_special_character_:".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
         };
 
-        match worksheet.set_name("name_with_special_character_*") {
+        let name = "name_with_special_character_*".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
         };
 
-        match worksheet.set_name("name_with_special_character_?") {
+        let name = "name_with_special_character_?".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
         };
 
-        match worksheet.set_name("name_with_special_character_/") {
+        let name = "name_with_special_character_/".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
         };
 
-        match worksheet.set_name("name_with_special_character_\\") {
+        let name = "name_with_special_character_\\".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
         };
 
-        match worksheet.set_name("'start with apostrophe") {
+        let name = "'start with apostrophe".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe(name)),
         };
 
-        match worksheet.set_name("end with apostrophe'") {
+        let name = "end with apostrophe'".to_string();
+        match worksheet.set_name(&name) {
             Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe),
+            Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe(name)),
         };
     }
 

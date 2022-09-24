@@ -42,6 +42,7 @@
 use crate::app::App;
 use crate::content_types::ContentTypes;
 use crate::core::Core;
+use crate::error::XlsxError;
 use crate::format::Format;
 use crate::relationship::Relationship;
 use crate::shared_strings::SharedStrings;
@@ -67,9 +68,18 @@ impl Packager {
     // -----------------------------------------------------------------------
 
     // Create a new Packager struct.
-    pub(crate) fn new(filename: &str) -> Packager {
+    pub(crate) fn new(filename: &str) -> Result<Packager, XlsxError> {
         let path = std::path::Path::new(filename);
-        let file = std::fs::File::create(&path).unwrap();
+
+        let file = match std::fs::File::create(&path) {
+            Ok(file) => file,
+            Err(e) => {
+                return Err(XlsxError::IoError(format!(
+                    "Error creating output file {}: {}",
+                    filename, e
+                )))
+            }
+        };
 
         let zip = zip::ZipWriter::new(file);
 
@@ -79,7 +89,7 @@ impl Packager {
             .last_modified_time(DateTime::default())
             .large_file(false);
 
-        Packager { zip, zip_options }
+        Ok(Packager { zip, zip_options })
     }
 
     // Create the root and xl/ component xml files and add them to the zip/xlsx

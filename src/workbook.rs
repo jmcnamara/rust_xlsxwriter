@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
+#![warn(missing_docs)]
+
 use std::collections::HashMap;
 use std::mem;
 
@@ -18,8 +20,61 @@ use crate::{XlsxColor, XlsxPattern};
 /// The workbook struct represents an Excel file in it's entirety. It is the
 /// starting point for creating a new Excel xlsx file.
 ///
-/// The Workbook class represents the entire spreadsheet as you see it in Excel
+/// The Workbook struct represents the entire spreadsheet as you see it in Excel
 /// and internally it represents the Excel file as it is written on disk.
+///
+/// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
+///
+/// # Examples
+///
+/// Sample code to generate the Excel file shown above.
+///
+/// ```rust
+/// # // This code is available in examples/app_demo.rs
+/// #
+/// use chrono::NaiveDate;
+/// use rust_xlsxwriter::{Format, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file.
+///     let mut workbook = Workbook::new("demo.xlsx");
+///
+///     // Create some formats to use in the worksheet.
+///     let bold_format = Format::new().set_bold();
+///     let decimal_format = Format::new().set_num_format("0.000");
+///     let date_format = Format::new().set_num_format("yyyy-mm-dd");
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Set the column width for clarity.
+///     worksheet.set_column_width(0, 15)?;
+///
+///     // Write a string without formatting.
+///     worksheet.write_string_only(0, 0, "Hello")?;
+///
+///     // Write a string with the bold format defined above.
+///     worksheet.write_string(1, 0, "World", &bold_format)?;
+///
+///     // Write some numbers.
+///     worksheet.write_number_only(2, 0, 1)?;
+///     worksheet.write_number_only(3, 0, 2.34)?;
+///
+///     // Write a number with formatting.
+///     worksheet.write_number(4, 0, 3.00, &decimal_format)?;
+///
+///     // Write a formula.
+///     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+///
+///     // Write the date .
+///     let date = NaiveDate::from_ymd(2023, 1, 25);
+///     worksheet.write_date(6, 0, date, &date_format)?;
+///
+///     workbook.close()?;
+///
+///     Ok(())
+/// }
+/// ```
 pub struct Workbook<'a> {
     pub(crate) writer: XMLWriter,
     filename: &'a str,
@@ -37,7 +92,43 @@ impl<'a> Workbook<'a> {
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    // Create a new Workbook struct.
+    /// Create a new Workbook object to represent an Excel spreadsheet file.
+    ///
+    /// The `Workbook::new()` constructor is used to create a new Excel workbook
+    /// with a given filename.
+    ///
+    /// # Arguments
+    ///
+    /// * `filename` - The name of the new Excel file to create. The lifetime of
+    ///   the argument lasts for the lifetime of the workbook which is generally
+    ///   until the file is written with [`workbook.close()`](Workbook::close).
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a simple workbook, with one
+    /// unused worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_new.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new("workbook.xlsx");
+    ///
+    ///     _ = workbook.add_worksheet();
+    ///
+    ///     workbook.close()?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/workbook_new.png">
+    ///
     pub fn new(filename: &'a str) -> Workbook {
         let writer = XMLWriter::new();
         let default_format = Format::new();
@@ -56,7 +147,52 @@ impl<'a> Workbook<'a> {
         }
     }
 
-    // Prototype function for adding worksheets.
+    /// Add a new worksheet to a workbook.
+    ///
+    /// The `add_worksheet()` method adds a new [`worksheet`](Worksheet) to a
+    /// workbook.
+    ///
+    /// The worksheets will be given standard Excel name like `Sheet1`,
+    /// `Sheet2`, etc. Alternatively, the name can be set using
+    /// `worksheet.set_name()`, see the example below and the docs for
+    /// [`worksheet.set_name()`](Worksheet::set_name).
+    ///
+    /// The `add_worksheet()` method returns a mutable borrowed reference to a
+    /// Worksheet instance owned by the Workbook so only one worksheet can be in
+    /// existence at a time, see the example below. This limitation will be
+    /// removed, via other Worksheet creation methods, in an upcoming release.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating adding worksheets to a workbook.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_add_worksheet.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new("workbook.xlsx");
+    ///
+    ///     let worksheet = workbook.add_worksheet(); // Sheet1
+    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     let worksheet = workbook.add_worksheet().set_name("Foglio2")?;
+    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     let worksheet = workbook.add_worksheet(); // Sheet3
+    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     workbook.close()?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/workbook_add_worksheet.png">
+    ///
     pub fn add_worksheet(&mut self) -> &mut Worksheet {
         let sheet_name = format!("Sheet{}", self.worksheets.len() + 1);
 
@@ -67,25 +203,40 @@ impl<'a> Workbook<'a> {
         worksheet
     }
 
-    // Set the index for the format.
-    pub fn register_format(&mut self, format: &mut Format) {
-        let format_key = format.format_key();
-
-        match self.xf_indices.get_mut(&format_key) {
-            Some(xf_index) => {
-                format.set_xf_index(*xf_index);
-            }
-            None => {
-                let xf_index = self.xf_formats.len() as u32;
-                self.xf_formats.push(format.clone());
-                format.set_xf_index(xf_index);
-
-                self.xf_indices.insert(format_key, xf_index);
-            }
-        }
-    }
-
-    // Assemble the xlsx file and close it.
+    /// Close the Workbook object and write the XLSX file.
+    ///
+    /// The workbook close() method writes all data to the xlsx file and closes
+    /// it.
+    ///
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
+    ///   the workbook.
+    /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    ///   the xlsx file, or its sub-files.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating and closing a simple
+    /// workbook.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_new.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new("workbook.xlsx");
+    ///
+    ///     _ = workbook.add_worksheet();
+    ///
+    ///     workbook.close()?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
     pub fn close(&mut self) -> Result<(), XlsxError> {
         // Ensure that there is at least one worksheet in the workbook.
         if self.worksheets.is_empty() {
@@ -119,13 +270,21 @@ impl<'a> Workbook<'a> {
         self.prepare_format_properties();
 
         // Create the Packager object that will assemble the zip/xlsx file.
-        let mut packager = Packager::new(self.filename);
+        let mut packager = Packager::new(self.filename)?;
         let mut package_options = PackagerOptions::new();
 
-        // Set some of the packager options.
+        // Set some packager options, and check for duplicate worksheet names.
         package_options.num_worksheets = self.worksheets.len() as u16;
         for worksheet in self.worksheets.iter() {
-            package_options.worksheet_names.push(worksheet.name.clone());
+            let sheet_name = worksheet.name.clone();
+
+            // Check for duplicate sheet names, which aren't allowed by Excel.
+            if package_options.worksheet_names.contains(&sheet_name) {
+                return Err(XlsxError::SheetnameReused(sheet_name));
+            }
+
+            package_options.worksheet_names.push(sheet_name);
+
             if worksheet.uses_string_table {
                 package_options.has_sst_table = true;
             }
@@ -165,6 +324,26 @@ impl<'a> Workbook<'a> {
         packager.close();
 
         Ok(())
+    }
+
+    // Set the index for the format. This is currently only used in testing but
+    // will be used publicly at a later stage.
+    #[doc(hidden)]
+    pub fn register_format(&mut self, format: &mut Format) {
+        let format_key = format.format_key();
+
+        match self.xf_indices.get_mut(&format_key) {
+            Some(xf_index) => {
+                format.set_xf_index(*xf_index);
+            }
+            None => {
+                let xf_index = self.xf_formats.len() as u32;
+                self.xf_formats.push(format.clone());
+                format.set_xf_index(xf_index);
+
+                self.xf_indices.insert(format_key, xf_index);
+            }
+        }
     }
 
     // -----------------------------------------------------------------------

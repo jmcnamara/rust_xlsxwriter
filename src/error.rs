@@ -18,16 +18,24 @@ pub enum XlsxError {
     SheetnameCannotBeBlank,
 
     /// Worksheet name exceeds Excel's limit of 31 characters.
-    SheetnameLengthExceeded,
+    SheetnameLengthExceeded(String),
+
+    /// Worksheet name is already in use in the workbook.
+    SheetnameReused(String),
 
     /// Worksheet name cannot contain invalid characters: `[ ] : * ? / \`
-    SheetnameContainsInvalidCharacter,
+    SheetnameContainsInvalidCharacter(String),
 
     /// Worksheet name cannot start or end with an apostrophe.
-    SheetnameStartsOrEndsWithApostrophe,
+    SheetnameStartsOrEndsWithApostrophe(String),
 
     /// String exceeds Excel's limit of 32,767 characters.
     MaxStringLengthExceeded,
+
+    /// Wrapper for a variety of IO errors such as file permissions when writing
+    /// the xlsx file to disk. This can be caused by an non-existent parent directory
+    /// or, commonly on Windows, if the file is already open in Excel.
+    IoError(String),
 }
 
 impl Error for XlsxError {}
@@ -40,18 +48,35 @@ impl fmt::Display for XlsxError {
                 "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)."
             ),
             XlsxError::SheetnameCannotBeBlank => write!(f, "Worksheet name cannot be blank."),
-            XlsxError::SheetnameLengthExceeded => {
-                write!(f, "Worksheet name exceeds Excel's limit of 31 characters.")
+            XlsxError::SheetnameLengthExceeded(name) => {
+                write!(
+                    f,
+                    "Worksheet name \"{}\" exceeds Excel's limit of 31 characters.",
+                    name
+                )
             }
-            XlsxError::SheetnameContainsInvalidCharacter => write!(
+            XlsxError::SheetnameReused(name) => write!(
                 f,
-                "Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'."
+                "Worksheet name \"{}\" has already been used in this workbook.",
+                name
             ),
-            XlsxError::SheetnameStartsOrEndsWithApostrophe => {
-                write!(f, "Worksheet name cannot start or end with an apostrophe.")
+            XlsxError::SheetnameContainsInvalidCharacter(name) => write!(
+                f,
+                "Worksheet name \"{}\" cannot contain invalid characters: '[ ] : * ? / \\'.",
+                name
+            ),
+            XlsxError::SheetnameStartsOrEndsWithApostrophe(name) => {
+                write!(
+                    f,
+                    "Worksheet name \"{}\" cannot start or end with an apostrophe.",
+                    name
+                )
             }
             XlsxError::MaxStringLengthExceeded => {
                 write!(f, "String exceeds Excel's limit of 32,767 characters.")
+            }
+            XlsxError::IoError(e) => {
+                write!(f, "{}", e)
             }
         }
     }
@@ -65,6 +90,8 @@ mod tests {
 
     #[test]
     fn test_error_display() {
+        let name = "Foo";
+
         assert_eq!(
             XlsxError::RowColumnLimitError.to_string(),
             "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)."
@@ -74,16 +101,16 @@ mod tests {
             "Worksheet name cannot be blank."
         );
         assert_eq!(
-            XlsxError::SheetnameLengthExceeded.to_string(),
-            "Worksheet name exceeds Excel's limit of 31 characters."
+            XlsxError::SheetnameLengthExceeded(name.to_string()).to_string(),
+            "Worksheet name \"Foo\" exceeds Excel's limit of 31 characters."
         );
         assert_eq!(
-            XlsxError::SheetnameContainsInvalidCharacter.to_string(),
-            "Worksheet name cannot contain invalid characters: '[ ] : * ? / \\'."
+            XlsxError::SheetnameContainsInvalidCharacter(name.to_string()).to_string(),
+            "Worksheet name \"Foo\" cannot contain invalid characters: '[ ] : * ? / \\'."
         );
         assert_eq!(
-            XlsxError::SheetnameStartsOrEndsWithApostrophe.to_string(),
-            "Worksheet name cannot start or end with an apostrophe."
+            XlsxError::SheetnameStartsOrEndsWithApostrophe(name.to_string()).to_string(),
+            "Worksheet name \"Foo\" cannot start or end with an apostrophe."
         );
         assert_eq!(
             XlsxError::MaxStringLengthExceeded.to_string(),

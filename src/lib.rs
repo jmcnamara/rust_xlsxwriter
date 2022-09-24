@@ -72,6 +72,9 @@
 //! - Support for writing all basic Excel data types.
 //! - Full cell formatting support.
 //!
+//! Rust_xlsxwriter is under active development and new features will be added
+//! frequently.
+//!
 //! [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
 //!
 //!
