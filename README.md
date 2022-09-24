@@ -8,7 +8,7 @@ src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.
 
 Rust_xlsxwriter is a rust library that can be used to write text, numbers,
 dates and formulas to multiple worksheets in a new Excel 2007+ XLSX file. It
-has a focus on performance and on fidelity with file format created by
+has a focus on performance and on fidelity with the file format created by
 Excel. It cannot be used to modify an existing file.
 
 ## Example
