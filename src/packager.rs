@@ -1,7 +1,10 @@
 // packager - A library for assembling xml files into an Excel XLSX file.
-//
-// This module is used in conjunction by rust_xlsxwriter to create an Excel XLSX
-// container file.
+
+// SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
+// jmcnamara@cpan.org
+
+// This library is used by rust_xlsxwriter to create an Excel XLSX container
+// file.
 //
 // From Wikipedia: The Open Packaging Conventions (OPC) is a container-file
 // technology initially created by Microsoft to store a combination of XML and
@@ -33,11 +36,8 @@
 //     |_____rels
 //       |____ .rels
 //
-// The Packager class coordinates the classes that represent the elements of the
-// package and writes them into the XLSX file.
-//
-// SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
-// jmcnamara@cpan.org
+// The Packager struct coordinates the classes that represent the elements of
+// the package and writes them into the XLSX file.
 
 use crate::app::App;
 use crate::content_types::ContentTypes;

@@ -20,9 +20,6 @@ use crate::{XlsxColor, XlsxPattern};
 /// The workbook struct represents an Excel file in it's entirety. It is the
 /// starting point for creating a new Excel xlsx file.
 ///
-/// The Workbook struct represents the entire spreadsheet as you see it in Excel
-/// and internally it represents the Excel file as it is written on disk.
-///
 /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
 ///
 /// # Examples
@@ -97,6 +94,9 @@ impl<'a> Workbook<'a> {
     /// The `Workbook::new()` constructor is used to create a new Excel workbook
     /// with a given filename.
     ///
+    /// **Note**, `rust_xlsxwriter` can only create new files. It cannot read or
+    /// modify existing files.
+    ///
     /// # Arguments
     ///
     /// * `filename` - The name of the new Excel file to create. The lifetime of
@@ -157,7 +157,7 @@ impl<'a> Workbook<'a> {
     /// `worksheet.set_name()`, see the example below and the docs for
     /// [`worksheet.set_name()`](Worksheet::set_name).
     ///
-    /// The `add_worksheet()` method returns a mutable borrowed reference to a
+    /// The `add_worksheet()` method returns a borrowed mutable reference to a
     /// Worksheet instance owned by the Workbook so only one worksheet can be in
     /// existence at a time, see the example below. This limitation will be
     /// removed, via other Worksheet creation methods, in an upcoming release.
@@ -294,7 +294,6 @@ impl<'a> Workbook<'a> {
         packager.create_root_files(&package_options);
 
         // Write the styles.xml file to the zip/xlsx container.
-
         packager.create_styles_file(
             &self.xf_formats,
             self.font_count,

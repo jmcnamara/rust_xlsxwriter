@@ -73,9 +73,10 @@
 //! - Full cell formatting support.
 //!
 //! Rust_xlsxwriter is under active development and new features will be added
-//! frequently.
+//! frequently. See the [rust_xlsxwriter GitHub] for details.
 //!
 //! [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
+//! [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 //!
 //!
 //! # Getting started.
@@ -152,7 +153,8 @@
 //! # Tutorial
 //!
 //! For something more ambitious than a hello world application we will use
-//! `rust_xlsxwriter` to create a spreadsheet and add some monthly expenses.
+//! `rust_xlsxwriter` to create a spreadsheet and summarize some monthly
+//! expenses.
 //!
 //! ```ignore
 //!     let expenses = vec![
@@ -163,7 +165,10 @@
 //!     ];
 //! ```
 //!
-//! To do that we might start with a simple program like the following:
+//! ## Version 1: Adding data to a worksheet.
+//!
+//! To add the expense data shown above to a worksheet we could start with a
+//! simple program like the following:
 //!
 //! ```
 //! # // This code is available in examples/app_tutorial1.rs
@@ -204,6 +209,9 @@
 //! <img
 //! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/tutorial1.png">
 //!
+//! This is a simple program but it demonstrates some of the steps that would
+//! apply to any rust_xlsxwriter program.
+//!
 //! The first step is to create a new workbook object using the
 //! [`Workbook`](Workbook) constructor. [`Workbook::new`](Workbook::new) takes
 //! one argument which is the filename that we want to create:
@@ -225,7 +233,7 @@
 //! can specify the worksheet name using the
 //! [`worksheet.set_name()`](Worksheet::set_name) method.
 //!
-//! We then iterate over the data and use some the
+//! We then iterate over the data and use the
 //! [`worksheet.write_string_only()`](Worksheet::write_string_only) and
 //! [`worksheet.write_number_only()`](Worksheet::write_number_only) methods to
 //! write each row of our data:
@@ -239,7 +247,7 @@
 //! is written without any formatting. We will see how to add formatting
 //! shortly.
 //!
-//! Throughout `rust_xlsxwriter`, rows and columns are zero indexed. So, for
+//! Throughout rust_xlsxwriter rows and columns are zero indexed. So, for
 //! example, the first cell in a worksheet, `A1`, is `(0, 0)`.
 //!
 //! We then add a formula to calculate the total of the items in the second
@@ -255,6 +263,10 @@
 //! ```ignore
 //!     workbook.close()?;
 //! ```
+//!
+//! This will give use the spreadsheet shown in the image above.
+//!
+//! ## Version 2: Adding some formatting.
 //!
 //! The previous program converted the required data into an Excel file but it
 //! looked a little bare. In order to make the information clearer we can add
@@ -338,6 +350,8 @@
 //! [`worksheet.write_number()`](Worksheet::write_number) methods which can
 //! write data and formatting together.
 //!
+//! ## Version 3: Adding dates and more formatting to the worksheet.
+//!
 //! Let's extend the program a little bit more to add some dates to the data:
 //!
 //! ```ignore
@@ -419,9 +433,6 @@
 //!     Ok(())
 //! }
 //!```
-//!
-//! The main difference between this and the previous program is that we have
-//! added handling for dates.
 //!
 //! Dates and times in Excel are floating point numbers that have a number
 //! format applied to display them in the correct format. In order to handle

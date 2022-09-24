@@ -1833,7 +1833,7 @@ impl Worksheet {
     // Crate level helper methods.
     // -----------------------------------------------------------------------
 
-    // Store a number cell.
+    // Store a number cell in the worksheet data table structure.
     fn store_number(
         &mut self,
         row: RowNum,
@@ -1870,7 +1870,7 @@ impl Worksheet {
         Ok(self)
     }
 
-    // Store a string cell.
+    // Store a string cell in the worksheet data table structure.
     fn store_string(
         &mut self,
         row: RowNum,
@@ -1906,7 +1906,7 @@ impl Worksheet {
         Ok(self)
     }
 
-    // Store a formula cell.
+    // Store a formula cell in the worksheet data table structure.
     fn store_formula(
         &mut self,
         row: RowNum,
@@ -1951,7 +1951,7 @@ impl Worksheet {
         Ok(self)
     }
 
-    // Store a string cell.
+    // Store a blank cell in the worksheet data table structure.
     fn store_blank(
         &mut self,
         row: RowNum,
@@ -1974,7 +1974,7 @@ impl Worksheet {
         Ok(self)
     }
 
-    // Insert a cell value into the worksheet table data structure.
+    // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
         match self.table.get_mut(&row) {
             Some(columns) => {
@@ -2023,7 +2023,7 @@ impl Worksheet {
     }
 
     // Store local copies of unique formats passed to the write methods. These
-    // indexes will be replaced by global/worksheet indices before the worksheet
+    // indexes will be replaced by global/workbook indices before the worksheet
     // is saved.
     fn format_index(&mut self, format: &Format) -> u32 {
         let format_key = format.format_key();
@@ -2039,7 +2039,7 @@ impl Worksheet {
         }
     }
 
-    // Set the mapping between the local format indices and the global/worksheet
+    // Set the mapping between the local format indices and the global/workbook
     // indices.
     pub(crate) fn set_global_xf_indices(&mut self, workbook_indices: &[u32]) {
         self.global_xf_indices = workbook_indices.to_owned();
