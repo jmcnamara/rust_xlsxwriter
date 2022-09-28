@@ -221,7 +221,7 @@ impl Worksheet {
         }
 
         // Check that sheet sheetname is <= 31, an Excel limit.
-        if name.len() > 31 {
+        if name.chars().count() > 31 {
             return Err(XlsxError::SheetnameLengthExceeded(name.to_string()));
         }
 
