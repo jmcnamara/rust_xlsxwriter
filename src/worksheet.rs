@@ -1884,7 +1884,7 @@ impl Worksheet {
         }
 
         //  Check that the string is < Excel limit of 32767 chars.
-        if string.len() as u16 > MAX_STRING_LEN {
+        if string.chars().count() as u16 > MAX_STRING_LEN {
             return Err(XlsxError::MaxStringLengthExceeded);
         }
 
