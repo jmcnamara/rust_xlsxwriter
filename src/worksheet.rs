@@ -194,8 +194,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_name.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_name.png">
     ///
     /// The worksheet name must be a valid Excel worksheet name, i.e:
     ///
@@ -311,8 +310,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_number.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_number.png">
     ///
     ///
     pub fn write_number<T>(
@@ -399,8 +397,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_number_only.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_number_only.png">
     ///
     pub fn write_number_only<T>(
         &mut self,
@@ -472,8 +469,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_string.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_string.png">
     ///
     pub fn write_string(
         &mut self,
@@ -614,8 +610,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_formula.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_formula.png">
     ///
     pub fn write_formula(
         &mut self,
@@ -748,8 +743,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_blank.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_blank.png">
     ///
     pub fn write_blank(
         &mut self,
@@ -836,8 +830,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_datetime.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_datetime.png">
     ///
     pub fn write_datetime(
         &mut self,
@@ -927,8 +920,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_date.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_date.png">
     ///
     pub fn write_date(
         &mut self,
@@ -1018,8 +1010,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_time.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_time.png">
     ///
     pub fn write_time(
         &mut self,
@@ -1032,6 +1023,123 @@ impl Worksheet {
 
         // Store the cell data.
         self.store_number(row, col, number, Some(format))
+    }
+
+    /// Write a formatted boolean value to a worksheet cell.
+    ///
+    /// Write a boolean value with formatting to a worksheet cell. The format is set
+    /// via a [`Format`] struct which can control the numerical formatting of
+    /// the number, for example as a currency or a percentage value, or the
+    /// visual format, such as bold and italic text.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `boolean` - The boolean value to write to the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted boolean values to a
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_boolean.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.write_boolean(0, 0, true, &bold)?;
+    ///     worksheet.write_boolean(1, 0, false, &bold)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_boolean.png">
+    ///
+    ///
+    pub fn write_boolean(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        boolean: bool,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_boolean(row, col, boolean, Some(format))
+    }
+
+    /// Write an unformatted boolean value to a cell.
+    ///
+    /// Write an unformatted boolean value to a worksheet cell. This is similar to
+    /// [`write_boolean()`](Worksheet::write_boolean()) except you don' have to
+    /// supply a [`Format`] so it is useful for writing raw data.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `boolean` - The boolean value to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing boolean values to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_boolean_only.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.write_boolean_only(0, 0, true)?;
+    ///     worksheet.write_boolean_only(1, 0, false)?;
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_boolean_only.png">
+    ///
+    pub fn write_boolean_only(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        boolean: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_boolean(row, col, boolean, None)
     }
 
     /// Set the height for a row of cells.
@@ -1081,8 +1189,7 @@ impl Worksheet {
     /// ```
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
     ///
     pub fn set_row_height<T>(&mut self, row: RowNum, height: T) -> Result<&mut Worksheet, XlsxError>
     where
@@ -1162,8 +1269,7 @@ impl Worksheet {
     /// ```
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
     ///
     pub fn set_row_height_pixels(
         &mut self,
@@ -1230,8 +1336,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_row_format.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_row_format.png">
     ///
     pub fn set_row_format(
         &mut self,
@@ -1334,8 +1439,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
     ///
     pub fn set_column_width<T>(
         &mut self,
@@ -1422,8 +1526,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
     ///
     pub fn set_column_width_pixels(
         &mut self,
@@ -1501,8 +1604,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_format.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_column_format.png">
     ///
     pub fn set_column_format(
         &mut self,
@@ -1729,8 +1831,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_right_to_left.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_right_to_left.png">
     ///
     pub fn set_right_to_left(&mut self) -> &mut Worksheet {
         self.right_to_left = true;
@@ -1968,6 +2069,33 @@ impl Worksheet {
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::Blank { xf_index };
+
+        self.insert_cell(row, col, cell);
+
+        Ok(self)
+    }
+
+    // Store a boolean cell in the worksheet data table structure.
+    fn store_boolean(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        boolean: bool,
+        format: Option<&Format>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Get the index of the format object, if any.
+        let xf_index = match format {
+            Some(format) => self.format_index(format),
+            None => 0,
+        };
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::Boolean { boolean, xf_index };
 
         self.insert_cell(row, col, cell);
 
@@ -2334,6 +2462,11 @@ impl Worksheet {
                                         self.get_cell_xf_index(xf_index, row_options, col_num);
                                     self.write_blank_cell(row_num, col_num, &xf_index);
                                 }
+                                CellType::Boolean { boolean, xf_index } => {
+                                    let xf_index =
+                                        self.get_cell_xf_index(xf_index, row_options, col_num);
+                                    self.write_boolean_cell(row_num, col_num, boolean, &xf_index);
+                                }
                             }
                         }
                     }
@@ -2511,6 +2644,27 @@ impl Worksheet {
         }
     }
 
+    // Write the <c> element for a boolean cell.
+    fn write_boolean_cell(&mut self, row: RowNum, col: ColNum, boolean: &bool, xf_index: &u32) {
+        let col_name = self.col_to_name(col);
+        let mut style = String::from("");
+        let boolean = if *boolean { 1 } else { 0 };
+
+        if *xf_index > 0 {
+            style = format!(r#" s="{}""#, *xf_index);
+        }
+
+        write!(
+            &mut self.writer.xmlfile,
+            r#"<c r="{}{}"{} t="b"><v>{}</v></c>"#,
+            col_name,
+            row + 1,
+            style,
+            boolean
+        )
+        .expect("Couldn't write to file");
+    }
+
     // Write the <cols> element.
     fn write_cols(&mut self) {
         if self.changed_cols.is_empty() {
@@ -2625,6 +2779,15 @@ enum CellType {
     Blank {
         xf_index: u32,
     },
+    Boolean {
+        boolean: bool,
+        xf_index: u32,
+    },
+    Formula {
+        formula: String,
+        xf_index: u32,
+        result: String,
+    },
     Number {
         number: f64,
         xf_index: u32,
@@ -2632,11 +2795,6 @@ enum CellType {
     String {
         string: String,
         xf_index: u32,
-    },
-    Formula {
-        formula: String,
-        xf_index: u32,
-        result: String,
     },
 }
 
