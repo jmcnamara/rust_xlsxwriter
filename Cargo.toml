@@ -1,8 +1,8 @@
 [package]
 name = "rust_xlsxwriter"
-description = "A Rust module for writing files in the Excel 2007+ XLSX file format"
+description = "A Rust library for writing Excel 2007 XLSX files"
 authors = ["John McNamara <jmcnamara@cpan.org>"]
-homepage = "https://crates.io/crates/rust_xlsxwriter"
+homepage = "https://rustxlsxwriter.github.io"
 repository = "https://github.com/jmcnamara/rust_xlsxwriter"
 keywords = ["excel", "xlsx"]
 readme = "README.md"
