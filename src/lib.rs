@@ -7,7 +7,7 @@
 //! the XLSX format.
 //!
 //! <img
-//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
+//! src="https://rustxlsxwriter.github.io/images/demo.png">
 //!
 //! Rust_xlsxwriter is a rust library that can be used to write text, numbers,
 //! dates and formulas to multiple worksheets in a new Excel 2007+ XLSX file. It
@@ -148,7 +148,7 @@
 //! something like this:
 //!
 //! <img
-//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/hello.png">
+//! src="https://rustxlsxwriter.github.io/images/hello.png">
 //!
 //! # Tutorial
 //!
@@ -207,7 +207,7 @@
 //! If we run this program we should get a spreadsheet that looks like this:
 //!
 //! <img
-//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/tutorial1.png">
+//! src="https://rustxlsxwriter.github.io/images/tutorial1.png">
 //!
 //! This is a simple program but it demonstrates some of the steps that would
 //! apply to any rust_xlsxwriter program.
@@ -264,7 +264,7 @@
 //!     workbook.close()?;
 //! ```
 //!
-//! This will give use the spreadsheet shown in the image above.
+//! This will give us the spreadsheet shown in the image above.
 //!
 //! ## Version 2: Adding some formatting.
 //!
@@ -273,7 +273,7 @@
 //! some simple formatting, like this:
 //!
 //! <img
-//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/tutorial2.png">
+//! src="https://rustxlsxwriter.github.io/images/tutorial2.png">
 //!
 //! The differences here are that we have added "Item" and "Cost" column headers
 //! in a bold font, we have formatted the currency in the second column and we
@@ -366,7 +366,7 @@
 //! The corresponding spreadsheet will look like this:
 //!
 //! <img
-//! src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/tutorial3.png">
+//! src="https://rustxlsxwriter.github.io/images/tutorial3.png">
 //!
 //! The differences here are that we have added a "Date" column with formatting
 //! and made that column a little wider to accommodate the dates.

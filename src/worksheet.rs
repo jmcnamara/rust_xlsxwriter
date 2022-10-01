@@ -34,7 +34,7 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 /// The worksheet struct represents an Excel worksheet. It handles operations
 /// such as writing data to cells or formatting worksheet layout.
 ///
-/// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
+/// <img src="https://rustxlsxwriter.github.io/images/demo.png">
 ///
 /// # Examples
 ///
@@ -195,7 +195,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_name.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_name.png">
     ///
     /// The worksheet name must be a valid Excel worksheet name, i.e:
     ///
@@ -312,7 +312,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_number.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_number.png">
     ///
     ///
     pub fn write_number<T>(
@@ -400,7 +400,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_number_only.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_number_only.png">
     ///
     pub fn write_number_only<T>(
         &mut self,
@@ -473,7 +473,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_string.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_string.png">
     ///
     pub fn write_string(
         &mut self,
@@ -548,7 +548,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_string_only.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_string_only.png">
     ///
     pub fn write_string_only(
         &mut self,
@@ -615,7 +615,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_formula.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_formula.png">
     ///
     pub fn write_formula(
         &mut self,
@@ -678,7 +678,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_formula_only.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_formula_only.png">
     ///
     pub fn write_formula_only(
         &mut self,
@@ -749,7 +749,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_blank.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_blank.png">
     ///
     pub fn write_blank(
         &mut self,
@@ -837,7 +837,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_datetime.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_datetime.png">
     ///
     pub fn write_datetime(
         &mut self,
@@ -928,7 +928,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_date.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_date.png">
     ///
     pub fn write_date(
         &mut self,
@@ -1019,7 +1019,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_write_time.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_time.png">
     ///
     pub fn write_time(
         &mut self,
@@ -1082,7 +1082,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_height.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
     ///
     pub fn set_row_height<T>(&mut self, row: RowNum, height: T) -> Result<&mut Worksheet, XlsxError>
     where
@@ -1163,7 +1163,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_height.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
     ///
     pub fn set_row_height_pixels(
         &mut self,
@@ -1231,7 +1231,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_row_format.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_row_format.png">
     ///
     pub fn set_row_format(
         &mut self,
@@ -1335,7 +1335,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_width.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
     ///
     pub fn set_column_width<T>(
         &mut self,
@@ -1423,7 +1423,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_width.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
     ///
     pub fn set_column_width_pixels(
         &mut self,
@@ -1502,7 +1502,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_column_format.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_format.png">
     ///
     pub fn set_column_format(
         &mut self,
@@ -1730,7 +1730,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/worksheet_set_right_to_left.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_right_to_left.png">
     ///
     pub fn set_right_to_left(&mut self) -> &mut Worksheet {
         self.right_to_left = true;

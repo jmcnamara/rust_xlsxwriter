@@ -20,7 +20,7 @@ use crate::{XlsxColor, XlsxPattern};
 /// The workbook struct represents an Excel file in it's entirety. It is the
 /// starting point for creating a new Excel xlsx file.
 ///
-/// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
+/// <img src="https://rustxlsxwriter.github.io/images/demo.png">
 ///
 /// # Examples
 ///
@@ -127,7 +127,7 @@ impl<'a> Workbook<'a> {
     /// Output file:
     ///
     /// <img
-    /// src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/workbook_new.png">
+    /// src="https://rustxlsxwriter.github.io/images/workbook_new.png">
     ///
     pub fn new(filename: &'a str) -> Workbook {
         let writer = XMLWriter::new();
@@ -191,7 +191,7 @@ impl<'a> Workbook<'a> {
     ///
     /// Output file:
     ///
-    /// <img src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/workbook_add_worksheet.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet.png">
     ///
     pub fn add_worksheet(&mut self) -> &mut Worksheet {
         let sheet_name = format!("Sheet{}", self.worksheets.len() + 1);
