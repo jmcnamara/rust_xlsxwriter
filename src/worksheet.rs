@@ -32,7 +32,7 @@ const DEFAULT_ROW_HEIGHT: f64 = 15.0;
 const DEFAULT_COL_WIDTH: f64 = 8.43;
 
 /// The worksheet struct represents an Excel worksheet. It handles operations
-/// such as writing data to cells or formatting worksheet layout.
+/// such as writing data to cells or formatting the worksheet layout.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/demo.png">
 ///

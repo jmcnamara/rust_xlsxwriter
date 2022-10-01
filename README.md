@@ -3,8 +3,7 @@
 The `rust_xlsxwriter` library is a rust library for writing Excel files in
 the XLSX format.
 
-<img
-src="https://github.com/jmcnamara/rust_xlsxwriter/raw/main/examples/images/demo.png">
+<img src="https://rustxlsxwriter.github.io/images/demo.png">
 
 Rust_xlsxwriter is a rust library that can be used to write text, numbers,
 dates and formulas to multiple worksheets in a new Excel 2007+ XLSX file. It
@@ -16,8 +15,6 @@ Excel. It cannot be used to modify an existing file.
 Sample code to generate the Excel file shown above.
 
 ```rust
-# // This code is available in examples/app_demo.rs
-#
 use chrono::NaiveDate;
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
