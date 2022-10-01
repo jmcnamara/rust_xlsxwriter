@@ -108,7 +108,7 @@
 //! edition = "2021"
 //!
 //! [dependencies]
-//! rust_xlsxwriter = "0.2.0"
+//! rust_xlsxwriter = "0.3.0"
 //! ```
 //!
 //! Modify the main.rs file so it looks like this:

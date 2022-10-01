@@ -126,8 +126,7 @@ impl<'a> Workbook<'a> {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/workbook_new.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
     ///
     pub fn new(filename: &'a str) -> Workbook {
         let writer = XMLWriter::new();

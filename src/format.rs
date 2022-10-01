@@ -743,8 +743,7 @@ impl Format {
     /// Note how the numbers above have been displayed by Excel in the output
     /// file according to the given number format:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_num_format.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_num_format.png">
     ///
     pub fn set_num_format(mut self, num_format: &str) -> Format {
         self.num_format = num_format.to_string();
@@ -845,8 +844,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_num_format_index.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_num_format_index.png">
     ///
     pub fn set_num_format_index(mut self, num_format_index: u8) -> Format {
         self.num_format_index = num_format_index as u16;
@@ -961,8 +959,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_font_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_color.png">
     ///
     pub fn set_font_color(mut self, font_color: XlsxColor) -> Format {
         if !font_color.is_valid() {
@@ -1009,8 +1006,7 @@ impl Format {
     /// ```
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_font_name.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_name.png">
     ///
     pub fn set_font_name(mut self, font_name: &str) -> Format {
         self.font_name = font_name.to_string();
@@ -1055,8 +1051,7 @@ impl Format {
     /// ```
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_font_size.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_size.png">
     ///
     pub fn set_font_size<T>(mut self, font_size: T) -> Format
     where
@@ -1149,8 +1144,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_underline.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_underline.png">
     ///
     pub fn set_underline(mut self, underline: XlsxUnderline) -> Format {
         self.underline = underline;
@@ -1186,8 +1180,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_font_strikethrough.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_strikethrough.png">
     ///
     pub fn set_font_strikethrough(mut self) -> Format {
         self.font_strikethrough = true;
@@ -1334,8 +1327,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_text_wrap.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_text_wrap.png">
     ///
     pub fn set_text_wrap(mut self) -> Format {
         self.text_wrap = true;
@@ -1386,8 +1378,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_indent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_indent.png">
     ///
     pub fn set_indent(mut self, indent: u8) -> Format {
         self.indent = indent;
@@ -1503,8 +1494,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_reading_direction.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_reading_direction.png">
     ///
     pub fn set_reading_direction(mut self, reading_direction: u8) -> Format {
         if reading_direction > 2 {
@@ -1605,8 +1595,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_pattern.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_pattern.png">
     ///
     pub fn set_pattern(mut self, pattern: XlsxPattern) -> Format {
         self.pattern = pattern;
@@ -1654,8 +1643,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_background_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_background_color.png">
     ///
     ///
     ///
@@ -1710,8 +1698,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_foreground_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_foreground_color.png">
     ///
     ///
     ///
@@ -1769,8 +1756,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_border.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_border.png">
     ///
     pub fn set_border(mut self, border: XlsxBorder) -> Format {
         self.border_top = border;
@@ -1839,8 +1825,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_border_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_border_color.png">
     ///
     pub fn set_border_color(mut self, color: XlsxColor) -> Format {
         if !color.is_valid() {
@@ -2026,8 +2011,7 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/format_set_border_diagonal.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_border_diagonal.png">
     ///
     pub fn set_border_diagonal(mut self, border: XlsxBorder) -> Format {
         self.border_diagonal = border;
