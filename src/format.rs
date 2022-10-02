@@ -6,7 +6,7 @@
 #![warn(missing_docs)]
 
 #[derive(Clone)]
-/// The Format struct is used to defined cell working for data in a worksheet.
+/// The Format struct is used to define cell formatting for data in a worksheet.
 ///
 /// The properties of a cell that can be formatted include: fonts, colors,
 /// patterns, borders, alignment and number formatting.
@@ -183,8 +183,8 @@
 ///
 /// # Format Colors
 ///
-/// Format property colors are specified the [`XlsxColor`] enum using a Html
-/// style RGB integer value or a limited number of defined colors:
+/// Format property colors are specified by using the [`XlsxColor`] enum with a
+/// Html style RGB integer value or a limited number of defined colors:
 ///
 /// ```
 /// # // This code is available in examples/doc_enum_xlsxcolor.rs
@@ -293,12 +293,12 @@
 /// - Currency
 /// - Accounting
 /// - Date
-/// - Time",
+/// - Time
 /// - Percentage
 /// - Fraction
 /// - Scientific
 /// - Text
-/// - Custom.
+/// - Custom
 ///
 /// In the case of the example above the formatted output shows up as a Number
 /// category:
@@ -353,7 +353,7 @@
 ///
 /// # Number Formats in different locales
 ///
-/// As shown in the previous section the `format_set_num_format()` method is
+/// As shown in the previous section the `format.set_num_format()` method is
 /// used to set the number format for `rust_xlsxwriter` formats. A common use
 /// case is to set a number format with a "grouping/thousands" separator and a
 /// "decimal" point:
@@ -389,10 +389,11 @@
 /// <img src="https://rustxlsxwriter.github.io/images/format_currency5.png">
 ///
 /// In other locales these values may be reversed or different. They are
-/// generally set in the "Region" settings of Windows or Mac OS. Excel handles
+/// generally set in the "Region" settings of Windows or Mac OS.  Excel handles
 /// this by storing the number format in the file format in the US locale, in
-/// this case `#, the host OS. For example, here is the same, unmodified, output
-/// file shown above in a German locale:
+/// this case `#,##0.00`, but renders it according to the regional settings of
+/// the host OS. For example, here is the same, unmodified, output file shown
+/// above in a German locale:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/format_currency6.png">
 ///
