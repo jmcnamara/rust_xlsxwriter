@@ -91,6 +91,7 @@ pub struct Worksheet {
     pub(crate) name: String,
     pub(crate) selected: bool,
     pub(crate) uses_string_table: bool,
+    pub(crate) has_dynamic_arrays: bool,
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     col_names: HashMap<ColNum, String>,
     dimensions: WorksheetDimensions,
@@ -133,6 +134,7 @@ impl Worksheet {
             name,
             selected: false,
             uses_string_table: false,
+            has_dynamic_arrays: false,
             table,
             col_names,
             dimensions,
@@ -620,7 +622,7 @@ impl Worksheet {
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_formula(row, col, formula, Some(format), None)
+        self.store_formula(row, col, formula, Some(format))
     }
 
     /// Write an unformatted formula to a worksheet cell.
@@ -682,7 +684,104 @@ impl Worksheet {
         formula: &str,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_formula(row, col, formula, None, None)
+        self.store_formula(row, col, formula, None)
+    }
+
+    ///
+    pub fn write_array_formula(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        formula: &str,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_array_formula(
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+            formula,
+            Some(format),
+            false,
+        )
+    }
+
+    ///
+    pub fn write_array_formula_only(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        formula: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_array_formula(
+            first_row, first_col, last_row, last_col, formula, None, false,
+        )
+    }
+
+    ///
+    pub fn write_dynamic_array_formula(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        formula: &str,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_array_formula(
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+            formula,
+            Some(format),
+            true,
+        )
+    }
+
+    ///
+    pub fn write_dynamic_array_formula_only(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        formula: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_array_formula(
+            first_row, first_col, last_row, last_col, formula, None, true,
+        )
+    }
+
+    ///
+    pub fn write_dynamic_formula(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        formula: &str,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_array_formula(row, col, row, col, formula, Some(format), true)
+    }
+
+    ///
+    pub fn write_dynamic_formula_only(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        formula: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_array_formula(row, col, row, col, formula, None, true)
     }
 
     /// Write a blank formatted worksheet cell.
@@ -1696,22 +1795,30 @@ impl Worksheet {
     /// ```
     ///
     pub fn set_formula_result(&mut self, row: RowNum, col: ColNum, result: &str) -> &mut Worksheet {
-        let mut cell_exists = false;
-
         if let Some(columns) = self.table.get_mut(&row) {
-            if let Some(CellType::Formula {
-                formula: _,
-                xf_index: _,
-                result: cell_result,
-            }) = columns.get_mut(&col)
-            {
-                *cell_result = result.to_string();
-                cell_exists = true;
+            if let Some(cell) = columns.get_mut(&col) {
+                match cell {
+                    CellType::Formula {
+                        formula: _,
+                        xf_index: _,
+                        result: cell_result,
+                    } => {
+                        *cell_result = result.to_string();
+                    }
+                    CellType::ArrayFormula {
+                        formula: _,
+                        xf_index: _,
+                        result: cell_result,
+                        is_dynamic: _,
+                        range: _,
+                    } => {
+                        *cell_result = result.to_string();
+                    }
+                    _ => {
+                        eprintln!("Cell ({}, {}) doesn't contain a formula.", row, col);
+                    }
+                }
             }
-        }
-
-        if !cell_exists {
-            eprintln!("Cell ({}, {}) doesn't contain a formula.", row, col);
         }
 
         self
@@ -2014,7 +2121,6 @@ impl Worksheet {
         col: ColNum,
         formula: &str,
         format: Option<&Format>,
-        result: Option<&str>,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
@@ -2034,20 +2140,92 @@ impl Worksheet {
             formula.remove(0);
         }
 
-        // Set the formula result to the user defined value or the default.
-        let result = match result {
-            Some(result) => result.to_string(),
-            None => self.default_result.clone(),
-        };
-
         // Create the appropriate cell type to hold the data.
         let cell = CellType::Formula {
             formula,
             xf_index,
-            result,
+            result: self.default_result.clone(),
         };
 
         self.insert_cell(row, col, cell);
+
+        Ok(self)
+    }
+
+    // Store an array formula cell in the worksheet data table structure.
+    #[allow(clippy::too_many_arguments)]
+    fn store_array_formula(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        formula: &str,
+        format: Option<&Format>,
+        is_dynamic: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(first_row, first_col)
+            || !self.check_dimensions(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let first_row = first_row;
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Get the index of the format object, if any.
+        let xf_index = match format {
+            Some(format) => self.format_index(format),
+            None => 0,
+        };
+
+        let mut formula = formula.to_string();
+
+        // Strip the {} array braces and leading = if they exist.
+        if formula.starts_with('{') {
+            formula.remove(0);
+        }
+        if formula.starts_with('=') {
+            formula.remove(0);
+        }
+        if formula.ends_with('}') {
+            formula.pop();
+        }
+
+        // Create the array range reference.
+        let range = utility::cell_range(first_row, first_col, last_row, last_col);
+
+        if is_dynamic {
+            self.has_dynamic_arrays = true;
+        }
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::ArrayFormula {
+            formula,
+            xf_index,
+            result: self.default_result.clone(),
+            is_dynamic,
+            range,
+        };
+
+        self.insert_cell(first_row, first_col, cell);
+
+        // Pad out the rest of the area with formatted zeroes.
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                if !(row == first_row && col == first_col) {
+                    match format {
+                        Some(format) => self.write_number(row, col, 0, format).unwrap(),
+                        None => self.write_number_only(row, col, 0).unwrap(),
+                    };
+                }
+            }
+        }
 
         Ok(self)
     }
@@ -2457,6 +2635,20 @@ impl Worksheet {
                                         row_num, col_num, formula, &xf_index, result,
                                     )
                                 }
+                                CellType::ArrayFormula {
+                                    formula,
+                                    xf_index,
+                                    result,
+                                    is_dynamic,
+                                    range,
+                                } => {
+                                    let xf_index =
+                                        self.get_cell_xf_index(xf_index, row_options, col_num);
+                                    self.write_array_formula_cell(
+                                        row_num, col_num, formula, &xf_index, result, is_dynamic,
+                                        range,
+                                    )
+                                }
                                 CellType::Blank { xf_index } => {
                                     let xf_index =
                                         self.get_cell_xf_index(xf_index, row_options, col_num);
@@ -2596,7 +2788,7 @@ impl Worksheet {
         .expect("Couldn't write to file");
     }
 
-    // Write the <c> element for a string.
+    // Write the <c> element for a formula.
     fn write_formula_cell(
         &mut self,
         row: RowNum,
@@ -2618,6 +2810,44 @@ impl Worksheet {
             col_name,
             row + 1,
             style,
+            formula,
+            result
+        )
+        .expect("Couldn't write to file");
+    }
+
+    // Write the <c> element for an array formula.
+    #[allow(clippy::too_many_arguments)]
+    fn write_array_formula_cell(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        formula: &str,
+        xf_index: &u32,
+        result: &str,
+        is_dynamic: &bool,
+        range: &str,
+    ) {
+        let col_name = self.col_to_name(col);
+        let mut style = String::from("");
+        let mut cm = String::from("");
+
+        if *xf_index > 0 {
+            style = format!(r#" s="{}""#, *xf_index);
+        }
+
+        if *is_dynamic {
+            cm = String::from(r#" cm="1""#);
+        }
+
+        write!(
+            &mut self.writer.xmlfile,
+            r#"<c r="{}{}"{}{}><f t="array" ref="{}">{}</f><v>{}</v></c>"#,
+            col_name,
+            row + 1,
+            style,
+            cm,
+            range,
             formula,
             result
         )
@@ -2776,6 +3006,13 @@ struct ColOptions {
 
 #[derive(Clone)]
 enum CellType {
+    ArrayFormula {
+        formula: String,
+        xf_index: u32,
+        result: String,
+        is_dynamic: bool,
+        range: String,
+    },
     Blank {
         xf_index: u32,
     },

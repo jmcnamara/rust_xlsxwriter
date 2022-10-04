@@ -82,6 +82,7 @@ pub struct Workbook<'a> {
     fill_count: u16,
     border_count: u16,
     num_format_count: u16,
+    is_closed: bool,
 }
 
 impl<'a> Workbook<'a> {
@@ -143,6 +144,7 @@ impl<'a> Workbook<'a> {
             fill_count: 0,
             border_count: 0,
             num_format_count: 0,
+            is_closed: false,
         }
     }
 
@@ -237,6 +239,11 @@ impl<'a> Workbook<'a> {
     /// ```
     ///
     pub fn close(&mut self) -> Result<(), XlsxError> {
+        // Check if the file has already been written.
+        if self.is_closed {
+            return Err(XlsxError::FileReClosedError);
+        }
+
         // Ensure that there is at least one worksheet in the workbook.
         if self.worksheets.is_empty() {
             self.add_worksheet();
@@ -287,6 +294,10 @@ impl<'a> Workbook<'a> {
             if worksheet.uses_string_table {
                 package_options.has_sst_table = true;
             }
+
+            if worksheet.has_dynamic_arrays {
+                package_options.has_dynamic_arrays = true;
+            }
         }
 
         // Start the zip/xlsx container.
@@ -320,6 +331,8 @@ impl<'a> Workbook<'a> {
 
         // Close and write the final zip/xlsx container.
         packager.close();
+
+        self.is_closed = true;
 
         Ok(())
     }

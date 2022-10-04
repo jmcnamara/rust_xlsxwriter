@@ -44,6 +44,7 @@ use crate::content_types::ContentTypes;
 use crate::core::Core;
 use crate::error::XlsxError;
 use crate::format::Format;
+use crate::metadata::Metadata;
 use crate::relationship::Relationship;
 use crate::shared_strings::SharedStrings;
 use crate::shared_strings_table::SharedStringsTable;
@@ -124,6 +125,10 @@ impl Packager {
     pub(crate) fn create_doc_prop_files(&mut self, options: &PackagerOptions) {
         self.write_core_file();
         self.write_app_file(options);
+
+        if options.has_dynamic_arrays {
+            self.write_metadata_file();
+        }
     }
 
     // Close the zip file.
@@ -141,6 +146,10 @@ impl Packager {
 
         if options.has_sst_table {
             content_types.add_share_strings();
+        }
+
+        if options.has_dynamic_arrays {
+            content_types.add_metadata();
         }
 
         self.zip
@@ -185,6 +194,10 @@ impl Packager {
 
         if options.has_sst_table {
             rels.add_document_relationship("/sharedStrings", "sharedStrings.xml");
+        }
+
+        if options.has_dynamic_arrays {
+            rels.add_document_relationship("/sheetMetadata", "metadata.xml");
         }
 
         self.zip
@@ -306,11 +319,25 @@ impl Packager {
         let buffer = app.writer.read_to_buffer();
         self.zip.write_all(&*buffer).unwrap();
     }
+
+    // Write the metadata.xml file.
+    fn write_metadata_file(&mut self) {
+        let mut metadata = Metadata::new();
+
+        self.zip
+            .start_file("xl/metadata.xml", self.zip_options)
+            .unwrap();
+
+        metadata.assemble_xml_file();
+        let buffer = metadata.writer.read_to_buffer();
+        self.zip.write_all(&*buffer).unwrap();
+    }
 }
 
 // Internal struct to pass options to the Packager struct.
 pub struct PackagerOptions {
     pub has_sst_table: bool,
+    pub has_dynamic_arrays: bool,
     pub num_worksheets: u16,
     pub worksheet_names: Vec<String>,
 }
@@ -320,6 +347,7 @@ impl PackagerOptions {
     pub(crate) fn new() -> PackagerOptions {
         PackagerOptions {
             has_sst_table: false,
+            has_dynamic_arrays: false,
             num_worksheets: 0,
             worksheet_names: vec![],
         }

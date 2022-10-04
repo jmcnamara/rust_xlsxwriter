@@ -23,7 +23,5 @@ fn main() -> Result<(), XlsxError> {
     }
     workbook.close()?;
 
-    println!("row = {}, col = {}", row_max, col_max);
-
     Ok(())
 }

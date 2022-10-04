@@ -14,6 +14,10 @@ pub enum XlsxError {
     /// 1,048,576 rows and 16,384 columns for a worksheet.
     RowColumnLimitError,
 
+    /// First row or column is greater than last row or column in a range
+    /// specification, i.e., the order is reversed.
+    RowColumnOrderError,
+
     /// Worksheet name cannot be blank.
     SheetnameCannotBeBlank,
 
@@ -36,6 +40,9 @@ pub enum XlsxError {
     /// the xlsx file to disk. This can be caused by an non-existent parent directory
     /// or, commonly on Windows, if the file is already open in Excel.
     IoError(String),
+
+    /// Cannot close() file that is already closed.
+    FileReClosedError,
 }
 
 impl Error for XlsxError {}
@@ -46,6 +53,10 @@ impl fmt::Display for XlsxError {
             XlsxError::RowColumnLimitError => write!(
                 f,
                 "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)."
+            ),
+            XlsxError::RowColumnOrderError => write!(
+                f,
+                "First row or column in range is greater than last row or column. "
             ),
             XlsxError::SheetnameCannotBeBlank => write!(f, "Worksheet name cannot be blank."),
             XlsxError::SheetnameLengthExceeded(name) => {
@@ -78,6 +89,7 @@ impl fmt::Display for XlsxError {
             XlsxError::IoError(e) => {
                 write!(f, "{}", e)
             }
+            XlsxError::FileReClosedError => write!(f, "File has already been closed."),
         }
     }
 }

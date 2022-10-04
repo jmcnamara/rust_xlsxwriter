@@ -652,7 +652,7 @@ impl Format {
     }
 
     // Check if the format has an alignment property set and requires a Styles
-    // <alignment> element. This handles a special case where Excel ignore
+    // <alignment> element. This also handles a special case where Excel ignore
     // Bottom as a default.
     pub(crate) fn has_alignment(&self) -> bool {
         self.horizontal_align != XlsxAlign::General
@@ -690,13 +690,15 @@ impl Format {
     ///
     /// This method is used to define the numerical format of a number in Excel.
     /// It controls whether a number is displayed as an integer, a floating
-    /// point
-    /// t.
+    /// point number, a date, a currency value or some other user defined
+    /// format.
     ///
-    /// See also [Number Format Categories] and [Number Formats in different locales].
+    /// See also [Number Format Categories] and [Number Formats in different
+    /// locales].
     ///
     /// [Number Format Categories]: struct.Format.html#number-format-categories
-    /// [Number Formats in different locales]: struct.Format.html#number-formats-in-different-locales
+    /// [Number Formats in different locales]:
+    ///     struct.Format.html#number-formats-in-different-locales
     ///
     /// # Arguments
     ///
@@ -744,7 +746,8 @@ impl Format {
     /// Note how the numbers above have been displayed by Excel in the output
     /// file according to the given number format:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_num_format.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_num_format.png">
     ///
     pub fn set_num_format(mut self, num_format: &str) -> Format {
         self.num_format = num_format.to_string();

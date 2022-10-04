@@ -461,6 +461,7 @@ mod content_types;
 mod core;
 mod error;
 mod format;
+mod metadata;
 mod packager;
 mod relationship;
 mod shared_strings;

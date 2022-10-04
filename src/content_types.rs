@@ -88,6 +88,14 @@ impl ContentTypes {
         );
     }
 
+    // Add the metadata file to the ContentTypes overrides.
+    pub(crate) fn add_metadata(&mut self) {
+        self.add_override(
+            "/xl/metadata.xml",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheetMetadata+xml",
+        );
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
