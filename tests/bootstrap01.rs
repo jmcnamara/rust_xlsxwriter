@@ -5,7 +5,6 @@
 // jmcnamara@cpan.org
 
 use rust_xlsxwriter::{Workbook, XlsxError};
-use serial_test::serial;
 
 mod common;
 
@@ -30,21 +29,19 @@ fn create_new_xlsx_file2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-#[serial]
 fn bootstrap01_single_worksheet() {
     let testcase = "bootstrap01";
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'a');
     _ = create_new_xlsx_file1(&xlsxwriter_file);
     common::assert_eq(&excel_file, &xlsxwriter_file);
 }
 
 #[test]
-#[serial]
 fn bootstrap01_add_default_worksheet() {
     let testcase = "bootstrap01";
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'b');
     _ = create_new_xlsx_file2(&xlsxwriter_file);
     common::assert_eq(&excel_file, &xlsxwriter_file);
     common::remove_test_xlsx_file(&xlsxwriter_file);

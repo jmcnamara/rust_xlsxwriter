@@ -5,7 +5,6 @@
 // jmcnamara@cpan.org
 
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
-use serial_test::serial;
 
 mod common;
 
@@ -56,22 +55,20 @@ fn create_new_xlsx_file_pixels(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-#[serial]
 fn bootstrap23_set_row() {
     let testcase = "bootstrap23";
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'a');
     _ = create_new_xlsx_file(&xlsxwriter_file);
     common::assert_eq(&excel_file, &xlsxwriter_file);
     common::remove_test_xlsx_file(&xlsxwriter_file);
 }
 
 #[test]
-#[serial]
 fn bootstrap23_set_row_pixels() {
     let testcase = "bootstrap23";
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'b');
     _ = create_new_xlsx_file_pixels(&xlsxwriter_file);
     common::assert_eq(&excel_file, &xlsxwriter_file);
     common::remove_test_xlsx_file(&xlsxwriter_file);

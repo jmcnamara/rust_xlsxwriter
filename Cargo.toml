@@ -20,7 +20,6 @@ zip = "0.6.2"
 [dev-dependencies]
 pretty_assertions = "0.6.1"
 regex = "1.5.6"
-serial_test = "0.9.0"
 tempfile = "3.3.0"
 assert_float_eq = "1"
 

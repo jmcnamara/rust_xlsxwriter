@@ -14,9 +14,20 @@ use std::fs::File;
 use std::io::Read;
 
 // Generate the xlsx file names used in the test.
+#[allow(dead_code)]
 pub fn get_xlsx_filenames(test_case: &str) -> (String, String) {
     let expected_file = format!("tests/input/{}.xlsx", test_case);
     let got_file = format!("tests/output/rs_{}.xlsx", test_case);
+
+    (expected_file, got_file)
+}
+
+// Generate the xlsx file names used in the test. Append a unique character to
+// the output file to allow multiple simultaneous tests.
+#[allow(dead_code)]
+pub fn get_xlsx_filenames_unique(test_case: &str, version: char) -> (String, String) {
+    let expected_file = format!("tests/input/{}.xlsx", test_case);
+    let got_file = format!("tests/output/rs_{}_{}.xlsx", test_case, version);
 
     (expected_file, got_file)
 }
