@@ -166,7 +166,7 @@ fn escape_attributes(attribute: &str) -> String {
 // Escape XML characters in data sections of tags.  Note, this
 // is different from escape_attributes() because double quotes
 // and newline are not escaped by Excel.
-fn escape_data(attribute: &str) -> String {
+pub(crate) fn escape_data(attribute: &str) -> String {
     attribute
         .replace('&', "&amp;")
         .replace('<', "&lt;")

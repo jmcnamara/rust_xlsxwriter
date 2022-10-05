@@ -2799,19 +2799,25 @@ impl Worksheet {
     ) {
         let col_name = self.col_to_name(col);
         let mut style = String::from("");
+        let mut result_type = String::from("");
 
         if *xf_index > 0 {
             style = format!(r#" s="{}""#, *xf_index);
         }
 
+        if !result.parse::<f64>().is_ok() {
+            result_type = String::from(r#" t="str""#);
+        }
+
         write!(
             &mut self.writer.xmlfile,
-            r#"<c r="{}{}"{}><f>{}</f><v>{}</v></c>"#,
+            r#"<c r="{}{}"{}{}><f>{}</f><v>{}</v></c>"#,
             col_name,
             row + 1,
             style,
-            formula,
-            result
+            result_type,
+            crate::xmlwriter::escape_data(formula),
+            crate::xmlwriter::escape_data(result),
         )
         .expect("Couldn't write to file");
     }
@@ -2831,6 +2837,7 @@ impl Worksheet {
         let col_name = self.col_to_name(col);
         let mut style = String::from("");
         let mut cm = String::from("");
+        let mut result_type = String::from("");
 
         if *xf_index > 0 {
             style = format!(r#" s="{}""#, *xf_index);
@@ -2840,16 +2847,21 @@ impl Worksheet {
             cm = String::from(r#" cm="1""#);
         }
 
+        if !result.parse::<f64>().is_ok() {
+            result_type = String::from(r#" t="str""#);
+        }
+
         write!(
             &mut self.writer.xmlfile,
-            r#"<c r="{}{}"{}{}><f t="array" ref="{}">{}</f><v>{}</v></c>"#,
+            r#"<c r="{}{}"{}{}{}><f t="array" ref="{}">{}</f><v>{}</v></c>"#,
             col_name,
             row + 1,
             style,
             cm,
+            result_type,
             range,
-            formula,
-            result
+            crate::xmlwriter::escape_data(formula),
+            crate::xmlwriter::escape_data(result),
         )
         .expect("Couldn't write to file");
     }
