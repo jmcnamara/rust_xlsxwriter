@@ -5,6 +5,17 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2022-10-10
+
+### Added
+
+- Added support for array formulas and dynamic array formulas via
+  `worksheet.write_array_formula()` and
+  `worksheet.write_dynamic_array_formula()`.
+
+- Added links to https://rustxlsxwriter.github.io docs.
+
+
 ## [0.3.1] - 2022-10-01
 
 ### Fixed
