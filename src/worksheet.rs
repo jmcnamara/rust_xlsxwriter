@@ -6,6 +6,7 @@
 #![warn(missing_docs)]
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 use regex::Regex;
+use std::borrow::Cow;
 use std::cmp;
 use std::collections::HashMap;
 use std::io::Write;
@@ -104,6 +105,7 @@ pub struct Worksheet {
     paper_size: u8,
     right_to_left: bool,
     default_result: String,
+    use_future_functions: bool,
 }
 
 impl Worksheet {
@@ -147,6 +149,7 @@ impl Worksheet {
             paper_size: 0,
             right_to_left: false,
             default_result: "0".to_string(),
+            use_future_functions: false,
         }
     }
 
@@ -687,6 +690,83 @@ impl Worksheet {
         self.store_formula(row, col, formula, None)
     }
 
+    /// Write a formatted array formula to a worksheet cell.
+    ///
+    /// Write an array formula with formatting to a worksheet cell. The format
+    /// is set via a [`Format`] struct which can control the font or color or
+    /// properties such as bold and italic.
+    ///
+    /// The `write_array_formula()` method writes an array formula to a cell
+    /// range. In Excel an array formula is a formula that performs a
+    /// calculation on a range of values. It can return a single value or a
+    /// range/"array" of values.
+    ///
+    /// An array formula is displayed with a pair of curly brackets around the
+    /// formula like this: `{=SUM(A1:B1*A2:B2)}`. The `write_array_formula()`
+    /// method doesn't require actually require these so you can omit them in
+    /// the formula, and the equal sign, if you wish like this:
+    /// `SUM(A1:B1*A2:B2)`.
+    ///
+    /// For array formulas that return a range of values you must specify the
+    /// range that the return values will be written to with the `first_` and
+    /// `last_` parameters. If the array formula returns a single value then the
+    /// first_ and last_ parameters should be the same, as shown in the example
+    /// below.
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `formula` - The formula to write to the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing an array formula with
+    /// formatting to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_array_formula.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #    let worksheet = workbook.add_worksheet();
+    /// #
+    /// #    // Add a format.
+    /// #    let bold = Format::new().set_bold();
+    /// #
+    /// #    // Write some test data.
+    /// #    worksheet.write_number_only(0, 1, 500)?;
+    /// #    worksheet.write_number_only(0, 2, 300)?;
+    /// #    worksheet.write_number_only(1, 1, 10)?;
+    /// #    worksheet.write_number_only(1, 2, 15)?;
+    ///
+    ///     // Write an array formula that returns a single value.
+    ///     worksheet.write_array_formula(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}", &bold)?;
+    ///
+    /// #     // Close the file.
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula.png">
     ///
     pub fn write_array_formula(
         &mut self,
@@ -709,6 +789,77 @@ impl Worksheet {
         )
     }
 
+    /// Write an  array formula to a worksheet cell.
+    ///
+    /// The `write_array_formula_only()` method writes an array formula to a
+    /// cell range. In Excel an array formula is a formula that performs a
+    /// calculation on a range of values. It can return a single value or a
+    /// range/"array" of values. This is similar to
+    /// [`write_array_formula()`](Worksheet::write_array_formula()) except you
+    /// don't have to supply a [`Format`] so it is useful for writing raw data.
+    ///
+    /// An array formula is displayed with a pair of curly brackets around the
+    /// formula like this: `{=SUM(A1:B1*A2:B2)}`. The `write_array_formula()`
+    /// method doesn't require actually require these so you can omit them in
+    /// the formula, and the equal sign, if you wish like this:
+    /// `SUM(A1:B1*A2:B2)`.
+    ///
+    /// For array formulas that return a range of values you must specify the
+    /// range that the return values will be written to with the `first_` and
+    /// `last_` parameters. If the array formula returns a single value then the
+    /// first_ and last_ parameters should be the same, as shown in the example
+    /// below.
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `formula` - The formula to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing an array formulas to a
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_array_formula_only.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file.
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #    let worksheet = workbook.add_worksheet();
+    /// #
+    /// #    // Write some test data.
+    /// #    worksheet.write_number_only(0, 1, 500)?;
+    /// #    worksheet.write_number_only(0, 2, 300)?;
+    /// #    worksheet.write_number_only(1, 1, 10)?;
+    /// #    worksheet.write_number_only(1, 2, 15)?;
+    ///
+    ///     // Write an array formula that returns a single value.
+    ///     worksheet.write_array_formula_only(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}")?;
+    ///
+    /// #     // Close the file.
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula_only.png">
     ///
     pub fn write_array_formula_only(
         &mut self,
@@ -724,6 +875,89 @@ impl Worksheet {
         )
     }
 
+    /// Write a formatted dynamic array formula to a worksheet cell or range of
+    /// cells.
+    ///
+    /// The `write_dynamic_array_formula()` function writes an Excel 365 dynamic
+    /// array formula to a cell range. Some examples of functions that return
+    /// dynamic arrays are:
+    ///
+    /// - `FILTER()`
+    /// - `RANDARRAY()`
+    /// - `SEQUENCE()`
+    /// - `SORTBY()`
+    /// - `SORT()`
+    /// - `UNIQUE()`
+    /// - `XLOOKUP()`
+    /// - `XMATCH()`
+    ///
+    /// The format is set via a [`Format`] struct which can control the font or
+    /// color or properties such as bold and italic.
+    ///
+    /// For array formulas that return a range of values you must specify the
+    /// range that the return values will be written to with the `first_` and
+    /// `last_` parameters. If the array formula returns a single value then the
+    /// first_ and last_ parameters should be the same, as shown in the example
+    /// below or use the
+    /// [`write_dynamic_formula()`](Worksheet::write_dynamic_formula()) method.
+    ///
+    /// For more details see the `rust_xlsxwriter` documentation section on
+    /// [Dynamic Array support] and the [Dynamic array formulas] example.
+    ///
+    /// [Dynamic Array support]:
+    ///     https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
+    /// [Dynamic array formulas]:
+    ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `formula` - The formula to write to the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates a static function which generally
+    /// returns one value turned into a dynamic array function which returns a
+    /// range of values.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_dynamic_array_formula.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Write a dynamic formula using a static function.
+    ///     worksheet.write_dynamic_array_formula(0, 1, 0, 1, "=LEN(A1:A3)", &bold)?;
+    /// #
+    /// #     // Write some data for the function to operate on.
+    /// #     worksheet.write_string_only(0, 0, "Foo")?;
+    /// #     worksheet.write_string_only(1, 0, "Food")?;
+    /// #     worksheet.write_string_only(2, 0, "Frood")?;
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula.png">
     ///
     pub fn write_dynamic_array_formula(
         &mut self,
@@ -746,6 +980,65 @@ impl Worksheet {
         )
     }
 
+    /// Write a dynamic array formula to a worksheet cell or range of cells.
+    ///
+    /// This method is similar to
+    /// [`write_dynamic_array_formula()`](Worksheet::write_dynamic_array_formula())
+    /// except that it doesn't require a [`Format`] struct.
+    ///
+    /// For more details see the `rust_xlsxwriter` documentation section on
+    /// [Dynamic Array support] and the [Dynamic array formulas] example.
+    ///
+    /// [Dynamic Array support]:
+    ///     https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
+    /// [Dynamic array formulas]:
+    ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `formula` - The formula to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates a static function which generally returns
+    /// one value turned into a dynamic array function which returns a range of
+    /// values.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_dynamic_array_formula_only.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write a dynamic formula using a static function.
+    ///     worksheet.write_dynamic_array_formula_only(0, 1, 0, 1, "=LEN(A1:A3)")?;
+    /// #
+    /// #     // Write some data for the function to operate on.
+    /// #     worksheet.write_string_only(0, 0, "Foo")?;
+    /// #     worksheet.write_string_only(1, 0, "Food")?;
+    /// #     worksheet.write_string_only(2, 0, "Frood")?;
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula_only.png">
     ///
     pub fn write_dynamic_array_formula_only(
         &mut self,
@@ -761,6 +1054,34 @@ impl Worksheet {
         )
     }
 
+    /// Write a formatted dynamic formula to a worksheet cell.
+    ///
+    /// The `write_dynamic_formula()` method is similar to the
+    /// [`write_dynamic_array_formula()`](Worksheet::write_dynamic_array_formula())
+    /// method, shown above, except that it writes a dynamic array formula to a
+    /// single cell, rather than a range. This is a syntactic shortcut since the
+    /// array range isn't generally known for a dynamic range and specifying the
+    /// initial cell is sufficient for Excel.
+    ///
+    /// For more details see the `rust_xlsxwriter` documentation section on
+    /// [Dynamic Array support] and the [Dynamic array formulas] example.
+    ///
+    /// [Dynamic Array support]:
+    ///     https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
+    /// [Dynamic array formulas]:
+    ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `formula` - The formula to write to the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
     ///
     pub fn write_dynamic_formula(
         &mut self,
@@ -773,6 +1094,33 @@ impl Worksheet {
         self.store_array_formula(row, col, row, col, formula, Some(format), true)
     }
 
+    /// Write a dynamic formula to a worksheet cell.
+    ///
+    /// The `write_dynamic_formula_only()` method is similar to the
+    /// [`write_dynamic_array_formula_only()`](Worksheet::write_dynamic_array_formula_only())
+    /// method, shown above, except that it writes a dynamic array formula to a
+    /// single cell, rather than a range. This is a syntactic shortcut since the
+    /// array range isn't generally known for a dynamic range and specifying the
+    /// initial cell is sufficient for Excel.
+    ///
+    /// For more details see the `rust_xlsxwriter` documentation section on
+    /// [Dynamic Array support] and the [Dynamic array formulas] example.
+    ///
+    /// [Dynamic Array support]:
+    ///     https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
+    /// [Dynamic array formulas]:
+    ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `formula` - The formula to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
     ///
     pub fn write_dynamic_formula_only(
         &mut self,
@@ -1870,6 +2218,64 @@ impl Worksheet {
         self
     }
 
+    /// Enable the use of newer Excel future functions.
+    ///
+    /// Enable the use of newer Excel “future” functions without having to
+    /// prefix them with with `_xlfn`.
+    ///
+    /// Excel 2010 and later versions added functions which weren't defined in
+    /// the original file specification. These functions are referred to by
+    /// Microsoft as "Future Functions". Examples of these functions are `ACOT`,
+    /// `CHISQ.DIST.RT` , `CONFIDENCE.NORM`, `STDEV.P`, `STDEV.S` and
+    /// `WORKDAY.INTL`.
+    ///
+    /// When written using [`write_formula()`](Worksheet::write_formula()) these
+    /// functions need to be fully qualified with a prefix such as `_xlfn.`
+    ///
+    /// Alternatively you can use the `worksheet.use_future_functions()`
+    /// function to have `rust_xlsxwriter` automatically handle future functions
+    /// for you, see below.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing an Excel "Future Function"
+    /// with an implicit prefix and the use_future_functions() method.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_working_with_formulas_future3.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("future_function.xlsx");
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write a future function and automatically add the required prefix.
+    ///     worksheet.use_future_functions(true);
+    ///     worksheet.write_formula_only(0, 0, "=STDEV.S(B1:B5)")?;
+    /// #
+    /// #     // Write some data for the function to operate on.
+    /// #     worksheet.write_number_only(0, 1, 1.23)?;
+    /// #     worksheet.write_number_only(1, 1, 1.03)?;
+    /// #     worksheet.write_number_only(2, 1, 1.20)?;
+    /// #     worksheet.write_number_only(3, 1, 1.15)?;
+    /// #     worksheet.write_number_only(4, 1, 1.22)?;
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/working_with_formulas2.png">
+    ///
+    pub fn use_future_functions(&mut self, enable: bool) {
+        self.use_future_functions = enable;
+    }
+
     // -----------------------------------------------------------------------
     // Worksheet page setup methods.
     // -----------------------------------------------------------------------
@@ -2122,6 +2528,11 @@ impl Worksheet {
         formula: &str,
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
+        // Transfer to dynamic formula handling function.
+        if is_dynamic_function(formula) {
+            return self.store_array_formula(row, col, row, col, formula, None, true);
+        }
+
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -2133,12 +2544,7 @@ impl Worksheet {
             None => 0,
         };
 
-        let mut formula = formula.to_string();
-
-        // Strip the leading = if it exists.
-        if formula.starts_with('=') {
-            formula.remove(0);
-        }
+        let formula = prepare_formula(formula, self.use_future_functions);
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::Formula {
@@ -2184,21 +2590,16 @@ impl Worksheet {
             None => 0,
         };
 
-        let mut formula = formula.to_string();
-
-        // Strip the {} array braces and leading = if they exist.
-        if formula.starts_with('{') {
-            formula.remove(0);
-        }
-        if formula.starts_with('=') {
-            formula.remove(0);
-        }
-        if formula.ends_with('}') {
-            formula.pop();
-        }
+        let formula = prepare_formula(formula, self.use_future_functions);
 
         // Create the array range reference.
         let range = utility::cell_range(first_row, first_col, last_row, last_col);
+
+        // Check for a dynamic function in a standard static array formula.
+        let mut is_dynamic = is_dynamic;
+        if !is_dynamic && is_dynamic_function(&formula) {
+            is_dynamic = true;
+        }
 
         if is_dynamic {
             self.has_dynamic_arrays = true;
@@ -2805,7 +3206,7 @@ impl Worksheet {
             style = format!(r#" s="{}""#, *xf_index);
         }
 
-        if !result.parse::<f64>().is_ok() {
+        if result.parse::<f64>().is_err() {
             result_type = String::from(r#" t="str""#);
         }
 
@@ -2847,7 +3248,7 @@ impl Worksheet {
             cm = String::from(r#" cm="1""#);
         }
 
-        if !result.parse::<f64>().is_ok() {
+        if result.parse::<f64>().is_err() {
             result_type = String::from(r#" t="str""#);
         }
 
@@ -2993,8 +3394,81 @@ impl Worksheet {
 }
 
 // -----------------------------------------------------------------------
-// Helper enums/structs
+// Helper enums/structs/functions.
 // -----------------------------------------------------------------------
+
+// Utility method to strip equal sign and array braces from a formula and
+// also expand out future and dynamic array formulas.
+fn prepare_formula(formula: &str, expand_future_functions: bool) -> String {
+    let mut formula = formula.to_string();
+
+    // Remove array formula braces and the leading = if they exist.
+    if formula.starts_with('{') {
+        formula.remove(0);
+    }
+    if formula.starts_with('=') {
+        formula.remove(0);
+    }
+    if formula.ends_with('}') {
+        formula.pop();
+    }
+
+    // Exit if formula is already expanded by the user.
+    if formula.contains("_xlfn.") {
+        return formula;
+    }
+
+    // Expand dynamic formulas.
+    formula = escape_dynamic_formulas1(&formula).into();
+    formula = escape_dynamic_formulas2(&formula).into();
+
+    if expand_future_functions {
+        formula = escape_future_functions(&formula).into();
+    }
+
+    formula
+}
+
+// Escape/expand the dynamic formula _xlfn functions.
+fn escape_dynamic_formulas1(formula: &str) -> Cow<str> {
+    lazy_static! {
+        static ref XLFN: Regex = Regex::new(
+            r"\b(ANCHORARRAY|LAMBDA|LET|RANDARRAY|SEQUENCE|SINGLE|SORTBY|UNIQUE|XLOOKUP|XMATCH)\("
+        )
+        .unwrap();
+    }
+    XLFN.replace_all(formula, "_xlfn.$1(")
+}
+
+// Escape/expand the dynamic formula _xlfn._xlws. functions.
+fn escape_dynamic_formulas2(formula: &str) -> Cow<str> {
+    lazy_static! {
+        static ref XLWS: Regex = Regex::new(r"\b(FILTER|SORT)\(").unwrap();
+    }
+    XLWS.replace_all(formula, "_xlfn._xlws.$1(")
+}
+
+// Escape/expand future/_xlfn functions.
+fn escape_future_functions(formula: &str) -> Cow<str> {
+    lazy_static! {
+        static ref FUTURE: Regex = Regex::new(
+            r"\b(ACOTH|ACOT|AGGREGATE|ARABIC|BASE|BETA\.DIST|BETA\.INV|BINOM\.DIST\.RANGE|BINOM\.DIST|BINOM\.INV|BITAND|BITLSHIFT|BITOR|BITRSHIFT|BITXOR|CEILING\.MATH|CEILING\.PRECISE|CHISQ\.DIST\.RT|CHISQ\.DIST|CHISQ\.INV\.RT|CHISQ\.INV|CHISQ\.TEST|COMBINA|CONCAT|CONFIDENCE\.NORM|CONFIDENCE\.T|COTH|COT|COVARIANCE\.P|COVARIANCE\.S|CSCH|CSC|DAYS|DECIMAL|ERF\.PRECISE|ERFC\.PRECISE|EXPON\.DIST|F\.DIST\.RT|F\.DIST|F\.INV\.RT|F\.INV|F\.TEST|FILTERXML|FLOOR\.MATH|FLOOR\.PRECISE|FORECAST\.ETS\.CONFINT|FORECAST\.ETS\.SEASONALITY|FORECAST\.ETS\.STAT|FORECAST\.ETS|FORECAST\.LINEAR|FORMULATEXT|GAMMA\.DIST|GAMMA\.INV|GAMMALN\.PRECISE|GAMMA|GAUSS|HYPGEOM\.DIST|IFNA|IFS|IMCOSH|IMCOT|IMCSCH|IMCSC|IMSECH|IMSEC|IMSINH|IMTAN|ISFORMULA|ISOWEEKNUM|LOGNORM\.DIST|LOGNORM\.INV|MAXIFS|MINIFS|MODE\.MULT|MODE\.SNGL|MUNIT|NEGBINOM\.DIST|NORM\.DIST|NORM\.INV|NORM\.S\.DIST|NORM\.S\.INV|NUMBERVALUE|PDURATION|PERCENTILE\.EXC|PERCENTILE\.INC|PERCENTRANK\.EXC|PERCENTRANK\.INC|PERMUTATIONA|PHI|POISSON\.DIST|QUARTILE\.EXC|QUARTILE\.INC|QUERYSTRING|RANK\.AVG|RANK\.EQ|RRI|SECH|SEC|SHEETS|SHEET|SKEW\.P|STDEV\.P|STDEV\.S|SWITCH|T\.DIST\.2T|T\.DIST\.RT|T\.DIST|T\.INV\.2T|T\.INV|T\.TEST|TEXTJOIN|UNICHAR|UNICODE|VAR\.P|VAR\.S|WEBSERVICE|WEIBULL\.DIST|XOR|Z\.TEST)\("
+        )
+        .unwrap();
+    }
+    FUTURE.replace_all(formula, "_xlfn.$1(")
+}
+
+// Check of a dynamic function/formula.
+fn is_dynamic_function(formula: &str) -> bool {
+    lazy_static! {
+        static ref DYNAMIC_FUNCTION: Regex = Regex::new(
+            r"\b(ANCHORARRAY|FILTER|LAMBDA|LET|RANDARRAY|SEQUENCE|SINGLE|SORTBY|SORT|UNIQUE|XLOOKUP|XMATCH)\("
+        )
+        .unwrap();
+    }
+    DYNAMIC_FUNCTION.is_match(formula)
+}
 
 #[derive(Clone)]
 struct WorksheetDimensions {
@@ -3089,6 +3563,187 @@ mod tests {
         );
 
         assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_dynamic_function_escapes() {
+        let formulas = vec![
+            // Test simple escapes for formulas.
+            ("=foo()", "foo()"),
+            ("{foo()}", "foo()"),
+            ("{=foo()}", "foo()"),
+            // Dynamic functions.
+            ("LET()", "_xlfn.LET()"),
+            ("SEQUENCE(10)", "_xlfn.SEQUENCE(10)"),
+            ("UNIQUES(A1:A10)", "UNIQUES(A1:A10)"),
+            ("UUNIQUE(A1:A10)", "UUNIQUE(A1:A10)"),
+            ("SINGLE(A1:A3)", "_xlfn.SINGLE(A1:A3)"),
+            ("UNIQUE(A1:A10)", "_xlfn.UNIQUE(A1:A10)"),
+            ("_xlfn.SEQUENCE(10)", "_xlfn.SEQUENCE(10)"),
+            ("SORT(A1:A10)", "_xlfn._xlws.SORT(A1:A10)"),
+            ("RANDARRAY(10,1)", "_xlfn.RANDARRAY(10,1)"),
+            ("ANCHORARRAY(C1)", "_xlfn.ANCHORARRAY(C1)"),
+            ("SORTBY(A1:A10,B1)", "_xlfn.SORTBY(A1:A10,B1)"),
+            ("FILTER(A1:A10,1)", "_xlfn._xlws.FILTER(A1:A10,1)"),
+            ("XMATCH(B1:B2,A1:A10)", "_xlfn.XMATCH(B1:B2,A1:A10)"),
+            ("COUNTA(ANCHORARRAY(C1))", "COUNTA(_xlfn.ANCHORARRAY(C1))"),
+            (
+                "SEQUENCE(10)*SEQUENCE(10)",
+                "_xlfn.SEQUENCE(10)*_xlfn.SEQUENCE(10)",
+            ),
+            (
+                "XLOOKUP(\"India\",A22:A23,B22:B23)",
+                "_xlfn.XLOOKUP(\"India\",A22:A23,B22:B23)",
+            ),
+            (
+                "XLOOKUP(B1,A1:A10,ANCHORARRAY(D1))",
+                "_xlfn.XLOOKUP(B1,A1:A10,_xlfn.ANCHORARRAY(D1))",
+            ),
+            (
+                "LAMBDA(_xlpm.number, _xlpm.number + 1)(1)",
+                "_xlfn.LAMBDA(_xlpm.number, _xlpm.number + 1)(1)",
+            ),
+            // Future functions.
+            ("COT()", "_xlfn.COT()"),
+            ("CSC()", "_xlfn.CSC()"),
+            ("IFS()", "_xlfn.IFS()"),
+            ("PHI()", "_xlfn.PHI()"),
+            ("RRI()", "_xlfn.RRI()"),
+            ("SEC()", "_xlfn.SEC()"),
+            ("XOR()", "_xlfn.XOR()"),
+            ("ACOT()", "_xlfn.ACOT()"),
+            ("BASE()", "_xlfn.BASE()"),
+            ("COTH()", "_xlfn.COTH()"),
+            ("CSCH()", "_xlfn.CSCH()"),
+            ("DAYS()", "_xlfn.DAYS()"),
+            ("IFNA()", "_xlfn.IFNA()"),
+            ("SECH()", "_xlfn.SECH()"),
+            ("ACOTH()", "_xlfn.ACOTH()"),
+            ("BITOR()", "_xlfn.BITOR()"),
+            ("F.INV()", "_xlfn.F.INV()"),
+            ("GAMMA()", "_xlfn.GAMMA()"),
+            ("GAUSS()", "_xlfn.GAUSS()"),
+            ("IMCOT()", "_xlfn.IMCOT()"),
+            ("IMCSC()", "_xlfn.IMCSC()"),
+            ("IMSEC()", "_xlfn.IMSEC()"),
+            ("IMTAN()", "_xlfn.IMTAN()"),
+            ("MUNIT()", "_xlfn.MUNIT()"),
+            ("SHEET()", "_xlfn.SHEET()"),
+            ("T.INV()", "_xlfn.T.INV()"),
+            ("VAR.P()", "_xlfn.VAR.P()"),
+            ("VAR.S()", "_xlfn.VAR.S()"),
+            ("ARABIC()", "_xlfn.ARABIC()"),
+            ("BITAND()", "_xlfn.BITAND()"),
+            ("BITXOR()", "_xlfn.BITXOR()"),
+            ("CONCAT()", "_xlfn.CONCAT()"),
+            ("F.DIST()", "_xlfn.F.DIST()"),
+            ("F.TEST()", "_xlfn.F.TEST()"),
+            ("IMCOSH()", "_xlfn.IMCOSH()"),
+            ("IMCSCH()", "_xlfn.IMCSCH()"),
+            ("IMSECH()", "_xlfn.IMSECH()"),
+            ("IMSINH()", "_xlfn.IMSINH()"),
+            ("MAXIFS()", "_xlfn.MAXIFS()"),
+            ("MINIFS()", "_xlfn.MINIFS()"),
+            ("SHEETS()", "_xlfn.SHEETS()"),
+            ("SKEW.P()", "_xlfn.SKEW.P()"),
+            ("SWITCH()", "_xlfn.SWITCH()"),
+            ("T.DIST()", "_xlfn.T.DIST()"),
+            ("T.TEST()", "_xlfn.T.TEST()"),
+            ("Z.TEST()", "_xlfn.Z.TEST()"),
+            ("COMBINA()", "_xlfn.COMBINA()"),
+            ("DECIMAL()", "_xlfn.DECIMAL()"),
+            ("RANK.EQ()", "_xlfn.RANK.EQ()"),
+            ("STDEV.P()", "_xlfn.STDEV.P()"),
+            ("STDEV.S()", "_xlfn.STDEV.S()"),
+            ("UNICHAR()", "_xlfn.UNICHAR()"),
+            ("UNICODE()", "_xlfn.UNICODE()"),
+            ("BETA.INV()", "_xlfn.BETA.INV()"),
+            ("F.INV.RT()", "_xlfn.F.INV.RT()"),
+            ("ISO.CEILING()", "ISO.CEILING()"),
+            ("NORM.INV()", "_xlfn.NORM.INV()"),
+            ("RANK.AVG()", "_xlfn.RANK.AVG()"),
+            ("T.INV.2T()", "_xlfn.T.INV.2T()"),
+            ("TEXTJOIN()", "_xlfn.TEXTJOIN()"),
+            ("AGGREGATE()", "_xlfn.AGGREGATE()"),
+            ("BETA.DIST()", "_xlfn.BETA.DIST()"),
+            ("BINOM.INV()", "_xlfn.BINOM.INV()"),
+            ("BITLSHIFT()", "_xlfn.BITLSHIFT()"),
+            ("BITRSHIFT()", "_xlfn.BITRSHIFT()"),
+            ("CHISQ.INV()", "_xlfn.CHISQ.INV()"),
+            ("ECMA.CEILING()", "ECMA.CEILING()"),
+            ("F.DIST.RT()", "_xlfn.F.DIST.RT()"),
+            ("FILTERXML()", "_xlfn.FILTERXML()"),
+            ("GAMMA.INV()", "_xlfn.GAMMA.INV()"),
+            ("ISFORMULA()", "_xlfn.ISFORMULA()"),
+            ("MODE.MULT()", "_xlfn.MODE.MULT()"),
+            ("MODE.SNGL()", "_xlfn.MODE.SNGL()"),
+            ("NORM.DIST()", "_xlfn.NORM.DIST()"),
+            ("PDURATION()", "_xlfn.PDURATION()"),
+            ("T.DIST.2T()", "_xlfn.T.DIST.2T()"),
+            ("T.DIST.RT()", "_xlfn.T.DIST.RT()"),
+            ("WORKDAY.INTL()", "WORKDAY.INTL()"),
+            ("BINOM.DIST()", "_xlfn.BINOM.DIST()"),
+            ("CHISQ.DIST()", "_xlfn.CHISQ.DIST()"),
+            ("CHISQ.TEST()", "_xlfn.CHISQ.TEST()"),
+            ("EXPON.DIST()", "_xlfn.EXPON.DIST()"),
+            ("FLOOR.MATH()", "_xlfn.FLOOR.MATH()"),
+            ("GAMMA.DIST()", "_xlfn.GAMMA.DIST()"),
+            ("ISOWEEKNUM()", "_xlfn.ISOWEEKNUM()"),
+            ("NORM.S.INV()", "_xlfn.NORM.S.INV()"),
+            ("WEBSERVICE()", "_xlfn.WEBSERVICE()"),
+            ("ERF.PRECISE()", "_xlfn.ERF.PRECISE()"),
+            ("FORMULATEXT()", "_xlfn.FORMULATEXT()"),
+            ("LOGNORM.INV()", "_xlfn.LOGNORM.INV()"),
+            ("NORM.S.DIST()", "_xlfn.NORM.S.DIST()"),
+            ("NUMBERVALUE()", "_xlfn.NUMBERVALUE()"),
+            ("QUERYSTRING()", "_xlfn.QUERYSTRING()"),
+            ("CEILING.MATH()", "_xlfn.CEILING.MATH()"),
+            ("CHISQ.INV.RT()", "_xlfn.CHISQ.INV.RT()"),
+            ("CONFIDENCE.T()", "_xlfn.CONFIDENCE.T()"),
+            ("COVARIANCE.P()", "_xlfn.COVARIANCE.P()"),
+            ("COVARIANCE.S()", "_xlfn.COVARIANCE.S()"),
+            ("ERFC.PRECISE()", "_xlfn.ERFC.PRECISE()"),
+            ("FORECAST.ETS()", "_xlfn.FORECAST.ETS()"),
+            ("HYPGEOM.DIST()", "_xlfn.HYPGEOM.DIST()"),
+            ("LOGNORM.DIST()", "_xlfn.LOGNORM.DIST()"),
+            ("PERMUTATIONA()", "_xlfn.PERMUTATIONA()"),
+            ("POISSON.DIST()", "_xlfn.POISSON.DIST()"),
+            ("QUARTILE.EXC()", "_xlfn.QUARTILE.EXC()"),
+            ("QUARTILE.INC()", "_xlfn.QUARTILE.INC()"),
+            ("WEIBULL.DIST()", "_xlfn.WEIBULL.DIST()"),
+            ("CHISQ.DIST.RT()", "_xlfn.CHISQ.DIST.RT()"),
+            ("FLOOR.PRECISE()", "_xlfn.FLOOR.PRECISE()"),
+            ("NEGBINOM.DIST()", "_xlfn.NEGBINOM.DIST()"),
+            ("NETWORKDAYS.INTL()", "NETWORKDAYS.INTL()"),
+            ("PERCENTILE.EXC()", "_xlfn.PERCENTILE.EXC()"),
+            ("PERCENTILE.INC()", "_xlfn.PERCENTILE.INC()"),
+            ("CEILING.PRECISE()", "_xlfn.CEILING.PRECISE()"),
+            ("CONFIDENCE.NORM()", "_xlfn.CONFIDENCE.NORM()"),
+            ("FORECAST.LINEAR()", "_xlfn.FORECAST.LINEAR()"),
+            ("GAMMALN.PRECISE()", "_xlfn.GAMMALN.PRECISE()"),
+            ("PERCENTRANK.EXC()", "_xlfn.PERCENTRANK.EXC()"),
+            ("PERCENTRANK.INC()", "_xlfn.PERCENTRANK.INC()"),
+            ("BINOM.DIST.RANGE()", "_xlfn.BINOM.DIST.RANGE()"),
+            ("FORECAST.ETS.STAT()", "_xlfn.FORECAST.ETS.STAT()"),
+            ("FORECAST.ETS.CONFINT()", "_xlfn.FORECAST.ETS.CONFINT()"),
+            (
+                "FORECAST.ETS.SEASONALITY()",
+                "_xlfn.FORECAST.ETS.SEASONALITY()",
+            ),
+            (
+                "Z.TEST(Z.TEST(Z.TEST()))",
+                "_xlfn.Z.TEST(_xlfn.Z.TEST(_xlfn.Z.TEST()))",
+            ),
+        ];
+
+        for test_data in formulas.iter() {
+            let mut formula = test_data.0.to_string();
+            let expected = test_data.1;
+
+            formula = prepare_formula(&formula, true);
+
+            assert_eq!(formula, expected);
+        }
     }
 
     #[test]

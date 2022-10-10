@@ -479,3 +479,6 @@ pub use error::*;
 pub use format::*;
 pub use workbook::*;
 pub use worksheet::*;
+
+#[macro_use]
+extern crate lazy_static;

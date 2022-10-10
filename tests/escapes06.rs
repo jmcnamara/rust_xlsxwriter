@@ -8,8 +8,7 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 mod common;
 
-// Test case to test strings that need XML escaping.
-//
+// Test strings that need XML escaping.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 

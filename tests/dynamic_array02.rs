@@ -8,9 +8,8 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 
 mod common;
 
-// Test case to test dynamic arrays/formulas.
-//
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+// Test case to test dynamic array formula: with explicit prefix.
+fn create_new_xlsx_file_a(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
     let worksheet = workbook.add_worksheet();
@@ -23,12 +22,85 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case to test dynamic array formula: with implicit prefix.
+fn create_new_xlsx_file_b(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new(filename);
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write_dynamic_formula_only(0, 1, "=UNIQUE(A1)")?;
+    worksheet.write_number_only(0, 0, 0)?;
+
+    workbook.close()?;
+
+    Ok(())
+}
+
+// Test case to test dynamic array formula: with standard formula function.
+fn create_new_xlsx_file_c(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new(filename);
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write_formula_only(0, 1, "=UNIQUE(A1)")?;
+    worksheet.write_number_only(0, 0, 0)?;
+
+    workbook.close()?;
+
+    Ok(())
+}
+
+// Test case to test dynamic array formula: with standard array formula
+// function.
+fn create_new_xlsx_file_d(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new(filename);
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write_array_formula_only(0, 1, 0, 1, "=UNIQUE(A1)")?;
+    worksheet.write_number_only(0, 0, 0)?;
+
+    workbook.close()?;
+
+    Ok(())
+}
+
 #[test]
-fn test_dynamic_array02() {
+fn test_dynamic_array02_a() {
     let testcase = "dynamic_array02";
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
-    _ = create_new_xlsx_file(&xlsxwriter_file);
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'a');
+    _ = create_new_xlsx_file_a(&xlsxwriter_file);
+    common::assert_eq(&excel_file, &xlsxwriter_file);
+    common::remove_test_xlsx_file(&xlsxwriter_file);
+}
+
+#[test]
+fn test_dynamic_array02_b() {
+    let testcase = "dynamic_array02";
+
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'b');
+    _ = create_new_xlsx_file_b(&xlsxwriter_file);
+    common::assert_eq(&excel_file, &xlsxwriter_file);
+    common::remove_test_xlsx_file(&xlsxwriter_file);
+}
+
+#[test]
+fn test_dynamic_array02_c() {
+    let testcase = "dynamic_array02";
+
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'c');
+    _ = create_new_xlsx_file_c(&xlsxwriter_file);
+    common::assert_eq(&excel_file, &xlsxwriter_file);
+    common::remove_test_xlsx_file(&xlsxwriter_file);
+}
+
+#[test]
+fn test_dynamic_array02_d() {
+    let testcase = "dynamic_array02";
+
+    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'd');
+    _ = create_new_xlsx_file_d(&xlsxwriter_file);
     common::assert_eq(&excel_file, &xlsxwriter_file);
     common::remove_test_xlsx_file(&xlsxwriter_file);
 }

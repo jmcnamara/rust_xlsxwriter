@@ -16,6 +16,7 @@ itertools = "0.10.0"
 regex = "1.5.6"
 tempfile = "3.3.0"
 zip = "0.6.2"
+lazy_static = "1.4.0"
 
 [dev-dependencies]
 pretty_assertions = "0.6.1"

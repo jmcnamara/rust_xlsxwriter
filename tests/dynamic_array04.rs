@@ -8,8 +8,7 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 mod common;
 
-// Test case to test TODO.
-//
+// Test dynamic function with formatting.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 

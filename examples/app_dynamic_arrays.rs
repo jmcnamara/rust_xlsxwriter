@@ -25,7 +25,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet1 = workbook.add_worksheet().set_name("Filter")?;
 
-    worksheet1.write_dynamic_formula_only(1, 5, "=_xlfn._xlws.FILTER(A1:D17,C1:C17=K2)")?;
+    worksheet1.write_dynamic_formula_only(1, 5, "=FILTER(A1:D17,C1:C17=K2)")?;
 
     // Write the data the function will work on.
     worksheet1.write_string(0, 10, "Product", &header2)?;
@@ -45,10 +45,10 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet2 = workbook.add_worksheet().set_name("Unique")?;
 
-    worksheet2.write_dynamic_formula_only(1, 5, "=_xlfn.UNIQUE(B2:B17)")?;
+    worksheet2.write_dynamic_formula_only(1, 5, "=UNIQUE(B2:B17)")?;
 
     // A more complex example combining SORT and UNIQUE.
-    worksheet2.write_dynamic_formula_only(1, 7, "_xlfn._xlws.SORT(_xlfn.UNIQUE(B2:B17))")?;
+    worksheet2.write_dynamic_formula_only(1, 7, "SORT(UNIQUE(B2:B17))")?;
 
     // Write the data the function will work on.
     worksheet2.write_string(0, 5, "Sales Rep", &header2)?;
@@ -65,14 +65,10 @@ fn main() -> Result<(), XlsxError> {
     let worksheet3 = workbook.add_worksheet().set_name("Sort")?;
 
     // A simple SORT example.
-    worksheet3.write_dynamic_formula_only(1, 5, "=_xlfn._xlws.SORT(B2:B17)")?;
+    worksheet3.write_dynamic_formula_only(1, 5, "=SORT(B2:B17)")?;
 
     // A more complex example combining SORT and FILTER.
-    worksheet3.write_dynamic_formula_only(
-        1,
-        7,
-        r#"=_xlfn._xlws.SORT(_xlfn._xlws.FILTER(C2:D17,D2:D17>5000,""),2,1)"#,
-    )?;
+    worksheet3.write_dynamic_formula_only(1, 7, r#"=SORT(FILTER(C2:D17,D2:D17>5000,""),2,1)"#)?;
 
     // Write the data the function will work on.
     worksheet3.write_string(0, 5, "Sales Rep", &header2)?;
@@ -89,7 +85,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet4 = workbook.add_worksheet().set_name("Sortby")?;
 
-    worksheet4.write_dynamic_formula_only(1, 3, "=_xlfn.SORTBY(A2:B9,B2:B9)")?;
+    worksheet4.write_dynamic_formula_only(1, 3, "=SORTBY(A2:B9,B2:B9)")?;
 
     // Write the data the function will work on.
     worksheet4.write_string(0, 0, "Name", &header1)?;
@@ -123,7 +119,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet5 = workbook.add_worksheet().set_name("Xlookup")?;
 
-    worksheet5.write_dynamic_formula_only(0, 5, "=_xlfn.XLOOKUP(E1,A2:A9,C2:C9)")?;
+    worksheet5.write_dynamic_formula_only(0, 5, "=XLOOKUP(E1,A2:A9,C2:C9)")?;
 
     // Write the data the function will work on.
     worksheet5.write_string(0, 0, "Country", &header1)?;
@@ -167,7 +163,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet6 = workbook.add_worksheet().set_name("Xmatch")?;
 
-    worksheet6.write_dynamic_formula_only(1, 3, "=_xlfn.XMATCH(C2,A2:A6)")?;
+    worksheet6.write_dynamic_formula_only(1, 3, "=XMATCH(C2,A2:A6)")?;
 
     // Write the data the function will work on.
     worksheet6.write_string(0, 0, "Product", &header1)?;
@@ -189,26 +185,26 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet7 = workbook.add_worksheet().set_name("Randarray")?;
 
-    worksheet7.write_dynamic_formula_only(0, 0, "=_xlfn.RANDARRAY(5,3,1,100, TRUE)")?;
+    worksheet7.write_dynamic_formula_only(0, 0, "=RANDARRAY(5,3,1,100, TRUE)")?;
 
     // -----------------------------------------------------------------------
     // Example of using the SEQUENCE() function.
     // -----------------------------------------------------------------------
     let worksheet8 = workbook.add_worksheet().set_name("Sequence")?;
 
-    worksheet8.write_dynamic_formula_only(0, 0, "=_xlfn.SEQUENCE(4,5)")?;
+    worksheet8.write_dynamic_formula_only(0, 0, "=SEQUENCE(4,5)")?;
 
     // -----------------------------------------------------------------------
     // Example of using the Spill range operator.
     // -----------------------------------------------------------------------
     let worksheet9 = workbook.add_worksheet().set_name("Spill ranges")?;
 
-    worksheet9.write_dynamic_formula_only(1, 7, "=_xlfn.ANCHORARRAY(F2)")?;
+    worksheet9.write_dynamic_formula_only(1, 7, "=ANCHORARRAY(F2)")?;
 
-    worksheet9.write_dynamic_formula_only(1, 9, "=COUNTA(_xlfn.ANCHORARRAY(F2))")?;
+    worksheet9.write_dynamic_formula_only(1, 9, "=COUNTA(ANCHORARRAY(F2))")?;
 
     // Write the data the to work on.
-    worksheet9.write_dynamic_formula_only(1, 5, "=_xlfn.UNIQUE(B2:B17)")?;
+    worksheet9.write_dynamic_formula_only(1, 5, "=UNIQUE(B2:B17)")?;
     worksheet9.write_string(0, 5, "Unique", &header2)?;
     worksheet9.write_string(0, 7, "Spill", &header2)?;
     worksheet9.write_string(0, 9, "Spill", &header2)?;

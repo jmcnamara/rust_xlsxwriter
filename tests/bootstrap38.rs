@@ -9,7 +9,7 @@ use std::collections::HashSet;
 
 mod common;
 
-// Test case to demonstrate writing data with XML escapes
+// Test case to demonstrate writing data with XML escapes.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
