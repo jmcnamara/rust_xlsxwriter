@@ -85,12 +85,14 @@ frequently.
 - [The rust_xlsxwriter crate]
 - [The rust_xlsxwriter API docs at docs.rs]
 - [The rust_xlsxwriter repository]
+- [Release Notes]
 
 [Working with the rust_xlsxwriter library]:
     https://rustxlsxwriter.github.io/index.html
 [Getting started]: https://rustxlsxwriter.github.io/getting_stared.html
 [Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
 [Cookbook Examples]: https://rustxlsxwriter.github.io/examples/intro.html
-[rust_xlsxwriter crate]: https://crates.io/crates/rust_xlsxwriter
-[rust_xlsxwriter API docs at docs.rs]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
-[rust_xlsxwriter repository]: https://github.com/jmcnamara/rust_xlsxwriter
+[The rust_xlsxwriter crate]: https://crates.io/crates/rust_xlsxwriter
+[The rust_xlsxwriter API docs at docs.rs]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
+[The rust_xlsxwriter repository]: https://github.com/jmcnamara/rust_xlsxwriter
+[Release Notes]: https://rustxlsxwriter.github.io/changelog.html
