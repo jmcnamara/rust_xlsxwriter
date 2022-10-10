@@ -567,6 +567,10 @@ impl Worksheet {
     /// via a [`Format`] struct which can control the font or color or
     /// properties such as bold and italic.
     ///
+    /// See also the `rust_xlsxwriter` documentation on [Working with Formulas].
+    ///
+    /// [Working with Formulas]: https://rustxlsxwriter.github.io/formulas/intro.html
+    ///
     ///
     /// # Arguments
     ///
@@ -633,6 +637,10 @@ impl Worksheet {
     /// Write an unformatted formula to a worksheet cell. This is similar to
     /// [`write_formula()`](Worksheet::write_formula()) except you don't have to
     /// supply a [`Format`] so it is useful for writing raw data.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Working with Formulas].
+    ///
+    /// [Working with Formulas]: https://rustxlsxwriter.github.io/formulas/intro.html
     ///
     /// # Arguments
     ///

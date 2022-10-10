@@ -9,11 +9,19 @@ collection of features.
 The `doc_{struct}_{function}.rs` examples are more specific examples from the
 documentation and generally show how an individual function works.
 
+* app_array_formula.rs - Example of how to use the rust_xlsxwriter to write
+  simple array formulas.
+
 * app_colors.rs - A sample palette of the the defined colors and user
   defined RGB colors available in the rust_xlsxwriter library.
 
 * app_demo.rs - A simple, getting started, example of some of the features
   of the rust_xlsxwriter library.
+
+* app_dynamic_arrays.rs - An example of how to use the rust_xlsxwriter
+  library to write formulas and functions that create dynamic arrays. These
+  functions are new to Excel 365. The examples mirror the examples in the
+  Excel documentation for these functions.
 
 * app_formatting.rs - An example of the various cell formatting options
   that are available in the rust_xlsxwriter library. These are laid out on
@@ -133,6 +141,30 @@ documentation and generally show how an individual function works.
 * doc_workbook_new.rs - Demonstrates creating a simple workbook, with one
   unused worksheet.
 
+* doc_working_with_formulas_dynamic_len.rs - Demonstrates a static function
+  which generally returns one value turned into a dynamic function which
+  returns a range of values.
+
+* doc_working_with_formulas_future1.rs - Demonstrates writing an Excel
+  "Future Function" without an explicit prefix, which results in an Excel
+  error.
+
+* doc_working_with_formulas_future2.rs - Demonstrates writing an Excel
+  "Future Function" with an explicit prefix.
+
+* doc_working_with_formulas_future3.rs - Demonstrates writing an Excel
+  "Future Function" with an implicit prefix and the use_future_functions()
+  method.
+
+* doc_working_with_formulas_intro.rs - Demonstrates a simple formula.
+
+* doc_working_with_formulas_static_len.rs - Demonstrates a static function
+  which generally returns one value. Compare this with the dynamic function
+  output of doc_working_with_formulas_dynamic_len.rs.
+
+* doc_working_with_formulas_syntax.rs - Demonstrates some common formula
+  syntax errors.
+
 * doc_worksheet_set_column_format.rs - Demonstrates setting the format for
   a column in Excel.
 
@@ -169,14 +201,34 @@ documentation and generally show how an individual function works.
 * doc_worksheet_set_row_height_pixels.rs - Demonstrates setting the height
   for a row in Excel.
 
+* doc_worksheet_write_array_formula.rs - Demonstrates writing an array
+  formulas with formatting to a worksheet.
+
+* doc_worksheet_write_array_formula_only.rs - Demonstrates writing an array
+  formulas to a worksheet.
+
 * doc_worksheet_write_blank.rs - Demonstrates writing a blank cell with
   formatting, i.e., a cell that has no data but does have formatting.
+
+* doc_worksheet_write_boolean.rs - Demonstrates writing formatted boolean
+  values to a worksheet.
+
+* doc_worksheet_write_boolean_only.rs - Demonstrates writing boolean values
+  to a worksheet.
 
 * doc_worksheet_write_date.rs - Demonstrates writing formatted dates in an
   Excel worksheet.
 
 * doc_worksheet_write_datetime.rs - Demonstrates writing formatted
   datetimes in an Excel worksheet.
+
+* doc_worksheet_write_dynamic_array_formula.rs - Demonstrates a static
+  function which generally returns one value turned into a dynamic array
+  function which returns a range of values.
+
+* doc_worksheet_write_dynamic_array_formula_only.rs - Demonstrates a static
+  function which generally returns one value turned into a dynamic array
+  function which returns a range of values.
 
 * doc_worksheet_write_formula.rs - Demonstrates writing formulas with
   formatting to a worksheet.

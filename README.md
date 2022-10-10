@@ -65,6 +65,7 @@ features are:
 
 - Support for writing all basic Excel data types.
 - Full cell formatting support.
+- Formula support, including new Excel 365 dynamic functions.
 
 Rust_xlsxwriter is under active development and new features will be added
 frequently.
@@ -72,3 +73,24 @@ frequently.
 [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
 [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 
+## See also
+
+- [Working with the rust_xlsxwriter library]: The main, non API
+  documentation for `rust_xlsxwriter`.
+    - [Getting started]: A simple getting started guide on how to use
+      `rust_xlsxwriter` in a project and write a Hello World example.
+    - [Tutorial]: A larger example of using `rust_xlsxwriter` to write some
+       expense data to a spreadsheet.
+    - [Cookbook Examples]
+- [The rust_xlsxwriter crate]
+- [The rust_xlsxwriter API docs at docs.rs]
+- [The rust_xlsxwriter repository]
+
+[Working with the rust_xlsxwriter library]:
+    https://rustxlsxwriter.github.io/index.html
+[Getting started]: https://rustxlsxwriter.github.io/getting_stared.html
+[Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
+[Cookbook Examples]: https://rustxlsxwriter.github.io/examples/intro.html
+[rust_xlsxwriter crate]: https://crates.io/crates/rust_xlsxwriter
+[rust_xlsxwriter API docs at docs.rs]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
+[rust_xlsxwriter repository]: https://github.com/jmcnamara/rust_xlsxwriter
