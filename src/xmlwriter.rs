@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
+use std::borrow::Cow;
 use std::fs::File;
 use std::io::{BufWriter, Read, Seek, Write};
 
@@ -154,23 +155,69 @@ impl XMLWriter {
 }
 
 // Escape XML characters in attributes.
-fn escape_attributes(attribute: &str) -> String {
-    attribute
-        .replace('&', "&amp;")
-        .replace('"', "&quot;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
-        .replace('\n', "&#xA;")
+pub fn escape_attributes(attribute: &str) -> Cow<str> {
+    for (i, ch) in attribute.chars().enumerate() {
+        if match_attribute_html_char(ch).is_some() {
+            let mut escaped_string = String::with_capacity(attribute.len());
+            escaped_string.push_str(&attribute[..i]);
+
+            for ch in attribute[i..].chars() {
+                match match_attribute_html_char(ch) {
+                    Some(escaped_char) => escaped_string.push_str(escaped_char),
+                    None => escaped_string.push(ch),
+                };
+            }
+
+            return Cow::Owned(escaped_string);
+        }
+    }
+
+    Cow::Borrowed(attribute)
+}
+
+// Match function for escape_attributes().
+fn match_attribute_html_char(ch: char) -> Option<&'static str> {
+    match ch {
+        '&' => Some("&amp;"),
+        '"' => Some("&quot;"),
+        '<' => Some("&lt;"),
+        '>' => Some("&gt;"),
+        '\n' => Some("&#xA;"),
+        _ => None,
+    }
 }
 
 // Escape XML characters in data sections of tags.  Note, this
 // is different from escape_attributes() because double quotes
 // and newline are not escaped by Excel.
-pub(crate) fn escape_data(attribute: &str) -> String {
-    attribute
-        .replace('&', "&amp;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
+pub fn escape_data(data: &str) -> Cow<str> {
+    for (i, ch) in data.chars().enumerate() {
+        if match_data_html_char(ch).is_some() {
+            let mut escaped_string = String::with_capacity(data.len());
+            escaped_string.push_str(&data[..i]);
+
+            for ch in data[i..].chars() {
+                match match_data_html_char(ch) {
+                    Some(escaped_char) => escaped_string.push_str(escaped_char),
+                    None => escaped_string.push(ch),
+                };
+            }
+
+            return Cow::Owned(escaped_string);
+        }
+    }
+
+    Cow::Borrowed(data)
+}
+
+// Match function for escape_data().
+fn match_data_html_char(ch: char) -> Option<&'static str> {
+    match ch {
+        '&' => Some("&amp;"),
+        '<' => Some("&lt;"),
+        '>' => Some("&gt;"),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
