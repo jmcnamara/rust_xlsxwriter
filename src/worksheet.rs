@@ -107,6 +107,8 @@ pub struct Worksheet {
     right_to_left: bool,
     portrait: bool,
     page_view: u8,
+    zoom: u16,
+    zoom_scale_normal: bool,
     default_result: String,
     use_future_functions: bool,
 }
@@ -154,6 +156,8 @@ impl Worksheet {
             right_to_left: false,
             portrait: true,
             page_view: 9,
+            zoom: 100,
+            zoom_scale_normal: false,
             default_result: "0".to_string(),
             use_future_functions: false,
         }
@@ -2563,6 +2567,54 @@ impl Worksheet {
         self
     }
 
+    /// Set the worksheet zoom factor.
+    ///
+    /// Set the worksheet zoom factor in the range 10 <= zoom <= 400.
+    ///
+    /// # Arguments
+    ///
+    /// * `zoom` - The worksheet zoom level.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet zoom level.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_zoom.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.set_zoom(200);
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_zoom.png">
+    ///
+    pub fn set_zoom(&mut self, zoom: u16) -> &mut Worksheet {
+        if zoom < 10 || zoom > 400 {
+            eprintln!("Zoom factor {} outside range: 10 <= zoom <= 400", zoom);
+
+            return self;
+        }
+
+        self.zoom = zoom;
+        self.zoom_scale_normal = true;
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -3053,6 +3105,14 @@ impl Worksheet {
 
         if self.page_view == 1 {
             attributes.push(("view", "pageLayout".to_string()));
+        }
+
+        if self.zoom != 100 {
+            attributes.push(("zoomScale", self.zoom.to_string()));
+
+            if self.zoom_scale_normal {
+                attributes.push(("zoomScaleNormal", self.zoom.to_string()));
+            }
         }
 
         attributes.push(("workbookViewId", "0".to_string()));
