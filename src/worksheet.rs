@@ -106,6 +106,7 @@ pub struct Worksheet {
     default_page_order: bool,
     right_to_left: bool,
     portrait: bool,
+    page_view: u8,
     default_result: String,
     use_future_functions: bool,
 }
@@ -152,6 +153,7 @@ impl Worksheet {
             default_page_order: true,
             right_to_left: false,
             portrait: true,
+            page_view: 9,
             default_result: "0".to_string(),
             use_future_functions: false,
         }
@@ -2551,6 +2553,16 @@ impl Worksheet {
         self
     }
 
+    /// Set the page view mode to page layout.
+    ///
+    /// This method is used to display the worksheet in “View ->Page Layout”
+    /// mode.
+    ///
+    pub fn set_view_page_layout(&mut self) -> &mut Worksheet {
+        self.page_view = 1;
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -3037,6 +3049,10 @@ impl Worksheet {
 
         if self.selected {
             attributes.push(("tabSelected", "1".to_string()));
+        }
+
+        if self.page_view == 1 {
+            attributes.push(("view", "pageLayout".to_string()));
         }
 
         attributes.push(("workbookViewId", "0".to_string()));
