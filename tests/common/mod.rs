@@ -22,6 +22,7 @@ pub struct TestRunner<'a> {
     input_filename: String,
     output_filename: String,
     ignore_files: HashSet<&'a str>,
+    ignore_elements: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> TestRunner<'a> {
@@ -33,6 +34,7 @@ impl<'a> TestRunner<'a> {
             input_filename: "".to_string(),
             output_filename: "".to_string(),
             ignore_files: HashSet::new(),
+            ignore_elements: HashMap::new(),
         }
     }
 
@@ -60,6 +62,13 @@ impl<'a> TestRunner<'a> {
         self
     }
 
+    // Ignore certain elements with xml files.
+    #[allow(dead_code)]
+    pub fn ignore_elements(mut self, filename: &'a str, pattern: &'a str) -> TestRunner<'a> {
+        self.ignore_elements.insert(filename, pattern);
+        self
+    }
+
     // Initialize the in/out filenames once other properties have been set.
     #[allow(dead_code)]
     pub fn initialize(mut self) -> TestRunner<'a> {
@@ -82,6 +91,7 @@ impl<'a> TestRunner<'a> {
             &self.input_filename,
             &self.output_filename,
             &self.ignore_files,
+            &self.ignore_elements,
         );
 
         assert_eq!(exp, got);
@@ -102,6 +112,7 @@ fn compare_xlsx_files(
     exp_file: &str,
     got_file: &str,
     ignore_files: &HashSet<&str>,
+    ignore_elements: &HashMap<&str, &str>,
 ) -> (Vec<String>, Vec<String>) {
     // Open the xlsx files.
     let exp_fh = match File::open(exp_file) {
@@ -240,6 +251,23 @@ fn compare_xlsx_files(
         if filename == "[Content_Types].xml" || filename.ends_with(".rels") {
             exp_xml_vec = sort_xml_file_data(exp_xml_vec);
             got_xml_vec = sort_xml_file_data(got_xml_vec);
+        }
+
+        // Ignore certain elements within files, for example <pageMargins> which
+        // changes in the lower decimal places.
+        if ignore_elements.contains_key(filename.as_str()) {
+            let pattern = ignore_elements.get(filename.as_str()).unwrap();
+            let re = Regex::new(pattern).unwrap();
+
+            exp_xml_vec = exp_xml_vec
+                .into_iter()
+                .filter(|x| !re.is_match(x))
+                .collect::<Vec<String>>();
+
+            got_xml_vec = got_xml_vec
+                .into_iter()
+                .filter(|x| !re.is_match(x))
+                .collect::<Vec<String>>();
         }
 
         // Add the filename to the xml vector to help identify where

@@ -103,6 +103,7 @@ pub struct Worksheet {
     changed_cols: HashMap<ColNum, ColOptions>,
     page_setup_changed: bool,
     paper_size: u8,
+    default_page_order: bool,
     right_to_left: bool,
     default_result: String,
     use_future_functions: bool,
@@ -147,6 +148,7 @@ impl Worksheet {
             changed_cols,
             page_setup_changed: false,
             paper_size: 0,
+            default_page_order: true,
             right_to_left: false,
             default_result: "0".to_string(),
             use_future_functions: false,
@@ -2451,6 +2453,49 @@ impl Worksheet {
         self
     }
 
+    /// Set the order in which pages are printed.
+    ///
+    /// The `set_page_order()` method is used to change the default print
+    /// direction. This is referred to by Excel as the sheet "page order":
+    ///
+    /// The default page order is shown below for a worksheet that extends over
+    /// 4 pages. The order is called "down then over":
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_page_order.png">
+    ///
+    /// However, by using the `set_page_order()` method the print order will be
+    /// changed to "over then down".
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet printed page order.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_page_order.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Set the page print to "over then down"
+    ///     worksheet.set_page_order();
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    pub fn set_page_order(&mut self) -> &mut Worksheet {
+        self.default_page_order = false;
+        self.page_setup_changed = true;
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -2982,6 +3027,10 @@ impl Worksheet {
 
         if self.paper_size > 0 {
             attributes.push(("paperSize", self.paper_size.to_string()));
+        }
+
+        if !self.default_page_order {
+            attributes.push(("pageOrder", "overThenDown".to_string()));
         }
 
         attributes.push(("orientation", "portrait".to_string()));
