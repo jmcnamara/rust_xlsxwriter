@@ -105,6 +105,7 @@ pub struct Worksheet {
     paper_size: u8,
     default_page_order: bool,
     right_to_left: bool,
+    portrait: bool,
     default_result: String,
     use_future_functions: bool,
 }
@@ -150,6 +151,7 @@ impl Worksheet {
             paper_size: 0,
             default_page_order: true,
             right_to_left: false,
+            portrait: true,
             default_result: "0".to_string(),
             use_future_functions: false,
         }
@@ -2496,6 +2498,59 @@ impl Worksheet {
         self
     }
 
+    /// Set the page orientation to landscape.
+    ///
+    /// The `set_landscape()` method is used to set the orientation of a
+    /// worksheet's printed page to landscape.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_landscape.png">
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet page orientation to
+    /// landscape.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_landscape.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.set_landscape();
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn set_landscape(&mut self) -> &mut Worksheet {
+        self.portrait = false;
+        self.page_setup_changed = true;
+        self
+    }
+
+    /// Set the page orientation to portrait.
+    ///
+    ///  This `set_portrait()` method  is used to set the orientation of a
+    ///  worksheet's printed page to portrait. The default worksheet orientation
+    ///  is portrait, so this function is rarely required.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_portrait.png">
+    ///
+    pub fn set_portrait(&mut self) -> &mut Worksheet {
+        self.portrait = true;
+        self.page_setup_changed = true;
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -3033,7 +3088,12 @@ impl Worksheet {
             attributes.push(("pageOrder", "overThenDown".to_string()));
         }
 
-        attributes.push(("orientation", "portrait".to_string()));
+        if self.portrait {
+            attributes.push(("orientation", "portrait".to_string()));
+        } else {
+            attributes.push(("orientation", "landscape".to_string()));
+        }
+
         attributes.push(("horizontalDpi", "200".to_string()));
         attributes.push(("verticalDpi", "200".to_string()));
 
