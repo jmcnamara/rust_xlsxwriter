@@ -25,10 +25,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn test_dynamic_array01() {
-    let testcase = "dynamic_array01";
+    let test_runner = common::TestRunner::new("dynamic_array01").initialize();
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
-    _ = create_new_xlsx_file(&xlsxwriter_file);
-    common::assert_eq(&excel_file, &xlsxwriter_file);
-    common::remove_test_xlsx_file(&xlsxwriter_file);
+    _ = create_new_xlsx_file(test_runner.output_file());
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
 }

@@ -28,10 +28,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn bootstrap12_bold_and_italic_text_mixed() {
-    let testcase = "bootstrap12";
+    let test_runner = common::TestRunner::new("bootstrap12").initialize();
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
-    _ = create_new_xlsx_file(&xlsxwriter_file);
-    common::assert_eq(&excel_file, &xlsxwriter_file);
-    common::remove_test_xlsx_file(&xlsxwriter_file);
+    _ = create_new_xlsx_file(test_runner.output_file());
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
 }

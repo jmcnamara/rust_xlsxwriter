@@ -5,12 +5,10 @@
 // jmcnamara@cpan.org
 
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
-use std::collections::HashSet;
 
 mod common;
 
 // Test case to test array formulas, with a format.
-//
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
@@ -33,15 +31,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn test_array_formula02() {
-    let testcase = "array_formula02";
+    let test_runner = common::TestRunner::new("array_formula02")
+        .ignore_calc_chain()
+        .initialize();
 
-    let mut ignore_files: HashSet<&str> = HashSet::new();
-    ignore_files.insert("xl/calcChain.xml");
-    ignore_files.insert("[Content_Types].xml");
-    ignore_files.insert("xl/_rels/workbook.xml.rels");
+    _ = create_new_xlsx_file(test_runner.output_file());
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames(testcase);
-    _ = create_new_xlsx_file(&xlsxwriter_file);
-    common::assert_eq_most(&excel_file, &xlsxwriter_file, &ignore_files);
-    common::remove_test_xlsx_file(&xlsxwriter_file);
+    test_runner.assert_eq();
+    test_runner.cleanup();
 }

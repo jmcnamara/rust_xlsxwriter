@@ -9,7 +9,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 mod common;
 
 // Test future function with explicit xlfn.
-fn create_new_xlsx_file_a(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
     let worksheet = workbook.add_worksheet();
@@ -23,7 +23,7 @@ fn create_new_xlsx_file_a(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Test future function with implicit xlfn.
-fn create_new_xlsx_file_b(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
     let worksheet = workbook.add_worksheet();
@@ -38,21 +38,23 @@ fn create_new_xlsx_file_b(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_dynamic_array03_a() {
-    let testcase = "dynamic_array03";
+fn test_dynamic_array03_1() {
+    let test_runner = common::TestRunner::new("dynamic_array03")
+        .unique("1")
+        .initialize();
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'a');
-    _ = create_new_xlsx_file_a(&xlsxwriter_file);
-    common::assert_eq(&excel_file, &xlsxwriter_file);
-    common::remove_test_xlsx_file(&xlsxwriter_file);
+    _ = create_new_xlsx_file_1(test_runner.output_file());
+
+    test_runner.assert_eq();
 }
 
 #[test]
-fn test_dynamic_array03_b() {
-    let testcase = "dynamic_array03";
+fn test_dynamic_array03_2() {
+    let test_runner = common::TestRunner::new("dynamic_array03")
+        .unique("2")
+        .initialize();
 
-    let (excel_file, xlsxwriter_file) = common::get_xlsx_filenames_unique(testcase, 'b');
-    _ = create_new_xlsx_file_b(&xlsxwriter_file);
-    common::assert_eq(&excel_file, &xlsxwriter_file);
-    common::remove_test_xlsx_file(&xlsxwriter_file);
+    _ = create_new_xlsx_file_2(test_runner.output_file());
+
+    test_runner.assert_eq();
 }

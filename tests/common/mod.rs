@@ -13,49 +13,85 @@ use std::fs;
 use std::fs::File;
 use std::io::Read;
 
-// Generate the xlsx file names used in the test.
+// Simple test runner struct and methods to create a new xlsx output file and
+// compare it with an input xlsx file created by Excel.
 #[allow(dead_code)]
-pub fn get_xlsx_filenames(test_case: &str) -> (String, String) {
-    let expected_file = format!("tests/input/{}.xlsx", test_case);
-    let got_file = format!("tests/output/rs_{}.xlsx", test_case);
-
-    (expected_file, got_file)
+pub struct TestRunner<'a> {
+    testcase: &'a str,
+    unique: &'a str,
+    input_filename: String,
+    output_filename: String,
+    ignore_files: HashSet<&'a str>,
 }
 
-// Generate the xlsx file names used in the test. Append a unique character to
-// the output file to allow multiple simultaneous tests.
-#[allow(dead_code)]
-pub fn get_xlsx_filenames_unique(test_case: &str, version: char) -> (String, String) {
-    let expected_file = format!("tests/input/{}.xlsx", test_case);
-    let got_file = format!("tests/output/rs_{}_{}.xlsx", test_case, version);
+impl<'a> TestRunner<'a> {
+    #[allow(dead_code)]
+    pub fn new(testcase: &'a str) -> TestRunner {
+        TestRunner {
+            testcase,
+            unique: "",
+            input_filename: "".to_string(),
+            output_filename: "".to_string(),
+            ignore_files: HashSet::new(),
+        }
+    }
 
-    (expected_file, got_file)
-}
+    // Set string to add to the default output filename to make it unique so
+    // that the multiple tests can be run in parallel.
+    #[allow(dead_code)]
+    pub fn unique(mut self, unique_string: &'a str) -> TestRunner {
+        self.unique = unique_string;
+        self
+    }
 
-// Test the vectors from compare_xlsx_files using pretty_assertions for clearer
-// differentiation.
-#[allow(dead_code)]
-pub fn assert_eq(expected_file: &str, got_file: &str) {
-    let ignore_files: HashSet<&str> = HashSet::new();
+    // Ignore certain xml files within the test xlsx files.
+    #[allow(dead_code)]
+    pub fn ignore_file(mut self, filename: &'a str) -> TestRunner<'a> {
+        self.ignore_files.insert(filename);
+        self
+    }
 
-    let (exp, got) = compare_xlsx_files(expected_file, got_file, &ignore_files);
+    // Ignore the files associated with the formula xl/calcChain.xml.
+    #[allow(dead_code)]
+    pub fn ignore_calc_chain(mut self) -> TestRunner<'a> {
+        self.ignore_files.insert("xl/calcChain.xml");
+        self.ignore_files.insert("[Content_Types].xml");
+        self.ignore_files.insert("xl/_rels/workbook.xml.rels");
+        self
+    }
 
-    assert_eq!(exp, got);
-}
+    // Initialize the in/out filenames once other properties have been set.
+    #[allow(dead_code)]
+    pub fn initialize(mut self) -> TestRunner<'a> {
+        self.input_filename = format!("tests/input/{}.xlsx", self.testcase);
+        self.output_filename = format!("tests/output/rs_{}_{}.xlsx", self.testcase, self.unique);
+        self
+    }
 
-// Test the vectors from compare_xlsx_files with option to ignore some file or
-// elements. For example "xl/calcChain.xml" and associated metadata, which we
-// don't/can't generate and isn't strictly required by Excel.
-#[allow(dead_code)]
-pub fn assert_eq_most(expected_file: &str, got_file: &str, ignore_files: &HashSet<&str>) {
-    let (exp, got) = compare_xlsx_files(expected_file, got_file, ignore_files);
+    // Getter for the output file name which can be passed to the xlsx file
+    // creation function.
+    #[allow(dead_code)]
+    pub fn output_file(&self) -> &String {
+        &self.output_filename
+    }
 
-    assert_eq!(exp, got);
-}
+    // Test if the input and output file are equal.
+    #[allow(dead_code)]
+    pub fn assert_eq(&self) {
+        let (exp, got) = compare_xlsx_files(
+            &self.input_filename,
+            &self.output_filename,
+            &self.ignore_files,
+        );
 
-// Removed xlsx file(s) created during tests.
-pub fn remove_test_xlsx_file(filename: &str) {
-    fs::remove_file(filename).unwrap();
+        assert_eq!(exp, got);
+    }
+
+    // Clean up any the temp output file.
+    #[allow(dead_code)]
+    pub fn cleanup(&self) {
+        fs::remove_file(&self.output_filename).unwrap();
+    }
 }
 
 // Unzip 2 xlsx files and compare whether they have the same filenames and
