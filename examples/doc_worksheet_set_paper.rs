@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Set the printer paper size.
-    worksheet.set_paper(9); // A4 paper size.
+    worksheet.set_paper_size(9); // A4 paper size.
 
     workbook.close()?;
 

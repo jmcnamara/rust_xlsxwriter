@@ -14,7 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Test paper size as well.
-    worksheet.set_paper(11);
+    worksheet.set_paper_size(11);
 
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_foreground_color(XlsxColor::Red);

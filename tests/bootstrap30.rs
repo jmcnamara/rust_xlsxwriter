@@ -12,7 +12,7 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
     let worksheet = workbook.add_worksheet();
-    worksheet.set_paper(9);
+    worksheet.set_paper_size(9);
 
     worksheet.set_row_height(0, 85.5)?;
     worksheet.set_row_height(1, 85.5)?;

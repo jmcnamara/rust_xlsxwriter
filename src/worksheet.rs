@@ -2440,14 +2440,14 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     ///
     ///     // Set the printer paper size.
-    ///     worksheet.set_paper(9); // A4 paper size.
+    ///     worksheet.set_paper_size(9); // A4 paper size.
     ///
     /// #     workbook.close()?;
     /// #
     /// #     Ok(())
     /// # }
     /// ```
-    pub fn set_paper(&mut self, paper_size: u8) -> &mut Worksheet {
+    pub fn set_paper_size(&mut self, paper_size: u8) -> &mut Worksheet {
         self.paper_size = paper_size;
         self.page_setup_changed = true;
         self
