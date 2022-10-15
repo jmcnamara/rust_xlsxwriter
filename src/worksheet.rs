@@ -106,9 +106,8 @@ pub struct Worksheet {
     default_page_order: bool,
     right_to_left: bool,
     portrait: bool,
-    page_view: u8,
+    page_view: PageView,
     zoom: u16,
-    zoom_scale_normal: bool,
     default_result: String,
     use_future_functions: bool,
 }
@@ -155,9 +154,8 @@ impl Worksheet {
             default_page_order: true,
             right_to_left: false,
             portrait: true,
-            page_view: 9,
+            page_view: PageView::Normal,
             zoom: 100,
-            zoom_scale_normal: false,
             default_result: "0".to_string(),
             use_future_functions: false,
         }
@@ -2509,9 +2507,6 @@ impl Worksheet {
     /// The `set_landscape()` method is used to set the orientation of a
     /// worksheet's printed page to landscape.
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_landscape.png">
-    ///
     /// # Examples
     ///
     /// The following example demonstrates setting the worksheet page orientation to
@@ -2548,22 +2543,39 @@ impl Worksheet {
     ///  worksheet's printed page to portrait. The default worksheet orientation
     ///  is portrait, so this function is rarely required.
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_portrait.png">
-    ///
     pub fn set_portrait(&mut self) -> &mut Worksheet {
         self.portrait = true;
         self.page_setup_changed = true;
         self
     }
 
+    /// Set the page view mode to normal layout.
+    ///
+    /// This method is used to display the worksheet in “View -> Normal”
+    /// mode. This is the default.
+    ///
+    pub fn set_view_normal(&mut self) -> &mut Worksheet {
+        self.page_view = PageView::Normal;
+        self
+    }
+
     /// Set the page view mode to page layout.
     ///
-    /// This method is used to display the worksheet in “View ->Page Layout”
+    /// This method is used to display the worksheet in “View -> Page Layout”
     /// mode.
     ///
     pub fn set_view_page_layout(&mut self) -> &mut Worksheet {
-        self.page_view = 1;
+        self.page_view = PageView::PageLayout;
+        self
+    }
+
+    /// Set the page view mode to page break preview.
+    ///
+    /// This method is used to display the worksheet in “View -> Page Break
+    /// Preview” mode.
+    ///
+    pub fn set_view_page_break_preview(&mut self) -> &mut Worksheet {
+        self.page_view = PageView::PageBreaks;
         self
     }
 
@@ -2611,7 +2623,6 @@ impl Worksheet {
         }
 
         self.zoom = zoom;
-        self.zoom_scale_normal = true;
         self
     }
 
@@ -3103,15 +3114,29 @@ impl Worksheet {
             attributes.push(("tabSelected", "1".to_string()));
         }
 
-        if self.page_view == 1 {
-            attributes.push(("view", "pageLayout".to_string()));
+        match self.page_view {
+            PageView::PageLayout => {
+                attributes.push(("view", "pageLayout".to_string()));
+            }
+            PageView::PageBreaks => {
+                attributes.push(("view", "pageBreakPreview".to_string()));
+            }
+            PageView::Normal => {}
         }
 
         if self.zoom != 100 {
             attributes.push(("zoomScale", self.zoom.to_string()));
 
-            if self.zoom_scale_normal {
-                attributes.push(("zoomScaleNormal", self.zoom.to_string()));
+            match self.page_view {
+                PageView::PageLayout => {
+                    attributes.push(("zoomScalePageLayoutView", self.zoom.to_string()));
+                }
+                PageView::PageBreaks => {
+                    attributes.push(("zoomScaleSheetLayoutView", self.zoom.to_string()));
+                }
+                PageView::Normal => {
+                    attributes.push(("zoomScaleNormal", self.zoom.to_string()));
+                }
             }
         }
 
@@ -3712,6 +3737,13 @@ enum CellType {
         string: String,
         xf_index: u32,
     },
+}
+
+#[derive(Clone, Copy)]
+enum PageView {
+    Normal,
+    PageLayout,
+    PageBreaks,
 }
 
 // -----------------------------------------------------------------------

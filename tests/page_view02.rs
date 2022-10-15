@@ -8,19 +8,18 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 
 mod common;
 
-// Test to demonstrate set page orientation to landscape.
+// Test to demonstrate page view page breaks + zoom.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "Foo")?;
-
-    worksheet.set_landscape();
+    worksheet.set_view_page_layout();
+    worksheet.set_zoom(75);
+    worksheet.set_portrait();
     worksheet.set_paper_size(9);
 
-    // Secondary test. Shouldn't have an effect.
-    worksheet.set_view_normal();
+    worksheet.write_string_only(0, 0, "Foo")?;
 
     workbook.close()?;
 
@@ -28,8 +27,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_landscape01() {
-    let test_runner = common::TestRunner::new("landscape01").initialize();
+fn test_page_view02() {
+    let test_runner = common::TestRunner::new("page_view02").initialize();
 
     _ = create_new_xlsx_file(test_runner.output_file());
 
