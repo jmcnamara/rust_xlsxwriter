@@ -108,6 +108,15 @@ pub struct Worksheet {
     portrait: bool,
     page_view: PageView,
     zoom: u16,
+    header: String,
+    footer: String,
+    head_footer_changed: bool,
+    margin_left: f64,
+    margin_right: f64,
+    margin_top: f64,
+    margin_bottom: f64,
+    margin_header: f64,
+    margin_footer: f64,
     default_result: String,
     use_future_functions: bool,
 }
@@ -156,6 +165,15 @@ impl Worksheet {
             portrait: true,
             page_view: PageView::Normal,
             zoom: 100,
+            header: "".to_string(),
+            footer: "".to_string(),
+            head_footer_changed: false,
+            margin_left: 0.7,
+            margin_right: 0.7,
+            margin_top: 0.75,
+            margin_bottom: 0.75,
+            margin_header: 0.3,
+            margin_footer: 0.3,
             default_result: "0".to_string(),
             use_future_functions: false,
         }
@@ -2616,13 +2634,254 @@ impl Worksheet {
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_zoom.png">
     ///
     pub fn set_zoom(&mut self, zoom: u16) -> &mut Worksheet {
-        if zoom < 10 || zoom > 400 {
-            eprintln!("Zoom factor {} outside range: 10 <= zoom <= 400", zoom);
-
+        if !(10..=400).contains(&zoom) {
+            eprintln!("Zoom factor {} outside range: 10 <= zoom <= 400.", zoom);
             return self;
         }
 
         self.zoom = zoom;
+        self
+    }
+
+    /// Set the printed page header caption.
+    ///
+    /// The `set_header()` method can be used to set the header for a worksheet.
+    ///
+    /// Headers and footers are generated using a string which is a combination
+    /// of plain text and optional control characters.
+    ///
+    /// The available control characters are:
+    ///
+    /// | Control              | Category      | Description           |
+    /// | -------------------- | ------------- | --------------------- |
+    /// | `&L`                 | Alignment     | Left                  |
+    /// | `&C`                 |               | Center                |
+    /// | `&R`                 |               | Right                 |
+    /// | `&[Page]`  or `&P`   | Information   | Page number           |
+    /// | `&[Pages]` or `&N`   |               | Total number of pages |
+    /// | `&[Date]`  or `&D`   |               | Date                  |
+    /// | `&[Time]`  or `&T`   |               | Time                  |
+    /// | `&[File]`  or `&F`   |               | File name             |
+    /// | `&[Tab]`   or `&A`   |               | Worksheet name        |
+    /// | `&[Path]`  or `&Z`   |               | Workbook path         |
+    /// | `&fontsize`          | Font          | Font size             |
+    /// | `&"font,style"`      |               | Font name and style   |
+    /// | `&U`                 |               | Single underline      |
+    /// | `&E`                 |               | Double underline      |
+    /// | `&S`                 |               | Strikethrough         |
+    /// | `&X`                 |               | Superscript           |
+    /// | `&Y`                 |               | Subscript             |
+    /// | `&&`                 | Miscellaneous | Literal ampersand &   |
+    ///
+    /// Some of the placeholder variables have a long version like `&[Page]` and
+    /// a short version like `&P`. The longer version is displayed in the Excel
+    /// interface but the shorter version is the way that it is stored in the
+    /// file format. Either version is okay since `rust_xlsxwriter` will
+    /// translate as required.
+    ///
+    /// Headers and footers have 3 edit areas to the left, center and right.
+    /// Text can be aligned to these areas by prefixing the text with the
+    /// control characters `&L`, `&C` and `&R`.
+    ///
+    /// For example:
+    ///
+    /// ```text
+    /// worksheet.set_header("&LHello");
+    ///
+    ///  ---------------------------------------------------------------
+    /// |                                                               |
+    /// | Hello                                                         |
+    /// |                                                               |
+    ///
+    /// worksheet.set_header("&CHello");
+    ///
+    ///  ---------------------------------------------------------------
+    /// |                                                               |
+    /// |                          Hello                                |
+    /// |                                                               |
+    ///
+    /// worksheet.set_header("&RHello");
+    ///
+    ///  ---------------------------------------------------------------
+    /// |                                                               |
+    /// |                                                         Hello |
+    /// |                                                               |
+    /// ```
+    ///
+    /// You can also have text in each of the alignment areas:
+    ///
+    /// ```text
+    /// worksheet.set_header("&LCiao&CBello&RCielo");
+    ///
+    ///  ---------------------------------------------------------------
+    /// |                                                               |
+    /// | Ciao                     Bello                          Cielo |
+    /// |                                                               |
+    /// ```
+    ///
+    /// The information control characters act as variables/templates that Excel
+    /// will update/expand as the workbook or worksheet changes.
+    ///
+    /// ```text
+    /// worksheet.set_header("&CPage &[Page] of &[Pages]");
+    ///
+    ///  ---------------------------------------------------------------
+    /// |                                                               |
+    /// |                        Page 1 of 6                            |
+    /// |                                                               |
+    /// ```
+    ///
+    /// Times and dates are in the user's default format:
+    ///
+    /// ```text
+    /// worksheet.set_header("&CUpdated at &[Time]");
+    ///
+    ///  ---------------------------------------------------------------
+    /// |                                                               |
+    /// |                    Updated at 12:30 PM                        |
+    /// |                                                               |
+    /// ```
+    ///
+    /// To include a single literal ampersand `&` in a header or footer you
+    /// should use a double ampersand `&&`:
+    ///
+    /// ```text
+    /// worksheet.set_header("&CCuriouser && Curiouser - Attorneys at Law");
+    ///
+    ///  ---------------------------------------------------------------
+    /// |                                                               |
+    /// |                   Curiouser & Curiouser                       |
+    /// |                                                               |
+    /// ```
+    ///
+    /// You can specify the font size of a section of the text by prefixing it
+    /// with the control character `&n` where `n` is the font size:
+    ///
+    /// ```text
+    /// worksheet1.set_header("&C&30Hello Big");
+    /// worksheet2.set_header("&C&10Hello Small");
+    /// ```
+    ///
+    /// You can specify the font of a section of the text by prefixing it with
+    /// the control sequence `&"font,style"` where `fontname` is a font name
+    /// such as Windows font descriptions: "Regular", "Italic", "Bold" or "Bold
+    /// Italic": "Courier New" or "Times New Roman" and `style` is one of the
+    /// standard Windows font descriptions like “Regular”, “Italic”, “Bold” or
+    /// “Bold Italic”:
+    ///
+    /// ```text
+    /// worksheet1.set_header(r#"&C&"Courier New,Italic"Hello"#);
+    /// worksheet2.set_header(r#"&C&"Courier New,Bold Italic"Hello"#);
+    /// worksheet3.set_header(r#"&C&"Times New Roman,Regular"Hello"#);
+    /// ```
+    ///
+    /// It is possible to combine all of these features together to create
+    /// complex headers and footers. If you set up a complex header in Excel you
+    /// can transfer it to `rust_xlsxwriter` by inspecting the string in the
+    /// Excel file. For example the following shows how unzip and grep the Excel
+    /// XML sub-files on a Linux system. The example uses libxml's xmllint to
+    /// format the XML for clarity:
+    ///
+    /// ```text
+    /// $ unzip myfile.xlsm -d myfile
+    /// $ xmllint --format `find myfile -name "*.xml" | xargs` | \
+    ///     egrep "Header|Footer" | sed 's/&amp;/\&/g'
+    ///
+    ///  <headerFooter scaleWithDoc="0">
+    ///    <oddHeader>&L&P</oddHeader>
+    ///  </headerFooter>
+    /// ```
+    ///
+    /// Note: Excel requires that the header or footer string be less than 256
+    /// characters, including the control characters. Strings longer than this
+    /// will not be written, and a warning will be output.
+    ///
+    /// # Arguments
+    ///
+    /// * `header` - The header string with optional control characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet header.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_header.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     worksheet.set_header("&CPage &P of &N");
+    ///
+    /// #     worksheet.write_string_only(0, 0, "Hello")?;
+    /// #     worksheet.write_string_only(200, 0, "Hello")?;
+    /// #     worksheet.set_view_page_layout();
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_header.png">
+    ///
+    pub fn set_header(&mut self, header: &str) -> &mut Worksheet {
+        let header = header
+            .replace("&[Tab]", "&A")
+            .replace("&[Date]", "&D")
+            .replace("&[File]", "&F")
+            .replace("&[Page]", "&P")
+            .replace("&[Path]", "&Z")
+            .replace("&[Time]", "&T")
+            .replace("&[Pages]", "&N")
+            .replace("&[Picture]", "&G");
+
+        if header.chars().count() > 255 {
+            eprintln!("Header string exceeds Excel's limit of 255 characters.");
+            return self;
+        }
+
+        self.header = header;
+        self.head_footer_changed = true;
+        self
+    }
+
+    /// Set the printed page footer caption.
+    ///
+    /// The `set_footer()` method can be used to set the footer for a worksheet.
+    ///
+    /// See the documentation for [`set_header()`](Worksheet::set_header()) for
+    /// more details on the syntax of the header/footer string.
+    ///
+    /// # Arguments
+    ///
+    /// * `footer` - The footer string with optional control characters.
+    ///
+    pub fn set_footer(&mut self, footer: &str) -> &mut Worksheet {
+        let footer = footer
+            .replace("&[Tab]", "&A")
+            .replace("&[Date]", "&D")
+            .replace("&[File]", "&F")
+            .replace("&[Page]", "&P")
+            .replace("&[Path]", "&Z")
+            .replace("&[Time]", "&T")
+            .replace("&[Pages]", "&N")
+            .replace("&[Picture]", "&G");
+
+        if footer.chars().count() > 255 {
+            eprintln!("Footer string exceeds Excel's limit of 255 characters.");
+            return self;
+        }
+
+        self.footer = footer;
+        self.head_footer_changed = true;
         self
     }
 
@@ -3057,6 +3316,11 @@ impl Worksheet {
             self.write_page_setup();
         }
 
+        // Write the headerFooter element.
+        if self.head_footer_changed {
+            self.write_header_footer();
+        }
+
         // Close the worksheet tag.
         self.writer.xml_end_tag("worksheet");
     }
@@ -3166,12 +3430,12 @@ impl Worksheet {
     // Write the <pageMargins> element.
     fn write_page_margins(&mut self) {
         let attributes = vec![
-            ("left", "0.7".to_string()),
-            ("right", "0.7".to_string()),
-            ("top", "0.75".to_string()),
-            ("bottom", "0.75".to_string()),
-            ("header", "0.3".to_string()),
-            ("footer", "0.3".to_string()),
+            ("left", self.margin_left.to_string()),
+            ("right", self.margin_right.to_string()),
+            ("top", self.margin_top.to_string()),
+            ("bottom", self.margin_bottom.to_string()),
+            ("header", self.margin_header.to_string()),
+            ("footer", self.margin_footer.to_string()),
         ];
 
         self.writer.xml_empty_tag_attr("pageMargins", &attributes);
@@ -3608,6 +3872,33 @@ impl Worksheet {
         }
 
         self.writer.xml_empty_tag_attr("col", &attributes);
+    }
+
+    // Write the <headerFooter> element.
+    fn write_header_footer(&mut self) {
+        self.writer.xml_start_tag("headerFooter");
+
+        // Write the oddHeader element.
+        if !self.header.is_empty() {
+            self.write_odd_header();
+        }
+
+        // Write the oddFooter element.
+        if !self.footer.is_empty() {
+            self.write_odd_footer();
+        }
+
+        self.writer.xml_end_tag("headerFooter");
+    }
+
+    // Write the <oddHeader> element.
+    fn write_odd_header(&mut self) {
+        self.writer.xml_data_element("oddHeader", &self.header);
+    }
+
+    // Write the <oddFooter> element.
+    fn write_odd_footer(&mut self) {
+        self.writer.xml_data_element("oddFooter", &self.footer);
     }
 }
 

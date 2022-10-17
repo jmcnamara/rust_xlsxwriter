@@ -8,7 +8,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 
 mod common;
 
-// Test to demonstrate TODO
+// Test to demonstrate page view layout.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
