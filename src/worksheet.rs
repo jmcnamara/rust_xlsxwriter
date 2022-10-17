@@ -2584,6 +2584,7 @@ impl Worksheet {
     ///
     pub fn set_view_page_layout(&mut self) -> &mut Worksheet {
         self.page_view = PageView::PageLayout;
+        self.page_setup_changed = true;
         self
     }
 
@@ -2594,6 +2595,7 @@ impl Worksheet {
     ///
     pub fn set_view_page_break_preview(&mut self) -> &mut Worksheet {
         self.page_view = PageView::PageBreaks;
+        self.page_setup_changed = true;
         self
     }
 
@@ -2849,6 +2851,7 @@ impl Worksheet {
         }
 
         self.header = header;
+        self.page_setup_changed = true;
         self.head_footer_changed = true;
         self
     }
@@ -2881,7 +2884,89 @@ impl Worksheet {
         }
 
         self.footer = footer;
+        self.page_setup_changed = true;
         self.head_footer_changed = true;
+        self
+    }
+
+    /// Set the page margins.
+    ///
+    /// The `set_margins()` method is used to set the margins of the worksheet
+    /// when it is printed. The units are in inches. Specifying `-1.0` for any
+    /// parameter will give the default Excel value. The defaults are shown
+    /// below.
+    ///
+    /// # Arguments
+    ///
+    /// * `left` - Left margin in inches. Excel default is 0.7.
+    /// * `right` - Right margin in inches. Excel default is 0.7.
+    /// * `top` - Top margin in inches. Excel default is 0.75.
+    /// * `bottom` - Bottom margin in inches. Excel default is 0.75.
+    /// * `header` - Header margin in inches. Excel default is 0.3.
+    /// * `footer` - Footer margin in inches. Excel default is 0.3.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet margins.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_margins.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.set_margins(1.0, 1.25, 1.5, 1.75, 0.75, 0.25);
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_margins.png">
+    ///
+    pub fn set_margins(
+        &mut self,
+        left: f64,
+        right: f64,
+        top: f64,
+        bottom: f64,
+        header: f64,
+        footer: f64,
+    ) -> &mut Worksheet {
+        if left >= 0.0 {
+            self.margin_left = left;
+            self.page_setup_changed = true;
+        }
+        if right >= 0.0 {
+            self.margin_right = right;
+            self.page_setup_changed = true;
+        }
+        if top >= 0.0 {
+            self.margin_top = top;
+            self.page_setup_changed = true;
+        }
+        if bottom >= 0.0 {
+            self.margin_bottom = bottom;
+            self.page_setup_changed = true;
+        }
+        if header >= 0.0 {
+            self.margin_header = header;
+            self.page_setup_changed = true;
+        }
+        if footer >= 0.0 {
+            self.margin_footer = footer;
+            self.page_setup_changed = true;
+        }
+
         self
     }
 

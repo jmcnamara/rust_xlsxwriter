@@ -15,7 +15,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     worksheet.set_view_page_layout();
-    worksheet.set_portrait();
     worksheet.set_paper_size(9);
 
     worksheet.write_string_only(0, 0, "Foo")?;

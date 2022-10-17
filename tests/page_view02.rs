@@ -16,7 +16,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_view_page_layout();
     worksheet.set_zoom(75);
-    worksheet.set_portrait();
     worksheet.set_paper_size(9);
 
     worksheet.write_string_only(0, 0, "Foo")?;

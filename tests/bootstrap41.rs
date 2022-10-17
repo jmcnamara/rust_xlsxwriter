@@ -17,13 +17,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_header("&CPage &P of &N");
     worksheet.set_footer("&R&F");
 
-    worksheet.set_portrait();
-
     let worksheet = workbook.add_worksheet();
 
     worksheet.set_header("&C&[Page]&[Pages]&[Date]&[Time]&[Path]&[File]&[File]&[Tab]");
-
-    worksheet.set_portrait();
 
     workbook.close()?;
 
@@ -32,9 +28,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn bootstrap40_header_footer() {
-    let test_runner = common::TestRunner::new("bootstrap41")
-        .ignore_calc_chain()
-        .initialize();
+    let test_runner = common::TestRunner::new("bootstrap41").initialize();
 
     _ = create_new_xlsx_file(test_runner.output_file());
 

@@ -8,24 +8,18 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 
 mod common;
 
-// Test case to demonstrate setting worksheet zoom.
+// Test case to demonstrate setting margins.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.set_zoom(200);
+    worksheet.set_margins(1.0, 1.25, 1.5, 1.75, 0.75, 0.25);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.set_zoom(75);
+    worksheet.set_margins(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
 
-    // This zoom is the default and should be ignored.
     let worksheet = workbook.add_worksheet();
-    worksheet.set_zoom(100);
-
-    // These zooms are outside the allowed range and should be ignored.
-    let worksheet = workbook.add_worksheet();
-    worksheet.set_zoom(401);
-    worksheet.set_zoom(9);
+    worksheet.set_margins(0.25, 0.25, 0.75, 0.75, 0.3, 0.3);
 
     workbook.close()?;
 
@@ -33,8 +27,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn bootstrap40_zoom() {
-    let test_runner = common::TestRunner::new("bootstrap40").initialize();
+fn bootstrap42_margins() {
+    let test_runner = common::TestRunner::new("bootstrap42").initialize();
 
     _ = create_new_xlsx_file(test_runner.output_file());
 
