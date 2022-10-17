@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## [0.6.0] - 2022-10-18
+
+### Added
+
+- Added more page setup methods:
+
+  - [`worksheet.set_header()`]
+  - [`worksheet.set_footer()`]
+  - [`worksheet.set_margins()`]
+
+  See also the rust_xlsxwriter user documentation on [Adding Headers and
+  Footers].
+
+[`worksheet.set_header()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_header
+[`worksheet.set_footer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_footer
+[`worksheet.set_margins()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_margins
+[Adding Headers and Footers]: https://rustxlsxwriter.github.io/worksheet/headers.html
+
 ## [0.5.0] - 2022-10-16
 
 ### Added
@@ -34,10 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`worksheet.write_array_formula()`] and
   [`worksheet.write_dynamic_array_formula()`].
 
-- Added document links to https://rustxlsxwriter.github.io.
+See also the rust_xlsxwriter user documentation on [Dynamic Array support].
 
 [`worksheet.write_array_formula()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_array_formula
 [`worksheet.write_dynamic_array_formula()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_dynamic_array_formula
+
+[Dynamic Array support]: https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
 
 ## [0.3.1] - 2022-10-01
 
