@@ -75,8 +75,7 @@ frequently.
 
 ## See also
 
-- [Working with the rust_xlsxwriter library]: The main, non API
-  documentation for `rust_xlsxwriter`.
+- [User Guide - Working with the rust_xlsxwriter library]
     - [Getting started]: A simple getting started guide on how to use
       `rust_xlsxwriter` in a project and write a Hello World example.
     - [Tutorial]: A larger example of using `rust_xlsxwriter` to write some
@@ -87,7 +86,7 @@ frequently.
 - [The rust_xlsxwriter repository]
 - [Release Notes]
 
-[Working with the rust_xlsxwriter library]:
+[User Guide - Working with the rust_xlsxwriter library]:
     https://rustxlsxwriter.github.io/index.html
 [Getting started]: https://rustxlsxwriter.github.io/getting_stared.html
 [Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
