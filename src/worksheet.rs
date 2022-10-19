@@ -102,21 +102,35 @@ pub struct Worksheet {
     changed_rows: HashMap<RowNum, RowOptions>,
     changed_cols: HashMap<ColNum, ColOptions>,
     page_setup_changed: bool,
+    fit_to_page: bool,
+    fit_width: u16,
+    fit_height: u16,
     paper_size: u8,
     default_page_order: bool,
     right_to_left: bool,
     portrait: bool,
     page_view: PageView,
     zoom: u16,
+    print_scale: u16,
+    print_options_changed: bool,
+    center_horizontally: bool,
+    center_vertically: bool,
+    print_gridlines: bool,
+    print_black_and_white: bool,
+    print_draft: bool,
+    print_headings: bool,
     header: String,
     footer: String,
     head_footer_changed: bool,
+    header_footer_scale_with_doc: bool,
+    header_footer_align_with_page: bool,
     margin_left: f64,
     margin_right: f64,
     margin_top: f64,
     margin_bottom: f64,
     margin_header: f64,
     margin_footer: f64,
+    first_page_number: u16,
     default_result: String,
     use_future_functions: bool,
 }
@@ -159,21 +173,35 @@ impl Worksheet {
             changed_rows,
             changed_cols,
             page_setup_changed: false,
+            fit_to_page: false,
+            fit_width: 1,
+            fit_height: 1,
             paper_size: 0,
             default_page_order: true,
             right_to_left: false,
             portrait: true,
             page_view: PageView::Normal,
             zoom: 100,
+            print_scale: 100,
+            print_options_changed: false,
+            center_horizontally: false,
+            center_vertically: false,
+            print_gridlines: false,
+            print_black_and_white: false,
+            print_draft: false,
+            print_headings: false,
             header: "".to_string(),
             footer: "".to_string(),
             head_footer_changed: false,
+            header_footer_scale_with_doc: true,
+            header_footer_align_with_page: true,
             margin_left: 0.7,
             margin_right: 0.7,
             margin_top: 0.75,
             margin_bottom: 0.75,
             margin_header: 0.3,
             margin_footer: 0.3,
+            first_page_number: 0,
             default_result: "0".to_string(),
             use_future_functions: false,
         }
@@ -2603,6 +2631,10 @@ impl Worksheet {
     ///
     /// Set the worksheet zoom factor in the range 10 <= zoom <= 400.
     ///
+    /// The default zoom level is 100. The `set_zoom()` method does not affect
+    /// the scale of the printed page in Excel. For that you should use
+    /// [`set_print_fit_to_pages()`](Worksheet::set_print_fit_to_pages).
+    ///
     /// # Arguments
     ///
     /// * `zoom` - The worksheet zoom level.
@@ -2633,11 +2665,15 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_zoom.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_zoom.png">
     ///
     pub fn set_zoom(&mut self, zoom: u16) -> &mut Worksheet {
         if !(10..=400).contains(&zoom) {
-            eprintln!("Zoom factor {} outside range: 10 <= zoom <= 400.", zoom);
+            eprintln!(
+                "Zoom factor {} outside Excel range: 10 <= zoom <= 400.",
+                zoom
+            );
             return self;
         }
 
@@ -2889,6 +2925,57 @@ impl Worksheet {
         self
     }
 
+    /// Set the page setup option to scale the header/footer with the document.
+    ///
+    /// This option determines whether the headers and footers use the same
+    /// scaling as the worksheet. This defaults to "on" in Excel.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    pub fn set_header_footer_scale_with_doc(&mut self, enable: bool) -> &mut Worksheet {
+        self.header_footer_scale_with_doc = enable;
+
+        if !enable {
+            self.page_setup_changed = true;
+            self.head_footer_changed = true;
+        }
+
+        self
+    }
+
+    /// Set the page setup option to align the header/footer with the margins.
+    ///
+    /// This option determines whether the headers and footers align with the
+    /// left and right margins of the worksheet. This defaults to "on" in Excel.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///`
+    pub fn set_header_footer_align_with_page(&mut self, enable: bool) -> &mut Worksheet {
+        self.header_footer_align_with_page = enable;
+
+        if !enable {
+            self.page_setup_changed = true;
+            self.head_footer_changed = true;
+        }
+        self
+    }
+
     /// Set the page margins.
     ///
     /// The `set_margins()` method is used to set the margins of the worksheet
@@ -2967,6 +3054,343 @@ impl Worksheet {
             self.page_setup_changed = true;
         }
 
+        self
+    }
+
+    /// Set the first page number when printing.
+    ///
+    /// The `set_print_first_page_number()` method is used to set the page
+    /// number of the first page when the worksheet is printed out. This option
+    /// will only have and effect if you have a header/footer with the `&[Page]`
+    /// control character, see [`set_header()`](Worksheet::set_header()).
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `page_number` - The page number of the first printed page.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the page number on the printed
+    /// page.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_print_first_page_number.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.set_header("&CPage &P of &N");
+    ///     worksheet.set_print_first_page_number(2);
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    pub fn set_print_first_page_number(&mut self, page_number: u16) -> &mut Worksheet {
+        self.first_page_number = page_number;
+        self.page_setup_changed = true;
+        self
+    }
+
+    /// Set the page setup option to set the print scale.
+    ///
+    /// Set the scale factor of the printed page, in the range 10 <= scale <=
+    /// 400.
+    ///
+    /// The default scale factor is 100. The `set_print_fit_to_pages()` method
+    /// does not affect the scale of the visible page in Excel. For that you
+    /// should use [`set_zoom()`](Worksheet::set_zoom).
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `scale` - The print scale factor.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the scale of the worksheet page
+    /// when printed.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_print_scale.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Scale the printed worksheet to 50%.
+    ///     worksheet.set_print_scale(50);
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn set_print_scale(&mut self, scale: u16) -> &mut Worksheet {
+        if !(10..=400).contains(&scale) {
+            eprintln!(
+                "Scale factor {} outside Excel range: 10 <= zoom <= 400.",
+                scale
+            );
+            return self;
+        }
+
+        // This property is mutually exclusive with fit to page.
+        self.fit_to_page = false;
+
+        self.print_scale = scale;
+        self.page_setup_changed = true;
+        self
+    }
+
+    /// Fit the printed area to a specific number of pages both vertically and
+    /// horizontally.
+    ///
+    /// The `set_print_fit_to_pages()` method is used to fit the printed area to
+    /// a specific number of pages both vertically and horizontally. If the
+    /// printed area exceeds the specified number of pages it will be scaled
+    /// down to fit. This ensures that the printed area will always appear on
+    /// the specified number of pages even if the page size or margins change:
+    ///
+    /// ```text
+    ///     worksheet1.set_print_fit_to_pages(1, 1); // Fit to 1x1 pages.
+    ///     worksheet2.set_print_fit_to_pages(2, 1); // Fit to 2x1 pages.
+    ///     worksheet3.set_print_fit_to_pages(1, 2); // Fit to 1x2 pages.
+    /// ```
+    ///
+    /// The print area can be defined using the `set_print_area()` method.
+    ///
+    /// A common requirement is to fit the printed output to `n` pages wide but
+    /// have the height be as long as necessary. To achieve this set the
+    /// `height` to 0, see the example below.
+    ///
+    /// **Notes**:
+    ///
+    /// - The `set_print_fit_to_pages()` will override any manual page breaks
+    ///   that are defined in the worksheet.
+    ///
+    /// - When using `set_print_fit_to_pages()` it may also be required to set
+    ///   the printer paper size using
+    ///   [`set_paper_size()`](Worksheet::set_paper_size) or else Excel will
+    ///   default to "US Letter".
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - Number of pages horizontally.
+    /// * `height` - Number of pages vertically.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the scale of the worksheet to fit
+    /// a defined number of pages vertically and horizontally. This example shows a
+    /// common use case which is to fit the printed output to 1 page wide but have
+    /// the height be as long as necessary.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_print_fit_to_pages.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Set the printed output to fit 1 page wide and as long as necessary.
+    ///     worksheet.set_print_fit_to_pages(1, 0);
+    ///
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_print_fit_to_pages.png">
+    ///
+    pub fn set_print_fit_to_pages(&mut self, width: u16, height: u16) -> &mut Worksheet {
+        self.fit_width = width;
+        self.fit_height = height;
+
+        // This property is mutually exclusive with print scale.
+        self.print_scale = 100;
+
+        self.fit_to_page = true;
+        self.page_setup_changed = true;
+        self
+    }
+
+    /// Center the printed page horizontally.
+    ///
+    /// Center the worksheet data horizontally between the margins on the
+    /// printed page
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_print_center_horizontally(&mut self, enable: bool) -> &mut Worksheet {
+        self.center_horizontally = enable;
+
+        if enable {
+            self.print_options_changed = true;
+            self.page_setup_changed = true;
+        }
+        self
+    }
+
+    /// Center the printed page vertically.
+    ///
+    /// Center the worksheet data vertically between the margins on the
+    /// printed page
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_print_center_vertically(&mut self, enable: bool) -> &mut Worksheet {
+        self.center_vertically = enable;
+
+        if enable {
+            self.print_options_changed = true;
+            self.page_setup_changed = true;
+        }
+        self
+    }
+
+    /// Set the page setup option to turn on printed gridlines.
+    ///
+    /// The `set_print_gridlines()` method is use to turn on/off gridlines on
+    /// the printed pages. It is off by default.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_print_gridlines(&mut self, enable: bool) -> &mut Worksheet {
+        self.print_gridlines = enable;
+
+        if enable {
+            self.print_options_changed = true;
+            self.page_setup_changed = true;
+        }
+        self
+    }
+
+    /// Set the page setup option to print in black and white.
+    ///
+    /// This `set_print_black_and_white()` method can be used to force printing
+    /// in black and white only. It is off by default.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_print_black_and_white(&mut self, enable: bool) -> &mut Worksheet {
+        self.print_black_and_white = enable;
+
+        if enable {
+            self.page_setup_changed = true;
+        }
+        self
+    }
+
+    /// Set the page setup option to print in draft quality.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page Setup].
+    ///
+    /// [Worksheet - Page Setup]: https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_print_draft(&mut self, enable: bool) -> &mut Worksheet {
+        self.print_draft = enable;
+
+        if enable {
+            self.page_setup_changed = true;
+        }
+        self
+    }
+
+    /// Set the page setup option to print the row and column headers on the
+    /// printed page.
+    ///
+    /// The `set_print_headings()` method turns on the row and column headers
+    /// when printing a worksheet. This option is off by default.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
+    /// Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_print_headings(&mut self, enable: bool) -> &mut Worksheet {
+        self.print_headings = enable;
+
+        if enable {
+            self.print_options_changed = true;
+            self.page_setup_changed = true;
+        }
         self
     }
 
@@ -3377,8 +3801,10 @@ impl Worksheet {
         // Write the worksheet element.
         self.write_worksheet();
 
-        // Write the dimension element.
+        // Write the sheetPr element.
+        self.write_sheet_pr();
 
+        // Write the dimension element.
         self.write_dimension();
 
         // Write the sheetViews element.
@@ -3392,6 +3818,11 @@ impl Worksheet {
 
         // Write the sheetData element.
         self.write_sheet_data(string_table);
+
+        // Write the printOptions element.
+        if self.print_options_changed {
+            self.write_print_options();
+        }
 
         // Write the pageMargins element.
         self.write_page_margins();
@@ -3419,6 +3850,31 @@ impl Worksheet {
         let attributes = vec![("xmlns", xmlns), ("xmlns:r", xmlns_r)];
 
         self.writer.xml_start_tag_attr("worksheet", &attributes);
+    }
+
+    // Write the <sheetPr> element.
+    fn write_sheet_pr(&mut self) {
+        if !self.fit_to_page {
+            return;
+        }
+
+        self.writer.xml_start_tag("sheetPr");
+
+        // Write the pageSetUpPr element.
+        self.write_page_set_up_pr();
+
+        self.writer.xml_end_tag("sheetPr");
+    }
+
+    // Write the <pageSetUpPr> element.
+    fn write_page_set_up_pr(&mut self) {
+        if !self.fit_to_page {
+            return;
+        }
+
+        let attributes = vec![("fitToPage", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("pageSetUpPr", &attributes);
     }
 
     // Write the <dimension> element.
@@ -3512,6 +3968,29 @@ impl Worksheet {
         }
     }
 
+    // Write the <printOptions> element.
+    fn write_print_options(&mut self) {
+        let mut attributes = vec![];
+
+        if self.center_horizontally {
+            attributes.push(("horizontalCentered", "1".to_string()));
+        }
+
+        if self.center_vertically {
+            attributes.push(("verticalCentered", "1".to_string()));
+        }
+
+        if self.print_headings {
+            attributes.push(("headings", "1".to_string()));
+        }
+
+        if self.print_gridlines {
+            attributes.push(("gridLines", "1".to_string()));
+        }
+
+        self.writer.xml_empty_tag_attr("printOptions", &attributes);
+    }
+
     // Write the <pageMargins> element.
     fn write_page_margins(&mut self) {
         let attributes = vec![
@@ -3534,6 +4013,19 @@ impl Worksheet {
             attributes.push(("paperSize", self.paper_size.to_string()));
         }
 
+        if self.print_scale != 100 {
+            attributes.push(("scale", self.print_scale.to_string()));
+        }
+
+        if self.fit_to_page {
+            if self.fit_width != 1 {
+                attributes.push(("fitToWidth", self.fit_width.to_string()));
+            }
+            if self.fit_height != 1 {
+                attributes.push(("fitToHeight", self.fit_height.to_string()));
+            }
+        }
+
         if !self.default_page_order {
             attributes.push(("pageOrder", "overThenDown".to_string()));
         }
@@ -3542,6 +4034,18 @@ impl Worksheet {
             attributes.push(("orientation", "portrait".to_string()));
         } else {
             attributes.push(("orientation", "landscape".to_string()));
+        }
+
+        if self.first_page_number > 0 {
+            attributes.push(("useFirstPageNumber", self.first_page_number.to_string()));
+        }
+
+        if self.print_black_and_white {
+            attributes.push(("blackAndWhite", "1".to_string()));
+        }
+
+        if self.print_draft {
+            attributes.push(("draft", "1".to_string()));
         }
 
         attributes.push(("horizontalDpi", "200".to_string()));
@@ -3961,19 +4465,33 @@ impl Worksheet {
 
     // Write the <headerFooter> element.
     fn write_header_footer(&mut self) {
-        self.writer.xml_start_tag("headerFooter");
+        let mut attributes = vec![];
 
-        // Write the oddHeader element.
-        if !self.header.is_empty() {
-            self.write_odd_header();
+        if !self.header_footer_scale_with_doc {
+            attributes.push(("scaleWithDoc", "0".to_string()));
         }
 
-        // Write the oddFooter element.
-        if !self.footer.is_empty() {
-            self.write_odd_footer();
+        if !self.header_footer_align_with_page {
+            attributes.push(("alignWithMargins", "0".to_string()));
         }
 
-        self.writer.xml_end_tag("headerFooter");
+        if self.header.is_empty() && self.footer.is_empty() {
+            self.writer.xml_empty_tag_attr("headerFooter", &attributes);
+        } else {
+            self.writer.xml_start_tag_attr("headerFooter", &attributes);
+
+            // Write the oddHeader element.
+            if !self.header.is_empty() {
+                self.write_odd_header();
+            }
+
+            // Write the oddFooter element.
+            if !self.footer.is_empty() {
+                self.write_odd_footer();
+            }
+
+            self.writer.xml_end_tag("headerFooter");
+        }
     }
 
     // Write the <oddHeader> element.
