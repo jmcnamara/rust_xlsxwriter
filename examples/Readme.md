@@ -28,6 +28,9 @@ documentation and generally show how an individual function works.
   worksheets that correspond to the sections of the Excel "Format Cells"
   dialog.
 
+* app_headers_footers.rs - An example of setting headers and footers in
+  worksheets using the rust_xlsxwriter library.
+
 * app_hello_world.rs - Create a simple Hello World style Excel spreadsheet
   using the rust_xlsxwriter library.
 
@@ -182,11 +185,43 @@ documentation and generally show how an individual function works.
   setting the default result for all non-calculated formulas in a
   worksheet.
 
+* doc_worksheet_set_header.rs - Demonstrates setting the worksheet header.
+
+* doc_worksheet_set_landscape.rs - Demonstrates setting the worksheet page
+  orientation to landscape.
+
+* doc_worksheet_set_margins.rs - Demonstrates setting the worksheet
+  margins.
+
 * doc_worksheet_set_name.rs - Demonstrates setting user defined worksheet
   names and the default values when a name isn't set.
 
+* doc_worksheet_set_page_order.rs - Demonstrates setting the worksheet
+  printed page order.
+
 * doc_worksheet_set_paper.rs - Demonstrates setting the worksheet paper
   size/type for the printed output.
+
+* doc_worksheet_set_print_area.rs - Demonstrates setting the print area for
+  several worksheets.
+
+* doc_worksheet_set_print_first_page_number.rs - Demonstrates setting the
+  page number on the printed page.
+
+* doc_worksheet_set_print_fit_to_pages.rs - Demonstrates setting the scale
+  of the worksheet to fit a defined number of pages vertically and
+  horizontally. This example shows a common use case which is to fit the
+  printed output to 1 page wide but have the height be as long as
+  necessary.
+
+* doc_worksheet_set_print_scale.rs - Demonstrates setting the scale of the
+  worksheet page when printed.
+
+* doc_worksheet_set_repeat_columns.rs - Demonstrates setting the columns to
+  repeat on each printed page.
+
+* doc_worksheet_set_repeat_rows.rs - Demonstrates setting the rows to
+  repeat on each printed page.
 
 * doc_worksheet_set_right_to_left.rs - Demonstrates changing the default
   worksheet and cell text direction changed from left-to-right to
@@ -200,6 +235,9 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_set_row_height_pixels.rs - Demonstrates setting the height
   for a row in Excel.
+
+* doc_worksheet_set_zoom.rs - Demonstrates setting the worksheet zoom
+  level.
 
 * doc_worksheet_write_array_formula.rs - Demonstrates writing an array
   formulas with formatting to a worksheet.

@@ -13,6 +13,7 @@ use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
 use crate::shared_strings_table::SharedStringsTable;
+use crate::utility;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 use crate::{XlsxColor, XlsxPattern};
@@ -83,6 +84,7 @@ pub struct Workbook<'a> {
     border_count: u16,
     num_format_count: u16,
     is_closed: bool,
+    defined_names: Vec<DefinedName>,
 }
 
 impl<'a> Workbook<'a> {
@@ -145,6 +147,7 @@ impl<'a> Workbook<'a> {
             border_count: 0,
             num_format_count: 0,
             is_closed: false,
+            defined_names: vec![],
         }
     }
 
@@ -279,10 +282,13 @@ impl<'a> Workbook<'a> {
         let mut packager = Packager::new(self.filename)?;
         let mut package_options = PackagerOptions::new();
 
-        // Set some packager options, and check for duplicate worksheet names.
+        // Iterate over the worksheets to capture workbook and package level
+        // data.
         package_options.num_worksheets = self.worksheets.len() as u16;
-        for worksheet in self.worksheets.iter() {
+
+        for (sheet_index, worksheet) in self.worksheets.iter().enumerate() {
             let sheet_name = worksheet.name.clone();
+            let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
 
             // Check for duplicate sheet names, which aren't allowed by Excel.
             if package_options.worksheet_names.contains(&sheet_name) {
@@ -297,6 +303,52 @@ impl<'a> Workbook<'a> {
 
             if worksheet.has_dynamic_arrays {
                 package_options.has_dynamic_arrays = true;
+            }
+
+            // Store any user defined print areas which are a category of defined name.
+            if !worksheet.print_area.is_empty() {
+                let defined_name = DefinedName {
+                    name: "_xlnm.Print_Area".to_string(),
+                    range: format!("{}!{}", quoted_sheet_name, worksheet.print_area),
+                    index: sheet_index as u16,
+                };
+
+                self.defined_names.push(defined_name);
+                package_options
+                    .defined_names
+                    .push(format!("{}!Print_Area", quoted_sheet_name));
+            }
+
+            // Store any user defined print repeat rows/columns which are a
+            // category of defined name.
+            if !worksheet.repeat_row_range.is_empty() || !worksheet.repeat_col_range.is_empty() {
+                let range;
+
+                if !worksheet.repeat_row_range.is_empty() && !worksheet.repeat_col_range.is_empty()
+                {
+                    range = format!(
+                        "{}!{},{}!{}",
+                        quoted_sheet_name,
+                        worksheet.repeat_col_range,
+                        quoted_sheet_name,
+                        worksheet.repeat_row_range
+                    );
+                } else if !worksheet.repeat_row_range.is_empty() {
+                    range = format!("{}!{}", quoted_sheet_name, worksheet.repeat_row_range);
+                } else {
+                    range = format!("{}!{}", quoted_sheet_name, worksheet.repeat_col_range);
+                }
+
+                let defined_name = DefinedName {
+                    name: "_xlnm.Print_Titles".to_string(),
+                    range: range.clone(),
+                    index: sheet_index as u16,
+                };
+
+                self.defined_names.push(defined_name);
+                package_options
+                    .defined_names
+                    .push(format!("{}!Print_Titles", quoted_sheet_name));
             }
         }
 
@@ -560,6 +612,11 @@ impl<'a> Workbook<'a> {
         // Write the sheets element.
         self.write_sheets();
 
+        // Write the definedNames element.
+        if !self.defined_names.is_empty() {
+            self.write_defined_names();
+        }
+
         // Write the calcPr element.
         self.write_calc_pr();
 
@@ -651,6 +708,23 @@ impl<'a> Workbook<'a> {
         self.writer.xml_empty_tag_attr("sheet", &attributes);
     }
 
+    // Write the <definedNames> element.
+    fn write_defined_names(&mut self) {
+        self.writer.xml_start_tag("definedNames");
+
+        for defined_name in self.defined_names.iter() {
+            let attributes = vec![
+                ("name", defined_name.name.to_string()),
+                ("localSheetId", defined_name.index.to_string()),
+            ];
+
+            self.writer
+                .xml_data_element_attr("definedName", &defined_name.range, &attributes);
+        }
+
+        self.writer.xml_end_tag("definedNames");
+    }
+
     // Write the <calcPr> element.
     fn write_calc_pr(&mut self) {
         let attributes = vec![
@@ -660,6 +734,17 @@ impl<'a> Workbook<'a> {
 
         self.writer.xml_empty_tag_attr("calcPr", &attributes);
     }
+}
+
+// -----------------------------------------------------------------------
+// Helper enums/structs/functions.
+// -----------------------------------------------------------------------
+
+#[derive(Clone)]
+struct DefinedName {
+    name: String,
+    range: String,
+    index: u16,
 }
 
 #[cfg(test)]

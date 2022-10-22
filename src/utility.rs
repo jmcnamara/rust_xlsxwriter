@@ -38,21 +38,65 @@ pub fn rowcol_to_cell(row_num: RowNum, col_num: ColNum) -> String {
     format!("{}{}", col_to_name(col_num), row_num + 1)
 }
 
+// Convert a zero indexed row and column cell reference to an absolute $A$1
+// style string.
+pub fn rowcol_to_cell_abs(row_num: RowNum, col_num: ColNum) -> String {
+    format!("${}${}", col_to_name(col_num), row_num + 1)
+}
+
 // Convert zero indexed row and col cell references to a A1:B1 style range string.
 pub fn cell_range(
-    start_row: RowNum,
-    start_col: ColNum,
-    end_row: RowNum,
-    end_col: ColNum,
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
 ) -> String {
-    let range1 = rowcol_to_cell(start_row, start_col);
-    let range2 = rowcol_to_cell(end_row, end_col);
+    let range1 = rowcol_to_cell(first_row, first_col);
+    let range2 = rowcol_to_cell(last_row, last_col);
 
     if range1 == range2 {
         range1
     } else {
         format!("{}:{}", range1, range2)
     }
+}
+
+// Convert zero indexed row and col cell references to an absolute $A$1:$B$1
+// style range string.
+pub fn cell_range_abs(
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
+) -> String {
+    let range1 = rowcol_to_cell_abs(first_row, first_col);
+    let range2 = rowcol_to_cell_abs(last_row, last_col);
+
+    if range1 == range2 {
+        range1
+    } else {
+        format!("{}:{}", range1, range2)
+    }
+}
+
+// Create a quoted version of a worksheet name. Excel single quotes worksheet
+// names that contain spaces and some other characters.
+pub fn quote_sheetname(sheetname: &str) -> String {
+    let mut sheetname = sheetname.to_string();
+
+    // Ignore strings that are already quoted.
+    if !sheetname.starts_with('\'') {
+        // double quote and other single quotes.
+        sheetname = sheetname.replace('\'', "''");
+
+        // Single quote the worksheet name if it contains any of the characters
+        // that Excel quotes when using the name in a formula.
+        if sheetname.contains(' ') || sheetname.contains('!') || sheetname.contains('\'') {
+            sheetname = format!("'{}'", sheetname);
+        }
+    }
+
+    sheetname
 }
 
 //
@@ -133,6 +177,27 @@ mod tests {
                 cell_range,
                 utility::cell_range(start_row, start_col, end_row, end_col)
             );
+        }
+    }
+
+    #[test]
+    fn test_quote_sheetname() {
+        let tests = vec![
+            ("Sheet1", "Sheet1"),
+            ("Sheet.2", "Sheet.2"),
+            ("Sheet_3", "Sheet_3"),
+            ("'Sheet4'", "'Sheet4'"),
+            ("'Sheet 5'", "Sheet 5"),
+            ("'Sheet!6'", "Sheet!6"),
+            ("'Sheet''7'", "Sheet'7"),
+            (
+                "'a''''''''''''''''''''''''''''''''''''''''''''''''''''''''''b'",
+                "a'''''''''''''''''''''''''''''b",
+            ),
+        ];
+
+        for (exp, sheetname) in tests {
+            assert_eq!(exp, utility::quote_sheetname(sheetname));
         }
     }
 }

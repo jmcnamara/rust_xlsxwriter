@@ -311,6 +311,14 @@ impl Packager {
             app.add_part_name(sheet_name);
         }
 
+        if !options.defined_names.is_empty() {
+            app.add_heading_pair("Named Ranges", options.defined_names.len() as u16);
+
+            for defined_name in options.defined_names.iter() {
+                app.add_part_name(defined_name);
+            }
+        }
+
         self.zip
             .start_file("docProps/app.xml", self.zip_options)
             .unwrap();
@@ -340,6 +348,7 @@ pub struct PackagerOptions {
     pub has_dynamic_arrays: bool,
     pub num_worksheets: u16,
     pub worksheet_names: Vec<String>,
+    pub defined_names: Vec<String>,
 }
 
 impl PackagerOptions {
@@ -350,6 +359,7 @@ impl PackagerOptions {
             has_dynamic_arrays: false,
             num_worksheets: 0,
             worksheet_names: vec![],
+            defined_names: vec![],
         }
     }
 }

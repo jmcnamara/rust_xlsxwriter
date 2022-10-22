@@ -93,6 +93,9 @@ pub struct Worksheet {
     pub(crate) selected: bool,
     pub(crate) uses_string_table: bool,
     pub(crate) has_dynamic_arrays: bool,
+    pub(crate) print_area: String,
+    pub(crate) repeat_row_range: String,
+    pub(crate) repeat_col_range: String,
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     col_names: HashMap<ColNum, String>,
     dimensions: WorksheetDimensions,
@@ -164,6 +167,9 @@ impl Worksheet {
             selected: false,
             uses_string_table: false,
             has_dynamic_arrays: false,
+            print_area: "".to_string(),
+            repeat_row_range: "".to_string(),
+            repeat_col_range: "".to_string(),
             table,
             col_names,
             dimensions,
@@ -884,6 +890,8 @@ impl Worksheet {
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    ///   than the last row or column.
     ///
     /// # Examples
     ///
@@ -984,6 +992,8 @@ impl Worksheet {
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    ///   than the last row or column.
     ///
     /// # Examples
     ///
@@ -2516,12 +2526,18 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_set_page_order.png">
     ///
-    /// However, by using the `set_page_order()` method the print order will be
+    /// However, by using `set_page_order(false)` the print order will be
     /// changed to "over then down".
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. Set `true` to get "Down, then
+    ///   over" (the default) and `false` to get "Over, then down".
     ///
     /// # Examples
     ///
-    /// The following example demonstrates setting the worksheet printed page order.
+    /// The following example demonstrates setting the worksheet printed page
+    /// order.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_page_order.rs
@@ -2535,16 +2551,19 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Set the page print to "over then down"
-    ///     worksheet.set_page_order();
+    ///     worksheet.set_page_order(false);
     /// #
     /// #     workbook.close()?;
     /// #
     /// #     Ok(())
     /// # }
     /// ```
-    pub fn set_page_order(&mut self) -> &mut Worksheet {
-        self.default_page_order = false;
-        self.page_setup_changed = true;
+    pub fn set_page_order(&mut self, enable: bool) -> &mut Worksheet {
+        self.default_page_order = enable;
+
+        if !enable {
+            self.page_setup_changed = true;
+        }
         self
     }
 
@@ -3394,6 +3413,281 @@ impl Worksheet {
         self
     }
 
+    /// Set the print area for the worksheet.
+    ///
+    /// This method is used to specify the area of the worksheet that will be
+    /// printed.
+    ///
+    /// In order to specify an entire row or column range such as `1:20` or
+    /// `A:H` you must specify the corresponding maximum column or row range.
+    /// For example:
+    ///
+    /// - `(0, 0, 31, 16_383) == 1:32`.
+    /// - `(0, 0, 1_048_575, 12) == A:M`.
+    ///
+    /// In these examples 16_383 is the maximum column and 1_048_575 is the
+    /// maximum row (zero indexed).
+    ///
+    /// See also the example below and the `rust_xlsxwriter` documentation on
+    /// [Worksheet - Page Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    ///   than the last row or column.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the print area for several
+    /// worksheets.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_print_area.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    ///     let worksheet1 = workbook.add_worksheet();
+    ///     // Set the print area to "A1:M32"
+    ///     worksheet1.set_print_area(0, 0, 31, 12)?;
+    ///
+    ///     let worksheet2 = workbook.add_worksheet();
+    ///     // Set the print area to "1:32"
+    ///     worksheet2.set_print_area(0, 0, 31, 16_383)?;
+    ///
+    ///     let worksheet3 = workbook.add_worksheet();
+    ///     // Set the print area to "A:M"
+    ///     worksheet3.set_print_area(0, 0, 1_048_575, 12)?;
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file, page setup dialog for worksheet1:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_print_area.png">
+    ///
+    pub fn set_print_area(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // The print range format can change depending of whether it contains a
+        // full range of row or columns, or not. We need to handle each of the 4
+        // possible cases.
+        if first_row == 0 && first_col == 0 && last_row == ROW_MAX - 1 && last_col == COL_MAX - 1 {
+            // The print range is the entire worksheet, therefore it is the same
+            // as the default, so we can ignore it.
+            return Ok(self);
+        } else if first_col == 0 && last_col == COL_MAX - 1 {
+            // The print range is the entire column range, therefore we create a
+            // row only range.
+            self.print_area = format!("${}:${}", first_row + 1, last_row + 1);
+        } else if first_row == 0 && last_row == ROW_MAX - 1 {
+            // The print range is the entire row range, therefore we create a
+            // column only range.
+            self.print_area = format!(
+                "${}:${}",
+                utility::col_to_name(first_col),
+                utility::col_to_name(last_col)
+            );
+        } else {
+            // Otherwise handle it as a stand cell range.
+            self.print_area = utility::cell_range_abs(first_row, first_col, last_row, last_col);
+        }
+
+        self.page_setup_changed = true;
+        Ok(self)
+    }
+
+    /// Set the number of rows to repeat at the top of each printed page.
+    ///
+    /// For large Excel documents it is often desirable to have the first row or
+    /// rows of the worksheet print out at the top of each page.
+    ///
+    /// See the example below and the `rust_xlsxwriter` documentation on
+    /// [Worksheet - Page Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (Zero indexed.)
+    /// * `last_row` - The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the rows to repeat on each
+    /// printed page.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_repeat_rows.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    ///     let worksheet1 = workbook.add_worksheet();
+    ///     // Repeat the first row in the printed output.
+    ///     worksheet1.set_repeat_rows(0, 0)?;
+    ///
+    ///     let worksheet2 = workbook.add_worksheet();
+    ///     // Repeat the first 2 rows in the printed output.
+    ///     worksheet2.set_repeat_rows(0, 1)?;
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file, page setup dialog for worksheet2:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_repeat_rows.png">
+    ///
+    pub fn set_repeat_rows(
+        &mut self,
+        first_row: RowNum,
+        last_row: RowNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows are in the allowed range.
+        if !self.check_dimensions_only(first_row, 0) || !self.check_dimensions_only(last_row, 0) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Set the print range as a row only range.
+        self.repeat_row_range = format!("${}:${}", first_row + 1, last_row + 1);
+
+        self.page_setup_changed = true;
+        Ok(self)
+    }
+
+    /// Set the columns to repeat at the left hand side of each printed page.
+    ///
+    /// For large Excel documents it is often desirable to have the first column
+    /// or columns of the worksheet print out at the left hand side of each
+    /// page.
+    ///
+    /// See the example below and the `rust_xlsxwriter` documentation on
+    /// [Worksheet - Page Setup].
+    ///
+    /// [Worksheet - Page Setup]:
+    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    ///
+    /// # Arguments
+    ///
+    /// * `first_col` - The first row of the range. (Zero indexed.)
+    /// * `last_col` - The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    ///   than the last row or column.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the columns to repeat on each
+    /// printed page.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_repeat_columns.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #
+    ///     let worksheet1 = workbook.add_worksheet();
+    ///     // Repeat the first column in the printed output.
+    ///     worksheet1.set_repeat_columns(0, 0)?;
+    ///
+    ///     let worksheet2 = workbook.add_worksheet();
+    ///     // Repeat the first 2 columns in the printed output.
+    ///     worksheet2.set_repeat_columns(0, 1)?;
+    /// #
+    /// #     workbook.close()?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file, page setup dialog for worksheet2:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_repeat_columns.png">
+    ///
+    pub fn set_repeat_columns(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check columns are in the allowed range.
+        if !self.check_dimensions_only(0, first_col) || !self.check_dimensions_only(0, last_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Set the print range as a column only range.
+        self.repeat_col_range = format!(
+            "${}:${}",
+            utility::col_to_name(first_col),
+            utility::col_to_name(last_col)
+        );
+
+        self.page_setup_changed = true;
+        Ok(self)
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -3521,14 +3815,12 @@ impl Worksheet {
         format: Option<&Format>,
         is_dynamic: bool,
     ) -> Result<&mut Worksheet, XlsxError> {
-        // Check row and col are in the allowed range.
+        // Check rows and cols are in the allowed range.
         if !self.check_dimensions(first_row, first_col)
             || !self.check_dimensions(last_row, last_col)
         {
             return Err(XlsxError::RowColumnLimitError);
         }
-
-        let first_row = first_row;
 
         // Check order of first/last values.
         if first_row > last_row || first_col > last_col {
@@ -3665,6 +3957,20 @@ impl Worksheet {
         self.dimensions.col_min = cmp::min(self.dimensions.col_min, col);
         self.dimensions.row_max = cmp::max(self.dimensions.row_max, row);
         self.dimensions.col_max = cmp::max(self.dimensions.col_max, col);
+
+        true
+    }
+
+    // Check that row and col are within the allowed Excel range but don't
+    // modify the worksheet cell range.
+    fn check_dimensions_only(&mut self, row: RowNum, col: ColNum) -> bool {
+        // Check that the row an column number are withing Excel's ranges.
+        if row >= ROW_MAX {
+            return false;
+        }
+        if col >= COL_MAX {
+            return false;
+        }
 
         true
     }

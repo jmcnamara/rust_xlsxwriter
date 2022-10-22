@@ -73,7 +73,14 @@ impl<'a> TestRunner<'a> {
     #[allow(dead_code)]
     pub fn initialize(mut self) -> TestRunner<'a> {
         self.input_filename = format!("tests/input/{}.xlsx", self.testcase);
-        self.output_filename = format!("tests/output/rs_{}_{}.xlsx", self.testcase, self.unique);
+
+        if self.unique.is_empty() {
+            self.output_filename = format!("tests/output/rs_{}.xlsx", self.testcase);
+        } else {
+            self.output_filename =
+                format!("tests/output/rs_{}_{}.xlsx", self.testcase, self.unique);
+        }
+
         self
     }
 

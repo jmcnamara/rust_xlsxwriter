@@ -12,7 +12,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Set the page print to "over then down"
-    worksheet.set_page_order();
+    worksheet.set_page_order(false);
 
     workbook.close()?;
 

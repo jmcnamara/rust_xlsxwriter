@@ -8,17 +8,14 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 
 mod common;
 
-// Test to demonstrate print-across print option.
+// Test the creation of a simple rust_xlsxwriter file with a print area.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
 
     let worksheet = workbook.add_worksheet();
-
-    worksheet.set_page_order(false);
-    worksheet.set_paper_size(9);
-    worksheet.set_portrait(); // Secondary test. Should be the default.
-
     worksheet.write_string_only(0, 0, "Foo")?;
+
+    worksheet.set_print_area(0, 0, 7, 0)?;
 
     workbook.close()?;
 
@@ -26,10 +23,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_print_across01() {
-    let test_runner = common::TestRunner::new("print_across01")
-        .ignore_elements("xl/worksheets/sheet1.xml", "<pageMargins")
-        .initialize();
+fn test_print_area04() {
+    let test_runner = common::TestRunner::new("print_area04").initialize();
 
     _ = create_new_xlsx_file(test_runner.output_file());
 
