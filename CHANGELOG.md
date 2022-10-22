@@ -5,7 +5,7 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - 2022-10-22 - In Progress
+## [0.7.0] - 2022-10-22
 
 ### Added
 
@@ -68,7 +68,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`worksheet.set_print_headings()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_print_headings
 [`worksheet.set_page_order()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_page_order
 
+### Fixes
 
+- Fix for cargo issue where chrono dependency had a RUSTSEC warning. [GitHub
+  Issue #6].
+
+[GitHub Issue #6]: https://github.com/jmcnamara/rust_xlsxwriter/issues/6
 
 ## [0.6.0] - 2022-10-18
 
