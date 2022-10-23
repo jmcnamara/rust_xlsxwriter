@@ -19,12 +19,15 @@ fn main() -> Result<(), XlsxError> {
 
     // Create some alignment formats.
     let format1 = Format::new().set_align(XlsxAlign::Center);
+
     let format2 = Format::new()
         .set_align(XlsxAlign::Top)
         .set_align(XlsxAlign::Left);
+
     let format3 = Format::new()
         .set_align(XlsxAlign::VerticalCenter)
         .set_align(XlsxAlign::Center);
+
     let format4 = Format::new()
         .set_align(XlsxAlign::Bottom)
         .set_align(XlsxAlign::Right);

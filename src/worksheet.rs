@@ -2652,7 +2652,7 @@ impl Worksheet {
     ///
     /// The default zoom level is 100. The `set_zoom()` method does not affect
     /// the scale of the printed page in Excel. For that you should use
-    /// [`set_print_fit_to_pages()`](Worksheet::set_print_fit_to_pages).
+    /// [`set_print_scale()`](Worksheet::set_print_scale).
     ///
     /// # Arguments
     ///
@@ -3128,7 +3128,7 @@ impl Worksheet {
     /// Set the scale factor of the printed page, in the range 10 <= scale <=
     /// 400.
     ///
-    /// The default scale factor is 100. The `set_print_fit_to_pages()` method
+    /// The default scale factor is 100. The `set_print_scale()` method
     /// does not affect the scale of the visible page in Excel. For that you
     /// should use [`set_zoom()`](Worksheet::set_zoom).
     ///

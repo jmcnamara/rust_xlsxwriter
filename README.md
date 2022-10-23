@@ -66,6 +66,7 @@ features are:
 - Support for writing all basic Excel data types.
 - Full cell formatting support.
 - Formula support, including new Excel 365 dynamic functions.
+- Page/Printing Setup support.
 
 Rust_xlsxwriter is under active development and new features will be added
 frequently.
