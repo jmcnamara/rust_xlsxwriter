@@ -52,6 +52,7 @@ use crate::styles::Styles;
 use crate::theme::Theme;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
+use crate::FileHandle;
 
 use std::io::Write;
 use zip::write::FileOptions;
@@ -69,17 +70,29 @@ impl Packager {
     // -----------------------------------------------------------------------
 
     // Create a new Packager struct.
-    pub(crate) fn new(filename: &str) -> Result<Packager, XlsxError> {
-        let path = std::path::Path::new(filename);
-
-        let file = match std::fs::File::create(&path) {
-            Ok(file) => file,
-            Err(e) => {
-                return Err(XlsxError::IoError(format!(
-                    "Error creating output file {}: {}",
-                    filename, e
-                )))
+    pub(crate) fn new(filehandle: &FileHandle) -> Result<Packager, XlsxError> {
+        let file = match filehandle {
+            FileHandle::FromString(filename) => {
+                let path = std::path::Path::new(filename);
+                match std::fs::File::create(&path) {
+                    Ok(file) => file,
+                    Err(e) => {
+                        return Err(XlsxError::IoError(format!(
+                            "Error creating output file {}: {}",
+                            filename, e
+                        )))
+                    }
+                }
             }
+            FileHandle::FromPath(path) => match std::fs::File::create(&path) {
+                Ok(file) => file,
+                Err(e) => {
+                    return Err(XlsxError::IoError(format!(
+                        "Error creating output file from path: {}",
+                        e
+                    )))
+                }
+            },
         };
 
         let zip = zip::ZipWriter::new(file);

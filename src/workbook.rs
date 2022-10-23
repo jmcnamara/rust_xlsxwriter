@@ -7,6 +7,7 @@
 
 use std::collections::HashMap;
 use std::mem;
+use std::path::Path;
 
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -75,7 +76,7 @@ use crate::{XlsxColor, XlsxPattern};
 /// ```
 pub struct Workbook<'a> {
     pub(crate) writer: XMLWriter,
-    filename: &'a str,
+    filehandle: FileHandle<'a>,
     worksheets: Vec<Worksheet>,
     xf_formats: Vec<Format>,
     xf_indices: HashMap<String, u32>,
@@ -132,13 +133,60 @@ impl<'a> Workbook<'a> {
     /// <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
     ///
     pub fn new(filename: &'a str) -> Workbook {
+        let filehandle = FileHandle::FromString(filename);
+
+        Self::common_constructor(filehandle)
+    }
+
+    /// Create a new Workbook object to represent an Excel spreadsheet file,
+    /// from a Path.
+    ///
+    /// The `Workbook::new_from_path()` constructor is used to create a new
+    /// Excel workbook from a [std::path] Path or PathBuf instance.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - A reference to a Path or PathBuf instance. The lifetime of
+    ///   the argument lasts for the lifetime of the workbook which is generally
+    ///   until the file is written with [`workbook.close()`](Workbook::close).
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a simple workbook from a
+    /// Path, with one unused worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_new_from_path.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let path = std::path::Path::new("workbook.xlsx");
+    ///     let mut workbook = Workbook::new_from_path(&path);
+    ///
+    ///     _ = workbook.add_worksheet();
+    ///
+    ///     workbook.close()?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    pub fn new_from_path(path: &'a Path) -> Workbook {
+        let filehandle = FileHandle::FromPath(path);
+
+        Self::common_constructor(filehandle)
+    }
+
+    // Common constructor used in the differ new*() variants.
+    fn common_constructor(filehandle: FileHandle) -> Workbook {
         let writer = XMLWriter::new();
         let default_format = Format::new();
         let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
         Workbook {
             writer,
-            filename,
+            filehandle,
             worksheets: vec![],
             xf_formats: vec![default_format],
             xf_indices,
@@ -279,7 +327,7 @@ impl<'a> Workbook<'a> {
         self.prepare_format_properties();
 
         // Create the Packager object that will assemble the zip/xlsx file.
-        let mut packager = Packager::new(self.filename)?;
+        let mut packager = Packager::new(&self.filehandle)?;
         let mut package_options = PackagerOptions::new();
 
         // Iterate over the worksheets to capture workbook and package level
@@ -745,6 +793,11 @@ struct DefinedName {
     name: String,
     range: String,
     index: u16,
+}
+
+pub(crate) enum FileHandle<'a> {
+    FromString(&'a str),
+    FromPath(&'a Path),
 }
 
 #[cfg(test)]

@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
+use std::path::{Path, PathBuf};
+
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 mod common;
@@ -22,6 +24,31 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 // Has an implicit add_worksheet.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new(filename);
+
+    workbook.close()?;
+
+    Ok(())
+}
+
+// Test case to demonstrate creating a basic file from a path.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let path = Path::new(filename);
+
+    let mut workbook = Workbook::new_from_path(&path);
+    _ = workbook.add_worksheet();
+
+    workbook.close()?;
+
+    Ok(())
+}
+
+// Test case to demonstrate creating a basic file from a pathbuf.
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let mut path = PathBuf::new();
+    path.push(filename);
+
+    let mut workbook = Workbook::new_from_path(&path);
+    _ = workbook.add_worksheet();
 
     workbook.close()?;
 
@@ -47,6 +74,30 @@ fn bootstrap01_add_default_worksheet() {
         .initialize();
 
     _ = create_new_xlsx_file_2(test_runner.output_file());
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap01_new_from_path() {
+    let test_runner = common::TestRunner::new("bootstrap01")
+        .unique("3")
+        .initialize();
+
+    _ = create_new_xlsx_file_3(test_runner.output_file());
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap01_new_from_pathbuf() {
+    let test_runner = common::TestRunner::new("bootstrap01")
+        .unique("4")
+        .initialize();
+
+    _ = create_new_xlsx_file_4(test_runner.output_file());
 
     test_runner.assert_eq();
     test_runner.cleanup();
