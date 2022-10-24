@@ -156,24 +156,9 @@ impl XMLWriter {
 
 // Escape XML characters in attributes.
 pub fn escape_attributes(attribute: &str) -> Cow<str> {
-    for (i, ch) in attribute.chars().enumerate() {
-        if match_attribute_html_char(ch).is_some() {
-            let mut escaped_string = String::with_capacity(attribute.len());
-            escaped_string.push_str(&attribute[..i]);
-
-            for ch in attribute[i..].chars() {
-                match match_attribute_html_char(ch) {
-                    Some(escaped_char) => escaped_string.push_str(escaped_char),
-                    None => escaped_string.push(ch),
-                };
-            }
-
-            return Cow::Owned(escaped_string);
-        }
-    }
-
-    Cow::Borrowed(attribute)
+    escape_string(attribute, match_attribute_html_char)
 }
+
 
 // Match function for escape_attributes().
 fn match_attribute_html_char(ch: char) -> Option<&'static str> {
@@ -191,13 +176,18 @@ fn match_attribute_html_char(ch: char) -> Option<&'static str> {
 // is different from escape_attributes() because double quotes
 // and newline are not escaped by Excel.
 pub fn escape_data(data: &str) -> Cow<str> {
-    for (i, ch) in data.chars().enumerate() {
-        if match_data_html_char(ch).is_some() {
-            let mut escaped_string = String::with_capacity(data.len());
-            escaped_string.push_str(&data[..i]);
+    escape_string(data, match_data_html_char)
+}
 
-            for ch in data[i..].chars() {
-                match match_data_html_char(ch) {
+fn escape_string<H>(original: &str, char_handler: H) -> Cow<str> where H: FnOnce(char) -> Option<&'static str> + Copy {
+    for (i, ch) in original.chars().enumerate() {
+        if char_handler(ch).is_some() {
+            let consumed_chars = original.chars().take(i);
+            let lefted_chars = original.chars().skip(i);
+            let mut escaped_string: String = consumed_chars.collect();
+
+            for ch in lefted_chars {
+                match char_handler(ch) {
                     Some(escaped_char) => escaped_string.push_str(escaped_char),
                     None => escaped_string.push(ch),
                 };
@@ -207,7 +197,7 @@ pub fn escape_data(data: &str) -> Cow<str> {
         }
     }
 
-    Cow::Borrowed(data)
+    Cow::Borrowed(original)
 }
 
 // Match function for escape_data().
