@@ -344,6 +344,18 @@ mod tests {
     }
 
     #[test]
+    fn test_xml_data_element_with_escapes_non_ascii() {
+        let expected = r#"<foo span="8" text="Ы&amp;&lt;&gt;&quot;&#xA;">Ы&amp;&lt;&gt;"</foo>"#;
+        let attributes = vec![("span", "8".to_string()), ("text", "Ы&<>\"\n".to_owned())];
+
+        let mut writer = XMLWriter::new();
+        writer.xml_data_element_attr("foo", "Ы&<>\"", &attributes);
+
+        let got = writer.read_to_string();
+        assert_eq!(got, expected);
+    }
+
+    #[test]
     fn test_xml_si_element() {
         let expected = "<si><t>foo</t></si>";
 
