@@ -159,6 +159,12 @@ pub fn escape_attributes(attribute: &str) -> Cow<str> {
     escape_string(attribute, match_attribute_html_char)
 }
 
+// Escape XML characters in data sections of tags.  Note, this
+// is different from escape_attributes() because double quotes
+// and newline are not escaped by Excel.
+pub fn escape_data(data: &str) -> Cow<str> {
+    escape_string(data, match_data_html_char)
+}
 
 // Match function for escape_attributes().
 fn match_attribute_html_char(ch: char) -> Option<&'static str> {
@@ -172,21 +178,28 @@ fn match_attribute_html_char(ch: char) -> Option<&'static str> {
     }
 }
 
-// Escape XML characters in data sections of tags.  Note, this
-// is different from escape_attributes() because double quotes
-// and newline are not escaped by Excel.
-pub fn escape_data(data: &str) -> Cow<str> {
-    escape_string(data, match_data_html_char)
+// Match function for escape_data().
+fn match_data_html_char(ch: char) -> Option<&'static str> {
+    match ch {
+        '&' => Some("&amp;"),
+        '<' => Some("&lt;"),
+        '>' => Some("&gt;"),
+        _ => None,
+    }
 }
 
-fn escape_string<H>(original: &str, char_handler: H) -> Cow<str> where H: FnOnce(char) -> Option<&'static str> + Copy {
+// Generic escape function with function pointer for the required handler.
+fn escape_string<H>(original: &str, char_handler: H) -> Cow<str>
+where
+    H: FnOnce(char) -> Option<&'static str> + Copy,
+{
     for (i, ch) in original.chars().enumerate() {
         if char_handler(ch).is_some() {
             let consumed_chars = original.chars().take(i);
-            let lefted_chars = original.chars().skip(i);
+            let remaining_chars = original.chars().skip(i);
             let mut escaped_string: String = consumed_chars.collect();
 
-            for ch in lefted_chars {
+            for ch in remaining_chars {
                 match char_handler(ch) {
                     Some(escaped_char) => escaped_string.push_str(escaped_char),
                     None => escaped_string.push(ch),
@@ -198,16 +211,6 @@ fn escape_string<H>(original: &str, char_handler: H) -> Cow<str> where H: FnOnce
     }
 
     Cow::Borrowed(original)
-}
-
-// Match function for escape_data().
-fn match_data_html_char(ch: char) -> Option<&'static str> {
-    match ch {
-        '&' => Some("&amp;"),
-        '<' => Some("&lt;"),
-        '>' => Some("&gt;"),
-        _ => None,
-    }
 }
 
 #[cfg(test)]
