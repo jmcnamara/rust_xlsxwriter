@@ -13,7 +13,6 @@ use crate::error::XlsxError;
 use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
-use crate::shared_strings_table::SharedStringsTable;
 use crate::utility;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
@@ -77,13 +76,13 @@ use crate::{XlsxColor, XlsxPattern};
 pub struct Workbook<'a> {
     pub(crate) writer: XMLWriter,
     filehandle: FileHandle<'a>,
-    worksheets: Vec<Worksheet>,
-    xf_formats: Vec<Format>,
+    pub(crate) worksheets: Vec<Worksheet>,
     xf_indices: HashMap<String, u32>,
-    font_count: u16,
-    fill_count: u16,
-    border_count: u16,
-    num_format_count: u16,
+    pub(crate) xf_formats: Vec<Format>,
+    pub(crate) font_count: u16,
+    pub(crate) fill_count: u16,
+    pub(crate) border_count: u16,
+    pub(crate) num_format_count: u16,
     is_closed: bool,
     defined_names: Vec<DefinedName>,
 }
@@ -188,8 +187,8 @@ impl<'a> Workbook<'a> {
             writer,
             filehandle,
             worksheets: vec![],
-            xf_formats: vec![default_format],
             xf_indices,
+            xf_formats: vec![default_format],
             font_count: 0,
             fill_count: 0,
             border_count: 0,
@@ -326,108 +325,15 @@ impl<'a> Workbook<'a> {
         // Prepare the formats for writing with styles.rs.
         self.prepare_format_properties();
 
+        // Collect workbook level metadata to help generate the xlsx file.
+        let mut package_options = PackagerOptions::new();
+        package_options = self.set_package_options(package_options)?;
+
         // Create the Packager object that will assemble the zip/xlsx file.
         let mut packager = Packager::new(&self.filehandle)?;
-        let mut package_options = PackagerOptions::new();
 
-        // Iterate over the worksheets to capture workbook and package level
-        // data.
-        package_options.num_worksheets = self.worksheets.len() as u16;
-
-        for (sheet_index, worksheet) in self.worksheets.iter().enumerate() {
-            let sheet_name = worksheet.name.clone();
-            let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
-
-            // Check for duplicate sheet names, which aren't allowed by Excel.
-            if package_options.worksheet_names.contains(&sheet_name) {
-                return Err(XlsxError::SheetnameReused(sheet_name));
-            }
-
-            package_options.worksheet_names.push(sheet_name);
-
-            if worksheet.uses_string_table {
-                package_options.has_sst_table = true;
-            }
-
-            if worksheet.has_dynamic_arrays {
-                package_options.has_dynamic_arrays = true;
-            }
-
-            // Store any user defined print areas which are a category of defined name.
-            if !worksheet.print_area.is_empty() {
-                let defined_name = DefinedName {
-                    name: "_xlnm.Print_Area".to_string(),
-                    range: format!("{}!{}", quoted_sheet_name, worksheet.print_area),
-                    index: sheet_index as u16,
-                };
-
-                self.defined_names.push(defined_name);
-                package_options
-                    .defined_names
-                    .push(format!("{}!Print_Area", quoted_sheet_name));
-            }
-
-            // Store any user defined print repeat rows/columns which are a
-            // category of defined name.
-            if !worksheet.repeat_row_range.is_empty() || !worksheet.repeat_col_range.is_empty() {
-                let range;
-
-                if !worksheet.repeat_row_range.is_empty() && !worksheet.repeat_col_range.is_empty()
-                {
-                    range = format!(
-                        "{}!{},{}!{}",
-                        quoted_sheet_name,
-                        worksheet.repeat_col_range,
-                        quoted_sheet_name,
-                        worksheet.repeat_row_range
-                    );
-                } else if !worksheet.repeat_row_range.is_empty() {
-                    range = format!("{}!{}", quoted_sheet_name, worksheet.repeat_row_range);
-                } else {
-                    range = format!("{}!{}", quoted_sheet_name, worksheet.repeat_col_range);
-                }
-
-                let defined_name = DefinedName {
-                    name: "_xlnm.Print_Titles".to_string(),
-                    range: range.clone(),
-                    index: sheet_index as u16,
-                };
-
-                self.defined_names.push(defined_name);
-                package_options
-                    .defined_names
-                    .push(format!("{}!Print_Titles", quoted_sheet_name));
-            }
-        }
-
-        // Start the zip/xlsx container.
-        packager.create_root_files(&package_options);
-
-        // Write the styles.xml file to the zip/xlsx container.
-        packager.create_styles_file(
-            &self.xf_formats,
-            self.font_count,
-            self.fill_count,
-            self.border_count,
-            self.num_format_count,
-        );
-
-        // Write the workbook to the zip/xlsx container.
-        packager.write_workbook_file(self);
-
-        // Write the worksheets to the zip/xlsx container.
-        let mut string_table = SharedStringsTable::new();
-        for (index, worksheet) in self.worksheets.iter_mut().enumerate() {
-            packager.write_worksheet_file(worksheet, index + 1, &mut string_table);
-        }
-
-        // Write the share string table.
-        if package_options.has_sst_table {
-            packager.write_shared_strings_file(&string_table);
-        }
-
-        // Write the docProp files to the zip/xlsx container.
-        packager.create_doc_prop_files(&package_options);
+        // Assemble the xlsx file and its sub-components.
+        packager.assemble_file(self, &package_options);
 
         // Close and write the final zip/xlsx container.
         packager.close();
@@ -635,6 +541,85 @@ impl<'a> Workbook<'a> {
                 }
             }
         }
+    }
+
+    // Collect some workbook level metadata to help generate the xlsx
+    // package/file.
+    fn set_package_options(
+        &mut self,
+        mut package_options: PackagerOptions,
+    ) -> Result<PackagerOptions, XlsxError> {
+        package_options.num_worksheets = self.worksheets.len() as u16;
+
+        // Iterate over the worksheets to capture workbook and update the
+        // package options metadata.
+        for (sheet_index, worksheet) in self.worksheets.iter().enumerate() {
+            let sheet_name = worksheet.name.clone();
+            let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
+
+            // Check for duplicate sheet names, which aren't allowed by Excel.
+            if package_options.worksheet_names.contains(&sheet_name) {
+                return Err(XlsxError::SheetnameReused(sheet_name));
+            }
+
+            package_options.worksheet_names.push(sheet_name);
+
+            if worksheet.uses_string_table {
+                package_options.has_sst_table = true;
+            }
+
+            if worksheet.has_dynamic_arrays {
+                package_options.has_dynamic_arrays = true;
+            }
+
+            // Store any user defined print areas which are a category of defined name.
+            if !worksheet.print_area.is_empty() {
+                let defined_name = DefinedName {
+                    name: "_xlnm.Print_Area".to_string(),
+                    range: format!("{}!{}", quoted_sheet_name, worksheet.print_area),
+                    index: sheet_index as u16,
+                };
+
+                self.defined_names.push(defined_name);
+                package_options
+                    .defined_names
+                    .push(format!("{}!Print_Area", quoted_sheet_name));
+            }
+
+            // Store any user defined print repeat rows/columns which are a
+            // category of defined name.
+            if !worksheet.repeat_row_range.is_empty() || !worksheet.repeat_col_range.is_empty() {
+                let range;
+
+                if !worksheet.repeat_row_range.is_empty() && !worksheet.repeat_col_range.is_empty()
+                {
+                    range = format!(
+                        "{}!{},{}!{}",
+                        quoted_sheet_name,
+                        worksheet.repeat_col_range,
+                        quoted_sheet_name,
+                        worksheet.repeat_row_range
+                    );
+                } else if !worksheet.repeat_row_range.is_empty() {
+                    range = format!("{}!{}", quoted_sheet_name, worksheet.repeat_row_range);
+                } else {
+                    range = format!("{}!{}", quoted_sheet_name, worksheet.repeat_col_range);
+                }
+
+                let defined_name = DefinedName {
+                    name: "_xlnm.Print_Titles".to_string(),
+                    range: range.clone(),
+                    index: sheet_index as u16,
+                };
+
+                self.defined_names.push(defined_name);
+                package_options
+                    .defined_names
+                    .push(format!("{}!Print_Titles", quoted_sheet_name));
+            }
+        }
+
+        Ok(package_options)
     }
 
     // -----------------------------------------------------------------------

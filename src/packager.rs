@@ -106,48 +106,37 @@ impl Packager {
         Ok(Packager { zip, zip_options })
     }
 
-    // Create the root and xl/ component xml files and add them to the zip/xlsx
-    // container.
-    pub(crate) fn create_root_files(&mut self, options: &PackagerOptions) {
+    // Write the xml files that make up the XLSX OPC package.
+    pub(crate) fn assemble_file(&mut self, workbook: &mut Workbook, options: &PackagerOptions) {
         self.write_content_types_file(options);
         self.write_root_rels_file();
         self.write_workbook_rels_file(options);
         self.write_theme_file();
-    }
+        self.create_styles_file(workbook);
+        self.write_workbook_file(workbook);
 
-    // Create the styles.xml file and add it to the zip/xlsx container.
-    pub(crate) fn create_styles_file(
-        &mut self,
-        xf_formats: &Vec<Format>,
-        font_count: u16,
-        fill_count: u16,
-        border_count: u16,
-        num_format_count: u16,
-    ) {
-        self.write_styles_file(
-            xf_formats,
-            font_count,
-            fill_count,
-            border_count,
-            num_format_count,
-        );
-    }
-
-    // Create the docProps component xml files and add them to the zip/xlsx
-    // container.
-    pub(crate) fn create_doc_prop_files(&mut self, options: &PackagerOptions) {
-        self.write_core_file();
-        self.write_app_file(options);
-
-        if options.has_dynamic_arrays {
-            self.write_metadata_file();
+        // Write the worksheets and update the share string table at the same time.
+        let mut string_table = SharedStringsTable::new();
+        for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
+            self.write_worksheet_file(worksheet, index + 1, &mut string_table);
         }
+
+        if options.has_sst_table {
+            self.write_shared_strings_file(&string_table);
+        }
+
+        self.create_doc_prop_files(options);
     }
 
     // Close the zip file.
     pub(crate) fn close(&mut self) {
+        // TODO. Reraise this and other zip results/errors.
         self.zip.finish().unwrap();
     }
+
+    // -----------------------------------------------------------------------
+    // Internal function/methods.
+    // -----------------------------------------------------------------------
 
     // Write the [ContentTypes].xml file.
     fn write_content_types_file(&mut self, options: &PackagerOptions) {
@@ -220,6 +209,28 @@ impl Packager {
         rels.assemble_xml_file();
         let buffer = rels.writer.read_to_buffer();
         self.zip.write_all(&*buffer).unwrap();
+    }
+
+    // Create the styles.xml file and add it to the zip/xlsx container.
+    fn create_styles_file(&mut self, workbook: &mut Workbook) {
+        self.write_styles_file(
+            &workbook.xf_formats,
+            workbook.font_count,
+            workbook.fill_count,
+            workbook.border_count,
+            workbook.num_format_count,
+        );
+    }
+
+    // Create the docProps component xml files and add them to the zip/xlsx
+    // container.
+    fn create_doc_prop_files(&mut self, options: &PackagerOptions) {
+        self.write_core_file();
+        self.write_app_file(options);
+
+        if options.has_dynamic_arrays {
+            self.write_metadata_file();
+        }
     }
 
     // Write a worksheet xml file.
