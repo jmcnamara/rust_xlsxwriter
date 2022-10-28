@@ -23,6 +23,12 @@ documentation and generally show how an individual function works.
   functions are new to Excel 365. The examples mirror the examples in the
   Excel documentation for these functions.
 
+* app_file_to_memory.rs - An example of creating a simple Excel xlsx file
+  in an in memory Vec<u8> buffer using the rust_xlsxwriter library. Note,
+  although the final file will be in memory the intermediate files that
+  make up the xlsx file are written to temporary files on disk before the
+  final file is assembled.
+
 * app_formatting.rs - An example of the various cell formatting options
   that are available in the rust_xlsxwriter library. These are laid out on
   worksheets that correspond to the sections of the Excel "Format Cells"
@@ -143,6 +149,12 @@ documentation and generally show how an individual function works.
 
 * doc_workbook_new.rs - Demonstrates creating a simple workbook, with one
   unused worksheet.
+
+* doc_workbook_new_from_buffer.rs - Demonstrates creating a simple workbook
+  to a Vec<u8> buffer.
+
+* doc_workbook_new_from_path.rs - Demonstrates creating a simple workbook
+  from a Path, with one unused worksheet.
 
 * doc_working_with_formulas_dynamic_len.rs - Demonstrates a static function
   which generally returns one value turned into a dynamic function which
