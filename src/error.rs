@@ -39,6 +39,9 @@ pub enum XlsxError {
     /// Cannot close() file that is already closed.
     FileReClosedError,
 
+    /// Workbook wasn't created with `new_to_buffer()` and cannot return the file as buffered data.
+    WorkbookWithoutBuffer,
+
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -101,6 +104,10 @@ impl fmt::Display for XlsxError {
             }
 
             XlsxError::FileReClosedError => write!(f, "File has already been closed."),
+
+            XlsxError::WorkbookWithoutBuffer => {
+                write!(f, "Workbook wasn't created with 'new_to_buffer()'.")
+            }
 
             XlsxError::IoError(e) => {
                 write!(f, "{}", e)

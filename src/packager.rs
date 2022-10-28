@@ -51,34 +51,25 @@ use crate::styles::Styles;
 use crate::theme::Theme;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
-use crate::FileHandle;
 
-use std::io::Write;
+use std::io::{Seek, Write};
 use zip::write::FileOptions;
 use zip::{DateTime, ZipWriter};
 
 // Packager struct to assembler the xlsx file.
-pub struct Packager {
-    zip: ZipWriter<std::fs::File>,
+pub struct Packager<W: Write + Seek> {
+    zip: ZipWriter<W>,
     zip_options: FileOptions,
 }
 
-impl Packager {
+impl<W: Write + Seek> Packager<W> {
     // -----------------------------------------------------------------------
     // Crate public methods.
     // -----------------------------------------------------------------------
 
     // Create a new Packager struct.
-    pub(crate) fn new(filehandle: &FileHandle) -> Result<Packager, XlsxError> {
-        let file = match filehandle {
-            FileHandle::FromString(filename) => {
-                let path = std::path::Path::new(filename);
-                std::fs::File::create(&path)?
-            }
-            FileHandle::FromPath(path) => std::fs::File::create(&path)?,
-        };
-
-        let zip = zip::ZipWriter::new(file);
+    pub(crate) fn new(writer: W) -> Result<Packager<W>, XlsxError> {
+        let zip = zip::ZipWriter::new(writer);
 
         let zip_options = FileOptions::default()
             .compression_method(zip::CompressionMethod::Deflated)
@@ -102,7 +93,7 @@ impl Packager {
         self.write_styles_file(workbook)?;
         self.write_workbook_file(workbook)?;
 
-        // Write the worksheets and update the share string table at the same time.
+        // Write the worksheets and update the shared string table at the same time.
         let mut string_table = SharedStringsTable::new();
         for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
             self.write_worksheet_file(worksheet, index + 1, &mut string_table)?;
@@ -119,11 +110,7 @@ impl Packager {
             self.write_metadata_file()?;
         }
 
-        Ok(())
-    }
-
-    // Close the zip file.
-    pub(crate) fn close(&mut self) -> Result<(), XlsxError> {
+        // Close the zip file.
         self.zip.finish()?;
 
         Ok(())

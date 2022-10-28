@@ -75,7 +75,7 @@ use crate::{XlsxColor, XlsxPattern};
 /// ```
 pub struct Workbook<'a> {
     pub(crate) writer: XMLWriter,
-    filehandle: FileHandle<'a>,
+    filehandle: FileHandleFrom<'a>,
     pub(crate) worksheets: Vec<Worksheet>,
     xf_indices: HashMap<String, u32>,
     pub(crate) xf_formats: Vec<Format>,
@@ -132,7 +132,7 @@ impl<'a> Workbook<'a> {
     /// <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
     ///
     pub fn new(filename: &'a str) -> Workbook {
-        let filehandle = FileHandle::FromString(filename);
+        let filehandle = FileHandleFrom::String(filename);
 
         Self::common_constructor(filehandle)
     }
@@ -141,7 +141,7 @@ impl<'a> Workbook<'a> {
     /// from a Path.
     ///
     /// The `Workbook::new_from_path()` constructor is used to create a new
-    /// Excel workbook from a [std::path] Path or PathBuf instance.
+    /// Excel workbook from a [`std::path`] Path or PathBuf instance.
     ///
     /// # Arguments
     ///
@@ -172,13 +172,54 @@ impl<'a> Workbook<'a> {
     /// ```
     ///
     pub fn new_from_path(path: &'a Path) -> Workbook {
-        let filehandle = FileHandle::FromPath(path);
+        let filehandle = FileHandleFrom::Path(path);
+
+        Self::common_constructor(filehandle)
+    }
+
+    /// Create a new Workbook object to represent an Excel spreadsheet file in a
+    /// memory buffer.
+    ///
+    /// The `Workbook::new_from_buffer()` constructor is used to create a new
+    /// Excel workbook that will be returned as a Vec<u8> buffer via the
+    /// [`workbook.close_to_buffer()`](Workbook::close_to_buffer) method.
+    ///
+    /// Note, although the final file will be in memory the intermediate files
+    /// that make up the xlsx file are written to temporary files on disk before
+    /// the final file is assembled.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a simple workbook to a
+    /// Vec<u8> buffer.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_new_from_buffer.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///      let mut workbook = Workbook::new_from_buffer();
+    ///
+    ///      let worksheet = workbook.add_worksheet();
+    ///      worksheet.write_string_only(0, 0, "Hello")?;
+    ///
+    ///      let buf = workbook.close_to_buffer()?;
+    /// #
+    /// #     println!("File size: {}", buf.len());
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn new_from_buffer() -> Workbook<'a> {
+        let filehandle = FileHandleFrom::Buffer;
 
         Self::common_constructor(filehandle)
     }
 
     // Common constructor used in the differ new*() variants.
-    fn common_constructor(filehandle: FileHandle) -> Workbook {
+    fn common_constructor(filehandle: FileHandleFrom) -> Workbook {
         let writer = XMLWriter::new();
         let default_format = Format::new();
         let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
@@ -256,7 +297,7 @@ impl<'a> Workbook<'a> {
 
     /// Close the Workbook object and write the XLSX file.
     ///
-    /// The workbook close() method writes all data to the xlsx file and closes
+    /// The workbook `close()` method writes all data to the xlsx file and closes
     /// it.
     ///
     ///
@@ -266,6 +307,8 @@ impl<'a> Workbook<'a> {
     ///   the workbook.
     /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
     ///   the xlsx file, or its sub-files.
+    /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
+    ///   creating the xlsx file, or its sub-files.
     ///
     /// # Examples
     ///
@@ -289,6 +332,88 @@ impl<'a> Workbook<'a> {
     /// ```
     ///
     pub fn close(&mut self) -> Result<(), XlsxError> {
+        _ = self.close_internal()?;
+        Ok(())
+    }
+
+    /// Close the Workbook object and return the xlsx file as a byte vector.
+    ///
+    /// The workbook `close_to_buffer()` method similar to the
+    /// [`close()`](Workbook::close) method except that it returns a file as a
+    /// `Vec<u8>` buffer suitable for streaming in a web application.
+    ///
+    /// It can only be used with a workbook created using
+    /// [`workbook.new_from_buffer()`](Workbook::new_from_buffer).
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
+    ///   the workbook.
+    /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    ///   the xlsx file, or its sub-files.
+    /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
+    ///   creating the xlsx file, or its sub-files.
+    /// * [`XlsxError::WorkbookWithoutBuffer`] - Workbook wasn't created with
+    ///   `new_to_buffer()`.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a simple workbook to a
+    /// Vec<u8> buffer.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_new_from_buffer.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///      let mut workbook = Workbook::new_from_buffer();
+    ///
+    ///      let worksheet = workbook.add_worksheet();
+    ///      worksheet.write_string_only(0, 0, "Hello")?;
+    ///
+    ///      let buf = workbook.close_to_buffer()?;
+    /// #
+    /// #     println!("File size: {}", buf.len());
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn close_to_buffer(&mut self) -> Result<Vec<u8>, XlsxError> {
+        match self.filehandle {
+            FileHandleFrom::Buffer => Ok(self.close_internal()?),
+            _ => Err(XlsxError::WorkbookWithoutBuffer),
+        }
+    }
+
+    // Set the index for the format. This is currently only used in testing but
+    // may be used publicly at a later stage.
+    #[doc(hidden)]
+    pub fn register_format(&mut self, format: &mut Format) {
+        let format_key = format.format_key();
+
+        match self.xf_indices.get_mut(&format_key) {
+            Some(xf_index) => {
+                format.set_xf_index(*xf_index);
+            }
+            None => {
+                let xf_index = self.xf_formats.len() as u32;
+                self.xf_formats.push(format.clone());
+                format.set_xf_index(xf_index);
+
+                self.xf_indices.insert(format_key, xf_index);
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Internal function/methods.
+    // -----------------------------------------------------------------------
+
+    // Internal function to prepare the workbook and other component files for
+    // writing to the xlsx file.
+    fn close_internal(&mut self) -> Result<Vec<u8>, XlsxError> {
         // Check if the file has already been written.
         if self.is_closed {
             return Err(XlsxError::FileReClosedError);
@@ -330,42 +455,30 @@ impl<'a> Workbook<'a> {
         package_options = self.set_package_options(package_options)?;
 
         // Create the Packager object that will assemble the zip/xlsx file.
-        let mut packager = Packager::new(&self.filehandle)?;
-
-        // Assemble the xlsx file and its sub-components.
-        packager.assemble_file(self, &package_options)?;
-
-        // Close and write the final zip/xlsx container.
-        packager.close()?;
+        let mut buf: Vec<u8> = vec![];
+        match self.filehandle {
+            FileHandleFrom::String(filename) => {
+                let path = std::path::Path::new(filename);
+                let file = std::fs::File::create(&path)?;
+                let mut packager = Packager::new(file)?;
+                packager.assemble_file(self, &package_options)?;
+            }
+            FileHandleFrom::Path(path) => {
+                let file = std::fs::File::create(&path)?;
+                let mut packager = Packager::new(file)?;
+                packager.assemble_file(self, &package_options)?;
+            }
+            FileHandleFrom::Buffer => {
+                let cursor = std::io::Cursor::new(&mut buf);
+                let mut packager = Packager::new(cursor)?;
+                packager.assemble_file(self, &package_options)?;
+            }
+        };
 
         self.is_closed = true;
 
-        Ok(())
+        Ok(buf)
     }
-
-    // Set the index for the format. This is currently only used in testing but
-    // will be used publicly at a later stage.
-    #[doc(hidden)]
-    pub fn register_format(&mut self, format: &mut Format) {
-        let format_key = format.format_key();
-
-        match self.xf_indices.get_mut(&format_key) {
-            Some(xf_index) => {
-                format.set_xf_index(*xf_index);
-            }
-            None => {
-                let xf_index = self.xf_formats.len() as u32;
-                self.xf_formats.push(format.clone());
-                format.set_xf_index(xf_index);
-
-                self.xf_indices.insert(format_key, xf_index);
-            }
-        }
-    }
-
-    // -----------------------------------------------------------------------
-    // Internal function/methods.
-    // -----------------------------------------------------------------------
 
     // Evaluate and clone formats from worksheets into a workbook level vector
     // of unique format. Also return the index for use in remapping worksheet
@@ -779,9 +892,10 @@ struct DefinedName {
     index: u16,
 }
 
-pub(crate) enum FileHandle<'a> {
-    FromString(&'a str),
-    FromPath(&'a Path),
+pub(crate) enum FileHandleFrom<'a> {
+    String(&'a str),
+    Path(&'a Path),
+    Buffer,
 }
 
 // -----------------------------------------------------------------------

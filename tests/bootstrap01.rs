@@ -55,6 +55,20 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case to demonstrate creating a basic file to a buffer.
+fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new_from_buffer();
+    _ = workbook.add_worksheet();
+
+    let buf = workbook.close_to_buffer()?;
+
+    // Write the buffer out to a file.
+    let mut file = std::fs::File::create(filename)?;
+    std::io::Write::write_all(&mut file, &buf)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap01_single_worksheet() {
     let test_runner = common::TestRunner::new("bootstrap01")
@@ -98,6 +112,18 @@ fn bootstrap01_new_from_pathbuf() {
         .initialize();
 
     _ = create_new_xlsx_file_4(test_runner.output_file());
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap01_new_from_buffer() {
+    let test_runner = common::TestRunner::new("bootstrap01")
+        .unique("5")
+        .initialize();
+
+    _ = create_new_xlsx_file_5(test_runner.output_file());
 
     test_runner.assert_eq();
     test_runner.cleanup();
