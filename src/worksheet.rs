@@ -5463,70 +5463,75 @@ mod tests {
     fn check_invalid_worksheet_names() {
         let mut worksheet = Worksheet::new("".to_string());
 
-        match worksheet.set_name("") {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameCannotBeBlank),
-        };
+        let result = worksheet.set_name("");
+        assert!(matches!(result, Err(XlsxError::SheetnameCannotBeBlank)));
 
         let name = "name_that_is_longer_than_thirty_one_characters".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameLengthExceeded(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(result, Err(XlsxError::SheetnameLengthExceeded(_))));
 
         let name = "name_with_special_character_[".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
 
         let name = "name_with_special_character_]".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
 
         let name = "name_with_special_character_:".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
 
         let name = "name_with_special_character_*".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
 
         let name = "name_with_special_character_?".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
 
         let name = "name_with_special_character_/".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
 
         let name = "name_with_special_character_\\".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameContainsInvalidCharacter(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
 
         let name = "'start with apostrophe".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(_))
+        ));
 
         let name = "end with apostrophe'".to_string();
-        match worksheet.set_name(&name) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::SheetnameStartsOrEndsWithApostrophe(name)),
-        };
+        let result = worksheet.set_name(&name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(_))
+        ));
     }
 
     #[test]
@@ -5537,55 +5542,35 @@ mod tests {
         assert_eq!(worksheet.check_dimensions(ROW_MAX, 0), false);
         assert_eq!(worksheet.check_dimensions(0, COL_MAX), false);
 
-        match worksheet.write_string(ROW_MAX, 0, "", &format) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.write_string(ROW_MAX, 0, "", &format);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.write_string_only(ROW_MAX, 0, "") {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.write_string_only(ROW_MAX, 0, "");
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.write_number(ROW_MAX, 0, 0, &format) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.write_number(ROW_MAX, 0, 0, &format);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.write_number_only(ROW_MAX, 0, 0) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.write_number_only(ROW_MAX, 0, 0);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.set_row_height(ROW_MAX, 20) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.set_row_height(ROW_MAX, 20);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.set_row_height_pixels(ROW_MAX, 20) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.set_row_height_pixels(ROW_MAX, 20);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.set_row_format(ROW_MAX, &format) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.set_row_format(ROW_MAX, &format);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.set_column_width(COL_MAX, 20) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.set_column_width(COL_MAX, 20);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.set_column_width_pixels(COL_MAX, 20) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.set_column_width_pixels(COL_MAX, 20);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        match worksheet.set_column_format(COL_MAX, &format) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::RowColumnLimitError),
-        };
+        let result = worksheet.set_column_format(COL_MAX, &format);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
     }
 
     #[test]
@@ -5594,10 +5579,8 @@ mod tests {
         let chars: [u8; 32_768] = [64; 32_768];
         let long_string = std::str::from_utf8(&chars);
 
-        match worksheet.write_string_only(0, 0, long_string.unwrap()) {
-            Ok(_) => assert!(false),
-            Err(err) => assert_eq!(err, XlsxError::MaxStringLengthExceeded),
-        };
+        let result = worksheet.write_string_only(0, 0, long_string.unwrap());
+        assert!(matches!(result, Err(XlsxError::MaxStringLengthExceeded)));
     }
 
     #[test]

@@ -43,7 +43,6 @@ use crate::app::App;
 use crate::content_types::ContentTypes;
 use crate::core::Core;
 use crate::error::XlsxError;
-use crate::format::Format;
 use crate::metadata::Metadata;
 use crate::relationship::Relationship;
 use crate::shared_strings::SharedStrings;
@@ -74,25 +73,9 @@ impl Packager {
         let file = match filehandle {
             FileHandle::FromString(filename) => {
                 let path = std::path::Path::new(filename);
-                match std::fs::File::create(&path) {
-                    Ok(file) => file,
-                    Err(e) => {
-                        return Err(XlsxError::IoError(format!(
-                            "Error creating output file {}: {}",
-                            filename, e
-                        )))
-                    }
-                }
+                std::fs::File::create(&path)?
             }
-            FileHandle::FromPath(path) => match std::fs::File::create(&path) {
-                Ok(file) => file,
-                Err(e) => {
-                    return Err(XlsxError::IoError(format!(
-                        "Error creating output file from path: {}",
-                        e
-                    )))
-                }
-            },
+            FileHandle::FromPath(path) => std::fs::File::create(&path)?,
         };
 
         let zip = zip::ZipWriter::new(file);
@@ -107,31 +90,43 @@ impl Packager {
     }
 
     // Write the xml files that make up the XLSX OPC package.
-    pub(crate) fn assemble_file(&mut self, workbook: &mut Workbook, options: &PackagerOptions) {
-        self.write_content_types_file(options);
-        self.write_root_rels_file();
-        self.write_workbook_rels_file(options);
-        self.write_theme_file();
-        self.create_styles_file(workbook);
-        self.write_workbook_file(workbook);
+    pub(crate) fn assemble_file(
+        &mut self,
+        workbook: &mut Workbook,
+        options: &PackagerOptions,
+    ) -> Result<(), XlsxError> {
+        self.write_content_types_file(options)?;
+        self.write_root_rels_file()?;
+        self.write_workbook_rels_file(options)?;
+        self.write_theme_file()?;
+        self.write_styles_file(workbook)?;
+        self.write_workbook_file(workbook)?;
 
         // Write the worksheets and update the share string table at the same time.
         let mut string_table = SharedStringsTable::new();
         for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
-            self.write_worksheet_file(worksheet, index + 1, &mut string_table);
+            self.write_worksheet_file(worksheet, index + 1, &mut string_table)?;
         }
 
         if options.has_sst_table {
-            self.write_shared_strings_file(&string_table);
+            self.write_shared_strings_file(&string_table)?;
         }
 
-        self.create_doc_prop_files(options);
+        self.write_core_file()?;
+        self.write_app_file(options)?;
+
+        if options.has_dynamic_arrays {
+            self.write_metadata_file()?;
+        }
+
+        Ok(())
     }
 
     // Close the zip file.
-    pub(crate) fn close(&mut self) {
-        // TODO. Reraise this and other zip results/errors.
-        self.zip.finish().unwrap();
+    pub(crate) fn close(&mut self) -> Result<(), XlsxError> {
+        self.zip.finish()?;
+
+        Ok(())
     }
 
     // -----------------------------------------------------------------------
@@ -139,7 +134,7 @@ impl Packager {
     // -----------------------------------------------------------------------
 
     // Write the [ContentTypes].xml file.
-    fn write_content_types_file(&mut self, options: &PackagerOptions) {
+    fn write_content_types_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut content_types = ContentTypes::new();
 
         for i in 0..options.num_worksheets {
@@ -155,33 +150,34 @@ impl Packager {
         }
 
         self.zip
-            .start_file("[Content_Types].xml", self.zip_options)
-            .unwrap();
+            .start_file("[Content_Types].xml", self.zip_options)?;
 
         content_types.assemble_xml_file();
         let buffer = content_types.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the root level _rels/.rels xml file.
-    fn write_root_rels_file(&mut self) {
+    fn write_root_rels_file(&mut self) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
         rels.add_document_relationship("/officeDocument", "xl/workbook.xml");
         rels.add_package_relationship("/metadata/core-properties", "docProps/core.xml");
         rels.add_document_relationship("/extended-properties", "docProps/app.xml");
 
-        self.zip
-            .start_file("_rels/.rels", self.zip_options)
-            .unwrap();
+        self.zip.start_file("_rels/.rels", self.zip_options)?;
 
         rels.assemble_xml_file();
         let buffer = rels.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the workbook level workbook.xml.rels xml file.
-    fn write_workbook_rels_file(&mut self, options: &PackagerOptions) {
+    fn write_workbook_rels_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
         for worksheet_index in 1..=options.num_worksheets {
@@ -203,34 +199,13 @@ impl Packager {
         }
 
         self.zip
-            .start_file("xl/_rels/workbook.xml.rels", self.zip_options)
-            .unwrap();
+            .start_file("xl/_rels/workbook.xml.rels", self.zip_options)?;
 
         rels.assemble_xml_file();
         let buffer = rels.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
-    }
+        self.zip.write_all(&*buffer)?;
 
-    // Create the styles.xml file and add it to the zip/xlsx container.
-    fn create_styles_file(&mut self, workbook: &mut Workbook) {
-        self.write_styles_file(
-            &workbook.xf_formats,
-            workbook.font_count,
-            workbook.fill_count,
-            workbook.border_count,
-            workbook.num_format_count,
-        );
-    }
-
-    // Create the docProps component xml files and add them to the zip/xlsx
-    // container.
-    fn create_doc_prop_files(&mut self, options: &PackagerOptions) {
-        self.write_core_file();
-        self.write_app_file(options);
-
-        if options.has_dynamic_arrays {
-            self.write_metadata_file();
-        }
+        Ok(())
     }
 
     // Write a worksheet xml file.
@@ -239,94 +214,94 @@ impl Packager {
         worksheet: &mut Worksheet,
         index: usize,
         string_table: &mut SharedStringsTable,
-    ) {
+    ) -> Result<(), XlsxError> {
         let filename = format!("xl/worksheets/sheet{}.xml", index);
 
-        self.zip.start_file(filename, self.zip_options).unwrap();
+        self.zip.start_file(filename, self.zip_options)?;
 
         worksheet.assemble_xml_file(string_table);
         let buffer = worksheet.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the workbook.xml file.
-    pub(crate) fn write_workbook_file(&mut self, workbook: &mut Workbook) {
-        self.zip
-            .start_file("xl/workbook.xml", self.zip_options)
-            .unwrap();
+    pub(crate) fn write_workbook_file(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        self.zip.start_file("xl/workbook.xml", self.zip_options)?;
 
         workbook.assemble_xml_file();
         let buffer = workbook.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the sharedStrings.xml file.
-    pub fn write_shared_strings_file(&mut self, string_table: &SharedStringsTable) {
+    pub fn write_shared_strings_file(
+        &mut self,
+        string_table: &SharedStringsTable,
+    ) -> Result<(), XlsxError> {
         let mut shared_strings = SharedStrings::new();
 
         self.zip
-            .start_file("xl/sharedStrings.xml", self.zip_options)
-            .unwrap();
+            .start_file("xl/sharedStrings.xml", self.zip_options)?;
 
         shared_strings.assemble_xml_file(string_table);
         let buffer = shared_strings.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the styles.xml file.
-    fn write_styles_file(
-        &mut self,
-        xf_formats: &Vec<Format>,
-        font_count: u16,
-        fill_count: u16,
-        border_count: u16,
-        num_format_count: u16,
-    ) {
+    fn write_styles_file(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut styles = Styles::new(
-            xf_formats,
-            font_count,
-            fill_count,
-            border_count,
-            num_format_count,
+            &workbook.xf_formats,
+            workbook.font_count,
+            workbook.fill_count,
+            workbook.border_count,
+            workbook.num_format_count,
         );
 
-        self.zip
-            .start_file("xl/styles.xml", self.zip_options)
-            .unwrap();
+        self.zip.start_file("xl/styles.xml", self.zip_options)?;
 
         styles.assemble_xml_file();
         let buffer = styles.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the theme.xml file.
-    fn write_theme_file(&mut self) {
+    fn write_theme_file(&mut self) -> Result<(), XlsxError> {
         let mut theme = Theme::new();
 
         self.zip
-            .start_file("xl/theme/theme1.xml", self.zip_options)
-            .unwrap();
+            .start_file("xl/theme/theme1.xml", self.zip_options)?;
 
         theme.assemble_xml_file();
         let buffer = theme.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the core.xml file.
-    fn write_core_file(&mut self) {
+    fn write_core_file(&mut self) -> Result<(), XlsxError> {
         let mut core = Core::new();
 
-        self.zip
-            .start_file("docProps/core.xml", self.zip_options)
-            .unwrap();
+        self.zip.start_file("docProps/core.xml", self.zip_options)?;
 
         core.assemble_xml_file();
         let buffer = core.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the app.xml file.
-    fn write_app_file(&mut self, options: &PackagerOptions) {
+    fn write_app_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut app = App::new();
 
         app.add_heading_pair("Worksheets", options.num_worksheets);
@@ -343,26 +318,26 @@ impl Packager {
             }
         }
 
-        self.zip
-            .start_file("docProps/app.xml", self.zip_options)
-            .unwrap();
+        self.zip.start_file("docProps/app.xml", self.zip_options)?;
 
         app.assemble_xml_file();
         let buffer = app.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 
     // Write the metadata.xml file.
-    fn write_metadata_file(&mut self) {
+    fn write_metadata_file(&mut self) -> Result<(), XlsxError> {
         let mut metadata = Metadata::new();
 
-        self.zip
-            .start_file("xl/metadata.xml", self.zip_options)
-            .unwrap();
+        self.zip.start_file("xl/metadata.xml", self.zip_options)?;
 
         metadata.assemble_xml_file();
         let buffer = metadata.writer.read_to_buffer();
-        self.zip.write_all(&*buffer).unwrap();
+        self.zip.write_all(&*buffer)?;
+
+        Ok(())
     }
 }
 

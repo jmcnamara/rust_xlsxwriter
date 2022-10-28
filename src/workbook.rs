@@ -333,10 +333,10 @@ impl<'a> Workbook<'a> {
         let mut packager = Packager::new(&self.filehandle)?;
 
         // Assemble the xlsx file and its sub-components.
-        packager.assemble_file(self, &package_options);
+        packager.assemble_file(self, &package_options)?;
 
         // Close and write the final zip/xlsx container.
-        packager.close();
+        packager.close()?;
 
         self.is_closed = true;
 
@@ -454,7 +454,6 @@ impl<'a> Workbook<'a> {
             // If the user specifies a foreground or background color without a
             // pattern they probably wanted a solid fill, so we fill in the
             // defaults.
-            //
             if (xf_format.pattern == XlsxPattern::None || xf_format.pattern == XlsxPattern::Solid)
                 && xf_format.background_color != XlsxColor::Automatic
                 && xf_format.foreground_color == XlsxColor::Automatic

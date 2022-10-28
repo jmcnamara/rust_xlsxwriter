@@ -7,7 +7,7 @@
 use std::error::Error;
 use std::fmt;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 /// Error values for the `rust_xlsxwriter` library.
 pub enum XlsxError {
     /// Error returned when a row or column argument exceeds Excel's limits of
@@ -36,13 +36,19 @@ pub enum XlsxError {
     /// String exceeds Excel's limit of 32,767 characters.
     MaxStringLengthExceeded,
 
-    /// Wrapper for a variety of IO errors such as file permissions when writing
-    /// the xlsx file to disk. This can be caused by an non-existent parent directory
-    /// or, commonly on Windows, if the file is already open in Excel.
-    IoError(String),
-
     /// Cannot close() file that is already closed.
     FileReClosedError,
+
+    /// Wrapper for a variety of [std::io::Error] errors such as file
+    /// permissions when writing the xlsx file to disk. This can be caused by an
+    /// non-existent parent directory or, commonly on Windows, if the file is
+    /// already open in Excel.
+    IoError(std::io::Error),
+
+    /// Wrapper for a variety of [zip::result::ZipError] errors from
+    /// [zip::ZipWriter]. These relate to errors arising from creating
+    /// the XLSX file zip container.
+    ZipError(zip::result::ZipError),
 }
 
 impl Error for XlsxError {}
@@ -54,11 +60,14 @@ impl fmt::Display for XlsxError {
                 f,
                 "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)."
             ),
+
             XlsxError::RowColumnOrderError => write!(
                 f,
                 "First row or column in range is greater than last row or column. "
             ),
+
             XlsxError::SheetnameCannotBeBlank => write!(f, "Worksheet name cannot be blank."),
+
             XlsxError::SheetnameLengthExceeded(name) => {
                 write!(
                     f,
@@ -66,16 +75,19 @@ impl fmt::Display for XlsxError {
                     name
                 )
             }
+
             XlsxError::SheetnameReused(name) => write!(
                 f,
                 "Worksheet name \"{}\" has already been used in this workbook.",
                 name
             ),
+
             XlsxError::SheetnameContainsInvalidCharacter(name) => write!(
                 f,
                 "Worksheet name \"{}\" cannot contain invalid characters: '[ ] : * ? / \\'.",
                 name
             ),
+
             XlsxError::SheetnameStartsOrEndsWithApostrophe(name) => {
                 write!(
                     f,
@@ -83,14 +95,35 @@ impl fmt::Display for XlsxError {
                     name
                 )
             }
+
             XlsxError::MaxStringLengthExceeded => {
                 write!(f, "String exceeds Excel's limit of 32,767 characters.")
             }
+
+            XlsxError::FileReClosedError => write!(f, "File has already been closed."),
+
             XlsxError::IoError(e) => {
                 write!(f, "{}", e)
             }
-            XlsxError::FileReClosedError => write!(f, "File has already been closed."),
+
+            XlsxError::ZipError(e) => {
+                write!(f, "{}", e)
+            }
         }
+    }
+}
+
+// Convert errors from ZipWriter.
+impl From<zip::result::ZipError> for XlsxError {
+    fn from(e: zip::result::ZipError) -> XlsxError {
+        XlsxError::ZipError(e)
+    }
+}
+
+// Convert IO errors that arise directly or from ZipWriter.
+impl From<std::io::Error> for XlsxError {
+    fn from(e: std::io::Error) -> XlsxError {
+        XlsxError::IoError(e)
     }
 }
 
