@@ -76,19 +76,18 @@ frequently.
 
 ## See also
 
-- [User Guide - Working with the rust_xlsxwriter library]
+- [User Guide] - Working with the `rust_xlsxwriter` library.
     - [Getting started]: A simple getting started guide on how to use
       `rust_xlsxwriter` in a project and write a Hello World example.
     - [Tutorial]: A larger example of using `rust_xlsxwriter` to write some
        expense data to a spreadsheet.
-    - [Cookbook Examples]
+    - [Cookbook Examples].
 - [The rust_xlsxwriter crate]
 - [The rust_xlsxwriter API docs at docs.rs]
 - [The rust_xlsxwriter repository]
 - [Release Notes]
 
-[User Guide - Working with the rust_xlsxwriter library]:
-    https://rustxlsxwriter.github.io/index.html
+[User Guide]: https://rustxlsxwriter.github.io/index.html
 [Getting started]: https://rustxlsxwriter.github.io/getting_stared.html
 [Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
 [Cookbook Examples]: https://rustxlsxwriter.github.io/examples/intro.html

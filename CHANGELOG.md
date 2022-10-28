@@ -5,6 +5,20 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2022-10-28
+
+### Added
+
+- Added support for creating files from paths via [`workbook.new_from_path()`].
+
+- Added support for creating file to a buffer via [`workbook.new_from_buffer()`] and [`workbook.close_to_buffer()`].
+
+
+[`workbook.new_from_path()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.new_from_path
+[`workbook.new_from_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.new_from_buffer
+[`workbook.close_to_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.close_to_buffer
+
+
 ## [0.7.0] - 2022-10-22
 
 ### Added
