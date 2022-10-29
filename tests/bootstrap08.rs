@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with some string cell data.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet1 = workbook.add_worksheet();
 
@@ -26,7 +26,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet2.write_string_only(2, 0, "World")?;
     worksheet2.write_string_only(3, 0, "Hello")?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with user defined row.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_italic();
@@ -26,14 +26,14 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_row_height(10, 23.25)?;
     worksheet.set_row_format(10, &format1)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }
 
 // Test case to demonstrate creating a basic file with user defined row.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_italic();
@@ -49,7 +49,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_row_height_pixels(10, 31)?;
     worksheet.set_row_format(10, &format1)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

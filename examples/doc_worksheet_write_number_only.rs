@@ -8,7 +8,7 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("numbers.xlsx");
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -29,7 +29,7 @@ fn main() -> Result<(), XlsxError> {
     // when the number is unformatted.
     worksheet.write_number_only(7, 0, 1234.50000)?;
 
-    workbook.close()?;
+    workbook.save("numbers.xlsx")?;
 
     Ok(())
 }

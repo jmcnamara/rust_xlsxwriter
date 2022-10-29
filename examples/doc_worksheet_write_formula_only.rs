@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("formulas.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -21,7 +21,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_formula_only(4, 0, "=AVERAGE(1, 2, 3, 4)")?;
     worksheet.write_formula_only(5, 0, r#"=DATEVALUE("1-Jan-2023")"#)?;
 
-    workbook.close()?;
+    workbook.save("formulas.xlsx")?;
 
     Ok(())
 }

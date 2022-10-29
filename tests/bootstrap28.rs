@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with user defined column.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_italic();
@@ -35,7 +35,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_format(8, &format2)?;
     worksheet.set_column_format(5, &format3)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

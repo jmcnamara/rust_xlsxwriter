@@ -9,7 +9,7 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     // Set the printed output to fit 1 page wide and as long as necessary.
     worksheet.set_print_fit_to_pages(1, 0);
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

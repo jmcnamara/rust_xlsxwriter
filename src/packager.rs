@@ -1,9 +1,9 @@
-// packager - A library for assembling xml files into an Excel XLSX file.
+// packager - A library for assembling xml files into an Excel xlsx file.
 
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
-// This library is used by rust_xlsxwriter to create an Excel XLSX container
+// This library is used by rust_xlsxwriter to create an Excel xlsx container
 // file.
 //
 // From Wikipedia: The Open Packaging Conventions (OPC) is a container-file
@@ -12,7 +12,7 @@
 // Specification (OpenXPS) document.
 // http://en.wikipedia.org/wiki/Open_Packaging_Conventions.
 //
-// At its simplest an Excel XLSX file contains the following elements::
+// At its simplest an Excel xlsx file contains the following elements::
 //
 //      ____ [Content_Types].xml
 //     |
@@ -37,7 +37,7 @@
 //       |____ .rels
 //
 // The Packager struct coordinates the classes that represent the elements of
-// the package and writes them into the XLSX file.
+// the package and writes them into the xlsx file.
 
 use crate::app::App;
 use crate::content_types::ContentTypes;
@@ -80,7 +80,7 @@ impl<W: Write + Seek> Packager<W> {
         Ok(Packager { zip, zip_options })
     }
 
-    // Write the xml files that make up the XLSX OPC package.
+    // Write the xml files that make up the xlsx OPC package.
     pub(crate) fn assemble_file(
         &mut self,
         workbook: &mut Workbook,

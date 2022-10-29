@@ -6,7 +6,7 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    let mut workbook = Workbook::new();
 
     let worksheet1 = workbook.add_worksheet();
     // Set the print area to "A1:M32"
@@ -20,7 +20,7 @@ fn main() -> Result<(), XlsxError> {
     // Set the print area to "A:M"
     worksheet3.set_print_area(0, 0, 1_048_575, 12)?;
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

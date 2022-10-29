@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate setting worksheet zoom.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
     worksheet.set_zoom(200);
@@ -27,7 +27,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_zoom(401);
     worksheet.set_zoom(9);
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

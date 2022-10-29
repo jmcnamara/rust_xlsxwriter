@@ -7,7 +7,7 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    let mut workbook = Workbook::new();
 
     let bold = Format::new().set_bold();
 
@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_boolean(0, 0, true, &bold)?;
     worksheet.write_boolean(1, 0, false, &bold)?;
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

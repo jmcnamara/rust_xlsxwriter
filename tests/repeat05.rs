@@ -10,7 +10,7 @@ mod common;
 
 // Test the creation of a simple rust_xlsxwriter file with repeat rows/cols.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet1 = workbook.add_worksheet();
     worksheet1.write_string_only(0, 0, "Foo")?;
@@ -23,7 +23,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet3.set_repeat_rows(2, 3)?;
     worksheet3.set_repeat_columns(1, 5)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

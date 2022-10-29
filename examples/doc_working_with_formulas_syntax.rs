@@ -6,7 +6,7 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("formula.xlsx");
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     // OK.
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
     // French function name. Causes Excel error on file opening.
     worksheet.write_formula_only(2, 0, "=SOMME(1, 2, 3)")?;
 
-    workbook.close()?;
+    workbook.save("formula.xlsx")?;
 
     Ok(())
 }

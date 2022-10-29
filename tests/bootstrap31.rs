@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with cell patterns and color.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     // Test paper size as well.
@@ -31,7 +31,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_blank(3, 0, &format4)?;
     worksheet.write_blank(4, 0, &format5)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

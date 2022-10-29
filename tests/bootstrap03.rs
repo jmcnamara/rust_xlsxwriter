@@ -10,12 +10,12 @@ mod common;
 
 // Test case to demonstrate creating a basic file with 3 worksheets and no data.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     _ = workbook.add_worksheet().set_name("Foo");
     _ = workbook.add_worksheet();
     _ = workbook.add_worksheet().set_name("Bar");
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

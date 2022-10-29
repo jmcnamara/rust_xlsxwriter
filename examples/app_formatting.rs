@@ -8,8 +8,8 @@
 use rust_xlsxwriter::*;
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("cell_formats.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a general heading format.
     let header_format = Format::new()
@@ -242,8 +242,8 @@ fn main() -> Result<(), XlsxError> {
         .set_pattern(XlsxPattern::Gray0625);
     worksheet.write_string(4, 1, "Pattern fill", &fill_format2)?;
 
-    // Close and save the file.
-    workbook.close()?;
+    // Save the file to disk.
+    workbook.save("cell_formats.xlsx")?;
 
     Ok(())
 }

@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with user defined row.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_italic();
@@ -21,7 +21,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     worksheet.set_row_format(2, &format2)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

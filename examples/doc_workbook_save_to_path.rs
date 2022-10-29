@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates creating a simple workbook from a Path,
-//! with one unused worksheet.
+//! The following example demonstrates creating a simple workbook using a rust
+//! Path reference.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let path = std::path::Path::new("workbook.xlsx");
-    let mut workbook = Workbook::new_from_path(&path);
+    let mut workbook = Workbook::new();
 
     _ = workbook.add_worksheet();
 
-    workbook.close()?;
+    workbook.save_to_path(&path)?;
 
     Ok(())
 }

@@ -10,7 +10,7 @@ mod common;
 
 // Test case to test simple formatting.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet1 = workbook.add_worksheet();
 
@@ -26,7 +26,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet3.write_string(2, 1, "Bar", &bold)?;
     worksheet3.write_number_only(3, 2, 234)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("colors.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     let format1 = Format::new().set_font_color(XlsxColor::Red);
     let format2 = Format::new().set_font_color(XlsxColor::Green);
@@ -25,7 +25,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(4, 0, "#FFACFF", &format5)?;
     worksheet.write_string(5, 0, "#CC7E16", &format6)?;
 
-    workbook.close()?;
+    workbook.save("colors.xlsx")?;
 
     Ok(())
 }

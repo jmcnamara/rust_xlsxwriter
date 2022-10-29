@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet.
     let worksheet = workbook.add_worksheet();
@@ -22,7 +22,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_blank(1, 1, &format1)?;
     worksheet.write_blank(3, 1, &format2)?;
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

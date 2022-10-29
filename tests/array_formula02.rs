@@ -10,7 +10,7 @@ mod common;
 
 // Test case to test array formulas, with a format.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
     let bold = Format::new().set_bold();
@@ -24,7 +24,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_number_only(1, 2, 0)?;
     worksheet.write_number_only(2, 2, 0)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

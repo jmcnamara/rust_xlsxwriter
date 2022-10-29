@@ -7,15 +7,15 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("formulas.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
     worksheet.set_formula_result_default("");
 
-    workbook.close()?;
+    workbook.save("formulas.xlsx")?;
 
     Ok(())
 }

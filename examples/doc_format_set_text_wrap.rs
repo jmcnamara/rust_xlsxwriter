@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("formats.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     let format1 = Format::new().set_text_wrap();
@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(1, 0, "Some text that is wrapped", &format1)?;
     worksheet.write_string(2, 0, "Some text\nthat is\nwrapped\nat newlines", &format1)?;
 
-    workbook.close()?;
+    workbook.save("formats.xlsx")?;
 
     Ok(())
 }

@@ -7,7 +7,7 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    let mut workbook = Workbook::new();
 
     let worksheet1 = workbook.add_worksheet();
     // Repeat the first row in the printed output.
@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     // Repeat the first 2 rows in the printed output.
     worksheet2.set_repeat_rows(0, 1)?;
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with alignment formatting.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     let format1 = Format::new().set_align(XlsxAlign::Left);
     let format2 = Format::new().set_align(XlsxAlign::Center);
@@ -43,7 +43,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(12, 0, "Rust", &format12)?;
     worksheet.write_string(13, 0, "Rust", &format13)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

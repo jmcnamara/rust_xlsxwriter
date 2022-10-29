@@ -10,7 +10,7 @@ mod common;
 
 // Test to demonstrate set page orientation to landscape.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
 
@@ -22,7 +22,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     // Secondary test. Shouldn't have an effect.
     worksheet.set_view_normal();
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

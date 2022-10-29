@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("formats.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     let format1 = Format::new().set_underline(XlsxUnderline::None);
@@ -23,7 +23,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(3, 0, "Single Accounting", &format4)?;
     worksheet.write_string(4, 0, "Double Accounting", &format5)?;
 
-    workbook.close()?;
+    workbook.save("formats.xlsx")?;
 
     Ok(())
 }

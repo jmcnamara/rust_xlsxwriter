@@ -10,7 +10,7 @@ mod common;
 
 // Test to demonstrate various print options.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
 
@@ -20,7 +20,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_print_black_and_white(true);
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

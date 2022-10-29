@@ -12,10 +12,10 @@ mod common;
 
 // Test case to demonstrate creating a basic file with 1 worksheet and no data.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     _ = workbook.add_worksheet();
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }
@@ -23,9 +23,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 // Test case to demonstrate creating a basic file with 1 worksheet and no data.
 // Has an implicit add_worksheet.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }
@@ -34,10 +34,10 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let path = Path::new(filename);
 
-    let mut workbook = Workbook::new_from_path(&path);
+    let mut workbook = Workbook::new();
     _ = workbook.add_worksheet();
 
-    workbook.close()?;
+    workbook.save_to_path(&path)?;
 
     Ok(())
 }
@@ -47,20 +47,20 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let mut path = PathBuf::new();
     path.push(filename);
 
-    let mut workbook = Workbook::new_from_path(&path);
+    let mut workbook = Workbook::new();
     _ = workbook.add_worksheet();
 
-    workbook.close()?;
+    workbook.save_to_path(&path)?;
 
     Ok(())
 }
 
 // Test case to demonstrate creating a basic file to a buffer.
 fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new_from_buffer();
+    let mut workbook = Workbook::new();
     _ = workbook.add_worksheet();
 
-    let buf = workbook.close_to_buffer()?;
+    let buf = workbook.save_to_buffer()?;
 
     // Write the buffer out to a file.
     let mut file = std::fs::File::create(filename)?;

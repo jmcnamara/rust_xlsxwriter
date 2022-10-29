@@ -10,8 +10,8 @@ fn main() -> Result<(), XlsxError> {
     // Some sample data we want to write to a spreadsheet.
     let expenses = vec![("Rent", 2000), ("Gas", 200), ("Food", 500), ("Gym", 100)];
 
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("tutorial1.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -28,8 +28,8 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string_only(row, 0, "Total")?;
     worksheet.write_formula_only(row, 1, "=SUM(B1:B4)")?;
 
-    // Close the file.
-    workbook.close()?;
+    // Save the file to disk.
+    workbook.save("tutorial1.xlsx")?;
 
     Ok(())
 }

@@ -12,7 +12,7 @@ mod common;
 // handled as strings but at a latter stage them may be stored as Excel error
 // types.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     worksheet.write_number_only(0, 0, f64::NAN)?;
@@ -22,7 +22,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string_only(1, 0, "#DIV/0!")?;
     worksheet.write_string_only(2, 0, "#DIV/0!")?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

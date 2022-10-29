@@ -10,8 +10,8 @@ fn main() -> Result<(), XlsxError> {
     // Some sample data we want to write to a spreadsheet.
     let expenses = vec![("Rent", 2000), ("Gas", 200), ("Food", 500), ("Gym", 100)];
 
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("tutorial2.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a bold format to use to highlight cells.
     let bold = Format::new().set_bold();
@@ -38,8 +38,8 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(row, 0, "Total", &bold)?;
     worksheet.write_formula(row, 1, "=SUM(B2:B5)", &money_format)?;
 
-    // Close the file.
-    workbook.close()?;
+    // Save the file to disk.
+    workbook.save("tutorial2.xlsx")?;
 
     Ok(())
 }

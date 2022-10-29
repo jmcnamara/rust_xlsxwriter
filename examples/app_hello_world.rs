@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("hello.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -19,8 +19,8 @@ fn main() -> Result<(), XlsxError> {
     // Write a number to cell (1, 0) = A2.
     worksheet.write_number_only(1, 0, 12345)?;
 
-    // Close the file.
-    workbook.close()?;
+    // Save the file to disk.
+    workbook.save("hello.xlsx")?;
 
     Ok(())
 }

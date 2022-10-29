@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("strings.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Create some formats to use in the worksheet.
     let bold_format = Format::new().set_bold();
@@ -23,7 +23,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(2, 0, "नमस्ते", &italic_format)?;
     worksheet.write_string(3, 0, "こんにちは", &italic_format)?;
 
-    workbook.close()?;
+    workbook.save("strings.xlsx")?;
 
     Ok(())
 }

@@ -21,8 +21,8 @@
 /// use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file.
-///     let mut workbook = Workbook::new("formats.xlsx");
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
 ///     // Add a worksheet.
 ///     let worksheet = workbook.add_worksheet();
@@ -61,7 +61,7 @@
 ///     let format10 = Format::new().set_bold().set_italic();
 ///     worksheet.write_string(9, 0, "Bold and Italic", &format10)?;
 ///
-///      workbook.close()?;
+///      workbook.save("formats.xlsx")?;
 ///
 ///      Ok(())
 ///  }
@@ -82,8 +82,8 @@
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-/// #     // Create a new Excel file.
-/// #     let mut workbook = Workbook::new("formats.xlsx");
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
 /// #
 /// #     // Add a worksheet.
 /// #     let worksheet = workbook.add_worksheet();
@@ -96,7 +96,7 @@
 ///
 ///     worksheet.write_string(0, 0, "Hello", &format)?;
 ///
-/// #     workbook.close()?;
+/// #     workbook.save("formats.xlsx")?;
 /// #
 /// #     Ok(())
 /// # }
@@ -112,8 +112,8 @@
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-/// #     // Create a new Excel file.
-/// #     let mut workbook = Workbook::new("formats.xlsx");
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
 /// #
 /// #     // Add a worksheet.
 /// #     let worksheet = workbook.add_worksheet();
@@ -129,7 +129,7 @@
 ///     worksheet.write_string(0, 0, "Hello", &format1)?;
 ///     worksheet.write_string(1, 0, "Hello", &format2)?;
 ///
-/// #     workbook.close()?;
+/// #     workbook.save("formats.xlsx")?;
 /// #
 /// #     Ok(())
 /// # }
@@ -192,8 +192,8 @@
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file.
-///     let mut workbook = Workbook::new("colors.xlsx");
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
 ///     let format1 = Format::new().set_font_color(XlsxColor::Red);
 ///     let format2 = Format::new().set_font_color(XlsxColor::Green);
@@ -210,7 +210,7 @@
 ///     worksheet.write_string(4, 0, "#FFACFF", &format5)?;
 ///     worksheet.write_string(5, 0, "#CC7E16", &format6)?;
 ///
-/// #     workbook.close()?;
+/// #     workbook.save("colors.xlsx")?;
 /// #
 /// #     Ok(())
 /// # }
@@ -233,8 +233,8 @@
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-/// #     // Create a new Excel file.
-/// #     let mut workbook = Workbook::new("formats.xlsx");
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
 /// #
 /// #     // Add a worksheet.
 /// #     let worksheet = workbook.add_worksheet();
@@ -246,7 +246,7 @@
 ///      worksheet.write_string_only(0, 0, "Hello")?;
 ///      worksheet.write_string     (1, 0, "Hello", &format)?;
 /// #
-/// #     workbook.close()?;
+/// #     workbook.save("formats.xlsx")?;
 /// #
 /// #     Ok(())
 /// # }
@@ -267,8 +267,8 @@
 /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file.
-///     let mut workbook = Workbook::new("currency_format.xlsx");
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
 ///     // Add a worksheet.
 ///     let worksheet = workbook.add_worksheet();
@@ -278,7 +278,7 @@
 ///
 ///     worksheet.write_number(0, 0, 1234.56, &currency_format)?;
 ///
-///     workbook.close()?;
+///     workbook.save("currency_format.xlsx")?;
 ///
 ///     Ok(())
 /// }
@@ -326,8 +326,8 @@
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-/// #    // Create a new Excel file.
-/// #    let mut workbook = Workbook::new("currency_format.xlsx");
+/// #    // Create a new Excel file object.
+/// #    let mut workbook = Workbook::new();
 /// #
 /// #    // Add a worksheet.
 /// #    let worksheet = workbook.add_worksheet();
@@ -337,7 +337,7 @@
 ///
 ///     worksheet.write_number(0, 0, 1234.56, &currency_format)?;
 ///
-/// #   workbook.close()?;
+/// #   workbook.save("currency_format.xlsx")?;
 /// #
 /// #   Ok(())
 /// # }
@@ -364,8 +364,8 @@
 /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file.
-///     let mut workbook = Workbook::new("number_format.xlsx");
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
 ///
 ///     // Add a worksheet.
@@ -376,7 +376,7 @@
 ///
 ///     worksheet.write_number(0, 0, 1234.56, &currency_format)?;
 ///
-///     workbook.close()?;
+///     workbook.save("number_format.xlsx")?;
 ///
 ///     Ok(())
 /// }
@@ -715,8 +715,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new().set_num_format("0.00");
@@ -737,7 +737,7 @@ impl Format {
     ///     worksheet.write_number(6, 0, 44927.521, &format7)?;
     ///     worksheet.write_number(7, 0, 44927.521, &format8)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -832,15 +832,15 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format = Format::new().set_num_format_index(15);
     ///
     ///     worksheet.write_number(0, 0, 44927.521, &format)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -867,15 +867,15 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format = Format::new().set_bold();
     ///
     ///     worksheet.write_string(0, 0, "Hello", &format)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -902,15 +902,15 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format = Format::new().set_italic();
     ///
     ///     worksheet.write_string(0, 0, "Hello", &format)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -947,15 +947,15 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format = Format::new().set_font_color(XlsxColor::Red);
     ///
     ///     worksheet.write_string(0, 0, "Wheelbarrow", &format)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -995,15 +995,15 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format = Format::new().set_font_name("Avenir Black Oblique");
     ///
     ///     worksheet.write_string(0, 0, "Avenir Black Oblique", &format)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1040,15 +1040,15 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format = Format::new().set_font_size(30);
     ///
     ///     worksheet.write_string(0, 0, "Font Size 30", &format)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1124,8 +1124,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new().set_underline(XlsxUnderline::None);
@@ -1140,7 +1140,7 @@ impl Format {
     ///     worksheet.write_string(3, 0, "Single Accounting", &format4)?;
     ///     worksheet.write_string(4, 0, "Double Accounting", &format5)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1168,15 +1168,15 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format = Format::new().set_font_strikethrough();
     ///
     ///     worksheet.write_string(0, 0, "Strikethrough Text", &format)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1228,8 +1228,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Widen the rows/column for clarity.
@@ -1259,7 +1259,7 @@ impl Format {
     ///     worksheet.write_string(2, 0, "Center - Center", &format3)?;
     ///     worksheet.write_string(3, 0, "Bottom - Right", &format4)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1316,8 +1316,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new().set_text_wrap();
@@ -1326,7 +1326,7 @@ impl Format {
     ///     worksheet.write_string(1, 0, "Some text that is wrapped", &format1)?;
     ///     worksheet.write_string(2, 0, "Some text\nthat is\nwrapped\nat newlines", &format1)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1366,8 +1366,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new().set_indent(1);
@@ -1377,7 +1377,7 @@ impl Format {
     ///     worksheet.write_string(1, 0, "Indent 1", &format1)?;
     ///     worksheet.write_string(2, 0, "Indent 2", &format2)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1412,8 +1412,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Widen the rows/column for clarity.
@@ -1430,7 +1430,7 @@ impl Format {
     ///     worksheet.write_string(1, 0, "Rust", &format2)?;
     ///     worksheet.write_string(2, 0, "Rust", &format3)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1481,8 +1481,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #     worksheet.set_column_width(0, 25)?;
     /// #
@@ -1493,7 +1493,7 @@ impl Format {
     ///     worksheet.write_string(1, 0, "نص عربي / English text", &format1)?;
     ///     worksheet.write_string(2, 0, "نص عربي / English text", &format2)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1528,15 +1528,15 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new().set_shrink();
     ///
     ///     worksheet.write_string(0, 0, "Shrink text to fit", &format1)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1576,8 +1576,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet.
     /// #     let worksheet = workbook.add_worksheet();
@@ -1594,7 +1594,7 @@ impl Format {
     ///     worksheet.write_string(0, 0, "Rust", &format1)?;
     ///     worksheet.write_blank(1, 0, &format2)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1632,8 +1632,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet.
     /// #     let worksheet = workbook.add_worksheet();
@@ -1642,7 +1642,7 @@ impl Format {
     ///
     ///     worksheet.write_string(0, 0, "Rust", &format1)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1684,8 +1684,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet.
     /// #     let worksheet = workbook.add_worksheet();
@@ -1697,7 +1697,7 @@ impl Format {
     ///
     ///     worksheet.write_blank(0, 0, &format1)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1743,8 +1743,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new().set_border(XlsxBorder::Thin);
@@ -1755,7 +1755,7 @@ impl Format {
     ///     worksheet.write_blank(3, 1, &format2)?;
     ///     worksheet.write_blank(5, 1, &format3)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1804,8 +1804,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new()
@@ -1824,7 +1824,7 @@ impl Format {
     ///     worksheet.write_blank(3, 1, &format2)?;
     ///     worksheet.write_blank(5, 1, &format3)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1984,8 +1984,8 @@ impl Format {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxDiagonalBorder, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formats.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new()
@@ -2010,7 +2010,7 @@ impl Format {
     ///     worksheet.write_blank(5, 1, &format3)?;
     ///     worksheet.write_blank(7, 1, &format4)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2150,8 +2150,8 @@ impl Format {
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file.
-///     let mut workbook = Workbook::new("colors.xlsx");
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
 ///     let format1 = Format::new().set_font_color(XlsxColor::Red);
 ///     let format2 = Format::new().set_font_color(XlsxColor::Green);
@@ -2168,7 +2168,7 @@ impl Format {
 ///     worksheet.write_string(4, 0, "#FFACFF", &format5)?;
 ///     worksheet.write_string(5, 0, "#CC7E16", &format6)?;
 ///
-/// #     workbook.close()?;
+/// #     workbook.save("colors.xlsx")?;
 /// #
 /// #     Ok(())
 /// # }
@@ -2472,8 +2472,8 @@ pub enum XlsxDiagonalBorder {
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-/// #     // Create a new Excel file.
-/// #     let mut workbook = Workbook::new("formats.xlsx");
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
 /// #     let worksheet = workbook.add_worksheet();
 /// #
 ///     let format1 = Format::new().set_underline(XlsxUnderline::None);
@@ -2488,7 +2488,7 @@ pub enum XlsxDiagonalBorder {
 ///     worksheet.write_string(3, 0, "Single Accounting", &format4)?;
 ///     worksheet.write_string(4, 0, "Double Accounting", &format5)?;
 ///
-/// #     workbook.close()?;
+/// #     workbook.save("formats.xlsx")?;
 /// #
 /// #     Ok(())
 /// # }

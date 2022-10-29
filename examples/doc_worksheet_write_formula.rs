@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("formulas.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Create some formats to use in the worksheet.
     let bold_format = Format::new().set_bold();
@@ -23,7 +23,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_formula(2, 0, "=SIN(PI()/4)", &italic_format)?;
     worksheet.write_formula(3, 0, "=AVERAGE(1, 2, 3, 4)", &italic_format)?;
 
-    workbook.close()?;
+    workbook.save("formulas.xlsx")?;
 
     Ok(())
 }

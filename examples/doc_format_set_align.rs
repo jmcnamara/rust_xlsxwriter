@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("formats.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     // Widen the rows/column for clarity.
@@ -37,7 +37,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(2, 0, "Center - Center", &format3)?;
     worksheet.write_string(3, 0, "Bottom - Right", &format4)?;
 
-    workbook.close()?;
+    workbook.save("formats.xlsx")?;
 
     Ok(())
 }

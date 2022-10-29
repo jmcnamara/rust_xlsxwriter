@@ -150,11 +150,14 @@ documentation and generally show how an individual function works.
 * doc_workbook_new.rs - Demonstrates creating a simple workbook, with one
   unused worksheet.
 
-* doc_workbook_new_from_buffer.rs - Demonstrates creating a simple workbook
+* doc_workbook_save.rs - Demonstrates creating a simple workbook, with one
+  unused worksheet.
+
+* doc_workbook_save_to_buffer.rs - Demonstrates creating a simple workbook
   to a Vec<u8> buffer.
 
-* doc_workbook_new_from_path.rs - Demonstrates creating a simple workbook
-  from a Path, with one unused worksheet.
+* doc_workbook_save_to_path.rs - Demonstrates creating a simple workbook
+  using a rust Path reference.
 
 * doc_working_with_formulas_dynamic_len.rs - Demonstrates a static function
   which generally returns one value turned into a dynamic function which

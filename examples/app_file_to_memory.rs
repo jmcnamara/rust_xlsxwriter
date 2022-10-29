@@ -11,8 +11,8 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new_from_buffer();
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -24,7 +24,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_number_only(1, 0, 12345)?;
 
     // Get the file data in a Vec<u8> buffer.
-    let buf = workbook.close_to_buffer()?;
+    let buf = workbook.save_to_buffer()?;
 
     // For the sake of this example we write the data to a file.
     let file = std::fs::File::create("from_buffer.xlsx")?;

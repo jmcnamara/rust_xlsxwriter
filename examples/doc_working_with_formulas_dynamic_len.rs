@@ -7,7 +7,7 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("function_new.xlsx");
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     // Write a dynamic formula using a static function.
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string_only(1, 0, "Food")?;
     worksheet.write_string_only(2, 0, "Frood")?;
 
-    workbook.close()?;
+    workbook.save("function_new.xlsx")?;
 
     Ok(())
 }

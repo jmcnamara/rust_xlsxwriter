@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with a font color.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     // Add an error color and duplicate to the test.
     let format = Format::new()
@@ -21,7 +21,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     worksheet.write_string(0, 0, "Hello", &format)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

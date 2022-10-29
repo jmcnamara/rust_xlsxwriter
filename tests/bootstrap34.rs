@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with cell borders.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     let format1 = Format::new().set_unlocked();
@@ -20,7 +20,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_blank(0, 0, &format1)?;
     worksheet.write_blank(1, 0, &format2)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

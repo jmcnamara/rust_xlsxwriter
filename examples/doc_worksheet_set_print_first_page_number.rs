@@ -7,7 +7,7 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -15,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_header("&CPage &P of &N");
     worksheet.set_print_first_page_number(2);
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

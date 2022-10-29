@@ -6,7 +6,7 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string_only(200, 0, "Hello")?;
     worksheet.set_view_page_layout();
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

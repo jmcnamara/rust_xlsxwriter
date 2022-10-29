@@ -4,12 +4,12 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 //! The `rust_xlsxwriter` library is a rust library for writing Excel files in
-//! the XLSX format.
+//! the xlsx format.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/demo.png">
 //!
 //! Rust_xlsxwriter is a rust library that can be used to write text, numbers,
-//! dates and formulas to multiple worksheets in a new Excel 2007+ XLSX file. It
+//! dates and formulas to multiple worksheets in a new Excel 2007+ xlsx file. It
 //! has a focus on performance and on fidelity with the file format created by
 //! Excel. It cannot be used to modify an existing file.
 //!
@@ -24,8 +24,8 @@
 //! use rust_xlsxwriter::{Format, Workbook, XlsxError};
 //!
 //! fn main() -> Result<(), XlsxError> {
-//!     // Create a new Excel file.
-//!     let mut workbook = Workbook::new("demo.xlsx");
+//!     // Create a new Excel file object.
+//!     let mut workbook = Workbook::new();
 //!
 //!     // Create some formats to use in the worksheet.
 //!     let bold_format = Format::new().set_bold();
@@ -58,7 +58,7 @@
 //!     let date = NaiveDate::from_ymd(2023, 1, 25);
 //!     worksheet.write_date(6, 0, date, &date_format)?;
 //!
-//!     workbook.close()?;
+//!     workbook.save("demo.xlsx")?;
 //!
 //!     Ok(())
 //! }
@@ -82,7 +82,7 @@
 //!
 //! # See also
 //!
-//! - [User Guide] - Working with the `rust_xlsxwriter` library.
+//! - [User Guide]: Working with the `rust_xlsxwriter` library.
 //!     - [Getting started]: A simple getting started guide on how to use
 //!       `rust_xlsxwriter` in a project and write a Hello World example.
 //!     - [Tutorial]: A larger example of using `rust_xlsxwriter` to write some

@@ -8,7 +8,7 @@ use chrono::NaiveDate;
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -33,7 +33,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_date(3, 0, date, &format4)?;
     worksheet.write_date(4, 0, date, &format5)?;
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

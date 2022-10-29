@@ -10,27 +10,27 @@ mod common;
 
 // Test case to demonstrate writing a future function, with explicit xlfn.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     worksheet.write_formula_only(0, 0, "=_xlfn.ISOWEEKNUM(1)")?;
     worksheet.set_formula_result(0, 0, "52");
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }
 
 // Test case to demonstrate writing a future function, with implicit xlfn.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     worksheet.use_future_functions(true);
     worksheet.write_formula_only(0, 0, "=ISOWEEKNUM(1)")?;
     worksheet.set_formula_result(0, 0, "52");
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

@@ -16,8 +16,8 @@ fn main() -> Result<(), XlsxError> {
         ("Gym", 100, "2022-09-28"),
     ];
 
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("tutorial3.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a bold format to use to highlight cells.
     let bold = Format::new().set_bold();
@@ -55,8 +55,8 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(row, 0, "Total", &bold)?;
     worksheet.write_formula(row, 1, "=SUM(B2:B5)", &money_format)?;
 
-    // Close the file.
-    workbook.close()?;
+    // Save the file to disk.
+    workbook.save("tutorial3.xlsx")?;
 
     Ok(())
 }

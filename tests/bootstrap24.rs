@@ -12,7 +12,7 @@ mod common;
 // This variant handles unformatted data in a formatted row.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     // The order of the code is arranged to test various code branches.
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_italic();
@@ -32,7 +32,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_row_height(10, 23.25)?;
     worksheet.write_string_only(10, 2, "Rust")?; // Implicit format.
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

@@ -8,8 +8,8 @@ use chrono::NaiveDate;
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("demo.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Create some formats to use in the worksheet.
     let bold_format = Format::new().set_bold();
@@ -42,7 +42,7 @@ fn main() -> Result<(), XlsxError> {
     let date = NaiveDate::from_ymd(2023, 1, 25);
     worksheet.write_date(6, 0, date, &date_format)?;
 
-    workbook.close()?;
+    workbook.save("demo.xlsx")?;
 
     Ok(())
 }

@@ -34,8 +34,8 @@ use crate::{XlsxColor, XlsxPattern};
 /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file.
-///     let mut workbook = Workbook::new("demo.xlsx");
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
 ///     // Create some formats to use in the worksheet.
 ///     let bold_format = Format::new().set_bold();
@@ -68,14 +68,13 @@ use crate::{XlsxColor, XlsxPattern};
 ///     let date = NaiveDate::from_ymd(2023, 1, 25);
 ///     worksheet.write_date(6, 0, date, &date_format)?;
 ///
-///     workbook.close()?;
+///     workbook.save("demo.xlsx")?;
 ///
 ///     Ok(())
 /// }
 /// ```
-pub struct Workbook<'a> {
+pub struct Workbook {
     pub(crate) writer: XMLWriter,
-    filehandle: FileHandleFrom<'a>,
     pub(crate) worksheets: Vec<Worksheet>,
     xf_indices: HashMap<String, u32>,
     pub(crate) xf_formats: Vec<Format>,
@@ -87,7 +86,13 @@ pub struct Workbook<'a> {
     defined_names: Vec<DefinedName>,
 }
 
-impl<'a> Workbook<'a> {
+impl Default for Workbook {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Workbook {
     // -----------------------------------------------------------------------
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
@@ -95,16 +100,13 @@ impl<'a> Workbook<'a> {
     /// Create a new Workbook object to represent an Excel spreadsheet file.
     ///
     /// The `Workbook::new()` constructor is used to create a new Excel workbook
-    /// with a given filename.
+    /// object. This is used to create worksheets and add data prior to saving
+    /// everything to an xlsx file with [`save()`](Workbook::save),
+    /// [`save_to_path()`](Workbook::save_to_path) or
+    /// [`save_to_buffer()`](Workbook::save_to_buffer).
     ///
-    /// **Note**, `rust_xlsxwriter` can only create new files. It cannot read or
+    /// **Note**: `rust_xlsxwriter` can only create new files. It cannot read or
     /// modify existing files.
-    ///
-    /// # Arguments
-    ///
-    /// * `filename` - The name of the new Excel file to create. The lifetime of
-    ///   the argument lasts for the lifetime of the workbook which is generally
-    ///   until the file is written with [`workbook.close()`](Workbook::close).
     ///
     /// # Examples
     ///
@@ -117,11 +119,11 @@ impl<'a> Workbook<'a> {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {
-    ///     let mut workbook = Workbook::new("workbook.xlsx");
+    ///     let mut workbook = Workbook::new();
     ///
     ///     _ = workbook.add_worksheet();
     ///
-    ///     workbook.close()?;
+    ///     workbook.save("workbook.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -131,102 +133,13 @@ impl<'a> Workbook<'a> {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
     ///
-    pub fn new(filename: &'a str) -> Workbook {
-        let filehandle = FileHandleFrom::String(filename);
-
-        Self::common_constructor(filehandle)
-    }
-
-    /// Create a new Workbook object to represent an Excel spreadsheet file,
-    /// from a Path.
-    ///
-    /// The `Workbook::new_from_path()` constructor is used to create a new
-    /// Excel workbook from a [`std::path`] Path or PathBuf instance.
-    ///
-    /// # Arguments
-    ///
-    /// * `path` - A reference to a Path or PathBuf instance. The lifetime of
-    ///   the argument lasts for the lifetime of the workbook which is generally
-    ///   until the file is written with [`workbook.close()`](Workbook::close).
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates creating a simple workbook from a
-    /// Path, with one unused worksheet.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_workbook_new_from_path.rs
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    ///
-    /// fn main() -> Result<(), XlsxError> {
-    ///     let path = std::path::Path::new("workbook.xlsx");
-    ///     let mut workbook = Workbook::new_from_path(&path);
-    ///
-    ///     _ = workbook.add_worksheet();
-    ///
-    ///     workbook.close()?;
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    ///
-    pub fn new_from_path(path: &'a Path) -> Workbook {
-        let filehandle = FileHandleFrom::Path(path);
-
-        Self::common_constructor(filehandle)
-    }
-
-    /// Create a new Workbook object to represent an Excel spreadsheet file in a
-    /// memory buffer.
-    ///
-    /// The `Workbook::new_from_buffer()` constructor is used to create a new
-    /// Excel workbook that will be returned as a Vec<u8> buffer via the
-    /// [`workbook.close_to_buffer()`](Workbook::close_to_buffer) method.
-    ///
-    /// Note, although the final file will be in memory the intermediate files
-    /// that make up the xlsx file are written to temporary files on disk before
-    /// the final file is assembled.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates creating a simple workbook to a
-    /// Vec<u8> buffer.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_workbook_new_from_buffer.rs
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    ///      let mut workbook = Workbook::new_from_buffer();
-    ///
-    ///      let worksheet = workbook.add_worksheet();
-    ///      worksheet.write_string_only(0, 0, "Hello")?;
-    ///
-    ///      let buf = workbook.close_to_buffer()?;
-    /// #
-    /// #     println!("File size: {}", buf.len());
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    pub fn new_from_buffer() -> Workbook<'a> {
-        let filehandle = FileHandleFrom::Buffer;
-
-        Self::common_constructor(filehandle)
-    }
-
-    // Common constructor used in the differ new*() variants.
-    fn common_constructor(filehandle: FileHandleFrom) -> Workbook {
+    pub fn new() -> Workbook {
         let writer = XMLWriter::new();
         let default_format = Format::new();
         let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
         Workbook {
             writer,
-            filehandle,
             worksheets: vec![],
             xf_indices,
             xf_formats: vec![default_format],
@@ -264,7 +177,7 @@ impl<'a> Workbook<'a> {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {
-    ///     let mut workbook = Workbook::new("workbook.xlsx");
+    ///     let mut workbook = Workbook::new();
     ///
     ///     let worksheet = workbook.add_worksheet(); // Sheet1
     ///     worksheet.write_string_only(0, 0, "Hello")?;
@@ -275,7 +188,7 @@ impl<'a> Workbook<'a> {
     ///     let worksheet = workbook.add_worksheet(); // Sheet3
     ///     worksheet.write_string_only(0, 0, "Hello")?;
     ///
-    ///     workbook.close()?;
+    ///     workbook.save("workbook.xlsx")?;
     ///
     ///     Ok(())
     /// }
@@ -295,11 +208,14 @@ impl<'a> Workbook<'a> {
         worksheet
     }
 
-    /// Close the Workbook object and write the XLSX file.
+    /// Save the Workbook as an xlsx file.
     ///
-    /// The workbook `close()` method writes all data to the xlsx file and closes
-    /// it.
+    /// The workbook `save()` method writes all the Workbook data to a new xlsx
+    /// file. It will overwrite any existing file.
     ///
+    /// # Arguments
+    ///
+    /// * `filename` - The name of the new Excel file to create.
     ///
     /// # Errors
     ///
@@ -312,38 +228,46 @@ impl<'a> Workbook<'a> {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates creating and closing a simple
-    /// workbook.
+    /// The following example demonstrates creating a simple workbook, with one
+    /// unused worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_workbook_new.rs
+    /// # // This code is available in examples/doc_workbook_save.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {
-    ///     let mut workbook = Workbook::new("workbook.xlsx");
+    ///     let mut workbook = Workbook::new();
     ///
     ///     _ = workbook.add_worksheet();
     ///
-    ///     workbook.close()?;
+    ///     workbook.save("workbook.xlsx")?;
     ///
     ///     Ok(())
     /// }
     /// ```
     ///
-    pub fn close(&mut self) -> Result<(), XlsxError> {
-        _ = self.close_internal()?;
+    pub fn save(&mut self, filename: &str) -> Result<(), XlsxError> {
+        let filehandle = FileHandleFrom::String(filename);
+        _ = self.save_internal(filehandle)?;
         Ok(())
     }
 
-    /// Close the Workbook object and return the xlsx file as a byte vector.
+    /// Save the Workbook as an xlsx file using a Path reference.
     ///
-    /// The workbook `close_to_buffer()` method similar to the
-    /// [`close()`](Workbook::close) method except that it returns a file as a
-    /// `Vec<u8>` buffer suitable for streaming in a web application.
+    /// The workbook `save_to_path()` method writes all Workbook data to a new
+    /// xlsx file using a a [`std::path`] Path or PathBuf instance. It will
+    /// overwrite any existing file.
     ///
-    /// It can only be used with a workbook created using
-    /// [`workbook.new_from_buffer()`](Workbook::new_from_buffer).
+    /// For most cases the [`save()`](Workbook::save) method which uses a simple
+    /// string representation of the file path/name will be sufficient. However,
+    /// there are use cases, on Windows in particular, where generating the path
+    /// string may be error prone and where it can be preferable to use a
+    /// [`std::path`] Path or PathBuf instance and `save_to_path()`.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - A reference to a [`std::path`] Path or PathBuf instance.
     ///
     /// # Errors
     ///
@@ -353,38 +277,78 @@ impl<'a> Workbook<'a> {
     ///   the xlsx file, or its sub-files.
     /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
     ///   creating the xlsx file, or its sub-files.
-    /// * [`XlsxError::WorkbookWithoutBuffer`] - Workbook wasn't created with
-    ///   `new_to_buffer()`.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates creating a simple workbook to a
-    /// Vec<u8> buffer.
+    /// The following example demonstrates creating a simple workbook using a
+    /// rust Path reference.
     ///
     /// ```
-    /// # // This code is available in examples/doc_workbook_new_from_buffer.rs
+    /// # // This code is available in examples/doc_workbook_save_to_path.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    ///      let mut workbook = Workbook::new_from_buffer();
     ///
-    ///      let worksheet = workbook.add_worksheet();
-    ///      worksheet.write_string_only(0, 0, "Hello")?;
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let path = std::path::Path::new("workbook.xlsx");
+    ///     let mut workbook = Workbook::new();
     ///
-    ///      let buf = workbook.close_to_buffer()?;
-    /// #
-    /// #     println!("File size: {}", buf.len());
-    /// #
-    /// #     Ok(())
-    /// # }
+    ///     _ = workbook.add_worksheet();
+    ///
+    ///     workbook.save_to_path(&path)?;
+    ///
+    ///     Ok(())
+    /// }
     /// ```
     ///
-    pub fn close_to_buffer(&mut self) -> Result<Vec<u8>, XlsxError> {
-        match self.filehandle {
-            FileHandleFrom::Buffer => Ok(self.close_internal()?),
-            _ => Err(XlsxError::WorkbookWithoutBuffer),
-        }
+    pub fn save_to_path(&mut self, path: &Path) -> Result<(), XlsxError> {
+        let filehandle = FileHandleFrom::Path(path);
+        _ = self.save_internal(filehandle)?;
+        Ok(())
+    }
+
+    /// Save the Workbook as an xlsx file and return it as a byte vector.
+    ///
+    /// The workbook `save_to_buffer()` method is similar to the
+    /// [`save()`](Workbook::save) method except that it returns the xlsx file
+    /// as a `Vec<u8>` buffer suitable for streaming in a web application.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
+    ///   the workbook.
+    /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    ///   the xlsx file, or its sub-files.
+    /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
+    ///   creating the xlsx file, or its sub-files.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a simple workbook to a Vec<u8>
+    /// buffer.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_save_to_buffer.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet = workbook.add_worksheet();
+    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     let buf = workbook.save_to_buffer()?;
+    ///
+    ///     println!("File size: {}", buf.len());
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    pub fn save_to_buffer(&mut self) -> Result<Vec<u8>, XlsxError> {
+        let filehandle = FileHandleFrom::Buffer;
+        let buf = self.save_internal(filehandle)?;
+        Ok(buf)
     }
 
     // Set the index for the format. This is currently only used in testing but
@@ -413,7 +377,7 @@ impl<'a> Workbook<'a> {
 
     // Internal function to prepare the workbook and other component files for
     // writing to the xlsx file.
-    fn close_internal(&mut self) -> Result<Vec<u8>, XlsxError> {
+    fn save_internal(&mut self, filehandle: FileHandleFrom) -> Result<Vec<u8>, XlsxError> {
         // Check if the file has already been written.
         if self.is_closed {
             return Err(XlsxError::FileReClosedError);
@@ -456,7 +420,7 @@ impl<'a> Workbook<'a> {
 
         // Create the Packager object that will assemble the zip/xlsx file.
         let mut buf: Vec<u8> = vec![];
-        match self.filehandle {
+        match filehandle {
             FileHandleFrom::String(filename) => {
                 let path = std::path::Path::new(filename);
                 let file = std::fs::File::create(&path)?;
@@ -910,7 +874,7 @@ mod tests {
 
     #[test]
     fn test_assemble() {
-        let mut workbook = Workbook::new("test.xlsx");
+        let mut workbook = Workbook::new();
         workbook.add_worksheet();
 
         workbook.assemble_xml_file();

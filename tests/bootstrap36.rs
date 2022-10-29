@@ -11,7 +11,7 @@ mod common;
 
 // Test case to demonstrate creating a basic file with some string cell data.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let format1 = Format::new().set_num_format("dd/mm/yyyy;@");
     let format2 = Format::new().set_num_format("mm/dd/yyyy;@");
@@ -36,7 +36,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_datetime(4, 0, datetime2, &format5)?;
     worksheet.write_time(5, 0, time, &format6)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

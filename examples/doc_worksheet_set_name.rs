@@ -7,14 +7,14 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("worksheets.xlsx");
+    let mut workbook = Workbook::new();
 
     _ = workbook.add_worksheet(); // Sheet1
     _ = workbook.add_worksheet().set_name("Foglio2"); // Foglio2
     _ = workbook.add_worksheet().set_name("Data"); // Data
     _ = workbook.add_worksheet(); // Sheet4
 
-    workbook.close()?;
+    workbook.save("worksheets.xlsx")?;
 
     Ok(())
 }

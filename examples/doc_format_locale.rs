@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("number_format.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet.
     let worksheet = workbook.add_worksheet();
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
 
     worksheet.write_number(0, 0, 1234.56, &currency_format)?;
 
-    workbook.close()?;
+    workbook.save("number_format.xlsx")?;
 
     Ok(())
 }

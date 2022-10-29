@@ -48,8 +48,8 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file.
-///     let mut workbook = Workbook::new("demo.xlsx");
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
 ///     // Create some formats to use in the worksheet.
 ///     let bold_format = Format::new().set_bold();
@@ -82,7 +82,7 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 ///     let date = NaiveDate::from_ymd(2023, 1, 25);
 ///     worksheet.write_date(6, 0, date, &date_format)?;
 ///
-///     workbook.close()?;
+///     workbook.save("demo.xlsx")?;
 ///
 ///     Ok(())
 /// }
@@ -244,14 +244,14 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    ///     let mut workbook = Workbook::new("worksheets.xlsx");
+    ///     let mut workbook = Workbook::new();
     ///
     ///     _ = workbook.add_worksheet();                     // Sheet1
     ///     _ = workbook.add_worksheet().set_name("Foglio2"); // Foglio2
     ///     _ = workbook.add_worksheet().set_name("Data");    // Data
     ///     _ = workbook.add_worksheet();                     // Sheet4
     ///
-    /// #    workbook.close()?;
+    /// #    workbook.save("worksheets.xlsx")?;
     /// #
     /// #    Ok(())
     /// # }
@@ -351,7 +351,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    ///     let mut workbook = Workbook::new("numbers.xlsx");
+    ///     let mut workbook = Workbook::new();
     ///
     ///     // Create some formats to use with the numbers below.
     ///     let number_format = Format::new().set_num_format("#,##0.00");
@@ -367,7 +367,7 @@ impl Worksheet {
     ///     worksheet.write_number(2, 0, 0.3300, &percentage_format)?;
     ///     worksheet.write_number(3, 0, 1234.5, &bold_italic_format)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("numbers.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -433,7 +433,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    ///     let mut workbook = Workbook::new("numbers.xlsx");
+    ///     let mut workbook = Workbook::new();
     ///
     ///     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -454,7 +454,7 @@ impl Worksheet {
     ///     // when the number is unformatted.
     ///     worksheet.write_number_only(7, 0, 1234.50000)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("numbers.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -510,8 +510,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    ///     // Create a new Excel file.
-    ///     let mut workbook = Workbook::new("strings.xlsx");
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
     ///
     ///     // Create some formats to use in the worksheet.
     ///     let bold_format = Format::new().set_bold();
@@ -526,7 +526,7 @@ impl Worksheet {
     ///     worksheet.write_string(2, 0, "नमस्ते",      &italic_format)?;
     ///     worksheet.write_string(3, 0, "こんにちは", &italic_format)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("strings.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -582,8 +582,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #   // Create a new Excel file.
-    /// #   let mut workbook = Workbook::new("strings.xlsx");
+    /// #   // Create a new Excel file object.
+    /// #   let mut workbook = Workbook::new();
     /// #
     /// #   // Add a worksheet to the workbook.
     /// #   let worksheet = workbook.add_worksheet();
@@ -601,7 +601,7 @@ impl Worksheet {
     ///     worksheet.write_string_only(9,  0, "Здравствуйте")?;
     ///     worksheet.write_string_only(10, 0, "Hola")?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("strings.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -655,8 +655,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formulas.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     ///     // Create some formats to use in the worksheet.
     ///     let bold_format = Format::new().set_bold();
@@ -671,7 +671,7 @@ impl Worksheet {
     ///     worksheet.write_formula(2, 0, "=SIN(PI()/4)", &italic_format)?;
     ///     worksheet.write_formula(3, 0, "=AVERAGE(1, 2, 3, 4)", &italic_format)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -724,8 +724,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formulas.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -738,7 +738,7 @@ impl Worksheet {
     ///     worksheet.write_formula_only(4, 0, "=AVERAGE(1, 2, 3, 4)")?;
     ///     worksheet.write_formula_only(5, 0, r#"=DATEVALUE("1-Jan-2023")"#)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -806,8 +806,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #    let worksheet = workbook.add_worksheet();
@@ -824,8 +824,8 @@ impl Worksheet {
     ///     // Write an array formula that returns a single value.
     ///     worksheet.write_array_formula(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}", &bold)?;
     ///
-    /// #     // Close the file.
-    /// #     workbook.close()?;
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -904,8 +904,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #    let worksheet = workbook.add_worksheet();
@@ -919,8 +919,8 @@ impl Worksheet {
     ///     // Write an array formula that returns a single value.
     ///     worksheet.write_array_formula_only(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}")?;
     ///
-    /// #     // Close the file.
-    /// #     workbook.close()?;
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1007,7 +1007,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     let bold = Format::new().set_bold();
@@ -1020,7 +1020,7 @@ impl Worksheet {
     /// #     worksheet.write_string_only(1, 0, "Food")?;
     /// #     worksheet.write_string_only(2, 0, "Frood")?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1091,7 +1091,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Write a dynamic formula using a static function.
@@ -1102,7 +1102,7 @@ impl Worksheet {
     /// #     worksheet.write_string_only(1, 0, "Food")?;
     /// #     worksheet.write_string_only(2, 0, "Frood")?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1239,8 +1239,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet.
     ///     let worksheet = workbook.add_worksheet();
@@ -1254,7 +1254,7 @@ impl Worksheet {
     ///     worksheet.write_blank(1, 1, &format1)?;
     ///     worksheet.write_blank(3, 1, &format2)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1316,7 +1316,7 @@ impl Worksheet {
     /// # use chrono::NaiveDate;
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -1341,7 +1341,7 @@ impl Worksheet {
     ///     worksheet.write_datetime(3, 0, datetime, &format4)?;
     ///     worksheet.write_datetime(4, 0, datetime, &format5)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1406,7 +1406,7 @@ impl Worksheet {
     /// # use chrono::NaiveDate;
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -1431,7 +1431,7 @@ impl Worksheet {
     ///     worksheet.write_date(3, 0, date, &format4)?;
     ///     worksheet.write_date(4, 0, date, &format5)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1496,7 +1496,7 @@ impl Worksheet {
     /// # use chrono::NaiveTime;
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -1521,7 +1521,7 @@ impl Worksheet {
     ///     worksheet.write_time(3, 0, time, &format4)?;
     ///     worksheet.write_time(4, 0, time, &format5)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1574,7 +1574,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     let bold = Format::new().set_bold();
     /// #
@@ -1584,7 +1584,7 @@ impl Worksheet {
     ///     worksheet.write_boolean(0, 0, true, &bold)?;
     ///     worksheet.write_boolean(1, 0, false, &bold)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1633,7 +1633,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -1641,7 +1641,7 @@ impl Worksheet {
     ///     worksheet.write_boolean_only(0, 0, true)?;
     ///     worksheet.write_boolean_only(1, 0, false)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1689,7 +1689,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -1701,7 +1701,7 @@ impl Worksheet {
     ///     // Set the row height in Excel character units.
     ///     worksheet.set_row_height(2, 30)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1769,7 +1769,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -1781,7 +1781,7 @@ impl Worksheet {
     ///     // Set the row height in pixels.
     ///     worksheet.set_row_height_pixels(2, 40)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1829,7 +1829,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -1847,7 +1847,7 @@ impl Worksheet {
     ///     // Add some formatted text that overrides the row format.
     ///     worksheet.write_string(1, 2, "Hello", &bold_format)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1935,7 +1935,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -1950,7 +1950,7 @@ impl Worksheet {
     ///     worksheet.set_column_width(4, 4)?;
     ///     worksheet.set_column_width(5, 4)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2022,7 +2022,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -2037,7 +2037,7 @@ impl Worksheet {
     ///     worksheet.set_column_width_pixels(4, 33)?;
     ///     worksheet.set_column_width_pixels(5, 33)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2097,7 +2097,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
@@ -2115,7 +2115,7 @@ impl Worksheet {
     ///     // Add some formatted text that overrides the column format.
     ///     worksheet.write_string(2, 1, "Hello", &bold_format)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2166,7 +2166,7 @@ impl Worksheet {
     /// written using [`write_formula()`](Worksheet::write_formula()) or
     /// [`write_formula_only()`](Worksheet::write_formula_only()). Instead it
     /// stores the value 0 as the formula result. It then sets a global flag in
-    /// the XLSX file to say that all formulas and functions should be
+    /// the xlsx file to say that all formulas and functions should be
     /// recalculated when the file is opened.
     ///
     /// This works fine with Excel and other spreadsheet applications. However,
@@ -2198,8 +2198,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formulas.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
@@ -2208,7 +2208,7 @@ impl Worksheet {
     ///         .write_formula_only(0, 0, "1+1")?
     ///         .set_formula_result(0, 0, "2");
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2250,7 +2250,7 @@ impl Worksheet {
     /// written using [`write_formula()`](Worksheet::write_formula()) or
     /// [`write_formula_only()`](Worksheet::write_formula_only()). Instead it
     /// stores the value 0 as the formula result. It then sets a global flag in
-    /// the XLSX file to say that all formulas and functions should be
+    /// the xlsx file to say that all formulas and functions should be
     /// recalculated when the file is opened.
     ///
     /// However, for LibreOffice the default formula result should be set to the
@@ -2272,15 +2272,15 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("formulas.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     ///
     ///     worksheet.set_formula_result_default("");
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2319,7 +2319,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("future_function.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Write a future function and automatically add the required prefix.
@@ -2333,7 +2333,7 @@ impl Worksheet {
     /// #     worksheet.write_number_only(3, 1, 1.15)?;
     /// #     worksheet.write_number_only(4, 1, 1.22)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("future_function.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2378,8 +2378,8 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file.
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
     /// #
     ///     // Add the cell formats.
     ///     let format_left_to_right = Format::new().set_reading_direction(1);
@@ -2408,7 +2408,7 @@ impl Worksheet {
     ///     worksheet2.write_string(1, 0, "نص عربي / English text", &format_left_to_right)?;
     ///     worksheet2.write_string(2, 0, "نص عربي / English text", &format_right_to_left)?;
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2496,7 +2496,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
@@ -2504,7 +2504,7 @@ impl Worksheet {
     ///     // Set the printer paper size.
     ///     worksheet.set_paper_size(9); // A4 paper size.
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2545,7 +2545,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
@@ -2553,7 +2553,7 @@ impl Worksheet {
     ///     // Set the page print to "over then down"
     ///     worksheet.set_page_order(false);
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2583,14 +2583,14 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     ///
     ///     worksheet.set_landscape();
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2668,7 +2668,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
@@ -2676,7 +2676,7 @@ impl Worksheet {
     ///     worksheet.write_string_only(0, 0, "Hello")?;
     ///     worksheet.set_zoom(200);
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -2867,7 +2867,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
@@ -2878,7 +2878,7 @@ impl Worksheet {
     /// #     worksheet.write_string_only(200, 0, "Hello")?;
     /// #     worksheet.set_view_page_layout();
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -3021,14 +3021,14 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     ///
     ///     worksheet.set_margins(1.0, 1.25, 1.5, 1.75, 0.75, 0.25);
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -3104,7 +3104,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
@@ -3112,7 +3112,7 @@ impl Worksheet {
     ///     worksheet.set_header("&CPage &P of &N");
     ///     worksheet.set_print_first_page_number(2);
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -3153,7 +3153,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
@@ -3161,7 +3161,7 @@ impl Worksheet {
     ///     // Scale the printed worksheet to 50%.
     ///     worksheet.set_print_scale(50);
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -3239,7 +3239,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
@@ -3247,7 +3247,7 @@ impl Worksheet {
     ///     // Set the printed output to fit 1 page wide and as long as necessary.
     ///     worksheet.set_print_fit_to_pages(1, 0);
     ///
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -3459,7 +3459,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     ///     let worksheet1 = workbook.add_worksheet();
     ///     // Set the print area to "A1:M32"
@@ -3473,7 +3473,7 @@ impl Worksheet {
     ///     // Set the print area to "A:M"
     ///     worksheet3.set_print_area(0, 0, 1_048_575, 12)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -3565,7 +3565,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     ///     let worksheet1 = workbook.add_worksheet();
     ///     // Repeat the first row in the printed output.
@@ -3575,7 +3575,7 @@ impl Worksheet {
     ///     // Repeat the first 2 rows in the printed output.
     ///     worksheet2.set_repeat_rows(0, 1)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -3642,7 +3642,7 @@ impl Worksheet {
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new("worksheet.xlsx");
+    /// #     let mut workbook = Workbook::new();
     /// #
     ///     let worksheet1 = workbook.add_worksheet();
     ///     // Repeat the first column in the printed output.
@@ -3652,7 +3652,7 @@ impl Worksheet {
     ///     // Repeat the first 2 columns in the printed output.
     ///     worksheet2.set_repeat_columns(0, 1)?;
     /// #
-    /// #     workbook.close()?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -4448,7 +4448,7 @@ impl Worksheet {
         }
     }
 
-    // Calculate the "spans" attribute of the <row> tag. This is an XLSX
+    // Calculate the "spans" attribute of the <row> tag. This is an xlsx
     // optimization and isn't strictly required. However, it makes comparing
     // files easier. The span is the same for each block of 16 rows.
     fn calculate_spans(&mut self) -> HashMap<u32, String> {

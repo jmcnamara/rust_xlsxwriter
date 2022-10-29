@@ -7,8 +7,8 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("headers_footers.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // -----------------------------------------------------------------------
     // A simple example to start.
@@ -63,7 +63,7 @@ fn main() -> Result<(), XlsxError> {
 
     worksheet5.set_header("&CCuriouser && Curiouser - Attorneys at Law");
 
-    workbook.close()?;
+    workbook.save("headers_footers.xlsx")?;
 
     Ok(())
 }

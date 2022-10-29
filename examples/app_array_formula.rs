@@ -6,8 +6,8 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("array_formula.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -34,8 +34,8 @@ fn main() -> Result<(), XlsxError> {
     // Write an array formula that returns a range of values.
     worksheet.write_array_formula_only(4, 0, 6, 0, "{=TREND(C5:C7,B5:B7)}")?;
 
-    // Close the file.
-    workbook.close()?;
+    // Save the file to disk.
+    workbook.save("array_formula.xlsx")?;
 
     Ok(())
 }

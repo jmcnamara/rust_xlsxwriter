@@ -7,8 +7,8 @@
 use rust_xlsxwriter::*;
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("colors.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet.
     let worksheet = workbook.add_worksheet();
@@ -95,8 +95,8 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string_only(19, 0, "#DAA520")?;
     worksheet.write_blank(19, 1, &color_format)?;
 
-    // Close and save the file.
-    workbook.close()?;
+    // Save the file to disk.
+    workbook.save("colors.xlsx")?;
 
     Ok(())
 }

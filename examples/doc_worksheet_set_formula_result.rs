@@ -8,8 +8,8 @@
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("formulas.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
         .write_formula_only(0, 0, "1+1")?
         .set_formula_result(0, 0, "2");
 
-    workbook.close()?;
+    workbook.save("formulas.xlsx")?;
 
     Ok(())
 }

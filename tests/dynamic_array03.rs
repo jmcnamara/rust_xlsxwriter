@@ -10,21 +10,21 @@ mod common;
 
 // Test future function with explicit xlfn.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
 
     worksheet.write_formula_only(0, 0, "=1+_xlfn.XOR(1)")?;
     worksheet.set_formula_result(0, 0, "2");
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }
 
 // Test future function with implicit xlfn.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
 
@@ -32,7 +32,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_formula_only(0, 0, "=1+XOR(1)")?;
     worksheet.set_formula_result(0, 0, "2");
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

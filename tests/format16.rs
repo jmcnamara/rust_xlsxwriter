@@ -10,14 +10,14 @@ mod common;
 
 // Test case to test simple formatting.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
     let pattern = Format::new().set_pattern(XlsxPattern::MediumGray);
 
     worksheet.write_blank(0, 0, &pattern)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

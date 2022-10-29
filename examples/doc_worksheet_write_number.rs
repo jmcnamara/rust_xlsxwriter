@@ -7,7 +7,7 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new("numbers.xlsx");
+    let mut workbook = Workbook::new();
 
     // Create some formats to use with the numbers below.
     let number_format = Format::new().set_num_format("#,##0.00");
@@ -23,7 +23,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_number(2, 0, 0.3300, &percentage_format)?;
     worksheet.write_number(3, 0, 1234.5, &bold_italic_format)?;
 
-    workbook.close()?;
+    workbook.save("numbers.xlsx")?;
 
     Ok(())
 }

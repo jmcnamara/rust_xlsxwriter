@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate cell font formatting.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let format1 = Format::new().set_font_script(XlsxScript::None);
     let format2 = Format::new().set_font_script(XlsxScript::Superscript);
@@ -21,7 +21,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(1, 0, "Rust", &format2)?;
     worksheet.write_string(2, 0, "Rust", &format3)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

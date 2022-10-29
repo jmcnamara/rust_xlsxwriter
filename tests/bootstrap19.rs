@@ -10,7 +10,7 @@ mod common;
 
 // Test case to demonstrate cell font formatting.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let mut format1 = Format::new().set_font_scheme("");
     let format2 = Format::new().set_font_name("Arial");
@@ -29,7 +29,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     workbook.register_format(&mut format1);
     workbook.register_format(&mut format1);
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

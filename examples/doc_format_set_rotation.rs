@@ -6,8 +6,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("formats.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     // Widen the rows/column for clarity.
@@ -24,7 +24,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(1, 0, "Rust", &format2)?;
     worksheet.write_string(2, 0, "Rust", &format3)?;
 
-    workbook.close()?;
+    workbook.save("formats.xlsx")?;
 
     Ok(())
 }

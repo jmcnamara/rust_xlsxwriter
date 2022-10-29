@@ -35,12 +35,12 @@ body:
         use rust_xlsxwriter::{Workbook, XlsxError};
 
         fn main() -> Result<(), XlsxError> {
-            let mut workbook = Workbook::new("test.xlsx");
+            let mut workbook = Workbook::new();
             let worksheet = workbook.add_worksheet();
 
             worksheet.write_string_only(0, 0, "Hello")?;
 
-            workbook.close()?;
+            workbook.save("test.xlsx")?;
             Ok(())
         }
         ```

@@ -27,7 +27,7 @@ impl Relationship {
         }
     }
 
-    // Add container relationship to XLSX .rels xml files.
+    // Add container relationship to xlsx .rels xml files.
     pub(crate) fn add_document_relationship(&mut self, rel_type: &str, target: &str) {
         let document_schema = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 
@@ -38,7 +38,7 @@ impl Relationship {
         ));
     }
 
-    // Add container relationship to XLSX .rels xml files.
+    // Add container relationship to xlsx .rels xml files.
     pub(crate) fn add_package_relationship(&mut self, rel_type: &str, target: &str) {
         let package_schema = "http://schemas.openxmlformats.org/package/2006/relationships";
 

@@ -10,14 +10,14 @@ mod common;
 
 // Test the creation of a simple rust_xlsxwriter file with a print area.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string_only(0, 0, "Foo")?;
 
     worksheet.set_print_area(0, 0, 0, 16_383)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

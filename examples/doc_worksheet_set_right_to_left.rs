@@ -8,8 +8,8 @@
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file.
-    let mut workbook = Workbook::new("worksheet.xlsx");
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
 
     // Add the cell formats.
     let format_left_to_right = Format::new().set_reading_direction(1);
@@ -38,7 +38,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet2.write_string(1, 0, "نص عربي / English text", &format_left_to_right)?;
     worksheet2.write_string(2, 0, "نص عربي / English text", &format_right_to_left)?;
 
-    workbook.close()?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }

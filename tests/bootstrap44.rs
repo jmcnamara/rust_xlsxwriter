@@ -10,14 +10,14 @@ mod common;
 
 // Test case to demonstrate setting various page setup methods.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string_only(0, 0, "Foo")?;
 
     worksheet.set_repeat_rows(0, 0)?;
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }

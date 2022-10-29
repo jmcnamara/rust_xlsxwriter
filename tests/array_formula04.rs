@@ -10,7 +10,7 @@ mod common;
 
 // Test case to test array formulas, single cell range and set formula result.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new(filename);
+    let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
 
@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_formula_result(0, 0, "0");
 
-    workbook.close()?;
+    workbook.save(filename)?;
 
     Ok(())
 }
