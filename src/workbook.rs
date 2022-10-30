@@ -371,6 +371,101 @@ impl Workbook {
         ))
     }
 
+
+    /// Get a mutable reference to the vector of worksheets.
+    ///
+    /// Get a mutable reference to the vector of Worksheets used by the Workbook
+    /// instance. This can be useful for iterating over, and performing the same
+    /// operation, on all the worksheets in the workbook. See the example below.
+    ///
+    /// If you are careful you can also use some of the standard [slice]
+    /// operations on the vector reference, see below.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates operating on the vector of all the
+    /// worksheets in a workbook.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_worksheets_mut.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     // Add three worksheets to the workbook.
+    ///     let _ = workbook.add_worksheet();
+    ///     let _ = workbook.add_worksheet();
+    ///     let _ = workbook.add_worksheet();
+    ///
+    ///     // Write the same data to all three worksheets.
+    ///     for worksheet in workbook.worksheets_mut() {
+    ///         worksheet.write_string_only(0, 0, "Hello")?;
+    ///         worksheet.write_number_only(1, 0, 12345)?;
+    ///     }
+    ///
+    ///     // If you are careful you can use standard slice operations.
+    ///     workbook.worksheets_mut().swap(0, 1);
+    /// #
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file, note the same data is in all three worksheets and Sheet2
+    /// and Sheet1 have swapped position:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_worksheets_mut.png">
+    ///
+   pub fn worksheets_mut(&mut self) -> &mut Vec<Worksheet> {
+    &mut self.worksheets
+}
+
+    /// Get a reference to the vector of worksheets.
+    ///
+    /// Get a reference to the vector of Worksheets used by the Workbook
+    /// instance. This is less useful than
+    /// [`worksheets_mut`](Workbook::worksheets_mut) version since a mutable
+    /// reference is required for most worksheet operations.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates operating on the vector of all the
+    /// worksheets in a workbook. The non mutable version of this method is less
+    /// useful than `workbook.worksheets_mut()`.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_worksheets.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     // Add three worksheets to the workbook.
+    ///     let _ = workbook.add_worksheet();
+    ///     let _ = workbook.add_worksheet();
+    ///     let _ = workbook.add_worksheet();
+    ///
+    ///     // Get some information from all three worksheets.
+    ///     for worksheet in workbook.worksheets() {
+    ///         println!("{}", worksheet.name());
+    ///     }
+    ///
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn worksheets(&mut self) -> &Vec<Worksheet> {
+        &self.worksheets
+    }
+
+
     /// Save the Workbook as an xlsx file.
     ///
     /// The workbook `save()` method writes all the Workbook data to a new xlsx

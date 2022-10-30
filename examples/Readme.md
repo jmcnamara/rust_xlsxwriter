@@ -165,6 +165,13 @@ documentation and generally show how an individual function works.
 * doc_workbook_worksheet_from_name.rs - Demonstrates getting worksheet
   reference by name.
 
+* doc_workbook_worksheets.rs - Demonstrates operating on the vector of all
+  the worksheets in a workbook. The non mutable version of this method is
+  less useful than `workbook.worksheets_mut()`.
+
+* doc_workbook_worksheets_mut.rs - Demonstrates operating on the vector of
+  all the worksheets in a workbook.
+
 * doc_working_with_formulas_dynamic_len.rs - Demonstrates a static function
   which generally returns one value turned into a dynamic function which
   returns a range of values.

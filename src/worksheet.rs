@@ -4408,8 +4408,6 @@ impl Worksheet {
 
         // Swap out the worksheet data structures so we can iterate over it and
         // still call self.write_xml() methods.
-        //
-        // TODO. check efficiency of this and/or alternatives.
         let mut temp_table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
         let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
         mem::swap(&mut temp_table, &mut self.table);
