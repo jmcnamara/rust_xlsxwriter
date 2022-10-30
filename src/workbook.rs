@@ -68,6 +68,7 @@ use crate::{XlsxColor, XlsxPattern};
 ///     let date = NaiveDate::from_ymd(2023, 1, 25);
 ///     worksheet.write_date(6, 0, date, &date_format)?;
 ///
+///     // Save the file to disk.
 ///     workbook.save("demo.xlsx")?;
 ///
 ///     Ok(())
@@ -82,7 +83,6 @@ pub struct Workbook {
     pub(crate) fill_count: u16,
     pub(crate) border_count: u16,
     pub(crate) num_format_count: u16,
-    is_closed: bool,
     defined_names: Vec<DefinedName>,
 }
 
@@ -147,7 +147,6 @@ impl Workbook {
             fill_count: 0,
             border_count: 0,
             num_format_count: 0,
-            is_closed: false,
             defined_names: vec![],
         }
     }
@@ -206,6 +205,170 @@ impl Workbook {
         let worksheet = self.worksheets.last_mut().unwrap();
 
         worksheet
+    }
+
+    /// Get a worksheet reference by index.
+    ///
+    /// Get a reference to a worksheet created via
+    /// [`workbook.add_worksheet()`](Workbook::add_worksheet) using an index
+    /// based on the creation order.
+    ///
+    /// Due to borrow checking rules you can only have one active reference to a
+    /// worksheet object created by `add_worksheet()` since that method always
+    /// returns a mutable reference. For a workbook with multiple worksheets
+    /// this restriction is generally workable if you can create and use the
+    /// worksheets sequentially since you will only need to have one reference
+    /// at any one time. However, if you can't structure your code to work
+    /// sequentially then you get a reference to a previously created worksheet
+    /// using `worksheet_from_index()`. The standard borrow checking rules still
+    /// apply so you will have to give up ownership of any other worksheet
+    /// reference prior to calling this method. See the example below.
+    ///
+    /// See also [`worksheet_from_name()`](Workbook::worksheet_from_name).
+    ///
+    /// # Arguments
+    ///
+    /// * `index` - The index of the worksheet to get a reference to.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::UnknownWorksheetNameOrIndex`] - Error when trying to
+    ///   retrieve a worksheet reference by index. This is usually an index out
+    ///   of bounds error.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates getting worksheet reference by index.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_worksheet_from_index.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     // Start with a reference to worksheet1.
+    ///     let mut worksheet1 = workbook.add_worksheet();
+    ///     worksheet1.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     // If we don't try to use the workbook1 reference again we can switch to
+    ///     // using a reference to worksheet2.
+    ///     let mut worksheet2 = workbook.add_worksheet();
+    ///     worksheet2.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     // Stop using worksheet2 and move back to worksheet1.
+    ///     worksheet1 = workbook.worksheet_from_index(0)?;
+    ///     worksheet1.write_string_only(1, 0, "Sheet1")?;
+    ///
+    ///     // Stop using worksheet1 and move back to worksheet2.
+    ///     worksheet2 = workbook.worksheet_from_index(1)?;
+    ///     worksheet2.write_string_only(1, 0, "Sheet2")?;
+    ///
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_worksheet_from_index.png">
+    ///
+    pub fn worksheet_from_index(&mut self, index: usize) -> Result<&mut Worksheet, XlsxError> {
+        if let Some(worksheet) = self.worksheets.get_mut(index) {
+            Ok(worksheet)
+        } else {
+            Err(XlsxError::UnknownWorksheetNameOrIndex(index.to_string()))
+        }
+    }
+
+    /// Get a worksheet reference by name.
+    ///
+    /// Get a reference to a worksheet created via
+    /// [`workbook.add_worksheet()`](Workbook::add_worksheet) using the sheet
+    /// name.
+    ///
+    /// Due to borrow checking rules you can only have one active reference to a
+    /// worksheet object created by `add_worksheet()` since that method always
+    /// returns a mutable reference. For a workbook with multiple worksheets
+    /// this restriction is generally workable if you can create and use the
+    /// worksheets sequentially since you will only need to have one reference
+    /// at any one time. However, if you can't structure your code to work
+    /// sequentially then you get a reference to a previously created worksheet
+    /// using `worksheet_from_name()`. The standard borrow checking rules still
+    /// apply so you will have to give up ownership of any other worksheet
+    /// reference prior to calling this method. See the example below.
+    ///
+    /// Worksheet names are usually "Sheet1", "Sheet2", etc., or else a user
+    /// define name that was set using
+    /// [`worksheet.set_name()`](Worksheet::set_name). You can also use the
+    /// [`worksheet.name()`](Worksheet::name) method to get the name.
+    ///
+    /// See also [`worksheet_from_index()`](Workbook::worksheet_from_index).
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the worksheet to get a reference to.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::UnknownWorksheetNameOrIndex`] - Error when trying to
+    ///   retrieve a worksheet reference by index. This is usually an index out
+    ///   of bounds error.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates getting worksheet reference by index.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_worksheet_from_index.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     // Start with a reference to worksheet1.
+    ///     let mut worksheet1 = workbook.add_worksheet();
+    ///     worksheet1.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     // If we don't try to use the workbook1 reference again we can switch to
+    ///     // using a reference to worksheet2.
+    ///     let mut worksheet2 = workbook.add_worksheet();
+    ///     worksheet2.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     // Stop using worksheet2 and move back to worksheet1.
+    ///     worksheet1 = workbook.worksheet_from_index(0)?;
+    ///     worksheet1.write_string_only(1, 0, "Sheet1")?;
+    ///
+    ///     // Stop using worksheet1 and move back to worksheet2.
+    ///     worksheet2 = workbook.worksheet_from_index(1)?;
+    ///     worksheet2.write_string_only(1, 0, "Sheet2")?;
+    ///
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_worksheet_from_name.png">
+    ///
+    pub fn worksheet_from_name(&mut self, sheetname: &str) -> Result<&mut Worksheet, XlsxError> {
+        for (index, worksheet) in self.worksheets.iter_mut().enumerate() {
+            if sheetname == worksheet.name {
+                return self.worksheet_from_index(index);
+            }
+        }
+
+        // If we didn't find a matching sheet name then raise
+        Err(XlsxError::UnknownWorksheetNameOrIndex(
+            sheetname.to_string(),
+        ))
     }
 
     /// Save the Workbook as an xlsx file.
@@ -378,10 +541,14 @@ impl Workbook {
     // Internal function to prepare the workbook and other component files for
     // writing to the xlsx file.
     fn save_internal(&mut self, filehandle: FileHandleFrom) -> Result<Vec<u8>, XlsxError> {
-        // Check if the file has already been written.
-        if self.is_closed {
-            return Err(XlsxError::FileReClosedError);
+        // Reset workbook and worksheet xml writers between saves.
+        self.writer.reset();
+        for worksheet in self.worksheets.iter_mut() {
+            worksheet.writer.reset();
         }
+
+        // Clear any global metadata arrays between saves.
+        self.defined_names = vec![];
 
         // Ensure that there is at least one worksheet in the workbook.
         if self.worksheets.is_empty() {
@@ -438,8 +605,6 @@ impl Workbook {
                 packager.assemble_file(self, &package_options)?;
             }
         };
-
-        self.is_closed = true;
 
         Ok(buf)
     }

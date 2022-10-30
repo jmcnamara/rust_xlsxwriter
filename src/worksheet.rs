@@ -82,6 +82,7 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 ///     let date = NaiveDate::from_ymd(2023, 1, 25);
 ///     worksheet.write_date(6, 0, date, &date_format)?;
 ///
+///     // Save the file to disk.
 ///     workbook.save("demo.xlsx")?;
 ///
 ///     Ok(())
@@ -307,6 +308,47 @@ impl Worksheet {
         self.name = name.to_string();
 
         Ok(self)
+    }
+
+    /// Get the worksheet name.
+    ///
+    /// Get the worksheet name that was set automatically such as Sheet1,
+    /// Sheet2, etc., or that was set by the user using
+    /// [`set_name()`](Worksheet::set_name).
+    ///
+    /// The worksheet name can be used to get a reference to a worksheet object
+    /// using the
+    /// [`workbook.worksheet_from_name()`](super::Workbook::worksheet_from_name)
+    /// method.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates getting a worksheet name.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     // Try name() using a default sheet name.
+    ///     let worksheet = workbook.add_worksheet();
+    ///     assert_eq!("Sheet1", worksheet.name());
+    ///
+    ///     // Try name() using a user defined sheet name.
+    ///     let worksheet = workbook.add_worksheet().set_name("Data")?;
+    ///     assert_eq!("Data", worksheet.name());
+    ///
+    /// #    workbook.save("workbook.xlsx")?;
+    /// #
+    /// #    Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 
     /// Write a formatted number to a worksheet cell.
@@ -4446,6 +4488,10 @@ impl Worksheet {
                 }
             }
         }
+
+        // Swap back in data.
+        mem::swap(&mut temp_table, &mut self.table);
+        mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
     }
 
     // Calculate the "spans" attribute of the <row> tag. This is an xlsx
@@ -5532,6 +5578,19 @@ mod tests {
             result,
             Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(_))
         ));
+    }
+
+    #[test]
+    fn get_name() {
+        let mut worksheet = Worksheet::new("".to_string());
+
+        let got = worksheet.name();
+        assert_eq!("", got);
+
+        let exp = "Sheet1";
+        worksheet.set_name(exp).unwrap();
+        let got = worksheet.name();
+        assert_eq!(exp, got);
     }
 
     #[test]

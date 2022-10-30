@@ -159,6 +159,12 @@ documentation and generally show how an individual function works.
 * doc_workbook_save_to_path.rs - Demonstrates creating a simple workbook
   using a rust Path reference.
 
+* doc_workbook_worksheet_from_index.rs - Demonstrates getting worksheet
+  reference by index.
+
+* doc_workbook_worksheet_from_name.rs - Demonstrates getting worksheet
+  reference by name.
+
 * doc_working_with_formulas_dynamic_len.rs - Demonstrates a static function
   which generally returns one value turned into a dynamic function which
   returns a range of values.
@@ -182,6 +188,8 @@ documentation and generally show how an individual function works.
 
 * doc_working_with_formulas_syntax.rs - Demonstrates some common formula
   syntax errors.
+
+* doc_worksheet_name.rs - Demonstrates getting a worksheet name.
 
 * doc_worksheet_set_column_format.rs - Demonstrates setting the format for
   a column in Excel.

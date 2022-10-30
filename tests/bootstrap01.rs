@@ -69,6 +69,17 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for multiple saves.
+fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    workbook.save(filename)?;
+    workbook.save(filename)?;
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap01_single_worksheet() {
     let test_runner = common::TestRunner::new("bootstrap01")
@@ -124,6 +135,18 @@ fn bootstrap01_new_from_buffer() {
         .initialize();
 
     _ = create_new_xlsx_file_5(test_runner.output_file());
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap01_multi_save1() {
+    let test_runner = common::TestRunner::new("bootstrap01")
+        .unique("6")
+        .initialize();
+
+    _ = create_new_xlsx_file_6(test_runner.output_file());
 
     test_runner.assert_eq();
     test_runner.cleanup();

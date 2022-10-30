@@ -36,8 +36,8 @@ pub enum XlsxError {
     /// String exceeds Excel's limit of 32,767 characters.
     MaxStringLengthExceeded,
 
-    /// Cannot close() file that is already closed.
-    FileReClosedError,
+    /// Error when trying to retrieve a worksheet reference by index or by name.
+    UnknownWorksheetNameOrIndex(String),
 
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
@@ -100,7 +100,9 @@ impl fmt::Display for XlsxError {
                 write!(f, "String exceeds Excel's limit of 32,767 characters.")
             }
 
-            XlsxError::FileReClosedError => write!(f, "File has already been closed."),
+            XlsxError::UnknownWorksheetNameOrIndex(name) => {
+                write!(f, "Unknown Worksheet name or index \"{}\".", name)
+            }
 
             XlsxError::IoError(e) => {
                 write!(f, "{}", e)

@@ -1,6 +1,6 @@
 [package]
 name = "rust_xlsxwriter"
-description = "A Rust library for writing Excel 2007 XLSX files"
+description = "A Rust library for writing Excel 2007 xlsx files"
 authors = ["John McNamara <jmcnamara@cpan.org>"]
 homepage = "https://rustxlsxwriter.github.io"
 repository = "https://github.com/jmcnamara/rust_xlsxwriter"

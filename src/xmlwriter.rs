@@ -49,6 +49,12 @@ impl XMLWriter {
         buffer
     }
 
+    // Return data to write to xlsx/zip file member.
+    pub(crate) fn reset(&mut self) {
+        self.xmlfile.rewind().unwrap();
+        self.xmlfile.get_ref().set_len(0).unwrap();
+    }
+
     // Write an XML file declaration.
     pub(crate) fn xml_declaration(&mut self) {
         writeln!(

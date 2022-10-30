@@ -23,6 +23,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     workbook.save(filename)?;
 
+    // Also test multiple saves.
+    workbook.save(filename)?;
+    workbook.save(filename)?;
+    workbook.save(filename)?;
+
     Ok(())
 }
 

@@ -53,6 +53,7 @@ fn main() -> Result<(), XlsxError> {
     let date = NaiveDate::from_ymd(2023, 1, 25);
     worksheet.write_date(6, 0, date, &date_format)?;
 
+    // Save the file to disk.
     workbook.save("demo.xlsx")?;
 
     Ok(())

@@ -86,6 +86,7 @@ impl<W: Write + Seek> Packager<W> {
         workbook: &mut Workbook,
         options: &PackagerOptions,
     ) -> Result<(), XlsxError> {
+        // Write the sub-component files.
         self.write_content_types_file(options)?;
         self.write_root_rels_file()?;
         self.write_workbook_rels_file(options)?;
