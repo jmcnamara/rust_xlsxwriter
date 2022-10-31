@@ -163,12 +163,15 @@ impl Workbook {
     ///
     /// The `add_worksheet()` method returns a borrowed mutable reference to a
     /// Worksheet instance owned by the Workbook so only one worksheet can be in
-    /// existence at a time, see the example below. This limitation will be
-    /// removed, via other Worksheet creation methods, in an upcoming release.
+    /// existence at a time, see the example below. This limitation can be
+    /// avoided, if necessary, by creating standalone Worksheet objects via
+    /// [`Worksheet::new()`] and then later adding them to the workbook with
+    /// [[`workbook.push_worksheet`](Workbook.push_worksheet).
     ///
     /// # Examples
     ///
-    /// The following example demonstrates creating adding worksheets to a workbook.
+    /// The following example demonstrates creating adding worksheets to a
+    /// workbook.
     ///
     /// ```
     /// # // This code is available in examples/doc_workbook_add_worksheet.rs
@@ -195,12 +198,15 @@ impl Workbook {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet.png">
     ///
     pub fn add_worksheet(&mut self) -> &mut Worksheet {
-        let sheet_name = format!("Sheet{}", self.worksheets.len() + 1);
+        let name = format!("Sheet{}", self.worksheets.len() + 1);
 
-        let worksheet = Worksheet::new(sheet_name);
+        let mut worksheet = Worksheet::new();
+        worksheet.set_name(&name).unwrap();
+
         self.worksheets.push(worksheet);
         let worksheet = self.worksheets.last_mut().unwrap();
 
@@ -371,7 +377,6 @@ impl Workbook {
         ))
     }
 
-
     /// Get a mutable reference to the vector of worksheets.
     ///
     /// Get a mutable reference to the vector of Worksheets used by the Workbook
@@ -420,9 +425,9 @@ impl Workbook {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/workbook_worksheets_mut.png">
     ///
-   pub fn worksheets_mut(&mut self) -> &mut Vec<Worksheet> {
-    &mut self.worksheets
-}
+    pub fn worksheets_mut(&mut self) -> &mut Vec<Worksheet> {
+        &mut self.worksheets
+    }
 
     /// Get a reference to the vector of worksheets.
     ///
@@ -465,6 +470,65 @@ impl Workbook {
         &self.worksheets
     }
 
+    /// Add a worksheet object to a workbook.
+    ///
+    /// Add a worksheet created directly using `Workbook::new()` to a workbook.
+    ///
+    /// There are two way of creating a worksheet object with rust_xlsxwriter:
+    /// via the [`workbook.add_worksheet()`](Workbook::add_worksheet) method and
+    /// via the [`Worksheet::new()`] constructor. The first method ties the
+    /// worksheet to the workbook object that will write it automatically when
+    /// the file is saved, whereas the second method creates a worksheet that is
+    /// independent of a workbook. This has certain advantages in keeping the
+    /// worksheet free of the workbook borrow checking until you wish to add it.
+    ///
+    /// When working with the independent worksheet object you can add it to a
+    /// workbook using `push_worksheet()`, see the example below.
+    ///
+    /// # Arguments
+    ///
+    /// * `worksheet` - The worksheet to add to the workbook.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a standalone worksheet
+    /// object and then adding to a workbook.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_push_worksheet.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///     let mut worksheet = Worksheet::new();
+    ///
+    ///     // Use the worksheet object.
+    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///
+    ///     // Add it to the workbook.
+    ///     workbook.push_worksheet(worksheet);
+    ///
+    ///     // Save the workbook.
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_push_worksheet.png">
+    ///
+    pub fn push_worksheet(&mut self, mut worksheet: Worksheet) {
+        if worksheet.name().is_empty() {
+            let name = format!("Sheet{}", self.worksheets.len() + 1);
+            worksheet.set_name(&name).unwrap();
+        }
+
+        self.worksheets.push(worksheet);
+    }
 
     /// Save the Workbook as an xlsx file.
     ///

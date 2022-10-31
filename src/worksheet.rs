@@ -139,13 +139,78 @@ pub struct Worksheet {
     use_future_functions: bool,
 }
 
+impl Default for Worksheet {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Worksheet {
     // -----------------------------------------------------------------------
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    // Create a new Worksheet struct.
-    pub(crate) fn new(name: String) -> Worksheet {
+    /// Create a new Worksheet object to represent an Excel worksheet.
+    ///
+    /// The `Worksheet::new()` constructor is used to create a new Excel
+    /// worksheet object. This can be used to write data to a worksheet prior to
+    /// adding it to a workbook.
+    ///
+    /// There are two way of creating a worksheet object with rust_xlsxwriter:
+    /// via the [`workbook.add_worksheet()`](Workbook.add_worksheet) method and
+    /// via the [`Worksheet::new()`] constructor. The first method ties the
+    /// worksheet to the workbook object that will write it automatically when
+    /// the file is saved, whereas the second method creates a worksheet that is
+    /// independent of a workbook. This has certain advantages in keeping the
+    /// worksheet free of the workbook borrow checking until you wish to add it.
+    ///
+    /// When working with an independent worksheet object you will need to add
+    /// it to a workbook using
+    /// [`workbook.push_worksheet`](Workbook.push_worksheet) in order for it to
+    /// be written to a file.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating new worksheet objects and
+    /// then adding them to a workbook.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_new.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     // Create a new workbook.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Create new worksheets.
+    ///     let mut worksheet1 = Worksheet::new();
+    ///     let mut worksheet2 = Worksheet::new();
+    ///
+    ///     // Use the first workbook.
+    ///     worksheet1.write_string_only(0, 0, "Hello")?;
+    ///     worksheet1.write_string_only(1, 0, "Sheet1")?;
+    ///
+    ///     // Use the second workbook.
+    ///     worksheet2.write_string_only(0, 0, "Hello")?;
+    ///     worksheet2.write_string_only(1, 0, "Sheet2")?;
+    ///
+    ///     // Add the worksheets to the workbook.
+    ///     workbook.push_worksheet(worksheet1);
+    ///     workbook.push_worksheet(worksheet2);
+    ///
+    ///     // Save the workbook.
+    ///     workbook.save("worksheets.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_new.png">
+    ///
+    pub fn new() -> Worksheet {
         let writer = XMLWriter::new();
         let table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
         let col_names: HashMap<ColNum, String> = HashMap::new();
@@ -164,7 +229,7 @@ impl Worksheet {
 
         Worksheet {
             writer,
-            name,
+            name: "".to_string(),
             selected: false,
             uses_string_table: false,
             has_dynamic_arrays: false,
@@ -5006,7 +5071,7 @@ mod tests {
 
     #[test]
     fn test_assemble() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
         let mut string_table = SharedStringsTable::new();
 
         worksheet.selected = true;
@@ -5217,7 +5282,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_1() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (0..17).enumerate() {
             worksheet
@@ -5233,7 +5298,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_2() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (1..18).enumerate() {
             worksheet
@@ -5249,7 +5314,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_3() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (2..19).enumerate() {
             worksheet
@@ -5265,7 +5330,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_4() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (3..20).enumerate() {
             worksheet
@@ -5281,7 +5346,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_5() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (4..21).enumerate() {
             worksheet
@@ -5297,7 +5362,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_6() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (5..22).enumerate() {
             worksheet
@@ -5313,7 +5378,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_7() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (6..23).enumerate() {
             worksheet
@@ -5329,7 +5394,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_8() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (7..24).enumerate() {
             worksheet
@@ -5345,7 +5410,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_9() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (8..25).enumerate() {
             worksheet
@@ -5361,7 +5426,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_10() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (9..26).enumerate() {
             worksheet
@@ -5377,7 +5442,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_11() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (10..27).enumerate() {
             worksheet
@@ -5393,7 +5458,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_12() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (11..28).enumerate() {
             worksheet
@@ -5409,7 +5474,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_13() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (12..29).enumerate() {
             worksheet
@@ -5425,7 +5490,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_14() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (13..30).enumerate() {
             worksheet
@@ -5441,7 +5506,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_15() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (14..31).enumerate() {
             worksheet
@@ -5457,7 +5522,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_16() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (15..32).enumerate() {
             worksheet
@@ -5473,7 +5538,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_17() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (16..33).enumerate() {
             worksheet
@@ -5489,7 +5554,7 @@ mod tests {
 
     #[test]
     fn test_calculate_spans_18() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         for (col_num, row_num) in (16..33).enumerate() {
             worksheet
@@ -5505,7 +5570,7 @@ mod tests {
 
     #[test]
     fn check_invalid_worksheet_names() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         let result = worksheet.set_name("");
         assert!(matches!(result, Err(XlsxError::SheetnameCannotBeBlank)));
@@ -5580,7 +5645,7 @@ mod tests {
 
     #[test]
     fn get_name() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         let got = worksheet.name();
         assert_eq!("", got);
@@ -5593,7 +5658,7 @@ mod tests {
 
     #[test]
     fn check_dimensions() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
         let format = Format::default();
 
         assert_eq!(worksheet.check_dimensions(ROW_MAX, 0), false);
@@ -5632,7 +5697,7 @@ mod tests {
 
     #[test]
     fn long_string() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
         let chars: [u8; 32_768] = [64; 32_768];
         let long_string = std::str::from_utf8(&chars);
 
@@ -5642,7 +5707,7 @@ mod tests {
 
     #[test]
     fn date_times() {
-        let mut worksheet = Worksheet::new("".to_string());
+        let mut worksheet = Worksheet::new();
 
         // Test date and time
         let datetime = NaiveDate::from_ymd(1899, 12, 31).and_hms_milli(0, 0, 0, 0);

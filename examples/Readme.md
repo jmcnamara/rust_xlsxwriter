@@ -150,6 +150,9 @@ documentation and generally show how an individual function works.
 * doc_workbook_new.rs - Demonstrates creating a simple workbook, with one
   unused worksheet.
 
+* doc_workbook_push_worksheet.rs - Demonstrates creating a standalone
+  worksheet object and then adding it to a workbook.
+
 * doc_workbook_save.rs - Demonstrates creating a simple workbook, with one
   unused worksheet.
 
@@ -197,6 +200,9 @@ documentation and generally show how an individual function works.
   syntax errors.
 
 * doc_worksheet_name.rs - Demonstrates getting a worksheet name.
+
+* doc_worksheet_new.rs - Demonstrates creating new worksheet objects and
+  then adding them to a workbook.
 
 * doc_worksheet_set_column_format.rs - Demonstrates setting the format for
   a column in Excel.
