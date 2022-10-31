@@ -5,18 +5,53 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2022-10-31
+
+**Note, this version contains a major backward incompatible API change where it
+restructures the Workbook constructor/destructor sequence and introduces a
+`save()` method to replace `close()`.**
+
+### Changed
+
+- The [`Workbook::new()`] method no longer takes a filename. Instead the naming
+  of the file has move to a [`workbook.save()`] method which replaces
+  `workbook.close()`.
+- There are now supporting [`workbook.save_to_path()`] and
+  [`workbook.save_to_buffer()`] methods.
+
+### Added
+
+- Added new methods to get references to worksheet objects used by the workbook:
+
+  - [`workbook.worksheet_from_name()`]
+  - [`workbook.worksheet_from_index()`]
+  - [`workbook.worksheets_mut()`]
+
+- Made the [`Worksheet::new()`] method public and added the
+  [`workbook.push_worksheet()`] to add Worksheet instances to a Workbook. See
+  also the `rust_xlsxwriter` documentation on [Creating Worksheets] and working
+  with the borrow checker.
+
+[`Workbook::new()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.new
+[`Worksheet::new()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet::new.html#method.
+[`workbook.save()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.save
+[Creating Worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
+[`workbook.save_to_path()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.save_to_path
+[`workbook.save_to_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.save_to_buffer
+[`workbook.worksheets_mut()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.worksheets_mut
+[`workbook.push_worksheet()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.push_worksheet
+[`workbook.worksheet_from_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.worksheet_from_name
+[`workbook.worksheet_from_index()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.worksheet_from_index
+
+
 ## [0.8.0] - 2022-10-28
 
 ### Added
 
-- Added support for creating files from paths via [`workbook.new_from_path()`].
+- Added support for creating files from paths via `workbook.new_from_path()`.
 
-- Added support for creating file to a buffer via [`workbook.new_from_buffer()`] and [`workbook.close_to_buffer()`].
+- Added support for creating file to a buffer via `workbook.new_from_buffer()` and `workbook.close_to_buffer()`.
 
-
-[`workbook.new_from_path()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.new_from_path
-[`workbook.new_from_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.new_from_buffer
-[`workbook.close_to_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.close_to_buffer
 
 
 ## [0.7.0] - 2022-10-22
