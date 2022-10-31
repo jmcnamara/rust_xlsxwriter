@@ -31,7 +31,8 @@ fn test_print_across01() {
         .ignore_elements("xl/worksheets/sheet1.xml", "<pageMargins")
         .initialize();
 
-    _ = create_new_xlsx_file(test_runner.output_file());
+    let result = create_new_xlsx_file(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

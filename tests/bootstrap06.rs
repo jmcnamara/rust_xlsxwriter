@@ -24,7 +24,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 fn bootstrap06_write_string() {
     let test_runner = common::TestRunner::new("bootstrap06").initialize();
 
-    _ = create_new_xlsx_file(test_runner.output_file());
+    let result = create_new_xlsx_file(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

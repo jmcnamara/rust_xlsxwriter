@@ -42,7 +42,8 @@ fn bootstrap39_future_function_1() {
         .ignore_calc_chain()
         .initialize();
 
-    _ = create_new_xlsx_file_1(test_runner.output_file());
+    let result = create_new_xlsx_file_1(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -55,7 +56,8 @@ fn bootstrap39_future_function_2() {
         .ignore_calc_chain()
         .initialize();
 
-    _ = create_new_xlsx_file_2(test_runner.output_file());
+    let result = create_new_xlsx_file_2(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

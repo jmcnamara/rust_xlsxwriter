@@ -29,7 +29,8 @@ fn test_array_formula04() {
         .ignore_calc_chain()
         .initialize();
 
-    _ = create_new_xlsx_file(test_runner.output_file());
+    let result = create_new_xlsx_file(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

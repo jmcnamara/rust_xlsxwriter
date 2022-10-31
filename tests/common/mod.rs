@@ -4,6 +4,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
+#[macro_export]
+macro_rules! assert_result {
+    ( $x:expr ) => {
+        match $x {
+            Ok(result) => result,
+            Err(e) => panic!("\n!\n! XlsxError:\n! {}\n!\n", e),
+        }
+    };
+}
+
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 use regex::Regex;

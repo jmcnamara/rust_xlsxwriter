@@ -54,7 +54,8 @@ fn bootstrap07_write_repeated_strings() {
         .unique("1")
         .initialize();
 
-    _ = create_new_xlsx_file1(test_runner.output_file());
+    let result = create_new_xlsx_file1(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -66,7 +67,8 @@ fn bootstrap07_multi_save() {
         .unique("2")
         .initialize();
 
-    _ = create_new_xlsx_file2(test_runner.output_file());
+    let result = create_new_xlsx_file2(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

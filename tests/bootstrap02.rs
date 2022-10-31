@@ -66,7 +66,8 @@ fn bootstrap02_multiple_worksheets() {
         .unique("1")
         .initialize();
 
-    _ = create_new_xlsx_file1(test_runner.output_file());
+    let result = create_new_xlsx_file1(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -78,7 +79,8 @@ fn bootstrap02_multiple_new_worksheets() {
         .unique("2")
         .initialize();
 
-    _ = create_new_xlsx_file2(test_runner.output_file());
+    let result = create_new_xlsx_file2(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -90,7 +92,8 @@ fn bootstrap02_multiple_new_worksheets_default_names() {
         .unique("3")
         .initialize();
 
-    _ = create_new_xlsx_file3(test_runner.output_file());
+    let result = create_new_xlsx_file3(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

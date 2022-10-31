@@ -26,7 +26,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 fn test_print_area06() {
     let test_runner = common::TestRunner::new("print_area06").initialize();
 
-    _ = create_new_xlsx_file(test_runner.output_file());
+    let result = create_new_xlsx_file(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

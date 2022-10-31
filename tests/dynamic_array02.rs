@@ -71,7 +71,8 @@ fn test_dynamic_array02_1() {
         .unique("1")
         .initialize();
 
-    _ = create_new_xlsx_file_1(test_runner.output_file());
+    let result = create_new_xlsx_file_1(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -83,7 +84,8 @@ fn test_dynamic_array02_2() {
         .unique("2")
         .initialize();
 
-    _ = create_new_xlsx_file_2(test_runner.output_file());
+    let result = create_new_xlsx_file_2(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -95,7 +97,8 @@ fn test_dynamic_array02_3() {
         .unique("3")
         .initialize();
 
-    _ = create_new_xlsx_file_3(test_runner.output_file());
+    let result = create_new_xlsx_file_3(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -107,7 +110,8 @@ fn test_dynamic_array02_4() {
         .unique("4")
         .initialize();
 
-    _ = create_new_xlsx_file_4(test_runner.output_file());
+    let result = create_new_xlsx_file_4(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

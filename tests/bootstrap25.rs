@@ -53,7 +53,8 @@ fn bootstrap25_set_column() {
         .unique("1")
         .initialize();
 
-    _ = create_new_xlsx_file_1(test_runner.output_file());
+    let result = create_new_xlsx_file_1(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -65,7 +66,8 @@ fn bootstrap25_set_column_pixels() {
         .unique("2")
         .initialize();
 
-    _ = create_new_xlsx_file_2(test_runner.output_file());
+    let result = create_new_xlsx_file_2(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

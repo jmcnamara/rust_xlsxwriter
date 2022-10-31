@@ -27,7 +27,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 fn test_repeat03() {
     let test_runner = common::TestRunner::new("repeat03").initialize();
 
-    _ = create_new_xlsx_file(test_runner.output_file());
+    let result = create_new_xlsx_file(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

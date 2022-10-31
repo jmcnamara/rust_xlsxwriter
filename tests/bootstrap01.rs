@@ -86,7 +86,8 @@ fn bootstrap01_single_worksheet() {
         .unique("1")
         .initialize();
 
-    _ = create_new_xlsx_file_1(test_runner.output_file());
+    let result = create_new_xlsx_file_1(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -98,7 +99,8 @@ fn bootstrap01_add_default_worksheet() {
         .unique("2")
         .initialize();
 
-    _ = create_new_xlsx_file_2(test_runner.output_file());
+    let result = create_new_xlsx_file_2(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -110,7 +112,8 @@ fn bootstrap01_new_from_path() {
         .unique("3")
         .initialize();
 
-    _ = create_new_xlsx_file_3(test_runner.output_file());
+    let result = create_new_xlsx_file_3(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -122,7 +125,8 @@ fn bootstrap01_new_from_pathbuf() {
         .unique("4")
         .initialize();
 
-    _ = create_new_xlsx_file_4(test_runner.output_file());
+    let result = create_new_xlsx_file_4(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -134,7 +138,8 @@ fn bootstrap01_new_from_buffer() {
         .unique("5")
         .initialize();
 
-    _ = create_new_xlsx_file_5(test_runner.output_file());
+    let result = create_new_xlsx_file_5(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -146,7 +151,8 @@ fn bootstrap01_multi_save1() {
         .unique("6")
         .initialize();
 
-    _ = create_new_xlsx_file_6(test_runner.output_file());
+    let result = create_new_xlsx_file_6(test_runner.output_file());
+    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
