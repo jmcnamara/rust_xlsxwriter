@@ -4,7 +4,7 @@
 //! The following example demonstrates operating on the vector of all the
 //! worksheets in a workbook.
 
-use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -13,10 +13,6 @@ fn main() -> Result<(), XlsxError> {
     let _ = workbook.add_worksheet();
     let _ = workbook.add_worksheet();
     let _ = workbook.add_worksheet();
-
-    let worksheet4 = Worksheet::new();
-
-    workbook.worksheets_mut().push(worksheet4);
 
     // Write the same data to all three worksheets.
     for worksheet in workbook.worksheets_mut() {

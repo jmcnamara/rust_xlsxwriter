@@ -166,7 +166,12 @@ impl Workbook {
     /// existence at a time, see the example below. This limitation can be
     /// avoided, if necessary, by creating standalone Worksheet objects via
     /// [`Worksheet::new()`] and then later adding them to the workbook with
-    /// [[`workbook.push_worksheet`](Workbook.push_worksheet).
+    /// [`workbook.push_worksheet`](Workbook::push_worksheet).
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Creating worksheets]
+    /// and working with the borrow checker.
+    ///
+    /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
     ///
     /// # Examples
     ///
@@ -230,7 +235,11 @@ impl Workbook {
     /// apply so you will have to give up ownership of any other worksheet
     /// reference prior to calling this method. See the example below.
     ///
-    /// See also [`worksheet_from_name()`](Workbook::worksheet_from_name).
+    /// See also [`worksheet_from_name()`](Workbook::worksheet_from_name) and
+    /// the `rust_xlsxwriter` documentation on [Creating worksheets]
+    /// and working with the borrow checker.
+    ///
+    /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
     ///
     /// # Arguments
     ///
@@ -312,7 +321,9 @@ impl Workbook {
     /// [`worksheet.set_name()`](Worksheet::set_name). You can also use the
     /// [`worksheet.name()`](Worksheet::name) method to get the name.
     ///
-    /// See also [`worksheet_from_index()`](Workbook::worksheet_from_index).
+    /// See also [`worksheet_from_index()`](Workbook::worksheet_from_index) and
+    /// the `rust_xlsxwriter` documentation on [Creating worksheets] and working
+    /// with the borrow checker.
     ///
     /// # Arguments
     ///
@@ -385,6 +396,12 @@ impl Workbook {
     ///
     /// If you are careful you can also use some of the standard [slice]
     /// operations on the vector reference, see below.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Creating worksheets]
+    /// and working with the borrow checker.
+    ///
+    /// [Creating worksheets]:
+    ///     https://rustxlsxwriter.github.io/worksheet/create.html
     ///
     /// # Examples
     ///
@@ -485,6 +502,11 @@ impl Workbook {
     /// When working with the independent worksheet object you can add it to a
     /// workbook using `push_worksheet()`, see the example below.
     ///
+    /// See also the `rust_xlsxwriter` documentation on [Creating worksheets]
+    /// and working with the borrow checker.
+    ///
+    /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
+    ///
     /// # Arguments
     ///
     /// * `worksheet` - The worksheet to add to the workbook.
@@ -534,6 +556,13 @@ impl Workbook {
     ///
     /// The workbook `save()` method writes all the Workbook data to a new xlsx
     /// file. It will overwrite any existing file.
+    ///
+    /// The `save()` method can be called multiple times so it is possible to
+    /// get incremental files at different stages of a process, or to save the
+    /// same Workbook object to different file names. However, `save()` is an
+    /// expensive operation which assembles multiple files into an xlsx/zip
+    /// container so for performance reasons you shouldn't call it
+    /// unnecessarily.
     ///
     /// # Arguments
     ///

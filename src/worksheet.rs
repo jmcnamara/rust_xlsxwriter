@@ -157,17 +157,23 @@ impl Worksheet {
     /// adding it to a workbook.
     ///
     /// There are two way of creating a worksheet object with rust_xlsxwriter:
-    /// via the [`workbook.add_worksheet()`](Workbook.add_worksheet) method and
-    /// via the [`Worksheet::new()`] constructor. The first method ties the
-    /// worksheet to the workbook object that will write it automatically when
-    /// the file is saved, whereas the second method creates a worksheet that is
-    /// independent of a workbook. This has certain advantages in keeping the
-    /// worksheet free of the workbook borrow checking until you wish to add it.
+    /// via the [`workbook.add_worksheet()`](crate::Workbook::add_worksheet)
+    /// method and via the [`Worksheet::new()`] constructor. The first method
+    /// ties the worksheet to the workbook object that will write it
+    /// automatically when the file is saved, whereas the second method creates
+    /// a worksheet that is independent of a workbook. This has certain
+    /// advantages in keeping the worksheet free of the workbook borrow checking
+    /// until you wish to add it.
     ///
     /// When working with an independent worksheet object you will need to add
     /// it to a workbook using
-    /// [`workbook.push_worksheet`](Workbook.push_worksheet) in order for it to
-    /// be written to a file.
+    /// [`workbook.push_worksheet`](crate::Workbook::push_worksheet) in order
+    /// for it to be written to a file.
+    ///
+    /// See also the `rust_xlsxwriter` documentation on [Creating worksheets]
+    /// and working with the borrow checker.
+    ///
+    /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
     ///
     /// # Examples
     ///
