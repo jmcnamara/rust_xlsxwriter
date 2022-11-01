@@ -137,6 +137,7 @@ pub struct Worksheet {
     first_page_number: u16,
     default_result: String,
     use_future_functions: bool,
+    panes: Panes,
 }
 
 impl Default for Worksheet {
@@ -233,6 +234,11 @@ impl Worksheet {
             col_max: 0,
         };
 
+        let panes = Panes {
+            freeze_cell: (0, 0),
+            top_cell: (0, 0),
+        };
+
         Worksheet {
             writer,
             name: "".to_string(),
@@ -282,6 +288,7 @@ impl Worksheet {
             first_page_number: 0,
             default_result: "0".to_string(),
             use_future_functions: false,
+            panes,
         }
     }
 
@@ -2813,6 +2820,153 @@ impl Worksheet {
         self
     }
 
+    /// Freeze panes in a worksheet.
+    ///
+    /// The `set_freeze_panes()` method can be used to divide a worksheet into
+    /// horizontal or vertical regions known as panes and to “freeze” these
+    /// panes so that the splitter bars are not visible.
+    ///
+    /// As with Excel the split is to the top and left of the cell. So to freeze
+    /// the top row and leftmost column you would use `(1, 1)` (zero-indexed).
+    /// Also, you can set one of the row and col parameters as 0 if you do not
+    /// want either the vertical or horizontal split. See the example below.
+    ///
+    /// In Excel it is also possible to set "split" panes without freezing them.
+    /// That feature isn't currently supported by rust_xlsxwriter.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet panes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_freeze_panes.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let mut worksheet1 = Worksheet::new();
+    /// #     let mut worksheet2 = Worksheet::new();
+    /// #     let mut worksheet3 = Worksheet::new();
+    /// #
+    /// #     worksheet1.write_string_only(0, 0, "Scroll down")?;
+    /// #     worksheet2.write_string_only(0, 0, "Scroll across")?;
+    /// #     worksheet3.write_string_only(0, 0, "Scroll down or across")?;
+    ///
+    ///     // Freeze the top row only.
+    ///     worksheet1.set_freeze_panes(1, 0)?;
+    ///
+    ///     // Freeze the leftmost column only.
+    ///     worksheet2.set_freeze_panes(0, 1)?;
+    ///
+    ///     // Freeze the top row and leftmost column.
+    ///     worksheet3.set_freeze_panes(1, 1)?;
+    ///
+    /// #     workbook.push_worksheet(worksheet1);
+    /// #     workbook.push_worksheet(worksheet2);
+    /// #     workbook.push_worksheet(worksheet3);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_freeze_panes.png">
+    ///
+    pub fn set_freeze_panes(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        self.panes.freeze_cell = (row, col);
+        Ok(self)
+    }
+
+    /// Set the top most cell in the scrolling area of a freeze pane.
+    ///
+    /// This method is used in conjunction with the
+    /// [`set_freeze_panes()`](Worksheet::set_freeze_panes) method to set the
+    /// top most visible cell in the scrolling range. For example you may want
+    /// to freeze the top row a but have the worksheet pre-scrolled so that cell
+    /// `A20` is visible in the scrolled area. See the example below.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet panes and also
+    /// setting the topmost visible cell in the scrolled area.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_freeze_panes_top_cell.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.write_string_only(0, 0, "Scroll down")?;
+    ///
+    ///     // Freeze the top row only.
+    ///     worksheet.set_freeze_panes(1, 0)?;
+    ///
+    ///     // Pre-scroll to the row 20.
+    ///     worksheet.set_freeze_panes_top_cell(19, 0)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_freeze_panes_top_cell.png">
+    ///
+    pub fn set_freeze_panes_top_cell(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        self.panes.top_cell = (row, col);
+        Ok(self)
+    }
+
     /// Set the printed page header caption.
     ///
     /// The `set_header()` method can be used to set the header for a worksheet.
@@ -4366,7 +4520,77 @@ impl Worksheet {
 
         attributes.push(("workbookViewId", "0".to_string()));
 
-        self.writer.xml_empty_tag_attr("sheetView", &attributes);
+        if self.panes.is_empty() {
+            self.writer.xml_empty_tag_attr("sheetView", &attributes);
+        } else {
+            self.writer.xml_start_tag_attr("sheetView", &attributes);
+            self.write_panes();
+            self.writer.xml_end_tag("sheetView");
+        }
+    }
+
+    // Write the elements associated with panes.
+    fn write_panes(&mut self) {
+        let row = self.panes.freeze_cell.0;
+        let col = self.panes.freeze_cell.1;
+
+        // Write the pane and selection elements.
+        if row > 0 && col > 0 {
+            self.write_pane("bottomRight");
+            self.write_selection(
+                "topRight",
+                &utility::rowcol_to_cell(0, col),
+                &utility::rowcol_to_cell(0, col),
+            );
+            self.write_selection(
+                "bottomLeft",
+                &utility::rowcol_to_cell(row, 0),
+                &utility::rowcol_to_cell(row, 0),
+            );
+            self.write_selection("bottomRight", "", "");
+        } else if col > 0 {
+            self.write_pane("topRight");
+            self.write_selection("topRight", "", "");
+        } else {
+            self.write_pane("bottomLeft");
+            self.write_selection("bottomLeft", "", "");
+        }
+    }
+
+    // Write the <pane> element.
+    fn write_pane(&mut self, active_pane: &str) {
+        let row = self.panes.freeze_cell.0;
+        let col = self.panes.freeze_cell.1;
+        let mut attributes = vec![];
+
+        if col > 0 {
+            attributes.push(("xSplit", col.to_string()));
+        }
+
+        if row > 0 {
+            attributes.push(("ySplit", row.to_string()));
+        }
+
+        attributes.push(("topLeftCell", self.panes.top_left()));
+        attributes.push(("activePane", active_pane.to_string()));
+        attributes.push(("state", "frozen".to_string()));
+
+        self.writer.xml_empty_tag_attr("pane", &attributes);
+    }
+
+    // Write the <selection> element.
+    fn write_selection(&mut self, position: &str, active_cell: &str, range: &str) {
+        let mut attributes = vec![("pane", position.to_string())];
+
+        if !active_cell.is_empty() {
+            attributes.push(("activeCell", active_cell.to_string()));
+        }
+
+        if !range.is_empty() {
+            attributes.push(("sqref", range.to_string()));
+        }
+
+        self.writer.xml_empty_tag_attr("selection", &attributes);
     }
 
     // Write the <sheetFormatPr> element.
@@ -5059,6 +5283,26 @@ enum PageView {
     Normal,
     PageLayout,
     PageBreaks,
+}
+
+#[derive(Clone)]
+struct Panes {
+    freeze_cell: (RowNum, ColNum),
+    top_cell: (RowNum, ColNum),
+}
+
+impl Panes {
+    fn is_empty(&self) -> bool {
+        self.freeze_cell.0 == 0 && self.freeze_cell.1 == 0
+    }
+
+    fn top_left(&self) -> String {
+        if self.top_cell.0 == 0 && self.top_cell.1 == 0 {
+            utility::rowcol_to_cell(self.freeze_cell.0, self.freeze_cell.1)
+        } else {
+            utility::rowcol_to_cell(self.top_cell.0, self.top_cell.1)
+        }
+    }
 }
 
 // -----------------------------------------------------------------------

@@ -40,6 +40,9 @@ documentation and generally show how an individual function works.
 * app_hello_world.rs - Create a simple Hello World style Excel spreadsheet
   using the rust_xlsxwriter library.
 
+* app_panes.rs - A simple example of setting some "freeze" panes in
+  worksheets using the rust_xlsxwriter library.
+
 * app_perf_test.rs - Simple performance test for rust_xlsxwriter.
 
 * app_right_to_left.rs - Example of using rust_xlsxwriter to create a
@@ -220,6 +223,13 @@ documentation and generally show how an individual function works.
 * doc_worksheet_set_formula_result_default.rs - Demonstrates manually
   setting the default result for all non-calculated formulas in a
   worksheet.
+
+* doc_worksheet_set_freeze_panes.rs - Demonstrates setting the worksheet
+  panes.
+
+* doc_worksheet_set_freeze_panes_top_cell.rs - Demonstrates setting the
+  worksheet panes and also setting the topmost visible cell in the scrolled
+  area.
 
 * doc_worksheet_set_header.rs - Demonstrates setting the worksheet header.
 
