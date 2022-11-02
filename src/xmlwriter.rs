@@ -9,6 +9,7 @@ use std::borrow::Cow;
 use std::fs::File;
 use std::io::{BufWriter, Read, Seek, Write};
 
+use regex::Regex;
 use tempfile::tempfile;
 
 pub struct XMLWriter {
@@ -145,14 +146,14 @@ impl XMLWriter {
             write!(
                 &mut self.xmlfile,
                 r#"<si><t xml:space="preserve">{}</t></si>"#,
-                escape_si_data(string)
+                escape_si_data(&escape_xml_escapes(string))
             )
             .expect("Couldn't write to file");
         } else {
             write!(
                 &mut self.xmlfile,
                 "<si><t>{}</t></si>",
-                escape_si_data(string)
+                escape_si_data(&escape_xml_escapes(string))
             )
             .expect("Couldn't write to file");
         }
@@ -270,6 +271,16 @@ where
     }
 
     Cow::Borrowed(original)
+}
+
+// Excel escapes control characters with _xHHHH_ and also escapes any literal
+// strings of that type by encoding the leading underscore. So "\0" -> _x0000_
+// and "_x0000_" -> _x005F_x0000_.
+fn escape_xml_escapes(si_string: &str) -> Cow<str> {
+    lazy_static! {
+        static ref XML_ESCAPE: Regex = Regex::new(r"(_x[0-9a-fA-F]{4}_)").unwrap();
+    }
+    XML_ESCAPE.replace_all(si_string, "_x005F$1")
 }
 
 // -----------------------------------------------------------------------
