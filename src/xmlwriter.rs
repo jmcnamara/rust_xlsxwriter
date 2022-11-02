@@ -145,12 +145,16 @@ impl XMLWriter {
             write!(
                 &mut self.xmlfile,
                 r#"<si><t xml:space="preserve">{}</t></si>"#,
-                escape_data(string)
+                escape_si_data(string)
             )
             .expect("Couldn't write to file");
         } else {
-            write!(&mut self.xmlfile, "<si><t>{}</t></si>", escape_data(string))
-                .expect("Couldn't write to file");
+            write!(
+                &mut self.xmlfile,
+                "<si><t>{}</t></si>",
+                escape_si_data(string)
+            )
+            .expect("Couldn't write to file");
         }
     }
 
@@ -170,6 +174,12 @@ pub fn escape_attributes(attribute: &str) -> Cow<str> {
 // and newline are not escaped by Excel.
 pub fn escape_data(data: &str) -> Cow<str> {
     escape_string(data, match_data_html_char)
+}
+
+// Escape XML characters in shared strings. In particular we need to escape
+// control and non-printing characters in the range '\x00' - '\x1F'.
+pub fn escape_si_data(data: &str) -> Cow<str> {
+    escape_string(data, match_shared_string_char)
 }
 
 // Match function for escape_attributes().
@@ -194,10 +204,53 @@ fn match_data_html_char(ch: char) -> Option<&'static str> {
     }
 }
 
+// Match function for escape_si_data(). Excel escapes control characters and
+// other non-printing characters in the range '\x00' - '\x1F' with _xHHHH_.
+fn match_shared_string_char(ch: char) -> Option<&'static str> {
+    match ch {
+        '\x00' => Some("_x0000_"),
+        '\x01' => Some("_x0001_"),
+        '\x02' => Some("_x0002_"),
+        '\x03' => Some("_x0003_"),
+        '\x04' => Some("_x0004_"),
+        '\x05' => Some("_x0005_"),
+        '\x06' => Some("_x0006_"),
+        '\x07' => Some("_x0007_"),
+        '\x08' => Some("_x0008_"),
+        // No escape required for '\x09' = '\t'
+        // No escape required for '\x0A' = '\n'
+        '\x0B' => Some("_x000B_"),
+        '\x0C' => Some("_x000C_"),
+        '\x0D' => Some("_x000D_"),
+        '\x0E' => Some("_x000E_"),
+        '\x0F' => Some("_x000F_"),
+        '\x10' => Some("_x0010_"),
+        '\x11' => Some("_x0011_"),
+        '\x12' => Some("_x0012_"),
+        '\x13' => Some("_x0013_"),
+        '\x14' => Some("_x0014_"),
+        '\x15' => Some("_x0015_"),
+        '\x16' => Some("_x0016_"),
+        '\x17' => Some("_x0017_"),
+        '\x18' => Some("_x0018_"),
+        '\x19' => Some("_x0019_"),
+        '\x1A' => Some("_x001A_"),
+        '\x1B' => Some("_x001B_"),
+        '\x1C' => Some("_x001C_"),
+        '\x1D' => Some("_x001D_"),
+        '\x1E' => Some("_x001E_"),
+        '\x1F' => Some("_x001F_"),
+        '&' => Some("&amp;"),
+        '<' => Some("&lt;"),
+        '>' => Some("&gt;"),
+        _ => None,
+    }
+}
+
 // Generic escape function with function pointer for the required handler.
-fn escape_string<H>(original: &str, char_handler: H) -> Cow<str>
+fn escape_string<F>(original: &str, char_handler: F) -> Cow<str>
 where
-    H: FnOnce(char) -> Option<&'static str> + Copy,
+    F: FnOnce(char) -> Option<&'static str> + Copy,
 {
     for (i, ch) in original.chars().enumerate() {
         if char_handler(ch).is_some() {
