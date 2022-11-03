@@ -2028,11 +2028,7 @@ impl Worksheet {
     /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels())
     /// method.
     ///
-    /// There is no way to specify "AutoFit" for a column in the Excel file
-    /// format. This feature is only available at runtime from within Excel. It
-    /// is possible to simulate "AutoFit" in your application by tracking the
-    /// maximum width of the data in the column as your write it and then
-    /// adjusting the column width at the end.
+    /// See also the [`set_autofit()`](Worksheet::set_autofit()) method.
     ///
     /// # Arguments
     ///
@@ -2095,14 +2091,8 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        // Update an existing col metadata object or create a new one.
-        match self.changed_cols.get_mut(&col) {
-            Some(col_options) => col_options.width = width,
-            None => {
-                let col_options = ColOptions { width, xf_index: 0 };
-                self.changed_cols.insert(col, col_options);
-            }
-        }
+        // Store the column width.
+        self.store_column_width(col, width, false);
 
         Ok(self)
     }
@@ -2115,11 +2105,7 @@ impl Worksheet {
     /// To set the width in Excel character units use the
     /// [`set_column_width()`](Worksheet::set_column_width()) method.
     ///
-    /// There is no way to specify "AutoFit" for a column in the Excel file
-    /// format. This feature is only available at runtime from within Excel. It
-    /// is possible to simulate "AutoFit" in your application by tracking the
-    /// maximum width of the data in the column as your write it and then
-    /// adjusting the column width at the end.
+    /// See also the [`set_autofit()`](Worksheet::set_autofit()) method.
     ///
     /// # Arguments
     ///
@@ -2272,6 +2258,7 @@ impl Worksheet {
                 let col_options = ColOptions {
                     width: DEFAULT_COL_WIDTH,
                     xf_index,
+                    is_auto_width: true,
                 };
                 self.changed_cols.insert(col, col_options);
             }
@@ -3955,6 +3942,121 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// Autofit the worksheet column widths, approximately.
+    ///
+    /// Simulate column auto-fitting based on the data in the worksheet columns.
+    ///
+    /// There is no option available in the xlsx file format that
+    /// rust_xlsxwriter can use to say "autofit columns on loading".
+    /// Auto-fitting of columns is something that Excel does at runtime when it
+    /// has access to all of the worksheet information as well as the Windows
+    /// functions for calculating display areas based on fonts and formatting.
+    ///
+    /// As such the autofit widths that are calculated by
+    /// `worksheet.set_autofit()` are based on simple heuristics. This isn't
+    /// perfect but for most cases it should be sufficient and if not you can
+    /// set your own widths, see below. It is intended that the `set_autofit()`
+    /// fitting algorithm will be improved in upcoming releases.
+    ///
+    /// The `worksheet.set_autofit()` method ignores columns that already have
+    /// an explicit column width set via
+    /// [`set_column_width()`](Worksheet::set_column_width()) or
+    /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()). You
+    /// can use these methods if you wish to override the `set_autofit()`
+    /// values.
+    ///
+    /// **Note**, `set_autofit()` iterates through all the cells in a worksheet
+    /// that have been populated with data and performs a length calculation on
+    /// each one, so it can have a performance overhead for bigger worksheets.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates auto-fitting the worksheet column
+    /// widths based on the data in the columns. See all the [Autofitting
+    /// Columns] example in the user guide/examples directory.
+    ///
+    /// [Autofitting Columns]:
+    ///     https://rustxlsxwriter.github.io/examples/autofit.html
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_autofit.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some data
+    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.write_string_only(0, 1, "Hello")?;
+    ///     worksheet.write_string_only(1, 1, "Hello World")?;
+    ///     worksheet.write_number_only(0, 2, 123)?;
+    ///     worksheet.write_number_only(0, 3, 123456)?;
+    ///
+    ///     // Autofit the columns.
+    ///     worksheet.set_autofit();
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_autofit.png">
+    ///
+    pub fn set_autofit(&mut self) -> &mut Worksheet {
+        let mut max_widths: HashMap<ColNum, f64> = HashMap::new();
+
+        // Iterate over all of the data in the worksheet and find the max data
+        // width for each column. This is currently a crude approximation. It
+        // will be improved over time.
+        for row_num in self.dimensions.row_min..=self.dimensions.row_max {
+            if let Some(columns) = self.table.get(&row_num) {
+                for col_num in self.dimensions.col_min..=self.dimensions.col_max {
+                    if let Some(cell) = columns.get(&col_num) {
+                        let string_len = match cell {
+                            CellType::Blank { .. } => 0.0,
+                            CellType::Boolean { .. } => 5.5,
+                            CellType::Formula { .. } => 0.0,
+                            CellType::ArrayFormula { .. } => 0.0,
+                            CellType::String { string, .. } => string.len() as f64,
+                            CellType::Number { number, .. } => {
+                                1.2 * number.to_string().len() as f64
+                            }
+                        };
+                        match max_widths.get_mut(&col_num) {
+                            // Update the max for the column.
+                            Some(max) => {
+                                if string_len > *max {
+                                    *max = string_len
+                                }
+                            }
+                            None => {
+                                // Add a new column entry and maximum.
+                                max_widths.insert(col_num, string_len);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Set the max width for each column.
+        for (col, width) in max_widths.iter() {
+            if *width > 0.0 {
+                self.store_column_width(*col, *width, true);
+            }
+        }
+
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -4204,6 +4306,41 @@ impl Worksheet {
                 let mut columns: HashMap<ColNum, CellType> = HashMap::new();
                 columns.insert(col, cell);
                 self.table.insert(row, columns);
+            }
+        }
+    }
+
+    // Store the column width in Excel character units. Updates to the width can
+    // come from the external User or from the internal Autofit routines.
+    fn store_column_width(&mut self, col: ColNum, width: f64, is_auto_width: bool) {
+        // Excel has a maximum limit of 255 units for the column width.
+        let mut width = width;
+        if width > 255.0 {
+            width = 255.0;
+        }
+
+        // Update an existing col metadata object or create a new one.
+        match self.changed_cols.get_mut(&col) {
+            Some(col_options) => {
+                // Note, the Autofit updater can only change the width if it
+                // hasn't already been explicitly set by the User.
+                if is_auto_width == col_options.is_auto_width {
+                    // Autofit or User can update the same type.
+                    col_options.width = width
+                } else if !is_auto_width {
+                    // User can update either type.
+                    col_options.width = width;
+                    col_options.is_auto_width = false;
+                }
+            }
+            None => {
+                // Create a new column metadata object.
+                let col_options = ColOptions {
+                    width,
+                    xf_index: 0,
+                    is_auto_width,
+                };
+                self.changed_cols.insert(col, col_options);
             }
         }
     }
@@ -5245,6 +5382,7 @@ struct RowOptions {
 struct ColOptions {
     width: f64,
     xf_index: u32,
+    is_auto_width: bool,
 }
 
 #[derive(Clone)]
