@@ -246,17 +246,16 @@ fn compare_xlsx_files(
         // Remove workbookView dimensions which are almost always different and
         // calcPr which can have different Excel version ids.
         if filename == "xl/workbook.xml" {
-            let re = Regex::new(r"<workbookView[^>]*>").unwrap();
-            exp_xml_string = re
-                .replace_all(&exp_xml_string, "<workbookView/>")
-                .to_string();
-            got_xml_string = re
-                .replace_all(&got_xml_string, "<workbookView/>")
-                .to_string();
+            let re = Regex::new(
+                r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#,
+            )
+            .unwrap();
+            exp_xml_string = re.replace(&exp_xml_string, "<workbookView").to_string();
+            got_xml_string = re.replace(&got_xml_string, "<workbookView").to_string();
 
             let re = Regex::new(r"<calcPr[^>]*>").unwrap();
-            exp_xml_string = re.replace_all(&exp_xml_string, "<calcPr/>").to_string();
-            got_xml_string = re.replace_all(&got_xml_string, "<calcPr/>").to_string();
+            exp_xml_string = re.replace(&exp_xml_string, "<calcPr/>").to_string();
+            got_xml_string = re.replace(&got_xml_string, "<calcPr/>").to_string();
         }
 
         // Convert the xml strings to vectors for easier comparison.

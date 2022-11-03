@@ -83,6 +83,8 @@ pub struct Workbook {
     pub(crate) fill_count: u16,
     pub(crate) border_count: u16,
     pub(crate) num_format_count: u16,
+    active_tab: u16,
+    first_sheet: u16,
     defined_names: Vec<DefinedName>,
 }
 
@@ -147,6 +149,8 @@ impl Workbook {
             fill_count: 0,
             border_count: 0,
             num_format_count: 0,
+            active_tab: 0,
+            first_sheet: 0,
             defined_names: vec![],
         }
     }
@@ -559,7 +563,7 @@ impl Workbook {
     ///
     /// The `save()` method can be called multiple times so it is possible to
     /// get incremental files at different stages of a process, or to save the
-    /// same Workbook object to different file names. However, `save()` is an
+    /// same Workbook object to different   file names. However, `save()` is an
     /// expensive operation which assembles multiple files into an xlsx/zip
     /// container so for performance reasons you shouldn't call it
     /// unnecessarily.
@@ -742,8 +746,8 @@ impl Workbook {
         if self.worksheets.is_empty() {
             self.add_worksheet();
         }
-        // Ensure one sheet is selected.
-        self.worksheets[0].selected = true;
+        // Ensure one sheet is active/selected.
+        self.set_active_worksheets();
 
         // Convert any local formats to workbook/global formats.
         let mut worksheet_formats: Vec<Vec<Format>> = vec![];
@@ -795,6 +799,23 @@ impl Workbook {
         };
 
         Ok(buf)
+    }
+
+    // Iterates through the worksheets and find which is the user defined Active
+    // sheet. If none has been set then default to the first sheet, like Excel.
+    fn set_active_worksheets(&mut self) {
+        let mut active_index = 0;
+
+        for (i, worksheet) in self.worksheets.iter().enumerate() {
+            if worksheet.active {
+                active_index = i;
+            }
+            if worksheet.first_sheet {
+                self.first_sheet = i as u16;
+            }
+        }
+        self.worksheets[active_index].set_active(true);
+        self.active_tab = active_index as u16;
     }
 
     // Evaluate and clone formats from worksheets into a workbook level vector
@@ -1128,12 +1149,23 @@ impl Workbook {
 
     // Write the <workbookView> element.
     fn write_workbook_view(&mut self) {
-        let attributes = vec![
+        let mut attributes = vec![
             ("xWindow", "240".to_string()),
             ("yWindow", "15".to_string()),
             ("windowWidth", "16095".to_string()),
             ("windowHeight", "9660".to_string()),
         ];
+
+        // Store the firstSheet attribute when it isn't the first sheet.
+        if self.first_sheet > 0 {
+            let first_sheet = self.first_sheet + 1;
+            attributes.push(("firstSheet", first_sheet.to_string()));
+        }
+
+        // Store the activeTab attribute when it isn't the first sheet.
+        if self.active_tab > 0 {
+            attributes.push(("activeTab", self.active_tab.to_string()));
+        }
 
         self.writer.xml_empty_tag_attr("workbookView", &attributes);
     }
@@ -1142,30 +1174,31 @@ impl Workbook {
     fn write_sheets(&mut self) {
         self.writer.xml_start_tag("sheets");
 
-        let mut worksheet_names = vec![];
+        let mut worksheet_data = vec![];
         for worksheet in self.worksheets.iter() {
-            worksheet_names.push(worksheet.name.clone());
+            worksheet_data.push((worksheet.name.clone(), worksheet.hidden));
         }
 
-        for (index, name) in worksheet_names.iter().enumerate() {
+        for (index, data) in worksheet_data.iter().enumerate() {
             // Write the sheet element.
-            self.write_sheet(name, (index + 1) as u16);
+            self.write_sheet(&data.0, data.1, (index + 1) as u16);
         }
 
         self.writer.xml_end_tag("sheets");
     }
 
     // Write the <sheet> element.
-    fn write_sheet(&mut self, name: &str, index: u16) {
-        //let name = name;
+    fn write_sheet(&mut self, name: &str, is_hidden: bool, index: u16) {
         let sheet_id = format!("{}", index);
         let ref_id = format!("rId{}", index);
 
-        let attributes = vec![
-            ("name", name.to_string()),
-            ("sheetId", sheet_id),
-            ("r:id", ref_id),
-        ];
+        let mut attributes = vec![("name", name.to_string()), ("sheetId", sheet_id)];
+
+        if is_hidden {
+            attributes.push(("state", "hidden".to_string()));
+        }
+
+        attributes.push(("r:id", ref_id));
 
         self.writer.xml_empty_tag_attr("sheet", &attributes);
     }

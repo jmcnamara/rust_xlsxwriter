@@ -2265,6 +2265,11 @@ impl XlsxColor {
         format!("{:06X}", self.value())
     }
 
+    // Get the u32 RGB value for a color, in ARGB format.
+    pub(crate) fn hex_argb_value(self) -> String {
+        format!("FF{:06X}", self.value())
+    }
+
     // Check if the RGB value is in the correct range.
     pub(crate) fn is_valid(self) -> bool {
         if let XlsxColor::RGB(color) = self {

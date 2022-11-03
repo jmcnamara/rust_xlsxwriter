@@ -15,8 +15,8 @@ use std::mem;
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::shared_strings_table::SharedStringsTable;
-use crate::utility;
 use crate::xmlwriter::XMLWriter;
+use crate::{utility, XlsxColor};
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
 /// in a worksheet is 1,048,576.
@@ -91,7 +91,10 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 pub struct Worksheet {
     pub(crate) writer: XMLWriter,
     pub(crate) name: String,
+    pub(crate) active: bool,
     pub(crate) selected: bool,
+    pub(crate) hidden: bool,
+    pub(crate) first_sheet: bool,
     pub(crate) uses_string_table: bool,
     pub(crate) has_dynamic_arrays: bool,
     pub(crate) print_area: String,
@@ -106,6 +109,7 @@ pub struct Worksheet {
     changed_rows: HashMap<RowNum, RowOptions>,
     changed_cols: HashMap<ColNum, ColOptions>,
     page_setup_changed: bool,
+    tab_color: XlsxColor,
     fit_to_page: bool,
     fit_width: u16,
     fit_height: u16,
@@ -242,7 +246,10 @@ impl Worksheet {
         Worksheet {
             writer,
             name: "".to_string(),
+            active: false,
             selected: false,
+            hidden: false,
+            first_sheet: false,
             uses_string_table: false,
             has_dynamic_arrays: false,
             print_area: "".to_string(),
@@ -258,6 +265,7 @@ impl Worksheet {
             changed_cols,
             page_setup_changed: false,
             fit_to_page: false,
+            tab_color: XlsxColor::Automatic,
             fit_width: 1,
             fit_height: 1,
             paper_size: 0,
@@ -2530,6 +2538,266 @@ impl Worksheet {
         self
     }
 
+    /// Make a worksheet the active/initially visible worksheet in a workbook.
+    ///
+    /// The `set_active()` method is used to specify which worksheet is
+    /// initially visible in a multi-sheet workbook. If no worksheet is set then
+    /// the first worksheet is made the active worksheet, like in Excel.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting a worksheet as the visible
+    /// worksheet when a file is opened.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_active.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet1 = Worksheet::new();
+    ///     let worksheet3 = Worksheet::new();
+    ///     let mut worksheet2 = Worksheet::new();
+    ///
+    ///     worksheet2.set_active(true);
+    ///
+    /// #   workbook.push_worksheet(worksheet1);
+    /// #   workbook.push_worksheet(worksheet2);
+    /// #   workbook.push_worksheet(worksheet3);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_active.png">
+    ///
+    pub fn set_active(&mut self, enable: bool) -> &mut Worksheet {
+        self.active = enable;
+
+        // Activated worksheets must also be selected and cannot be hidden.
+        if self.active {
+            self.selected = true;
+            self.hidden = false;
+        }
+
+        self
+    }
+
+    /// Set a worksheet tab as selected.
+    ///
+    /// The `set_selected()` method is used to indicate that a worksheet is
+    /// selected in a multi-sheet workbook.
+    ///
+    /// A selected worksheet has its tab highlighted. Selecting worksheets is a
+    /// way of grouping them together so that, for example, several worksheets
+    /// could be printed in one go. A worksheet that has been activated via the
+    /// [`set_active()`](Worksheet::set_active) method will also appear as
+    /// selected.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates selecting worksheet in a workbook. The
+    /// active worksheet is selected by default so in this example the first two
+    /// worksheets are selected.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_selected.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet1 = Worksheet::new();
+    ///     let worksheet3 = Worksheet::new();
+    ///     let mut worksheet2 = Worksheet::new();
+    ///
+    ///     worksheet2.set_selected(true);
+    ///
+    /// #   workbook.push_worksheet(worksheet1);
+    /// #   workbook.push_worksheet(worksheet2);
+    /// #   workbook.push_worksheet(worksheet3);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_selected.png">
+    ///
+    pub fn set_selected(&mut self, enable: bool) -> &mut Worksheet {
+        self.selected = enable;
+
+        // Selected worksheets cannot be hidden.
+        if self.selected {
+            self.hidden = false;
+        }
+
+        self
+    }
+
+    /// Hide a worksheet.
+    ///
+    /// The `set_hidden()` method is used to hide a worksheet. This can be used
+    /// to hide a worksheet in order to avoid confusing a user with intermediate
+    /// data or calculations.
+    ///
+    /// In Excel a hidden worksheet can not be activated or selected so this
+    /// method is mutually exclusive with the
+    /// [`set_active()`](Worksheet::set_active) and
+    /// [`set_selected()`](Worksheet::set_selected) methods. In addition, since
+    /// the first worksheet will default to being the active worksheet, you
+    /// cannot hide the first worksheet without activating another sheet.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates hiding a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_hidden.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet1 = Worksheet::new();
+    ///     let worksheet3 = Worksheet::new();
+    ///     let mut worksheet2 = Worksheet::new();
+    ///
+    ///     worksheet2.set_hidden(true);
+    ///
+    /// #    workbook.push_worksheet(worksheet1);
+    /// #    workbook.push_worksheet(worksheet2);
+    /// #    workbook.push_worksheet(worksheet3);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_hidden.png">
+    ///
+    pub fn set_hidden(&mut self, enable: bool) -> &mut Worksheet {
+        self.hidden = enable;
+
+        // Hidden worksheets cannot be active or hidden.
+        if self.hidden {
+            self.selected = false;
+            self.active = false;
+        }
+
+        self
+    }
+
+    /// Set current worksheet as the first visible sheet tab.
+    ///
+    /// The [`set_active()`](Worksheet::set_active)  method determines
+    /// which worksheet is initially selected. However, if there are a large
+    /// number of worksheets the selected worksheet may not appear on the
+    /// screen. To avoid this you can select which is the leftmost visible
+    /// worksheet tab using `set_first_sheet()`.
+    ///
+    /// This method is not required very often. The default is the first
+    /// worksheet.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_first_sheet(&mut self, enable: bool) -> &mut Worksheet {
+        self.first_sheet = enable;
+
+        // First visible worksheet cannot be hidden.
+        if self.selected {
+            self.hidden = false;
+        }
+        self
+    }
+
+    /// Set the color of the worksheet tab.
+    ///
+    /// The `set_tab_color()` method can be used to change the color of the
+    /// worksheet tab. This is useful for highlighting the important tab in a
+    /// group of worksheets.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The tab color property defined by a [`XlsxColor`] enum
+    ///   value.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates set the tab color of worksheets.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_tab_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, Worksheet, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     let mut worksheet1 = Worksheet::new();
+    ///     let mut worksheet2 = Worksheet::new();
+    ///     let mut worksheet3 = Worksheet::new();
+    ///     let mut worksheet4 = Worksheet::new();
+    ///
+    ///     worksheet1.set_tab_color(XlsxColor::Red);
+    ///     worksheet2.set_tab_color(XlsxColor::Green);
+    ///     worksheet3.set_tab_color(XlsxColor::RGB(0xFF9900));
+    ///
+    ///     // worksheet4 will have the default color.
+    ///     worksheet4.set_active(true);
+    ///
+    /// #    workbook.push_worksheet(worksheet1);
+    /// #    workbook.push_worksheet(worksheet2);
+    /// #    workbook.push_worksheet(worksheet3);
+    /// #    workbook.push_worksheet(worksheet4);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_tab_color.png">
+    ///
+    pub fn set_tab_color(&mut self, color: XlsxColor) -> &mut Worksheet {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.tab_color = color;
+        self
+    }
+
     /// Set the paper type/size when printing.
     ///
     /// This method is used to set the paper format for the printed output of a
@@ -4564,7 +4832,7 @@ impl Worksheet {
 
     // Write the <sheetPr> element.
     fn write_sheet_pr(&mut self) {
-        if !self.fit_to_page {
+        if !self.fit_to_page && self.tab_color == XlsxColor::Automatic {
             return;
         }
 
@@ -4572,6 +4840,9 @@ impl Worksheet {
 
         // Write the pageSetUpPr element.
         self.write_page_set_up_pr();
+
+        // Write the tabColor element.
+        self.write_tab_color();
 
         self.writer.xml_end_tag("sheetPr");
     }
@@ -4585,6 +4856,17 @@ impl Worksheet {
         let attributes = vec![("fitToPage", "1".to_string())];
 
         self.writer.xml_empty_tag_attr("pageSetUpPr", &attributes);
+    }
+
+    // Write the <tabColor> element.
+    fn write_tab_color(&mut self) {
+        if self.tab_color == XlsxColor::Automatic {
+            return;
+        }
+
+        let attributes = vec![("rgb", self.tab_color.hex_argb_value())];
+
+        self.writer.xml_empty_tag_attr("tabColor", &attributes);
     }
 
     // Write the <dimension> element.
