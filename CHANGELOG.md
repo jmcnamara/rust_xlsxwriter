@@ -6,16 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## In progress [0.10.0] - 2022-11-XX
+## [0.10.0] - 2022-11-03
 
 ### Added
+
+- Added a simulated [`worksheet.set_autofit()`] method to automatically adjust
+  the width of columns with data. See also the [app_autofit] sample application.
 
 - Added the [`worksheet.set_freeze_panes()`] method to set "freeze" panes for
   worksheets. See also the [app_panes] example application.
 
 [app_panes]: https://rustxlsxwriter.github.io/examples/panes.html
+[app_autofit]: https://rustxlsxwriter.github.io/examples/autofit.html
+[`worksheet.set_autofit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_autofit
 [`worksheet.set_freeze_panes()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_freeze_panes
-
 
 ## [0.9.0] - 2022-10-31
 
