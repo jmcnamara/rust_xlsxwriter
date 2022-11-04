@@ -28,7 +28,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Add a worksheet and change it to right to left direction.
     let worksheet2 = workbook.add_worksheet();
-    worksheet2.set_right_to_left();
+    worksheet2.set_right_to_left(true);
 
     // Make the column wider for clarity.
     worksheet2.set_column_width(0, 25)?;
