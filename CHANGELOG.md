@@ -5,6 +5,27 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2022-11-04
+
+### Added
+
+- Added several worksheet methods for working with worksheet tabs:
+
+  - [`worksheet.set_active()`]: Set the active/visible worksheet.
+  - [`worksheet.set_tab_color()`]: Set the tab color.
+  - [`worksheet.set_hidden()`]: Hide a worksheet.
+  - [`worksheet.set_selected()`]: Set a worksheet as selected.
+  - [`worksheet.set_first_tab()`]: Set the first visible tab.
+
+  See also [Working with worksheet tabs] in the user guide.
+
+[`worksheet.set_active()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_active
+[`worksheet.set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_hidden
+[`worksheet.set_selected()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_selected
+[`worksheet.set_tab_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_tab_color
+[`worksheet.set_first_tab()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_first_tab
+[Working with worksheet tabs]: https://rustxlsxwriter.github.io/worksheet/tabs.html
+
 
 ## [0.10.0] - 2022-11-03
 
