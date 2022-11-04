@@ -2726,7 +2726,7 @@ impl Worksheet {
     /// which worksheet is initially selected. However, if there are a large
     /// number of worksheets the selected worksheet may not appear on the
     /// screen. To avoid this you can select which is the leftmost visible
-    /// worksheet tab using `set_first_sheet()`.
+    /// worksheet tab using `set_first_tab()`.
     ///
     /// This method is not required very often. The default is the first
     /// worksheet.
@@ -2735,7 +2735,7 @@ impl Worksheet {
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
-    pub fn set_first_sheet(&mut self, enable: bool) -> &mut Worksheet {
+    pub fn set_first_tab(&mut self, enable: bool) -> &mut Worksheet {
         self.first_sheet = enable;
 
         // First visible worksheet cannot be hidden.

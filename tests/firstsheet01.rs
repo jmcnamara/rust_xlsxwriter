@@ -33,7 +33,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet19 = Worksheet::new();
     let mut worksheet20 = Worksheet::new();
 
-    worksheet8.set_first_sheet(true);
+    worksheet8.set_first_tab(true);
     worksheet20.set_active(true);
 
     workbook.push_worksheet(worksheet1);
