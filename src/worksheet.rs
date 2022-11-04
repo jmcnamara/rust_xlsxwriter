@@ -4832,7 +4832,7 @@ impl Worksheet {
 
     // Write the <sheetPr> element.
     fn write_sheet_pr(&mut self) {
-        if !self.fit_to_page && self.tab_color == XlsxColor::Automatic {
+        if !self.fit_to_page && self.tab_color.is_default() {
             return;
         }
 
@@ -4860,11 +4860,11 @@ impl Worksheet {
 
     // Write the <tabColor> element.
     fn write_tab_color(&mut self) {
-        if self.tab_color == XlsxColor::Automatic {
+        if self.tab_color.is_default() {
             return;
         }
 
-        let attributes = vec![("rgb", self.tab_color.hex_argb_value())];
+        let attributes = vec![("rgb", self.tab_color.argb_hex_value())];
 
         self.writer.xml_empty_tag_attr("tabColor", &attributes);
     }

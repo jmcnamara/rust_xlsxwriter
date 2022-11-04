@@ -290,8 +290,8 @@ impl<'a> Styles<'a> {
     fn write_fill(&mut self, xf_format: &Format) {
         // Special handling for pattern only case.
         if xf_format.pattern != XlsxPattern::None
-            && xf_format.background_color == XlsxColor::Automatic
-            && xf_format.foreground_color == XlsxColor::Automatic
+            && xf_format.background_color.is_default()
+            && xf_format.foreground_color.is_default()
         {
             self.write_default_fill(xf_format.pattern.value().to_string());
             return;
@@ -305,19 +305,19 @@ impl<'a> Styles<'a> {
         self.writer.xml_start_tag_attr("patternFill", &attributes);
 
         // Write the foreground color.
-        if xf_format.foreground_color != XlsxColor::Automatic {
+        if xf_format.foreground_color.is_not_default() {
             let attributes = vec![(
                 "rgb",
-                format!("FF{}", xf_format.foreground_color.hex_value()),
+                format!("FF{}", xf_format.foreground_color.rgb_hex_value()),
             )];
             self.writer.xml_empty_tag_attr("fgColor", &attributes);
         }
 
         // Write the background color.
-        if xf_format.background_color != XlsxColor::Automatic {
+        if xf_format.background_color.is_not_default() {
             let attributes = vec![(
                 "rgb",
-                format!("FF{}", xf_format.background_color.hex_value()),
+                format!("FF{}", xf_format.background_color.rgb_hex_value()),
             )];
             self.writer.xml_empty_tag_attr("bgColor", &attributes);
         } else {
@@ -406,8 +406,8 @@ impl<'a> Styles<'a> {
         let mut attributes = vec![("style", border_style.value().to_string())];
         self.writer.xml_start_tag_attr(border_type, &attributes);
 
-        if border_color != XlsxColor::Automatic {
-            attributes = vec![("rgb", format!("FF{}", border_color.hex_value()))];
+        if border_color.is_not_default() {
+            attributes = vec![("rgb", format!("FF{}", border_color.rgb_hex_value()))];
         } else {
             attributes = vec![("auto", "1".to_string())];
         }

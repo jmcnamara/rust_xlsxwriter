@@ -592,7 +592,7 @@ impl Format {
             "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
             self.bold,
             self.font_charset,
-            self.font_color.hex_value(),
+            self.font_color.rgb_hex_value(),
             self.font_condense,
             self.font_extend,
             self.font_family,
@@ -611,16 +611,16 @@ impl Format {
         format!(
             "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
             self.border_bottom.value(),
-            self.border_bottom_color.hex_value(),
+            self.border_bottom_color.rgb_hex_value(),
             self.border_diagonal.value(),
-            self.border_diagonal_color.hex_value(),
+            self.border_diagonal_color.rgb_hex_value(),
             self.border_diagonal_type as u8,
             self.border_left.value(),
-            self.border_left_color.hex_value(),
+            self.border_left_color.rgb_hex_value(),
             self.border_right.value(),
-            self.border_right_color.hex_value(),
+            self.border_right_color.rgb_hex_value(),
             self.border_top.value(),
-            self.border_top_color.hex_value(),
+            self.border_top_color.rgb_hex_value(),
         )
     }
 
@@ -628,8 +628,8 @@ impl Format {
         format!(
             "{}:{}:{}",
             self.pattern.value(),
-            self.background_color.hex_value(),
-            self.foreground_color.hex_value(),
+            self.background_color.rgb_hex_value(),
+            self.foreground_color.rgb_hex_value(),
         )
     }
 
@@ -2260,13 +2260,14 @@ impl XlsxColor {
         }
     }
 
-    // Get the u32 RGB value for a color.
-    pub(crate) fn hex_value(self) -> String {
+    // Get the hex value for a color in RGB format.
+    pub(crate) fn rgb_hex_value(self) -> String {
         format!("{:06X}", self.value())
     }
 
-    // Get the u32 RGB value for a color, in ARGB format.
-    pub(crate) fn hex_argb_value(self) -> String {
+    // Get the hex value for a color in ARGB format, where the alpha channel is
+    // always FF.
+    pub(crate) fn argb_hex_value(self) -> String {
         format!("FF{:06X}", self.value())
     }
 
@@ -2280,6 +2281,16 @@ impl XlsxColor {
         }
 
         true
+    }
+
+    // Check if the color is unchanged from its default.
+    pub(crate) fn is_default(self) -> bool {
+        self == XlsxColor::Automatic
+    }
+
+    // Check if the color has changed from its default.
+    pub(crate) fn is_not_default(self) -> bool {
+        self != XlsxColor::Automatic
     }
 }
 
@@ -2595,24 +2606,24 @@ mod tests {
 
     #[test]
     fn test_hex_value() {
-        assert_eq!("FFFFFFFF", XlsxColor::Automatic.hex_value());
-        assert_eq!("000000", XlsxColor::Black.hex_value());
-        assert_eq!("0000FF", XlsxColor::Blue.hex_value());
-        assert_eq!("800000", XlsxColor::Brown.hex_value());
-        assert_eq!("00FFFF", XlsxColor::Cyan.hex_value());
-        assert_eq!("808080", XlsxColor::Gray.hex_value());
-        assert_eq!("008000", XlsxColor::Green.hex_value());
-        assert_eq!("00FF00", XlsxColor::Lime.hex_value());
-        assert_eq!("FF00FF", XlsxColor::Magenta.hex_value());
-        assert_eq!("000080", XlsxColor::Navy.hex_value());
-        assert_eq!("FF6600", XlsxColor::Orange.hex_value());
-        assert_eq!("FF00FF", XlsxColor::Pink.hex_value());
-        assert_eq!("800080", XlsxColor::Purple.hex_value());
-        assert_eq!("FF0000", XlsxColor::Red.hex_value());
-        assert_eq!("C0C0C0", XlsxColor::Silver.hex_value());
-        assert_eq!("FFFFFF", XlsxColor::White.hex_value());
-        assert_eq!("FFFF00", XlsxColor::Yellow.hex_value());
-        assert_eq!("ABCDEF", XlsxColor::RGB(0xABCDEF).hex_value());
+        assert_eq!("FFFFFFFF", XlsxColor::Automatic.rgb_hex_value());
+        assert_eq!("000000", XlsxColor::Black.rgb_hex_value());
+        assert_eq!("0000FF", XlsxColor::Blue.rgb_hex_value());
+        assert_eq!("800000", XlsxColor::Brown.rgb_hex_value());
+        assert_eq!("00FFFF", XlsxColor::Cyan.rgb_hex_value());
+        assert_eq!("808080", XlsxColor::Gray.rgb_hex_value());
+        assert_eq!("008000", XlsxColor::Green.rgb_hex_value());
+        assert_eq!("00FF00", XlsxColor::Lime.rgb_hex_value());
+        assert_eq!("FF00FF", XlsxColor::Magenta.rgb_hex_value());
+        assert_eq!("000080", XlsxColor::Navy.rgb_hex_value());
+        assert_eq!("FF6600", XlsxColor::Orange.rgb_hex_value());
+        assert_eq!("FF00FF", XlsxColor::Pink.rgb_hex_value());
+        assert_eq!("800080", XlsxColor::Purple.rgb_hex_value());
+        assert_eq!("FF0000", XlsxColor::Red.rgb_hex_value());
+        assert_eq!("C0C0C0", XlsxColor::Silver.rgb_hex_value());
+        assert_eq!("FFFFFF", XlsxColor::White.rgb_hex_value());
+        assert_eq!("FFFF00", XlsxColor::Yellow.rgb_hex_value());
+        assert_eq!("ABCDEF", XlsxColor::RGB(0xABCDEF).rgb_hex_value());
     }
 
     #[test]
