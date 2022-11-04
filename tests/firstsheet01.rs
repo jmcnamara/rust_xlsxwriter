@@ -8,7 +8,7 @@ use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
 
 mod common;
 
-// Test to demonstrate setting the first visible
+// Test to demonstrate setting the first visible tab in a group of worksheets.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 

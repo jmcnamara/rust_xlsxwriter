@@ -12,6 +12,9 @@ documentation and generally show how an individual function works.
 * app_array_formula.rs - Example of how to use the rust_xlsxwriter to write
   simple array formulas.
 
+* app_autofit.rs - An example of using a simulated Column Autofit using the
+  rust_xlsxwriter library.
+
 * app_colors.rs - A sample palette of the the defined colors and user
   defined RGB colors available in the rust_xlsxwriter library.
 
@@ -207,6 +210,12 @@ documentation and generally show how an individual function works.
 * doc_worksheet_new.rs - Demonstrates creating new worksheet objects and
   then adding them to a workbook.
 
+* doc_worksheet_set_active.rs - Demonstrates setting a worksheet as the
+  visible worksheet when a file is opened.
+
+* doc_worksheet_set_autofit.rs - Demonstrates auto-fitting the worksheet
+  column widths based on the data in the columns.
+
 * doc_worksheet_set_column_format.rs - Demonstrates setting the format for
   a column in Excel.
 
@@ -232,6 +241,8 @@ documentation and generally show how an individual function works.
   area.
 
 * doc_worksheet_set_header.rs - Demonstrates setting the worksheet header.
+
+* doc_worksheet_set_hidden.rs - Demonstrates hiding a worksheet.
 
 * doc_worksheet_set_landscape.rs - Demonstrates setting the worksheet page
   orientation to landscape.
@@ -281,6 +292,13 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_set_row_height_pixels.rs - Demonstrates setting the height
   for a row in Excel.
+
+* doc_worksheet_set_selected.rs - Demonstrates selecting worksheet in a
+  workbook. The active worksheet is selected by default so in this example
+  the first two worksheets are selected.
+
+* doc_worksheet_set_tab_color.rs - Demonstrates set the tab color of
+  worksheets.
 
 * doc_worksheet_set_zoom.rs - Demonstrates setting the worksheet zoom
   level.

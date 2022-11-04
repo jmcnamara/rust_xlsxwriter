@@ -328,19 +328,21 @@ impl Worksheet {
     /// and the default values when a name isn't set.
     ///
     /// ```
+    /// # // This code is available in examples/doc_worksheet_set_name.rs
+    /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    ///     let mut workbook = Workbook::new();
+    /// #     let mut workbook = Workbook::new();
     ///
-    ///     _ = workbook.add_worksheet();                     // Sheet1
-    ///     _ = workbook.add_worksheet().set_name("Foglio2"); // Foglio2
-    ///     _ = workbook.add_worksheet().set_name("Data");    // Data
-    ///     _ = workbook.add_worksheet();                     // Sheet4
+    ///     _ = workbook.add_worksheet(); // Defaults to Sheet1
+    ///     _ = workbook.add_worksheet().set_name("Foglio2");
+    ///     _ = workbook.add_worksheet().set_name("Data");
+    ///     _ = workbook.add_worksheet(); // Defaults to Sheet4
     ///
-    /// #    workbook.save("worksheets.xlsx")?;
+    /// #     workbook.save("worksheets.xlsx")?;
     /// #
-    /// #    Ok(())
+    /// #     Ok(())
     /// # }
     /// ```
     ///
