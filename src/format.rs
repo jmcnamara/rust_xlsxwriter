@@ -2134,10 +2134,28 @@ impl Format {
 // -----------------------------------------------------------------------
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxColor enum defines an RGB color the can be used in rust_xlsxwriter
-/// formatting.
+/// The XlsxColor enum defines Excel colors the can be used throughout the
+/// rust_xlsxwriter.
 ///
-/// You can use a small range of named colors or defined your own RGB color.
+/// There are 3 types of colors within the enum:
+///
+/// 1. Predefined named colors like `XlsxColor::Green`.
+/// 2. User defined RGB colors such as `XlsxColor::RGB(0x4F026A)` using a format
+///    similar to html colors like `#RRGGBB`, except as an integer.
+/// 3. Theme colors from the standard palette of 60 colors like
+///    `XlsxColor::Theme(9, 4)`. The theme colors are shown in the image below.
+///
+///    <img
+///    src="https://rustxlsxwriter.github.io/images/theme_color_palette.png">
+///
+///    The syntax for theme colors in XlsxColor is `Theme(color, shade)` where
+///    `color` is one of the 0-9 values on the top row and `shade` is the
+///    variant in the associated column from 0-5. For example "White, background
+///    1" in the top left is `Theme(0, 0)` and "Orange, Accent 6, Darker 50%" in
+///    the bottom right is `Theme(9, 5)`.
+///
+/// Note, there are no plans to support anything other than the default Excel
+/// "Office" theme.
 ///
 /// # Examples
 ///
@@ -2150,23 +2168,24 @@ impl Format {
 /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file object.
-///     let mut workbook = Workbook::new();
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #     worksheet.set_column_width(0, 14)?;
 ///
 ///     let format1 = Format::new().set_font_color(XlsxColor::Red);
 ///     let format2 = Format::new().set_font_color(XlsxColor::Green);
 ///     let format3 = Format::new().set_font_color(XlsxColor::RGB(0x4F026A));
 ///     let format4 = Format::new().set_font_color(XlsxColor::RGB(0x73CC5F));
-///     let format5 = Format::new().set_font_color(XlsxColor::RGB(0xFFACFF));
-///     let format6 = Format::new().set_font_color(XlsxColor::RGB(0xCC7E16));
+///     let format5 = Format::new().set_font_color(XlsxColor::Theme(4, 0));
+///     let format6 = Format::new().set_font_color(XlsxColor::Theme(9, 4));
 ///
-///     let worksheet = workbook.add_worksheet();
 ///     worksheet.write_string(0, 0, "Red", &format1)?;
 ///     worksheet.write_string(1, 0, "Green", &format2)?;
 ///     worksheet.write_string(2, 0, "#4F026A", &format3)?;
 ///     worksheet.write_string(3, 0, "#73CC5F", &format4)?;
-///     worksheet.write_string(4, 0, "#FFACFF", &format5)?;
-///     worksheet.write_string(5, 0, "#CC7E16", &format6)?;
+///     worksheet.write_string(4, 0, "Theme (4, 0)", &format5)?;
+///     worksheet.write_string(5, 0, "Theme (9, 4)", &format6)?;
 ///
 /// #     workbook.save("colors.xlsx")?;
 /// #
@@ -2182,6 +2201,13 @@ pub enum XlsxColor {
     /// A user defined RGB color in the range 0x000000 (black) to 0xFFFFFF
     /// (white). Any values outside this range will be ignored with a a warning.
     RGB(u32),
+
+    /// A theme color on the default palette (see the image above). The syntax
+    /// for theme colors is `Theme(color, shade)` where `color` is one of the
+    /// 0-9 values on the top row and `shade` is the variant in the associated
+    /// column from 0-5. Any values outside these ranges will be ignored with a
+    /// a warning.
+    Theme(u8, u8),
 
     /// The default/automatic color for an Excel property.
     Automatic,
@@ -2239,7 +2265,6 @@ impl XlsxColor {
     // Get the u32 RGB value for a color.
     pub(crate) fn value(self) -> u32 {
         match self {
-            XlsxColor::RGB(color) => color,
             XlsxColor::Automatic => 0xFFFFFFFF,
             XlsxColor::Black => 0x000000,
             XlsxColor::Blue => 0x0000FF,
@@ -2257,6 +2282,8 @@ impl XlsxColor {
             XlsxColor::Silver => 0xC0C0C0,
             XlsxColor::White => 0xFFFFFF,
             XlsxColor::Yellow => 0xFFFF00,
+            XlsxColor::RGB(color) => color,
+            XlsxColor::Theme(color, shade) => 0xFE000000 + ((color as u32) << 8) + shade as u32,
         }
     }
 
@@ -2265,23 +2292,140 @@ impl XlsxColor {
         format!("FF{:06X}", self.value())
     }
 
-    // Convert the color in a set of "rgb" attributes used in color related XML
-    // elements.
+    // Convert the color in a set of "rgb" or "theme/tint" attributes used in
+    // color related XML elements.
     pub(crate) fn attributes(self) -> Vec<(&'static str, String)> {
-        let attributes = vec![("rgb", self.rgb_hex_value())];
-        attributes
+        match self {
+            Self::Theme(color, shade) => match color {
+                // The first 3 columns of colors in the theme palette are
+                // different from the others.
+                0 => match shade {
+                    1 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-4.9989318521683403E-2".to_string()),
+                    ],
+                    2 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.14999847407452621".to_string()),
+                    ],
+                    3 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.249977111117893".to_string()),
+                    ],
+                    4 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.34998626667073579".to_string()),
+                    ],
+                    5 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.499984740745262".to_string()),
+                    ],
+                    // The 0 shade is omitted from the attributes.
+                    _ => vec![("theme", color.to_string())],
+                },
+                1 => match shade {
+                    1 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "0.499984740745262".to_string()),
+                    ],
+                    2 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "0.34998626667073579".to_string()),
+                    ],
+                    3 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "0.249977111117893".to_string()),
+                    ],
+                    4 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "0.14999847407452621".to_string()),
+                    ],
+                    5 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "4.9989318521683403E-2".to_string()),
+                    ],
+                    // The 0 shade is omitted from the attributes.
+                    _ => vec![("theme", color.to_string())],
+                },
+                2 => match shade {
+                    1 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-9.9978637043366805E-2".to_string()),
+                    ],
+                    2 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.249977111117893".to_string()),
+                    ],
+                    3 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.499984740745262".to_string()),
+                    ],
+                    4 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.749992370372631".to_string()),
+                    ],
+                    5 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.89999084444715716".to_string()),
+                    ],
+                    // The 0 shade is omitted from the attributes.
+                    _ => vec![("theme", color.to_string())],
+                },
+                _ => match shade {
+                    1 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "0.79998168889431442".to_string()),
+                    ],
+                    2 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "0.59999389629810485".to_string()),
+                    ],
+                    3 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "0.39997558519241921".to_string()),
+                    ],
+                    4 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.249977111117893".to_string()),
+                    ],
+                    5 => vec![
+                        ("theme", color.to_string()),
+                        ("tint", "-0.499984740745262".to_string()),
+                    ],
+                    // The 0 shade is omitted from the attributes.
+                    _ => vec![("theme", color.to_string())],
+                },
+            },
+
+            // Handle RGB color.
+            _ => vec![("rgb", self.rgb_hex_value())],
+        }
     }
 
-    // Check if the RGB value is in the correct range.
+    // Check if the RGB and Theme values are in the correct range. Any of the
+    // simple enum will be by default.
     pub(crate) fn is_valid(self) -> bool {
-        if let XlsxColor::RGB(color) = self {
-            if color > 0xFFFFFF {
-                eprintln!("RGB color must be in the the range 0x000000 - 0xFFFFFF.");
-                return false;
+        match self {
+            XlsxColor::RGB(color) => {
+                if color > 0xFFFFFF {
+                    eprintln!("RGB color must be in the the range 0x000000 - 0xFFFFFF.");
+                    return false;
+                }
+                true
             }
+            XlsxColor::Theme(color, shade) => {
+                if color > 9 {
+                    eprintln!("Theme color must be in the the range 0 - 9.");
+                    return false;
+                }
+                if shade > 5 {
+                    eprintln!("Theme shade must be in the the range 0 - 5.");
+                    return false;
+                }
+                true
+            }
+            _ => true,
         }
-
-        true
     }
 
     // Check if the color is unchanged from its default.
@@ -2625,6 +2769,7 @@ mod tests {
         assert_eq!("FFFFFFFF", XlsxColor::White.rgb_hex_value());
         assert_eq!("FFFFFF00", XlsxColor::Yellow.rgb_hex_value());
         assert_eq!("FFABCDEF", XlsxColor::RGB(0xABCDEF).rgb_hex_value());
+        assert_eq!("FFFE000201", XlsxColor::Theme(2, 1).rgb_hex_value());
     }
 
     #[test]

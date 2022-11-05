@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
-//! A sample palette of the the defined colors and user defined RGB colors
-//! available in the rust_xlsxwriter library.
+//! A demonstration of the RGB and Theme colors palettes available in the
+//! rust_xlsxwriter library.
 
 use rust_xlsxwriter::*;
 
@@ -10,8 +10,8 @@ fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
     let mut workbook = Workbook::new();
 
-    // Add a worksheet.
-    let worksheet = workbook.add_worksheet();
+    // Add a worksheet for the RGB colors.
+    let worksheet = workbook.add_worksheet().set_name("RGB Colors")?;
 
     // Write some enum defined colors to cells.
     let color_format = Format::new().set_background_color(XlsxColor::Black);
@@ -94,6 +94,31 @@ fn main() -> Result<(), XlsxError> {
     let color_format = Format::new().set_background_color(XlsxColor::RGB(0xDAA520));
     worksheet.write_string_only(19, 0, "#DAA520")?;
     worksheet.write_blank(19, 1, &color_format)?;
+
+    // Add a worksheet for the Theme colors.
+    let worksheet = workbook.add_worksheet().set_name("Theme Colors")?;
+
+    // Create a cell with each of the theme colors.
+    for row in 0..=5u32 {
+        for col in 0..=9u16 {
+            let color = col as u8;
+            let shade = row as u8;
+            let theme_color = XlsxColor::Theme(color, shade);
+            let text = format!("({}, {})", col, row);
+
+            let mut font_color = XlsxColor::White;
+            if col == 0 {
+                font_color = XlsxColor::Automatic;
+            }
+
+            let color_format = Format::new()
+                .set_background_color(theme_color)
+                .set_font_color(font_color)
+                .set_align(XlsxAlign::Center);
+
+            worksheet.write_string(row, col, &text, &color_format)?;
+        }
+    }
 
     // Save the file to disk.
     workbook.save("colors.xlsx")?;
