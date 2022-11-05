@@ -4870,7 +4870,7 @@ impl Worksheet {
             return;
         }
 
-        let attributes = vec![("rgb", self.tab_color.argb_hex_value())];
+        let attributes = self.tab_color.attributes();
 
         self.writer.xml_empty_tag_attr("tabColor", &attributes);
     }

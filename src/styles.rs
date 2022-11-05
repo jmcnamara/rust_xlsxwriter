@@ -176,7 +176,7 @@ impl<'a> Styles<'a> {
                 attributes.push(("theme", "1".to_string()));
             }
             _ => {
-                attributes.push(("rgb", format!("FF{:06X}", xf_format.font_color.value())));
+                attributes.append(&mut xf_format.font_color.attributes());
             }
         }
 
@@ -306,19 +306,13 @@ impl<'a> Styles<'a> {
 
         // Write the foreground color.
         if xf_format.foreground_color.is_not_default() {
-            let attributes = vec![(
-                "rgb",
-                format!("FF{}", xf_format.foreground_color.rgb_hex_value()),
-            )];
+            let attributes = xf_format.foreground_color.attributes();
             self.writer.xml_empty_tag_attr("fgColor", &attributes);
         }
 
         // Write the background color.
         if xf_format.background_color.is_not_default() {
-            let attributes = vec![(
-                "rgb",
-                format!("FF{}", xf_format.background_color.rgb_hex_value()),
-            )];
+            let attributes = xf_format.background_color.attributes();
             self.writer.xml_empty_tag_attr("bgColor", &attributes);
         } else {
             let attributes = vec![("indexed", "64".to_string())];
@@ -407,7 +401,7 @@ impl<'a> Styles<'a> {
         self.writer.xml_start_tag_attr(border_type, &attributes);
 
         if border_color.is_not_default() {
-            attributes = vec![("rgb", format!("FF{}", border_color.rgb_hex_value()))];
+            attributes = border_color.attributes();
         } else {
             attributes = vec![("auto", "1".to_string())];
         }
