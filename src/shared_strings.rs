@@ -55,7 +55,7 @@ impl SharedStrings {
     fn write_sst_strings(&mut self, string_table: &SharedStringsTable) {
         for (string, _) in string_table.strings.iter().sorted_by_key(|x| x.1) {
             let preserve_whitespace =
-                string.starts_with(&['\t', '\n', ' ']) || string.ends_with(&['\t', '\n', ' ']);
+                string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']);
 
             self.writer.xml_si_element(string, preserve_whitespace);
         }

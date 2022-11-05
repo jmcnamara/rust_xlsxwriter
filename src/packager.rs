@@ -142,7 +142,7 @@ impl<W: Write + Seek> Packager<W> {
 
         content_types.assemble_xml_file();
         let buffer = content_types.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -159,7 +159,7 @@ impl<W: Write + Seek> Packager<W> {
 
         rels.assemble_xml_file();
         let buffer = rels.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -191,7 +191,7 @@ impl<W: Write + Seek> Packager<W> {
 
         rels.assemble_xml_file();
         let buffer = rels.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -209,7 +209,7 @@ impl<W: Write + Seek> Packager<W> {
 
         worksheet.assemble_xml_file(string_table);
         let buffer = worksheet.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -220,7 +220,7 @@ impl<W: Write + Seek> Packager<W> {
 
         workbook.assemble_xml_file();
         let buffer = workbook.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -237,7 +237,7 @@ impl<W: Write + Seek> Packager<W> {
 
         shared_strings.assemble_xml_file(string_table);
         let buffer = shared_strings.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -256,7 +256,7 @@ impl<W: Write + Seek> Packager<W> {
 
         styles.assemble_xml_file();
         let buffer = styles.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -270,7 +270,7 @@ impl<W: Write + Seek> Packager<W> {
 
         theme.assemble_xml_file();
         let buffer = theme.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -283,7 +283,7 @@ impl<W: Write + Seek> Packager<W> {
 
         core.assemble_xml_file();
         let buffer = core.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -310,7 +310,7 @@ impl<W: Write + Seek> Packager<W> {
 
         app.assemble_xml_file();
         let buffer = app.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }
@@ -323,7 +323,7 @@ impl<W: Write + Seek> Packager<W> {
 
         metadata.assemble_xml_file();
         let buffer = metadata.writer.read_to_buffer();
-        self.zip.write_all(&*buffer)?;
+        self.zip.write_all(&buffer)?;
 
         Ok(())
     }

@@ -5432,7 +5432,7 @@ impl Worksheet {
     fn write_boolean_cell(&mut self, row: RowNum, col: ColNum, boolean: &bool, xf_index: &u32) {
         let col_name = self.col_to_name(col);
         let mut style = String::from("");
-        let boolean = if *boolean { 1 } else { 0 };
+        let boolean = i32::from(*boolean);
 
         if *xf_index > 0 {
             style = format!(r#" s="{}""#, *xf_index);

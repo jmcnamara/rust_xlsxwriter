@@ -782,12 +782,12 @@ impl Workbook {
         match filehandle {
             FileHandleFrom::String(filename) => {
                 let path = std::path::Path::new(filename);
-                let file = std::fs::File::create(&path)?;
+                let file = std::fs::File::create(path)?;
                 let mut packager = Packager::new(file)?;
                 packager.assemble_file(self, &package_options)?;
             }
             FileHandleFrom::Path(path) => {
-                let file = std::fs::File::create(&path)?;
+                let file = std::fs::File::create(path)?;
                 let mut packager = Packager::new(file)?;
                 packager.assemble_file(self, &package_options)?;
             }
