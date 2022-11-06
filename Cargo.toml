@@ -35,6 +35,7 @@ spellcheck = {cmd = [
 ]}
 
 coverage = { cmd = [
+    "rm -rf target/coverage",
     "mkdir -p target/coverage",
     "CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='target/coverage/rust_xlsxwriter-%p-%m.profraw' cargo test",
     "grcov target/coverage/ --binary-path ./target/debug/deps/ -s src -t lcov --branch -o target/coverage/lcov.info",

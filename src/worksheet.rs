@@ -5967,7 +5967,7 @@ mod tests {
 
     #[test]
     fn test_assemble() {
-        let mut worksheet = Worksheet::new();
+        let mut worksheet = Worksheet::default();
         let mut string_table = SharedStringsTable::new();
 
         worksheet.selected = true;
@@ -6564,7 +6564,15 @@ mod tests {
         // Test for overlap.
         let _ = worksheet.merge_range(1, 1, 20, 20, "Foo", &format);
         let result = worksheet.merge_range(2, 2, 3, 3, "Foo", &format);
-        assert!(matches!(result, Err(XlsxError::MergeRangeOverlaps(_, _))))
+        assert!(matches!(result, Err(XlsxError::MergeRangeOverlaps(_, _))));
+
+        // Test out of range value.
+        let result = worksheet.merge_range(ROW_MAX, 1, 1, 1, "Foo", &format);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
+
+        // Test out reversed values
+        let result = worksheet.merge_range(5, 1, 1, 1, "Foo", &format);
+        assert!(matches!(result, Err(XlsxError::RowColumnOrderError)));
     }
 
     #[test]

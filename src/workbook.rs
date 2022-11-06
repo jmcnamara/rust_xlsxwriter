@@ -1266,7 +1266,7 @@ mod tests {
 
     #[test]
     fn test_assemble() {
-        let mut workbook = Workbook::new();
+        let mut workbook = Workbook::default();
         workbook.add_worksheet();
 
         workbook.assemble_xml_file();

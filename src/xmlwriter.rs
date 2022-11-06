@@ -296,7 +296,7 @@ mod tests {
     fn test_xml_declaration() {
         let expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 
-        let mut writer = XMLWriter::new();
+        let mut writer = XMLWriter::default();
         writer.xml_declaration();
 
         let got = writer.read_to_string();
