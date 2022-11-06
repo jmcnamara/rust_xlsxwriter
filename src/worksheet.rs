@@ -45,7 +45,7 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 /// # // This code is available in examples/app_demo.rs
 /// #
 /// use chrono::NaiveDate;
-/// use rust_xlsxwriter::{Format, Workbook, XlsxError};
+/// use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
@@ -55,6 +55,9 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 ///     let bold_format = Format::new().set_bold();
 ///     let decimal_format = Format::new().set_num_format("0.000");
 ///     let date_format = Format::new().set_num_format("yyyy-mm-dd");
+///     let merge_format = Format::new()
+///         .set_border(XlsxBorder::Thin)
+///         .set_align(XlsxAlign::Center);
 ///
 ///     // Add a worksheet to the workbook.
 ///     let worksheet = workbook.add_worksheet();
@@ -78,9 +81,12 @@ const DEFAULT_COL_WIDTH: f64 = 8.43;
 ///     // Write a formula.
 ///     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
 ///
-///     // Write the date .
+///     // Write a date.
 ///     let date = NaiveDate::from_ymd(2023, 1, 25);
 ///     worksheet.write_date(6, 0, date, &date_format)?;
+///
+///     // Write some merged cells.
+///     worksheet.merge_range(7, 0, 7, 1, "Merged cells", &merge_format)?;
 ///
 ///     // Save the file to disk.
 ///     workbook.save("demo.xlsx")?;
@@ -100,10 +106,12 @@ pub struct Worksheet {
     pub(crate) print_area: String,
     pub(crate) repeat_row_range: String,
     pub(crate) repeat_col_range: String,
-    table: HashMap<RowNum, HashMap<ColNum, CellType>>,
-    col_names: HashMap<ColNum, String>,
-    dimensions: WorksheetDimensions,
     pub(crate) xf_formats: Vec<Format>,
+    table: HashMap<RowNum, HashMap<ColNum, CellType>>,
+    merged_ranges: Vec<CellRange>,
+    merged_cells: HashMap<(RowNum, ColNum), usize>,
+    col_names: HashMap<ColNum, String>,
+    dimensions: CellRange,
     xf_indices: HashMap<String, u32>,
     global_xf_indices: Vec<u32>,
     changed_rows: HashMap<RowNum, RowOptions>,
@@ -223,19 +231,16 @@ impl Worksheet {
     ///
     pub fn new() -> Worksheet {
         let writer = XMLWriter::new();
-        let table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
-        let col_names: HashMap<ColNum, String> = HashMap::new();
-        let changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
-        let changed_cols: HashMap<ColNum, ColOptions> = HashMap::new();
+
         let default_format = Format::new();
         let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
         // Initialize the min and max dimensions with their opposite value.
-        let dimensions = WorksheetDimensions {
-            row_min: ROW_MAX,
-            col_min: COL_MAX,
-            row_max: 0,
-            col_max: 0,
+        let dimensions = CellRange {
+            first_row: ROW_MAX,
+            first_col: COL_MAX,
+            last_row: 0,
+            last_col: 0,
         };
 
         let panes = Panes {
@@ -255,14 +260,16 @@ impl Worksheet {
             print_area: "".to_string(),
             repeat_row_range: "".to_string(),
             repeat_col_range: "".to_string(),
-            table,
-            col_names,
+            table: HashMap::new(),
+            col_names: HashMap::new(),
             dimensions,
+            merged_ranges: vec![],
+            merged_cells: HashMap::new(),
             xf_formats: vec![default_format],
             xf_indices,
             global_xf_indices: vec![],
-            changed_rows,
-            changed_cols,
+            changed_rows: HashMap::new(),
+            changed_cols: HashMap::new(),
             page_setup_changed: false,
             fit_to_page: false,
             tab_color: XlsxColor::Automatic,
@@ -924,6 +931,8 @@ impl Worksheet {
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
     ///
     /// # Examples
     ///
@@ -1208,6 +1217,8 @@ impl Worksheet {
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
     ///
     /// # Examples
     ///
@@ -1791,6 +1802,163 @@ impl Worksheet {
         self.store_boolean(row, col, boolean, None)
     }
 
+    /// Merge a range of cells.
+    ///
+    /// The `merge_range()` method allows cells to be merged together so that
+    /// they act as a single area.
+    ///
+    /// The `merge_range()` method writes a string to the merged cells. In order
+    /// to write other data types, such as a number or a formula, you can
+    /// overwrite the first cell with a call to one of the other
+    /// `worksheet.write_*()` functions. The same [`Format`] instance should be
+    /// used as was used in the merged range, see the example below.
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `string` - The string to write to the cell. Other types can also be
+    ///   handled. See the documentation above and the example below.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    /// * [`XlsxError::MergeRangeSingleCell`] - A merge range cannot be a single
+    ///   cell in Excel.
+    /// * [`XlsxError::MergeRangeOverlaps`] - The merge range overlaps a
+    ///   previous merge range.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of creating merged ranges in a worksheet using the
+    /// rust_xlsxwriter library.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_merge_range.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write some merged cells with centering.
+    ///     let format = Format::new().set_align(XlsxAlign::Center);
+    ///
+    ///     worksheet.merge_range(1, 1, 1, 2, "Merged cells", &format)?;
+    ///
+    ///     // Write some merged cells with centering and a border.
+    ///     let format = Format::new()
+    ///         .set_align(XlsxAlign::Center)
+    ///         .set_border(XlsxBorder::Thin);
+    ///
+    ///     worksheet.merge_range(3, 1, 3, 2, "Merged cells", &format)?;
+    ///
+    ///     // Write some merged cells with a number by overwriting the first cell in
+    ///     // the string merge range with the formatted number.
+    ///     worksheet.merge_range(5, 1, 5, 2, "", &format)?;
+    ///     worksheet.write_number(5, 1, 12345.67, &format)?;
+    ///
+    ///     // Example with a more complex format and larger range.
+    ///     let format = Format::new()
+    ///         .set_align(XlsxAlign::Center)
+    ///         .set_align(XlsxAlign::VerticalCenter)
+    ///         .set_border(XlsxBorder::Thin)
+    ///         .set_background_color(XlsxColor::Silver);
+    ///
+    ///     worksheet.merge_range(7, 1, 8, 3, "Merged cells", &format)?;
+    ///
+    /// #    // Save the file to disk.
+    /// #     workbook.save("merge_range.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/app_merge_range.png">
+    ///
+    pub fn merge_range(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        string: &str,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions(first_row, first_col)
+            || !self.check_dimensions(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Check that the range isn't a singe cell, which isn't allowed by Excel.
+        if first_row == last_row && first_col == last_col {
+            return Err(XlsxError::MergeRangeSingleCell);
+        }
+
+        // Write the first cell in the range.
+        self.write_string(first_row, first_col, string, format)?;
+
+        // Pad out the rest of the range with formatted blanks cells.
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                // Skip the first cell which was written above.
+                if row == first_row && col == first_col {
+                    continue;
+                }
+                self.write_blank(row, col, format)?;
+            }
+        }
+
+        // Create a cell range for storage/testing.
+        let cell_range = CellRange {
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+        };
+
+        // Check if the merged range overlaps any previous merged range. This is
+        // a major error in Excel.
+        let new_index = self.merged_ranges.len();
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                match self.merged_cells.get_mut(&(row, col)) {
+                    Some(index) => {
+                        let previous_cell_range = self.merged_ranges.get(*index).unwrap();
+                        return Err(XlsxError::MergeRangeOverlaps(
+                            cell_range.to_error_string(),
+                            previous_cell_range.to_error_string(),
+                        ));
+                    }
+                    None => self.merged_cells.insert((row, col), new_index),
+                };
+            }
+        }
+
+        // Store the merge range if everything was okay.
+        self.merged_ranges.push(cell_range);
+
+        Ok(self)
+    }
+
     /// Set the height for a row of cells.
     ///
     /// The `set_row_height()` method is used to change the default height of a
@@ -1845,8 +2013,8 @@ impl Worksheet {
         T: Into<f64>,
     {
         // Set a suitable column range for the row dimension check/set.
-        let min_col = if self.dimensions.col_min != COL_MAX {
-            self.dimensions.col_min
+        let min_col = if self.dimensions.first_col != COL_MAX {
+            self.dimensions.first_col
         } else {
             0
         };
@@ -1993,8 +2161,8 @@ impl Worksheet {
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Set a suitable column range for the row dimension check/set.
-        let min_col = if self.dimensions.col_min != COL_MAX {
-            self.dimensions.col_min
+        let min_col = if self.dimensions.first_col != COL_MAX {
+            self.dimensions.first_col
         } else {
             0
         };
@@ -2247,8 +2415,8 @@ impl Worksheet {
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Set a suitable row range for the dimension check/set.
-        let min_row = if self.dimensions.row_min != ROW_MAX {
-            self.dimensions.row_min
+        let min_row = if self.dimensions.first_row != ROW_MAX {
+            self.dimensions.first_row
         } else {
             0
         };
@@ -4290,9 +4458,9 @@ impl Worksheet {
         // Iterate over all of the data in the worksheet and find the max data
         // width for each column. This is currently a crude approximation. It
         // will be improved over time.
-        for row_num in self.dimensions.row_min..=self.dimensions.row_max {
+        for row_num in self.dimensions.first_row..=self.dimensions.last_row {
             if let Some(columns) = self.table.get(&row_num) {
-                for col_num in self.dimensions.col_min..=self.dimensions.col_max {
+                for col_num in self.dimensions.first_col..=self.dimensions.last_col {
                     if let Some(cell) = columns.get(&col_num) {
                         let string_len = match cell {
                             CellType::Blank { .. } => 0.0,
@@ -4380,6 +4548,15 @@ impl Worksheet {
         string: &str,
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
+        // Empty strings are ignored by Excel unless they have a format in which
+        // case they are treated as a blank cell.
+        if string.is_empty() {
+            match format {
+                Some(format) => return self.write_blank(row, col, format),
+                None => return Ok(self),
+            };
+        }
+
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColumnLimitError);
@@ -4631,10 +4808,10 @@ impl Worksheet {
         }
 
         // Store any changes in worksheet dimensions.
-        self.dimensions.row_min = cmp::min(self.dimensions.row_min, row);
-        self.dimensions.col_min = cmp::min(self.dimensions.col_min, col);
-        self.dimensions.row_max = cmp::max(self.dimensions.row_max, row);
-        self.dimensions.col_max = cmp::max(self.dimensions.col_max, col);
+        self.dimensions.first_row = cmp::min(self.dimensions.first_row, row);
+        self.dimensions.first_col = cmp::min(self.dimensions.first_col, col);
+        self.dimensions.last_row = cmp::max(self.dimensions.last_row, row);
+        self.dimensions.last_col = cmp::max(self.dimensions.last_col, col);
 
         true
     }
@@ -4803,6 +4980,11 @@ impl Worksheet {
         // Write the sheetData element.
         self.write_sheet_data(string_table);
 
+        // Write the mergeCells element.
+        if !self.merged_ranges.is_empty() {
+            self.write_merge_cells();
+        }
+
         // Write the printOptions element.
         if self.print_options_changed {
             self.write_print_options();
@@ -4883,10 +5065,10 @@ impl Worksheet {
         if !self.table.is_empty() || !self.changed_rows.is_empty() || !self.changed_cols.is_empty()
         {
             range = utility::cell_range(
-                self.dimensions.row_min,
-                self.dimensions.col_min,
-                self.dimensions.row_max,
-                self.dimensions.col_max,
+                self.dimensions.first_row,
+                self.dimensions.first_col,
+                self.dimensions.last_row,
+                self.dimensions.last_col,
             );
         }
 
@@ -5036,6 +5218,27 @@ impl Worksheet {
         }
     }
 
+    // Write the <mergeCells> element.
+    fn write_merge_cells(&mut self) {
+        let attributes = vec![("count", self.merged_ranges.len().to_string())];
+
+        self.writer.xml_start_tag_attr("mergeCells", &attributes);
+
+        for merge_range in &self.merged_ranges.clone() {
+            // Write the mergeCell element.
+            self.write_merge_cell(merge_range);
+        }
+
+        self.writer.xml_end_tag("mergeCells");
+    }
+
+    // Write the <mergeCell> element.
+    fn write_merge_cell(&mut self, merge_range: &CellRange) {
+        let attributes = vec![("ref", merge_range.to_range_string())];
+
+        self.writer.xml_empty_tag_attr("mergeCell", &attributes);
+    }
+
     // Write the <printOptions> element.
     fn write_print_options(&mut self) {
         let mut attributes = vec![];
@@ -5133,7 +5336,7 @@ impl Worksheet {
         mem::swap(&mut temp_table, &mut self.table);
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
 
-        for row_num in self.dimensions.row_min..=self.dimensions.row_max {
+        for row_num in self.dimensions.first_row..=self.dimensions.last_row {
             let span_index = row_num / 16;
             let span = spans.get(&span_index);
 
@@ -5143,7 +5346,7 @@ impl Worksheet {
             if columns.is_some() || row_options.is_some() {
                 if let Some(columns) = columns {
                     self.write_row(row_num, span, row_options, true);
-                    for col_num in self.dimensions.col_min..=self.dimensions.col_max {
+                    for col_num in self.dimensions.first_col..=self.dimensions.last_col {
                         if let Some(cell) = columns.get(&col_num) {
                             match cell {
                                 CellType::Number { number, xf_index } => {
@@ -5220,9 +5423,9 @@ impl Worksheet {
         let mut span_min = COL_MAX;
         let mut span_max = 0;
 
-        for row_num in self.dimensions.row_min..=self.dimensions.row_max {
+        for row_num in self.dimensions.first_row..=self.dimensions.last_row {
             if let Some(columns) = self.table.get(&row_num) {
-                for col_num in self.dimensions.col_min..=self.dimensions.col_max {
+                for col_num in self.dimensions.first_col..=self.dimensions.last_col {
                     match columns.get(&col_num) {
                         Some(_) => {
                             if span_min == COL_MAX {
@@ -5239,7 +5442,7 @@ impl Worksheet {
             }
 
             // Store the span range for each block or 16 rows.
-            if (row_num + 1) % 16 == 0 || row_num == self.dimensions.row_max {
+            if (row_num + 1) % 16 == 0 || row_num == self.dimensions.last_row {
                 let span_index = row_num / 16;
                 if span_min != COL_MAX {
                     span_min += 1;
@@ -5653,11 +5856,28 @@ fn is_dynamic_function(formula: &str) -> bool {
 }
 
 #[derive(Clone)]
-struct WorksheetDimensions {
-    row_min: RowNum,
-    col_min: ColNum,
-    row_max: RowNum,
-    col_max: ColNum,
+struct CellRange {
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
+}
+
+impl CellRange {
+    fn to_range_string(&self) -> String {
+        utility::cell_range(self.first_row, self.first_col, self.last_row, self.last_col)
+    }
+
+    fn to_error_string(&self) -> String {
+        format!(
+            "({}, {}, {}, {}) / {}",
+            self.first_row,
+            self.first_col,
+            self.last_row,
+            self.last_col,
+            utility::cell_range(self.first_row, self.first_col, self.last_row, self.last_col)
+        )
+    }
 }
 
 #[derive(Clone)]
@@ -6333,6 +6553,21 @@ mod tests {
     }
 
     #[test]
+    fn merge_range() {
+        let mut worksheet = Worksheet::new();
+        let format = Format::default();
+
+        // Test single merge cell.
+        let result = worksheet.merge_range(1, 1, 1, 1, "Foo", &format);
+        assert!(matches!(result, Err(XlsxError::MergeRangeSingleCell)));
+
+        // Test for overlap.
+        let _ = worksheet.merge_range(1, 1, 20, 20, "Foo", &format);
+        let result = worksheet.merge_range(2, 2, 3, 3, "Foo", &format);
+        assert!(matches!(result, Err(XlsxError::MergeRangeOverlaps(_, _))))
+    }
+
+    #[test]
     fn check_dimensions() {
         let mut worksheet = Worksheet::new();
         let format = Format::default();
@@ -6340,10 +6575,10 @@ mod tests {
         assert_eq!(worksheet.check_dimensions(ROW_MAX, 0), false);
         assert_eq!(worksheet.check_dimensions(0, COL_MAX), false);
 
-        let result = worksheet.write_string(ROW_MAX, 0, "", &format);
+        let result = worksheet.write_string(ROW_MAX, 0, "Foo", &format);
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        let result = worksheet.write_string_only(ROW_MAX, 0, "");
+        let result = worksheet.write_string_only(ROW_MAX, 0, "Foo");
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
         let result = worksheet.write_number(ROW_MAX, 0, 0, &format);

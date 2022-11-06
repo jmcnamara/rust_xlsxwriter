@@ -39,6 +39,12 @@ pub enum XlsxError {
     /// Error when trying to retrieve a worksheet reference by index or by name.
     UnknownWorksheetNameOrIndex(String),
 
+    /// A merge range cannot be a single cell in Excel.
+    MergeRangeSingleCell,
+
+    /// The merge range overlaps a previous merge range.
+    MergeRangeOverlaps(String, String),
+
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -102,6 +108,18 @@ impl fmt::Display for XlsxError {
 
             XlsxError::UnknownWorksheetNameOrIndex(name) => {
                 write!(f, "Unknown Worksheet name or index \"{}\".", name)
+            }
+
+            XlsxError::MergeRangeSingleCell => {
+                write!(f, "A merge range cannot be a single cell in Excel.")
+            }
+
+            XlsxError::MergeRangeOverlaps(current, previous) => {
+                write!(
+                    f,
+                    "Merge range {} overlaps with previous merge range {}.",
+                    current, previous
+                )
             }
 
             XlsxError::IoError(e) => {

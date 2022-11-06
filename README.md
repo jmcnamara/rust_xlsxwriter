@@ -16,7 +16,7 @@ Sample code to generate the Excel file shown above.
 
 ```rust
 use chrono::NaiveDate;
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -26,6 +26,9 @@ fn main() -> Result<(), XlsxError> {
     let bold_format = Format::new().set_bold();
     let decimal_format = Format::new().set_num_format("0.000");
     let date_format = Format::new().set_num_format("yyyy-mm-dd");
+    let merge_format = Format::new()
+        .set_border(XlsxBorder::Thin)
+        .set_align(XlsxAlign::Center);
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -49,9 +52,12 @@ fn main() -> Result<(), XlsxError> {
     // Write a formula.
     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
 
-    // Write the date .
+    // Write a date.
     let date = NaiveDate::from_ymd(2023, 1, 25);
     worksheet.write_date(6, 0, date, &date_format)?;
+
+    // Write some merged cells.
+    worksheet.merge_range(7, 0, 7, 1, "Merged cells", &merge_format)?;
 
     // Save the file to disk.
     workbook.save("demo.xlsx")?;
@@ -68,6 +74,7 @@ features are:
 - Full cell formatting support.
 - Formula support, including new Excel 365 dynamic functions.
 - Page/Printing Setup support.
+- Merged ranges.
 
 Rust_xlsxwriter is under active development and new features will be added
 frequently.

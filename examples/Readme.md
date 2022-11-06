@@ -15,8 +15,8 @@ documentation and generally show how an individual function works.
 * app_autofit.rs - An example of using a simulated Column Autofit using the
   rust_xlsxwriter library.
 
-* app_colors.rs - A sample palette of the the defined colors and user
-  defined RGB colors available in the rust_xlsxwriter library.
+* app_colors.rs - A demonstration of the RGB and Theme colors palettes
+  available in the rust_xlsxwriter library.
 
 * app_demo.rs - A simple, getting started, example of some of the features
   of the rust_xlsxwriter library.
@@ -41,6 +41,9 @@ documentation and generally show how an individual function works.
   worksheets using the rust_xlsxwriter library.
 
 * app_hello_world.rs - Create a simple Hello World style Excel spreadsheet
+  using the rust_xlsxwriter library.
+
+* app_merge_range.rs - An example of creating merged ranges in a worksheet
   using the rust_xlsxwriter library.
 
 * app_panes.rs - A simple example of setting some "freeze" panes in
