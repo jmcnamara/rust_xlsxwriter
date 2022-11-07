@@ -12,10 +12,10 @@ edition = "2021"
 
 [dependencies]
 chrono = {version = "0.4.22", default-features = false, features = ["clock"]}
+zip = {version = "0.6.2", default-features = false, features = ["deflate"]}
 itertools = "0.10.0"
 regex = "1.5.6"
 tempfile = "3.3.0"
-zip = "0.6.2"
 lazy_static = "1.4.0"
 
 [dev-dependencies]
