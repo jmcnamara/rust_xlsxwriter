@@ -141,8 +141,7 @@ impl<W: Write + Seek> Packager<W> {
             .start_file("[Content_Types].xml", self.zip_options)?;
 
         content_types.assemble_xml_file();
-        let buffer = content_types.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(content_types.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -158,8 +157,7 @@ impl<W: Write + Seek> Packager<W> {
         self.zip.start_file("_rels/.rels", self.zip_options)?;
 
         rels.assemble_xml_file();
-        let buffer = rels.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -190,8 +188,7 @@ impl<W: Write + Seek> Packager<W> {
             .start_file("xl/_rels/workbook.xml.rels", self.zip_options)?;
 
         rels.assemble_xml_file();
-        let buffer = rels.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -208,8 +205,7 @@ impl<W: Write + Seek> Packager<W> {
         self.zip.start_file(filename, self.zip_options)?;
 
         worksheet.assemble_xml_file(string_table);
-        let buffer = worksheet.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(worksheet.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -219,8 +215,7 @@ impl<W: Write + Seek> Packager<W> {
         self.zip.start_file("xl/workbook.xml", self.zip_options)?;
 
         workbook.assemble_xml_file();
-        let buffer = workbook.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(workbook.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -236,8 +231,8 @@ impl<W: Write + Seek> Packager<W> {
             .start_file("xl/sharedStrings.xml", self.zip_options)?;
 
         shared_strings.assemble_xml_file(string_table);
-        let buffer = shared_strings.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip
+            .write_all(shared_strings.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -255,8 +250,7 @@ impl<W: Write + Seek> Packager<W> {
         self.zip.start_file("xl/styles.xml", self.zip_options)?;
 
         styles.assemble_xml_file();
-        let buffer = styles.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(styles.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -269,8 +263,7 @@ impl<W: Write + Seek> Packager<W> {
             .start_file("xl/theme/theme1.xml", self.zip_options)?;
 
         theme.assemble_xml_file();
-        let buffer = theme.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(theme.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -282,8 +275,7 @@ impl<W: Write + Seek> Packager<W> {
         self.zip.start_file("docProps/core.xml", self.zip_options)?;
 
         core.assemble_xml_file();
-        let buffer = core.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(core.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -309,8 +301,7 @@ impl<W: Write + Seek> Packager<W> {
         self.zip.start_file("docProps/app.xml", self.zip_options)?;
 
         app.assemble_xml_file();
-        let buffer = app.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(app.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -322,8 +313,7 @@ impl<W: Write + Seek> Packager<W> {
         self.zip.start_file("xl/metadata.xml", self.zip_options)?;
 
         metadata.assemble_xml_file();
-        let buffer = metadata.writer.read_to_buffer();
-        self.zip.write_all(&buffer)?;
+        self.zip.write_all(metadata.writer.xmlfile.get_ref())?;
 
         Ok(())
     }

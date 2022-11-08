@@ -5,15 +5,13 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
-use std::borrow::Cow;
-use std::fs::File;
-use std::io::{BufWriter, Read, Seek, Write};
-
 use regex::Regex;
-use tempfile::tempfile;
+use std::borrow::Cow;
+use std::io::{Cursor, Write};
+use std::str;
 
 pub struct XMLWriter {
-    pub(crate) xmlfile: BufWriter<File>,
+    pub(crate) xmlfile: Cursor<Vec<u8>>,
 }
 
 impl Default for XMLWriter {
@@ -22,38 +20,25 @@ impl Default for XMLWriter {
     }
 }
 
+// Base XML writing struct used to write xlsx sub-component xml file.
 impl XMLWriter {
-    // Create a new XMLWriter struct to write XML to a given filehandle.
     pub(crate) fn new() -> XMLWriter {
-        let xmlfile = tempfile().unwrap();
-        let xmlfile = BufWriter::new(xmlfile);
+        let buf: Vec<u8> = Vec::with_capacity(2048);
+        let xmlfile = Cursor::new(buf);
+
         XMLWriter { xmlfile }
     }
 
-    // Helper function for tests to read xml data back from the xml filehandle.
+    // Helper function to read back stored xml data for tests.
     #[allow(dead_code)]
-    pub(crate) fn read_to_string(&mut self) -> String {
-        let mut xml_string = String::new();
-        self.xmlfile.rewind().unwrap();
-        self.xmlfile
-            .get_ref()
-            .read_to_string(&mut xml_string)
-            .unwrap();
-        xml_string
+    pub(crate) fn read_to_string(&mut self) -> &str {
+        str::from_utf8(self.xmlfile.get_ref()).unwrap()
     }
 
-    // Return data to write to xlsx/zip file member.
-    pub(crate) fn read_to_buffer(&mut self) -> Vec<u8> {
-        let mut buffer = Vec::new();
-        self.xmlfile.rewind().unwrap();
-        self.xmlfile.get_ref().read_to_end(&mut buffer).unwrap();
-        buffer
-    }
-
-    // Return data to write to xlsx/zip file member.
+    // Reset the memory buffer, usually between saves.
     pub(crate) fn reset(&mut self) {
-        self.xmlfile.rewind().unwrap();
-        self.xmlfile.get_ref().set_len(0).unwrap();
+        let buf: Vec<u8> = Vec::with_capacity(2048);
+        self.xmlfile = Cursor::new(buf);
     }
 
     // Write an XML file declaration.

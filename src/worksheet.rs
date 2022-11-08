@@ -232,7 +232,7 @@ impl Worksheet {
     pub fn new() -> Worksheet {
         let writer = XMLWriter::new();
 
-        let default_format = Format::new();
+        let default_format = Format::default();
         let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
         // Initialize the min and max dimensions with their opposite value.

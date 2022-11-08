@@ -3,10 +3,6 @@
 
 //! An example of creating a simple Excel xlsx file in an in memory Vec<u8>
 //! buffer using the rust_xlsxwriter library.
-//!
-//! Note, although the final file will be in memory the intermediate files that
-//! make up the xlsx file are written to temporary files on disk before the
-//! final file is assembled.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 

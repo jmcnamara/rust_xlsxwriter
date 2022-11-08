@@ -15,13 +15,11 @@ chrono = {version = "0.4.22", default-features = false, features = ["clock"]}
 zip = {version = "0.6.2", default-features = false, features = ["deflate"]}
 itertools = "0.10.0"
 regex = "1.5.6"
-tempfile = "3.3.0"
 lazy_static = "1.4.0"
 
 [dev-dependencies]
 pretty_assertions = "0.6.1"
 regex = "1.5.6"
-tempfile = "3.3.0"
 assert_float_eq = "1"
 
 # Some local package management and release check commands.
