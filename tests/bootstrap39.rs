@@ -37,13 +37,12 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn bootstrap39_future_function_1() {
-    let test_runner = common::TestRunner::new("bootstrap39")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap39")
+        .set_function(create_new_xlsx_file_1)
         .unique("1")
         .ignore_calc_chain()
         .initialize();
-
-    let result = create_new_xlsx_file_1(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -51,13 +50,12 @@ fn bootstrap39_future_function_1() {
 
 #[test]
 fn bootstrap39_future_function_2() {
-    let test_runner = common::TestRunner::new("bootstrap39")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap39")
+        .set_function(create_new_xlsx_file_2)
         .unique("2")
         .ignore_calc_chain()
         .initialize();
-
-    let result = create_new_xlsx_file_2(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

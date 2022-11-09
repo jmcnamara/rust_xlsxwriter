@@ -17,6 +17,7 @@ macro_rules! assert_result {
 #[cfg(test)]
 use pretty_assertions::assert_eq;
 use regex::Regex;
+use rust_xlsxwriter::XlsxError;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
@@ -26,8 +27,12 @@ use std::io::Read;
 // Simple test runner struct and methods to create a new xlsx output file and
 // compare it with an input xlsx file created by Excel.
 #[allow(dead_code)]
-pub struct TestRunner<'a> {
-    testcase: &'a str,
+pub struct TestRunner<'a, F>
+where
+    F: FnOnce(&str) -> Result<(), XlsxError> + Copy,
+{
+    test_name: &'a str,
+    test_function: Option<F>,
     unique: &'a str,
     input_filename: String,
     output_filename: String,
@@ -35,11 +40,14 @@ pub struct TestRunner<'a> {
     ignore_elements: HashMap<&'a str, &'a str>,
 }
 
-impl<'a> TestRunner<'a> {
-    #[allow(dead_code)]
-    pub fn new(testcase: &'a str) -> TestRunner {
+impl<'a, F> TestRunner<'a, F>
+where
+    F: FnOnce(&str) -> Result<(), XlsxError> + Copy,
+{
+    pub fn new() -> TestRunner<'a, F> {
         TestRunner {
-            testcase,
+            test_name: "",
+            test_function: None,
             unique: "",
             input_filename: "".to_string(),
             output_filename: "".to_string(),
@@ -48,24 +56,36 @@ impl<'a> TestRunner<'a> {
         }
     }
 
+    // Set the testcase name.
+    pub fn set_name(mut self, testcase: &'a str) -> TestRunner<F> {
+        self.test_name = testcase;
+        self
+    }
+
+    // Set the test function pointer.
+    pub fn set_function(mut self, test_function: F) -> TestRunner<'a, F> {
+        self.test_function = Some(test_function);
+        self
+    }
+
     // Set string to add to the default output filename to make it unique so
     // that the multiple tests can be run in parallel.
     #[allow(dead_code)]
-    pub fn unique(mut self, unique_string: &'a str) -> TestRunner {
+    pub fn unique(mut self, unique_string: &'a str) -> TestRunner<F> {
         self.unique = unique_string;
         self
     }
 
     // Ignore certain xml files within the test xlsx files.
     #[allow(dead_code)]
-    pub fn ignore_file(mut self, filename: &'a str) -> TestRunner<'a> {
+    pub fn ignore_file(mut self, filename: &'a str) -> TestRunner<'a, F> {
         self.ignore_files.insert(filename);
         self
     }
 
     // Ignore the files associated with the formula xl/calcChain.xml.
     #[allow(dead_code)]
-    pub fn ignore_calc_chain(mut self) -> TestRunner<'a> {
+    pub fn ignore_calc_chain(mut self) -> TestRunner<'a, F> {
         self.ignore_files.insert("xl/calcChain.xml");
         self.ignore_files.insert("[Content_Types].xml");
         self.ignore_files.insert("xl/_rels/workbook.xml.rels");
@@ -74,36 +94,37 @@ impl<'a> TestRunner<'a> {
 
     // Ignore certain elements with xml files.
     #[allow(dead_code)]
-    pub fn ignore_elements(mut self, filename: &'a str, pattern: &'a str) -> TestRunner<'a> {
+    pub fn ignore_elements(mut self, filename: &'a str, pattern: &'a str) -> TestRunner<'a, F> {
         self.ignore_elements.insert(filename, pattern);
         self
     }
 
     // Initialize the in/out filenames once other properties have been set.
-    #[allow(dead_code)]
-    pub fn initialize(mut self) -> TestRunner<'a> {
-        self.input_filename = format!("tests/input/{}.xlsx", self.testcase);
+    pub fn initialize(mut self) -> TestRunner<'a, F> {
+        self.input_filename = format!("tests/input/{}.xlsx", self.test_name);
 
         if self.unique.is_empty() {
-            self.output_filename = format!("tests/output/rs_{}.xlsx", self.testcase);
+            self.output_filename = format!("tests/output/rs_{}.xlsx", self.test_name);
         } else {
             self.output_filename =
-                format!("tests/output/rs_{}_{}.xlsx", self.testcase, self.unique);
+                format!("tests/output/rs_{}_{}.xlsx", self.test_name, self.unique);
         }
 
         self
     }
 
-    // Getter for the output file name which can be passed to the xlsx file
-    // creation function.
-    #[allow(dead_code)]
-    pub fn output_file(&self) -> &String {
-        &self.output_filename
-    }
-
-    // Test if the input and output file are equal.
-    #[allow(dead_code)]
+    // Run the test function, check its result, and then test if the input and
+    // generated output file are equal.
     pub fn assert_eq(&self) {
+        // Get the test function and run it to generate the output file.
+        let testcode = (self.test_function).unwrap();
+        let result = (testcode)(&self.output_filename);
+
+        // Check for any XlsxError errors from the test code.
+        assert_result!(result);
+
+        // If the function ran correctly then compare the input/reference file
+        // with the output/generated file.
         let (exp, got) = compare_xlsx_files(
             &self.input_filename,
             &self.output_filename,
@@ -115,7 +136,6 @@ impl<'a> TestRunner<'a> {
     }
 
     // Clean up any the temp output file.
-    #[allow(dead_code)]
     pub fn cleanup(&self) {
         fs::remove_file(&self.output_filename).unwrap();
     }

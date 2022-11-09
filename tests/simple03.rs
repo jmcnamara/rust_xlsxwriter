@@ -43,10 +43,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn test_simple03() {
-    let test_runner = common::TestRunner::new("simple03").initialize();
-
-    let result = create_new_xlsx_file(test_runner.output_file());
-    assert_result!(result);
+    let test_runner = common::TestRunner::new()
+        .set_name("simple03")
+        .set_function(create_new_xlsx_file)
+        .initialize();
 
     test_runner.assert_eq();
     test_runner.cleanup();

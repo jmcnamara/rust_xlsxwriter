@@ -9,7 +9,7 @@ use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
 mod common;
 
 // Test case to demonstrate creating a basic file with 3 worksheets and no data.
-fn create_new_xlsx_file1(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     _ = workbook.add_worksheet();
     _ = workbook.add_worksheet();
@@ -22,7 +22,7 @@ fn create_new_xlsx_file1(filename: &str) -> Result<(), XlsxError> {
 
 // Test case to demonstrate creating a basic file with 3 worksheets via
 // Worksheet::new() and push_worksheet().
-fn create_new_xlsx_file2(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut worksheet1 = Worksheet::new();
     let mut worksheet2 = Worksheet::new();
     let mut worksheet3 = Worksheet::new();
@@ -44,7 +44,7 @@ fn create_new_xlsx_file2(filename: &str) -> Result<(), XlsxError> {
 
 // Test case to demonstrate creating a basic file with 3 worksheets via
 // Worksheet::new() and push_worksheet() + default sheet names.
-fn create_new_xlsx_file3(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let worksheet1 = Worksheet::new();
     let worksheet2 = Worksheet::new();
     let worksheet3 = Worksheet::new();
@@ -62,12 +62,11 @@ fn create_new_xlsx_file3(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn bootstrap02_multiple_worksheets() {
-    let test_runner = common::TestRunner::new("bootstrap02")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap02")
+        .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
-
-    let result = create_new_xlsx_file1(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -75,12 +74,11 @@ fn bootstrap02_multiple_worksheets() {
 
 #[test]
 fn bootstrap02_multiple_new_worksheets() {
-    let test_runner = common::TestRunner::new("bootstrap02")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap02")
+        .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();
-
-    let result = create_new_xlsx_file2(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -88,12 +86,11 @@ fn bootstrap02_multiple_new_worksheets() {
 
 #[test]
 fn bootstrap02_multiple_new_worksheets_default_names() {
-    let test_runner = common::TestRunner::new("bootstrap02")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap02")
+        .set_function(create_new_xlsx_file_3)
         .unique("3")
         .initialize();
-
-    let result = create_new_xlsx_file3(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

@@ -2283,6 +2283,7 @@ impl XlsxColor {
             XlsxColor::White => 0xFFFFFF,
             XlsxColor::Yellow => 0xFFFF00,
             XlsxColor::RGB(color) => color,
+            // Use a pseudo RGB color for Theme to differentiate in comparison testing.
             XlsxColor::Theme(color, shade) => 0xFE000000 + ((color as u32) << 8) + shade as u32,
         }
     }

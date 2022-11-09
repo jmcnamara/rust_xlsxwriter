@@ -33,10 +33,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn bootstrap12_bold_and_italic_text_mixed() {
-    let test_runner = common::TestRunner::new("bootstrap12").initialize();
-
-    let result = create_new_xlsx_file(test_runner.output_file());
-    assert_result!(result);
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap12")
+        .set_function(create_new_xlsx_file)
+        .initialize();
 
     test_runner.assert_eq();
     test_runner.cleanup();

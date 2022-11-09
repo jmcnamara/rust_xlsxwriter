@@ -27,10 +27,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn test_page_view02() {
-    let test_runner = common::TestRunner::new("page_view02").initialize();
-
-    let result = create_new_xlsx_file(test_runner.output_file());
-    assert_result!(result);
+    let test_runner = common::TestRunner::new()
+        .set_name("page_view02")
+        .set_function(create_new_xlsx_file)
+        .initialize();
 
     test_runner.assert_eq();
     test_runner.cleanup();

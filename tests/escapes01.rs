@@ -42,12 +42,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn test_escapes01() {
-    let test_runner = common::TestRunner::new("escapes01")
+    let test_runner = common::TestRunner::new()
+        .set_name("escapes01")
+        .set_function(create_new_xlsx_file)
         .ignore_calc_chain()
         .initialize();
-
-    let result = create_new_xlsx_file(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

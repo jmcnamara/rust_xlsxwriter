@@ -24,12 +24,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn bootstrap38_write_data_with_escapes() {
-    let test_runner = common::TestRunner::new("bootstrap38")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap38")
+        .set_function(create_new_xlsx_file)
         .ignore_calc_chain()
         .initialize();
-
-    let result = create_new_xlsx_file(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

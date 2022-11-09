@@ -67,12 +67,11 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn test_dynamic_array02_1() {
-    let test_runner = common::TestRunner::new("dynamic_array02")
+    let test_runner = common::TestRunner::new()
+        .set_name("dynamic_array02")
+        .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
-
-    let result = create_new_xlsx_file_1(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -80,12 +79,11 @@ fn test_dynamic_array02_1() {
 
 #[test]
 fn test_dynamic_array02_2() {
-    let test_runner = common::TestRunner::new("dynamic_array02")
+    let test_runner = common::TestRunner::new()
+        .set_name("dynamic_array02")
+        .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();
-
-    let result = create_new_xlsx_file_2(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -93,12 +91,11 @@ fn test_dynamic_array02_2() {
 
 #[test]
 fn test_dynamic_array02_3() {
-    let test_runner = common::TestRunner::new("dynamic_array02")
+    let test_runner = common::TestRunner::new()
+        .set_name("dynamic_array02")
+        .set_function(create_new_xlsx_file_3)
         .unique("3")
         .initialize();
-
-    let result = create_new_xlsx_file_3(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -106,12 +103,11 @@ fn test_dynamic_array02_3() {
 
 #[test]
 fn test_dynamic_array02_4() {
-    let test_runner = common::TestRunner::new("dynamic_array02")
+    let test_runner = common::TestRunner::new()
+        .set_name("dynamic_array02")
+        .set_function(create_new_xlsx_file_4)
         .unique("4")
         .initialize();
-
-    let result = create_new_xlsx_file_4(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

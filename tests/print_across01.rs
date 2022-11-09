@@ -27,12 +27,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn test_print_across01() {
-    let test_runner = common::TestRunner::new("print_across01")
+    let test_runner = common::TestRunner::new()
+        .set_name("print_across01")
+        .set_function(create_new_xlsx_file)
         .ignore_elements("xl/worksheets/sheet1.xml", "<pageMargins")
         .initialize();
-
-    let result = create_new_xlsx_file(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

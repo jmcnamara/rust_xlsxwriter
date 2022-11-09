@@ -9,7 +9,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 mod common;
 
 // Test case to demonstrate creating a basic file with some string cell data.
-fn create_new_xlsx_file1(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
@@ -24,7 +24,7 @@ fn create_new_xlsx_file1(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Test case to demonstrate incremental saving and the get_worksheet*() methods.
-fn create_new_xlsx_file2(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     let name = worksheet.name();
@@ -50,12 +50,11 @@ fn create_new_xlsx_file2(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn bootstrap07_write_repeated_strings() {
-    let test_runner = common::TestRunner::new("bootstrap07")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap07")
+        .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
-
-    let result = create_new_xlsx_file1(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -63,12 +62,11 @@ fn bootstrap07_write_repeated_strings() {
 
 #[test]
 fn bootstrap07_multi_save() {
-    let test_runner = common::TestRunner::new("bootstrap07")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap07")
+        .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();
-
-    let result = create_new_xlsx_file2(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();

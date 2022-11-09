@@ -49,12 +49,11 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
 #[test]
 fn bootstrap25_set_column() {
-    let test_runner = common::TestRunner::new("bootstrap25")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap25")
+        .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
-
-    let result = create_new_xlsx_file_1(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
@@ -62,12 +61,11 @@ fn bootstrap25_set_column() {
 
 #[test]
 fn bootstrap25_set_column_pixels() {
-    let test_runner = common::TestRunner::new("bootstrap25")
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap25")
+        .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();
-
-    let result = create_new_xlsx_file_2(test_runner.output_file());
-    assert_result!(result);
 
     test_runner.assert_eq();
     test_runner.cleanup();
