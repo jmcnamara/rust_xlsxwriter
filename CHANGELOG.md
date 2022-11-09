@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dependency changes to make WASM compilation easier:
 
   - Reduced the `zip` dependency to the minimum import only.
-  - Removed dependency on `tempfile`. The library now uses in memory files
+  - Removed dependency on `tempfile`. The library now uses in memory files.
 
 ## [0.12.0] - 2022-11-06
 
