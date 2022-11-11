@@ -16,6 +16,7 @@ pub struct Styles<'a> {
     fill_count: u16,
     border_count: u16,
     num_format_count: u16,
+    has_hyperlink_style: bool,
 }
 
 impl<'a> Styles<'a> {
@@ -30,6 +31,7 @@ impl<'a> Styles<'a> {
         fill_count: u16,
         border_count: u16,
         num_format_count: u16,
+        has_hyperlink_style: bool,
     ) -> Styles {
         let writer = XMLWriter::new();
 
@@ -40,6 +42,7 @@ impl<'a> Styles<'a> {
             fill_count,
             border_count,
             num_format_count,
+            has_hyperlink_style,
         }
     }
 
@@ -208,10 +211,8 @@ impl<'a> Styles<'a> {
     fn write_font_scheme(&mut self, xf_format: &Format) {
         let mut attributes = vec![];
 
-        if xf_format.font_name == "Calibri" {
-            attributes.push(("val", "minor".to_string()));
-        } else if !xf_format.font_scheme.is_empty() {
-            attributes.push(("val", xf_format.font_scheme.clone()));
+        if !xf_format.font_scheme.is_empty() {
+            attributes.push(("val", xf_format.font_scheme.to_string()));
         } else {
             return;
         }
@@ -413,18 +414,27 @@ impl<'a> Styles<'a> {
 
     // Write the <cellStyleXfs> element.
     fn write_cell_style_xfs(&mut self) {
-        let attributes = vec![("count", "1".to_string())];
+        let mut count = 1;
+        if self.has_hyperlink_style {
+            count = 2;
+        }
+
+        let attributes = vec![("count", count.to_string())];
 
         self.writer.xml_start_tag_attr("cellStyleXfs", &attributes);
 
-        // Write the style xf element.
-        self.write_style_xf();
+        // Write the style xf elements.
+        self.write_normal_style_xf();
+
+        if self.has_hyperlink_style {
+            self.write_hyperlink_style_xf();
+        }
 
         self.writer.xml_end_tag("cellStyleXfs");
     }
 
-    // Write the style <xf> element.
-    fn write_style_xf(&mut self) {
+    // Write the style <xf> element for the "Normal" style.
+    fn write_normal_style_xf(&mut self) {
         let attributes = vec![
             ("numFmtId", "0".to_string()),
             ("fontId", "0".to_string()),
@@ -433,6 +443,40 @@ impl<'a> Styles<'a> {
         ];
 
         self.writer.xml_empty_tag_attr("xf", &attributes);
+    }
+
+    // Write the style <xf> element for the "Hyperlink" style.
+    fn write_hyperlink_style_xf(&mut self) {
+        let attributes = vec![
+            ("numFmtId", "0".to_string()),
+            ("fontId", "1".to_string()),
+            ("fillId", "0".to_string()),
+            ("borderId", "0".to_string()),
+            ("applyNumberFormat", "0".to_string()),
+            ("applyFill", "0".to_string()),
+            ("applyBorder", "0".to_string()),
+            ("applyAlignment", "0".to_string()),
+            ("applyProtection", "0".to_string()),
+        ];
+
+        self.writer.xml_start_tag_attr("xf", &attributes);
+        self.write_hyperlink_alignment();
+        self.write_hyperlink_protection();
+        self.writer.xml_end_tag("xf");
+    }
+
+    // Write the <alignment> element for hyperlinks.
+    fn write_hyperlink_alignment(&mut self) {
+        let attributes = vec![("vertical", "top".to_string())];
+
+        self.writer.xml_empty_tag_attr("alignment", &attributes);
+    }
+
+    // Write the <protection> element for hyperlinks.
+    fn write_hyperlink_protection(&mut self) {
+        let attributes = vec![("locked", "0".to_string())];
+
+        self.writer.xml_empty_tag_attr("protection", &attributes);
     }
 
     // Write the <cellXfs> element.
@@ -452,23 +496,25 @@ impl<'a> Styles<'a> {
 
     // Write the cell <xf> element.
     fn write_cell_xf(&mut self, xf_format: &Format) {
+        let has_protection = xf_format.has_protection();
+        let has_alignment = xf_format.has_alignment();
+        let apply_alignment = xf_format.apply_alignment();
+        let is_hyperlink = xf_format.is_hyperlink;
+        let xf_id = i32::from(is_hyperlink);
+
         let mut attributes = vec![
             ("numFmtId", xf_format.num_format_index.to_string()),
             ("fontId", xf_format.font_index.to_string()),
             ("fillId", xf_format.fill_index.to_string()),
             ("borderId", xf_format.border_index.to_string()),
-            ("xfId", "0".to_string()),
+            ("xfId", xf_id.to_string()),
         ];
-
-        let has_protection = xf_format.has_protection();
-        let has_alignment = xf_format.has_alignment();
-        let apply_alignment = xf_format.apply_alignment();
 
         if xf_format.num_format_index > 0 {
             attributes.push(("applyNumberFormat", "1".to_string()));
         }
 
-        if xf_format.font_index > 0 {
+        if xf_format.font_index > 0 && !is_hyperlink {
             attributes.push(("applyFont", "1".to_string()));
         }
 
@@ -480,11 +526,11 @@ impl<'a> Styles<'a> {
             attributes.push(("applyBorder", "1".to_string()));
         }
 
-        if apply_alignment {
+        if apply_alignment || is_hyperlink {
             attributes.push(("applyAlignment", "1".to_string()));
         }
 
-        if has_protection {
+        if has_protection || is_hyperlink {
             attributes.push(("applyProtection", "1".to_string()));
         }
 
@@ -617,22 +663,41 @@ impl<'a> Styles<'a> {
 
     // Write the <cellStyles> element.
     fn write_cell_styles(&mut self) {
-        let attributes = vec![("count", "1".to_string())];
+        let mut count = 1;
+        if self.has_hyperlink_style {
+            count = 2;
+        }
+
+        let attributes = vec![("count", count.to_string())];
 
         self.writer.xml_start_tag_attr("cellStyles", &attributes);
 
-        // Write the cellStyle element.
-        self.write_cell_style();
+        // Write the cellStyle elements.
+        if self.has_hyperlink_style {
+            self.write_hyperlink_cell_style();
+        }
+        self.write_normal_cell_style();
 
         self.writer.xml_end_tag("cellStyles");
     }
 
-    // Write the <cellStyle> element.
-    fn write_cell_style(&mut self) {
+    // Write the <cellStyle> element for the "Normal" style.
+    fn write_normal_cell_style(&mut self) {
         let attributes = vec![
             ("name", "Normal".to_string()),
             ("xfId", "0".to_string()),
             ("builtinId", "0".to_string()),
+        ];
+
+        self.writer.xml_empty_tag_attr("cellStyle", &attributes);
+    }
+
+    // Write the <cellStyle> element for the "Hyperlink" style.
+    fn write_hyperlink_cell_style(&mut self) {
+        let attributes = vec![
+            ("name", "Hyperlink".to_string()),
+            ("xfId", "1".to_string()),
+            ("builtinId", "8".to_string()),
         ];
 
         self.writer.xml_empty_tag_attr("cellStyle", &attributes);
@@ -704,7 +769,7 @@ mod tests {
         xf_format.set_border_index(0, true);
 
         let xf_formats = vec![xf_format];
-        let mut styles = Styles::new(&xf_formats, 1, 2, 1, 0);
+        let mut styles = Styles::new(&xf_formats, 1, 2, 1, 0, false);
 
         styles.assemble_xml_file();
 

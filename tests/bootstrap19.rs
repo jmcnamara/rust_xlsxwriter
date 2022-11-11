@@ -12,7 +12,7 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let mut format1 = Format::new().set_font_scheme("");
+    let mut format1 = Format::default();
     let format2 = Format::new().set_font_name("Arial");
     let format3 = Format::new().set_font_name("Consolas").set_font_family(3);
     let format4 = Format::new().set_font_size(10);

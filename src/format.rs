@@ -434,7 +434,7 @@ pub struct Format {
     pub(crate) font_scheme: String,
     pub(crate) font_condense: bool,
     pub(crate) font_extend: bool,
-    pub(crate) theme: u8,
+    pub(crate) is_hyperlink: bool,
 
     // Alignment properties.
     pub(crate) horizontal_align: XlsxAlign,
@@ -519,10 +519,10 @@ impl Format {
             font_script: XlsxScript::None,
             font_family: 2,
             font_charset: 0,
-            font_scheme: "".to_string(),
+            font_scheme: "minor".to_string(),
             font_condense: false,
             font_extend: false,
-            theme: 0,
+            is_hyperlink: false,
             hidden: false,
             locked: true,
             horizontal_align: XlsxAlign::General,
@@ -602,7 +602,7 @@ impl Format {
             self.font_size,
             self.font_strikethrough,
             self.italic,
-            self.theme,
+            self.is_hyperlink,
             self.underline as u8,
         )
     }
@@ -1014,6 +1014,11 @@ impl Format {
     ///
     pub fn set_font_name(mut self, font_name: &str) -> Format {
         self.font_name = font_name.to_string();
+
+        if font_name != "Calibri" {
+            self.font_scheme = "".to_string();
+        }
+
         self
     }
 
@@ -2054,6 +2059,19 @@ impl Format {
         self
     }
 
+    /// Set the hyperlink style.
+    ///
+    /// Set the hyperlink style for use with urls. This is usually set
+    /// automatically when writing urls without a format applied.
+    pub fn set_hyperlink_style(mut self) -> Format {
+        self.is_hyperlink = true;
+        self.font_color = XlsxColor::Theme(10, 0);
+        self.underline = XlsxUnderline::Single;
+        self.font_scheme = "".to_string();
+
+        self
+    }
+
     /// Set the Format cell unlocked state.
     ///
     /// This method can be used to allow modification of a cell in a protected
@@ -2125,6 +2143,13 @@ impl Format {
     /// The opposite of [`set_hidden()`](Format::set_hidden()).
     pub fn unset_hidden(mut self) -> Format {
         self.hidden = false;
+        self
+    }
+
+    /// Unset the hyperlink style.
+    pub fn unset_hyperlink_style(mut self) -> Format {
+        self.is_hyperlink = true;
+
         self
     }
 }

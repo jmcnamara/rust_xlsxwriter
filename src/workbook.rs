@@ -89,6 +89,7 @@ pub struct Workbook {
     pub(crate) fill_count: u16,
     pub(crate) border_count: u16,
     pub(crate) num_format_count: u16,
+    pub(crate) has_hyperlink_style: bool,
     active_tab: u16,
     first_sheet: u16,
     defined_names: Vec<DefinedName>,
@@ -158,6 +159,7 @@ impl Workbook {
             active_tab: 0,
             first_sheet: 0,
             defined_names: vec![],
+            has_hyperlink_style: false,
         }
     }
 
@@ -755,6 +757,18 @@ impl Workbook {
         // Ensure one sheet is active/selected.
         self.set_active_worksheets();
 
+        // Check for the use of hyperlink style in the worksheets and if so add
+        // a hyperlink style to the global formats.
+        for worksheet in self.worksheets.iter() {
+            if worksheet.has_hyperlink_style {
+                let format = Format::new().set_hyperlink_style();
+                self.xf_indices.insert(format.format_key(), 1);
+                self.xf_formats.push(format);
+                self.has_hyperlink_style = true;
+                break;
+            }
+        }
+
         // Convert any local formats to workbook/global formats.
         let mut worksheet_formats: Vec<Vec<Format>> = vec![];
         for worksheet in self.worksheets.iter() {
@@ -825,7 +839,7 @@ impl Workbook {
     }
 
     // Evaluate and clone formats from worksheets into a workbook level vector
-    // of unique format. Also return the index for use in remapping worksheet
+    // of unique formats. Also return the index for use in remapping worksheet
     // format indices.
     fn format_index(&mut self, format: &Format) -> u32 {
         let format_key = format.format_key();

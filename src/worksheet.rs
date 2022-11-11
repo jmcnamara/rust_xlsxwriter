@@ -107,6 +107,7 @@ pub struct Worksheet {
     pub(crate) repeat_row_range: String,
     pub(crate) repeat_col_range: String,
     pub(crate) xf_formats: Vec<Format>,
+    pub(crate) has_hyperlink_style: bool,
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
@@ -304,6 +305,7 @@ impl Worksheet {
             default_result: "0".to_string(),
             use_future_functions: false,
             panes,
+            has_hyperlink_style: false,
         }
     }
 
@@ -4853,6 +4855,9 @@ impl Worksheet {
                 let xf_index = self.xf_formats.len() as u32;
                 self.xf_formats.push(format.clone());
                 self.xf_indices.insert(format_key, xf_index);
+                if format.is_hyperlink {
+                    self.has_hyperlink_style = true;
+                }
                 xf_index
             }
         }
