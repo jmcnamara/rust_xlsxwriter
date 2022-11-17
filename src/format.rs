@@ -2063,7 +2063,8 @@ impl Format {
     ///
     /// Set the hyperlink style for use with urls. This is usually set
     /// automatically when writing urls without a format applied.
-    pub fn set_hyperlink_style(mut self) -> Format {
+    ///
+    pub fn set_hyperlink(mut self) -> Format {
         self.is_hyperlink = true;
         self.font_color = XlsxColor::Theme(10, 0);
         self.underline = XlsxUnderline::Single;

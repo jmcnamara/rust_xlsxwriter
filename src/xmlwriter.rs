@@ -168,6 +168,15 @@ pub fn escape_si_data(data: &str) -> Cow<str> {
     escape_string(data, match_shared_string_char)
 }
 
+// Escape non-url characters in a hyperlink/url.
+pub fn escape_url(data: &str) -> Cow<str> {
+    escape_string(data, match_url_char)
+}
+
+// -----------------------------------------------------------------------
+// Helper functions. Mainly for string escaping.
+// -----------------------------------------------------------------------
+
 // Match function for escape_attributes().
 fn match_attribute_html_char(ch: char) -> Option<&'static str> {
     match ch {
@@ -229,6 +238,24 @@ fn match_shared_string_char(ch: char) -> Option<&'static str> {
         '&' => Some("&amp;"),
         '<' => Some("&lt;"),
         '>' => Some("&gt;"),
+        _ => None,
+    }
+}
+
+// Match the url characters that Excel escapes.
+fn match_url_char(ch: char) -> Option<&'static str> {
+    match ch {
+        '%' => Some("%25"),
+        '"' => Some("%22"),
+        ' ' => Some("%20"),
+        '<' => Some("%3c"),
+        '>' => Some("%3e"),
+        '[' => Some("%5b"),
+        ']' => Some("%5d"),
+        '^' => Some("%5e"),
+        '`' => Some("%60"),
+        '{' => Some("%7b"),
+        '}' => Some("%7d"),
         _ => None,
     }
 }

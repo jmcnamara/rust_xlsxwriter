@@ -761,7 +761,7 @@ impl Workbook {
         // a hyperlink style to the global formats.
         for worksheet in self.worksheets.iter() {
             if worksheet.has_hyperlink_style {
-                let format = Format::new().set_hyperlink_style();
+                let format = Format::new().set_hyperlink();
                 self.xf_indices.insert(format.format_key(), 1);
                 self.xf_formats.push(format);
                 self.has_hyperlink_style = true;

@@ -28,13 +28,18 @@ impl Relationship {
     }
 
     // Add container relationship to xlsx .rels xml files.
-    pub(crate) fn add_document_relationship(&mut self, rel_type: &str, target: &str) {
+    pub(crate) fn add_document_relationship(
+        &mut self,
+        rel_type: &str,
+        target: &str,
+        target_mode: &str,
+    ) {
         let document_schema = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 
         self.relationships.push((
-            format!("{}{}", document_schema, rel_type),
+            format!("{document_schema}/{rel_type}"),
             target.to_string(),
-            "".to_string(),
+            target_mode.to_string(),
         ));
     }
 
@@ -43,7 +48,7 @@ impl Relationship {
         let package_schema = "http://schemas.openxmlformats.org/package/2006/relationships";
 
         self.relationships.push((
-            format!("{}{}", package_schema, rel_type),
+            format!("{package_schema}/{rel_type}"),
             target.to_string(),
             "".to_string(),
         ));
@@ -108,11 +113,11 @@ mod tests {
     fn test_assemble() {
         let mut rels = Relationship::new();
 
-        rels.add_document_relationship("/worksheet", "worksheets/sheet1.xml");
-        rels.add_document_relationship("/theme", "theme/theme1.xml");
-        rels.add_document_relationship("/styles", "styles.xml");
-        rels.add_document_relationship("/sharedStrings", "sharedStrings.xml");
-        rels.add_document_relationship("/calcChain", "calcChain.xml");
+        rels.add_document_relationship("worksheet", "worksheets/sheet1.xml", "");
+        rels.add_document_relationship("theme", "theme/theme1.xml", "");
+        rels.add_document_relationship("styles", "styles.xml", "");
+        rels.add_document_relationship("sharedStrings", "sharedStrings.xml", "");
+        rels.add_document_relationship("calcChain", "calcChain.xml", "");
 
         rels.assemble_xml_file();
 

@@ -8,7 +8,7 @@ use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 use regex::Regex;
 use std::borrow::Cow;
 use std::cmp;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::io::Write;
 use std::mem;
 
@@ -108,6 +108,7 @@ pub struct Worksheet {
     pub(crate) repeat_col_range: String,
     pub(crate) xf_formats: Vec<Format>,
     pub(crate) has_hyperlink_style: bool,
+    pub(crate) relationships: Vec<(String, String, String)>,
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
@@ -151,6 +152,7 @@ pub struct Worksheet {
     default_result: String,
     use_future_functions: bool,
     panes: Panes,
+    hyperlinks: BTreeMap<(RowNum, ColNum), Hyperlink>,
 }
 
 impl Default for Worksheet {
@@ -306,6 +308,8 @@ impl Worksheet {
             use_future_functions: false,
             panes,
             has_hyperlink_style: false,
+            hyperlinks: BTreeMap::new(),
+            relationships: vec![],
         }
     }
 
@@ -1415,6 +1419,55 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_blank(row, col, format)
+    }
+
+    ///
+    pub fn write_url(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        string: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_url(row, col, string, "", "", None)
+    }
+
+    ///
+    pub fn write_url_with_text(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        string: &str,
+        text: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_url(row, col, string, text, "", None)
+    }
+
+    ///
+    pub fn write_url_with_format(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        string: &str,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_url(row, col, string, "", "", Some(format))
+    }
+
+    ///
+    pub fn write_url_with_options(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        string: &str,
+        text: &str,
+        tip: &str,
+        format: Option<&Format>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_url(row, col, string, text, tip, format)
     }
 
     /// Write a formatted date and time to a worksheet cell.
@@ -4746,6 +4799,34 @@ impl Worksheet {
         Ok(self)
     }
 
+    // Store a url and associated properties. Urls in Excel are handled in a
+    // number of ways: they are written as a string similar to write_string(),
+    // they are written in the <hyperlinks> element within the worksheet, and
+    // they are referenced in the worksheet.rels file.
+    fn store_url(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        url: &str,
+        text: &str,
+        tip: &str,
+        format: Option<&Format>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let hyperlink = Hyperlink::new(url, text, tip);
+
+        match format {
+            Some(format) => self.write_string(row, col, &hyperlink.text, format)?,
+            None => {
+                let hyperlink_format = Format::new().set_hyperlink();
+                self.write_string(row, col, &hyperlink.text, &hyperlink_format)?
+            }
+        };
+
+        self.hyperlinks.insert((row, col), hyperlink);
+
+        Ok(self)
+    }
+
     // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
         match self.table.get_mut(&row) {
@@ -4988,6 +5069,11 @@ impl Worksheet {
         // Write the mergeCells element.
         if !self.merged_ranges.is_empty() {
             self.write_merge_cells();
+        }
+
+        // Write the hyperlinks elements.
+        if !self.hyperlinks.is_empty() {
+            self.write_hyperlinks();
         }
 
         // Write the printOptions element.
@@ -5242,6 +5328,59 @@ impl Worksheet {
         let attributes = vec![("ref", merge_range.to_range_string())];
 
         self.writer.xml_empty_tag_attr("mergeCell", &attributes);
+    }
+
+    // Write the <hyperlinks> element.
+    fn write_hyperlinks(&mut self) {
+        self.writer.xml_start_tag("hyperlinks");
+
+        let mut ref_id = 1u16;
+        for (cell, hyperlink) in &mut self.hyperlinks.clone() {
+            ref_id = hyperlink.increment_ref_id(ref_id);
+            self.write_hyperlink(cell.0, cell.1, hyperlink);
+        }
+
+        self.writer.xml_end_tag("hyperlinks");
+    }
+
+    // Write the <hyperlink> element.
+    fn write_hyperlink(&mut self, row: RowNum, col: ColNum, hyperlink: &Hyperlink) {
+        let mut attributes = vec![("ref", utility::rowcol_to_cell(row, col))];
+
+        match hyperlink.link_type {
+            HyperlinkType::Url | HyperlinkType::File => {
+                let ref_id = hyperlink.ref_id;
+                attributes.push(("r:id", format!("rId{ref_id}")));
+
+                if !hyperlink.location.is_empty() {
+                    attributes.push(("location", hyperlink.location.to_string()));
+                }
+
+                if !hyperlink.tip.is_empty() {
+                    attributes.push(("tooltip", hyperlink.tip.to_string()));
+                }
+
+                // Store the linkage to the worksheets rels file.
+                self.relationships.push((
+                    "hyperlink".to_string(),
+                    hyperlink.url.to_string(),
+                    "External".to_string(),
+                ));
+            }
+            HyperlinkType::Internal => {
+                // Internal links don't use the rel file reference id.
+                attributes.push(("location", hyperlink.location.to_string()));
+
+                if !hyperlink.tip.is_empty() {
+                    attributes.push(("tooltip", hyperlink.tip.to_string()));
+                }
+
+                attributes.push(("display", hyperlink.text.to_string()));
+            }
+            _ => {}
+        }
+
+        self.writer.xml_empty_tag_attr("hyperlink", &attributes);
     }
 
     // Write the <printOptions> element.
@@ -5954,6 +6093,119 @@ impl Panes {
             utility::rowcol_to_cell(self.top_cell.0, self.top_cell.1)
         }
     }
+}
+
+#[derive(Clone)]
+// Simple struct for handling different Excel hyperlinks types.
+struct Hyperlink {
+    url: String,
+    text: String,
+    tip: String,
+    location: String,
+    link_type: HyperlinkType,
+    ref_id: u16,
+}
+
+impl Hyperlink {
+    fn new(url: &str, text: &str, tip: &str) -> Hyperlink {
+        let mut hyperlink = Hyperlink {
+            url: url.to_string(),
+            text: text.to_string(),
+            tip: tip.to_string(),
+            location: "".to_string(),
+            link_type: HyperlinkType::Unknown,
+            ref_id: 0,
+        };
+
+        Self::initialize(&mut hyperlink);
+
+        hyperlink
+    }
+
+    // This method handles a variety of different string processing that needs
+    // to be done for links and targets associated with Excel hyperlinks.
+    fn initialize(&mut self) {
+        lazy_static! {
+            static ref URL: Regex = Regex::new(r"^(ftp|http)s?://").unwrap();
+            static ref REMOTE_FILE: Regex = Regex::new(r"^(\\\\|\w:)").unwrap();
+            static ref URL_ESCAPE: Regex = Regex::new(r"%[0-9a-fA-F]{2}").unwrap();
+        }
+
+        if URL.is_match(&self.url) {
+            // Handle web links like http://.
+            self.link_type = HyperlinkType::Url;
+
+            if self.text.is_empty() {
+                self.text = self.url.clone();
+            }
+
+            // Split the url into url + #anchor if that exists.
+            let parts: Vec<&str> = self.url.splitn(2, '#').collect();
+            if parts.len() == 2 {
+                self.location = parts[1].to_string();
+                self.url = parts[0].to_string();
+            }
+        } else if self.url.starts_with("mailto:") {
+            // Handle mail address links.
+            self.link_type = HyperlinkType::Url;
+
+            if self.text.is_empty() {
+                self.text = self.url.replacen("mailto:", "", 1);
+            }
+        } else if self.url.starts_with("internal:") {
+            // Handle links to cells within the workbook.
+            self.link_type = HyperlinkType::Internal;
+            self.location = self.url.replacen("internal:", "", 1);
+
+            if self.text.is_empty() {
+                self.text = self.location.clone();
+            }
+        } else if self.url.starts_with("file:///") {
+            // Handle links to other files or cells in other Excel files.
+            self.link_type = HyperlinkType::File;
+            let bare_link = self.url.replacen("file:///", "", 1);
+
+            // Links to local files aren't prefixed with file:///.
+            if !REMOTE_FILE.is_match(&bare_link) {
+                self.url = bare_link.clone();
+            }
+
+            if self.text.is_empty() {
+                self.text = bare_link;
+            }
+
+            // Split the url into url + #anchor if that exists.
+            let parts: Vec<&str> = self.url.splitn(2, '#').collect();
+            if parts.len() == 2 {
+                self.location = parts[1].to_string();
+                self.url = parts[0].to_string();
+            }
+        }
+
+        // Escape any url characters in the url string.
+        if !URL_ESCAPE.is_match(&self.url) {
+            self.url = crate::xmlwriter::escape_url(&self.url).into();
+        }
+    }
+
+    // Increment the ref id
+    fn increment_ref_id(&mut self, ref_id: u16) -> u16 {
+        match self.link_type {
+            HyperlinkType::Url | HyperlinkType::File => {
+                self.ref_id = ref_id;
+                ref_id + 1
+            }
+            _ => ref_id,
+        }
+    }
+}
+
+#[derive(Clone)]
+enum HyperlinkType {
+    Unknown,
+    Url,
+    Internal,
+    File,
 }
 
 // -----------------------------------------------------------------------

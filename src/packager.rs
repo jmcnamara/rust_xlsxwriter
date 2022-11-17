@@ -98,6 +98,9 @@ impl<W: Write + Seek> Packager<W> {
         let mut string_table = SharedStringsTable::new();
         for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
             self.write_worksheet_file(worksheet, index + 1, &mut string_table)?;
+            if !worksheet.relationships.is_empty() {
+                self.write_worksheet_rels_file(&worksheet.relationships, index + 1)?;
+            }
         }
 
         if options.has_sst_table {
@@ -150,9 +153,9 @@ impl<W: Write + Seek> Packager<W> {
     fn write_root_rels_file(&mut self) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
-        rels.add_document_relationship("/officeDocument", "xl/workbook.xml");
-        rels.add_package_relationship("/metadata/core-properties", "docProps/core.xml");
-        rels.add_document_relationship("/extended-properties", "docProps/app.xml");
+        rels.add_document_relationship("officeDocument", "xl/workbook.xml", "");
+        rels.add_package_relationship("metadata/core-properties", "docProps/core.xml");
+        rels.add_document_relationship("extended-properties", "docProps/app.xml", "");
 
         self.zip.start_file("_rels/.rels", self.zip_options)?;
 
@@ -168,20 +171,21 @@ impl<W: Write + Seek> Packager<W> {
 
         for worksheet_index in 1..=options.num_worksheets {
             rels.add_document_relationship(
-                "/worksheet",
+                "worksheet",
                 format!("worksheets/sheet{}.xml", worksheet_index).as_str(),
+                "",
             );
         }
 
-        rels.add_document_relationship("/theme", "theme/theme1.xml");
-        rels.add_document_relationship("/styles", "styles.xml");
+        rels.add_document_relationship("theme", "theme/theme1.xml", "");
+        rels.add_document_relationship("styles", "styles.xml", "");
 
         if options.has_sst_table {
-            rels.add_document_relationship("/sharedStrings", "sharedStrings.xml");
+            rels.add_document_relationship("sharedStrings", "sharedStrings.xml", "");
         }
 
         if options.has_dynamic_arrays {
-            rels.add_document_relationship("/sheetMetadata", "metadata.xml");
+            rels.add_document_relationship("sheetMetadata", "metadata.xml", "");
         }
 
         self.zip
@@ -206,6 +210,28 @@ impl<W: Write + Seek> Packager<W> {
 
         worksheet.assemble_xml_file(string_table);
         self.zip.write_all(worksheet.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write a worksheet rels file.
+    pub(crate) fn write_worksheet_rels_file(
+        &mut self,
+        relationships: &[(String, String, String)],
+        index: usize,
+    ) -> Result<(), XlsxError> {
+        let mut rels = Relationship::new();
+
+        for relationship in relationships.iter() {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
+        let filename = format!("xl/worksheets/_rels/sheet{}.xml.rels", index);
+
+        self.zip.start_file(filename, self.zip_options)?;
+
+        rels.assemble_xml_file();
+        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
