@@ -20,7 +20,6 @@
 //! ```rust
 //! # // This code is available in examples/app_demo.rs
 //! #
-//! use chrono::NaiveDate;
 //! use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxError};
 //!
 //! fn main() -> Result<(), XlsxError> {
@@ -39,7 +38,7 @@
 //!     let worksheet = workbook.add_worksheet();
 //!
 //!     // Set the column width for clarity.
-//!     worksheet.set_column_width(0, 15)?;
+//!     worksheet.set_column_width(0, 22)?;
 //!
 //!     // Write a string without formatting.
 //!     worksheet.write_string_only(0, 0, "Hello")?;
@@ -61,8 +60,12 @@
 //!     let date = NaiveDate::from_ymd(2023, 1, 25);
 //!     worksheet.write_date(6, 0, date, &date_format)?;
 //!
+//!     // Write some links.
+//!     worksheet.write_url(7, 0, "https://www.rust-lang.org")?;
+//!     worksheet.write_url_with_text(8, 0, "https://www.rust-lang.org", "Learn Rust!")?;
+//!
 //!     // Write some merged cells.
-//!     worksheet.merge_range(7, 0, 7, 1, "Merged cells", &merge_format)?;
+//!     worksheet.merge_range(9, 0, 9, 1, "Merged cells", &merge_format)?;
 //!
 //!     // Save the file to disk.
 //!     workbook.save("demo.xlsx")?;
@@ -78,6 +81,7 @@
 //! - Support for writing all basic Excel data types.
 //! - Full cell formatting support.
 //! - Formula support, including new Excel 365 dynamic functions.
+//! - Hyperlink support.
 //! - Page/Printing Setup support.
 //! - Merged ranges.
 //!

@@ -27,10 +27,7 @@ documentation and generally show how an individual function works.
   Excel documentation for these functions.
 
 * app_file_to_memory.rs - An example of creating a simple Excel xlsx file
-  in an in memory Vec<u8> buffer using the rust_xlsxwriter library. Note,
-  although the final file will be in memory the intermediate files that
-  make up the xlsx file are written to temporary files on disk before the
-  final file is assembled.
+  in an in memory Vec<u8> buffer using the rust_xlsxwriter library.
 
 * app_formatting.rs - An example of the various cell formatting options
   that are available in the rust_xlsxwriter library. These are laid out on
@@ -42,6 +39,9 @@ documentation and generally show how an individual function works.
 
 * app_hello_world.rs - Create a simple Hello World style Excel spreadsheet
   using the rust_xlsxwriter library.
+
+* app_hyperlinks.rs - A simple, getting started, example of some of the
+  features of the rust_xlsxwriter library.
 
 * app_merge_range.rs - An example of creating merged ranges in a worksheet
   using the rust_xlsxwriter library.
@@ -357,4 +357,10 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_write_time.rs - Demonstrates writing formatted times in an
   Excel worksheet.
+
+* doc_worksheet_write_url_with_format.rs - Demonstrates writing a url with
+  alternative format.
+
+* doc_worksheet_write_url_with_text.rs - Demonstrates writing a url with
+  alternative text.
 
