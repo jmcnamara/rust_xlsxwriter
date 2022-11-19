@@ -10,7 +10,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
     let mut workbook = Workbook::new();
 
-    // Create some formats to use in the worksheet.
+    // Create a format to use in the worksheet.
     let link_format = Format::new()
         .set_font_color(XlsxColor::Red)
         .set_underline(XlsxUnderline::Single);

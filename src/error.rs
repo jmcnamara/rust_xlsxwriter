@@ -45,6 +45,14 @@ pub enum XlsxError {
     /// The merge range overlaps a previous merge range.
     MergeRangeOverlaps(String, String),
 
+    /// URL string exceeds Excel's url of 2080 characters.
+    MaxUrlLengthExceeded,
+
+    /// Unknown url type. The URL/URIs supported by Excel are `http://`,
+    /// `https://`, `ftp://`, `ftps://`, `mailto:`, `file://` and the
+    /// pseudo-uri `internal:`:
+    UnknownUrlType(String),
+
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -77,28 +85,24 @@ impl fmt::Display for XlsxError {
             XlsxError::SheetnameLengthExceeded(name) => {
                 write!(
                     f,
-                    "Worksheet name \"{}\" exceeds Excel's limit of 31 characters.",
-                    name
+                    "Worksheet name \"{name}\" exceeds Excel's limit of 31 characters."
                 )
             }
 
             XlsxError::SheetnameReused(name) => write!(
                 f,
-                "Worksheet name \"{}\" has already been used in this workbook.",
-                name
+                "Worksheet name \"{name}\" has already been used in this workbook.",
             ),
 
             XlsxError::SheetnameContainsInvalidCharacter(name) => write!(
                 f,
-                "Worksheet name \"{}\" cannot contain invalid characters: '[ ] : * ? / \\'.",
-                name
+                "Worksheet name \"{name}\" cannot contain invalid characters: '[ ] : * ? / \\'.",
             ),
 
             XlsxError::SheetnameStartsOrEndsWithApostrophe(name) => {
                 write!(
                     f,
-                    "Worksheet name \"{}\" cannot start or end with an apostrophe.",
-                    name
+                    "Worksheet name \"{name}\" cannot start or end with an apostrophe.",
                 )
             }
 
@@ -107,7 +111,7 @@ impl fmt::Display for XlsxError {
             }
 
             XlsxError::UnknownWorksheetNameOrIndex(name) => {
-                write!(f, "Unknown Worksheet name or index \"{}\".", name)
+                write!(f, "Unknown Worksheet name or index \"{name}\".")
             }
 
             XlsxError::MergeRangeSingleCell => {
@@ -117,17 +121,24 @@ impl fmt::Display for XlsxError {
             XlsxError::MergeRangeOverlaps(current, previous) => {
                 write!(
                     f,
-                    "Merge range {} overlaps with previous merge range {}.",
-                    current, previous
+                    "Merge range {current} overlaps with previous merge range {previous}."
                 )
             }
 
-            XlsxError::IoError(e) => {
-                write!(f, "{}", e)
+            XlsxError::MaxUrlLengthExceeded => {
+                write!(f, "URL string exceeds Excel's limit of 2083 characters.")
             }
 
-            XlsxError::ZipError(e) => {
-                write!(f, "{}", e)
+            XlsxError::UnknownUrlType(url) => {
+                write!(f, "Unknown/unsupported url type: \"{url}\".")
+            }
+
+            XlsxError::IoError(error) => {
+                write!(f, "{error}")
+            }
+
+            XlsxError::ZipError(error) => {
+                write!(f, "{error}")
             }
         }
     }

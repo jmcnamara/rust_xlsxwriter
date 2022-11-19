@@ -26,11 +26,13 @@ pub type RowNum = u32;
 /// columns in a worksheet is 16,384.
 pub type ColNum = u16;
 
-const ROW_MAX: RowNum = 1_048_576;
 const COL_MAX: ColNum = 16_384;
-const MAX_STRING_LEN: u16 = 32_767;
-const DEFAULT_ROW_HEIGHT: f64 = 15.0;
+const ROW_MAX: RowNum = 1_048_576;
+const MAX_URL_LEN: usize = 2_080;
+const MAX_STRING_LEN: usize = 32_767;
+const MAX_PARAMETER_LEN: usize = 255;
 const DEFAULT_COL_WIDTH: f64 = 8.43;
+const DEFAULT_ROW_HEIGHT: f64 = 15.0;
 
 /// The worksheet struct represents an Excel worksheet. It handles operations
 /// such as writing data to cells or formatting the worksheet layout.
@@ -1421,6 +1423,131 @@ impl Worksheet {
         self.store_blank(row, col, format)
     }
 
+    /// Write a url/hyperlink to a worksheet cell.
+    ///
+    /// Write a url/hyperlink to a worksheet cell with the default Excel
+    /// "Hyperlink" cell style.
+    ///
+    /// There are 3 types of url/link supported by Excel:
+    ///
+    /// 1. Web based URIs like:
+    ///
+    ///    * `http://`, `https://`, `ftp://`, `ftps://` and `mailto:`.
+    ///
+    /// 2. Local file links using the `file://` URI.
+    ///
+    ///    * `file:///Book2.xlsx`
+    ///    * `file:///..\Sales\Book2.xlsx`
+    ///    * `file:///C:\Temp\Book1.xlsx`
+    ///    * `file:///Book2.xlsx#Sheet1!A1`
+    ///    * `file:///Book2.xlsx#'Sales Data'!A1:G5`
+    ///
+    ///    Most paths will be relative to the root folder, following the Windows
+    ///    convention, so most paths should start with `file:///`. For links to
+    ///    other Excel files the url string can include a sheet and cell
+    ///    reference after the `"#"` anchor, as shown in the last 2 examples
+    ///    above. When using Windows paths, like in the examples above, it is
+    ///    best to use a Rust raw string to avoid issues with the backslashes:
+    ///    `r"file:///C:\Temp\Book1.xlsx"`.
+    ///
+    /// 3. Internal links to a cell or range of cells in the workbook using the
+    ///    pseudo-uri `internal:`:
+    ///
+    ///    * `internal:Sheet2!A1`
+    ///    * `internal:Sheet2!A1:G5`
+    ///    * `internal:'Sales Data'!A1`
+    ///
+    ///    Worksheet references are typically of the form `Sheet1!A1` where a
+    ///    worksheet and target cell should be specified. You can also link to a
+    ///    worksheet range using the standard Excel range notation like
+    ///    `Sheet1!A1:B2`. Excel requires that worksheet names containing spaces
+    ///    or non alphanumeric characters are single quoted as follows `'Sales
+    ///    Data'!A1`.
+    ///
+    /// The function will escape the following characters in URLs as required by
+    /// Excel, ``\s " < > \ [ ] ` ^ { }``, unless the URL already contains `%xx`
+    /// style escapes. In which case it is assumed that the URL was escaped
+    /// correctly by the user and will by passed directly to Excel.
+    ///
+    /// Excel has a limit of around 2080 characters in the url string. Strings
+    /// beyond this limit will raise an error, see below.
+    ///
+    /// For other variants of this function see:
+    ///
+    /// * [`write_url_with_text()`](Worksheet::write_url_with_text()) to add
+    ///   alternative text to the link.
+    /// * [`write_url_with_format()`](Worksheet::write_url_with_format()) to add
+    ///   an alternative format to the link
+    /// * [`write_url_with_options()`](Worksheet::write_url_with_options()) to
+    ///   add a screen tip and all other options to the link
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `string` - The url string to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    ///   Excel's limit of 2080 characters.
+    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    ///   the supported types listed above.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates several of the url writing methods.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_hyperlinks.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxUnderline};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Create a format to use in the worksheet.
+    /// #     let link_format = Format::new()
+    /// #         .set_font_color(XlsxColor::Red)
+    /// #         .set_underline(XlsxUnderline::Single);
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet1 = workbook.add_worksheet();
+    /// #
+    /// #     // Set the column width for clarity.
+    /// #     worksheet1.set_column_width(0, 26)?;
+    /// #
+    ///     // Write some url links.
+    ///     worksheet1.write_url(0, 0, "https://www.rust-lang.org")?;
+    ///     worksheet1.write_url_with_text(1, 0, "https://www.rust-lang.org", "Learn Rust")?;
+    ///     worksheet1.write_url_with_format(2, 0, "https://www.rust-lang.org", &link_format)?;
+    ///
+    ///     // Write some internal links.
+    ///     worksheet1.write_url(4, 0, "internal:Sheet1!A1")?;
+    ///     worksheet1.write_url(5, 0, "internal:Sheet2!C4")?;
+    ///
+    ///     // Write some external links.
+    ///     worksheet1.write_url(7, 0, r"file:///C:\Temp\Book1.xlsx")?;
+    ///     worksheet1.write_url(8, 0, r"file:///C:\Temp\Book1.xlsx#Sheet1!C4")?;
+    ///
+    ///     // Add another sheet to link to.
+    ///     let worksheet2 = workbook.add_worksheet();
+    ///     worksheet2.write_string_only(3, 2, "Here I am")?;
+    ///     worksheet2.write_url_with_text(4, 2, "internal:Sheet1!A6", "Go back")?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("hyperlinks.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/app_hyperlinks.png">
     ///
     pub fn write_url(
         &mut self,
@@ -1432,6 +1559,65 @@ impl Worksheet {
         self.store_url(row, col, string, "", "", None)
     }
 
+    /// Write a url/hyperlink to a worksheet cell with an alternative text.
+    ///
+    /// Write a url/hyperlink to a worksheet cell with an alternative, user
+    /// friendly, text and the default Excel "Hyperlink" cell style.
+    ///
+    /// This method is similar to [`write_url()`](Worksheet::write_url())  except
+    /// that you can specify an alternative string for the url. For example you
+    /// could have a cell contain the link [Learn
+    /// Rust](https://www.rust-lang.org) instead of the raw link
+    /// <https://www.rust-lang.org>.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `string` - The url string to write to the cell.
+    /// * `text` - The alternative string to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - Text string exceeds Excel's
+    ///   limit of 32,767 characters.
+    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    ///   Excel's limit of 2080 characters.
+    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    ///   the supported types listed above.
+    ///
+    /// # Examples
+    ///
+    /// A simple, getting started, example of some of the features of the
+    /// rust_xlsxwriter library.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_url_with_text.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook , XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write a url and alternative text.
+    ///     worksheet.write_url_with_text(0, 0, "https://www.rust-lang.org", "Learn Rust")?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_text.png">
     ///
     pub fn write_url_with_text(
         &mut self,
@@ -1444,6 +1630,64 @@ impl Worksheet {
         self.store_url(row, col, string, text, "", None)
     }
 
+    /// Write a url/hyperlink to a worksheet cell with a user defined format
+    ///
+    /// Write a url/hyperlink to a worksheet cell with a user defined format
+    /// instead of the default Excel "Hyperlink" cell style.
+    ///
+    /// This method is similar to [`write_url()`](Worksheet::write_url())
+    /// except that you can specify an alternative format for the url.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `string` - The url string to write to the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    ///   Excel's limit of 2080 characters.
+    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    ///   the supported types listed above.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing a url with alternative format.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_url_with_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxUnderline};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a format to use in the worksheet.
+    ///     let link_format = Format::new()
+    ///         .set_font_color(XlsxColor::Red)
+    ///         .set_underline(XlsxUnderline::Single);
+    ///
+    ///     // Write a url with an alternative format.
+    ///     worksheet.write_url_with_format(0, 0, "https://www.rust-lang.org", &link_format)?;
+    ///
+    /// #    // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_format.png">
     ///
     pub fn write_url_with_format(
         &mut self,
@@ -1456,6 +1700,35 @@ impl Worksheet {
         self.store_url(row, col, string, "", "", Some(format))
     }
 
+    /// Write a url/hyperlink to a worksheet cell with various options
+    ///
+    /// This method is similar to [`write_url()`](Worksheet::write_url()) and
+    /// variant methods except that you can also add a screen tip message, if
+    /// required.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `string` - The url string to write to the cell.
+    /// * `text` - The alternative string to write to the cell.
+    /// * `tip` - The screen tip string to display when the user hovers over the
+    ///   url cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// The `text` and `tip` parameters are optional and can be set as a blank
+    /// string. The `format` is an `Option<>` parameter and can be specified as `None` if not required.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - Text string exceeds Excel's
+    ///   limit of 32,767 characters.
+    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    ///   Excel's limit of 2080 characters or the screen tip exceed 255 characters.
+    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    ///   the supported types listed above.
     ///
     pub fn write_url_with_options(
         &mut self,
@@ -4618,7 +4891,7 @@ impl Worksheet {
         }
 
         //  Check that the string is < Excel limit of 32767 chars.
-        if string.chars().count() as u16 > MAX_STRING_LEN {
+        if string.chars().count() > MAX_STRING_LEN {
             return Err(XlsxError::MaxStringLengthExceeded);
         }
 
@@ -4812,7 +5085,7 @@ impl Worksheet {
         tip: &str,
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let hyperlink = Hyperlink::new(url, text, tip);
+        let hyperlink = Hyperlink::new(url, text, tip)?;
 
         match format {
             Some(format) => self.write_string(row, col, &hyperlink.text, format)?,
@@ -6107,7 +6380,7 @@ struct Hyperlink {
 }
 
 impl Hyperlink {
-    fn new(url: &str, text: &str, tip: &str) -> Hyperlink {
+    fn new(url: &str, text: &str, tip: &str) -> Result<Hyperlink, XlsxError> {
         let mut hyperlink = Hyperlink {
             url: url.to_string(),
             text: text.to_string(),
@@ -6119,7 +6392,16 @@ impl Hyperlink {
 
         Self::initialize(&mut hyperlink);
 
-        hyperlink
+        // Check the hyperlink string lengths are within Excel's limits. The text
+        // length is checked by write_string().
+        if hyperlink.url.chars().count() > MAX_URL_LEN
+            || hyperlink.location.chars().count() > MAX_URL_LEN
+            || hyperlink.tip.chars().count() > MAX_PARAMETER_LEN
+        {
+            return Err(XlsxError::MaxUrlLengthExceeded);
+        }
+
+        Ok(hyperlink)
     }
 
     // This method handles a variety of different string processing that needs
@@ -6127,8 +6409,8 @@ impl Hyperlink {
     fn initialize(&mut self) {
         lazy_static! {
             static ref URL: Regex = Regex::new(r"^(ftp|http)s?://").unwrap();
-            static ref REMOTE_FILE: Regex = Regex::new(r"^(\\\\|\w:)").unwrap();
             static ref URL_ESCAPE: Regex = Regex::new(r"%[0-9a-fA-F]{2}").unwrap();
+            static ref REMOTE_FILE: Regex = Regex::new(r"^(\\\\|\w:)").unwrap();
         }
 
         if URL.is_match(&self.url) {
@@ -6160,10 +6442,11 @@ impl Hyperlink {
             if self.text.is_empty() {
                 self.text = self.location.clone();
             }
-        } else if self.url.starts_with("file:///") {
+        } else if self.url.starts_with("file://") {
             // Handle links to other files or cells in other Excel files.
             self.link_type = HyperlinkType::File;
             let bare_link = self.url.replacen("file:///", "", 1);
+            let bare_link = bare_link.replacen("file://", "", 1);
 
             // Links to local files aren't prefixed with file:///.
             if !REMOTE_FILE.is_match(&bare_link) {
