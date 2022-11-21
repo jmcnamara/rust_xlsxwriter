@@ -20,6 +20,7 @@
 //! ```rust
 //! # // This code is available in examples/app_demo.rs
 //! #
+//! use chrono::NaiveDate;
 //! use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxError};
 //!
 //! fn main() -> Result<(), XlsxError> {

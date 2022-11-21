@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.13.0] - 2022-11-21
+
+### Added
+
+- Added support for writing hyperlinks in worksheets via the following methods:
+
+  - [`worksheet.write_url()`] to write a link with a default hyperlink format style.
+  - [`worksheet.write_url_with_text()`] to add alternative text to the link.
+  - [`worksheet.write_url_with_format()`] to add an alternative format to the link.
+  - [`worksheet.write_url_with_options()`] to add a screen tip and all other options to the link.
+
+See also the [hyperlinks example] in the user guide.
+
+[hyperlinks example]: https://rustxlsxwriter.github.io/examples/hyperlinks.html
+[`worksheet.write_url()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_url
+[`worksheet.write_url_with_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_url_with_text
+[`worksheet.write_url_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_url_with_format
+[`worksheet.write_url_with_options()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_url_with_options
+
+
 ## [0.12.1] - 2022-11-09
 
 ### Changed

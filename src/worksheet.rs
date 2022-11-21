@@ -46,6 +46,7 @@ const DEFAULT_ROW_HEIGHT: f64 = 15.0;
 /// ```rust
 /// # // This code is available in examples/app_demo.rs
 /// #
+/// use chrono::NaiveDate;
 /// use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
@@ -1480,9 +1481,9 @@ impl Worksheet {
     /// * [`write_url_with_text()`](Worksheet::write_url_with_text()) to add
     ///   alternative text to the link.
     /// * [`write_url_with_format()`](Worksheet::write_url_with_format()) to add
-    ///   an alternative format to the link
+    ///   an alternative format to the link.
     /// * [`write_url_with_options()`](Worksheet::write_url_with_options()) to
-    ///   add a screen tip and all other options to the link
+    ///   add a screen tip and all other options to the link.
     ///
     /// # Arguments
     ///
