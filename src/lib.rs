@@ -58,7 +58,7 @@
 //!     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
 //!
 //!     // Write a date.
-//!     let date = NaiveDate::from_ymd(2023, 1, 25);
+//!     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
 //!     worksheet.write_date(6, 0, date, &date_format)?;
 //!
 //!     // Write some links.

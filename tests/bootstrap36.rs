@@ -23,10 +23,16 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     worksheet.set_column_width(0, 30)?;
 
-    let datetime = NaiveDate::from_ymd(2023, 1, 25).and_hms(0, 0, 0);
+    let datetime = NaiveDate::from_ymd_opt(2023, 1, 25)
+        .unwrap()
+        .and_hms_opt(0, 0, 0)
+        .unwrap();
     let date = datetime.date();
 
-    let datetime2 = NaiveDate::from_ymd(2023, 1, 25).and_hms(18, 0, 0);
+    let datetime2 = NaiveDate::from_ymd_opt(2023, 1, 25)
+        .unwrap()
+        .and_hms_opt(18, 0, 0)
+        .unwrap();
     let time = datetime2.time();
 
     worksheet.write_datetime(0, 0, datetime, &format1)?;

@@ -24,7 +24,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_column_width(0, 30)?;
 
     // Create a date object.
-    let date = NaiveDate::from_ymd(2023, 1, 25);
+    let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
 
     // Write the date with different Excel formats.
     worksheet.write_date(0, 0, date, &format1)?;

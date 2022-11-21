@@ -142,7 +142,7 @@ mod tests {
         let mut core = Core::new();
 
         core.set_author("A User");
-        core.set_creation_time(Utc.ymd(2010, 1, 1).and_hms(0, 0, 0));
+        core.set_creation_time(Utc.with_ymd_and_hms(2010, 1, 1, 0, 0, 0).unwrap());
 
         core.assemble_xml_file();
 
