@@ -6,6 +6,7 @@
 #![warn(missing_docs)]
 
 use std::collections::HashMap;
+use std::io::{Seek, Write, Cursor};
 use std::mem;
 use std::path::Path;
 
@@ -575,14 +576,14 @@ impl Workbook {
     ///
     /// The `save()` method can be called multiple times so it is possible to
     /// get incremental files at different stages of a process, or to save the
-    /// same Workbook object to different   file names. However, `save()` is an
+    /// same Workbook object to different paths. However, `save()` is an
     /// expensive operation which assembles multiple files into an xlsx/zip
     /// container so for performance reasons you shouldn't call it
     /// unnecessarily.
     ///
     /// # Arguments
     ///
-    /// * `filename` - The name of the new Excel file to create.
+    /// * `path` - The path of the new Excel file to create.
     ///
     /// # Errors
     ///
@@ -614,62 +615,9 @@ impl Workbook {
     /// }
     /// ```
     ///
-    pub fn save(&mut self, filename: &str) -> Result<(), XlsxError> {
-        let filehandle = FileHandleFrom::String(filename);
-        _ = self.save_internal(filehandle)?;
-        Ok(())
-    }
-
-    /// Save the Workbook as an xlsx file using a Path reference.
-    ///
-    /// The workbook `save_to_path()` method writes all Workbook data to a new
-    /// xlsx file using a a [`std::path`] Path or PathBuf instance. It will
-    /// overwrite any existing file.
-    ///
-    /// For most cases the [`save()`](Workbook::save) method which uses a simple
-    /// string representation of the file path/name will be sufficient. However,
-    /// there are use cases, on Windows in particular, where generating the path
-    /// string may be error prone and where it can be preferable to use a
-    /// [`std::path`] Path or PathBuf instance and `save_to_path()`.
-    ///
-    /// # Arguments
-    ///
-    /// * `path` - A reference to a [`std::path`] Path or PathBuf instance.
-    ///
-    /// # Errors
-    ///
-    /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
-    ///   the workbook.
-    /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
-    ///   the xlsx file, or its sub-files.
-    /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
-    ///   creating the xlsx file, or its sub-files.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates creating a simple workbook using a
-    /// rust Path reference.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_workbook_save_to_path.rs
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    ///
-    /// fn main() -> Result<(), XlsxError> {
-    ///     let path = std::path::Path::new("workbook.xlsx");
-    ///     let mut workbook = Workbook::new();
-    ///
-    ///     _ = workbook.add_worksheet();
-    ///
-    ///     workbook.save_to_path(&path)?;
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    ///
-    pub fn save_to_path(&mut self, path: &Path) -> Result<(), XlsxError> {
-        let filehandle = FileHandleFrom::Path(path);
-        _ = self.save_internal(filehandle)?;
+    pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<(), XlsxError> {
+        let file = std::fs::File::create(path)?;
+        _ = self.save_internal(file)?;
         Ok(())
     }
 
@@ -713,8 +661,9 @@ impl Workbook {
     /// ```
     ///
     pub fn save_to_buffer(&mut self) -> Result<Vec<u8>, XlsxError> {
-        let filehandle = FileHandleFrom::Buffer;
-        let buf = self.save_internal(filehandle)?;
+        let mut buf = vec![];
+        let cursor = Cursor::new(&mut buf);
+        self.save_internal(cursor)?;
         Ok(buf)
     }
 
@@ -744,7 +693,7 @@ impl Workbook {
 
     // Internal function to prepare the workbook and other component files for
     // writing to the xlsx file.
-    fn save_internal(&mut self, filehandle: FileHandleFrom) -> Result<Vec<u8>, XlsxError> {
+    fn save_internal<W: Write + Seek>(&mut self, writer: W) -> Result<(), XlsxError> {
         // Reset workbook and worksheet xml writers between saves.
         self.writer.reset();
         for worksheet in self.worksheets.iter_mut() {
@@ -802,27 +751,10 @@ impl Workbook {
         package_options = self.set_package_options(package_options)?;
 
         // Create the Packager object that will assemble the zip/xlsx file.
-        let mut buf: Vec<u8> = vec![];
-        match filehandle {
-            FileHandleFrom::String(filename) => {
-                let path = std::path::Path::new(filename);
-                let file = std::fs::File::create(path)?;
-                let mut packager = Packager::new(file)?;
-                packager.assemble_file(self, &package_options)?;
-            }
-            FileHandleFrom::Path(path) => {
-                let file = std::fs::File::create(path)?;
-                let mut packager = Packager::new(file)?;
-                packager.assemble_file(self, &package_options)?;
-            }
-            FileHandleFrom::Buffer => {
-                let cursor = std::io::Cursor::new(&mut buf);
-                let mut packager = Packager::new(cursor)?;
-                packager.assemble_file(self, &package_options)?;
-            }
-        };
-
-        Ok(buf)
+        let mut packager = Packager::new(writer)?;
+        packager.assemble_file(self, &package_options)?;
+        
+        Ok(())
     }
 
     // Iterates through the worksheets and find which is the user defined Active
@@ -1264,12 +1196,6 @@ struct DefinedName {
     name: String,
     range: String,
     index: u16,
-}
-
-pub(crate) enum FileHandleFrom<'a> {
-    String(&'a str),
-    Path(&'a Path),
-    Buffer,
 }
 
 // -----------------------------------------------------------------------
