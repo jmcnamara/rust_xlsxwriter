@@ -6,7 +6,7 @@
 #![warn(missing_docs)]
 
 use std::collections::HashMap;
-use std::io::{Seek, Write, Cursor};
+use std::io::{Cursor, Seek, Write};
 use std::mem;
 use std::path::Path;
 
@@ -583,7 +583,8 @@ impl Workbook {
     ///
     /// # Arguments
     ///
-    /// * `path` - The path of the new Excel file to create.
+    /// * `path` - The path of the new Excel file to create as a `&str` or as a
+    ///   [`std::path`] Path or PathBuf instance.
     ///
     /// # Errors
     ///
@@ -617,7 +618,7 @@ impl Workbook {
     ///
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<(), XlsxError> {
         let file = std::fs::File::create(path)?;
-        _ = self.save_internal(file)?;
+        self.save_internal(file)?;
         Ok(())
     }
 
@@ -753,7 +754,7 @@ impl Workbook {
         // Create the Packager object that will assemble the zip/xlsx file.
         let mut packager = Packager::new(writer)?;
         packager.assemble_file(self, &package_options)?;
-        
+
         Ok(())
     }
 
