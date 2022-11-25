@@ -12,7 +12,7 @@ fn main() -> Result<(), XlsxError> {
 
     _ = workbook.add_worksheet();
 
-    workbook.save_to_path(&path)?;
+    workbook.save(&path)?;
 
     Ok(())
 }
