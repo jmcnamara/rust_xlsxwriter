@@ -21,7 +21,7 @@
 //! # // This code is available in examples/app_demo.rs
 //! #
 //! use chrono::NaiveDate;
-//! use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxError};
+//! use rust_xlsxwriter::{Format, Image, Workbook, XlsxAlign, XlsxBorder, XlsxError};
 //!
 //! fn main() -> Result<(), XlsxError> {
 //!     // Create a new Excel file object.
@@ -63,10 +63,14 @@
 //!
 //!     // Write some links.
 //!     worksheet.write_url(7, 0, "https://www.rust-lang.org")?;
-//!     worksheet.write_url_with_text(8, 0, "https://www.rust-lang.org", "Learn Rust!")?;
+//!     worksheet.write_url_with_text(8, 0, "https://www.rust-lang.org", "Learn Rust")?;
 //!
 //!     // Write some merged cells.
 //!     worksheet.merge_range(9, 0, 9, 1, "Merged cells", &merge_format)?;
+//!
+//!     // Insert an image.
+//!     let image = Image::new("examples/rust_logo.png")?;
+//!     worksheet.insert_image(1, 2, &image)?;
 //!
 //!     // Save the file to disk.
 //!     workbook.save("demo.xlsx")?;
@@ -85,6 +89,7 @@
 //! - Hyperlink support.
 //! - Page/Printing Setup support.
 //! - Merged ranges.
+//! - Worksheet PNG/JPEG/GIF/BMP images.
 //!
 //! Rust_xlsxwriter is under active development and new features will be added
 //! frequently. See the [rust_xlsxwriter GitHub] for details.

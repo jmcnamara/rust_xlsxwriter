@@ -43,6 +43,9 @@ documentation and generally show how an individual function works.
 * app_hyperlinks.rs - A simple, getting started, example of some of the
   features of the rust_xlsxwriter library.
 
+* app_images.rs - An example of inserting images into a worksheet using
+  rust_xlsxwriter.
+
 * app_merge_range.rs - An example of creating merged ranges in a worksheet
   using the rust_xlsxwriter library.
 
@@ -153,6 +156,16 @@ documentation and generally show how an individual function works.
 * doc_format_set_underline.rs - Demonstrates setting underline properties
   for a format.
 
+* doc_image.rs - This example shows how to create an image object and use
+  it to insert the image into a worksheet.
+
+* doc_image_dimensions.rs - This example shows how to get some of the
+  properties of an Image that will be used in an Excel worksheet.
+
+* doc_image_set_scale_width.rs - This example shows how to create an image
+  object and use it to insert the image into a worksheet. The image in this
+  case is scaled.
+
 * doc_workbook_add_worksheet.rs - Demonstrates creating adding worksheets
   to a workbook.
 
@@ -207,6 +220,9 @@ documentation and generally show how an individual function works.
 
 * doc_working_with_formulas_syntax.rs - Demonstrates some common formula
   syntax errors.
+
+* doc_worksheet_insert_image_with_offset.rs - This example shows how to add
+  an image to a worksheet at an offset within the cell.
 
 * doc_worksheet_name.rs - Demonstrates getting a worksheet name.
 

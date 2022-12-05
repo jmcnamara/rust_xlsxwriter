@@ -5,6 +5,31 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2022-12-05
+
+### Added
+
+- Added support for inserting images into worksheets with
+  [`worksheet.insert_image()`] and [`worksheet.insert_image_with_offset()`] and
+  the [Image] struct.
+
+  See also the [images example] in the user guide.
+
+  Upcoming versions of the library will support additional image handling
+  features such as EMF and WMF formats, removal of duplicate images, hyperlinks
+  in images and images in headers/footers.
+
+### Removed
+
+- The [`workbook.save()`] method has been extended to handle paths or strings.
+  The `workbook.save_to_path()` method has been removed. See [PR #15].
+
+[Image]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
+[PR #15]: https://github.com/jmcnamara/rust_xlsxwriter/pull/15
+[images example]: https://rustxlsxwriter.github.io/examples/images.html
+[`worksheet.insert_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.insert_image
+[`worksheet.insert_image_with_offset()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.insert_image_with_offset
+
 
 ## [0.13.0] - 2022-11-21
 
