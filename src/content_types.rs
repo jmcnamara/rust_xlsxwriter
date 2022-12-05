@@ -75,7 +75,15 @@ impl ContentTypes {
     pub(crate) fn add_worksheet_name(&mut self, worksheet_name: &str) {
         let content_type =
             "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml";
-        let part_name = format!("/xl/worksheets/{}.xml", worksheet_name);
+        let part_name = format!("/xl/worksheets/{worksheet_name}.xml");
+
+        self.add_override(&part_name, content_type);
+    }
+
+    // Add the name of a drawing to the ContentTypes overrides.
+    pub(crate) fn add_drawing_name(&mut self, drawing_name: &str) {
+        let content_type = "application/vnd.openxmlformats-officedocument.drawing+xml";
+        let part_name = format!("/xl/drawings/{drawing_name}.xml");
 
         self.add_override(&part_name, content_type);
     }

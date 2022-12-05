@@ -51,6 +51,7 @@ use crate::styles::Styles;
 use crate::theme::Theme;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
+use crate::NUM_IMAGE_FORMATS;
 
 use std::io::{Seek, Write};
 use zip::write::FileOptions;
@@ -98,8 +99,8 @@ impl<W: Write + Seek> Packager<W> {
         let mut string_table = SharedStringsTable::new();
         for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
             self.write_worksheet_file(worksheet, index + 1, &mut string_table)?;
-            if !worksheet.relationships.is_empty() {
-                self.write_worksheet_rels_file(&worksheet.relationships, index + 1)?;
+            if worksheet.has_relationships() {
+                self.write_worksheet_rels_file(worksheet, index + 1)?;
             }
         }
 
@@ -109,6 +110,14 @@ impl<W: Write + Seek> Packager<W> {
 
         self.write_core_file()?;
         self.write_app_file(options)?;
+        self.write_drawing_files(workbook)?;
+        self.write_image_files(workbook)?;
+
+        for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
+            if !worksheet.drawing_relationships.is_empty() {
+                self.write_drawing_rels_file(&worksheet.drawing_relationships, index + 1)?;
+            }
+        }
 
         if options.has_dynamic_arrays {
             self.write_metadata_file()?;
@@ -132,12 +141,30 @@ impl<W: Write + Seek> Packager<W> {
             content_types.add_worksheet_name(format!("sheet{}", i + 1).as_str());
         }
 
+        for i in 0..options.num_drawings {
+            content_types.add_drawing_name(format!("drawing{}", i + 1).as_str());
+        }
+
         if options.has_sst_table {
             content_types.add_share_strings();
         }
 
         if options.has_dynamic_arrays {
             content_types.add_metadata();
+        }
+
+        // Add content types for image formats used in the workbook.
+        if options.image_types[1] {
+            content_types.add_default("png", "image/png");
+        }
+        if options.image_types[2] {
+            content_types.add_default("jpeg", "image/jpeg");
+        }
+        if options.image_types[3] {
+            content_types.add_default("gif", "image/gif");
+        }
+        if options.image_types[4] {
+            content_types.add_default("bmp", "image/bmp");
         }
 
         self.zip
@@ -204,7 +231,7 @@ impl<W: Write + Seek> Packager<W> {
         index: usize,
         string_table: &mut SharedStringsTable,
     ) -> Result<(), XlsxError> {
-        let filename = format!("xl/worksheets/sheet{}.xml", index);
+        let filename = format!("xl/worksheets/sheet{index}.xml");
 
         self.zip.start_file(filename, self.zip_options)?;
 
@@ -217,6 +244,32 @@ impl<W: Write + Seek> Packager<W> {
     // Write a worksheet rels file.
     pub(crate) fn write_worksheet_rels_file(
         &mut self,
+        worksheet: &Worksheet,
+        index: usize,
+    ) -> Result<(), XlsxError> {
+        let mut rels = Relationship::new();
+
+        for relationship in worksheet.hyperlink_relationships.iter() {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
+        for relationship in worksheet.image_relationships.iter() {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
+        let filename = format!("xl/worksheets/_rels/sheet{index}.xml.rels");
+
+        self.zip.start_file(filename, self.zip_options)?;
+
+        rels.assemble_xml_file();
+        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write a drawing rels file.
+    pub(crate) fn write_drawing_rels_file(
+        &mut self,
         relationships: &[(String, String, String)],
         index: usize,
     ) -> Result<(), XlsxError> {
@@ -226,7 +279,7 @@ impl<W: Write + Seek> Packager<W> {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
-        let filename = format!("xl/worksheets/_rels/sheet{}.xml.rels", index);
+        let filename = format!("xl/drawings/_rels/drawing{index}.xml.rels");
 
         self.zip.start_file(filename, self.zip_options)?;
 
@@ -344,15 +397,51 @@ impl<W: Write + Seek> Packager<W> {
 
         Ok(())
     }
+
+    // Write the drawing files.
+    fn write_drawing_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        let mut index = 1;
+        for worksheet in workbook.worksheets.iter_mut() {
+            if !worksheet.drawing.drawings.is_empty() {
+                let filename = format!("xl/drawings/drawing{index}.xml");
+                self.zip.start_file(filename, self.zip_options)?;
+
+                worksheet.drawing.assemble_xml_file();
+                self.zip
+                    .write_all(worksheet.drawing.writer.xmlfile.get_ref())?;
+                index += 1;
+            }
+        }
+
+        Ok(())
+    }
+
+    // Write the image files.
+    fn write_image_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        let mut index = 1;
+        for worksheet in workbook.worksheets.iter_mut() {
+            for (_, image) in worksheet.images.iter() {
+                let filename = format!("xl/media/image{index}.{}", image.image_type.extension());
+                self.zip.start_file(filename, self.zip_options)?;
+
+                self.zip.write_all(&image.data())?;
+                index += 1;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 // Internal struct to pass options to the Packager struct.
-pub struct PackagerOptions {
-    pub has_sst_table: bool,
-    pub has_dynamic_arrays: bool,
-    pub num_worksheets: u16,
-    pub worksheet_names: Vec<String>,
-    pub defined_names: Vec<String>,
+pub(crate) struct PackagerOptions {
+    pub(crate) has_sst_table: bool,
+    pub(crate) has_dynamic_arrays: bool,
+    pub(crate) num_worksheets: u16,
+    pub(crate) num_drawings: u16,
+    pub(crate) worksheet_names: Vec<String>,
+    pub(crate) defined_names: Vec<String>,
+    pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
 }
 
 impl PackagerOptions {
@@ -362,8 +451,10 @@ impl PackagerOptions {
             has_sst_table: false,
             has_dynamic_arrays: false,
             num_worksheets: 0,
+            num_drawings: 0,
             worksheet_names: vec![],
             defined_names: vec![],
+            image_types: [false; NUM_IMAGE_FORMATS],
         }
     }
 }

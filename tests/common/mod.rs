@@ -14,15 +14,18 @@ macro_rules! assert_result {
     };
 }
 
+use std::collections::hash_map::DefaultHasher;
 #[cfg(test)]
-use pretty_assertions::assert_eq;
-use regex::Regex;
-use rust_xlsxwriter::XlsxError;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::fs::File;
+use std::hash::{Hash, Hasher};
 use std::io::Read;
+
+use pretty_assertions::assert_eq;
+use regex::Regex;
+use rust_xlsxwriter::XlsxError;
 
 // Simple test runner struct and methods to create a new xlsx output file and
 // compare it with an input xlsx file created by Excel.
@@ -210,13 +213,27 @@ fn compare_xlsx_files(
         };
 
         // Ignore any test specific files like "xl/calcChain.xml".
-        if !ignore_files.contains(file.name()) {
-            exp_filenames.push(file.name().to_string());
+        if ignore_files.contains(file.name()) {
+            continue;
         }
 
-        let mut xml_data = String::new();
-        file.read_to_string(&mut xml_data).unwrap();
-        exp_xml.insert(file.name().to_string(), xml_data);
+        // Store the filenames for comparison of the file structure.
+        exp_filenames.push(file.name().to_string());
+
+        if is_binary_file(file.name()) {
+            // Get a checksum for binary files.
+            let mut bin_data: Vec<u8> = vec![];
+            file.read_to_end(&mut bin_data).unwrap();
+            let mut hasher = DefaultHasher::new();
+            bin_data.hash(&mut hasher);
+            let xml_data = format!("checksum = {}", hasher.finish());
+            exp_xml.insert(file.name().to_string(), xml_data);
+        } else {
+            // Read XML data from non-binary files.
+            let mut xml_data = String::new();
+            file.read_to_string(&mut xml_data).unwrap();
+            exp_xml.insert(file.name().to_string(), xml_data);
+        }
     }
 
     for i in 0..got_zip.len() {
@@ -231,13 +248,27 @@ fn compare_xlsx_files(
         };
 
         // Ignore any test specific files like "xl/calcChain.xml".
-        if !ignore_files.contains(file.name()) {
-            got_filenames.push(file.name().to_string());
+        if ignore_files.contains(file.name()) {
+            continue;
         }
 
-        let mut xml_data = String::new();
-        file.read_to_string(&mut xml_data).unwrap();
-        got_xml.insert(file.name().to_string(), xml_data);
+        // Store the filenames for comparison of the file structure.
+        got_filenames.push(file.name().to_string());
+
+        if is_binary_file(file.name()) {
+            // Get a checksum for binary files.
+            let mut bin_data: Vec<u8> = vec![];
+            file.read_to_end(&mut bin_data).unwrap();
+            let mut hasher = DefaultHasher::new();
+            bin_data.hash(&mut hasher);
+            let xml_data = format!("checksum = {}", hasher.finish());
+            got_xml.insert(file.name().to_string(), xml_data);
+        } else {
+            // Read XML data from non-binary files.
+            let mut xml_data = String::new();
+            file.read_to_string(&mut xml_data).unwrap();
+            got_xml.insert(file.name().to_string(), xml_data);
+        }
     }
 
     // Sort the xlsx filenames/structure
@@ -360,4 +391,12 @@ fn sort_xml_file_data(mut xml_elements: Vec<String>) -> Vec<String> {
     xml_elements.push(last);
 
     xml_elements
+}
+
+// Check for binary files (as opposed to XML files).
+fn is_binary_file(filename: &str) -> bool {
+    filename.ends_with(".png")
+        || filename.ends_with(".jpeg")
+        || filename.ends_with(".bmp")
+        || filename.ends_with(".gif")
 }

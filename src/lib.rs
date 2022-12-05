@@ -112,8 +112,10 @@
 mod app;
 mod content_types;
 mod core;
+mod drawing;
 mod error;
 mod format;
+mod image;
 mod metadata;
 mod packager;
 mod relationship;
@@ -130,6 +132,7 @@ mod xmlwriter;
 // Re-export the public APIs.
 pub use error::*;
 pub use format::*;
+pub use image::*;
 pub use workbook::*;
 pub use worksheet::*;
 

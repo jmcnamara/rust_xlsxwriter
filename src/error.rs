@@ -53,6 +53,12 @@ pub enum XlsxError {
     /// pseudo-uri `internal:`:
     UnknownUrlType(String),
 
+    /// Unknown image type. The supported image formats are PNG, JPG, GIF and BMP.
+    UnknownImageType,
+
+    /// Image has 0 width or height, or the dimensions couldn't be read.
+    ImageDimensionError,
+
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -131,6 +137,14 @@ impl fmt::Display for XlsxError {
 
             XlsxError::UnknownUrlType(url) => {
                 write!(f, "Unknown/unsupported url type: \"{url}\".")
+            }
+
+            XlsxError::UnknownImageType => {
+                write!(f, "Unknown image type.")
+            }
+
+            XlsxError::ImageDimensionError => {
+                write!(f, "Image with or height couldn't be read from file.")
             }
 
             XlsxError::IoError(error) => {

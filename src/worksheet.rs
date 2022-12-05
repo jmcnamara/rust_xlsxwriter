@@ -12,11 +12,12 @@ use std::collections::{BTreeMap, HashMap};
 use std::io::Write;
 use std::mem;
 
+use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo};
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::xmlwriter::XMLWriter;
-use crate::{utility, XlsxColor};
+use crate::{utility, Image, XlsxColor};
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
 /// in a worksheet is 1,048,576.
@@ -33,8 +34,9 @@ const MAX_STRING_LEN: usize = 32_767;
 const MAX_PARAMETER_LEN: usize = 255;
 const DEFAULT_COL_WIDTH: f64 = 8.43;
 const DEFAULT_ROW_HEIGHT: f64 = 15.0;
+pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 
-/// The worksheet struct represents an Excel worksheet. It handles operations
+/// The Worksheet struct represents an Excel worksheet. It handles operations
 /// such as writing data to cells or formatting the worksheet layout.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/demo.png">
@@ -114,7 +116,12 @@ pub struct Worksheet {
     pub(crate) repeat_col_range: String,
     pub(crate) xf_formats: Vec<Format>,
     pub(crate) has_hyperlink_style: bool,
-    pub(crate) relationships: Vec<(String, String, String)>,
+    pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
+    pub(crate) image_relationships: Vec<(String, String, String)>,
+    pub(crate) drawing_relationships: Vec<(String, String, String)>,
+    pub(crate) images: BTreeMap<(RowNum, ColNum), Image>,
+    pub(crate) drawing: Drawing,
+    pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
@@ -159,6 +166,7 @@ pub struct Worksheet {
     use_future_functions: bool,
     panes: Panes,
     hyperlinks: BTreeMap<(RowNum, ColNum), Hyperlink>,
+    rel_count: u16,
 }
 
 impl Default for Worksheet {
@@ -315,7 +323,13 @@ impl Worksheet {
             panes,
             has_hyperlink_style: false,
             hyperlinks: BTreeMap::new(),
-            relationships: vec![],
+            hyperlink_relationships: vec![],
+            image_relationships: vec![],
+            drawing_relationships: vec![],
+            images: BTreeMap::new(),
+            drawing: Drawing::new(),
+            image_types: [false; NUM_IMAGE_FORMATS],
+            rel_count: 0,
         }
     }
 
@@ -2290,6 +2304,170 @@ impl Worksheet {
 
         // Store the merge range if everything was okay.
         self.merged_ranges.push(cell_range);
+
+        Ok(self)
+    }
+
+    /// Add an image to a worksheet.
+    ///
+    /// Add an image to a worksheet at a cell location. The image should be
+    /// encapsulated in an [`Image`] object.
+    ///
+    /// The supported image formats are:
+    ///
+    /// - PNG
+    /// - JPG
+    /// - GIF: The image can be an animated gif in more resent versions of
+    ///   Excel.
+    /// - BMP: BMP images are only supported for backward compatibility. In
+    ///   general it is best to avoid BMP images since they are not compressed.
+    ///   If used, BMP images must be 24 bit, true color, bitmaps.
+    ///
+    /// EMF and WMF file formats will be supported in an upcoming version of the
+    /// library.
+    ///
+    /// **NOTE on SVG files**: Excel doesn't directly support SVG files in the
+    /// same way as other image file formats. It allows SVG to be inserted into
+    /// a worksheet but converts them to, and displays them as, PNG files. It
+    /// stores the original SVG image in the file so the original format can be
+    /// retrieved. This removes the file size and resolution advantage of using
+    /// SVG files. As such SVG files are not supported by `rust_xlsxwriter`
+    /// since a conversion to the PNG format would be required and that format
+    /// is already supported.
+    ///
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `image` - The [`Image`] to insert into the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a new Image object and
+    /// adding it to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_image.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new image object.
+    ///     let image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///     // Insert the image.
+    ///     worksheet.insert_image(1, 2, &image)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/image_intro.png">
+    ///
+    pub fn insert_image(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.insert_image_with_offset(row, col, image, 0, 0)?;
+
+        Ok(self)
+    }
+
+    /// Add an image to a worksheet at an offset.
+    ///
+    /// Add an image to a worksheet at a pixel offset within a cell location.
+    /// The image should be encapsulated in an [`Image`] object.
+    ///
+    /// This method is similar to [`insert_image()`](Worksheet::insert_image)
+    /// except that the image can be offset from the top left of the cell.
+    ///
+    /// Note, it is possible to offset the image outside the target cell if
+    /// required.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `image` - The [`Image`] to insert into the cell.
+    /// * `x_offset`: The horizontal offset within the cell in pixels.
+    /// * `y_offset`: The vertical offset within the cell in pixels.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to add an image to a worksheet at an offset within
+    /// the cell.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_image_with_offset.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new image object.
+    ///     let image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///     // Insert the image at an offset.
+    ///     worksheet.insert_image_with_offset(1, 2, &image, 10, 5)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_insert_image_with_offset.png">
+    ///
+    pub fn insert_image_with_offset(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+        x_offset: u32,
+        y_offset: u32,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let mut image = image.clone();
+        image.x_offset = x_offset;
+        image.y_offset = y_offset;
+
+        self.images.insert((row, col), image);
 
         Ok(self)
     }
@@ -5162,7 +5340,7 @@ impl Worksheet {
     // Check that row and col are within the allowed Excel range and store max
     // and min values for use in other methods/elements.
     fn check_dimensions(&mut self, row: RowNum, col: ColNum) -> bool {
-        // Check that the row an column number are withing Excel's ranges.
+        // Check that the row an column number are within Excel's ranges.
         if row >= ROW_MAX {
             return false;
         }
@@ -5182,7 +5360,7 @@ impl Worksheet {
     // Check that row and col are within the allowed Excel range but don't
     // modify the worksheet cell range.
     fn check_dimensions_only(&mut self, row: RowNum, col: ColNum) -> bool {
-        // Check that the row an column number are withing Excel's ranges.
+        // Check that the row an column number are within Excel's ranges.
         if row >= ROW_MAX {
             return false;
         }
@@ -5317,6 +5495,243 @@ impl Worksheet {
         duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
     }
 
+    // Convert the image dimensions into drawing dimensions and add them to the
+    // Drawing object. Also set the rel linkages between the files.
+    pub(crate) fn prepare_images(&mut self, mut ref_id: u32, drawing_id: u32) {
+        for (cell, image) in self.images.clone().iter() {
+            let row = cell.0;
+            let col = cell.1;
+
+            let drawing_info = self.position_object_emus(row, col, image);
+
+            self.drawing.drawings.push(drawing_info);
+
+            // Store the used image type for the Content Type file.
+            self.image_types[image.image_type.clone() as usize] = true;
+
+            let image_name = format!("../media/image{ref_id}.{}", image.image_type.extension());
+            // Store the linkage to the drawings rels file.
+            self.drawing_relationships
+                .push(("image".to_string(), image_name, "".to_string()));
+
+            ref_id += 1;
+        }
+
+        let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
+
+        // Store the linkage to the worksheets rels file.
+        self.image_relationships
+            .push(("drawing".to_string(), drawing_name, "".to_string()));
+    }
+
+    // Calculate the vertices that define the position of a graphical object
+    // within the worksheet in EMUs. The vertices are expressed as English
+    // Metric Units (EMUs). There are 12,700 EMUs per point. Therefore, 12,700 *
+    // 3 /4 = 9,525 EMUs per pixel.
+    fn position_object_emus(&mut self, row: RowNum, col: ColNum, image: &Image) -> DrawingInfo {
+        let mut drawing_info = self.position_object_pixels(row, col, image);
+
+        // Convert the pixel values to EMUs.
+        drawing_info.to.col_offset = round_to_emus(drawing_info.to.col_offset);
+        drawing_info.to.row_offset = round_to_emus(drawing_info.to.row_offset);
+
+        drawing_info.from.col_offset = round_to_emus(drawing_info.from.col_offset);
+        drawing_info.from.row_offset = round_to_emus(drawing_info.from.row_offset);
+
+        drawing_info.col_absolute *= 9525;
+        drawing_info.row_absolute *= 9525;
+
+        drawing_info.width = round_to_emus(drawing_info.width);
+        drawing_info.height = round_to_emus(drawing_info.height);
+
+        drawing_info
+    }
+
+    // Calculate the vertices that define the position of a graphical object
+    // within the worksheet in pixels.
+    //
+    //         +------------+------------+
+    //         |     A      |      B     |
+    //   +-----+------------+------------+
+    //   |     |(x1,y1)     |            |
+    //   |  1  |(A1)._______|______      |
+    //   |     |    |              |     |
+    //   |     |    |              |     |
+    //   +-----+----|    OBJECT    |-----+
+    //   |     |    |              |     |
+    //   |  2  |    |______________.     |
+    //   |     |            |        (B2)|
+    //   |     |            |     (x2,y2)|
+    //   +---- +------------+------------+
+    //
+    // Example of an object that covers some of the area from cell A1 to  B2.
+    //
+    // Based on the width and height of the object we need to calculate 8 vars:
+    //
+    //     col_start, row_start, col_end, row_end, x1, y1, x2, y2.
+    //
+    // We also calculate the absolute x and y position of the top left vertex of
+    // the object. This is required for images.
+    //
+    // The width and height of the cells that the object occupies can be
+    // variable and have to be taken into account.
+    //
+    // The values of col_start and row_start are passed in from the calling
+    // function. The values of col_end and row_end are calculated by subtracting
+    // the width and height of the object from the width and height of the
+    // underlying cells.
+    //
+    fn position_object_pixels(&mut self, row: RowNum, col: ColNum, image: &Image) -> DrawingInfo {
+        let mut row_start: RowNum = row; // Row containing top left corner.
+        let mut col_start: ColNum = col; // Column containing upper left corner.
+
+        let mut x1: u32 = image.x_offset; // Distance to left side of object.
+        let mut y1: u32 = image.y_offset; // Distance to top of object.
+
+        let mut row_end: RowNum; // Row containing bottom right corner.
+        let mut col_end: ColNum; // Column containing lower right corner.
+
+        let mut x2: f64; // Distance to right side of object.
+        let mut y2: f64; // Distance to bottom of object.
+
+        let width = image.width_scaled(); // Width of object frame.
+        let height = image.height_scaled(); // Height of object frame.
+
+        let mut x_abs: u32 = 0; // Absolute distance to left side of object.
+        let mut y_abs: u32 = 0; // Absolute distance to top  side of object.
+
+        // Calculate the absolute x offset of the top-left vertex.
+        for col in 0..col_start {
+            x_abs += self.column_size(col);
+        }
+        x_abs += x1;
+
+        // Calculate the absolute y offset of the top-left vertex.
+        for row in 0..row_start {
+            y_abs += self.row_size(row);
+        }
+        y_abs += y1;
+
+        // Adjust start col for offsets that are greater than the col width.
+        loop {
+            let col_size = self.column_size(col_start);
+            if x1 >= col_size {
+                x1 -= col_size;
+                col_start += 1;
+            } else {
+                break;
+            }
+        }
+
+        // Adjust start row for offsets that are greater than the row height.
+        loop {
+            let row_size = self.row_size(row_start);
+            if y1 >= row_size {
+                y1 -= row_size;
+                row_start += 1;
+            } else {
+                break;
+            }
+        }
+
+        // Initialize end cell to the same as the start cell.
+        col_end = col_start;
+        row_end = row_start;
+
+        // Calculate the end vertices.
+        x2 = width + x1 as f64;
+        y2 = height + y1 as f64;
+
+        // Subtract the underlying cell widths to find the end cell.
+        loop {
+            let col_size = self.column_size(col_end) as f64;
+            if x2 >= col_size {
+                x2 -= col_size;
+                col_end += 1;
+            } else {
+                break;
+            }
+        }
+
+        //Subtract the underlying cell heights to find the end cell.
+        loop {
+            let row_size = self.row_size(row_end) as f64;
+            if y2 >= row_size {
+                y2 -= row_size;
+                row_end += 1;
+            } else {
+                break;
+            }
+        }
+
+        // Create structs to hold the drawing information.
+        let from = DrawingCoordinates {
+            col: col_start as u32,
+            row: row_start,
+            col_offset: x1 as f64,
+            row_offset: y1 as f64,
+        };
+
+        let to = DrawingCoordinates {
+            col: col_end as u32,
+            row: row_end,
+            col_offset: x2 as f64,
+            row_offset: y2 as f64,
+        };
+
+        DrawingInfo {
+            from,
+            to,
+            col_absolute: x_abs,
+            row_absolute: y_abs,
+            width,
+            height,
+            description: image.alt_text.clone(),
+        }
+    }
+
+    // Get the user specified or default column size.
+    fn column_size(&mut self, col: ColNum) -> u32 {
+        let max_digit_width = 7.0_f64;
+        let padding = 5.0_f64;
+
+        match self.changed_cols.get(&col) {
+            Some(col_options) => {
+                let width = col_options.width;
+                if width < 1.0 {
+                    (width * (max_digit_width + padding) + 0.5) as u32
+                } else {
+                    (width * max_digit_width + 0.5) as u32 + padding as u32
+                }
+            }
+            None => 64,
+        }
+    }
+
+    // Get the user specified or default row width.
+    fn row_size(&mut self, row: RowNum) -> u32 {
+        match self.changed_rows.get(&row) {
+            Some(row_options) => (row_options.height * 4.0 / 3.0) as u32,
+            None => 20,
+        }
+    }
+
+    // Reset an worksheet global data or structures between saves.
+    pub(crate) fn reset(&mut self) {
+        self.writer.reset();
+        self.drawing.writer.reset();
+        self.rel_count = 0;
+        self.drawing.drawings.clear();
+        self.hyperlink_relationships.clear();
+        self.image_relationships.clear();
+        self.drawing_relationships.clear();
+    }
+
+    // Check if any external relationships are required.
+    pub(crate) fn has_relationships(&self) -> bool {
+        !self.hyperlink_relationships.is_empty() || !self.image_relationships.is_empty()
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -5372,6 +5787,11 @@ impl Worksheet {
         // Write the headerFooter element.
         if self.head_footer_changed {
             self.write_header_footer();
+        }
+
+        // Write the drawing element.
+        if !self.drawing.drawings.is_empty() {
+            self.write_drawing();
         }
 
         // Close the worksheet tag.
@@ -5620,6 +6040,8 @@ impl Worksheet {
             self.write_hyperlink(cell.0, cell.1, hyperlink);
         }
 
+        self.rel_count = ref_id - 1;
+
         self.writer.xml_end_tag("hyperlinks");
     }
 
@@ -5641,7 +6063,7 @@ impl Worksheet {
                 }
 
                 // Store the linkage to the worksheets rels file.
-                self.relationships.push((
+                self.hyperlink_relationships.push((
                     "hyperlink".to_string(),
                     hyperlink.url.to_string(),
                     "External".to_string(),
@@ -6200,11 +6622,24 @@ impl Worksheet {
     fn write_odd_footer(&mut self) {
         self.writer.xml_data_element("oddFooter", &self.footer);
     }
+
+    // Write the <drawing> element.
+    fn write_drawing(&mut self) {
+        self.rel_count += 1;
+        let attributes = vec![("r:id", format!("rId{}", self.rel_count))];
+
+        self.writer.xml_empty_tag_attr("drawing", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
+
+// Round to the closest integer number of emu units.
+fn round_to_emus(dimension: f64) -> f64 {
+    ((0.5 + dimension * 9525.0) as u32) as f64
+}
 
 // Utility method to strip equal sign and array braces from a formula and
 // also expand out future and dynamic array formulas.

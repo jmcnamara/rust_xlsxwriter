@@ -19,7 +19,7 @@ use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 use crate::{XlsxColor, XlsxPattern};
 
-/// The workbook struct represents an Excel file in it's entirety. It is the
+/// The Workbook struct represents an Excel file in it's entirety. It is the
 /// starting point for creating a new Excel xlsx file.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/demo.png">
@@ -88,13 +88,13 @@ use crate::{XlsxColor, XlsxPattern};
 pub struct Workbook {
     pub(crate) writer: XMLWriter,
     pub(crate) worksheets: Vec<Worksheet>,
-    xf_indices: HashMap<String, u32>,
     pub(crate) xf_formats: Vec<Format>,
     pub(crate) font_count: u16,
     pub(crate) fill_count: u16,
     pub(crate) border_count: u16,
     pub(crate) num_format_count: u16,
     pub(crate) has_hyperlink_style: bool,
+    xf_indices: HashMap<String, u32>,
     active_tab: u16,
     first_sheet: u16,
     defined_names: Vec<DefinedName>,
@@ -115,8 +115,7 @@ impl Workbook {
     ///
     /// The `Workbook::new()` constructor is used to create a new Excel workbook
     /// object. This is used to create worksheets and add data prior to saving
-    /// everything to an xlsx file with [`save()`](Workbook::save),
-    /// [`save_to_path()`](Workbook::save_to_path) or
+    /// everything to an xlsx file with [`save()`](Workbook::save), or
     /// [`save_to_buffer()`](Workbook::save_to_buffer).
     ///
     /// **Note**: `rust_xlsxwriter` can only create new files. It cannot read or
@@ -698,7 +697,7 @@ impl Workbook {
         // Reset workbook and worksheet xml writers between saves.
         self.writer.reset();
         for worksheet in self.worksheets.iter_mut() {
-            worksheet.writer.reset();
+            worksheet.reset();
         }
 
         // Clear any global metadata arrays between saves.
@@ -723,7 +722,7 @@ impl Workbook {
             }
         }
 
-        // Convert any local formats to workbook/global formats.
+        // Convert any worksheet local formats to workbook/global formats.
         let mut worksheet_formats: Vec<Vec<Format>> = vec![];
         for worksheet in self.worksheets.iter() {
             let formats = worksheet.xf_formats.clone();
@@ -743,6 +742,9 @@ impl Workbook {
         for (i, worksheet) in self.worksheets.iter_mut().enumerate() {
             worksheet.set_global_xf_indices(&worksheet_indices[i]);
         }
+
+        // Convert the images in the workbooks into drawing files and rel links.
+        self.prepare_drawings();
 
         // Prepare the formats for writing with styles.rs.
         self.prepare_format_properties();
@@ -773,6 +775,23 @@ impl Workbook {
         }
         self.worksheets[active_index].set_active(true);
         self.active_tab = active_index as u16;
+    }
+
+    // Convert the images in the workbooks into drawing files and rel links.
+    fn prepare_drawings(&mut self) {
+        let mut ref_id = 1;
+        let mut drawing_id = 1;
+
+        for worksheet in self.worksheets.iter_mut() {
+            if worksheet.images.is_empty() {
+                continue;
+            } else {
+                worksheet.prepare_images(ref_id, drawing_id);
+
+                ref_id += 1;
+                drawing_id += 1;
+            }
+        }
     }
 
     // Evaluate and clone formats from worksheets into a workbook level vector
@@ -979,6 +998,10 @@ impl Workbook {
                 package_options.has_dynamic_arrays = true;
             }
 
+            if !worksheet.drawing.drawings.is_empty() {
+                package_options.num_drawings += 1;
+            }
+
             // Store any user defined print areas which are a category of defined name.
             if !worksheet.print_area.is_empty() {
                 let defined_name = DefinedName {
@@ -1023,6 +1046,13 @@ impl Workbook {
                 package_options
                     .defined_names
                     .push(format!("{}!Print_Titles", quoted_sheet_name));
+            }
+
+            // Set the used image types.
+            for i in 0..5 {
+                if worksheet.image_types[i] {
+                    package_options.image_types[i] = true;
+                }
             }
         }
 
