@@ -58,6 +58,7 @@ pub struct Image {
     pub(crate) y_offset: u32,
     pub(crate) image_type: XlsxImageType,
     pub(crate) alt_text: String,
+    pub(crate) decorative: bool,
     path: PathBuf,
 }
 
@@ -156,6 +157,7 @@ impl Image {
             image_type: XlsxImageType::Unknown,
             alt_text: "".to_string(),
             path: path_buf,
+            decorative: false,
         };
 
         Self::process_image(&mut image)?;
@@ -245,11 +247,118 @@ impl Image {
         self
     }
 
-    /// This will be documented in the next release when the "decorative"
-    /// property is added.
-    #[doc(hidden)]
+    /// Set the alt text for the image.
+    ///
+    /// Set the alt text for the image to help accessibility. The alt text is
+    /// used with screen readers to help people with visual disabilities.
+    ///
+    /// See the following Microsoft documentation on [Everything you need to
+    /// know to write effective alt
+    /// text](https://support.microsoft.com/en-us/office/everything-you-need-to-know-to-write-effective-alt-text-df98f884-ca3d-456c-807b-1a1fa82f5dc2)
+    ///
+    /// # Arguments
+    ///
+    /// * `alt_text` - The alt text string to add to the image.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to create an image object and set the alternative
+    /// text to help accessibility.
+    ///
+    ///
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_image_set_alt_text.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #      let mut workbook = Workbook::new();
+    /// #
+    /// #    // Add a worksheet to the workbook.
+    /// #    let worksheet = workbook.add_worksheet();
+    /// #
+    ///    // Create a new image object.
+    ///     let mut image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///    // Set the alternative text.
+    ///    image.set_alt_text("A circular logo with gear teeth on the outside \
+    ///                        and a large letter R on the inside.\n\n\
+    ///                        The logo of the Rust programming language.");
+    ///
+    /// #    // Insert the image.
+    /// #    worksheet.insert_image(1, 2, &image)?;
+    /// #
+    /// #    // Save the file to disk.
+    /// #      workbook.save("image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Alt text dialog in Excel:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/image_set_alt_text.png">
+    ///
     pub fn set_alt_text(&mut self, alt_text: &str) -> &mut Image {
         self.alt_text = alt_text.to_string();
+        self
+    }
+
+    /// Mark an image as decorative.
+    ///
+    /// Not all images need an alt text description. Some images may contain
+    /// little or no useful visual information, for example a simple shape with
+    /// color used to divide sections. Such images can be marked as "decorative"
+    /// so that screen readers can inform the users that they don't contain
+    /// important information.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to create an image object and set the decorative
+    /// property to indicate the it doesn't contain useful visual information.
+    /// This is used to improve the accessibility of visual elements.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_image_set_decorative.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #    // Add a worksheet to the workbook.
+    /// #    let worksheet = workbook.add_worksheet();
+    ///
+    /// #    // Create a new image object.
+    ///    let mut image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///    image.set_decorative(true);
+    ///
+    /// #    // Insert the image.
+    /// #    worksheet.insert_image(1, 2, &image)?;
+    ///
+    /// #    // Save the file to disk.
+    /// #    workbook.save("image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Alt text dialog in Excel:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/image_set_decorative.png">
+    ///
+    pub fn set_decorative(&mut self, enable: bool) -> &mut Image {
+        self.decorative = enable;
         self
     }
 
@@ -276,11 +385,6 @@ impl Image {
     /// #     Ok(())
     /// # }
     /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/image_dimensions.png">
-    ///
     pub fn width(&self) -> f64 {
         self.width
     }

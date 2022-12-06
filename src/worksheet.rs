@@ -5691,6 +5691,7 @@ impl Worksheet {
             width,
             height,
             description: image.alt_text.clone(),
+            decorative: image.decorative,
         }
     }
 

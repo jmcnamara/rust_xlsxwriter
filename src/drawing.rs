@@ -153,7 +153,49 @@ impl Drawing {
             attributes.push(("descr", drawing_info.description.clone()))
         }
 
-        self.writer.xml_empty_tag_attr("xdr:cNvPr", &attributes);
+        if drawing_info.decorative {
+            self.writer.xml_start_tag_attr("xdr:cNvPr", &attributes);
+            self.write_decorative();
+            self.writer.xml_end_tag("xdr:cNvPr");
+        } else {
+            self.writer.xml_empty_tag_attr("xdr:cNvPr", &attributes);
+        }
+    }
+
+    // Write the decorative sub elements.
+    fn write_decorative(&mut self) {
+        self.writer.xml_start_tag("a:extLst");
+
+        let attributes = vec![("uri", "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}".to_string())];
+        self.writer.xml_start_tag_attr("a:ext", &attributes);
+
+        let attributes = vec![
+            (
+                "xmlns:a16",
+                "http://schemas.microsoft.com/office/drawing/2014/main".to_string(),
+            ),
+            ("id", "{00000000-0008-0000-0000-000002000000}".to_string()),
+        ];
+        self.writer
+            .xml_empty_tag_attr("a16:creationId", &attributes);
+
+        self.writer.xml_end_tag("a:ext");
+
+        let attributes = vec![("uri", "{C183D7F6-B498-43B3-948B-1728B52AA6E4}".to_string())];
+        self.writer.xml_start_tag_attr("a:ext", &attributes);
+
+        let attributes = vec![
+            (
+                "xmlns:adec",
+                "http://schemas.microsoft.com/office/drawing/2017/decorative".to_string(),
+            ),
+            ("val", "1".to_string()),
+        ];
+        self.writer
+            .xml_empty_tag_attr("adec:decorative", &attributes);
+
+        self.writer.xml_end_tag("a:ext");
+        self.writer.xml_end_tag("a:extLst");
     }
 
     // Write the <a:picLocks> element.
@@ -259,6 +301,7 @@ pub(crate) struct DrawingInfo {
     pub(crate) width: f64,
     pub(crate) height: f64,
     pub(crate) description: String,
+    pub(crate) decorative: bool,
 }
 
 // -----------------------------------------------------------------------
@@ -297,6 +340,7 @@ mod tests {
             width: 1142857.0,
             height: 1142857.0,
             description: "rust.png".to_string(),
+            decorative: false,
         };
 
         drawing.drawings.push(drawing_info);

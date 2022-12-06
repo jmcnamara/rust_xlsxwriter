@@ -162,6 +162,14 @@ documentation and generally show how an individual function works.
 * doc_image_dimensions.rs - This example shows how to get some of the
   properties of an Image that will be used in an Excel worksheet.
 
+* doc_image_set_alt_text.rs - This example shows how to create an image
+  object and set the alternative text to help accessibility.
+
+* doc_image_set_decorative.rs - This example shows how to create an image
+  object and set the decorative property to indicate the it doesn't contain
+  useful visual information. This is used to improve the accessibility of
+  visual elements.
+
 * doc_image_set_scale_width.rs - This example shows how to create an image
   object and use it to insert the image into a worksheet. The image in this
   case is scaled.
