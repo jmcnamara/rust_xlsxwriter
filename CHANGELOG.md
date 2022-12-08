@@ -5,6 +5,19 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2022-12-08
+
+### Added
+
+- Added support for images in buffers via [`image.new_from_buffer()`].
+
+- Added image accessability features via [`image.set_alt_text()`] and[`image.set_decorative()`].
+
+[`image.set_alt_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_alt_text
+[`image.set_decorative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_decorative
+[`image.new_from_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.new_from_buffer
+
+
 ## [0.14.0] - 2022-12-05
 
 ### Added

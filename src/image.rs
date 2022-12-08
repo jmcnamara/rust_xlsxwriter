@@ -174,8 +174,8 @@ impl Image {
     /// Create an Image object from a u8 buffer. The image can then be inserted
     /// into a worksheet.
     ///
-    /// This method is similar to `new()`, see above, except the image data can
-    /// be in a buffer instead of a file path.
+    /// This method is similar to [`new()`](Image::new), see above, except the
+    /// image data can be in a buffer instead of a file path.
     ///
     /// # Arguments
     ///
@@ -237,7 +237,8 @@ impl Image {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/image_new_from_buffer.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/image_new_from_buffer.png">
     ///
     pub fn new_from_buffer(buffer: &[u8]) -> Result<Image, XlsxError> {
         let mut image = Image {
