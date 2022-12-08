@@ -424,7 +424,7 @@ impl<W: Write + Seek> Packager<W> {
                 let filename = format!("xl/media/image{index}.{}", image.image_type.extension());
                 self.zip.start_file(filename, self.zip_options)?;
 
-                self.zip.write_all(&image.data())?;
+                self.zip.write_all(&image.data)?;
                 index += 1;
             }
         }

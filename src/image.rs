@@ -59,9 +59,7 @@ pub struct Image {
     pub(crate) image_type: XlsxImageType,
     pub(crate) alt_text: String,
     pub(crate) decorative: bool,
-    path: PathBuf,
-    data: Vec<u8>,
-    has_data: bool,
+    pub(crate) data: Vec<u8>,
 }
 
 impl Image {
@@ -146,6 +144,11 @@ impl Image {
         let mut path_buf = PathBuf::new();
         path_buf.push(path);
 
+        let file = File::open(path_buf)?;
+        let mut reader = BufReader::new(file);
+        let mut data = vec![];
+        reader.read_to_end(&mut data)?;
+
         let mut image = Image {
             height: 0.0,
             width: 0.0,
@@ -158,10 +161,8 @@ impl Image {
             has_default_dpi: true,
             image_type: XlsxImageType::Unknown,
             alt_text: "".to_string(),
-            path: path_buf,
             decorative: false,
-            data: vec![],
-            has_data: false,
+            data,
         };
 
         Self::process_image(&mut image)?;
@@ -251,10 +252,8 @@ impl Image {
             has_default_dpi: true,
             image_type: XlsxImageType::Unknown,
             alt_text: "".to_string(),
-            path: PathBuf::new(),
             decorative: false,
             data: buffer.to_vec(),
-            has_data: true,
         };
 
         Self::process_image(&mut image)?;
@@ -521,35 +520,13 @@ impl Image {
         height * 96.0 / self.height_dpi
     }
 
-    // Get the image data as a u8 stream to add to the zipfile.
-    pub(crate) fn data(&self) -> Vec<u8> {
-        if self.has_data {
-            self.data.clone()
-        } else {
-            let file = File::open(self.path.clone()).unwrap();
-            let mut reader = BufReader::new(file);
-            let mut data: Vec<u8> = vec![];
-            reader.read_to_end(&mut data).unwrap();
-            data
-        }
-    }
-
     // -----------------------------------------------------------------------
     // Internal methods.
     // -----------------------------------------------------------------------
 
     // Extract type and width and height information from an image file.
     fn process_image(&mut self) -> Result<(), XlsxError> {
-        let mut data: Vec<u8>;
-
-        if self.has_data {
-            data = self.data.clone();
-        } else {
-            let file = File::open(self.path.clone())?;
-            let mut reader = BufReader::new(file);
-            data = vec![];
-            reader.read_to_end(&mut data)?;
-        }
+        let data = self.data.clone();
 
         let png_marker = &data[1..4];
         let jpg_marker = unpack_u16_from_be_bytes(&data, 0);
