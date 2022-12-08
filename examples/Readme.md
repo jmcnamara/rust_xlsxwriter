@@ -162,6 +162,9 @@ documentation and generally show how an individual function works.
 * doc_image_dimensions.rs - This example shows how to get some of the
   properties of an Image that will be used in an Excel worksheet.
 
+* doc_image_new_from_buffer.rs - This example shows how to create an image
+  object from a u8 buffer.
+
 * doc_image_set_alt_text.rs - This example shows how to create an image
   object and set the alternative text to help accessibility.
 

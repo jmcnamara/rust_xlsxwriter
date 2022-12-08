@@ -60,6 +60,8 @@ pub struct Image {
     pub(crate) alt_text: String,
     pub(crate) decorative: bool,
     path: PathBuf,
+    data: Vec<u8>,
+    has_data: bool,
 }
 
 impl Image {
@@ -158,19 +160,104 @@ impl Image {
             alt_text: "".to_string(),
             path: path_buf,
             decorative: false,
+            data: vec![],
+            has_data: false,
         };
 
         Self::process_image(&mut image)?;
 
-        // Check that we read a valid image.
-        if let XlsxImageType::Unknown = image.image_type {
-            return Err(XlsxError::UnknownImageType);
-        }
+        Ok(image)
+    }
 
-        // Check that we read a the image dimensions.
-        if image.width == 0.0 || image.height == 0.0 {
-            return Err(XlsxError::ImageDimensionError);
-        }
+    ///
+    /// Create an Image object from a u8 buffer. The image can then be inserted
+    /// into a worksheet.
+    ///
+    /// This method is similar to `new()`, see above, except the image data can
+    /// be in a buffer instead of a file path.
+    ///
+    /// # Arguments
+    ///
+    /// * `buffer` - The image data as a u8 array or vector.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::UnknownImageType`] - Unknown image type. The supported
+    ///   image formats are PNG, JPG, GIF and BMP.
+    /// * [`XlsxError::ImageDimensionError`] - Image has 0 width or height, or
+    ///   the dimensions couldn't be read.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to create an image object from a u8 buffer.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_image_new_from_buffer.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Create a new image object.
+    /// #     let buf: [u8; 200] = [
+    /// #         0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44,
+    /// #         0x52, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x20, 0x08, 0x02, 0x00, 0x00, 0x00, 0xfc,
+    /// #         0x18, 0xed, 0xa3, 0x00, 0x00, 0x00, 0x01, 0x73, 0x52, 0x47, 0x42, 0x00, 0xae, 0xce, 0x1c,
+    /// #         0xe9, 0x00, 0x00, 0x00, 0x04, 0x67, 0x41, 0x4d, 0x41, 0x00, 0x00, 0xb1, 0x8f, 0x0b, 0xfc,
+    /// #         0x61, 0x05, 0x00, 0x00, 0x00, 0x20, 0x63, 0x48, 0x52, 0x4d, 0x00, 0x00, 0x7a, 0x26, 0x00,
+    /// #         0x00, 0x80, 0x84, 0x00, 0x00, 0xfa, 0x00, 0x00, 0x00, 0x80, 0xe8, 0x00, 0x00, 0x75, 0x30,
+    /// #         0x00, 0x00, 0xea, 0x60, 0x00, 0x00, 0x3a, 0x98, 0x00, 0x00, 0x17, 0x70, 0x9c, 0xba, 0x51,
+    /// #         0x3c, 0x00, 0x00, 0x00, 0x46, 0x49, 0x44, 0x41, 0x54, 0x48, 0x4b, 0x63, 0xfc, 0xcf, 0x40,
+    /// #         0x63, 0x00, 0xb4, 0x80, 0xa6, 0x88, 0xb6, 0xa6, 0x83, 0x82, 0x87, 0xa6, 0xce, 0x1f, 0xb5,
+    /// #         0x80, 0x98, 0xe0, 0x1d, 0x8d, 0x03, 0x82, 0xa1, 0x34, 0x1a, 0x44, 0xa3, 0x41, 0x44, 0x30,
+    /// #         0x04, 0x08, 0x2a, 0x18, 0x4d, 0x45, 0xa3, 0x41, 0x44, 0x30, 0x04, 0x08, 0x2a, 0x18, 0x4d,
+    /// #         0x45, 0xa3, 0x41, 0x44, 0x30, 0x04, 0x08, 0x2a, 0x18, 0x4d, 0x45, 0x03, 0x1f, 0x44, 0x00,
+    /// #         0xaa, 0x35, 0xdd, 0x4e, 0xe6, 0xd5, 0xa1, 0x22, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+    /// #         0x44, 0xae, 0x42, 0x60, 0x82,
+    /// #     ];
+    /// #
+    ///     // Create a new image object from a u8 buffer.
+    ///     let image = Image::new_from_buffer(&buf)?;
+    ///
+    ///     // Insert the image.
+    ///     worksheet.insert_image(1, 2, &image)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/image_new_from_buffer.png">
+    ///
+    pub fn new_from_buffer(buffer: &[u8]) -> Result<Image, XlsxError> {
+        let mut image = Image {
+            height: 0.0,
+            width: 0.0,
+            width_dpi: 96.0,
+            height_dpi: 96.0,
+            scale_width: 1.0,
+            scale_height: 1.0,
+            x_offset: 0,
+            y_offset: 0,
+            has_default_dpi: true,
+            image_type: XlsxImageType::Unknown,
+            alt_text: "".to_string(),
+            path: PathBuf::new(),
+            decorative: false,
+            data: buffer.to_vec(),
+            has_data: true,
+        };
+
+        Self::process_image(&mut image)?;
 
         Ok(image)
     }
@@ -436,11 +523,15 @@ impl Image {
 
     // Get the image data as a u8 stream to add to the zipfile.
     pub(crate) fn data(&self) -> Vec<u8> {
-        let file = File::open(self.path.clone()).unwrap();
-        let mut reader = BufReader::new(file);
-        let mut data: Vec<u8> = vec![];
-        reader.read_to_end(&mut data).unwrap();
-        data
+        if self.has_data {
+            self.data.clone()
+        } else {
+            let file = File::open(self.path.clone()).unwrap();
+            let mut reader = BufReader::new(file);
+            let mut data: Vec<u8> = vec![];
+            reader.read_to_end(&mut data).unwrap();
+            data
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -449,10 +540,16 @@ impl Image {
 
     // Extract type and width and height information from an image file.
     fn process_image(&mut self) -> Result<(), XlsxError> {
-        let file = File::open(self.path.clone())?;
-        let mut reader = BufReader::new(file);
-        let mut data: Vec<u8> = vec![];
-        reader.read_to_end(&mut data)?;
+        let mut data: Vec<u8>;
+
+        if self.has_data {
+            data = self.data.clone();
+        } else {
+            let file = File::open(self.path.clone())?;
+            let mut reader = BufReader::new(file);
+            data = vec![];
+            reader.read_to_end(&mut data)?;
+        }
 
         let png_marker = &data[1..4];
         let jpg_marker = unpack_u16_from_be_bytes(&data, 0);
@@ -467,6 +564,16 @@ impl Image {
             self.process_bmp(&data);
         } else if gif_marker == "GIF8".as_bytes() {
             self.process_gif(&data);
+        }
+
+        // Check that we read a valid image.
+        if let XlsxImageType::Unknown = self.image_type {
+            return Err(XlsxError::UnknownImageType);
+        }
+
+        // Check that we read a the image dimensions.
+        if self.width == 0.0 || self.height == 0.0 {
+            return Err(XlsxError::ImageDimensionError);
         }
 
         Ok(())
