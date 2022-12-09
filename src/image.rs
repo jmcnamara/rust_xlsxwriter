@@ -5,7 +5,9 @@
 
 #![warn(missing_docs)]
 
+use std::collections::hash_map::DefaultHasher;
 use std::fs::File;
+use std::hash::{Hash, Hasher};
 use std::io::BufReader;
 use std::io::Read;
 use std::path::Path;
@@ -59,6 +61,7 @@ pub struct Image {
     pub(crate) image_type: XlsxImageType,
     pub(crate) alt_text: String,
     pub(crate) decorative: bool,
+    pub(crate) hash: u64,
     pub(crate) data: Vec<u8>,
 }
 
@@ -149,25 +152,7 @@ impl Image {
         let mut data = vec![];
         reader.read_to_end(&mut data)?;
 
-        let mut image = Image {
-            height: 0.0,
-            width: 0.0,
-            width_dpi: 96.0,
-            height_dpi: 96.0,
-            scale_width: 1.0,
-            scale_height: 1.0,
-            x_offset: 0,
-            y_offset: 0,
-            has_default_dpi: true,
-            image_type: XlsxImageType::Unknown,
-            alt_text: "".to_string(),
-            decorative: false,
-            data,
-        };
-
-        Self::process_image(&mut image)?;
-
-        Ok(image)
+        Self::new_from_buffer(&data)
     }
 
     ///
@@ -254,6 +239,7 @@ impl Image {
             image_type: XlsxImageType::Unknown,
             alt_text: "".to_string(),
             decorative: false,
+            hash: 0,
             data: buffer.to_vec(),
         };
 
@@ -553,6 +539,11 @@ impl Image {
         if self.width == 0.0 || self.height == 0.0 {
             return Err(XlsxError::ImageDimensionError);
         }
+
+        // Set a hash for the image to allow removal of duplicates.
+        let mut hasher = DefaultHasher::new();
+        data.hash(&mut hasher);
+        self.hash = hasher.finish();
 
         Ok(())
     }

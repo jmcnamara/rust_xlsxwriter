@@ -5501,24 +5501,49 @@ impl Worksheet {
 
     // Convert the image dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
-    pub(crate) fn prepare_images(&mut self, mut ref_id: u32, drawing_id: u32) {
+    pub(crate) fn prepare_images(&mut self, image_ids: &mut HashMap<u64, u32>, drawing_id: u32) {
+        let mut rel_ids: HashMap<u64, u32> = HashMap::new();
+
         for (cell, image) in self.images.clone().iter() {
             let row = cell.0;
             let col = cell.1;
 
-            let drawing_info = self.position_object_emus(row, col, image);
+            let image_id = match image_ids.get(&image.hash) {
+                Some(image_id) => *image_id,
+                None => {
+                    let image_id = 1 + image_ids.len() as u32;
+                    image_ids.insert(image.hash, image_id);
+                    image_id
+                }
+            };
 
+            let rel_id = match rel_ids.get(&image.hash) {
+                Some(rel_id) => *rel_id,
+                None => {
+                    let rel_id = 1 + rel_ids.len() as u32;
+                    rel_ids.insert(image.hash, rel_id);
+
+                    // Store the linkage to the drawings rels file.
+                    let image_name =
+                        format!("../media/image{image_id}.{}", image.image_type.extension());
+                    self.drawing_relationships.push((
+                        "image".to_string(),
+                        image_name,
+                        "".to_string(),
+                    ));
+
+                    rel_id
+                }
+            };
+
+            // Convert the image dimensions to drawing dimensions and store the
+            // drawing object.
+            let mut drawing_info = self.position_object_emus(row, col, image);
+            drawing_info.rel_id = rel_id;
             self.drawing.drawings.push(drawing_info);
 
             // Store the used image type for the Content Type file.
             self.image_types[image.image_type.clone() as usize] = true;
-
-            let image_name = format!("../media/image{ref_id}.{}", image.image_type.extension());
-            // Store the linkage to the drawings rels file.
-            self.drawing_relationships
-                .push(("image".to_string(), image_name, "".to_string()));
-
-            ref_id += 1;
         }
 
         let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
@@ -5692,6 +5717,7 @@ impl Worksheet {
             height,
             description: image.alt_text.clone(),
             decorative: image.decorative,
+            rel_id: 0,
         }
     }
 

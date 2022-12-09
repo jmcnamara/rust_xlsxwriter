@@ -53,6 +53,7 @@ use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
 use crate::NUM_IMAGE_FORMATS;
 
+use std::collections::HashSet;
 use std::io::{Seek, Write};
 use zip::write::FileOptions;
 use zip::{DateTime, ZipWriter};
@@ -419,13 +420,19 @@ impl<W: Write + Seek> Packager<W> {
     // Write the image files.
     fn write_image_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut index = 1;
+        let mut unique_images = HashSet::new();
+
         for worksheet in workbook.worksheets.iter_mut() {
             for (_, image) in worksheet.images.iter() {
-                let filename = format!("xl/media/image{index}.{}", image.image_type.extension());
-                self.zip.start_file(filename, self.zip_options)?;
+                if !unique_images.contains(&image.hash) {
+                    let filename =
+                        format!("xl/media/image{index}.{}", image.image_type.extension());
+                    self.zip.start_file(filename, self.zip_options)?;
 
-                self.zip.write_all(&image.data)?;
-                index += 1;
+                    self.zip.write_all(&image.data)?;
+                    unique_images.insert(image.hash);
+                    index += 1;
+                }
             }
         }
 

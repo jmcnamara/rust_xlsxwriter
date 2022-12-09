@@ -119,7 +119,7 @@ impl Drawing {
         self.write_nv_pic_pr(index, drawing_info);
 
         // Write the xdr:blipFill element.
-        self.write_blip_fill(index);
+        self.write_blip_fill(drawing_info.rel_id);
 
         // Write the xdr:spPr element.
         self.write_sp_pr(drawing_info);
@@ -302,6 +302,7 @@ pub(crate) struct DrawingInfo {
     pub(crate) height: f64,
     pub(crate) description: String,
     pub(crate) decorative: bool,
+    pub(crate) rel_id: u32,
 }
 
 // -----------------------------------------------------------------------
@@ -341,6 +342,7 @@ mod tests {
             height: 1142857.0,
             description: "rust.png".to_string(),
             decorative: false,
+            rel_id: 1,
         };
 
         drawing.drawings.push(drawing_info);

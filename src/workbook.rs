@@ -783,16 +783,16 @@ impl Workbook {
 
     // Convert the images in the workbooks into drawing files and rel links.
     fn prepare_drawings(&mut self) {
-        let mut ref_id = 1;
         let mut drawing_id = 1;
+
+        // These are the image ids for each unique image file.
+        let mut image_ids: HashMap<u64, u32> = HashMap::new();
 
         for worksheet in self.worksheets.iter_mut() {
             if worksheet.images.is_empty() {
                 continue;
             } else {
-                worksheet.prepare_images(ref_id, drawing_id);
-
-                ref_id += 1;
+                worksheet.prepare_images(&mut image_ids, drawing_id);
                 drawing_id += 1;
             }
         }
