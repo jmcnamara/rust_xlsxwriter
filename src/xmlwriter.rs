@@ -52,7 +52,7 @@ impl XMLWriter {
 
     // Write an XML start tag without attributes.
     pub(crate) fn xml_start_tag(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, r"<{}>", tag).expect("Couldn't write to file");
+        write!(&mut self.xmlfile, r"<{tag}>").expect("Couldn't write to file");
     }
 
     // Write an XML start tag with attributes.
@@ -69,12 +69,12 @@ impl XMLWriter {
 
     // Write an XML end tag.
     pub(crate) fn xml_end_tag(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, r"</{}>", tag).expect("Couldn't write to file");
+        write!(&mut self.xmlfile, r"</{tag}>").expect("Couldn't write to file");
     }
 
     // Write an empty XML tag without attributes.
     pub(crate) fn xml_empty_tag(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, r"<{}/>", tag).expect("Couldn't write to file");
+        write!(&mut self.xmlfile, r"<{tag}/>").expect("Couldn't write to file");
     }
 
     // Write an empty XML tag with attributes.
@@ -86,7 +86,7 @@ impl XMLWriter {
             attribute_str.push_str(&pair);
         }
 
-        write!(&mut self.xmlfile, r"<{}{}/>", tag, attribute_str).expect("Couldn't write to file");
+        write!(&mut self.xmlfile, r"<{tag}{attribute_str}/>").expect("Couldn't write to file");
     }
 
     // Write an XML element containing data without attributes.
@@ -146,7 +146,7 @@ impl XMLWriter {
 
     // Write the theme string to the theme file.
     pub(crate) fn write_theme(&mut self, theme: &str) {
-        writeln!(&mut self.xmlfile, "{}", theme).expect("Couldn't write to file");
+        writeln!(&mut self.xmlfile, "{theme}").expect("Couldn't write to file");
     }
 }
 
