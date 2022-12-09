@@ -3,8 +3,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
-use crate::xmlwriter::XMLWriter;
 use chrono::{DateTime, Utc};
+
+use crate::xmlwriter::XMLWriter;
 
 pub struct Core {
     pub(crate) writer: XMLWriter,

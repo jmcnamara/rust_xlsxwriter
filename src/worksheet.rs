@@ -4,13 +4,14 @@
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
 #![warn(missing_docs)]
-use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
-use regex::Regex;
 use std::borrow::Cow;
 use std::cmp;
 use std::collections::{BTreeMap, HashMap};
 use std::io::Write;
 use std::mem;
+
+use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
+use regex::Regex;
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo};
 use crate::error::XlsxError;

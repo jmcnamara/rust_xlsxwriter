@@ -39,6 +39,12 @@
 // The Packager struct coordinates the classes that represent the elements of
 // the package and writes them into the xlsx file.
 
+use std::collections::HashSet;
+use std::io::{Seek, Write};
+
+use zip::write::FileOptions;
+use zip::{DateTime, ZipWriter};
+
 use crate::app::App;
 use crate::content_types::ContentTypes;
 use crate::core::Core;
@@ -52,11 +58,6 @@ use crate::theme::Theme;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
 use crate::NUM_IMAGE_FORMATS;
-
-use std::collections::HashSet;
-use std::io::{Seek, Write};
-use zip::write::FileOptions;
-use zip::{DateTime, ZipWriter};
 
 // Packager struct to assembler the xlsx file.
 pub struct Packager<W: Write + Seek> {

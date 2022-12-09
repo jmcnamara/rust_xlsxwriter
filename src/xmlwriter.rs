@@ -5,10 +5,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
 // jmcnamara@cpan.org
 
-use regex::Regex;
 use std::borrow::Cow;
 use std::io::{Cursor, Write};
 use std::str;
+
+use regex::Regex;
 
 pub struct XMLWriter {
     pub(crate) xmlfile: Cursor<Vec<u8>>,
