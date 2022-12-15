@@ -60,6 +60,9 @@ pub struct Image {
     pub(crate) y_offset: u32,
     pub(crate) image_type: XlsxImageType,
     pub(crate) alt_text: String,
+    pub(crate) vml_name: String,
+    pub(crate) position: XlsxImagePosition,
+    pub(crate) is_header: bool,
     pub(crate) decorative: bool,
     pub(crate) hash: u64,
     pub(crate) data: Vec<u8>,
@@ -147,12 +150,20 @@ impl Image {
         let mut path_buf = PathBuf::new();
         path_buf.push(path);
 
+        let vml_name = match path_buf.file_stem() {
+            Some(file_stem) => file_stem.to_string_lossy().to_string(),
+            None => "image".to_string(),
+        };
+
         let file = File::open(path_buf)?;
         let mut reader = BufReader::new(file);
         let mut data = vec![];
         reader.read_to_end(&mut data)?;
 
-        Self::new_from_buffer(&data)
+        let mut image = Self::new_from_buffer(&data)?;
+        image.vml_name = vml_name;
+
+        Ok(image)
     }
 
     ///
@@ -238,6 +249,9 @@ impl Image {
             has_default_dpi: true,
             image_type: XlsxImageType::Unknown,
             alt_text: "".to_string(),
+            vml_name: "image".to_string(),
+            position: XlsxImagePosition::Center,
+            is_header: true,
             decorative: false,
             hash: 0,
             data: buffer.to_vec(),
@@ -507,6 +521,48 @@ impl Image {
         height * 96.0 / self.height_dpi
     }
 
+    // Get the image width as used by header/footer VML.
+    pub(crate) fn vml_width(&self) -> f64 {
+        // Scale the height/width by the resolution, relative to 72dpi.
+        let mut width = self.width * 72.0 / self.width_dpi;
+
+        // Excel uses a rounding based around 72 and 96 dpi.
+        width = width * 96.0 / 72.0 + 0.25;
+        width.floor() * 72.0 / 96.0
+    }
+
+    // Get the image height as used by header/footer VML.
+    pub(crate) fn vml_height(&self) -> f64 {
+        // Scale the height/width by the resolution, relative to 72dpi.
+        let mut height = self.height * 72.0 / self.height_dpi;
+
+        // Excel uses a rounding based around 72 and 96 dpi.
+        height = height * 96.0 / 72.0 + 0.25;
+        height.floor() * 72.0 / 96.0
+    }
+
+    // Get the image short name as used by header/footer VML.
+    pub(crate) fn vml_name(&self) -> String {
+        self.vml_name.clone()
+    }
+
+    // Get the image position string as used by header/footer VML.
+    pub(crate) fn vml_position(&self) -> String {
+        if self.is_header {
+            match self.position {
+                XlsxImagePosition::Left => "LH".to_string(),
+                XlsxImagePosition::Right => "RH".to_string(),
+                XlsxImagePosition::Center => "CH".to_string(),
+            }
+        } else {
+            match self.position {
+                XlsxImagePosition::Left => "LF".to_string(),
+                XlsxImagePosition::Right => "RF".to_string(),
+                XlsxImagePosition::Center => "CF".to_string(),
+            }
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Internal methods.
     // -----------------------------------------------------------------------
@@ -693,6 +749,20 @@ impl Image {
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
+
+/// TODO
+#[derive(Clone, Debug)]
+pub enum XlsxImagePosition {
+    /// TODO
+    Left,
+
+    /// TODO
+    Center,
+
+    /// TODO
+    Right,
+}
+
 #[derive(Clone, Debug)]
 pub(crate) enum XlsxImageType {
     Unknown,

@@ -14,9 +14,9 @@ use crate::error::XlsxError;
 use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
-use crate::utility;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
+use crate::{utility, NUM_IMAGE_FORMATS};
 use crate::{XlsxColor, XlsxPattern};
 
 /// The Workbook struct represents an Excel file in it's entirety. It is the
@@ -784,16 +784,28 @@ impl Workbook {
     // Convert the images in the workbooks into drawing files and rel links.
     fn prepare_drawings(&mut self) {
         let mut drawing_id = 1;
+        let mut vml_drawing_id = 1;
 
         // These are the image ids for each unique image file.
-        let mut image_ids: HashMap<u64, u32> = HashMap::new();
+        let mut worksheet_image_ids: HashMap<u64, u32> = HashMap::new();
+        let mut header_footer_image_ids: HashMap<u64, u32> = HashMap::new();
 
         for worksheet in self.worksheets.iter_mut() {
-            if worksheet.images.is_empty() {
-                continue;
-            } else {
-                worksheet.prepare_images(&mut image_ids, drawing_id);
+            if !worksheet.images.is_empty() {
+                worksheet.prepare_worksheet_images(&mut worksheet_image_ids, drawing_id);
                 drawing_id += 1;
+            }
+
+            if worksheet.has_header_footer_images() {
+                // The header/footer images are counted from the last worksheet id.
+                let base_image_id = worksheet_image_ids.len() as u32;
+
+                worksheet.prepare_header_footer_images(
+                    &mut header_footer_image_ids,
+                    base_image_id,
+                    vml_drawing_id,
+                );
+                vml_drawing_id += 1;
             }
         }
     }
@@ -1002,6 +1014,10 @@ impl Workbook {
                 package_options.has_dynamic_arrays = true;
             }
 
+            if worksheet.has_header_footer_images() {
+                package_options.has_vml = true;
+            }
+
             if !worksheet.drawing.drawings.is_empty() {
                 package_options.num_drawings += 1;
             }
@@ -1053,7 +1069,7 @@ impl Workbook {
             }
 
             // Set the used image types.
-            for i in 0..5 {
+            for i in 0..NUM_IMAGE_FORMATS {
                 if worksheet.image_types[i] {
                     package_options.image_types[i] = true;
                 }

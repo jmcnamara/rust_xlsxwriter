@@ -15,13 +15,29 @@ pub(crate) fn xml_to_vec(xml_string: &str) -> Vec<String> {
 
         // Add back the removed brackets.
         if !element.starts_with('<') {
-            element = format!("<{}", element);
+            element = format!("<{element}");
         }
         if !element.ends_with('>') {
-            element = format!("{}>", element);
+            element = format!("{element}>");
         }
 
         xml_elements.push(element);
     }
     xml_elements
+}
+
+#[cfg(test)]
+// Convert VML string/doc into a vector for comparison testing. Excel VML tends
+// to be less structured than other XML so it needs more massaging.
+pub(crate) fn vml_to_vec(vml_string: &str) -> Vec<String> {
+    let mut vml_string = vml_string.replace(['\r', '\n'], "");
+
+    let re = regex::Regex::new(r"\s+").unwrap();
+    vml_string = re.replace_all(&vml_string, " ").into();
+
+    vml_string = vml_string.replace("; ", ";");
+    vml_string = vml_string.replace('\'', "\"");
+    vml_string = vml_string.replace("<x:Anchor> ", "<x:Anchor>");
+
+    xml_to_vec(&vml_string)
 }

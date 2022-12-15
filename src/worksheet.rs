@@ -17,8 +17,9 @@ use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo};
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::shared_strings_table::SharedStringsTable;
+use crate::vml::VmlInfo;
 use crate::xmlwriter::XMLWriter;
-use crate::{utility, Image, XlsxColor};
+use crate::{utility, Image, XlsxColor, XlsxImagePosition};
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
 /// in a worksheet is 1,048,576.
@@ -124,9 +125,12 @@ pub struct Worksheet {
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
     pub(crate) image_relationships: Vec<(String, String, String)>,
     pub(crate) drawing_relationships: Vec<(String, String, String)>,
+    pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
     pub(crate) images: BTreeMap<(RowNum, ColNum), Image>,
+    pub(crate) header_footer_vml_info: Vec<VmlInfo>,
     pub(crate) drawing: Drawing,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
+    pub(crate) header_footer_images: [Option<Image>; 6],
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
@@ -331,9 +335,12 @@ impl Worksheet {
             hyperlink_relationships: vec![],
             image_relationships: vec![],
             drawing_relationships: vec![],
+            vml_drawing_relationships: vec![],
             images: BTreeMap::new(),
             drawing: Drawing::new(),
             image_types: [false; NUM_IMAGE_FORMATS],
+            header_footer_images: [None, None, None, None, None, None],
+            header_footer_vml_info: vec![],
             rel_count: 0,
         }
     }
@@ -4158,6 +4165,34 @@ impl Worksheet {
         self
     }
 
+    /// TODO
+    pub fn set_header_image(
+        &mut self,
+        image: &Image,
+        position: XlsxImagePosition,
+    ) -> &mut Worksheet {
+        let mut image = image.clone();
+        image.position = position.clone();
+        image.is_header = true;
+        self.header_footer_images[position as usize] = Some(image);
+
+        self
+    }
+
+    /// TODO
+    pub fn set_footer_image(
+        &mut self,
+        image: &Image,
+        position: XlsxImagePosition,
+    ) -> &mut Worksheet {
+        let mut image = image.clone();
+        image.position = position.clone();
+        image.is_header = false;
+        self.header_footer_images[3 + position as usize] = Some(image);
+
+        self
+    }
+
     /// Set the page setup option to scale the header/footer with the document.
     ///
     /// This option determines whether the headers and footers use the same
@@ -5502,7 +5537,11 @@ impl Worksheet {
 
     // Convert the image dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
-    pub(crate) fn prepare_images(&mut self, image_ids: &mut HashMap<u64, u32>, drawing_id: u32) {
+    pub(crate) fn prepare_worksheet_images(
+        &mut self,
+        image_ids: &mut HashMap<u64, u32>,
+        drawing_id: u32,
+    ) {
         let mut rel_ids: HashMap<u64, u32> = HashMap::new();
 
         for (cell, image) in self.images.clone().iter() {
@@ -5547,11 +5586,72 @@ impl Worksheet {
             self.image_types[image.image_type.clone() as usize] = true;
         }
 
-        let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
-
         // Store the linkage to the worksheets rels file.
+        let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
         self.image_relationships
             .push(("drawing".to_string(), drawing_name, "".to_string()));
+    }
+
+    // Set up images used in headers and footers. Excel handles these
+    // differently from worksheet images and stores them in a VML file rather
+    // than an Drawing file.
+    pub(crate) fn prepare_header_footer_images(
+        &mut self,
+        image_ids: &mut HashMap<u64, u32>,
+        base_image_id: u32,
+        drawing_id: u32,
+    ) {
+        let mut rel_ids: HashMap<u64, u32> = HashMap::new();
+        for image in self.header_footer_images.clone().into_iter().flatten() {
+            let image_id = match image_ids.get(&image.hash) {
+                Some(image_id) => *image_id,
+                None => {
+                    let image_id = 1 + base_image_id + image_ids.len() as u32;
+                    image_ids.insert(image.hash, image_id);
+                    image_id
+                }
+            };
+
+            let rel_id = match rel_ids.get(&image.hash) {
+                Some(rel_id) => *rel_id,
+                None => {
+                    let rel_id = 1 + rel_ids.len() as u32;
+                    rel_ids.insert(image.hash, rel_id);
+
+                    // Store the linkage to the drawings rels file.
+                    let image_name =
+                        format!("../media/image{image_id}.{}", image.image_type.extension());
+                    self.vml_drawing_relationships.push((
+                        "image".to_string(),
+                        image_name,
+                        "".to_string(),
+                    ));
+
+                    rel_id
+                }
+            };
+
+            // Header images are stored in a vmlDrawing file. We create a struct
+            // to store the required image information in that format.
+            let vml_info = VmlInfo {
+                width: image.vml_width(),
+                height: image.vml_height(),
+                title: image.vml_name(),
+                rel_id,
+                position: image.vml_position(),
+            };
+
+            // Store the header/footer vml data.
+            self.header_footer_vml_info.push(vml_info);
+
+            // Store the used image type for the Content Type file.
+            self.image_types[image.image_type as usize] = true;
+        }
+
+        // Store the linkage to the worksheets rels file.
+        let vml_drawing_name = format!("../drawings/vmlDrawing{drawing_id}.vml");
+        self.image_relationships
+            .push(("vmlDrawing".to_string(), vml_drawing_name, "".to_string()));
     }
 
     // Calculate the vertices that define the position of a graphical object
@@ -5764,6 +5864,16 @@ impl Worksheet {
         !self.hyperlink_relationships.is_empty() || !self.image_relationships.is_empty()
     }
 
+    // Check if there is a header image.
+    pub(crate) fn has_header_footer_images(&self) -> bool {
+        self.header_footer_images[0].is_some()
+            || self.header_footer_images[1].is_some()
+            || self.header_footer_images[2].is_some()
+            || self.header_footer_images[3].is_some()
+            || self.header_footer_images[4].is_some()
+            || self.header_footer_images[5].is_some()
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -5824,6 +5934,11 @@ impl Worksheet {
         // Write the drawing element.
         if !self.drawing.drawings.is_empty() {
             self.write_drawing();
+        }
+
+        // Write the legacyDrawingHF element.
+        if self.has_header_footer_images() {
+            self.write_legacy_drawing_hf();
         }
 
         // Close the worksheet tag.
@@ -6661,6 +6776,15 @@ impl Worksheet {
         let attributes = vec![("r:id", format!("rId{}", self.rel_count))];
 
         self.writer.xml_empty_tag_attr("drawing", &attributes);
+    }
+
+    // Write the <legacyDrawingHF> element.
+    fn write_legacy_drawing_hf(&mut self) {
+        self.rel_count += 1;
+        let attributes = vec![("r:id", format!("rId{}", self.rel_count))];
+
+        self.writer
+            .xml_empty_tag_attr("legacyDrawingHF", &attributes);
     }
 }
 

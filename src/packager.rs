@@ -55,6 +55,7 @@ use crate::shared_strings::SharedStrings;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::theme::Theme;
+use crate::vml::Vml;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
 use crate::NUM_IMAGE_FORMATS;
@@ -113,11 +114,15 @@ impl<W: Write + Seek> Packager<W> {
         self.write_core_file()?;
         self.write_app_file(options)?;
         self.write_drawing_files(workbook)?;
+        self.write_vml_files(workbook)?;
         self.write_image_files(workbook)?;
 
         for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
             if !worksheet.drawing_relationships.is_empty() {
                 self.write_drawing_rels_file(&worksheet.drawing_relationships, index + 1)?;
+            }
+            if !worksheet.vml_drawing_relationships.is_empty() {
+                self.write_vml_drawing_rels_file(&worksheet.vml_drawing_relationships, index + 1)?;
             }
         }
 
@@ -153,6 +158,13 @@ impl<W: Write + Seek> Packager<W> {
 
         if options.has_dynamic_arrays {
             content_types.add_metadata();
+        }
+
+        if options.has_vml {
+            content_types.add_default(
+                "vml",
+                "application/vnd.openxmlformats-officedocument.vmlDrawing",
+            );
         }
 
         // Add content types for image formats used in the workbook.
@@ -291,6 +303,28 @@ impl<W: Write + Seek> Packager<W> {
         Ok(())
     }
 
+    // Write a vmlDrawing rels file.
+    pub(crate) fn write_vml_drawing_rels_file(
+        &mut self,
+        relationships: &[(String, String, String)],
+        index: usize,
+    ) -> Result<(), XlsxError> {
+        let mut rels = Relationship::new();
+
+        for relationship in relationships.iter() {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
+        let filename = format!("xl/drawings/_rels/vmlDrawing{index}.vml.rels");
+
+        self.zip.start_file(filename, self.zip_options)?;
+
+        rels.assemble_xml_file();
+        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
     // Write the workbook.xml file.
     pub(crate) fn write_workbook_file(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         self.zip.start_file("xl/workbook.xml", self.zip_options)?;
@@ -418,10 +452,34 @@ impl<W: Write + Seek> Packager<W> {
         Ok(())
     }
 
+    // Write the vml files.
+    fn write_vml_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        let mut index = 1;
+        for worksheet in workbook.worksheets.iter_mut() {
+            if worksheet.has_header_footer_images() {
+                let filename = format!("xl/drawings/vmlDrawing{index}.vml");
+                self.zip.start_file(filename, self.zip_options)?;
+
+                let mut vml = Vml::new();
+                vml.header_images
+                    .append(&mut worksheet.header_footer_vml_info);
+                vml.data_id = index;
+                vml.shape_id = 1024 * index;
+                vml.assemble_xml_file();
+
+                self.zip.write_all(vml.writer.xmlfile.get_ref())?;
+                index += 1;
+            }
+        }
+
+        Ok(())
+    }
+
     // Write the image files.
     fn write_image_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut index = 1;
         let mut unique_images = HashSet::new();
+        let mut unique_header_footer_images = HashSet::new();
 
         for worksheet in workbook.worksheets.iter_mut() {
             for (_, image) in worksheet.images.iter() {
@@ -435,6 +493,19 @@ impl<W: Write + Seek> Packager<W> {
                     index += 1;
                 }
             }
+            if worksheet.has_header_footer_images() {
+                for image in worksheet.header_footer_images.clone().into_iter().flatten() {
+                    if !unique_header_footer_images.contains(&image.hash) {
+                        let filename =
+                            format!("xl/media/image{index}.{}", image.image_type.extension());
+                        self.zip.start_file(filename, self.zip_options)?;
+
+                        self.zip.write_all(&image.data)?;
+                        unique_header_footer_images.insert(image.hash);
+                        index += 1;
+                    }
+                }
+            }
         }
 
         Ok(())
@@ -445,6 +516,7 @@ impl<W: Write + Seek> Packager<W> {
 pub(crate) struct PackagerOptions {
     pub(crate) has_sst_table: bool,
     pub(crate) has_dynamic_arrays: bool,
+    pub(crate) has_vml: bool,
     pub(crate) num_worksheets: u16,
     pub(crate) num_drawings: u16,
     pub(crate) worksheet_names: Vec<String>,
@@ -458,6 +530,7 @@ impl PackagerOptions {
         PackagerOptions {
             has_sst_table: false,
             has_dynamic_arrays: false,
+            has_vml: false,
             num_worksheets: 0,
             num_drawings: 0,
             worksheet_names: vec![],

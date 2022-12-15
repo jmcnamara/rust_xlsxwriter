@@ -9,7 +9,7 @@ macro_rules! assert_result {
     ( $x:expr ) => {
         match $x {
             Ok(result) => result,
-            Err(e) => panic!("\n!\n! XlsxError:\n! {}\n!\n", e),
+            Err(e) => panic!("\n!\n! XlsxError:\n! {:?}\n!\n", e),
         }
     };
 }
@@ -310,8 +310,15 @@ fn compare_xlsx_files(
         }
 
         // Convert the xml strings to vectors for easier comparison.
-        let mut exp_xml_vec = xml_to_vec(&exp_xml_string);
-        let mut got_xml_vec = xml_to_vec(&got_xml_string);
+        let mut exp_xml_vec;
+        let mut got_xml_vec;
+        if filename.ends_with(".vml") {
+            exp_xml_vec = vml_to_vec(&exp_xml_string);
+            got_xml_vec = vml_to_vec(&got_xml_string);
+        } else {
+            exp_xml_vec = xml_to_vec(&exp_xml_string);
+            got_xml_vec = xml_to_vec(&got_xml_string);
+        }
 
         // Reorder randomized XML elements in some xlsx xml files to
         // allow comparison testing.
@@ -371,6 +378,21 @@ fn xml_to_vec(xml_string: &str) -> Vec<String> {
         xml_elements.push(element);
     }
     xml_elements
+}
+
+// Convert VML string/doc into a vector for comparison testing. Excel VML tends
+// to be less structured than other XML so it needs more massaging.
+pub(crate) fn vml_to_vec(vml_string: &str) -> Vec<String> {
+    let mut vml_string = vml_string.replace(['\r', '\n'], "");
+
+    let re = regex::Regex::new(r"\s+").unwrap();
+    vml_string = re.replace_all(&vml_string, " ").into();
+
+    vml_string = vml_string.replace("; ", ";");
+    vml_string = vml_string.replace('\'', "\"");
+    vml_string = vml_string.replace("<x:Anchor> ", "<x:Anchor>");
+
+    xml_to_vec(&vml_string)
 }
 
 // Re-order the elements in an vec of XML elements for comparison purposes. This

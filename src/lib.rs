@@ -130,6 +130,7 @@ mod styles;
 mod test_functions;
 mod theme;
 mod utility;
+mod vml;
 mod workbook;
 mod worksheet;
 mod xmlwriter;
