@@ -68,6 +68,11 @@ documentation and generally show how an individual function works.
 * app_tutorial3.rs - A simple program to write some data to an Excel
   spreadsheet using rust_xlsxwriter. Part 3 of a tutorial.
 
+* app_watermark.rs - An example of adding a worksheet watermark image using
+  the rust_xlsxwriter library. This is based on the method of putting an
+  image in the worksheet header as suggested in the Microsoft
+  documentation.
+
 * doc_enum_xlsxcolor.rs - Demonstrates using different XlsxColor enum
   values to set the color of some text in a worksheet.
 

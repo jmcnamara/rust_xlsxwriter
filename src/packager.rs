@@ -117,12 +117,17 @@ impl<W: Write + Seek> Packager<W> {
         self.write_vml_files(workbook)?;
         self.write_image_files(workbook)?;
 
-        for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
+        let mut image_index = 1;
+        let mut vml_index = 1;
+
+        for worksheet in workbook.worksheets.iter_mut() {
             if !worksheet.drawing_relationships.is_empty() {
-                self.write_drawing_rels_file(&worksheet.drawing_relationships, index + 1)?;
+                self.write_drawing_rels_file(&worksheet.drawing_relationships, image_index)?;
+                image_index += 1;
             }
             if !worksheet.vml_drawing_relationships.is_empty() {
-                self.write_vml_drawing_rels_file(&worksheet.vml_drawing_relationships, index + 1)?;
+                self.write_vml_drawing_rels_file(&worksheet.vml_drawing_relationships, vml_index)?;
+                vml_index += 1;
             }
         }
 
@@ -478,18 +483,18 @@ impl<W: Write + Seek> Packager<W> {
     // Write the image files.
     fn write_image_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut index = 1;
-        let mut unique_images = HashSet::new();
+        let mut unique_worksheet_images = HashSet::new();
         let mut unique_header_footer_images = HashSet::new();
 
         for worksheet in workbook.worksheets.iter_mut() {
             for (_, image) in worksheet.images.iter() {
-                if !unique_images.contains(&image.hash) {
+                if !unique_worksheet_images.contains(&image.hash) {
                     let filename =
                         format!("xl/media/image{index}.{}", image.image_type.extension());
                     self.zip.start_file(filename, self.zip_options)?;
 
                     self.zip.write_all(&image.data)?;
-                    unique_images.insert(image.hash);
+                    unique_worksheet_images.insert(image.hash);
                     index += 1;
                 }
             }

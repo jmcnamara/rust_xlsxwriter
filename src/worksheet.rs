@@ -3949,6 +3949,7 @@ impl Worksheet {
     /// | `&S`                 |               | Strikethrough         |
     /// | `&X`                 |               | Superscript           |
     /// | `&Y`                 |               | Subscript             |
+    /// | `&[Picture]` or `&G` | Images        | Picture/image         |
     /// | `&&`                 | Miscellaneous | Literal ampersand &   |
     ///
     /// Some of the placeholder variables have a long version like `&[Page]` and
@@ -5639,6 +5640,7 @@ impl Worksheet {
                 title: image.vml_name(),
                 rel_id,
                 position: image.vml_position(),
+                is_scaled: image.is_scaled(),
             };
 
             // Store the header/footer vml data.

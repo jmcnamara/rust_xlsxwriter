@@ -4,7 +4,7 @@
 //! An example of setting headers and footers in worksheets using the
 //! rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -36,32 +36,49 @@ fn main() -> Result<(), XlsxError> {
     worksheet2.set_footer("&LCurrent date: &D&RCurrent time: &T");
 
     // -----------------------------------------------------------------------
-    // This example shows how to use more than one font.
+    // This is an example of setting a header image.
     // -----------------------------------------------------------------------
-    let worksheet3 = workbook.add_worksheet().set_name("Mixed fonts")?;
+    let worksheet3 = workbook.add_worksheet().set_name("Images")?;
     worksheet3.set_view_page_layout();
     worksheet3.write_string_only(0, 0, "Some text")?;
 
-    worksheet3.set_header(r#"&C&"Courier New,Bold"Hello &"Arial,Italic"World"#);
-    worksheet3.set_footer(r#"&C&"Symbol"e&"Arial" = mc&X2"#);
+    let mut image = Image::new("examples/rust_logo.png")?;
+    image.set_scale_height(0.5);
+    image.set_scale_width(0.5);
+
+    worksheet3.set_header("&L&[Picture]");
+    worksheet3.set_header_image(&image, XlsxImagePosition::Left);
+
+    // Increase the top margin to 1.2 for clarity. The -1.0 values are ignored.
+    worksheet3.set_margins(-1.0, -1.0, 1.2, -1.0, -1.0, -1.0);
+
+    // -----------------------------------------------------------------------
+    // This example shows how to use more than one font.
+    // -----------------------------------------------------------------------
+    let worksheet4 = workbook.add_worksheet().set_name("Mixed fonts")?;
+    worksheet4.set_view_page_layout();
+    worksheet4.write_string_only(0, 0, "Some text")?;
+
+    worksheet4.set_header(r#"&C&"Courier New,Bold"Hello &"Arial,Italic"World"#);
+    worksheet4.set_footer(r#"&C&"Symbol"e&"Arial" = mc&X2"#);
 
     // -----------------------------------------------------------------------
     // Example of line wrapping.
     // -----------------------------------------------------------------------
-    let worksheet4 = workbook.add_worksheet().set_name("Word wrap")?;
-    worksheet4.set_view_page_layout();
-    worksheet4.write_string_only(0, 0, "Some text")?;
+    let worksheet5 = workbook.add_worksheet().set_name("Word wrap")?;
+    worksheet5.set_view_page_layout();
+    worksheet5.write_string_only(0, 0, "Some text")?;
 
-    worksheet4.set_header("&CHeading 1\nHeading 2");
+    worksheet5.set_header("&CHeading 1\nHeading 2");
 
     // -----------------------------------------------------------------------
     // Example of inserting a literal ampersand &.
     // -----------------------------------------------------------------------
-    let worksheet5 = workbook.add_worksheet().set_name("Ampersand")?;
-    worksheet5.set_view_page_layout();
-    worksheet5.write_string_only(0, 0, "Some text")?;
+    let worksheet6 = workbook.add_worksheet().set_name("Ampersand")?;
+    worksheet6.set_view_page_layout();
+    worksheet6.write_string_only(0, 0, "Some text")?;
 
-    worksheet5.set_header("&CCuriouser && Curiouser - Attorneys at Law");
+    worksheet6.set_header("&CCuriouser && Curiouser - Attorneys at Law");
 
     workbook.save("headers_footers.xlsx")?;
 

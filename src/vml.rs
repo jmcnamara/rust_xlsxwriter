@@ -208,7 +208,7 @@ impl Vml {
         self.write_imagedata(vml_info);
 
         // Write the o:lock element.
-        self.write_shape_lock();
+        self.write_shape_lock(vml_info);
 
         self.writer.xml_end_tag("v:shape");
     }
@@ -224,8 +224,12 @@ impl Vml {
     }
 
     // Write the <o:lock> element.
-    fn write_shape_lock(&mut self) {
-        let attributes = vec![("v:ext", "edit".to_string()), ("rotation", "t".to_string())];
+    fn write_shape_lock(&mut self, vml_info: &VmlInfo) {
+        let mut attributes = vec![("v:ext", "edit".to_string()), ("rotation", "t".to_string())];
+
+        if vml_info.is_scaled {
+            attributes.push(("aspectratio", "f".to_string()));
+        }
 
         self.writer.xml_empty_tag_attr("o:lock", &attributes);
     }
@@ -241,6 +245,7 @@ pub(crate) struct VmlInfo {
     pub(crate) title: String,
     pub(crate) rel_id: u32,
     pub(crate) position: String,
+    pub(crate) is_scaled: bool,
 }
 
 // -----------------------------------------------------------------------
@@ -264,6 +269,7 @@ mod tests {
             title: "red".to_string(),
             rel_id: 1,
             position: "LH".to_string(),
+            is_scaled: false,
         };
 
         vml.header_images.push(vml_info);
@@ -321,6 +327,7 @@ mod tests {
             title: "red".to_string(),
             rel_id: 1,
             position: "LH".to_string(),
+            is_scaled: false,
         };
 
         let vml_info2 = VmlInfo {
@@ -329,6 +336,7 @@ mod tests {
             title: "blue".to_string(),
             rel_id: 2,
             position: "CH".to_string(),
+            is_scaled: false,
         };
 
         vml.header_images.push(vml_info1);

@@ -524,7 +524,7 @@ impl Image {
     // Get the image width as used by header/footer VML.
     pub(crate) fn vml_width(&self) -> f64 {
         // Scale the height/width by the resolution, relative to 72dpi.
-        let mut width = self.width * 72.0 / self.width_dpi;
+        let mut width = self.width * 72.0 / self.width_dpi * self.scale_width;
 
         // Excel uses a rounding based around 72 and 96 dpi.
         width = width * 96.0 / 72.0 + 0.25;
@@ -534,7 +534,7 @@ impl Image {
     // Get the image height as used by header/footer VML.
     pub(crate) fn vml_height(&self) -> f64 {
         // Scale the height/width by the resolution, relative to 72dpi.
-        let mut height = self.height * 72.0 / self.height_dpi;
+        let mut height = self.height * 72.0 / self.height_dpi * self.scale_height;
 
         // Excel uses a rounding based around 72 and 96 dpi.
         height = height * 96.0 / 72.0 + 0.25;
@@ -544,6 +544,11 @@ impl Image {
     // Get the image short name as used by header/footer VML.
     pub(crate) fn vml_name(&self) -> String {
         self.vml_name.clone()
+    }
+
+    // Check if the image scale has changed. Mainly used by header/footer VML.
+    pub(crate) fn is_scaled(&self) -> bool {
+        self.scale_height != 1.0 || self.scale_width != 1.0
     }
 
     // Get the image position string as used by header/footer VML.
@@ -561,6 +566,16 @@ impl Image {
                 XlsxImagePosition::Center => "CF".to_string(),
             }
         }
+    }
+
+    /// Set an internal name used for header/footer images.
+    ///
+    /// This method sets an internal image name used by header/footer VML. It is
+    /// mainly used for completeness in testing. It isn't useful to the end user.
+    #[doc(hidden)]
+    pub fn set_vml_name(&mut self, name: &str) -> &mut Image {
+        self.vml_name = name.to_string();
+        self
     }
 
     // -----------------------------------------------------------------------
