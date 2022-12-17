@@ -17,7 +17,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let image = Image::new("tests/input/images/watermark.png")?;
 
     worksheet.set_header("&C&G");
-    worksheet.set_header_image(&image, XlsxImagePosition::Center);
+    worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
 
     worksheet.set_paper_size(9);
 

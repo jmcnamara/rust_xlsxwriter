@@ -277,6 +277,9 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_set_header.rs - Demonstrates setting the worksheet header.
 
+* doc_worksheet_set_header_image.rs - Demonstrates adding a header image to
+  a worksheet.
+
 * doc_worksheet_set_hidden.rs - Demonstrates hiding a worksheet.
 
 * doc_worksheet_set_landscape.rs - Demonstrates setting the worksheet page

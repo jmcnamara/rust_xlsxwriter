@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     image.set_scale_height(0.5);
 
     worksheet.set_header("&L&G");
-    worksheet.set_header_image(&image, XlsxImagePosition::Left);
+    worksheet.set_header_image(&image, XlsxImagePosition::Left)?;
 
     workbook.save(filename)?;
 

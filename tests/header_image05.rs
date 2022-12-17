@@ -19,8 +19,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_header("&L&G");
     worksheet.set_footer("&L&G");
-    worksheet.set_header_image(&image1, XlsxImagePosition::Left);
-    worksheet.set_footer_image(&image2, XlsxImagePosition::Left);
+    worksheet.set_header_image(&image1, XlsxImagePosition::Left)?;
+    worksheet.set_footer_image(&image2, XlsxImagePosition::Left)?;
 
     workbook.save(filename)?;
 

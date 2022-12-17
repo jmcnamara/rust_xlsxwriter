@@ -20,7 +20,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let image2 = Image::new("tests/input/images/blue.jpg")?;
 
     worksheet.set_header("&L&G");
-    worksheet.set_header_image(&image2, XlsxImagePosition::Left);
+    worksheet.set_header_image(&image2, XlsxImagePosition::Left)?;
 
     worksheet.insert_image(2, 1, &image1)?;
 

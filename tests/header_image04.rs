@@ -19,9 +19,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let image3 = Image::new("tests/input/images/yellow.jpg")?;
 
     worksheet.set_footer("&L&G&C&G&R&G");
-    worksheet.set_footer_image(&image1, XlsxImagePosition::Left);
-    worksheet.set_footer_image(&image2, XlsxImagePosition::Center);
-    worksheet.set_footer_image(&image3, XlsxImagePosition::Right);
+    worksheet.set_footer_image(&image1, XlsxImagePosition::Left)?;
+    worksheet.set_footer_image(&image2, XlsxImagePosition::Center)?;
+    worksheet.set_footer_image(&image3, XlsxImagePosition::Right)?;
 
     workbook.save(filename)?;
 

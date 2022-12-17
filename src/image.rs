@@ -462,12 +462,12 @@ impl Image {
     /// # use rust_xlsxwriter::{Image, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     let image = Image::new("examples/rust_logo.png")?;
-    /// #
-    /// #     assert_eq!(106.0, image.width());
-    /// #     assert_eq!(106.0, image.height());
-    /// #     assert_eq!(96.0, image.width_dpi());
-    /// #     assert_eq!(96.0, image.height_dpi());
+    ///     let image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///     assert_eq!(106.0, image.width());
+    ///     assert_eq!(106.0, image.height());
+    ///     assert_eq!(96.0, image.width_dpi());
+    ///     assert_eq!(96.0, image.height_dpi());
     /// #
     /// #     Ok(())
     /// # }
@@ -765,16 +765,19 @@ impl Image {
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
 
-/// TODO
+/// Enum to represent the image position in a header or footer. Used with the
+/// [worksheet.set_header_image()](crate::Worksheet::set_header_image) and
+/// [worksheet.set_footer_image()](crate::Worksheet::set_footer_image) methods.
+///
 #[derive(Clone, Debug)]
 pub enum XlsxImagePosition {
-    /// TODO
+    /// The image is positioned in the left section of the header/footer.
     Left,
 
-    /// TODO
+    /// The image is positioned in the center section of the header/footer.
     Center,
 
-    /// TODO
+    /// The image is positioned in the right section of the header/footer.
     Right,
 }
 

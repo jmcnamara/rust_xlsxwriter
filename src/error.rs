@@ -10,6 +10,10 @@ use std::fmt;
 #[derive(Debug)]
 /// Error values for the `rust_xlsxwriter` library.
 pub enum XlsxError {
+    /// A general parameter error that is raised when a parameter conflicts with
+    /// an Excel limit or syntax. The nature of the error in on the error string.
+    ParameterError(String),
+
     /// Error returned when a row or column argument exceeds Excel's limits of
     /// 1,048,576 rows and 16,384 columns for a worksheet.
     RowColumnLimitError,
@@ -76,6 +80,9 @@ impl Error for XlsxError {}
 impl fmt::Display for XlsxError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            XlsxError::ParameterError(error) => {
+                write!(f, "Parameter error: \"{error}\".")
+            }
             XlsxError::RowColumnLimitError => write!(
                 f,
                 "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)."

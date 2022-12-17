@@ -17,11 +17,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet1 = workbook.add_worksheet();
     worksheet1.set_header("&L&G");
-    worksheet1.set_header_image(&image1, XlsxImagePosition::Left);
+    worksheet1.set_header_image(&image1, XlsxImagePosition::Left)?;
 
     let worksheet2 = workbook.add_worksheet();
     worksheet2.set_header("&L&G");
-    worksheet2.set_header_image(&image2, XlsxImagePosition::Left);
+    worksheet2.set_header_image(&image2, XlsxImagePosition::Left)?;
 
     workbook.save(filename)?;
 

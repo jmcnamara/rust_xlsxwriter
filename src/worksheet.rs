@@ -4112,7 +4112,7 @@ impl Worksheet {
     /// src="https://rustxlsxwriter.github.io/images/worksheet_set_header.png">
     ///
     pub fn set_header(&mut self, header: &str) -> &mut Worksheet {
-        let header = header
+        let header_copy = header
             .replace("&[Tab]", "&A")
             .replace("&[Date]", "&D")
             .replace("&[File]", "&F")
@@ -4122,12 +4122,12 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        if header.chars().count() > 255 {
+        if header_copy.chars().count() > 255 {
             eprintln!("Header string exceeds Excel's limit of 255 characters.");
             return self;
         }
 
-        self.header = header;
+        self.header = header.to_string();
         self.page_setup_changed = true;
         self.head_footer_changed = true;
         self
@@ -4145,7 +4145,7 @@ impl Worksheet {
     /// * `footer` - The footer string with optional control characters.
     ///
     pub fn set_footer(&mut self, footer: &str) -> &mut Worksheet {
-        let footer = footer
+        let footer_copy = footer
             .replace("&[Tab]", "&A")
             .replace("&[Date]", "&D")
             .replace("&[File]", "&F")
@@ -4155,43 +4155,176 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        if footer.chars().count() > 255 {
+        if footer_copy.chars().count() > 255 {
             eprintln!("Footer string exceeds Excel's limit of 255 characters.");
             return self;
         }
 
-        self.footer = footer;
+        self.footer = footer.to_string();
         self.page_setup_changed = true;
         self.head_footer_changed = true;
         self
     }
 
-    /// TODO
+    /// Insert an image in a worksheet header.
+    ///
+    /// Insert an image in a worksheet header in one of the 3 sections supported
+    /// by Excel: Left, Center and Right. This needs to be preceded by a call to
+    /// [worksheet.set_header()](Worksheet::set_header) where a corresponding
+    /// `&[Picture]` element is added to the header formatting string such as
+    /// `"&L&[Picture]"`.
+    ///
+    /// # Arguments
+    ///
+    /// * `position` - The image position as defined by the [XlsxImagePosition]
+    ///   enum.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::ParameterError`] - Parameter error if there isn't a
+    ///   corresponding `&[Picture]`/`&[G]` variable in the header string.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a header image to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_header_image.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Scale the image so it fits in the header.
+    ///     let mut image = Image::new("examples/rust_logo.png")?;
+    /// #     image.set_scale_height(0.5);
+    /// #     image.set_scale_width(0.5);
+    ///
+    ///     // Insert the watermark image in the header.
+    ///     worksheet.set_header("&C&[Picture]");
+    ///     worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
+    ///
+    /// #     // Increase the top margin to 1.2 for clarity. The -1.0 values are ignored.
+    /// #     worksheet.set_margins(-1.0, -1.0, 1.2, -1.0, -1.0, -1.0);
+    /// #
+    /// #     // Set Page View mode so the watermark is visible.
+    /// #     worksheet.set_view_page_layout();
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_header_image.png">
+    ///
+    /// An example of adding a worksheet watermark image using the
+    /// rust_xlsxwriter library. This is based on the method of putting an image
+    /// in the worksheet header as suggested in the [Microsoft documentation].
+    ///
+    /// [Microsoft documentation]:
+    ///     https://support.microsoft.com/en-us/office/add-a-watermark-in-excel-a372182a-d733-484e-825c-18ddf3edf009
+    ///
+    /// ```
+    /// # // This code is available in examples/app_watermark.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let image = Image::new("examples/watermark.png")?;
+    ///
+    ///     // Insert the watermark image in the header.
+    ///     worksheet.set_header("&C&[Picture]");
+    ///     worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
+    /// #
+    /// #     // Set Page View mode so the watermark is visible.
+    /// #     worksheet.set_view_page_layout();
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("watermark.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/app_watermark.png">
+    ///
     pub fn set_header_image(
         &mut self,
         image: &Image,
         position: XlsxImagePosition,
-    ) -> &mut Worksheet {
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check that there is a matching  &[Picture]/&[G] variable in the
+        // header string.
+        if !self.verify_header_footer_image(&self.header, &position) {
+            let error = format!(
+                "No &[Picture] or &[G] variable in header string: '{}' for position = '{:?}'",
+                self.header, position
+            );
+            return Err(XlsxError::ParameterError(error));
+        }
+
         let mut image = image.clone();
         image.position = position.clone();
         image.is_header = true;
         self.header_footer_images[position as usize] = Some(image);
 
-        self
+        Ok(self)
     }
 
-    /// TODO
+    /// Insert an image in a worksheet footer.
+    ///
+    /// See the documentation for
+    /// [`set_header_image()`](Worksheet::set_header_image()) for more details.
+    ///
+    /// # Arguments
+    ///
+    /// * `position` - The image position as defined by the [XlsxImagePosition]
+    ///   enum.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::ParameterError`] - Parameter error if there isn't a
+    ///   corresponding `&[Picture]`/`&[G]` variable in the header string.
+    ///
     pub fn set_footer_image(
         &mut self,
         image: &Image,
         position: XlsxImagePosition,
-    ) -> &mut Worksheet {
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check that there is a matching  &[Picture]/&[G] variable in the
+        // footer string.
+        if !self.verify_header_footer_image(&self.footer, &position) {
+            let error = format!(
+                "No &[Picture] or &[G] variable in footer string: '{}' for position = '{:?}'",
+                self.footer, position
+            );
+            return Err(XlsxError::ParameterError(error));
+        }
+
         let mut image = image.clone();
         image.position = position.clone();
         image.is_header = false;
         self.header_footer_images[3 + position as usize] = Some(image);
 
-        self
+        Ok(self)
     }
 
     /// Set the page setup option to scale the header/footer with the document.
@@ -5876,6 +6009,30 @@ impl Worksheet {
             || self.header_footer_images[5].is_some()
     }
 
+    // Check that there is a header/footer &[Picture] variable in the correct
+    // position to match the corresponding image object.
+    fn verify_header_footer_image(&self, string: &str, position: &XlsxImagePosition) -> bool {
+        lazy_static! {
+            static ref LEFT: Regex = Regex::new(r"(&[L].*)(:?&[CR])?").unwrap();
+            static ref RIGHT: Regex = Regex::new(r"(&[R].*)(:?&[LC])?").unwrap();
+            static ref CENTER: Regex = Regex::new(r"(&[C].*)(:?&[LR])?").unwrap();
+        }
+
+        let caps = match position {
+            XlsxImagePosition::Left => LEFT.captures(string),
+            XlsxImagePosition::Right => RIGHT.captures(string),
+            XlsxImagePosition::Center => CENTER.captures(string),
+        };
+
+        match caps {
+            Some(caps) => {
+                let segment = caps.get(1).unwrap().as_str();
+                segment.contains("&[Picture]") || segment.contains("&G")
+            }
+            None => false,
+        }
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -6764,12 +6921,34 @@ impl Worksheet {
 
     // Write the <oddHeader> element.
     fn write_odd_header(&mut self) {
-        self.writer.xml_data_element("oddHeader", &self.header);
+        let header = self
+            .header
+            .replace("&[Tab]", "&A")
+            .replace("&[Date]", "&D")
+            .replace("&[File]", "&F")
+            .replace("&[Page]", "&P")
+            .replace("&[Path]", "&Z")
+            .replace("&[Time]", "&T")
+            .replace("&[Pages]", "&N")
+            .replace("&[Picture]", "&G");
+
+        self.writer.xml_data_element("oddHeader", &header);
     }
 
     // Write the <oddFooter> element.
     fn write_odd_footer(&mut self) {
-        self.writer.xml_data_element("oddFooter", &self.footer);
+        let footer = self
+            .footer
+            .replace("&[Tab]", "&A")
+            .replace("&[Date]", "&D")
+            .replace("&[File]", "&F")
+            .replace("&[Page]", "&P")
+            .replace("&[Path]", "&Z")
+            .replace("&[Time]", "&T")
+            .replace("&[Pages]", "&N")
+            .replace("&[Picture]", "&G");
+
+        self.writer.xml_data_element("oddFooter", &footer);
     }
 
     // Write the <drawing> element.
@@ -7132,6 +7311,26 @@ mod tests {
         );
 
         assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn verify_header_footer_images() {
+        let worksheet = Worksheet::new();
+
+        let strings = [
+            ("", XlsxImagePosition::Left, false),
+            ("&L&[Picture]", XlsxImagePosition::Left, true),
+            ("&R&[Picture]", XlsxImagePosition::Right, true),
+            ("&C&[Picture]", XlsxImagePosition::Center, true),
+            ("&R&[Picture]", XlsxImagePosition::Left, false),
+            ("&L&[Picture]&C&[Picture]", XlsxImagePosition::Left, true),
+            ("&L&[Picture]&C&[Picture]", XlsxImagePosition::Center, true),
+            ("&L&[Picture]&C&[Picture]", XlsxImagePosition::Right, false),
+        ];
+
+        for (string, position, exp) in strings {
+            assert_eq!(exp, worksheet.verify_header_footer_image(string, &position));
+        }
     }
 
     #[test]

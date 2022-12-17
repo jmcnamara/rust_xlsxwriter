@@ -47,7 +47,7 @@ fn main() -> Result<(), XlsxError> {
     image.set_scale_width(0.5);
 
     worksheet3.set_header("&L&[Picture]");
-    worksheet3.set_header_image(&image, XlsxImagePosition::Left);
+    worksheet3.set_header_image(&image, XlsxImagePosition::Left)?;
 
     // Increase the top margin to 1.2 for clarity. The -1.0 values are ignored.
     worksheet3.set_margins(-1.0, -1.0, 1.2, -1.0, -1.0, -1.0);

@@ -24,7 +24,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let image = Image::new("tests/input/images/red.jpg")?;
 
     worksheet3.set_header("&L&G");
-    worksheet3.set_header_image(&image, XlsxImagePosition::Left);
+    worksheet3.set_header_image(&image, XlsxImagePosition::Left)?;
 
     workbook.save(filename)?;
 

@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
-//! An example of adding a worksheet watermark image using the rust_xlsxwriter
-//! library. This is based on the method of putting an image in the worksheet
-//! header as suggested in the Microsoft documentation.
+//! The following example demonstrates adding a header image to a worksheet.
 
 use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
 
@@ -14,17 +12,23 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    let image = Image::new("examples/watermark.png")?;
+    // Scale the image so it fits in the header.
+    let mut image = Image::new("examples/rust_logo.png")?;
+    image.set_scale_height(0.5);
+    image.set_scale_width(0.5);
 
     // Insert the watermark image in the header.
     worksheet.set_header("&C&[Picture]");
     worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
 
+    // Increase the top margin to 1.2 for clarity. The -1.0 values are ignored.
+    worksheet.set_margins(-1.0, -1.0, 1.2, -1.0, -1.0, -1.0);
+
     // Set Page View mode so the watermark is visible.
     worksheet.set_view_page_layout();
 
     // Save the file to disk.
-    workbook.save("watermark.xlsx")?;
+    workbook.save("worksheet.xlsx")?;
 
     Ok(())
 }
