@@ -5,6 +5,20 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2022-12-17
+
+### Added
+
+- Added support for images in headers/footers via the
+  [`worksheet.set_header_image()`] and [`worksheet.set_footer_image()`] methods.
+
+  See the [Headers and Footers] and [Adding a watermark] examples in the user guide.
+
+[Headers and Footers]: https://rustxlsxwriter.github.io/examples/headers.html
+[Adding a watermark]: https://rustxlsxwriter.github.io/examples/watermark.html
+[`worksheet.set_footer_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_footer_image
+[`worksheet.set_header_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_header_image
+
 
 ## [0.16.0] - 2022-12-09
 
