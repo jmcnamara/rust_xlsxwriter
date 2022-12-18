@@ -5,6 +5,14 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.1] - 2022-12-18
+
+### Fixed
+
+- Fixes issue where header image files became corrupt during incremental saves.
+  Also fixes similar issues in some formatting code.
+
+
 ## [0.17.0] - 2022-12-17
 
 ### Added
