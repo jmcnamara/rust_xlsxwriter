@@ -17,6 +17,7 @@ pub struct Styles<'a> {
     border_count: u16,
     num_format_count: u16,
     has_hyperlink_style: bool,
+    is_rich_string_style: bool,
 }
 
 impl<'a> Styles<'a> {
@@ -32,6 +33,7 @@ impl<'a> Styles<'a> {
         border_count: u16,
         num_format_count: u16,
         has_hyperlink_style: bool,
+        is_rich_string_style: bool,
     ) -> Styles {
         let writer = XMLWriter::new();
 
@@ -43,6 +45,7 @@ impl<'a> Styles<'a> {
             border_count,
             num_format_count,
             has_hyperlink_style,
+            is_rich_string_style,
         }
     }
 
@@ -116,8 +119,12 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <font> element.
-    fn write_font(&mut self, xf_format: &Format) {
-        self.writer.xml_start_tag("font");
+    pub(crate) fn write_font(&mut self, xf_format: &Format) {
+        if self.is_rich_string_style {
+            self.writer.xml_start_tag("rPr");
+        } else {
+            self.writer.xml_start_tag("font");
+        }
 
         if xf_format.bold {
             self.writer.xml_empty_tag("b");
@@ -160,7 +167,11 @@ impl<'a> Styles<'a> {
         // Write the scheme element.
         self.write_font_scheme(xf_format);
 
-        self.writer.xml_end_tag("font");
+        if self.is_rich_string_style {
+            self.writer.xml_end_tag("rPr");
+        } else {
+            self.writer.xml_end_tag("font");
+        }
     }
 
     // Write the <sz> element.
@@ -190,7 +201,11 @@ impl<'a> Styles<'a> {
     fn write_font_name(&mut self, xf_format: &Format) {
         let attributes = vec![("val", xf_format.font_name.clone())];
 
-        self.writer.xml_empty_tag_attr("name", &attributes);
+        if self.is_rich_string_style {
+            self.writer.xml_empty_tag_attr("rFont", &attributes);
+        } else {
+            self.writer.xml_empty_tag_attr("name", &attributes);
+        }
     }
 
     // Write the <family> element.
@@ -769,7 +784,7 @@ mod tests {
         xf_format.set_border_index(0, true);
 
         let xf_formats = vec![xf_format];
-        let mut styles = Styles::new(&xf_formats, 1, 2, 1, 0, false);
+        let mut styles = Styles::new(&xf_formats, 1, 2, 1, 0, false, false);
 
         styles.assemble_xml_file();
 

@@ -366,6 +366,7 @@ impl<W: Write + Seek> Packager<W> {
             workbook.border_count,
             workbook.num_format_count,
             workbook.has_hyperlink_style,
+            false,
         );
 
         self.zip.start_file("xl/styles.xml", self.zip_options)?;

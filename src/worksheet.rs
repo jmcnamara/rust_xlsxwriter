@@ -17,6 +17,7 @@ use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo};
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::shared_strings_table::SharedStringsTable;
+use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::XMLWriter;
 use crate::{utility, Image, XlsxColor, XlsxImagePosition};
@@ -794,6 +795,31 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_string(row, col, string, None)
+    }
+
+    /// TODO
+    pub fn write_rich_string_only(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        segments: &[(&Format, &str)],
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let string = self.get_write_rich_string(segments)?;
+
+        self.store_string(row, col, &string, None)
+    }
+
+    /// TODO
+    pub fn write_rich_string(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        segments: &[(&Format, &str)],
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let string = self.get_write_rich_string(segments)?;
+
+        self.store_string(row, col, &string, Some(format))
     }
 
     /// Write a formatted formula to a worksheet cell.
@@ -5457,6 +5483,45 @@ impl Worksheet {
         self.hyperlinks.insert((row, col), hyperlink);
 
         Ok(self)
+    }
+
+    // A rich string is handled in Excel like any other shared string except
+    // that it has inline font markup within the string. To generate the require
+    // font xml we use an instance of the Style struct.
+    fn get_write_rich_string(&mut self, segments: &[(&Format, &str)]) -> Result<String, XlsxError> {
+        let mut first_segment = true;
+
+        // Create a Style struct object to generate the font xml.
+        let xf_formats: Vec<Format> = vec![];
+        let mut styler = Styles::new(&xf_formats, 0, 0, 0, 0, false, true);
+
+        for (format, string) in segments {
+            let attributes =
+                if string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']) {
+                    vec![("xml:space", "preserve".to_string())]
+                } else {
+                    vec![]
+                };
+
+            // First segment doesn't require a font run for the default format.
+            if format.is_default() && first_segment {
+                styler.writer.xml_start_tag("r");
+                styler
+                    .writer
+                    .xml_data_element_attr("t", string, &attributes);
+                styler.writer.xml_end_tag("r");
+            } else {
+                styler.writer.xml_start_tag("r");
+                styler.write_font(format);
+                styler
+                    .writer
+                    .xml_data_element_attr("t", string, &attributes);
+                styler.writer.xml_end_tag("r");
+            }
+            first_segment = false;
+        }
+
+        Ok(styler.writer.read_to_string2())
     }
 
     // Insert a cell value into the worksheet data table structure.

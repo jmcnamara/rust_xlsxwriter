@@ -415,6 +415,7 @@ pub struct Format {
     pub(crate) has_font: bool,
     pub(crate) has_fill: bool,
     pub(crate) has_border: bool,
+    default_format_key: String,
 
     // Number properties.
     pub(crate) num_format: String,
@@ -498,7 +499,7 @@ impl Format {
     /// }
     /// ```
     pub fn new() -> Format {
-        Format {
+        let mut format = Format {
             xf_index: 0,
             font_index: 0,
             fill_index: 0,
@@ -547,7 +548,12 @@ impl Format {
             indent: 0,
             shrink: false,
             reading_direction: 0,
-        }
+            default_format_key: "".to_string(),
+        };
+
+        format.default_format_key = format.format_key();
+
+        format
     }
 
     // -----------------------------------------------------------------------
@@ -680,6 +686,11 @@ impl Format {
     // Check if the format has protection properties set.
     pub(crate) fn has_protection(&self) -> bool {
         self.hidden || !self.locked
+    }
+
+    // Check if the format is in the default/unmodified condition.
+    pub(crate) fn is_default(&self) -> bool {
+        self.default_format_key == self.format_key()
     }
 
     // -----------------------------------------------------------------------

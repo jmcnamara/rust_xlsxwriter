@@ -58,7 +58,11 @@ impl SharedStrings {
             let preserve_whitespace =
                 string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']);
 
-            self.writer.xml_si_element(string, preserve_whitespace);
+            if string.starts_with("<r>") && string.ends_with("</r>") {
+                self.writer.xml_rich_si_element(string);
+            } else {
+                self.writer.xml_si_element(string, preserve_whitespace);
+            }
         }
     }
 }

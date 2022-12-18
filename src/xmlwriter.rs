@@ -36,6 +36,10 @@ impl XMLWriter {
         str::from_utf8(self.xmlfile.get_ref()).unwrap()
     }
 
+    pub(crate) fn read_to_string2(&mut self) -> String {
+        str::from_utf8(self.xmlfile.get_ref()).unwrap().to_string()
+    }
+
     // Reset the memory buffer, usually between saves.
     pub(crate) fn reset(&mut self) {
         let buf: Vec<u8> = Vec::with_capacity(2048);
@@ -126,7 +130,7 @@ impl XMLWriter {
         .expect("Couldn't write to file");
     }
 
-    // Optimized tag writer for shared strings `<si>` elements.
+    // Optimized tag writer for shared strings <si> elements.
     pub(crate) fn xml_si_element(&mut self, string: &str, preserve_whitespace: bool) {
         if preserve_whitespace {
             write!(
@@ -143,6 +147,11 @@ impl XMLWriter {
             )
             .expect("Couldn't write to file");
         }
+    }
+
+    // Write <si> element for rich strings.
+    pub(crate) fn xml_rich_si_element(&mut self, string: &str) {
+        write!(&mut self.xmlfile, r#"<si>{string}</si>"#).expect("Couldn't write to file");
     }
 
     // Write the theme string to the theme file.
