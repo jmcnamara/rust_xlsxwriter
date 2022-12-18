@@ -152,23 +152,26 @@ impl Workbook {
     ///
     pub fn new() -> Workbook {
         let writer = XMLWriter::new();
-        let default_format = Format::new();
-        let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
 
-        Workbook {
+        let mut workbook = Workbook {
             writer,
-            worksheets: vec![],
-            xf_indices,
-            xf_formats: vec![default_format],
             font_count: 0,
+            active_tab: 0,
             fill_count: 0,
+            first_sheet: 0,
             border_count: 0,
             num_format_count: 0,
-            active_tab: 0,
-            first_sheet: 0,
-            defined_names: vec![],
             has_hyperlink_style: false,
-        }
+            worksheets: vec![],
+            xf_formats: vec![],
+            defined_names: vec![],
+            xf_indices: HashMap::new(),
+        };
+
+        // Initialize the workbook with the same function used to reset it.
+        Self::reset(&mut workbook);
+
+        workbook
     }
 
     /// Add a new worksheet to a workbook.
@@ -620,6 +623,11 @@ impl Workbook {
     /// ```
     ///
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<(), XlsxError> {
+        // Some test code to test double saves. This should be turned into a
+        // feature or a config item.
+        // let file = std::fs::File::create(path.as_ref().clone())?;
+        // self.save_internal(file)?;
+
         let file = std::fs::File::create(path)?;
         self.save_internal(file)?;
         Ok(())
@@ -695,14 +703,29 @@ impl Workbook {
     // Internal function/methods.
     // -----------------------------------------------------------------------
 
-    // Internal function to prepare the workbook and other component files for
-    // writing to the xlsx file.
-    fn save_internal<W: Write + Seek>(&mut self, writer: W) -> Result<(), XlsxError> {
-        // Reset workbook and worksheet xml writers between saves.
+    // Reset workbook between saves.
+    fn reset(&mut self) {
         self.writer.reset();
+
+        // Reset the format index handler.
+        let default_format = Format::new();
+        self.xf_indices = HashMap::from([(default_format.format_key(), 0)]);
+        self.xf_formats = vec![default_format];
+        self.font_count = 0;
+        self.fill_count = 0;
+        self.border_count = 0;
+        self.num_format_count = 0;
+
         for worksheet in self.worksheets.iter_mut() {
             worksheet.reset();
         }
+    }
+
+    // Internal function to prepare the workbook and other component files for
+    // writing to the xlsx file.
+    fn save_internal<W: Write + Seek>(&mut self, writer: W) -> Result<(), XlsxError> {
+        // Reset workbook and worksheet state data between saves.
+        self.reset();
 
         // Clear any global metadata arrays between saves.
         self.defined_names = vec![];

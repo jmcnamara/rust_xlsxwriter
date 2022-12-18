@@ -18,7 +18,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_url_with_options(0, 0, "http://www.perl.org/", "", "", Some(&format))?;
 
     workbook.save(filename)?;
-    workbook.save(filename)?; // Test double save.
 
     Ok(())
 }

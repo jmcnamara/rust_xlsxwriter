@@ -5992,6 +5992,8 @@ impl Worksheet {
         self.hyperlink_relationships.clear();
         self.image_relationships.clear();
         self.drawing_relationships.clear();
+        self.vml_drawing_relationships.clear();
+        self.header_footer_vml_info.clear();
     }
 
     // Check if any external relationships are required.
