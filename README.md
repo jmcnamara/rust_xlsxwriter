@@ -85,6 +85,7 @@ features are:
 - Page/Printing Setup support.
 - Merged ranges.
 - Worksheet PNG/JPEG/GIF/BMP images.
+- Rich multi-format strings.
 
 Rust_xlsxwriter is under active development and new features will be added
 frequently.
