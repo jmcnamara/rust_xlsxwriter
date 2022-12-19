@@ -223,7 +223,7 @@ mod tests {
 
         app.assemble_xml_file();
 
-        let got = app.writer.read_to_string();
+        let got = app.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(
@@ -271,7 +271,7 @@ mod tests {
 
         app.assemble_xml_file();
 
-        let got = app.writer.read_to_string();
+        let got = app.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(
@@ -321,7 +321,7 @@ mod tests {
 
         app.assemble_xml_file();
 
-        let got = app.writer.read_to_string();
+        let got = app.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

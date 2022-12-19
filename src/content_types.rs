@@ -179,7 +179,7 @@ mod tests {
         content_types.add_share_strings();
         content_types.assemble_xml_file();
 
-        let got = content_types.writer.read_to_string();
+        let got = content_types.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

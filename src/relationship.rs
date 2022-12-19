@@ -121,7 +121,7 @@ mod tests {
 
         rels.assemble_xml_file();
 
-        let got = rels.writer.read_to_string();
+        let got = rels.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

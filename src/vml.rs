@@ -278,7 +278,7 @@ mod tests {
 
         vml.assemble_xml_file();
 
-        let got = vml.writer.read_to_string();
+        let got = vml.writer.read_to_str();
         let got = vml_to_vec(&got);
 
         let expected = vml_to_vec(
@@ -346,7 +346,7 @@ mod tests {
 
         vml.assemble_xml_file();
 
-        let got = vml.writer.read_to_string();
+        let got = vml.writer.read_to_str();
         let got = vml_to_vec(&got);
 
         let expected = vml_to_vec(

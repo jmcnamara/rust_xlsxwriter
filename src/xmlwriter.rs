@@ -32,11 +32,11 @@ impl XMLWriter {
 
     // Helper function to read back stored xml data for tests.
     #[allow(dead_code)]
-    pub(crate) fn read_to_string(&mut self) -> &str {
+    pub(crate) fn read_to_str(&mut self) -> &str {
         str::from_utf8(self.xmlfile.get_ref()).unwrap()
     }
 
-    pub(crate) fn read_to_string2(&mut self) -> String {
+    pub(crate) fn read_to_string(&mut self) -> String {
         str::from_utf8(self.xmlfile.get_ref()).unwrap().to_string()
     }
 
@@ -321,7 +321,7 @@ mod tests {
         let mut writer = XMLWriter::default();
         writer.xml_declaration();
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -332,7 +332,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_start_tag("foo");
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
     #[test]
@@ -343,7 +343,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_start_tag_attr("foo", &attributes);
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -355,7 +355,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_start_tag_attr("foo", &attributes);
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -367,7 +367,7 @@ mod tests {
 
         writer.xml_end_tag("foo");
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -379,7 +379,7 @@ mod tests {
 
         writer.xml_empty_tag("foo");
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -392,7 +392,7 @@ mod tests {
 
         writer.xml_empty_tag_attr("foo", &attributes);
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -403,7 +403,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_data_element("foo", "bar");
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -415,7 +415,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "bar", &attributes);
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -427,7 +427,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "&<>\"", &attributes);
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -439,7 +439,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "Ы&<>\"", &attributes);
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -450,7 +450,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_si_element("foo", false);
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 
@@ -461,7 +461,7 @@ mod tests {
         let mut writer = XMLWriter::new();
         writer.xml_si_element("    foo", true);
 
-        let got = writer.read_to_string();
+        let got = writer.read_to_str();
         assert_eq!(got, expected);
     }
 }

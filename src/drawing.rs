@@ -349,7 +349,7 @@ mod tests {
 
         drawing.assemble_xml_file();
 
-        let got = drawing.writer.read_to_string();
+        let got = drawing.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

@@ -94,7 +94,7 @@ mod tests {
 
         shared_strings.assemble_xml_file(&string_table);
 
-        let got = shared_strings.writer.read_to_string();
+        let got = shared_strings.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(
@@ -129,7 +129,7 @@ mod tests {
 
         shared_strings.assemble_xml_file(&string_table);
 
-        let got = shared_strings.writer.read_to_string();
+        let got = shared_strings.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(

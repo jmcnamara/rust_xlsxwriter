@@ -5521,7 +5521,7 @@ impl Worksheet {
             first_segment = false;
         }
 
-        Ok(styler.writer.read_to_string2())
+        Ok(styler.writer.read_to_string())
     }
 
     // Insert a cell value into the worksheet data table structure.
@@ -7359,7 +7359,7 @@ mod tests {
 
         worksheet.assemble_xml_file(&mut string_table);
 
-        let got = worksheet.writer.read_to_string();
+        let got = worksheet.writer.read_to_str();
         let got = xml_to_vec(&got);
 
         let expected = xml_to_vec(
