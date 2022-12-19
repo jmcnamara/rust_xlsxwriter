@@ -5,6 +5,20 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2022-12-19
+
+### Added
+
+- Added support for "rich" strings with multiple font formats via
+  [`worksheet.write_rich_string_only()`] and [`worksheet.write_rich_string()`].
+  For example strings like "This is **bold** and this is *italic*".
+
+  See also the [Rich strings example] in the user guide.
+
+[Rich strings example]: https://rustxlsxwriter.github.io/examples/rich_strings.html
+[`worksheet.write_rich_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_rich_string
+[`worksheet.write_rich_string_only()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_rich_string_only
+
 ## [0.17.1] - 2022-12-18
 
 ### Fixed
