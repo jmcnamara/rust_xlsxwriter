@@ -797,27 +797,237 @@ impl Worksheet {
         self.store_string(row, col, string, None)
     }
 
-    /// TODO
+    /// Write a "rich" string with multiple formats to a worksheet cell.
+    ///
+    /// The `write_rich_string_only()` method is used to write strings with
+    /// multiple font formats within the string. For example strings like "This
+    /// is **bold** and this is *italic*". For strings with a single format you
+    /// can use the more common [`write_string()`](Worksheet::write_string)
+    /// method.
+    ///
+    /// The basic rule is to break the string into pairs of [`Format`] and
+    /// [`str`] fragments. So if we look at the above string again:
+    ///
+    /// * This is **bold** and this is *italic*
+    ///
+    /// The would be broken down into 4 fragments:
+    ///
+    /// ```text
+    ///      default: |This is |
+    ///      bold:    |bold|
+    ///      default: | and this is |
+    ///      italic:  |italic|
+    /// ```
+    ///
+    /// This should then be converted to an array of [`Format`] and [`str`]
+    /// tuples:
+    ///
+    /// ```text
+    ///     let segments = [
+    ///        (&default, "This is "),
+    ///        (&red,     "red"),
+    ///        (&default, " and this is "),
+    ///        (&blue,    "blue"),
+    ///     ];
+    /// ```
+    ///
+    /// See the full example below.
+    ///
+    /// For the default format segments you can use
+    /// [`Format::default()`](Format::default).
+    ///
+    /// Note, only the Font elements of the [`Format`] are used by Excel in rich
+    /// strings. For example it isn't possible in Excel to highlight part of the
+    /// string with a yellow background. It is possible to have a yellow
+    /// background for the entire cell or to format other cell properties using
+    /// an additional [`Format`] object and the
+    /// [`write_rich_string()`](Worksheet::write_rich_string) method, see below.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `rich_string` - An array reference of `(&Format, &str)` tuples. See
+    ///   the Errors section below for the restrictions.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    /// * [`XlsxError::ParameterError`] - The following error cases will raise a
+    ///   `ParameterError` error:
+    ///   * If any of the str elements is empty. Excel doesn't allow this.
+    ///   * If there isn't at least one `(&Format, &str)` tuple element in the
+    ///     `rich_string` parameter array. Strictly speaking there should be at
+    ///     least 2 tuples to make a rich string, otherwise it is just a normal
+    ///     formatted string. However, Excel allows it.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing a "rich" string with multiple
+    /// formats.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_rich_string_only.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.set_column_width(0, 30)?;
+    /// #
+    ///     // Add some formats to use in the rich strings.
+    ///     let default = Format::default();
+    ///     let red = Format::new().set_font_color(XlsxColor::Red);
+    ///     let blue = Format::new().set_font_color(XlsxColor::Blue);
+    ///
+    ///     // Write a Rich strings with multiple formats.
+    ///     let segments = [
+    ///         (&default, "This is "),
+    ///         (&red,     "red"),
+    ///         (&default, " and this is "),
+    ///         (&blue,    "blue"),
+    ///     ];
+    ///     worksheet.write_rich_string_only(0, 0, &segments)?;
+    ///
+    ///     // It is possible, and idiomatic, to use slices as the string segments.
+    ///     let text = "This is blue and this is red";
+    ///     let segments = [
+    ///         (&default, &text[..8]),
+    ///         (&blue,    &text[8..12]),
+    ///         (&default, &text[12..25]),
+    ///         (&red,     &text[25..]),
+    ///     ];
+    ///     worksheet.write_rich_string_only(1, 0, &segments)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string_only.png">
+    ///
     pub fn write_rich_string_only(
         &mut self,
         row: RowNum,
         col: ColNum,
-        segments: &[(&Format, &str)],
+        rich_string: &[(&Format, &str)],
     ) -> Result<&mut Worksheet, XlsxError> {
-        let string = self.get_write_rich_string(segments)?;
+        let string = self.get_write_rich_string(rich_string)?;
 
         self.store_string(row, col, &string, None)
     }
 
-    /// TODO
+    /// Write a "rich" string with multiple formats to a worksheet cell, with an
+    /// additional cell format.
+    ///
+    /// The `write_rich_string()` method is used to write strings with multiple
+    /// font formats within the string. For example strings like "This is
+    /// **bold** and this is *italic*". It also allows you to add an additional
+    /// [`Format`] to the cell so that you can, for example, center the text in
+    /// the cell.
+    ///
+    /// The syntax for creating and using `(&Format, &str)` tuples to create the
+    /// rich string is shown above in
+    /// [`write_rich_string_only()`](Worksheet::write_rich_string_only).
+    ///
+    /// For strings with a single format you can use the more common
+    /// [`write_string()`](Worksheet::write_string) method.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `rich_string` - An array reference of `(&Format, &str)` tuples. See
+    ///   the Errors section below for the restrictions.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    /// * [`XlsxError::ParameterError`] - The following error cases will raise a
+    ///   `ParameterError` error:
+    ///   * If any of the str elements is empty. Excel doesn't allow this.
+    ///   * If there isn't at least one `(&Format, &str)` tuple element in the
+    ///     `rich_string` parameter array. Strictly speaking there should be at
+    ///     least 2 tuples to make a rich string, otherwise it is just a normal
+    ///     formatted string. However, Excel allows it.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing a "rich" string with multiple
+    /// formats, and an additional cell format.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_rich_string.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.set_column_width(0, 30)?;
+    /// #
+    ///     // Add some formats to use in the rich strings.
+    ///     let default = Format::default();
+    ///     let red = Format::new().set_font_color(XlsxColor::Red);
+    ///     let blue = Format::new().set_font_color(XlsxColor::Blue);
+    ///
+    ///     // Write a rich strings with multiple formats.
+    ///     let segments = [
+    ///         (&default, "This is "),
+    ///         (&red,     "red"),
+    ///         (&default, " and this is "),
+    ///         (&blue,    "blue"),
+    ///     ];
+    ///     worksheet.write_rich_string_only(0, 0, &segments)?;
+    ///
+    ///     // Add an extra format to use for the entire cell.
+    ///     let center = Format::new().set_align(XlsxAlign::Center);
+    ///
+    ///     // Write the rich string again with the cell format.
+    ///     worksheet.write_rich_string(2, 0, &segments, &center)?;
+    ///
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string.png">
+    ///
     pub fn write_rich_string(
         &mut self,
         row: RowNum,
         col: ColNum,
-        segments: &[(&Format, &str)],
+        rich_string: &[(&Format, &str)],
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let string = self.get_write_rich_string(segments)?;
+        let string = self.get_write_rich_string(rich_string)?;
 
         self.store_string(row, col, &string, Some(format))
     }
@@ -5489,13 +5699,24 @@ impl Worksheet {
     // that it has inline font markup within the string. To generate the require
     // font xml we use an instance of the Style struct.
     fn get_write_rich_string(&mut self, segments: &[(&Format, &str)]) -> Result<String, XlsxError> {
-        let mut first_segment = true;
+        // Check that there is at least one segment tuple.
+        if segments.is_empty() {
+            let error = "Rich string must contain at least 1 (&Format, &str) tuple.";
+            return Err(XlsxError::ParameterError(error.to_string()));
+        }
 
         // Create a Style struct object to generate the font xml.
         let xf_formats: Vec<Format> = vec![];
         let mut styler = Styles::new(&xf_formats, 0, 0, 0, 0, false, true);
 
+        let mut first_segment = true;
         for (format, string) in segments {
+            // Excel doesn't allow empty string segments in a rich string.
+            if string.is_empty() {
+                let error = "Strings in rich string (&Format, &str) tuples cannot be blank.";
+                return Err(XlsxError::ParameterError(error.to_string()));
+            }
+
             let attributes =
                 if string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']) {
                     vec![("xml:space", "preserve".to_string())]
@@ -7398,6 +7619,34 @@ mod tests {
         for (string, position, exp) in strings {
             assert_eq!(exp, worksheet.verify_header_footer_image(string, &position));
         }
+    }
+
+    #[test]
+    fn set_header_image() {
+        let mut worksheet = Worksheet::new();
+
+        let image = Image::new("tests/input/images/red.jpg").unwrap();
+        worksheet.set_header("&R&G");
+
+        // Test inserting an image without a matching header position.
+        let result = worksheet.set_header_image(&image, XlsxImagePosition::Left);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+    }
+
+    #[test]
+    fn rich_string() {
+        let mut worksheet = Worksheet::new();
+
+        // Test an empty array.
+        let segments = [];
+        let result = worksheet.write_rich_string_only(0, 0, &segments);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+
+        // Test an empty string.
+        let default = Format::default();
+        let segments = [(&default, "")];
+        let result = worksheet.write_rich_string_only(0, 0, &segments);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
     }
 
     #[test]

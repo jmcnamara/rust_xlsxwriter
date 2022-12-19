@@ -25,8 +25,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let segments = [(&default, "ab"), (&bold, "cd"), (&default, "efg")];
     worksheet.write_rich_string(2, 0, &segments, &center)?;
 
-    //&worksheet.write_rich_string_string(2, 0, "ab", bold, "cd", "efg", format)??;
-
     workbook.save(filename)?;
 
     Ok(())

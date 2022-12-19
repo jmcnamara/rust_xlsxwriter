@@ -22,7 +22,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(1, 0, "Bar", &italic)?;
 
     let segments = [(&default, "abcd"), (&italic, "ef"), (&default, "g")];
-
     worksheet.write_rich_string_only(2, 0, &segments)?;
 
     workbook.save(filename)?;
