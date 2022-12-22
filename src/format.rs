@@ -1209,8 +1209,9 @@ impl Format {
 
     /// Set the Format font super/subscript property.
     ///
-    /// Note, this method is currently of limited use until the library
-    /// implements multi-format "rich" strings.
+    /// This feature is generally only useful when using a font in a "rich"
+    /// string. See
+    /// [`write_rich_string_only()`](Worksheet::write_rich_string_only).
     ///
     /// # Arguments
     ///
