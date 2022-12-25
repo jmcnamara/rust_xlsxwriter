@@ -99,6 +99,17 @@ pub fn quote_sheetname(sheetname: &str) -> String {
     sheetname
 }
 
+// Clone and strip the leading '=' from formulas, if present.
+pub(crate) fn formula_to_string(formula: &str) -> String {
+    let mut formula = formula.to_string();
+
+    if formula.starts_with('=') {
+        formula.remove(0);
+    }
+
+    formula
+}
+
 //
 // Tests.
 //

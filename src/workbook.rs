@@ -16,7 +16,7 @@ use crate::packager::Packager;
 use crate::packager::PackagerOptions;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
-use crate::{utility, NUM_IMAGE_FORMATS};
+use crate::{utility, DefinedName, DefinedNameType, NUM_IMAGE_FORMATS};
 use crate::{XlsxColor, XlsxPattern};
 
 /// The Workbook struct represents an Excel file in it's entirety. It is the
@@ -102,6 +102,7 @@ pub struct Workbook {
     active_tab: u16,
     first_sheet: u16,
     defined_names: Vec<DefinedName>,
+    user_defined_names: Vec<DefinedName>,
 }
 
 impl Default for Workbook {
@@ -165,6 +166,7 @@ impl Workbook {
             worksheets: vec![],
             xf_formats: vec![],
             defined_names: vec![],
+            user_defined_names: vec![],
             xf_indices: HashMap::new(),
         };
 
@@ -699,6 +701,30 @@ impl Workbook {
         }
     }
 
+    /// TODO
+    pub fn define_name(&mut self, name: &str, formula: &str) -> &mut Workbook {
+        let mut defined_name = DefinedName::new();
+
+        match name.find('!') {
+            Some(position) => {
+                defined_name.quoted_sheet_name = name[0..position].to_string();
+                defined_name.name = name[position + 1..].to_string();
+                defined_name.name_type = DefinedNameType::Local;
+            }
+            None => {
+                defined_name.name = name.to_string();
+                defined_name.name_type = DefinedNameType::Global;
+            }
+        }
+
+        defined_name.range = utility::formula_to_string(formula);
+        defined_name.set_sort_name();
+
+        self.user_defined_names.push(defined_name);
+
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Internal function/methods.
     // -----------------------------------------------------------------------
@@ -707,7 +733,6 @@ impl Workbook {
     fn reset(&mut self) {
         self.writer.reset();
 
-        // Reset the format index handler.
         let default_format = Format::new();
         self.xf_indices = HashMap::from([(default_format.format_key(), 0)]);
         self.xf_formats = vec![default_format];
@@ -726,9 +751,6 @@ impl Workbook {
     fn save_internal<W: Write + Seek>(&mut self, writer: W) -> Result<(), XlsxError> {
         // Reset workbook and worksheet state data between saves.
         self.reset();
-
-        // Clear any global metadata arrays between saves.
-        self.defined_names = vec![];
 
         // Ensure that there is at least one worksheet in the workbook.
         if self.worksheets.is_empty() {
@@ -1016,18 +1038,22 @@ impl Workbook {
     ) -> Result<PackagerOptions, XlsxError> {
         package_options.num_worksheets = self.worksheets.len() as u16;
 
+        let mut defined_names = self.user_defined_names.clone();
+        let mut sheet_names: HashMap<String, u16> = HashMap::new();
+
         // Iterate over the worksheets to capture workbook and update the
         // package options metadata.
         for (sheet_index, worksheet) in self.worksheets.iter().enumerate() {
             let sheet_name = worksheet.name.clone();
             let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
+            sheet_names.insert(sheet_name.clone(), sheet_index as u16);
 
             // Check for duplicate sheet names, which aren't allowed by Excel.
             if package_options.worksheet_names.contains(&sheet_name) {
                 return Err(XlsxError::SheetnameReused(sheet_name));
             }
 
-            package_options.worksheet_names.push(sheet_name);
+            package_options.worksheet_names.push(sheet_name.clone());
 
             if worksheet.uses_string_table {
                 package_options.has_sst_table = true;
@@ -1045,50 +1071,26 @@ impl Workbook {
                 package_options.num_drawings += 1;
             }
 
-            // Store any user defined print areas which are a category of defined name.
-            if !worksheet.print_area.is_empty() {
-                let defined_name = DefinedName {
-                    name: "_xlnm.Print_Area".to_string(),
-                    range: format!("{}!{}", quoted_sheet_name, worksheet.print_area),
-                    index: sheet_index as u16,
-                };
+            // Store the autofilter areas which are a category of defined name.
+            if worksheet.autofilter_defined_name.in_use {
+                let mut defined_name = worksheet.autofilter_defined_name.clone();
+                defined_name.initialize(&quoted_sheet_name);
+                defined_names.push(defined_name);
+            }
 
-                self.defined_names.push(defined_name);
-                package_options
-                    .defined_names
-                    .push(format!("{}!Print_Area", quoted_sheet_name));
+            // Store any user defined print areas which are a category of defined name.
+            if worksheet.print_area_defined_name.in_use {
+                let mut defined_name = worksheet.print_area_defined_name.clone();
+                defined_name.initialize(&quoted_sheet_name);
+                defined_names.push(defined_name);
             }
 
             // Store any user defined print repeat rows/columns which are a
             // category of defined name.
-            if !worksheet.repeat_row_range.is_empty() || !worksheet.repeat_col_range.is_empty() {
-                let range;
-
-                if !worksheet.repeat_row_range.is_empty() && !worksheet.repeat_col_range.is_empty()
-                {
-                    range = format!(
-                        "{}!{},{}!{}",
-                        quoted_sheet_name,
-                        worksheet.repeat_col_range,
-                        quoted_sheet_name,
-                        worksheet.repeat_row_range
-                    );
-                } else if !worksheet.repeat_row_range.is_empty() {
-                    range = format!("{}!{}", quoted_sheet_name, worksheet.repeat_row_range);
-                } else {
-                    range = format!("{}!{}", quoted_sheet_name, worksheet.repeat_col_range);
-                }
-
-                let defined_name = DefinedName {
-                    name: "_xlnm.Print_Titles".to_string(),
-                    range: range.clone(),
-                    index: sheet_index as u16,
-                };
-
-                self.defined_names.push(defined_name);
-                package_options
-                    .defined_names
-                    .push(format!("{}!Print_Titles", quoted_sheet_name));
+            if worksheet.repeat_row_cols_defined_name.in_use {
+                let mut defined_name = worksheet.repeat_row_cols_defined_name.clone();
+                defined_name.initialize(&quoted_sheet_name);
+                defined_names.push(defined_name);
             }
 
             // Set the used image types.
@@ -1098,6 +1100,39 @@ impl Workbook {
                 }
             }
         }
+
+        // Map the sheet name and associated index so that we can map a sheet
+        // reference in a Local/Sheet defined name to a worksheet index.
+        for defined_name in defined_names.iter_mut() {
+            let sheet_name = defined_name.unquoted_sheet_name();
+
+            if !sheet_name.is_empty() {
+                match sheet_names.get(&sheet_name) {
+                    Some(index) => defined_name.index = *index,
+                    None => {
+                        let error = format!(
+                            "Unknown worksheet name '{}' in defined name '{}'",
+                            sheet_name, defined_name.name
+                        );
+                        return Err(XlsxError::ParameterError(error));
+                    }
+                }
+            }
+        }
+
+        // Excel stores defined names in a sorted order.
+        defined_names.sort_by_key(|n| (n.sort_name.clone(), n.range.clone()));
+
+        // Map the non-Global defined names to App.xml entries.
+        for defined_name in defined_names.iter() {
+            println!(">>>| {}", defined_name.sort_name);
+            let app_name = defined_name.app_name();
+            if !app_name.is_empty() {
+                package_options.defined_names.push(app_name);
+            }
+        }
+
+        self.defined_names = defined_names;
 
         Ok(package_options)
     }
@@ -1238,10 +1273,18 @@ impl Workbook {
         self.writer.xml_start_tag("definedNames");
 
         for defined_name in self.defined_names.iter() {
-            let attributes = vec![
-                ("name", defined_name.name.to_string()),
-                ("localSheetId", defined_name.index.to_string()),
-            ];
+            let mut attributes = vec![("name", defined_name.name())];
+
+            match defined_name.name_type {
+                DefinedNameType::Global => {}
+                _ => {
+                    attributes.push(("localSheetId", defined_name.index.to_string()));
+                }
+            }
+
+            if let DefinedNameType::Autofilter = defined_name.name_type {
+                attributes.push(("hidden", "1".to_string()));
+            }
 
             self.writer
                 .xml_data_element_attr("definedName", &defined_name.range, &attributes);
@@ -1264,13 +1307,6 @@ impl Workbook {
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
-
-#[derive(Clone)]
-struct DefinedName {
-    name: String,
-    range: String,
-    index: u16,
-}
 
 // -----------------------------------------------------------------------
 // Tests.

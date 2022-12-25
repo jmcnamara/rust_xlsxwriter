@@ -118,9 +118,10 @@ pub struct Worksheet {
     pub(crate) first_sheet: bool,
     pub(crate) uses_string_table: bool,
     pub(crate) has_dynamic_arrays: bool,
-    pub(crate) print_area: String,
-    pub(crate) repeat_row_range: String,
-    pub(crate) repeat_col_range: String,
+    pub(crate) print_area_defined_name: DefinedName,
+    pub(crate) repeat_row_cols_defined_name: DefinedName,
+    pub(crate) autofilter_defined_name: DefinedName,
+    pub(crate) autofilter_area: String,
     pub(crate) xf_formats: Vec<Format>,
     pub(crate) has_hyperlink_style: bool,
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
@@ -284,9 +285,10 @@ impl Worksheet {
             first_sheet: false,
             uses_string_table: false,
             has_dynamic_arrays: false,
-            print_area: "".to_string(),
-            repeat_row_range: "".to_string(),
-            repeat_col_range: "".to_string(),
+            print_area_defined_name: DefinedName::new(),
+            repeat_row_cols_defined_name: DefinedName::new(),
+            autofilter_defined_name: DefinedName::new(),
+            autofilter_area: "".to_string(),
             table: HashMap::new(),
             col_names: HashMap::new(),
             dimensions,
@@ -3206,6 +3208,45 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// TODO
+    pub fn set_autofilter(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // The print range is the entire worksheet, therefore it is the same
+        // as the default, so we can ignore it.
+        if first_row == 0 && first_col == 0 && last_row == ROW_MAX - 1 && last_col == COL_MAX - 1 {
+            return Ok(self);
+        }
+
+        // Store the defined name information.
+        self.autofilter_defined_name.in_use = true;
+        self.autofilter_defined_name.name_type = DefinedNameType::Autofilter;
+        self.autofilter_defined_name.first_row = first_row;
+        self.autofilter_defined_name.first_col = first_col;
+        self.autofilter_defined_name.last_row = last_row;
+        self.autofilter_defined_name.last_col = last_col;
+
+        self.autofilter_area = utility::cell_range(first_row, first_col, last_row, last_col);
+
+        Ok(self)
+    }
+
     /// Write a user defined result to a worksheet formula cell.
     ///
     /// The `rust_xlsxwriter` library doesn’t calculate the result of a formula
@@ -5122,29 +5163,19 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-        // The print range format can change depending of whether it contains a
-        // full range of row or columns, or not. We need to handle each of the 4
-        // possible cases.
+        // The print range is the entire worksheet, therefore it is the same
+        // as the default, so we can ignore it.
         if first_row == 0 && first_col == 0 && last_row == ROW_MAX - 1 && last_col == COL_MAX - 1 {
-            // The print range is the entire worksheet, therefore it is the same
-            // as the default, so we can ignore it.
             return Ok(self);
-        } else if first_col == 0 && last_col == COL_MAX - 1 {
-            // The print range is the entire column range, therefore we create a
-            // row only range.
-            self.print_area = format!("${}:${}", first_row + 1, last_row + 1);
-        } else if first_row == 0 && last_row == ROW_MAX - 1 {
-            // The print range is the entire row range, therefore we create a
-            // column only range.
-            self.print_area = format!(
-                "${}:${}",
-                utility::col_to_name(first_col),
-                utility::col_to_name(last_col)
-            );
-        } else {
-            // Otherwise handle it as a stand cell range.
-            self.print_area = utility::cell_range_abs(first_row, first_col, last_row, last_col);
         }
+
+        // Store the defined name information.
+        self.print_area_defined_name.in_use = true;
+        self.print_area_defined_name.name_type = DefinedNameType::PrintArea;
+        self.print_area_defined_name.first_row = first_row;
+        self.print_area_defined_name.first_col = first_col;
+        self.print_area_defined_name.last_row = last_row;
+        self.print_area_defined_name.last_col = last_col;
 
         self.page_setup_changed = true;
         Ok(self)
@@ -5219,8 +5250,11 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-        // Set the print range as a row only range.
-        self.repeat_row_range = format!("${}:${}", first_row + 1, last_row + 1);
+        // Store the range data.
+        self.repeat_row_cols_defined_name.in_use = true;
+        self.repeat_row_cols_defined_name.name_type = DefinedNameType::PrintTitles;
+        self.repeat_row_cols_defined_name.first_row = first_row;
+        self.repeat_row_cols_defined_name.last_row = last_row;
 
         self.page_setup_changed = true;
         Ok(self)
@@ -5296,12 +5330,11 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-        // Set the print range as a column only range.
-        self.repeat_col_range = format!(
-            "${}:${}",
-            utility::col_to_name(first_col),
-            utility::col_to_name(last_col)
-        );
+        // Store the defined name information.
+        self.repeat_row_cols_defined_name.in_use = true;
+        self.repeat_row_cols_defined_name.name_type = DefinedNameType::PrintTitles;
+        self.repeat_row_cols_defined_name.first_col = first_col;
+        self.repeat_row_cols_defined_name.last_col = last_col;
 
         self.page_setup_changed = true;
         Ok(self)
@@ -6350,6 +6383,11 @@ impl Worksheet {
         // Write the sheetData element.
         self.write_sheet_data(string_table);
 
+        // Write the autoFilter element.
+        if !self.autofilter_area.is_empty() {
+            self.write_auto_filter();
+        }
+
         // Write the mergeCells element.
         if !self.merged_ranges.is_empty() {
             self.write_merge_cells();
@@ -6763,6 +6801,13 @@ impl Worksheet {
         attributes.push(("verticalDpi", "200".to_string()));
 
         self.writer.xml_empty_tag_attr("pageSetup", &attributes);
+    }
+
+    // Write the <autoFilter> element.
+    fn write_auto_filter(&mut self) {
+        let attributes = vec![("ref", self.autofilter_area.clone())];
+
+        self.writer.xml_empty_tag_attr("autoFilter", &attributes);
     }
 
     // Write out all the row and cell data in the worksheet data table.
@@ -7556,6 +7601,171 @@ enum HyperlinkType {
     Url,
     Internal,
     File,
+}
+
+// Struct to hold and transform data for the various defined names variants:
+// user defined names, autofilters, print titles and print areas.
+#[derive(Clone)]
+pub(crate) struct DefinedName {
+    pub(crate) in_use: bool,
+    pub(crate) name: String,
+    pub(crate) sort_name: String,
+    pub(crate) range: String,
+    pub(crate) quoted_sheet_name: String,
+    pub(crate) index: u16,
+    pub(crate) name_type: DefinedNameType,
+    pub(crate) first_row: RowNum,
+    pub(crate) first_col: ColNum,
+    pub(crate) last_row: RowNum,
+    pub(crate) last_col: ColNum,
+}
+
+impl DefinedName {
+    pub(crate) fn new() -> DefinedName {
+        DefinedName {
+            in_use: false,
+            name: "".to_string(),
+            sort_name: "".to_string(),
+            range: "".to_string(),
+            quoted_sheet_name: "".to_string(),
+            index: 0,
+            name_type: DefinedNameType::Global,
+            first_row: ROW_MAX,
+            first_col: COL_MAX,
+            last_row: 0,
+            last_col: 0,
+        }
+    }
+
+    pub(crate) fn initialize(&mut self, sheet_name: &str) {
+        self.quoted_sheet_name = sheet_name.to_string();
+        self.set_range();
+        self.set_sort_name();
+    }
+
+    // Get the version of the defined name required by the App.xml file. Global
+    // and Autofilter variants return the empty string and are ignored.
+    pub(crate) fn app_name(&self) -> String {
+        match self.name_type {
+            DefinedNameType::Local => format!("{}!{}", self.quoted_sheet_name, self.name),
+            DefinedNameType::PrintArea => format!("{}!Print_Area", self.quoted_sheet_name),
+            DefinedNameType::Autofilter => "".to_string(),
+            DefinedNameType::PrintTitles => format!("{}!Print_Titles", self.quoted_sheet_name),
+            DefinedNameType::Global => {
+                if self.range.contains('!') {
+                    self.name.clone()
+                } else {
+                    "".to_string()
+                }
+            }
+        }
+    }
+
+    pub(crate) fn name(&self) -> String {
+        match self.name_type {
+            DefinedNameType::PrintArea => "_xlnm.Print_Area".to_string(),
+            DefinedNameType::Autofilter => "_xlnm._FilterDatabase".to_string(),
+            DefinedNameType::PrintTitles => "_xlnm.Print_Titles".to_string(),
+            _ => self.name.clone(),
+        }
+    }
+
+    pub(crate) fn unquoted_sheet_name(&self) -> String {
+        if self.quoted_sheet_name.starts_with('\'') && self.quoted_sheet_name.ends_with('\'') {
+            self.quoted_sheet_name[1..self.quoted_sheet_name.len() - 1].to_string()
+        } else {
+            self.quoted_sheet_name.clone()
+        }
+    }
+
+    // The defined names are stored in a sorted order based on lowercase
+    // and modified versions of the actual defined name.
+    pub(crate) fn set_sort_name(&mut self) {
+        let mut sort_name = match self.name_type {
+            DefinedNameType::PrintArea => "Print_Area{}".to_string(),
+            DefinedNameType::Autofilter => "_FilterDatabase{}".to_string(),
+            DefinedNameType::PrintTitles => "Print_Titles".to_string(),
+            _ => self.name.clone(),
+        };
+
+        sort_name = sort_name.replace('\'', "");
+        self.sort_name = sort_name.to_lowercase();
+    }
+
+    pub(crate) fn set_range(&mut self) {
+        match self.name_type {
+            DefinedNameType::Autofilter | DefinedNameType::PrintArea => {
+                let range;
+                if self.first_col == 0 && self.last_col == COL_MAX - 1 {
+                    // The print range is the entire column range, therefore we
+                    // create a row only range.
+                    range = format!("${}:${}", self.first_row + 1, self.last_row + 1);
+                } else if self.first_row == 0 && self.last_row == ROW_MAX - 1 {
+                    // The print range is the entire row range, therefore we
+                    // create a column only range.
+                    range = format!(
+                        "${}:${}",
+                        utility::col_to_name(self.first_col),
+                        utility::col_to_name(self.last_col)
+                    );
+                } else {
+                    // Otherwise handle it as a standard cell range.
+                    range = utility::cell_range_abs(
+                        self.first_row,
+                        self.first_col,
+                        self.last_row,
+                        self.last_col,
+                    );
+                }
+
+                self.range = format!("{}!{}", self.quoted_sheet_name, range);
+            }
+            DefinedNameType::PrintTitles => {
+                let mut range = "".to_string();
+
+                if self.first_col != COL_MAX || self.last_col != 0 {
+                    // Repeat columns.
+                    range = format!(
+                        "{}!${}:${}",
+                        self.quoted_sheet_name,
+                        utility::col_to_name(self.first_col),
+                        utility::col_to_name(self.last_col)
+                    );
+                }
+
+                if self.first_row != ROW_MAX || self.last_row != 0 {
+                    // Repeat rows.
+                    let row_range = format!(
+                        "{}!${}:${}",
+                        self.quoted_sheet_name,
+                        self.first_row + 1,
+                        self.last_row + 1
+                    );
+
+                    if range.is_empty() {
+                        // The range is rows only.
+                        range = row_range;
+                    } else {
+                        // Excel stores combined repeat rows and columns as a
+                        // comma separated list.
+                        range = format!("{range},{row_range}");
+                    }
+                }
+
+                self.range = range;
+            }
+            _ => {}
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) enum DefinedNameType {
+    Autofilter,
+    Global,
+    Local,
+    PrintArea,
+    PrintTitles,
 }
 
 // -----------------------------------------------------------------------
