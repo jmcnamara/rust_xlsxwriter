@@ -12,11 +12,23 @@ documentation and generally show how an individual function works.
 * app_array_formula.rs - Example of how to use the rust_xlsxwriter to write
   simple array formulas.
 
+* app_autofilter.rs - An example of how to create autofilters with the
+  rust_xlsxwriter library.. An autofilter is a way of adding drop down
+  lists to the headers of a 2D range of worksheet data. This allows users
+  to filter the data based on simple criteria so that some data is shown
+  and some is hidden. Note, adding filter criteria isn't currently
+  supported. That will be added in an upcoming version.
+
 * app_autofit.rs - An example of using a simulated Column Autofit using the
   rust_xlsxwriter library.
 
 * app_colors.rs - A demonstration of the RGB and Theme colors palettes
   available in the rust_xlsxwriter library.
+
+* app_defined_name.rs - Example of how to create defined names using the
+  rust_xlsxwriter library. This functionality is used to define user
+  friendly variable names to represent a value, a single cell,	or a range
+  of cells in a workbook.
 
 * app_demo.rs - A simple, getting started, example of some of the features
   of the rust_xlsxwriter library.
@@ -53,6 +65,9 @@ documentation and generally show how an individual function works.
   worksheets using the rust_xlsxwriter library.
 
 * app_perf_test.rs - Simple performance test for rust_xlsxwriter.
+
+* app_rich_strings.rs - An example of using the rust_xlsxwriter library to
+  write "rich" multi-format strings in worksheet cells.
 
 * app_right_to_left.rs - Example of using rust_xlsxwriter to create a
   workbook with the default worksheet and cell text direction changed from
@@ -237,6 +252,9 @@ documentation and generally show how an individual function works.
 * doc_working_with_formulas_syntax.rs - Demonstrates some common formula
   syntax errors.
 
+* doc_worksheet_autofilter.rs - Demonstrates setting a simple autofilter in
+  a worksheet.
+
 * doc_worksheet_insert_image_with_offset.rs - This example shows how to add
   an image to a worksheet at an offset within the cell.
 
@@ -382,6 +400,12 @@ documentation and generally show how an individual function works.
 * doc_worksheet_write_number_only.rs - Demonstrates writing unformatted
   numbers to an Excel worksheet. Any numeric type that will convert
   [`Into`] f64 can be transferred to Excel.
+
+* doc_worksheet_write_rich_string.rs - Demonstrates writing a "rich" string
+  with multiple formats, and an additional cell format.
+
+* doc_worksheet_write_rich_string_only.rs - Demonstrates writing a "rich"
+  string with multiple formats.
 
 * doc_worksheet_write_string.rs - Demonstrates setting different formatting
   for numbers in an Excel worksheet.

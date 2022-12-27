@@ -91,6 +91,8 @@
 //! - Merged ranges.
 //! - Worksheet PNG/JPEG/GIF/BMP images.
 //! - Rich multi-format strings.
+//! - Defined names.
+//! - Autofilters.
 //!
 //! Rust_xlsxwriter is under active development and new features will be added
 //! frequently. See the [rust_xlsxwriter GitHub] for details.

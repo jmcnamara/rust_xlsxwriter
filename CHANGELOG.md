@@ -5,6 +5,27 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0] - 2022-12-27
+
+### Added
+
+- Added support for created defined variable names at a workbook and worksheet
+  level via [`workbook.define_name()`].
+
+  See also [Using defined names] in the user guide.
+
+- Added initial support for autofilters via [`worksheet.autofilter()`].
+
+  Note, adding filter criteria isn't currently supported. That will be added in
+  an upcoming version. See also [Adding Autofilters] in the user guide.
+
+
+[Adding Autofilters]: https://rustxlsxwriter.github.io/examples/autofilter.html
+[Using defined names]: https://rustxlsxwriter.github.io/examples/defined_names.html
+[`worksheet.autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofilter
+[`workbook.define_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.define_name
+
+
 ## [0.18.0] - 2022-12-19
 
 ### Added
