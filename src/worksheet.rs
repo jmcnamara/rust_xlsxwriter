@@ -3208,8 +3208,72 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
-    pub fn set_autofilter(
+    /// Set the autofilter area in the worksheet.
+    ///
+    /// The `autofilter()` method allows an autofilter to be added to a
+    /// worksheet. An autofilter is a way of adding drop down lists to the
+    /// headers of a 2D range of worksheet data. This allows users to filter the
+    /// data based on simple criteria so that some data is shown and some is
+    /// hidden.
+    ///
+    /// Note, this version of the library doesn't support adding filter
+    /// conditions. That will be added in an upcoming version.
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting a simple autofilter in a
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_autofilter.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some header titles.
+    ///     worksheet.write_string_only(0, 0, "Region")?;
+    ///     worksheet.write_string_only(0, 1, "Count")?;
+    ///
+    ///     // Write some test data.
+    ///     for row in 1..9 {
+    ///         worksheet.write_string_only(row as u32, 0, "East")?;
+    ///         worksheet.write_number_only(row as u32, 1, row * 100)?;
+    ///     }
+    ///
+    ///     // Set the autofilter.
+    ///     worksheet.autofilter(0, 0, 8, 1)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_autofilter.png">
+    ///
+    pub fn autofilter(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
@@ -3226,12 +3290,6 @@ impl Worksheet {
         // Check order of first/last values.
         if first_row > last_row || first_col > last_col {
             return Err(XlsxError::RowColumnOrderError);
-        }
-
-        // The print range is the entire worksheet, therefore it is the same
-        // as the default, so we can ignore it.
-        if first_row == 0 && first_col == 0 && last_row == ROW_MAX - 1 && last_col == COL_MAX - 1 {
-            return Ok(self);
         }
 
         // Store the defined name information.

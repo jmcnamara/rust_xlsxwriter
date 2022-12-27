@@ -1211,7 +1211,7 @@ impl Format {
     ///
     /// This feature is generally only useful when using a font in a "rich"
     /// string. See
-    /// [`write_rich_string_only()`](Worksheet::write_rich_string_only).
+    /// [`write_rich_string_only()`](crate::Worksheet::write_rich_string_only).
     ///
     /// # Arguments
     ///

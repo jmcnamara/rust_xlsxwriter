@@ -14,7 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let _worksheet = workbook.add_worksheet().set_name("sheet One")?;
 
-    workbook.define_name("Sales", r"='sheet One'!$G$1:$H$10");
+    workbook.define_name("Sales", r"='sheet One'!$G$1:$H$10")?;
 
     workbook.save(filename)?;
 

@@ -652,8 +652,8 @@ impl Workbook {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates creating a simple workbook to a Vec<u8>
-    /// buffer.
+    /// The following example demonstrates creating a simple workbook to a
+    /// `Vec<u8>` buffer.
     ///
     /// ```
     /// # // This code is available in examples/doc_workbook_save_to_buffer.rs
@@ -701,10 +701,124 @@ impl Workbook {
         }
     }
 
-    /// TODO
-    pub fn define_name(&mut self, name: &str, formula: &str) -> &mut Workbook {
+    /// Create a defined name in the workbook to use as a variable.
+    ///
+    /// The `define_name()` method is used to defined a variable name that can
+    /// be used to represent a value, a single cell or a range of cells in a
+    /// workbook. These are sometimes referred to as a "Named Ranges".
+    ///
+    /// Defined names are generally used to simplify or clarify formulas by
+    /// using descriptive variable names. For example:
+    ///
+    /// ```text
+    ///     // Global workbook name.
+    ///     workbook.define_name("Exchange_rate", "=0.96")?;
+    ///     worksheet.write_formula_only(0, 0, "=Exchange_rate")?;
+    /// ```
+    ///
+    /// A name defined like this is "global" to the workbook and can be used in
+    /// any worksheet in the workbook.  It is also possible to define a
+    /// local/worksheet name by prefixing it with the sheet name using the
+    /// syntax `"sheetname!defined_name"`:
+    ///
+    /// ```text
+    ///     // Local worksheet name.
+    ///     workbook.define_name('Sheet2!Sales', '=Sheet2!$G$1:$G$10')?;
+    /// ```
+    ///
+    /// See the full example below.
+    ///
+    /// Note, Excel has limitations on names used in defined names. For example
+    /// it must start with a letter or underscore and cannot contain a space or
+    /// any of the characters: `,/*[]:\"'`. It also cannot look like an Excel
+    /// range such as `A1`, `XFD12345` or `R1C1`. If in doubt it best to test
+    /// the name in Excel first.
+    ///
+    /// For local defined names sheet name must exist (at the time of saving)
+    /// and if the sheet name contains spaces or special characters you must
+    /// follow the Excel convention and enclose it in single quotes:
+    ///
+    /// ```text
+    ///     workbook.define_name("'New Data'!Sales", ""=Sheet2!$G$1:$G$10")?;
+    /// ```
+    ///
+    /// The rules for names in Excel are explained in the Microsoft Office
+    /// documentation on how to [Define and use names in
+    /// formulas](https://support.microsoft.com/en-us/office/define-and-use-names-in-formulas-4d0f13ac-53b7-422e-afd2-abd7ff379c64)
+    /// and subsections.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The variable name to define.
+    /// * `formula` - The formula, value or range that the name defines..
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::ParameterError`] - The following Excel error cases will
+    ///   raise a `ParameterError` error:
+    ///   * If the name doesn't start with a letter or underscore.
+    ///   * If the name contains `,/*[]:\"'` or `space`.
+    ///
+    /// # Examples
+    ///
+    /// Example of how to create defined names using the rust_xlsxwriter
+    /// library.
+    ///
+    /// This functionality is used to define user friendly variable names to
+    /// represent a value, a single cell,  or a range of cells in a workbook.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_defined_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add two worksheets to the workbook.
+    /// #     let _ = workbook.add_worksheet();
+    /// #     let _ = workbook.add_worksheet();
+    /// #
+    ///     // Define some global/workbook names.
+    ///     workbook.define_name("Exchange_rate", "=0.96")?;
+    ///     workbook.define_name("Sales", "=Sheet1!$G$1:$H$10")?;
+    ///
+    ///     // Define a local/worksheet name. Over-rides the "Sales" name above.
+    ///     workbook.define_name("Sheet2!Sales", "=Sheet2!$G$1:$G$10")?;
+    ///
+    /// #     // Write some text in the file and one of the defined names in a formula.
+    /// #     for worksheet in workbook.worksheets_mut() {
+    /// #         worksheet.set_column_width(0, 45)?;
+    /// #         worksheet.write_string_only(0, 0, "This worksheet contains some defined names.")?;
+    /// #         worksheet.write_string_only(1, 0, "See Formulas -> Name Manager above.")?;
+    /// #         worksheet.write_string_only(2, 0, "Example formula in cell B3 ->")?;
+    /// #
+    /// #         worksheet.write_formula_only(2, 1, "=Exchange_rate")?;
+    /// #     }
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("defined_name.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/app_defined_name1.png">
+    ///
+    /// Here is the output in the Excel Name Manager. Note that there is a
+    /// Global/Workbook "Sales" variable name and a Local/Worksheet version.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/app_defined_name2.png">
+    ///
+    pub fn define_name(&mut self, name: &str, formula: &str) -> Result<&mut Workbook, XlsxError> {
         let mut defined_name = DefinedName::new();
 
+        // Match Global/Workbook or Local/Worksheet defined names.
         match name.find('!') {
             Some(position) => {
                 defined_name.quoted_sheet_name = name[0..position].to_string();
@@ -717,12 +831,37 @@ impl Workbook {
             }
         }
 
+        // Excel requires that the name starts with a letter or underscore.
+        // Also, backspace is allowed but undocumented by Excel.
+        if !defined_name.name.chars().next().unwrap().is_alphabetic()
+            && !defined_name.name.starts_with('_')
+            && !defined_name.name.starts_with('\\')
+        {
+            let error = format!(
+                "Name '{}' must start with a letter or underscore in Excel",
+                defined_name.name
+            );
+            return Err(XlsxError::ParameterError(error));
+        }
+
+        // Excel also prohibits certain characters in the name.
+        if defined_name
+            .name
+            .contains([' ', ',', '/', '*', '[', ']', ':', '"', '\''])
+        {
+            let error = format!(
+                "Name '{}' cannot contain any of the characters `,/*[]:\"'` or `space` in Excel",
+                defined_name.name
+            );
+            return Err(XlsxError::ParameterError(error));
+        }
+
         defined_name.range = utility::formula_to_string(formula);
         defined_name.set_sort_name();
 
         self.user_defined_names.push(defined_name);
 
-        self
+        Ok(self)
     }
 
     // -----------------------------------------------------------------------
@@ -1125,7 +1264,6 @@ impl Workbook {
 
         // Map the non-Global defined names to App.xml entries.
         for defined_name in defined_names.iter() {
-            println!(">>>| {}", defined_name.sort_name);
             let app_name = defined_name.app_name();
             if !app_name.is_empty() {
                 package_options.defined_names.push(app_name);
@@ -1315,7 +1453,7 @@ impl Workbook {
 mod tests {
 
     use super::Workbook;
-    use crate::test_functions::xml_to_vec;
+    use crate::{test_functions::xml_to_vec, XlsxError};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -1346,5 +1484,23 @@ mod tests {
         );
 
         assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn define_name() {
+        let mut workbook = Workbook::default();
+
+        // Test invalid defined names.
+        let names = vec![
+            ".foo",    // Invalid start character.
+            "foo bar", // Space in name
+            "Foo,",    // Other invalid characters.
+            "Foo/", "Foo[", "Foo]", "Foo'", "Foo\"bar", "Foo:", "Foo*",
+        ];
+
+        for name in names {
+            let result = workbook.define_name(name, "");
+            assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+        }
     }
 }

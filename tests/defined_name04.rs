@@ -14,12 +14,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let _worksheet = workbook.add_worksheet();
 
-    workbook.define_name("\\__", "=Sheet1!$A$1");
-    workbook.define_name("a3f6", "=Sheet1!$A$2");
-    workbook.define_name("afoo.bar", "=Sheet1!$A$3");
-    workbook.define_name("étude", "=Sheet1!$A$4");
-    workbook.define_name("eésumé", "=Sheet1!$A$5");
-    workbook.define_name("a", "=Sheet1!$A$6");
+    workbook.define_name("\\__", "=Sheet1!$A$1")?;
+    workbook.define_name("a3f6", "=Sheet1!$A$2")?;
+    workbook.define_name("afoo.bar", "=Sheet1!$A$3")?;
+    workbook.define_name("étude", "=Sheet1!$A$4")?;
+    workbook.define_name("eésumé", "=Sheet1!$A$5")?;
+    workbook.define_name("a", "=Sheet1!$A$6")?;
 
     workbook.save(filename)?;
 

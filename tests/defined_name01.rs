@@ -17,7 +17,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet1.write_string_only(0, 5, "Filter")?;
     worksheet1.write_string_only(0, 6, "Auto")?;
 
-    worksheet1.set_autofilter(0, 5, 0, 6)?;
+    worksheet1.autofilter(0, 5, 0, 6)?;
     worksheet1.set_print_area(0, 0, 5, 4)?;
     worksheet1.set_print_fit_to_pages(2, 2);
 
@@ -27,14 +27,14 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet3 = workbook.add_worksheet().set_name("Sheet 3")?;
     worksheet3.set_portrait();
 
-    workbook.define_name("'Sheet 3'!Bar", "='Sheet 3'!$A$1");
-    workbook.define_name("Abc", "=Sheet1!$A$1");
-    workbook.define_name("Baz", "=0.98");
-    workbook.define_name("Sheet2!Bar", "=Sheet2!$A$1");
-    workbook.define_name("Sheet1!Bar", "=Sheet1!$A$1");
-    workbook.define_name("Sheet2!aaa", "=Sheet2!$A$1");
-    workbook.define_name("_Egg", "=Sheet1!$A$1");
-    workbook.define_name("_Fog", "=Sheet1!$A$1");
+    workbook.define_name("'Sheet 3'!Bar", "='Sheet 3'!$A$1")?;
+    workbook.define_name("Abc", "=Sheet1!$A$1")?;
+    workbook.define_name("Baz", "=0.98")?;
+    workbook.define_name("Sheet2!Bar", "=Sheet2!$A$1")?;
+    workbook.define_name("Sheet1!Bar", "=Sheet1!$A$1")?;
+    workbook.define_name("Sheet2!aaa", "=Sheet2!$A$1")?;
+    workbook.define_name("_Egg", "=Sheet1!$A$1")?;
+    workbook.define_name("_Fog", "=Sheet1!$A$1")?;
 
     workbook.save(filename)?;
 

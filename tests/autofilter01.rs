@@ -17,7 +17,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     // Add the data used in the autofilter tests.
     common::populate_autofilter_data(worksheet);
 
-    worksheet.set_autofilter(0, 0, 50, 3)?;
+    worksheet.autofilter(0, 0, 50, 3)?;
 
     workbook.save(filename)?;
 
