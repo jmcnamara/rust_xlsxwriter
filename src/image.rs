@@ -506,7 +506,7 @@ impl Image {
     // Get the scale width of the image for Excel size calculations.
     pub(crate) fn width_scaled(&self) -> f64 {
         // Scale to user scale.
-        let width = (self.width as f64) * self.scale_width;
+        let width = self.width * self.scale_width;
 
         // Scale for non 96dpi resolutions.
         width * 96.0 / self.width_dpi
@@ -515,7 +515,7 @@ impl Image {
     // Get the scale height of the image for Excel size calculations.
     pub(crate) fn height_scaled(&self) -> f64 {
         // Scale to user scale.
-        let height = (self.height as f64) * self.scale_height;
+        let height = self.height * self.scale_height;
 
         // Scale for non 96dpi resolutions.
         height * 96.0 / self.height_dpi

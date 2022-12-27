@@ -6317,8 +6317,8 @@ impl Worksheet {
         let to = DrawingCoordinates {
             col: col_end as u32,
             row: row_end,
-            col_offset: x2 as f64,
-            row_offset: y2 as f64,
+            col_offset: x2,
+            row_offset: y2,
         };
 
         DrawingInfo {
