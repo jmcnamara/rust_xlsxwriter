@@ -58,6 +58,9 @@ documentation and generally show how an individual function works.
 * app_images.rs - An example of inserting images into a worksheet using
   rust_xlsxwriter.
 
+* app_lambda.rs - An example of using the new Excel LAMBDA() function with
+  the rust_xlsxwriter library.
+
 * app_merge_range.rs - An example of creating merged ranges in a worksheet
   using the rust_xlsxwriter library.
 
