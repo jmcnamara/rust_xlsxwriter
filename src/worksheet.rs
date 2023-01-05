@@ -2969,7 +2969,7 @@ impl Worksheet {
     /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels())
     /// method.
     ///
-    /// See also the [`set_autofit()`](Worksheet::set_autofit()) method.
+    /// See also the [`autofit()`](Worksheet::autofit()) method.
     ///
     /// # Arguments
     ///
@@ -3046,7 +3046,7 @@ impl Worksheet {
     /// To set the width in Excel character units use the
     /// [`set_column_width()`](Worksheet::set_column_width()) method.
     ///
-    /// See also the [`set_autofit()`](Worksheet::set_autofit()) method.
+    /// See also the [`autofit()`](Worksheet::autofit()) method.
     ///
     /// # Arguments
     ///
@@ -5409,19 +5409,19 @@ impl Worksheet {
     /// functions for calculating display areas based on fonts and formatting.
     ///
     /// As such the autofit widths that are calculated by
-    /// `worksheet.set_autofit()` are based on simple heuristics. This isn't
+    /// `worksheet.autofit()` are based on simple heuristics. This isn't
     /// perfect but for most cases it should be sufficient and if not you can
-    /// set your own widths, see below. It is intended that the `set_autofit()`
+    /// set your own widths, see below. It is intended that the `autofit()`
     /// fitting algorithm will be improved in upcoming releases.
     ///
-    /// The `worksheet.set_autofit()` method ignores columns that already have
+    /// The `worksheet.autofit()` method ignores columns that already have
     /// an explicit column width set via
     /// [`set_column_width()`](Worksheet::set_column_width()) or
     /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()). You
-    /// can use these methods if you wish to override the `set_autofit()`
+    /// can use these methods if you wish to override the `autofit()`
     /// values.
     ///
-    /// **Note**, `set_autofit()` iterates through all the cells in a worksheet
+    /// **Note**, `autofit()` iterates through all the cells in a worksheet
     /// that have been populated with data and performs a length calculation on
     /// each one, so it can have a performance overhead for bigger worksheets.
     ///
@@ -5435,7 +5435,7 @@ impl Worksheet {
     ///     https://rustxlsxwriter.github.io/examples/autofit.html
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_set_autofit.rs
+    /// # // This code is available in examples/doc_worksheet_autofit.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
@@ -5453,7 +5453,7 @@ impl Worksheet {
     ///     worksheet.write_number_only(0, 3, 123456)?;
     ///
     ///     // Autofit the columns.
-    ///     worksheet.set_autofit();
+    ///     worksheet.autofit();
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -5464,9 +5464,9 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_autofit.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_autofit.png">
     ///
-    pub fn set_autofit(&mut self) -> &mut Worksheet {
+    pub fn autofit(&mut self) -> &mut Worksheet {
         let mut max_widths: HashMap<ColNum, f64> = HashMap::new();
 
         // Iterate over all of the data in the worksheet and find the max data

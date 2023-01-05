@@ -20,7 +20,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_number_only(0, 3, 123456)?;
 
     // Autofit the columns.
-    worksheet.set_autofit();
+    worksheet.autofit();
 
     workbook.save("worksheet.xlsx")?;
 

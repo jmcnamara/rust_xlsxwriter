@@ -37,7 +37,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_number_only(0, 5, 12345)?;
 
     // Run autofit after the data have been added to the worksheet.
-    worksheet.set_autofit();
+    worksheet.autofit();
 
     // Save the file to disk.
     workbook.save("autofit.xlsx")?;

@@ -19,7 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Note, adding filter criteria isn't currently supported. That will be added in
   an upcoming version. See also [Adding Autofilters] in the user guide.
 
-
 [Adding Autofilters]: https://rustxlsxwriter.github.io/examples/autofilter.html
 [Using defined names]: https://rustxlsxwriter.github.io/examples/defined_names.html
 [`worksheet.autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofilter
@@ -178,7 +177,7 @@ See also the [hyperlinks example] in the user guide.
 
 ### Added
 
-- Added a simulated [`worksheet.set_autofit()`] method to automatically adjust
+- Added a simulated [`worksheet.autofit()`] method to automatically adjust
   the width of columns with data. See also the [app_autofit] sample application.
 
 - Added the [`worksheet.set_freeze_panes()`] method to set "freeze" panes for
@@ -186,7 +185,7 @@ See also the [hyperlinks example] in the user guide.
 
 [app_panes]: https://rustxlsxwriter.github.io/examples/panes.html
 [app_autofit]: https://rustxlsxwriter.github.io/examples/autofit.html
-[`worksheet.set_autofit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_autofit
+[`worksheet.autofit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofit
 [`worksheet.set_freeze_panes()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_freeze_panes
 
 ## [0.9.0] - 2022-10-31

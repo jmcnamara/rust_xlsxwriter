@@ -269,7 +269,7 @@ documentation and generally show how an individual function works.
 * doc_worksheet_set_active.rs - Demonstrates setting a worksheet as the
   visible worksheet when a file is opened.
 
-* doc_worksheet_set_autofit.rs - Demonstrates auto-fitting the worksheet
+* doc_worksheet_autofit.rs - Demonstrates auto-fitting the worksheet
   column widths based on the data in the columns.
 
 * doc_worksheet_set_column_format.rs - Demonstrates setting the format for
