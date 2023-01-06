@@ -927,9 +927,9 @@ impl Worksheet {
         col: ColNum,
         rich_string: &[(&Format, &str)],
     ) -> Result<&mut Worksheet, XlsxError> {
-        let string = self.get_write_rich_string(rich_string)?;
+        let (string, raw_string) = self.get_rich_string(rich_string)?;
 
-        self.store_string(row, col, &string, None)
+        self.store_rich_string(row, col, &string, &raw_string, None)
     }
 
     /// Write a "rich" string with multiple formats to a worksheet cell, with an
@@ -1029,9 +1029,9 @@ impl Worksheet {
         rich_string: &[(&Format, &str)],
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let string = self.get_write_rich_string(rich_string)?;
+        let (string, raw_string) = self.get_rich_string(rich_string)?;
 
-        self.store_string(row, col, &string, Some(format))
+        self.store_rich_string(row, col, &string, &raw_string, Some(format))
     }
 
     /// Write a formatted formula to a worksheet cell.
@@ -2101,7 +2101,7 @@ impl Worksheet {
         let number = self.datetime_to_excel(datetime);
 
         // Store the cell data.
-        self.store_number(row, col, number, Some(format))
+        self.store_datetime(row, col, number, Some(format))
     }
 
     /// Write a formatted date to a worksheet cell.
@@ -2191,7 +2191,7 @@ impl Worksheet {
         let number = self.date_to_excel(date);
 
         // Store the cell data.
-        self.store_number(row, col, number, Some(format))
+        self.store_datetime(row, col, number, Some(format))
     }
 
     /// Write a formatted time to a worksheet cell.
@@ -2281,7 +2281,7 @@ impl Worksheet {
         let number = self.time_to_excel(time);
 
         // Store the cell data.
-        self.store_number(row, col, number, Some(format))
+        self.store_datetime(row, col, number, Some(format))
     }
 
     /// Write a formatted boolean value to a worksheet cell.
@@ -3199,7 +3199,7 @@ impl Worksheet {
                 let col_options = ColOptions {
                     width: DEFAULT_COL_WIDTH,
                     xf_index,
-                    is_auto_width: true,
+                    autofit: false,
                 };
                 self.changed_cols.insert(col, col_options);
             }
@@ -5402,28 +5402,27 @@ impl Worksheet {
     ///
     /// Simulate column auto-fitting based on the data in the worksheet columns.
     ///
-    /// There is no option available in the xlsx file format that
-    /// rust_xlsxwriter can use to say "autofit columns on loading".
-    /// Auto-fitting of columns is something that Excel does at runtime when it
-    /// has access to all of the worksheet information as well as the Windows
-    /// functions for calculating display areas based on fonts and formatting.
+    /// There is no option in the xlsx file format that can be used to say
+    /// "autofit columns on loading". Auto-fitting of columns is something that
+    /// Excel does at runtime when it has access to all of the worksheet
+    /// information as well as the Windows functions for calculating display
+    /// areas based on fonts and formatting.
     ///
-    /// As such the autofit widths that are calculated by
-    /// `worksheet.autofit()` are based on simple heuristics. This isn't
-    /// perfect but for most cases it should be sufficient and if not you can
-    /// set your own widths, see below. It is intended that the `autofit()`
-    /// fitting algorithm will be improved in upcoming releases.
+    /// As such `worksheet.autofit()` simulates this behavior by calculating
+    /// string widths using metrics taken from Excel. This isn't perfect but for
+    /// most cases it should be sufficient and if not you can set your own
+    /// widths, see below.
     ///
-    /// The `worksheet.autofit()` method ignores columns that already have
-    /// an explicit column width set via
+    /// The `autofit()` method ignores columns that already have an explicit
+    /// column width set via
     /// [`set_column_width()`](Worksheet::set_column_width()) or
-    /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()). You
-    /// can use these methods if you wish to override the `autofit()`
-    /// values.
+    /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()) if
+    /// it is greater than the calculate maximum width. Alternatively, calling
+    /// these methods after `autofit()` will override the autofit value.
     ///
-    /// **Note**, `autofit()` iterates through all the cells in a worksheet
-    /// that have been populated with data and performs a length calculation on
-    /// each one, so it can have a performance overhead for bigger worksheets.
+    /// **Note**, `autofit()` iterates through all the cells in a worksheet that
+    /// have been populated with data and performs a length calculation on each
+    /// one, so it can have a performance overhead for larger worksheets.
     ///
     /// # Examples
     ///
@@ -5441,10 +5440,10 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Add some data
     ///     worksheet.write_string_only(0, 0, "Hello")?;
     ///     worksheet.write_string_only(0, 1, "Hello")?;
@@ -5454,7 +5453,7 @@ impl Worksheet {
     ///
     ///     // Autofit the columns.
     ///     worksheet.autofit();
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -5467,35 +5466,99 @@ impl Worksheet {
     /// src="https://rustxlsxwriter.github.io/images/worksheet_autofit.png">
     ///
     pub fn autofit(&mut self) -> &mut Worksheet {
-        let mut max_widths: HashMap<ColNum, f64> = HashMap::new();
+        let mut max_widths: HashMap<ColNum, u16> = HashMap::new();
 
         // Iterate over all of the data in the worksheet and find the max data
-        // width for each column. This is currently a crude approximation. It
-        // will be improved over time.
+        // width for each column.
         for row_num in self.dimensions.first_row..=self.dimensions.last_row {
             if let Some(columns) = self.table.get(&row_num) {
                 for col_num in self.dimensions.first_col..=self.dimensions.last_col {
                     if let Some(cell) = columns.get(&col_num) {
-                        let string_len = match cell {
-                            CellType::Blank { .. } => 0.0,
-                            CellType::Boolean { .. } => 5.5,
-                            CellType::Formula { .. } => 0.0,
-                            CellType::ArrayFormula { .. } => 0.0,
-                            CellType::String { string, .. } => string.len() as f64,
-                            CellType::Number { number, .. } => {
-                                1.2 * number.to_string().len() as f64
-                            }
-                        };
-                        match max_widths.get_mut(&col_num) {
-                            // Update the max for the column.
-                            Some(max) => {
-                                if string_len > *max {
-                                    *max = string_len
+                        let pixel_width = match cell {
+                            // For strings we do a calculation based on
+                            // character widths taken from Excel. For rich
+                            // strings we use the unformatted string. We also
+                            // split multi-line strings and handle each part
+                            // separately.
+                            CellType::String { string, .. }
+                            | CellType::RichString {
+                                string: _,
+                                xf_index: _,
+                                raw_string: string,
+                            } => {
+                                if !string.contains('\n') {
+                                    utility::pixel_width(string)
+                                } else {
+                                    let mut max = 0;
+                                    for segment in string.split('\n') {
+                                        let length = utility::pixel_width(segment);
+                                        max = cmp::max(max, length);
+                                    }
+                                    max
                                 }
                             }
-                            None => {
-                                // Add a new column entry and maximum.
-                                max_widths.insert(col_num, string_len);
+
+                            // For numbers we use a workaround/optimization
+                            // since digits all have a pixel width of 7. This
+                            // gives a slightly greater width for the decimal
+                            // place and minus sign but only by a few pixels and
+                            // over-estimation is okay.
+                            CellType::Number { number, .. } => 7 * number.to_string().len() as u16,
+
+                            // For Boolean types we use the Excel standard
+                            // widths for TRUE and FALSE.
+                            CellType::Boolean { boolean, .. } => {
+                                if *boolean {
+                                    31
+                                } else {
+                                    36
+                                }
+                            }
+
+                            // For formulas we autofit the result of the formula
+                            // if it has a non-zero/default value.
+                            CellType::Formula {
+                                formula: _,
+                                xf_index: _,
+                                result,
+                            }
+                            | CellType::ArrayFormula {
+                                formula: _,
+                                xf_index: _,
+                                result,
+                                ..
+                            } => {
+                                if result == "0" || result.is_empty() {
+                                    0
+                                } else {
+                                    utility::pixel_width(result)
+                                }
+                            }
+
+                            // Datetimes are just numbers but they also have an
+                            // Excel format. It isn't feasible to parse the
+                            // number format to get the actual string width for
+                            // all format types so we use a width based on the
+                            // Excel's default format: mm/dd/yyyy.
+                            CellType::DateTime { .. } => 68,
+
+                            // Ignore blank cells, like Excel.
+                            CellType::Blank { .. } => 0,
+                        };
+
+                        // Update the max column width.
+                        if pixel_width > 0 {
+                            match max_widths.get_mut(&col_num) {
+                                // Update the max for the column.
+                                Some(max) => {
+                                    if pixel_width > *max {
+                                        *max = pixel_width
+                                    }
+                                }
+                                None => {
+                                    // Add a new column entry and maximum.
+                                    max_widths.insert(col_num, pixel_width);
+                                }
                             }
                         }
                     }
@@ -5503,11 +5566,10 @@ impl Worksheet {
             }
         }
 
-        // Set the max width for each column.
-        for (col, width) in max_widths.iter() {
-            if *width > 0.0 {
-                self.store_column_width(*col, *width, true);
-            }
+        // Set the max character width for each column.
+        for (col, pixels) in max_widths.iter() {
+            let width = self.pixels_to_width(*pixels + 7);
+            self.store_column_width(*col, width, true);
         }
 
         self
@@ -5524,6 +5586,29 @@ impl Worksheet {
         col: ColNum,
         number: f64,
         format: Option<&Format>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.store_number_type(row, col, number, format, false)
+    }
+
+    // Store a datetime cell in the worksheet data table structure.
+    fn store_datetime(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        number: f64,
+        format: Option<&Format>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.store_number_type(row, col, number, format, true)
+    }
+
+    // Store a number/datetime cell in the worksheet data table structure.
+    fn store_number_type(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        number: f64,
+        format: Option<&Format>,
+        is_datetime: bool,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and col are in the allowed range.
         if !self.check_dimensions(row, col) {
@@ -5547,7 +5632,11 @@ impl Worksheet {
         };
 
         // Create the appropriate cell type to hold the data.
-        let cell = CellType::Number { number, xf_index };
+        let cell = if is_datetime {
+            CellType::DateTime { number, xf_index }
+        } else {
+            CellType::Number { number, xf_index }
+        };
 
         self.insert_cell(row, col, cell);
 
@@ -5591,6 +5680,53 @@ impl Worksheet {
         let cell = CellType::String {
             string: string.to_string(),
             xf_index,
+        };
+
+        self.insert_cell(row, col, cell);
+        self.uses_string_table = true;
+
+        Ok(self)
+    }
+
+    // Store a rich string cell in the worksheet data table structure.
+    fn store_rich_string(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        string: &str,
+        raw_string: &str,
+        format: Option<&Format>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Empty strings are ignored by Excel unless they have a format in which
+        // case they are treated as a blank cell.
+        if string.is_empty() {
+            match format {
+                Some(format) => return self.write_blank(row, col, format),
+                None => return Ok(self),
+            };
+        }
+
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        //  Check that the string is < Excel limit of 32767 chars.
+        if string.chars().count() > MAX_STRING_LEN {
+            return Err(XlsxError::MaxStringLengthExceeded);
+        }
+
+        // Get the index of the format object, if any.
+        let xf_index = match format {
+            Some(format) => self.format_index(format),
+            None => 0,
+        };
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::RichString {
+            string: string.to_string(),
+            xf_index,
+            raw_string: raw_string.to_string(),
         };
 
         self.insert_cell(row, col, cell);
@@ -5787,9 +5923,12 @@ impl Worksheet {
     }
 
     // A rich string is handled in Excel like any other shared string except
-    // that it has inline font markup within the string. To generate the require
-    // font xml we use an instance of the Style struct.
-    fn get_write_rich_string(&mut self, segments: &[(&Format, &str)]) -> Result<String, XlsxError> {
+    // that it has inline font markup within the string. To generate the
+    // required font xml we use an instance of the Style struct.
+    fn get_rich_string(
+        &mut self,
+        segments: &[(&Format, &str)],
+    ) -> Result<(String, String), XlsxError> {
         // Check that there is at least one segment tuple.
         if segments.is_empty() {
             let error = "Rich string must contain at least 1 (&Format, &str) tuple.";
@@ -5799,6 +5938,7 @@ impl Worksheet {
         // Create a Style struct object to generate the font xml.
         let xf_formats: Vec<Format> = vec![];
         let mut styler = Styles::new(&xf_formats, 0, 0, 0, 0, false, true);
+        let mut raw_string = "".to_string();
 
         let mut first_segment = true;
         for (format, string) in segments {
@@ -5807,6 +5947,9 @@ impl Worksheet {
                 let error = "Strings in rich string (&Format, &str) tuples cannot be blank.";
                 return Err(XlsxError::ParameterError(error.to_string()));
             }
+
+            // Accumulate the string segments into a unformatted string.
+            raw_string.push_str(string);
 
             let attributes =
                 if string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']) {
@@ -5833,7 +5976,7 @@ impl Worksheet {
             first_segment = false;
         }
 
-        Ok(styler.writer.read_to_string())
+        Ok((styler.writer.read_to_string(), raw_string))
     }
 
     // Insert a cell value into the worksheet data table structure.
@@ -5854,8 +5997,8 @@ impl Worksheet {
     }
 
     // Store the column width in Excel character units. Updates to the width can
-    // come from the external User or from the internal Autofit routines.
-    fn store_column_width(&mut self, col: ColNum, width: f64, is_auto_width: bool) {
+    // come from the external user or from the internal autofit() routines.
+    fn store_column_width(&mut self, col: ColNum, width: f64, autofit: bool) {
         // Excel has a maximum limit of 255 units for the column width.
         let mut width = width;
         if width > 255.0 {
@@ -5865,15 +6008,17 @@ impl Worksheet {
         // Update an existing col metadata object or create a new one.
         match self.changed_cols.get_mut(&col) {
             Some(col_options) => {
-                // Note, the Autofit updater can only change the width if it
-                // hasn't already been explicitly set by the User.
-                if is_auto_width == col_options.is_auto_width {
-                    // Autofit or User can update the same type.
-                    col_options.width = width
-                } else if !is_auto_width {
-                    // User can update either type.
+                // Note, autofit() will only update a user defined value if is
+                // greater than it. All other conditions are simple updates.
+                println!("\n\n>>> width = {width}, autofit = {autofit}");
+                if autofit && !col_options.autofit {
+                    if width > col_options.width {
+                        col_options.width = width;
+                        col_options.autofit = true;
+                    }
+                } else {
                     col_options.width = width;
-                    col_options.is_auto_width = false;
+                    col_options.autofit = autofit;
                 }
             }
             None => {
@@ -5881,7 +6026,7 @@ impl Worksheet {
                 let col_options = ColOptions {
                     width,
                     xf_index: 0,
-                    is_auto_width,
+                    autofit,
                 };
                 self.changed_cols.insert(col, col_options);
             }
@@ -6412,6 +6557,22 @@ impl Worksheet {
         }
     }
 
+    // Convert column pixel width to character width.
+    pub(crate) fn pixels_to_width(&mut self, pixels: u16) -> f64 {
+        // Properties for Calibri 11.
+        let max_digit_width = 7.0_f64;
+        let padding = 5.0_f64;
+        let mut width = pixels as f64;
+
+        if width < 12.0 {
+            width /= max_digit_width + padding;
+        } else {
+            width = (width - padding) / max_digit_width
+        }
+
+        width
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -6892,12 +7053,16 @@ impl Worksheet {
                     for col_num in self.dimensions.first_col..=self.dimensions.last_col {
                         if let Some(cell) = columns.get(&col_num) {
                             match cell {
-                                CellType::Number { number, xf_index } => {
+                                CellType::Number { number, xf_index }
+                                | CellType::DateTime { number, xf_index } => {
                                     let xf_index =
                                         self.get_cell_xf_index(xf_index, row_options, col_num);
                                     self.write_number_cell(row_num, col_num, number, &xf_index)
                                 }
-                                CellType::String { string, xf_index } => {
+                                CellType::String { string, xf_index }
+                                | CellType::RichString {
+                                    string, xf_index, ..
+                                } => {
                                     let xf_index =
                                         self.get_cell_xf_index(xf_index, row_options, col_num);
                                     let string_index = string_table.shared_string_index(string);
@@ -7272,6 +7437,10 @@ impl Worksheet {
             attributes.push(("style", xf_index.to_string()));
         }
 
+        if col_options.autofit {
+            attributes.push(("bestFit", "1".to_string()));
+        }
+
         if has_custom_width {
             attributes.push(("customWidth", "1".to_string()));
         }
@@ -7477,7 +7646,7 @@ struct RowOptions {
 struct ColOptions {
     width: f64,
     xf_index: u32,
-    is_auto_width: bool,
+    autofit: bool,
 }
 
 #[derive(Clone)]
@@ -7505,9 +7674,18 @@ enum CellType {
         number: f64,
         xf_index: u32,
     },
+    DateTime {
+        number: f64,
+        xf_index: u32,
+    },
     String {
         string: String,
         xf_index: u32,
+    },
+    RichString {
+        string: String,
+        xf_index: u32,
+        raw_string: String,
     },
 }
 
