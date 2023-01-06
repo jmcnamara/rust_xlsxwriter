@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // Copyright 2022, John McNamara, jmcnamara@cpan.org
 
-//! An example of using a simulated Column Autofit using the rust_xlsxwriter
-//! library.
+//! An example of using simulated autofit to automatically adjust the width of
+//! worksheet columns based on the data in the cells.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 
@@ -13,30 +13,22 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Write some data to the worksheet.
+    // Write some worksheet data to demonstrate autofitting.
+    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string_only(1, 0, "Food")?;
+    worksheet.write_string_only(2, 0, "Foody")?;
+    worksheet.write_string_only(3, 0, "Froody")?;
 
-    // Columns with explicitly defined widths aren't auto-fitted.
-    worksheet.set_column_width(0, 18)?;
-    worksheet.write_string_only(0, 0, "User set widths")?;
-    worksheet.write_string_only(1, 0, "aren't changed")?;
+    worksheet.write_number_only(0, 1, 12345)?;
+    worksheet.write_number_only(1, 1, 12345678)?;
+    worksheet.write_number_only(2, 1, 12345)?;
 
-    // Columns without explicitly defined widths are auto-fitted.
-    worksheet.write_string_only(0, 1, "Implicit widths")?;
-    worksheet.write_string_only(1, 1, "are changed")?;
+    worksheet.write_string_only(0, 2, "Some longer text")?;
 
-    // Add some similar words of different lengths.
-    worksheet.write_string_only(0, 2, "Fo")?;
-    worksheet.write_string_only(1, 2, "Foo")?;
-    worksheet.write_string_only(2, 2, "Food")?;
-    worksheet.write_string_only(3, 2, "Frood")?;
-    worksheet.write_string_only(4, 2, "Froody")?;
+    worksheet.write_url(0, 3, "http://ww.google.com")?;
+    worksheet.write_url(1, 3, "https://github.com")?;
 
-    // Add some numbers.
-    worksheet.write_number_only(0, 3, 123)?;
-    worksheet.write_number_only(0, 4, 1234)?;
-    worksheet.write_number_only(0, 5, 12345)?;
-
-    // Run autofit after the data have been added to the worksheet.
+    // Autofit the worksheet.
     worksheet.autofit();
 
     // Save the file to disk.

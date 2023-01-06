@@ -19,8 +19,8 @@ documentation and generally show how an individual function works.
   and some is hidden. Note, adding filter criteria isn't currently
   supported. That will be added in an upcoming version.
 
-* app_autofit.rs - An example of using a simulated Column Autofit using the
-  rust_xlsxwriter library.
+* app_autofit.rs - An example of using simulated autofit to automatically
+  adjust the width of worksheet columns based on the data in the cells.
 
 * app_colors.rs - A demonstration of the RGB and Theme colors palettes
   available in the rust_xlsxwriter library.
@@ -258,6 +258,9 @@ documentation and generally show how an individual function works.
 * doc_worksheet_autofilter.rs - Demonstrates setting a simple autofilter in
   a worksheet.
 
+* doc_worksheet_autofit.rs - Demonstrates auto-fitting the worksheet column
+  widths based on the data in the columns.
+
 * doc_worksheet_insert_image_with_offset.rs - This example shows how to add
   an image to a worksheet at an offset within the cell.
 
@@ -268,9 +271,6 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_set_active.rs - Demonstrates setting a worksheet as the
   visible worksheet when a file is opened.
-
-* doc_worksheet_autofit.rs - Demonstrates auto-fitting the worksheet
-  column widths based on the data in the columns.
 
 * doc_worksheet_set_column_format.rs - Demonstrates setting the format for
   a column in Excel.
