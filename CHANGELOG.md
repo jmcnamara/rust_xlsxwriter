@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.20.0] - 2023-01-06
+
+### Added
+
+- Improved fitting algorithm for [`worksheet.autofit()`]. See also the
+  [app_autofit] sample application.
+
+### Changed
+
+- The `worksheet.set_autofit()` method has been renamed to `worksheet.autofit()`
+  for consistency with the other language versions of this library.
+
+
 ## [0.19.0] - 2022-12-27
 
 ### Added
