@@ -1,7 +1,8 @@
 // packager - A library for assembling xml files into an Excel xlsx file.
 
-// SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
-// jmcnamara@cpan.org
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 // This library is used by rust_xlsxwriter to create an Excel xlsx container
 // file.

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright 2022, John McNamara, jmcnamara@cpan.org
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! An example of the various cell formatting options that are available in the
 //! rust_xlsxwriter library. These are laid out on worksheets that correspond to

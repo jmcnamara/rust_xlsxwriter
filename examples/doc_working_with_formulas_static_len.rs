@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright 2022, John McNamara, jmcnamara@cpan.org
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates a static function which generally returns
 //! one value. Compare this with the dynamic function output of

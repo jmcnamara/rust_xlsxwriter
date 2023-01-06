@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright 2022, John McNamara, jmcnamara@cpan.org
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! An example of how to use the rust_xlsxwriter library to write formulas and
 //! functions that create dynamic arrays. These functions are new to Excel

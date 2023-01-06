@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright 2022, John McNamara, jmcnamara@cpan.org
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates writing some UTF-8 strings to a
 //! worksheet. The UTF-8 encoding is the only encoding supported by the Excel

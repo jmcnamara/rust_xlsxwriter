@@ -1,7 +1,8 @@
 // Entry point for rust_xlsxwriter library.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright 2022, John McNamara, jmcnamara@cpan.org
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The `rust_xlsxwriter` library is a rust library for writing Excel files in
 //! the xlsx format.

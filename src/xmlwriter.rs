@@ -2,8 +2,9 @@
 // escaping as used by Excel in xlsx xml files. This is a base "class" or set of
 // functionality for all of the other xml writing structs.
 //
-// SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
-// jmcnamara@cpan.org
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use std::borrow::Cow;
 use std::io::{Cursor, Write};

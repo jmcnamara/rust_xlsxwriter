@@ -1,8 +1,9 @@
 // Test helper functions for integration tests. These functions convert Excel
 // xml files into vectors of xml elements to make comparison testing easier.
 //
-// SPDX-License-Identifier: MIT OR Apache-2.0 Copyright 2022, John McNamara,
-// jmcnamara@cpan.org
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 #[macro_export]
 macro_rules! assert_result {

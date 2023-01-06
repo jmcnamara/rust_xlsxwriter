@@ -1,7 +1,8 @@
 // app - A module for creating the Excel app.xml file.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright 2022, John McNamara, jmcnamara@cpan.org
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::xmlwriter::XMLWriter;
 

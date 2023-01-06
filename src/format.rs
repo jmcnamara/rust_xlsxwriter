@@ -1,7 +1,8 @@
 // format - A module for representing Excel cell formats.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright 2022, John McNamara, jmcnamara@cpan.org
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 #![warn(missing_docs)]
 

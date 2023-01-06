@@ -5,7 +5,8 @@
 // writing and writes the index to the worksheet instead.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright 2022, John McNamara, jmcnamara@cpan.org
+//
+// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use std::collections::HashMap;
 
