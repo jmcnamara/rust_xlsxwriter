@@ -6011,7 +6011,6 @@ impl Worksheet {
             Some(col_options) => {
                 // Note, autofit() will only update a user defined value if is
                 // greater than it. All other conditions are simple updates.
-                println!("\n\n>>> width = {width}, autofit = {autofit}");
                 if autofit && !col_options.autofit {
                     if width > col_options.width {
                         col_options.width = width;
