@@ -4,14 +4,11 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use chrono::{DateTime, Utc};
-
-use crate::xmlwriter::XMLWriter;
+use crate::{xmlwriter::XMLWriter, Properties};
 
 pub struct Core {
     pub(crate) writer: XMLWriter,
-    author: String,
-    creation_time: DateTime<Utc>,
+    pub(crate) properties: Properties,
 }
 
 impl Core {
@@ -25,23 +22,8 @@ impl Core {
 
         Core {
             writer,
-            author: "".to_string(),
-            creation_time: Utc::now(),
+            properties: Properties::new(),
         }
-    }
-
-    // Temporary function for testing. This will be replaced with full property
-    // handling later.
-    #[allow(dead_code)]
-    pub(crate) fn set_author(&mut self, author: &str) {
-        self.author = author.to_string();
-    }
-
-    // Temporary function for testing. This will be replaced with full property
-    // handling later.
-    #[allow(dead_code)]
-    pub(crate) fn set_creation_time(&mut self, create_time: DateTime<Utc>) {
-        self.creation_time = create_time;
     }
 
     // -----------------------------------------------------------------------
@@ -55,8 +37,19 @@ impl Core {
         // Write the cp:coreProperties element.
         self.write_cp_core_properties();
 
+        // Write the dc:title element.
+        self.write_dc_title();
+
+        // Write the dc:subject element.
+        self.write_dc_subject();
         // Write the dc:creator element.
         self.write_dc_creator();
+
+        // Write the cp:keywords element.
+        self.write_cp_keywords();
+
+        // Write the dc:description element.
+        self.write_dc_description();
 
         // Write the cp:lastModifiedBy element.
         self.write_cp_last_modified_by();
@@ -66,6 +59,12 @@ impl Core {
 
         // Write the dcterms:modified element.
         self.write_dcterms_modified();
+
+        // Write the cp:category element.
+        self.write_cp_category();
+
+        // Write the cp:contentStatus element.
+        self.write_cp_content_status();
 
         // Close the coreProperties tag.
         self.writer.xml_end_tag("cp:coreProperties");
@@ -92,21 +91,55 @@ impl Core {
             .xml_start_tag_attr("cp:coreProperties", &attributes);
     }
 
+    // Write the <dc:title> element.
+    fn write_dc_title(&mut self) {
+        if !self.properties.title.is_empty() {
+            self.writer
+                .xml_data_element("dc:title", &self.properties.title);
+        }
+    }
+
+    // Write the <dc:subject> element.
+    fn write_dc_subject(&mut self) {
+        if !self.properties.subject.is_empty() {
+            self.writer
+                .xml_data_element("dc:subject", &self.properties.subject);
+        }
+    }
+
     // Write the <dc:creator> element.
     fn write_dc_creator(&mut self) {
-        self.writer.xml_data_element("dc:creator", &self.author);
+        self.writer
+            .xml_data_element("dc:creator", &self.properties.author);
+    }
+
+    // Write the <cp:keywords> element.
+    fn write_cp_keywords(&mut self) {
+        if !self.properties.keywords.is_empty() {
+            self.writer
+                .xml_data_element("cp:keywords", &self.properties.keywords);
+        }
+    }
+
+    // Write the <dc:description> element.
+    fn write_dc_description(&mut self) {
+        if !self.properties.comment.is_empty() {
+            self.writer
+                .xml_data_element("dc:description", &self.properties.comment);
+        }
     }
 
     // Write the <cp:lastModifiedBy> element.
     fn write_cp_last_modified_by(&mut self) {
         self.writer
-            .xml_data_element("cp:lastModifiedBy", &self.author);
+            .xml_data_element("cp:lastModifiedBy", &self.properties.author);
     }
 
     // Write the <dcterms:created> element.
     fn write_dcterms_created(&mut self) {
         let attributes = vec![("xsi:type", "dcterms:W3CDTF".to_string())];
         let datetime = self
+            .properties
             .creation_time
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
@@ -119,11 +152,28 @@ impl Core {
         let attributes = vec![("xsi:type", "dcterms:W3CDTF".to_string())];
 
         let datetime = self
+            .properties
             .creation_time
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
         self.writer
             .xml_data_element_attr("dcterms:modified", &datetime, &attributes);
+    }
+
+    // Write the <cp:category> element.
+    fn write_cp_category(&mut self) {
+        if !self.properties.category.is_empty() {
+            self.writer
+                .xml_data_element("cp:category", &self.properties.category);
+        }
+    }
+
+    // Write the <cp:contentStatus> element.
+    fn write_cp_content_status(&mut self) {
+        if !self.properties.status.is_empty() {
+            self.writer
+                .xml_data_element("cp:contentStatus", &self.properties.status);
+        }
     }
 }
 
@@ -134,17 +184,20 @@ impl Core {
 mod tests {
 
     use super::Core;
-    use crate::test_functions::xml_to_vec;
+    use crate::{test_functions::xml_to_vec, Properties};
     use chrono::{TimeZone, Utc};
 
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_assemble() {
-        let mut core = Core::new();
+        let date = Utc.with_ymd_and_hms(2010, 1, 1, 0, 0, 0).unwrap();
+        let properties = Properties::new()
+            .set_author("A User")
+            .set_creation_datetime(&date);
 
-        core.set_author("A User");
-        core.set_creation_time(Utc.with_ymd_and_hms(2010, 1, 1, 0, 0, 0).unwrap());
+        let mut core = Core::new();
+        core.properties = properties;
 
         core.assemble_xml_file();
 
@@ -163,6 +216,6 @@ mod tests {
             "#,
         );
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 }

@@ -127,6 +127,7 @@ mod format;
 mod image;
 mod metadata;
 mod packager;
+mod properties;
 mod relationship;
 mod shared_strings;
 mod shared_strings_table;
@@ -143,6 +144,7 @@ mod xmlwriter;
 pub use error::*;
 pub use format::*;
 pub use image::*;
+pub use properties::*;
 pub use workbook::*;
 pub use worksheet::*;
 

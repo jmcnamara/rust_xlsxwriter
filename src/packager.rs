@@ -59,7 +59,7 @@ use crate::theme::Theme;
 use crate::vml::Vml;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
-use crate::NUM_IMAGE_FORMATS;
+use crate::{Properties, NUM_IMAGE_FORMATS};
 
 // Packager struct to assembler the xlsx file.
 pub struct Packager<W: Write + Seek> {
@@ -112,7 +112,7 @@ impl<W: Write + Seek> Packager<W> {
             self.write_shared_strings_file(&string_table)?;
         }
 
-        self.write_core_file()?;
+        self.write_core_file(options)?;
         self.write_app_file(options)?;
         self.write_drawing_files(workbook)?;
         self.write_vml_files(workbook)?;
@@ -392,8 +392,9 @@ impl<W: Write + Seek> Packager<W> {
     }
 
     // Write the core.xml file.
-    fn write_core_file(&mut self) -> Result<(), XlsxError> {
+    fn write_core_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut core = Core::new();
+        core.properties = options.properties.clone();
 
         self.zip.start_file("docProps/core.xml", self.zip_options)?;
 
@@ -406,6 +407,7 @@ impl<W: Write + Seek> Packager<W> {
     // Write the app.xml file.
     fn write_app_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut app = App::new();
+        app.properties = options.properties.clone();
 
         app.add_heading_pair("Worksheets", options.num_worksheets);
 
@@ -529,6 +531,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) worksheet_names: Vec<String>,
     pub(crate) defined_names: Vec<String>,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
+    pub(crate) properties: Properties,
 }
 
 impl PackagerOptions {
@@ -543,6 +546,7 @@ impl PackagerOptions {
             worksheet_names: vec![],
             defined_names: vec![],
             image_types: [false; NUM_IMAGE_FORMATS],
+            properties: Properties::new(),
         }
     }
 }

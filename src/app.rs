@@ -4,13 +4,14 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use crate::xmlwriter::XMLWriter;
+use crate::{xmlwriter::XMLWriter, Properties};
 
 pub struct App {
     pub(crate) writer: XMLWriter,
     heading_pairs: Vec<(String, u16)>,
     table_parts: Vec<String>,
     doc_security: u8,
+    pub(crate) properties: Properties,
 }
 
 impl App {
@@ -27,6 +28,7 @@ impl App {
             heading_pairs: vec![],
             table_parts: vec![],
             doc_security: 0,
+            properties: Properties::new(),
         }
     }
 
@@ -66,6 +68,9 @@ impl App {
         // Write the TitlesOfParts element.
         self.write_titles_of_parts();
 
+        // Write the Manager element.
+        self.write_manager();
+
         // Write the Company element.
         self.write_company();
 
@@ -74,6 +79,9 @@ impl App {
 
         // Write the SharedDoc element.
         self.write_shared_doc();
+
+        // Write the HyperlinkBase element.
+        self.write_hyperlink_base();
 
         // Write the HyperlinksChanged element.
         self.write_hyperlinks_changed();
@@ -179,9 +187,18 @@ impl App {
         self.writer.xml_data_element("vt:i4", &count.to_string());
     }
 
+    // Write the <Manager> element.
+    fn write_manager(&mut self) {
+        if !self.properties.manager.is_empty() {
+            self.writer
+                .xml_data_element("Manager", &self.properties.manager);
+        }
+    }
+
     // Write the <Company> element.
     fn write_company(&mut self) {
-        self.writer.xml_data_element("Company", "");
+        self.writer
+            .xml_data_element("Company", &self.properties.company);
     }
 
     // Write the <LinksUpToDate> element.
@@ -192,6 +209,14 @@ impl App {
     // Write the <SharedDoc> element.
     fn write_shared_doc(&mut self) {
         self.writer.xml_data_element("SharedDoc", "false");
+    }
+
+    // Write the <HyperlinkBase> element.
+    fn write_hyperlink_base(&mut self) {
+        if !self.properties.hyperlink_base.is_empty() {
+            self.writer
+                .xml_data_element("HyperlinkBase", &self.properties.hyperlink_base);
+        }
     }
 
     // Write the <HyperlinksChanged> element.
