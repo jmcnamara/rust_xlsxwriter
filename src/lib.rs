@@ -121,6 +121,7 @@
 mod app;
 mod content_types;
 mod core;
+mod custom;
 mod drawing;
 mod error;
 mod format;

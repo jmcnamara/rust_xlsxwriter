@@ -104,6 +104,14 @@ impl ContentTypes {
         );
     }
 
+    // Add the custom properties to the ContentTypes overrides.
+    pub(crate) fn add_custom_properties(&mut self) {
+        self.add_override(
+            "/docProps/custom.xml",
+            "application/vnd.openxmlformats-officedocument.custom-properties+xml",
+        );
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------

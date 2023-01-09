@@ -11,10 +11,14 @@ use chrono::{DateTime, Utc};
 /// The Properties struct is used to create an object to represent document
 /// metadata properties.
 ///
-/// It is used to create an object to represent various document properties for
-/// an Excel file such as the Author's name or the Creation Date.
+/// The Properties struct is used to create an object to represent various
+/// document properties for an Excel file such as the Author's name or the
+/// Creation Date.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/app_doc_properties.png">
+///
+/// Properties can be set for the "Summary" section and also for the "Custom"
+/// section of the Excel document properties. See the examples below.
 ///
 /// The Properties struct is used in conjunction with the
 /// [`workbook.set_properties()`](crate::Workbook::set_properties) method.
@@ -56,11 +60,42 @@ use chrono::{DateTime, Utc};
 /// }
 /// ```
 ///
+/// An example of setting custom/user defined workbook document properties.
+///
+/// ```
+/// # // This code is available in examples/doc_properties_custom.rs
+/// #
+/// use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///
+///     let properties = Properties::new()
+///         .set_custom_text("Checked by", "Admin")
+///         .set_custom_boolean("Cross check", true)
+///         .set_custom_text("Department", "Finance")
+///         .set_custom_number_i32("Document number", 55301);
+///
+///     workbook.set_properties(&properties);
+///
+///     workbook.save("properties.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/doc_properties_custom.png">
+///
+///
 /// # Checksum of a saved file
 ///
-/// A common issue that occurs with `rust_xlsxwriter`, but also with Excel, is that
-/// running the same program twice doesn't generate the same file, byte for byte.
-/// This can cause issue with systems that do checksumming for testing purposes.
+/// A common issue that occurs with `rust_xlsxwriter`, but also with Excel, is
+/// that running the same program twice doesn't generate the same file, byte for
+/// byte. This can cause issues with applications that do checksumming for
+/// testing purposes.
 ///
 /// For example consider the following simple `rust_xlsxwriter` program:
 ///
@@ -81,7 +116,8 @@ use chrono::{DateTime, Utc};
 /// }
 /// ```
 ///
-/// If we run this several times, with a small delay, we will get different checksums as shown below:
+/// If we run this several times, with a small delay, we will get different
+/// checksums as shown below:
 ///
 /// ```bash
 /// $ cargo run --example doc_properties_checksum1
@@ -97,8 +133,8 @@ use chrono::{DateTime, Utc};
 /// 56692 6 properties.xlsx # Different to previous.
 /// ```
 ///
-/// This is due to a file creation datetime that is included in the file and which
-/// changes each time a new file is created.
+/// This is due to a file creation datetime that is included in the file and
+/// which changes each time a new file is created.
 ///
 /// The relevant section of the `docProps/core.xml` sub-file in the xlsx format
 /// looks like this:
@@ -172,6 +208,7 @@ pub struct Properties {
     pub(crate) keywords: String,
     pub(crate) hyperlink_base: String,
     pub(crate) creation_time: DateTime<Utc>,
+    pub(crate) custom_properties: Vec<CustomProperty>,
 }
 
 impl Default for Properties {
@@ -195,13 +232,14 @@ impl Properties {
             keywords: "".to_string(),
             hyperlink_base: "".to_string(),
             creation_time: Utc::now(),
+            custom_properties: vec![],
         }
     }
 
     /// Set the Title field of the document properties.
     ///
     /// Set the "Title" field of the document properties to create a title for
-    /// the document such as "Sales Report".
+    /// the document such as "Sales Report". See the example above.
     ///
     /// # Arguments
     ///
@@ -216,7 +254,7 @@ impl Properties {
     /// Set the Subject field of the document properties.
     ///
     /// Set the "Subject" field of the document properties to indicate the
-    /// subject matter.
+    /// subject matter. See the example above.
     ///
     /// # Arguments
     ///
@@ -230,7 +268,8 @@ impl Properties {
 
     /// Set the Manager field of the document properties.
     ///
-    /// Set the "Manager" field of the document properties.
+    /// Set the "Manager" field of the document properties. See the example
+    /// above. See the example above.
     ///
     /// # Arguments
     ///
@@ -244,7 +283,8 @@ impl Properties {
 
     /// Set the Company field of the document properties.
     ///
-    /// Set the "Company" field of the document properties.
+    /// Set the "Company" field of the document properties. See the example
+    /// above.
     ///
     /// # Arguments
     ///
@@ -259,7 +299,7 @@ impl Properties {
     /// Set the Category field of the document properties.
     ///
     /// Set the "Category" field of the document properties to indicate the
-    /// category that the file belongs to.
+    /// category that the file belongs to. See the example above.
     ///
     /// # Arguments
     ///
@@ -273,7 +313,8 @@ impl Properties {
 
     /// Set the Author field of the document properties.
     ///
-    /// Set the "Author" field of the document properties.
+    /// Set the "Author" field of the document properties. See the example
+    /// above.
     ///
     /// # Arguments
     ///
@@ -288,7 +329,7 @@ impl Properties {
     /// Set the Keywords field of the document properties.
     ///
     /// Set the "Keywords" field of the document properties. This can be one or
-    /// more keywords that can be used in searches.
+    /// more keywords that can be used in searches. See the example above.
     ///
     /// # Arguments
     ///
@@ -303,7 +344,8 @@ impl Properties {
     /// Set the Comment field of the document properties.
     ///
     /// Set the "Comment" field of the document properties. This can be a
-    /// general comment or summary that you want to add to the properties.
+    /// general comment or summary that you want to add to the properties. See
+    /// the example above.
     ///
     /// # Arguments
     ///
@@ -349,7 +391,7 @@ impl Properties {
     ///
     /// Excel sets a date and time for every new document in UTC. The
     /// `rust_xlsxwriter` library does the same. However there may be cases
-    /// where you wish to set a different creation time.
+    /// where you wish to set a different creation time.  See the example above.
     ///
     /// # Arguments
     ///
@@ -363,4 +405,154 @@ impl Properties {
 
         self
     }
+
+    /// Set a custom text document property.
+    ///
+    /// Set a user defined text property that will appear in the Custom section
+    /// of the document properties. See the example above.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The user defined name of the custom property.
+    /// * `value` - The text/string value of the custom property.
+    ///
+    pub fn set_custom_text(mut self, name: &str, value: &str) -> Properties {
+        let mut property = CustomProperty::new();
+        property.property_type = CustomPropertyType::Text;
+        property.name = name.to_string();
+        property.text = value.to_string();
+
+        self.custom_properties.push(property);
+
+        self
+    }
+
+    /// Set a custom integer number document property.
+    ///
+    /// Set a user defined number property that will appear in the Custom
+    /// section of the document properties. See the example above.
+    ///
+    /// Excel supports two types of number property: i32 and f64. This method
+    /// supports i32, see also `set_custom_number_f64()`.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The user defined name of the custom property.
+    /// * `value` - The integer value of the custom property.
+    ///
+    pub fn set_custom_number_i32(mut self, name: &str, value: i32) -> Properties {
+        let mut property = CustomProperty::new();
+        property.property_type = CustomPropertyType::Int;
+        property.name = name.to_string();
+        property.number_int = value;
+
+        self.custom_properties.push(property);
+
+        self
+    }
+
+    /// Set a custom real number document property.
+    ///
+    /// Set a user defined number property that will appear in the Custom
+    /// section of the document properties. See the example above.
+    ///
+    /// Excel supports two types of number property: i32 and f64. This method
+    /// supports f64, see also `set_custom_number_i32()`.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The user defined name of the custom property.
+    /// * `value` - The real value of the custom property.
+    ///
+    pub fn set_custom_number_f64(mut self, name: &str, value: f64) -> Properties {
+        let mut property = CustomProperty::new();
+        property.property_type = CustomPropertyType::Real;
+        property.name = name.to_string();
+        property.number_real = value;
+
+        self.custom_properties.push(property);
+
+        self
+    }
+
+    /// Set a custom boolean document property.
+    ///
+    /// Set a user defined boolean property that will appear in the Custom
+    /// section of the document properties. See the example above.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The user defined name of the custom property.
+    /// * `value` - The boolean value of the custom property.
+    ///
+    pub fn set_custom_boolean(mut self, name: &str, value: bool) -> Properties {
+        let mut property = CustomProperty::new();
+        property.property_type = CustomPropertyType::Bool;
+        property.name = name.to_string();
+        property.boolean = value;
+
+        self.custom_properties.push(property);
+
+        self
+    }
+
+    /// Set a custom datetime document property.
+    ///
+    /// Set a user defined UTC datetime property that will appear in the Custom
+    /// section of the document properties. See the example above.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The user defined name of the custom property.
+    /// * `value` - The datetime value of the custom property.
+    ///
+    pub fn set_custom_datetime(mut self, name: &str, value: &DateTime<Utc>) -> Properties {
+        let mut property = CustomProperty::new();
+        property.property_type = CustomPropertyType::DateTime;
+        property.name = name.to_string();
+        property.datetime = *value;
+
+        self.custom_properties.push(property);
+
+        self
+    }
+}
+
+// -----------------------------------------------------------------------
+// Helper enums/structs/functions.
+// -----------------------------------------------------------------------
+
+///
+#[derive(Clone)]
+pub(crate) struct CustomProperty {
+    pub(crate) property_type: CustomPropertyType,
+    pub(crate) name: String,
+    pub(crate) text: String,
+    pub(crate) number_int: i32,
+    pub(crate) number_real: f64,
+    pub(crate) boolean: bool,
+    pub(crate) datetime: DateTime<Utc>,
+}
+
+impl CustomProperty {
+    pub(crate) fn new() -> CustomProperty {
+        CustomProperty {
+            property_type: CustomPropertyType::Text,
+            name: "".to_string(),
+            text: "".to_string(),
+            number_int: 0,
+            number_real: 0.0,
+            boolean: true,
+            datetime: Utc::now(),
+        }
+    }
+}
+
+#[derive(Clone)]
+pub(crate) enum CustomPropertyType {
+    Text,
+    Int,
+    Real,
+    Bool,
+    DateTime,
 }

@@ -49,6 +49,7 @@ use zip::{DateTime, ZipWriter};
 use crate::app::App;
 use crate::content_types::ContentTypes;
 use crate::core::Core;
+use crate::custom::Custom;
 use crate::error::XlsxError;
 use crate::metadata::Metadata;
 use crate::relationship::Relationship;
@@ -93,7 +94,7 @@ impl<W: Write + Seek> Packager<W> {
     ) -> Result<(), XlsxError> {
         // Write the sub-component files.
         self.write_content_types_file(options)?;
-        self.write_root_rels_file()?;
+        self.write_root_rels_file(options)?;
         self.write_workbook_rels_file(options)?;
         self.write_theme_file()?;
         self.write_styles_file(workbook)?;
@@ -114,6 +115,8 @@ impl<W: Write + Seek> Packager<W> {
 
         self.write_core_file(options)?;
         self.write_app_file(options)?;
+        self.write_custom_file(options)?;
+
         self.write_drawing_files(workbook)?;
         self.write_vml_files(workbook)?;
         self.write_image_files(workbook)?;
@@ -187,6 +190,10 @@ impl<W: Write + Seek> Packager<W> {
             content_types.add_default("bmp", "image/bmp");
         }
 
+        if !options.properties.custom_properties.is_empty() {
+            content_types.add_custom_properties();
+        }
+
         self.zip
             .start_file("[Content_Types].xml", self.zip_options)?;
 
@@ -197,12 +204,16 @@ impl<W: Write + Seek> Packager<W> {
     }
 
     // Write the root level _rels/.rels xml file.
-    fn write_root_rels_file(&mut self) -> Result<(), XlsxError> {
+    fn write_root_rels_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
         rels.add_document_relationship("officeDocument", "xl/workbook.xml", "");
         rels.add_package_relationship("metadata/core-properties", "docProps/core.xml");
         rels.add_document_relationship("extended-properties", "docProps/app.xml", "");
+
+        if !options.properties.custom_properties.is_empty() {
+            rels.add_document_relationship("custom-properties", "docProps/custom.xml", "");
+        }
 
         self.zip.start_file("_rels/.rels", self.zip_options)?;
 
@@ -400,6 +411,24 @@ impl<W: Write + Seek> Packager<W> {
 
         core.assemble_xml_file();
         self.zip.write_all(core.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write the custom.xml file.
+    fn write_custom_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
+        if options.properties.custom_properties.is_empty() {
+            return Ok(());
+        }
+
+        let mut custom = Custom::new();
+        custom.properties = options.properties.clone();
+
+        self.zip
+            .start_file("docProps/custom.xml", self.zip_options)?;
+
+        custom.assemble_xml_file();
+        self.zip.write_all(custom.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
