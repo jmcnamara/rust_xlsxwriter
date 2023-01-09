@@ -47,7 +47,7 @@ fn main() -> Result<(), XlsxError> {
         worksheet.write_number(row, 1, expense.1, &money_format)?;
 
         let date = NaiveDate::parse_from_str(expense.2, "%Y-%m-%d").unwrap();
-        worksheet.write_date(row, 2, date, &date_format)?;
+        worksheet.write_date(row, 2, &date, &date_format)?;
 
         row += 1;
     }

@@ -91,7 +91,7 @@ pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 ///
 ///     // Write a date.
 ///     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
-///     worksheet.write_date(6, 0, date, &date_format)?;
+///     worksheet.write_date(6, 0, &date, &date_format)?;
 ///
 ///     // Write some links.
 ///     worksheet.write_url(7, 0, "https://www.rust-lang.org")?;
@@ -2076,11 +2076,11 @@ impl Worksheet {
     ///         .unwrap();
     ///
     ///     // Write the datetime with different Excel formats.
-    ///     worksheet.write_datetime(0, 0, datetime, &format1)?;
-    ///     worksheet.write_datetime(1, 0, datetime, &format2)?;
-    ///     worksheet.write_datetime(2, 0, datetime, &format3)?;
-    ///     worksheet.write_datetime(3, 0, datetime, &format4)?;
-    ///     worksheet.write_datetime(4, 0, datetime, &format5)?;
+    ///     worksheet.write_datetime(0, 0, &datetime, &format1)?;
+    ///     worksheet.write_datetime(1, 0, &datetime, &format2)?;
+    ///     worksheet.write_datetime(2, 0, &datetime, &format3)?;
+    ///     worksheet.write_datetime(3, 0, &datetime, &format4)?;
+    ///     worksheet.write_datetime(4, 0, &datetime, &format5)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2096,7 +2096,7 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        datetime: NaiveDateTime,
+        datetime: &NaiveDateTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         let number = self.datetime_to_excel(datetime);
@@ -2166,11 +2166,11 @@ impl Worksheet {
     ///     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
     ///
     ///     // Write the date with different Excel formats.
-    ///     worksheet.write_date(0, 0, date, &format1)?;
-    ///     worksheet.write_date(1, 0, date, &format2)?;
-    ///     worksheet.write_date(2, 0, date, &format3)?;
-    ///     worksheet.write_date(3, 0, date, &format4)?;
-    ///     worksheet.write_date(4, 0, date, &format5)?;
+    ///     worksheet.write_date(0, 0, &date, &format1)?;
+    ///     worksheet.write_date(1, 0, &date, &format2)?;
+    ///     worksheet.write_date(2, 0, &date, &format3)?;
+    ///     worksheet.write_date(3, 0, &date, &format4)?;
+    ///     worksheet.write_date(4, 0, &date, &format5)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2186,7 +2186,7 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        date: NaiveDate,
+        date: &NaiveDate,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         let number = self.date_to_excel(date);
@@ -2256,11 +2256,11 @@ impl Worksheet {
     ///     let time = NaiveTime::from_hms_milli(2, 59, 3, 456);
     ///
     ///     // Write the time with different Excel formats.
-    ///     worksheet.write_time(0, 0, time, &format1)?;
-    ///     worksheet.write_time(1, 0, time, &format2)?;
-    ///     worksheet.write_time(2, 0, time, &format3)?;
-    ///     worksheet.write_time(3, 0, time, &format4)?;
-    ///     worksheet.write_time(4, 0, time, &format5)?;
+    ///     worksheet.write_time(0, 0, &time, &format1)?;
+    ///     worksheet.write_time(1, 0, &time, &format2)?;
+    ///     worksheet.write_time(2, 0, &time, &format3)?;
+    ///     worksheet.write_time(3, 0, &time, &format4)?;
+    ///     worksheet.write_time(4, 0, &time, &format5)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2276,7 +2276,7 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        time: NaiveTime,
+        time: &NaiveTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         let number = self.time_to_excel(time);
@@ -6156,9 +6156,9 @@ impl Worksheet {
     //   information in any way.
 
     // Convert a chrono::NaiveTime to an Excel serial datetime.
-    fn datetime_to_excel(&mut self, datetime: NaiveDateTime) -> f64 {
-        let excel_date = self.date_to_excel(datetime.date());
-        let excel_time = self.time_to_excel(datetime.time());
+    fn datetime_to_excel(&mut self, datetime: &NaiveDateTime) -> f64 {
+        let excel_date = self.date_to_excel(&datetime.date());
+        let excel_time = self.time_to_excel(&datetime.time());
 
         excel_date + excel_time
     }
@@ -6166,10 +6166,10 @@ impl Worksheet {
     // Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
     // is the number of days since the epoch, which is either 1899-12-31 or
     // 1904-01-01.
-    fn date_to_excel(&mut self, date: NaiveDate) -> f64 {
+    fn date_to_excel(&mut self, date: &NaiveDate) -> f64 {
         let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
-        let duration = date - epoch;
+        let duration = *date - epoch;
         let mut excel_date = duration.num_days() as f64;
 
         // For legacy reasons Excel treats 1900 as a leap year. We add an additional
@@ -6184,9 +6184,9 @@ impl Worksheet {
     // Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
     // datetime is the number of milliseconds divided by the total number of
     // milliseconds in the day.
-    fn time_to_excel(&mut self, time: NaiveTime) -> f64 {
+    fn time_to_excel(&mut self, time: &NaiveTime) -> f64 {
         let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
-        let duration = time - midnight;
+        let duration = *time - midnight;
 
         duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
     }
@@ -8836,7 +8836,7 @@ mod tests {
                 .unwrap()
                 .and_hms_milli_opt(hour, min, seconds, millis)
                 .unwrap();
-            assert_eq!(expected, worksheet.datetime_to_excel(datetime));
+            assert_eq!(expected, worksheet.datetime_to_excel(&datetime));
         }
     }
 
@@ -9049,7 +9049,7 @@ mod tests {
         for test_data in dates {
             let (year, month, day, expected) = test_data;
             let datetime = NaiveDate::from_ymd_opt(year, month, day).unwrap();
-            assert_eq!(expected, worksheet.date_to_excel(datetime));
+            assert_eq!(expected, worksheet.date_to_excel(&datetime));
         }
     }
 
@@ -9162,7 +9162,7 @@ mod tests {
         for test_data in times {
             let (hour, min, seconds, millis, expected) = test_data;
             let datetime = NaiveTime::from_hms_milli_opt(hour, min, seconds, millis).unwrap();
-            let mut diff = worksheet.time_to_excel(datetime) - expected;
+            let mut diff = worksheet.time_to_excel(&datetime) - expected;
             diff = diff.abs();
             assert!(diff < 0.00000000001);
         }

@@ -31,11 +31,11 @@ fn main() -> Result<(), XlsxError> {
         .unwrap();
 
     // Write the datetime with different Excel formats.
-    worksheet.write_datetime(0, 0, datetime, &format1)?;
-    worksheet.write_datetime(1, 0, datetime, &format2)?;
-    worksheet.write_datetime(2, 0, datetime, &format3)?;
-    worksheet.write_datetime(3, 0, datetime, &format4)?;
-    worksheet.write_datetime(4, 0, datetime, &format5)?;
+    worksheet.write_datetime(0, 0, &datetime, &format1)?;
+    worksheet.write_datetime(1, 0, &datetime, &format2)?;
+    worksheet.write_datetime(2, 0, &datetime, &format3)?;
+    worksheet.write_datetime(3, 0, &datetime, &format4)?;
+    worksheet.write_datetime(4, 0, &datetime, &format5)?;
 
     workbook.save("worksheet.xlsx")?;
 

@@ -28,11 +28,11 @@ fn main() -> Result<(), XlsxError> {
     let time = NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap();
 
     // Write the time with different Excel formats.
-    worksheet.write_time(0, 0, time, &format1)?;
-    worksheet.write_time(1, 0, time, &format2)?;
-    worksheet.write_time(2, 0, time, &format3)?;
-    worksheet.write_time(3, 0, time, &format4)?;
-    worksheet.write_time(4, 0, time, &format5)?;
+    worksheet.write_time(0, 0, &time, &format1)?;
+    worksheet.write_time(1, 0, &time, &format2)?;
+    worksheet.write_time(2, 0, &time, &format3)?;
+    worksheet.write_time(3, 0, &time, &format4)?;
+    worksheet.write_time(4, 0, &time, &format5)?;
 
     workbook.save("worksheet.xlsx")?;
 

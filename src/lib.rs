@@ -60,7 +60,7 @@
 //!
 //!     // Write a date.
 //!     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
-//!     worksheet.write_date(6, 0, date, &date_format)?;
+//!     worksheet.write_date(6, 0, &date, &date_format)?;
 //!
 //!     // Write some links.
 //!     worksheet.write_url(7, 0, "https://www.rust-lang.org")?;
