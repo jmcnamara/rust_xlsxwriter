@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.21.0] - 2023-01-09
+
+### Added
+
+- Added support for setting document metadata properties such as Author and
+  Creation Date. For more details see [`Properties`] and
+  [`workbook::set_properties()`].
+
+[`Properties`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Properties.html
+[`workbook::set_properties()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.set_properties
+
+### Changed
+
+- Change date/time parameters to references in [`worksheet.write_datetime()`],
+  [`worksheet.write_date()`] and [`worksheet.write_time()`] for consistency.
+
+[`worksheet.write_date()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_date
+[`worksheet.write_time()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_time
+[`worksheet.write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_datetime
+
+
 ## [0.20.0] - 2023-01-06
 
 ### Added
