@@ -31,7 +31,7 @@ spellcheck = {cmd = [
     "aspell --lang=en_US --check README.md"
 ]}
 
-coverage = { cmd = [
+coverage = {cmd = [
     "rm -rf target/coverage",
     "mkdir -p target/coverage",
     "CARGO_INCREMENTAL=0 RUSTFLAGS='-Cinstrument-coverage' LLVM_PROFILE_FILE='target/coverage/rust_xlsxwriter-%p-%m.profraw' cargo test",
@@ -39,7 +39,9 @@ coverage = { cmd = [
     "grcov target/coverage/ --binary-path ./target/debug/deps/ -s src -t html --branch -o target/coverage/html",
     "rm target/coverage/*.profraw",
     "open target/coverage/html/index.html"
-] }
+]}
+
+release_check = {cmd = ["../release/release_check.sh"]}
 
 # Profile
 # cargo instruments -t time --example app_perf_test
