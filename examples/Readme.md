@@ -33,6 +33,9 @@ documentation and generally show how an individual function works.
 * app_demo.rs - A simple, getting started, example of some of the features
   of the rust_xlsxwriter library.
 
+* app_doc_properties.rs - An example of setting workbook document
+  properties for a file created using the rust_xlsxwriter library.
+
 * app_dynamic_arrays.rs - An example of how to use the rust_xlsxwriter
   library to write formulas and functions that create dynamic arrays. These
   functions are new to Excel 365. The examples mirror the examples in the
@@ -164,6 +167,9 @@ documentation and generally show how an individual function works.
 * doc_format_set_pattern.rs - Demonstrates setting the cell pattern (with
   colors).
 
+* doc_format_set_quote_prefix.rs - Demonstrates setting the quote prefix
+  property for a format.
+
 * doc_format_set_reading_direction.rs - Demonstrates setting the text
   reading direction. This is useful when creating Arabic, Hebrew or other
   near or far eastern worksheets.
@@ -199,6 +205,15 @@ documentation and generally show how an individual function works.
 * doc_image_set_scale_width.rs - This example shows how to create an image
   object and use it to insert the image into a worksheet. The image in this
   case is scaled.
+
+* doc_properties_checksum1.rs - Create a simple workbook to demonstrate the
+  changing checksum due to the changing creation date.
+
+* doc_properties_checksum2.rs - Create a simple workbook to demonstrate a
+  constant checksum due to the a constant creation date.
+
+* doc_properties_custom.rs - An example of setting custom/user defined
+  workbook document properties.
 
 * doc_workbook_add_worksheet.rs - Demonstrates creating adding worksheets
   to a workbook.

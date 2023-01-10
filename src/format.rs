@@ -469,6 +469,9 @@ pub struct Format {
     // Protection properties.
     pub(crate) hidden: bool,
     pub(crate) locked: bool,
+
+    // Non-UI properties.
+    pub(crate) quote_prefix: bool,
 }
 
 impl Default for Format {
@@ -549,6 +552,7 @@ impl Format {
             indent: 0,
             shrink: false,
             reading_direction: 0,
+            quote_prefix: false,
             default_format_key: "".to_string(),
         };
 
@@ -582,7 +586,7 @@ impl Format {
 
     pub(crate) fn format_key(&self) -> String {
         format!(
-            "{}:{}:{}:{}:{}:{}:{}:{}",
+            "{}:{}:{}:{}:{}:{}:{}:{}:{}",
             self.alignment_key(),
             self.border_key(),
             self.fill_key(),
@@ -591,6 +595,7 @@ impl Format {
             self.locked,
             self.num_format,
             self.num_format_index,
+            self.quote_prefix,
         )
     }
 
@@ -874,7 +879,7 @@ impl Format {
     /// The following example demonstrates setting the bold property for a format.
     ///
     /// ```
-    /// # // This code is available in examples/doc_format_set_set_bold.rs
+    /// # // This code is available in examples/doc_format_set_bold.rs
     /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
@@ -2111,6 +2116,50 @@ impl Format {
         self
     }
 
+    /// Set the quote_prefix property for a Format.
+    ///
+    /// Set the quote prefix property of a format to ensure a string is treated
+    /// as a string after editing. This is the same as prefixing the string with
+    /// a single quote in Excel. You don't need to add the quote to the string
+    /// but you do need to add the format.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the quote prefix property for a
+    /// format.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_set_quote_prefix.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let format = Format::new().set_quote_prefix();
+    ///
+    ///     // If the "=Hello" string was edited in Excel it would change into an
+    ///     // invalid formula and raise an error. The quote prefix adds a virtual quote
+    ///     // to the start of the string and prevents this from happening.
+    ///     worksheet.write_string(0, 0, "=Hello", &format)?;
+    ///
+    /// #     workbook.save("formats.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/format_set_quote_prefix.png">
+    ///
+    pub fn set_quote_prefix(mut self) -> Format {
+        self.quote_prefix = true;
+        self
+    }
+
     /// Unset the bold Format property back to its default "off" state.
     /// The opposite of [`set_bold()`](Format::set_bold()).
     pub fn unset_bold(mut self) -> Format {
@@ -2164,6 +2213,13 @@ impl Format {
     pub fn unset_hyperlink_style(mut self) -> Format {
         self.is_hyperlink = true;
 
+        self
+    }
+
+    /// Unset the quote_prefix Format property back to its default "off" state.
+    /// The opposite of [`set_quote_prefix()`](Format::set_quote_prefix()).
+    pub fn unset_quote_prefix(mut self) -> Format {
+        self.quote_prefix = false;
         self
     }
 }

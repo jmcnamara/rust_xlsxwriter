@@ -526,6 +526,10 @@ impl<'a> Styles<'a> {
             ("xfId", xf_id.to_string()),
         ];
 
+        if xf_format.quote_prefix {
+            attributes.push(("quotePrefix", "1".to_string()));
+        }
+
         if xf_format.num_format_index > 0 {
             attributes.push(("applyNumberFormat", "1".to_string()));
         }
