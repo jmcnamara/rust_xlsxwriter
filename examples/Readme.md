@@ -94,6 +94,9 @@ documentation and generally show how an individual function works.
   image in the worksheet header as suggested in the Microsoft
   documentation.
 
+* app_worksheet_protection.rs - Example of cell locking and formula hiding
+  in an Excel worksheet rust_xlsxwriter library.
+
 * doc_enum_xlsxcolor.rs - Demonstrates using different XlsxColor enum
   values to set the color of some text in a worksheet.
 
@@ -283,6 +286,14 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_new.rs - Demonstrates creating new worksheet objects and
   then adding them to a workbook.
+
+* doc_worksheet_protect_with_options.rs - Demonstrates setting the
+  worksheet properties to be protected in a protected worksheet. In this
+  case we protect the overall worksheet but allow columns and rows to be
+  inserted.
+
+* doc_worksheet_protect_with_password.rs - Demonstrates protecting a
+  worksheet from editing with a password.
 
 * doc_worksheet_set_active.rs - Demonstrates setting a worksheet as the
   visible worksheet when a file is opened.

@@ -2096,7 +2096,58 @@ impl Format {
     /// This method can be used to allow modification of a cell in a protected
     /// worksheet. In Excel, cell locking is turned on by default for all cells.
     /// However, it only has an effect if the worksheet has been protected using
-    /// the `worksheet.protect()` method (not implemented yet).
+    /// the [`worksheet.protect()`](crate::Worksheet::protect) method.
+    ///
+    /// # Examples
+    ///
+    /// Example of cell locking and formula hiding in an Excel worksheet
+    /// rust_xlsxwriter library.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_worksheet_protection.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some format objects.
+    ///     let unlocked = Format::new().set_unlocked();
+    ///     let hidden = Format::new().set_hidden();
+    ///
+    ///     // Protect the worksheet to turn on cell locking.
+    ///     worksheet.protect();
+    ///
+    ///     // Examples of cell locking and hiding.
+    ///     worksheet.write_string_only(0, 0, "Cell B1 is locked. It cannot be edited.")?;
+    ///     worksheet.write_formula_only(0, 1, "=1+2")?; // Locked by default.
+    ///
+    ///     worksheet.write_string_only(1, 0, "Cell B2 is unlocked. It can be edited.")?;
+    ///     worksheet.write_formula(1, 1, "=1+2", &unlocked)?;
+    ///
+    ///     worksheet.write_string_only(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
+    ///     worksheet.write_formula(2, 1, "=1+2", &hidden)?;
+    ///
+    /// #     worksheet.write_string_only(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
+    /// #     worksheet.write_string_only(5, 0, "to remove the worksheet protection.")?;
+    ///
+    /// #     worksheet.autofit();
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet_protection.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/app_worksheet_protection.png">
     ///
     pub fn set_unlocked(mut self) -> Format {
         self.locked = false;
@@ -2108,8 +2159,10 @@ impl Format {
     /// This method can be used to hide a formula while still displaying its
     /// result. This is generally used to hide complex calculations from end
     /// users who are only interested in the result. It only has an effect if
-    /// the worksheet has been protected using the `worksheet.protect()` method
-    /// (not implemented yet).
+    /// the worksheet has been protected using the
+    /// [`worksheet.protect()`](crate::Worksheet::protect) method.
+    ///
+    /// See the example above.
     ///
     pub fn set_hidden(mut self) -> Format {
         self.hidden = true;

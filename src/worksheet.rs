@@ -179,6 +179,9 @@ pub struct Worksheet {
     panes: Panes,
     hyperlinks: BTreeMap<(RowNum, ColNum), Hyperlink>,
     rel_count: u16,
+    protection_on: bool,
+    protection_hash: u16,
+    protection_options: ProtectWorksheetOptions,
 }
 
 impl Default for Worksheet {
@@ -346,6 +349,9 @@ impl Worksheet {
             header_footer_images: [None, None, None, None, None, None],
             header_footer_vml_info: vec![],
             rel_count: 0,
+            protection_on: false,
+            protection_hash: 0,
+            protection_options: ProtectWorksheetOptions::new(),
         }
     }
 
@@ -3304,6 +3310,203 @@ impl Worksheet {
         self.autofilter_area = utility::cell_range(first_row, first_col, last_row, last_col);
 
         Ok(self)
+    }
+
+    /// Protect a worksheet from modification.
+    ///
+    /// The `protect()` method protects a worksheet from modification. It works
+    /// by enabling a cell's `locked` and `hidden` properties, if they have been
+    /// set. A **locked** cell cannot be edited and this property is on by
+    /// default for all cells. A **hidden** cell will display the results of a
+    /// formula but not the formula itself.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/protection_alert.png">
+    ///
+    /// These properties can be set using the
+    /// [`format.set_locked()`](Format::set_locked)
+    /// [`format.set_unlocked()`](Format::set_unlocked) and
+    /// [`worksheet.set_hidden()`](Format::set_hidden) format methods. All cells
+    /// have the `locked` property turned on by default (see the example below)
+    /// so in general you don't have to explicitly turn it on.
+    ///
+    /// # Examples
+    ///
+    /// Example of cell locking and formula hiding in an Excel worksheet
+    /// rust_xlsxwriter library.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_worksheet_protection.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some format objects.
+    ///     let unlocked = Format::new().set_unlocked();
+    ///     let hidden = Format::new().set_hidden();
+    ///
+    ///     // Protect the worksheet to turn on cell locking.
+    ///     worksheet.protect();
+    ///
+    ///     // Examples of cell locking and hiding.
+    ///     worksheet.write_string_only(0, 0, "Cell B1 is locked. It cannot be edited.")?;
+    ///     worksheet.write_formula_only(0, 1, "=1+2")?; // Locked by default.
+    ///
+    ///     worksheet.write_string_only(1, 0, "Cell B2 is unlocked. It can be edited.")?;
+    ///     worksheet.write_formula(1, 1, "=1+2", &unlocked)?;
+    ///
+    ///     worksheet.write_string_only(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
+    ///     worksheet.write_formula(2, 1, "=1+2", &hidden)?;
+    ///
+    /// #     worksheet.write_string_only(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
+    /// #     worksheet.write_string_only(5, 0, "to remove the worksheet protection.")?;
+    ///
+    /// #     worksheet.autofit();
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet_protection.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/app_worksheet_protection.png">
+    ///
+    pub fn protect(&mut self) -> &mut Worksheet {
+        self.protection_on = true;
+
+        self
+    }
+
+    /// Protect a worksheet from modification with a password.
+    ///
+    /// The `protect_with_password()` method is like the
+    /// [`protect()`](Worksheet::protect) method, see above, except that you can
+    /// add an optional, weak, password to prevent modification.
+    ///
+    /// **Note**: Worksheet level passwords in Excel offer very weak protection.
+    /// They do not encrypt your data and are very easy to deactivate. Full
+    /// workbook encryption is not supported by `rust_xlsxwriter`. However, it
+    /// is possible to encrypt an XlsxWriter file using a third party open
+    /// source tool called [msoffice-crypt](https://github.com/herumi/msoffice).
+    /// This works for macOS, Linux and Windows:
+    ///
+    /// ```text
+    /// msoffice-crypt.exe -e -p password clear.xlsx encrypted.xlsx
+    /// ```
+    ///
+    /// # Arguments
+    ///
+    /// * `password` - The password string. Note, only ascii text passwords are
+    ///   supported. Passing the empty string "" is the same as turning on
+    ///   protection without a password.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates protecting a worksheet from editing
+    /// with a password.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_protect_with_password.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.protect_with_password("abc123");
+    ///
+    ///     worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_password.png">
+    ///
+    pub fn protect_with_password(&mut self, password: &str) -> &mut Worksheet {
+        self.protection_on = true;
+        self.protection_hash = utility::hash_password(password);
+
+        self
+    }
+
+    /// Specify which worksheet elements should, or shouldn't, be protected.
+    ///
+    /// The `protect_with_password()` method is like the
+    /// [`protect()`](Worksheet::protect) method, see above, except it also
+    /// specifies which worksheet elements should, or shouldn't, be protected.
+    ///
+    /// You can specify which worksheet elements protection should be on or off
+    /// via a [`ProtectWorksheetOptions`] struct reference. The Excel options
+    /// with their default states are shown below:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options1.png">
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the worksheet properties to
+    /// be protected in a protected worksheet. In this case we protect the
+    /// overall worksheet but allow columns and rows to be inserted.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_protect_with_options.rs
+    /// #
+    /// # use rust_xlsxwriter::{ProtectWorksheetOptions, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Set some of the options and use the defaults for everything else.
+    ///     let options = ProtectWorksheetOptions {
+    ///         insert_columns: true,
+    ///         insert_rows: true,
+    ///         ..ProtectWorksheetOptions::default()
+    ///     };
+    ///
+    ///     // Set the protection options.
+    ///     worksheet.protect_with_options(&options);
+    ///
+    /// #     worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Excel dialog for the output file, compare this with the default image
+    /// above:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options2.png">
+    ///
+    pub fn protect_with_options(&mut self, options: &ProtectWorksheetOptions) -> &mut Worksheet {
+        self.protection_on = true;
+        self.protection_options = options.clone();
+
+        self
     }
 
     /// Write a user defined result to a worksheet formula cell.
@@ -6602,6 +6805,11 @@ impl Worksheet {
         // Write the sheetData element.
         self.write_sheet_data(string_table);
 
+        // Write the sheetProtection element.
+        if self.protection_on {
+            self.write_sheet_protection();
+        }
+
         // Write the autoFilter element.
         if !self.autofilter_area.is_empty() {
             self.write_auto_filter();
@@ -7527,11 +7735,232 @@ impl Worksheet {
         self.writer
             .xml_empty_tag_attr("legacyDrawingHF", &attributes);
     }
+
+    // Write the <sheetProtection> element.
+    fn write_sheet_protection(&mut self) {
+        let mut attributes = vec![];
+
+        if self.protection_hash != 0x0000 {
+            attributes.push(("password", format!("{:04X}", self.protection_hash)));
+        }
+
+        attributes.push(("sheet", "1".to_string()));
+
+        if !self.protection_options.edit_objects {
+            attributes.push(("objects", "1".to_string()));
+        }
+
+        if !self.protection_options.edit_scenarios {
+            attributes.push(("scenarios", "1".to_string()));
+        }
+
+        if self.protection_options.format_cells {
+            attributes.push(("formatCells", "0".to_string()));
+        }
+
+        if self.protection_options.format_columns {
+            attributes.push(("formatColumns", "0".to_string()));
+        }
+
+        if self.protection_options.format_rows {
+            attributes.push(("formatRows", "0".to_string()));
+        }
+
+        if self.protection_options.insert_columns {
+            attributes.push(("insertColumns", "0".to_string()));
+        }
+
+        if self.protection_options.insert_rows {
+            attributes.push(("insertRows", "0".to_string()));
+        }
+
+        if self.protection_options.insert_links {
+            attributes.push(("insertHyperlinks", "0".to_string()));
+        }
+
+        if self.protection_options.delete_columns {
+            attributes.push(("deleteColumns", "0".to_string()));
+        }
+
+        if self.protection_options.delete_rows {
+            attributes.push(("deleteRows", "0".to_string()));
+        }
+
+        if !self.protection_options.select_locked_cells {
+            attributes.push(("selectLockedCells", "1".to_string()));
+        }
+
+        if self.protection_options.sort {
+            attributes.push(("sort", "0".to_string()));
+        }
+
+        if self.protection_options.use_autofilter {
+            attributes.push(("autoFilter", "0".to_string()));
+        }
+
+        if self.protection_options.use_pivot_tables {
+            attributes.push(("pivotTables", "0".to_string()));
+        }
+
+        if !self.protection_options.select_unlocked_cells {
+            attributes.push(("selectUnlockedCells", "1".to_string()));
+        }
+
+        self.writer
+            .xml_empty_tag_attr("sheetProtection", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
+
+/// The `ProtectWorksheetOptions` struct is use to set the elements that can or
+/// can't be changed in a protected worksheet.
+///
+/// You can specify which worksheet elements protection should be on or off via
+/// the `ProtectWorksheetOptions` members. The corresponding Excel options with
+/// their default states are shown below:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options1.png">
+///
+/// # Examples
+///
+/// The following example demonstrates setting the worksheet properties to be
+/// protected in a protected worksheet. In this case we protect the overall
+/// worksheet but allow columns and rows to be inserted.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_protect_with_options.rs
+/// #
+/// use rust_xlsxwriter::{ProtectWorksheetOptions, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Set some of the options and use the defaults for everything else.
+///     let options = ProtectWorksheetOptions {
+///         insert_columns: true,
+///         insert_rows: true,
+///         ..ProtectWorksheetOptions::default()
+///     };
+///
+///     // Set the protection options.
+///     worksheet.protect_with_options(&options);
+///
+///     worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
+///
+///     workbook.save("worksheet.xlsx")?;
+///
+///     Ok(())
+///  }
+/// ```
+///
+/// Excel dialog for the output file, compare this with the default image above:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options2.png">
+///
+///
+///
+#[derive(Clone)]
+pub struct ProtectWorksheetOptions {
+    /// When `true` (the default) the user can select locked cells in a
+    /// protected worksheet.
+    pub select_locked_cells: bool,
+
+    /// When `true` (the default) the user can select unlocked cells in a
+    /// protected worksheet.
+    pub select_unlocked_cells: bool,
+
+    /// When `false` (the default) the user cannot format cells in a protected
+    /// worksheet.
+    pub format_cells: bool,
+
+    /// When `false` (the default) the user cannot format cells in a protected
+    /// worksheet.
+    pub format_columns: bool,
+
+    /// When `false` (the default) the user cannot format rows in a protected
+    /// worksheet.
+    pub format_rows: bool,
+
+    /// When `false` (the default) the user cannot insert new columns in a
+    /// protected worksheet.
+    pub insert_columns: bool,
+
+    /// When `false` (the default) the user cannot insert new rows in a
+    /// protected worksheet.
+    pub insert_rows: bool,
+
+    /// When `false` (the default) the user cannot insert hyperlinks/urls in a
+    /// protected worksheet.
+    pub insert_links: bool,
+
+    /// When `false` (the default) the user cannot delete columns in a protected
+    /// worksheet.
+    pub delete_columns: bool,
+
+    /// When `false` (the default) the user cannot delete rows in a protected
+    /// worksheet.
+    pub delete_rows: bool,
+
+    /// When `false` (the default) the user cannot sort data in a protected
+    /// worksheet.
+    pub sort: bool,
+
+    /// When `false` (the default) the user cannot use autofilters in a
+    /// protected worksheet.
+    pub use_autofilter: bool,
+
+    /// When `false` (the default) the user cannot use pivot tables or pivot
+    /// charts in a protected worksheet.
+    pub use_pivot_tables: bool,
+
+    /// When `false` (the default) the user cannot edit scenarios in a protected
+    /// worksheet.
+    pub edit_scenarios: bool,
+
+    /// When `false` (the default) the user cannot edit objects such as images,
+    /// charts or textboxes in a protected worksheet.
+    pub edit_objects: bool,
+}
+
+impl Default for ProtectWorksheetOptions {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ProtectWorksheetOptions {
+    /// Create a new ProtectWorksheetOptions object to use with the
+    /// [`worksheet.protect_with_options()`](Worksheet::protect_with_options) method.
+    ///
+    pub fn new() -> ProtectWorksheetOptions {
+        ProtectWorksheetOptions {
+            select_locked_cells: true,
+            select_unlocked_cells: true,
+            format_cells: false,
+            format_columns: false,
+            format_rows: false,
+            insert_columns: false,
+            insert_rows: false,
+            insert_links: false,
+
+            delete_columns: false,
+            delete_rows: false,
+            sort: false,
+            use_autofilter: false,
+            use_pivot_tables: false,
+            edit_scenarios: false,
+            edit_objects: false,
+        }
+    }
+}
 
 // Round to the closest integer number of emu units.
 fn round_to_emus(dimension: f64) -> f64 {
