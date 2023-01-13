@@ -437,6 +437,7 @@ impl<W: Write + Seek> Packager<W> {
     fn write_app_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut app = App::new();
         app.properties = options.properties.clone();
+        app.doc_security = options.doc_security;
 
         app.add_heading_pair("Worksheets", options.num_worksheets);
 
@@ -557,6 +558,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) has_vml: bool,
     pub(crate) num_worksheets: u16,
     pub(crate) num_drawings: u16,
+    pub(crate) doc_security: u8,
     pub(crate) worksheet_names: Vec<String>,
     pub(crate) defined_names: Vec<String>,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
@@ -572,6 +574,7 @@ impl PackagerOptions {
             has_vml: false,
             num_worksheets: 0,
             num_drawings: 0,
+            doc_security: 0,
             worksheet_names: vec![],
             defined_names: vec![],
             image_types: [false; NUM_IMAGE_FORMATS],

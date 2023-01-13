@@ -182,6 +182,7 @@ pub struct Worksheet {
     protection_on: bool,
     protection_hash: u16,
     protection_options: ProtectWorksheetOptions,
+    unprotected_ranges: Vec<(String, String, u16)>,
 }
 
 impl Default for Worksheet {
@@ -352,6 +353,7 @@ impl Worksheet {
             protection_on: false,
             protection_hash: 0,
             protection_options: ProtectWorksheetOptions::new(),
+            unprotected_ranges: vec![],
         }
     }
 
@@ -3426,10 +3428,11 @@ impl Worksheet {
     ///     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
     ///
+    ///     // Protect the worksheet from modification.
     ///     worksheet.protect_with_password("abc123");
     ///
-    ///     worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
-    ///
+    /// #     worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -3507,6 +3510,169 @@ impl Worksheet {
         self.protection_options = options.clone();
 
         self
+    }
+
+    /// Unprotect a range of cells in a protected worksheet.
+    ///
+    /// As shown in the example for the
+    /// [`worksheet.protect()`](Worksheet::protect) method it is possible to
+    /// unprotect a cell by setting the format `unprotect` property. Excel also
+    /// offers an interface to unprotect larger ranges of cells. This is
+    /// replicated in `rust_xlsxwriter` using the `unprotect_range()` method,
+    /// see the example below.
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates unprotecting ranges in a protected
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_unprotect_range.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Protect the worksheet from modification.
+    ///     worksheet.protect();
+    ///
+    ///     // Unprotect range D4:F10.
+    ///     worksheet.unprotect_range(4, 3, 9, 5)?;
+    ///
+    ///     // Unprotect single cell B3 by repeating (row, col).
+    ///     worksheet.unprotect_range(2, 1, 2, 1)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Dialog from the output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_unprotect_range.png">
+    ///
+    pub fn unprotect_range(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.unprotect_range_with_options(first_row, first_col, last_row, last_col, "", "")
+    }
+
+    /// Unprotect a range of cells in a protected worksheet, with options.
+    ///
+    /// This method is similar to
+    /// `unprotect_range()`[Worksheet::unprotect_range], see above, expect that
+    /// it allows you to specify two additional parameters to set the name of
+    /// the range (instead of the default Range1 .. RangeN) and also a optional
+    /// weak password (see
+    /// [`protect_with_password()`](Worksheet::protect_with_password) for an
+    /// explanation of what weak means here).
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `name` - The name of the range instead of RangeN. Can be blank if not
+    ///   required.
+    /// * `password` - The password to prevent modification of the range. Can be
+    ///   blank if not required.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates unprotecting ranges in a protected
+    /// worksheet, with additional options.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_unprotect_range_with_options.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Protect the worksheet from modification.
+    ///     worksheet.protect();
+    ///
+    ///     // Unprotect range D4:F10 and give it a user defined name.
+    ///     worksheet.unprotect_range_with_options(4, 3, 9, 5, "MyRange", "")?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Dialog from the output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_unprotect_range_with_options.png">
+    ///
+    pub fn unprotect_range_with_options(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        name: &str,
+        password: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        let range = utility::cell_range(first_row, first_col, last_row, last_col);
+        let mut name = name.to_string();
+        let password_hash = utility::hash_password(password);
+
+        if name.is_empty() {
+            name = format!("Range{}", 1 + self.unprotected_ranges.len());
+        }
+
+        self.unprotected_ranges.push((range, name, password_hash));
+
+        Ok(self)
     }
 
     /// Write a user defined result to a worksheet formula cell.
@@ -6810,6 +6976,11 @@ impl Worksheet {
             self.write_sheet_protection();
         }
 
+        // Write the protectedRange element.
+        if !self.unprotected_ranges.is_empty() {
+            self.write_protected_ranges();
+        }
+
         // Write the autoFilter element.
         if !self.autofilter_area.is_empty() {
             self.write_auto_filter();
@@ -7808,6 +7979,32 @@ impl Worksheet {
 
         self.writer
             .xml_empty_tag_attr("sheetProtection", &attributes);
+    }
+
+    // Write the <protectedRanges> element.
+    fn write_protected_ranges(&mut self) {
+        self.writer.xml_start_tag("protectedRanges");
+
+        for (range, name, hash) in self.unprotected_ranges.clone() {
+            self.write_protected_range(range, name, hash);
+        }
+
+        self.writer.xml_end_tag("protectedRanges");
+    }
+
+    // Write the <protectedRange> element.
+    fn write_protected_range(&mut self, range: String, name: String, hash: u16) {
+        let mut attributes = vec![];
+
+        if hash > 0 {
+            attributes.push(("password", format!("{:04X}", hash)));
+        }
+
+        attributes.push(("sqref", range));
+        attributes.push(("name", name));
+
+        self.writer
+            .xml_empty_tag_attr("protectedRange", &attributes);
     }
 }
 

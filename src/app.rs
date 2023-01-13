@@ -10,7 +10,7 @@ pub struct App {
     pub(crate) writer: XMLWriter,
     heading_pairs: Vec<(String, u16)>,
     table_parts: Vec<String>,
-    doc_security: u8,
+    pub(crate) doc_security: u8,
     pub(crate) properties: Properties,
 }
 

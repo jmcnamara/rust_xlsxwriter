@@ -105,6 +105,7 @@ pub struct Workbook {
     first_sheet: u16,
     defined_names: Vec<DefinedName>,
     user_defined_names: Vec<DefinedName>,
+    read_only_mode: u8,
 }
 
 impl Default for Workbook {
@@ -165,6 +166,7 @@ impl Workbook {
             first_sheet: 0,
             border_count: 0,
             num_format_count: 0,
+            read_only_mode: 0,
             has_hyperlink_style: false,
             worksheets: vec![],
             xf_formats: vec![],
@@ -958,6 +960,46 @@ impl Workbook {
         self
     }
 
+    /// Add a recommendation to open the file in “read-only” mode.
+    ///
+    /// This method can be used to set the Excel “Read-only Recommended” option
+    /// that is available when saving a file. This presents the user of the file
+    /// with an option to open it in "read-only" mode. This means that any
+    /// changes to the file can’t be saved back to the same file and must be
+    /// saved to a new file.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a simple workbook which opens
+    /// with a recommendation that the file should be opened in read only mode.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_read_only_recommended.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     let _worksheet = workbook.add_worksheet();
+    ///
+    ///     workbook.read_only_recommended();
+    ///
+    ///     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Alert when you open the output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/workbook_read_only_recommended.png">
+    ///
+    pub fn read_only_recommended(&mut self) -> &mut Workbook {
+        self.read_only_mode = 2;
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Internal function/methods.
     // -----------------------------------------------------------------------
@@ -1270,6 +1312,7 @@ impl Workbook {
         mut package_options: PackagerOptions,
     ) -> Result<PackagerOptions, XlsxError> {
         package_options.num_worksheets = self.worksheets.len() as u16;
+        package_options.doc_security = self.read_only_mode;
 
         let mut defined_names = self.user_defined_names.clone();
         let mut sheet_names: HashMap<String, u16> = HashMap::new();
@@ -1385,6 +1428,11 @@ impl Workbook {
         // Write the fileVersion element.
         self.write_file_version();
 
+        // Write the fileSharing element.
+        if self.read_only_mode == 2 {
+            self.write_file_sharing();
+        }
+
         // Write the workbookPr element.
         self.write_workbook_pr();
 
@@ -1427,6 +1475,13 @@ impl Workbook {
         ];
 
         self.writer.xml_empty_tag_attr("fileVersion", &attributes);
+    }
+
+    // Write the <fileSharing> element.
+    fn write_file_sharing(&mut self) {
+        let attributes = vec![("readOnlyRecommended", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("fileSharing", &attributes);
     }
 
     // Write the <workbookPr> element.

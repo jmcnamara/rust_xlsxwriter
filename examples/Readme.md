@@ -227,6 +227,10 @@ documentation and generally show how an individual function works.
 * doc_workbook_push_worksheet.rs - Demonstrates creating a standalone
   worksheet object and then adding it to a workbook.
 
+* doc_workbook_read_only_recommended.rs - Demonstrates creating a simple
+  workbook which opens with a recommendation that the file should be opened
+  in read only mode.
+
 * doc_workbook_save.rs - Demonstrates creating a simple workbook, with one
   unused worksheet.
 
@@ -387,6 +391,12 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_set_zoom.rs - Demonstrates setting the worksheet zoom
   level.
+
+* doc_worksheet_unprotect_range.rs - Demonstrates unprotecting ranges in a
+  protected worksheet.
+
+* doc_worksheet_unprotect_range_with_options.rs - Demonstrates unprotecting
+  ranges in a protected worksheet, with additional options.
 
 * doc_worksheet_write_array_formula.rs - Demonstrates writing an array
   formulas with formatting to a worksheet.
