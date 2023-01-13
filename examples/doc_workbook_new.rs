@@ -10,7 +10,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    _ = workbook.add_worksheet();
+    let _worksheet = workbook.add_worksheet();
 
     workbook.save("workbook.xlsx")?;
 

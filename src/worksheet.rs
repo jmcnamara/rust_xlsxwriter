@@ -392,10 +392,10 @@ impl Worksheet {
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
     ///
-    ///     _ = workbook.add_worksheet(); // Defaults to Sheet1
-    ///     _ = workbook.add_worksheet().set_name("Foglio2");
-    ///     _ = workbook.add_worksheet().set_name("Data");
-    ///     _ = workbook.add_worksheet(); // Defaults to Sheet4
+    ///     let _worksheet1 = workbook.add_worksheet(); // Defaults to Sheet1
+    ///     let _worksheet2 = workbook.add_worksheet().set_name("Foglio2");
+    ///     let _worksheet3 = workbook.add_worksheet().set_name("Data");
+    ///     let _worksheet4 = workbook.add_worksheet(); // Defaults to Sheet4
     ///
     /// #     workbook.save("worksheets.xlsx")?;
     /// #
@@ -9288,7 +9288,7 @@ mod tests {
         assert!(matches!(result, Err(XlsxError::MergeRangeSingleCell)));
 
         // Test for overlap.
-        let _ = worksheet.merge_range(1, 1, 20, 20, "Foo", &format);
+        let _worksheet = worksheet.merge_range(1, 1, 20, 20, "Foo", &format);
         let result = worksheet.merge_range(2, 2, 3, 3, "Foo", &format);
         assert!(matches!(result, Err(XlsxError::MergeRangeOverlaps(_, _))));
 

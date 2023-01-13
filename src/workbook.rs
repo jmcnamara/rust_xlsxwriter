@@ -142,7 +142,7 @@ impl Workbook {
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
     ///
-    ///     _ = workbook.add_worksheet();
+    ///     let _worksheet = workbook.add_worksheet();
     ///
     ///     workbook.save("workbook.xlsx")?;
     ///
@@ -498,9 +498,9 @@ impl Workbook {
     /// #     let mut workbook = Workbook::new();
     ///
     ///     // Add three worksheets to the workbook.
-    ///     let _ = workbook.add_worksheet();
-    ///     let _ = workbook.add_worksheet();
-    ///     let _ = workbook.add_worksheet();
+    ///     let _worksheet1 = workbook.add_worksheet();
+    ///     let _worksheet2 = workbook.add_worksheet();
+    ///     let _worksheet3 = workbook.add_worksheet();
     ///
     ///     // Get some information from all three worksheets.
     ///     for worksheet in workbook.worksheets() {
@@ -621,7 +621,7 @@ impl Workbook {
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
     ///
-    ///     _ = workbook.add_worksheet();
+    ///     let _worksheet = workbook.add_worksheet();
     ///
     ///     workbook.save("workbook.xlsx")?;
     ///
@@ -782,8 +782,8 @@ impl Workbook {
     /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add two worksheets to the workbook.
-    /// #     let _ = workbook.add_worksheet();
-    /// #     let _ = workbook.add_worksheet();
+    /// #     let _worksheet1 = workbook.add_worksheet();
+    /// #     let _worksheet2 = workbook.add_worksheet();
     /// #
     ///     // Define some global/workbook names.
     ///     workbook.define_name("Exchange_rate", "=0.96")?;

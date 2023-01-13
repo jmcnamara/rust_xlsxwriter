@@ -10,10 +10,10 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    _ = workbook.add_worksheet(); // Defaults to Sheet1
-    _ = workbook.add_worksheet().set_name("Foglio2");
-    _ = workbook.add_worksheet().set_name("Data");
-    _ = workbook.add_worksheet(); // Defaults to Sheet4
+    let _worksheet1 = workbook.add_worksheet(); // Defaults to Sheet1
+    let _worksheet2 = workbook.add_worksheet().set_name("Foglio2");
+    let _worksheet3 = workbook.add_worksheet().set_name("Data");
+    let _worksheet4 = workbook.add_worksheet(); // Defaults to Sheet4
 
     workbook.save("worksheets.xlsx")?;
 

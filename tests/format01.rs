@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet1.write_string_only(0, 0, "Foo")?;
     worksheet1.write_number_only(1, 0, 123)?;
 
-    let _ = workbook.add_worksheet().set_name("Data Sheet");
+    let _worksheet2 = workbook.add_worksheet().set_name("Data Sheet");
     let worksheet3 = workbook.add_worksheet();
 
     let bold = Format::new().set_bold();

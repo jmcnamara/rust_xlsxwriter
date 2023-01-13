@@ -52,8 +52,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         Some(&format),
     )?;
 
-    let _ = workbook.add_worksheet();
-    let _ = workbook.add_worksheet().set_name("Data Sheet");
+    let _worksheet2 = workbook.add_worksheet();
+    let _worksheet3 = workbook.add_worksheet().set_name("Data Sheet");
 
     workbook.save(filename)?;
 

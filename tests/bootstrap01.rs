@@ -14,7 +14,7 @@ mod common;
 // Test case to demonstrate creating a basic file with 1 worksheet and no data.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    _ = workbook.add_worksheet();
+    let _worksheet = workbook.add_worksheet();
 
     workbook.save(filename)?;
 
@@ -36,7 +36,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let path = Path::new(filename);
 
     let mut workbook = Workbook::new();
-    _ = workbook.add_worksheet();
+    let _worksheet = workbook.add_worksheet();
 
     workbook.save(&path)?;
 
@@ -49,7 +49,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     path.push(filename);
 
     let mut workbook = Workbook::new();
-    _ = workbook.add_worksheet();
+    let _worksheet = workbook.add_worksheet();
 
     workbook.save(&path)?;
 
@@ -59,7 +59,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 // Test case to demonstrate creating a basic file to a buffer.
 fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    _ = workbook.add_worksheet();
+    let _worksheet = workbook.add_worksheet();
 
     let buf = workbook.save_to_buffer()?;
 

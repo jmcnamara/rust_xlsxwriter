@@ -12,9 +12,9 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Add three worksheets to the workbook.
-    let _ = workbook.add_worksheet();
-    let _ = workbook.add_worksheet();
-    let _ = workbook.add_worksheet();
+    let _worksheet1 = workbook.add_worksheet();
+    let _worksheet2 = workbook.add_worksheet();
+    let _worksheet2 = workbook.add_worksheet();
 
     // Get some information from all three worksheets.
     for worksheet in workbook.worksheets() {

@@ -25,7 +25,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         Some(&format),
     )?;
 
-    let _ = workbook.add_worksheet().set_name("A & B")?;
+    let _worksheet2 = workbook.add_worksheet().set_name("A & B")?;
 
     workbook.save(filename)?;
 
