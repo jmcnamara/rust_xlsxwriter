@@ -403,9 +403,9 @@
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/format_currency7.png">
 ///
-/// In order to replicate Excel's behavior all XlsxWriter programs should use US
-/// locale formatting which will then be rendered in the settings of your host
-/// OS.
+/// In order to replicate Excel's behavior all rust_xlsxwriter programs should
+/// use US locale formatting which will then be rendered in the settings of your
+/// host OS.
 ///
 
 pub struct Format {

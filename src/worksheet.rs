@@ -3398,7 +3398,7 @@ impl Worksheet {
     /// **Note**: Worksheet level passwords in Excel offer very weak protection.
     /// They do not encrypt your data and are very easy to deactivate. Full
     /// workbook encryption is not supported by `rust_xlsxwriter`. However, it
-    /// is possible to encrypt an XlsxWriter file using a third party open
+    /// is possible to encrypt an rust_xlsxwriter file using a third party open
     /// source tool called [msoffice-crypt](https://github.com/herumi/msoffice).
     /// This works for macOS, Linux and Windows:
     ///
