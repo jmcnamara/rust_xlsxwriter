@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.22.0] - 2023-01-13
+
+### Added
+
+- Added support for worksheet protection via the [`worksheet.protect()`],
+  [`worksheet.protect_with_password()`] and [`worksheet.protect_with_options()`].
+
+  See also the section on [Worksheet protection] in the user guide.
+
+- Add option to make the xlsx file read-only when opened by Excel via the
+  [`workbook.read_only_recommended()`] method.
+
+
+[Worksheet protection]:  https://rustxlsxwriter.github.io/worksheet/create.html
+[`worksheet.protect()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.protect
+[`worksheet.protect_with_options()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.protect_with_options
+[`workbook.read_only_recommended()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.read_only_recommended
+[`worksheet.protect_with_password()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.protect_with_password
+
+
 ## [0.21.0] - 2023-01-09
 
 ### Added
