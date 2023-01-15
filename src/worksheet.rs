@@ -183,6 +183,7 @@ pub struct Worksheet {
     protection_hash: u16,
     protection_options: ProtectWorksheetOptions,
     unprotected_ranges: Vec<(String, String, u16)>,
+    selected_range: (String, String),
 }
 
 impl Default for Worksheet {
@@ -354,6 +355,7 @@ impl Worksheet {
             protection_hash: 0,
             protection_options: ProtectWorksheetOptions::new(),
             unprotected_ranges: vec![],
+            selected_range: ("".to_string(), "".to_string()),
         }
     }
 
@@ -3671,6 +3673,101 @@ impl Worksheet {
         }
 
         self.unprotected_ranges.push((range, name, password_hash));
+
+        Ok(self)
+    }
+
+    /// Set the selected cell or cells in a worksheet.
+    ///
+    /// The `set_selection()` method can be used to specify which cell or range
+    /// of cells is selected in a worksheet. The most common requirement is to
+    /// select a single cell, in which case the `first_` and `last_` parameters
+    /// should be the same.
+    ///
+    /// The active cell within a selected range is determined by the order in
+    /// which `first_` and `last_` are specified.
+    ///
+    /// Only one range of cells can be selected. The default cell selection is
+    /// (0, 0, 0, 0), "A1".
+    ///
+    /// # Arguments
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates selecting cells in worksheets. The order
+    /// of selection within the range depends on the order of `first` and `last`.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_selection.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet1 = workbook.add_worksheet();
+    ///     worksheet1.set_selection(3, 2, 3, 2)?; // Cell C4
+    ///
+    ///     let worksheet2 = workbook.add_worksheet();
+    ///     worksheet2.set_selection(3, 2, 6, 6)?; // Cells C4 to G7.
+    ///
+    ///     let worksheet3 = workbook.add_worksheet();
+    ///     worksheet3.set_selection(6, 6, 3, 2)?; // Cells G7 to C4.
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_selection.png">
+    pub fn set_selection(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // The first/last order can be reversed to allow a selection to go from
+        // the end to the start. We take the active cell from the user first
+        // row/col and then reverse them as required for the full range.
+        let active_cell = utility::rowcol_to_cell(first_row, first_col);
+
+        let mut first_row = first_row;
+        let mut first_col = first_col;
+        let mut last_row = last_row;
+        let mut last_col = last_col;
+
+        if first_row > last_row {
+            std::mem::swap(&mut first_row, &mut last_row);
+        }
+
+        if first_col > last_col {
+            std::mem::swap(&mut first_col, &mut last_col);
+        }
+
+        let range = utility::cell_range(first_row, first_col, last_row, last_col);
+
+        self.selected_range = (active_cell, range);
 
         Ok(self)
     }
@@ -7148,17 +7245,34 @@ impl Worksheet {
 
         attributes.push(("workbookViewId", "0".to_string()));
 
-        if self.panes.is_empty() {
+        if self.panes.is_empty() && self.selected_range.0.is_empty() {
             self.writer.xml_empty_tag_attr("sheetView", &attributes);
         } else {
             self.writer.xml_start_tag_attr("sheetView", &attributes);
             self.write_panes();
+            self.write_selections();
             self.writer.xml_end_tag("sheetView");
         }
     }
 
+    // Write the elements associated with cell selections.
+    fn write_selections(&mut self) {
+        if self.selected_range.0.is_empty() {
+            return;
+        }
+
+        let active_cell = self.selected_range.0.clone();
+        let range = self.selected_range.1.clone();
+
+        self.write_selection("", &active_cell, &range);
+    }
+
     // Write the elements associated with panes.
     fn write_panes(&mut self) {
+        if self.panes.is_empty() {
+            return;
+        }
+
         let row = self.panes.freeze_cell.0;
         let col = self.panes.freeze_cell.1;
 
@@ -7208,7 +7322,11 @@ impl Worksheet {
 
     // Write the <selection> element.
     fn write_selection(&mut self, position: &str, active_cell: &str, range: &str) {
-        let mut attributes = vec![("pane", position.to_string())];
+        let mut attributes = vec![];
+
+        if !position.is_empty() {
+            attributes.push(("pane", position.to_string()));
+        }
 
         if !active_cell.is_empty() {
             attributes.push(("activeCell", active_cell.to_string()));
