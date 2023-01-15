@@ -630,10 +630,11 @@ impl Workbook {
     /// ```
     ///
     pub fn save<P: AsRef<Path>>(&mut self, path: P) -> Result<(), XlsxError> {
-        // Some test code to test double saves. This should be turned into a
-        // feature or a config item.
-        // let file = std::fs::File::create(path.as_ref().clone())?;
-        // self.save_internal(file)?;
+        if cfg!(feature = "test_resave") {
+            // Some test code to test double/multiple saves.
+            let file = std::fs::File::create(<&std::path::Path>::clone(&path.as_ref()))?;
+            self.save_internal(file)?;
+        }
 
         let file = std::fs::File::create(path)?;
         self.save_internal(file)?;
