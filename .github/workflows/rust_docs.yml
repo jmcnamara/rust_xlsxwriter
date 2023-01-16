@@ -1,4 +1,4 @@
-name: Rust - test resave feature
+name: Rust - test docs
 
 on:
   push:
@@ -17,5 +17,5 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Run the tests for the resave feature set
-      run: cargo test --features "test_resave" --test '*'
+    - name: Test doc build for warnings
+      run: RUSTDOCFLAGS="-D warnings" cargo doc

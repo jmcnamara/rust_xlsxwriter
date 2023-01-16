@@ -16,8 +16,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose
+
     - name: Test that new code is formatted
       run: |
         cargo fmt
