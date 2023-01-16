@@ -7,7 +7,7 @@
 #![warn(missing_docs)]
 use std::borrow::Cow;
 use std::cmp;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Write;
 use std::mem;
 
@@ -185,6 +185,8 @@ pub struct Worksheet {
     unprotected_ranges: Vec<(String, String, u16)>,
     selected_range: (String, String),
     top_left_cell: String,
+    horizontal_breaks: Vec<u32>,
+    vertical_breaks: Vec<u32>,
 }
 
 impl Default for Worksheet {
@@ -358,6 +360,8 @@ impl Worksheet {
             unprotected_ranges: vec![],
             selected_range: ("".to_string(), "".to_string()),
             top_left_cell: "".to_string(),
+            horizontal_breaks: vec![],
+            vertical_breaks: vec![],
         }
     }
 
@@ -4592,6 +4596,115 @@ impl Worksheet {
         self
     }
 
+    /// Set the horizontal page breaks on a worksheet.
+    ///
+    /// The `set_page_breaks()` method adds horizontal page breaks to a
+    /// worksheet. A page break causes all the data that follows it to be
+    /// printed on the next page. Horizontal page breaks act between rows.
+    ///
+    /// # Arguments
+    ///
+    /// * `breaks` - A list of one or more row numbers where the page breaks
+    ///   occur. To create a page break between rows 20 and 21 you must specify
+    ///   the break at row 21. However in zero index notation this is actually
+    ///   row 20. So you can pretend for a small while that you are using 1
+    ///   index notation.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::ParameterError`] - The number of page breaks exceeds
+    ///   Excel's limit of 1023 page breaks.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting page breaks for a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_page_breaks.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet = workbook.add_worksheet();
+    ///     worksheet.write_string_only(100, 100, "Test")?;
+    ///
+    ///     // Set a page break at rows 20, 40 and 60.
+    ///     worksheet.set_page_breaks(&[20, 40, 60])?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_page_breaks.png">
+    ///
+    pub fn set_page_breaks(&mut self, breaks: &[RowNum]) -> Result<&mut Worksheet, XlsxError> {
+        // Ignore empty input.
+        if breaks.is_empty() {
+            return Ok(self);
+        }
+
+        // Sort list and remove any duplicates and 0.
+        let breaks = self.process_pagebreaks(breaks)?;
+
+        // Check max break value is within Excel column limit.
+        if *breaks.last().unwrap() >= ROW_MAX {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        self.horizontal_breaks = breaks;
+
+        Ok(self)
+    }
+
+    /// Set the vertical page breaks on a worksheet.
+    ///
+    /// The `set_vertical_page_breaks()` method adds vertical page breaks to a
+    /// worksheet. This is much less common than the
+    /// [`set_page_breaks()`](Worksheet::set_page_breaks) method shown above.
+    ///
+    /// # Arguments
+    ///
+    /// * `breaks` - A list of one or more column numbers where the page breaks
+    ///   occur.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::ParameterError`] - The number of page breaks exceeds
+    ///   Excel's limit of 1023 page breaks.
+    ///
+    pub fn set_vertical_page_breaks(
+        &mut self,
+        breaks: &[u32],
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Ignore empty input.
+        if breaks.is_empty() {
+            return Ok(self);
+        }
+
+        // Sort list and remove any duplicates and 0.
+        let breaks = self.process_pagebreaks(breaks)?;
+
+        // Check max break value is within Excel col limit.
+        if *breaks.last().unwrap() >= COL_MAX as u32 {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        self.vertical_breaks = breaks;
+
+        Ok(self)
+    }
+
     /// Set the worksheet zoom factor.
     ///
     /// Set the worksheet zoom factor in the range 10 <= zoom <= 400.
@@ -6116,6 +6229,30 @@ impl Worksheet {
     // Crate level helper methods.
     // -----------------------------------------------------------------------
 
+    // Process pagebreaks to sort them, remove duplicates and check the number
+    // is within the Excel limit.
+    pub(crate) fn process_pagebreaks(&mut self, breaks: &[u32]) -> Result<Vec<u32>, XlsxError> {
+        let unique_breaks: HashSet<u32> = breaks.iter().copied().collect();
+        let mut breaks: Vec<u32> = unique_breaks.into_iter().collect();
+        breaks.sort();
+
+        // Remove invalid 0 row/col.
+        if breaks[0] == 0 {
+            breaks.remove(0);
+        }
+
+        // The Excel 2007 specification says that the maximum number of page
+        // breaks is 1026. However, in practice it is actually 1023.
+        if breaks.len() > 1023 {
+            let error =
+                "Maximum number of horizontal or vertical pagebreaks allowed by Excel is 1023"
+                    .to_string();
+            return Err(XlsxError::ParameterError(error));
+        }
+
+        Ok(breaks)
+    }
+
     // Store a number cell in the worksheet data table structure.
     fn store_number(
         &mut self,
@@ -7181,6 +7318,16 @@ impl Worksheet {
             self.write_header_footer();
         }
 
+        // Write the rowBreaks element.
+        if !self.horizontal_breaks.is_empty() {
+            self.write_row_breaks();
+        }
+
+        // Write the colBreaks element.
+        if !self.vertical_breaks.is_empty() {
+            self.write_col_breaks();
+        }
+
         // Write the drawing element.
         if !self.drawing.drawings.is_empty() {
             self.write_drawing();
@@ -8198,6 +8345,62 @@ impl Worksheet {
         self.writer
             .xml_empty_tag_attr("protectedRange", &attributes);
     }
+
+    // Write the <rowBreaks> element.
+    fn write_row_breaks(&mut self) {
+        let attributes = vec![
+            ("count", self.horizontal_breaks.len().to_string()),
+            ("manualBreakCount", self.horizontal_breaks.len().to_string()),
+        ];
+
+        self.writer.xml_start_tag_attr("rowBreaks", &attributes);
+
+        for row_num in self.horizontal_breaks.clone() {
+            // Write the brk element.
+            self.write_row_brk(row_num);
+        }
+
+        self.writer.xml_end_tag("rowBreaks");
+    }
+
+    // Write the row <brk> element.
+    fn write_row_brk(&mut self, row_num: u32) {
+        let attributes = vec![
+            ("id", row_num.to_string()),
+            ("max", "16383".to_string()),
+            ("man", "1".to_string()),
+        ];
+
+        self.writer.xml_empty_tag_attr("brk", &attributes);
+    }
+
+    // Write the <colBreaks> element.
+    fn write_col_breaks(&mut self) {
+        let attributes = vec![
+            ("count", self.vertical_breaks.len().to_string()),
+            ("manualBreakCount", self.vertical_breaks.len().to_string()),
+        ];
+
+        self.writer.xml_start_tag_attr("colBreaks", &attributes);
+
+        for col_num in self.vertical_breaks.clone() {
+            // Write the brk element.
+            self.write_col_brk(col_num);
+        }
+
+        self.writer.xml_end_tag("colBreaks");
+    }
+
+    // Write the col <brk> element.
+    fn write_col_brk(&mut self, col_num: u32) {
+        let attributes = vec![
+            ("id", col_num.to_string()),
+            ("max", "1048575".to_string()),
+            ("man", "1".to_string()),
+        ];
+
+        self.writer.xml_empty_tag_attr("brk", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -8883,6 +9086,35 @@ mod tests {
         for (string, position, exp) in strings {
             assert_eq!(exp, worksheet.verify_header_footer_image(string, &position));
         }
+    }
+
+    #[test]
+    fn process_pagebreaks() {
+        let mut worksheet = Worksheet::new();
+
+        // Test removing duplicates.
+        let got = worksheet.process_pagebreaks(&[1, 1, 1, 1]).unwrap();
+        assert_eq!(vec![1], got);
+
+        // Test removing 0.
+        let got = worksheet.process_pagebreaks(&[0, 1, 2, 3, 4]).unwrap();
+        assert_eq!(vec![1, 2, 3, 4], got);
+
+        // Test sort order.
+        let got = worksheet.process_pagebreaks(&[1, 12, 2, 13, 3, 4]).unwrap();
+        assert_eq!(vec![1, 2, 3, 4, 12, 13], got);
+
+        // Exceed the number of allow breaks.
+        let breaks = (1u32..=1024).collect::<Vec<u32>>();
+        let result = worksheet.process_pagebreaks(&breaks);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+
+        // Test row and column limits.
+        let result = worksheet.set_page_breaks(&[ROW_MAX]);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
+
+        let result = worksheet.set_vertical_page_breaks(&[COL_MAX as u32]);
+        assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
     }
 
     #[test]
