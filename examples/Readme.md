@@ -342,6 +342,9 @@ documentation and generally show how an individual function works.
 * doc_worksheet_set_name.rs - Demonstrates setting user defined worksheet
   names and the default values when a name isn't set.
 
+* doc_worksheet_set_page_breaks.rs - Demonstrates setting page breaks for a
+  worksheet.
+
 * doc_worksheet_set_page_order.rs - Demonstrates setting the worksheet
   printed page order.
 
@@ -386,8 +389,16 @@ documentation and generally show how an individual function works.
   workbook. The active worksheet is selected by default so in this example
   the first two worksheets are selected.
 
+* doc_worksheet_set_selection.rs - Demonstrates selecting cells in
+  worksheets. The order of selection within the range depends on the order
+  of `first` and `last`.
+
 * doc_worksheet_set_tab_color.rs - Demonstrates set the tab color of
   worksheets.
+
+* doc_worksheet_set_top_left_cell.rs - Demonstrates setting the top and
+  leftmost visible cell in the worksheet. Often used in conjunction with
+  `set_selection()` to activate the same cell.
 
 * doc_worksheet_set_zoom.rs - Demonstrates setting the worksheet zoom
   level.

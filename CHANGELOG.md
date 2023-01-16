@@ -5,6 +5,20 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0] - 2023-01-16
+
+### Added
+
+Added more page setup methods.
+
+- Added [`worksheet.set_selection()`] method to select a cell or range of cells in a worksheet.
+- Added [`worksheet.set_top_left_cell()`] method to set the top and leftmost visible cell.
+- Added [`worksheet.set_page_breaks()`] method to add page breaks to a worksheet.
+
+[`worksheet.set_selection()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_selection
+[`worksheet.set_page_breaks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_page_breaks
+[`worksheet.set_top_left_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_top_left_cell
+
 
 ## [0.22.0] - 2023-01-13
 
