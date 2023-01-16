@@ -184,6 +184,7 @@ pub struct Worksheet {
     protection_options: ProtectWorksheetOptions,
     unprotected_ranges: Vec<(String, String, u16)>,
     selected_range: (String, String),
+    top_left_cell: String,
 }
 
 impl Default for Worksheet {
@@ -356,6 +357,7 @@ impl Worksheet {
             protection_options: ProtectWorksheetOptions::new(),
             unprotected_ranges: vec![],
             selected_range: ("".to_string(), "".to_string()),
+            top_left_cell: "".to_string(),
         }
     }
 
@@ -3768,6 +3770,74 @@ impl Worksheet {
         let range = utility::cell_range(first_row, first_col, last_row, last_col);
 
         self.selected_range = (active_cell, range);
+
+        Ok(self)
+    }
+
+    /// Set the first visible cell at the top left of a worksheet.
+    ///
+    /// This `set_top_left_cell()` method can be used to set the top leftmost
+    /// visible cell in the worksheet.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the top and leftmost visible
+    /// cell in the worksheet. Often used in conjunction with `set_selection()`
+    /// to activate the same cell.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_top_left_cell.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #    let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Set top-left cell to AA32.
+    ///     worksheet.set_top_left_cell(31, 26)?;
+    ///
+    ///     // Also make this the active/selected cell.
+    ///     worksheet.set_selection(31, 26, 31, 26)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_top_left_cell.png">
+    ///
+    pub fn set_top_left_cell(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Ignore cell (0, 0) since that is the default top-left cell.
+        if row == 0 && col == 0 {
+            return Ok(self);
+        }
+
+        self.top_left_cell = utility::rowcol_to_cell(row, col);
 
         Ok(self)
     }
@@ -7225,6 +7295,10 @@ impl Worksheet {
                 attributes.push(("view", "pageBreakPreview".to_string()));
             }
             PageView::Normal => {}
+        }
+
+        if !self.top_left_cell.is_empty() {
+            attributes.push(("topLeftCell", self.top_left_cell.clone()));
         }
 
         if self.zoom != 100 {
