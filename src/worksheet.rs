@@ -3832,7 +3832,7 @@ impl Worksheet {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and col are in the allowed range.
-        if !self.check_dimensions(row, col) {
+        if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
         }
 
@@ -7397,7 +7397,10 @@ impl Worksheet {
         let mut attributes = vec![];
         let mut range = "A1".to_string();
 
-        if !self.table.is_empty() || !self.changed_rows.is_empty() || !self.changed_cols.is_empty()
+        if self.dimensions.first_row != ROW_MAX
+            || self.dimensions.first_col != COL_MAX
+            || self.dimensions.last_row != 0
+            || self.dimensions.last_col != 0
         {
             range = utility::cell_range(
                 self.dimensions.first_row,
