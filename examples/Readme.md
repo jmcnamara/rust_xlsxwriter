@@ -305,6 +305,9 @@ documentation and generally show how an individual function works.
 * doc_worksheet_set_column_format.rs - Demonstrates setting the format for
   a column in Excel.
 
+* doc_worksheet_set_column_hidden.rs - Demonstrates hiding a worksheet
+  column.
+
 * doc_worksheet_set_column_width.rs - Demonstrates setting the width of
   columns in Excel.
 
@@ -384,6 +387,8 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_set_row_height_pixels.rs - Demonstrates setting the height
   for a row in Excel.
+
+* doc_worksheet_set_row_hidden.rs - Demonstrates hiding a worksheet row.
 
 * doc_worksheet_set_selected.rs - Demonstrates selecting worksheet in a
   workbook. The active worksheet is selected by default so in this example

@@ -2812,6 +2812,7 @@ impl Worksheet {
                 let row_options = RowOptions {
                     height,
                     xf_index: 0,
+                    hidden: false,
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -2962,6 +2963,81 @@ impl Worksheet {
                 let row_options = RowOptions {
                     height: DEFAULT_ROW_HEIGHT,
                     xf_index,
+                    hidden: false,
+                };
+                self.changed_rows.insert(row, row_options);
+            }
+        }
+
+        Ok(self)
+    }
+
+    /// Hide a worksheet row.
+    ///
+    /// The `set_row_hidden()` method is used to hide a row. This can be
+    /// used, for example, to hide intermediary steps in a complicated
+    /// calculation.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates hiding a worksheet row.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_row_hidden.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Hide row 2 (with zero indexing).
+    ///     worksheet.set_row_hidden(1)?;
+    ///
+    ///     worksheet.write_string_only(2, 0, "Row 2 is hidden")?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_row_hidden.png">
+    ///
+    pub fn set_row_hidden(&mut self, row: RowNum) -> Result<&mut Worksheet, XlsxError> {
+        // Set a suitable column range for the row dimension check/set.
+        let min_col = if self.dimensions.first_col != COL_MAX {
+            self.dimensions.first_col
+        } else {
+            0
+        };
+
+        // Check row is in the allowed range.
+        if !self.check_dimensions(row, min_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Update an existing row metadata object or create a new one.
+        match self.changed_rows.get_mut(&row) {
+            Some(row_options) => row_options.hidden = true,
+            None => {
+                let row_options = RowOptions {
+                    height: DEFAULT_ROW_HEIGHT,
+                    xf_index: 0,
+                    hidden: true,
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -3216,6 +3292,75 @@ impl Worksheet {
                 let col_options = ColOptions {
                     width: DEFAULT_COL_WIDTH,
                     xf_index,
+                    hidden: false,
+                    autofit: false,
+                };
+                self.changed_cols.insert(col, col_options);
+            }
+        }
+
+        Ok(self)
+    }
+
+    /// Hide a worksheet column.
+    ///
+    /// The `set_column_hidden()` method is used to hide a column. This can be
+    /// used, for example, to hide intermediary steps in a complicated
+    /// calculation.
+    ///
+    /// # Arguments
+    ///
+    /// * `col` - The zero indexed column number.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    ///   limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates hiding a worksheet column.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_column_hidden.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Hide column B.
+    ///     worksheet.set_column_hidden(1)?;
+    ///
+    ///     worksheet.write_string_only(0, 3, "Column B is hidden")?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_column_hidden.png">
+    ///
+    pub fn set_column_hidden(&mut self, col: ColNum) -> Result<&mut Worksheet, XlsxError> {
+        // Check if column is in the allowed range without updating dimensions.
+        if col >= COL_MAX {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Update an existing col metadata object or create a new one.
+        match self.changed_cols.get_mut(&col) {
+            Some(col_options) => col_options.hidden = true,
+            None => {
+                let col_options = ColOptions {
+                    width: DEFAULT_COL_WIDTH,
+                    xf_index: 0,
+                    hidden: true,
                     autofit: false,
                 };
                 self.changed_cols.insert(col, col_options);
@@ -6699,6 +6844,7 @@ impl Worksheet {
                 let col_options = ColOptions {
                     width,
                     xf_index: 0,
+                    hidden: false,
                     autofit,
                 };
                 self.changed_cols.insert(col, col_options);
@@ -7909,8 +8055,16 @@ impl Worksheet {
                 attributes.push(("s", xf_index.to_string()));
                 attributes.push(("customFormat", "1".to_string()));
             }
+
             if row_options.height != DEFAULT_ROW_HEIGHT {
                 attributes.push(("ht", row_options.height.to_string()));
+            }
+
+            if row_options.hidden {
+                attributes.push(("hidden", "1".to_string()));
+            }
+
+            if row_options.height != DEFAULT_ROW_HEIGHT {
                 attributes.push(("customHeight", "1".to_string()));
             }
         }
@@ -8130,7 +8284,13 @@ impl Worksheet {
         let last_col = *last_col + 1;
         let mut width = col_options.width;
         let mut xf_index = col_options.xf_index;
-        let has_custom_width = width != 8.43;
+        let has_custom_width = width != DEFAULT_COL_WIDTH;
+        let hidden = col_options.hidden;
+
+        // The default col width changes to 0 for hidden columns.
+        if width == DEFAULT_COL_WIDTH && hidden {
+            width = 0.0;
+        }
 
         // Convert column width from user units to character width.
         if width > 0.0 {
@@ -8162,7 +8322,11 @@ impl Worksheet {
             attributes.push(("bestFit", "1".to_string()));
         }
 
-        if has_custom_width {
+        if hidden {
+            attributes.push(("hidden", "1".to_string()));
+        }
+
+        if has_custom_width || hidden {
             attributes.push(("customWidth", "1".to_string()));
         }
 
@@ -8664,12 +8828,14 @@ impl CellRange {
 struct RowOptions {
     height: f64,
     xf_index: u32,
+    hidden: bool,
 }
 
 #[derive(Clone, PartialEq)]
 struct ColOptions {
     width: f64,
     xf_index: u32,
+    hidden: bool,
     autofit: bool,
 }
 
