@@ -205,6 +205,10 @@ documentation and generally show how an individual function works.
   useful visual information. This is used to improve the accessibility of
   visual elements.
 
+* doc_image_set_object_movement.rs - This example shows how to create an
+  image object and set the option to control how it behaves when the cells
+  underneath it are changed.
+
 * doc_image_set_scale_width.rs - This example shows how to create an image
   object and use it to insert the image into a worksheet. The image in this
   case is scaled.

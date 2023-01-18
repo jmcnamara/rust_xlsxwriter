@@ -4,7 +4,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use crate::xmlwriter::XMLWriter;
+use crate::{xmlwriter::XMLWriter, XlsxObjectMovement};
 
 pub struct Drawing {
     pub(crate) writer: XMLWriter,
@@ -64,7 +64,17 @@ impl Drawing {
 
     // Write the <xdr:twoCellAnchor> element.
     fn write_two_cell_anchor(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        let attributes = vec![("editAs", "oneCell".to_string())];
+        let mut attributes = vec![];
+
+        match drawing_info.object_movement {
+            XlsxObjectMovement::Default | XlsxObjectMovement::MoveButDontSizeWithCells => {
+                attributes.push(("editAs", "oneCell".to_string()))
+            }
+            XlsxObjectMovement::DontMoveOrSizeWithCells => {
+                attributes.push(("editAs", "absolute".to_string()))
+            }
+            _ => (),
+        }
 
         self.writer
             .xml_start_tag_attr("xdr:twoCellAnchor", &attributes);
@@ -303,6 +313,7 @@ pub(crate) struct DrawingInfo {
     pub(crate) height: f64,
     pub(crate) description: String,
     pub(crate) decorative: bool,
+    pub(crate) object_movement: XlsxObjectMovement,
     pub(crate) rel_id: u32,
 }
 
@@ -344,6 +355,7 @@ mod tests {
             description: "rust.png".to_string(),
             decorative: false,
             rel_id: 1,
+            object_movement: XlsxObjectMovement::Default,
         };
 
         drawing.drawings.push(drawing_info);

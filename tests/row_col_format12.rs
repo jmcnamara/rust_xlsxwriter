@@ -10,7 +10,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 mod common;
 
 // Test to demonstrate row or column formatting.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -22,11 +22,37 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Use implicit column hiding by setting width to 0.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.set_column_width(2, 0)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_row_col_format12() {
+fn test_row_col_format12_1() {
     let test_runner = common::TestRunner::new()
         .set_name("row_col_format12")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_row_col_format12_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("row_col_format12")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

@@ -14,7 +14,7 @@ use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 
-use crate::XlsxError;
+use crate::{XlsxError, XlsxObjectMovement};
 
 #[derive(Clone, Debug)]
 /// The Image struct is used to create an object to represent an image that can
@@ -62,7 +62,8 @@ pub struct Image {
     pub(crate) image_type: XlsxImageType,
     pub(crate) alt_text: String,
     pub(crate) vml_name: String,
-    pub(crate) position: XlsxImagePosition,
+    pub(crate) header_position: XlsxImagePosition,
+    pub(crate) object_movement: XlsxObjectMovement,
     pub(crate) is_header: bool,
     pub(crate) decorative: bool,
     pub(crate) hash: u64,
@@ -251,7 +252,8 @@ impl Image {
             image_type: XlsxImageType::Unknown,
             alt_text: "".to_string(),
             vml_name: "image".to_string(),
-            position: XlsxImagePosition::Center,
+            header_position: XlsxImagePosition::Center,
+            object_movement: XlsxObjectMovement::Default,
             is_header: true,
             decorative: false,
             hash: 0,
@@ -450,6 +452,73 @@ impl Image {
         self
     }
 
+    /// Set the object movement options for a worksheet image.
+    ///
+    /// Set the option to define how an image will behave in Excel if the cells
+    /// under the image are moved, deleted, or have their size changed. In Excel
+    /// the options are:
+    ///
+    /// 1. Move and size with cells
+    /// 2. Move but don't size with cells
+    /// 3. Don't move or size with cells
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
+    ///
+    /// These values are defined in the [`XlsxObjectMovement`] enum.
+    ///
+    /// The [`XlsxObjectMovement`] enum also provides an additional option to
+    /// "Move and size with cells - after the image is inserted" to allow images
+    /// to be hidden in rows or columns. In Excel this equates to option 1 above
+    /// but the internal image position calculations are handled differently.
+    ///
+    /// # Arguments
+    ///
+    /// * `option` - An image/object positioning behavior defined by the
+    ///   [`XlsxObjectMovement`] enum.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to create an image object and set the option to
+    /// control how it behaves when the cells underneath it are changed.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_image_set_object_movement.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxObjectMovement};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new image object.
+    ///     let mut image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///     // Set the object movement/positioning options.
+    ///     image.set_object_movement(XlsxObjectMovement::MoveButDontSizeWithCells);
+    ///
+    ///     // Insert the image.
+    ///     worksheet.insert_image(1, 2, &image)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/image_set_object_movement.png">
+    ///
+    pub fn set_object_movement(&mut self, option: XlsxObjectMovement) -> &mut Image {
+        self.object_movement = option;
+        self
+    }
+
     /// Get the width of the image used for the size calculations in Excel.
     ///
     /// # Examples
@@ -555,13 +624,13 @@ impl Image {
     // Get the image position string as used by header/footer VML.
     pub(crate) fn vml_position(&self) -> String {
         if self.is_header {
-            match self.position {
+            match self.header_position {
                 XlsxImagePosition::Left => "LH".to_string(),
                 XlsxImagePosition::Right => "RH".to_string(),
                 XlsxImagePosition::Center => "CH".to_string(),
             }
         } else {
-            match self.position {
+            match self.header_position {
                 XlsxImagePosition::Left => "LF".to_string(),
                 XlsxImagePosition::Right => "RF".to_string(),
                 XlsxImagePosition::Center => "CF".to_string(),

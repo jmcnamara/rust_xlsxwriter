@@ -2792,6 +2792,14 @@ impl Worksheet {
     where
         T: Into<f64>,
     {
+        let height = height.into();
+
+        // If the height is 0 then the Excel treats the row as hidden with
+        // default height.
+        if height == 0.0 {
+            return self.set_row_hidden(row);
+        }
+
         // Set a suitable column range for the row dimension check/set.
         let min_col = if self.dimensions.first_col != COL_MAX {
             self.dimensions.first_col
@@ -2805,7 +2813,6 @@ impl Worksheet {
         }
 
         // Update an existing row metadata object or create a new one.
-        let height = height.into();
         match self.changed_rows.get_mut(&row) {
             Some(row_options) => row_options.height = height,
             None => {
@@ -3119,6 +3126,12 @@ impl Worksheet {
         T: Into<f64>,
     {
         let width = width.into();
+
+        // If the width is 0 then the Excel treats the column as hidden with
+        // default width.
+        if width == 0.0 {
+            return self.set_column_hidden(col);
+        }
 
         // Check if column is in the allowed range without updating dimensions.
         if col >= COL_MAX {
@@ -5412,7 +5425,7 @@ impl Worksheet {
         }
 
         let mut image = image.clone();
-        image.position = position.clone();
+        image.header_position = position.clone();
         image.is_header = true;
         self.header_footer_images[position as usize] = Some(image);
 
@@ -5450,7 +5463,7 @@ impl Worksheet {
         }
 
         let mut image = image.clone();
-        image.position = position.clone();
+        image.header_position = position.clone();
         image.is_header = false;
         self.header_footer_images[3 + position as usize] = Some(image);
 
@@ -7208,19 +7221,19 @@ impl Worksheet {
 
         // Calculate the absolute x offset of the top-left vertex.
         for col in 0..col_start {
-            x_abs += self.column_size(col);
+            x_abs += self.column_pixel_width(col, &image.object_movement);
         }
         x_abs += x1;
 
         // Calculate the absolute y offset of the top-left vertex.
         for row in 0..row_start {
-            y_abs += self.row_size(row);
+            y_abs += self.row_pixel_height(row, &image.object_movement);
         }
         y_abs += y1;
 
         // Adjust start col for offsets that are greater than the col width.
         loop {
-            let col_size = self.column_size(col_start);
+            let col_size = self.column_pixel_width(col_start, &image.object_movement);
             if x1 >= col_size {
                 x1 -= col_size;
                 col_start += 1;
@@ -7231,7 +7244,7 @@ impl Worksheet {
 
         // Adjust start row for offsets that are greater than the row height.
         loop {
-            let row_size = self.row_size(row_start);
+            let row_size = self.row_pixel_height(row_start, &image.object_movement);
             if y1 >= row_size {
                 y1 -= row_size;
                 row_start += 1;
@@ -7250,7 +7263,7 @@ impl Worksheet {
 
         // Subtract the underlying cell widths to find the end cell.
         loop {
-            let col_size = self.column_size(col_end) as f64;
+            let col_size = self.column_pixel_width(col_end, &image.object_movement) as f64;
             if x2 >= col_size {
                 x2 -= col_size;
                 col_end += 1;
@@ -7261,7 +7274,7 @@ impl Worksheet {
 
         //Subtract the underlying cell heights to find the end cell.
         loop {
-            let row_size = self.row_size(row_end) as f64;
+            let row_size = self.row_pixel_height(row_end, &image.object_movement) as f64;
             if y2 >= row_size {
                 y2 -= row_size;
                 row_end += 1;
@@ -7294,32 +7307,52 @@ impl Worksheet {
             height,
             description: image.alt_text.clone(),
             decorative: image.decorative,
+            object_movement: image.object_movement.clone(),
             rel_id: 0,
         }
     }
 
-    // Get the user specified or default column size.
-    fn column_size(&mut self, col: ColNum) -> u32 {
+    // Convert the width of a cell from character units to pixels. Excel rounds
+    // the column width to the nearest pixel.
+    fn column_pixel_width(&mut self, col: ColNum, position: &XlsxObjectMovement) -> u32 {
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
 
         match self.changed_cols.get(&col) {
             Some(col_options) => {
-                let width = col_options.width;
-                if width < 1.0 {
-                    (width * (max_digit_width + padding) + 0.5) as u32
+                let pixel_width = col_options.width;
+                let hidden = col_options.hidden;
+
+                if hidden && *position != XlsxObjectMovement::MoveAndSizeWithCellsAfter {
+                    // A hidden column is treated as having a width of zero unless
+                    // the "object_movement" is MoveAndSizeWithCellsAfter.
+                    0u32
+                } else if pixel_width < 1.0 {
+                    (pixel_width * (max_digit_width + padding) + 0.5) as u32
                 } else {
-                    (width * max_digit_width + 0.5) as u32 + padding as u32
+                    (pixel_width * max_digit_width + 0.5) as u32 + padding as u32
                 }
             }
+            // If the width hasn't been set we use the default value.
             None => 64,
         }
     }
 
-    // Get the user specified or default row width.
-    fn row_size(&mut self, row: RowNum) -> u32 {
+    // Convert the height of a cell from character units to pixels. If the
+    // height hasn't been set by the user we use the default value.
+    fn row_pixel_height(&mut self, row: RowNum, position: &XlsxObjectMovement) -> u32 {
         match self.changed_rows.get(&row) {
-            Some(row_options) => (row_options.height * 4.0 / 3.0) as u32,
+            Some(row_options) => {
+                let hidden = row_options.hidden;
+
+                if hidden && *position != XlsxObjectMovement::MoveAndSizeWithCellsAfter {
+                    // A hidden row is treated as having a height of zero unless
+                    // the "object_movement" is MoveAndSizeWithCellsAfter.
+                    0u32
+                } else {
+                    (row_options.height * 4.0 / 3.0) as u32
+                }
+            }
             None => 20,
         }
     }
@@ -8719,6 +8752,36 @@ impl ProtectWorksheetOptions {
             edit_objects: false,
         }
     }
+}
+
+/// Options to control the movement of worksheet objects such as images.
+///
+/// This enum defines the way control a worksheet object, such a an images,
+/// moves when the cells underneath it are moved, resized or deleted. This
+/// equates to the following Excel options:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
+///
+/// Used with [`image.set_object_movement`](Image::set_object_movement).
+///
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum XlsxObjectMovement {
+    /// Default movement for the object.
+    Default,
+
+    /// Move and size the worksheet object with the cells.
+    MoveAndSizeWithCells,
+
+    /// Move but don't size the worksheet object with the cells.
+    MoveButDontSizeWithCells,
+
+    /// Don't move or size the worksheet object with the cells.
+    DontMoveOrSizeWithCells,
+
+    /// Same as `MoveAndSizeWithCells` except hidden cells are applied after the
+    /// object is inserted. This allows the insertion of objects in hidden rows
+    /// or columns.
+    MoveAndSizeWithCellsAfter,
 }
 
 // Round to the closest integer number of emu units.
