@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the [XlsxObjectMovement] enum to control how a worksheet object, such a
   an image, moves when the cells underneath it are moved, resized or deleted.
 
-[XlsxObjectMovement]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.XlsxImagePosition.html
+[XlsxObjectMovement]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.XlsxObjectMovement.html
 [`worksheet.set_row_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_row_hidden
 [`worksheet.set_column_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_column_hidden
 
