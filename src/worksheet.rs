@@ -12,6 +12,7 @@ use std::io::Write;
 use std::mem;
 
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
+use itertools::Itertools;
 use regex::Regex;
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo};
@@ -187,6 +188,8 @@ pub struct Worksheet {
     top_left_cell: String,
     horizontal_breaks: Vec<u32>,
     vertical_breaks: Vec<u32>,
+    filter_conditions: HashMap<ColNum, FilterCondition>,
+    filter_rows_off: bool,
 }
 
 impl Default for Worksheet {
@@ -362,6 +365,8 @@ impl Worksheet {
             top_left_cell: "".to_string(),
             horizontal_breaks: vec![],
             vertical_breaks: vec![],
+            filter_conditions: HashMap::new(),
+            filter_rows_off: false,
         }
     }
 
@@ -3477,7 +3482,130 @@ impl Worksheet {
 
         self.autofilter_area = utility::cell_range(first_row, first_col, last_row, last_col);
 
+        // Clear any previous filters.
+        self.filter_conditions = HashMap::new();
+
         Ok(self)
+    }
+
+    /// TODO
+    pub fn filter_column(
+        &mut self,
+        col: ColNum,
+        filter_condition: &FilterCondition,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check that an autofilter has been created before a condition can be
+        // applied to it.
+        if !self.autofilter_defined_name.in_use {
+            let error =
+                "The 'autofilter()' range must be set before a 'filter_condition' can be applied."
+                    .to_string();
+            return Err(XlsxError::ParameterError(error));
+        }
+
+        // Check if column is in the allowed range without updating dimensions.
+        if col >= COL_MAX {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check if column is within the autofilter column range.
+        if col < self.autofilter_defined_name.first_col
+            || col > self.autofilter_defined_name.last_col
+        {
+            let error = format!(
+                "Col '{col}' outside user defined autofilter column range '{}-{}'",
+                self.autofilter_defined_name.first_col, self.autofilter_defined_name.last_col
+            );
+            return Err(XlsxError::ParameterError(error));
+        }
+
+        // Check the filter condition have been set up correctly.
+        // if filter_condition.filter_type == FilterCriteriaTypes::Unset {
+        //     let error = format!("The 'filter_condition' doesn't have a value set.");
+        //     return Err(XlsxError::ParameterError(error));
+        // }
+
+        self.filter_conditions.insert(col, filter_condition.clone());
+
+        Ok(self)
+    }
+
+    /// TODO
+    pub fn filter_rows_off(&mut self) -> &mut Worksheet {
+        self.filter_rows_off = true;
+        self
+    }
+
+    // TODO
+    pub(crate) fn hide_autofilter_rows(&mut self) {
+        if self.filter_conditions.is_empty() || self.filter_rows_off {
+            return;
+        }
+
+        let cols: Vec<ColNum> = self.filter_conditions.keys().cloned().collect();
+        let first_row = self.autofilter_defined_name.first_row + 1; // Skip header.
+        let last_row = self.autofilter_defined_name.last_row;
+
+        for col in cols {
+            let filter_condition = self.filter_conditions.get(&col).unwrap().clone();
+            for row in first_row..=last_row {
+                if !self.row_matches_list_filter(row, col, &filter_condition) {
+                    self.set_row_hidden(row).unwrap();
+                }
+            }
+        }
+    }
+
+    // TODO
+    fn row_matches_list_filter(
+        &self,
+        row_num: RowNum,
+        col_num: ColNum,
+        filter_condition: &FilterCondition,
+    ) -> bool {
+        if let Some(columns) = self.table.get(&row_num) {
+            if let Some(cell) = columns.get(&col_num) {
+                match cell {
+                    CellType::String { string, .. }
+                    | CellType::RichString {
+                        string: _,
+                        xf_index: _,
+                        raw_string: string,
+                    } => {
+                        for data in &filter_condition.list {
+                            if string.to_lowercase().trim() == data.string.to_lowercase().trim() {
+                                return true;
+                            }
+                        }
+
+                        if filter_condition.match_blanks && string.trim().is_empty() {
+                            return true;
+                        }
+                    }
+                    CellType::Number { number, .. } => {
+                        for data in &filter_condition.list {
+                            if data.data_type == FilterDataType::Number && number == &data.number {
+                                return true;
+                            }
+                        }
+                    }
+
+                    CellType::Blank { .. } => {
+                        if filter_condition.match_blanks {
+                            return true;
+                        }
+                    }
+
+                    _ => {}
+                };
+            } else if filter_condition.match_blanks {
+                return true;
+            }
+        } else if filter_condition.match_blanks {
+            return true;
+        }
+
+        false
     }
 
     /// Protect a worksheet from modification.
@@ -7534,19 +7662,28 @@ impl Worksheet {
 
     // Write the <sheetPr> element.
     fn write_sheet_pr(&mut self) {
-        if !self.fit_to_page && self.tab_color.is_default() {
+        if self.filter_conditions.is_empty() && !self.fit_to_page && self.tab_color.is_default() {
             return;
         }
 
-        self.writer.xml_start_tag("sheetPr");
+        let mut attributes = vec![];
+        if !self.filter_conditions.is_empty() {
+            attributes.push(("filterMode", "1".to_string()));
+        }
 
-        // Write the pageSetUpPr element.
-        self.write_page_set_up_pr();
+        if self.fit_to_page || self.tab_color.is_not_default() {
+            self.writer.xml_start_tag_attr("sheetPr", &attributes);
 
-        // Write the tabColor element.
-        self.write_tab_color();
+            // Write the pageSetUpPr element.
+            self.write_page_set_up_pr();
 
-        self.writer.xml_end_tag("sheetPr");
+            // Write the tabColor element.
+            self.write_tab_color();
+
+            self.writer.xml_end_tag("sheetPr");
+        } else {
+            self.writer.xml_empty_tag_attr("sheetPr", &attributes);
+        }
     }
 
     // Write the <pageSetUpPr> element.
@@ -7926,7 +8063,60 @@ impl Worksheet {
     fn write_auto_filter(&mut self) {
         let attributes = vec![("ref", self.autofilter_area.clone())];
 
-        self.writer.xml_empty_tag_attr("autoFilter", &attributes);
+        if self.filter_conditions.is_empty() {
+            self.writer.xml_empty_tag_attr("autoFilter", &attributes);
+        } else {
+            self.writer.xml_start_tag_attr("autoFilter", &attributes);
+            let col_offset = self.autofilter_defined_name.first_col;
+
+            for col in self.filter_conditions.clone().keys().sorted() {
+                let filter_condition = self.filter_conditions.get(col).unwrap().clone();
+
+                self.write_filter_column(*col - col_offset, &filter_condition);
+            }
+
+            self.writer.xml_end_tag("autoFilter");
+        }
+    }
+
+    // Write the <filterColumn> element.
+    fn write_filter_column(&mut self, col: ColNum, filter_condition: &FilterCondition) {
+        let attributes = vec![("colId", col.to_string())];
+
+        self.writer.xml_start_tag_attr("filterColumn", &attributes);
+
+        self.write_filters(filter_condition);
+
+        self.writer.xml_end_tag("filterColumn");
+    }
+
+    // Write the <filters> element.
+    fn write_filters(&mut self, filter_condition: &FilterCondition) {
+        let mut attributes = vec![];
+
+        if filter_condition.is_list_filter && filter_condition.match_blanks {
+            attributes.push(("blank", "1".to_string()));
+        }
+
+        if filter_condition.list.is_empty() {
+            self.writer.xml_empty_tag_attr("filters", &attributes);
+        } else {
+            self.writer.xml_start_tag_attr("filters", &attributes);
+
+            for data in &filter_condition.list {
+                // Write the filter element.
+                self.write_filter(data.string.clone());
+            }
+
+            self.writer.xml_end_tag("filters");
+        }
+    }
+
+    // Write the <filter> element.
+    fn write_filter(&mut self, value: String) {
+        let attributes = vec![("val", value)];
+
+        self.writer.xml_empty_tag_attr("filter", &attributes);
     }
 
     // Write out all the row and cell data in the worksheet data table.
@@ -8606,6 +8796,92 @@ impl Worksheet {
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
+
+///
+#[derive(Clone)]
+pub struct FilterCondition {
+    pub(crate) is_list_filter: bool,
+    pub(crate) match_blanks: bool,
+    pub(crate) list: Vec<FilterData>,
+}
+
+#[allow(clippy::new_without_default)]
+impl FilterCondition {
+    /// TODO
+    pub fn new() -> FilterCondition {
+        FilterCondition {
+            is_list_filter: true,
+            match_blanks: false,
+            list: vec![],
+        }
+    }
+
+    /// TODO
+    pub fn list_push_string(mut self, value: &str) -> FilterCondition {
+        self.list.push(FilterData::new_string(value));
+        self
+    }
+
+    /// TODO
+    pub fn list_push_number<T>(mut self, value: T) -> FilterCondition
+    where
+        T: Into<f64>,
+    {
+        self.list.push(FilterData::new_number(value.into()));
+        self
+    }
+
+    /// TODO
+    pub fn list_match_blanks(mut self) -> FilterCondition {
+        self.match_blanks = true;
+        self
+    }
+}
+
+///
+#[derive(Clone)]
+pub enum FilterCriteria {
+    /// TODO
+    EqualTo,
+
+    /// TODO
+    NotEqualTo,
+
+    /// TODO
+    Unset,
+}
+
+#[derive(Clone)]
+pub(crate) struct FilterData {
+    data_type: FilterDataType,
+    string: String,
+    number: f64,
+}
+
+impl FilterData {
+    fn new_string(value: &str) -> FilterData {
+        FilterData {
+            data_type: FilterDataType::String,
+            string: value.to_string(),
+            number: 0.0,
+        }
+    }
+
+    fn new_number(value: f64) -> FilterData {
+        FilterData {
+            data_type: FilterDataType::Number,
+            string: value.to_string(),
+            number: value,
+        }
+    }
+}
+
+// TODO
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) enum FilterDataType {
+    String,
+    Number,
+}
 
 /// The `ProtectWorksheetOptions` struct is use to set the elements that can or
 /// can't be changed in a protected worksheet.
@@ -9318,6 +9594,71 @@ mod tests {
         for (string, position, exp) in strings {
             assert_eq!(exp, worksheet.verify_header_footer_image(string, &position));
         }
+    }
+
+    #[test]
+    fn row_matches_list_filter_blanks() {
+        let mut worksheet = Worksheet::new();
+        let bold = Format::new().set_bold();
+
+        worksheet.write_string_only(0, 0, "Header").unwrap();
+        worksheet.write_string_only(1, 0, "").unwrap();
+        worksheet.write_string_only(2, 0, " ").unwrap();
+        worksheet.write_string_only(3, 0, "  ").unwrap();
+        worksheet.write_string(4, 0, "", &bold).unwrap();
+
+        let filter_condition = FilterCondition::new().list_match_blanks();
+
+        assert!(!worksheet.row_matches_list_filter(0, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(5, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(7, 7, &filter_condition));
+    }
+
+    #[test]
+    fn row_matches_list_filter_strings() {
+        let mut worksheet = Worksheet::new();
+        worksheet.write_string_only(0, 0, "Header").unwrap();
+        worksheet.write_string_only(1, 0, "South").unwrap();
+        worksheet.write_string_only(2, 0, "south").unwrap();
+        worksheet.write_string_only(3, 0, "SOUTH").unwrap();
+        worksheet.write_string_only(4, 0, "South ").unwrap();
+        worksheet.write_string_only(5, 0, " South").unwrap();
+        worksheet.write_string_only(6, 0, " South ").unwrap();
+        worksheet.write_string_only(7, 0, "Mouth").unwrap();
+
+        let filter_condition = FilterCondition::new().list_push_string("South");
+
+        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(5, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(6, 0, &filter_condition));
+        assert!(!worksheet.row_matches_list_filter(7, 0, &filter_condition));
+    }
+
+    #[test]
+    fn row_matches_list_filter_numbers() {
+        let mut worksheet = Worksheet::new();
+
+        worksheet.write_string_only(0, 0, "Header").unwrap();
+        worksheet.write_number_only(1, 0, 1000).unwrap();
+        worksheet.write_number_only(2, 0, 1000.0).unwrap();
+        worksheet.write_string_only(3, 0, "1000").unwrap();
+        worksheet.write_string_only(4, 0, " 1000 ").unwrap();
+        worksheet.write_number_only(5, 0, 2000).unwrap();
+
+        let filter_condition = FilterCondition::new().list_push_number(1000);
+
+        assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(3, 0, &filter_condition));
+        assert!(worksheet.row_matches_list_filter(4, 0, &filter_condition));
+        assert!(!worksheet.row_matches_list_filter(5, 0, &filter_condition));
     }
 
     #[test]

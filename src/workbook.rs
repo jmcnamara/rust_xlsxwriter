@@ -1065,7 +1065,11 @@ impl Workbook {
         }
 
         for (i, worksheet) in self.worksheets.iter_mut().enumerate() {
+            // Map worksheet/local format indices to the workbook/global values.
             worksheet.set_global_xf_indices(&worksheet_indices[i]);
+
+            // Perform the autofilter row hiding.
+            worksheet.hide_autofilter_rows();
         }
 
         // Convert the images in the workbooks into drawing files and rel links.

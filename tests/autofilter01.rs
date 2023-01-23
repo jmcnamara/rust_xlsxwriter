@@ -15,8 +15,21 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    // Add the data used in the autofilter tests.
-    common::populate_autofilter_data(worksheet);
+    // Write the headers.
+    worksheet.write_string_only(0, 0, "Region").unwrap();
+    worksheet.write_string_only(0, 1, "Item").unwrap();
+    worksheet.write_string_only(0, 2, "Volume").unwrap();
+    worksheet.write_string_only(0, 3, "Month").unwrap();
+
+    // Write the data used in the autofilter.
+    let data = common::get_autofilter_data();
+    for (row, data) in data.iter().enumerate() {
+        let row = 1 + row as u32;
+        worksheet.write_string_only(row, 0, data.0)?;
+        worksheet.write_string_only(row, 1, data.1)?;
+        worksheet.write_number_only(row, 2, data.2)?;
+        worksheet.write_string_only(row, 3, data.3)?;
+    }
 
     worksheet.autofilter(0, 0, 50, 3)?;
 

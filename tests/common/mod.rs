@@ -26,7 +26,6 @@ use std::io::Read;
 
 use pretty_assertions::assert_eq;
 use regex::Regex;
-use rust_xlsxwriter::Worksheet;
 use rust_xlsxwriter::XlsxError;
 
 // Simple test runner struct and methods to create a new xlsx output file and
@@ -427,8 +426,8 @@ fn is_binary_file(filename: &str) -> bool {
 
 // Create the data structure used in the autofilter tests.
 #[allow(dead_code)]
-pub fn populate_autofilter_data(worksheet: &mut Worksheet) {
-    let data = vec![
+pub fn get_autofilter_data() -> Vec<(&'static str, &'static str, u16, &'static str)> {
+    vec![
         ("East", "Apple", 9000, "July"),
         ("East", "Apple", 5000, "July"),
         ("South", "Orange", 9000, "September"),
@@ -479,18 +478,5 @@ pub fn populate_autofilter_data(worksheet: &mut Worksheet) {
         ("South", "Pear", 1000, "December"),
         ("North", "Grape", 10000, "July"),
         ("East", "Grape", 6000, "February"),
-    ];
-
-    worksheet.write_string_only(0, 0, "Region").unwrap();
-    worksheet.write_string_only(0, 1, "Item").unwrap();
-    worksheet.write_string_only(0, 2, "Volume").unwrap();
-    worksheet.write_string_only(0, 3, "Month").unwrap();
-
-    for (row, data) in data.iter().enumerate() {
-        let row = 1 + row as u32;
-        worksheet.write_string_only(row, 0, data.0).unwrap();
-        worksheet.write_string_only(row, 1, data.1).unwrap();
-        worksheet.write_number_only(row, 2, data.2).unwrap();
-        worksheet.write_string_only(row, 3, data.3).unwrap();
-    }
+    ]
 }

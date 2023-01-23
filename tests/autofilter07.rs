@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
 
 mod common;
 
@@ -16,20 +16,26 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the headers.
-    worksheet.write_string_only(0, 0, "Region").unwrap();
-    worksheet.write_string_only(0, 1, "Item").unwrap();
-    worksheet.write_string_only(0, 2, "Volume").unwrap();
-    worksheet.write_string_only(0, 3, "Month").unwrap();
+    worksheet.write_string_only(2, 3, "Region").unwrap();
+    worksheet.write_string_only(2, 4, "Item").unwrap();
+    worksheet.write_string_only(2, 5, "Volume").unwrap();
+    worksheet.write_string_only(2, 6, "Month").unwrap();
 
     // Write the data used in the autofilter.
     let data = common::get_autofilter_data();
     for (row, data) in data.iter().enumerate() {
-        let row = 1 + row as u32;
-        worksheet.write_string_only(row, 0, data.0)?;
-        worksheet.write_string_only(row, 1, data.1)?;
-        worksheet.write_number_only(row, 2, data.2)?;
-        worksheet.write_string_only(row, 3, data.3)?;
+        let row = 3 + row as u32;
+        worksheet.write_string_only(row, 3, data.0)?;
+        worksheet.write_string_only(row, 4, data.1)?;
+        worksheet.write_number_only(row, 5, data.2)?;
+        worksheet.write_string_only(row, 6, data.3)?;
     }
+
+    worksheet.autofilter(2, 3, 52, 6)?;
+
+    let filter_condition = FilterCondition::new().list_push_string("East");
+
+    worksheet.filter_column(3, &filter_condition)?;
 
     workbook.save(filename)?;
 
@@ -37,9 +43,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_autofilter00() {
+fn test_autofilter07() {
     let test_runner = common::TestRunner::new()
-        .set_name("autofilter00")
+        .set_name("autofilter07")
         .set_function(create_new_xlsx_file)
         .initialize();
 

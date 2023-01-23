@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
 
 mod common;
 
@@ -31,15 +31,24 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         worksheet.write_string_only(row, 3, data.3)?;
     }
 
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    let filter_condition = FilterCondition::new()
+        .list_push_number(3000)
+        .list_push_number(5000)
+        .list_push_number(8000);
+
+    worksheet.filter_column(2, &filter_condition)?;
+
     workbook.save(filename)?;
 
     Ok(())
 }
 
 #[test]
-fn test_autofilter00() {
+fn test_autofilter11() {
     let test_runner = common::TestRunner::new()
-        .set_name("autofilter00")
+        .set_name("autofilter11")
         .set_function(create_new_xlsx_file)
         .initialize();
 
