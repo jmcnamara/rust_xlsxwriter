@@ -189,7 +189,7 @@ pub struct Worksheet {
     horizontal_breaks: Vec<u32>,
     vertical_breaks: Vec<u32>,
     filter_conditions: HashMap<ColNum, FilterCondition>,
-    filter_rows_off: bool,
+    filter_conditions_off: bool,
 }
 
 impl Default for Worksheet {
@@ -366,7 +366,7 @@ impl Worksheet {
             horizontal_breaks: vec![],
             vertical_breaks: vec![],
             filter_conditions: HashMap::new(),
-            filter_rows_off: false,
+            filter_conditions_off: false,
         }
     }
 
@@ -3519,6 +3519,7 @@ impl Worksheet {
             return Err(XlsxError::ParameterError(error));
         }
 
+        // TODO
         // Check the filter condition have been set up correctly.
         // if filter_condition.filter_type == FilterCriteriaTypes::Unset {
         //     let error = format!("The 'filter_condition' doesn't have a value set.");
@@ -3531,81 +3532,9 @@ impl Worksheet {
     }
 
     /// TODO
-    pub fn filter_rows_off(&mut self) -> &mut Worksheet {
-        self.filter_rows_off = true;
+    pub fn filter_conditions_off(&mut self) -> &mut Worksheet {
+        self.filter_conditions_off = true;
         self
-    }
-
-    // TODO
-    pub(crate) fn hide_autofilter_rows(&mut self) {
-        if self.filter_conditions.is_empty() || self.filter_rows_off {
-            return;
-        }
-
-        let cols: Vec<ColNum> = self.filter_conditions.keys().cloned().collect();
-        let first_row = self.autofilter_defined_name.first_row + 1; // Skip header.
-        let last_row = self.autofilter_defined_name.last_row;
-
-        for col in cols {
-            let filter_condition = self.filter_conditions.get(&col).unwrap().clone();
-            for row in first_row..=last_row {
-                if !self.row_matches_list_filter(row, col, &filter_condition) {
-                    self.set_row_hidden(row).unwrap();
-                }
-            }
-        }
-    }
-
-    // TODO
-    fn row_matches_list_filter(
-        &self,
-        row_num: RowNum,
-        col_num: ColNum,
-        filter_condition: &FilterCondition,
-    ) -> bool {
-        if let Some(columns) = self.table.get(&row_num) {
-            if let Some(cell) = columns.get(&col_num) {
-                match cell {
-                    CellType::String { string, .. }
-                    | CellType::RichString {
-                        string: _,
-                        xf_index: _,
-                        raw_string: string,
-                    } => {
-                        for data in &filter_condition.list {
-                            if string.to_lowercase().trim() == data.string.to_lowercase().trim() {
-                                return true;
-                            }
-                        }
-
-                        if filter_condition.match_blanks && string.trim().is_empty() {
-                            return true;
-                        }
-                    }
-                    CellType::Number { number, .. } => {
-                        for data in &filter_condition.list {
-                            if data.data_type == FilterDataType::Number && number == &data.number {
-                                return true;
-                            }
-                        }
-                    }
-
-                    CellType::Blank { .. } => {
-                        if filter_condition.match_blanks {
-                            return true;
-                        }
-                    }
-
-                    _ => {}
-                };
-            } else if filter_condition.match_blanks {
-                return true;
-            }
-        } else if filter_condition.match_blanks {
-            return true;
-        }
-
-        false
     }
 
     /// Protect a worksheet from modification.
@@ -6515,6 +6444,220 @@ impl Worksheet {
     // Crate level helper methods.
     // -----------------------------------------------------------------------
 
+    // Hide any rows in the autofilter range that don't match the autofilter
+    // conditions, like Excel does at runtime.
+    pub(crate) fn hide_autofilter_rows(&mut self) {
+        if self.filter_conditions.is_empty() || self.filter_conditions_off {
+            return;
+        }
+
+        // Get the range that the autofilter applies to.
+        let filter_columns: Vec<ColNum> = self.filter_conditions.keys().cloned().collect();
+        let first_row = self.autofilter_defined_name.first_row + 1; // Skip header.
+        let last_row = self.autofilter_defined_name.last_row;
+
+        for col_num in filter_columns {
+            // Iterate through each column filter conditions.
+            let filter_condition = self.filter_conditions.get(&col_num).unwrap().clone();
+            for row_num in first_row..=last_row {
+                if filter_condition.is_list_filter {
+                    // Handle list filters.
+                    if !self.row_matches_list_filter(row_num, col_num, &filter_condition) {
+                        self.set_row_hidden(row_num).unwrap();
+                    }
+                } else {
+                    // Handle custom filters.
+                    if !self.row_matches_custom_filters(row_num, col_num, &filter_condition) {
+                        self.set_row_hidden(row_num).unwrap();
+                    }
+                }
+            }
+        }
+    }
+
+    // Check if the data in a cell matches one of the values in the list of
+    // filter conditions (which in the list filter case is a list of strings or
+    // number values).
+    //
+    // Excel trims leading and trailing space and then does a lowercase
+    // comparison. It also matches numbers against "numbers stored as strings".
+    // It also treats "blanks" as empty cells but also any string that is
+    // composed of whitespace. See the test cases for examples. We try to match
+    // all these conditions.
+    fn row_matches_list_filter(
+        &self,
+        row_num: RowNum,
+        col_num: ColNum,
+        filter_condition: &FilterCondition,
+    ) -> bool {
+        let mut has_cell_data = false;
+
+        if let Some(columns) = self.table.get(&row_num) {
+            if let Some(cell) = columns.get(&col_num) {
+                has_cell_data = true;
+
+                match cell {
+                    CellType::String { string, .. }
+                    | CellType::RichString {
+                        string: _,
+                        xf_index: _,
+                        raw_string: string,
+                    } => {
+                        let cell_string = string.clone().to_lowercase().trim().to_string();
+
+                        for filter in &filter_condition.list {
+                            if cell_string == filter.string.to_lowercase().trim() {
+                                return true;
+                            }
+                        }
+
+                        if filter_condition.should_match_blanks && cell_string.is_empty() {
+                            return true;
+                        }
+                    }
+                    CellType::Number { number, .. } => {
+                        for filter in &filter_condition.list {
+                            if filter.data_type == FilterDataType::Number
+                                && number == &filter.number
+                            {
+                                return true;
+                            }
+                        }
+                    }
+
+                    CellType::Blank { .. } => {
+                        if filter_condition.should_match_blanks {
+                            return true;
+                        }
+                    }
+                    // We don't currently try to handle matching any other data types.
+                    _ => {}
+                };
+            }
+        }
+
+        // If there is no cell data then that qualifies as Blanks in Excel.
+        if !has_cell_data && filter_condition.should_match_blanks {
+            return true;
+        }
+
+        // If none of the conditions match then we return false and hide the row.
+        false
+    }
+
+    // Check if the data in a cell matches one of the conditions and values is a
+    // custom filter. Excel allows 1 or 2 custom filters. We check for each
+    // filter and evaluate the result(s) with the user defined and/or condition.
+    fn row_matches_custom_filters(
+        &self,
+        row_num: RowNum,
+        col_num: ColNum,
+        filter_condition: &FilterCondition,
+    ) -> bool {
+        let condition1;
+        let condition2;
+
+        if let Some(data) = &filter_condition.custom1 {
+            condition1 = self.row_matches_custom_filter(row_num, col_num, data);
+        } else {
+            condition1 = false;
+        }
+
+        if let Some(data) = &filter_condition.custom2 {
+            condition2 = self.row_matches_custom_filter(row_num, col_num, data);
+        } else {
+            return condition1;
+        }
+
+        if filter_condition.apply_logical_and {
+            condition1 && condition2
+        } else {
+            condition1 || condition2
+        }
+    }
+
+    // Check if the data in a cell matches one custom filter.
+    //
+    // Excel trims leading and trailing space and then does a lowercase
+    // comparison. It also matches numbers against "numbers stored as strings".
+    // It also applies the comparison operators to strings. However, it doesn't
+    // apply the string criteria (like contains()) to numbers (unless they are
+    // stored as strings).
+    fn row_matches_custom_filter(
+        &self,
+        row_num: RowNum,
+        col_num: ColNum,
+        filter: &FilterData,
+    ) -> bool {
+        if let Some(columns) = self.table.get(&row_num) {
+            if let Some(cell) = columns.get(&col_num) {
+                match cell {
+                    CellType::String { string, .. }
+                    | CellType::RichString {
+                        string: _,
+                        xf_index: _,
+                        raw_string: string,
+                    } => {
+                        let cell_string = string.clone().to_lowercase().trim().to_string();
+                        let filter_string = filter.string.to_lowercase().trim().to_string();
+
+                        match filter.criteria {
+                            FilterCriteria::EqualTo => return cell_string == filter_string,
+                            FilterCriteria::NotEqualTo => return cell_string != filter_string,
+                            FilterCriteria::LessThan => return cell_string < filter_string,
+                            FilterCriteria::GreaterThan => return cell_string > filter_string,
+                            FilterCriteria::LessThanOrEqualTo => {
+                                return cell_string <= filter_string
+                            }
+                            FilterCriteria::GreaterThanOrEqualTo => {
+                                return cell_string >= filter_string
+                            }
+                            FilterCriteria::EndsWith => {
+                                return cell_string.ends_with(&filter_string)
+                            }
+                            FilterCriteria::DoesNotEndWith => {
+                                return !cell_string.ends_with(&filter_string)
+                            }
+                            FilterCriteria::BeginsWith => {
+                                return cell_string.starts_with(&filter_string)
+                            }
+                            FilterCriteria::DoesNotBeginWith => {
+                                return !cell_string.starts_with(&filter_string)
+                            }
+                            FilterCriteria::Contains => {
+                                return cell_string.contains(&filter_string)
+                            }
+                            FilterCriteria::DoesNotContain => {
+                                return !cell_string.contains(&filter_string)
+                            }
+                        }
+                    }
+                    CellType::Number { number, .. } => {
+                        if filter.data_type == FilterDataType::Number {
+                            match filter.criteria {
+                                FilterCriteria::EqualTo => return *number == filter.number,
+                                FilterCriteria::LessThan => return *number < filter.number,
+                                FilterCriteria::NotEqualTo => return *number != filter.number,
+                                FilterCriteria::GreaterThan => return *number > filter.number,
+                                FilterCriteria::LessThanOrEqualTo => {
+                                    return *number <= filter.number
+                                }
+                                FilterCriteria::GreaterThanOrEqualTo => {
+                                    return *number >= filter.number
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                    // We don't currently try to handle matching any other data types.
+                    _ => {}
+                };
+            }
+        }
+
+        false
+    }
+
     // Process pagebreaks to sort them, remove duplicates and check the number
     // is within the Excel limit.
     pub(crate) fn process_pagebreaks(&mut self, breaks: &[u32]) -> Result<Vec<u32>, XlsxError> {
@@ -8085,16 +8228,20 @@ impl Worksheet {
 
         self.writer.xml_start_tag_attr("filterColumn", &attributes);
 
-        self.write_filters(filter_condition);
+        if filter_condition.is_list_filter {
+            self.write_list_filters(filter_condition);
+        } else {
+            self.write_custom_filters(filter_condition)
+        }
 
         self.writer.xml_end_tag("filterColumn");
     }
 
     // Write the <filters> element.
-    fn write_filters(&mut self, filter_condition: &FilterCondition) {
+    fn write_list_filters(&mut self, filter_condition: &FilterCondition) {
         let mut attributes = vec![];
 
-        if filter_condition.is_list_filter && filter_condition.match_blanks {
+        if filter_condition.should_match_blanks {
             attributes.push(("blank", "1".to_string()));
         }
 
@@ -8117,6 +8264,39 @@ impl Worksheet {
         let attributes = vec![("val", value)];
 
         self.writer.xml_empty_tag_attr("filter", &attributes);
+    }
+
+    // Write the <customFilters> element.
+    fn write_custom_filters(&mut self, filter_condition: &FilterCondition) {
+        let mut attributes = vec![];
+
+        if filter_condition.apply_logical_and {
+            attributes.push(("and", "1".to_string()));
+        }
+
+        self.writer.xml_start_tag_attr("customFilters", &attributes);
+
+        if let Some(data) = filter_condition.custom1.as_ref() {
+            self.write_custom_filter(data);
+        }
+        if let Some(data) = filter_condition.custom2.as_ref() {
+            self.write_custom_filter(data);
+        }
+
+        self.writer.xml_end_tag("customFilters");
+    }
+
+    // Write the <customFilter> element.
+    fn write_custom_filter(&mut self, data: &FilterData) {
+        let mut attributes = vec![];
+
+        if !data.criteria.operator().is_empty() {
+            attributes.push(("operator", data.criteria.operator()));
+        }
+
+        attributes.push(("val", data.value()));
+
+        self.writer.xml_empty_tag_attr("customFilter", &attributes);
     }
 
     // Write out all the row and cell data in the worksheet data table.
@@ -8801,8 +8981,11 @@ impl Worksheet {
 #[derive(Clone)]
 pub struct FilterCondition {
     pub(crate) is_list_filter: bool,
-    pub(crate) match_blanks: bool,
+    pub(crate) apply_logical_and: bool,
+    pub(crate) should_match_blanks: bool,
     pub(crate) list: Vec<FilterData>,
+    pub(crate) custom1: Option<FilterData>,
+    pub(crate) custom2: Option<FilterData>,
 }
 
 #[allow(clippy::new_without_default)]
@@ -8811,14 +8994,18 @@ impl FilterCondition {
     pub fn new() -> FilterCondition {
         FilterCondition {
             is_list_filter: true,
-            match_blanks: false,
+            apply_logical_and: false,
+            should_match_blanks: false,
             list: vec![],
+            custom1: None,
+            custom2: None,
         }
     }
 
     /// TODO
     pub fn list_push_string(mut self, value: &str) -> FilterCondition {
         self.list.push(FilterData::new_string(value));
+        self.is_list_filter = true;
         self
     }
 
@@ -8828,18 +9015,61 @@ impl FilterCondition {
         T: Into<f64>,
     {
         self.list.push(FilterData::new_number(value.into()));
+        self.is_list_filter = true;
         self
     }
 
     /// TODO
     pub fn list_match_blanks(mut self) -> FilterCondition {
-        self.match_blanks = true;
+        self.should_match_blanks = true;
+        self.is_list_filter = true;
+        self
+    }
+
+    /// TODO
+    pub fn custom1_string(mut self, criteria: FilterCriteria, value: &str) -> FilterCondition {
+        self.custom1 = Some(FilterData::new_string_and_criteria(value, criteria));
+        self.is_list_filter = false;
+        self
+    }
+
+    /// TODO
+    pub fn custom2_string(mut self, criteria: FilterCriteria, value: &str) -> FilterCondition {
+        self.custom2 = Some(FilterData::new_string_and_criteria(value, criteria));
+        self.is_list_filter = false;
+        self
+    }
+
+    /// TODO
+    pub fn custom1_number<T>(mut self, criteria: FilterCriteria, value: T) -> FilterCondition
+    where
+        T: Into<f64>,
+    {
+        self.custom1 = Some(FilterData::new_number_and_criteria(value.into(), criteria));
+        self.is_list_filter = false;
+        self
+    }
+
+    /// TODO
+    pub fn custom2_number<T>(mut self, criteria: FilterCriteria, value: T) -> FilterCondition
+    where
+        T: Into<f64>,
+    {
+        self.custom2 = Some(FilterData::new_number_and_criteria(value.into(), criteria));
+        self.is_list_filter = false;
+        self
+    }
+
+    /// TODO
+    pub fn custom_and_condition(mut self) -> FilterCondition {
+        self.apply_logical_and = true;
+        self.is_list_filter = false;
         self
     }
 }
 
 ///
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum FilterCriteria {
     /// TODO
     EqualTo,
@@ -8848,7 +9078,53 @@ pub enum FilterCriteria {
     NotEqualTo,
 
     /// TODO
-    Unset,
+    GreaterThan,
+
+    /// TODO
+    GreaterThanOrEqualTo,
+
+    /// TODO
+    LessThan,
+
+    /// TODO
+    LessThanOrEqualTo,
+
+    /// TODO
+    BeginsWith,
+
+    /// TODO
+    DoesNotBeginWith,
+
+    /// TODO
+    EndsWith,
+
+    /// TODO
+    DoesNotEndWith,
+
+    /// TODO
+    Contains,
+
+    /// TODO
+    DoesNotContain,
+}
+
+impl FilterCriteria {
+    pub(crate) fn operator(&self) -> String {
+        match self {
+            FilterCriteria::EqualTo => "".to_string(),
+            FilterCriteria::LessThan => "lessThan".to_string(),
+            FilterCriteria::NotEqualTo => "notEqual".to_string(),
+            FilterCriteria::GreaterThan => "greaterThan".to_string(),
+            FilterCriteria::LessThanOrEqualTo => "lessThanOrEqual".to_string(),
+            FilterCriteria::GreaterThanOrEqualTo => "greaterThanOrEqual".to_string(),
+            FilterCriteria::EndsWith => "".to_string(),
+            FilterCriteria::Contains => "".to_string(),
+            FilterCriteria::BeginsWith => "".to_string(),
+            FilterCriteria::DoesNotEndWith => "notEqual".to_string(),
+            FilterCriteria::DoesNotContain => "notEqual".to_string(),
+            FilterCriteria::DoesNotBeginWith => "notEqual".to_string(),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -8856,27 +9132,56 @@ pub(crate) struct FilterData {
     data_type: FilterDataType,
     string: String,
     number: f64,
+    criteria: FilterCriteria,
 }
 
 impl FilterData {
     fn new_string(value: &str) -> FilterData {
+        FilterData::new_string_and_criteria(value, FilterCriteria::EqualTo)
+    }
+
+    fn new_number(value: f64) -> FilterData {
+        FilterData::new_number_and_criteria(value, FilterCriteria::EqualTo)
+    }
+
+    fn new_string_and_criteria(value: &str, criteria: FilterCriteria) -> FilterData {
         FilterData {
             data_type: FilterDataType::String,
             string: value.to_string(),
             number: 0.0,
+            criteria,
         }
     }
 
-    fn new_number(value: f64) -> FilterData {
+    fn new_number_and_criteria(value: f64, criteria: FilterCriteria) -> FilterData {
+        // Store number but also convert it to a string since Excel makes string
+        // comparisons to "numbers stored as strings".
         FilterData {
             data_type: FilterDataType::Number,
             string: value.to_string(),
             number: value,
+            criteria,
+        }
+    }
+
+    // Excel stores some of the string operators as simple regex patterns.
+    fn value(&self) -> String {
+        match self.criteria {
+            FilterCriteria::EndsWith | FilterCriteria::DoesNotEndWith => {
+                format!("*{}", self.string)
+            }
+            FilterCriteria::Contains | FilterCriteria::DoesNotContain => {
+                format!("*{}*", self.string)
+            }
+            FilterCriteria::BeginsWith | FilterCriteria::DoesNotBeginWith => {
+                format!("{}*", self.string)
+            }
+            // For everything else, including numbers, we just use the string value.
+            _ => self.string.clone(),
         }
     }
 }
 
-// TODO
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) enum FilterDataType {
     String,

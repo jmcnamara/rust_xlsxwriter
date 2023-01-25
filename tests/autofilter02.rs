@@ -73,7 +73,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let filter_condition = FilterCondition::new().list_push_string("East");
     worksheet.filter_column(0, &filter_condition)?;
 
-    worksheet.filter_rows_off();
+    worksheet.filter_conditions_off();
 
     workbook.save(filename)?;
 
