@@ -1548,8 +1548,8 @@ impl Workbook {
 
     // Write the <sheet> element.
     fn write_sheet(&mut self, name: &str, is_hidden: bool, index: u16) {
-        let sheet_id = format!("{}", index);
-        let ref_id = format!("rId{}", index);
+        let sheet_id = format!("{index}");
+        let ref_id = format!("rId{index}");
 
         let mut attributes = vec![("name", name.to_string()), ("sheetId", sheet_id)];
 

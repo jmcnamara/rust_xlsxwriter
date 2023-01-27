@@ -230,7 +230,7 @@ impl<W: Write + Seek> Packager<W> {
         for worksheet_index in 1..=options.num_worksheets {
             rels.add_document_relationship(
                 "worksheet",
-                format!("worksheets/sheet{}.xml", worksheet_index).as_str(),
+                format!("worksheets/sheet{worksheet_index}.xml").as_str(),
                 "",
             );
         }

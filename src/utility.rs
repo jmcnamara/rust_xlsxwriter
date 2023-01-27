@@ -25,7 +25,7 @@ pub fn col_to_name(col_num: ColNum) -> String {
         let col_letter = char::from_u32(64u32 + remainder as u32).unwrap();
 
         // Accumulate the column letters, right to left.
-        col_name = format!("{}{}", col_letter, col_name);
+        col_name = format!("{col_letter}{col_name}");
 
         // Get the next order of magnitude.
         col_num = (col_num - 1) / 26;
@@ -58,7 +58,7 @@ pub fn cell_range(
     if range1 == range2 {
         range1
     } else {
-        format!("{}:{}", range1, range2)
+        format!("{range1}:{range2}")
     }
 }
 
@@ -76,7 +76,7 @@ pub fn cell_range_abs(
     if range1 == range2 {
         range1
     } else {
-        format!("{}:{}", range1, range2)
+        format!("{range1}:{range2}")
     }
 }
 
@@ -93,7 +93,7 @@ pub fn quote_sheetname(sheetname: &str) -> String {
         // Single quote the worksheet name if it contains any of the characters
         // that Excel quotes when using the name in a formula.
         if sheetname.contains(' ') || sheetname.contains('!') || sheetname.contains('\'') {
-            sheetname = format!("'{}'", sheetname);
+            sheetname = format!("'{sheetname}'");
         }
     }
 

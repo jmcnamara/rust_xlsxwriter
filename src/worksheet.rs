@@ -4136,7 +4136,7 @@ impl Worksheet {
                         *cell_result = result.to_string();
                     }
                     _ => {
-                        eprintln!("Cell ({}, {}) doesn't contain a formula.", row, col);
+                        eprintln!("Cell ({row}, {col}) doesn't contain a formula.");
                     }
                 }
             }
@@ -4963,10 +4963,7 @@ impl Worksheet {
     ///
     pub fn set_zoom(&mut self, zoom: u16) -> &mut Worksheet {
         if !(10..=400).contains(&zoom) {
-            eprintln!(
-                "Zoom factor {} outside Excel range: 10 <= zoom <= 400.",
-                zoom
-            );
+            eprintln!("Zoom factor {zoom} outside Excel range: 10 <= zoom <= 400.");
             return self;
         }
 
@@ -5752,10 +5749,7 @@ impl Worksheet {
     ///
     pub fn set_print_scale(&mut self, scale: u16) -> &mut Worksheet {
         if !(10..=400).contains(&scale) {
-            eprintln!(
-                "Scale factor {} outside Excel range: 10 <= zoom <= 400.",
-                scale
-            );
+            eprintln!("Scale factor {scale} outside Excel range: 10 <= zoom <= 400.");
             return self;
         }
 
@@ -8436,7 +8430,7 @@ impl Worksheet {
                 if span_min != COL_MAX {
                     span_min += 1;
                     span_max += 1;
-                    let span_range = format!("{}:{}", span_min, span_max);
+                    let span_range = format!("{span_min}:{span_max}");
                     spans.insert(span_index, span_range);
                     span_min = COL_MAX;
                 }
@@ -8917,7 +8911,7 @@ impl Worksheet {
         let mut attributes = vec![];
 
         if hash > 0 {
-            attributes.push(("password", format!("{:04X}", hash)));
+            attributes.push(("password", format!("{hash:04X}")));
         }
 
         attributes.push(("sqref", range));

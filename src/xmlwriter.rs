@@ -70,7 +70,7 @@ impl XMLWriter {
             attribute_str.push_str(&pair);
         }
 
-        write!(&mut self.xmlfile, r"<{}{}>", tag, attribute_str).expect("Couldn't write to file");
+        write!(&mut self.xmlfile, r"<{tag}{attribute_str}>").expect("Couldn't write to file");
     }
 
     // Write an XML end tag.
