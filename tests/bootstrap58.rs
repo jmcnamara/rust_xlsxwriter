@@ -16,10 +16,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the headers.
-    worksheet.write_string_only(0, 0, "Region").unwrap();
-    worksheet.write_string_only(0, 1, "Item").unwrap();
-    worksheet.write_string_only(0, 2, "Volume").unwrap();
-    worksheet.write_string_only(0, 3, "Month").unwrap();
+    worksheet.write_string_only(0, 0, "Region")?;
+    worksheet.write_string_only(0, 1, "Item")?;
+    worksheet.write_string_only(0, 2, "Volume")?;
+    worksheet.write_string_only(0, 3, "Month")?;
 
     // Write the data used in the autofilter.
     let data = common::get_autofilter_data();
@@ -34,23 +34,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.autofilter(0, 0, 50, 3)?;
 
     let filter_condition1 = FilterCondition::new()
-        .custom1_string(FilterCriteria::BeginsWith, "Ea")
-        .custom2_string(FilterCriteria::EndsWith, "st")
-        .custom_and_condition();
+        .add_custom_string_filter(FilterCriteria::BeginsWith, "Ea")
+        .add_custom_string_filter(FilterCriteria::EndsWith, "st");
 
     worksheet.filter_column(0, &filter_condition1)?;
 
     let filter_condition2 = FilterCondition::new()
-        .custom1_string(FilterCriteria::Contains, "e")
-        .custom2_string(FilterCriteria::DoesNotContain, "g")
-        .custom_and_condition();
+        .add_custom_string_filter(FilterCriteria::Contains, "e")
+        .add_custom_string_filter(FilterCriteria::DoesNotContain, "g");
 
     worksheet.filter_column(1, &filter_condition2)?;
 
     let filter_condition3 = FilterCondition::new()
-        .custom1_string(FilterCriteria::DoesNotBeginWith, "J")
-        .custom2_string(FilterCriteria::DoesNotEndWith, "Y")
-        .custom_and_condition();
+        .add_custom_string_filter(FilterCriteria::DoesNotBeginWith, "J")
+        .add_custom_string_filter(FilterCriteria::DoesNotEndWith, "Y");
 
     worksheet.filter_column(3, &filter_condition3)?;
 

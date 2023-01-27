@@ -16,10 +16,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the headers.
-    worksheet.write_string_only(2, 3, "Region").unwrap();
-    worksheet.write_string_only(2, 4, "Item").unwrap();
-    worksheet.write_string_only(2, 5, "Volume").unwrap();
-    worksheet.write_string_only(2, 6, "Month").unwrap();
+    worksheet.write_string_only(2, 3, "Region")?;
+    worksheet.write_string_only(2, 4, "Item")?;
+    worksheet.write_string_only(2, 5, "Volume")?;
+    worksheet.write_string_only(2, 6, "Month")?;
 
     // Write the data used in the autofilter.
     let data = common::get_autofilter_data();
@@ -33,7 +33,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.autofilter(2, 3, 52, 6)?;
 
-    let filter_condition = FilterCondition::new().list_push_string("East");
+    let filter_condition = FilterCondition::new().add_string_filter("East");
 
     worksheet.filter_column(3, &filter_condition)?;
 

@@ -12,20 +12,141 @@
 //! in an upcoming version.
 //!
 
-use rust_xlsxwriter::{Format, Workbook, Worksheet, XlsxError};
+use rust_xlsxwriter::{FilterCondition, FilterCriteria, Format, Workbook, Worksheet, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
     let mut workbook = Workbook::new();
 
-    // Add a worksheet to the workbook.
-    let worksheet1 = workbook.add_worksheet();
+    // -----------------------------------------------------------------------
+    // 1. Add an autofilter to a data range.
+    // -----------------------------------------------------------------------
 
-    // Add some sample filter data.
-    populate_autofilter_data(worksheet1)?;
+    // Add a worksheet  with some sample data to filter.
+    let worksheet = workbook.add_worksheet();
+    populate_autofilter_data(worksheet, false)?;
 
-    // Set the autofilter.
-    worksheet1.autofilter(0, 0, 50, 3)?;
+    // Set the autofilter area, including the header/filter row.
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    // -----------------------------------------------------------------------
+    // 2. Add an autofilter with a list filter conditions.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet  with some sample data to filter.
+    let worksheet = workbook.add_worksheet();
+    populate_autofilter_data(worksheet, false)?;
+
+    // Set the autofilter area.
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    // Set a filter condition to only show cells matching "East" in the first
+    // column.
+    let filter_condition = FilterCondition::new().add_string_filter("East");
+    worksheet.filter_column(0, &filter_condition)?;
+
+    // -----------------------------------------------------------------------
+    // 3. Add an autofilter with a list filter condition on multiple items.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet  with some sample data to filter.
+    let worksheet = workbook.add_worksheet();
+    populate_autofilter_data(worksheet, false)?;
+
+    // Set the autofilter area.
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    // Set a filter condition to only show cells matching "East", "West" or
+    // "South" in the first column.
+    let filter_condition = FilterCondition::new()
+        .add_string_filter("East")
+        .add_string_filter("West")
+        .add_string_filter("South");
+    worksheet.filter_column(0, &filter_condition)?;
+
+    // -----------------------------------------------------------------------
+    // 4. Add an autofilter with a list filter condition with blanks.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet  with some sample data to filter.
+    let worksheet = workbook.add_worksheet();
+    populate_autofilter_data(worksheet, true)?;
+
+    // Set the autofilter area.
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    // Set a filter condition to only show cells matching "East" or blanks.
+    let filter_condition = FilterCondition::new()
+        .add_string_filter("East")
+        .add_blanks_filter();
+    worksheet.filter_column(0, &filter_condition)?;
+
+    // -----------------------------------------------------------------------
+    // 5. Add an autofilter with list filters in multiple columns.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet  with some sample data to filter.
+    let worksheet = workbook.add_worksheet();
+    populate_autofilter_data(worksheet, false)?;
+
+    // Set the autofilter area.
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    // Set a filter condition for 2 separate columns.
+    let filter_condition1 = FilterCondition::new().add_string_filter("East");
+    worksheet.filter_column(0, &filter_condition1)?;
+
+    let filter_condition2 = FilterCondition::new().add_string_filter("July");
+    worksheet.filter_column(3, &filter_condition2)?;
+
+    // -----------------------------------------------------------------------
+    // 6. Add an autofilter with custom filter condition.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet  with some sample data to filter.
+    let worksheet = workbook.add_worksheet();
+    populate_autofilter_data(worksheet, false)?;
+
+    // Set the autofilter area.
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    // Set a custom number filter.
+    let filter_condition =
+        FilterCondition::new().add_custom_number_filter(FilterCriteria::GreaterThan, 8000);
+    worksheet.filter_column(2, &filter_condition)?;
+
+    // -----------------------------------------------------------------------
+    // 7. Add an autofilter with 2 custom filters to create a "between" condition.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet  with some sample data to filter.
+    let worksheet = workbook.add_worksheet();
+    populate_autofilter_data(worksheet, false)?;
+
+    // Set the autofilter area.
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    // Set  2custom number filters in a "between" configuration.
+    let filter_condition = FilterCondition::new()
+        .add_custom_number_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)
+        .add_custom_number_filter(FilterCriteria::LessThanOrEqualTo, 6000);
+    worksheet.filter_column(2, &filter_condition)?;
+
+    // -----------------------------------------------------------------------
+    // 8. Add an autofilter for non blanks. This is done using a custom filter.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet  with some sample data to filter.
+    let worksheet = workbook.add_worksheet();
+    populate_autofilter_data(worksheet, true)?;
+
+    // Set the autofilter area.
+    worksheet.autofilter(0, 0, 50, 3)?;
+
+    // Set a custom number filter of `!= " "` to filter non blanks.
+    let filter_condition =
+        FilterCondition::new().add_custom_string_filter(FilterCriteria::NotEqualTo, " ");
+    worksheet.filter_column(0, &filter_condition)?;
 
     // Save the file to disk.
     workbook.save("autofilter.xlsx")?;
@@ -34,11 +155,14 @@ fn main() -> Result<(), XlsxError> {
 }
 
 // Generate worksheet data to filter on.
-pub fn populate_autofilter_data(worksheet: &mut Worksheet) -> Result<(), XlsxError> {
+pub fn populate_autofilter_data(
+    worksheet: &mut Worksheet,
+    add_blanks: bool,
+) -> Result<(), XlsxError> {
     // The sample data to add to the worksheet.
-    let data = vec![
+    let mut data = vec![
         ("East", "Apple", 9000, "July"),
-        ("East", "Apple", 5000, "July"),
+        ("East", "Apple", 5000, "April"),
         ("South", "Orange", 9000, "September"),
         ("North", "Apple", 2000, "November"),
         ("West", "Apple", 9000, "November"),
@@ -57,7 +181,7 @@ pub fn populate_autofilter_data(worksheet: &mut Worksheet) -> Result<(), XlsxErr
         ("West", "Pear", 7000, "December"),
         ("South", "Apple", 2000, "October"),
         ("East", "Grape", 7000, "December"),
-        ("North", "Grape", 6000, "April"),
+        ("North", "Grape", 6000, "July"),
         ("East", "Pear", 8000, "February"),
         ("North", "Apple", 7000, "August"),
         ("North", "Orange", 7000, "July"),
@@ -65,12 +189,12 @@ pub fn populate_autofilter_data(worksheet: &mut Worksheet) -> Result<(), XlsxErr
         ("South", "Grape", 8000, "September"),
         ("West", "Apple", 3000, "October"),
         ("South", "Orange", 10000, "November"),
-        ("West", "Grape", 4000, "July"),
+        ("West", "Grape", 4000, "December"),
         ("North", "Orange", 5000, "August"),
         ("East", "Orange", 1000, "November"),
         ("East", "Orange", 4000, "October"),
         ("North", "Grape", 5000, "August"),
-        ("East", "Apple", 1000, "December"),
+        ("East", "Apple", 1000, "July"),
         ("South", "Apple", 10000, "March"),
         ("East", "Grape", 7000, "October"),
         ("West", "Grape", 1000, "September"),
@@ -88,6 +212,14 @@ pub fn populate_autofilter_data(worksheet: &mut Worksheet) -> Result<(), XlsxErr
         ("North", "Grape", 10000, "July"),
         ("East", "Grape", 6000, "February"),
     ];
+
+    // Introduce a blanks cells for some of the examples.
+    if add_blanks {
+        data[5].0 = "";
+        data[18].0 = "";
+        data[30].0 = "";
+        data[40].0 = "";
+    }
 
     // Widen the columns for clarity.
     worksheet.set_column_width(0, 12)?;

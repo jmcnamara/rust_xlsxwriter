@@ -6524,7 +6524,6 @@ impl Worksheet {
                             }
                         }
                     }
-
                     CellType::Blank { .. } => {
                         if filter_condition.should_match_blanks {
                             return true;
@@ -6569,10 +6568,10 @@ impl Worksheet {
             return condition1;
         }
 
-        if filter_condition.apply_logical_and {
-            condition1 && condition2
-        } else {
+        if filter_condition.apply_logical_or {
             condition1 || condition2
+        } else {
+            condition1 && condition2
         }
     }
 
@@ -6649,8 +6648,20 @@ impl Worksheet {
                             }
                         }
                     }
-                    // We don't currently try to handle matching any other data types.
-                    _ => {}
+                    CellType::Blank { .. } => {
+                        // We need to handle "match non-blanks" as a special condition.
+                        // Excel converts this to a custom filter of `!= " "`.
+                        if filter.criteria == FilterCriteria::NotEqualTo && filter.string == " " {
+                            return false;
+                        }
+                    }
+                    _ => {
+                        // Any existing non-blank cell should match the "non-blanks" criteria
+                        // explained above.
+                        if filter.criteria == FilterCriteria::NotEqualTo && filter.string == " " {
+                            return true;
+                        }
+                    }
                 };
             }
         }
@@ -8270,7 +8281,7 @@ impl Worksheet {
     fn write_custom_filters(&mut self, filter_condition: &FilterCondition) {
         let mut attributes = vec![];
 
-        if filter_condition.apply_logical_and {
+        if !filter_condition.apply_logical_or {
             attributes.push(("and", "1".to_string()));
         }
 
@@ -8977,11 +8988,11 @@ impl Worksheet {
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
 
-///
+/// TODO
 #[derive(Clone)]
 pub struct FilterCondition {
     pub(crate) is_list_filter: bool,
-    pub(crate) apply_logical_and: bool,
+    pub(crate) apply_logical_or: bool,
     pub(crate) should_match_blanks: bool,
     pub(crate) list: Vec<FilterData>,
     pub(crate) custom1: Option<FilterData>,
@@ -8994,7 +9005,7 @@ impl FilterCondition {
     pub fn new() -> FilterCondition {
         FilterCondition {
             is_list_filter: true,
-            apply_logical_and: false,
+            apply_logical_or: true,
             should_match_blanks: false,
             list: vec![],
             custom1: None,
@@ -9003,14 +9014,14 @@ impl FilterCondition {
     }
 
     /// TODO
-    pub fn list_push_string(mut self, value: &str) -> FilterCondition {
+    pub fn add_string_filter(mut self, value: &str) -> FilterCondition {
         self.list.push(FilterData::new_string(value));
         self.is_list_filter = true;
         self
     }
 
     /// TODO
-    pub fn list_push_number<T>(mut self, value: T) -> FilterCondition
+    pub fn add_number_filter<T>(mut self, value: T) -> FilterCondition
     where
         T: Into<f64>,
     {
@@ -9020,56 +9031,63 @@ impl FilterCondition {
     }
 
     /// TODO
-    pub fn list_match_blanks(mut self) -> FilterCondition {
+    pub fn add_blanks_filter(mut self) -> FilterCondition {
         self.should_match_blanks = true;
         self.is_list_filter = true;
         self
     }
 
     /// TODO
-    pub fn custom1_string(mut self, criteria: FilterCriteria, value: &str) -> FilterCondition {
-        self.custom1 = Some(FilterData::new_string_and_criteria(value, criteria));
+    pub fn add_custom_string_filter(
+        mut self,
+        criteria: FilterCriteria,
+        value: &str,
+    ) -> FilterCondition {
+        if self.custom1.is_none() {
+            self.custom1 = Some(FilterData::new_string_and_criteria(value, criteria));
+        } else if self.custom2.is_none() {
+            self.custom2 = Some(FilterData::new_string_and_criteria(value, criteria));
+            self.apply_logical_or = false;
+        } else {
+            // TODO Warn
+        }
+
         self.is_list_filter = false;
         self
     }
 
     /// TODO
-    pub fn custom2_string(mut self, criteria: FilterCriteria, value: &str) -> FilterCondition {
-        self.custom2 = Some(FilterData::new_string_and_criteria(value, criteria));
-        self.is_list_filter = false;
-        self
-    }
-
-    /// TODO
-    pub fn custom1_number<T>(mut self, criteria: FilterCriteria, value: T) -> FilterCondition
+    pub fn add_custom_number_filter<T>(
+        mut self,
+        criteria: FilterCriteria,
+        value: T,
+    ) -> FilterCondition
     where
         T: Into<f64>,
     {
-        self.custom1 = Some(FilterData::new_number_and_criteria(value.into(), criteria));
+        if self.custom1.is_none() {
+            self.custom1 = Some(FilterData::new_number_and_criteria(value.into(), criteria));
+        } else if self.custom2.is_none() {
+            self.custom2 = Some(FilterData::new_number_and_criteria(value.into(), criteria));
+            self.apply_logical_or = false;
+        } else {
+            // TODO Warn
+        }
+
         self.is_list_filter = false;
         self
     }
 
     /// TODO
-    pub fn custom2_number<T>(mut self, criteria: FilterCriteria, value: T) -> FilterCondition
-    where
-        T: Into<f64>,
-    {
-        self.custom2 = Some(FilterData::new_number_and_criteria(value.into(), criteria));
-        self.is_list_filter = false;
-        self
-    }
-
-    /// TODO
-    pub fn custom_and_condition(mut self) -> FilterCondition {
-        self.apply_logical_and = true;
+    pub fn add_custom_boolean_or(mut self) -> FilterCondition {
+        self.apply_logical_or = true;
         self.is_list_filter = false;
         self
     }
 }
 
 ///
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum FilterCriteria {
     /// TODO
     EqualTo,
@@ -9912,7 +9930,7 @@ mod tests {
         worksheet.write_string_only(3, 0, "  ").unwrap();
         worksheet.write_string(4, 0, "", &bold).unwrap();
 
-        let filter_condition = FilterCondition::new().list_match_blanks();
+        let filter_condition = FilterCondition::new().add_blanks_filter();
 
         assert!(!worksheet.row_matches_list_filter(0, 0, &filter_condition));
         assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
@@ -9935,7 +9953,7 @@ mod tests {
         worksheet.write_string_only(6, 0, " South ").unwrap();
         worksheet.write_string_only(7, 0, "Mouth").unwrap();
 
-        let filter_condition = FilterCondition::new().list_push_string("South");
+        let filter_condition = FilterCondition::new().add_string_filter("South");
 
         assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
         assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
@@ -9957,7 +9975,7 @@ mod tests {
         worksheet.write_string_only(4, 0, " 1000 ").unwrap();
         worksheet.write_number_only(5, 0, 2000).unwrap();
 
-        let filter_condition = FilterCondition::new().list_push_number(1000);
+        let filter_condition = FilterCondition::new().add_number_filter(1000);
 
         assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
         assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));

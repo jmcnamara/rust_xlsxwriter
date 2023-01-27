@@ -16,10 +16,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the headers.
-    worksheet.write_string_only(0, 0, "Region").unwrap();
-    worksheet.write_string_only(0, 1, "Item").unwrap();
-    worksheet.write_string_only(0, 2, "Volume").unwrap();
-    worksheet.write_string_only(0, 3, "Month").unwrap();
+    worksheet.write_string_only(0, 0, "Region")?;
+    worksheet.write_string_only(0, 1, "Item")?;
+    worksheet.write_string_only(0, 2, "Volume")?;
+    worksheet.write_string_only(0, 3, "Month")?;
 
     // Write the data used in the autofilter.
     let data = common::get_autofilter_data();
@@ -33,14 +33,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.autofilter(0, 0, 50, 3)?;
 
-    let filter_condition1 = FilterCondition::new().list_push_string("East");
+    let filter_condition1 = FilterCondition::new().add_string_filter("East");
 
     worksheet.filter_column(0, &filter_condition1)?;
 
     let filter_condition2 = FilterCondition::new()
-        .custom1_number(FilterCriteria::GreaterThan, 3000)
-        .custom2_number(FilterCriteria::LessThan, 8000)
-        .custom_and_condition();
+        .add_custom_number_filter(FilterCriteria::GreaterThan, 3000)
+        .add_custom_number_filter(FilterCriteria::LessThan, 8000);
 
     worksheet.filter_column(2, &filter_condition2)?;
 

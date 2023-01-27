@@ -22,7 +22,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string_only(0, 3, "Month")?;
 
     // Write the data used in the autofilter.
-    let data = common::get_autofilter_data();
+    let mut data = common::get_autofilter_data();
+
+    // Create a blank cell for testing.
+    data[5].0 = "";
+
     for (row, data) in data.iter().enumerate() {
         let row = 1 + row as u32;
         worksheet.write_string_only(row, 0, data.0)?;
@@ -33,39 +37,19 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.autofilter(0, 0, 50, 3)?;
 
-    let filter_condition1 = FilterCondition::new()
-        .add_custom_string_filter(FilterCriteria::NotEqualTo, "South")
-        .add_custom_string_filter(FilterCriteria::EqualTo, "North")
-        .add_custom_boolean_or();
-
-    worksheet.filter_column(0, &filter_condition1)?;
-
-    let filter_condition2 = FilterCondition::new()
-        .add_custom_string_filter(FilterCriteria::GreaterThan, "Apple")
-        .add_custom_string_filter(FilterCriteria::LessThan, "Pear");
-
-    worksheet.filter_column(1, &filter_condition2)?;
-
-    let filter_condition3 = FilterCondition::new()
-        .add_custom_number_filter(FilterCriteria::GreaterThanOrEqualTo, 3000)
-        .add_custom_number_filter(FilterCriteria::LessThanOrEqualTo, 9000);
-
-    worksheet.filter_column(2, &filter_condition3)?;
-
-    let filter_condition4 = FilterCondition::new()
-        .add_custom_string_filter(FilterCriteria::GreaterThanOrEqualTo, "February")
-        .add_custom_string_filter(FilterCriteria::LessThanOrEqualTo, "November");
-
-    worksheet.filter_column(3, &filter_condition4)?;
+    let filter_condition =
+        FilterCondition::new().add_custom_string_filter(FilterCriteria::NotEqualTo, " ");
+    worksheet.filter_column(0, &filter_condition)?;
 
     workbook.save(filename)?;
 
     Ok(())
 }
+
 #[test]
-fn test_bootstrap57() {
+fn test_autofilter06() {
     let test_runner = common::TestRunner::new()
-        .set_name("bootstrap57")
+        .set_name("autofilter06")
         .set_function(create_new_xlsx_file)
         .initialize();
 
