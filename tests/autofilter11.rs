@@ -34,9 +34,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.autofilter(0, 0, 50, 3)?;
 
     let filter_condition = FilterCondition::new()
-        .add_number_filter(3000)
-        .add_number_filter(5000)
-        .add_number_filter(8000);
+        .add_list_filter(3000)
+        .add_list_filter(5000)
+        .add_list_filter(8000);
 
     worksheet.filter_column(2, &filter_condition)?;
 

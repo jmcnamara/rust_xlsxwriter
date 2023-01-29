@@ -34,20 +34,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.autofilter(0, 0, 50, 3)?;
 
     let filter_condition1 = FilterCondition::new()
-        .add_custom_string_filter(FilterCriteria::BeginsWith, "Ea")
-        .add_custom_string_filter(FilterCriteria::EndsWith, "st");
+        .add_custom_filter(FilterCriteria::BeginsWith, "Ea")
+        .add_custom_filter(FilterCriteria::EndsWith, "st");
 
     worksheet.filter_column(0, &filter_condition1)?;
 
     let filter_condition2 = FilterCondition::new()
-        .add_custom_string_filter(FilterCriteria::Contains, "e")
-        .add_custom_string_filter(FilterCriteria::DoesNotContain, "g");
+        .add_custom_filter(FilterCriteria::Contains, "e")
+        .add_custom_filter(FilterCriteria::DoesNotContain, "g");
 
     worksheet.filter_column(1, &filter_condition2)?;
 
     let filter_condition3 = FilterCondition::new()
-        .add_custom_string_filter(FilterCriteria::DoesNotBeginWith, "J")
-        .add_custom_string_filter(FilterCriteria::DoesNotEndWith, "Y");
+        .add_custom_filter(FilterCriteria::DoesNotBeginWith, "J")
+        .add_custom_filter(FilterCriteria::DoesNotEndWith, "Y");
 
     worksheet.filter_column(3, &filter_condition3)?;
 

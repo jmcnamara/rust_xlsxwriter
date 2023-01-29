@@ -33,7 +33,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.autofilter(0, 0, 50, 3)?;
 
-    let filter_condition = FilterCondition::new().add_string_filter("East");
+    let filter_condition = FilterCondition::new().add_list_filter("East");
     worksheet.filter_column(0, &filter_condition)?;
 
     workbook.save(filename)?;
@@ -70,7 +70,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.autofilter(0, 0, 50, 3)?;
 
-    let filter_condition = FilterCondition::new().add_string_filter("East");
+    let filter_condition = FilterCondition::new().add_list_filter("East");
     worksheet.filter_column(0, &filter_condition)?;
 
     worksheet.filter_conditions_off();

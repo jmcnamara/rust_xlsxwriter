@@ -28,7 +28,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.autofilter(0, 0, 7, 0)?;
 
     let filter_condition =
-        FilterCondition::new().add_custom_string_filter(FilterCriteria::NotEqualTo, " ");
+        FilterCondition::new().add_custom_filter(FilterCriteria::NotEqualTo, " ");
     worksheet.filter_column(0, &filter_condition)?;
 
     workbook.save(filename)?;

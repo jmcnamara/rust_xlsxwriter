@@ -38,8 +38,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.autofilter(0, 0, 50, 3)?;
 
     let filter_condition = FilterCondition::new()
-        .add_string_filter("North")
-        .add_blanks_filter();
+        .add_list_filter("North")
+        .add_list_blanks_filter();
 
     worksheet.filter_column(0, &filter_condition)?;
 

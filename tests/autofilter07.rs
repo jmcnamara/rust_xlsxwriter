@@ -33,7 +33,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.autofilter(2, 3, 52, 6)?;
 
-    let filter_condition = FilterCondition::new().add_string_filter("East");
+    let filter_condition = FilterCondition::new().add_list_filter("East");
 
     worksheet.filter_column(3, &filter_condition)?;
 

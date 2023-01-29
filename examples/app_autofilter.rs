@@ -42,7 +42,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Set a filter condition to only show cells matching "East" in the first
     // column.
-    let filter_condition = FilterCondition::new().add_string_filter("East");
+    let filter_condition = FilterCondition::new().add_list_filter("East");
     worksheet.filter_column(0, &filter_condition)?;
 
     // -----------------------------------------------------------------------
@@ -59,9 +59,9 @@ fn main() -> Result<(), XlsxError> {
     // Set a filter condition to only show cells matching "East", "West" or
     // "South" in the first column.
     let filter_condition = FilterCondition::new()
-        .add_string_filter("East")
-        .add_string_filter("West")
-        .add_string_filter("South");
+        .add_list_filter("East")
+        .add_list_filter("West")
+        .add_list_filter("South");
     worksheet.filter_column(0, &filter_condition)?;
 
     // -----------------------------------------------------------------------
@@ -77,8 +77,8 @@ fn main() -> Result<(), XlsxError> {
 
     // Set a filter condition to only show cells matching "East" or blanks.
     let filter_condition = FilterCondition::new()
-        .add_string_filter("East")
-        .add_blanks_filter();
+        .add_list_filter("East")
+        .add_list_blanks_filter();
     worksheet.filter_column(0, &filter_condition)?;
 
     // -----------------------------------------------------------------------
@@ -93,10 +93,10 @@ fn main() -> Result<(), XlsxError> {
     worksheet.autofilter(0, 0, 50, 3)?;
 
     // Set a filter condition for 2 separate columns.
-    let filter_condition1 = FilterCondition::new().add_string_filter("East");
+    let filter_condition1 = FilterCondition::new().add_list_filter("East");
     worksheet.filter_column(0, &filter_condition1)?;
 
-    let filter_condition2 = FilterCondition::new().add_string_filter("July");
+    let filter_condition2 = FilterCondition::new().add_list_filter("July");
     worksheet.filter_column(3, &filter_condition2)?;
 
     // -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Set a custom number filter.
     let filter_condition =
-        FilterCondition::new().add_custom_number_filter(FilterCriteria::GreaterThan, 8000);
+        FilterCondition::new().add_custom_filter(FilterCriteria::GreaterThan, 8000);
     worksheet.filter_column(2, &filter_condition)?;
 
     // -----------------------------------------------------------------------
@@ -128,8 +128,8 @@ fn main() -> Result<(), XlsxError> {
 
     // Set  2custom number filters in a "between" configuration.
     let filter_condition = FilterCondition::new()
-        .add_custom_number_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)
-        .add_custom_number_filter(FilterCriteria::LessThanOrEqualTo, 6000);
+        .add_custom_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)
+        .add_custom_filter(FilterCriteria::LessThanOrEqualTo, 6000);
     worksheet.filter_column(2, &filter_condition)?;
 
     // -----------------------------------------------------------------------
@@ -145,7 +145,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Set a custom number filter of `!= " "` to filter non blanks.
     let filter_condition =
-        FilterCondition::new().add_custom_string_filter(FilterCriteria::NotEqualTo, " ");
+        FilterCondition::new().add_custom_filter(FilterCriteria::NotEqualTo, " ");
     worksheet.filter_column(0, &filter_condition)?;
 
     // Save the file to disk.

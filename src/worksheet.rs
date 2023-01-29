@@ -9008,61 +9008,32 @@ impl FilterCondition {
     }
 
     /// TODO
-    pub fn add_string_filter(mut self, value: &str) -> FilterCondition {
-        self.list.push(FilterData::new_string(value));
-        self.is_list_filter = true;
-        self
-    }
-
-    /// TODO
-    pub fn add_number_filter<T>(mut self, value: T) -> FilterCondition
+    pub fn add_list_filter<T>(mut self, value: T) -> FilterCondition
     where
-        T: Into<f64>,
+        T: IntoFilterData,
     {
-        self.list.push(FilterData::new_number(value.into()));
+        self.list
+            .push(value.new_filter_data(FilterCriteria::EqualTo));
         self.is_list_filter = true;
         self
     }
 
     /// TODO
-    pub fn add_blanks_filter(mut self) -> FilterCondition {
+    pub fn add_list_blanks_filter(mut self) -> FilterCondition {
         self.should_match_blanks = true;
         self.is_list_filter = true;
         self
     }
 
     /// TODO
-    pub fn add_custom_string_filter(
-        mut self,
-        criteria: FilterCriteria,
-        value: &str,
-    ) -> FilterCondition {
-        if self.custom1.is_none() {
-            self.custom1 = Some(FilterData::new_string_and_criteria(value, criteria));
-        } else if self.custom2.is_none() {
-            self.custom2 = Some(FilterData::new_string_and_criteria(value, criteria));
-            self.apply_logical_or = false;
-        } else {
-            // TODO Warn
-        }
-
-        self.is_list_filter = false;
-        self
-    }
-
-    /// TODO
-    pub fn add_custom_number_filter<T>(
-        mut self,
-        criteria: FilterCriteria,
-        value: T,
-    ) -> FilterCondition
+    pub fn add_custom_filter<T>(mut self, criteria: FilterCriteria, value: T) -> FilterCondition
     where
-        T: Into<f64>,
+        T: IntoFilterData,
     {
         if self.custom1.is_none() {
-            self.custom1 = Some(FilterData::new_number_and_criteria(value.into(), criteria));
+            self.custom1 = Some(value.new_filter_data(criteria));
         } else if self.custom2.is_none() {
-            self.custom2 = Some(FilterData::new_number_and_criteria(value.into(), criteria));
+            self.custom2 = Some(value.new_filter_data(criteria));
             self.apply_logical_or = false;
         } else {
             // TODO Warn
@@ -9139,8 +9110,9 @@ impl FilterCriteria {
     }
 }
 
+/// TODO
 #[derive(Clone)]
-pub(crate) struct FilterData {
+pub struct FilterData {
     data_type: FilterDataType,
     string: String,
     number: f64,
@@ -9148,14 +9120,6 @@ pub(crate) struct FilterData {
 }
 
 impl FilterData {
-    fn new_string(value: &str) -> FilterData {
-        FilterData::new_string_and_criteria(value, FilterCriteria::EqualTo)
-    }
-
-    fn new_number(value: f64) -> FilterData {
-        FilterData::new_number_and_criteria(value, FilterCriteria::EqualTo)
-    }
-
     fn new_string_and_criteria(value: &str, criteria: FilterCriteria) -> FilterData {
         FilterData {
             data_type: FilterDataType::String,
@@ -9191,6 +9155,30 @@ impl FilterData {
             // For everything else, including numbers, we just use the string value.
             _ => self.string.clone(),
         }
+    }
+}
+
+/// TODO - generic
+pub trait IntoFilterData {
+    /// TODO - generic
+    fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData;
+}
+
+impl IntoFilterData for f64 {
+    fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData {
+        FilterData::new_number_and_criteria(*self, criteria)
+    }
+}
+
+impl IntoFilterData for i32 {
+    fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData {
+        FilterData::new_number_and_criteria(*self as f64, criteria)
+    }
+}
+
+impl IntoFilterData for &str {
+    fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData {
+        FilterData::new_string_and_criteria(self, criteria)
     }
 }
 
@@ -9924,7 +9912,7 @@ mod tests {
         worksheet.write_string_only(3, 0, "  ").unwrap();
         worksheet.write_string(4, 0, "", &bold).unwrap();
 
-        let filter_condition = FilterCondition::new().add_blanks_filter();
+        let filter_condition = FilterCondition::new().add_list_blanks_filter();
 
         assert!(!worksheet.row_matches_list_filter(0, 0, &filter_condition));
         assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
@@ -9947,7 +9935,7 @@ mod tests {
         worksheet.write_string_only(6, 0, " South ").unwrap();
         worksheet.write_string_only(7, 0, "Mouth").unwrap();
 
-        let filter_condition = FilterCondition::new().add_string_filter("South");
+        let filter_condition = FilterCondition::new().add_list_filter("South");
 
         assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
         assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
@@ -9969,7 +9957,7 @@ mod tests {
         worksheet.write_string_only(4, 0, " 1000 ").unwrap();
         worksheet.write_number_only(5, 0, 2000).unwrap();
 
-        let filter_condition = FilterCondition::new().add_number_filter(1000);
+        let filter_condition = FilterCondition::new().add_list_filter(1000);
 
         assert!(worksheet.row_matches_list_filter(1, 0, &filter_condition));
         assert!(worksheet.row_matches_list_filter(2, 0, &filter_condition));
