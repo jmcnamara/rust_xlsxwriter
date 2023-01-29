@@ -47,7 +47,7 @@ Added more page setup methods.
   [`workbook.read_only_recommended()`] method.
 
 
-[Worksheet protection]:  https://rustxlsxwriter.github.io/worksheet/create.html
+[Worksheet protection]:  https://rustxlsxwriter.github.io/worksheet/protection.html
 [`worksheet.protect()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.protect
 [`worksheet.protect_with_options()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.protect_with_options
 [`workbook.read_only_recommended()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.read_only_recommended
