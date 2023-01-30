@@ -3058,6 +3058,41 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// Unhide a user hidden worksheet row.
+    ///
+    /// The `set_row_unhidden()` method is used to unhide a previously hidden
+    /// row. This can be used in conjunction with autofilter rules.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    ///
+    pub fn set_row_unhidden(&mut self, row: RowNum) -> Result<&mut Worksheet, XlsxError> {
+        // Set a suitable column range for the row dimension check/set.
+        let min_col = if self.dimensions.first_col != COL_MAX {
+            self.dimensions.first_col
+        } else {
+            0
+        };
+
+        // Check row is in the allowed range.
+        if !self.check_dimensions(row, min_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Only update an existing row metadata object.
+        if let Some(row_options) = self.changed_rows.get_mut(&row) {
+            row_options.hidden = false;
+        }
+
+        Ok(self)
+    }
+
     /// Set the width for a worksheet column.
     ///
     /// The `set_column_width()` method is used to change the default width of a

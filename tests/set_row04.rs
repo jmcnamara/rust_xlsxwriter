@@ -31,6 +31,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_row_hidden(20)?;
 
+    // Set a row to hidden and then unhidden.
+    worksheet.set_row_hidden(0)?;
+    worksheet.set_row_unhidden(0)?;
+
     workbook.save(filename)?;
 
     Ok(())
