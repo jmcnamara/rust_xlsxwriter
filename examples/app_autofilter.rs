@@ -2,14 +2,11 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of how to create autofilters with the rust_xlsxwriter library..
+//! An example of how to create autofilters with the rust_xlsxwriter library.
 //!
 //! An autofilter is a way of adding drop down lists to the headers of a 2D
 //! range of worksheet data. This allows users to filter the data based on
 //! simple criteria so that some data is shown and some is hidden.
-//!
-//! Note, adding filter criteria isn't currently supported. That will be added
-//! in an upcoming version.
 //!
 
 use rust_xlsxwriter::{FilterCondition, FilterCriteria, Format, Workbook, Worksheet, XlsxError};
@@ -30,7 +27,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.autofilter(0, 0, 50, 3)?;
 
     // -----------------------------------------------------------------------
-    // 2. Add an autofilter with a list filter conditions.
+    // 2. Add an autofilter with a list filter condition.
     // -----------------------------------------------------------------------
 
     // Add a worksheet  with some sample data to filter.
@@ -65,7 +62,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.filter_column(0, &filter_condition)?;
 
     // -----------------------------------------------------------------------
-    // 4. Add an autofilter with a list filter condition with blanks.
+    // 4. Add an autofilter with a list filter condition to match blank cells.
     // -----------------------------------------------------------------------
 
     // Add a worksheet  with some sample data to filter.
@@ -75,10 +72,8 @@ fn main() -> Result<(), XlsxError> {
     // Set the autofilter area.
     worksheet.autofilter(0, 0, 50, 3)?;
 
-    // Set a filter condition to only show cells matching "East" or blanks.
-    let filter_condition = FilterCondition::new()
-        .add_list_filter("East")
-        .add_list_blanks_filter();
+    // Set a filter condition to only show cells matching blanks.
+    let filter_condition = FilterCondition::new().add_list_blanks_filter();
     worksheet.filter_column(0, &filter_condition)?;
 
     // -----------------------------------------------------------------------
@@ -107,7 +102,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     populate_autofilter_data(worksheet, false)?;
 
-    // Set the autofilter area.
+    // Set the autofilter area for numbers greater than 8000.
     worksheet.autofilter(0, 0, 50, 3)?;
 
     // Set a custom number filter.
@@ -126,14 +121,14 @@ fn main() -> Result<(), XlsxError> {
     // Set the autofilter area.
     worksheet.autofilter(0, 0, 50, 3)?;
 
-    // Set  2custom number filters in a "between" configuration.
+    // Set two custom number filters in a "between" configuration.
     let filter_condition = FilterCondition::new()
         .add_custom_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)
         .add_custom_filter(FilterCriteria::LessThanOrEqualTo, 6000);
     worksheet.filter_column(2, &filter_condition)?;
 
     // -----------------------------------------------------------------------
-    // 8. Add an autofilter for non blanks. This is done using a custom filter.
+    // 8. Add an autofilter for non blanks.
     // -----------------------------------------------------------------------
 
     // Add a worksheet  with some sample data to filter.
@@ -142,6 +137,17 @@ fn main() -> Result<(), XlsxError> {
 
     // Set the autofilter area.
     worksheet.autofilter(0, 0, 50, 3)?;
+
+    // Filter non-blanks by filtering on all the unique non-blank
+    // strings/numbers in the column.
+    let filter_condition = FilterCondition::new()
+        .add_list_filter("East")
+        .add_list_filter("West")
+        .add_list_filter("North")
+        .add_list_filter("South");
+    worksheet.filter_column(0, &filter_condition)?;
+
+    // Or you can add a simpler custom filter to get the same result.
 
     // Set a custom number filter of `!= " "` to filter non blanks.
     let filter_condition =
@@ -213,7 +219,7 @@ pub fn populate_autofilter_data(
         ("East", "Grape", 6000, "February"),
     ];
 
-    // Introduce a blanks cells for some of the examples.
+    // Introduce blanks cells for some of the examples.
     if add_blanks {
         data[5].0 = "";
         data[18].0 = "";

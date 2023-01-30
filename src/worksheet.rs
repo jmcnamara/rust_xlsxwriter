@@ -189,7 +189,7 @@ pub struct Worksheet {
     horizontal_breaks: Vec<u32>,
     vertical_breaks: Vec<u32>,
     filter_conditions: HashMap<ColNum, FilterCondition>,
-    filter_conditions_off: bool,
+    filter_automatic_off: bool,
 }
 
 impl Default for Worksheet {
@@ -366,7 +366,7 @@ impl Worksheet {
             horizontal_breaks: vec![],
             vertical_breaks: vec![],
             filter_conditions: HashMap::new(),
-            filter_conditions_off: false,
+            filter_automatic_off: false,
         }
     }
 
@@ -3396,8 +3396,12 @@ impl Worksheet {
     /// data based on simple criteria so that some data is shown and some is
     /// hidden.
     ///
-    /// Note, this version of the library doesn't support adding filter
-    /// conditions. That will be added in an upcoming version.
+    /// See the [`filter_column`](Worksheet::filter_column) method for an
+    /// explanation of how to set a filter conditions for columns in the
+    /// autofilter range.
+    ///
+    /// Note, Excel only allows one autofilter range per worksheet so calling
+    /// this method multiple times will overwrite the previous range.
     ///
     /// # Arguments
     ///
@@ -3426,21 +3430,26 @@ impl Worksheet {
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
     /// #
-    /// #     // Add a worksheet to the workbook.
+    /// #     // Add a worksheet with some sample data to filter.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
-    ///     // Add some header titles.
-    ///     worksheet.write_string_only(0, 0, "Region")?;
-    ///     worksheet.write_string_only(0, 1, "Count")?;
-    ///
-    ///     // Write some test data.
-    ///     for row in 1..9 {
-    ///         worksheet.write_string_only(row as u32, 0, "East")?;
-    ///         worksheet.write_number_only(row as u32, 1, row * 100)?;
-    ///     }
-    ///
-    ///     // Set the autofilter.
-    ///     worksheet.autofilter(0, 0, 8, 1)?;
+    /// #     worksheet.write_string_only(0, 0, "Region")?;
+    /// #     worksheet.write_string_only(1, 0, "East")?;
+    /// #     worksheet.write_string_only(2, 0, "West")?;
+    /// #     worksheet.write_string_only(3, 0, "East")?;
+    /// #     worksheet.write_string_only(4, 0, "North")?;
+    /// #     worksheet.write_string_only(5, 0, "South")?;
+    /// #     worksheet.write_string_only(6, 0, "West")?;
+    /// #
+    /// #     worksheet.write_string_only(0, 1, "Sales")?;
+    /// #     worksheet.write_number_only(1, 1, 3000)?;
+    /// #     worksheet.write_number_only(2, 1, 8000)?;
+    /// #     worksheet.write_number_only(3, 1, 5000)?;
+    /// #     worksheet.write_number_only(4, 1, 4000)?;
+    /// #     worksheet.write_number_only(5, 1, 7000)?;
+    /// #     worksheet.write_number_only(6, 1, 9000)?;
+    /// #
+    /// #     // Set the autofilter.
+    /// #     worksheet.autofilter(0, 0, 6, 1)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3450,8 +3459,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_autofilter.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_autofilter.png">
     ///
     pub fn autofilter(
         &mut self,
@@ -3488,12 +3496,121 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
+    /// Set the filter condition for a column in an autofilter range.
+    ///
+    /// The [`autofilter()`](Worksheet::autofilter) method sets the cell range
+    /// for an autofilter but in order to filter rows within the filter area you
+    /// must also add a filter condition.
+    ///
+    /// Excel supports two main types of filter. The first, and most common, is
+    /// a list filter where the user selects the items to filter from a list of
+    /// all the values in the the column range:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/autofilter_list.png">
+    ///
+    /// The other main type of filter is a custom filter where the user can
+    /// specify 1 or 2 conditions like ">= 4000" and "<= 6000":
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/autofilter_custom.png">
+    ///
+    /// In Excel these are mutually exclusive and you will need to choose one or
+    /// the other via the [`FilterCondition`] struct parameter.
+    ///
+    /// For more details on setting filter conditions see [`FilterCondition`]
+    /// and the [Working with Autofilters] section of the Users Guide.
+    ///
+    /// [Working with Autofilters]:
+    ///     https://rustxlsxwriter.github.io/formulas/autofilters.html
+    ///
+    /// Note, there are some limitations on autofilter conditions. The main one
+    /// is that the hiding of rows that don't match a filter is not an automatic
+    /// part of the file format. Instead it is necessary to hide rows that don't
+    /// match the filters. The `rust_xlsxwriter` library does this automatically
+    /// and in most cases will get it right, however, there may be cases where
+    /// you need to manually hide some of the rows. See [Auto-hiding filtered
+    /// rows].
+    ///
+    /// [Auto-hiding filtered rows]:
+    ///     https://rustxlsxwriter.github.io/formulas/autofilters.html#auto-hiding-filtered-rows
+    ///
+    /// # Arguments
+    ///
+    /// * `col` - The zero indexed column number.
+    /// * `filter_condition` - The column filter condition defined by the
+    ///   [`FilterCondition`] struct.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    ///   limits.
+    /// * [`XlsxError::ParameterError`] - Parameter error for the following
+    ///   issues:
+    ///   - The [`autofilter()`](Worksheet::autofilter) range hasn't been set.
+    ///   - The column is outside the [`autofilter()`](Worksheet::autofilter)
+    ///     range.
+    ///   - The [`FilterCondition`] doesn't have a condition set.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting an autofilter with a list
+    /// filter condition.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_filter_column1.rs
+    /// #
+    /// # use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet with some sample data to filter.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     worksheet.write_string_only(0, 0, "Region")?;
+    /// #     worksheet.write_string_only(1, 0, "East")?;
+    /// #     worksheet.write_string_only(2, 0, "West")?;
+    /// #     worksheet.write_string_only(3, 0, "East")?;
+    /// #     worksheet.write_string_only(4, 0, "North")?;
+    /// #     worksheet.write_string_only(5, 0, "South")?;
+    /// #     worksheet.write_string_only(6, 0, "West")?;
+    /// #
+    /// #     worksheet.write_string_only(0, 1, "Sales")?;
+    /// #     worksheet.write_number_only(1, 1, 3000)?;
+    /// #     worksheet.write_number_only(2, 1, 8000)?;
+    /// #     worksheet.write_number_only(3, 1, 5000)?;
+    /// #     worksheet.write_number_only(4, 1, 4000)?;
+    /// #     worksheet.write_number_only(5, 1, 7000)?;
+    /// #     worksheet.write_number_only(6, 1, 9000)?;
+    /// #
+    /// #     // Set the autofilter.
+    /// #     worksheet.autofilter(0, 0, 6, 1)?;
+    /// #
+    ///     // Set a filter condition to only show cells matching "East" in the first
+    ///     // column.
+    ///     let filter_condition = FilterCondition::new().add_list_filter("East");
+    ///     worksheet.filter_column(0, &filter_condition)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column1.png">
+    ///
     pub fn filter_column(
         &mut self,
         col: ColNum,
         filter_condition: &FilterCondition,
     ) -> Result<&mut Worksheet, XlsxError> {
+        // Check if column is in the allowed range without updating dimensions.
+        if col >= COL_MAX {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
         // Check that an autofilter has been created before a condition can be
         // applied to it.
         if !self.autofilter_defined_name.in_use {
@@ -3501,11 +3618,6 @@ impl Worksheet {
                 "The 'autofilter()' range must be set before a 'filter_condition' can be applied."
                     .to_string();
             return Err(XlsxError::ParameterError(error));
-        }
-
-        // Check if column is in the allowed range without updating dimensions.
-        if col >= COL_MAX {
-            return Err(XlsxError::RowColumnLimitError);
         }
 
         // Check if column is within the autofilter column range.
@@ -3519,21 +3631,38 @@ impl Worksheet {
             return Err(XlsxError::ParameterError(error));
         }
 
-        // TODO
         // Check the filter condition have been set up correctly.
-        // if filter_condition.filter_type == FilterCriteriaTypes::Unset {
-        //     let error = format!("The 'filter_condition' doesn't have a value set.");
-        //     return Err(XlsxError::ParameterError(error));
-        // }
+        if filter_condition.list.is_empty()
+            && filter_condition.custom1.is_none()
+            && !filter_condition.should_match_blanks
+        {
+            let error =
+                "The 'filter_condition' doesn't have a data value or condition set.".to_string();
+            return Err(XlsxError::ParameterError(error));
+        }
 
         self.filter_conditions.insert(col, filter_condition.clone());
 
         Ok(self)
     }
 
-    /// TODO
-    pub fn filter_conditions_off(&mut self) -> &mut Worksheet {
-        self.filter_conditions_off = true;
+    /// Turn off the option to automatically hide rows that don't match filters.
+    ///
+    /// Rows that don't match autofilter conditions are hidden by Excel at
+    /// runtime. This feature isn't an automatic part of the file format and in
+    /// practice it is necessary for the user to hide rows that don't match the
+    /// applied filters. The `rust_xlsxwriter` library tries to do this
+    /// automatically and in most cases will get it right, however, there may be
+    /// cases where you need to manually hide some of the rows and may want to
+    /// turn off the automatic handling using `filter_automatic_off()`.
+    ///
+    /// See [Auto-hiding filtered rows] in the User Guide.
+    ///
+    /// [Auto-hiding filtered rows]:
+    ///     https://rustxlsxwriter.github.io/formulas/autofilters.html#auto-hiding-filtered-rows
+    ///
+    pub fn filter_automatic_off(&mut self) -> &mut Worksheet {
+        self.filter_automatic_off = true;
         self
     }
 
@@ -6441,7 +6570,7 @@ impl Worksheet {
     // Hide any rows in the autofilter range that don't match the autofilter
     // conditions, like Excel does at runtime.
     pub(crate) fn hide_autofilter_rows(&mut self) {
-        if self.filter_conditions.is_empty() || self.filter_conditions_off {
+        if self.filter_conditions.is_empty() || self.filter_automatic_off {
             return;
         }
 
@@ -8982,7 +9111,391 @@ impl Worksheet {
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
 
-/// TODO
+/// The `FilterCondition` struct is used to define autofilter rules associated
+/// with an [`autofilter()`](Worksheet::autofilter()) range.
+///
+/// Excel supports two main types of filter conditions. The first, and most
+/// common, is a list filter where the user selects the items to filter from a
+/// list of all the values in the the column range:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/autofilter_list.png">
+///
+/// The other main type of filter is a custom filter where the user can specify
+/// 1 or 2 conditions like ">= 4000" and "<= 6000":
+///
+/// <img src="https://rustxlsxwriter.github.io/images/autofilter_custom.png">
+///
+/// In Excel these are mutually exclusive and you will need to choose one or the
+/// other via the [`FilterCondition`]
+/// [`add_list_filter()`](FilterCondition::add_list_filter) and
+/// [`add_custom_filter()`](FilterCondition::add_custom_filter) methods.
+///
+///
+///
+/// # Examples
+///
+/// The following example demonstrates setting an autofilter with a list filter
+/// condition.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_filter_column1.rs
+/// #
+/// # use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet with some sample data to filter.
+/// #     let worksheet = workbook.add_worksheet();
+/// #     worksheet.write_string_only(0, 0, "Region")?;
+/// #     worksheet.write_string_only(1, 0, "East")?;
+/// #     worksheet.write_string_only(2, 0, "West")?;
+/// #     worksheet.write_string_only(3, 0, "East")?;
+/// #     worksheet.write_string_only(4, 0, "North")?;
+/// #     worksheet.write_string_only(5, 0, "South")?;
+/// #     worksheet.write_string_only(6, 0, "West")?;
+/// #
+/// #     worksheet.write_string_only(0, 1, "Sales")?;
+/// #     worksheet.write_number_only(1, 1, 3000)?;
+/// #     worksheet.write_number_only(2, 1, 8000)?;
+/// #     worksheet.write_number_only(3, 1, 5000)?;
+/// #     worksheet.write_number_only(4, 1, 4000)?;
+/// #     worksheet.write_number_only(5, 1, 7000)?;
+/// #     worksheet.write_number_only(6, 1, 9000)?;
+/// #
+/// #     // Set the autofilter.
+/// #     worksheet.autofilter(0, 0, 6, 1)?;
+///
+///     // Set a filter condition to only show cells matching "East" in the first
+///     // column.
+///     let filter_condition = FilterCondition::new().add_list_filter("East");
+///     worksheet.filter_column(0, &filter_condition)?;
+///
+/// #     workbook.save("worksheet.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column1.png">
+///
+///
+/// The following example demonstrates setting an autofilter with multiple list
+/// filter conditions.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_filter_column2.rs
+/// #
+/// # use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet with some sample data to filter.
+/// #     let worksheet = workbook.add_worksheet();
+/// #     worksheet.write_string_only(0, 0, "Region")?;
+/// #     worksheet.write_string_only(1, 0, "East")?;
+/// #     worksheet.write_string_only(2, 0, "West")?;
+/// #     worksheet.write_string_only(3, 0, "East")?;
+/// #     worksheet.write_string_only(4, 0, "North")?;
+/// #     worksheet.write_string_only(5, 0, "South")?;
+/// #     worksheet.write_string_only(6, 0, "West")?;
+/// #
+/// #     worksheet.write_string_only(0, 1, "Sales")?;
+/// #     worksheet.write_number_only(1, 1, 3000)?;
+/// #     worksheet.write_number_only(2, 1, 8000)?;
+/// #     worksheet.write_number_only(3, 1, 5000)?;
+/// #     worksheet.write_number_only(4, 1, 4000)?;
+/// #     worksheet.write_number_only(5, 1, 7000)?;
+/// #     worksheet.write_number_only(6, 1, 9000)?;
+/// #
+/// #     // Set the autofilter.
+/// #     worksheet.autofilter(0, 0, 6, 1)?;
+///
+///     // Set a filter condition to only show cells matching "East", "West" or
+///     // "South" in the first column.
+///     let filter_condition = FilterCondition::new()
+///         .add_list_filter("East")
+///         .add_list_filter("West")
+///         .add_list_filter("South");
+///     worksheet.filter_column(0, &filter_condition)?;
+///
+/// #     workbook.save("worksheet.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column2.png">
+///
+///
+/// The following example demonstrates setting an autofilter with a list filter
+/// for blank cells.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_filter_column3.rs
+/// #
+/// # use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet with some sample data to filter.
+/// #     let worksheet = workbook.add_worksheet();
+/// #     worksheet.write_string_only(0, 0, "Region")?;
+/// #     worksheet.write_string_only(1, 0, "")?;
+/// #     worksheet.write_string_only(2, 0, "West")?;
+/// #     worksheet.write_string_only(3, 0, "East")?;
+/// #     worksheet.write_string_only(4, 0, "North")?;
+/// #
+/// #     worksheet.write_string_only(6, 0, "West")?;
+/// #
+/// #     worksheet.write_string_only(0, 1, "Sales")?;
+/// #     worksheet.write_number_only(1, 1, 3000)?;
+/// #     worksheet.write_number_only(2, 1, 8000)?;
+/// #     worksheet.write_number_only(3, 1, 5000)?;
+/// #     worksheet.write_number_only(4, 1, 4000)?;
+/// #     worksheet.write_number_only(5, 1, 7000)?;
+/// #     worksheet.write_number_only(6, 1, 9000)?;
+/// #
+/// #     // Set the autofilter.
+/// #     worksheet.autofilter(0, 0, 6, 1)?;
+///
+///     // Set a filter condition to only show cells matching blanks.
+///     let filter_condition = FilterCondition::new().add_list_blanks_filter();
+///
+///     worksheet.filter_column(0, &filter_condition)?;
+///
+/// #     workbook.save("worksheet.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column3.png">
+///
+///
+/// The following example demonstrates setting an autofilter with different list
+/// filter conditions in separate columns.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_filter_column4.rs
+/// #
+/// # use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet with some sample data to filter.
+/// #     let worksheet = workbook.add_worksheet();
+/// #     worksheet.write_string_only(0, 0, "Region")?;
+/// #     worksheet.write_string_only(1, 0, "East")?;
+/// #     worksheet.write_string_only(2, 0, "West")?;
+/// #     worksheet.write_string_only(3, 0, "East")?;
+/// #     worksheet.write_string_only(4, 0, "North")?;
+/// #     worksheet.write_string_only(5, 0, "South")?;
+/// #     worksheet.write_string_only(6, 0, "West")?;
+/// #
+/// #     worksheet.write_string_only(0, 1, "Sales")?;
+/// #     worksheet.write_number_only(1, 1, 3000)?;
+/// #     worksheet.write_number_only(2, 1, 8000)?;
+/// #     worksheet.write_number_only(3, 1, 5000)?;
+/// #     worksheet.write_number_only(4, 1, 4000)?;
+/// #     worksheet.write_number_only(5, 1, 7000)?;
+/// #     worksheet.write_number_only(6, 1, 9000)?;
+/// #
+/// #     // Set the autofilter.
+/// #     worksheet.autofilter(0, 0, 6, 1)?;
+///
+///     // Set a filter condition for 2 separate columns.
+///     let filter_condition1 = FilterCondition::new().add_list_filter("East");
+///     worksheet.filter_column(0, &filter_condition1)?;
+///
+///     let filter_condition2 = FilterCondition::new().add_list_filter(3000);
+///     worksheet.filter_column(1, &filter_condition2)?;
+///
+/// #     workbook.save("worksheet.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column4.png">
+///
+///
+/// The following example demonstrates setting an autofilter for a custom number
+/// filter.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_filter_column5.rs
+/// #
+/// # use rust_xlsxwriter::{FilterCondition, FilterCriteria, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet with some sample data to filter.
+/// #     let worksheet = workbook.add_worksheet();
+/// #     worksheet.write_string_only(0, 0, "Region")?;
+/// #     worksheet.write_string_only(1, 0, "East")?;
+/// #     worksheet.write_string_only(2, 0, "West")?;
+/// #     worksheet.write_string_only(3, 0, "East")?;
+/// #     worksheet.write_string_only(4, 0, "North")?;
+/// #     worksheet.write_string_only(5, 0, "South")?;
+/// #     worksheet.write_string_only(6, 0, "West")?;
+/// #
+/// #     worksheet.write_string_only(0, 1, "Sales")?;
+/// #     worksheet.write_number_only(1, 1, 3000)?;
+/// #     worksheet.write_number_only(2, 1, 8000)?;
+/// #     worksheet.write_number_only(3, 1, 5000)?;
+/// #     worksheet.write_number_only(4, 1, 4000)?;
+/// #     worksheet.write_number_only(5, 1, 7000)?;
+/// #     worksheet.write_number_only(6, 1, 9000)?;
+/// #
+/// #     // Set the autofilter.
+/// #     worksheet.autofilter(0, 0, 6, 1)?;
+///
+///     // Set a custom number filter.
+///     let filter_condition =
+///         FilterCondition::new().add_custom_filter(FilterCriteria::GreaterThan, 4000);
+///     worksheet.filter_column(1, &filter_condition)?;
+///
+/// #     workbook.save("worksheet.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column5.png">
+///
+///
+/// The following example demonstrates setting an autofilter for two custom
+/// number filters to create a "between" condition.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_filter_column6.rs
+/// #
+/// # use rust_xlsxwriter::{FilterCondition, FilterCriteria, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet with some sample data to filter.
+/// #     let worksheet = workbook.add_worksheet();
+/// #     worksheet.write_string_only(0, 0, "Region")?;
+/// #     worksheet.write_string_only(1, 0, "East")?;
+/// #     worksheet.write_string_only(2, 0, "West")?;
+/// #     worksheet.write_string_only(3, 0, "East")?;
+/// #     worksheet.write_string_only(4, 0, "North")?;
+/// #     worksheet.write_string_only(5, 0, "South")?;
+/// #     worksheet.write_string_only(6, 0, "West")?;
+/// #
+/// #     worksheet.write_string_only(0, 1, "Sales")?;
+/// #     worksheet.write_number_only(1, 1, 3000)?;
+/// #     worksheet.write_number_only(2, 1, 8000)?;
+/// #     worksheet.write_number_only(3, 1, 5000)?;
+/// #     worksheet.write_number_only(4, 1, 4000)?;
+/// #     worksheet.write_number_only(5, 1, 7000)?;
+/// #     worksheet.write_number_only(6, 1, 9000)?;
+/// #
+/// #     // Set the autofilter.
+/// #     worksheet.autofilter(0, 0, 6, 1)?;
+///
+///     // Set two custom number filters in a "between" configuration.
+///     let filter_condition = FilterCondition::new()
+///         .add_custom_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)
+///         .add_custom_filter(FilterCriteria::LessThanOrEqualTo, 8000);
+///     worksheet.filter_column(1, &filter_condition)?;
+///
+/// #     workbook.save("worksheet.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column6.png">
+///
+///
+/// The following example demonstrates setting an autofilter to show all the
+/// non-blank values in a column. This can be done in 2 ways: by adding a filter
+/// for each district string/number in the column or since that may be difficult
+/// to figure out programmatically you can set a custom filter. Excel uses both
+/// of these methods depending on the data being filtered.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_filter_column7.rs
+/// #
+/// # use rust_xlsxwriter::{FilterCondition, FilterCriteria, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet with some sample data to filter.
+/// #     let worksheet = workbook.add_worksheet();
+/// #     worksheet.write_string_only(0, 0, "Region")?;
+/// #     worksheet.write_string_only(1, 0, "")?;
+/// #     worksheet.write_string_only(2, 0, "West")?;
+/// #     worksheet.write_string_only(3, 0, "East")?;
+/// #     worksheet.write_string_only(4, 0, "")?;
+/// #     worksheet.write_string_only(5, 0, "")?;
+/// #     worksheet.write_string_only(6, 0, "West")?;
+/// #
+/// #     worksheet.write_string_only(0, 1, "Sales")?;
+/// #     worksheet.write_number_only(1, 1, 3000)?;
+/// #     worksheet.write_number_only(2, 1, 8000)?;
+/// #     worksheet.write_number_only(3, 1, 5000)?;
+/// #     worksheet.write_number_only(4, 1, 4000)?;
+/// #     worksheet.write_number_only(5, 1, 7000)?;
+/// #     worksheet.write_number_only(6, 1, 9000)?;
+/// #
+/// #     // Set the autofilter.
+/// #     worksheet.autofilter(0, 0, 6, 1)?;
+///
+///     // Filter non-blanks by filtering on all the unique non-blank
+///     // strings/numbers in the column.
+///     let filter_condition = FilterCondition::new()
+///         .add_list_filter("East")
+///         .add_list_filter("West")
+///         .add_list_filter("North")
+///         .add_list_filter("South");
+///     worksheet.filter_column(0, &filter_condition)?;
+///
+///     // Or you can add a simpler custom filter to get the same result.
+///
+///     // Set a custom number filter of `!= " "` to filter non blanks.
+///     let filter_condition =
+///         FilterCondition::new().add_custom_filter(FilterCriteria::NotEqualTo, " ");
+///     worksheet.filter_column(0, &filter_condition)?;
+///
+/// #     workbook.save("worksheet.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column7.png">
+///
 #[derive(Clone)]
 pub struct FilterCondition {
     pub(crate) is_list_filter: bool,
@@ -8995,7 +9508,12 @@ pub struct FilterCondition {
 
 #[allow(clippy::new_without_default)]
 impl FilterCondition {
-    /// TODO
+    /// Create a new FilterCondition struct to define autofilter rules
+    /// associated with an [`autofilter()`](Worksheet::autofilter()) range and
+    /// the the [`filter_column`](Worksheet::filter_column) method.
+    ///
+    /// See the examples above.
+    ///
     pub fn new() -> FilterCondition {
         FilterCondition {
             is_list_filter: true,
@@ -9007,7 +9525,72 @@ impl FilterCondition {
         }
     }
 
-    /// TODO
+    /// Add a list filter condition.
+    ///
+    /// Add a list filter to a column in an autofilter range. This method can be
+    /// called multiple times to add multiple "equal to" filter conditions with
+    /// a boolean "or". So in the example below the the equivalent Rust
+    /// expression for the filter condition would be: `value == "East" || value
+    /// == "West" || value == "South"`.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value can be a `&str`,`f64` or `i32` type for which the
+    ///   [`IntoFilterData`] trait is implemented.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting an autofilter with multiple
+    /// list filter conditions.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_filter_column2.rs
+    /// #
+    /// # use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet with some sample data to filter.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     worksheet.write_string_only(0, 0, "Region")?;
+    /// #     worksheet.write_string_only(1, 0, "East")?;
+    /// #     worksheet.write_string_only(2, 0, "West")?;
+    /// #     worksheet.write_string_only(3, 0, "East")?;
+    /// #     worksheet.write_string_only(4, 0, "North")?;
+    /// #     worksheet.write_string_only(5, 0, "South")?;
+    /// #     worksheet.write_string_only(6, 0, "West")?;
+    /// #
+    /// #     worksheet.write_string_only(0, 1, "Sales")?;
+    /// #     worksheet.write_number_only(1, 1, 3000)?;
+    /// #     worksheet.write_number_only(2, 1, 8000)?;
+    /// #     worksheet.write_number_only(3, 1, 5000)?;
+    /// #     worksheet.write_number_only(4, 1, 4000)?;
+    /// #     worksheet.write_number_only(5, 1, 7000)?;
+    /// #     worksheet.write_number_only(6, 1, 9000)?;
+    /// #
+    /// #     // Set the autofilter.
+    /// #     worksheet.autofilter(0, 0, 6, 1)?;
+    ///
+    ///     // Set a filter condition to only show cells matching "East", "West" or
+    ///     // "South" in the first column.
+    ///     let filter_condition = FilterCondition::new()
+    ///         .add_list_filter("East")
+    ///         .add_list_filter("West")
+    ///         .add_list_filter("South");
+    ///     worksheet.filter_column(0, &filter_condition)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column2.png">
+    ///
     pub fn add_list_filter<T>(mut self, value: T) -> FilterCondition
     where
         T: IntoFilterData,
@@ -9018,14 +9601,202 @@ impl FilterCondition {
         self
     }
 
-    /// TODO
+    /// Add a list filter to filter on Blanks.
+    ///
+    /// Add a filter condition to a list filter to show Blank cells. For
+    /// autofilters Excel treats empty or whitespace only cells as "Blank".
+    ///
+    /// Filtering non-blanks can be done in two ways. See the second example
+    /// below.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting an autofilter with a list
+    /// filter for blank cells.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_filter_column3.rs
+    /// #
+    /// # use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet with some sample data to filter.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     worksheet.write_string_only(0, 0, "Region")?;
+    /// #     worksheet.write_string_only(1, 0, "")?;
+    /// #     worksheet.write_string_only(2, 0, "West")?;
+    /// #     worksheet.write_string_only(3, 0, "East")?;
+    /// #     worksheet.write_string_only(4, 0, "North")?;
+    /// #
+    /// #     worksheet.write_string_only(6, 0, "West")?;
+    /// #
+    /// #     worksheet.write_string_only(0, 1, "Sales")?;
+    /// #     worksheet.write_number_only(1, 1, 3000)?;
+    /// #     worksheet.write_number_only(2, 1, 8000)?;
+    /// #     worksheet.write_number_only(3, 1, 5000)?;
+    /// #     worksheet.write_number_only(4, 1, 4000)?;
+    /// #     worksheet.write_number_only(5, 1, 7000)?;
+    /// #     worksheet.write_number_only(6, 1, 9000)?;
+    /// #
+    /// #     // Set the autofilter.
+    /// #     worksheet.autofilter(0, 0, 6, 1)?;
+    ///
+    ///     // Set a filter condition to only show cells matching blanks.
+    ///     let filter_condition = FilterCondition::new().add_list_blanks_filter();
+    ///
+    ///     worksheet.filter_column(0, &filter_condition)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column3.png">
+    ///
+    ///
+    /// The following example demonstrates does the opposite of the previous
+    /// example, it sets an autofilter to show all the non-blank values in a
+    /// column. This can be done in two ways: by adding a filter for each district
+    /// string/number in the column or since that may be difficult to figure out
+    /// programmatically you can set a custom filter. Excel uses both of these
+    /// methods depending on the data being filtered.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_filter_column7.rs
+    /// #
+    /// # use rust_xlsxwriter::{FilterCondition, FilterCriteria, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet with some sample data to filter.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     worksheet.write_string_only(0, 0, "Region")?;
+    /// #     worksheet.write_string_only(1, 0, "")?;
+    /// #     worksheet.write_string_only(2, 0, "West")?;
+    /// #     worksheet.write_string_only(3, 0, "East")?;
+    /// #     worksheet.write_string_only(4, 0, "")?;
+    /// #     worksheet.write_string_only(5, 0, "")?;
+    /// #     worksheet.write_string_only(6, 0, "West")?;
+    /// #
+    /// #     worksheet.write_string_only(0, 1, "Sales")?;
+    /// #     worksheet.write_number_only(1, 1, 3000)?;
+    /// #     worksheet.write_number_only(2, 1, 8000)?;
+    /// #     worksheet.write_number_only(3, 1, 5000)?;
+    /// #     worksheet.write_number_only(4, 1, 4000)?;
+    /// #     worksheet.write_number_only(5, 1, 7000)?;
+    /// #     worksheet.write_number_only(6, 1, 9000)?;
+    /// #
+    /// #     // Set the autofilter.
+    /// #     worksheet.autofilter(0, 0, 6, 1)?;
+    ///
+    ///     // Filter non-blanks by filtering on all the unique non-blank
+    ///     // strings/numbers in the column.
+    ///     let filter_condition = FilterCondition::new()
+    ///         .add_list_filter("East")
+    ///         .add_list_filter("West")
+    ///         .add_list_filter("North")
+    ///         .add_list_filter("South");
+    ///     worksheet.filter_column(0, &filter_condition)?;
+    ///
+    ///     // Or you can add a simpler custom filter to get the same result.
+    ///
+    ///     // Set a custom number filter of `!= " "` to filter non blanks.
+    ///     let filter_condition =
+    ///         FilterCondition::new().add_custom_filter(FilterCriteria::NotEqualTo, " ");
+    ///     worksheet.filter_column(0, &filter_condition)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column7.png">
+    ///
     pub fn add_list_blanks_filter(mut self) -> FilterCondition {
         self.should_match_blanks = true;
         self.is_list_filter = true;
         self
     }
 
-    /// TODO
+    /// Add a custom filter condition.
+    ///
+    /// Add a custom filter to a column in an autofilter range. Excel only
+    /// allows two custom conditions so this method can only be called twice.
+    ///
+    /// When two conditions are specified, like the example below, the logical
+    /// operator defaults to "and", like in Excel. However you can use the
+    /// [`add_custom_boolean_or`](FilterCondition::add_custom_boolean_or) method
+    /// below to get an "or" logical condition.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The value can be a `&str`,`f64` or `i32` type for which the
+    ///   [`IntoFilterData`] trait is implemented.
+    /// * `criteria` - The criteria/operator to use in the filter as defined by
+    ///   the [`FilterCriteria`] struct.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting an autofilter for two custom
+    /// number filters to create a "between" condition.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_filter_column6.rs
+    /// #
+    /// # use rust_xlsxwriter::{FilterCondition, FilterCriteria, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet with some sample data to filter.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     worksheet.write_string_only(0, 0, "Region")?;
+    /// #     worksheet.write_string_only(1, 0, "East")?;
+    /// #     worksheet.write_string_only(2, 0, "West")?;
+    /// #     worksheet.write_string_only(3, 0, "East")?;
+    /// #     worksheet.write_string_only(4, 0, "North")?;
+    /// #     worksheet.write_string_only(5, 0, "South")?;
+    /// #     worksheet.write_string_only(6, 0, "West")?;
+    /// #
+    /// #     worksheet.write_string_only(0, 1, "Sales")?;
+    /// #     worksheet.write_number_only(1, 1, 3000)?;
+    /// #     worksheet.write_number_only(2, 1, 8000)?;
+    /// #     worksheet.write_number_only(3, 1, 5000)?;
+    /// #     worksheet.write_number_only(4, 1, 4000)?;
+    /// #     worksheet.write_number_only(5, 1, 7000)?;
+    /// #     worksheet.write_number_only(6, 1, 9000)?;
+    /// #
+    /// #     // Set the autofilter.
+    /// #     worksheet.autofilter(0, 0, 6, 1)?;
+    ///
+    ///     // Set two custom number filters in a "between" configuration.
+    ///     let filter_condition = FilterCondition::new()
+    ///         .add_custom_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)
+    ///         .add_custom_filter(FilterCriteria::LessThanOrEqualTo, 8000);
+    ///     worksheet.filter_column(1, &filter_condition)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column6.png">
+    ///
     pub fn add_custom_filter<T>(mut self, criteria: FilterCriteria, value: T) -> FilterCondition
     where
         T: IntoFilterData,
@@ -9036,14 +9807,20 @@ impl FilterCondition {
             self.custom2 = Some(value.new_filter_data(criteria));
             self.apply_logical_or = false;
         } else {
-            // TODO Warn
+            eprintln!("Excel only allows 2 custom filter conditions.");
         }
 
         self.is_list_filter = false;
         self
     }
 
-    /// TODO
+    /// Add an "or" logical condition for two custom filters.
+    ///
+    /// When two conditions are specified, like the example above, the logical
+    /// operator defaults to "and", as in Excel. However you can use the
+    /// [`add_custom_boolean_or`](FilterCondition::add_custom_boolean_or) method
+    /// to get an "or" logical condition.
+    ///
     pub fn add_custom_boolean_or(mut self) -> FilterCondition {
         self.apply_logical_or = true;
         self.is_list_filter = false;
@@ -9051,43 +9828,53 @@ impl FilterCondition {
     }
 }
 
+/// The FilterCriteria struct defines logical filter criteria used in an
+/// autofilter.
+///
+/// These filter criteria are used with the [`FilterCondition`]
+/// [`add_custom_filter()`](FilterCondition::add_custom_filter) method.
+///
+/// Currently only Excel's string and number filter operations are supported.
+/// The numeric style criteria such as `>=` can also be applied to strings (like
+/// in Rust) but the string operations like `BeginsWith` are only applied to
+/// strings in Excel.
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum FilterCriteria {
-    /// TODO
+    /// Show numbers or strings that are equal to the filter value.
     EqualTo,
 
-    /// TODO
+    /// Show numbers or strings that are not equal to the filter value.
     NotEqualTo,
 
-    /// TODO
+    /// Show numbers or strings that are greater than the filter value.
     GreaterThan,
 
-    /// TODO
+    /// Show numbers or strings that are greater than or equal to the filter value.
     GreaterThanOrEqualTo,
 
-    /// TODO
+    /// Show numbers or strings that are less than the filter value.
     LessThan,
 
-    /// TODO
+    /// Show numbers or strings that are less than or equal to the filter value.
     LessThanOrEqualTo,
 
-    /// TODO
+    /// Show strings that begin with the filter string value.
     BeginsWith,
 
-    /// TODO
+    /// Show strings that do not begin with the filter string value.
     DoesNotBeginWith,
 
-    /// TODO
+    /// Show strings that end with the filter string value.
     EndsWith,
 
-    /// TODO
+    /// Show strings that do not end with the filter string value.
     DoesNotEndWith,
 
-    /// TODO
+    /// Show strings that contain with the filter string value.
     Contains,
 
-    /// TODO
+    /// Show strings that do not contain with the filter string value.
     DoesNotContain,
 }
 
@@ -9110,7 +9897,8 @@ impl FilterCriteria {
     }
 }
 
-/// TODO
+/// Simple data type to allow a generic mapping from Rusts string and number
+/// types to the types used in Excel's filters.
 #[derive(Clone)]
 pub struct FilterData {
     data_type: FilterDataType,
@@ -9158,9 +9946,11 @@ impl FilterData {
     }
 }
 
-/// TODO - generic
+/// Trait to map different Rust types into Excel data types used in filters.
+/// Currently only string and number like types are supported.
 pub trait IntoFilterData {
-    /// TODO - generic
+    /// Types/objects supporting this trait must be able to convert to
+    /// FilterData struct.
     fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData;
 }
 

@@ -2,10 +2,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates setting a simple autofilter in a
-//! worksheet.
+//! The following example demonstrates setting an autofilter with different list
+//! filter conditions in separate columns.
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{FilterCondition, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -30,6 +30,13 @@ fn main() -> Result<(), XlsxError> {
 
     // Set the autofilter.
     worksheet.autofilter(0, 0, 6, 1)?;
+
+    // Set a filter condition for 2 separate columns.
+    let filter_condition1 = FilterCondition::new().add_list_filter("East");
+    worksheet.filter_column(0, &filter_condition1)?;
+
+    let filter_condition2 = FilterCondition::new().add_list_filter(3000);
+    worksheet.filter_column(1, &filter_condition2)?;
 
     workbook.save("worksheet.xlsx")?;
 

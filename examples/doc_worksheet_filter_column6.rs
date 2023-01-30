@@ -2,10 +2,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates setting a simple autofilter in a
-//! worksheet.
+//! The following example demonstrates setting an autofilter for two custom
+//! number filters to create a "between" condition.
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{FilterCondition, FilterCriteria, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -30,6 +30,12 @@ fn main() -> Result<(), XlsxError> {
 
     // Set the autofilter.
     worksheet.autofilter(0, 0, 6, 1)?;
+
+    // Set two custom number filters in a "between" configuration.
+    let filter_condition = FilterCondition::new()
+        .add_custom_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)
+        .add_custom_filter(FilterCriteria::LessThanOrEqualTo, 8000);
+    worksheet.filter_column(1, &filter_condition)?;
 
     workbook.save("worksheet.xlsx")?;
 

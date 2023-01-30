@@ -2,10 +2,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates setting a simple autofilter in a
-//! worksheet.
+//! The following example demonstrates setting an autofilter for a custom number
+//! filter.
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{FilterCondition, FilterCriteria, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -30,6 +30,11 @@ fn main() -> Result<(), XlsxError> {
 
     // Set the autofilter.
     worksheet.autofilter(0, 0, 6, 1)?;
+
+    // Set a custom number filter.
+    let filter_condition =
+        FilterCondition::new().add_custom_filter(FilterCriteria::GreaterThan, 4000);
+    worksheet.filter_column(1, &filter_condition)?;
 
     workbook.save("worksheet.xlsx")?;
 

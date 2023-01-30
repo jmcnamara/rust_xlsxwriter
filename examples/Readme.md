@@ -13,11 +13,10 @@ documentation and generally show how an individual function works.
   simple array formulas.
 
 * app_autofilter.rs - An example of how to create autofilters with the
-  rust_xlsxwriter library.. An autofilter is a way of adding drop down
-  lists to the headers of a 2D range of worksheet data. This allows users
-  to filter the data based on simple criteria so that some data is shown
-  and some is hidden. Note, adding filter criteria isn't currently
-  supported. That will be added in an upcoming version.
+  rust_xlsxwriter library. An autofilter is a way of adding drop down lists
+  to the headers of a 2D range of worksheet data. This allows users to
+  filter the data based on simple criteria so that some data is shown and
+  some is hidden.
 
 * app_autofit.rs - An example of using simulated autofit to automatically
   adjust the width of worksheet columns based on the data in the cells.
@@ -286,6 +285,31 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_autofit.rs - Demonstrates auto-fitting the worksheet column
   widths based on the data in the columns.
+
+* doc_worksheet_filter_column1.rs - Demonstrates setting an autofilter with
+  a list filter condition.
+
+* doc_worksheet_filter_column2.rs - Demonstrates setting an autofilter with
+  multiple list filter conditions.
+
+* doc_worksheet_filter_column3.rs - Demonstrates setting an autofilter with
+  a list filter for blank cells.
+
+* doc_worksheet_filter_column4.rs - Demonstrates setting an autofilter with
+  different list filter conditions in separate columns.
+
+* doc_worksheet_filter_column5.rs - Demonstrates setting an autofilter for
+  a custom number filter.
+
+* doc_worksheet_filter_column6.rs - Demonstrates setting an autofilter for
+  two custom number filters to create a "between" condition.
+
+* doc_worksheet_filter_column7.rs - Demonstrates setting an autofilter to
+  show all the non-blank values in a column. This can be done in 2 ways: by
+  adding a filter for each district string/number in the column or since
+  that may be difficult to figure out programmatically you can set a custom
+  filter. Excel uses both of these methods depending on the data being
+  filtered.
 
 * doc_worksheet_insert_image_with_offset.rs - This example shows how to add
   an image to a worksheet at an offset within the cell.
