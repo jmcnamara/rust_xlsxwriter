@@ -41,7 +41,7 @@ mod tests {
             "#,
         );
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -380,7 +380,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:16".to_string()), (1, "17:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -396,7 +396,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:15".to_string()), (1, "16:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -412,7 +412,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:14".to_string()), (1, "15:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -428,7 +428,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:13".to_string()), (1, "14:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -444,7 +444,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:12".to_string()), (1, "13:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -460,7 +460,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:11".to_string()), (1, "12:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -476,7 +476,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:10".to_string()), (1, "11:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -492,7 +492,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:9".to_string()), (1, "10:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -508,7 +508,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:8".to_string()), (1, "9:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -524,7 +524,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:7".to_string()), (1, "8:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -540,7 +540,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:6".to_string()), (1, "7:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -556,7 +556,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:5".to_string()), (1, "6:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -572,7 +572,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:4".to_string()), (1, "5:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -588,7 +588,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:3".to_string()), (1, "4:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -604,7 +604,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:2".to_string()), (1, "3:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -620,7 +620,7 @@ mod tests {
         let expected = HashMap::from([(0, "1:1".to_string()), (1, "2:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -636,7 +636,7 @@ mod tests {
         let expected = HashMap::from([(1, "1:16".to_string()), (2, "17:17".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -652,7 +652,7 @@ mod tests {
         let expected = HashMap::from([(1, "2:17".to_string()), (2, "18:18".to_string())]);
         let got = worksheet.calculate_spans();
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]

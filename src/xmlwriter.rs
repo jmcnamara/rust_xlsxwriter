@@ -323,7 +323,7 @@ mod tests {
         writer.xml_declaration();
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -334,7 +334,7 @@ mod tests {
         writer.xml_start_tag("foo");
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
     #[test]
     fn test_xml_start_tag_without_attributes_implicit() {
@@ -345,7 +345,7 @@ mod tests {
         writer.xml_start_tag_attr("foo", &attributes);
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -357,7 +357,7 @@ mod tests {
         writer.xml_start_tag_attr("foo", &attributes);
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -369,7 +369,7 @@ mod tests {
         writer.xml_end_tag("foo");
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -381,7 +381,7 @@ mod tests {
         writer.xml_empty_tag("foo");
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -394,7 +394,7 @@ mod tests {
         writer.xml_empty_tag_attr("foo", &attributes);
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -405,7 +405,7 @@ mod tests {
         writer.xml_data_element("foo", "bar");
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -417,7 +417,7 @@ mod tests {
         writer.xml_data_element_attr("foo", "bar", &attributes);
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -429,7 +429,7 @@ mod tests {
         writer.xml_data_element_attr("foo", "&<>\"", &attributes);
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -441,7 +441,7 @@ mod tests {
         writer.xml_data_element_attr("foo", "Ы&<>\"", &attributes);
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -452,7 +452,7 @@ mod tests {
         writer.xml_si_element("foo", false);
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -463,6 +463,6 @@ mod tests {
         writer.xml_si_element("    foo", true);
 
         let got = writer.read_to_str();
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 }

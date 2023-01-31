@@ -284,7 +284,7 @@ mod tests {
                 "#,
         );
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -333,7 +333,7 @@ mod tests {
                 "#,
         );
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 
     #[test]
@@ -389,6 +389,6 @@ mod tests {
                 "#,
         );
 
-        assert_eq!(got, expected);
+        assert_eq!(expected, got);
     }
 }
