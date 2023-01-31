@@ -13,7 +13,7 @@
 // Specification (OpenXPS) document.
 // http://en.wikipedia.org/wiki/Open_Packaging_Conventions.
 //
-// At its simplest an Excel xlsx file contains the following elements::
+// At its simplest an Excel xlsx file contains the following elements:
 //
 //      ____ [Content_Types].xml
 //     |
