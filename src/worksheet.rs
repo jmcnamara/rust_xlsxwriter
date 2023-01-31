@@ -22,7 +22,7 @@ use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::XMLWriter;
-use crate::{utility, Image, ProtectWorksheetOptions, XlsxColor, XlsxImagePosition};
+use crate::{utility, Image, ProtectWorksheetOptions, XlsxColor, XlsxImagePosition, XlsxObjectMovement};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -9148,35 +9148,6 @@ impl Worksheet {
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
 
-/// Options to control the movement of worksheet objects such as images.
-///
-/// This enum defines the way control a worksheet object, such a an images,
-/// moves when the cells underneath it are moved, resized or deleted. This
-/// equates to the following Excel options:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
-///
-/// Used with [`image.set_object_movement`](Image::set_object_movement).
-///
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum XlsxObjectMovement {
-    /// Default movement for the object.
-    Default,
-
-    /// Move and size the worksheet object with the cells.
-    MoveAndSizeWithCells,
-
-    /// Move but don't size the worksheet object with the cells.
-    MoveButDontSizeWithCells,
-
-    /// Don't move or size the worksheet object with the cells.
-    DontMoveOrSizeWithCells,
-
-    /// Same as `MoveAndSizeWithCells` except hidden cells are applied after the
-    /// object is inserted. This allows the insertion of objects in hidden rows
-    /// or columns.
-    MoveAndSizeWithCellsAfter,
-}
 
 // Round to the closest integer number of emu units.
 fn round_to_emus(dimension: f64) -> f64 {

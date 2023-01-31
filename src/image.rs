@@ -14,7 +14,7 @@ use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 
-use crate::{XlsxError, XlsxObjectMovement};
+use crate::XlsxError;
 
 #[derive(Clone, Debug)]
 /// The Image struct is used to create an object to represent an image that can
@@ -834,6 +834,37 @@ impl Image {
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
+
+/// Options to control the movement of worksheet objects such as images.
+///
+/// This enum defines the way control a worksheet object, such a an images,
+/// moves when the cells underneath it are moved, resized or deleted. This
+/// equates to the following Excel options:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
+///
+/// Used with [`image.set_object_movement`](Image::set_object_movement).
+///
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum XlsxObjectMovement {
+    /// Default movement for the object.
+    Default,
+
+    /// Move and size the worksheet object with the cells.
+    MoveAndSizeWithCells,
+
+    /// Move but don't size the worksheet object with the cells.
+    MoveButDontSizeWithCells,
+
+    /// Don't move or size the worksheet object with the cells.
+    DontMoveOrSizeWithCells,
+
+    /// Same as `MoveAndSizeWithCells` except hidden cells are applied after the
+    /// object is inserted. This allows the insertion of objects in hidden rows
+    /// or columns.
+    MoveAndSizeWithCellsAfter,
+}
+
 
 /// Enum to represent the image position in a header or footer. Used with the
 /// [worksheet.set_header_image()](crate::Worksheet::set_header_image) and
