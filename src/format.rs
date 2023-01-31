@@ -260,7 +260,7 @@
 ///
 /// The [`set_num_format()`](Format::set_num_format) method is used to set the
 /// number format for numbers used with
-/// [`write_number()`](super::Worksheet::write_number()):
+/// [`write_number()`](crate::Worksheet::write_number()):
 ///
 /// ```
 /// # // This code is available in examples/doc_format_currency1.rs
@@ -1326,7 +1326,7 @@ impl Format {
     ///
     /// Excel generally adjusts the height of the cell to fit the wrapped text
     /// unless a explicit row height has be set via
-    /// [`worksheet.set_row_height()`](super::Worksheet::set_row_height()).
+    /// [`worksheet.set_row_height()`](crate::Worksheet::set_row_height()).
     ///
     /// # Examples
     ///
@@ -1479,7 +1479,7 @@ impl Format {
     /// Set the text reading direction. This is useful when creating Arabic,
     /// Hebrew or other near or far eastern worksheets. It can be used in
     /// conjunction with the Worksheet
-    /// [`set_right_to_left`](super::Worksheet::set_right_to_left()) method
+    /// [`set_right_to_left`](crate::Worksheet::set_right_to_left()) method
     /// which changes the cell display direction of the worksheet.
     ///
     /// # Arguments

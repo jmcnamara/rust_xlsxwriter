@@ -477,7 +477,7 @@ impl Worksheet {
     ///
     /// The worksheet name can be used to get a reference to a worksheet object
     /// using the
-    /// [`workbook.worksheet_from_name()`](super::Workbook::worksheet_from_name)
+    /// [`workbook.worksheet_from_name()`](crate::Workbook::worksheet_from_name)
     /// method.
     ///
     /// # Examples
@@ -4430,7 +4430,7 @@ impl Worksheet {
     /// worksheets that use right-to-left as the default direction.
     ///
     /// Depending on your use case, and text, you may also need to use the
-    /// [`Format::set_reading_direction()`](super::Format::set_reading_direction)
+    /// [`Format::set_reading_direction()`](crate::Format::set_reading_direction)
     /// method to set the direction of the text within the cells.
     ///
     /// # Arguments
