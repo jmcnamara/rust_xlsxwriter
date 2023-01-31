@@ -3061,7 +3061,8 @@ impl Worksheet {
     /// Unhide a user hidden worksheet row.
     ///
     /// The `set_row_unhidden()` method is used to unhide a previously hidden
-    /// row. This can be used in conjunction with autofilter rules.
+    /// row. This can occasionally be useful when used in conjunction with
+    /// autofilter rules.
     ///
     /// # Arguments
     ///
