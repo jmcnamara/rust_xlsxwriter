@@ -124,6 +124,7 @@ mod core;
 mod custom;
 mod drawing;
 mod error;
+mod filter;
 mod format;
 mod image;
 mod metadata;
@@ -143,6 +144,7 @@ mod xmlwriter;
 
 // Re-export the public APIs.
 pub use error::*;
+pub use filter::*;
 pub use format::*;
 pub use image::*;
 pub use properties::*;
