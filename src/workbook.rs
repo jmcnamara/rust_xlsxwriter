@@ -138,7 +138,7 @@ impl Workbook {
     /// # // This code is available in examples/doc_workbook_new.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    ///
+    /// #
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
     ///
@@ -212,7 +212,7 @@ impl Workbook {
     /// # // This code is available in examples/doc_workbook_add_worksheet.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    ///
+    /// #
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
     ///
@@ -376,7 +376,7 @@ impl Workbook {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     // Start with a reference to worksheet1.
     ///     let mut worksheet1 = workbook.add_worksheet();
     ///     worksheet1.write_string_only(0, 0, "Hello")?;
@@ -496,7 +496,7 @@ impl Workbook {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     // Add three worksheets to the workbook.
     ///     let _worksheet1 = workbook.add_worksheet();
     ///     let _worksheet2 = workbook.add_worksheet();
@@ -617,7 +617,7 @@ impl Workbook {
     /// # // This code is available in examples/doc_workbook_save.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    ///
+    /// #
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
     ///
@@ -665,7 +665,7 @@ impl Workbook {
     /// # // This code is available in examples/doc_workbook_save_to_buffer.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    ///
+    /// #
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
     ///
@@ -891,7 +891,7 @@ impl Workbook {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     let properties = Properties::new()
     ///         .set_title("This is an example spreadsheet")
     ///         .set_subject("That demonstrates document properties")

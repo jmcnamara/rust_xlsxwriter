@@ -404,7 +404,7 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     let _worksheet1 = workbook.add_worksheet(); // Defaults to Sheet1
     ///     let _worksheet2 = workbook.add_worksheet().set_name("Foglio2");
     ///     let _worksheet3 = workbook.add_worksheet().set_name("Data");
@@ -1257,7 +1257,7 @@ impl Worksheet {
     /// #    worksheet.write_number_only(0, 2, 300)?;
     /// #    worksheet.write_number_only(1, 1, 10)?;
     /// #    worksheet.write_number_only(1, 2, 15)?;
-    ///
+    /// #
     ///     // Write an array formula that returns a single value.
     ///     worksheet.write_array_formula(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}", &bold)?;
     ///
@@ -1352,7 +1352,7 @@ impl Worksheet {
     /// #    worksheet.write_number_only(0, 2, 300)?;
     /// #    worksheet.write_number_only(1, 1, 10)?;
     /// #    worksheet.write_number_only(1, 2, 15)?;
-    ///
+    /// #
     ///     // Write an array formula that returns a single value.
     ///     worksheet.write_array_formula_only(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}")?;
     ///
@@ -3484,9 +3484,9 @@ impl Worksheet {
     /// #     worksheet.write_number_only(5, 1, 7000)?;
     /// #     worksheet.write_number_only(6, 1, 9000)?;
     /// #
-    /// #     // Set the autofilter.
-    /// #     worksheet.autofilter(0, 0, 6, 1)?;
-    ///
+    ///     // Set the autofilter.
+    ///     worksheet.autofilter(0, 0, 6, 1)?;
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -3756,9 +3756,9 @@ impl Worksheet {
     ///
     /// #     worksheet.write_string_only(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
     /// #     worksheet.write_string_only(5, 0, "to remove the worksheet protection.")?;
-    ///
+    /// #
     /// #     worksheet.autofit();
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("worksheet_protection.xlsx")?;
     /// #
@@ -3812,7 +3812,7 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
     ///
@@ -3868,7 +3868,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Set some of the options and use the defaults for everything else.
     ///     let options = ProtectWorksheetOptions {
     ///         insert_columns: true,
@@ -3938,7 +3938,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Protect the worksheet from modification.
     ///     worksheet.protect();
     ///
@@ -4012,7 +4012,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Protect the worksheet from modification.
     ///     worksheet.protect();
     ///
@@ -4100,7 +4100,7 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     let worksheet1 = workbook.add_worksheet();
     ///     worksheet1.set_selection(3, 2, 3, 2)?; // Cell C4
     ///
@@ -4188,7 +4188,7 @@ impl Worksheet {
     /// #     let mut workbook = Workbook::new();
     /// #
     /// #    let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Set top-left cell to AA32.
     ///     worksheet.set_top_left_cell(31, 26)?;
     ///
@@ -4269,7 +4269,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     worksheet
     ///         .write_formula_only(0, 0, "1+1")?
     ///         .set_formula_result(0, 0, "2");
@@ -4343,14 +4343,14 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     worksheet.set_formula_result_default("");
     ///
     /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
-    ///
+    /// #
     pub fn set_formula_result_default(&mut self, result: &str) -> &mut Worksheet {
         self.default_result = result.to_string();
         self
@@ -4515,7 +4515,7 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     let worksheet1 = Worksheet::new();
     ///     let worksheet3 = Worksheet::new();
     ///     let mut worksheet2 = Worksheet::new();
@@ -4576,7 +4576,7 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     let worksheet1 = Worksheet::new();
     ///     let worksheet3 = Worksheet::new();
     ///     let mut worksheet2 = Worksheet::new();
@@ -4636,7 +4636,7 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     let worksheet1 = Worksheet::new();
     ///     let worksheet3 = Worksheet::new();
     ///     let mut worksheet2 = Worksheet::new();
@@ -4716,7 +4716,7 @@ impl Worksheet {
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    ///
+    /// #
     ///     let mut worksheet1 = Worksheet::new();
     ///     let mut worksheet2 = Worksheet::new();
     ///     let mut worksheet3 = Worksheet::new();
@@ -4830,7 +4830,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Set the printer paper size.
     ///     worksheet.set_paper_size(9); // A4 paper size.
     ///
@@ -4917,7 +4917,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     worksheet.set_landscape();
     ///
     /// #     workbook.save("worksheet.xlsx")?;
@@ -5111,7 +5111,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     worksheet.write_string_only(0, 0, "Hello")?;
     ///     worksheet.set_zoom(200);
     ///
@@ -5179,7 +5179,7 @@ impl Worksheet {
     /// #     worksheet1.write_string_only(0, 0, "Scroll down")?;
     /// #     worksheet2.write_string_only(0, 0, "Scroll across")?;
     /// #     worksheet3.write_string_only(0, 0, "Scroll down or across")?;
-    ///
+    /// #
     ///     // Freeze the top row only.
     ///     worksheet1.set_freeze_panes(1, 0)?;
     ///
@@ -5251,7 +5251,7 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     worksheet.write_string_only(0, 0, "Scroll down")?;
-    ///
+    /// #
     ///     // Freeze the top row only.
     ///     worksheet.set_freeze_panes(1, 0)?;
     ///
@@ -5566,7 +5566,7 @@ impl Worksheet {
     ///     let mut image = Image::new("examples/rust_logo.png")?;
     /// #     image.set_scale_height(0.5);
     /// #     image.set_scale_width(0.5);
-    ///
+    /// #
     ///     // Insert the watermark image in the header.
     ///     worksheet.set_header("&C&[Picture]");
     ///     worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
@@ -5770,7 +5770,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     worksheet.set_margins(1.0, 1.25, 1.5, 1.75, 0.75, 0.25);
     ///
     /// #     workbook.save("worksheet.xlsx")?;
@@ -5853,7 +5853,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     worksheet.set_header("&CPage &P of &N");
     ///     worksheet.set_print_first_page_number(2);
     ///
@@ -5902,7 +5902,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Scale the printed worksheet to 50%.
     ///     worksheet.set_print_scale(50);
     ///
@@ -5985,7 +5985,7 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Set the printed output to fit 1 page wide and as long as necessary.
     ///     worksheet.set_print_fit_to_pages(1, 0);
     ///
@@ -9607,7 +9607,7 @@ impl FilterCondition {
     /// #
     /// #     // Set the autofilter.
     /// #     worksheet.autofilter(0, 0, 6, 1)?;
-    ///
+    /// #
     ///     // Set a filter condition to only show cells matching "East", "West" or
     ///     // "South" in the first column.
     ///     let filter_condition = FilterCondition::new()
@@ -9678,7 +9678,7 @@ impl FilterCondition {
     /// #
     /// #     // Set the autofilter.
     /// #     worksheet.autofilter(0, 0, 6, 1)?;
-    ///
+    /// #
     ///     // Set a filter condition to only show cells matching blanks.
     ///     let filter_condition = FilterCondition::new().add_list_blanks_filter();
     ///
@@ -9731,7 +9731,7 @@ impl FilterCondition {
     /// #
     /// #     // Set the autofilter.
     /// #     worksheet.autofilter(0, 0, 6, 1)?;
-    ///
+    /// #
     ///     // Filter non-blanks by filtering on all the unique non-blank
     ///     // strings/numbers in the column.
     ///     let filter_condition = FilterCondition::new()
@@ -9815,7 +9815,7 @@ impl FilterCondition {
     /// #
     /// #     // Set the autofilter.
     /// #     worksheet.autofilter(0, 0, 6, 1)?;
-    ///
+    /// #
     ///     // Set two custom number filters in a "between" configuration.
     ///     let filter_condition = FilterCondition::new()
     ///         .add_custom_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)

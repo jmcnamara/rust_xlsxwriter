@@ -295,7 +295,7 @@ impl Image {
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     ///     // Create a new image object.
     ///     let mut image = Image::new("examples/rust_logo.png")?;
     ///
@@ -426,7 +426,7 @@ impl Image {
     /// #
     /// #    // Add a worksheet to the workbook.
     /// #    let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     /// #    // Create a new image object.
     ///    let mut image = Image::new("examples/rust_logo.png")?;
     ///
@@ -434,7 +434,7 @@ impl Image {
     ///
     /// #    // Insert the image.
     /// #    worksheet.insert_image(1, 2, &image)?;
-    ///
+    /// #
     /// #    // Save the file to disk.
     /// #    workbook.save("image.xlsx")?;
     /// #

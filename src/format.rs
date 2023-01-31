@@ -2134,9 +2134,9 @@ impl Format {
     ///
     /// #     worksheet.write_string_only(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
     /// #     worksheet.write_string_only(5, 0, "to remove the worksheet protection.")?;
-    ///
+    /// #
     /// #     worksheet.autofit();
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("worksheet_protection.xlsx")?;
     /// #
