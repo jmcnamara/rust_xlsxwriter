@@ -74,8 +74,8 @@ impl SharedStrings {
 #[cfg(test)]
 mod tests {
 
-    use super::SharedStrings;
-    use super::SharedStringsTable;
+    use crate::shared_strings::SharedStrings;
+    use crate::shared_strings_table::SharedStringsTable;
     use crate::test_functions::xml_to_vec;
     use pretty_assertions::assert_eq;
 

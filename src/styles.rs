@@ -777,9 +777,9 @@ impl<'a> Styles<'a> {
 #[cfg(test)]
 mod tests {
 
-    use super::Format;
-    use super::Styles;
+    use crate::styles::Styles;
     use crate::test_functions::xml_to_vec;
+    use crate::Format;
     use pretty_assertions::assert_eq;
 
     #[test]

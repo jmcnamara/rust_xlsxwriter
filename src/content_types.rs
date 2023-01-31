@@ -175,7 +175,7 @@ impl ContentTypes {
 #[cfg(test)]
 mod tests {
 
-    use super::ContentTypes;
+    use crate::content_types::ContentTypes;
     use crate::test_functions::xml_to_vec;
     use pretty_assertions::assert_eq;
 

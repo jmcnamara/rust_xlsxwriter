@@ -7,8 +7,8 @@
 #[cfg(test)]
 mod tests {
 
-    use crate::worksheet::SharedStringsTable;
     use crate::test_functions::xml_to_vec;
+    use crate::worksheet::SharedStringsTable;
     use crate::worksheet::*;
     use crate::XlsxError;
     use pretty_assertions::assert_eq;

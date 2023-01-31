@@ -236,7 +236,7 @@ impl App {
 #[cfg(test)]
 mod tests {
 
-    use super::App;
+    use crate::app::App;
     use crate::test_functions::xml_to_vec;
     use pretty_assertions::assert_eq;
 

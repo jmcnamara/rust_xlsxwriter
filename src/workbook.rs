@@ -1608,7 +1608,7 @@ impl Workbook {
 #[cfg(test)]
 mod tests {
 
-    use super::Workbook;
+    use crate::Workbook;
     use crate::{test_functions::xml_to_vec, XlsxError};
     use pretty_assertions::assert_eq;
 

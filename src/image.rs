@@ -897,7 +897,7 @@ mod tests {
 
     use crate::XlsxError;
 
-    use super::Image;
+    use crate::Image;
 
     #[test]
     fn test_images() {

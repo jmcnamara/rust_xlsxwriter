@@ -117,7 +117,7 @@ impl Custom {
 #[cfg(test)]
 mod tests {
 
-    use super::Custom;
+    use crate::custom::Custom;
     use crate::{test_functions::xml_to_vec, Properties};
     use chrono::{TimeZone, Utc};
     use pretty_assertions::assert_eq;

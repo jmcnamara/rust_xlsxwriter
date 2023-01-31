@@ -24,7 +24,6 @@ use crate::vml::VmlInfo;
 use crate::xmlwriter::XMLWriter;
 use crate::{utility, Image, XlsxColor, XlsxImagePosition};
 
-
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
 /// in a worksheet is 1,048,576.
 pub type RowNum = u32;

@@ -2895,8 +2895,8 @@ pub enum XlsxAlign {
 #[cfg(test)]
 mod tests {
 
-    use super::Format;
-    use super::XlsxColor;
+    use crate::Format;
+    use crate::XlsxColor;
 
     #[test]
     fn test_hex_value() {

@@ -183,7 +183,7 @@ impl Core {
 #[cfg(test)]
 mod tests {
 
-    use super::Core;
+    use crate::core::Core;
     use crate::{test_functions::xml_to_vec, Properties};
     use chrono::{TimeZone, Utc};
 

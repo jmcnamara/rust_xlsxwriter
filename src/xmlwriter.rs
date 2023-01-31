@@ -312,7 +312,7 @@ fn escape_xml_escapes(si_string: &str) -> Cow<str> {
 #[cfg(test)]
 mod tests {
 
-    use super::XMLWriter;
+    use crate::xmlwriter::XMLWriter;
     use pretty_assertions::assert_eq;
 
     #[test]

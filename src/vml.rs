@@ -255,7 +255,7 @@ pub(crate) struct VmlInfo {
 #[cfg(test)]
 mod tests {
 
-    use super::Vml;
+    use crate::vml::Vml;
     use crate::{test_functions::vml_to_vec, vml::VmlInfo};
 
     use pretty_assertions::assert_eq;

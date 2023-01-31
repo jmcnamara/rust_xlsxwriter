@@ -288,8 +288,8 @@ impl Theme {
 #[cfg(test)]
 mod tests {
 
-    use super::Theme;
     use crate::test_functions::xml_to_vec;
+    use crate::theme::Theme;
     use pretty_assertions::assert_eq;
 
     #[test]

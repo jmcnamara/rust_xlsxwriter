@@ -106,7 +106,7 @@ impl Relationship {
 #[cfg(test)]
 mod tests {
 
-    use super::Relationship;
+    use crate::relationship::Relationship;
     use crate::test_functions::xml_to_vec;
     use pretty_assertions::assert_eq;
 

@@ -188,7 +188,7 @@ mod tests {
 
     use std::io::{Error, ErrorKind};
 
-    use super::XlsxError;
+    use crate::XlsxError;
     use pretty_assertions::assert_eq;
     use zip::result::ZipError;
 

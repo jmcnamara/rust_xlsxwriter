@@ -57,7 +57,7 @@ impl SharedStringsTable {
 #[cfg(test)]
 mod tests {
 
-    use super::SharedStringsTable;
+    use crate::shared_strings_table::SharedStringsTable;
 
     #[test]
     fn test_shared_string_table() {
