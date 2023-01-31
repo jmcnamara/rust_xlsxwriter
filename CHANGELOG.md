@@ -5,6 +5,31 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+
+
+## [0.25.0] - 2023-01-30
+
+**Note**: The next version of rust_xlsxwriter will contain backward incompatible
+changes in order to standardize and simplify certain parts of the API.
+
+### Added
+
+- Added ability to filter columns in [`worksheet.autofilter()`] ranges via
+  [`worksheet.filter_column()`] and [`FilterCondition`].
+
+  The library automatically hides any rows that don't match the supplied
+  criteria. This is an additional feature that isn't available in the other
+  language ports of "xlsxwriter".
+
+  See also the [Working with Autofilters] section of the Users Guide.
+
+[`FilterCondition`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.FilterCondition.html
+[Working with Autofilters]: https://rustxlsxwriter.github.io/formulas/autofilters.html
+[`worksheet.autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.autofilter
+[`worksheet.filter_column()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.filter_column
+
+
 ## [0.24.0] - 2023-01-18
 
 ### Added
