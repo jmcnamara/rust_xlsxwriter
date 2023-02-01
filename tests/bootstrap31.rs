@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
+use rust_xlsxwriter::{Format, FormatPattern, Workbook, XlsxColor, XlsxError};
 
 mod common;
 
@@ -19,11 +19,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_foreground_color(XlsxColor::Red);
-    let format3 = Format::new().set_pattern(XlsxPattern::MediumGray);
+    let format3 = Format::new().set_pattern(FormatPattern::MediumGray);
     let format4 = Format::new()
         .set_background_color(XlsxColor::Yellow)
         .set_foreground_color(XlsxColor::Red)
-        .set_pattern(XlsxPattern::DarkVertical);
+        .set_pattern(FormatPattern::DarkVertical);
     let format5 = Format::new().set_background_color(XlsxColor::RGB(0x00B050));
 
     worksheet.write_blank(0, 0, &format1)?;

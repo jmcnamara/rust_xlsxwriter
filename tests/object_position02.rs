@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxObjectMovement};
+use rust_xlsxwriter::{Image, ObjectMovement, Workbook, XlsxError};
 
 mod common;
 
@@ -17,7 +17,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let mut image = Image::new("tests/input/images/red.png")?;
     image.set_alt_text("red.png");
-    image.set_object_movement(XlsxObjectMovement::MoveButDontSizeWithCells);
+    image.set_object_movement(ObjectMovement::MoveButDontSizeWithCells);
 
     worksheet.insert_image(8, 4, &image)?;
 

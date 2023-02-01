@@ -4,16 +4,16 @@
 
 //! The following example demonstrates setting a cell border.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    let format1 = Format::new().set_border(XlsxBorder::Thin);
-    let format2 = Format::new().set_border(XlsxBorder::Dotted);
-    let format3 = Format::new().set_border(XlsxBorder::Double);
+    let format1 = Format::new().set_border(FormatBorder::Thin);
+    let format2 = Format::new().set_border(FormatBorder::Dotted);
+    let format3 = Format::new().set_border(FormatBorder::Double);
 
     worksheet.write_blank(1, 1, &format1)?;
     worksheet.write_blank(3, 1, &format2)?;

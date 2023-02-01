@@ -4,7 +4,7 @@
 
 //! The following example demonstrates setting the foreground/pattern color.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
+use rust_xlsxwriter::{Format, FormatPattern, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
     let format1 = Format::new()
         .set_background_color(XlsxColor::Yellow)
         .set_foreground_color(XlsxColor::Red)
-        .set_pattern(XlsxPattern::DarkVertical);
+        .set_pattern(FormatPattern::DarkVertical);
 
     worksheet.write_blank(0, 0, &format1)?;
 

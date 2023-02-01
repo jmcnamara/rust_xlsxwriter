@@ -6,7 +6,7 @@
 //! protected in a protected worksheet. In this case we protect the overall
 //! worksheet but allow columns and rows to be inserted.
 
-use rust_xlsxwriter::{ProtectWorksheetOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{ProtectionOptions, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -15,10 +15,10 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Set some of the options and use the defaults for everything else.
-    let options = ProtectWorksheetOptions {
+    let options = ProtectionOptions {
         insert_columns: true,
         insert_rows: true,
-        ..ProtectWorksheetOptions::default()
+        ..ProtectionOptions::default()
     };
 
     // Set the protection options.

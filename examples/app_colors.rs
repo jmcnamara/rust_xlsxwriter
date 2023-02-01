@@ -115,7 +115,7 @@ fn main() -> Result<(), XlsxError> {
             let color_format = Format::new()
                 .set_background_color(theme_color)
                 .set_font_color(font_color)
-                .set_align(XlsxAlign::Center);
+                .set_align(FormatAlign::Center);
 
             worksheet.write_string(row, col, &text, &color_format)?;
         }

@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxDiagonalBorder, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, FormatDiagonalBorder, Workbook, XlsxColor, XlsxError};
 
 mod common;
 
@@ -14,27 +14,27 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let format1 = Format::new()
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderUp);
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderUp);
 
     let format2 = Format::new()
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderDown);
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderDown);
 
     let format3 = Format::new()
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderUpDown);
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown);
 
     let format4 = Format::new()
-        .set_border(XlsxBorder::Thin)
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderUpDown);
+        .set_border(FormatBorder::Thin)
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown);
 
     let format5 = Format::new()
-        .set_border(XlsxBorder::Thin)
+        .set_border(FormatBorder::Thin)
         .set_border_color(XlsxColor::RGB(0x00B050))
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderUpDown)
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown)
         .set_border_diagonal_color(XlsxColor::Red);
 
     let worksheet = workbook.add_worksheet();

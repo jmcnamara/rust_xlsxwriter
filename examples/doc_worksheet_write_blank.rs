@@ -5,7 +5,7 @@
 //! The following example demonstrates writing a blank cell with formatting,
 //! i.e., a cell that has no data but does have formatting.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
 
     let format2 = Format::new()
         .set_background_color(XlsxColor::Yellow)
-        .set_border(XlsxBorder::Thin);
+        .set_border(FormatBorder::Thin);
 
     worksheet.write_blank(1, 1, &format1)?;
     worksheet.write_blank(3, 1, &format2)?;

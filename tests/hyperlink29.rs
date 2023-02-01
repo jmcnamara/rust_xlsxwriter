@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxUnderline};
+use rust_xlsxwriter::{Format, FormatUnderline, Workbook, XlsxColor, XlsxError};
 
 mod common;
 
@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     let format = Format::new()
         .set_font_color(XlsxColor::Red)
-        .set_underline(XlsxUnderline::Single);
+        .set_underline(FormatUnderline::Single);
 
     worksheet.write_url(0, 0, "http://www.perl.org/")?;
     worksheet.write_url_with_options(1, 0, "http://www.perl.com/", "", "", Some(&format))?;

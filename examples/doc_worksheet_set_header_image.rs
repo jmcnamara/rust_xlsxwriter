@@ -4,7 +4,7 @@
 
 //! The following example demonstrates adding a header image to a worksheet.
 
-use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
+use rust_xlsxwriter::{HeaderImagePosition, Image, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -20,7 +20,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Insert the watermark image in the header.
     worksheet.set_header("&C&[Picture]");
-    worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
+    worksheet.set_header_image(&image, HeaderImagePosition::Center)?;
 
     // Increase the top margin to 1.2 for clarity. The -1.0 values are ignored.
     worksheet.set_margins(-1.0, -1.0, 1.2, -1.0, -1.0, -1.0);

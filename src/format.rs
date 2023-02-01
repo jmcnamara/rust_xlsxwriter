@@ -19,7 +19,7 @@
 /// ```
 /// # // This code is available in examples/doc_format_intro.rs
 /// #
-/// use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+/// use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxColor, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
@@ -50,7 +50,7 @@
 ///     let format6 = Format::new().set_background_color(XlsxColor::RGB(0xDAA520));
 ///     worksheet.write_string(5, 0, "Fills", &format6)?;
 ///
-///     let format7 = Format::new().set_border(XlsxBorder::Thin);
+///     let format7 = Format::new().set_border(FormatBorder::Thin);
 ///     worksheet.write_string(6, 0, "Borders", &format7)?;
 ///
 ///     let format8 = Format::new().set_bold();
@@ -425,12 +425,12 @@ pub struct Format {
     // Font properties.
     pub(crate) bold: bool,
     pub(crate) italic: bool,
-    pub(crate) underline: XlsxUnderline,
+    pub(crate) underline: FormatUnderline,
     pub(crate) font_name: String,
     pub(crate) font_size: f64,
     pub(crate) font_color: XlsxColor,
     pub(crate) font_strikethrough: bool,
-    pub(crate) font_script: XlsxScript,
+    pub(crate) font_script: FormatScript,
     pub(crate) font_family: u8,
     pub(crate) font_charset: u8,
     pub(crate) font_scheme: String,
@@ -439,8 +439,8 @@ pub struct Format {
     pub(crate) is_hyperlink: bool,
 
     // Alignment properties.
-    pub(crate) horizontal_align: XlsxAlign,
-    pub(crate) vertical_align: XlsxAlign,
+    pub(crate) horizontal_align: FormatAlign,
+    pub(crate) vertical_align: FormatAlign,
     pub(crate) text_wrap: bool,
     pub(crate) justify_last: bool,
     pub(crate) rotation: i16,
@@ -449,22 +449,22 @@ pub struct Format {
     pub(crate) reading_direction: u8,
 
     // Border properties.
-    pub(crate) border_bottom: XlsxBorder,
-    pub(crate) border_top: XlsxBorder,
-    pub(crate) border_left: XlsxBorder,
-    pub(crate) border_right: XlsxBorder,
+    pub(crate) border_bottom: FormatBorder,
+    pub(crate) border_top: FormatBorder,
+    pub(crate) border_left: FormatBorder,
+    pub(crate) border_right: FormatBorder,
     pub(crate) border_bottom_color: XlsxColor,
     pub(crate) border_top_color: XlsxColor,
     pub(crate) border_left_color: XlsxColor,
     pub(crate) border_right_color: XlsxColor,
-    pub(crate) border_diagonal: XlsxBorder,
+    pub(crate) border_diagonal: FormatBorder,
     pub(crate) border_diagonal_color: XlsxColor,
-    pub(crate) border_diagonal_type: XlsxDiagonalBorder,
+    pub(crate) border_diagonal_type: FormatDiagonalBorder,
 
     // Fill properties.
     pub(crate) foreground_color: XlsxColor,
     pub(crate) background_color: XlsxColor,
-    pub(crate) pattern: XlsxPattern,
+    pub(crate) pattern: FormatPattern,
 
     // Protection properties.
     pub(crate) hidden: bool,
@@ -516,12 +516,12 @@ impl Format {
             num_format_index: 0,
             bold: false,
             italic: false,
-            underline: XlsxUnderline::None,
+            underline: FormatUnderline::None,
             font_name: "Calibri".to_string(),
             font_size: 11.0,
             font_color: XlsxColor::Automatic,
             font_strikethrough: false,
-            font_script: XlsxScript::None,
+            font_script: FormatScript::None,
             font_family: 2,
             font_charset: 0,
             font_scheme: "minor".to_string(),
@@ -530,20 +530,20 @@ impl Format {
             is_hyperlink: false,
             hidden: false,
             locked: true,
-            horizontal_align: XlsxAlign::General,
-            vertical_align: XlsxAlign::General,
+            horizontal_align: FormatAlign::General,
+            vertical_align: FormatAlign::General,
             text_wrap: false,
             justify_last: false,
             rotation: 0,
             foreground_color: XlsxColor::Automatic,
             background_color: XlsxColor::Automatic,
-            pattern: XlsxPattern::None,
-            border_bottom: XlsxBorder::None,
-            border_top: XlsxBorder::None,
-            border_left: XlsxBorder::None,
-            border_right: XlsxBorder::None,
-            border_diagonal: XlsxBorder::None,
-            border_diagonal_type: XlsxDiagonalBorder::None,
+            pattern: FormatPattern::None,
+            border_bottom: FormatBorder::None,
+            border_top: FormatBorder::None,
+            border_left: FormatBorder::None,
+            border_right: FormatBorder::None,
+            border_diagonal: FormatBorder::None,
+            border_diagonal_type: FormatDiagonalBorder::None,
             border_bottom_color: XlsxColor::Automatic,
             border_top_color: XlsxColor::Automatic,
             border_left_color: XlsxColor::Automatic,
@@ -667,9 +667,9 @@ impl Format {
     // <alignment> element. This also handles a special case where Excel ignore
     // Bottom as a default.
     pub(crate) fn has_alignment(&self) -> bool {
-        self.horizontal_align != XlsxAlign::General
-            || !(self.vertical_align == XlsxAlign::General
-                || self.vertical_align == XlsxAlign::Bottom)
+        self.horizontal_align != FormatAlign::General
+            || !(self.vertical_align == FormatAlign::General
+                || self.vertical_align == FormatAlign::Bottom)
             || self.indent != 0
             || self.rotation != 0
             || self.text_wrap
@@ -680,8 +680,8 @@ impl Format {
     // Check if the format has an alignment property set and requires a Styles
     // "applyAlignment" attribute.
     pub(crate) fn apply_alignment(&self) -> bool {
-        self.horizontal_align != XlsxAlign::General
-            || self.vertical_align != XlsxAlign::General
+        self.horizontal_align != FormatAlign::General
+            || self.vertical_align != FormatAlign::General
             || self.indent != 0
             || self.rotation != 0
             || self.text_wrap
@@ -1132,7 +1132,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `underline` - The underline type defined by a [`XlsxUnderline`] enum
+    /// * `underline` - The underline type defined by a [`FormatUnderline`] enum
     ///   value.
     ///
     /// # Examples
@@ -1143,18 +1143,18 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_underline.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError, FormatUnderline};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     let format1 = Format::new().set_underline(XlsxUnderline::None);
-    ///     let format2 = Format::new().set_underline(XlsxUnderline::Single);
-    ///     let format3 = Format::new().set_underline(XlsxUnderline::Double);
-    ///     let format4 = Format::new().set_underline(XlsxUnderline::SingleAccounting);
-    ///     let format5 = Format::new().set_underline(XlsxUnderline::DoubleAccounting);
+    ///     let format1 = Format::new().set_underline(FormatUnderline::None);
+    ///     let format2 = Format::new().set_underline(FormatUnderline::Single);
+    ///     let format3 = Format::new().set_underline(FormatUnderline::Double);
+    ///     let format4 = Format::new().set_underline(FormatUnderline::SingleAccounting);
+    ///     let format5 = Format::new().set_underline(FormatUnderline::DoubleAccounting);
     ///
     ///     worksheet.write_string(0, 0, "None",              &format1)?;
     ///     worksheet.write_string(1, 0, "Single",            &format2)?;
@@ -1172,7 +1172,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_underline.png">
     ///
-    pub fn set_underline(mut self, underline: XlsxUnderline) -> Format {
+    pub fn set_underline(mut self, underline: FormatUnderline) -> Format {
         self.underline = underline;
         self
     }
@@ -1222,10 +1222,10 @@ impl Format {
     /// # Arguments
     ///
     /// * `font_script` - The font superscript or subscript property via a
-    ///   [`XlsxScript`] enum.
+    ///   [`FormatScript`] enum.
     ///
     ///
-    pub fn set_font_script(mut self, font_script: XlsxScript) -> Format {
+    pub fn set_font_script(mut self, font_script: FormatScript) -> Format {
         self.font_script = font_script;
         self
     }
@@ -1238,7 +1238,7 @@ impl Format {
     /// # Arguments
     ///
     /// * `align` - The vertical and or horizontal alignment direction as
-    ///   defined by the [`XlsxAlign`] enum.
+    ///   defined by the [`FormatAlign`] enum.
     ///
     /// # Examples
     ///
@@ -1248,7 +1248,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_align.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatAlign, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1263,19 +1263,19 @@ impl Format {
     /// #
     /// #     // Create some alignment formats.
     ///     let format1 = Format::new()
-    ///         .set_align(XlsxAlign::Center);
+    ///         .set_align(FormatAlign::Center);
     ///
     ///     let format2 = Format::new()
-    ///         .set_align(XlsxAlign::Top)
-    ///         .set_align(XlsxAlign::Left);
+    ///         .set_align(FormatAlign::Top)
+    ///         .set_align(FormatAlign::Left);
     ///
     ///     let format3 = Format::new()
-    ///         .set_align(XlsxAlign::VerticalCenter)
-    ///         .set_align(XlsxAlign::Center);
+    ///         .set_align(FormatAlign::VerticalCenter)
+    ///         .set_align(FormatAlign::Center);
     ///
     ///     let format4 = Format::new()
-    ///         .set_align(XlsxAlign::Bottom)
-    ///         .set_align(XlsxAlign::Right);
+    ///         .set_align(FormatAlign::Bottom)
+    ///         .set_align(FormatAlign::Right);
     ///
     ///     worksheet.write_string(0, 0, "Center", &format1)?;
     ///     worksheet.write_string(1, 0, "Top - Left", &format2)?;
@@ -1291,26 +1291,26 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_align.png">
     ///
-    pub fn set_align(mut self, align: XlsxAlign) -> Format {
+    pub fn set_align(mut self, align: FormatAlign) -> Format {
         match align {
-            XlsxAlign::General => {
-                self.horizontal_align = XlsxAlign::General;
-                self.vertical_align = XlsxAlign::General;
+            FormatAlign::General => {
+                self.horizontal_align = FormatAlign::General;
+                self.vertical_align = FormatAlign::General;
             }
-            XlsxAlign::Center
-            | XlsxAlign::CenterAcross
-            | XlsxAlign::Distributed
-            | XlsxAlign::Fill
-            | XlsxAlign::Justify
-            | XlsxAlign::Left
-            | XlsxAlign::Right => {
+            FormatAlign::Center
+            | FormatAlign::CenterAcross
+            | FormatAlign::Distributed
+            | FormatAlign::Fill
+            | FormatAlign::Justify
+            | FormatAlign::Left
+            | FormatAlign::Right => {
                 self.horizontal_align = align;
             }
-            XlsxAlign::Bottom
-            | XlsxAlign::Top
-            | XlsxAlign::VerticalCenter
-            | XlsxAlign::VerticalDistributed
-            | XlsxAlign::VerticalJustify => {
+            FormatAlign::Bottom
+            | FormatAlign::Top
+            | FormatAlign::VerticalCenter
+            | FormatAlign::VerticalDistributed
+            | FormatAlign::VerticalJustify => {
                 self.vertical_align = align;
             }
         }
@@ -1369,8 +1369,8 @@ impl Format {
     /// This method can be used to indent text in a cell.
     ///
     /// Indentation is a horizontal alignment property. It can be used in Excel
-    /// in conjunction with the [Left](XlsxAlign::Left),
-    /// [Right](XlsxAlign::Right) and [Distributed](XlsxAlign::Distributed)
+    /// in conjunction with the [Left](FormatAlign::Left),
+    /// [Right](FormatAlign::Right) and [Distributed](FormatAlign::Distributed)
     /// alignments. It will override any other horizontal properties that don't
     /// support indentation.
     ///
@@ -1577,7 +1577,7 @@ impl Format {
     /// Set the Format pattern property.
     ///
     /// Set the pattern for a cell. The most commonly used pattern is
-    /// [`XlsxPattern::Solid`].
+    /// [`FormatPattern::Solid`].
     ///
     /// To set the pattern colors see
     /// [`set_background_color()`](Format::set_background_color()) and
@@ -1585,7 +1585,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `pattern` - The pattern property defined by a [`XlsxPattern`] enum
+    /// * `pattern` - The pattern property defined by a [`FormatPattern`] enum
     ///   value.
     ///
     /// # Examples
@@ -1596,7 +1596,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_pattern.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, FormatPattern};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1607,12 +1607,12 @@ impl Format {
     /// #
     ///     let format1 = Format::new()
     ///         .set_background_color(XlsxColor::Green)
-    ///         .set_pattern(XlsxPattern::Solid);
+    ///         .set_pattern(FormatPattern::Solid);
     ///
     ///     let format2 = Format::new()
     ///         .set_background_color(XlsxColor::Yellow)
     ///         .set_foreground_color(XlsxColor::Red)
-    ///         .set_pattern(XlsxPattern::DarkVertical);
+    ///         .set_pattern(FormatPattern::DarkVertical);
     ///
     ///     worksheet.write_string(0, 0, "Rust", &format1)?;
     ///     worksheet.write_blank(1, 0, &format2)?;
@@ -1627,7 +1627,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_pattern.png">
     ///
-    pub fn set_pattern(mut self, pattern: XlsxPattern) -> Format {
+    pub fn set_pattern(mut self, pattern: FormatPattern) -> Format {
         self.pattern = pattern;
         self
     }
@@ -1704,7 +1704,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_foreground_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, FormatPattern};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1716,7 +1716,7 @@ impl Format {
     ///     let format1 = Format::new()
     ///         .set_background_color(XlsxColor::Yellow)
     ///         .set_foreground_color(XlsxColor::Red)
-    ///         .set_pattern(XlsxPattern::DarkVertical);
+    ///         .set_pattern(FormatPattern::DarkVertical);
     ///
     ///     worksheet.write_blank(0, 0, &format1)?;
     ///
@@ -1753,7 +1753,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
     /// # Examples
@@ -1763,16 +1763,16 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_border.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     let format1 = Format::new().set_border(XlsxBorder::Thin);
-    ///     let format2 = Format::new().set_border(XlsxBorder::Dotted);
-    ///     let format3 = Format::new().set_border(XlsxBorder::Double);
+    ///     let format1 = Format::new().set_border(FormatBorder::Thin);
+    ///     let format2 = Format::new().set_border(FormatBorder::Dotted);
+    ///     let format3 = Format::new().set_border(FormatBorder::Double);
     ///
     ///     worksheet.write_blank(1, 1, &format1)?;
     ///     worksheet.write_blank(3, 1, &format2)?;
@@ -1788,7 +1788,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_border.png">
     ///
-    pub fn set_border(mut self, border: XlsxBorder) -> Format {
+    pub fn set_border(mut self, border: FormatBorder) -> Format {
         self.border_top = border;
         self.border_left = border;
         self.border_right = border;
@@ -1824,7 +1824,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_border_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1832,15 +1832,15 @@ impl Format {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new()
-    ///         .set_border(XlsxBorder::Thin)
+    ///         .set_border(FormatBorder::Thin)
     ///         .set_border_color(XlsxColor::Blue);
     ///
     ///     let format2 = Format::new()
-    ///         .set_border(XlsxBorder::Dotted)
+    ///         .set_border(FormatBorder::Dotted)
     ///         .set_border_color(XlsxColor::Red);
     ///
     ///     let format3 = Format::new()
-    ///         .set_border(XlsxBorder::Double)
+    ///         .set_border(FormatBorder::Double)
     ///         .set_border_color(XlsxColor::Green);
     ///
     ///     worksheet.write_blank(1, 1, &format1)?;
@@ -1874,10 +1874,10 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
-    pub fn set_border_top(mut self, border: XlsxBorder) -> Format {
+    pub fn set_border_top(mut self, border: FormatBorder) -> Format {
         self.border_top = border;
         self
     }
@@ -1903,10 +1903,10 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
-    pub fn set_border_bottom(mut self, border: XlsxBorder) -> Format {
+    pub fn set_border_bottom(mut self, border: FormatBorder) -> Format {
         self.border_bottom = border;
         self
     }
@@ -1932,10 +1932,10 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
-    pub fn set_border_left(mut self, border: XlsxBorder) -> Format {
+    pub fn set_border_left(mut self, border: FormatBorder) -> Format {
         self.border_left = border;
         self
     }
@@ -1961,10 +1961,10 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
-    pub fn set_border_right(mut self, border: XlsxBorder) -> Format {
+    pub fn set_border_right(mut self, border: FormatBorder) -> Format {
         self.border_right = border;
         self
     }
@@ -1994,7 +1994,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `border` - The border property as defined by a [`XlsxBorder`] enum
+    /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
     /// # Examples
@@ -2004,7 +2004,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_border_diagonal.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxDiagonalBorder, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxColor, FormatDiagonalBorder, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -2012,20 +2012,20 @@ impl Format {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new()
-    ///         .set_border_diagonal(XlsxBorder::Thin)
-    ///         .set_border_diagonal_type(XlsxDiagonalBorder::BorderUp);
+    ///         .set_border_diagonal(FormatBorder::Thin)
+    ///         .set_border_diagonal_type(FormatDiagonalBorder::BorderUp);
     ///
     ///     let format2 = Format::new()
-    ///         .set_border_diagonal(XlsxBorder::Thin)
-    ///         .set_border_diagonal_type(XlsxDiagonalBorder::BorderDown);
+    ///         .set_border_diagonal(FormatBorder::Thin)
+    ///         .set_border_diagonal_type(FormatDiagonalBorder::BorderDown);
     ///
     ///     let format3 = Format::new()
-    ///         .set_border_diagonal(XlsxBorder::Thin)
-    ///         .set_border_diagonal_type(XlsxDiagonalBorder::BorderUpDown);
+    ///         .set_border_diagonal(FormatBorder::Thin)
+    ///         .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown);
     ///
     ///     let format4 = Format::new()
-    ///         .set_border_diagonal(XlsxBorder::Thin)
-    ///         .set_border_diagonal_type(XlsxDiagonalBorder::BorderUpDown)
+    ///         .set_border_diagonal(FormatBorder::Thin)
+    ///         .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown)
     ///         .set_border_diagonal_color(XlsxColor::Red);
     ///
     ///     worksheet.write_blank(1, 1, &format1)?;
@@ -2043,7 +2043,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_border_diagonal.png">
     ///
-    pub fn set_border_diagonal(mut self, border: XlsxBorder) -> Format {
+    pub fn set_border_diagonal(mut self, border: FormatBorder) -> Format {
         self.border_diagonal = border;
         self
     }
@@ -2070,9 +2070,9 @@ impl Format {
     /// # Arguments
     ///
     /// * `border_type` - The diagonal border type as defined by a
-    ///   [`XlsxDiagonalBorder`] enum value.
+    ///   [`FormatDiagonalBorder`] enum value.
     ///
-    pub fn set_border_diagonal_type(mut self, border_type: XlsxDiagonalBorder) -> Format {
+    pub fn set_border_diagonal_type(mut self, border_type: FormatDiagonalBorder) -> Format {
         self.border_diagonal_type = border_type;
         self
     }
@@ -2085,7 +2085,7 @@ impl Format {
     pub fn set_hyperlink(mut self) -> Format {
         self.is_hyperlink = true;
         self.font_color = XlsxColor::Theme(10, 0);
-        self.underline = XlsxUnderline::Single;
+        self.underline = FormatUnderline::Single;
         self.font_scheme = "".to_string();
 
         self
@@ -2589,9 +2589,9 @@ impl XlsxColor {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxPattern enum defines the Excel patterns values that can be added to
-/// a Format pattern.
-pub enum XlsxPattern {
+/// The FormatPattern enum defines the Excel pattern types that can be added to
+/// a [`Format`].
+pub enum FormatPattern {
     /// Automatic or Empty pattern.
     None,
 
@@ -2650,37 +2650,37 @@ pub enum XlsxPattern {
     Gray0625,
 }
 
-impl XlsxPattern {
+impl FormatPattern {
     // Get the Excel string value for the pattern type.
     pub(crate) fn value(&self) -> &str {
         match self {
-            XlsxPattern::None => "none",
-            XlsxPattern::Solid => "solid",
-            XlsxPattern::MediumGray => "mediumGray",
-            XlsxPattern::DarkGray => "darkGray",
-            XlsxPattern::LightGray => "lightGray",
-            XlsxPattern::DarkHorizontal => "darkHorizontal",
-            XlsxPattern::DarkVertical => "darkVertical",
-            XlsxPattern::DarkDown => "darkDown",
-            XlsxPattern::DarkUp => "darkUp",
-            XlsxPattern::DarkGrid => "darkGrid",
-            XlsxPattern::DarkTrellis => "darkTrellis",
-            XlsxPattern::LightHorizontal => "lightHorizontal",
-            XlsxPattern::LightVertical => "lightVertical",
-            XlsxPattern::LightDown => "lightDown",
-            XlsxPattern::LightUp => "lightUp",
-            XlsxPattern::LightGrid => "lightGrid",
-            XlsxPattern::LightTrellis => "lightTrellis",
-            XlsxPattern::Gray125 => "gray125",
-            XlsxPattern::Gray0625 => "gray0625",
+            FormatPattern::None => "none",
+            FormatPattern::Solid => "solid",
+            FormatPattern::MediumGray => "mediumGray",
+            FormatPattern::DarkGray => "darkGray",
+            FormatPattern::LightGray => "lightGray",
+            FormatPattern::DarkHorizontal => "darkHorizontal",
+            FormatPattern::DarkVertical => "darkVertical",
+            FormatPattern::DarkDown => "darkDown",
+            FormatPattern::DarkUp => "darkUp",
+            FormatPattern::DarkGrid => "darkGrid",
+            FormatPattern::DarkTrellis => "darkTrellis",
+            FormatPattern::LightHorizontal => "lightHorizontal",
+            FormatPattern::LightVertical => "lightVertical",
+            FormatPattern::LightDown => "lightDown",
+            FormatPattern::LightUp => "lightUp",
+            FormatPattern::LightGrid => "lightGrid",
+            FormatPattern::LightTrellis => "lightTrellis",
+            FormatPattern::Gray125 => "gray125",
+            FormatPattern::Gray0625 => "gray0625",
         }
     }
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxBorder enum defines the Excel border types that can be added to
-/// a Format pattern.
-pub enum XlsxBorder {
+/// The FormatBorder enum defines the Excel border types that can be added to
+/// a [`Format`] pattern.
+pub enum FormatBorder {
     /// No border.
     None,
 
@@ -2724,33 +2724,35 @@ pub enum XlsxBorder {
     SlantDashDot,
 }
 
-impl XlsxBorder {
+impl FormatBorder {
     // Get the Excel string value for the border type.
     pub(crate) fn value(&self) -> &str {
         match self {
-            XlsxBorder::None => "none",
-            XlsxBorder::Thin => "thin",
-            XlsxBorder::Medium => "medium",
-            XlsxBorder::Dashed => "dashed",
-            XlsxBorder::Dotted => "dotted",
-            XlsxBorder::Thick => "thick",
-            XlsxBorder::Double => "double",
-            XlsxBorder::Hair => "hair",
-            XlsxBorder::MediumDashed => "mediumDashed",
-            XlsxBorder::DashDot => "dashDot",
-            XlsxBorder::MediumDashDot => "mediumDashDot",
-            XlsxBorder::DashDotDot => "dashDotDot",
-            XlsxBorder::MediumDashDotDot => "mediumDashDotDot",
-            XlsxBorder::SlantDashDot => "slantDashDot",
+            FormatBorder::None => "none",
+            FormatBorder::Thin => "thin",
+            FormatBorder::Medium => "medium",
+            FormatBorder::Dashed => "dashed",
+            FormatBorder::Dotted => "dotted",
+            FormatBorder::Thick => "thick",
+            FormatBorder::Double => "double",
+            FormatBorder::Hair => "hair",
+            FormatBorder::MediumDashed => "mediumDashed",
+            FormatBorder::DashDot => "dashDot",
+            FormatBorder::MediumDashDot => "mediumDashDot",
+            FormatBorder::DashDotDot => "dashDotDot",
+            FormatBorder::MediumDashDotDot => "mediumDashDotDot",
+            FormatBorder::SlantDashDot => "slantDashDot",
         }
     }
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxDiagonalBorder enum defines the [`Format`] diagonal border types, see
-/// [`set_border_diagonal()`](Format::set_border_diagonal()) .
+/// The FormatDiagonalBorder enum defines [`Format`] diagonal border types.
 ///
-pub enum XlsxDiagonalBorder {
+/// This is used with the
+/// [`Format::set_border_diagonal()`](Format::set_border_diagonal()) method.
+///
+pub enum FormatDiagonalBorder {
     /// The default/automatic format for an Excel font.
     None,
 
@@ -2765,7 +2767,7 @@ pub enum XlsxDiagonalBorder {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxUnderline enum defines the font underline type in a [`Format`].
+/// The FormatUnderline enum defines the font underline type in a [`Format`].
 ///
 /// The difference between a normal underline and an "accounting" underline is
 /// that a normal underline only underlines the text/number in a cell whereas an
@@ -2779,18 +2781,18 @@ pub enum XlsxDiagonalBorder {
 /// ```
 /// # // This code is available in examples/doc_format_set_align.rs
 /// #
-/// # use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
+/// # use rust_xlsxwriter::{Format, Workbook, XlsxError, FormatUnderline};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     // Create a new Excel file object.
 /// #     let mut workbook = Workbook::new();
 /// #     let worksheet = workbook.add_worksheet();
 /// #
-///     let format1 = Format::new().set_underline(XlsxUnderline::None);
-///     let format2 = Format::new().set_underline(XlsxUnderline::Single);
-///     let format3 = Format::new().set_underline(XlsxUnderline::Double);
-///     let format4 = Format::new().set_underline(XlsxUnderline::SingleAccounting);
-///     let format5 = Format::new().set_underline(XlsxUnderline::DoubleAccounting);
+///     let format1 = Format::new().set_underline(FormatUnderline::None);
+///     let format2 = Format::new().set_underline(FormatUnderline::Single);
+///     let format3 = Format::new().set_underline(FormatUnderline::Double);
+///     let format4 = Format::new().set_underline(FormatUnderline::SingleAccounting);
+///     let format5 = Format::new().set_underline(FormatUnderline::DoubleAccounting);
 ///
 ///     worksheet.write_string(0, 0, "None",              &format1)?;
 ///     worksheet.write_string(1, 0, "Single",            &format2)?;
@@ -2808,7 +2810,7 @@ pub enum XlsxDiagonalBorder {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/format_set_underline.png">
 ///
-pub enum XlsxUnderline {
+pub enum FormatUnderline {
     /// The default/automatic underline for an Excel font.
     None,
 
@@ -2826,10 +2828,10 @@ pub enum XlsxUnderline {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxScript enum defines the [`Format`] font superscript and subscript
+/// The FormatScript enum defines the [`Format`] font superscript and subscript
 /// properties.
 ///
-pub enum XlsxScript {
+pub enum FormatScript {
     /// The default/automatic format for an Excel font.
     None,
 
@@ -2841,10 +2843,10 @@ pub enum XlsxScript {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxAlign enum defines the vertical and horizontal alignment properties
-/// for a [`Format`].
+/// The FormatAlign enum defines the vertical and horizontal alignment properties
+/// of a [`Format`].
 ///
-pub enum XlsxAlign {
+pub enum FormatAlign {
     /// General/default alignment. The cell will use Excel's default for the
     /// data type, for example Left for text and Right for numbers.
     General,

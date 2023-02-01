@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxError};
 
 mod common;
 
@@ -15,7 +15,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
-    let center = Format::new().set_align(XlsxAlign::CenterAcross);
+    let center = Format::new().set_align(FormatAlign::CenterAcross);
 
     worksheet.write_string(0, 0, "foo", &center)?;
 

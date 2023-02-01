@@ -4,7 +4,7 @@
 
 //! The following example demonstrates writing a url with alternative format.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxUnderline};
+use rust_xlsxwriter::{Format, FormatUnderline, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a format to use in the worksheet.
     let link_format = Format::new()
         .set_font_color(XlsxColor::Red)
-        .set_underline(XlsxUnderline::Single);
+        .set_underline(FormatUnderline::Single);
 
     // Write a url with an alternative format.
     worksheet.write_url_with_format(0, 0, "https://www.rust-lang.org", &link_format)?;

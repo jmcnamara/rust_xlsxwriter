@@ -4,7 +4,7 @@
 
 //! The following example demonstrates setting the cell pattern (with colors).
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxPattern};
+use rust_xlsxwriter::{Format, FormatPattern, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -15,12 +15,12 @@ fn main() -> Result<(), XlsxError> {
 
     let format1 = Format::new()
         .set_background_color(XlsxColor::Green)
-        .set_pattern(XlsxPattern::Solid);
+        .set_pattern(FormatPattern::Solid);
 
     let format2 = Format::new()
         .set_background_color(XlsxColor::Yellow)
         .set_foreground_color(XlsxColor::Red)
-        .set_pattern(XlsxPattern::DarkVertical);
+        .set_pattern(FormatPattern::DarkVertical);
 
     worksheet.write_string(0, 0, "Rust", &format1)?;
     worksheet.write_blank(1, 0, &format2)?;

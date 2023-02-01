@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxError};
 
 mod common;
 
@@ -22,16 +22,16 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_bold()
         .set_locked()
         .set_rotation(0)
-        .set_align(XlsxAlign::Left)
-        .set_align(XlsxAlign::Bottom);
+        .set_align(FormatAlign::Left)
+        .set_align(FormatAlign::Bottom);
 
     let format2 = Format::new()
         .set_font_name("Arial")
         .set_bold()
         .set_locked()
         .set_rotation(90)
-        .set_align(XlsxAlign::Center)
-        .set_align(XlsxAlign::Bottom);
+        .set_align(FormatAlign::Center)
+        .set_align(FormatAlign::Bottom);
 
     worksheet.write_string(0, 0, "Foo", &format1)?;
     worksheet.write_string(0, 1, "Bar", &format2)?;

@@ -6,8 +6,10 @@
 
 #![warn(missing_docs)]
 
-/// The FilterCondition struct is used to define autofilter rules associated
-/// with an [`autofilter()`](crate::Worksheet::autofilter()) range.
+/// The FilterCondition struct is used to define autofilter rules.
+///
+/// Autofilter rules are associated with ranges created using
+/// [`autofilter()`](crate::Worksheet::autofilter()).
 ///
 /// Excel supports two main types of filter conditions. The first, and most
 /// common, is a list filter where the user selects the items to filter from a
@@ -793,8 +795,11 @@ impl FilterCriteria {
     }
 }
 
-/// The FilterData struct is a simple data type to allow a generic mapping from Rusts
-/// string and number types to the types used in Excel's filters.
+/// The FilterData struct represents data types used in Excel's filters.
+///
+/// The FilterData struct is a simple data type to allow a generic mapping
+/// between Rust's string and number types and similar types used in Excel's
+/// filters.
 #[derive(Clone)]
 pub struct FilterData {
     pub(crate) data_type: FilterDataType,
@@ -843,6 +848,7 @@ impl FilterData {
 }
 
 /// Trait to map different Rust types into Excel data types used in filters.
+///
 /// Currently only string and number like types are supported.
 pub trait IntoFilterData {
     /// Types/objects supporting this trait must be able to convert to

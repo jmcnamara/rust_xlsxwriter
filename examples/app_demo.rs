@@ -6,7 +6,7 @@
 //! rust_xlsxwriter library.
 
 use chrono::NaiveDate;
-use rust_xlsxwriter::{Format, Image, Workbook, XlsxAlign, XlsxBorder, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Image, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -17,8 +17,8 @@ fn main() -> Result<(), XlsxError> {
     let decimal_format = Format::new().set_num_format("0.000");
     let date_format = Format::new().set_num_format("yyyy-mm-dd");
     let merge_format = Format::new()
-        .set_border(XlsxBorder::Thin)
-        .set_align(XlsxAlign::Center);
+        .set_border(FormatBorder::Thin)
+        .set_align(FormatAlign::Center);
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();

@@ -18,7 +18,7 @@ use crate::packager::PackagerOptions;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 use crate::{utility, DefinedName, DefinedNameType, Properties, NUM_IMAGE_FORMATS};
-use crate::{XlsxColor, XlsxPattern};
+use crate::{FormatPattern, XlsxColor};
 
 /// The Workbook struct represents an Excel file in it's entirety. It is the
 /// starting point for creating a new Excel xlsx file.
@@ -33,7 +33,7 @@ use crate::{XlsxColor, XlsxPattern};
 /// # // This code is available in examples/app_demo.rs
 /// #
 /// use chrono::NaiveDate;
-/// use rust_xlsxwriter::{Format, Image, Workbook, XlsxAlign, XlsxBorder, XlsxError};
+/// use rust_xlsxwriter::{Format, Image, Workbook, FormatAlign, FormatBorder, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
@@ -44,8 +44,8 @@ use crate::{XlsxColor, XlsxPattern};
 ///     let decimal_format = Format::new().set_num_format("0.000");
 ///     let date_format = Format::new().set_num_format("yyyy-mm-dd");
 ///     let merge_format = Format::new()
-///         .set_border(XlsxBorder::Thin)
-///         .set_align(XlsxAlign::Center);
+///         .set_border(FormatBorder::Thin)
+///         .set_align(FormatAlign::Center);
 ///
 ///     // Add a worksheet to the workbook.
 ///     let worksheet = workbook.add_worksheet();
@@ -1202,14 +1202,14 @@ impl Workbook {
         let mut fill_key = temp_format.fill_key();
         fill_indices.insert(fill_key, 0);
         fill_key = temp_format
-            .set_pattern(crate::XlsxPattern::Gray125)
+            .set_pattern(crate::FormatPattern::Gray125)
             .fill_key();
         fill_indices.insert(fill_key, 1);
 
         for xf_format in &mut self.xf_formats {
             // For a solid fill (pattern == "solid") Excel reverses the role of
             // foreground and background colors, and
-            if xf_format.pattern == XlsxPattern::Solid
+            if xf_format.pattern == FormatPattern::Solid
                 && xf_format.background_color.is_not_default()
                 && xf_format.foreground_color.is_not_default()
             {
@@ -1222,21 +1222,23 @@ impl Workbook {
             // If the user specifies a foreground or background color without a
             // pattern they probably wanted a solid fill, so we fill in the
             // defaults.
-            if (xf_format.pattern == XlsxPattern::None || xf_format.pattern == XlsxPattern::Solid)
+            if (xf_format.pattern == FormatPattern::None
+                || xf_format.pattern == FormatPattern::Solid)
                 && xf_format.background_color.is_not_default()
                 && xf_format.foreground_color.is_default()
             {
                 xf_format.foreground_color = xf_format.background_color;
                 xf_format.background_color = XlsxColor::Automatic;
-                xf_format.pattern = XlsxPattern::Solid;
+                xf_format.pattern = FormatPattern::Solid;
             }
 
-            if (xf_format.pattern == XlsxPattern::None || xf_format.pattern == XlsxPattern::Solid)
+            if (xf_format.pattern == FormatPattern::None
+                || xf_format.pattern == FormatPattern::Solid)
                 && xf_format.background_color.is_default()
                 && xf_format.foreground_color.is_not_default()
             {
                 xf_format.background_color = XlsxColor::Automatic;
-                xf_format.pattern = XlsxPattern::Solid;
+                xf_format.pattern = FormatPattern::Solid;
             }
 
             // Get a unique fill identifier.

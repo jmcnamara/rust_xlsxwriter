@@ -4,7 +4,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use crate::{xmlwriter::XMLWriter, XlsxObjectMovement};
+use crate::{xmlwriter::XMLWriter, ObjectMovement};
 
 pub struct Drawing {
     pub(crate) writer: XMLWriter,
@@ -67,10 +67,10 @@ impl Drawing {
         let mut attributes = vec![];
 
         match drawing_info.object_movement {
-            XlsxObjectMovement::Default | XlsxObjectMovement::MoveButDontSizeWithCells => {
+            ObjectMovement::Default | ObjectMovement::MoveButDontSizeWithCells => {
                 attributes.push(("editAs", "oneCell".to_string()))
             }
-            XlsxObjectMovement::DontMoveOrSizeWithCells => {
+            ObjectMovement::DontMoveOrSizeWithCells => {
                 attributes.push(("editAs", "absolute".to_string()))
             }
             _ => (),
@@ -313,7 +313,7 @@ pub(crate) struct DrawingInfo {
     pub(crate) height: f64,
     pub(crate) description: String,
     pub(crate) decorative: bool,
-    pub(crate) object_movement: XlsxObjectMovement,
+    pub(crate) object_movement: ObjectMovement,
     pub(crate) rel_id: u32,
 }
 
@@ -355,7 +355,7 @@ mod tests {
             description: "rust.png".to_string(),
             decorative: false,
             rel_id: 1,
-            object_movement: XlsxObjectMovement::Default,
+            object_movement: ObjectMovement::Default,
         };
 
         drawing.drawings.push(drawing_info);

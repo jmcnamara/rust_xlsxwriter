@@ -5,7 +5,7 @@
 //! The following example demonstrates setting various cell alignment
 //! properties.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -19,19 +19,19 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_column_width(0, 18)?;
 
     // Create some alignment formats.
-    let format1 = Format::new().set_align(XlsxAlign::Center);
+    let format1 = Format::new().set_align(FormatAlign::Center);
 
     let format2 = Format::new()
-        .set_align(XlsxAlign::Top)
-        .set_align(XlsxAlign::Left);
+        .set_align(FormatAlign::Top)
+        .set_align(FormatAlign::Left);
 
     let format3 = Format::new()
-        .set_align(XlsxAlign::VerticalCenter)
-        .set_align(XlsxAlign::Center);
+        .set_align(FormatAlign::VerticalCenter)
+        .set_align(FormatAlign::Center);
 
     let format4 = Format::new()
-        .set_align(XlsxAlign::Bottom)
-        .set_align(XlsxAlign::Right);
+        .set_align(FormatAlign::Bottom)
+        .set_align(FormatAlign::Right);
 
     worksheet.write_string(0, 0, "Center", &format1)?;
     worksheet.write_string(1, 0, "Top - Left", &format2)?;

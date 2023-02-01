@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxPattern};
+use rust_xlsxwriter::{Format, FormatPattern, Workbook, XlsxError};
 
 mod common;
 
@@ -14,7 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
-    let pattern = Format::new().set_pattern(XlsxPattern::MediumGray);
+    let pattern = Format::new().set_pattern(FormatPattern::MediumGray);
 
     worksheet.write_blank(0, 0, &pattern)?;
 

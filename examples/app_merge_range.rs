@@ -5,7 +5,7 @@
 //! An example of creating merged ranges in a worksheet using the
 //! rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -13,14 +13,14 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write some merged cells with centering.
-    let format = Format::new().set_align(XlsxAlign::Center);
+    let format = Format::new().set_align(FormatAlign::Center);
 
     worksheet.merge_range(1, 1, 1, 2, "Merged cells", &format)?;
 
     // Write some merged cells with centering and a border.
     let format = Format::new()
-        .set_align(XlsxAlign::Center)
-        .set_border(XlsxBorder::Thin);
+        .set_align(FormatAlign::Center)
+        .set_border(FormatBorder::Thin);
 
     worksheet.merge_range(3, 1, 3, 2, "Merged cells", &format)?;
 
@@ -31,9 +31,9 @@ fn main() -> Result<(), XlsxError> {
 
     // Example with a more complex format and larger range.
     let format = Format::new()
-        .set_align(XlsxAlign::Center)
-        .set_align(XlsxAlign::VerticalCenter)
-        .set_border(XlsxBorder::Thin)
+        .set_align(FormatAlign::Center)
+        .set_align(FormatAlign::VerticalCenter)
+        .set_border(FormatBorder::Thin)
         .set_background_color(XlsxColor::Silver);
 
     worksheet.merge_range(7, 1, 8, 3, "Merged cells", &format)?;

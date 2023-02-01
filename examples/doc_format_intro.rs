@@ -5,7 +5,7 @@
 //! The following example demonstrates some of the available formatting
 //! properties.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -36,7 +36,7 @@ fn main() -> Result<(), XlsxError> {
     let format6 = Format::new().set_background_color(XlsxColor::RGB(0xDAA520));
     worksheet.write_string(5, 0, "Fills", &format6)?;
 
-    let format7 = Format::new().set_border(XlsxBorder::Thin);
+    let format7 = Format::new().set_border(FormatBorder::Thin);
     worksheet.write_string(6, 0, "Borders", &format7)?;
 
     let format8 = Format::new().set_bold();

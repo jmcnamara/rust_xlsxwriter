@@ -5,7 +5,7 @@
 //! The following example demonstrates writing a "rich" string with multiple
 //! formats, and an additional cell format.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -31,7 +31,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_rich_string_only(0, 0, &segments)?;
 
     // Add an extra format to use for the entire cell.
-    let center = Format::new().set_align(XlsxAlign::Center);
+    let center = Format::new().set_align(FormatAlign::Center);
 
     // Write the rich string again with the cell format.
     worksheet.write_rich_string(2, 0, &segments, &center)?;

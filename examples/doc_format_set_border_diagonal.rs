@@ -4,7 +4,7 @@
 
 //! The following example demonstrates setting cell diagonal borders.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxDiagonalBorder, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, FormatDiagonalBorder, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -12,20 +12,20 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     let format1 = Format::new()
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderUp);
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderUp);
 
     let format2 = Format::new()
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderDown);
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderDown);
 
     let format3 = Format::new()
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderUpDown);
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown);
 
     let format4 = Format::new()
-        .set_border_diagonal(XlsxBorder::Thin)
-        .set_border_diagonal_type(XlsxDiagonalBorder::BorderUpDown)
+        .set_border_diagonal(FormatBorder::Thin)
+        .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown)
         .set_border_diagonal_color(XlsxColor::Red);
 
     worksheet.write_blank(1, 1, &format1)?;

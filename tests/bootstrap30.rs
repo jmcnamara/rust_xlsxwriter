@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxError};
 
 mod common;
 
@@ -26,7 +26,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format4 = Format::new().set_text_wrap();
     let format5 = Format::new().set_shrink();
     let format6 = Format::new().set_indent(1);
-    let format7 = Format::new().set_indent(1).set_align(XlsxAlign::Right);
+    let format7 = Format::new().set_indent(1).set_align(FormatAlign::Right);
     let format8 = Format::new().set_reading_direction(1);
     let format9 = Format::new().set_reading_direction(2);
 

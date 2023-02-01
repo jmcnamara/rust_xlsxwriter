@@ -5,7 +5,7 @@
 //! This example shows how to create an image object and set the option to
 //! control how it behaves when the cells underneath it are changed.
 
-use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxObjectMovement};
+use rust_xlsxwriter::{Image, ObjectMovement, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
     let mut image = Image::new("examples/rust_logo.png")?;
 
     // Set the object movement/positioning options.
-    image.set_object_movement(XlsxObjectMovement::MoveButDontSizeWithCells);
+    image.set_object_movement(ObjectMovement::MoveButDontSizeWithCells);
 
     // Insert the image.
     worksheet.insert_image(1, 2, &image)?;

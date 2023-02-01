@@ -49,14 +49,22 @@ mod tests {
         let worksheet = Worksheet::new();
 
         let strings = [
-            ("", XlsxImagePosition::Left, false),
-            ("&L&[Picture]", XlsxImagePosition::Left, true),
-            ("&R&[Picture]", XlsxImagePosition::Right, true),
-            ("&C&[Picture]", XlsxImagePosition::Center, true),
-            ("&R&[Picture]", XlsxImagePosition::Left, false),
-            ("&L&[Picture]&C&[Picture]", XlsxImagePosition::Left, true),
-            ("&L&[Picture]&C&[Picture]", XlsxImagePosition::Center, true),
-            ("&L&[Picture]&C&[Picture]", XlsxImagePosition::Right, false),
+            ("", HeaderImagePosition::Left, false),
+            ("&L&[Picture]", HeaderImagePosition::Left, true),
+            ("&R&[Picture]", HeaderImagePosition::Right, true),
+            ("&C&[Picture]", HeaderImagePosition::Center, true),
+            ("&R&[Picture]", HeaderImagePosition::Left, false),
+            ("&L&[Picture]&C&[Picture]", HeaderImagePosition::Left, true),
+            (
+                "&L&[Picture]&C&[Picture]",
+                HeaderImagePosition::Center,
+                true,
+            ),
+            (
+                "&L&[Picture]&C&[Picture]",
+                HeaderImagePosition::Right,
+                false,
+            ),
         ];
 
         for (string, position, exp) in strings {
@@ -166,7 +174,7 @@ mod tests {
         worksheet.set_header("&R&G");
 
         // Test inserting an image without a matching header position.
-        let result = worksheet.set_header_image(&image, XlsxImagePosition::Left);
+        let result = worksheet.set_header_image(&image, HeaderImagePosition::Left);
         assert!(matches!(result, Err(XlsxError::ParameterError(_))));
     }
 

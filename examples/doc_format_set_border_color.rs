@@ -4,7 +4,7 @@
 
 //! The following example demonstrates setting a cell border and color.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -12,15 +12,15 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     let format1 = Format::new()
-        .set_border(XlsxBorder::Thin)
+        .set_border(FormatBorder::Thin)
         .set_border_color(XlsxColor::Blue);
 
     let format2 = Format::new()
-        .set_border(XlsxBorder::Dotted)
+        .set_border(FormatBorder::Dotted)
         .set_border_color(XlsxColor::Red);
 
     let format3 = Format::new()
-        .set_border(XlsxBorder::Double)
+        .set_border(FormatBorder::Double)
         .set_border_color(XlsxColor::Green);
 
     worksheet.write_blank(1, 1, &format1)?;

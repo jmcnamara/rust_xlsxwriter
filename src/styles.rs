@@ -7,7 +7,8 @@
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
 use crate::{
-    XlsxAlign, XlsxBorder, XlsxColor, XlsxDiagonalBorder, XlsxPattern, XlsxScript, XlsxUnderline,
+    FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern, FormatScript, FormatUnderline,
+    XlsxColor,
 };
 
 pub struct Styles<'a> {
@@ -139,11 +140,11 @@ impl<'a> Styles<'a> {
             self.writer.xml_empty_tag("strike");
         }
 
-        if xf_format.underline != XlsxUnderline::None {
+        if xf_format.underline != FormatUnderline::None {
             self.write_font_underline(xf_format);
         }
 
-        if xf_format.font_script != XlsxScript::None {
+        if xf_format.font_script != FormatScript::None {
             self.write_vert_align(xf_format);
         }
         // Write the sz element.
@@ -241,13 +242,13 @@ impl<'a> Styles<'a> {
         let mut attributes = vec![];
 
         match xf_format.underline {
-            XlsxUnderline::Double => {
+            FormatUnderline::Double => {
                 attributes.push(("val", "double".to_string()));
             }
-            XlsxUnderline::SingleAccounting => {
+            FormatUnderline::SingleAccounting => {
                 attributes.push(("val", "singleAccounting".to_string()));
             }
-            XlsxUnderline::DoubleAccounting => {
+            FormatUnderline::DoubleAccounting => {
                 attributes.push(("val", "doubleAccounting".to_string()));
             }
             _ => {}
@@ -261,10 +262,10 @@ impl<'a> Styles<'a> {
         let mut attributes = vec![];
 
         match xf_format.font_script {
-            XlsxScript::Superscript => {
+            FormatScript::Superscript => {
                 attributes.push(("val", "superscript".to_string()));
             }
-            XlsxScript::Subscript => {
+            FormatScript::Subscript => {
                 attributes.push(("val", "subscript".to_string()));
             }
             _ => {}
@@ -306,7 +307,7 @@ impl<'a> Styles<'a> {
     // Write the user defined <fill> element.
     fn write_fill(&mut self, xf_format: &Format) {
         // Special handling for pattern only case.
-        if xf_format.pattern != XlsxPattern::None
+        if xf_format.pattern != FormatPattern::None
             && xf_format.background_color.is_default()
             && xf_format.foreground_color.is_default()
         {
@@ -360,18 +361,18 @@ impl<'a> Styles<'a> {
     // Write the <border> element.
     fn write_border(&mut self, xf_format: &Format) {
         match xf_format.border_diagonal_type {
-            XlsxDiagonalBorder::None => {
+            FormatDiagonalBorder::None => {
                 self.writer.xml_start_tag("border");
             }
-            XlsxDiagonalBorder::BorderUp => {
+            FormatDiagonalBorder::BorderUp => {
                 let attributes = vec![("diagonalUp", "1".to_string())];
                 self.writer.xml_start_tag_attr("border", &attributes);
             }
-            XlsxDiagonalBorder::BorderDown => {
+            FormatDiagonalBorder::BorderDown => {
                 let attributes = vec![("diagonalDown", "1".to_string())];
                 self.writer.xml_start_tag_attr("border", &attributes);
             }
-            XlsxDiagonalBorder::BorderUpDown => {
+            FormatDiagonalBorder::BorderUpDown => {
                 let attributes = vec![
                     ("diagonalUp", "1".to_string()),
                     ("diagonalDown", "1".to_string()),
@@ -406,10 +407,10 @@ impl<'a> Styles<'a> {
     fn write_sub_border(
         &mut self,
         border_type: &str,
-        border_style: XlsxBorder,
+        border_style: FormatBorder,
         border_color: XlsxColor,
     ) {
-        if border_style == XlsxBorder::None {
+        if border_style == FormatBorder::None {
             self.writer.xml_empty_tag(border_type);
             return;
         }
@@ -598,43 +599,43 @@ impl<'a> Styles<'a> {
         // "distributed". If it is defined for any other alignment or no
         // alignment has been set then default to left alignment.
         if xf_format.indent > 0
-            && horizontal_align != XlsxAlign::Left
-            && horizontal_align != XlsxAlign::Right
-            && horizontal_align != XlsxAlign::Distributed
+            && horizontal_align != FormatAlign::Left
+            && horizontal_align != FormatAlign::Right
+            && horizontal_align != FormatAlign::Distributed
         {
-            horizontal_align = XlsxAlign::Left;
+            horizontal_align = FormatAlign::Left;
         }
 
         // Check for properties that are mutually exclusive with "shrink".
         if xf_format.text_wrap
-            || horizontal_align == XlsxAlign::Fill
-            || horizontal_align == XlsxAlign::Justify
-            || horizontal_align == XlsxAlign::Distributed
+            || horizontal_align == FormatAlign::Fill
+            || horizontal_align == FormatAlign::Justify
+            || horizontal_align == FormatAlign::Distributed
         {
             shrink = false;
         }
 
         // Set the various attributes for horizontal alignment.
         match horizontal_align {
-            XlsxAlign::Center => {
+            FormatAlign::Center => {
                 attributes.push(("horizontal", "center".to_string()));
             }
-            XlsxAlign::CenterAcross => {
+            FormatAlign::CenterAcross => {
                 attributes.push(("horizontal", "centerContinuous".to_string()));
             }
-            XlsxAlign::Distributed => {
+            FormatAlign::Distributed => {
                 attributes.push(("horizontal", "distributed".to_string()));
             }
-            XlsxAlign::Fill => {
+            FormatAlign::Fill => {
                 attributes.push(("horizontal", "fill".to_string()));
             }
-            XlsxAlign::Justify => {
+            FormatAlign::Justify => {
                 attributes.push(("horizontal", "justify".to_string()));
             }
-            XlsxAlign::Left => {
+            FormatAlign::Left => {
                 attributes.push(("horizontal", "left".to_string()));
             }
-            XlsxAlign::Right => {
+            FormatAlign::Right => {
                 attributes.push(("horizontal", "right".to_string()));
             }
             _ => {}
@@ -642,16 +643,16 @@ impl<'a> Styles<'a> {
 
         // Set the various attributes for vertical alignment.
         match xf_format.vertical_align {
-            XlsxAlign::VerticalCenter => {
+            FormatAlign::VerticalCenter => {
                 attributes.push(("vertical", "center".to_string()));
             }
-            XlsxAlign::VerticalDistributed => {
+            FormatAlign::VerticalDistributed => {
                 attributes.push(("vertical", "distributed".to_string()));
             }
-            XlsxAlign::VerticalJustify => {
+            FormatAlign::VerticalJustify => {
                 attributes.push(("vertical", "justify".to_string()));
             }
-            XlsxAlign::Top => {
+            FormatAlign::Top => {
                 attributes.push(("vertical", "top".to_string()));
             }
             _ => {}

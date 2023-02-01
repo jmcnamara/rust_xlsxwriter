@@ -6,11 +6,11 @@
 
 #![warn(missing_docs)]
 
-/// The `ProtectWorksheetOptions` struct is use to set the elements that can or
+/// The ProtectionOptions struct is use to set the elements that can or
 /// can't be changed in a protected worksheet.
 ///
 /// You can specify which worksheet elements protection should be on or off via
-/// the `ProtectWorksheetOptions` members. The corresponding Excel options with
+/// the `ProtectionOptions` members. The corresponding Excel options with
 /// their default states are shown below:
 ///
 /// <img
@@ -25,7 +25,7 @@
 /// ```
 /// # // This code is available in examples/doc_worksheet_protect_with_options.rs
 /// #
-/// use rust_xlsxwriter::{ProtectWorksheetOptions, Workbook, XlsxError};
+/// use rust_xlsxwriter::{ProtectionOptions, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     let mut workbook = Workbook::new();
@@ -34,10 +34,10 @@
 ///     let worksheet = workbook.add_worksheet();
 ///
 ///     // Set some of the options and use the defaults for everything else.
-///     let options = ProtectWorksheetOptions {
+///     let options = ProtectionOptions {
 ///         insert_columns: true,
 ///         insert_rows: true,
-///         ..ProtectWorksheetOptions::default()
+///         ..ProtectionOptions::default()
 ///     };
 ///
 ///     // Set the protection options.
@@ -59,7 +59,7 @@
 ///
 ///
 #[derive(Clone)]
-pub struct ProtectWorksheetOptions {
+pub struct ProtectionOptions {
     /// When `true` (the default) the user can select locked cells in a
     /// protected worksheet.
     pub select_locked_cells: bool,
@@ -121,18 +121,18 @@ pub struct ProtectWorksheetOptions {
     pub edit_objects: bool,
 }
 
-impl Default for ProtectWorksheetOptions {
+impl Default for ProtectionOptions {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl ProtectWorksheetOptions {
-    /// Create a new ProtectWorksheetOptions object to use with the
+impl ProtectionOptions {
+    /// Create a new ProtectionOptions object to use with the
     /// [`worksheet.protect_with_options()`](crate::Worksheet::protect_with_options) method.
     ///
-    pub fn new() -> ProtectWorksheetOptions {
-        ProtectWorksheetOptions {
+    pub fn new() -> ProtectionOptions {
+        ProtectionOptions {
             select_locked_cells: true,
             select_unlocked_cells: true,
             format_cells: false,

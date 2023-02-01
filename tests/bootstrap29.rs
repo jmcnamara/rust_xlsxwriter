@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxError};
 
 mod common;
 
@@ -13,21 +13,21 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
-    let format1 = Format::new().set_align(XlsxAlign::Left);
-    let format2 = Format::new().set_align(XlsxAlign::Center);
-    let format3 = Format::new().set_align(XlsxAlign::Right);
-    let format4 = Format::new().set_align(XlsxAlign::Fill);
-    let format5 = Format::new().set_align(XlsxAlign::Justify);
-    let format6 = Format::new().set_align(XlsxAlign::CenterAcross);
-    let format7 = Format::new().set_align(XlsxAlign::Distributed);
-    let format8 = Format::new().set_align(XlsxAlign::Bottom);
-    let format9 = Format::new().set_align(XlsxAlign::VerticalCenter);
-    let format10 = Format::new().set_align(XlsxAlign::Top);
-    let format11 = Format::new().set_align(XlsxAlign::VerticalJustify);
-    let format12 = Format::new().set_align(XlsxAlign::VerticalDistributed);
+    let format1 = Format::new().set_align(FormatAlign::Left);
+    let format2 = Format::new().set_align(FormatAlign::Center);
+    let format3 = Format::new().set_align(FormatAlign::Right);
+    let format4 = Format::new().set_align(FormatAlign::Fill);
+    let format5 = Format::new().set_align(FormatAlign::Justify);
+    let format6 = Format::new().set_align(FormatAlign::CenterAcross);
+    let format7 = Format::new().set_align(FormatAlign::Distributed);
+    let format8 = Format::new().set_align(FormatAlign::Bottom);
+    let format9 = Format::new().set_align(FormatAlign::VerticalCenter);
+    let format10 = Format::new().set_align(FormatAlign::Top);
+    let format11 = Format::new().set_align(FormatAlign::VerticalJustify);
+    let format12 = Format::new().set_align(FormatAlign::VerticalDistributed);
     let format13 = Format::new()
-        .set_align(XlsxAlign::Center)
-        .set_align(XlsxAlign::VerticalCenter);
+        .set_align(FormatAlign::Center)
+        .set_align(FormatAlign::VerticalCenter);
 
     worksheet.write_string_only(0, 0, "Rust")?;
     worksheet.write_string(1, 0, "Rust", &format1)?;

@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
 
 mod common;
 
@@ -16,17 +16,17 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     let top_left_bottom = Format::new()
-        .set_border_left(XlsxBorder::Thin)
-        .set_border_top(XlsxBorder::Thin)
-        .set_border_bottom(XlsxBorder::Thin);
+        .set_border_left(FormatBorder::Thin)
+        .set_border_top(FormatBorder::Thin)
+        .set_border_bottom(FormatBorder::Thin);
 
     let top_bottom = Format::new()
-        .set_border_top(XlsxBorder::Thin)
-        .set_border_bottom(XlsxBorder::Thin);
+        .set_border_top(FormatBorder::Thin)
+        .set_border_bottom(FormatBorder::Thin);
 
     let top_left = Format::new()
-        .set_border_left(XlsxBorder::Thin)
-        .set_border_top(XlsxBorder::Thin);
+        .set_border_left(FormatBorder::Thin)
+        .set_border_top(FormatBorder::Thin);
 
     worksheet.write_string(1, 1, "test", &top_left_bottom)?;
     worksheet.write_string(1, 3, "test", &top_left)?;

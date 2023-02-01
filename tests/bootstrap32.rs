@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxColor, XlsxError};
 
 mod common;
 
@@ -13,37 +13,37 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let format1 = Format::new().set_border(XlsxBorder::Thin);
+    let format1 = Format::new().set_border(FormatBorder::Thin);
 
     let format2 = Format::new()
-        .set_border(XlsxBorder::Hair)
+        .set_border(FormatBorder::Hair)
         .set_border_color(XlsxColor::Red);
 
     let format3 = Format::new()
-        .set_border_top(XlsxBorder::Dotted)
-        .set_border_left(XlsxBorder::DashDotDot)
-        .set_border_right(XlsxBorder::Dashed)
-        .set_border_bottom(XlsxBorder::DashDot)
+        .set_border_top(FormatBorder::Dotted)
+        .set_border_left(FormatBorder::DashDotDot)
+        .set_border_right(FormatBorder::Dashed)
+        .set_border_bottom(FormatBorder::DashDot)
         .set_border_top_color(XlsxColor::Red)
         .set_border_left_color(XlsxColor::Red)
         .set_border_right_color(XlsxColor::Red)
         .set_border_bottom_color(XlsxColor::Red);
 
     let format4 = Format::new()
-        .set_border_top(XlsxBorder::MediumDashDotDot)
-        .set_border_left(XlsxBorder::MediumDashDotDot)
-        .set_border_right(XlsxBorder::MediumDashDot)
-        .set_border_bottom(XlsxBorder::SlantDashDot)
+        .set_border_top(FormatBorder::MediumDashDotDot)
+        .set_border_left(FormatBorder::MediumDashDotDot)
+        .set_border_right(FormatBorder::MediumDashDot)
+        .set_border_bottom(FormatBorder::SlantDashDot)
         .set_border_top_color(XlsxColor::Red)
         .set_border_left_color(XlsxColor::Red)
         .set_border_right_color(XlsxColor::Red)
         .set_border_bottom_color(XlsxColor::Red);
 
     let format5 = Format::new()
-        .set_border_top(XlsxBorder::MediumDashed)
-        .set_border_left(XlsxBorder::Medium)
-        .set_border_right(XlsxBorder::Double)
-        .set_border_bottom(XlsxBorder::Thick)
+        .set_border_top(FormatBorder::MediumDashed)
+        .set_border_left(FormatBorder::Medium)
+        .set_border_right(FormatBorder::Double)
+        .set_border_bottom(FormatBorder::Thick)
         .set_border_top_color(XlsxColor::Red)
         .set_border_left_color(XlsxColor::Red)
         .set_border_right_color(XlsxColor::Red)

@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxError};
 
 mod common;
 
@@ -14,7 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
-    let format = Format::new().set_align(XlsxAlign::Center);
+    let format = Format::new().set_align(FormatAlign::Center);
 
     worksheet.merge_range(3, 2, 4, 4, "http://www.perl.org/", &format)?;
     worksheet.write_url_with_options(3, 2, "http://www.perl.org/", "", "", Some(&format))?;

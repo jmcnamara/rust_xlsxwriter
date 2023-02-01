@@ -37,10 +37,10 @@ changes in order to standardize and simplify certain parts of the API.
 - Added support for hiding rows and columns (to hide intermediate calculations)
   via the [`worksheet.set_column_hidden()`] and[`worksheet.set_row_hidden()`]
   method. This is also a required precursor to adding autofilter conditions.
-- Added the [XlsxObjectMovement] enum to control how a worksheet object, such a
+- Added the [ObjectMovement] enum to control how a worksheet object, such a
   an image, moves when the cells underneath it are moved, resized or deleted.
 
-[XlsxObjectMovement]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.XlsxObjectMovement.html
+[ObjectMovement]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.ObjectMovement.html
 [`worksheet.set_row_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_row_hidden
 [`worksheet.set_column_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_column_hidden
 

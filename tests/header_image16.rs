@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
+use rust_xlsxwriter::{HeaderImagePosition, Image, Workbook, XlsxError};
 
 mod common;
 
@@ -17,15 +17,15 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet1 = workbook.add_worksheet();
     worksheet1.set_header("&L&G");
-    worksheet1.set_header_image(&image, XlsxImagePosition::Left)?;
+    worksheet1.set_header_image(&image, HeaderImagePosition::Left)?;
     worksheet1.set_footer("&R&G");
-    worksheet1.set_footer_image(&image, XlsxImagePosition::Right)?;
+    worksheet1.set_footer_image(&image, HeaderImagePosition::Right)?;
 
     let worksheet2 = workbook.add_worksheet();
     worksheet2.set_header("&L&G");
-    worksheet2.set_header_image(&image, XlsxImagePosition::Left)?;
+    worksheet2.set_header_image(&image, HeaderImagePosition::Left)?;
     worksheet2.set_footer("&R&G");
-    worksheet2.set_footer_image(&image, XlsxImagePosition::Right)?;
+    worksheet2.set_footer_image(&image, HeaderImagePosition::Right)?;
 
     workbook.save(filename)?;
 

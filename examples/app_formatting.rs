@@ -15,8 +15,8 @@ fn main() -> Result<(), XlsxError> {
     // Add a general heading format.
     let header_format = Format::new()
         .set_bold()
-        .set_align(XlsxAlign::Top)
-        .set_border(XlsxBorder::Thin)
+        .set_align(FormatAlign::Top)
+        .set_border(FormatBorder::Thin)
         .set_background_color(XlsxColor::RGB(0xC6EFCE));
 
     // -----------------------------------------------------------------------
@@ -97,22 +97,22 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(0, 0, "Alignment formats", &header_format)?;
 
     // Some examples of positional alignment formats.
-    let center_format = Format::new().set_align(XlsxAlign::Center);
+    let center_format = Format::new().set_align(FormatAlign::Center);
     worksheet.write_string(1, 0, "Center", &center_format)?;
 
     let top_left_format = Format::new()
-        .set_align(XlsxAlign::Top)
-        .set_align(XlsxAlign::Left);
+        .set_align(FormatAlign::Top)
+        .set_align(FormatAlign::Left);
     worksheet.write_string(2, 0, "Top - Left", &top_left_format)?;
 
     let center_center_format = Format::new()
-        .set_align(XlsxAlign::VerticalCenter)
-        .set_align(XlsxAlign::Center);
+        .set_align(FormatAlign::VerticalCenter)
+        .set_align(FormatAlign::Center);
     worksheet.write_string(3, 0, "Center - Center", &center_center_format)?;
 
     let bottom_right_format = Format::new()
-        .set_align(XlsxAlign::Bottom)
-        .set_align(XlsxAlign::Right);
+        .set_align(FormatAlign::Bottom)
+        .set_align(FormatAlign::Right);
     worksheet.write_string(4, 0, "Bottom - Right", &bottom_right_format)?;
 
     // Some indentation formats.
@@ -185,7 +185,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(9, 0, "Font color", &font_color_format)?;
 
     // Font underline.
-    let underline_format = Format::new().set_underline(XlsxUnderline::Single);
+    let underline_format = Format::new().set_underline(FormatUnderline::Single);
     worksheet.write_string(10, 0, "Underline", &underline_format)?;
 
     // Font strike-though.
@@ -205,17 +205,17 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(0, 2, "Border formats", &header_format)?;
 
     // Add some borders to cells.
-    let border_format1 = Format::new().set_border(XlsxBorder::Thin);
+    let border_format1 = Format::new().set_border(FormatBorder::Thin);
     worksheet.write_string(2, 2, "Thin Border", &border_format1)?;
 
-    let border_format2 = Format::new().set_border(XlsxBorder::Dotted);
+    let border_format2 = Format::new().set_border(FormatBorder::Dotted);
     worksheet.write_string(4, 2, "Dotted Border", &border_format2)?;
 
-    let border_format3 = Format::new().set_border(XlsxBorder::Double);
+    let border_format3 = Format::new().set_border(FormatBorder::Double);
     worksheet.write_string(6, 2, "Double Border", &border_format3)?;
 
     let border_format4 = Format::new()
-        .set_border(XlsxBorder::Thin)
+        .set_border(FormatBorder::Thin)
         .set_border_color(XlsxColor::Red);
     worksheet.write_string(8, 2, "Color Border", &border_format4)?;
 
@@ -234,13 +234,13 @@ fn main() -> Result<(), XlsxError> {
     // Write some cells with pattern fills.
     let fill_format1 = Format::new()
         .set_background_color(XlsxColor::Yellow)
-        .set_pattern(XlsxPattern::Solid);
+        .set_pattern(FormatPattern::Solid);
     worksheet.write_string(2, 1, "Solid fill", &fill_format1)?;
 
     let fill_format2 = Format::new()
         .set_background_color(XlsxColor::Yellow)
         .set_foreground_color(XlsxColor::Orange)
-        .set_pattern(XlsxPattern::Gray0625);
+        .set_pattern(FormatPattern::Gray0625);
     worksheet.write_string(4, 1, "Pattern fill", &fill_format2)?;
 
     // Save the file to disk.

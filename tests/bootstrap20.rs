@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxUnderline};
+use rust_xlsxwriter::{Format, FormatUnderline, Workbook, XlsxError};
 
 mod common;
 
@@ -13,11 +13,11 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let format1 = Format::new().set_underline(XlsxUnderline::None);
-    let format2 = Format::new().set_underline(XlsxUnderline::Single);
-    let format3 = Format::new().set_underline(XlsxUnderline::Double);
-    let format4 = Format::new().set_underline(XlsxUnderline::SingleAccounting);
-    let format5 = Format::new().set_underline(XlsxUnderline::DoubleAccounting);
+    let format1 = Format::new().set_underline(FormatUnderline::None);
+    let format2 = Format::new().set_underline(FormatUnderline::Single);
+    let format3 = Format::new().set_underline(FormatUnderline::Double);
+    let format4 = Format::new().set_underline(FormatUnderline::SingleAccounting);
+    let format5 = Format::new().set_underline(FormatUnderline::DoubleAccounting);
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string(0, 0, "Rust", &format1)?;

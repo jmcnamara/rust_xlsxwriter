@@ -5,7 +5,7 @@
 //! An example of using the rust_xlsxwriter library to write "rich" multi-format
 //! strings in worksheet cells.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxColor, XlsxError, XlsxScript};
+use rust_xlsxwriter::{Format, FormatAlign, FormatScript, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -22,8 +22,8 @@ fn main() -> Result<(), XlsxError> {
     let blue = Format::new().set_font_color(XlsxColor::Blue);
     let bold = Format::new().set_bold();
     let italic = Format::new().set_italic();
-    let center = Format::new().set_align(XlsxAlign::Center);
-    let superscript = Format::new().set_font_script(XlsxScript::Superscript);
+    let center = Format::new().set_align(FormatAlign::Center);
+    let superscript = Format::new().set_font_script(FormatScript::Superscript);
 
     // Write some rich strings with multiple formats.
     let segments = [

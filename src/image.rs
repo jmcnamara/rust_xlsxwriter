@@ -62,8 +62,8 @@ pub struct Image {
     pub(crate) image_type: XlsxImageType,
     pub(crate) alt_text: String,
     pub(crate) vml_name: String,
-    pub(crate) header_position: XlsxImagePosition,
-    pub(crate) object_movement: XlsxObjectMovement,
+    pub(crate) header_position: HeaderImagePosition,
+    pub(crate) object_movement: ObjectMovement,
     pub(crate) is_header: bool,
     pub(crate) decorative: bool,
     pub(crate) hash: u64,
@@ -252,8 +252,8 @@ impl Image {
             image_type: XlsxImageType::Unknown,
             alt_text: "".to_string(),
             vml_name: "image".to_string(),
-            header_position: XlsxImagePosition::Center,
-            object_movement: XlsxObjectMovement::Default,
+            header_position: HeaderImagePosition::Center,
+            object_movement: ObjectMovement::Default,
             is_header: true,
             decorative: false,
             hash: 0,
@@ -464,9 +464,9 @@ impl Image {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
     ///
-    /// These values are defined in the [`XlsxObjectMovement`] enum.
+    /// These values are defined in the [`ObjectMovement`] enum.
     ///
-    /// The [`XlsxObjectMovement`] enum also provides an additional option to
+    /// The [`ObjectMovement`] enum also provides an additional option to
     /// "Move and size with cells - after the image is inserted" to allow images
     /// to be hidden in rows or columns. In Excel this equates to option 1 above
     /// but the internal image position calculations are handled differently.
@@ -474,7 +474,7 @@ impl Image {
     /// # Arguments
     ///
     /// * `option` - An image/object positioning behavior defined by the
-    ///   [`XlsxObjectMovement`] enum.
+    ///   [`ObjectMovement`] enum.
     ///
     /// # Examples
     ///
@@ -484,7 +484,7 @@ impl Image {
     /// ```
     /// # // This code is available in examples/doc_image_set_object_movement.rs
     /// #
-    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxObjectMovement};
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, ObjectMovement};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -497,7 +497,7 @@ impl Image {
     ///     let mut image = Image::new("examples/rust_logo.png")?;
     ///
     ///     // Set the object movement/positioning options.
-    ///     image.set_object_movement(XlsxObjectMovement::MoveButDontSizeWithCells);
+    ///     image.set_object_movement(ObjectMovement::MoveButDontSizeWithCells);
     ///
     ///     // Insert the image.
     ///     worksheet.insert_image(1, 2, &image)?;
@@ -514,7 +514,7 @@ impl Image {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/image_set_object_movement.png">
     ///
-    pub fn set_object_movement(&mut self, option: XlsxObjectMovement) -> &mut Image {
+    pub fn set_object_movement(&mut self, option: ObjectMovement) -> &mut Image {
         self.object_movement = option;
         self
     }
@@ -625,15 +625,15 @@ impl Image {
     pub(crate) fn vml_position(&self) -> String {
         if self.is_header {
             match self.header_position {
-                XlsxImagePosition::Left => "LH".to_string(),
-                XlsxImagePosition::Right => "RH".to_string(),
-                XlsxImagePosition::Center => "CH".to_string(),
+                HeaderImagePosition::Left => "LH".to_string(),
+                HeaderImagePosition::Right => "RH".to_string(),
+                HeaderImagePosition::Center => "CH".to_string(),
             }
         } else {
             match self.header_position {
-                XlsxImagePosition::Left => "LF".to_string(),
-                XlsxImagePosition::Right => "RF".to_string(),
-                XlsxImagePosition::Center => "CF".to_string(),
+                HeaderImagePosition::Left => "LF".to_string(),
+                HeaderImagePosition::Right => "RF".to_string(),
+                HeaderImagePosition::Center => "CF".to_string(),
             }
         }
     }
@@ -846,7 +846,7 @@ impl Image {
 /// Used with [`image.set_object_movement`](Image::set_object_movement).
 ///
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum XlsxObjectMovement {
+pub enum ObjectMovement {
     /// Default movement for the object.
     Default,
 
@@ -865,13 +865,15 @@ pub enum XlsxObjectMovement {
     MoveAndSizeWithCellsAfter,
 }
 
-
-/// Enum to represent the image position in a header or footer. Used with the
-/// [worksheet.set_header_image()](crate::Worksheet::set_header_image) and
-/// [worksheet.set_footer_image()](crate::Worksheet::set_footer_image) methods.
+/// Enum to represent the image position in a header or footer.
+///
+/// Used with the
+/// [`worksheet.set_header_image()`](crate::Worksheet::set_header_image) and
+/// [`worksheet.set_footer_image()`](crate::Worksheet::set_footer_image)
+/// methods.
 ///
 #[derive(Clone, Debug)]
-pub enum XlsxImagePosition {
+pub enum HeaderImagePosition {
     /// The image is positioned in the left section of the header/footer.
     Left,
 

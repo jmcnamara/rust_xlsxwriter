@@ -22,7 +22,7 @@ use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::XMLWriter;
-use crate::{utility, Image, ProtectWorksheetOptions, XlsxColor, XlsxImagePosition, XlsxObjectMovement};
+use crate::{utility, HeaderImagePosition, Image, ObjectMovement, ProtectionOptions, XlsxColor};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -55,7 +55,7 @@ pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 /// # // This code is available in examples/app_demo.rs
 /// #
 /// use chrono::NaiveDate;
-/// use rust_xlsxwriter::{Format, Image, Workbook, XlsxAlign, XlsxBorder, XlsxError};
+/// use rust_xlsxwriter::{Format, Image, Workbook, FormatAlign, FormatBorder, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
@@ -66,8 +66,8 @@ pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 ///     let decimal_format = Format::new().set_num_format("0.000");
 ///     let date_format = Format::new().set_num_format("yyyy-mm-dd");
 ///     let merge_format = Format::new()
-///         .set_border(XlsxBorder::Thin)
-///         .set_align(XlsxAlign::Center);
+///         .set_border(FormatBorder::Thin)
+///         .set_align(FormatAlign::Center);
 ///
 ///     // Add a worksheet to the workbook.
 ///     let worksheet = workbook.add_worksheet();
@@ -183,7 +183,7 @@ pub struct Worksheet {
     rel_count: u16,
     protection_on: bool,
     protection_hash: u16,
-    protection_options: ProtectWorksheetOptions,
+    protection_options: ProtectionOptions,
     unprotected_ranges: Vec<(String, String, u16)>,
     selected_range: (String, String),
     top_left_cell: String,
@@ -360,7 +360,7 @@ impl Worksheet {
             rel_count: 0,
             protection_on: false,
             protection_hash: 0,
-            protection_options: ProtectWorksheetOptions::new(),
+            protection_options: ProtectionOptions::new(),
             unprotected_ranges: vec![],
             selected_range: ("".to_string(), "".to_string()),
             top_left_cell: "".to_string(),
@@ -1001,7 +1001,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_rich_string.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatAlign, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1027,7 +1027,7 @@ impl Worksheet {
     ///     worksheet.write_rich_string_only(0, 0, &segments)?;
     ///
     ///     // Add an extra format to use for the entire cell.
-    ///     let center = Format::new().set_align(XlsxAlign::Center);
+    ///     let center = Format::new().set_align(FormatAlign::Center);
     ///
     ///     // Write the rich string again with the cell format.
     ///     worksheet.write_rich_string(2, 0, &segments, &center)?;
@@ -1676,7 +1676,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_blank.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxBorder, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1689,7 +1689,7 @@ impl Worksheet {
     ///
     ///     let format2 = Format::new()
     ///         .set_background_color(XlsxColor::Yellow)
-    ///         .set_border(XlsxBorder::Thin);
+    ///         .set_border(FormatBorder::Thin);
     ///
     ///     worksheet.write_blank(1, 1, &format1)?;
     ///     worksheet.write_blank(3, 1, &format2)?;
@@ -1794,7 +1794,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/app_hyperlinks.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxUnderline};
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, FormatUnderline};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1803,7 +1803,7 @@ impl Worksheet {
     /// #     // Create a format to use in the worksheet.
     /// #     let link_format = Format::new()
     /// #         .set_font_color(XlsxColor::Red)
-    /// #         .set_underline(XlsxUnderline::Single);
+    /// #         .set_underline(FormatUnderline::Single);
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet1 = workbook.add_worksheet();
@@ -1952,7 +1952,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_url_with_format.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, XlsxUnderline};
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, FormatUnderline};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1964,7 +1964,7 @@ impl Worksheet {
     ///     // Create a format to use in the worksheet.
     ///     let link_format = Format::new()
     ///         .set_font_color(XlsxColor::Red)
-    ///         .set_underline(XlsxUnderline::Single);
+    ///         .set_underline(FormatUnderline::Single);
     ///
     ///     // Write a url with an alternative format.
     ///     worksheet.write_url_with_format(0, 0, "https://www.rust-lang.org", &link_format)?;
@@ -2465,7 +2465,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/app_merge_range.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxAlign, XlsxBorder, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatAlign, FormatBorder, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -2473,14 +2473,14 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Write some merged cells with centering.
-    ///     let format = Format::new().set_align(XlsxAlign::Center);
+    ///     let format = Format::new().set_align(FormatAlign::Center);
     ///
     ///     worksheet.merge_range(1, 1, 1, 2, "Merged cells", &format)?;
     ///
     ///     // Write some merged cells with centering and a border.
     ///     let format = Format::new()
-    ///         .set_align(XlsxAlign::Center)
-    ///         .set_border(XlsxBorder::Thin);
+    ///         .set_align(FormatAlign::Center)
+    ///         .set_border(FormatBorder::Thin);
     ///
     ///     worksheet.merge_range(3, 1, 3, 2, "Merged cells", &format)?;
     ///
@@ -2491,9 +2491,9 @@ impl Worksheet {
     ///
     ///     // Example with a more complex format and larger range.
     ///     let format = Format::new()
-    ///         .set_align(XlsxAlign::Center)
-    ///         .set_align(XlsxAlign::VerticalCenter)
-    ///         .set_border(XlsxBorder::Thin)
+    ///         .set_align(FormatAlign::Center)
+    ///         .set_align(FormatAlign::VerticalCenter)
+    ///         .set_border(FormatBorder::Thin)
     ///         .set_background_color(XlsxColor::Silver);
     ///
     ///     worksheet.merge_range(7, 1, 8, 3, "Merged cells", &format)?;
@@ -3847,7 +3847,7 @@ impl Worksheet {
     /// specifies which worksheet elements should, or shouldn't, be protected.
     ///
     /// You can specify which worksheet elements protection should be on or off
-    /// via a [`ProtectWorksheetOptions`] struct reference. The Excel options
+    /// via a [`ProtectionOptions`] struct reference. The Excel options
     /// with their default states are shown below:
     ///
     /// <img
@@ -3862,7 +3862,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_protect_with_options.rs
     /// #
-    /// # use rust_xlsxwriter::{ProtectWorksheetOptions, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{ProtectionOptions, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -3871,10 +3871,10 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Set some of the options and use the defaults for everything else.
-    ///     let options = ProtectWorksheetOptions {
+    ///     let options = ProtectionOptions {
     ///         insert_columns: true,
     ///         insert_rows: true,
-    ///         ..ProtectWorksheetOptions::default()
+    ///         ..ProtectionOptions::default()
     ///     };
     ///
     ///     // Set the protection options.
@@ -3894,7 +3894,7 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options2.png">
     ///
-    pub fn protect_with_options(&mut self, options: &ProtectWorksheetOptions) -> &mut Worksheet {
+    pub fn protect_with_options(&mut self, options: &ProtectionOptions) -> &mut Worksheet {
         self.protection_on = true;
         self.protection_options = options.clone();
 
@@ -5539,7 +5539,7 @@ impl Worksheet {
     ///
     /// # Arguments
     ///
-    /// * `position` - The image position as defined by the [XlsxImagePosition]
+    /// * `position` - The image position as defined by the [HeaderImagePosition]
     ///   enum.
     ///
     /// # Errors
@@ -5554,7 +5554,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_header_image.rs
     /// #
-    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, HeaderImagePosition};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -5570,7 +5570,7 @@ impl Worksheet {
     /// #
     ///     // Insert the watermark image in the header.
     ///     worksheet.set_header("&C&[Picture]");
-    ///     worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
+    ///     worksheet.set_header_image(&image, HeaderImagePosition::Center)?;
     ///
     /// #     // Increase the top margin to 1.2 for clarity. The -1.0 values are ignored.
     /// #     worksheet.set_margins(-1.0, -1.0, 1.2, -1.0, -1.0, -1.0);
@@ -5600,7 +5600,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/app_watermark.rs
     /// #
-    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError, HeaderImagePosition};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -5613,7 +5613,7 @@ impl Worksheet {
     ///
     ///     // Insert the watermark image in the header.
     ///     worksheet.set_header("&C&[Picture]");
-    ///     worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
+    ///     worksheet.set_header_image(&image, HeaderImagePosition::Center)?;
     /// #
     /// #     // Set Page View mode so the watermark is visible.
     /// #     worksheet.set_view_page_layout();
@@ -5632,7 +5632,7 @@ impl Worksheet {
     pub fn set_header_image(
         &mut self,
         image: &Image,
-        position: XlsxImagePosition,
+        position: HeaderImagePosition,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check that there is a matching  &[Picture]/&[G] variable in the
         // header string.
@@ -5659,7 +5659,7 @@ impl Worksheet {
     ///
     /// # Arguments
     ///
-    /// * `position` - The image position as defined by the [XlsxImagePosition]
+    /// * `position` - The image position as defined by the [HeaderImagePosition]
     ///   enum.
     ///
     /// # Errors
@@ -5670,7 +5670,7 @@ impl Worksheet {
     pub fn set_footer_image(
         &mut self,
         image: &Image,
-        position: XlsxImagePosition,
+        position: HeaderImagePosition,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check that there is a matching  &[Picture]/&[G] variable in the
         // footer string.
@@ -7756,7 +7756,7 @@ impl Worksheet {
 
     // Convert the width of a cell from character units to pixels. Excel rounds
     // the column width to the nearest pixel.
-    fn column_pixel_width(&mut self, col: ColNum, position: &XlsxObjectMovement) -> u32 {
+    fn column_pixel_width(&mut self, col: ColNum, position: &ObjectMovement) -> u32 {
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
 
@@ -7765,7 +7765,7 @@ impl Worksheet {
                 let pixel_width = col_options.width;
                 let hidden = col_options.hidden;
 
-                if hidden && *position != XlsxObjectMovement::MoveAndSizeWithCellsAfter {
+                if hidden && *position != ObjectMovement::MoveAndSizeWithCellsAfter {
                     // A hidden column is treated as having a width of zero unless
                     // the "object_movement" is MoveAndSizeWithCellsAfter.
                     0u32
@@ -7782,12 +7782,12 @@ impl Worksheet {
 
     // Convert the height of a cell from character units to pixels. If the
     // height hasn't been set by the user we use the default value.
-    fn row_pixel_height(&mut self, row: RowNum, position: &XlsxObjectMovement) -> u32 {
+    fn row_pixel_height(&mut self, row: RowNum, position: &ObjectMovement) -> u32 {
         match self.changed_rows.get(&row) {
             Some(row_options) => {
                 let hidden = row_options.hidden;
 
-                if hidden && *position != XlsxObjectMovement::MoveAndSizeWithCellsAfter {
+                if hidden && *position != ObjectMovement::MoveAndSizeWithCellsAfter {
                     // A hidden row is treated as having a height of zero unless
                     // the "object_movement" is MoveAndSizeWithCellsAfter.
                     0u32
@@ -7829,7 +7829,7 @@ impl Worksheet {
 
     // Check that there is a header/footer &[Picture] variable in the correct
     // position to match the corresponding image object.
-    fn verify_header_footer_image(&self, string: &str, position: &XlsxImagePosition) -> bool {
+    fn verify_header_footer_image(&self, string: &str, position: &HeaderImagePosition) -> bool {
         lazy_static! {
             static ref LEFT: Regex = Regex::new(r"(&[L].*)(:?&[CR])?").unwrap();
             static ref RIGHT: Regex = Regex::new(r"(&[R].*)(:?&[LC])?").unwrap();
@@ -7837,9 +7837,9 @@ impl Worksheet {
         }
 
         let caps = match position {
-            XlsxImagePosition::Left => LEFT.captures(string),
-            XlsxImagePosition::Right => RIGHT.captures(string),
-            XlsxImagePosition::Center => CENTER.captures(string),
+            HeaderImagePosition::Left => LEFT.captures(string),
+            HeaderImagePosition::Right => RIGHT.captures(string),
+            HeaderImagePosition::Center => CENTER.captures(string),
         };
 
         match caps {
@@ -9147,7 +9147,6 @@ impl Worksheet {
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
-
 
 // Round to the closest integer number of emu units.
 fn round_to_emus(dimension: f64) -> f64 {

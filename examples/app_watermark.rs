@@ -6,7 +6,7 @@
 //! library. This is based on the method of putting an image in the worksheet
 //! header as suggested in the Microsoft documentation.
 
-use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
+use rust_xlsxwriter::{HeaderImagePosition, Image, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Insert the watermark image in the header.
     worksheet.set_header("&C&[Picture]");
-    worksheet.set_header_image(&image, XlsxImagePosition::Center)?;
+    worksheet.set_header_image(&image, HeaderImagePosition::Center)?;
 
     // Set Page View mode so the watermark is visible.
     worksheet.set_view_page_layout();

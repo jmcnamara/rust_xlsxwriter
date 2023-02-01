@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Image, Workbook, XlsxError, XlsxImagePosition};
+use rust_xlsxwriter::{HeaderImagePosition, Image, Workbook, XlsxError};
 
 mod common;
 
@@ -18,7 +18,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let image = Image::new("tests/input/images/red.jpg")?;
 
     worksheet.set_header("&L&G");
-    worksheet.set_header_image(&image, XlsxImagePosition::Left)?;
+    worksheet.set_header_image(&image, HeaderImagePosition::Left)?;
 
     workbook.save(filename)?;
 
@@ -85,7 +85,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     image.set_vml_name("red");
 
     worksheet.set_header("&L&G");
-    worksheet.set_header_image(&image, XlsxImagePosition::Left)?;
+    worksheet.set_header_image(&image, HeaderImagePosition::Left)?;
 
     workbook.save(filename)?;
 
