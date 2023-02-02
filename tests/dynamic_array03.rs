@@ -15,7 +15,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_formula_only(0, 0, "=1+_xlfn.XOR(1)")?;
+    worksheet.write_formula(0, 0, "=1+_xlfn.XOR(1)")?;
     worksheet.set_formula_result(0, 0, "2");
 
     workbook.save(filename)?;
@@ -30,7 +30,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     worksheet.use_future_functions(true);
-    worksheet.write_formula_only(0, 0, "=1+XOR(1)")?;
+    worksheet.write_formula(0, 0, "=1+XOR(1)")?;
     worksheet.set_formula_result(0, 0, "2");
 
     workbook.save(filename)?;

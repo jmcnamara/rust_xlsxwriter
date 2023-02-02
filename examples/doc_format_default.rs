@@ -17,8 +17,8 @@ fn main() -> Result<(), XlsxError> {
     let format = Format::default();
 
     // These methods calls are equivalent.
-    worksheet.write_string_only(0, 0, "Hello")?;
-    worksheet.write_string(1, 0, "Hello", &format)?;
+    worksheet.write_string(0, 0, "Hello")?;
+    worksheet.write_string_with_format(1, 0, "Hello", &format)?;
 
     workbook.save("formats.xlsx")?;
 

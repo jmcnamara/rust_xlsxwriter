@@ -14,7 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet1 = workbook.add_worksheet();
-    worksheet1.write_string_only(0, 0, "Foo")?;
+    worksheet1.write_string(0, 0, "Foo")?;
     worksheet1.set_repeat_rows(0, 0)?;
 
     let worksheet2 = workbook.add_worksheet();

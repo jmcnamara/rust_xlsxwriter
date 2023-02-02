@@ -15,23 +15,23 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_array_formula_only(0, 0, 2, 0, "{=SUM(B1:C1*B2:C2)}")?;
+    worksheet.write_array_formula(0, 0, 2, 0, "{=SUM(B1:C1*B2:C2)}")?;
     worksheet.set_formula_result(0, 0, "1000");
 
-    worksheet.write_number_only(0, 1, 20)?;
-    worksheet.write_number_only(1, 1, 30)?;
-    worksheet.write_number_only(2, 1, 40)?;
+    worksheet.write_number(0, 1, 20)?;
+    worksheet.write_number(1, 1, 30)?;
+    worksheet.write_number(2, 1, 40)?;
 
-    worksheet.write_number_only(0, 2, 10)?;
-    worksheet.write_number_only(1, 2, 40)?;
-    worksheet.write_number_only(2, 2, 20)?;
+    worksheet.write_number(0, 2, 10)?;
+    worksheet.write_number(1, 2, 40)?;
+    worksheet.write_number(2, 2, 20)?;
 
     worksheet.autofit();
 
     // Put these after the autofit() so that the autofit in on the formula
     // result.
-    worksheet.write_number_only(1, 0, 1000)?;
-    worksheet.write_number_only(2, 0, 1000)?;
+    worksheet.write_number(1, 0, 1000)?;
+    worksheet.write_number(2, 0, 1000)?;
 
     workbook.save(filename)?;
 

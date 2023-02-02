@@ -19,11 +19,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let italic = Format::new().set_italic();
 
     worksheet.set_row_format(4, &bold)?;
-    worksheet.write_string(4, 2, "Foo", &mixed)?;
+    worksheet.write_string_with_format(4, 2, "Foo", &mixed)?;
     worksheet.set_column_format(2, &italic)?;
 
-    worksheet.write_string_only(0, 2, "Foo")?;
-    worksheet.write_string_only(4, 0, "Foo")?;
+    worksheet.write_string(0, 2, "Foo")?;
+    worksheet.write_string(4, 0, "Foo")?;
 
     workbook.save(filename)?;
 

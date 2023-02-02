@@ -14,10 +14,10 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "Hello")?;
-    worksheet.write_string_only(1, 0, "World")?;
-    worksheet.write_string_only(2, 0, "Hello")?;
-    worksheet.write_string_only(3, 0, "World")?;
+    worksheet.write_string(0, 0, "Hello")?;
+    worksheet.write_string(1, 0, "World")?;
+    worksheet.write_string(2, 0, "Hello")?;
+    worksheet.write_string(3, 0, "World")?;
 
     workbook.save(filename)?;
 
@@ -31,19 +31,19 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let name = worksheet.name();
 
     // Test incremental save.
-    worksheet.write_string_only(0, 0, "Hello")?;
+    worksheet.write_string(0, 0, "Hello")?;
     workbook.save(filename)?;
 
     let worksheet = workbook.worksheet_from_index(0)?;
-    worksheet.write_string_only(1, 0, "World")?;
+    worksheet.write_string(1, 0, "World")?;
     workbook.save(filename)?;
 
     let worksheet = workbook.worksheet_from_index(0)?;
-    worksheet.write_string_only(2, 0, "Hello")?;
+    worksheet.write_string(2, 0, "Hello")?;
     workbook.save(filename)?;
 
     let worksheet = workbook.worksheet_from_name(&name)?;
-    worksheet.write_string_only(3, 0, "World")?;
+    worksheet.write_string(3, 0, "World")?;
     workbook.save(filename)?;
 
     Ok(())

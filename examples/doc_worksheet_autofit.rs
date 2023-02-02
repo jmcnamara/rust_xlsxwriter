@@ -14,11 +14,11 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Add some data
-    worksheet.write_string_only(0, 0, "Hello")?;
-    worksheet.write_string_only(0, 1, "Hello")?;
-    worksheet.write_string_only(1, 1, "Hello World")?;
-    worksheet.write_number_only(0, 2, 123)?;
-    worksheet.write_number_only(0, 3, 123456)?;
+    worksheet.write_string(0, 0, "Hello")?;
+    worksheet.write_string(0, 1, "Hello")?;
+    worksheet.write_string(1, 1, "Hello World")?;
+    worksheet.write_number(0, 2, 123)?;
+    worksheet.write_number(0, 3, 123456)?;
 
     // Autofit the columns.
     worksheet.autofit();

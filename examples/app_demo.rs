@@ -27,20 +27,20 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_column_width(0, 22)?;
 
     // Write a string without formatting.
-    worksheet.write_string_only(0, 0, "Hello")?;
+    worksheet.write_string(0, 0, "Hello")?;
 
     // Write a string with the bold format defined above.
-    worksheet.write_string(1, 0, "World", &bold_format)?;
+    worksheet.write_string_with_format(1, 0, "World", &bold_format)?;
 
     // Write some numbers.
-    worksheet.write_number_only(2, 0, 1)?;
-    worksheet.write_number_only(3, 0, 2.34)?;
+    worksheet.write_number(2, 0, 1)?;
+    worksheet.write_number(3, 0, 2.34)?;
 
     // Write a number with formatting.
-    worksheet.write_number(4, 0, 3.00, &decimal_format)?;
+    worksheet.write_number_with_format(4, 0, 3.00, &decimal_format)?;
 
     // Write a formula.
-    worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+    worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
 
     // Write a date.
     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();

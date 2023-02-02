@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_print_area(0, 0, 19, 6)?;
     worksheet.set_repeat_rows(0, 0)?;
 
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
 
     workbook.save(filename)?;
 

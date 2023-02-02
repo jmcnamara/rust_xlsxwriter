@@ -30,16 +30,16 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format8 = Format::new().set_reading_direction(1);
     let format9 = Format::new().set_reading_direction(2);
 
-    worksheet.write_string(0, 0, "Rust", &format1)?;
-    worksheet.write_string(1, 0, "Rust", &format2)?;
-    worksheet.write_string(2, 0, "Rust", &format3)?;
-    worksheet.write_string(3, 0, "Rust", &format4)?;
-    worksheet.write_string(4, 0, "Text\nWrap", &format4)?;
-    worksheet.write_string(5, 0, "Rust", &format5)?;
-    worksheet.write_string(6, 0, "Rust", &format6)?;
-    worksheet.write_string(7, 0, "Rust", &format7)?;
-    worksheet.write_string(8, 0, "Rust", &format8)?;
-    worksheet.write_string(9, 0, "Rust", &format9)?;
+    worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
+    worksheet.write_string_with_format(1, 0, "Rust", &format2)?;
+    worksheet.write_string_with_format(2, 0, "Rust", &format3)?;
+    worksheet.write_string_with_format(3, 0, "Rust", &format4)?;
+    worksheet.write_string_with_format(4, 0, "Text\nWrap", &format4)?;
+    worksheet.write_string_with_format(5, 0, "Rust", &format5)?;
+    worksheet.write_string_with_format(6, 0, "Rust", &format6)?;
+    worksheet.write_string_with_format(7, 0, "Rust", &format7)?;
+    worksheet.write_string_with_format(8, 0, "Rust", &format8)?;
+    worksheet.write_string_with_format(9, 0, "Rust", &format9)?;
 
     workbook.save(filename)?;
 

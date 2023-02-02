@@ -33,9 +33,9 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write some column headers.
-    worksheet.write_string(0, 0, "Item", &bold)?;
-    worksheet.write_string(0, 1, "Cost", &bold)?;
-    worksheet.write_string(0, 2, "Date", &bold)?;
+    worksheet.write_string_with_format(0, 0, "Item", &bold)?;
+    worksheet.write_string_with_format(0, 1, "Cost", &bold)?;
+    worksheet.write_string_with_format(0, 2, "Date", &bold)?;
 
     // Adjust the date column width for clarity.
     worksheet.set_column_width(2, 15)?;
@@ -43,8 +43,8 @@ fn main() -> Result<(), XlsxError> {
     // Iterate over the data and write it out row by row.
     let mut row = 1;
     for expense in expenses.iter() {
-        worksheet.write_string_only(row, 0, expense.0)?;
-        worksheet.write_number(row, 1, expense.1, &money_format)?;
+        worksheet.write_string(row, 0, expense.0)?;
+        worksheet.write_number_with_format(row, 1, expense.1, &money_format)?;
 
         let date = NaiveDate::parse_from_str(expense.2, "%Y-%m-%d").unwrap();
         worksheet.write_date(row, 2, &date, &date_format)?;
@@ -53,8 +53,8 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Write a total using a formula.
-    worksheet.write_string(row, 0, "Total", &bold)?;
-    worksheet.write_formula(row, 1, "=SUM(B2:B5)", &money_format)?;
+    worksheet.write_string_with_format(row, 0, "Total", &bold)?;
+    worksheet.write_formula_with_format(row, 1, "=SUM(B2:B5)", &money_format)?;
 
     // Save the file to disk.
     workbook.save("tutorial3.xlsx")?;

@@ -5,24 +5,22 @@
 //! The following example demonstrates writing formulas with formatting to a
 //! worksheet.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
     let mut workbook = Workbook::new();
 
-    // Create some formats to use in the worksheet.
-    let bold_format = Format::new().set_bold();
-    let italic_format = Format::new().set_italic();
-
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Write some formulas with formatting.
-    worksheet.write_formula(0, 0, "=1+2+3", &bold_format)?;
-    worksheet.write_formula(1, 0, "=A1*2", &bold_format)?;
-    worksheet.write_formula(2, 0, "=SIN(PI()/4)", &italic_format)?;
-    worksheet.write_formula(3, 0, "=AVERAGE(1, 2, 3, 4)", &italic_format)?;
+    // Write some formulas to the worksheet.
+    worksheet.write_formula(0, 0, "=B3 + B4")?;
+    worksheet.write_formula(1, 0, "=SIN(PI()/4)")?;
+    worksheet.write_formula(2, 0, "=SUM(B1:B5)")?;
+    worksheet.write_formula(3, 0, r#"=IF(A3>1,"Yes", "No")"#)?;
+    worksheet.write_formula(4, 0, "=AVERAGE(1, 2, 3, 4)")?;
+    worksheet.write_formula(5, 0, r#"=DATEVALUE("1-Jan-2023")"#)?;
 
     workbook.save("formulas.xlsx")?;
 

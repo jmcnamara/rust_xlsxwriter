@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_align(FormatAlign::Center)
         .set_align(FormatAlign::VerticalCenter);
 
-    worksheet.write_string(1, 1, "Foo", &centered)?;
+    worksheet.write_string_with_format(1, 1, "Foo", &centered)?;
 
     workbook.save(filename)?;
 

@@ -16,12 +16,12 @@ fn main() -> Result<(), XlsxError> {
     let mut worksheet2 = Worksheet::new();
 
     // Use the first workbook.
-    worksheet1.write_string_only(0, 0, "Hello")?;
-    worksheet1.write_string_only(1, 0, "Sheet1")?;
+    worksheet1.write_string(0, 0, "Hello")?;
+    worksheet1.write_string(1, 0, "Sheet1")?;
 
     // Use the second workbook.
-    worksheet2.write_string_only(0, 0, "Hello")?;
-    worksheet2.write_string_only(1, 0, "Sheet2")?;
+    worksheet2.write_string(0, 0, "Hello")?;
+    worksheet2.write_string(1, 0, "Sheet2")?;
 
     // Add the worksheets to the workbook.
     workbook.push_worksheet(worksheet1);

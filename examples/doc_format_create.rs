@@ -20,7 +20,7 @@ fn main() -> Result<(), XlsxError> {
         .set_italic()
         .set_font_color(XlsxColor::Red);
 
-    worksheet.write_string(0, 0, "Hello", &format)?;
+    worksheet.write_string_with_format(0, 0, "Hello", &format)?;
 
     workbook.save("formats.xlsx")?;
 

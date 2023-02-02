@@ -15,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
     // Hide column B.
     worksheet.set_column_hidden(1)?;
 
-    worksheet.write_string_only(0, 3, "Column B is hidden")?;
+    worksheet.write_string(0, 3, "Column B is hidden")?;
 
     workbook.save("worksheet.xlsx")?;
 

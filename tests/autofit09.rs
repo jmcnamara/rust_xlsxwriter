@@ -17,8 +17,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let text_wrap = Format::new().set_text_wrap();
 
-    worksheet.write_string(0, 0, "Hello\nFoo", &text_wrap)?;
-    worksheet.write_string(2, 2, "Foo\nBamboo\nBar", &text_wrap)?;
+    worksheet.write_string_with_format(0, 0, "Hello\nFoo", &text_wrap)?;
+    worksheet.write_string_with_format(2, 2, "Foo\nBamboo\nBar", &text_wrap)?;
 
     worksheet.set_row_height(0, 33)?;
     worksheet.set_row_height(2, 48)?;

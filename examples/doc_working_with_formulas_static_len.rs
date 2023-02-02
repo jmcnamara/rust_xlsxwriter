@@ -13,12 +13,12 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write a a static function.
-    worksheet.write_formula_only(0, 1, "=LEN(A1:A3)")?;
+    worksheet.write_formula(0, 1, "=LEN(A1:A3)")?;
 
     // Write some data for the function to operate on.
-    worksheet.write_string_only(0, 0, "Foo")?;
-    worksheet.write_string_only(1, 0, "Food")?;
-    worksheet.write_string_only(2, 0, "Frood")?;
+    worksheet.write_string(0, 0, "Foo")?;
+    worksheet.write_string(1, 0, "Food")?;
+    worksheet.write_string(2, 0, "Frood")?;
 
     workbook.save("function_old.xlsx")?;
 

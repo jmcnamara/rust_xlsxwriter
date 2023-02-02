@@ -23,15 +23,15 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_row_format(10, &format1)?;
     worksheet.set_row_format(10, &format1)?; // Test overwriting an existing row.
 
-    worksheet.write_string_only(0, 0, "Rust")?;
-    worksheet.write_string_only(2, 0, "Rust")?;
-    worksheet.write_string(6, 0, "Rust", &format1)?; // Explicit format.
+    worksheet.write_string(0, 0, "Rust")?;
+    worksheet.write_string(2, 0, "Rust")?;
+    worksheet.write_string_with_format(6, 0, "Rust", &format1)?; // Explicit format.
 
     worksheet.set_row_height(4, 39)?;
     worksheet.set_row_format(8, &format2)?; // Explicit format.
 
     worksheet.set_row_height(10, 23.25)?;
-    worksheet.write_string_only(10, 2, "Rust")?; // Implicit format.
+    worksheet.write_string(10, 2, "Rust")?; // Implicit format.
 
     workbook.save(filename)?;
 

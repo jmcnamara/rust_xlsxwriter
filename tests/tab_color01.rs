@@ -15,7 +15,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_tab_color(XlsxColor::Red);
 
     workbook.save(filename)?;

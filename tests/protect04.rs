@@ -22,9 +22,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.unprotect_range(0, 0, 0, 0)?;
 
-    worksheet.write_number_only(0, 0, 1)?;
-    worksheet.write_number(1, 0, 2, &unlocked)?;
-    worksheet.write_number(2, 0, 3, &hidden)?;
+    worksheet.write_number(0, 0, 1)?;
+    worksheet.write_number_with_format(1, 0, 2, &unlocked)?;
+    worksheet.write_number_with_format(2, 0, 3, &hidden)?;
 
     workbook.save(filename)?;
 
@@ -44,9 +44,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.unprotect_range_with_options(0, 0, 0, 0, "", "")?;
 
-    worksheet.write_number_only(0, 0, 1)?;
-    worksheet.write_number(1, 0, 2, &unlocked)?;
-    worksheet.write_number(2, 0, 3, &hidden)?;
+    worksheet.write_number(0, 0, 1)?;
+    worksheet.write_number_with_format(1, 0, 2, &unlocked)?;
+    worksheet.write_number_with_format(2, 0, 3, &hidden)?;
 
     workbook.save(filename)?;
 

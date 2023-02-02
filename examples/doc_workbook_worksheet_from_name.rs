@@ -12,21 +12,21 @@ fn main() -> Result<(), XlsxError> {
     // Start with a reference to worksheet1.
     let mut worksheet1 = workbook.add_worksheet();
     let name1 = worksheet1.name(); // "Sheet1"
-    worksheet1.write_string_only(0, 0, "Hello")?;
+    worksheet1.write_string(0, 0, "Hello")?;
 
     // If we don't try to use the workbook1 reference again we can switch to
     // using a reference to worksheet2.
     let mut worksheet2 = workbook.add_worksheet().set_name("Data")?;
     let name2 = worksheet2.name();
-    worksheet2.write_string_only(0, 0, "Hello")?;
+    worksheet2.write_string(0, 0, "Hello")?;
 
     // Stop using worksheet2 and move back to worksheet1.
     worksheet1 = workbook.worksheet_from_name(&name1)?;
-    worksheet1.write_string_only(1, 0, "Sheet1")?;
+    worksheet1.write_string(1, 0, "Sheet1")?;
 
     // Stop using worksheet1 and move back to worksheet2.
     worksheet2 = workbook.worksheet_from_name(&name2)?;
-    worksheet2.write_string_only(1, 0, "Sheet2")?;
+    worksheet2.write_string(1, 0, "Sheet2")?;
 
     workbook.save("workbook.xlsx")?;
 

@@ -21,8 +21,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let format2 = format1.clone().set_italic();
 
-    worksheet.write_string(0, 0, "Foo", &format1)?;
-    worksheet.write_string(1, 0, "Bar", &format2)?;
+    worksheet.write_string_with_format(0, 0, "Foo", &format1)?;
+    worksheet.write_string_with_format(1, 0, "Bar", &format2)?;
 
     workbook.save(filename)?;
 

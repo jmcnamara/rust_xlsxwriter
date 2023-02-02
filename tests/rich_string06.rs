@@ -18,11 +18,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let red = Format::new().set_font_color(XlsxColor::Red);
     let default = Format::default();
 
-    worksheet.write_string(0, 0, "Foo", &red)?;
-    worksheet.write_string_only(1, 0, "Bar")?;
+    worksheet.write_string_with_format(0, 0, "Foo", &red)?;
+    worksheet.write_string(1, 0, "Bar")?;
 
     let segments = [(&default, "ab"), (&red, "cde"), (&default, "fg")];
-    worksheet.write_rich_string_only(2, 0, &segments)?;
+    worksheet.write_rich_string(2, 0, &segments)?;
 
     workbook.save(filename)?;
 

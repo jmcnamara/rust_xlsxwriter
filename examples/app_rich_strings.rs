@@ -32,7 +32,7 @@ fn main() -> Result<(), XlsxError> {
         (&default, " and this is "),
         (&italic, "italic"),
     ];
-    worksheet.write_rich_string_only(0, 0, &segments)?;
+    worksheet.write_rich_string(0, 0, &segments)?;
 
     let segments = [
         (&default, "This is "),
@@ -40,17 +40,17 @@ fn main() -> Result<(), XlsxError> {
         (&default, " and this is "),
         (&blue, "blue"),
     ];
-    worksheet.write_rich_string_only(2, 0, &segments)?;
+    worksheet.write_rich_string(2, 0, &segments)?;
 
     let segments = [
         (&default, "Some "),
         (&bold, "bold text"),
         (&default, " centered"),
     ];
-    worksheet.write_rich_string(4, 0, &segments, &center)?;
+    worksheet.write_rich_string_with_format(4, 0, &segments, &center)?;
 
     let segments = [(&italic, "j = k"), (&superscript, "(n-1)")];
-    worksheet.write_rich_string(6, 0, &segments, &center)?;
+    worksheet.write_rich_string_with_format(6, 0, &segments, &center)?;
 
     // It is possible, and idiomatic, to use slices as the string segments.
     let text = "This is blue and this is red";
@@ -60,7 +60,7 @@ fn main() -> Result<(), XlsxError> {
         (&default, &text[12..25]),
         (&red, &text[25..]),
     ];
-    worksheet.write_rich_string_only(8, 0, &segments)?;
+    worksheet.write_rich_string(8, 0, &segments)?;
 
     // Save the file to disk.
     workbook.save("rich_strings.xlsx")?;

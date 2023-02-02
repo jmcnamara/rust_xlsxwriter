@@ -22,7 +22,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_width(4, 0.92)?;
     worksheet.set_column_width(5, 0.92)?;
 
-    worksheet.write_number_only(8, 0, 123)?; // A cell to test dimensions.
+    worksheet.write_number(8, 0, 123)?; // A cell to test dimensions.
 
     workbook.save(filename)?;
 
@@ -41,7 +41,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_width_pixels(4, 11)?;
     worksheet.set_column_width_pixels(5, 11)?;
 
-    worksheet.write_number_only(8, 0, 123)?; // A cell to test dimensions.
+    worksheet.write_number(8, 0, 123)?; // A cell to test dimensions.
 
     workbook.save(filename)?;
 

@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
 
     let format = Format::new().set_font_size(30);
 
-    worksheet.write_string(0, 0, "Font Size 30", &format)?;
+    worksheet.write_string_with_format(0, 0, "Font Size 30", &format)?;
 
     workbook.save("formats.xlsx")?;
 

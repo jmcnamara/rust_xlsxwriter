@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_row_height(0, 45)?;
 
-    worksheet.write_string(0, 0, "Foo\nBar", &wrap)?;
+    worksheet.write_string_with_format(0, 0, "Foo\nBar", &wrap)?;
 
     workbook.save(filename)?;
 

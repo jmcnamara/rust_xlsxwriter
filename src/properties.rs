@@ -52,7 +52,7 @@ use chrono::{DateTime, Utc};
 ///     let worksheet = workbook.add_worksheet();
 ///
 ///     worksheet.set_column_width(0, 30)?;
-///     worksheet.write_string_only(0, 0, "See File -> Info -> Properties")?;
+///     worksheet.write_string(0, 0, "See File -> Info -> Properties")?;
 ///
 ///     workbook.save("doc_properties.xlsx")?;
 ///
@@ -108,7 +108,7 @@ use chrono::{DateTime, Utc};
 ///     let mut workbook = Workbook::new();
 ///     let worksheet = workbook.add_worksheet();
 ///
-///     worksheet.write_string_only(0, 0, "Hello")?;
+///     worksheet.write_string(0, 0, "Hello")?;
 ///
 ///     workbook.save("properties.xlsx")?;
 ///
@@ -171,7 +171,7 @@ use chrono::{DateTime, Utc};
 ///     workbook.set_properties(&properties);
 ///
 ///     let worksheet = workbook.add_worksheet();
-///     worksheet.write_string_only(0, 0, "Hello")?;
+///     worksheet.write_string(0, 0, "Hello")?;
 ///
 ///     workbook.save("properties.xlsx")?;
 ///

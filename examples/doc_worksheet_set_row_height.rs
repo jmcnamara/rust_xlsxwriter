@@ -12,8 +12,8 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Add some text.
-    worksheet.write_string_only(0, 0, "Normal")?;
-    worksheet.write_string_only(2, 0, "Taller")?;
+    worksheet.write_string(0, 0, "Normal")?;
+    worksheet.write_string(2, 0, "Taller")?;
 
     // Set the row height in Excel character units.
     worksheet.set_row_height(2, 30)?;

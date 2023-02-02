@@ -37,7 +37,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Add another sheet to link to.
     let worksheet2 = workbook.add_worksheet();
-    worksheet2.write_string_only(3, 2, "Here I am")?;
+    worksheet2.write_string(3, 2, "Here I am")?;
     worksheet2.write_url_with_text(4, 2, "internal:Sheet1!A6", "Go back")?;
 
     // Save the file to disk.

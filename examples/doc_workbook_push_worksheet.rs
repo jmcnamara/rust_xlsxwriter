@@ -12,7 +12,7 @@ fn main() -> Result<(), XlsxError> {
     let mut worksheet = Worksheet::new();
 
     // Use the worksheet object.
-    worksheet.write_string_only(0, 0, "Hello")?;
+    worksheet.write_string(0, 0, "Hello")?;
 
     // Add it to the workbook.
     workbook.push_worksheet(worksheet);

@@ -26,9 +26,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         (&default, "a"),
         (&bold, "r"),
     ];
-    worksheet.write_rich_string_only(0, 0, &segments)?;
+    worksheet.write_rich_string(0, 0, &segments)?;
 
-    worksheet.write_string(1, 0, "Bar", &bold)?;
+    worksheet.write_string_with_format(1, 0, "Bar", &bold)?;
 
     worksheet.autofit();
 

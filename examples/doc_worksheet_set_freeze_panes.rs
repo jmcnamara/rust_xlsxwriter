@@ -13,9 +13,9 @@ fn main() -> Result<(), XlsxError> {
     let mut worksheet2 = Worksheet::new();
     let mut worksheet3 = Worksheet::new();
 
-    worksheet1.write_string_only(0, 0, "Scroll down")?;
-    worksheet2.write_string_only(0, 0, "Scroll across")?;
-    worksheet3.write_string_only(0, 0, "Scroll down or across")?;
+    worksheet1.write_string(0, 0, "Scroll down")?;
+    worksheet2.write_string(0, 0, "Scroll across")?;
+    worksheet3.write_string(0, 0, "Scroll down or across")?;
 
     // Freeze the top row only.
     worksheet1.set_freeze_panes(1, 0)?;

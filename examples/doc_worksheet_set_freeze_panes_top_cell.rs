@@ -12,7 +12,7 @@ fn main() -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "Scroll down")?;
+    worksheet.write_string(0, 0, "Scroll down")?;
 
     // Freeze the top row only.
     worksheet.set_freeze_panes(1, 0)?;

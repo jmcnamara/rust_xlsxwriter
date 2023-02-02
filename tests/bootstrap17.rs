@@ -20,7 +20,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_font_color(XlsxColor::RGB(0xFF0000)); // Duplicate.
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string(0, 0, "Hello", &format)?;
+    worksheet.write_string_with_format(0, 0, "Hello", &format)?;
 
     workbook.save(filename)?;
 

@@ -20,14 +20,14 @@ fn main() -> Result<(), XlsxError> {
     // Iterate over the data and write it out row by row.
     let mut row = 0;
     for expense in expenses.iter() {
-        worksheet.write_string_only(row, 0, expense.0)?;
-        worksheet.write_number_only(row, 1, expense.1)?;
+        worksheet.write_string(row, 0, expense.0)?;
+        worksheet.write_number(row, 1, expense.1)?;
         row += 1;
     }
 
     // Write a total using a formula.
-    worksheet.write_string_only(row, 0, "Total")?;
-    worksheet.write_formula_only(row, 1, "=SUM(B1:B4)")?;
+    worksheet.write_string(row, 0, "Total")?;
+    worksheet.write_formula(row, 1, "=SUM(B1:B4)")?;
 
     // Save the file to disk.
     workbook.save("tutorial1.xlsx")?;

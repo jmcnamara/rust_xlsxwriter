@@ -20,11 +20,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let default = Format::default();
     let center = Format::new().set_align(FormatAlign::Center);
 
-    worksheet.write_string(0, 0, "Foo", &bold)?;
-    worksheet.write_string(1, 0, "Bar", &italic)?;
+    worksheet.write_string_with_format(0, 0, "Foo", &bold)?;
+    worksheet.write_string_with_format(1, 0, "Bar", &italic)?;
 
     let segments = [(&default, "ab"), (&bold, "cd"), (&default, "efg")];
-    worksheet.write_rich_string(2, 0, &segments, &center)?;
+    worksheet.write_rich_string_with_format(2, 0, &segments, &center)?;
 
     workbook.save(filename)?;
 

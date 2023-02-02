@@ -54,20 +54,20 @@ use crate::{FormatPattern, XlsxColor};
 ///     worksheet.set_column_width(0, 22)?;
 ///
 ///     // Write a string without formatting.
-///     worksheet.write_string_only(0, 0, "Hello")?;
+///     worksheet.write_string(0, 0, "Hello")?;
 ///
 ///     // Write a string with the bold format defined above.
-///     worksheet.write_string(1, 0, "World", &bold_format)?;
+///     worksheet.write_string_with_format(1, 0, "World", &bold_format)?;
 ///
 ///     // Write some numbers.
-///     worksheet.write_number_only(2, 0, 1)?;
-///     worksheet.write_number_only(3, 0, 2.34)?;
+///     worksheet.write_number(2, 0, 1)?;
+///     worksheet.write_number(3, 0, 2.34)?;
 ///
 ///     // Write a number with formatting.
-///     worksheet.write_number(4, 0, 3.00, &decimal_format)?;
+///     worksheet.write_number_with_format(4, 0, 3.00, &decimal_format)?;
 ///
 ///     // Write a formula.
-///     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+///     worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
 ///
 ///     // Write a date.
 ///     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
@@ -217,13 +217,13 @@ impl Workbook {
     ///     let mut workbook = Workbook::new();
     ///
     ///     let worksheet = workbook.add_worksheet(); // Sheet1
-    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.write_string(0, 0, "Hello")?;
     ///
     ///     let worksheet = workbook.add_worksheet().set_name("Foglio2")?;
-    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.write_string(0, 0, "Hello")?;
     ///
     ///     let worksheet = workbook.add_worksheet(); // Sheet3
-    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.write_string(0, 0, "Hello")?;
     ///
     ///     workbook.save("workbook.xlsx")?;
     ///
@@ -295,20 +295,20 @@ impl Workbook {
     /// #
     ///     // Start with a reference to worksheet1.
     ///     let mut worksheet1 = workbook.add_worksheet();
-    ///     worksheet1.write_string_only(0, 0, "Hello")?;
+    ///     worksheet1.write_string(0, 0, "Hello")?;
     ///
     ///     // If we don't try to use the workbook1 reference again we can switch to
     ///     // using a reference to worksheet2.
     ///     let mut worksheet2 = workbook.add_worksheet();
-    ///     worksheet2.write_string_only(0, 0, "Hello")?;
+    ///     worksheet2.write_string(0, 0, "Hello")?;
     ///
     ///     // Stop using worksheet2 and move back to worksheet1.
     ///     worksheet1 = workbook.worksheet_from_index(0)?;
-    ///     worksheet1.write_string_only(1, 0, "Sheet1")?;
+    ///     worksheet1.write_string(1, 0, "Sheet1")?;
     ///
     ///     // Stop using worksheet1 and move back to worksheet2.
     ///     worksheet2 = workbook.worksheet_from_index(1)?;
-    ///     worksheet2.write_string_only(1, 0, "Sheet2")?;
+    ///     worksheet2.write_string(1, 0, "Sheet2")?;
     ///
     /// #     workbook.save("workbook.xlsx")?;
     /// #
@@ -379,20 +379,20 @@ impl Workbook {
     /// #
     ///     // Start with a reference to worksheet1.
     ///     let mut worksheet1 = workbook.add_worksheet();
-    ///     worksheet1.write_string_only(0, 0, "Hello")?;
+    ///     worksheet1.write_string(0, 0, "Hello")?;
     ///
     ///     // If we don't try to use the workbook1 reference again we can switch to
     ///     // using a reference to worksheet2.
     ///     let mut worksheet2 = workbook.add_worksheet();
-    ///     worksheet2.write_string_only(0, 0, "Hello")?;
+    ///     worksheet2.write_string(0, 0, "Hello")?;
     ///
     ///     // Stop using worksheet2 and move back to worksheet1.
     ///     worksheet1 = workbook.worksheet_from_index(0)?;
-    ///     worksheet1.write_string_only(1, 0, "Sheet1")?;
+    ///     worksheet1.write_string(1, 0, "Sheet1")?;
     ///
     ///     // Stop using worksheet1 and move back to worksheet2.
     ///     worksheet2 = workbook.worksheet_from_index(1)?;
-    ///     worksheet2.write_string_only(1, 0, "Sheet2")?;
+    ///     worksheet2.write_string(1, 0, "Sheet2")?;
     ///
     /// #     workbook.save("workbook.xlsx")?;
     /// #
@@ -453,8 +453,8 @@ impl Workbook {
     ///
     ///     // Write the same data to all three worksheets.
     ///     for worksheet in workbook.worksheets_mut() {
-    ///         worksheet.write_string_only(0, 0, "Hello")?;
-    ///         worksheet.write_number_only(1, 0, 12345)?;
+    ///         worksheet.write_string(0, 0, "Hello")?;
+    ///         worksheet.write_number(1, 0, 12345)?;
     ///     }
     ///
     ///     // If you are careful you can use standard slice operations.
@@ -556,7 +556,7 @@ impl Workbook {
     ///     let mut worksheet = Worksheet::new();
     ///
     ///     // Use the worksheet object.
-    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.write_string(0, 0, "Hello")?;
     ///
     ///     // Add it to the workbook.
     ///     workbook.push_worksheet(worksheet);
@@ -670,7 +670,7 @@ impl Workbook {
     ///     let mut workbook = Workbook::new();
     ///
     ///     let worksheet = workbook.add_worksheet();
-    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.write_string(0, 0, "Hello")?;
     ///
     ///     let buf = workbook.save_to_buffer()?;
     ///
@@ -719,7 +719,7 @@ impl Workbook {
     /// ```text
     ///     // Global workbook name.
     ///     workbook.define_name("Exchange_rate", "=0.96")?;
-    ///     worksheet.write_formula_only(0, 0, "=Exchange_rate")?;
+    ///     worksheet.write_formula(0, 0, "=Exchange_rate")?;
     /// ```
     ///
     /// A name defined like this is "global" to the workbook and can be used in
@@ -796,11 +796,11 @@ impl Workbook {
     /// #     // Write some text in the file and one of the defined names in a formula.
     /// #     for worksheet in workbook.worksheets_mut() {
     /// #         worksheet.set_column_width(0, 45)?;
-    /// #         worksheet.write_string_only(0, 0, "This worksheet contains some defined names.")?;
-    /// #         worksheet.write_string_only(1, 0, "See Formulas -> Name Manager above.")?;
-    /// #         worksheet.write_string_only(2, 0, "Example formula in cell B3 ->")?;
+    /// #         worksheet.write_string(0, 0, "This worksheet contains some defined names.")?;
+    /// #         worksheet.write_string(1, 0, "See Formulas -> Name Manager above.")?;
+    /// #         worksheet.write_string(2, 0, "Example formula in cell B3 ->")?;
     /// #
-    /// #         worksheet.write_formula_only(2, 1, "=Exchange_rate")?;
+    /// #         worksheet.write_formula(2, 1, "=Exchange_rate")?;
     /// #     }
     /// #
     /// #     // Save the file to disk.
@@ -907,7 +907,7 @@ impl Workbook {
     /// #     let worksheet = workbook.add_worksheet();
     ///
     /// #     worksheet.set_column_width(0, 30)?;
-    /// #     worksheet.write_string_only(0, 0, "See File -> Info -> Properties")?;
+    /// #     worksheet.write_string(0, 0, "See File -> Info -> Properties")?;
     /// #
     /// #     workbook.save("doc_properties.xlsx")?;
     /// #
@@ -943,7 +943,7 @@ impl Workbook {
     ///     workbook.set_properties(&properties);
     ///
     ///     let worksheet = workbook.add_worksheet();
-    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.write_string(0, 0, "Hello")?;
     ///
     ///     workbook.save("properties.xlsx")?;
     ///

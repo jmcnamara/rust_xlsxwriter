@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
 
     let format = Format::new().set_font_name("Avenir Black Oblique");
 
-    worksheet.write_string(0, 0, "Avenir Black Oblique", &format)?;
+    worksheet.write_string_with_format(0, 0, "Avenir Black Oblique", &format)?;
 
     workbook.save("formats.xlsx")?;
 

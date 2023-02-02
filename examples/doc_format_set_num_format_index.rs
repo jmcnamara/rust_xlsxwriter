@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
 
     let format = Format::new().set_num_format_index(15);
 
-    worksheet.write_number(0, 0, 44927.521, &format)?;
+    worksheet.write_number_with_format(0, 0, 44927.521, &format)?;
 
     workbook.save("formats.xlsx")?;
 

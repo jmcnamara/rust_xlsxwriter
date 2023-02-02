@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format = Format::new().set_align(FormatAlign::Center);
 
     worksheet.merge_range(1, 1, 1, 3, "", &format)?;
-    worksheet.write_number(1, 1, 123, &format)?;
+    worksheet.write_number_with_format(1, 1, 123, &format)?;
 
     workbook.save(filename)?;
 

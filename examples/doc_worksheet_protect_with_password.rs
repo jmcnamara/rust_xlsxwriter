@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
     // Protect the worksheet from modification.
     worksheet.protect_with_password("abc123");
 
-    worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
+    worksheet.write_string(0, 0, "Unlock the worksheet to edit the cell")?;
 
     workbook.save("worksheet.xlsx")?;
 

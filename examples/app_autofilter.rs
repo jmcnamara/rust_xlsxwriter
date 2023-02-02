@@ -235,18 +235,18 @@ pub fn populate_autofilter_data(
 
     // Write the header titles.
     let header_format = Format::new().set_bold();
-    worksheet.write_string(0, 0, "Region", &header_format)?;
-    worksheet.write_string(0, 1, "Item", &header_format)?;
-    worksheet.write_string(0, 2, "Volume", &header_format)?;
-    worksheet.write_string(0, 3, "Month", &header_format)?;
+    worksheet.write_string_with_format(0, 0, "Region", &header_format)?;
+    worksheet.write_string_with_format(0, 1, "Item", &header_format)?;
+    worksheet.write_string_with_format(0, 2, "Volume", &header_format)?;
+    worksheet.write_string_with_format(0, 3, "Month", &header_format)?;
 
     // Write the other worksheet data.
     for (row, data) in data.iter().enumerate() {
         let row = 1 + row as u32;
-        worksheet.write_string_only(row, 0, data.0)?;
-        worksheet.write_string_only(row, 1, data.1)?;
-        worksheet.write_number_only(row, 2, data.2)?;
-        worksheet.write_string_only(row, 3, data.3)?;
+        worksheet.write_string(row, 0, data.0)?;
+        worksheet.write_string(row, 1, data.1)?;
+        worksheet.write_number(row, 2, data.2)?;
+        worksheet.write_string(row, 3, data.3)?;
     }
 
     Ok(())

@@ -18,7 +18,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_page_breaks(&[3, 7, 15])?;
 
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
 
     workbook.save(filename)?;
 
@@ -34,7 +34,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_page_breaks(&[15, 0, 0, 7, 3, 3, 7, 15])?;
 
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
 
     workbook.save(filename)?;
 

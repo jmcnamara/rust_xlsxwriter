@@ -16,20 +16,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let format1 = Format::new().set_bold();
 
-    worksheet.write_formula_only(0, 0, "=1+2+3-6")?;
-    worksheet.write_formula_only(1, 0, "=SIN(0)")?;
-    worksheet.write_formula(2, 0, "SIN(0)", &format1)?; // No equals sign.
+    worksheet.write_formula(0, 0, "=1+2+3-6")?;
+    worksheet.write_formula(1, 0, "=SIN(0)")?;
+    worksheet.write_formula_with_format(2, 0, "SIN(0)", &format1)?; // No equals sign.
     worksheet
-        .write_formula_only(3, 0, "=1+1")?
+        .write_formula(3, 0, "=1+1")?
         .set_formula_result(3, 0, "2");
     worksheet
-        .write_formula(4, 0, "1+1", &format1)?
+        .write_formula_with_format(4, 0, "1+1", &format1)?
         .set_formula_result(4, 0, "2");
 
     let worksheet = workbook.add_worksheet();
     worksheet.set_formula_result_default("2");
-    worksheet.write_formula_only(0, 0, "=2")?;
-    worksheet.write_formula_only(1, 0, "=1+1")?;
+    worksheet.write_formula(0, 0, "=2")?;
+    worksheet.write_formula(1, 0, "=1+1")?;
 
     workbook.save(filename)?;
 
@@ -37,7 +37,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn bootstrap35_write_formula() {
+fn bootstrap35_write_formula_with_format() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap35")
         .set_function(create_new_xlsx_file)

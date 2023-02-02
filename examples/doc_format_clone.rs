@@ -20,8 +20,8 @@ fn main() -> Result<(), XlsxError> {
     // Clone a new format and set some properties.
     let format2 = format1.clone().set_font_color(XlsxColor::Blue);
 
-    worksheet.write_string(0, 0, "Hello", &format1)?;
-    worksheet.write_string(1, 0, "Hello", &format2)?;
+    worksheet.write_string_with_format(0, 0, "Hello", &format1)?;
+    worksheet.write_string_with_format(1, 0, "Hello", &format2)?;
 
     workbook.save("formats.xlsx")?;
 

@@ -13,9 +13,9 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Add some text.
-    worksheet.write_string_only(0, 0, "Normal")?;
-    worksheet.write_string_only(0, 2, "Wider")?;
-    worksheet.write_string_only(0, 4, "Narrower")?;
+    worksheet.write_string(0, 0, "Normal")?;
+    worksheet.write_string(0, 2, "Wider")?;
+    worksheet.write_string(0, 4, "Narrower")?;
 
     // Set the column width in pixels.
     worksheet.set_column_width_pixels(2, 117)?;

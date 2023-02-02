@@ -16,9 +16,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_italic();
 
-    worksheet.write_string_only(0, 0, "Rust")?;
-    worksheet.write_string_only(2, 0, "Rust")?;
-    worksheet.write_string(6, 0, "Rust", &format1)?;
+    worksheet.write_string(0, 0, "Rust")?;
+    worksheet.write_string(2, 0, "Rust")?;
+    worksheet.write_string_with_format(6, 0, "Rust", &format1)?;
 
     worksheet.set_row_height(0, 24)?;
     worksheet.set_row_height(4, 39)?;
@@ -39,9 +39,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_italic();
 
-    worksheet.write_string_only(0, 0, "Rust")?;
-    worksheet.write_string_only(2, 0, "Rust")?;
-    worksheet.write_string(6, 0, "Rust", &format1)?;
+    worksheet.write_string(0, 0, "Rust")?;
+    worksheet.write_string(2, 0, "Rust")?;
+    worksheet.write_string_with_format(6, 0, "Rust", &format1)?;
 
     worksheet.set_row_height_pixels(0, 32)?;
     worksheet.set_row_height_pixels(4, 52)?;

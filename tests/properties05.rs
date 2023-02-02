@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
     worksheet.set_column_width(0, 70)?;
-    worksheet.write_string_only(
+    worksheet.write_string(
         0,
         0,
         r#"Select 'Office Button -> Prepare -> Properties' to see the file properties."#,

@@ -25,7 +25,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     worksheet.set_column_width(0, 30)?;
-    worksheet.write_string_only(0, 0, "See File -> Info -> Properties")?;
+    worksheet.write_string(0, 0, "See File -> Info -> Properties")?;
 
     workbook.save("doc_properties.xlsx")?;
 

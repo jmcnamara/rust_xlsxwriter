@@ -21,7 +21,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_font_charset(178);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string(0, 0, "Foo", &format1)?;
+    worksheet.write_string_with_format(0, 0, "Foo", &format1)?;
 
     workbook.save(filename)?;
 

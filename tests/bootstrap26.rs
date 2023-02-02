@@ -15,7 +15,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     let format1 = Format::new().set_bold();
 
-    worksheet.write_string_only(2, 2, "Rust")?;
+    worksheet.write_string(2, 2, "Rust")?;
     worksheet.set_column_format(3, &format1)?;
     worksheet.set_column_format(2, &format1)?;
     worksheet.set_column_format(2, &format1)?; // Overwrite format.

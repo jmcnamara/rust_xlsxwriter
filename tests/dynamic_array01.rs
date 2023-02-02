@@ -15,9 +15,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_dynamic_array_formula_only(0, 0, 0, 0, "=AVERAGE(TIMEVALUE(B1:B2))")?;
-    worksheet.write_string_only(0, 1, "12:00")?;
-    worksheet.write_string_only(1, 1, "12:00")?;
+    worksheet.write_dynamic_array_formula(0, 0, 0, 0, "=AVERAGE(TIMEVALUE(B1:B2))")?;
+    worksheet.write_string(0, 1, "12:00")?;
+    worksheet.write_string(1, 1, "12:00")?;
 
     workbook.save(filename)?;
 

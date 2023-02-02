@@ -21,8 +21,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let italic = Format::new().set_italic();
     let default = Format::default();
 
-    worksheet.write_string(0, 0, "Foo", &bold)?;
-    worksheet.write_string(1, 0, "Bar", &italic)?;
+    worksheet.write_string_with_format(0, 0, "Foo", &bold)?;
+    worksheet.write_string_with_format(1, 0, "Bar", &italic)?;
 
     let segments = [
         (&default, "This is "),
@@ -30,7 +30,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         (&default, " and this is "),
         (&italic, "italic"),
     ];
-    worksheet.write_rich_string_only(2, 0, &segments)?;
+    worksheet.write_rich_string(2, 0, &segments)?;
 
     workbook.save(filename)?;
 

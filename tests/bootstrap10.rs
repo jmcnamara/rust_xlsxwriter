@@ -16,10 +16,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format = Format::new().set_bold();
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string(0, 0, "Hello", &format)?;
+    worksheet.write_string_with_format(0, 0, "Hello", &format)?;
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string(0, 0, "World", &format)?;
+    worksheet.write_string_with_format(0, 0, "World", &format)?;
 
     workbook.save(filename)?;
 

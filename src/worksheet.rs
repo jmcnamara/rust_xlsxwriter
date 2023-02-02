@@ -76,20 +76,20 @@ pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 ///     worksheet.set_column_width(0, 22)?;
 ///
 ///     // Write a string without formatting.
-///     worksheet.write_string_only(0, 0, "Hello")?;
+///     worksheet.write_string(0, 0, "Hello")?;
 ///
 ///     // Write a string with the bold format defined above.
-///     worksheet.write_string(1, 0, "World", &bold_format)?;
+///     worksheet.write_string_with_format(1, 0, "World", &bold_format)?;
 ///
 ///     // Write some numbers.
-///     worksheet.write_number_only(2, 0, 1)?;
-///     worksheet.write_number_only(3, 0, 2.34)?;
+///     worksheet.write_number(2, 0, 1)?;
+///     worksheet.write_number(3, 0, 2.34)?;
 ///
 ///     // Write a number with formatting.
-///     worksheet.write_number(4, 0, 3.00, &decimal_format)?;
+///     worksheet.write_number_with_format(4, 0, 3.00, &decimal_format)?;
 ///
 ///     // Write a formula.
-///     worksheet.write_formula_only(5, 0, "=SIN(PI()/4)")?;
+///     worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
 ///
 ///     // Write a date.
 ///     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
@@ -248,12 +248,12 @@ impl Worksheet {
     ///     let mut worksheet2 = Worksheet::new();
     ///
     ///     // Use the first workbook.
-    ///     worksheet1.write_string_only(0, 0, "Hello")?;
-    ///     worksheet1.write_string_only(1, 0, "Sheet1")?;
+    ///     worksheet1.write_string(0, 0, "Hello")?;
+    ///     worksheet1.write_string(1, 0, "Sheet1")?;
     ///
     ///     // Use the second workbook.
-    ///     worksheet2.write_string_only(0, 0, "Hello")?;
-    ///     worksheet2.write_string_only(1, 0, "Sheet2")?;
+    ///     worksheet2.write_string(0, 0, "Hello")?;
+    ///     worksheet2.write_string(1, 0, "Sheet2")?;
     ///
     ///     // Add the worksheets to the workbook.
     ///     workbook.push_worksheet(worksheet1);
@@ -510,6 +510,93 @@ impl Worksheet {
         self.name.clone()
     }
 
+    /// Write an unformatted number to a cell.
+    ///
+    /// Write an unformatted number to a worksheet cell. To write a formatted
+    /// number see the
+    /// [`write_number_with_format()`](Worksheet::write_number_with_format())
+    /// method below.
+    ///
+    /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
+    /// the equivalent of rust's [`f64`] type. This method will accept any rust
+    /// type that will convert [`Into`] a f64. These include i8, u8, i16, u16,
+    /// i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
+    /// around 15 digits of precision. Anything beyond that cannot be stored by
+    /// Excel as a number without loss of precision and may need to be stored as
+    /// a string instead.
+    ///
+    /// [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_754
+    ///
+    ///  Excel doesn't have handling for NaN or INF floating point numbers.
+    ///  These will be stored as the strings "Nan", "INF", and "-INF" strings
+    ///  instead.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `number` - The number to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing unformatted numbers to an
+    /// Excel worksheet. Any numeric type that will convert [`Into`] f64 can be
+    /// transferred to Excel.
+    ///
+    /// ```
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some different rust number types to a worksheet.
+    ///     // Note, u64 isn't supported by Excel.
+    ///     worksheet.write_number(0, 0, 1_u8)?;
+    ///     worksheet.write_number(1, 0, 2_i16)?;
+    ///     worksheet.write_number(2, 0, 3_u32)?;
+    ///     worksheet.write_number(3, 0, 4_f32)?;
+    ///     worksheet.write_number(4, 0, 5_f64)?;
+    ///
+    ///     // Write some numbers with implicit types.
+    ///     worksheet.write_number(5, 0, 1234)?;
+    ///     worksheet.write_number(6, 0, 1234.5)?;
+    ///
+    ///     // Note Excel normally ignores trailing decimal zeros
+    ///     // when the number is unformatted.
+    ///     worksheet.write_number(7, 0, 1234.50000)?;
+    ///
+    /// #     workbook.save("numbers.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_number.png">
+    ///
+    pub fn write_number<T>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        number: T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<f64>,
+    {
+        // Store the cell data.
+        self.store_number(row, col, number.into(), None)
+    }
+
     /// Write a formatted number to a worksheet cell.
     ///
     /// Write a number with formatting to a worksheet cell. The format is set
@@ -563,10 +650,10 @@ impl Worksheet {
     ///     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
     ///
-    ///     worksheet.write_number(0, 0, 1234.5, &number_format)?;
-    ///     worksheet.write_number(1, 0, 1234.5, &currency_format)?;
-    ///     worksheet.write_number(2, 0, 0.3300, &percentage_format)?;
-    ///     worksheet.write_number(3, 0, 1234.5, &bold_italic_format)?;
+    ///     worksheet.write_number_with_format(0, 0, 1234.5, &number_format)?;
+    ///     worksheet.write_number_with_format(1, 0, 1234.5, &currency_format)?;
+    ///     worksheet.write_number_with_format(2, 0, 0.3300, &percentage_format)?;
+    ///     worksheet.write_number_with_format(3, 0, 1234.5, &bold_italic_format)?;
     ///
     /// #     workbook.save("numbers.xlsx")?;
     /// #
@@ -576,10 +663,10 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_number.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_number_with_format.png">
     ///
     ///
-    pub fn write_number<T>(
+    pub fn write_number_with_format<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -593,69 +680,63 @@ impl Worksheet {
         self.store_number(row, col, number.into(), Some(format))
     }
 
-    /// Write an unformatted number to a cell.
+    /// Write an unformatted string to a worksheet cell.
     ///
-    /// Write an unformatted number to a worksheet cell. This is similar to
-    /// [`write_number()`](Worksheet::write_number()) except you don' have to
-    /// supply a [`Format`] so it is useful for writing raw data.
+    /// Write an unformatted string to a worksheet cell. To write a formatted
+    /// string see the
+    /// [`write_string_with_format()`](Worksheet::write_string_with_format())
+    /// method below.
     ///
-    /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
-    /// the equivalent of rust's [`f64`] type. This method will accept any
-    /// rust type that will convert [`Into`] a f64. These include i8, u8, i16,
-    /// u16, i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
-    /// around 15 digits of precision. Anything beyond that cannot be stored by
-    /// Excel as a number without loss of precision and may need to be stored as
-    /// a string instead.
-    ///
-    /// [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_754
-    ///
-    ///  Excel doesn't have handling for NaN or INF floating point numbers.
-    ///  These will be stored as the strings "Nan", "INF", and "-INF" strings
-    ///  instead.
+    /// Excel only supports UTF-8 text in the xlsx file format. Any rust UTF-8
+    /// encoded string can be written with this method. The maximum string size
+    /// supported by Excel is 32,767 characters.
     ///
     /// # Arguments
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `number` - The number to write to the cell.
+    /// * `string` - The string to write to the cell.
     ///
     /// # Errors
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates writing unformatted numbers to an
-    /// Excel worksheet. Any numeric type that will convert [`Into`] f64 can be
-    /// transferred to Excel.
+    /// The following example demonstrates writing some strings to a worksheet.
+    /// The UTF-8 strings are taken from the UTF-8 example in the [Rust
+    /// Programming Language] book.
+    ///
+    /// [Rust Programming Language]:
+    ///     https://doc.rust-lang.org/book/ch08-02-strings.html#creating-a-new-string
     ///
     /// ```
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    ///     let mut workbook = Workbook::new();
-    ///
-    ///     // Add a worksheet to the workbook.
-    ///     let worksheet = workbook.add_worksheet();
-    ///
-    ///     // Write some different rust number types to a worksheet.
-    ///     // Note, u64 isn't supported by Excel.
-    ///     worksheet.write_number_only(0, 0, 1_u8)?;
-    ///     worksheet.write_number_only(1, 0, 2_i16)?;
-    ///     worksheet.write_number_only(2, 0, 3_u32)?;
-    ///     worksheet.write_number_only(3, 0, 4_f32)?;
-    ///     worksheet.write_number_only(4, 0, 5_f64)?;
-    ///
-    ///     // Write some numbers with implicit types.
-    ///     worksheet.write_number_only(5, 0, 1234)?;
-    ///     worksheet.write_number_only(6, 0, 1234.5)?;
-    ///
-    ///     // Note Excel normally ignores trailing decimal zeros
-    ///     // when the number is unformatted.
-    ///     worksheet.write_number_only(7, 0, 1234.50000)?;
-    ///
-    /// #     workbook.save("numbers.xlsx")?;
+    /// #   // Create a new Excel file object.
+    /// #   let mut workbook = Workbook::new();
+    /// #
+    /// #   // Add a worksheet to the workbook.
+    /// #   let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write some strings to the worksheet.
+    ///     worksheet.write_string(0,  0, "السلام عليكم")?;
+    ///     worksheet.write_string(1,  0, "Dobrý den")?;
+    ///     worksheet.write_string(2,  0, "Hello")?;
+    ///     worksheet.write_string(3,  0, "שָׁלוֹם")?;
+    ///     worksheet.write_string(4,  0, "नमस्ते")?;
+    ///     worksheet.write_string(5,  0, "こんにちは")?;
+    ///     worksheet.write_string(6,  0, "안녕하세요")?;
+    ///     worksheet.write_string(7,  0, "你好")?;
+    ///     worksheet.write_string(8,  0, "Olá")?;
+    ///     worksheet.write_string(9,  0, "Здравствуйте")?;
+    ///     worksheet.write_string(10, 0, "Hola")?;
+    /// #
+    /// #     workbook.save("strings.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -663,19 +744,17 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_number_only.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_string.png">
     ///
-    pub fn write_number_only<T>(
+    pub fn write_string(
         &mut self,
         row: RowNum,
         col: ColNum,
-        number: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<f64>,
-    {
+        string: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_number(row, col, number.into(), None)
+        self.store_string(row, col, string, None)
     }
 
     /// Write a formatted string to a worksheet cell.
@@ -722,10 +801,10 @@ impl Worksheet {
     ///     let worksheet = workbook.add_worksheet();
     ///
     ///     // Write some strings with formatting.
-    ///     worksheet.write_string(0, 0, "Hello",     &bold_format)?;
-    ///     worksheet.write_string(1, 0, "שָׁלוֹם",      &bold_format)?;
-    ///     worksheet.write_string(2, 0, "नमस्ते",      &italic_format)?;
-    ///     worksheet.write_string(3, 0, "こんにちは", &italic_format)?;
+    ///     worksheet.write_string_with_format(0, 0, "Hello",     &bold_format)?;
+    ///     worksheet.write_string_with_format(1, 0, "שָׁלוֹם",      &bold_format)?;
+    ///     worksheet.write_string_with_format(2, 0, "नमस्ते",      &italic_format)?;
+    ///     worksheet.write_string_with_format(3, 0, "こんにちは", &italic_format)?;
     ///
     /// #     workbook.save("strings.xlsx")?;
     /// #
@@ -735,9 +814,9 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_string.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_string_with_format.png">
     ///
-    pub fn write_string(
+    pub fn write_string_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -748,86 +827,12 @@ impl Worksheet {
         self.store_string(row, col, string, Some(format))
     }
 
-    /// Write an unformatted string to a worksheet cell.
-    ///
-    /// Write an unformatted string to a worksheet cell. This is similar to
-    /// [`write_string()`](Worksheet::write_string()) except you don't have to
-    /// supply a [`Format`] so it is useful for writing raw data.
-    ///
-    /// Excel only supports UTF-8 text in the xlsx file format. Any rust UTF-8
-    /// encoded string can be written with this method. The maximum string
-    /// size supported by Excel is 32,767 characters.
-    ///
-    /// # Arguments
-    ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `string` - The string to write to the cell.
-    ///
-    /// # Errors
-    ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
-    ///   of 32,767 characters.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates writing some strings to a worksheet. The
-    /// UTF-8 strings are taken from the UTF-8 example in the [Rust Programming
-    /// Language] book.
-    ///
-    /// [Rust Programming Language]:  https://doc.rust-lang.org/book/ch08-02-strings.html#creating-a-new-string
-    ///
-    /// ```
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #   // Create a new Excel file object.
-    /// #   let mut workbook = Workbook::new();
-    /// #
-    /// #   // Add a worksheet to the workbook.
-    /// #   let worksheet = workbook.add_worksheet();
-    /// #
-    ///     // Write some strings to the worksheet.
-    ///     worksheet.write_string_only(0,  0, "السلام عليكم")?;
-    ///     worksheet.write_string_only(1,  0, "Dobrý den")?;
-    ///     worksheet.write_string_only(2,  0, "Hello")?;
-    ///     worksheet.write_string_only(3,  0, "שָׁלוֹם")?;
-    ///     worksheet.write_string_only(4,  0, "नमस्ते")?;
-    ///     worksheet.write_string_only(5,  0, "こんにちは")?;
-    ///     worksheet.write_string_only(6,  0, "안녕하세요")?;
-    ///     worksheet.write_string_only(7,  0, "你好")?;
-    ///     worksheet.write_string_only(8,  0, "Olá")?;
-    ///     worksheet.write_string_only(9,  0, "Здравствуйте")?;
-    ///     worksheet.write_string_only(10, 0, "Hola")?;
-    /// #
-    /// #     workbook.save("strings.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_string_only.png">
-    ///
-    pub fn write_string_only(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        string: &str,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Store the cell data.
-        self.store_string(row, col, string, None)
-    }
-
     /// Write a "rich" string with multiple formats to a worksheet cell.
     ///
-    /// The `write_rich_string_only()` method is used to write strings with
+    /// The `write_rich_string()` method is used to write strings with
     /// multiple font formats within the string. For example strings like "This
     /// is **bold** and this is *italic*". For strings with a single format you
-    /// can use the more common [`write_string()`](Worksheet::write_string)
+    /// can use the more common [`write_string_with_format()`](Worksheet::write_string)
     /// method.
     ///
     /// The basic rule is to break the string into pairs of [`Format`] and
@@ -866,7 +871,7 @@ impl Worksheet {
     /// string with a yellow background. It is possible to have a yellow
     /// background for the entire cell or to format other cell properties using
     /// an additional [`Format`] object and the
-    /// [`write_rich_string()`](Worksheet::write_rich_string) method, see below.
+    /// [`write_rich_string_with_format()`](Worksheet::write_rich_string) method, see below.
     ///
     /// # Arguments
     ///
@@ -895,7 +900,7 @@ impl Worksheet {
     /// formats.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_rich_string_only.rs
+    /// # // This code is available in examples/doc_worksheet_write_rich_string.rs
     /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
     /// #
@@ -920,7 +925,7 @@ impl Worksheet {
     ///         (&default, " and this is "),
     ///         (&blue,    "blue"),
     ///     ];
-    ///     worksheet.write_rich_string_only(0, 0, &segments)?;
+    ///     worksheet.write_rich_string(0, 0, &segments)?;
     ///
     ///     // It is possible, and idiomatic, to use slices as the string segments.
     ///     let text = "This is blue and this is red";
@@ -930,7 +935,7 @@ impl Worksheet {
     ///         (&default, &text[12..25]),
     ///         (&red,     &text[25..]),
     ///     ];
-    ///     worksheet.write_rich_string_only(1, 0, &segments)?;
+    ///     worksheet.write_rich_string(1, 0, &segments)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("worksheet.xlsx")?;
@@ -942,9 +947,9 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string_only.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string.png">
     ///
-    pub fn write_rich_string_only(
+    pub fn write_rich_string(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -958,7 +963,7 @@ impl Worksheet {
     /// Write a "rich" string with multiple formats to a worksheet cell, with an
     /// additional cell format.
     ///
-    /// The `write_rich_string()` method is used to write strings with multiple
+    /// The `write_rich_string_with_format()` method is used to write strings with multiple
     /// font formats within the string. For example strings like "This is
     /// **bold** and this is *italic*". It also allows you to add an additional
     /// [`Format`] to the cell so that you can, for example, center the text in
@@ -966,10 +971,10 @@ impl Worksheet {
     ///
     /// The syntax for creating and using `(&Format, &str)` tuples to create the
     /// rich string is shown above in
-    /// [`write_rich_string_only()`](Worksheet::write_rich_string_only).
+    /// [`write_rich_string()`](Worksheet::write_rich_string).
     ///
     /// For strings with a single format you can use the more common
-    /// [`write_string()`](Worksheet::write_string) method.
+    /// [`write_string_with_format()`](Worksheet::write_string) method.
     ///
     /// # Arguments
     ///
@@ -999,7 +1004,7 @@ impl Worksheet {
     /// formats, and an additional cell format.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_rich_string.rs
+    /// # // This code is available in examples/doc_worksheet_write_rich_string_with_format.rs
     /// #
     /// # use rust_xlsxwriter::{Format, Workbook, FormatAlign, XlsxColor, XlsxError};
     /// #
@@ -1024,13 +1029,13 @@ impl Worksheet {
     ///         (&default, " and this is "),
     ///         (&blue,    "blue"),
     ///     ];
-    ///     worksheet.write_rich_string_only(0, 0, &segments)?;
+    ///     worksheet.write_rich_string(0, 0, &segments)?;
     ///
     ///     // Add an extra format to use for the entire cell.
     ///     let center = Format::new().set_align(FormatAlign::Center);
     ///
     ///     // Write the rich string again with the cell format.
-    ///     worksheet.write_rich_string(2, 0, &segments, &center)?;
+    ///     worksheet.write_rich_string_with_format(2, 0, &segments, &center)?;
     ///
     ///
     /// #     // Save the file to disk.
@@ -1043,9 +1048,9 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string_with_format.png">
     ///
-    pub fn write_rich_string(
+    pub fn write_rich_string_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -1055,6 +1060,71 @@ impl Worksheet {
         let (string, raw_string) = self.get_rich_string(rich_string)?;
 
         self.store_rich_string(row, col, &string, &raw_string, Some(format))
+    }
+
+    /// Write an unformatted formula to a worksheet cell.
+    ///
+    /// Write an unformatted Excel formula to a worksheet cell. See also the
+    /// `rust_xlsxwriter` documentation on [Working with Formulas].
+    ///
+    /// [Working with Formulas]:
+    ///     https://rustxlsxwriter.github.io/formulas/intro.html
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `formula` - The formula to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formulas with formatting to a
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_formula.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Write some formulas to the worksheet.
+    ///     worksheet.write_formula(0, 0, "=B3 + B4")?;
+    ///     worksheet.write_formula(1, 0, "=SIN(PI()/4)")?;
+    ///     worksheet.write_formula(2, 0, "=SUM(B1:B5)")?;
+    ///     worksheet.write_formula(3, 0, r#"=IF(A3>1,"Yes", "No")"#)?;
+    ///     worksheet.write_formula(4, 0, "=AVERAGE(1, 2, 3, 4)")?;
+    ///     worksheet.write_formula(5, 0, r#"=DATEVALUE("1-Jan-2023")"#)?;
+    ///
+    /// #     workbook.save("formulas.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_formula.png">
+    ///
+    pub fn write_formula(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        formula: &str,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_formula(row, col, formula, None)
     }
 
     /// Write a formatted formula to a worksheet cell.
@@ -1086,7 +1156,7 @@ impl Worksheet {
     /// worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_formula.rs
+    /// # // This code is available in examples/doc_worksheet_write_formula_with_format.rs
     /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
@@ -1102,10 +1172,10 @@ impl Worksheet {
     ///     let worksheet = workbook.add_worksheet();
     ///
     ///     // Write some formulas with formatting.
-    ///     worksheet.write_formula(0, 0, "=1+2+3", &bold_format)?;
-    ///     worksheet.write_formula(1, 0, "=A1*2", &bold_format)?;
-    ///     worksheet.write_formula(2, 0, "=SIN(PI()/4)", &italic_format)?;
-    ///     worksheet.write_formula(3, 0, "=AVERAGE(1, 2, 3, 4)", &italic_format)?;
+    ///     worksheet.write_formula_with_format(0, 0, "=1+2+3", &bold_format)?;
+    ///     worksheet.write_formula_with_format(1, 0, "=A1*2", &bold_format)?;
+    ///     worksheet.write_formula_with_format(2, 0, "=SIN(PI()/4)", &italic_format)?;
+    ///     worksheet.write_formula_with_format(3, 0, "=AVERAGE(1, 2, 3, 4)", &italic_format)?;
     ///
     /// #     workbook.save("formulas.xlsx")?;
     /// #
@@ -1115,9 +1185,9 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_formula.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_formula_with_format.png">
     ///
-    pub fn write_formula(
+    pub fn write_formula_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -1128,34 +1198,47 @@ impl Worksheet {
         self.store_formula(row, col, formula, Some(format))
     }
 
-    /// Write an unformatted formula to a worksheet cell.
+    /// Write an  array formula to a worksheet cell.
     ///
-    /// Write an unformatted formula to a worksheet cell. This is similar to
-    /// [`write_formula()`](Worksheet::write_formula()) except you don't have to
-    /// supply a [`Format`] so it is useful for writing raw data.
+    /// The `write_array_formula()` method writes an array formula to a
+    /// cell range. In Excel an array formula is a formula that performs a
+    /// calculation on a range of values. It can return a single value or a
+    /// range/"array" of values.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Working with Formulas].
+    /// An array formula is displayed with a pair of curly brackets around the
+    /// formula like this: `{=SUM(A1:B1*A2:B2)}`. The `write_array()`
+    /// method doesn't require actually require these so you can omit them in
+    /// the formula, and the equal sign, if you wish like this:
+    /// `SUM(A1:B1*A2:B2)`.
     ///
-    /// [Working with Formulas]: https://rustxlsxwriter.github.io/formulas/intro.html
+    /// For array formulas that return a range of values you must specify the
+    /// range that the return values will be written to with the `first_` and
+    /// `last_` parameters. If the array formula returns a single value then the
+    /// first_ and last_ parameters should be the same, as shown in the example
+    /// below.
     ///
     /// # Arguments
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
     /// * `formula` - The formula to write to the cell.
     ///
     /// # Errors
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    ///   than the last row or column.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates writing formulas with formatting to a
+    /// The following example demonstrates writing an array formulas to a
     /// worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_formula_only.rs
+    /// # // This code is available in examples/doc_worksheet_write_array_formula.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
@@ -1164,17 +1247,19 @@ impl Worksheet {
     /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
-    ///     let worksheet = workbook.add_worksheet();
+    /// #    let worksheet = workbook.add_worksheet();
+    /// #
+    /// #    // Write some test data.
+    /// #    worksheet.write_number(0, 1, 500)?;
+    /// #    worksheet.write_number(0, 2, 300)?;
+    /// #    worksheet.write_number(1, 1, 10)?;
+    /// #    worksheet.write_number(1, 2, 15)?;
+    /// #
+    ///     // Write an array formula that returns a single value.
+    ///     worksheet.write_array_formula(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}")?;
     ///
-    ///     // Write some formulas to the worksheet.
-    ///     worksheet.write_formula_only(0, 0, "=B3 + B4")?;
-    ///     worksheet.write_formula_only(1, 0, "=SIN(PI()/4)")?;
-    ///     worksheet.write_formula_only(2, 0, "=SUM(B1:B5)")?;
-    ///     worksheet.write_formula_only(3, 0, r#"=IF(A3>1,"Yes", "No")"#)?;
-    ///     worksheet.write_formula_only(4, 0, "=AVERAGE(1, 2, 3, 4)")?;
-    ///     worksheet.write_formula_only(5, 0, r#"=DATEVALUE("1-Jan-2023")"#)?;
-    ///
-    /// #     workbook.save("formulas.xlsx")?;
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -1182,16 +1267,21 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_formula_only.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula.png">
     ///
-    pub fn write_formula_only(
+    pub fn write_array_formula(
         &mut self,
-        row: RowNum,
-        col: ColNum,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
         formula: &str,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_formula(row, col, formula, None)
+        self.store_array_formula(
+            first_row, first_col, last_row, last_col, formula, None, false,
+        )
     }
 
     /// Write a formatted array formula to a worksheet cell.
@@ -1200,13 +1290,13 @@ impl Worksheet {
     /// is set via a [`Format`] struct which can control the font or color or
     /// properties such as bold and italic.
     ///
-    /// The `write_array_formula()` method writes an array formula to a cell
+    /// The `write_array()` method writes an array formula to a cell
     /// range. In Excel an array formula is a formula that performs a
     /// calculation on a range of values. It can return a single value or a
     /// range/"array" of values.
     ///
     /// An array formula is displayed with a pair of curly brackets around the
-    /// formula like this: `{=SUM(A1:B1*A2:B2)}`. The `write_array_formula()`
+    /// formula like this: `{=SUM(A1:B1*A2:B2)}`. The `write_array()`
     /// method doesn't require actually require these so you can omit them in
     /// the formula, and the equal sign, if you wish like this:
     /// `SUM(A1:B1*A2:B2)`.
@@ -1239,7 +1329,7 @@ impl Worksheet {
     /// formatting to a worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_array_formula.rs
+    /// # // This code is available in examples/doc_worksheet_write_array_formula_with_format.rs
     /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
@@ -1254,13 +1344,13 @@ impl Worksheet {
     /// #    let bold = Format::new().set_bold();
     /// #
     /// #    // Write some test data.
-    /// #    worksheet.write_number_only(0, 1, 500)?;
-    /// #    worksheet.write_number_only(0, 2, 300)?;
-    /// #    worksheet.write_number_only(1, 1, 10)?;
-    /// #    worksheet.write_number_only(1, 2, 15)?;
+    /// #    worksheet.write_number(0, 1, 500)?;
+    /// #    worksheet.write_number(0, 2, 300)?;
+    /// #    worksheet.write_number(1, 1, 10)?;
+    /// #    worksheet.write_number(1, 2, 15)?;
     /// #
     ///     // Write an array formula that returns a single value.
-    ///     worksheet.write_array_formula(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}", &bold)?;
+    ///     worksheet.write_array_formula_with_format(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}", &bold)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("worksheet.xlsx")?;
@@ -1272,9 +1362,9 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula_with_format.png">
     ///
-    pub fn write_array_formula(
+    pub fn write_array_formula_with_format(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
@@ -1295,26 +1385,28 @@ impl Worksheet {
         )
     }
 
-    /// Write an  array formula to a worksheet cell.
+    /// Write a dynamic array formula to a worksheet cell or range of cells.
     ///
-    /// The `write_array_formula_only()` method writes an array formula to a
-    /// cell range. In Excel an array formula is a formula that performs a
-    /// calculation on a range of values. It can return a single value or a
-    /// range/"array" of values. This is similar to
-    /// [`write_array_formula()`](Worksheet::write_array_formula()) except you
-    /// don't have to supply a [`Format`] so it is useful for writing raw data.
+    /// The `write_dynamic_array_formula()` function writes an Excel 365
+    /// dynamic array formula to a cell range. Some examples of functions that
+    /// return dynamic arrays are:
     ///
-    /// An array formula is displayed with a pair of curly brackets around the
-    /// formula like this: `{=SUM(A1:B1*A2:B2)}`. The `write_array_formula()`
-    /// method doesn't require actually require these so you can omit them in
-    /// the formula, and the equal sign, if you wish like this:
-    /// `SUM(A1:B1*A2:B2)`.
+    /// - `FILTER()`
+    /// - `RANDARRAY()`
+    /// - `SEQUENCE()`
+    /// - `SORTBY()`
+    /// - `SORT()`
+    /// - `UNIQUE()`
+    /// - `XLOOKUP()`
+    /// - `XMATCH()`
     ///
-    /// For array formulas that return a range of values you must specify the
-    /// range that the return values will be written to with the `first_` and
-    /// `last_` parameters. If the array formula returns a single value then the
-    /// first_ and last_ parameters should be the same, as shown in the example
-    /// below.
+    /// For more details see the `rust_xlsxwriter` documentation section on
+    /// [Dynamic Array support] and the [Dynamic array formulas] example.
+    ///
+    /// [Dynamic Array support]:
+    ///     https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
+    /// [Dynamic array formulas]:
+    ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
     ///
     /// # Arguments
     ///
@@ -1328,36 +1420,32 @@ impl Worksheet {
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
-    ///   than the last row or column.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates writing an array formulas to a
-    /// worksheet.
+    /// The following example demonstrates a static function which generally
+    /// returns one value turned into a dynamic array function which returns a
+    /// range of values.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_array_formula_only.rs
+    /// # // This code is available in examples/doc_worksheet_write_dynamic_array_formula.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #    let worksheet = workbook.add_worksheet();
+    /// #     // Write a dynamic formula using a static function.
+    ///     worksheet.write_dynamic_array_formula(0, 1, 0, 1, "=LEN(A1:A3)")?;
     /// #
-    /// #    // Write some test data.
-    /// #    worksheet.write_number_only(0, 1, 500)?;
-    /// #    worksheet.write_number_only(0, 2, 300)?;
-    /// #    worksheet.write_number_only(1, 1, 10)?;
-    /// #    worksheet.write_number_only(1, 2, 15)?;
+    /// #     // Write some data for the function to operate on.
+    /// #     worksheet.write_string(0, 0, "Foo")?;
+    /// #     worksheet.write_string(1, 0, "Food")?;
+    /// #     worksheet.write_string(2, 0, "Frood")?;
     /// #
-    ///     // Write an array formula that returns a single value.
-    ///     worksheet.write_array_formula_only(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}")?;
-    ///
-    /// #     // Save the file to disk.
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1367,9 +1455,9 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula_only.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula.png">
     ///
-    pub fn write_array_formula_only(
+    pub fn write_dynamic_array_formula(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
@@ -1379,14 +1467,14 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_array_formula(
-            first_row, first_col, last_row, last_col, formula, None, false,
+            first_row, first_col, last_row, last_col, formula, None, true,
         )
     }
 
     /// Write a formatted dynamic array formula to a worksheet cell or range of
     /// cells.
     ///
-    /// The `write_dynamic_array_formula()` function writes an Excel 365 dynamic
+    /// The `write_dynamic_array_formula_with_format()` function writes an Excel 365 dynamic
     /// array formula to a cell range. Some examples of functions that return
     /// dynamic arrays are:
     ///
@@ -1407,7 +1495,7 @@ impl Worksheet {
     /// `last_` parameters. If the array formula returns a single value then the
     /// first_ and last_ parameters should be the same, as shown in the example
     /// below or use the
-    /// [`write_dynamic_formula()`](Worksheet::write_dynamic_formula()) method.
+    /// [`write_dynamic_formula_with_format()`](Worksheet::write_dynamic_formula_with_format()) method.
     ///
     /// For more details see the `rust_xlsxwriter` documentation section on
     /// [Dynamic Array support] and the [Dynamic array formulas] example.
@@ -1440,7 +1528,7 @@ impl Worksheet {
     /// range of values.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_dynamic_array_formula.rs
+    /// # // This code is available in examples/doc_worksheet_write_dynamic_array_formula_with_format.rs
     /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
@@ -1451,12 +1539,12 @@ impl Worksheet {
     /// #     let bold = Format::new().set_bold();
     /// #
     /// #     // Write a dynamic formula using a static function.
-    ///     worksheet.write_dynamic_array_formula(0, 1, 0, 1, "=LEN(A1:A3)", &bold)?;
+    ///     worksheet.write_dynamic_array_formula_with_format(0, 1, 0, 1, "=LEN(A1:A3)", &bold)?;
     /// #
     /// #     // Write some data for the function to operate on.
-    /// #     worksheet.write_string_only(0, 0, "Foo")?;
-    /// #     worksheet.write_string_only(1, 0, "Food")?;
-    /// #     worksheet.write_string_only(2, 0, "Frood")?;
+    /// #     worksheet.write_string(0, 0, "Foo")?;
+    /// #     worksheet.write_string(1, 0, "Food")?;
+    /// #     worksheet.write_string(2, 0, "Frood")?;
     /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -1467,9 +1555,9 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula_with_format.png">
     ///
-    pub fn write_dynamic_array_formula(
+    pub fn write_dynamic_array_formula_with_format(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
@@ -1490,11 +1578,14 @@ impl Worksheet {
         )
     }
 
-    /// Write a dynamic array formula to a worksheet cell or range of cells.
+    /// Write a dynamic formula to a worksheet cell.
     ///
-    /// This method is similar to
+    /// The `write_dynamic_formula()` method is similar to the
     /// [`write_dynamic_array_formula()`](Worksheet::write_dynamic_array_formula())
-    /// except that it doesn't require a [`Format`] struct.
+    /// method, shown above, except that it writes a dynamic array formula to a
+    /// single cell, rather than a range. This is a syntactic shortcut since the
+    /// array range isn't generally known for a dynamic range and specifying the
+    /// initial cell is sufficient for Excel.
     ///
     /// For more details see the `rust_xlsxwriter` documentation section on
     /// [Dynamic Array support] and the [Dynamic array formulas] example.
@@ -1506,70 +1597,29 @@ impl Worksheet {
     ///
     /// # Arguments
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
     /// * `formula` - The formula to write to the cell.
     ///
     /// # Errors
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
-    ///   row.
     ///
-    /// # Examples
-    ///
-    /// The following example demonstrates a static function which generally returns
-    /// one value turned into a dynamic array function which returns a range of
-    /// values.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_worksheet_write_dynamic_array_formula_only.rs
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Write a dynamic formula using a static function.
-    ///     worksheet.write_dynamic_array_formula_only(0, 1, 0, 1, "=LEN(A1:A3)")?;
-    /// #
-    /// #     // Write some data for the function to operate on.
-    /// #     worksheet.write_string_only(0, 0, "Foo")?;
-    /// #     worksheet.write_string_only(1, 0, "Food")?;
-    /// #     worksheet.write_string_only(2, 0, "Frood")?;
-    /// #
-    /// #     workbook.save("worksheet.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula_only.png">
-    ///
-    pub fn write_dynamic_array_formula_only(
+    pub fn write_dynamic_formula(
         &mut self,
-        first_row: RowNum,
-        first_col: ColNum,
-        last_row: RowNum,
-        last_col: ColNum,
+        row: RowNum,
+        col: ColNum,
         formula: &str,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_array_formula(
-            first_row, first_col, last_row, last_col, formula, None, true,
-        )
+        self.store_array_formula(row, col, row, col, formula, None, true)
     }
 
     /// Write a formatted dynamic formula to a worksheet cell.
     ///
-    /// The `write_dynamic_formula()` method is similar to the
-    /// [`write_dynamic_array_formula()`](Worksheet::write_dynamic_array_formula())
+    /// The `write_dynamic_formula_with_format()` method is similar to the
+    /// [`write_dynamic_array_formula_with_format()`](Worksheet::write_dynamic_array_formula_with_format())
     /// method, shown above, except that it writes a dynamic array formula to a
     /// single cell, rather than a range. This is a syntactic shortcut since the
     /// array range isn't generally known for a dynamic range and specifying the
@@ -1595,7 +1645,7 @@ impl Worksheet {
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
-    pub fn write_dynamic_formula(
+    pub fn write_dynamic_formula_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -1604,44 +1654,6 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_array_formula(row, col, row, col, formula, Some(format), true)
-    }
-
-    /// Write a dynamic formula to a worksheet cell.
-    ///
-    /// The `write_dynamic_formula_only()` method is similar to the
-    /// [`write_dynamic_array_formula_only()`](Worksheet::write_dynamic_array_formula_only())
-    /// method, shown above, except that it writes a dynamic array formula to a
-    /// single cell, rather than a range. This is a syntactic shortcut since the
-    /// array range isn't generally known for a dynamic range and specifying the
-    /// initial cell is sufficient for Excel.
-    ///
-    /// For more details see the `rust_xlsxwriter` documentation section on
-    /// [Dynamic Array support] and the [Dynamic array formulas] example.
-    ///
-    /// [Dynamic Array support]:
-    ///     https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
-    /// [Dynamic array formulas]:
-    ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
-    ///
-    /// # Arguments
-    ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell.
-    ///
-    /// # Errors
-    ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    ///
-    pub fn write_dynamic_formula_only(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        formula: &str,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Store the cell data.
-        self.store_array_formula(row, col, row, col, formula, None, true)
     }
 
     /// Write a blank formatted worksheet cell.
@@ -1702,7 +1714,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_blank.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_blank.png">
     ///
     pub fn write_blank(
         &mut self,
@@ -1826,7 +1839,7 @@ impl Worksheet {
     ///
     ///     // Add another sheet to link to.
     ///     let worksheet2 = workbook.add_worksheet();
-    ///     worksheet2.write_string_only(3, 2, "Here I am")?;
+    ///     worksheet2.write_string(3, 2, "Here I am")?;
     ///     worksheet2.write_url_with_text(4, 2, "internal:Sheet1!A6", "Go back")?;
     ///
     /// #     // Save the file to disk.
@@ -2307,6 +2320,59 @@ impl Worksheet {
         self.store_datetime(row, col, number, Some(format))
     }
 
+    /// Write an unformatted boolean value to a cell.
+    ///
+    /// Write an unformatted Excel boolean value to a worksheet cell.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `boolean` - The boolean value to write to the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing boolean values to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_boolean.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.write_boolean(0, 0, true)?;
+    ///     worksheet.write_boolean(1, 0, false)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_boolean.png">
+    ///
+    pub fn write_boolean(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        boolean: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Store the cell data.
+        self.store_boolean(row, col, boolean, None)
+    }
+
     /// Write a formatted boolean value to a worksheet cell.
     ///
     /// Write a boolean value with formatting to a worksheet cell. The format is set
@@ -2332,7 +2398,7 @@ impl Worksheet {
     /// worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_boolean.rs
+    /// # // This code is available in examples/doc_worksheet_write_boolean_with_format.rs
     /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
@@ -2344,8 +2410,8 @@ impl Worksheet {
     /// #     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
     ///
-    ///     worksheet.write_boolean(0, 0, true, &bold)?;
-    ///     worksheet.write_boolean(1, 0, false, &bold)?;
+    ///     worksheet.write_boolean_with_format(0, 0, true, &bold)?;
+    ///     worksheet.write_boolean_with_format(1, 0, false, &bold)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2355,10 +2421,10 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_boolean.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_boolean_with_format.png">
     ///
     ///
-    pub fn write_boolean(
+    pub fn write_boolean_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -2367,61 +2433,6 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_boolean(row, col, boolean, Some(format))
-    }
-
-    /// Write an unformatted boolean value to a cell.
-    ///
-    /// Write an unformatted boolean value to a worksheet cell. This is similar to
-    /// [`write_boolean()`](Worksheet::write_boolean()) except you don' have to
-    /// supply a [`Format`] so it is useful for writing raw data.
-    ///
-    /// # Arguments
-    ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `boolean` - The boolean value to write to the cell.
-    ///
-    /// # Errors
-    ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates writing boolean values to a worksheet.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_worksheet_write_boolean_only.rs
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    ///     let worksheet = workbook.add_worksheet();
-    ///
-    ///     worksheet.write_boolean_only(0, 0, true)?;
-    ///     worksheet.write_boolean_only(1, 0, false)?;
-    ///
-    /// #     workbook.save("worksheet.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_boolean_only.png">
-    ///
-    pub fn write_boolean_only(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        boolean: bool,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Store the cell data.
-        self.store_boolean(row, col, boolean, None)
     }
 
     /// Merge a range of cells.
@@ -2487,7 +2498,7 @@ impl Worksheet {
     ///     // Write some merged cells with a number by overwriting the first cell in
     ///     // the string merge range with the formatted number.
     ///     worksheet.merge_range(5, 1, 5, 2, "", &format)?;
-    ///     worksheet.write_number(5, 1, 12345.67, &format)?;
+    ///     worksheet.write_number_with_format(5, 1, 12345.67, &format)?;
     ///
     ///     // Example with a more complex format and larger range.
     ///     let format = Format::new()
@@ -2536,7 +2547,7 @@ impl Worksheet {
         }
 
         // Write the first cell in the range.
-        self.write_string(first_row, first_col, string, format)?;
+        self.write_string_with_format(first_row, first_col, string, format)?;
 
         // Pad out the rest of the range with formatted blanks cells.
         for row in first_row..=last_row {
@@ -2779,8 +2790,8 @@ impl Worksheet {
     ///     let worksheet = workbook.add_worksheet();
     ///
     ///     // Add some text.
-    ///     worksheet.write_string_only(0, 0, "Normal")?;
-    ///     worksheet.write_string_only(2, 0, "Taller")?;
+    ///     worksheet.write_string(0, 0, "Normal")?;
+    ///     worksheet.write_string(2, 0, "Taller")?;
     ///
     ///     // Set the row height in Excel character units.
     ///     worksheet.set_row_height(2, 30)?;
@@ -2867,8 +2878,8 @@ impl Worksheet {
     ///     let worksheet = workbook.add_worksheet();
     ///
     ///     // Add some text.
-    ///     worksheet.write_string_only(0, 0, "Normal")?;
-    ///     worksheet.write_string_only(2, 0, "Taller")?;
+    ///     worksheet.write_string(0, 0, "Normal")?;
+    ///     worksheet.write_string(2, 0, "Taller")?;
     ///
     ///     // Set the row height in pixels.
     ///     worksheet.set_row_height_pixels(2, 40)?;
@@ -2934,10 +2945,10 @@ impl Worksheet {
     ///     worksheet.set_row_format(1, &red_format)?;
     ///
     ///     // Add some unformatted text that adopts the row format.
-    ///     worksheet.write_string_only(1, 0, "Hello")?;
+    ///     worksheet.write_string(1, 0, "Hello")?;
     ///
     ///     // Add some formatted text that overrides the row format.
-    ///     worksheet.write_string(1, 2, "Hello", &bold_format)?;
+    ///     worksheet.write_string_with_format(1, 2, "Hello", &bold_format)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3018,7 +3029,7 @@ impl Worksheet {
     ///     // Hide row 2 (with zero indexing).
     ///     worksheet.set_row_hidden(1)?;
     ///
-    ///     worksheet.write_string_only(2, 0, "Row 2 is hidden")?;
+    ///     worksheet.write_string(2, 0, "Row 2 is hidden")?;
     /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3140,9 +3151,9 @@ impl Worksheet {
     ///     let worksheet = workbook.add_worksheet();
     ///
     ///     // Add some text.
-    ///     worksheet.write_string_only(0, 0, "Normal")?;
-    ///     worksheet.write_string_only(0, 2, "Wider")?;
-    ///     worksheet.write_string_only(0, 4, "Narrower")?;
+    ///     worksheet.write_string(0, 0, "Normal")?;
+    ///     worksheet.write_string(0, 2, "Wider")?;
+    ///     worksheet.write_string(0, 4, "Narrower")?;
     ///
     ///     // Set the column width in Excel character units.
     ///     worksheet.set_column_width(2, 16)?;
@@ -3223,9 +3234,9 @@ impl Worksheet {
     ///     let worksheet = workbook.add_worksheet();
     ///
     ///     // Add some text.
-    ///     worksheet.write_string_only(0, 0, "Normal")?;
-    ///     worksheet.write_string_only(0, 2, "Wider")?;
-    ///     worksheet.write_string_only(0, 4, "Narrower")?;
+    ///     worksheet.write_string(0, 0, "Normal")?;
+    ///     worksheet.write_string(0, 2, "Wider")?;
+    ///     worksheet.write_string(0, 4, "Narrower")?;
     ///
     ///     // Set the column width in pixels.
     ///     worksheet.set_column_width_pixels(2, 117)?;
@@ -3305,10 +3316,10 @@ impl Worksheet {
     ///     worksheet.set_column_format(1, &red_format)?;
     ///
     ///     // Add some unformatted text that adopts the column format.
-    ///     worksheet.write_string_only(0, 1, "Hello")?;
+    ///     worksheet.write_string(0, 1, "Hello")?;
     ///
     ///     // Add some formatted text that overrides the column format.
-    ///     worksheet.write_string(2, 1, "Hello", &bold_format)?;
+    ///     worksheet.write_string_with_format(2, 1, "Hello", &bold_format)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3390,7 +3401,7 @@ impl Worksheet {
     ///     // Hide column B.
     ///     worksheet.set_column_hidden(1)?;
     ///
-    ///     worksheet.write_string_only(0, 3, "Column B is hidden")?;
+    ///     worksheet.write_string(0, 3, "Column B is hidden")?;
     /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3469,21 +3480,21 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet with some sample data to filter.
     /// #     let worksheet = workbook.add_worksheet();
-    /// #     worksheet.write_string_only(0, 0, "Region")?;
-    /// #     worksheet.write_string_only(1, 0, "East")?;
-    /// #     worksheet.write_string_only(2, 0, "West")?;
-    /// #     worksheet.write_string_only(3, 0, "East")?;
-    /// #     worksheet.write_string_only(4, 0, "North")?;
-    /// #     worksheet.write_string_only(5, 0, "South")?;
-    /// #     worksheet.write_string_only(6, 0, "West")?;
+    /// #     worksheet.write_string(0, 0, "Region")?;
+    /// #     worksheet.write_string(1, 0, "East")?;
+    /// #     worksheet.write_string(2, 0, "West")?;
+    /// #     worksheet.write_string(3, 0, "East")?;
+    /// #     worksheet.write_string(4, 0, "North")?;
+    /// #     worksheet.write_string(5, 0, "South")?;
+    /// #     worksheet.write_string(6, 0, "West")?;
     /// #
-    /// #     worksheet.write_string_only(0, 1, "Sales")?;
-    /// #     worksheet.write_number_only(1, 1, 3000)?;
-    /// #     worksheet.write_number_only(2, 1, 8000)?;
-    /// #     worksheet.write_number_only(3, 1, 5000)?;
-    /// #     worksheet.write_number_only(4, 1, 4000)?;
-    /// #     worksheet.write_number_only(5, 1, 7000)?;
-    /// #     worksheet.write_number_only(6, 1, 9000)?;
+    /// #     worksheet.write_string(0, 1, "Sales")?;
+    /// #     worksheet.write_number(1, 1, 3000)?;
+    /// #     worksheet.write_number(2, 1, 8000)?;
+    /// #     worksheet.write_number(3, 1, 5000)?;
+    /// #     worksheet.write_number(4, 1, 4000)?;
+    /// #     worksheet.write_number(5, 1, 7000)?;
+    /// #     worksheet.write_number(6, 1, 9000)?;
     /// #
     ///     // Set the autofilter.
     ///     worksheet.autofilter(0, 0, 6, 1)?;
@@ -3603,21 +3614,21 @@ impl Worksheet {
     /// #
     /// #     // Add a worksheet with some sample data to filter.
     /// #     let worksheet = workbook.add_worksheet();
-    /// #     worksheet.write_string_only(0, 0, "Region")?;
-    /// #     worksheet.write_string_only(1, 0, "East")?;
-    /// #     worksheet.write_string_only(2, 0, "West")?;
-    /// #     worksheet.write_string_only(3, 0, "East")?;
-    /// #     worksheet.write_string_only(4, 0, "North")?;
-    /// #     worksheet.write_string_only(5, 0, "South")?;
-    /// #     worksheet.write_string_only(6, 0, "West")?;
+    /// #     worksheet.write_string(0, 0, "Region")?;
+    /// #     worksheet.write_string(1, 0, "East")?;
+    /// #     worksheet.write_string(2, 0, "West")?;
+    /// #     worksheet.write_string(3, 0, "East")?;
+    /// #     worksheet.write_string(4, 0, "North")?;
+    /// #     worksheet.write_string(5, 0, "South")?;
+    /// #     worksheet.write_string(6, 0, "West")?;
     /// #
-    /// #     worksheet.write_string_only(0, 1, "Sales")?;
-    /// #     worksheet.write_number_only(1, 1, 3000)?;
-    /// #     worksheet.write_number_only(2, 1, 8000)?;
-    /// #     worksheet.write_number_only(3, 1, 5000)?;
-    /// #     worksheet.write_number_only(4, 1, 4000)?;
-    /// #     worksheet.write_number_only(5, 1, 7000)?;
-    /// #     worksheet.write_number_only(6, 1, 9000)?;
+    /// #     worksheet.write_string(0, 1, "Sales")?;
+    /// #     worksheet.write_number(1, 1, 3000)?;
+    /// #     worksheet.write_number(2, 1, 8000)?;
+    /// #     worksheet.write_number(3, 1, 5000)?;
+    /// #     worksheet.write_number(4, 1, 4000)?;
+    /// #     worksheet.write_number(5, 1, 7000)?;
+    /// #     worksheet.write_number(6, 1, 9000)?;
     /// #
     /// #     // Set the autofilter.
     /// #     worksheet.autofilter(0, 0, 6, 1)?;
@@ -3746,17 +3757,17 @@ impl Worksheet {
     ///     worksheet.protect();
     ///
     ///     // Examples of cell locking and hiding.
-    ///     worksheet.write_string_only(0, 0, "Cell B1 is locked. It cannot be edited.")?;
-    ///     worksheet.write_formula_only(0, 1, "=1+2")?; // Locked by default.
+    ///     worksheet.write_string(0, 0, "Cell B1 is locked. It cannot be edited.")?;
+    ///     worksheet.write_formula(0, 1, "=1+2")?; // Locked by default.
     ///
-    ///     worksheet.write_string_only(1, 0, "Cell B2 is unlocked. It can be edited.")?;
-    ///     worksheet.write_formula(1, 1, "=1+2", &unlocked)?;
+    ///     worksheet.write_string(1, 0, "Cell B2 is unlocked. It can be edited.")?;
+    ///     worksheet.write_formula_with_format(1, 1, "=1+2", &unlocked)?;
     ///
-    ///     worksheet.write_string_only(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
-    ///     worksheet.write_formula(2, 1, "=1+2", &hidden)?;
+    ///     worksheet.write_string(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
+    ///     worksheet.write_formula_with_format(2, 1, "=1+2", &hidden)?;
     ///
-    /// #     worksheet.write_string_only(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
-    /// #     worksheet.write_string_only(5, 0, "to remove the worksheet protection.")?;
+    /// #     worksheet.write_string(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
+    /// #     worksheet.write_string(5, 0, "to remove the worksheet protection.")?;
     /// #
     /// #     worksheet.autofit();
     /// #
@@ -3820,7 +3831,7 @@ impl Worksheet {
     ///     // Protect the worksheet from modification.
     ///     worksheet.protect_with_password("abc123");
     ///
-    /// #     worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
+    /// #     worksheet.write_string(0, 0, "Unlock the worksheet to edit the cell")?;
     /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3880,7 +3891,7 @@ impl Worksheet {
     ///     // Set the protection options.
     ///     worksheet.protect_with_options(&options);
     ///
-    /// #     worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
+    /// #     worksheet.write_string(0, 0, "Unlock the worksheet to edit the cell")?;
     /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -4230,8 +4241,8 @@ impl Worksheet {
     /// Write a user defined result to a worksheet formula cell.
     ///
     /// The `rust_xlsxwriter` library doesn’t calculate the result of a formula
-    /// written using [`write_formula()`](Worksheet::write_formula()) or
-    /// [`write_formula_only()`](Worksheet::write_formula_only()). Instead it
+    /// written using [`write_formula_with_format()`](Worksheet::write_formula_with_format()) or
+    /// [`write_formula()`](Worksheet::write_formula()). Instead it
     /// stores the value 0 as the formula result. It then sets a global flag in
     /// the xlsx file to say that all formulas and functions should be
     /// recalculated when the file is opened.
@@ -4272,7 +4283,7 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     worksheet
-    ///         .write_formula_only(0, 0, "1+1")?
+    ///         .write_formula(0, 0, "1+1")?
     ///         .set_formula_result(0, 0, "2");
     ///
     /// #     workbook.save("formulas.xlsx")?;
@@ -4314,8 +4325,8 @@ impl Worksheet {
     /// Write the default formula result for worksheet formulas.
     ///
     /// The `rust_xlsxwriter` library doesn’t calculate the result of a formula
-    /// written using [`write_formula()`](Worksheet::write_formula()) or
-    /// [`write_formula_only()`](Worksheet::write_formula_only()). Instead it
+    /// written using [`write_formula_with_format()`](Worksheet::write_formula_with_format()) or
+    /// [`write_formula()`](Worksheet::write_formula()). Instead it
     /// stores the value 0 as the formula result. It then sets a global flag in
     /// the xlsx file to say that all formulas and functions should be
     /// recalculated when the file is opened.
@@ -4368,7 +4379,7 @@ impl Worksheet {
     /// `CHISQ.DIST.RT` , `CONFIDENCE.NORM`, `STDEV.P`, `STDEV.S` and
     /// `WORKDAY.INTL`.
     ///
-    /// When written using [`write_formula()`](Worksheet::write_formula()) these
+    /// When written using [`write_formula_with_format()`](Worksheet::write_formula_with_format()) these
     /// functions need to be fully qualified with a prefix such as `_xlfn.`
     ///
     /// Alternatively you can use the `worksheet.use_future_functions()`
@@ -4391,14 +4402,14 @@ impl Worksheet {
     /// #
     /// #     // Write a future function and automatically add the required prefix.
     ///     worksheet.use_future_functions(true);
-    ///     worksheet.write_formula_only(0, 0, "=STDEV.S(B1:B5)")?;
+    ///     worksheet.write_formula(0, 0, "=STDEV.S(B1:B5)")?;
     /// #
     /// #     // Write some data for the function to operate on.
-    /// #     worksheet.write_number_only(0, 1, 1.23)?;
-    /// #     worksheet.write_number_only(1, 1, 1.03)?;
-    /// #     worksheet.write_number_only(2, 1, 1.20)?;
-    /// #     worksheet.write_number_only(3, 1, 1.15)?;
-    /// #     worksheet.write_number_only(4, 1, 1.22)?;
+    /// #     worksheet.write_number(0, 1, 1.23)?;
+    /// #     worksheet.write_number(1, 1, 1.03)?;
+    /// #     worksheet.write_number(2, 1, 1.20)?;
+    /// #     worksheet.write_number(3, 1, 1.15)?;
+    /// #     worksheet.write_number(4, 1, 1.22)?;
     /// #
     /// #     workbook.save("future_function.xlsx")?;
     /// #
@@ -4463,9 +4474,9 @@ impl Worksheet {
     ///     worksheet1.set_column_width(0,25)?;
     ///
     ///     // Standard direction:         | A1 | B1 | C1 | ...
-    ///     worksheet1.write_string_only(0, 0, "نص عربي / English text")?;
-    ///     worksheet1.write_string(1, 0, "نص عربي / English text", &format_left_to_right)?;
-    ///     worksheet1.write_string(2, 0, "نص عربي / English text", &format_right_to_left)?;
+    ///     worksheet1.write_string(0, 0, "نص عربي / English text")?;
+    ///     worksheet1.write_string_with_format(1, 0, "نص عربي / English text", &format_left_to_right)?;
+    ///     worksheet1.write_string_with_format(2, 0, "نص عربي / English text", &format_right_to_left)?;
     ///
     ///     // Add a worksheet and change it to right to left direction.
     ///     let worksheet2 = workbook.add_worksheet();
@@ -4475,9 +4486,9 @@ impl Worksheet {
     ///     worksheet2.set_column_width(0, 25)?;
     ///
     ///     // Right to left direction:    ... | C1 | B1 | A1 |
-    ///     worksheet2.write_string_only(0, 0, "نص عربي / English text")?;
-    ///     worksheet2.write_string(1, 0, "نص عربي / English text", &format_left_to_right)?;
-    ///     worksheet2.write_string(2, 0, "نص عربي / English text", &format_right_to_left)?;
+    ///     worksheet2.write_string(0, 0, "نص عربي / English text")?;
+    ///     worksheet2.write_string_with_format(1, 0, "نص عربي / English text", &format_left_to_right)?;
+    ///     worksheet2.write_string_with_format(2, 0, "نص عربي / English text", &format_right_to_left)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -5011,7 +5022,7 @@ impl Worksheet {
     /// #     let mut workbook = Workbook::new();
     /// #
     /// #     let worksheet = workbook.add_worksheet();
-    /// #     worksheet.write_string_only(100, 100, "Test")?;
+    /// #     worksheet.write_string(100, 100, "Test")?;
     /// #
     ///     // Set a page break at rows 20, 40 and 60.
     ///     worksheet.set_page_breaks(&[20, 40, 60])?;
@@ -5113,7 +5124,7 @@ impl Worksheet {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     worksheet.write_string_only(0, 0, "Hello")?;
+    ///     worksheet.write_string(0, 0, "Hello")?;
     ///     worksheet.set_zoom(200);
     ///
     /// #     workbook.save("worksheet.xlsx")?;
@@ -5177,9 +5188,9 @@ impl Worksheet {
     /// #     let mut worksheet2 = Worksheet::new();
     /// #     let mut worksheet3 = Worksheet::new();
     /// #
-    /// #     worksheet1.write_string_only(0, 0, "Scroll down")?;
-    /// #     worksheet2.write_string_only(0, 0, "Scroll across")?;
-    /// #     worksheet3.write_string_only(0, 0, "Scroll down or across")?;
+    /// #     worksheet1.write_string(0, 0, "Scroll down")?;
+    /// #     worksheet2.write_string(0, 0, "Scroll across")?;
+    /// #     worksheet3.write_string(0, 0, "Scroll down or across")?;
     /// #
     ///     // Freeze the top row only.
     ///     worksheet1.set_freeze_panes(1, 0)?;
@@ -5251,7 +5262,7 @@ impl Worksheet {
     /// #
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     worksheet.write_string_only(0, 0, "Scroll down")?;
+    /// #     worksheet.write_string(0, 0, "Scroll down")?;
     /// #
     ///     // Freeze the top row only.
     ///     worksheet.set_freeze_panes(1, 0)?;
@@ -5459,8 +5470,8 @@ impl Worksheet {
     /// #
     ///     worksheet.set_header("&CPage &P of &N");
     ///
-    /// #     worksheet.write_string_only(0, 0, "Hello")?;
-    /// #     worksheet.write_string_only(200, 0, "Hello")?;
+    /// #     worksheet.write_string(0, 0, "Hello")?;
+    /// #     worksheet.write_string(200, 0, "Hello")?;
     /// #     worksheet.set_view_page_layout();
     /// #
     /// #     workbook.save("worksheet.xlsx")?;
@@ -6470,11 +6481,11 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Add some data
-    ///     worksheet.write_string_only(0, 0, "Hello")?;
-    ///     worksheet.write_string_only(0, 1, "Hello")?;
-    ///     worksheet.write_string_only(1, 1, "Hello World")?;
-    ///     worksheet.write_number_only(0, 2, 123)?;
-    ///     worksheet.write_number_only(0, 3, 123456)?;
+    ///     worksheet.write_string(0, 0, "Hello")?;
+    ///     worksheet.write_string(0, 1, "Hello")?;
+    ///     worksheet.write_string(1, 1, "Hello World")?;
+    ///     worksheet.write_number(0, 2, 123)?;
+    ///     worksheet.write_number(0, 3, 123456)?;
     ///
     ///     // Autofit the columns.
     ///     worksheet.autofit();
@@ -7108,8 +7119,8 @@ impl Worksheet {
             for col in first_col..=last_col {
                 if !(row == first_row && col == first_col) {
                     match format {
-                        Some(format) => self.write_number(row, col, 0, format).unwrap(),
-                        None => self.write_number_only(row, col, 0).unwrap(),
+                        Some(format) => self.write_number_with_format(row, col, 0, format).unwrap(),
+                        None => self.write_number(row, col, 0).unwrap(),
                     };
                 }
             }
@@ -7169,7 +7180,7 @@ impl Worksheet {
     }
 
     // Store a url and associated properties. Urls in Excel are handled in a
-    // number of ways: they are written as a string similar to write_string(),
+    // number of ways: they are written as a string similar to write_string_with_format(),
     // they are written in the <hyperlinks> element within the worksheet, and
     // they are referenced in the worksheet.rels file.
     fn store_url(
@@ -7184,10 +7195,10 @@ impl Worksheet {
         let hyperlink = Hyperlink::new(url, text, tip)?;
 
         match format {
-            Some(format) => self.write_string(row, col, &hyperlink.text, format)?,
+            Some(format) => self.write_string_with_format(row, col, &hyperlink.text, format)?,
             None => {
                 let hyperlink_format = Format::new().set_hyperlink();
-                self.write_string(row, col, &hyperlink.text, &hyperlink_format)?
+                self.write_string_with_format(row, col, &hyperlink.text, &hyperlink_format)?
             }
         };
 
@@ -9358,7 +9369,7 @@ impl Hyperlink {
         Self::initialize(&mut hyperlink);
 
         // Check the hyperlink string lengths are within Excel's limits. The text
-        // length is checked by write_string().
+        // length is checked by write_string_with_format().
         if hyperlink.url.chars().count() > MAX_URL_LEN
             || hyperlink.location.chars().count() > MAX_URL_LEN
             || hyperlink.tip.chars().count() > MAX_PARAMETER_LEN

@@ -15,9 +15,9 @@ fn main() -> Result<(), XlsxError> {
     let format1 = Format::new().set_indent(1);
     let format2 = Format::new().set_indent(2);
 
-    worksheet.write_string_only(0, 0, "Indent 0")?;
-    worksheet.write_string(1, 0, "Indent 1", &format1)?;
-    worksheet.write_string(2, 0, "Indent 2", &format2)?;
+    worksheet.write_string(0, 0, "Indent 0")?;
+    worksheet.write_string_with_format(1, 0, "Indent 1", &format1)?;
+    worksheet.write_string_with_format(2, 0, "Indent 2", &format2)?;
 
     workbook.save("formats.xlsx")?;
 

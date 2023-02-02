@@ -28,9 +28,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_border_left(FormatBorder::Thin)
         .set_border_top(FormatBorder::Thin);
 
-    worksheet.write_string(1, 1, "test", &top_left_bottom)?;
-    worksheet.write_string(1, 3, "test", &top_left)?;
-    worksheet.write_string(1, 5, "test", &top_bottom)?;
+    worksheet.write_string_with_format(1, 1, "test", &top_left_bottom)?;
+    worksheet.write_string_with_format(1, 3, "test", &top_left)?;
+    worksheet.write_string_with_format(1, 5, "test", &top_bottom)?;
 
     workbook.save(filename)?;
 

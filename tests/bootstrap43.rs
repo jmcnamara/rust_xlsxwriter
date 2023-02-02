@@ -14,39 +14,39 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_print_first_page_number(1);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_print_scale(200);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_print_fit_to_pages(1, 1);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_print_fit_to_pages(2, 2);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_print_fit_to_pages(1, 0);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_print_center_horizontally(true);
     worksheet.set_print_center_vertically(true);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_print_headings(true);
     worksheet.set_print_gridlines(true);
     worksheet.set_print_black_and_white(true);
     worksheet.set_print_draft(true);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
     worksheet.set_header_footer_align_with_page(false);
     worksheet.set_header_footer_scale_with_doc(false);
 

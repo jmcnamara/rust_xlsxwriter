@@ -18,9 +18,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format3 = Format::new().set_num_format("0.0");
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_number(0, 0, 1, &format1)?;
-    worksheet.write_number(1, 1, 2, &format2)?;
-    worksheet.write_number(2, 2, 3, &format3)?;
+    worksheet.write_number_with_format(0, 0, 1, &format1)?;
+    worksheet.write_number_with_format(1, 1, 2, &format2)?;
+    worksheet.write_number_with_format(2, 2, 3, &format3)?;
 
     workbook.save(filename)?;
 

@@ -18,11 +18,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let bold = Format::new().set_bold();
     let italic = Format::new().set_italic();
 
-    worksheet.write_string(0, 0, "Foo", &bold)?;
-    worksheet.write_string(1, 0, "Bar", &italic)?;
+    worksheet.write_string_with_format(0, 0, "Foo", &bold)?;
+    worksheet.write_string_with_format(1, 0, "Bar", &italic)?;
 
     let segments = [(&bold, "abc"), (&italic, "defg")];
-    worksheet.write_rich_string_only(2, 0, &segments)?;
+    worksheet.write_rich_string(2, 0, &segments)?;
 
     workbook.save(filename)?;
 

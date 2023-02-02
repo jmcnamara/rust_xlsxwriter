@@ -15,10 +15,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "Hello")?;
-    worksheet.write_string_only(0, 1, "World")?;
-    worksheet.write_number_only(0, 2, 123)?;
-    worksheet.write_number_only(0, 3, 1234567)?;
+    worksheet.write_string(0, 0, "Hello")?;
+    worksheet.write_string(0, 1, "World")?;
+    worksheet.write_number(0, 2, 123)?;
+    worksheet.write_number(0, 3, 1234567)?;
 
     worksheet.autofit();
 

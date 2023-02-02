@@ -11,7 +11,7 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "Hello")?;
+    worksheet.write_string(0, 0, "Hello")?;
 
     workbook.save("properties.xlsx")?;
 

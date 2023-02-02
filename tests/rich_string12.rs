@@ -23,8 +23,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let default = Format::default();
     let wrap = Format::new().set_text_wrap();
 
-    worksheet.write_string(0, 0, "Foo", &bold)?;
-    worksheet.write_string(1, 0, "Bar", &italic)?;
+    worksheet.write_string_with_format(0, 0, "Foo", &bold)?;
+    worksheet.write_string_with_format(1, 0, "Bar", &italic)?;
 
     let segments = [
         (&default, "This is\n"),
@@ -32,7 +32,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         (&default, "and this is\n"),
         (&italic, "italic"),
     ];
-    worksheet.write_rich_string(2, 0, &segments, &wrap)?;
+    worksheet.write_rich_string_with_format(2, 0, &segments, &wrap)?;
 
     workbook.save(filename)?;
 

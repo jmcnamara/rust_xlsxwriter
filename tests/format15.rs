@@ -18,8 +18,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format1 = Format::new().set_bold();
     let format2 = Format::new().set_bold().set_num_format_index(1);
 
-    worksheet.write_number(0, 0, 1, &format1)?;
-    worksheet.write_number(1, 0, 2, &format2)?;
+    worksheet.write_number_with_format(0, 0, 1, &format1)?;
+    worksheet.write_number_with_format(1, 0, 2, &format2)?;
 
     workbook.save(filename)?;
 

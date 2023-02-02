@@ -15,16 +15,16 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write some worksheet data to demonstrate autofitting.
-    worksheet.write_string_only(0, 0, "Foo")?;
-    worksheet.write_string_only(1, 0, "Food")?;
-    worksheet.write_string_only(2, 0, "Foody")?;
-    worksheet.write_string_only(3, 0, "Froody")?;
+    worksheet.write_string(0, 0, "Foo")?;
+    worksheet.write_string(1, 0, "Food")?;
+    worksheet.write_string(2, 0, "Foody")?;
+    worksheet.write_string(3, 0, "Froody")?;
 
-    worksheet.write_number_only(0, 1, 12345)?;
-    worksheet.write_number_only(1, 1, 12345678)?;
-    worksheet.write_number_only(2, 1, 12345)?;
+    worksheet.write_number(0, 1, 12345)?;
+    worksheet.write_number(1, 1, 12345678)?;
+    worksheet.write_number(2, 1, 12345)?;
 
-    worksheet.write_string_only(0, 2, "Some longer text")?;
+    worksheet.write_string(0, 2, "Some longer text")?;
 
     worksheet.write_url(0, 3, "http://ww.google.com")?;
     worksheet.write_url(1, 3, "https://github.com")?;

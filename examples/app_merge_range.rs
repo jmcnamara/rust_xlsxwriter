@@ -27,7 +27,7 @@ fn main() -> Result<(), XlsxError> {
     // Write some merged cells with a number by overwriting the first cell in
     // the string merge range with the formatted number.
     worksheet.merge_range(5, 1, 5, 2, "", &format)?;
-    worksheet.write_number(5, 1, 12345.67, &format)?;
+    worksheet.write_number_with_format(5, 1, 12345.67, &format)?;
 
     // Example with a more complex format and larger range.
     let format = Format::new()

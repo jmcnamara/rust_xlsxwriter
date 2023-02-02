@@ -17,7 +17,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let bold = Format::new().set_bold();
 
     worksheet.set_row_format(0, &bold)?;
-    worksheet.write_string_only(0, 0, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
 
     workbook.save(filename)?;
 

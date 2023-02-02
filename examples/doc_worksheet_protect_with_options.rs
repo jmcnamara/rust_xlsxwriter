@@ -24,7 +24,7 @@ fn main() -> Result<(), XlsxError> {
     // Set the protection options.
     worksheet.protect_with_options(&options);
 
-    worksheet.write_string_only(0, 0, "Unlock the worksheet to edit the cell")?;
+    worksheet.write_string(0, 0, "Unlock the worksheet to edit the cell")?;
 
     workbook.save("worksheet.xlsx")?;
 

@@ -16,9 +16,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     let bold = Format::new().set_bold();
 
-    worksheet.write_dynamic_formula(0, 0, "=AVERAGE(TIMEVALUE(B1:B2))", &bold)?;
-    worksheet.write_string_only(0, 1, "12:00")?;
-    worksheet.write_string_only(1, 1, "12:00")?;
+    worksheet.write_dynamic_formula_with_format(0, 0, "=AVERAGE(TIMEVALUE(B1:B2))", &bold)?;
+    worksheet.write_string(0, 1, "12:00")?;
+    worksheet.write_string(1, 1, "12:00")?;
     worksheet.set_formula_result(0, 0, "0.5");
 
     workbook.save(filename)?;

@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format = Format::default();
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string(0, 0, "Foo", &format)?;
+    worksheet.write_string_with_format(0, 0, "Foo", &format)?;
 
     workbook.save(filename)?;
 

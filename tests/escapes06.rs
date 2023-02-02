@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.set_column_width(0, 14)?;
 
-    worksheet.write_number(0, 0, 123, &num_format)?;
+    worksheet.write_number_with_format(0, 0, 123, &num_format)?;
 
     workbook.save(filename)?;
 

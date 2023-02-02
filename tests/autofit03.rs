@@ -15,8 +15,8 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "A")?;
-    worksheet.write_string_only(0, 1, "A")?;
+    worksheet.write_string(0, 0, "A")?;
+    worksheet.write_string(0, 1, "A")?;
 
     worksheet.autofit();
 
@@ -33,8 +33,8 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "A")?;
-    worksheet.write_string_only(0, 1, "A")?;
+    worksheet.write_string(0, 0, "A")?;
+    worksheet.write_string(0, 1, "A")?;
 
     worksheet.set_column_width(1, 1.57143)?;
 

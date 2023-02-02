@@ -16,19 +16,19 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the headers.
-    worksheet.write_string_only(2, 3, "Region")?;
-    worksheet.write_string_only(2, 4, "Item")?;
-    worksheet.write_string_only(2, 5, "Volume")?;
-    worksheet.write_string_only(2, 6, "Month")?;
+    worksheet.write_string(2, 3, "Region")?;
+    worksheet.write_string(2, 4, "Item")?;
+    worksheet.write_string(2, 5, "Volume")?;
+    worksheet.write_string(2, 6, "Month")?;
 
     // Write the data used in the autofilter.
     let data = common::get_autofilter_data();
     for (row, data) in data.iter().enumerate() {
         let row = 3 + row as u32;
-        worksheet.write_string_only(row, 3, data.0)?;
-        worksheet.write_string_only(row, 4, data.1)?;
-        worksheet.write_number_only(row, 5, data.2)?;
-        worksheet.write_string_only(row, 6, data.3)?;
+        worksheet.write_string(row, 3, data.0)?;
+        worksheet.write_string(row, 4, data.1)?;
+        worksheet.write_number(row, 5, data.2)?;
+        worksheet.write_string(row, 6, data.3)?;
     }
 
     worksheet.autofilter(2, 3, 52, 6)?;

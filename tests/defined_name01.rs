@@ -15,8 +15,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet1 = workbook.add_worksheet();
 
-    worksheet1.write_string_only(0, 5, "Filter")?;
-    worksheet1.write_string_only(0, 6, "Auto")?;
+    worksheet1.write_string(0, 5, "Filter")?;
+    worksheet1.write_string(0, 6, "Auto")?;
 
     worksheet1.autofilter(0, 5, 0, 6)?;
     worksheet1.set_print_area(0, 0, 5, 4)?;

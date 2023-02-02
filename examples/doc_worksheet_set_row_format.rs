@@ -19,10 +19,10 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_row_format(1, &red_format)?;
 
     // Add some unformatted text that adopts the row format.
-    worksheet.write_string_only(1, 0, "Hello")?;
+    worksheet.write_string(1, 0, "Hello")?;
 
     // Add some formatted text that overrides the row format.
-    worksheet.write_string(1, 2, "Hello", &bold_format)?;
+    worksheet.write_string_with_format(1, 2, "Hello", &bold_format)?;
 
     workbook.save("worksheet.xlsx")?;
 

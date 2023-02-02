@@ -443,19 +443,19 @@ documentation and generally show how an individual function works.
   ranges in a protected worksheet, with additional options.
 
 * doc_worksheet_write_array_formula.rs - Demonstrates writing an array
-  formulas with formatting to a worksheet.
-
-* doc_worksheet_write_array_formula_only.rs - Demonstrates writing an array
   formulas to a worksheet.
+
+* doc_worksheet_write_array_formula_with_format.rs - Demonstrates writing
+  an array formulas with formatting to a worksheet.
 
 * doc_worksheet_write_blank.rs - Demonstrates writing a blank cell with
   formatting, i.e., a cell that has no data but does have formatting.
 
-* doc_worksheet_write_boolean.rs - Demonstrates writing formatted boolean
-  values to a worksheet.
+* doc_worksheet_write_boolean.rs - Demonstrates writing boolean values to a
+  worksheet.
 
-* doc_worksheet_write_boolean_only.rs - Demonstrates writing boolean values
-  to a worksheet.
+* doc_worksheet_write_boolean_with_format.rs - Demonstrates writing
+  formatted boolean values to a worksheet.
 
 * doc_worksheet_write_date.rs - Demonstrates writing formatted dates in an
   Excel worksheet.
@@ -467,35 +467,35 @@ documentation and generally show how an individual function works.
   function which generally returns one value turned into a dynamic array
   function which returns a range of values.
 
-* doc_worksheet_write_dynamic_array_formula_only.rs - Demonstrates a static
-  function which generally returns one value turned into a dynamic array
-  function which returns a range of values.
+* doc_worksheet_write_dynamic_array_formula_with_format.rs - Demonstrates a
+  static function which generally returns one value turned into a dynamic
+  array function which returns a range of values.
 
 * doc_worksheet_write_formula.rs - Demonstrates writing formulas with
   formatting to a worksheet.
 
-* doc_worksheet_write_formula_only.rs - Demonstrates writing formulas with
-  formatting to a worksheet.
+* doc_worksheet_write_formula_with_format.rs - Demonstrates writing
+  formulas with formatting to a worksheet.
 
-* doc_worksheet_write_number.rs - Demonstrates setting different formatting
-  for numbers in an Excel worksheet.
+* doc_worksheet_write_number.rs - Demonstrates writing unformatted numbers
+  to an Excel worksheet. Any numeric type that will convert [`Into`] f64
+  can be transferred to Excel.
 
-* doc_worksheet_write_number_only.rs - Demonstrates writing unformatted
-  numbers to an Excel worksheet. Any numeric type that will convert
-  [`Into`] f64 can be transferred to Excel.
+* doc_worksheet_write_number_with_format.rs - Demonstrates setting
+  different formatting for numbers in an Excel worksheet.
 
 * doc_worksheet_write_rich_string.rs - Demonstrates writing a "rich" string
-  with multiple formats, and an additional cell format.
+  with multiple formats.
 
-* doc_worksheet_write_rich_string_only.rs - Demonstrates writing a "rich"
-  string with multiple formats.
+* doc_worksheet_write_rich_string_with_format.rs - Demonstrates writing a
+  "rich" string with multiple formats, and an additional cell format.
 
-* doc_worksheet_write_string.rs - Demonstrates setting different formatting
-  for numbers in an Excel worksheet.
+* doc_worksheet_write_string.rs - Demonstrates writing some UTF-8 strings
+  to a worksheet. The UTF-8 encoding is the only encoding supported by the
+  Excel file format.
 
-* doc_worksheet_write_string_only.rs - Demonstrates writing some UTF-8
-  strings to a worksheet. The UTF-8 encoding is the only encoding supported
-  by the Excel file format.
+* doc_worksheet_write_string_with_format.rs - Demonstrates setting
+  different formatting for numbers in an Excel worksheet.
 
 * doc_worksheet_write_time.rs - Demonstrates writing formatted times in an
   Excel worksheet.

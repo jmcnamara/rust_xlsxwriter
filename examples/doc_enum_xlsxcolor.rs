@@ -20,12 +20,12 @@ fn main() -> Result<(), XlsxError> {
     let format5 = Format::new().set_font_color(XlsxColor::Theme(4, 0));
     let format6 = Format::new().set_font_color(XlsxColor::Theme(9, 4));
 
-    worksheet.write_string(0, 0, "Red", &format1)?;
-    worksheet.write_string(1, 0, "Green", &format2)?;
-    worksheet.write_string(2, 0, "#4F026A", &format3)?;
-    worksheet.write_string(3, 0, "#73CC5F", &format4)?;
-    worksheet.write_string(4, 0, "Theme (4, 0)", &format5)?;
-    worksheet.write_string(5, 0, "Theme (9, 4)", &format6)?;
+    worksheet.write_string_with_format(0, 0, "Red", &format1)?;
+    worksheet.write_string_with_format(1, 0, "Green", &format2)?;
+    worksheet.write_string_with_format(2, 0, "#4F026A", &format3)?;
+    worksheet.write_string_with_format(3, 0, "#73CC5F", &format4)?;
+    worksheet.write_string_with_format(4, 0, "Theme (4, 0)", &format5)?;
+    worksheet.write_string_with_format(5, 0, "Theme (9, 4)", &format6)?;
 
     workbook.save("colors.xlsx")?;
 

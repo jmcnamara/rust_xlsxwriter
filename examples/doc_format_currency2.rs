@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     // Add a format.
     let currency_format = Format::new().set_num_format("[$$-409]#,##0.00");
 
-    worksheet.write_number(0, 0, 1234.56, &currency_format)?;
+    worksheet.write_number_with_format(0, 0, 1234.56, &currency_format)?;
 
     workbook.save("currency_format.xlsx")?;
 

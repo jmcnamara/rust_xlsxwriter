@@ -15,8 +15,8 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_dynamic_formula_only(0, 1, "=_xlfn.UNIQUE(A1)")?;
-    worksheet.write_number_only(0, 0, 0)?;
+    worksheet.write_dynamic_formula(0, 1, "=_xlfn.UNIQUE(A1)")?;
+    worksheet.write_number(0, 0, 0)?;
 
     workbook.save(filename)?;
 
@@ -29,8 +29,8 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_dynamic_formula_only(0, 1, "=UNIQUE(A1)")?;
-    worksheet.write_number_only(0, 0, 0)?;
+    worksheet.write_dynamic_formula(0, 1, "=UNIQUE(A1)")?;
+    worksheet.write_number(0, 0, 0)?;
 
     workbook.save(filename)?;
 
@@ -43,8 +43,8 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_formula_only(0, 1, "=UNIQUE(A1)")?;
-    worksheet.write_number_only(0, 0, 0)?;
+    worksheet.write_formula(0, 1, "=UNIQUE(A1)")?;
+    worksheet.write_number(0, 0, 0)?;
 
     workbook.save(filename)?;
 
@@ -58,8 +58,8 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_array_formula_only(0, 1, 0, 1, "=UNIQUE(A1)")?;
-    worksheet.write_number_only(0, 0, 0)?;
+    worksheet.write_array_formula(0, 1, 0, 1, "=UNIQUE(A1)")?;
+    worksheet.write_number(0, 0, 0)?;
 
     workbook.save(filename)?;
 

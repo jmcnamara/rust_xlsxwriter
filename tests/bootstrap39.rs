@@ -14,7 +14,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_formula_only(0, 0, "=_xlfn.ISOWEEKNUM(1)")?;
+    worksheet.write_formula(0, 0, "=_xlfn.ISOWEEKNUM(1)")?;
     worksheet.set_formula_result(0, 0, "52");
 
     workbook.save(filename)?;
@@ -28,7 +28,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     worksheet.use_future_functions(true);
-    worksheet.write_formula_only(0, 0, "=ISOWEEKNUM(1)")?;
+    worksheet.write_formula(0, 0, "=ISOWEEKNUM(1)")?;
     worksheet.set_formula_result(0, 0, "52");
 
     workbook.save(filename)?;

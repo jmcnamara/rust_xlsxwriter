@@ -29,20 +29,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_align(FormatAlign::Center)
         .set_align(FormatAlign::VerticalCenter);
 
-    worksheet.write_string_only(0, 0, "Rust")?;
-    worksheet.write_string(1, 0, "Rust", &format1)?;
-    worksheet.write_string(2, 0, "Rust", &format2)?;
-    worksheet.write_string(3, 0, "Rust", &format3)?;
-    worksheet.write_string(4, 0, "Rust", &format4)?;
-    worksheet.write_string(5, 0, "Rust", &format5)?;
-    worksheet.write_string(6, 0, "Rust", &format6)?;
-    worksheet.write_string(7, 0, "Rust", &format7)?;
-    worksheet.write_string(8, 0, "Rust", &format8)?;
-    worksheet.write_string(9, 0, "Rust", &format9)?;
-    worksheet.write_string(10, 0, "Rust", &format10)?;
-    worksheet.write_string(11, 0, "Rust", &format11)?;
-    worksheet.write_string(12, 0, "Rust", &format12)?;
-    worksheet.write_string(13, 0, "Rust", &format13)?;
+    worksheet.write_string(0, 0, "Rust")?;
+    worksheet.write_string_with_format(1, 0, "Rust", &format1)?;
+    worksheet.write_string_with_format(2, 0, "Rust", &format2)?;
+    worksheet.write_string_with_format(3, 0, "Rust", &format3)?;
+    worksheet.write_string_with_format(4, 0, "Rust", &format4)?;
+    worksheet.write_string_with_format(5, 0, "Rust", &format5)?;
+    worksheet.write_string_with_format(6, 0, "Rust", &format6)?;
+    worksheet.write_string_with_format(7, 0, "Rust", &format7)?;
+    worksheet.write_string_with_format(8, 0, "Rust", &format8)?;
+    worksheet.write_string_with_format(9, 0, "Rust", &format9)?;
+    worksheet.write_string_with_format(10, 0, "Rust", &format10)?;
+    worksheet.write_string_with_format(11, 0, "Rust", &format11)?;
+    worksheet.write_string_with_format(12, 0, "Rust", &format12)?;
+    worksheet.write_string_with_format(13, 0, "Rust", &format13)?;
 
     workbook.save(filename)?;
 

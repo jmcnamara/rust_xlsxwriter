@@ -20,15 +20,15 @@ fn main() -> Result<(), XlsxError> {
     let mut image = Image::new("examples/rust_logo.png")?;
 
     // Insert the image.
-    worksheet.write_string_only(0, 0, "Insert an image in a cell:")?;
+    worksheet.write_string(0, 0, "Insert an image in a cell:")?;
     worksheet.insert_image(0, 1, &image)?;
 
     // Insert an image offset in the cell.
-    worksheet.write_string_only(7, 0, "Insert an image with an offset:")?;
+    worksheet.write_string(7, 0, "Insert an image with an offset:")?;
     worksheet.insert_image_with_offset(7, 1, &image, 5, 5)?;
 
     // Insert an image with scaling.
-    worksheet.write_string_only(15, 0, "Insert a scaled image:")?;
+    worksheet.write_string(15, 0, "Insert a scaled image:")?;
     image.set_scale_width(0.75).set_scale_height(0.75);
     worksheet.insert_image(15, 1, &image)?;
 

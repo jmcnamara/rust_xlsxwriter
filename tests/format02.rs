@@ -33,8 +33,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_align(FormatAlign::Center)
         .set_align(FormatAlign::Bottom);
 
-    worksheet.write_string(0, 0, "Foo", &format1)?;
-    worksheet.write_string(0, 1, "Bar", &format2)?;
+    worksheet.write_string_with_format(0, 0, "Foo", &format1)?;
+    worksheet.write_string_with_format(0, 1, "Bar", &format2)?;
 
     workbook.save(filename)?;
 

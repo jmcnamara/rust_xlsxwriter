@@ -15,8 +15,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_boolean_only(0, 0, true)?;
-    worksheet.write_boolean_only(0, 1, false)?;
+    worksheet.write_boolean(0, 0, true)?;
+    worksheet.write_boolean(0, 1, false)?;
 
     worksheet.autofit();
 

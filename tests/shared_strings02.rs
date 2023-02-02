@@ -15,20 +15,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "_")?;
-    worksheet.write_string_only(1, 0, "_x")?;
-    worksheet.write_string_only(2, 0, "_x0")?;
-    worksheet.write_string_only(3, 0, "_x00")?;
-    worksheet.write_string_only(4, 0, "_x000")?;
-    worksheet.write_string_only(5, 0, "_x0000")?;
-    worksheet.write_string_only(6, 0, "_x0000_")?;
-    worksheet.write_string_only(7, 0, "_x005F_")?;
-    worksheet.write_string_only(8, 0, "_x000G_")?;
-    worksheet.write_string_only(9, 0, "_X0000_")?;
-    worksheet.write_string_only(10, 0, "_x000a_")?;
-    worksheet.write_string_only(11, 0, "_x000A_")?;
-    worksheet.write_string_only(12, 0, "_x0000__x0000_")?;
-    worksheet.write_string_only(13, 0, "__x0000__")?;
+    worksheet.write_string(0, 0, "_")?;
+    worksheet.write_string(1, 0, "_x")?;
+    worksheet.write_string(2, 0, "_x0")?;
+    worksheet.write_string(3, 0, "_x00")?;
+    worksheet.write_string(4, 0, "_x000")?;
+    worksheet.write_string(5, 0, "_x0000")?;
+    worksheet.write_string(6, 0, "_x0000_")?;
+    worksheet.write_string(7, 0, "_x005F_")?;
+    worksheet.write_string(8, 0, "_x000G_")?;
+    worksheet.write_string(9, 0, "_X0000_")?;
+    worksheet.write_string(10, 0, "_x000a_")?;
+    worksheet.write_string(11, 0, "_x000A_")?;
+    worksheet.write_string(12, 0, "_x0000__x0000_")?;
+    worksheet.write_string(13, 0, "__x0000__")?;
 
     workbook.save(filename)?;
 

@@ -14,8 +14,8 @@ fn main() -> Result<(), XlsxError> {
 
     worksheet.set_header("&CPage &P of &N");
 
-    worksheet.write_string_only(0, 0, "Hello")?;
-    worksheet.write_string_only(200, 0, "Hello")?;
+    worksheet.write_string(0, 0, "Hello")?;
+    worksheet.write_string(200, 0, "Hello")?;
     worksheet.set_view_page_layout();
 
     workbook.save("worksheet.xlsx")?;

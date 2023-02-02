@@ -15,11 +15,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string_only(0, 0, "a")?;
-    worksheet.write_string_only(1, 0, "aaa")?;
-    worksheet.write_string_only(2, 0, "a")?;
-    worksheet.write_string_only(3, 0, "aaaa")?;
-    worksheet.write_string_only(4, 0, "a")?;
+    worksheet.write_string(0, 0, "a")?;
+    worksheet.write_string(1, 0, "aaa")?;
+    worksheet.write_string(2, 0, "a")?;
+    worksheet.write_string(3, 0, "aaaa")?;
+    worksheet.write_string(4, 0, "a")?;
 
     worksheet.autofit();
 

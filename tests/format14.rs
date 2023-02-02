@@ -17,7 +17,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     let center = Format::new().set_align(FormatAlign::CenterAcross);
 
-    worksheet.write_string(0, 0, "foo", &center)?;
+    worksheet.write_string_with_format(0, 0, "foo", &center)?;
 
     workbook.save(filename)?;
 

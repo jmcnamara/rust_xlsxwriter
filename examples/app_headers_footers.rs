@@ -20,7 +20,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet1.set_view_page_layout();
 
     // Add some sample text.
-    worksheet1.write_string_only(0, 0, "Some text")?;
+    worksheet1.write_string(0, 0, "Some text")?;
 
     worksheet1.set_header("&CHere is some centered text.");
     worksheet1.set_footer("&LHere is some left aligned text.");
@@ -30,7 +30,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet2 = workbook.add_worksheet().set_name("Variables")?;
     worksheet2.set_view_page_layout();
-    worksheet2.write_string_only(0, 0, "Some text")?;
+    worksheet2.write_string(0, 0, "Some text")?;
 
     // Note the sections separators "&L" (left) "&C" (center) and "&R" (right).
     worksheet2.set_header("&LPage &[Page] of &[Pages]&CFilename: &[File]&RSheetname: &[Tab]");
@@ -41,7 +41,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet3 = workbook.add_worksheet().set_name("Images")?;
     worksheet3.set_view_page_layout();
-    worksheet3.write_string_only(0, 0, "Some text")?;
+    worksheet3.write_string(0, 0, "Some text")?;
 
     let mut image = Image::new("examples/rust_logo.png")?;
     image.set_scale_height(0.5);
@@ -58,7 +58,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet4 = workbook.add_worksheet().set_name("Mixed fonts")?;
     worksheet4.set_view_page_layout();
-    worksheet4.write_string_only(0, 0, "Some text")?;
+    worksheet4.write_string(0, 0, "Some text")?;
 
     worksheet4.set_header(r#"&C&"Courier New,Bold"Hello &"Arial,Italic"World"#);
     worksheet4.set_footer(r#"&C&"Symbol"e&"Arial" = mc&X2"#);
@@ -68,7 +68,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet5 = workbook.add_worksheet().set_name("Word wrap")?;
     worksheet5.set_view_page_layout();
-    worksheet5.write_string_only(0, 0, "Some text")?;
+    worksheet5.write_string(0, 0, "Some text")?;
 
     worksheet5.set_header("&CHeading 1\nHeading 2");
 
@@ -77,7 +77,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let worksheet6 = workbook.add_worksheet().set_name("Ampersand")?;
     worksheet6.set_view_page_layout();
-    worksheet6.write_string_only(0, 0, "Some text")?;
+    worksheet6.write_string(0, 0, "Some text")?;
 
     worksheet6.set_header("&CCuriouser && Curiouser - Attorneys at Law");
 

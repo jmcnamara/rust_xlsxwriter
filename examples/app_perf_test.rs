@@ -16,9 +16,9 @@ fn main() -> Result<(), XlsxError> {
     for row in 0..row_max {
         for col in 0..col_max {
             if col % 2 == 1 {
-                worksheet.write_string_only(row, col, "Foo")?;
+                worksheet.write_string(row, col, "Foo")?;
             } else {
-                worksheet.write_number_only(row, col, 12345.0)?;
+                worksheet.write_number(row, col, 12345.0)?;
             }
         }
     }

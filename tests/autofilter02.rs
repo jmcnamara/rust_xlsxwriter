@@ -16,19 +16,19 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the headers.
-    worksheet.write_string_only(0, 0, "Region")?;
-    worksheet.write_string_only(0, 1, "Item")?;
-    worksheet.write_string_only(0, 2, "Volume")?;
-    worksheet.write_string_only(0, 3, "Month")?;
+    worksheet.write_string(0, 0, "Region")?;
+    worksheet.write_string(0, 1, "Item")?;
+    worksheet.write_string(0, 2, "Volume")?;
+    worksheet.write_string(0, 3, "Month")?;
 
     // Write the data used in the autofilter.
     let data = common::get_autofilter_data();
     for (row, data) in data.iter().enumerate() {
         let row = 1 + row as u32;
-        worksheet.write_string_only(row, 0, data.0)?;
-        worksheet.write_string_only(row, 1, data.1)?;
-        worksheet.write_number_only(row, 2, data.2)?;
-        worksheet.write_string_only(row, 3, data.3)?;
+        worksheet.write_string(row, 0, data.0)?;
+        worksheet.write_string(row, 1, data.1)?;
+        worksheet.write_number(row, 2, data.2)?;
+        worksheet.write_string(row, 3, data.3)?;
     }
 
     worksheet.autofilter(0, 0, 50, 3)?;
@@ -48,19 +48,19 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the headers.
-    worksheet.write_string_only(0, 0, "Region")?;
-    worksheet.write_string_only(0, 1, "Item")?;
-    worksheet.write_string_only(0, 2, "Volume")?;
-    worksheet.write_string_only(0, 3, "Month")?;
+    worksheet.write_string(0, 0, "Region")?;
+    worksheet.write_string(0, 1, "Item")?;
+    worksheet.write_string(0, 2, "Volume")?;
+    worksheet.write_string(0, 3, "Month")?;
 
     // Write the data used in the autofilter.
     let data = common::get_autofilter_data();
     for (row, data) in data.iter().enumerate() {
         let row = 1 + row as u32;
-        worksheet.write_string_only(row, 0, data.0)?;
-        worksheet.write_string_only(row, 1, data.1)?;
-        worksheet.write_number_only(row, 2, data.2)?;
-        worksheet.write_string_only(row, 3, data.3)?;
+        worksheet.write_string(row, 0, data.0)?;
+        worksheet.write_string(row, 1, data.1)?;
+        worksheet.write_number(row, 2, data.2)?;
+        worksheet.write_string(row, 3, data.3)?;
 
         // Hide the rows that don't match the filter.
         if data.0 != "East" {

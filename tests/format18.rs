@@ -17,7 +17,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let quote = Format::new().set_quote_prefix();
 
-    worksheet.write_string(0, 0, "= Hello", &quote)?;
+    worksheet.write_string_with_format(0, 0, "= Hello", &quote)?;
 
     workbook.save(filename)?;
 

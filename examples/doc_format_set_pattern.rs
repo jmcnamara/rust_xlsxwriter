@@ -22,7 +22,7 @@ fn main() -> Result<(), XlsxError> {
         .set_foreground_color(XlsxColor::Red)
         .set_pattern(FormatPattern::DarkVertical);
 
-    worksheet.write_string(0, 0, "Rust", &format1)?;
+    worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
     worksheet.write_blank(1, 0, &format2)?;
 
     workbook.save("formats.xlsx")?;

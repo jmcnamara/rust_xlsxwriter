@@ -10,13 +10,13 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet(); // Sheet1
-    worksheet.write_string_only(0, 0, "Hello")?;
+    worksheet.write_string(0, 0, "Hello")?;
 
     let worksheet = workbook.add_worksheet().set_name("Foglio2")?;
-    worksheet.write_string_only(0, 0, "Hello")?;
+    worksheet.write_string(0, 0, "Hello")?;
 
     let worksheet = workbook.add_worksheet(); // Sheet3
-    worksheet.write_string_only(0, 0, "Hello")?;
+    worksheet.write_string(0, 0, "Hello")?;
 
     workbook.save("workbook.xlsx")?;
 

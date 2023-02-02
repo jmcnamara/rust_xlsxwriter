@@ -20,11 +20,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format5 = Format::new().set_font_size(9.5);
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string(0, 0, "Rust", &format1)?;
-    worksheet.write_string(1, 0, "Rust", &format2)?;
-    worksheet.write_string(2, 0, "Rust", &format3)?;
-    worksheet.write_string(3, 0, "Rust", &format4)?;
-    worksheet.write_string(4, 0, "Rust", &format5)?;
+    worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
+    worksheet.write_string_with_format(1, 0, "Rust", &format2)?;
+    worksheet.write_string_with_format(2, 0, "Rust", &format3)?;
+    worksheet.write_string_with_format(3, 0, "Rust", &format4)?;
+    worksheet.write_string_with_format(4, 0, "Rust", &format5)?;
 
     // Secondary test for default format.
     workbook.register_format(&mut format1);

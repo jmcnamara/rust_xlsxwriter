@@ -16,25 +16,25 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet().set_name("5&4")?;
 
     worksheet
-        .write_formula_only(0, 0, r#"=IF(1>2,0,1)"#)?
+        .write_formula(0, 0, r#"=IF(1>2,0,1)"#)?
         .set_formula_result(0, 0, "1");
     worksheet
-        .write_formula_only(1, 0, r#"=CONCATENATE("'","<>&")"#)?
+        .write_formula(1, 0, r#"=CONCATENATE("'","<>&")"#)?
         .set_formula_result(1, 0, "'<>&");
     worksheet
-        .write_formula_only(2, 0, r#"=1&"b""#)?
+        .write_formula(2, 0, r#"=1&"b""#)?
         .set_formula_result(2, 0, "1b");
     worksheet
-        .write_formula_only(3, 0, r#"="'""#)?
+        .write_formula(3, 0, r#"="'""#)?
         .set_formula_result(3, 0, r#"'"#);
     worksheet
-        .write_formula_only(4, 0, r#"="""""#)?
+        .write_formula(4, 0, r#"="""""#)?
         .set_formula_result(4, 0, r#"""#);
     worksheet
-        .write_formula_only(5, 0, r#"="&" & "&""#)?
+        .write_formula(5, 0, r#"="&" & "&""#)?
         .set_formula_result(5, 0, "&&");
 
-    worksheet.write_string_only(7, 0, r#""&<>"#)?;
+    worksheet.write_string(7, 0, r#""&<>"#)?;
 
     workbook.save(filename)?;
 

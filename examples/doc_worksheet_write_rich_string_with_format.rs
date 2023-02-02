@@ -3,9 +3,9 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates writing a "rich" string with multiple
-//! formats.
+//! formats, and an additional cell format.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -28,17 +28,13 @@ fn main() -> Result<(), XlsxError> {
         (&default, " and this is "),
         (&blue, "blue"),
     ];
-    worksheet.write_rich_string_only(0, 0, &segments)?;
+    worksheet.write_rich_string(0, 0, &segments)?;
 
-    // It is possible, and idiomatic, to use slices as the string segments.
-    let text = "This is blue and this is red";
-    let segments = [
-        (&default, &text[..8]),
-        (&blue, &text[8..12]),
-        (&default, &text[12..25]),
-        (&red, &text[25..]),
-    ];
-    worksheet.write_rich_string_only(1, 0, &segments)?;
+    // Add an extra format to use for the entire cell.
+    let center = Format::new().set_align(FormatAlign::Center);
+
+    // Write the rich string again with the cell format.
+    worksheet.write_rich_string_with_format(2, 0, &segments, &center)?;
 
     // Save the file to disk.
     workbook.save("worksheet.xlsx")?;

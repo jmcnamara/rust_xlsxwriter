@@ -16,10 +16,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let format1 = Format::new().set_bold();
 
-    worksheet.write_boolean_only(0, 0, true)?;
-    worksheet.write_boolean_only(1, 0, false)?;
-    worksheet.write_boolean(2, 0, true, &format1)?;
-    worksheet.write_boolean(3, 0, false, &format1)?;
+    worksheet.write_boolean(0, 0, true)?;
+    worksheet.write_boolean(1, 0, false)?;
+    worksheet.write_boolean_with_format(2, 0, true, &format1)?;
+    worksheet.write_boolean_with_format(3, 0, false, &format1)?;
 
     workbook.save(filename)?;
 

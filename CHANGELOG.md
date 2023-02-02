@@ -138,14 +138,14 @@ Added more page setup methods.
 ### Added
 
 - Added support for "rich" strings with multiple font formats via
-  [`worksheet.write_rich_string_only()`] and [`worksheet.write_rich_string()`].
+  [`worksheet.write_rich_string()`] and [`worksheet.write_rich_string_with_format()`].
   For example strings like "This is **bold** and this is *italic*".
 
   See also the [Rich strings example] in the user guide.
 
 [Rich strings example]: https://rustxlsxwriter.github.io/examples/rich_strings.html
-[`worksheet.write_rich_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_rich_string
-[`worksheet.write_rich_string_only()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_rich_string_only
+[`worksheet.write_rich_string_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_rich_string
+[`worksheet.write_rich_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_rich_string_only
 
 ## [0.17.1] - 2022-12-18
 
@@ -459,13 +459,13 @@ restructures the Workbook constructor/destructor sequence and introduces a
 ### Added
 
 - Added support for array formulas and dynamic array formulas via
-  [`worksheet.write_array_formula()`] and
-  [`worksheet.write_dynamic_array_formula()`].
+  [`worksheet.write_array()`] and
+  [`worksheet.write_dynamic_array_formula_with_format()`].
 
 See also the rust_xlsxwriter user documentation on [Dynamic Array support].
 
-[`worksheet.write_array_formula()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_array_formula
-[`worksheet.write_dynamic_array_formula()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_dynamic_array_formula
+[`worksheet.write_array()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_array_formula
+[`worksheet.write_dynamic_array_formula_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_dynamic_array_formula
 
 [Dynamic Array support]: https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
 
@@ -480,10 +480,10 @@ See also the rust_xlsxwriter user documentation on [Dynamic Array support].
 
 ### Added
 
-- Added [`worksheet.write_boolean()`] method to support writing Excel boolean
+- Added [`worksheet.write_boolean_with_format()`] method to support writing Excel boolean
   values.
 
-[`worksheet.write_boolean()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_boolean
+[`worksheet.write_boolean_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_boolean
 
 ## [0.2.1] - 2022-09-22
 

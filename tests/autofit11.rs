@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     worksheet
-        .write_formula_only(0, 0, "=9999+1")?
+        .write_formula(0, 0, "=9999+1")?
         .set_formula_result(0, 0, "10000");
 
     worksheet.autofit();

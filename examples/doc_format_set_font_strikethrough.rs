@@ -14,7 +14,7 @@ fn main() -> Result<(), XlsxError> {
 
     let format = Format::new().set_font_strikethrough();
 
-    worksheet.write_string(0, 0, "Strikethrough Text", &format)?;
+    worksheet.write_string_with_format(0, 0, "Strikethrough Text", &format)?;
 
     workbook.save("formats.xlsx")?;
 

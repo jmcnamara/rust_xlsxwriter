@@ -15,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
     // Hide row 2 (with zero indexing).
     worksheet.set_row_hidden(1)?;
 
-    worksheet.write_string_only(2, 0, "Row 2 is hidden")?;
+    worksheet.write_string(2, 0, "Row 2 is hidden")?;
 
     workbook.save("worksheet.xlsx")?;
 

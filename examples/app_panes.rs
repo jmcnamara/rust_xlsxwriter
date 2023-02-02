@@ -36,12 +36,12 @@ fn main() -> Result<(), XlsxError> {
     // Add some data and formatting to the worksheet.
     worksheet1.set_row_height(0, 20)?;
     for col in 0..max_col {
-        worksheet1.write_string(0, col, "Scroll down", &header_format)?;
+        worksheet1.write_string_with_format(0, col, "Scroll down", &header_format)?;
         worksheet1.set_column_width(col, 16)?;
     }
     for row in 1..max_row {
         for col in 0..max_col {
-            worksheet1.write_number(row, col, row + 1, &center_format)?;
+            worksheet1.write_number_with_format(row, col, row + 1, &center_format)?;
         }
     }
 
@@ -56,10 +56,10 @@ fn main() -> Result<(), XlsxError> {
     // Add some data and formatting to the worksheet.
     worksheet2.set_column_width(0, 16)?;
     for row in 0..max_row {
-        worksheet2.write_string(row, 0, "Scroll Across", &header_format)?;
+        worksheet2.write_string_with_format(row, 0, "Scroll Across", &header_format)?;
 
         for col in 1..max_col {
-            worksheet2.write_number(row, col, col, &center_format)?;
+            worksheet2.write_number_with_format(row, col, col, &center_format)?;
         }
     }
 
@@ -77,14 +77,14 @@ fn main() -> Result<(), XlsxError> {
     worksheet3.write_blank(0, 0, &header_format)?;
 
     for col in 1..max_col {
-        worksheet3.write_string(0, col, "Scroll down", &header_format)?;
+        worksheet3.write_string_with_format(0, col, "Scroll down", &header_format)?;
         worksheet3.set_column_width(col, 16)?;
     }
     for row in 1..max_row {
-        worksheet3.write_string(row, 0, "Scroll Across", &header_format)?;
+        worksheet3.write_string_with_format(row, 0, "Scroll Across", &header_format)?;
 
         for col in 1..max_col {
-            worksheet3.write_number(row, col, col, &center_format)?;
+            worksheet3.write_number_with_format(row, col, col, &center_format)?;
         }
     }
 
@@ -106,14 +106,14 @@ fn main() -> Result<(), XlsxError> {
     worksheet4.write_blank(0, 0, &header_format)?;
 
     for col in 1..max_col {
-        worksheet4.write_string(0, col, "Scroll down", &header_format)?;
+        worksheet4.write_string_with_format(0, col, "Scroll down", &header_format)?;
         worksheet4.set_column_width(col, 16)?;
     }
     for row in 1..max_row {
-        worksheet4.write_string(row, 0, "Scroll Across", &header_format)?;
+        worksheet4.write_string_with_format(row, 0, "Scroll Across", &header_format)?;
 
         for col in 1..max_col {
-            worksheet4.write_number(row, col, col, &center_format)?;
+            worksheet4.write_number_with_format(row, col, col, &center_format)?;
         }
     }
 

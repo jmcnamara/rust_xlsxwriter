@@ -20,8 +20,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_format(0, &bold)?;
     worksheet.set_column_format(2, &italic)?;
 
-    worksheet.write_string_only(0, 0, "Foo")?;
-    worksheet.write_string_only(0, 2, "Bar")?;
+    worksheet.write_string(0, 0, "Foo")?;
+    worksheet.write_string(0, 2, "Bar")?;
 
     workbook.save(filename)?;
 

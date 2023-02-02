@@ -77,11 +77,11 @@ mod tests {
         let mut worksheet = Worksheet::new();
         let bold = Format::new().set_bold();
 
-        worksheet.write_string_only(0, 0, "Header").unwrap();
-        worksheet.write_string_only(1, 0, "").unwrap();
-        worksheet.write_string_only(2, 0, " ").unwrap();
-        worksheet.write_string_only(3, 0, "  ").unwrap();
-        worksheet.write_string(4, 0, "", &bold).unwrap();
+        worksheet.write_string(0, 0, "Header").unwrap();
+        worksheet.write_string(1, 0, "").unwrap();
+        worksheet.write_string(2, 0, " ").unwrap();
+        worksheet.write_string(3, 0, "  ").unwrap();
+        worksheet.write_string_with_format(4, 0, "", &bold).unwrap();
 
         let filter_condition = FilterCondition::new().add_list_blanks_filter();
 
@@ -97,14 +97,14 @@ mod tests {
     #[test]
     fn row_matches_list_filter_strings() {
         let mut worksheet = Worksheet::new();
-        worksheet.write_string_only(0, 0, "Header").unwrap();
-        worksheet.write_string_only(1, 0, "South").unwrap();
-        worksheet.write_string_only(2, 0, "south").unwrap();
-        worksheet.write_string_only(3, 0, "SOUTH").unwrap();
-        worksheet.write_string_only(4, 0, "South ").unwrap();
-        worksheet.write_string_only(5, 0, " South").unwrap();
-        worksheet.write_string_only(6, 0, " South ").unwrap();
-        worksheet.write_string_only(7, 0, "Mouth").unwrap();
+        worksheet.write_string(0, 0, "Header").unwrap();
+        worksheet.write_string(1, 0, "South").unwrap();
+        worksheet.write_string(2, 0, "south").unwrap();
+        worksheet.write_string(3, 0, "SOUTH").unwrap();
+        worksheet.write_string(4, 0, "South ").unwrap();
+        worksheet.write_string(5, 0, " South").unwrap();
+        worksheet.write_string(6, 0, " South ").unwrap();
+        worksheet.write_string(7, 0, "Mouth").unwrap();
 
         let filter_condition = FilterCondition::new().add_list_filter("South");
 
@@ -121,12 +121,12 @@ mod tests {
     fn row_matches_list_filter_numbers() {
         let mut worksheet = Worksheet::new();
 
-        worksheet.write_string_only(0, 0, "Header").unwrap();
-        worksheet.write_number_only(1, 0, 1000).unwrap();
-        worksheet.write_number_only(2, 0, 1000.0).unwrap();
-        worksheet.write_string_only(3, 0, "1000").unwrap();
-        worksheet.write_string_only(4, 0, " 1000 ").unwrap();
-        worksheet.write_number_only(5, 0, 2000).unwrap();
+        worksheet.write_string(0, 0, "Header").unwrap();
+        worksheet.write_number(1, 0, 1000).unwrap();
+        worksheet.write_number(2, 0, 1000.0).unwrap();
+        worksheet.write_string(3, 0, "1000").unwrap();
+        worksheet.write_string(4, 0, " 1000 ").unwrap();
+        worksheet.write_number(5, 0, 2000).unwrap();
 
         let filter_condition = FilterCondition::new().add_list_filter(1000);
 
@@ -184,13 +184,13 @@ mod tests {
 
         // Test an empty array.
         let segments = [];
-        let result = worksheet.write_rich_string_only(0, 0, &segments);
+        let result = worksheet.write_rich_string(0, 0, &segments);
         assert!(matches!(result, Err(XlsxError::ParameterError(_))));
 
         // Test an empty string.
         let default = Format::default();
         let segments = [(&default, "")];
-        let result = worksheet.write_rich_string_only(0, 0, &segments);
+        let result = worksheet.write_rich_string(0, 0, &segments);
         assert!(matches!(result, Err(XlsxError::ParameterError(_))));
     }
 
@@ -381,7 +381,7 @@ mod tests {
 
         for (col_num, row_num) in (0..17).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -397,7 +397,7 @@ mod tests {
 
         for (col_num, row_num) in (1..18).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -413,7 +413,7 @@ mod tests {
 
         for (col_num, row_num) in (2..19).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -429,7 +429,7 @@ mod tests {
 
         for (col_num, row_num) in (3..20).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -445,7 +445,7 @@ mod tests {
 
         for (col_num, row_num) in (4..21).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -461,7 +461,7 @@ mod tests {
 
         for (col_num, row_num) in (5..22).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -477,7 +477,7 @@ mod tests {
 
         for (col_num, row_num) in (6..23).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -493,7 +493,7 @@ mod tests {
 
         for (col_num, row_num) in (7..24).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -509,7 +509,7 @@ mod tests {
 
         for (col_num, row_num) in (8..25).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -525,7 +525,7 @@ mod tests {
 
         for (col_num, row_num) in (9..26).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -541,7 +541,7 @@ mod tests {
 
         for (col_num, row_num) in (10..27).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -557,7 +557,7 @@ mod tests {
 
         for (col_num, row_num) in (11..28).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -573,7 +573,7 @@ mod tests {
 
         for (col_num, row_num) in (12..29).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -589,7 +589,7 @@ mod tests {
 
         for (col_num, row_num) in (13..30).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -605,7 +605,7 @@ mod tests {
 
         for (col_num, row_num) in (14..31).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -621,7 +621,7 @@ mod tests {
 
         for (col_num, row_num) in (15..32).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -637,7 +637,7 @@ mod tests {
 
         for (col_num, row_num) in (16..33).enumerate() {
             worksheet
-                .write_number_only(row_num, col_num as u16, 1.0)
+                .write_number(row_num, col_num as u16, 1.0)
                 .unwrap();
         }
 
@@ -653,7 +653,7 @@ mod tests {
 
         for (col_num, row_num) in (16..33).enumerate() {
             worksheet
-                .write_number_only(row_num, (col_num + 1) as u16, 1.0)
+                .write_number(row_num, (col_num + 1) as u16, 1.0)
                 .unwrap();
         }
 
@@ -782,16 +782,16 @@ mod tests {
         assert_eq!(worksheet.check_dimensions(ROW_MAX, 0), false);
         assert_eq!(worksheet.check_dimensions(0, COL_MAX), false);
 
-        let result = worksheet.write_string(ROW_MAX, 0, "Foo", &format);
+        let result = worksheet.write_string_with_format(ROW_MAX, 0, "Foo", &format);
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        let result = worksheet.write_string_only(ROW_MAX, 0, "Foo");
+        let result = worksheet.write_string(ROW_MAX, 0, "Foo");
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        let result = worksheet.write_number(ROW_MAX, 0, 0, &format);
+        let result = worksheet.write_number_with_format(ROW_MAX, 0, 0, &format);
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
-        let result = worksheet.write_number_only(ROW_MAX, 0, 0);
+        let result = worksheet.write_number(ROW_MAX, 0, 0);
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
 
         let result = worksheet.set_row_height(ROW_MAX, 20);
@@ -819,7 +819,7 @@ mod tests {
         let chars: [u8; 32_768] = [64; 32_768];
         let long_string = std::str::from_utf8(&chars);
 
-        let result = worksheet.write_string_only(0, 0, long_string.unwrap());
+        let result = worksheet.write_string(0, 0, long_string.unwrap());
         assert!(matches!(result, Err(XlsxError::MaxStringLengthExceeded)));
     }
 

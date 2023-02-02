@@ -33,10 +33,10 @@ fn main() -> Result<(), XlsxError> {
         .set_align(FormatAlign::Bottom)
         .set_align(FormatAlign::Right);
 
-    worksheet.write_string(0, 0, "Center", &format1)?;
-    worksheet.write_string(1, 0, "Top - Left", &format2)?;
-    worksheet.write_string(2, 0, "Center - Center", &format3)?;
-    worksheet.write_string(3, 0, "Bottom - Right", &format4)?;
+    worksheet.write_string_with_format(0, 0, "Center", &format1)?;
+    worksheet.write_string_with_format(1, 0, "Top - Left", &format2)?;
+    worksheet.write_string_with_format(2, 0, "Center - Center", &format3)?;
+    worksheet.write_string_with_format(3, 0, "Bottom - Right", &format4)?;
 
     workbook.save("formats.xlsx")?;
 

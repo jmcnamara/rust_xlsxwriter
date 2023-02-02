@@ -23,14 +23,14 @@ fn main() -> Result<(), XlsxError> {
     let format7 = Format::new().set_num_format("d mmmm yyyy");
     let format8 = Format::new().set_num_format("dd/mm/yyyy hh:mm AM/PM");
 
-    worksheet.write_number(0, 0, 3.1415926, &format1)?;
-    worksheet.write_number(1, 0, 3.1415926, &format2)?;
-    worksheet.write_number(2, 0, 1234.56, &format3)?;
-    worksheet.write_number(3, 0, 1234.56, &format4)?;
-    worksheet.write_number(4, 0, 44927.521, &format5)?;
-    worksheet.write_number(5, 0, 44927.521, &format6)?;
-    worksheet.write_number(6, 0, 44927.521, &format7)?;
-    worksheet.write_number(7, 0, 44927.521, &format8)?;
+    worksheet.write_number_with_format(0, 0, 3.1415926, &format1)?;
+    worksheet.write_number_with_format(1, 0, 3.1415926, &format2)?;
+    worksheet.write_number_with_format(2, 0, 1234.56, &format3)?;
+    worksheet.write_number_with_format(3, 0, 1234.56, &format4)?;
+    worksheet.write_number_with_format(4, 0, 44927.521, &format5)?;
+    worksheet.write_number_with_format(5, 0, 44927.521, &format6)?;
+    worksheet.write_number_with_format(6, 0, 44927.521, &format7)?;
+    worksheet.write_number_with_format(7, 0, 44927.521, &format8)?;
 
     workbook.save("formats.xlsx")?;
 
