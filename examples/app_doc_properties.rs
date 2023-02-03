@@ -5,12 +5,12 @@
 //! An example of setting workbook document properties for a file created using
 //! the rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let properties = Properties::new()
+    let properties = DocProperties::new()
         .set_title("This is an example spreadsheet")
         .set_subject("That demonstrates document properties")
         .set_author("A. Rust User")

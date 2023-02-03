@@ -6,11 +6,11 @@
 
 use chrono::{DateTime, Utc};
 
-use crate::{xmlwriter::XMLWriter, CustomProperty, CustomPropertyType, Properties};
+use crate::{xmlwriter::XMLWriter, CustomProperty, CustomPropertyType, DocProperties};
 
 pub struct Custom {
     pub(crate) writer: XMLWriter,
-    pub(crate) properties: Properties,
+    pub(crate) properties: DocProperties,
 }
 
 impl Custom {
@@ -25,7 +25,7 @@ impl Custom {
         Custom {
             writer,
 
-            properties: Properties::new(),
+            properties: DocProperties::new(),
         }
     }
 
@@ -118,7 +118,7 @@ impl Custom {
 mod tests {
 
     use crate::custom::Custom;
-    use crate::{test_functions::xml_to_vec, Properties};
+    use crate::{test_functions::xml_to_vec, DocProperties};
     use chrono::{TimeZone, Utc};
     use pretty_assertions::assert_eq;
 
@@ -126,7 +126,7 @@ mod tests {
     fn test_assemble1() {
         let mut custom = Custom::new();
 
-        let properties = Properties::new().set_custom_property("Checked by", "Adam");
+        let properties = DocProperties::new().set_custom_property("Checked by", "Adam");
 
         custom.properties = properties;
 
@@ -155,7 +155,7 @@ mod tests {
 
         let mut custom = Custom::new();
 
-        let properties = Properties::new()
+        let properties = DocProperties::new()
             .set_custom_property("Checked by", "Adam")
             .set_custom_property("Date completed", &date)
             .set_custom_property("Document number", 12345)

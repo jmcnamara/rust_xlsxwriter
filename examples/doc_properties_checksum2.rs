@@ -6,7 +6,7 @@
 //! constant creation date.
 
 use chrono::{TimeZone, Utc};
-use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -15,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
     let date = Utc.with_ymd_and_hms(2023, 1, 1, 0, 0, 0).unwrap();
 
     // Add it to the document metadata.
-    let properties = Properties::new().set_creation_datetime(&date);
+    let properties = DocProperties::new().set_creation_datetime(&date);
     workbook.set_properties(&properties);
 
     let worksheet = workbook.add_worksheet();

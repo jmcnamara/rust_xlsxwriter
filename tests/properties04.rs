@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use chrono::{TimeZone, Utc};
-use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 
 mod common;
 
@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let date = Utc.with_ymd_and_hms(2016, 12, 12, 23, 0, 0).unwrap();
 
-    let properties = Properties::new()
+    let properties = DocProperties::new()
         .set_custom_property("Checked by", "Adam")
         .set_custom_property("Date completed", &date)
         .set_custom_property("Document number", 12345)

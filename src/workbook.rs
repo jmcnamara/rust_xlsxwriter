@@ -17,7 +17,7 @@ use crate::packager::Packager;
 use crate::packager::PackagerOptions;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
-use crate::{utility, DefinedName, DefinedNameType, Properties, NUM_IMAGE_FORMATS};
+use crate::{utility, DefinedName, DefinedNameType, DocProperties, NUM_IMAGE_FORMATS};
 use crate::{FormatPattern, XlsxColor};
 
 /// The Workbook struct represents an Excel file in it's entirety. It is the
@@ -92,7 +92,7 @@ use crate::{FormatPattern, XlsxColor};
 /// ```
 pub struct Workbook {
     pub(crate) writer: XMLWriter,
-    pub(crate) properties: Properties,
+    pub(crate) properties: DocProperties,
     pub(crate) worksheets: Vec<Worksheet>,
     pub(crate) xf_formats: Vec<Format>,
     pub(crate) font_count: u16,
@@ -159,7 +159,7 @@ impl Workbook {
 
         let mut workbook = Workbook {
             writer,
-            properties: Properties::new(),
+            properties: DocProperties::new(),
             font_count: 0,
             active_tab: 0,
             fill_count: 0,
@@ -873,11 +873,11 @@ impl Workbook {
     /// Set the Excel document metadata properties.
     ///
     /// Set various Excel document metadata properties such as Author or
-    /// Creation Date. It is used in conjunction with the [`Properties`] struct.
+    /// Creation Date. It is used in conjunction with the [`DocProperties`] struct.
     ///
     /// # Arguments
     ///
-    /// * `properties` - A reference to a [`Properties`] object.
+    /// * `properties` - A reference to a [`DocProperties`] object.
     ///
     /// # Examples
     ///
@@ -887,12 +887,12 @@ impl Workbook {
     /// ```
     /// # // This code is available in examples/app_doc_properties.rs
     /// #
-    /// # use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
     /// #
-    ///     let properties = Properties::new()
+    ///     let properties = DocProperties::new()
     ///         .set_title("This is an example spreadsheet")
     ///         .set_subject("That demonstrates document properties")
     ///         .set_author("A. Rust User")
@@ -930,7 +930,7 @@ impl Workbook {
     /// # // This code is available in examples/doc_properties_checksum2.rs
     /// #
     /// use chrono::{TimeZone, Utc};
-    /// use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+    /// use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
@@ -939,7 +939,7 @@ impl Workbook {
     ///     let date = Utc.with_ymd_and_hms(2023, 1, 1, 0, 0, 0).unwrap();
     ///
     ///     // Add it to the document metadata.
-    ///     let properties = Properties::new().set_creation_datetime(&date);
+    ///     let properties = DocProperties::new().set_creation_datetime(&date);
     ///     workbook.set_properties(&properties);
     ///
     ///     let worksheet = workbook.add_worksheet();
@@ -956,7 +956,7 @@ impl Workbook {
     /// [Checksum of a saved file]:
     ///     https://rustxlsxwriter.github.io/workbook/checksum.html
     ///
-    pub fn set_properties(&mut self, properties: &Properties) -> &mut Workbook {
+    pub fn set_properties(&mut self, properties: &DocProperties) -> &mut Workbook {
         self.properties = properties.clone();
         self
     }

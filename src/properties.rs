@@ -8,19 +8,19 @@
 
 use chrono::{DateTime, Utc};
 
-/// The Properties struct is used to create an object to represent document
+/// The DocProperties struct is used to create an object to represent document
 /// metadata properties.
 ///
-/// The Properties struct is used to create an object to represent various
+/// The DocProperties struct is used to create an object to represent various
 /// document properties for an Excel file such as the Author's name or the
 /// Creation Date.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/app_doc_properties.png">
 ///
-/// Properties can be set for the "Summary" section and also for the "Custom"
+/// DocProperties can be set for the "Summary" section and also for the "Custom"
 /// section of the Excel document properties. See the examples below.
 ///
-/// The Properties struct is used in conjunction with the
+/// The DocProperties struct is used in conjunction with the
 /// [`workbook.set_properties()`](crate::Workbook::set_properties) method.
 ///
 /// # Examples
@@ -32,19 +32,19 @@ use chrono::{DateTime, Utc};
 /// ```
 /// # // This code is available in examples/app_doc_properties.rs
 /// #
-/// use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+/// use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     let mut workbook = Workbook::new();
 ///
-///     let properties = Properties::new()
+///     let properties = DocProperties::new()
 ///         .set_title("This is an example spreadsheet")
 ///         .set_subject("That demonstrates document properties")
 ///         .set_author("A. Rust User")
 ///         .set_manager("J. Alfred Prufrock")
 ///         .set_company("Rust Solutions Inc")
 ///         .set_category("Sample spreadsheets")
-///         .set_keywords("Sample, Example, Properties")
+///         .set_keywords("Sample, Example, DocProperties")
 ///         .set_comment("Created with Rust and rust_xlsxwriter");
 ///
 ///     workbook.set_properties(&properties);
@@ -65,12 +65,12 @@ use chrono::{DateTime, Utc};
 /// ```
 /// # // This code is available in examples/doc_properties_custom.rs
 /// #
-/// use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+/// use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     let mut workbook = Workbook::new();
 ///
-///     let properties = Properties::new()
+///     let properties = DocProperties::new()
 ///         .set_custom_property("Checked by", "Admin")
 ///         .set_custom_property("Cross check", true)
 ///         .set_custom_property("Department", "Finance")
@@ -158,7 +158,7 @@ use chrono::{DateTime, Utc};
 /// # // This code is available in examples/doc_properties_checksum2.rs
 /// #
 /// use chrono::{TimeZone, Utc};
-/// use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+/// use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     let mut workbook = Workbook::new();
@@ -167,7 +167,7 @@ use chrono::{DateTime, Utc};
 ///     let date = Utc.with_ymd_and_hms(2023, 1, 1, 0, 0, 0).unwrap();
 ///
 ///     // Add it to the document metadata.
-///     let properties = Properties::new().set_creation_datetime(&date);
+///     let properties = DocProperties::new().set_creation_datetime(&date);
 ///     workbook.set_properties(&properties);
 ///
 ///     let worksheet = workbook.add_worksheet();
@@ -196,7 +196,7 @@ use chrono::{DateTime, Utc};
 /// ```
 ///
 #[derive(Clone)]
-pub struct Properties {
+pub struct DocProperties {
     pub(crate) author: String,
     pub(crate) title: String,
     pub(crate) comment: String,
@@ -211,16 +211,16 @@ pub struct Properties {
     pub(crate) custom_properties: Vec<CustomProperty>,
 }
 
-impl Default for Properties {
+impl Default for DocProperties {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Properties {
-    /// Create a new Properties struct.
-    pub fn new() -> Properties {
-        Properties {
+impl DocProperties {
+    /// Create a new DocProperties struct.
+    pub fn new() -> DocProperties {
+        DocProperties {
             title: "".to_string(),
             status: "".to_string(),
             author: "".to_string(),
@@ -245,7 +245,7 @@ impl Properties {
     ///
     /// * `title` - The title string property.
     ///
-    pub fn set_title(mut self, title: &str) -> Properties {
+    pub fn set_title(mut self, title: &str) -> DocProperties {
         self.title = title.to_string();
 
         self
@@ -260,7 +260,7 @@ impl Properties {
     ///
     /// * `subject` - The subject string property.
     ///
-    pub fn set_subject(mut self, subject: &str) -> Properties {
+    pub fn set_subject(mut self, subject: &str) -> DocProperties {
         self.subject = subject.to_string();
 
         self
@@ -275,7 +275,7 @@ impl Properties {
     ///
     /// * `manager` - The manager string property.
     ///
-    pub fn set_manager(mut self, manager: &str) -> Properties {
+    pub fn set_manager(mut self, manager: &str) -> DocProperties {
         self.manager = manager.to_string();
 
         self
@@ -290,7 +290,7 @@ impl Properties {
     ///
     /// * `company` - The company string property.
     ///
-    pub fn set_company(mut self, company: &str) -> Properties {
+    pub fn set_company(mut self, company: &str) -> DocProperties {
         self.company = company.to_string();
 
         self
@@ -305,7 +305,7 @@ impl Properties {
     ///
     /// * `category` - The category string property.
     ///
-    pub fn set_category(mut self, category: &str) -> Properties {
+    pub fn set_category(mut self, category: &str) -> DocProperties {
         self.category = category.to_string();
 
         self
@@ -320,7 +320,7 @@ impl Properties {
     ///
     /// * `author` - The author string property.
     ///
-    pub fn set_author(mut self, author: &str) -> Properties {
+    pub fn set_author(mut self, author: &str) -> DocProperties {
         self.author = author.to_string();
 
         self
@@ -335,7 +335,7 @@ impl Properties {
     ///
     /// * `keywords` - The keywords string property.
     ///
-    pub fn set_keywords(mut self, keywords: &str) -> Properties {
+    pub fn set_keywords(mut self, keywords: &str) -> DocProperties {
         self.keywords = keywords.to_string();
 
         self
@@ -351,7 +351,7 @@ impl Properties {
     ///
     /// * `comment` - The comment string property.
     ///
-    pub fn set_comment(mut self, comment: &str) -> Properties {
+    pub fn set_comment(mut self, comment: &str) -> DocProperties {
         self.comment = comment.to_string();
 
         self
@@ -366,7 +366,7 @@ impl Properties {
     ///
     /// * `status` - The status string property.
     ///
-    pub fn set_status(mut self, status: &str) -> Properties {
+    pub fn set_status(mut self, status: &str) -> DocProperties {
         self.status = status.to_string();
 
         self
@@ -381,7 +381,7 @@ impl Properties {
     ///
     /// * `hyperlink_base` - The hyperlink base string property.
     ///
-    pub fn set_hyperlink_base(mut self, hyperlink_base: &str) -> Properties {
+    pub fn set_hyperlink_base(mut self, hyperlink_base: &str) -> DocProperties {
         self.hyperlink_base = hyperlink_base.to_string();
 
         self
@@ -400,7 +400,7 @@ impl Properties {
     /// [`chrono::DateTime`]:
     ///     https://docs.rs/chrono/latest/chrono/struct.DateTime.html
     ///
-    pub fn set_creation_datetime(mut self, create_time: &DateTime<Utc>) -> Properties {
+    pub fn set_creation_datetime(mut self, create_time: &DateTime<Utc>) -> DocProperties {
         self.creation_time = *create_time;
 
         self
@@ -428,12 +428,12 @@ impl Properties {
     /// ```
     /// # // This code is available in examples/doc_properties_custom.rs
     /// #
-    /// use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+    /// use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {
     ///     let mut workbook = Workbook::new();
     ///
-    ///     let properties = Properties::new()
+    ///     let properties = DocProperties::new()
     ///         .set_custom_property("Checked by", "Admin")
     ///         .set_custom_property("Cross check", true)
     ///         .set_custom_property("Department", "Finance")
@@ -452,7 +452,7 @@ impl Properties {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/doc_properties_custom.png">
     ///
-    pub fn set_custom_property<T>(mut self, name: &str, value: T) -> Properties
+    pub fn set_custom_property<T>(mut self, name: &str, value: T) -> DocProperties
     where
         T: IntoCustomProperty,
     {
@@ -466,7 +466,9 @@ impl Properties {
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
 
-/// TODO
+/// The CustomProperty struct represents data types used in Excel’s custom
+/// document properties.
+#[doc(hidden)]
 #[derive(Clone)]
 pub struct CustomProperty {
     pub(crate) property_type: CustomPropertyType,

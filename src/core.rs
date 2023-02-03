@@ -4,11 +4,11 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use crate::{xmlwriter::XMLWriter, Properties};
+use crate::{xmlwriter::XMLWriter, DocProperties};
 
 pub struct Core {
     pub(crate) writer: XMLWriter,
-    pub(crate) properties: Properties,
+    pub(crate) properties: DocProperties,
 }
 
 impl Core {
@@ -22,7 +22,7 @@ impl Core {
 
         Core {
             writer,
-            properties: Properties::new(),
+            properties: DocProperties::new(),
         }
     }
 
@@ -184,7 +184,7 @@ impl Core {
 mod tests {
 
     use crate::core::Core;
-    use crate::{test_functions::xml_to_vec, Properties};
+    use crate::{test_functions::xml_to_vec, DocProperties};
     use chrono::{TimeZone, Utc};
 
     use pretty_assertions::assert_eq;
@@ -192,7 +192,7 @@ mod tests {
     #[test]
     fn test_assemble() {
         let date = Utc.with_ymd_and_hms(2010, 1, 1, 0, 0, 0).unwrap();
-        let properties = Properties::new()
+        let properties = DocProperties::new()
             .set_author("A User")
             .set_creation_datetime(&date);
 

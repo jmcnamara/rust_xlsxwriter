@@ -4,14 +4,14 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use crate::{xmlwriter::XMLWriter, Properties};
+use crate::{xmlwriter::XMLWriter, DocProperties};
 
 pub struct App {
     pub(crate) writer: XMLWriter,
     heading_pairs: Vec<(String, u16)>,
     table_parts: Vec<String>,
     pub(crate) doc_security: u8,
-    pub(crate) properties: Properties,
+    pub(crate) properties: DocProperties,
 }
 
 impl App {
@@ -28,7 +28,7 @@ impl App {
             heading_pairs: vec![],
             table_parts: vec![],
             doc_security: 0,
-            properties: Properties::new(),
+            properties: DocProperties::new(),
         }
     }
 

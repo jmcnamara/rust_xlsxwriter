@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 
 mod common;
 
@@ -13,7 +13,7 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let properties = Properties::new().set_hyperlink_base("C:\\");
+    let properties = DocProperties::new().set_hyperlink_base("C:\\");
 
     workbook.set_properties(&properties);
 

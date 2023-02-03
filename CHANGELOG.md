@@ -84,10 +84,10 @@ Added more page setup methods.
 ### Added
 
 - Added support for setting document metadata properties such as Author and
-  Creation Date. For more details see [`Properties`] and
+  Creation Date. For more details see [`DocProperties`] and
   [`workbook::set_properties()`].
 
-[`Properties`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Properties.html
+[`DocProperties`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.DocProperties.html
 [`workbook::set_properties()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.set_properties
 
 ### Changed

@@ -60,7 +60,7 @@ use crate::theme::Theme;
 use crate::vml::Vml;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
-use crate::{Properties, NUM_IMAGE_FORMATS};
+use crate::{DocProperties, NUM_IMAGE_FORMATS};
 
 // Packager struct to assembler the xlsx file.
 pub struct Packager<W: Write + Seek> {
@@ -562,7 +562,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) worksheet_names: Vec<String>,
     pub(crate) defined_names: Vec<String>,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
-    pub(crate) properties: Properties,
+    pub(crate) properties: DocProperties,
 }
 
 impl PackagerOptions {
@@ -578,7 +578,7 @@ impl PackagerOptions {
             worksheet_names: vec![],
             defined_names: vec![],
             image_types: [false; NUM_IMAGE_FORMATS],
-            properties: Properties::new(),
+            properties: DocProperties::new(),
         }
     }
 }

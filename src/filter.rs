@@ -800,6 +800,7 @@ impl FilterCriteria {
 /// The FilterData struct is a simple data type to allow a generic mapping
 /// between Rust's string and number types and similar types used in Excel's
 /// filters.
+#[doc(hidden)]
 #[derive(Clone)]
 pub struct FilterData {
     pub(crate) data_type: FilterDataType,

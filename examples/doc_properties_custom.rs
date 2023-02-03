@@ -4,12 +4,12 @@
 
 //! An example of setting custom/user defined workbook document properties.
 
-use rust_xlsxwriter::{Properties, Workbook, XlsxError};
+use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let properties = Properties::new()
+    let properties = DocProperties::new()
         .set_custom_property("Checked by", "Admin")
         .set_custom_property("Cross check", true)
         .set_custom_property("Department", "Finance")
