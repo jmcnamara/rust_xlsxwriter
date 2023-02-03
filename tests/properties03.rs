@@ -13,7 +13,7 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let properties = Properties::new().set_custom_text("Checked by", "Adam");
+    let properties = Properties::new().set_custom_property("Checked by", "Adam");
     workbook.set_properties(&properties);
 
     let worksheet = workbook.add_worksheet();

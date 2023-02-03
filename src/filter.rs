@@ -851,7 +851,7 @@ impl FilterData {
 ///
 /// Currently only string and number like types are supported.
 pub trait IntoFilterData {
-    /// Types/objects supporting this trait must be able to convert to
+    /// Types/objects supporting this trait must be able to convert to a
     /// FilterData struct.
     fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData;
 }

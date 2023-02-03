@@ -71,10 +71,10 @@ use chrono::{DateTime, Utc};
 ///     let mut workbook = Workbook::new();
 ///
 ///     let properties = Properties::new()
-///         .set_custom_text("Checked by", "Admin")
-///         .set_custom_boolean("Cross check", true)
-///         .set_custom_text("Department", "Finance")
-///         .set_custom_number_i32("Document number", 55301);
+///         .set_custom_property("Checked by", "Admin")
+///         .set_custom_property("Cross check", true)
+///         .set_custom_property("Department", "Finance")
+///         .set_custom_property("Document number", 55301);
 ///
 ///     workbook.set_properties(&properties);
 ///
@@ -406,113 +406,57 @@ impl Properties {
         self
     }
 
-    /// Set a custom text document property.
+    /// Set a custom document property.
     ///
-    /// Set a user defined text property that will appear in the Custom section
-    /// of the document properties. See the example above.
+    /// Set a user defined property that will appear in the Custom section of
+    /// the document properties.
     ///
-    /// # Arguments
-    ///
-    /// * `name` - The user defined name of the custom property.
-    /// * `value` - The text/string value of the custom property.
-    ///
-    pub fn set_custom_text(mut self, name: &str, value: &str) -> Properties {
-        let mut property = CustomProperty::new();
-        property.property_type = CustomPropertyType::Text;
-        property.name = name.to_string();
-        property.text = value.to_string();
-
-        self.custom_properties.push(property);
-
-        self
-    }
-
-    /// Set a custom integer number document property.
-    ///
-    /// Set a user defined number property that will appear in the Custom
-    /// section of the document properties. See the example above.
-    ///
-    /// Excel supports two types of number property: i32 and f64. This method
-    /// supports i32, see also `set_custom_number_f64()`.
+    /// Excel support custom data types that are equivalent to the Rust types:
+    /// [`&str`], [`f64`], [`i32`] [`bool`] and `&DateTime<Utc>`
     ///
     /// # Arguments
     ///
     /// * `name` - The user defined name of the custom property.
-    /// * `value` - The integer value of the custom property.
+    /// * `value` - The value can be a [`&str`], [`f64`], [`i32`] [`bool`] or
+    ///   `&DateTime<Utc>` type for which the `IntoCustomProperty` trait is
+    ///   implemented.
     ///
-    pub fn set_custom_number_i32(mut self, name: &str, value: i32) -> Properties {
-        let mut property = CustomProperty::new();
-        property.property_type = CustomPropertyType::Int;
-        property.name = name.to_string();
-        property.number_int = value;
-
-        self.custom_properties.push(property);
-
-        self
-    }
-
-    /// Set a custom real number document property.
+    /// # Examples
     ///
-    /// Set a user defined number property that will appear in the Custom
-    /// section of the document properties. See the example above.
+    /// An example of setting custom/user defined workbook document properties.
     ///
-    /// Excel supports two types of number property: i32 and f64. This method
-    /// supports f64, see also `set_custom_number_i32()`.
+    /// ```
+    /// # // This code is available in examples/doc_properties_custom.rs
+    /// #
+    /// use rust_xlsxwriter::{Properties, Workbook, XlsxError};
     ///
-    /// # Arguments
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
     ///
-    /// * `name` - The user defined name of the custom property.
-    /// * `value` - The real value of the custom property.
+    ///     let properties = Properties::new()
+    ///         .set_custom_property("Checked by", "Admin")
+    ///         .set_custom_property("Cross check", true)
+    ///         .set_custom_property("Department", "Finance")
+    ///         .set_custom_property("Document number", 55301);
     ///
-    pub fn set_custom_number_f64(mut self, name: &str, value: f64) -> Properties {
-        let mut property = CustomProperty::new();
-        property.property_type = CustomPropertyType::Real;
-        property.name = name.to_string();
-        property.number_real = value;
-
-        self.custom_properties.push(property);
-
-        self
-    }
-
-    /// Set a custom boolean document property.
+    ///     workbook.set_properties(&properties);
     ///
-    /// Set a user defined boolean property that will appear in the Custom
-    /// section of the document properties. See the example above.
+    ///     workbook.save("properties.xlsx")?;
     ///
-    /// # Arguments
+    ///     Ok(())
+    /// }
+    /// ```
     ///
-    /// * `name` - The user defined name of the custom property.
-    /// * `value` - The boolean value of the custom property.
+    /// Output file:
     ///
-    pub fn set_custom_boolean(mut self, name: &str, value: bool) -> Properties {
-        let mut property = CustomProperty::new();
-        property.property_type = CustomPropertyType::Bool;
-        property.name = name.to_string();
-        property.boolean = value;
-
-        self.custom_properties.push(property);
-
-        self
-    }
-
-    /// Set a custom datetime document property.
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/doc_properties_custom.png">
     ///
-    /// Set a user defined UTC datetime property that will appear in the Custom
-    /// section of the document properties. See the example above.
-    ///
-    /// # Arguments
-    ///
-    /// * `name` - The user defined name of the custom property.
-    /// * `value` - The datetime value of the custom property.
-    ///
-    pub fn set_custom_datetime(mut self, name: &str, value: &DateTime<Utc>) -> Properties {
-        let mut property = CustomProperty::new();
-        property.property_type = CustomPropertyType::DateTime;
-        property.name = name.to_string();
-        property.datetime = *value;
-
-        self.custom_properties.push(property);
+    pub fn set_custom_property<T>(mut self, name: &str, value: T) -> Properties
+    where
+        T: IntoCustomProperty,
+    {
+        self.custom_properties.push(value.new_custom_property(name));
 
         self
     }
@@ -522,9 +466,9 @@ impl Properties {
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
 
-///
+/// TODO
 #[derive(Clone)]
-pub(crate) struct CustomProperty {
+pub struct CustomProperty {
     pub(crate) property_type: CustomPropertyType,
     pub(crate) name: String,
     pub(crate) text: String,
@@ -534,8 +478,8 @@ pub(crate) struct CustomProperty {
     pub(crate) datetime: DateTime<Utc>,
 }
 
-impl CustomProperty {
-    pub(crate) fn new() -> CustomProperty {
+impl Default for CustomProperty {
+    fn default() -> Self {
         CustomProperty {
             property_type: CustomPropertyType::Text,
             name: "".to_string(),
@@ -548,6 +492,53 @@ impl CustomProperty {
     }
 }
 
+impl CustomProperty {
+    pub(crate) fn new_property_string(name: &str, value: &str) -> CustomProperty {
+        CustomProperty {
+            property_type: CustomPropertyType::Text,
+            name: name.to_string(),
+            text: value.to_string(),
+            ..Default::default()
+        }
+    }
+
+    pub(crate) fn new_property_i32(name: &str, value: i32) -> CustomProperty {
+        CustomProperty {
+            property_type: CustomPropertyType::Int,
+            name: name.to_string(),
+            number_int: value,
+            ..Default::default()
+        }
+    }
+
+    pub(crate) fn new_property_f64(name: &str, value: f64) -> CustomProperty {
+        CustomProperty {
+            property_type: CustomPropertyType::Real,
+            name: name.to_string(),
+            number_real: value,
+            ..Default::default()
+        }
+    }
+
+    pub(crate) fn new_property_bool(name: &str, value: bool) -> CustomProperty {
+        CustomProperty {
+            property_type: CustomPropertyType::Bool,
+            name: name.to_string(),
+            boolean: value,
+            ..Default::default()
+        }
+    }
+
+    pub(crate) fn new_property_datetime(name: &str, value: &DateTime<Utc>) -> CustomProperty {
+        CustomProperty {
+            property_type: CustomPropertyType::DateTime,
+            name: name.to_string(),
+            datetime: *value,
+            ..Default::default()
+        }
+    }
+}
+
 #[derive(Clone)]
 pub(crate) enum CustomPropertyType {
     Text,
@@ -555,4 +546,42 @@ pub(crate) enum CustomPropertyType {
     Real,
     Bool,
     DateTime,
+}
+
+/// Trait to map different Rust types into Excel data types used in custom document properties.
+///
+pub trait IntoCustomProperty {
+    /// Types/objects supporting this trait must be able to convert to a
+    /// CustomProperty struct.
+    fn new_custom_property(&self, name: &str) -> CustomProperty;
+}
+
+impl IntoCustomProperty for &str {
+    fn new_custom_property(&self, name: &str) -> CustomProperty {
+        CustomProperty::new_property_string(name, self)
+    }
+}
+
+impl IntoCustomProperty for i32 {
+    fn new_custom_property(&self, name: &str) -> CustomProperty {
+        CustomProperty::new_property_i32(name, *self)
+    }
+}
+
+impl IntoCustomProperty for f64 {
+    fn new_custom_property(&self, name: &str) -> CustomProperty {
+        CustomProperty::new_property_f64(name, *self)
+    }
+}
+
+impl IntoCustomProperty for bool {
+    fn new_custom_property(&self, name: &str) -> CustomProperty {
+        CustomProperty::new_property_bool(name, *self)
+    }
+}
+
+impl IntoCustomProperty for &DateTime<Utc> {
+    fn new_custom_property(&self, name: &str) -> CustomProperty {
+        CustomProperty::new_property_datetime(name, self)
+    }
 }

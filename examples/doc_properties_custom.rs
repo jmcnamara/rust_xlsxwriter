@@ -10,10 +10,10 @@ fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let properties = Properties::new()
-        .set_custom_text("Checked by", "Admin")
-        .set_custom_boolean("Cross check", true)
-        .set_custom_text("Department", "Finance")
-        .set_custom_number_i32("Document number", 55301);
+        .set_custom_property("Checked by", "Admin")
+        .set_custom_property("Cross check", true)
+        .set_custom_property("Department", "Finance")
+        .set_custom_property("Document number", 55301);
 
     workbook.set_properties(&properties);
 

@@ -17,14 +17,14 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let date = Utc.with_ymd_and_hms(2016, 12, 12, 23, 0, 0).unwrap();
 
     let properties = Properties::new()
-        .set_custom_text("Checked by", "Adam")
-        .set_custom_datetime("Date completed", &date)
-        .set_custom_number_i32("Document number", 12345)
-        .set_custom_number_f64("Reference", 1.2345)
-        .set_custom_boolean("Source", true)
-        .set_custom_boolean("Status", false)
-        .set_custom_text("Department", "Finance")
-        .set_custom_number_f64("Group", 1.2345678901234);
+        .set_custom_property("Checked by", "Adam")
+        .set_custom_property("Date completed", &date)
+        .set_custom_property("Document number", 12345)
+        .set_custom_property("Reference", 1.2345)
+        .set_custom_property("Source", true)
+        .set_custom_property("Status", false)
+        .set_custom_property("Department", "Finance")
+        .set_custom_property("Group", 1.2345678901234);
 
     workbook.set_properties(&properties);
 
