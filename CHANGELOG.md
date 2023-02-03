@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+## [0.26.0] - 2023-02-03
+
+  **Note: this version contains a major refactoring/renaming of some of the main
+  data writing functions and some of the enums and secondary structs. This will
+  require code changes from all current users but will allow more consistent
+  APIs in future releases. Nevertheless, I apologize for this level of change.**
+
+
+### Changed
+
+- The following worksheet functions have changed names to reflect their
+  frequency of usage.
+
+  | Previous name                        | New name                                    |
+  | :----------------------------------- | :------------------------------------------ |
+  | `write_string_only()`                | `write_string()`                            |
+  | `write_number_only()`                | `write_number()`                            |
+  | `write_formula_only()`               | `write_formula()`                           |
+  | `write_boolean_only()`               | `write_boolean()`                           |
+  | `write_rich_string_only()`           | `write_rich_string()`                       |
+  | `write_array_formula_only()`         | `write_array_formula()`                     |
+  | `write_dynamic_array_formula_only()` | `write_dynamic_array_formula()`             |
+  |                                      |                                             |
+  | `write_array_formula()`              | `write_array_formula_with_format()`         |
+  | `write_boolean()`                    | `write_boolean_with_format()`               |
+  | `write_dynamic_array_formula()`      | `write_dynamic_array_formula_with_format()` |
+  | `write_formula()`                    | `write_formula_with_format()`               |
+  | `write_number()`                     | `write_number_with_format()`                |
+  | `write_rich_string()`                | `write_rich_string_with_format()`           |
+  | `write_string()`                     | `write_string_with_format()`                |
+
+
+- The following enums and structs have changed to a more logical naming:
+
+  | Previous name              | New name                |
+  | :------------------------- | :---------------------- |
+  | `XlsxAlign`                | `FormatAlign`           |
+  | `XlsxBorder`               | `FormatBorder`          |
+  | `XlsxDiagonalBorder`       | `FormatDiagonalBorder`  |
+  | `XlsxPattern`              | `FormatPattern`         |
+  | `XlsxScript`               | `FormatScript`          |
+  | `XlsxUnderline`            | `FormatUnderline`       |
+  |                            |                         |
+  | `XlsxObjectMovement`       | `ObjectMovement`        |
+  | `XlsxImagePosition`        | `HeaderImagePosition`   |
+  |                            |                         |
+  | `ProtectWorksheetOptions`  | `ProtectionOptions`     |
+  | `Properties`               | `DocProperties`         |
+
+
+- The `DocProperties::set_custom_property()` method replaces several type
+  specific methods with a single trait based generic method.
+
 
 ## [0.25.0] - 2023-01-30
 
