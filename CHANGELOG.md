@@ -63,9 +63,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.25.0] - 2023-01-30
 
-**Note**: The next version of rust_xlsxwriter will contain backward incompatible
-changes in order to standardize and simplify certain parts of the API.
-
 ### Added
 
 - Added ability to filter columns in [`worksheet.autofilter()`] ranges via
