@@ -12,6 +12,7 @@ use std::str;
 
 use regex::Regex;
 
+#[derive(Clone)]
 pub struct XMLWriter {
     pub(crate) xmlfile: Cursor<Vec<u8>>,
 }

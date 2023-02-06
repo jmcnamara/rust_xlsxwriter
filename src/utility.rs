@@ -80,6 +80,26 @@ pub fn cell_range_abs(
     }
 }
 
+// Convert zero indexed row and col cell references to a chart absolute
+// Sheet1!$A$1:$B$1 style range string.
+pub fn chart_range_abs(
+    sheet_name: &str,
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
+) -> String {
+    let sheet_name = quote_sheetname(sheet_name);
+    let range1 = rowcol_to_cell_abs(first_row, first_col);
+    let range2 = rowcol_to_cell_abs(last_row, last_col);
+
+    if range1 == range2 {
+        format!("{sheet_name}!{range1}")
+    } else {
+        format!("{sheet_name}!{range1}:{range2}")
+    }
+}
+
 // Create a quoted version of a worksheet name. Excel single quotes worksheet
 // names that contain spaces and some other characters.
 pub fn quote_sheetname(sheetname: &str) -> String {

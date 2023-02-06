@@ -119,6 +119,7 @@
 //! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
 //!
 mod app;
+mod chart;
 mod content_types;
 mod core;
 mod custom;
@@ -144,6 +145,7 @@ mod worksheet;
 mod xmlwriter;
 
 // Re-export the public APIs.
+pub use chart::*;
 pub use error::*;
 pub use filter::*;
 pub use format::*;
