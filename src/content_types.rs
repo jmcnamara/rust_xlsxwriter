@@ -72,18 +72,26 @@ impl ContentTypes {
     }
 
     // Add the name of a worksheet to the ContentTypes overrides.
-    pub(crate) fn add_worksheet_name(&mut self, worksheet_name: &str) {
+    pub(crate) fn add_worksheet_name(&mut self, index: u16) {
         let content_type =
             "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml";
-        let part_name = format!("/xl/worksheets/{worksheet_name}.xml");
+        let part_name = format!("/xl/worksheets/sheet{index}.xml");
 
         self.add_override(&part_name, content_type);
     }
 
     // Add the name of a drawing to the ContentTypes overrides.
-    pub(crate) fn add_drawing_name(&mut self, drawing_name: &str) {
+    pub(crate) fn add_drawing_name(&mut self, index: u16) {
         let content_type = "application/vnd.openxmlformats-officedocument.drawing+xml";
-        let part_name = format!("/xl/drawings/{drawing_name}.xml");
+        let part_name = format!("/xl/drawings/drawing{index}.xml");
+
+        self.add_override(&part_name, content_type);
+    }
+
+    // Add the name of a chart to the ContentTypes overrides.
+    pub(crate) fn add_chart_name(&mut self, index: u16) {
+        let content_type = "application/vnd.openxmlformats-officedocument.drawingml.chart+xml";
+        let part_name = format!("/xl/charts/chart{index}.xml");
 
         self.add_override(&part_name, content_type);
     }
@@ -184,7 +192,7 @@ mod tests {
         let mut content_types = ContentTypes::new();
 
         content_types.add_default("jpeg", "image/jpeg");
-        content_types.add_worksheet_name("sheet1");
+        content_types.add_worksheet_name(1);
         content_types.add_share_strings();
         content_types.assemble_xml_file();
 

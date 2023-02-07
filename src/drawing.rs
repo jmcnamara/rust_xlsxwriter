@@ -67,13 +67,13 @@ impl Drawing {
         let mut attributes = vec![];
 
         match drawing_info.object_movement {
-            ObjectMovement::Default | ObjectMovement::MoveButDontSizeWithCells => {
+            ObjectMovement::MoveButDontSizeWithCells => {
                 attributes.push(("editAs", "oneCell".to_string()))
             }
             ObjectMovement::DontMoveOrSizeWithCells => {
                 attributes.push(("editAs", "absolute".to_string()))
             }
-            _ => (),
+            ObjectMovement::MoveAndSizeWithCells | ObjectMovement::MoveAndSizeWithCellsAfter => (),
         }
 
         self.writer
@@ -83,8 +83,10 @@ impl Drawing {
         self.write_from(&drawing_info.from);
         self.write_to(&drawing_info.to);
 
-        // Write the xdr:pic element.
-        self.write_pic(index, drawing_info);
+        match drawing_info.drawing_type {
+            DrawingType::Image => self.write_pic(index, drawing_info),
+            DrawingType::Chart => self.write_graphic_frame(index, drawing_info),
+        }
 
         self.writer.xml_empty_tag("xdr:clientData");
         self.writer.xml_end_tag("xdr:twoCellAnchor");
@@ -143,7 +145,7 @@ impl Drawing {
         self.writer.xml_start_tag("xdr:nvPicPr");
 
         // Write the xdr:cNvPr element.
-        self.write_c_nv_pr(index, drawing_info);
+        self.write_c_nv_pr(index, drawing_info, "Picture");
 
         // Write the xdr:cNvPicPr element.
         self.writer.xml_start_tag("xdr:cNvPicPr");
@@ -154,9 +156,9 @@ impl Drawing {
     }
 
     // Write the <xdr:cNvPr> element.
-    fn write_c_nv_pr(&mut self, index: u32, drawing_info: &DrawingInfo) {
+    fn write_c_nv_pr(&mut self, index: u32, drawing_info: &DrawingInfo, name: &str) {
         let id = index + 1;
-        let name = format!("Picture {index}");
+        let name = format!("{name} {index}");
 
         let mut attributes = vec![("id", id.to_string()), ("name", name)];
 
@@ -290,6 +292,112 @@ impl Drawing {
         self.writer.xml_empty_tag("a:avLst");
         self.writer.xml_end_tag("a:prstGeom");
     }
+
+    // Write the <xdr:graphicFrame> element.
+    fn write_graphic_frame(&mut self, index: u32, drawing_info: &DrawingInfo) {
+        let attributes = vec![("macro", "".to_string())];
+
+        self.writer
+            .xml_start_tag_attr("xdr:graphicFrame", &attributes);
+
+        // Write the xdr:nvGraphicFramePr element.
+        self.write_nv_graphic_frame_pr(index, drawing_info);
+
+        // Write the xdr:xfrm element.
+        self.write_xfrm();
+
+        // Write the a:graphic element.
+        self.write_a_graphic();
+
+        self.writer.xml_end_tag("xdr:graphicFrame");
+    }
+
+    // Write the <xdr:nvGraphicFramePr> element.
+    fn write_nv_graphic_frame_pr(&mut self, index: u32, drawing_info: &DrawingInfo) {
+        self.writer.xml_start_tag("xdr:nvGraphicFramePr");
+
+        // Write the xdr:cNvPr element.
+        self.write_c_nv_pr(index, drawing_info, "Chart");
+
+        // Write the xdr:cNvGraphicFramePr element.
+        self.write_c_nv_graphic_frame_pr();
+
+        self.writer.xml_end_tag("xdr:nvGraphicFramePr");
+    }
+
+    // Write the <xdr:cNvGraphicFramePr> element.
+    fn write_c_nv_graphic_frame_pr(&mut self) {
+        self.writer.xml_empty_tag("xdr:cNvGraphicFramePr");
+    }
+
+    // Write the <xdr:xfrm> element.
+    fn write_xfrm(&mut self) {
+        self.writer.xml_start_tag("xdr:xfrm");
+
+        // Write the a:off element.
+        self.write_chart_a_off();
+
+        // Write the a:ext element.
+        self.write_chart_a_ext();
+
+        self.writer.xml_end_tag("xdr:xfrm");
+    }
+
+    // Write the <a:off> element.
+    fn write_chart_a_off(&mut self) {
+        let attributes = vec![("x", "0".to_string()), ("y", "0".to_string())];
+
+        self.writer.xml_empty_tag_attr("a:off", &attributes);
+    }
+
+    // Write the <a:ext> element.
+    fn write_chart_a_ext(&mut self) {
+        let attributes = vec![("cx", "0".to_string()), ("cy", "0".to_string())];
+
+        self.writer.xml_empty_tag_attr("a:ext", &attributes);
+    }
+
+    // Write the <a:graphic> element.
+    fn write_a_graphic(&mut self) {
+        self.writer.xml_start_tag("a:graphic");
+
+        // Write the a:graphicData element.
+        self.write_a_graphic_data();
+
+        self.writer.xml_end_tag("a:graphic");
+    }
+
+    // Write the <a:graphicData> element.
+    fn write_a_graphic_data(&mut self) {
+        let attributes = vec![(
+            "uri",
+            "http://schemas.openxmlformats.org/drawingml/2006/chart".to_string(),
+        )];
+
+        self.writer.xml_start_tag_attr("a:graphicData", &attributes);
+
+        // Write the c:chart element.
+        self.write_chart();
+
+        self.writer.xml_end_tag("a:graphicData");
+    }
+
+    // Write the <c:chart> element.
+    fn write_chart(&mut self) {
+        let attributes = vec![
+            (
+                "xmlns:c",
+                "http://schemas.openxmlformats.org/drawingml/2006/chart".to_string(),
+            ),
+            (
+                "xmlns:r",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string(),
+            ),
+            ("r:id", "rId1".to_string()),
+        ];
+
+        self.writer.xml_empty_tag_attr("c:chart", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -315,6 +423,25 @@ pub(crate) struct DrawingInfo {
     pub(crate) decorative: bool,
     pub(crate) object_movement: ObjectMovement,
     pub(crate) rel_id: u32,
+    pub(crate) drawing_type: DrawingType,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum DrawingType {
+    Image,
+    Chart,
+}
+
+// Trait for object such as Images and Charts that translate to a Drawing object.
+pub(crate) trait DrawingObject {
+    fn x_offset(&self) -> u32;
+    fn y_offset(&self) -> u32;
+    fn width_scaled(&self) -> f64;
+    fn height_scaled(&self) -> f64;
+    fn object_movement(&self) -> ObjectMovement;
+    fn alt_text(&self) -> String;
+    fn decorative(&self) -> bool;
+    fn drawing_type(&self) -> DrawingType;
 }
 
 // -----------------------------------------------------------------------
@@ -355,7 +482,8 @@ mod tests {
             description: "rust.png".to_string(),
             decorative: false,
             rel_id: 1,
-            object_movement: ObjectMovement::Default,
+            object_movement: ObjectMovement::MoveButDontSizeWithCells,
+            drawing_type: DrawingType::Image,
         };
 
         drawing.drawings.push(drawing_info);

@@ -4,30 +4,60 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use crate::{utility, xmlwriter::XMLWriter, ColNum, RowNum};
+use crate::{
+    drawing::{DrawingObject, DrawingType},
+    utility,
+    xmlwriter::XMLWriter,
+    ColNum, ObjectMovement, RowNum,
+};
 
 #[derive(Clone)]
+#[allow(dead_code)] // TODO
 pub struct Chart {
+    pub(crate) id: u32,
     pub(crate) writer: XMLWriter,
-
+    pub(crate) x_offset: u32,
+    pub(crate) y_offset: u32,
+    pub(crate) alt_text: String,
+    pub(crate) vml_name: String,
+    pub(crate) object_movement: ObjectMovement,
+    pub(crate) decorative: bool,
+    pub(crate) drawing_type: DrawingType,
+    height: f64,
+    width: f64,
+    scale_width: f64,
+    scale_height: f64,
     axis_ids: (u32, u32),
     series: Vec<ChartSeries>,
 }
 
 /// TODO
-#[allow(dead_code)]
-
+#[allow(dead_code)] // TODO
 impl Chart {
     // -----------------------------------------------------------------------
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
     // Create a new Chart struct.
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Chart {
         let writer = XMLWriter::new();
 
         Chart {
             writer,
+            id: 0,
+            height: 288.0,
+            width: 480.0,
+            scale_width: 1.0,
+            scale_height: 1.0,
+            x_offset: 0,
+            y_offset: 0,
+            alt_text: "".to_string(),
+            vml_name: "image".to_string(),
+            object_movement: ObjectMovement::MoveAndSizeWithCells,
+            decorative: false,
+            drawing_type: DrawingType::Chart,
+
             axis_ids: (0, 0),
             series: vec![],
         }
@@ -529,12 +559,47 @@ impl Chart {
     }
 }
 
+// TODO
+impl DrawingObject for Chart {
+    fn x_offset(&self) -> u32 {
+        self.x_offset
+    }
+
+    fn y_offset(&self) -> u32 {
+        self.y_offset
+    }
+
+    fn width_scaled(&self) -> f64 {
+        self.width * self.scale_width
+    }
+
+    fn height_scaled(&self) -> f64 {
+        self.height * self.scale_height
+    }
+
+    fn object_movement(&self) -> ObjectMovement {
+        self.object_movement
+    }
+
+    fn alt_text(&self) -> String {
+        self.alt_text.clone()
+    }
+
+    fn decorative(&self) -> bool {
+        self.decorative
+    }
+
+    fn drawing_type(&self) -> DrawingType {
+        self.drawing_type
+    }
+}
+
 // -----------------------------------------------------------------------
 // Secondary structs.
 // -----------------------------------------------------------------------
 
 /// TODO
-#[allow(dead_code)]
+#[allow(dead_code)] // todo
 #[derive(Clone)]
 pub struct ChartSeries {
     value_range: ChartRange,
@@ -545,6 +610,7 @@ pub struct ChartSeries {
     category_cache_data: Vec<String>,
 }
 
+#[allow(clippy::new_without_default)]
 impl ChartSeries {
     pub fn new() -> ChartSeries {
         ChartSeries {
@@ -580,14 +646,14 @@ impl ChartSeries {
         self
     }
 
-    pub fn set_value_cache(mut self, data: &[String], is_numeric: bool) -> ChartSeries {
-        self.value_cache_data = data.to_vec();
+    pub fn set_value_cache(mut self, data: &[&str], is_numeric: bool) -> ChartSeries {
+        self.value_cache_data = data.iter().map(|s| s.to_string()).collect();
         self.value_cache_is_numeric = is_numeric;
         self
     }
 
-    pub fn set_category_cache(mut self, data: &[String], is_numeric: bool) -> ChartSeries {
-        self.category_cache_data = data.to_vec();
+    pub fn set_category_cache(mut self, data: &[&str], is_numeric: bool) -> ChartSeries {
+        self.category_cache_data = data.iter().map(|s| s.to_string()).collect();
         self.category_cache_is_numeric = is_numeric;
         self
     }
@@ -648,50 +714,14 @@ mod tests {
         let series1 = ChartSeries::new()
             .set_categories("Sheet1", 0, 0, 4, 0)
             .set_values("Sheet1", 0, 1, 4, 1)
-            .set_category_cache(
-                &[
-                    "1".to_string(),
-                    "2".to_string(),
-                    "3".to_string(),
-                    "4".to_string(),
-                    "5".to_string(),
-                ],
-                true,
-            )
-            .set_value_cache(
-                &[
-                    "2".to_string(),
-                    "4".to_string(),
-                    "6".to_string(),
-                    "8".to_string(),
-                    "10".to_string(),
-                ],
-                true,
-            );
+            .set_category_cache(&["1", "2", "3", "4", "5"], true)
+            .set_value_cache(&["2", "4", "6", "8", "10"], true);
 
         let series2 = ChartSeries::new()
             .set_categories("Sheet1", 0, 0, 4, 0)
             .set_values("Sheet1", 0, 2, 4, 2)
-            .set_category_cache(
-                &[
-                    "1".to_string(),
-                    "2".to_string(),
-                    "3".to_string(),
-                    "4".to_string(),
-                    "5".to_string(),
-                ],
-                true,
-            )
-            .set_value_cache(
-                &[
-                    "3".to_string(),
-                    "6".to_string(),
-                    "9".to_string(),
-                    "12".to_string(),
-                    "15".to_string(),
-                ],
-                true,
-            );
+            .set_category_cache(&["1", "2", "3", "4", "5"], true)
+            .set_value_cache(&["3", "6", "9", "12", "15"], true);
 
         let mut chart = Chart::new().add_series(&series1).add_series(&series2);
 

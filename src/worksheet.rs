@@ -15,13 +15,14 @@ use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 use itertools::Itertools;
 use regex::Regex;
 
-use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo};
+use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::XMLWriter;
+use crate::Chart;
 use crate::{utility, HeaderImagePosition, Image, ObjectMovement, ProtectionOptions, XlsxColor};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
 
@@ -136,6 +137,8 @@ pub struct Worksheet {
     pub(crate) drawing: Drawing,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     pub(crate) header_footer_images: [Option<Image>; 6],
+    pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
+
     table: HashMap<RowNum, HashMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
@@ -368,6 +371,7 @@ impl Worksheet {
             vertical_breaks: vec![],
             filter_conditions: HashMap::new(),
             filter_automatic_off: false,
+            charts: BTreeMap::new(),
         }
     }
 
@@ -2752,6 +2756,42 @@ impl Worksheet {
         image.y_offset = y_offset;
 
         self.images.insert((row, col), image);
+
+        Ok(self)
+    }
+
+    /// TODO
+    pub fn insert_chart(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        chart: &Chart,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.insert_chart_with_offset(row, col, chart, 0, 0)?;
+
+        Ok(self)
+    }
+
+    /// TODO
+    ///
+    pub fn insert_chart_with_offset(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        chart: &Chart,
+        x_offset: u32,
+        y_offset: u32,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let mut chart = chart.clone();
+        chart.x_offset = x_offset;
+        chart.y_offset = y_offset;
+
+        self.charts.insert((row, col), chart);
 
         Ok(self)
     }
@@ -7596,12 +7636,42 @@ impl Worksheet {
             .push(("vmlDrawing".to_string(), vml_drawing_name, "".to_string()));
     }
 
+    // Convert the chart dimensions into drawing dimensions and add them to the
+    // Drawing object. Also set the rel linkages between the files.
+    pub(crate) fn prepare_worksheet_charts(&mut self, chart_id: u32, drawing_id: u32) {
+        for (cell, chart) in self.charts.clone().iter_mut() {
+            let row = cell.0;
+            let col = cell.1;
+
+            chart.id = chart_id;
+
+            // Store the linkage to the charts rels file.
+            let chart_name = format!("../charts/chart{chart_id}.xml");
+            self.drawing_relationships
+                .push(("chart".to_string(), chart_name, "".to_string()));
+
+            // Convert the chart dimensions to drawing dimensions and store the
+            // drawing object.
+            let mut drawing_info = self.position_object_emus(row, col, chart);
+            drawing_info.rel_id = 99;
+            self.drawing.drawings.push(drawing_info);
+        }
+
+        // Store the linkage to the worksheets rels file.
+        let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
+        self.image_relationships
+            .push(("drawing".to_string(), drawing_name, "".to_string()));
+    }
+
     // Calculate the vertices that define the position of a graphical object
     // within the worksheet in EMUs. The vertices are expressed as English
     // Metric Units (EMUs). There are 12,700 EMUs per point. Therefore, 12,700 *
     // 3 /4 = 9,525 EMUs per pixel.
-    fn position_object_emus(&mut self, row: RowNum, col: ColNum, image: &Image) -> DrawingInfo {
-        let mut drawing_info = self.position_object_pixels(row, col, image);
+    fn position_object_emus<T>(&mut self, row: RowNum, col: ColNum, object: &T) -> DrawingInfo
+    where
+        T: DrawingObject,
+    {
+        let mut drawing_info = self.position_object_pixels(row, col, object);
 
         // Convert the pixel values to EMUs.
         drawing_info.to.col_offset = round_to_emus(drawing_info.to.col_offset);
@@ -7653,12 +7723,15 @@ impl Worksheet {
     // the width and height of the object from the width and height of the
     // underlying cells.
     //
-    fn position_object_pixels(&mut self, row: RowNum, col: ColNum, image: &Image) -> DrawingInfo {
+    fn position_object_pixels<T>(&mut self, row: RowNum, col: ColNum, object: &T) -> DrawingInfo
+    where
+        T: DrawingObject,
+    {
         let mut row_start: RowNum = row; // Row containing top left corner.
         let mut col_start: ColNum = col; // Column containing upper left corner.
 
-        let mut x1: u32 = image.x_offset; // Distance to left side of object.
-        let mut y1: u32 = image.y_offset; // Distance to top of object.
+        let mut x1: u32 = object.x_offset(); // Distance to left side of object.
+        let mut y1: u32 = object.y_offset(); // Distance to top of object.
 
         let mut row_end: RowNum; // Row containing bottom right corner.
         let mut col_end: ColNum; // Column containing lower right corner.
@@ -7666,27 +7739,27 @@ impl Worksheet {
         let mut x2: f64; // Distance to right side of object.
         let mut y2: f64; // Distance to bottom of object.
 
-        let width = image.width_scaled(); // Width of object frame.
-        let height = image.height_scaled(); // Height of object frame.
+        let width = object.width_scaled(); // Width of object frame.
+        let height = object.height_scaled(); // Height of object frame.
 
         let mut x_abs: u32 = 0; // Absolute distance to left side of object.
         let mut y_abs: u32 = 0; // Absolute distance to top  side of object.
 
         // Calculate the absolute x offset of the top-left vertex.
         for col in 0..col_start {
-            x_abs += self.column_pixel_width(col, &image.object_movement);
+            x_abs += self.column_pixel_width(col, &object.object_movement());
         }
         x_abs += x1;
 
         // Calculate the absolute y offset of the top-left vertex.
         for row in 0..row_start {
-            y_abs += self.row_pixel_height(row, &image.object_movement);
+            y_abs += self.row_pixel_height(row, &object.object_movement());
         }
         y_abs += y1;
 
         // Adjust start col for offsets that are greater than the col width.
         loop {
-            let col_size = self.column_pixel_width(col_start, &image.object_movement);
+            let col_size = self.column_pixel_width(col_start, &object.object_movement());
             if x1 >= col_size {
                 x1 -= col_size;
                 col_start += 1;
@@ -7697,7 +7770,7 @@ impl Worksheet {
 
         // Adjust start row for offsets that are greater than the row height.
         loop {
-            let row_size = self.row_pixel_height(row_start, &image.object_movement);
+            let row_size = self.row_pixel_height(row_start, &object.object_movement());
             if y1 >= row_size {
                 y1 -= row_size;
                 row_start += 1;
@@ -7716,7 +7789,7 @@ impl Worksheet {
 
         // Subtract the underlying cell widths to find the end cell.
         loop {
-            let col_size = self.column_pixel_width(col_end, &image.object_movement) as f64;
+            let col_size = self.column_pixel_width(col_end, &object.object_movement()) as f64;
             if x2 >= col_size {
                 x2 -= col_size;
                 col_end += 1;
@@ -7727,7 +7800,7 @@ impl Worksheet {
 
         //Subtract the underlying cell heights to find the end cell.
         loop {
-            let row_size = self.row_pixel_height(row_end, &image.object_movement) as f64;
+            let row_size = self.row_pixel_height(row_end, &object.object_movement()) as f64;
             if y2 >= row_size {
                 y2 -= row_size;
                 row_end += 1;
@@ -7758,9 +7831,10 @@ impl Worksheet {
             row_absolute: y_abs,
             width,
             height,
-            description: image.alt_text.clone(),
-            decorative: image.decorative,
-            object_movement: image.object_movement.clone(),
+            description: object.alt_text(),
+            decorative: object.decorative(),
+            object_movement: object.object_movement(),
+            drawing_type: object.drawing_type(),
             rel_id: 0,
         }
     }

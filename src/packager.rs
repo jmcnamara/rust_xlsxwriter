@@ -120,6 +120,7 @@ impl<W: Write + Seek> Packager<W> {
         self.write_drawing_files(workbook)?;
         self.write_vml_files(workbook)?;
         self.write_image_files(workbook)?;
+        self.write_chart_files(workbook)?;
 
         let mut image_index = 1;
         let mut vml_index = 1;
@@ -154,11 +155,15 @@ impl<W: Write + Seek> Packager<W> {
         let mut content_types = ContentTypes::new();
 
         for i in 0..options.num_worksheets {
-            content_types.add_worksheet_name(format!("sheet{}", i + 1).as_str());
+            content_types.add_worksheet_name(i + 1);
         }
 
         for i in 0..options.num_drawings {
-            content_types.add_drawing_name(format!("drawing{}", i + 1).as_str());
+            content_types.add_drawing_name(i + 1);
+        }
+
+        for i in 0..options.num_charts {
+            content_types.add_chart_name(i + 1);
         }
 
         if options.has_sst_table {
@@ -549,6 +554,23 @@ impl<W: Write + Seek> Packager<W> {
 
         Ok(())
     }
+
+    // Write the chart files.
+    fn write_chart_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        let mut index = 1;
+
+        for worksheet in workbook.worksheets.iter_mut() {
+            for (_, chart) in worksheet.charts.iter_mut() {
+                let filename = format!("xl/charts/chart{index}.xml");
+                self.zip.start_file(filename, self.zip_options)?;
+                chart.assemble_xml_file();
+                self.zip.write_all(chart.writer.xmlfile.get_ref())?;
+                index += 1;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 // Internal struct to pass options to the Packager struct.
@@ -558,6 +580,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) has_vml: bool,
     pub(crate) num_worksheets: u16,
     pub(crate) num_drawings: u16,
+    pub(crate) num_charts: u16,
     pub(crate) doc_security: u8,
     pub(crate) worksheet_names: Vec<String>,
     pub(crate) defined_names: Vec<String>,
@@ -574,6 +597,7 @@ impl PackagerOptions {
             has_vml: false,
             num_worksheets: 0,
             num_drawings: 0,
+            num_charts: 0,
             doc_security: 0,
             worksheet_names: vec![],
             defined_names: vec![],

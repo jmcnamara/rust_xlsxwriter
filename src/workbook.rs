@@ -1108,6 +1108,7 @@ impl Workbook {
 
     // Convert the images in the workbooks into drawing files and rel links.
     fn prepare_drawings(&mut self) {
+        let mut chart_id = 1;
         let mut drawing_id = 1;
         let mut vml_drawing_id = 1;
 
@@ -1118,6 +1119,15 @@ impl Workbook {
         for worksheet in self.worksheets.iter_mut() {
             if !worksheet.images.is_empty() {
                 worksheet.prepare_worksheet_images(&mut worksheet_image_ids, drawing_id);
+            }
+
+            if !worksheet.charts.is_empty() {
+                worksheet.prepare_worksheet_charts(chart_id, drawing_id);
+                chart_id += 1;
+            }
+
+            // Increase the drawing number/id for image/chart file.
+            if !worksheet.images.is_empty() || !worksheet.charts.is_empty() {
                 drawing_id += 1;
             }
 
@@ -1354,6 +1364,10 @@ impl Workbook {
 
             if !worksheet.drawing.drawings.is_empty() {
                 package_options.num_drawings += 1;
+            }
+
+            if !worksheet.charts.is_empty() {
+                package_options.num_charts += worksheet.charts.len() as u16;
             }
 
             // Store the autofilter areas which are a category of defined name.

@@ -14,6 +14,7 @@ use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 
+use crate::drawing::{DrawingObject, DrawingType};
 use crate::XlsxError;
 
 #[derive(Clone, Debug)]
@@ -68,6 +69,7 @@ pub struct Image {
     pub(crate) decorative: bool,
     pub(crate) hash: u64,
     pub(crate) data: Vec<u8>,
+    pub(crate) drawing_type: DrawingType,
 }
 
 impl Image {
@@ -253,11 +255,12 @@ impl Image {
             alt_text: "".to_string(),
             vml_name: "image".to_string(),
             header_position: HeaderImagePosition::Center,
-            object_movement: ObjectMovement::Default,
+            object_movement: ObjectMovement::MoveButDontSizeWithCells,
             is_header: true,
             decorative: false,
             hash: 0,
             data: buffer.to_vec(),
+            drawing_type: DrawingType::Image,
         };
 
         Self::process_image(&mut image)?;
@@ -573,24 +576,6 @@ impl Image {
         self.height_dpi
     }
 
-    // Get the scale width of the image for Excel size calculations.
-    pub(crate) fn width_scaled(&self) -> f64 {
-        // Scale to user scale.
-        let width = self.width * self.scale_width;
-
-        // Scale for non 96dpi resolutions.
-        width * 96.0 / self.width_dpi
-    }
-
-    // Get the scale height of the image for Excel size calculations.
-    pub(crate) fn height_scaled(&self) -> f64 {
-        // Scale to user scale.
-        let height = self.height * self.scale_height;
-
-        // Scale for non 96dpi resolutions.
-        height * 96.0 / self.height_dpi
-    }
-
     // Get the image width as used by header/footer VML.
     pub(crate) fn vml_width(&self) -> f64 {
         // Scale the height/width by the resolution, relative to 72dpi.
@@ -831,29 +816,63 @@ impl Image {
     }
 }
 
+// TODO
+impl DrawingObject for Image {
+    fn x_offset(&self) -> u32 {
+        self.x_offset
+    }
+
+    fn y_offset(&self) -> u32 {
+        self.y_offset
+    }
+
+    fn width_scaled(&self) -> f64 {
+        self.width * self.scale_width * 96.0 / self.width_dpi
+    }
+
+    fn height_scaled(&self) -> f64 {
+        self.height * self.scale_height * 96.0 / self.height_dpi
+    }
+
+    fn object_movement(&self) -> ObjectMovement {
+        self.object_movement
+    }
+
+    fn alt_text(&self) -> String {
+        self.alt_text.clone()
+    }
+
+    fn decorative(&self) -> bool {
+        self.decorative
+    }
+
+    fn drawing_type(&self) -> DrawingType {
+        self.drawing_type
+    }
+}
+
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
 
-/// Options to control the movement of worksheet objects such as images.
+/// Options to control the movement of worksheet objects such as images and
+/// charts.
 ///
-/// This enum defines the way control a worksheet object, such a an images,
-/// moves when the cells underneath it are moved, resized or deleted. This
-/// equates to the following Excel options:
+/// This enum defines the way control a worksheet object, such a an images or
+/// charts, moves when the cells underneath it are moved, resized or deleted.
+/// This equates to the following Excel options:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
 ///
 /// Used with [`image.set_object_movement`](Image::set_object_movement).
 ///
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum ObjectMovement {
-    /// Default movement for the object.
-    Default,
-
-    /// Move and size the worksheet object with the cells.
+    /// Move and size the worksheet object with the cells. Default for charts.
     MoveAndSizeWithCells,
 
-    /// Move but don't size the worksheet object with the cells.
+    /// Move but don't size the worksheet object with the cells. Default for
+    /// images.
     MoveButDontSizeWithCells,
 
     /// Don't move or size the worksheet object with the cells.
