@@ -5,11 +5,11 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartSeries, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartSeries, Image, Workbook, XlsxError};
 
 mod common;
 
-// Test to demonstrate object positioning options.
+// Test to demonstrate adding images to worksheets.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -24,22 +24,19 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let series1 = ChartSeries::new()
-        .set_categories("Sheet1", 0, 0, 4, 0)
-        .set_values("Sheet1", 0, 1, 4, 1)
-        .set_category_cache(&["1", "2", "3", "4", "5"], true)
-        .set_value_cache(&["2", "4", "6", "8", "10"], true);
+        .set_values("Sheet1", 0, 0, 4, 0)
+        .set_value_cache(&["1", "2", "3", "4", "5"], true);
 
-    let series2 = ChartSeries::new()
-        .set_categories("Sheet1", 0, 0, 4, 0)
-        .set_values("Sheet1", 0, 2, 4, 2)
-        .set_category_cache(&["1", "2", "3", "4", "5"], true)
-        .set_value_cache(&["3", "6", "9", "12", "15"], true);
+    let mut chart = Chart::new().add_series(&series1);
 
-    let mut chart = Chart::new().add_series(&series1).add_series(&series2);
-
-    chart.set_axis_ids(64052224, 64055552);
+    chart.set_axis_ids(87089152, 87093632);
 
     worksheet.insert_chart(8, 4, &chart)?;
+
+    let mut image = Image::new("tests/input/images/red.png")?;
+    image.set_alt_text("red.png");
+
+    worksheet.insert_image(1, 5, &image)?;
 
     workbook.save(filename)?;
 
@@ -47,9 +44,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_bar01() {
+fn test_image06() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_bar01")
+        .set_name("image06")
         .set_function(create_new_xlsx_file)
         .initialize();
 

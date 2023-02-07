@@ -310,6 +310,14 @@ fn compare_xlsx_files(
             got_xml_string = re.replace(&got_xml_string, "<calcPr/>").to_string();
         }
 
+        // The pageMargins element in chart files often contain values like
+        // "0.75000000000000011" instead of "0.75". We simplify/round these to
+        // make comparison easier.
+        if filename.starts_with("xl/charts/chart") {
+            let re = Regex::new(r"000000000000\d+").unwrap();
+            exp_xml_string = re.replace_all(&exp_xml_string, "").to_string();
+        }
+
         // Convert the xml strings to vectors for easier comparison.
         let mut exp_xml_vec;
         let mut got_xml_vec;

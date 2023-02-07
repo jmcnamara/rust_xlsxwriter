@@ -307,7 +307,7 @@ impl Drawing {
         self.write_xfrm();
 
         // Write the a:graphic element.
-        self.write_a_graphic();
+        self.write_a_graphic(index);
 
         self.writer.xml_end_tag("xdr:graphicFrame");
     }
@@ -358,17 +358,17 @@ impl Drawing {
     }
 
     // Write the <a:graphic> element.
-    fn write_a_graphic(&mut self) {
+    fn write_a_graphic(&mut self, index: u32) {
         self.writer.xml_start_tag("a:graphic");
 
         // Write the a:graphicData element.
-        self.write_a_graphic_data();
+        self.write_a_graphic_data(index);
 
         self.writer.xml_end_tag("a:graphic");
     }
 
     // Write the <a:graphicData> element.
-    fn write_a_graphic_data(&mut self) {
+    fn write_a_graphic_data(&mut self, index: u32) {
         let attributes = vec![(
             "uri",
             "http://schemas.openxmlformats.org/drawingml/2006/chart".to_string(),
@@ -377,13 +377,13 @@ impl Drawing {
         self.writer.xml_start_tag_attr("a:graphicData", &attributes);
 
         // Write the c:chart element.
-        self.write_chart();
+        self.write_chart(index);
 
         self.writer.xml_end_tag("a:graphicData");
     }
 
     // Write the <c:chart> element.
-    fn write_chart(&mut self) {
+    fn write_chart(&mut self, index: u32) {
         let attributes = vec![
             (
                 "xmlns:c",
@@ -393,7 +393,7 @@ impl Drawing {
                 "xmlns:r",
                 "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string(),
             ),
-            ("r:id", "rId1".to_string()),
+            ("r:id", format!("rId{index}")),
         ];
 
         self.writer.xml_empty_tag_attr("c:chart", &attributes);

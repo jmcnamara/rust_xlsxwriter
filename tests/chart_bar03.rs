@@ -9,7 +9,7 @@ use rust_xlsxwriter::{Chart, ChartSeries, Workbook, XlsxError};
 
 mod common;
 
-// Test to demonstrate object positioning options.
+// Test to demonstrate charts.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -37,9 +37,27 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let mut chart = Chart::new().add_series(&series1).add_series(&series2);
 
-    chart.set_axis_ids(64052224, 64055552);
+    chart.set_axis_ids(64265216, 64447616);
 
     worksheet.insert_chart(8, 4, &chart)?;
+
+    let series1 = ChartSeries::new()
+        .set_categories("Sheet1", 0, 0, 3, 0)
+        .set_values("Sheet1", 0, 1, 3, 1)
+        .set_category_cache(&["1", "2", "3", "4"], true)
+        .set_value_cache(&["2", "4", "6", "8"], true);
+
+    let series2 = ChartSeries::new()
+        .set_categories("Sheet1", 0, 0, 3, 0)
+        .set_values("Sheet1", 0, 2, 3, 2)
+        .set_category_cache(&["1", "2", "3", "4"], true)
+        .set_value_cache(&["3", "6", "9", "12"], true);
+
+    let mut chart = Chart::new().add_series(&series1).add_series(&series2);
+
+    chart.set_axis_ids(86048128, 86058112);
+
+    worksheet.insert_chart(24, 5, &chart)?;
 
     workbook.save(filename)?;
 
@@ -47,9 +65,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_bar01() {
+fn test_chart_bar03() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_bar01")
+        .set_name("chart_bar03")
         .set_function(create_new_xlsx_file)
         .initialize();
 

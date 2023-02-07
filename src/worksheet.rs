@@ -129,7 +129,7 @@ pub struct Worksheet {
     pub(crate) xf_formats: Vec<Format>,
     pub(crate) has_hyperlink_style: bool,
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
-    pub(crate) image_relationships: Vec<(String, String, String)>,
+    pub(crate) drawing_object_relationships: Vec<(String, String, String)>,
     pub(crate) drawing_relationships: Vec<(String, String, String)>,
     pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
     pub(crate) images: BTreeMap<(RowNum, ColNum), Image>,
@@ -194,6 +194,7 @@ pub struct Worksheet {
     vertical_breaks: Vec<u32>,
     filter_conditions: HashMap<ColNum, FilterCondition>,
     filter_automatic_off: bool,
+    has_drawing_object_linkage: bool,
 }
 
 impl Default for Worksheet {
@@ -352,7 +353,7 @@ impl Worksheet {
             has_hyperlink_style: false,
             hyperlinks: BTreeMap::new(),
             hyperlink_relationships: vec![],
-            image_relationships: vec![],
+            drawing_object_relationships: vec![],
             drawing_relationships: vec![],
             vml_drawing_relationships: vec![],
             images: BTreeMap::new(),
@@ -372,6 +373,7 @@ impl Worksheet {
             filter_conditions: HashMap::new(),
             filter_automatic_off: false,
             charts: BTreeMap::new(),
+            has_drawing_object_linkage: false,
         }
     }
 
@@ -7569,8 +7571,13 @@ impl Worksheet {
 
         // Store the linkage to the worksheets rels file.
         let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
-        self.image_relationships
-            .push(("drawing".to_string(), drawing_name, "".to_string()));
+        self.drawing_object_relationships.push((
+            "drawing".to_string(),
+            drawing_name,
+            "".to_string(),
+        ));
+
+        self.has_drawing_object_linkage = true;
     }
 
     // Set up images used in headers and footers. Excel handles these
@@ -7632,18 +7639,27 @@ impl Worksheet {
 
         // Store the linkage to the worksheets rels file.
         let vml_drawing_name = format!("../drawings/vmlDrawing{drawing_id}.vml");
-        self.image_relationships
-            .push(("vmlDrawing".to_string(), vml_drawing_name, "".to_string()));
+        self.drawing_object_relationships.push((
+            "vmlDrawing".to_string(),
+            vml_drawing_name,
+            "".to_string(),
+        ));
     }
 
     // Convert the chart dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
-    pub(crate) fn prepare_worksheet_charts(&mut self, chart_id: u32, drawing_id: u32) {
+    pub(crate) fn prepare_worksheet_charts(&mut self, mut chart_id: u32, drawing_id: u32) -> u32 {
+        for (_, chart) in self.charts.iter_mut() {
+            chart.id = chart_id;
+            chart.add_axis_ids();
+            chart_id += 1;
+        }
+
         for (cell, chart) in self.charts.clone().iter_mut() {
             let row = cell.0;
             let col = cell.1;
 
-            chart.id = chart_id;
+            let chart_id = chart.id;
 
             // Store the linkage to the charts rels file.
             let chart_name = format!("../charts/chart{chart_id}.xml");
@@ -7652,15 +7668,22 @@ impl Worksheet {
 
             // Convert the chart dimensions to drawing dimensions and store the
             // drawing object.
-            let mut drawing_info = self.position_object_emus(row, col, chart);
-            drawing_info.rel_id = 99;
+            let drawing_info = self.position_object_emus(row, col, chart);
             self.drawing.drawings.push(drawing_info);
         }
 
-        // Store the linkage to the worksheets rels file.
-        let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
-        self.image_relationships
-            .push(("drawing".to_string(), drawing_name, "".to_string()));
+        // Store the linkage to the worksheets rels file, if it hasn't already
+        // been set by the one of the image preparation functions.
+        if !self.has_drawing_object_linkage {
+            let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
+            self.drawing_object_relationships.push((
+                "drawing".to_string(),
+                drawing_name,
+                "".to_string(),
+            ));
+        }
+
+        chart_id
     }
 
     // Calculate the vertices that define the position of a graphical object
@@ -7891,7 +7914,7 @@ impl Worksheet {
         self.rel_count = 0;
         self.drawing.drawings.clear();
         self.hyperlink_relationships.clear();
-        self.image_relationships.clear();
+        self.drawing_object_relationships.clear();
         self.drawing_relationships.clear();
         self.vml_drawing_relationships.clear();
         self.header_footer_vml_info.clear();
@@ -7899,7 +7922,7 @@ impl Worksheet {
 
     // Check if any external relationships are required.
     pub(crate) fn has_relationships(&self) -> bool {
-        !self.hyperlink_relationships.is_empty() || !self.image_relationships.is_empty()
+        !self.hyperlink_relationships.is_empty() || !self.drawing_object_relationships.is_empty()
     }
 
     // Check if there is a header image.

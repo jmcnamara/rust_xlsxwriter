@@ -289,7 +289,7 @@ impl<W: Write + Seek> Packager<W> {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
-        for relationship in worksheet.image_relationships.iter() {
+        for relationship in worksheet.drawing_object_relationships.iter() {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 

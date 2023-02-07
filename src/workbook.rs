@@ -1122,8 +1122,7 @@ impl Workbook {
             }
 
             if !worksheet.charts.is_empty() {
-                worksheet.prepare_worksheet_charts(chart_id, drawing_id);
-                chart_id += 1;
+                chart_id = worksheet.prepare_worksheet_charts(chart_id, drawing_id);
             }
 
             // Increase the drawing number/id for image/chart file.

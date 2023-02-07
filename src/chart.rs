@@ -29,6 +29,7 @@ pub struct Chart {
     scale_height: f64,
     axis_ids: (u32, u32),
     series: Vec<ChartSeries>,
+    category_has_num_format: bool,
 }
 
 /// TODO
@@ -60,6 +61,7 @@ impl Chart {
 
             axis_ids: (0, 0),
             series: vec![],
+            category_has_num_format: false,
         }
     }
 
@@ -83,6 +85,18 @@ impl Chart {
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
+
+    // Set chart unique axis ids.
+    pub(crate) fn add_axis_ids(&mut self) {
+        if self.axis_ids.0 != 0 {
+            return;
+        }
+
+        let axis_id_1 = (5000 + self.id) * 10000 + 1;
+        let axis_id_2 = axis_id_1 + 1;
+
+        self.axis_ids = (axis_id_1, axis_id_2);
+    }
 
     // -----------------------------------------------------------------------
     // XML assembly methods.
@@ -220,7 +234,10 @@ impl Chart {
             self.write_order(index);
 
             // Write the c:cat element.
-            self.write_cat(&series.category_range, &series.category_cache_data);
+            if series.category_range.has_data() {
+                self.category_has_num_format = true;
+                self.write_cat(&series.category_range, &series.category_cache_data);
+            }
 
             // Write the c:val element.
             self.write_val(&series.value_range, &series.value_cache_data);
@@ -346,7 +363,9 @@ impl Chart {
         self.write_ax_pos("l");
 
         // Write the c:numFmt element.
-        self.write_num_fmt();
+        if self.category_has_num_format {
+            self.write_category_num_fmt();
+        }
 
         // Write the c:tickLblPos element.
         self.write_tick_lbl_pos();
@@ -385,7 +404,7 @@ impl Chart {
         self.write_major_gridlines();
 
         // Write the c:numFmt element.
-        self.write_num_fmt();
+        self.write_value_num_fmt();
 
         // Write the c:tickLblPos element.
         self.write_tick_lbl_pos();
@@ -427,7 +446,17 @@ impl Chart {
     }
 
     // Write the <c:numFmt> element.
-    fn write_num_fmt(&mut self) {
+    fn write_value_num_fmt(&mut self) {
+        let attributes = vec![
+            ("formatCode", "General".to_string()),
+            ("sourceLinked", "1".to_string()),
+        ];
+
+        self.writer.xml_empty_tag_attr("c:numFmt", &attributes);
+    }
+
+    // Write the <c:numFmt> element.
+    fn write_category_num_fmt(&mut self) {
         let attributes = vec![
             ("formatCode", "General".to_string()),
             ("sourceLinked", "1".to_string()),
@@ -671,7 +700,7 @@ struct ChartRange {
 }
 
 impl ChartRange {
-    fn new(
+    pub(crate) fn new(
         sheet_name: &str,
         first_row: RowNum,
         first_col: ColNum,
@@ -687,7 +716,7 @@ impl ChartRange {
         }
     }
 
-    fn formula(&self) -> String {
+    pub(crate) fn formula(&self) -> String {
         utility::chart_range_abs(
             &self.sheet_name,
             self.first_row,
@@ -695,6 +724,10 @@ impl ChartRange {
             self.last_row,
             self.last_col,
         )
+    }
+
+    pub(crate) fn has_data(&self) -> bool {
+        !self.sheet_name.is_empty()
     }
 }
 
