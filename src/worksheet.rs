@@ -22,8 +22,8 @@ use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::XMLWriter;
-use crate::Chart;
 use crate::{utility, HeaderImagePosition, Image, ObjectMovement, ProtectionOptions, XlsxColor};
+use crate::{Chart, ChartSeriesCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -7911,6 +7911,11 @@ impl Worksheet {
     pub(crate) fn reset(&mut self) {
         self.writer.reset();
         self.drawing.writer.reset();
+
+        for chart in self.charts.values_mut() {
+            chart.writer.reset()
+        }
+
         self.rel_count = 0;
         self.drawing.drawings.clear();
         self.hyperlink_relationships.clear();
@@ -7973,6 +7978,46 @@ impl Worksheet {
         }
 
         width
+    }
+
+    // Return a range of data from a worksheet to use as cache data in a chart
+    // file. If the range doesn't contain string/number data then we return a
+    // default struct with an empty cache.
+    pub(crate) fn get_cache_data(
+        &self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+    ) -> ChartSeriesCacheData {
+        let mut cache = ChartSeriesCacheData::new();
+        let mut data = vec![];
+        let mut is_numeric = true;
+
+        for row_num in first_row..=last_row {
+            match self.table.get(&row_num) {
+                Some(columns) => {
+                    for col_num in first_col..=last_col {
+                        match columns.get(&col_num) {
+                            Some(cell) => match cell {
+                                CellType::String { string, .. } => {
+                                    data.push(string.to_string());
+                                    is_numeric = false;
+                                }
+                                CellType::Number { number, .. } => data.push(number.to_string()),
+                                _ => return cache,
+                            },
+                            None => return cache,
+                        }
+                    }
+                }
+                None => return cache,
+            }
+        }
+
+        cache.is_numeric = is_numeric;
+        cache.data = data;
+        cache
     }
 
     // -----------------------------------------------------------------------

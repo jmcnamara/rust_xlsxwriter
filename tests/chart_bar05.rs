@@ -23,22 +23,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let series1 = ChartSeries::new()
-        .set_values("Sheet1", 0, 0, 4, 0)
-        .set_value_cache(&["1", "2", "3", "4", "5"], true);
-
-    let series2 = ChartSeries::new()
-        .set_values("Sheet1", 0, 1, 4, 1)
-        .set_value_cache(&["2", "4", "6", "8", "10"], true);
-
-    let series3 = ChartSeries::new()
-        .set_values("Sheet1", 0, 2, 4, 2)
-        .set_value_cache(&["3", "6", "9", "12", "15"], true);
-
     let mut chart = Chart::new()
-        .add_series(&series1)
-        .add_series(&series2)
-        .add_series(&series3);
+        .add_series(&ChartSeries::new().set_values("Sheet1", 0, 0, 4, 0))
+        .add_series(&ChartSeries::new().set_values("Sheet1", 0, 1, 4, 1))
+        .add_series(&ChartSeries::new().set_values("Sheet1", 0, 2, 4, 2));
 
     chart.set_axis_ids(64264064, 64447232);
 

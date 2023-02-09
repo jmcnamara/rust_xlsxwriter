@@ -23,9 +23,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let series1 = ChartSeries::new()
-        .set_values("Sheet1", 0, 0, 4, 0)
-        .set_value_cache(&["1", "2", "3", "4", "5"], true);
+    let series1 = ChartSeries::new().set_values("Sheet1", 0, 0, 4, 0);
 
     let mut chart = Chart::new().add_series(&series1);
 
