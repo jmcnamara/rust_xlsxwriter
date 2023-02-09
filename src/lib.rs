@@ -113,7 +113,7 @@
 //! - [Release Notes].
 //!
 //! [User Guide]: https://rustxlsxwriter.github.io/index.html
-//! [Getting started]: https://rustxlsxwriter.github.io/getting_stared.html
+//! [Getting started]: https://rustxlsxwriter.github.io/getting_started.html
 //! [Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
 //! [Cookbook Examples]: https://rustxlsxwriter.github.io/examples/intro.html
 //! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
