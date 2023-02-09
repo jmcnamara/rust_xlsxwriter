@@ -11,6 +11,8 @@ use crate::{
     ColNum, ObjectMovement, RowNum,
 };
 
+// TODO remove all the dead_code attributes.
+
 #[derive(Clone)]
 #[allow(dead_code)] // TODO
 pub struct Chart {
@@ -23,12 +25,12 @@ pub struct Chart {
     pub(crate) object_movement: ObjectMovement,
     pub(crate) decorative: bool,
     pub(crate) drawing_type: DrawingType,
+    pub(crate) series: Vec<ChartSeries>,
     height: f64,
     width: f64,
     scale_width: f64,
     scale_height: f64,
     axis_ids: (u32, u32),
-    series: Vec<ChartSeries>,
     category_has_num_format: bool,
 }
 
@@ -261,7 +263,7 @@ impl Chart {
     }
 
     // Write the <c:cat> element.
-    fn write_cat(&mut self, range: &ChartRange, cache: &[String]) {
+    fn write_cat(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
         self.writer.xml_start_tag("c:cat");
 
         // Write the c:numRef element.
@@ -271,7 +273,7 @@ impl Chart {
     }
 
     // Write the <c:val> element.
-    fn write_val(&mut self, range: &ChartRange, cache: &[String]) {
+    fn write_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
         self.writer.xml_start_tag("c:val");
 
         // Write the c:numRef element.
@@ -281,14 +283,16 @@ impl Chart {
     }
 
     // Write the <c:numRef> element.
-    fn write_num_ref(&mut self, range: &ChartRange, cache: &[String]) {
+    fn write_num_ref(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
         self.writer.xml_start_tag("c:numRef");
 
         // Write the c:f element.
         self.write_range_formula(&range.formula());
 
         // Write the c:numCache element.
-        self.write_num_cache(cache);
+        if cache.has_data() {
+            self.write_num_cache(cache);
+        }
 
         self.writer.xml_end_tag("c:numRef");
     }
@@ -299,17 +303,17 @@ impl Chart {
     }
 
     // Write the <c:numCache> element.
-    fn write_num_cache(&mut self, cache: &[String]) {
+    fn write_num_cache(&mut self, cache: &ChartSeriesCacheData) {
         self.writer.xml_start_tag("c:numCache");
 
         // Write the c:formatCode element.
         self.write_format_code();
 
         // Write the c:ptCount element.
-        self.write_pt_count(cache.len());
+        self.write_pt_count(cache.data.len());
 
         // Write the c:pt elements.
-        for (index, value) in cache.iter().enumerate() {
+        for (index, value) in cache.data.iter().enumerate() {
             self.write_pt(index, value);
         }
 
@@ -631,12 +635,10 @@ impl DrawingObject for Chart {
 #[allow(dead_code)] // todo
 #[derive(Clone)]
 pub struct ChartSeries {
-    value_range: ChartRange,
-    category_range: ChartRange,
-    value_cache_is_numeric: bool,
-    category_cache_is_numeric: bool,
-    value_cache_data: Vec<String>,
-    category_cache_data: Vec<String>,
+    pub(crate) value_range: ChartRange,
+    pub(crate) category_range: ChartRange,
+    pub(crate) value_cache_data: ChartSeriesCacheData,
+    pub(crate) category_cache_data: ChartSeriesCacheData,
 }
 
 #[allow(clippy::new_without_default)]
@@ -645,10 +647,8 @@ impl ChartSeries {
         ChartSeries {
             value_range: ChartRange::new("", 0, 0, 0, 0),
             category_range: ChartRange::new("", 0, 0, 0, 0),
-            value_cache_is_numeric: true,
-            category_cache_is_numeric: true,
-            value_cache_data: vec![],
-            category_cache_data: vec![],
+            value_cache_data: ChartSeriesCacheData::new(),
+            category_cache_data: ChartSeriesCacheData::new(),
         }
     }
     pub fn set_values(
@@ -676,14 +676,18 @@ impl ChartSeries {
     }
 
     pub fn set_value_cache(mut self, data: &[&str], is_numeric: bool) -> ChartSeries {
-        self.value_cache_data = data.iter().map(|s| s.to_string()).collect();
-        self.value_cache_is_numeric = is_numeric;
+        self.value_cache_data = ChartSeriesCacheData {
+            is_numeric,
+            data: data.iter().map(|s| s.to_string()).collect(),
+        };
         self
     }
 
     pub fn set_category_cache(mut self, data: &[&str], is_numeric: bool) -> ChartSeries {
-        self.category_cache_data = data.iter().map(|s| s.to_string()).collect();
-        self.category_cache_is_numeric = is_numeric;
+        self.category_cache_data = ChartSeriesCacheData {
+            is_numeric,
+            data: data.iter().map(|s| s.to_string()).collect(),
+        };
         self
     }
 }
@@ -691,7 +695,7 @@ impl ChartSeries {
 /// TODO
 #[allow(dead_code)]
 #[derive(Clone)]
-struct ChartRange {
+pub(crate) struct ChartRange {
     sheet_name: String,
     first_row: RowNum,
     first_col: ColNum,
@@ -726,8 +730,38 @@ impl ChartRange {
         )
     }
 
+    pub(crate) fn key(&self) -> (String, RowNum, ColNum, RowNum, ColNum) {
+        (
+            self.sheet_name.clone(),
+            self.first_row,
+            self.first_col,
+            self.last_row,
+            self.last_col,
+        )
+    }
+
     pub(crate) fn has_data(&self) -> bool {
         !self.sheet_name.is_empty()
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Clone)]
+pub(crate) struct ChartSeriesCacheData {
+    pub(crate) is_numeric: bool,
+    pub(crate) data: Vec<String>,
+}
+
+impl ChartSeriesCacheData {
+    pub(crate) fn new() -> ChartSeriesCacheData {
+        ChartSeriesCacheData {
+            is_numeric: false,
+            data: vec![],
+        }
+    }
+
+    pub(crate) fn has_data(&self) -> bool {
+        !self.data.is_empty()
     }
 }
 

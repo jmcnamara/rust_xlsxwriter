@@ -25,15 +25,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let series1 = ChartSeries::new()
         .set_categories("Sheet1", 0, 0, 4, 0)
-        .set_values("Sheet1", 0, 1, 4, 1)
-        .set_category_cache(&["1", "2", "3", "4", "5"], true)
-        .set_value_cache(&["2", "4", "6", "8", "10"], true);
+        .set_values("Sheet1", 0, 1, 4, 1);
 
     let series2 = ChartSeries::new()
         .set_categories("Sheet1", 0, 0, 4, 0)
-        .set_values("Sheet1", 0, 2, 4, 2)
-        .set_category_cache(&["1", "2", "3", "4", "5"], true)
-        .set_value_cache(&["3", "6", "9", "12", "15"], true);
+        .set_values("Sheet1", 0, 2, 4, 2);
 
     let chart = Chart::new().add_series(&series1).add_series(&series2);
 
@@ -41,15 +37,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let series1 = ChartSeries::new()
         .set_categories("Sheet1", 0, 0, 3, 0)
-        .set_values("Sheet1", 0, 1, 3, 1)
-        .set_category_cache(&["1", "2", "3", "4"], true)
-        .set_value_cache(&["2", "4", "6", "8"], true);
+        .set_values("Sheet1", 0, 1, 3, 1);
 
     let series2 = ChartSeries::new()
         .set_categories("Sheet1", 0, 0, 3, 0)
-        .set_values("Sheet1", 0, 2, 3, 2)
-        .set_category_cache(&["1", "2", "3", "4"], true)
-        .set_value_cache(&["3", "6", "9", "12"], true);
+        .set_values("Sheet1", 0, 2, 3, 2);
 
     let chart = Chart::new().add_series(&series1).add_series(&series2);
 

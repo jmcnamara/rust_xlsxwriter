@@ -17,7 +17,10 @@ use crate::packager::Packager;
 use crate::packager::PackagerOptions;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
-use crate::{utility, DefinedName, DefinedNameType, DocProperties, NUM_IMAGE_FORMATS};
+use crate::{
+    utility, ChartSeriesCacheData, ColNum, DefinedName, DefinedNameType, DocProperties, RowNum,
+    NUM_IMAGE_FORMATS,
+};
 use crate::{FormatPattern, XlsxColor};
 
 /// The Workbook struct represents an Excel file in it's entirety. It is the
@@ -1075,6 +1078,9 @@ impl Workbook {
         // Convert the images in the workbooks into drawing files and rel links.
         self.prepare_drawings();
 
+        // Fill the chart data caches from worksheet data.
+        self.prepare_chart_cache_data();
+
         // Prepare the formats for writing with styles.rs.
         self.prepare_format_properties();
 
@@ -1140,6 +1146,60 @@ impl Workbook {
                     vml_drawing_id,
                 );
                 vml_drawing_id += 1;
+            }
+        }
+    }
+
+    // Add worksheet number/string cache data to chart series. This isn't
+    // strictly necessary but it helps non-Excel apps to render charts
+    // correctly. However, if any non-number/string data is encountered or any
+    // of the cells are blanks then the cache will be empty.
+    fn prepare_chart_cache_data(&mut self) {
+        // First build up a hash of the chart data ranges. The data may not be
+        // in the same worksheet as the chart so we need to do the lookup at the
+        // workbook level.
+        let mut chart_caches: HashMap<
+            (String, RowNum, ColNum, RowNum, ColNum),
+            ChartSeriesCacheData,
+        > = HashMap::new();
+
+        for worksheet in self.worksheets.iter() {
+            if !worksheet.charts.is_empty() {
+                for chart in worksheet.charts.values() {
+                    for series in chart.series.iter() {
+                        if series.value_range.has_data() {
+                            chart_caches
+                                .insert(series.value_range.key(), ChartSeriesCacheData::new());
+                        }
+                        if series.category_range.has_data() {
+                            chart_caches
+                                .insert(series.category_range.key(), ChartSeriesCacheData::new());
+                        }
+                    }
+                }
+            }
+        }
+
+        // Populate the caches with data from the worksheet ranges.
+        for (key, cache) in &mut chart_caches {
+            if let Ok(worksheet) = self.worksheet_from_name(&key.0) {
+                *cache = worksheet.get_cache_data(key.1, key.2, key.3, key.4);
+            }
+        }
+
+        // Fill the caches back into the chart series.
+        for worksheet in self.worksheets.iter_mut() {
+            if !worksheet.charts.is_empty() {
+                for chart in worksheet.charts.values_mut() {
+                    for series in &mut chart.series {
+                        if let Some(cache) = chart_caches.get(&series.value_range.key()) {
+                            series.value_cache_data = cache.clone();
+                        }
+                        if let Some(cache) = chart_caches.get(&series.category_range.key()) {
+                            series.category_cache_data = cache.clone();
+                        }
+                    }
+                }
             }
         }
     }
