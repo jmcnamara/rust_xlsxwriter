@@ -14,34 +14,25 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
-    worksheet.write_string(0, 0, "Foo")?;
-
-    let worksheet2 = workbook.add_worksheet();
 
     // Add some test data for the chart(s).
     let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
     for (row_num, row_data) in data.iter().enumerate() {
         for (col_num, col_data) in row_data.iter().enumerate() {
-            worksheet2.write_number(row_num as u32, col_num as u16, *col_data)?;
+            worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
         }
     }
 
-    let mut series1 = ChartSeries::new();
-    series1
-        .set_categories("Sheet2", 0, 0, 4, 0)
-        .set_values("Sheet2", 0, 1, 4, 1);
+    let mut chart = Chart::new(ChartType::Column);
+    chart
+        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 0, 4, 0))
+        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 1, 4, 1))
+        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 2, 4, 2));
 
-    let mut series2 = ChartSeries::new();
-    series2
-        .set_categories("Sheet2", 0, 0, 4, 0)
-        .set_values("Sheet2", 0, 2, 4, 2);
+    // Set the chart axis ids to match the random values in the Excel file.
+    chart.set_axis_ids(43424000, 43434368);
 
-    let mut chart = Chart::new(ChartType::Bar);
-    chart.set_axis_ids(93218304, 93219840);
-
-    chart.push_series(&series1).push_series(&series2);
-
-    worksheet2.insert_chart(8, 4, &chart)?;
+    worksheet.insert_chart(8, 4, &chart)?;
 
     workbook.save(filename)?;
 
@@ -49,9 +40,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_bar02() {
+fn test_chart_column01() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_bar02")
+        .set_name("chart_column01")
         .set_function(create_new_xlsx_file)
         .initialize();
 

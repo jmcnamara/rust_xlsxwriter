@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartSeries, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
 
 mod common;
 
@@ -23,31 +23,31 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let series1 = ChartSeries::new()
+    let mut chart = Chart::new(ChartType::Bar);
+    chart.set_axis_ids(64265216, 64447616);
+    chart
+        .add_series()
         .set_categories("Sheet1", 0, 0, 4, 0)
         .set_values("Sheet1", 0, 1, 4, 1);
 
-    let series2 = ChartSeries::new()
+    chart
+        .add_series()
         .set_categories("Sheet1", 0, 0, 4, 0)
         .set_values("Sheet1", 0, 2, 4, 2);
 
-    let mut chart = Chart::new().add_series(&series1).add_series(&series2);
-
-    chart.set_axis_ids(64265216, 64447616);
-
     worksheet.insert_chart(8, 4, &chart)?;
 
-    let series1 = ChartSeries::new()
+    let mut chart = Chart::new(ChartType::Bar);
+    chart.set_axis_ids(86048128, 86058112);
+    chart
+        .add_series()
         .set_categories("Sheet1", 0, 0, 3, 0)
         .set_values("Sheet1", 0, 1, 3, 1);
 
-    let series2 = ChartSeries::new()
+    chart
+        .add_series()
         .set_categories("Sheet1", 0, 0, 3, 0)
         .set_values("Sheet1", 0, 2, 3, 2);
-
-    let mut chart = Chart::new().add_series(&series1).add_series(&series2);
-
-    chart.set_axis_ids(86048128, 86058112);
 
     worksheet.insert_chart(24, 5, &chart)?;
 

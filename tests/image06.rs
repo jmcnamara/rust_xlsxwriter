@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartSeries, Image, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartType, Image, Workbook, XlsxError};
 
 mod common;
 
@@ -23,11 +23,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let series1 = ChartSeries::new().set_values("Sheet1", 0, 0, 4, 0);
-
-    let mut chart = Chart::new().add_series(&series1);
-
+    let mut chart = Chart::new(ChartType::Bar);
     chart.set_axis_ids(87089152, 87093632);
+    chart.add_series().set_values("Sheet1", 0, 0, 4, 0);
 
     worksheet.insert_chart(8, 4, &chart)?;
 

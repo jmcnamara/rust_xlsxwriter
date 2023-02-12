@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartSeries, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
 
 mod common;
 
@@ -16,21 +16,24 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Add some test data for the chart(s).
-    let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
+    let data = [[1, 8, 3], [2, 7, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
     for (row_num, row_data) in data.iter().enumerate() {
         for (col_num, col_data) in row_data.iter().enumerate() {
             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
         }
     }
 
-    let mut chart = Chart::new(ChartType::Bar);
+    let mut chart = Chart::new(ChartType::Area);
+    chart.set_axis_ids(43407616, 43433984);
     chart
-        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 0, 4, 0))
-        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 1, 4, 1))
-        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 2, 4, 2));
+        .add_series()
+        .set_categories("Sheet1", 0, 0, 4, 0)
+        .set_values("Sheet1", 0, 1, 4, 1);
 
-    // Set the chart axis ids to match the random values in the Excel file.
-    chart.set_axis_ids(64264064, 64447232);
+    chart
+        .add_series()
+        .set_categories("Sheet1", 0, 0, 4, 0)
+        .set_values("Sheet1", 0, 2, 4, 2);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -40,9 +43,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_bar05() {
+fn test_chart_area01() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_bar05")
+        .set_name("chart_area01")
         .set_function(create_new_xlsx_file)
         .initialize();
 

@@ -32,6 +32,9 @@ pub struct Chart {
     scale_height: f64,
     axis_ids: (u32, u32),
     category_has_num_format: bool,
+    chart_type: ChartType,
+    x_axis: ChartAxis,
+    y_axis: ChartAxis,
 }
 
 /// TODO
@@ -43,10 +46,10 @@ impl Chart {
 
     // Create a new Chart struct.
     #[allow(clippy::new_without_default)]
-    pub fn new() -> Chart {
+    pub fn new(chart_type: ChartType) -> Chart {
         let writer = XMLWriter::new();
 
-        Chart {
+        let chart = Chart {
             writer,
             id: 0,
             height: 288.0,
@@ -64,13 +67,31 @@ impl Chart {
             axis_ids: (0, 0),
             series: vec![],
             category_has_num_format: false,
+            chart_type,
+            x_axis: ChartAxis::new(),
+            y_axis: ChartAxis::new(),
+        };
+
+        match chart_type {
+            ChartType::Bar => Self::initialize_bar_chart(chart),
+            ChartType::Area => Self::initialize_area_chart(chart),
+            ChartType::Line => Self::initialize_line_chart(chart),
+            ChartType::Column => Self::initialize_column_chart(chart),
+            _ => chart,
         }
     }
 
     // TODO.
-    pub fn add_series(mut self, series: &ChartSeries) -> Chart {
-        self.series.push(series.clone());
+    pub fn add_series(&mut self) -> &mut ChartSeries {
+        let series = ChartSeries::new();
+        self.series.push(series);
 
+        self.series.last_mut().unwrap()
+    }
+
+    // TODO.
+    pub fn push_series(&mut self, series: &ChartSeries) -> &mut Chart {
+        self.series.push(series.clone());
         self
     }
 
@@ -98,6 +119,166 @@ impl Chart {
         let axis_id_2 = axis_id_1 + 1;
 
         self.axis_ids = (axis_id_1, axis_id_2);
+    }
+
+    // -----------------------------------------------------------------------
+    // Chart specific methods.
+    // -----------------------------------------------------------------------
+
+    // Initialize area charts.
+    fn initialize_area_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_position = ChartAxisPosition::Bottom;
+
+        self.y_axis.axis_type = ChartAxisType::Value;
+        self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self
+    }
+
+    // Initialize bar charts. Bar chart category/value axes are reversed in
+    // comparison to other charts. Some of the defaults reflect this.
+    fn initialize_bar_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Value;
+        self.x_axis.axis_position = ChartAxisPosition::Bottom;
+
+        self.y_axis.axis_type = ChartAxisType::Category;
+        self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self
+    }
+
+    // Initialize column charts.
+    fn initialize_column_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_position = ChartAxisPosition::Bottom;
+
+        self.y_axis.axis_type = ChartAxisType::Value;
+        self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self
+    }
+
+    // Initialize line charts.
+    fn initialize_line_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_position = ChartAxisPosition::Bottom;
+
+        self.y_axis.axis_type = ChartAxisType::Value;
+        self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self
+    }
+
+    // Write the <c:areaChart> element for Column charts.
+    fn write_area_chart(&mut self) {
+        self.writer.xml_start_tag("c:areaChart");
+
+        // Write the c:grouping element.
+        self.write_grouping();
+
+        // Write the c:ser elements.
+        self.write_series();
+
+        // Write the c:axId elements.
+        self.write_ax_ids();
+
+        self.writer.xml_end_tag("c:areaChart");
+    }
+
+    // Write the <c:barChart> element for Bar charts.
+    fn write_bar_chart(&mut self) {
+        // Reverse the X and Y axes for Bar charts.
+        std::mem::swap(&mut self.x_axis, &mut self.y_axis);
+
+        self.writer.xml_start_tag("c:barChart");
+
+        // Write the c:barDir element.
+        self.write_bar_dir("bar");
+
+        // Write the c:grouping element.
+        self.write_grouping();
+
+        // Write the c:ser elements.
+        self.write_series();
+
+        // Write the c:axId elements.
+        self.write_ax_ids();
+
+        self.writer.xml_end_tag("c:barChart");
+    }
+
+    // Write the <c:barChart> element for Column charts.
+    fn write_column_chart(&mut self) {
+        self.writer.xml_start_tag("c:barChart");
+
+        // Write the c:barDir element.
+        self.write_bar_dir("col");
+
+        // Write the c:grouping element.
+        self.write_grouping();
+
+        // Write the c:ser elements.
+        self.write_series();
+
+        // Write the c:axId elements.
+        self.write_ax_ids();
+
+        self.writer.xml_end_tag("c:barChart");
+    }
+
+    // Write the <c:doughnutChart> element for Column charts.
+    fn write_doughnut_chart(&mut self) {
+        self.writer.xml_start_tag("c:doughnutChart");
+
+        // Write the c:varyColors element.
+        self.write_vary_colors();
+
+        // Write the c:ser elements.
+        self.write_series();
+
+        // Write the c:firstSliceAng element.
+        self.write_first_slice_ang();
+
+        // Write the c:holeSize element.
+        self.write_hole_size();
+
+        self.writer.xml_end_tag("c:doughnutChart");
+    }
+
+    // Write the <c:lineChart>element.
+    fn write_line_chart(&mut self) {
+        self.writer.xml_start_tag("c:lineChart");
+
+        // Write the c:grouping element.
+        self.write_grouping();
+
+        // Write the c:ser elements.
+        self.write_series();
+
+        // Write the c:marker element.
+        self.write_marker_value();
+
+        // Write the c:axId elements.
+        self.write_ax_ids();
+
+        self.writer.xml_end_tag("c:lineChart");
+    }
+
+    // Write the <c:pieChart> element for Column charts.
+    fn write_pie_chart(&mut self) {
+        self.writer.xml_start_tag("c:pieChart");
+
+        // Write the c:varyColors element.
+        self.write_vary_colors();
+
+        // Write the c:ser elements.
+        self.write_series();
+
+        // Write the c:firstSliceAng element.
+        self.write_first_slice_ang();
+
+        self.writer.xml_end_tag("c:pieChart");
     }
 
     // -----------------------------------------------------------------------
@@ -174,14 +355,22 @@ impl Chart {
         // Write the c:layout element.
         self.write_layout();
 
-        // Write the c:barChart element.
-        self.write_bar_chart();
+        match self.chart_type {
+            ChartType::Bar => self.write_bar_chart(),
+            ChartType::Pie => self.write_pie_chart(),
+            ChartType::Area => self.write_area_chart(),
+            ChartType::Line => self.write_line_chart(),
+            ChartType::Column => self.write_column_chart(),
+            ChartType::Doughnut => self.write_doughnut_chart(),
+        }
 
-        // Write the c:catAx element.
-        self.write_cat_ax();
+        if self.chart_type != ChartType::Pie && self.chart_type != ChartType::Doughnut {
+            // Write the c:catAx element.
+            self.write_cat_ax();
 
-        // Write the c:valAx element.
-        self.write_val_ax();
+            // Write the c:valAx element.
+            self.write_val_ax();
+        }
 
         self.writer.xml_end_tag("c:plotArea");
     }
@@ -191,35 +380,22 @@ impl Chart {
         self.writer.xml_empty_tag("c:layout");
     }
 
-    // Write the <c:barChart> element.
-    fn write_bar_chart(&mut self) {
-        self.writer.xml_start_tag("c:barChart");
-
-        // Write the c:barDir element.
-        self.write_bar_dir();
-
-        // Write the c:grouping element.
-        self.write_grouping();
-
-        // Write the c:ser elements.
-        self.write_series();
-
-        // Write the c:axId elements.
-        self.write_ax_ids();
-
-        self.writer.xml_end_tag("c:barChart");
-    }
-
     // Write the <c:barDir> element.
-    fn write_bar_dir(&mut self) {
-        let attributes = vec![("val", "bar".to_string())];
+    fn write_bar_dir(&mut self, direction: &str) {
+        let attributes = vec![("val", direction.to_string())];
 
         self.writer.xml_empty_tag_attr("c:barDir", &attributes);
     }
 
     // Write the <c:grouping> element.
     fn write_grouping(&mut self) {
-        let attributes = vec![("val", "clustered".to_string())];
+        let mut attributes = vec![];
+
+        match self.chart_type {
+            ChartType::Bar | ChartType::Column => attributes.push(("val", "clustered".to_string())),
+            ChartType::Line | ChartType::Area => attributes.push(("val", "standard".to_string())),
+            _ => {}
+        }
 
         self.writer.xml_empty_tag_attr("c:grouping", &attributes);
     }
@@ -234,6 +410,11 @@ impl Chart {
 
             // Write the c:order element.
             self.write_order(index);
+
+            // Write the c:marker element.
+            if self.chart_type == ChartType::Line {
+                self.write_marker();
+            }
 
             // Write the c:cat element.
             if series.category_range.has_data() {
@@ -364,7 +545,7 @@ impl Chart {
         self.write_scaling();
 
         // Write the c:axPos element.
-        self.write_ax_pos("l");
+        self.write_ax_pos(self.x_axis.axis_position);
 
         // Write the c:numFmt element.
         if self.category_has_num_format {
@@ -402,7 +583,7 @@ impl Chart {
         self.write_scaling();
 
         // Write the c:axPos element.
-        self.write_ax_pos("b");
+        self.write_ax_pos(self.y_axis.axis_position);
 
         // Write the c:majorGridlines element.
         self.write_major_gridlines();
@@ -443,7 +624,7 @@ impl Chart {
     }
 
     // Write the <c:axPos> element.
-    fn write_ax_pos(&mut self, position: &str) {
+    fn write_ax_pos(&mut self, position: ChartAxisPosition) {
         let attributes = vec![("val", position.to_string())];
 
         self.writer.xml_empty_tag_attr("c:axPos", &attributes);
@@ -518,7 +699,12 @@ impl Chart {
 
     // Write the <c:crossBetween> element.
     fn write_cross_between(&mut self) {
-        let attributes = vec![("val", "between".to_string())];
+        let mut attributes = vec![];
+
+        match self.chart_type {
+            ChartType::Area => attributes.push(("val", "midCat".to_string())),
+            _ => attributes.push(("val", "between".to_string())),
+        }
 
         self.writer
             .xml_empty_tag_attr("c:crossBetween", &attributes);
@@ -533,6 +719,11 @@ impl Chart {
 
         // Write the c:layout element.
         self.write_layout();
+
+        if self.chart_type == ChartType::Pie || self.chart_type == ChartType::Doughnut {
+            // Write the c:txPr element.
+            self.write_pie_tx_pr();
+        }
 
         self.writer.xml_end_tag("c:legend");
     }
@@ -590,7 +781,119 @@ impl Chart {
     fn write_page_setup(&mut self) {
         self.writer.xml_empty_tag("c:pageSetup");
     }
+
+    // Write the <c:marker> element.
+    fn write_marker_value(&mut self) {
+        let attributes = vec![("val", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:marker", &attributes);
+    }
+
+    // Write the <c:marker> element.
+    fn write_marker(&mut self) {
+        self.writer.xml_start_tag("c:marker");
+
+        // Write the c:symbol element.
+        self.write_symbol();
+
+        self.writer.xml_end_tag("c:marker");
+    }
+
+    // Write the <c:symbol> element.
+    fn write_symbol(&mut self) {
+        let attributes = vec![("val", "none".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:symbol", &attributes);
+    }
+
+    // Write the <c:varyColors> element.
+    fn write_vary_colors(&mut self) {
+        let attributes = vec![("val", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:varyColors", &attributes);
+    }
+
+    // Write the <c:firstSliceAng> element.
+    fn write_first_slice_ang(&mut self) {
+        let attributes = vec![("val", "0".to_string())];
+
+        self.writer
+            .xml_empty_tag_attr("c:firstSliceAng", &attributes);
+    }
+
+    // Write the <c:holeSize> element.
+    fn write_hole_size(&mut self) {
+        let attributes = vec![("val", "50".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:holeSize", &attributes);
+    }
+
+    // Write the <c:txPr> element.
+    fn write_pie_tx_pr(&mut self) {
+        self.writer.xml_start_tag("c:txPr");
+
+        // Write the a:bodyPr element.
+        self.write_a_body_pr();
+
+        // Write the a:lstStyle element.
+        self.write_a_lst_style();
+
+        // Write the a:p element.
+        self.write_a_p();
+
+        self.writer.xml_end_tag("c:txPr");
+    }
+
+    // Write the <a:bodyPr> element.
+    fn write_a_body_pr(&mut self) {
+        self.writer.xml_empty_tag("a:bodyPr");
+    }
+
+    // Write the <a:lstStyle> element.
+    fn write_a_lst_style(&mut self) {
+        self.writer.xml_empty_tag("a:lstStyle");
+    }
+
+    // Write the <a:p> element.
+    fn write_a_p(&mut self) {
+        self.writer.xml_start_tag("a:p");
+
+        // Write the a:pPr element.
+        self.write_pie_a_p_pr();
+
+        // Write the a:endParaRPr element.
+        self.write_a_end_para_rpr();
+
+        self.writer.xml_end_tag("a:p");
+    }
+
+    // Write the <a:pPr> element.
+    fn write_pie_a_p_pr(&mut self) {
+        let attributes = vec![("rtl", "0".to_string())];
+
+        self.writer.xml_start_tag_attr("a:pPr", &attributes);
+
+        // Write the a:defRPr element.
+        self.write_a_def_rpr();
+        self.writer.xml_end_tag("a:pPr");
+    }
+
+    // Write the <a:defRPr> element.
+    fn write_a_def_rpr(&mut self) {
+        self.writer.xml_empty_tag("a:defRPr");
+    }
+
+    // Write the <a:endParaRPr> element.
+    fn write_a_end_para_rpr(&mut self) {
+        let attributes = vec![("lang", "en-US".to_string())];
+
+        self.writer.xml_empty_tag_attr("a:endParaRPr", &attributes);
+    }
 }
+
+// -----------------------------------------------------------------------
+// Traits.
+// -----------------------------------------------------------------------
 
 // TODO
 impl DrawingObject for Chart {
@@ -652,30 +955,30 @@ impl ChartSeries {
         }
     }
     pub fn set_values(
-        mut self,
+        &mut self,
         sheet_name: &str,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-    ) -> ChartSeries {
+    ) -> &mut ChartSeries {
         self.value_range = ChartRange::new(sheet_name, first_row, first_col, last_row, last_col);
         self
     }
 
     pub fn set_categories(
-        mut self,
+        &mut self,
         sheet_name: &str,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-    ) -> ChartSeries {
+    ) -> &mut ChartSeries {
         self.category_range = ChartRange::new(sheet_name, first_row, first_col, last_row, last_col);
         self
     }
 
-    pub fn set_value_cache(mut self, data: &[&str], is_numeric: bool) -> ChartSeries {
+    pub fn set_value_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
         self.value_cache_data = ChartSeriesCacheData {
             is_numeric,
             data: data.iter().map(|s| s.to_string()).collect(),
@@ -683,7 +986,7 @@ impl ChartSeries {
         self
     }
 
-    pub fn set_category_cache(mut self, data: &[&str], is_numeric: bool) -> ChartSeries {
+    pub fn set_category_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
         self.category_cache_data = ChartSeriesCacheData {
             is_numeric,
             data: data.iter().map(|s| s.to_string()).collect(),
@@ -765,32 +1068,85 @@ impl ChartSeriesCacheData {
     }
 }
 
+#[allow(dead_code)]
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ChartType {
+    Area,
+    Bar,
+    Column,
+    Doughnut,
+    Line,
+    Pie,
+}
+
+#[allow(dead_code)]
+#[derive(Clone)]
+pub(crate) struct ChartAxis {
+    axis_type: ChartAxisType,
+    axis_position: ChartAxisPosition,
+}
+
+impl ChartAxis {
+    pub(crate) fn new() -> ChartAxis {
+        ChartAxis {
+            axis_type: ChartAxisType::Value,
+            axis_position: ChartAxisPosition::Bottom,
+        }
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Clone)]
+pub(crate) enum ChartAxisType {
+    Category,
+    Value,
+}
+
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub(crate) enum ChartAxisPosition {
+    Bottom,
+    Left,
+}
+
+impl ToString for ChartAxisPosition {
+    fn to_string(&self) -> String {
+        match self {
+            ChartAxisPosition::Bottom => "b".to_string(),
+            ChartAxisPosition::Left => "l".to_string(),
+        }
+    }
+}
+
 // -----------------------------------------------------------------------
 // Tests.
 // -----------------------------------------------------------------------
 #[cfg(test)]
 mod tests {
 
-    use crate::chart::Chart;
+    use crate::chart::{Chart, ChartType};
     use crate::test_functions::xml_to_vec;
     use crate::ChartSeries;
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_assemble() {
-        let series1 = ChartSeries::new()
+        let mut series1 = ChartSeries::new();
+        series1
             .set_categories("Sheet1", 0, 0, 4, 0)
             .set_values("Sheet1", 0, 1, 4, 1)
             .set_category_cache(&["1", "2", "3", "4", "5"], true)
             .set_value_cache(&["2", "4", "6", "8", "10"], true);
 
-        let series2 = ChartSeries::new()
+        let mut series2 = ChartSeries::new();
+        series2
             .set_categories("Sheet1", 0, 0, 4, 0)
             .set_values("Sheet1", 0, 2, 4, 2)
             .set_category_cache(&["1", "2", "3", "4", "5"], true)
             .set_value_cache(&["3", "6", "9", "12", "15"], true);
 
-        let mut chart = Chart::new().add_series(&series1).add_series(&series2);
+        let mut chart = Chart::new(ChartType::Bar);
+        chart.push_series(&series1).push_series(&series2);
 
         chart.set_axis_ids(64052224, 64055552);
 

@@ -16,24 +16,18 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Add some test data for the chart(s).
-    let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
-    for (row_num, row_data) in data.iter().enumerate() {
-        for (col_num, col_data) in row_data.iter().enumerate() {
-            worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+    let data = [[2, 4, 6], [60, 30, 10]];
+    for (col_num, col_data) in data.iter().enumerate() {
+        for (row_num, row_data) in col_data.iter().enumerate() {
+            worksheet.write_number(row_num as u32, col_num as u16, *row_data)?;
         }
     }
 
-    let mut chart = Chart::new(ChartType::Bar);
-    chart.set_axis_ids(64052224, 64055552);
+    let mut chart = Chart::new(ChartType::Doughnut);
     chart
         .add_series()
-        .set_categories("Sheet1", 0, 0, 4, 0)
-        .set_values("Sheet1", 0, 1, 4, 1);
-
-    chart
-        .add_series()
-        .set_categories("Sheet1", 0, 0, 4, 0)
-        .set_values("Sheet1", 0, 2, 4, 2);
+        .set_categories("Sheet1", 0, 0, 2, 0)
+        .set_values("Sheet1", 0, 1, 2, 1);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -43,9 +37,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_bar01() {
+fn test_chart_doughnut01() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_bar01")
+        .set_name("chart_doughnut01")
         .set_function(create_new_xlsx_file)
         .initialize();
 
