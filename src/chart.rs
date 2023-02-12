@@ -77,6 +77,7 @@ impl Chart {
             ChartType::Area => Self::initialize_area_chart(chart),
             ChartType::Line => Self::initialize_line_chart(chart),
             ChartType::Column => Self::initialize_column_chart(chart),
+            ChartType::Scatter => Self::initialize_scatter_chart(chart),
             _ => chart,
         }
     }
@@ -170,6 +171,17 @@ impl Chart {
         self
     }
 
+    // Initialize scatter charts.
+    fn initialize_scatter_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_position = ChartAxisPosition::Bottom;
+
+        self.y_axis.axis_type = ChartAxisType::Value;
+        self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self
+    }
+
     // Write the <c:areaChart> element for Column charts.
     fn write_area_chart(&mut self) {
         self.writer.xml_start_tag("c:areaChart");
@@ -188,9 +200,6 @@ impl Chart {
 
     // Write the <c:barChart> element for Bar charts.
     fn write_bar_chart(&mut self) {
-        // Reverse the X and Y axes for Bar charts.
-        std::mem::swap(&mut self.x_axis, &mut self.y_axis);
-
         self.writer.xml_start_tag("c:barChart");
 
         // Write the c:barDir element.
@@ -281,6 +290,22 @@ impl Chart {
         self.writer.xml_end_tag("c:pieChart");
     }
 
+    // Write the <c:scatterChart>element.
+    fn write_scatter_chart(&mut self) {
+        self.writer.xml_start_tag("c:scatterChart");
+
+        // Write the c:scatterStyle element.
+        self.write_scatter_style();
+
+        // Write the c:ser elements.
+        self.write_scatter_series();
+
+        // Write the c:axId elements.
+        self.write_ax_ids();
+
+        self.writer.xml_end_tag("c:scatterChart");
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -361,15 +386,37 @@ impl Chart {
             ChartType::Area => self.write_area_chart(),
             ChartType::Line => self.write_line_chart(),
             ChartType::Column => self.write_column_chart(),
+            ChartType::Scatter => self.write_scatter_chart(),
             ChartType::Doughnut => self.write_doughnut_chart(),
         }
 
-        if self.chart_type != ChartType::Pie && self.chart_type != ChartType::Doughnut {
-            // Write the c:catAx element.
-            self.write_cat_ax();
+        // Reverse the X and Y axes for Bar charts.
+        if self.chart_type == ChartType::Bar {
+            std::mem::swap(&mut self.x_axis, &mut self.y_axis);
+        }
 
-            // Write the c:valAx element.
-            self.write_val_ax();
+        match self.chart_type {
+            ChartType::Pie | ChartType::Doughnut => {}
+
+            ChartType::Scatter => {
+                // Write the c:valAx element.
+                self.write_cat_val_ax();
+
+                // Write the c:valAx element.
+                self.write_val_ax();
+            }
+            _ => {
+                // Write the c:catAx element.
+                self.write_cat_ax();
+
+                // Write the c:valAx element.
+                self.write_val_ax();
+            }
+        }
+
+        // Reset the X and Y axes for Bar charts.
+        if self.chart_type == ChartType::Bar {
+            std::mem::swap(&mut self.x_axis, &mut self.y_axis);
         }
 
         self.writer.xml_end_tag("c:plotArea");
@@ -400,6 +447,14 @@ impl Chart {
         self.writer.xml_empty_tag_attr("c:grouping", &attributes);
     }
 
+    // Write the <c:scatterStyle> element.
+    fn write_scatter_style(&mut self) {
+        let attributes = vec![("val", "lineMarker".to_string())];
+
+        self.writer
+            .xml_empty_tag_attr("c:scatterStyle", &attributes);
+    }
+
     // Write the <c:ser> element.
     fn write_series(&mut self) {
         for (index, series) in self.series.clone().iter().enumerate() {
@@ -419,11 +474,38 @@ impl Chart {
             // Write the c:cat element.
             if series.category_range.has_data() {
                 self.category_has_num_format = true;
-                self.write_cat(&series.category_range, &series.category_cache_data);
+
+                if self.chart_type == ChartType::Scatter {
+                    self.write_y_val(&series.category_range, &series.category_cache_data);
+                } else {
+                    self.write_cat(&series.category_range, &series.category_cache_data);
+                }
             }
 
             // Write the c:val element.
             self.write_val(&series.value_range, &series.value_cache_data);
+
+            self.writer.xml_end_tag("c:ser");
+        }
+    }
+
+    // Write the <c:ser> element for scatter charts.
+    fn write_scatter_series(&mut self) {
+        for (index, series) in self.series.clone().iter().enumerate() {
+            self.writer.xml_start_tag("c:ser");
+
+            // Write the c:idx element.
+            self.write_idx(index);
+
+            // Write the c:order element.
+            self.write_order(index);
+
+            // Write the c:spPr element.
+            self.write_sp_pr();
+
+            self.write_x_val(&series.category_range, &series.category_cache_data);
+
+            self.write_y_val(&series.value_range, &series.value_cache_data);
 
             self.writer.xml_end_tag("c:ser");
         }
@@ -461,6 +543,26 @@ impl Chart {
         self.write_num_ref(range, cache);
 
         self.writer.xml_end_tag("c:val");
+    }
+
+    // Write the <c:xVal> element for scatter charts.
+    fn write_x_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+        self.writer.xml_start_tag("c:xVal");
+
+        // Write the c:numRef element.
+        self.write_num_ref(range, cache);
+
+        self.writer.xml_end_tag("c:xVal");
+    }
+
+    // Write the <c:yVal> element for scatter charts.
+    fn write_y_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+        self.writer.xml_start_tag("c:yVal");
+
+        // Write the c:numRef element.
+        self.write_num_ref(range, cache);
+
+        self.writer.xml_end_tag("c:yVal");
     }
 
     // Write the <c:numRef> element.
@@ -606,6 +708,36 @@ impl Chart {
         self.writer.xml_end_tag("c:valAx");
     }
 
+    // Write the category <c:valAx> element for scatter charts.
+    fn write_cat_val_ax(&mut self) {
+        self.writer.xml_start_tag("c:valAx");
+
+        self.write_ax_id(self.axis_ids.0);
+
+        // Write the c:scaling element.
+        self.write_scaling();
+
+        // Write the c:axPos element.
+        self.write_ax_pos(self.x_axis.axis_position);
+
+        // Write the c:numFmt element.
+        self.write_value_num_fmt();
+
+        // Write the c:tickLblPos element.
+        self.write_tick_lbl_pos();
+
+        // Write the c:crossAx element.
+        self.write_cross_ax(self.axis_ids.1);
+
+        // Write the c:crosses element.
+        self.write_crosses();
+
+        // Write the c:crossBetween element.
+        self.write_cross_between();
+
+        self.writer.xml_end_tag("c:valAx");
+    }
+
     // Write the <c:scaling> element.
     fn write_scaling(&mut self) {
         self.writer.xml_start_tag("c:scaling");
@@ -702,7 +834,7 @@ impl Chart {
         let mut attributes = vec![];
 
         match self.chart_type {
-            ChartType::Area => attributes.push(("val", "midCat".to_string())),
+            ChartType::Area | ChartType::Scatter => attributes.push(("val", "midCat".to_string())),
             _ => attributes.push(("val", "between".to_string())),
         }
 
@@ -888,6 +1020,32 @@ impl Chart {
         let attributes = vec![("lang", "en-US".to_string())];
 
         self.writer.xml_empty_tag_attr("a:endParaRPr", &attributes);
+    }
+
+    // Write the <c:spPr> element.
+    fn write_sp_pr(&mut self) {
+        self.writer.xml_start_tag("c:spPr");
+
+        // Write the a:ln element.
+        self.write_a_ln();
+
+        self.writer.xml_end_tag("c:spPr");
+    }
+
+    // Write the <a:ln> element.
+    fn write_a_ln(&mut self) {
+        let attributes = vec![("w", "28575".to_string())];
+
+        self.writer.xml_start_tag_attr("a:ln", &attributes);
+
+        // Write the a:noFill element.
+        self.write_a_no_fill();
+        self.writer.xml_end_tag("a:ln");
+    }
+
+    // Write the <a:noFill> element.
+    fn write_a_no_fill(&mut self) {
+        self.writer.xml_empty_tag("a:noFill");
     }
 }
 
@@ -1077,6 +1235,7 @@ pub enum ChartType {
     Doughnut,
     Line,
     Pie,
+    Scatter,
 }
 
 #[allow(dead_code)]
