@@ -76,6 +76,7 @@ impl Chart {
             ChartType::Bar => Self::initialize_bar_chart(chart),
             ChartType::Area => Self::initialize_area_chart(chart),
             ChartType::Line => Self::initialize_line_chart(chart),
+            ChartType::Radar => Self::initialize_radar_chart(chart),
             ChartType::Column => Self::initialize_column_chart(chart),
             ChartType::Scatter => Self::initialize_scatter_chart(chart),
             _ => chart,
@@ -162,6 +163,17 @@ impl Chart {
 
     // Initialize line charts.
     fn initialize_line_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_position = ChartAxisPosition::Bottom;
+
+        self.y_axis.axis_type = ChartAxisType::Value;
+        self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self
+    }
+
+    // Initialize radar charts.
+    fn initialize_radar_chart(mut self) -> Chart {
         self.x_axis.axis_type = ChartAxisType::Category;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
 
@@ -290,6 +302,22 @@ impl Chart {
         self.writer.xml_end_tag("c:pieChart");
     }
 
+    // Write the <c:radarChart>element.
+    fn write_radar_chart(&mut self) {
+        self.writer.xml_start_tag("c:radarChart");
+
+        // Write the c:radarStyle element.
+        self.write_radar_style();
+
+        // Write the c:ser elements.
+        self.write_series();
+
+        // Write the c:axId elements.
+        self.write_ax_ids();
+
+        self.writer.xml_end_tag("c:radarChart");
+    }
+
     // Write the <c:scatterChart>element.
     fn write_scatter_chart(&mut self) {
         self.writer.xml_start_tag("c:scatterChart");
@@ -385,6 +413,7 @@ impl Chart {
             ChartType::Pie => self.write_pie_chart(),
             ChartType::Area => self.write_area_chart(),
             ChartType::Line => self.write_line_chart(),
+            ChartType::Radar => self.write_radar_chart(),
             ChartType::Column => self.write_column_chart(),
             ChartType::Scatter => self.write_scatter_chart(),
             ChartType::Doughnut => self.write_doughnut_chart(),
@@ -440,7 +469,9 @@ impl Chart {
 
         match self.chart_type {
             ChartType::Bar | ChartType::Column => attributes.push(("val", "clustered".to_string())),
-            ChartType::Line | ChartType::Area => attributes.push(("val", "standard".to_string())),
+            ChartType::Line | ChartType::Area | ChartType::Radar => {
+                attributes.push(("val", "standard".to_string()))
+            }
             _ => {}
         }
 
@@ -467,7 +498,7 @@ impl Chart {
             self.write_order(index);
 
             // Write the c:marker element.
-            if self.chart_type == ChartType::Line {
+            if self.chart_type == ChartType::Line || self.chart_type == ChartType::Radar {
                 self.write_marker();
             }
 
@@ -649,6 +680,10 @@ impl Chart {
         // Write the c:axPos element.
         self.write_ax_pos(self.x_axis.axis_position);
 
+        if self.chart_type == ChartType::Radar {
+            self.write_major_gridlines();
+        }
+
         // Write the c:numFmt element.
         if self.category_has_num_format {
             self.write_category_num_fmt();
@@ -692,6 +727,11 @@ impl Chart {
 
         // Write the c:numFmt element.
         self.write_value_num_fmt();
+
+        // Write the c:majorTickMark element.
+        if self.chart_type == ChartType::Radar {
+            self.write_major_tick_mark();
+        }
 
         // Write the c:tickLblPos element.
         self.write_tick_lbl_pos();
@@ -1047,6 +1087,21 @@ impl Chart {
     fn write_a_no_fill(&mut self) {
         self.writer.xml_empty_tag("a:noFill");
     }
+
+    // Write the <c:radarStyle> element.
+    fn write_radar_style(&mut self) {
+        let attributes = vec![("val", "marker".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:radarStyle", &attributes);
+    }
+
+    // Write the <c:majorTickMark> element.
+    fn write_major_tick_mark(&mut self) {
+        let attributes = vec![("val", "cross".to_string())];
+
+        self.writer
+            .xml_empty_tag_attr("c:majorTickMark", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1235,6 +1290,7 @@ pub enum ChartType {
     Doughnut,
     Line,
     Pie,
+    Radar,
     Scatter,
 }
 
