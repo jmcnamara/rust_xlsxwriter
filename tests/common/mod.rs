@@ -353,6 +353,10 @@ fn compare_xlsx_files(
                 .collect::<Vec<String>>();
         }
 
+        // Indent XML elements to make the visual comparison of failures easier.
+        exp_xml_vec = indent_elements(&exp_xml_vec);
+        got_xml_vec = indent_elements(&got_xml_vec);
+
         // Add the filename to the xml vector to help identify where
         // differences occurs.
         exp_xml_vec.insert(0, filename.to_string());
@@ -402,6 +406,27 @@ pub(crate) fn vml_to_vec(vml_string: &str) -> Vec<String> {
     vml_string = vml_string.replace("<x:Anchor> ", "<x:Anchor>");
 
     xml_to_vec(&vml_string)
+}
+
+// Indent XML elements to make the visual comparison of failures easier.
+fn indent_elements(xml_elements: &Vec<String>) -> Vec<String> {
+    let mut indented: Vec<String> = Vec::new();
+    let mut indent_level = 0;
+
+    for element in xml_elements {
+        if element.starts_with("</") {
+            indent_level -= 1;
+        }
+
+        let indentation = (0..indent_level).map(|_| "  ").collect::<String>();
+        indented.push(format!("{indentation}{element}"));
+
+        if !element.starts_with("<?") && !element.contains("</") && !element.ends_with("/>") {
+            indent_level += 1;
+        }
+    }
+
+    indented
 }
 
 // Re-order the elements in an vec of XML elements for comparison purposes. This
