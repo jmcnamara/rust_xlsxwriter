@@ -35,6 +35,11 @@ pub struct Chart {
     chart_type: ChartType,
     x_axis: ChartAxis,
     y_axis: ChartAxis,
+    grouping: ChartGrouping,
+    default_cross_between: bool,
+    default_num_format: String,
+    has_overlap: bool,
+    overlap: i8,
 }
 
 /// TODO
@@ -70,16 +75,28 @@ impl Chart {
             chart_type,
             x_axis: ChartAxis::new(),
             y_axis: ChartAxis::new(),
+            grouping: ChartGrouping::Standard,
+            default_cross_between: true,
+            default_num_format: "General".to_string(),
+            has_overlap: false,
+            overlap: 0,
         };
 
         match chart_type {
-            ChartType::Bar => Self::initialize_bar_chart(chart),
-            ChartType::Area => Self::initialize_area_chart(chart),
+            ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
+                Self::initialize_area_chart(chart)
+            }
+            ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
+                Self::initialize_bar_chart(chart)
+            }
+            ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
+                Self::initialize_column_chart(chart)
+            }
+            ChartType::Pie => Self::initialize_pie_chart(chart),
             ChartType::Line => Self::initialize_line_chart(chart),
             ChartType::Radar => Self::initialize_radar_chart(chart),
-            ChartType::Column => Self::initialize_column_chart(chart),
             ChartType::Scatter => Self::initialize_scatter_chart(chart),
-            _ => chart,
+            ChartType::Doughnut => Self::initialize_doughnut_chart(chart),
         }
     }
 
@@ -135,6 +152,17 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        self.default_cross_between = false;
+
+        if self.chart_type == ChartType::Area {
+            self.grouping = ChartGrouping::Standard;
+        } else if self.chart_type == ChartType::AreaStacked {
+            self.grouping = ChartGrouping::Stacked;
+        } else if self.chart_type == ChartType::AreaPercentStacked {
+            self.grouping = ChartGrouping::PercentStacked;
+            self.default_num_format = "0%".to_string();
+        }
+
         self
     }
 
@@ -147,6 +175,19 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Category;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        if self.chart_type == ChartType::Bar {
+            self.grouping = ChartGrouping::Clustered;
+        } else if self.chart_type == ChartType::BarStacked {
+            self.grouping = ChartGrouping::Stacked;
+            self.has_overlap = true;
+            self.overlap = 100;
+        } else if self.chart_type == ChartType::BarPercentStacked {
+            self.grouping = ChartGrouping::PercentStacked;
+            self.default_num_format = "0%".to_string();
+            self.has_overlap = true;
+            self.overlap = 100;
+        }
+
         self
     }
 
@@ -158,6 +199,26 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        if self.chart_type == ChartType::Column {
+            self.grouping = ChartGrouping::Clustered;
+        } else if self.chart_type == ChartType::ColumnStacked {
+            self.grouping = ChartGrouping::Stacked;
+            self.has_overlap = true;
+            self.overlap = 100;
+        } else if self.chart_type == ChartType::ColumnPercentStacked {
+            self.grouping = ChartGrouping::PercentStacked;
+            self.default_num_format = "0%".to_string();
+            self.has_overlap = true;
+            self.overlap = 100;
+        }
+
+        self
+    }
+
+    // Initialize doughnut charts.
+    fn initialize_doughnut_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
+
         self
     }
 
@@ -168,6 +229,13 @@ impl Chart {
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self
+    }
+
+    // Initialize pie charts.
+    fn initialize_pie_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
 
         self
     }
@@ -190,6 +258,8 @@ impl Chart {
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self.default_cross_between = false;
 
         self
     }
@@ -223,6 +293,11 @@ impl Chart {
         // Write the c:ser elements.
         self.write_series();
 
+        if self.has_overlap {
+            // Write the c:overlap element.
+            self.write_overlap();
+        }
+
         // Write the c:axId elements.
         self.write_ax_ids();
 
@@ -241,6 +316,11 @@ impl Chart {
 
         // Write the c:ser elements.
         self.write_series();
+
+        if self.has_overlap {
+            // Write the c:overlap element.
+            self.write_overlap();
+        }
 
         // Write the c:axId elements.
         self.write_ax_ids();
@@ -409,18 +489,27 @@ impl Chart {
         self.write_layout();
 
         match self.chart_type {
-            ChartType::Bar => self.write_bar_chart(),
+            ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
+                self.write_area_chart()
+            }
+            ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
+                self.write_bar_chart()
+            }
+            ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
+                self.write_column_chart()
+            }
             ChartType::Pie => self.write_pie_chart(),
-            ChartType::Area => self.write_area_chart(),
             ChartType::Line => self.write_line_chart(),
             ChartType::Radar => self.write_radar_chart(),
-            ChartType::Column => self.write_column_chart(),
             ChartType::Scatter => self.write_scatter_chart(),
             ChartType::Doughnut => self.write_doughnut_chart(),
         }
 
         // Reverse the X and Y axes for Bar charts.
-        if self.chart_type == ChartType::Bar {
+        if self.chart_type == ChartType::Bar
+            || self.chart_type == ChartType::BarStacked
+            || self.chart_type == ChartType::BarPercentStacked
+        {
             std::mem::swap(&mut self.x_axis, &mut self.y_axis);
         }
 
@@ -444,7 +533,10 @@ impl Chart {
         }
 
         // Reset the X and Y axes for Bar charts.
-        if self.chart_type == ChartType::Bar {
+        if self.chart_type == ChartType::Bar
+            || self.chart_type == ChartType::BarStacked
+            || self.chart_type == ChartType::BarPercentStacked
+        {
             std::mem::swap(&mut self.x_axis, &mut self.y_axis);
         }
 
@@ -465,15 +557,7 @@ impl Chart {
 
     // Write the <c:grouping> element.
     fn write_grouping(&mut self) {
-        let mut attributes = vec![];
-
-        match self.chart_type {
-            ChartType::Bar | ChartType::Column => attributes.push(("val", "clustered".to_string())),
-            ChartType::Line | ChartType::Area | ChartType::Radar => {
-                attributes.push(("val", "standard".to_string()))
-            }
-            _ => {}
-        }
+        let attributes = vec![("val", self.grouping.to_string())];
 
         self.writer.xml_empty_tag_attr("c:grouping", &attributes);
     }
@@ -803,7 +887,7 @@ impl Chart {
     }
 
     // Write the <c:numFmt> element.
-    fn write_value_num_fmt(&mut self) {
+    fn write_category_num_fmt(&mut self) {
         let attributes = vec![
             ("formatCode", "General".to_string()),
             ("sourceLinked", "1".to_string()),
@@ -813,9 +897,9 @@ impl Chart {
     }
 
     // Write the <c:numFmt> element.
-    fn write_category_num_fmt(&mut self) {
+    fn write_value_num_fmt(&mut self) {
         let attributes = vec![
-            ("formatCode", "General".to_string()),
+            ("formatCode", self.default_num_format.clone()),
             ("sourceLinked", "1".to_string()),
         ];
 
@@ -873,9 +957,10 @@ impl Chart {
     fn write_cross_between(&mut self) {
         let mut attributes = vec![];
 
-        match self.chart_type {
-            ChartType::Area | ChartType::Scatter => attributes.push(("val", "midCat".to_string())),
-            _ => attributes.push(("val", "between".to_string())),
+        if self.default_cross_between {
+            attributes.push(("val", "between".to_string()));
+        } else {
+            attributes.push(("val", "midCat".to_string()));
         }
 
         self.writer
@@ -1102,6 +1187,13 @@ impl Chart {
         self.writer
             .xml_empty_tag_attr("c:majorTickMark", &attributes);
     }
+
+    // Write the <c:overlap> element.
+    fn write_overlap(&mut self) {
+        let attributes = vec![("val", "100".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:overlap", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1285,12 +1377,25 @@ impl ChartSeriesCacheData {
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartType {
     Area,
+    AreaStacked,
+    AreaPercentStacked,
+
     Bar,
+    BarStacked,
+    BarPercentStacked,
+
     Column,
+    ColumnStacked,
+    ColumnPercentStacked,
+
     Doughnut,
+
     Line,
+
     Pie,
+
     Radar,
+
     Scatter,
 }
 
@@ -1329,6 +1434,26 @@ impl ToString for ChartAxisPosition {
         match self {
             ChartAxisPosition::Bottom => "b".to_string(),
             ChartAxisPosition::Left => "l".to_string(),
+        }
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+pub(crate) enum ChartGrouping {
+    Stacked,
+    Standard,
+    Clustered,
+    PercentStacked,
+}
+
+impl ToString for ChartGrouping {
+    fn to_string(&self) -> String {
+        match self {
+            ChartGrouping::Stacked => "stacked".to_string(),
+            ChartGrouping::Standard => "standard".to_string(),
+            ChartGrouping::Clustered => "clustered".to_string(),
+            ChartGrouping::PercentStacked => "percentStacked".to_string(),
         }
     }
 }
