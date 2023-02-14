@@ -33,6 +33,7 @@ pub struct Chart {
     axis_ids: (u32, u32),
     category_has_num_format: bool,
     chart_type: ChartType,
+    chart_group_type: ChartType,
     x_axis: ChartAxis,
     y_axis: ChartAxis,
     grouping: ChartGrouping,
@@ -73,6 +74,7 @@ impl Chart {
             series: vec![],
             category_has_num_format: false,
             chart_type,
+            chart_group_type: chart_type,
             x_axis: ChartAxis::new(),
             y_axis: ChartAxis::new(),
             grouping: ChartGrouping::Standard,
@@ -92,11 +94,15 @@ impl Chart {
             ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
                 Self::initialize_column_chart(chart)
             }
-            ChartType::Pie => Self::initialize_pie_chart(chart),
-            ChartType::Line => Self::initialize_line_chart(chart),
-            ChartType::Radar => Self::initialize_radar_chart(chart),
-            ChartType::Scatter => Self::initialize_scatter_chart(chart),
             ChartType::Doughnut => Self::initialize_doughnut_chart(chart),
+            ChartType::Line => Self::initialize_line_chart(chart),
+            ChartType::Pie => Self::initialize_pie_chart(chart),
+            ChartType::Radar => Self::initialize_radar_chart(chart),
+            ChartType::Scatter
+            | ChartType::ScatterStraight
+            | ChartType::ScatterStraightWithMarkers
+            | ChartType::ScatterSmooth
+            | ChartType::ScatterSmoothWithMarkers => Self::initialize_scatter_chart(chart),
         }
     }
 
@@ -152,6 +158,7 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        self.chart_group_type = ChartType::Area;
         self.default_cross_between = false;
 
         if self.chart_type == ChartType::Area {
@@ -174,6 +181,8 @@ impl Chart {
 
         self.y_axis.axis_type = ChartAxisType::Category;
         self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self.chart_group_type = ChartType::Bar;
 
         if self.chart_type == ChartType::Bar {
             self.grouping = ChartGrouping::Clustered;
@@ -199,6 +208,8 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        self.chart_group_type = ChartType::Column;
+
         if self.chart_type == ChartType::Column {
             self.grouping = ChartGrouping::Clustered;
         } else if self.chart_type == ChartType::ColumnStacked {
@@ -217,7 +228,7 @@ impl Chart {
 
     // Initialize doughnut charts.
     fn initialize_doughnut_chart(mut self) -> Chart {
-        self.x_axis.axis_type = ChartAxisType::Category;
+        self.chart_group_type = ChartType::Doughnut;
 
         self
     }
@@ -230,12 +241,14 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        self.chart_group_type = ChartType::Line;
+
         self
     }
 
     // Initialize pie charts.
     fn initialize_pie_chart(mut self) -> Chart {
-        self.x_axis.axis_type = ChartAxisType::Category;
+        self.chart_group_type = ChartType::Pie;
 
         self
     }
@@ -248,6 +261,8 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        self.chart_group_type = ChartType::Radar;
+
         self
     }
 
@@ -259,6 +274,7 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        self.chart_group_type = ChartType::Scatter;
         self.default_cross_between = false;
 
         self
@@ -498,22 +514,23 @@ impl Chart {
             ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
                 self.write_column_chart()
             }
-            ChartType::Pie => self.write_pie_chart(),
-            ChartType::Line => self.write_line_chart(),
-            ChartType::Radar => self.write_radar_chart(),
-            ChartType::Scatter => self.write_scatter_chart(),
             ChartType::Doughnut => self.write_doughnut_chart(),
+            ChartType::Line => self.write_line_chart(),
+            ChartType::Pie => self.write_pie_chart(),
+            ChartType::Radar => self.write_radar_chart(),
+            ChartType::Scatter
+            | ChartType::ScatterStraight
+            | ChartType::ScatterStraightWithMarkers
+            | ChartType::ScatterSmooth
+            | ChartType::ScatterSmoothWithMarkers => self.write_scatter_chart(),
         }
 
         // Reverse the X and Y axes for Bar charts.
-        if self.chart_type == ChartType::Bar
-            || self.chart_type == ChartType::BarStacked
-            || self.chart_type == ChartType::BarPercentStacked
-        {
+        if self.chart_group_type == ChartType::Bar {
             std::mem::swap(&mut self.x_axis, &mut self.y_axis);
         }
 
-        match self.chart_type {
+        match self.chart_group_type {
             ChartType::Pie | ChartType::Doughnut => {}
 
             ChartType::Scatter => {
@@ -533,10 +550,7 @@ impl Chart {
         }
 
         // Reset the X and Y axes for Bar charts.
-        if self.chart_type == ChartType::Bar
-            || self.chart_type == ChartType::BarStacked
-            || self.chart_type == ChartType::BarPercentStacked
-        {
+        if self.chart_group_type == ChartType::Bar {
             std::mem::swap(&mut self.x_axis, &mut self.y_axis);
         }
 
@@ -564,7 +578,15 @@ impl Chart {
 
     // Write the <c:scatterStyle> element.
     fn write_scatter_style(&mut self) {
-        let attributes = vec![("val", "lineMarker".to_string())];
+        let mut attributes = vec![];
+
+        if self.chart_type == ChartType::ScatterSmooth
+            || self.chart_type == ChartType::ScatterSmoothWithMarkers
+        {
+            attributes.push(("val", "smoothMarker".to_string()))
+        } else {
+            attributes.push(("val", "lineMarker".to_string()))
+        }
 
         self.writer
             .xml_empty_tag_attr("c:scatterStyle", &attributes);
@@ -589,12 +611,7 @@ impl Chart {
             // Write the c:cat element.
             if series.category_range.has_data() {
                 self.category_has_num_format = true;
-
-                if self.chart_type == ChartType::Scatter {
-                    self.write_y_val(&series.category_range, &series.category_cache_data);
-                } else {
-                    self.write_cat(&series.category_range, &series.category_cache_data);
-                }
+                self.write_cat(&series.category_range, &series.category_cache_data);
             }
 
             // Write the c:val element.
@@ -615,12 +632,27 @@ impl Chart {
             // Write the c:order element.
             self.write_order(index);
 
-            // Write the c:spPr element.
-            self.write_sp_pr();
+            if self.chart_type == ChartType::ScatterStraight
+                || self.chart_type == ChartType::ScatterSmooth
+            {
+                self.write_marker();
+            }
+
+            if self.chart_type == ChartType::Scatter {
+                // Write the c:spPr element.
+                self.write_sp_pr();
+            }
 
             self.write_x_val(&series.category_range, &series.category_cache_data);
 
             self.write_y_val(&series.value_range, &series.value_cache_data);
+
+            if self.chart_type == ChartType::ScatterSmooth
+                || self.chart_type == ChartType::ScatterSmoothWithMarkers
+            {
+                // Write the c:smooth element.
+                self.write_smooth();
+            }
 
             self.writer.xml_end_tag("c:ser");
         }
@@ -1194,6 +1226,13 @@ impl Chart {
 
         self.writer.xml_empty_tag_attr("c:overlap", &attributes);
     }
+
+    // Write the <c:smooth> element.
+    fn write_smooth(&mut self) {
+        let attributes = vec![("val", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:smooth", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1397,6 +1436,10 @@ pub enum ChartType {
     Radar,
 
     Scatter,
+    ScatterStraight,
+    ScatterStraightWithMarkers,
+    ScatterSmooth,
+    ScatterSmoothWithMarkers,
 }
 
 #[allow(dead_code)]
