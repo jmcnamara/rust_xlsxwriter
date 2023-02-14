@@ -105,7 +105,9 @@ impl Chart {
 
             ChartType::Pie => Self::initialize_pie_chart(chart),
 
-            ChartType::Radar => Self::initialize_radar_chart(chart),
+            ChartType::Radar | ChartType::RadarWithMarkers | ChartType::RadarFilled => {
+                Self::initialize_radar_chart(chart)
+            }
 
             ChartType::Scatter
             | ChartType::ScatterStraight
@@ -543,7 +545,9 @@ impl Chart {
 
             ChartType::Pie => self.write_pie_chart(),
 
-            ChartType::Radar => self.write_radar_chart(),
+            ChartType::Radar | ChartType::RadarWithMarkers | ChartType::RadarFilled => {
+                self.write_radar_chart()
+            }
 
             ChartType::Scatter
             | ChartType::ScatterStraight
@@ -823,7 +827,7 @@ impl Chart {
         // Write the c:axPos element.
         self.write_ax_pos(self.x_axis.axis_position);
 
-        if self.chart_type == ChartType::Radar {
+        if self.chart_group_type == ChartType::Radar {
             self.write_major_gridlines();
         }
 
@@ -872,7 +876,7 @@ impl Chart {
         self.write_value_num_fmt();
 
         // Write the c:majorTickMark element.
-        if self.chart_type == ChartType::Radar {
+        if self.chart_group_type == ChartType::Radar {
             self.write_major_tick_mark();
         }
 
@@ -1234,7 +1238,13 @@ impl Chart {
 
     // Write the <c:radarStyle> element.
     fn write_radar_style(&mut self) {
-        let attributes = vec![("val", "marker".to_string())];
+        let mut attributes = vec![];
+
+        if self.chart_type == ChartType::RadarFilled {
+            attributes.push(("val", "filled".to_string()));
+        } else {
+            attributes.push(("val", "marker".to_string()));
+        }
 
         self.writer.xml_empty_tag_attr("c:radarStyle", &attributes);
     }
@@ -1463,6 +1473,8 @@ pub enum ChartType {
     Pie,
 
     Radar,
+    RadarWithMarkers,
+    RadarFilled,
 
     Scatter,
     ScatterStraight,
