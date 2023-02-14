@@ -88,16 +88,25 @@ impl Chart {
             ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
                 Self::initialize_area_chart(chart)
             }
+
             ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
                 Self::initialize_bar_chart(chart)
             }
+
             ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
                 Self::initialize_column_chart(chart)
             }
+
             ChartType::Doughnut => Self::initialize_doughnut_chart(chart),
-            ChartType::Line => Self::initialize_line_chart(chart),
+
+            ChartType::Line | ChartType::LineStacked | ChartType::LinePercentStacked => {
+                Self::initialize_line_chart(chart)
+            }
+
             ChartType::Pie => Self::initialize_pie_chart(chart),
+
             ChartType::Radar => Self::initialize_radar_chart(chart),
+
             ChartType::Scatter
             | ChartType::ScatterStraight
             | ChartType::ScatterStraightWithMarkers
@@ -242,6 +251,15 @@ impl Chart {
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
         self.chart_group_type = ChartType::Line;
+
+        if self.chart_type == ChartType::Line {
+            self.grouping = ChartGrouping::Standard;
+        } else if self.chart_type == ChartType::LineStacked {
+            self.grouping = ChartGrouping::Stacked;
+        } else if self.chart_type == ChartType::LinePercentStacked {
+            self.grouping = ChartGrouping::PercentStacked;
+            self.default_num_format = "0%".to_string();
+        }
 
         self
     }
@@ -508,16 +526,25 @@ impl Chart {
             ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
                 self.write_area_chart()
             }
+
             ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
                 self.write_bar_chart()
             }
+
             ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
                 self.write_column_chart()
             }
+
             ChartType::Doughnut => self.write_doughnut_chart(),
-            ChartType::Line => self.write_line_chart(),
+
+            ChartType::Line | ChartType::LineStacked | ChartType::LinePercentStacked => {
+                self.write_line_chart()
+            }
+
             ChartType::Pie => self.write_pie_chart(),
+
             ChartType::Radar => self.write_radar_chart(),
+
             ChartType::Scatter
             | ChartType::ScatterStraight
             | ChartType::ScatterStraightWithMarkers
@@ -604,7 +631,7 @@ impl Chart {
             self.write_order(index);
 
             // Write the c:marker element.
-            if self.chart_type == ChartType::Line || self.chart_type == ChartType::Radar {
+            if self.chart_group_type == ChartType::Line || self.chart_type == ChartType::Radar {
                 self.write_marker();
             }
 
@@ -1430,6 +1457,8 @@ pub enum ChartType {
     Doughnut,
 
     Line,
+    LineStacked,
+    LinePercentStacked,
 
     Pie,
 
