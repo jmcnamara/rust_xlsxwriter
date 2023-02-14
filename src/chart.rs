@@ -41,6 +41,7 @@ pub struct Chart {
     default_num_format: String,
     has_overlap: bool,
     overlap: i8,
+    style: u8,
 }
 
 /// TODO
@@ -82,6 +83,7 @@ impl Chart {
             default_num_format: "General".to_string(),
             has_overlap: false,
             overlap: 0,
+            style: 2,
         };
 
         match chart_type {
@@ -128,6 +130,17 @@ impl Chart {
     // TODO.
     pub fn push_series(&mut self, series: &ChartSeries) -> &mut Chart {
         self.series.push(series.clone());
+        self
+    }
+
+    // TODO.
+    pub fn set_style(&mut self, style: u8) -> &mut Chart {
+        if (1..=48).contains(&style) {
+            self.style = style;
+        } else {
+            eprintln!("Style id {style} outside Excel range: 1 <= style <= 48.");
+        }
+
         self
     }
 
@@ -463,6 +476,11 @@ impl Chart {
 
         // Write the c:lang element.
         self.write_lang();
+
+        // Write the c:style element.
+        if self.style != 2 {
+            self.write_style();
+        }
 
         // Write the c:chart element.
         self.write_chart();
@@ -1269,6 +1287,13 @@ impl Chart {
         let attributes = vec![("val", "1".to_string())];
 
         self.writer.xml_empty_tag_attr("c:smooth", &attributes);
+    }
+
+    // Write the <c:style> element.
+    fn write_style(&mut self) {
+        let attributes = vec![("val", self.style.to_string())];
+
+        self.writer.xml_empty_tag_attr("c:style", &attributes);
     }
 }
 
