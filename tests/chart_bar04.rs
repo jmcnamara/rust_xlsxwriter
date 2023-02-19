@@ -27,13 +27,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.set_axis_ids(64446848, 64448384);
     chart
         .add_series()
-        .set_categories("Sheet1", 0, 0, 4, 0)
-        .set_values("Sheet1", 0, 1, 4, 1);
+        .set_categories_range("Sheet1", 0, 0, 4, 0)
+        .set_values_range("Sheet1", 0, 1, 4, 1);
 
     chart
         .add_series()
-        .set_categories("Sheet1", 0, 0, 4, 0)
-        .set_values("Sheet1", 0, 2, 4, 2);
+        .set_categories_range("Sheet1", 0, 0, 4, 0)
+        .set_values_range("Sheet1", 0, 2, 4, 2);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -51,13 +51,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.set_axis_ids(85389696, 85391232);
     chart
         .add_series()
-        .set_categories("Sheet2", 0, 0, 4, 0)
-        .set_values("Sheet2", 0, 1, 4, 1);
+        .set_categories_range("Sheet2", 0, 0, 4, 0)
+        .set_values_range("Sheet2", 0, 1, 4, 1);
 
     chart
         .add_series()
-        .set_categories("Sheet2", 0, 0, 4, 0)
-        .set_values("Sheet2", 0, 2, 4, 2);
+        .set_categories_range("Sheet2", 0, 0, 4, 0)
+        .set_values_range("Sheet2", 0, 2, 4, 2);
 
     worksheet.insert_chart(8, 4, &chart)?;
 

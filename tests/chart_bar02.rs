@@ -28,13 +28,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let mut series1 = ChartSeries::new();
     series1
-        .set_categories("Sheet2", 0, 0, 4, 0)
-        .set_values("Sheet2", 0, 1, 4, 1);
+        .set_categories_range("Sheet2", 0, 0, 4, 0)
+        .set_values_range("Sheet2", 0, 1, 4, 1);
 
     let mut series2 = ChartSeries::new();
     series2
-        .set_categories("Sheet2", 0, 0, 4, 0)
-        .set_values("Sheet2", 0, 2, 4, 2);
+        .set_categories_range("Sheet2", 0, 0, 4, 0)
+        .set_values_range("Sheet2", 0, 2, 4, 2);
 
     let mut chart = Chart::new(ChartType::Bar);
     chart.set_axis_ids(93218304, 93219840);

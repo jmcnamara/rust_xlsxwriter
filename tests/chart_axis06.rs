@@ -29,6 +29,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories_range("Sheet1", 0, 0, 2, 0)
         .set_values_range("Sheet1", 0, 1, 2, 1);
 
+    chart.title().set_name("Title");
+
+    // These should be ignored.
+    chart.x_axis().set_name("Apple");
+    chart.y_axis().set_name("Pear");
+
     worksheet.insert_chart(8, 4, &chart)?;
 
     workbook.save(filename)?;
@@ -37,9 +43,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_pie01() {
+fn test_chart_axis06() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_pie01")
+        .set_name("chart_axis06")
         .set_function(create_new_xlsx_file)
         .initialize();
 

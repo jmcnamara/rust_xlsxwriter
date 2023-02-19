@@ -25,9 +25,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let mut chart = Chart::new(ChartType::Radar);
     chart
-        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 0, 4, 0))
-        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 1, 4, 1))
-        .push_series(&ChartSeries::new().set_values("Sheet1", 0, 2, 4, 2));
+        .push_series(&ChartSeries::new().set_values_range("Sheet1", 0, 0, 4, 0))
+        .push_series(&ChartSeries::new().set_values_range("Sheet1", 0, 1, 4, 1))
+        .push_series(&ChartSeries::new().set_values_range("Sheet1", 0, 2, 4, 2));
 
     // Set the chart axis ids to match the random values in the Excel file.
     chart.set_axis_ids(56801152, 56802688);

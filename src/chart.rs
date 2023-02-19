@@ -34,6 +34,7 @@ pub struct Chart {
     category_has_num_format: bool,
     chart_type: ChartType,
     chart_group_type: ChartType,
+    title: ChartTitle,
     x_axis: ChartAxis,
     y_axis: ChartAxis,
     grouping: ChartGrouping,
@@ -76,6 +77,7 @@ impl Chart {
             category_has_num_format: false,
             chart_type,
             chart_group_type: chart_type,
+            title: ChartTitle::new(),
             x_axis: ChartAxis::new(),
             y_axis: ChartAxis::new(),
             grouping: ChartGrouping::Standard,
@@ -144,6 +146,21 @@ impl Chart {
         self
     }
 
+    // TODO.
+    pub fn title(&mut self) -> &mut ChartTitle {
+        &mut self.title
+    }
+
+    // TODO.
+    pub fn x_axis(&mut self) -> &mut ChartAxis {
+        &mut self.x_axis
+    }
+
+    // TODO.
+    pub fn y_axis(&mut self) -> &mut ChartAxis {
+        &mut self.y_axis
+    }
+
     /// Set default values for the chart axis ids.
     ///
     /// This is mainly used to ensure that the axis ids used in testing match
@@ -182,6 +199,8 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        self.y_axis.title.is_horizontal = true;
+
         self.chart_group_type = ChartType::Area;
         self.default_cross_between = false;
 
@@ -205,6 +224,8 @@ impl Chart {
 
         self.y_axis.axis_type = ChartAxisType::Category;
         self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self.y_axis.title.is_horizontal = true;
 
         self.chart_group_type = ChartType::Bar;
 
@@ -265,6 +286,8 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
+        self.y_axis.title.is_horizontal = true;
+
         self.chart_group_type = ChartType::Line;
 
         if self.chart_type == ChartType::Line {
@@ -306,6 +329,8 @@ impl Chart {
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
+
+        self.y_axis.title.is_horizontal = true;
 
         self.chart_group_type = ChartType::Scatter;
         self.default_cross_between = false;
@@ -523,6 +548,9 @@ impl Chart {
     fn write_chart(&mut self) {
         self.writer.xml_start_tag("c:chart");
 
+        // Write the c:title element.
+        self.write_chart_title(&self.title.clone());
+
         // Write the c:plotArea element.
         self.write_plot_area();
 
@@ -533,6 +561,13 @@ impl Chart {
         self.write_plot_vis_only();
 
         self.writer.xml_end_tag("c:chart");
+    }
+
+    // Write the <c:title> element.
+    fn write_chart_title(&mut self, title: &ChartTitle) {
+        if !title.name.is_empty() {
+            self.write_title_rich(title);
+        }
     }
 
     // Write the <c:plotArea> element.
@@ -849,13 +884,16 @@ impl Chart {
             self.write_major_gridlines();
         }
 
+        // Write the c:title element.
+        self.write_chart_title(&self.x_axis.title.clone());
+
         // Write the c:numFmt element.
         if self.category_has_num_format {
             self.write_category_num_fmt();
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_lbl_pos();
+        self.write_tick_label_position();
 
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.1);
@@ -890,6 +928,9 @@ impl Chart {
         // Write the c:majorGridlines element.
         self.write_major_gridlines();
 
+        // Write the c:title element.
+        self.write_chart_title(&self.y_axis.title.clone());
+
         // Write the c:numFmt element.
         self.write_value_num_fmt();
 
@@ -899,7 +940,7 @@ impl Chart {
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_lbl_pos();
+        self.write_tick_label_position();
 
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.0);
@@ -925,11 +966,14 @@ impl Chart {
         // Write the c:axPos element.
         self.write_ax_pos(self.x_axis.axis_position);
 
+        // Write the c:title element.
+        self.write_chart_title(&self.x_axis.title.clone());
+
         // Write the c:numFmt element.
         self.write_value_num_fmt();
 
         // Write the c:tickLblPos element.
-        self.write_tick_lbl_pos();
+        self.write_tick_label_position();
 
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.1);
@@ -993,7 +1037,7 @@ impl Chart {
     }
 
     // Write the <c:tickLblPos> element.
-    fn write_tick_lbl_pos(&mut self) {
+    fn write_tick_label_position(&mut self) {
         let attributes = vec![("val", "nextTo".to_string())];
 
         self.writer.xml_empty_tag_attr("c:tickLblPos", &attributes);
@@ -1060,7 +1104,7 @@ impl Chart {
 
         if self.chart_type == ChartType::Pie || self.chart_type == ChartType::Doughnut {
             // Write the c:txPr element.
-            self.write_pie_tx_pr();
+            self.write_tx_pr_pie();
         }
 
         self.writer.xml_end_tag("c:legend");
@@ -1167,24 +1211,36 @@ impl Chart {
     }
 
     // Write the <c:txPr> element.
-    fn write_pie_tx_pr(&mut self) {
+    fn write_tx_pr_pie(&mut self) {
         self.writer.xml_start_tag("c:txPr");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr();
+        self.write_a_body_pr(false);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
 
         // Write the a:p element.
-        self.write_a_p();
+        self.write_a_p_pie();
 
         self.writer.xml_end_tag("c:txPr");
     }
 
     // Write the <a:bodyPr> element.
-    fn write_a_body_pr(&mut self) {
-        self.writer.xml_empty_tag("a:bodyPr");
+    fn write_a_body_pr(&mut self, is_horizontal: bool) {
+        let mut attributes = vec![];
+        let mut rotation = 0;
+
+        if is_horizontal {
+            rotation = -5400000;
+        }
+
+        if rotation != 0 {
+            attributes.push(("rot", rotation.to_string()));
+            attributes.push(("vert", "horz".to_string()));
+        }
+
+        self.writer.xml_empty_tag_attr("a:bodyPr", &attributes);
     }
 
     // Write the <a:lstStyle> element.
@@ -1193,7 +1249,7 @@ impl Chart {
     }
 
     // Write the <a:p> element.
-    fn write_a_p(&mut self) {
+    fn write_a_p_pie(&mut self) {
         self.writer.xml_start_tag("a:p");
 
         // Write the a:pPr element.
@@ -1213,6 +1269,7 @@ impl Chart {
 
         // Write the a:defRPr element.
         self.write_a_def_rpr();
+
         self.writer.xml_end_tag("a:pPr");
     }
 
@@ -1295,6 +1352,93 @@ impl Chart {
 
         self.writer.xml_empty_tag_attr("c:style", &attributes);
     }
+
+    // Write the <c:title> element.
+    fn write_title_rich(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("c:title");
+
+        // Write the c:tx element.
+        self.write_tx_rich(title);
+
+        // Write the c:layout element.
+        self.write_layout();
+
+        self.writer.xml_end_tag("c:title");
+    }
+
+    // Write the <c:tx> element.
+    fn write_tx_rich(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("c:tx");
+
+        // Write the c:rich element.
+        self.write_rich(title);
+
+        self.writer.xml_end_tag("c:tx");
+    }
+
+    // Write the <c:rich> element.
+    fn write_rich(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("c:rich");
+
+        // Write the a:bodyPr element.
+        self.write_a_body_pr(title.is_horizontal);
+
+        // Write the a:lstStyle element.
+        self.write_a_lst_style();
+
+        // Write the a:p element.
+        self.write_a_p_rich(title);
+
+        self.writer.xml_end_tag("c:rich");
+    }
+
+    // Write the <a:p> element.
+    fn write_a_p_rich(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("a:p");
+
+        // Write the a:pPr element.
+        self.write_a_p_pr_rich();
+
+        // Write the a:r element.
+        self.write_a_r(title);
+
+        self.writer.xml_end_tag("a:p");
+    }
+
+    // Write the <a:pPr> element.
+    fn write_a_p_pr_rich(&mut self) {
+        self.writer.xml_start_tag("a:pPr");
+
+        // Write the a:defRPr element.
+        self.write_a_def_rpr();
+
+        self.writer.xml_end_tag("a:pPr");
+    }
+
+    // Write the <a:r> element.
+    fn write_a_r(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("a:r");
+
+        // Write the a:rPr element.
+        self.write_a_r_pr();
+
+        // Write the a:t element.
+        self.write_a_t(&title.name);
+
+        self.writer.xml_end_tag("a:r");
+    }
+
+    // Write the <a:rPr> element.
+    fn write_a_r_pr(&mut self) {
+        let attributes = vec![("lang", "en-US".to_string())];
+
+        self.writer.xml_empty_tag_attr("a:rPr", &attributes);
+    }
+
+    // Write the <a:t> element.
+    fn write_a_t(&mut self, name: &str) {
+        self.writer.xml_data_element("a:t", name);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1360,7 +1504,7 @@ impl ChartSeries {
             category_cache_data: ChartSeriesCacheData::new(),
         }
     }
-    pub fn set_values(
+    pub fn set_values_range(
         &mut self,
         sheet_name: &str,
         first_row: RowNum,
@@ -1372,7 +1516,7 @@ impl ChartSeries {
         self
     }
 
-    pub fn set_categories(
+    pub fn set_categories_range(
         &mut self,
         sheet_name: &str,
         first_row: RowNum,
@@ -1510,9 +1654,31 @@ pub enum ChartType {
 
 #[allow(dead_code)]
 #[derive(Clone)]
-pub(crate) struct ChartAxis {
+pub struct ChartTitle {
+    name: String,
+    is_horizontal: bool,
+}
+
+impl ChartTitle {
+    pub(crate) fn new() -> ChartTitle {
+        ChartTitle {
+            name: "".to_string(),
+            is_horizontal: false,
+        }
+    }
+
+    pub fn set_name(&mut self, name: &str) -> &mut ChartTitle {
+        self.name = name.to_string();
+        self
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Clone)]
+pub struct ChartAxis {
     axis_type: ChartAxisType,
     axis_position: ChartAxisPosition,
+    title: ChartTitle,
 }
 
 impl ChartAxis {
@@ -1520,7 +1686,13 @@ impl ChartAxis {
         ChartAxis {
             axis_type: ChartAxisType::Value,
             axis_position: ChartAxisPosition::Bottom,
+            title: ChartTitle::new(),
         }
+    }
+
+    pub fn set_name(&mut self, name: &str) -> &mut ChartAxis {
+        self.title.name = name.to_string();
+        self
     }
 }
 
@@ -1582,15 +1754,15 @@ mod tests {
     fn test_assemble() {
         let mut series1 = ChartSeries::new();
         series1
-            .set_categories("Sheet1", 0, 0, 4, 0)
-            .set_values("Sheet1", 0, 1, 4, 1)
+            .set_categories_range("Sheet1", 0, 0, 4, 0)
+            .set_values_range("Sheet1", 0, 1, 4, 1)
             .set_category_cache(&["1", "2", "3", "4", "5"], true)
             .set_value_cache(&["2", "4", "6", "8", "10"], true);
 
         let mut series2 = ChartSeries::new();
         series2
-            .set_categories("Sheet1", 0, 0, 4, 0)
-            .set_values("Sheet1", 0, 2, 4, 2)
+            .set_categories_range("Sheet1", 0, 0, 4, 0)
+            .set_values_range("Sheet1", 0, 2, 4, 2)
             .set_category_cache(&["1", "2", "3", "4", "5"], true)
             .set_value_cache(&["3", "6", "9", "12", "15"], true);
 

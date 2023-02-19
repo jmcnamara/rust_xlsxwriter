@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartSeries, ChartType, Workbook, XlsxError};
 
 mod common;
 
@@ -23,17 +23,18 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let mut chart = Chart::new(ChartType::ScatterStraightWithMarkers);
-    chart.set_axis_ids(54514816, 45705856);
+    let mut chart = Chart::new(ChartType::Bar);
     chart
-        .add_series()
-        .set_categories_range("Sheet1", 0, 0, 4, 0)
-        .set_values_range("Sheet1", 0, 1, 4, 1);
+        .push_series(&ChartSeries::new().set_values_range("Sheet1", 0, 0, 4, 0))
+        .push_series(&ChartSeries::new().set_values_range("Sheet1", 0, 1, 4, 1))
+        .push_series(&ChartSeries::new().set_values_range("Sheet1", 0, 2, 4, 2));
 
-    chart
-        .add_series()
-        .set_categories_range("Sheet1", 0, 0, 4, 0)
-        .set_values_range("Sheet1", 0, 2, 4, 2);
+    chart.title().set_name("Title");
+    chart.x_axis().set_name("Apple");
+    chart.y_axis().set_name("Pear");
+
+    // Set the chart axis ids to match the random values in the Excel file.
+    chart.set_axis_ids(64053248, 64446464);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -43,9 +44,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_scatter02() {
+fn test_chart_bar06() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_scatter02")
+        .set_name("chart_bar06")
         .set_function(create_new_xlsx_file)
         .initialize();
 
