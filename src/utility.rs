@@ -34,6 +34,17 @@ pub fn col_to_name(col_num: ColNum) -> String {
     col_name
 }
 
+// Convert a column string such as "A" to a zero indexed column reference.
+pub fn name_to_col(column: &str) -> ColNum {
+    let mut col_num = 0;
+
+    for char in column.chars() {
+        col_num = (col_num * 26) + (char as u16 - 'A' as u16 + 1);
+    }
+
+    col_num - 1
+}
+
 // Convert a zero indexed row and column cell reference to a A1 style string.
 pub fn rowcol_to_cell(row_num: RowNum, col_num: ColNum) -> String {
     format!("{}{}", col_to_name(col_num), row_num + 1)
@@ -262,6 +273,28 @@ mod tests {
 
         for (col_num, col_string) in tests {
             assert_eq!(col_string, utility::col_to_name(col_num));
+        }
+    }
+
+    #[test]
+    fn test_name_to_col() {
+        let tests = vec![
+            (0, "A"),
+            (1, "B"),
+            (2, "C"),
+            (9, "J"),
+            (24, "Y"),
+            (25, "Z"),
+            (26, "AA"),
+            (254, "IU"),
+            (255, "IV"),
+            (256, "IW"),
+            (16383, "XFD"),
+            (16384, "XFE"),
+        ];
+
+        for (col_num, col_string) in tests {
+            assert_eq!(col_num, utility::name_to_col(col_string));
         }
     }
 

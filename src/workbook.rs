@@ -1166,6 +1166,18 @@ impl Workbook {
         for worksheet in self.worksheets.iter() {
             if !worksheet.charts.is_empty() {
                 for chart in worksheet.charts.values() {
+                    if chart.title.range.has_data() {
+                        chart_caches.insert(chart.title.range.key(), ChartSeriesCacheData::new());
+                    }
+                    if chart.x_axis.title.range.has_data() {
+                        chart_caches
+                            .insert(chart.x_axis.title.range.key(), ChartSeriesCacheData::new());
+                    }
+                    if chart.y_axis.title.range.has_data() {
+                        chart_caches
+                            .insert(chart.y_axis.title.range.key(), ChartSeriesCacheData::new());
+                    }
+
                     for series in chart.series.iter() {
                         if series.value_range.has_data() {
                             chart_caches
@@ -1191,6 +1203,16 @@ impl Workbook {
         for worksheet in self.worksheets.iter_mut() {
             if !worksheet.charts.is_empty() {
                 for chart in worksheet.charts.values_mut() {
+                    if let Some(cache) = chart_caches.get(&chart.title.range.key()) {
+                        chart.title.cache_data = cache.clone();
+                    }
+                    if let Some(cache) = chart_caches.get(&chart.x_axis.title.range.key()) {
+                        chart.x_axis.title.cache_data = cache.clone();
+                    }
+                    if let Some(cache) = chart_caches.get(&chart.y_axis.title.range.key()) {
+                        chart.y_axis.title.cache_data = cache.clone();
+                    }
+
                     for series in &mut chart.series {
                         if let Some(cache) = chart_caches.get(&series.value_range.key()) {
                             series.value_cache_data = cache.clone();

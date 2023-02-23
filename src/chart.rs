@@ -4,6 +4,8 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+use regex::Regex;
+
 use crate::{
     drawing::{DrawingObject, DrawingType},
     utility,
@@ -34,9 +36,9 @@ pub struct Chart {
     category_has_num_format: bool,
     chart_type: ChartType,
     chart_group_type: ChartType,
-    title: ChartTitle,
-    x_axis: ChartAxis,
-    y_axis: ChartAxis,
+    pub(crate) title: ChartTitle,
+    pub(crate) x_axis: ChartAxis,
+    pub(crate) y_axis: ChartAxis,
     grouping: ChartGrouping,
     default_cross_between: bool,
     default_num_format: String,
@@ -549,6 +551,7 @@ impl Chart {
         self.writer.xml_start_tag("c:chart");
 
         // Write the c:title element.
+
         self.write_chart_title(&self.title.clone());
 
         // Write the c:plotArea element.
@@ -567,6 +570,8 @@ impl Chart {
     fn write_chart_title(&mut self, title: &ChartTitle) {
         if !title.name.is_empty() {
             self.write_title_rich(title);
+        } else if title.range.has_data() {
+            self.write_title_formula(title);
         }
     }
 
@@ -760,8 +765,7 @@ impl Chart {
     fn write_cat(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
         self.writer.xml_start_tag("c:cat");
 
-        // Write the c:numRef element.
-        self.write_num_ref(range, cache);
+        self.write_cache_ref(range, cache);
 
         self.writer.xml_end_tag("c:cat");
     }
@@ -770,8 +774,7 @@ impl Chart {
     fn write_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
         self.writer.xml_start_tag("c:val");
 
-        // Write the c:numRef element.
-        self.write_num_ref(range, cache);
+        self.write_cache_ref(range, cache);
 
         self.writer.xml_end_tag("c:val");
     }
@@ -780,8 +783,7 @@ impl Chart {
     fn write_x_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
         self.writer.xml_start_tag("c:xVal");
 
-        // Write the c:numRef element.
-        self.write_num_ref(range, cache);
+        self.write_cache_ref(range, cache);
 
         self.writer.xml_end_tag("c:xVal");
     }
@@ -790,10 +792,18 @@ impl Chart {
     fn write_y_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
         self.writer.xml_start_tag("c:yVal");
 
-        // Write the c:numRef element.
-        self.write_num_ref(range, cache);
+        self.write_cache_ref(range, cache);
 
         self.writer.xml_end_tag("c:yVal");
+    }
+
+    // Write the <c:numRef> or <c:strRef> elements.
+    fn write_cache_ref(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+        if cache.is_numeric {
+            self.write_num_ref(range, cache);
+        } else {
+            self.write_str_ref(range, cache);
+        }
     }
 
     // Write the <c:numRef> element.
@@ -811,9 +821,19 @@ impl Chart {
         self.writer.xml_end_tag("c:numRef");
     }
 
-    // Write the <c:f> element.
-    fn write_range_formula(&mut self, formula: &str) {
-        self.writer.xml_data_element("c:f", formula);
+    // Write the <c:strRef> element.
+    fn write_str_ref(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+        self.writer.xml_start_tag("c:strRef");
+
+        // Write the c:f element.
+        self.write_range_formula(&range.formula());
+
+        // Write the c:strCache element.
+        if cache.has_data() {
+            self.write_str_cache(cache);
+        }
+
+        self.writer.xml_end_tag("c:strRef");
     }
 
     // Write the <c:numCache> element.
@@ -832,6 +852,26 @@ impl Chart {
         }
 
         self.writer.xml_end_tag("c:numCache");
+    }
+
+    // Write the <c:strCache> element.
+    fn write_str_cache(&mut self, cache: &ChartSeriesCacheData) {
+        self.writer.xml_start_tag("c:strCache");
+
+        // Write the c:ptCount element.
+        self.write_pt_count(cache.data.len());
+
+        // Write the c:pt elements.
+        for (index, value) in cache.data.iter().enumerate() {
+            self.write_pt(index, value);
+        }
+
+        self.writer.xml_end_tag("c:strCache");
+    }
+
+    // Write the <c:f> element.
+    fn write_range_formula(&mut self, formula: &str) {
+        self.writer.xml_data_element("c:f", formula);
     }
 
     // Write the <c:formatCode> element.
@@ -1226,6 +1266,45 @@ impl Chart {
         self.writer.xml_end_tag("c:txPr");
     }
 
+    // Write the <c:txPr> element.
+    fn write_tx_pr(&mut self, is_horizontal: bool) {
+        self.writer.xml_start_tag("c:txPr");
+
+        // Write the a:bodyPr element.
+        self.write_a_body_pr(is_horizontal);
+
+        // Write the a:lstStyle element.
+        self.write_a_lst_style();
+
+        // Write the a:p element.
+        self.write_a_p_formula();
+
+        self.writer.xml_end_tag("c:txPr");
+    }
+
+    // Write the <a:p> element.
+    fn write_a_p_formula(&mut self) {
+        self.writer.xml_start_tag("a:p");
+
+        // Write the a:pPr element.
+        self.write_a_p_pr();
+
+        // Write the a:endParaRPr element.
+        self.write_a_end_para_rpr();
+
+        self.writer.xml_end_tag("a:p");
+    }
+
+    // Write the <a:pPr> element.
+    fn write_a_p_pr(&mut self) {
+        self.writer.xml_start_tag("a:pPr");
+
+        // Write the a:defRPr element.
+        self.write_a_def_rpr();
+
+        self.writer.xml_end_tag("a:pPr");
+    }
+
     // Write the <a:bodyPr> element.
     fn write_a_body_pr(&mut self, is_horizontal: bool) {
         let mut attributes = vec![];
@@ -1351,6 +1430,32 @@ impl Chart {
         let attributes = vec![("val", self.style.to_string())];
 
         self.writer.xml_empty_tag_attr("c:style", &attributes);
+    }
+
+    // Write the <c:title> element.
+    fn write_title_formula(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("c:title");
+
+        // Write the c:tx element.
+        self.write_tx_formula(title);
+
+        // Write the c:layout element.
+        self.write_layout();
+
+        // Write the c:txPr element.
+        self.write_tx_pr(title.is_horizontal);
+
+        self.writer.xml_end_tag("c:title");
+    }
+
+    // Write the <c:tx> element.
+    fn write_tx_formula(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("c:tx");
+
+        // Title is always a string type.
+        self.write_str_ref(&title.range, &title.cache_data);
+
+        self.writer.xml_end_tag("c:tx");
     }
 
     // Write the <c:title> element.
@@ -1498,8 +1603,8 @@ pub struct ChartSeries {
 impl ChartSeries {
     pub fn new() -> ChartSeries {
         ChartSeries {
-            value_range: ChartRange::new("", 0, 0, 0, 0),
-            category_range: ChartRange::new("", 0, 0, 0, 0),
+            value_range: ChartRange::new_from_range("", 0, 0, 0, 0),
+            category_range: ChartRange::new_from_range("", 0, 0, 0, 0),
             value_cache_data: ChartSeriesCacheData::new(),
             category_cache_data: ChartSeriesCacheData::new(),
         }
@@ -1512,7 +1617,8 @@ impl ChartSeries {
         last_row: RowNum,
         last_col: ColNum,
     ) -> &mut ChartSeries {
-        self.value_range = ChartRange::new(sheet_name, first_row, first_col, last_row, last_col);
+        self.value_range =
+            ChartRange::new_from_range(sheet_name, first_row, first_col, last_row, last_col);
         self
     }
 
@@ -1524,7 +1630,8 @@ impl ChartSeries {
         last_row: RowNum,
         last_col: ColNum,
     ) -> &mut ChartSeries {
-        self.category_range = ChartRange::new(sheet_name, first_row, first_col, last_row, last_col);
+        self.category_range =
+            ChartRange::new_from_range(sheet_name, first_row, first_col, last_row, last_col);
         self
     }
 
@@ -1557,7 +1664,7 @@ pub(crate) struct ChartRange {
 }
 
 impl ChartRange {
-    pub(crate) fn new(
+    pub(crate) fn new_from_range(
         sheet_name: &str,
         first_row: RowNum,
         first_col: ColNum,
@@ -1566,6 +1673,48 @@ impl ChartRange {
     ) -> ChartRange {
         ChartRange {
             sheet_name: sheet_name.to_string(),
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+        }
+    }
+
+    pub(crate) fn new_from_string(range_string: &str) -> ChartRange {
+        lazy_static! {
+            static ref CHART_CELL: Regex = Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+)").unwrap();
+            static ref CHART_RANGE: Regex =
+                Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+):\$?(\w+)\$?(\d+)").unwrap();
+        }
+
+        let mut sheet_name = "";
+        let mut first_row = 0;
+        let mut first_col = 0;
+        let mut last_row = 0;
+        let mut last_col = 0;
+
+        if let Some(caps) = CHART_RANGE.captures(range_string) {
+            sheet_name = caps.get(1).unwrap().as_str();
+            first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
+            last_row = caps.get(5).unwrap().as_str().parse::<u32>().unwrap() - 1;
+            first_col = utility::name_to_col(caps.get(2).unwrap().as_str());
+            last_col = utility::name_to_col(caps.get(4).unwrap().as_str());
+        } else if let Some(caps) = CHART_CELL.captures(range_string) {
+            sheet_name = caps.get(1).unwrap().as_str();
+            first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
+            first_col = utility::name_to_col(caps.get(2).unwrap().as_str());
+            last_row = first_row;
+            last_col = first_col;
+        }
+
+        let sheet_name: String = if sheet_name.starts_with('\'') && sheet_name.ends_with('\'') {
+            sheet_name[1..sheet_name.len() - 1].to_string()
+        } else {
+            sheet_name.to_string()
+        };
+
+        ChartRange {
+            sheet_name,
             first_row,
             first_col,
             last_row,
@@ -1655,6 +1804,8 @@ pub enum ChartType {
 #[allow(dead_code)]
 #[derive(Clone)]
 pub struct ChartTitle {
+    pub(crate) range: ChartRange,
+    pub(crate) cache_data: ChartSeriesCacheData,
     name: String,
     is_horizontal: bool,
 }
@@ -1662,13 +1813,19 @@ pub struct ChartTitle {
 impl ChartTitle {
     pub(crate) fn new() -> ChartTitle {
         ChartTitle {
+            range: ChartRange::new_from_range("", 0, 0, 0, 0),
+            cache_data: ChartSeriesCacheData::new(),
             name: "".to_string(),
             is_horizontal: false,
         }
     }
 
     pub fn set_name(&mut self, name: &str) -> &mut ChartTitle {
-        self.name = name.to_string();
+        if name.starts_with('=') {
+            self.range = ChartRange::new_from_string(name);
+        } else {
+            self.name = name.to_string();
+        }
         self
     }
 }
@@ -1678,7 +1835,7 @@ impl ChartTitle {
 pub struct ChartAxis {
     axis_type: ChartAxisType,
     axis_position: ChartAxisPosition,
-    title: ChartTitle,
+    pub(crate) title: ChartTitle,
 }
 
 impl ChartAxis {
@@ -1691,7 +1848,7 @@ impl ChartAxis {
     }
 
     pub fn set_name(&mut self, name: &str) -> &mut ChartAxis {
-        self.title.name = name.to_string();
+        self.title.set_name(name);
         self
     }
 }
@@ -1747,7 +1904,7 @@ mod tests {
 
     use crate::chart::{Chart, ChartType};
     use crate::test_functions::xml_to_vec;
-    use crate::ChartSeries;
+    use crate::{ChartRange, ChartSeries};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -1939,5 +2096,23 @@ mod tests {
         );
 
         assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_range_from_string() {
+        let range_string = "=Sheet1!$A$1:$A$5";
+        let range = ChartRange::new_from_string(range_string);
+        assert_eq!("Sheet1!$A$1:$A$5", range.formula());
+        assert_eq!("Sheet1", range.sheet_name);
+
+        let range_string = "Sheet1!$A$1:$A$5";
+        let range = ChartRange::new_from_string(range_string);
+        assert_eq!("Sheet1!$A$1:$A$5", range.formula());
+        assert_eq!("Sheet1", range.sheet_name);
+
+        let range_string = "Sheet 1!$A$1:$A$5";
+        let range = ChartRange::new_from_string(range_string);
+        assert_eq!("'Sheet 1'!$A$1:$A$5", range.formula());
+        assert_eq!("Sheet 1", range.sheet_name);
     }
 }
