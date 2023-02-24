@@ -551,8 +551,11 @@ impl Chart {
         self.writer.xml_start_tag("c:chart");
 
         // Write the c:title element.
-
-        self.write_chart_title(&self.title.clone());
+        if self.title.hidden {
+            self.write_auto_title_deleted();
+        } else {
+            self.write_chart_title(&self.title.clone());
+        }
 
         // Write the c:plotArea element.
         self.write_plot_area();
@@ -572,6 +575,15 @@ impl Chart {
             self.write_title_rich(title);
         } else if title.range.has_data() {
             self.write_title_formula(title);
+        }
+    }
+
+    // Write the <c:title> element.
+    fn write_series_title(&mut self, title: &ChartTitle) {
+        if !title.name.is_empty() {
+            self.write_tx_value(title);
+        } else if title.range.has_data() {
+            self.write_tx_formula(title);
         }
     }
 
@@ -691,6 +703,8 @@ impl Chart {
 
             // Write the c:order element.
             self.write_order(index);
+
+            self.write_series_title(&series.title);
 
             // Write the c:marker element.
             if self.chart_group_type == ChartType::Line || self.chart_type == ChartType::Radar {
@@ -1432,6 +1446,14 @@ impl Chart {
         self.writer.xml_empty_tag_attr("c:style", &attributes);
     }
 
+    // Write the <c:autoTitleDeleted> element.
+    fn write_auto_title_deleted(&mut self) {
+        let attributes = vec![("val", "1".to_string())];
+
+        self.writer
+            .xml_empty_tag_attr("c:autoTitleDeleted", &attributes);
+    }
+
     // Write the <c:title> element.
     fn write_title_formula(&mut self, title: &ChartTitle) {
         self.writer.xml_start_tag("c:title");
@@ -1477,6 +1499,15 @@ impl Chart {
 
         // Write the c:rich element.
         self.write_rich(title);
+
+        self.writer.xml_end_tag("c:tx");
+    }
+
+    // Write the <c:tx> element.
+    fn write_tx_value(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("c:tx");
+
+        self.writer.xml_data_element("c:v", &title.name);
 
         self.writer.xml_end_tag("c:tx");
     }
@@ -1597,6 +1628,7 @@ pub struct ChartSeries {
     pub(crate) category_range: ChartRange,
     pub(crate) value_cache_data: ChartSeriesCacheData,
     pub(crate) category_cache_data: ChartSeriesCacheData,
+    pub(crate) title: ChartTitle,
 }
 
 #[allow(clippy::new_without_default)]
@@ -1607,6 +1639,7 @@ impl ChartSeries {
             category_range: ChartRange::new_from_range("", 0, 0, 0, 0),
             value_cache_data: ChartSeriesCacheData::new(),
             category_cache_data: ChartSeriesCacheData::new(),
+            title: ChartTitle::new(),
         }
     }
     pub fn set_values_range(
@@ -1632,6 +1665,11 @@ impl ChartSeries {
     ) -> &mut ChartSeries {
         self.category_range =
             ChartRange::new_from_range(sheet_name, first_row, first_col, last_row, last_col);
+        self
+    }
+
+    pub fn set_name(&mut self, name: &str) -> &mut ChartSeries {
+        self.title.set_name(name);
         self
     }
 
@@ -1807,6 +1845,7 @@ pub struct ChartTitle {
     pub(crate) range: ChartRange,
     pub(crate) cache_data: ChartSeriesCacheData,
     name: String,
+    hidden: bool,
     is_horizontal: bool,
 }
 
@@ -1816,6 +1855,7 @@ impl ChartTitle {
             range: ChartRange::new_from_range("", 0, 0, 0, 0),
             cache_data: ChartSeriesCacheData::new(),
             name: "".to_string(),
+            hidden: false,
             is_horizontal: false,
         }
     }
@@ -1826,6 +1866,11 @@ impl ChartTitle {
         } else {
             self.name = name.to_string();
         }
+        self
+    }
+
+    pub fn set_hidden(&mut self) -> &mut ChartTitle {
+        self.hidden = true;
         self
     }
 }

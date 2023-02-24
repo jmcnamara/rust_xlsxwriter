@@ -1179,6 +1179,10 @@ impl Workbook {
                     }
 
                     for series in chart.series.iter() {
+                        if series.title.range.has_data() {
+                            chart_caches
+                                .insert(series.title.range.key(), ChartSeriesCacheData::new());
+                        }
                         if series.value_range.has_data() {
                             chart_caches
                                 .insert(series.value_range.key(), ChartSeriesCacheData::new());
@@ -1214,6 +1218,9 @@ impl Workbook {
                     }
 
                     for series in &mut chart.series {
+                        if let Some(cache) = chart_caches.get(&series.title.range.key()) {
+                            series.title.cache_data = cache.clone();
+                        }
                         if let Some(cache) = chart_caches.get(&series.value_range.key()) {
                             series.value_cache_data = cache.clone();
                         }
