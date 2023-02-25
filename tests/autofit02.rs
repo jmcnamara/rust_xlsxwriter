@@ -15,6 +15,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
+    // Test autofit on empty worksheet.
+    worksheet.autofit();
+
     worksheet.write_string(0, 0, "A")?;
 
     worksheet.autofit();
