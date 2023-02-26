@@ -1591,6 +1591,12 @@ impl IntoChartRange for (&str, RowNum, ColNum, RowNum, ColNum) {
     }
 }
 
+impl IntoChartRange for (&str, RowNum, ColNum) {
+    fn new_chart_range(&self) -> ChartRange {
+        ChartRange::new_from_range(self.0, self.1, self.2, self.1, self.2)
+    }
+}
+
 impl IntoChartRange for &str {
     fn new_chart_range(&self) -> ChartRange {
         ChartRange::new_from_string(self)
@@ -1674,7 +1680,10 @@ impl ChartSeries {
         self
     }
 
-    pub fn set_name(&mut self, name: &str) -> &mut ChartSeries {
+    pub fn set_name<T>(&mut self, name: T) -> &mut ChartSeries
+    where
+        T: IntoChartRange,
+    {
         self.title.set_name(name);
         self
     }
@@ -1705,6 +1714,7 @@ pub struct ChartRange {
     first_col: ColNum,
     last_row: RowNum,
     last_col: ColNum,
+    range_string: String,
 }
 
 impl ChartRange {
@@ -1721,6 +1731,7 @@ impl ChartRange {
             first_col,
             last_row,
             last_col,
+            range_string: "".to_string(),
         }
     }
 
@@ -1763,6 +1774,7 @@ impl ChartRange {
             first_col,
             last_row,
             last_col,
+            range_string: range_string.to_string(),
         }
     }
 
@@ -1866,12 +1878,18 @@ impl ChartTitle {
         }
     }
 
-    pub fn set_name(&mut self, name: &str) -> &mut ChartTitle {
-        if name.starts_with('=') {
-            self.range = ChartRange::new_from_string(name);
-        } else {
-            self.name = name.to_string();
+    pub fn set_name<T>(&mut self, name: T) -> &mut ChartTitle
+    where
+        T: IntoChartRange,
+    {
+        self.range = name.new_chart_range();
+
+        // If the name didn't convert to a populated range then it probably just
+        // a simple string title.
+        if !self.range.has_data() {
+            self.name = self.range.range_string.clone();
         }
+
         self
     }
 
@@ -1898,7 +1916,10 @@ impl ChartAxis {
         }
     }
 
-    pub fn set_name(&mut self, name: &str) -> &mut ChartAxis {
+    pub fn set_name<T>(&mut self, name: T) -> &mut ChartAxis
+    where
+        T: IntoChartRange,
+    {
         self.title.set_name(name);
         self
     }
