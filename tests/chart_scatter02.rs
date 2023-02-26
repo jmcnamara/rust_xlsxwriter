@@ -27,13 +27,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.set_axis_ids(54514816, 45705856);
     chart
         .add_series()
-        .set_categories_range("Sheet1", 0, 0, 4, 0)
-        .set_values_range("Sheet1", 0, 1, 4, 1);
+        .set_categories(("Sheet1", 0, 0, 4, 0))
+        .set_values(("Sheet1", 0, 1, 4, 1));
 
     chart
         .add_series()
-        .set_categories_range("Sheet1", 0, 0, 4, 0)
-        .set_values_range("Sheet1", 0, 2, 4, 2);
+        .set_categories(("Sheet1", 0, 0, 4, 0))
+        .set_values(("Sheet1", 0, 2, 4, 2));
 
     worksheet.insert_chart(8, 4, &chart)?;
 

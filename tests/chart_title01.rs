@@ -27,7 +27,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.set_axis_ids(46165376, 54462720);
     chart
         .add_series()
-        .set_values_range("Sheet1", 0, 0, 4, 0)
+        .set_values(("Sheet1", 0, 0, 4, 0))
         .set_name("Foo");
 
     chart.title().set_hidden();

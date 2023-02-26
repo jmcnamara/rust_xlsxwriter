@@ -26,8 +26,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut chart = Chart::new(ChartType::Pie);
     chart
         .add_series()
-        .set_categories_range("Sheet1", 0, 0, 2, 0)
-        .set_values_range("Sheet1", 0, 1, 2, 1);
+        .set_categories(("Sheet1", 0, 0, 2, 0))
+        .set_values(("Sheet1", 0, 1, 2, 1));
 
     worksheet.insert_chart(8, 4, &chart)?;
 

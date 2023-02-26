@@ -27,14 +27,14 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let mut chart = Chart::new(ChartType::Bar);
     chart.set_axis_ids(45925120, 45927040);
-    chart.add_series().set_values_range("Sheet1", 0, 0, 4, 0);
+    chart.add_series().set_values(("Sheet1", 0, 0, 4, 0));
     chart
         .add_series()
-        .set_values_range("Sheet1", 0, 1, 4, 1)
+        .set_values(("Sheet1", 0, 1, 4, 1))
         .set_name("Apple");
     chart
         .add_series()
-        .set_values_range("Sheet1", 0, 2, 4, 2)
+        .set_values(("Sheet1", 0, 2, 4, 2))
         .set_name("=Sheet1!$A$7");
 
     worksheet.insert_chart(8, 4, &chart)?;

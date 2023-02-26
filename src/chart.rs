@@ -1581,6 +1581,22 @@ impl Chart {
 // Traits.
 // -----------------------------------------------------------------------
 
+pub trait IntoChartRange {
+    fn new_chart_range(&self) -> ChartRange;
+}
+
+impl IntoChartRange for (&str, RowNum, ColNum, RowNum, ColNum) {
+    fn new_chart_range(&self) -> ChartRange {
+        ChartRange::new_from_range(self.0, self.1, self.2, self.3, self.4)
+    }
+}
+
+impl IntoChartRange for &str {
+    fn new_chart_range(&self) -> ChartRange {
+        ChartRange::new_from_string(self)
+    }
+}
+
 // TODO
 impl DrawingObject for Chart {
     fn x_offset(&self) -> u32 {
@@ -1642,29 +1658,19 @@ impl ChartSeries {
             title: ChartTitle::new(),
         }
     }
-    pub fn set_values_range(
-        &mut self,
-        sheet_name: &str,
-        first_row: RowNum,
-        first_col: ColNum,
-        last_row: RowNum,
-        last_col: ColNum,
-    ) -> &mut ChartSeries {
-        self.value_range =
-            ChartRange::new_from_range(sheet_name, first_row, first_col, last_row, last_col);
+    pub fn set_values<T>(&mut self, range: T) -> &mut ChartSeries
+    where
+        T: IntoChartRange,
+    {
+        self.value_range = range.new_chart_range();
         self
     }
 
-    pub fn set_categories_range(
-        &mut self,
-        sheet_name: &str,
-        first_row: RowNum,
-        first_col: ColNum,
-        last_row: RowNum,
-        last_col: ColNum,
-    ) -> &mut ChartSeries {
-        self.category_range =
-            ChartRange::new_from_range(sheet_name, first_row, first_col, last_row, last_col);
+    pub fn set_categories<T>(&mut self, range: T) -> &mut ChartSeries
+    where
+        T: IntoChartRange,
+    {
+        self.category_range = range.new_chart_range();
         self
     }
 
@@ -1693,7 +1699,7 @@ impl ChartSeries {
 /// TODO
 #[allow(dead_code)]
 #[derive(Clone)]
-pub(crate) struct ChartRange {
+pub struct ChartRange {
     sheet_name: String,
     first_row: RowNum,
     first_col: ColNum,
@@ -1702,7 +1708,7 @@ pub(crate) struct ChartRange {
 }
 
 impl ChartRange {
-    pub(crate) fn new_from_range(
+    pub fn new_from_range(
         sheet_name: &str,
         first_row: RowNum,
         first_col: ColNum,
@@ -1956,15 +1962,15 @@ mod tests {
     fn test_assemble() {
         let mut series1 = ChartSeries::new();
         series1
-            .set_categories_range("Sheet1", 0, 0, 4, 0)
-            .set_values_range("Sheet1", 0, 1, 4, 1)
+            .set_categories(("Sheet1", 0, 0, 4, 0))
+            .set_values(("Sheet1", 0, 1, 4, 1))
             .set_category_cache(&["1", "2", "3", "4", "5"], true)
             .set_value_cache(&["2", "4", "6", "8", "10"], true);
 
         let mut series2 = ChartSeries::new();
         series2
-            .set_categories_range("Sheet1", 0, 0, 4, 0)
-            .set_values_range("Sheet1", 0, 2, 4, 2)
+            .set_categories("Sheet1!$A$1:$A$5")
+            .set_values("Sheet1!$C$1:$C$5")
             .set_category_cache(&["1", "2", "3", "4", "5"], true)
             .set_value_cache(&["3", "6", "9", "12", "15"], true);
 
