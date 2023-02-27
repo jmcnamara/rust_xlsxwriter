@@ -735,6 +735,8 @@ impl Chart {
             // Write the c:order element.
             self.write_order(index);
 
+            self.write_series_title(&series.title);
+
             if self.chart_type == ChartType::ScatterStraight
                 || self.chart_type == ChartType::ScatterSmooth
             {
@@ -1813,7 +1815,7 @@ pub(crate) struct ChartSeriesCacheData {
 impl ChartSeriesCacheData {
     pub(crate) fn new() -> ChartSeriesCacheData {
         ChartSeriesCacheData {
-            is_numeric: false,
+            is_numeric: true,
             data: vec![],
         }
     }
