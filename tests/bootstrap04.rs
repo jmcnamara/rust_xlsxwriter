@@ -10,7 +10,7 @@ use rust_xlsxwriter::{Workbook, XlsxError};
 mod common;
 
 // Test case to demonstrate creating a basic file with some numeric cell data.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
@@ -23,11 +23,38 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Write numbers with generic write().
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write(0, 0, 1 as u32)?;
+    worksheet.write(1, 1, 2 as f32)?;
+    worksheet.write(2, 2, 3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn bootstrap04_write_numbers() {
+fn bootstrap04_write_numbers_1() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap04")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap04_write_numbers_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap04")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

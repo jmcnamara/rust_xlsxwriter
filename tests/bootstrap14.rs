@@ -10,7 +10,7 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 mod common;
 
 // Test case to demonstrate creating a basic file with some string cell data.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let format1 = Format::new().set_num_format("0.0");
@@ -25,11 +25,40 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// With generic write().
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let format1 = Format::new().set_num_format("0.0");
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.write_with_format(0, 0, 1, &format1)?;
+    worksheet.write_with_format(1, 1, 2, &format1)?;
+    worksheet.write_with_format(2, 2, 3, &format1)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap13_repeated_number_format() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap14")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap13_with_generic_writer() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap14")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

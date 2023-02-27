@@ -49,6 +49,21 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Write strings with generic write().
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write_string(0, 0, "Hello")?;
+    worksheet.write_string(1, 0, "World")?;
+    worksheet.write_string(2, 0, "Hello")?;
+    worksheet.write_string(3, 0, "World")?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap07_write_repeated_strings() {
     let test_runner = common::TestRunner::new()
@@ -67,6 +82,18 @@ fn bootstrap07_multi_save() {
         .set_name("bootstrap07")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap07_with_generic_write() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap07")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

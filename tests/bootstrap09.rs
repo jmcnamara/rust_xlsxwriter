@@ -10,7 +10,7 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 mod common;
 
 // Test case to demonstrate creating a basic file with some string cell data.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let format = Format::new().set_bold();
@@ -23,11 +23,38 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Write formatted string with generic write().
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let format = Format::new().set_bold();
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.write_with_format(0, 0, "Hello", &format)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap09_write_a_formatted_string() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap09")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap09_with_generic_write() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap09")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

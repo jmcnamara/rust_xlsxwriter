@@ -15,10 +15,10 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write a string to cell (0, 0) = A1.
-    worksheet.write_string(0, 0, "Hello")?;
+    worksheet.write(0, 0, "Hello")?;
 
     // Write a number to cell (1, 0) = A2.
-    worksheet.write_number(1, 0, 12345)?;
+    worksheet.write(1, 0, 12345)?;
 
     // Save the file to disk.
     workbook.save("hello.xlsx")?;
