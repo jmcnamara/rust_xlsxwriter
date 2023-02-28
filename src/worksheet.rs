@@ -536,7 +536,7 @@ impl Worksheet {
     where
         T: IntoExcelData,
     {
-        data.write(self, row, col)
+        data.write(self, row, col, None)
     }
 
     /// Write formatted generic data to a cell.
@@ -560,7 +560,7 @@ impl Worksheet {
     where
         T: IntoExcelData,
     {
-        data.write_with_format(self, row, col, format)
+        data.write(self, row, col, Some(format))
     }
 
     /// Write an unformatted number to a cell.
@@ -9354,65 +9354,39 @@ impl Worksheet {
 /// Trait to map user defined types to one of the supported Excel native types.
 ///
 pub trait IntoExcelData {
-    /// Trait method to handle writing an unformatted type to Excel.
-    fn write(
-        self,
-        worksheet: &mut Worksheet,
-        row: RowNum,
-        col: ColNum,
-    ) -> Result<&mut Worksheet, XlsxError>;
-
-    /// Trait method to handle writing a formatted type to Excel.
-    fn write_with_format<'a>(
+    /// Trait method to handle writing generic types to Excel.
+    fn write<'a>(
         self,
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: Option<&'a Format>,
     ) -> Result<&'a mut Worksheet, XlsxError>;
 }
 
 impl IntoExcelData for &str {
-    fn write(
-        self,
-        worksheet: &mut Worksheet,
-        row: RowNum,
-        col: ColNum,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        worksheet.store_string(row, col, self, None)
-    }
-
-    fn write_with_format<'a>(
+    fn write<'a>(
         self,
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: Option<&'a Format>,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        worksheet.store_string(row, col, self, Some(format))
+        worksheet.store_string(row, col, self, format)
     }
 }
 
 macro_rules! write_number_trait_impl {
     ($($t:ty)*) => ($(
         impl IntoExcelData for $t {
-            fn write(
-                self,
-                worksheet: &mut Worksheet,
-                row: RowNum,
-                col: ColNum,
-            ) -> Result<&mut Worksheet, XlsxError> {
-                worksheet.store_number(row, col, self, None)
-            }
-
-            fn write_with_format<'a>(
+            fn write<'a>(
                 self,
                 worksheet: &'a mut Worksheet,
                 row: RowNum,
                 col: ColNum,
-                format: &'a Format,
+                format: Option<&'a Format>,
             ) -> Result<&'a mut Worksheet, XlsxError> {
-                worksheet.store_number(row, col, self, Some(format))
+                worksheet.store_number(row, col, self, format)
             }
         }
     )*)

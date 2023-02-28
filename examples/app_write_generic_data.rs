@@ -51,36 +51,30 @@ impl UnixTime {
 // 25569.0. For Unix times beyond that we divide by the number of seconds in the
 // day (24 * 60 * 60) to get the Excel serial date.
 //
-// We must also supply a number format if one isn't specified.
+// We must also supply a number format if one isn't specified since that is
+// required for dates.
 //
 impl IntoExcelData for UnixTime {
-    fn write(
-        self,
-        worksheet: &mut Worksheet,
-        row: RowNum,
-        col: ColNum,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Create a default date format.
-        let format = Format::new().set_num_format("yyyy-mm-dd");
-
-        // Convert the Unix time to an Excel datetime.
-        let datetime = 25569.0 + (self.seconds / (24 * 60 * 60)) as f64;
-
-        // Write the date as a number with a format.
-        worksheet.write_number_with_format(row, col, datetime, &format)
-    }
-
-    fn write_with_format<'a>(
+    fn write<'a>(
         self,
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: Option<&'a Format>,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         // Convert the Unix time to an Excel datetime.
         let datetime = 25569.0 + (self.seconds / (24 * 60 * 60)) as f64;
 
-        // Write the date with the user supplied format.
-        worksheet.write_number_with_format(row, col, datetime, format)
+        match format {
+            Some(format) => {
+                // Write the date with the user supplied format.
+                worksheet.write_number_with_format(row, col, datetime, format)
+            }
+            None => {
+                // Create a default date format.
+                let format = Format::new().set_num_format("yyyy-mm-dd");
+                worksheet.write_number_with_format(row, col, datetime, &format)
+            }
+        }
     }
 }
