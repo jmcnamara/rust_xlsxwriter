@@ -14,7 +14,7 @@ fn main() -> Result<(), XlsxError> {
     let data = [[1, 2, 3, 4, 5], [2, 4, 6, 8, 10], [3, 6, 9, 12, 15]];
     for (col_num, col_data) in data.iter().enumerate() {
         for (row_num, row_data) in col_data.iter().enumerate() {
-            worksheet.write_number(row_num as u32, col_num as u16, *row_data)?;
+            worksheet.write(row_num as u32, col_num as u16, *row_data)?;
         }
     }
 

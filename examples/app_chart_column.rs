@@ -12,9 +12,9 @@ fn main() -> Result<(), XlsxError> {
     let bold = Format::new().set_bold();
 
     // Add the worksheet data that the charts will refer to.
-    worksheet.write_string_with_format(0, 0, "Number", &bold)?;
-    worksheet.write_string_with_format(0, 1, "Batch 1", &bold)?;
-    worksheet.write_string_with_format(0, 2, "Batch 2", &bold)?;
+    worksheet.write_with_format(0, 0, "Number", &bold)?;
+    worksheet.write_with_format(0, 1, "Batch 1", &bold)?;
+    worksheet.write_with_format(0, 2, "Batch 2", &bold)?;
 
     let data = [
         [2, 3, 4, 5, 6, 7],
@@ -23,7 +23,7 @@ fn main() -> Result<(), XlsxError> {
     ];
     for (col_num, col_data) in data.iter().enumerate() {
         for (row_num, row_data) in col_data.iter().enumerate() {
-            worksheet.write_number(row_num as u32 + 1, col_num as u16, *row_data)?;
+            worksheet.write(row_num as u32 + 1, col_num as u16, *row_data)?;
         }
     }
 
