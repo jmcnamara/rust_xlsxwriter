@@ -101,7 +101,7 @@ pub struct Workbook {
     pub(crate) font_count: u16,
     pub(crate) fill_count: u16,
     pub(crate) border_count: u16,
-    pub(crate) num_format_count: u16,
+    pub(crate) num_formats: Vec<String>,
     pub(crate) has_hyperlink_style: bool,
     xf_indices: HashMap<String, u32>,
     active_tab: u16,
@@ -168,7 +168,7 @@ impl Workbook {
             fill_count: 0,
             first_sheet: 0,
             border_count: 0,
-            num_format_count: 0,
+            num_formats: vec![],
             read_only_mode: 0,
             has_hyperlink_style: false,
             worksheets: vec![],
@@ -1018,7 +1018,7 @@ impl Workbook {
         self.font_count = 0;
         self.fill_count = 0;
         self.border_count = 0;
-        self.num_format_count = 0;
+        self.num_formats = vec![];
 
         for worksheet in self.worksheets.iter_mut() {
             worksheet.reset();
@@ -1381,9 +1381,10 @@ impl Workbook {
 
     // Set the number format index for the format objects.
     fn prepare_num_formats(&mut self) {
-        let mut num_formats: HashMap<String, u16> = HashMap::new();
+        let mut unique_num_formats: HashMap<String, u16> = HashMap::new();
         // User defined number formats in Excel start from index 164.
         let mut index = 164;
+        let mut num_formats = vec![];
 
         for xf_format in &mut self.xf_formats {
             if xf_format.num_format_index > 0 {
@@ -1396,18 +1397,20 @@ impl Workbook {
 
             let num_format_string = xf_format.num_format.clone();
 
-            match num_formats.get(&num_format_string) {
+            match unique_num_formats.get(&num_format_string) {
                 Some(index) => {
                     xf_format.set_num_format_index_u16(*index);
                 }
                 None => {
-                    num_formats.insert(num_format_string, index);
+                    unique_num_formats.insert(num_format_string.clone(), index);
                     xf_format.set_num_format_index_u16(index);
                     index += 1;
-                    self.num_format_count += 1;
+                    num_formats.push(num_format_string)
                 }
             }
         }
+
+        self.num_formats = num_formats;
     }
 
     // Collect some workbook level metadata to help generate the xlsx

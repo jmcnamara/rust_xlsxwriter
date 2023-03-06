@@ -17,7 +17,7 @@ pub struct Styles<'a> {
     font_count: u16,
     fill_count: u16,
     border_count: u16,
-    num_format_count: u16,
+    num_formats: Vec<String>,
     has_hyperlink_style: bool,
     is_rich_string_style: bool,
 }
@@ -33,7 +33,7 @@ impl<'a> Styles<'a> {
         font_count: u16,
         fill_count: u16,
         border_count: u16,
-        num_format_count: u16,
+        num_formats: Vec<String>,
         has_hyperlink_style: bool,
         is_rich_string_style: bool,
     ) -> Styles {
@@ -45,7 +45,7 @@ impl<'a> Styles<'a> {
             font_count,
             fill_count,
             border_count,
-            num_format_count,
+            num_formats,
             has_hyperlink_style,
             is_rich_string_style,
         }
@@ -744,18 +744,16 @@ impl<'a> Styles<'a> {
 
     // Write the <numFmts> element.
     fn write_num_fmts(&mut self) {
-        if self.num_format_count == 0 {
+        if self.num_formats.is_empty() {
             return;
         }
 
-        let attributes = vec![("count", self.num_format_count.to_string())];
+        let attributes = vec![("count", self.num_formats.len().to_string())];
         self.writer.xml_start_tag_attr("numFmts", &attributes);
 
         // Write the numFmt elements.
-        for xf_format in self.xf_formats {
-            if xf_format.num_format_index >= 164 {
-                self.write_num_fmt(xf_format.num_format_index, &xf_format.num_format);
-            }
+        for (index, num_format) in self.num_formats.clone().iter().enumerate() {
+            self.write_num_fmt(index as u16 + 164, num_format);
         }
 
         self.writer.xml_end_tag("numFmts");
@@ -790,7 +788,7 @@ mod tests {
         xf_format.set_border_index(0, true);
 
         let xf_formats = vec![xf_format];
-        let mut styles = Styles::new(&xf_formats, 1, 2, 1, 0, false, false);
+        let mut styles = Styles::new(&xf_formats, 1, 2, 1, vec![], false, false);
 
         styles.assemble_xml_file();
 

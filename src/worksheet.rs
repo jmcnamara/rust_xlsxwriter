@@ -7314,7 +7314,7 @@ impl Worksheet {
 
         // Create a Style struct object to generate the font xml.
         let xf_formats: Vec<Format> = vec![];
-        let mut styler = Styles::new(&xf_formats, 0, 0, 0, 0, false, true);
+        let mut styler = Styles::new(&xf_formats, 0, 0, 0, vec![], false, true);
         let mut raw_string = "".to_string();
 
         let mut first_segment = true;

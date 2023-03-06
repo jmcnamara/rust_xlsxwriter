@@ -381,7 +381,7 @@ impl<W: Write + Seek> Packager<W> {
             workbook.font_count,
             workbook.fill_count,
             workbook.border_count,
-            workbook.num_format_count,
+            workbook.num_formats.clone(),
             workbook.has_hyperlink_style,
             false,
         );
