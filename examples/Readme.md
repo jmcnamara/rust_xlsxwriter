@@ -21,6 +21,36 @@ documentation and generally show how an individual function works.
 * app_autofit.rs - An example of using simulated autofit to automatically
   adjust the width of worksheet columns based on the data in the cells.
 
+* app_chart.rs - A simple chart example using the rust_xlsxwriter library.
+
+* app_chart_area.rs - A example of creating area charts using the
+  rust_xlsxwriter library.
+
+* app_chart_bar.rs - A example of creating bar charts using the
+  rust_xlsxwriter library.
+
+* app_chart_column.rs - A example of creating column charts using the
+  rust_xlsxwriter library.
+
+* app_chart_doughnut.rs - A example of creating doughnut charts using the
+  rust_xlsxwriter library.
+
+* app_chart_line.rs - A example of creating line charts using the
+  rust_xlsxwriter library.
+
+* app_chart_pie.rs - A example of creating pie charts using the
+  rust_xlsxwriter library.
+
+* app_chart_radar.rs - A example of creating radar charts using the
+  rust_xlsxwriter library.
+
+* app_chart_scatter.rs - A example of creating scatter charts using the
+  rust_xlsxwriter library.
+
+* app_chart_styles.rs - # An example showing all 48 default chart styles
+  available in Excel 2007 using rust_xlsxwriter. Note, these styles are not
+  the same as the styles available in Excel 2013 and later.
+
 * app_colors.rs - A demonstration of the RGB and Theme colors palettes
   available in the rust_xlsxwriter library.
 
@@ -95,6 +125,42 @@ documentation and generally show how an individual function works.
 
 * app_worksheet_protection.rs - Example of cell locking and formula hiding
   in an Excel worksheet rust_xlsxwriter library.
+
+* app_write_generic_data.rs - Example of how to extend the the
+  rust_xlsxwriter write() method using the IntoExcelData trait to handle
+  arbitrary user data that can be mapped to one of the main Excel data
+  types.
+
+* doc_chart_add_series.rs - An example of creating a chart series via
+  [`chart.add_series()`](Chart::add_series).
+
+* doc_chart_axis_set_name.rs - A chart example demonstrating setting the
+  title of chart axes.
+
+* doc_chart_intro.rs - A simple chart example using the rust_xlsxwriter
+  library.
+
+* doc_chart_push_series.rs - An example of creating a chart series as a
+  standalone object and then adding it to a chart via the
+  [`chart.push_series()`](Chart::add_series) method.
+
+* doc_chart_series_set_categories.rs - A chart example demonstrating
+  setting the chart series categories and values.
+
+* doc_chart_series_set_name.rs - A chart example demonstrating setting the
+  chart series name.
+
+* doc_chart_series_set_values.rs - A chart example demonstrating setting
+  the chart series values.
+
+* doc_chart_simple.rs - A simple chart example using the rust_xlsxwriter
+  library.
+
+* doc_chart_title_set_hidden.rs - A simple chart example using the
+  rust_xlsxwriter library.
+
+* doc_chart_title_set_name.rs - A chart example demonstrating setting the
+  chart title.
 
 * doc_enum_xlsxcolor.rs - Demonstrates using different XlsxColor enum
   values to set the color of some text in a worksheet.
@@ -310,6 +376,9 @@ documentation and generally show how an individual function works.
   that may be difficult to figure out programmatically you can set a custom
   filter. Excel uses both of these methods depending on the data being
   filtered.
+
+* doc_worksheet_insert_chart_with_offset.rs - Example of adding a chart to
+  a worksheet with a pixel offset within the cell.
 
 * doc_worksheet_insert_image_with_offset.rs - This example shows how to add
   an image to a worksheet at an offset within the cell.

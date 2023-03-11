@@ -816,7 +816,7 @@ impl Image {
     }
 }
 
-// TODO
+// Trait for objects that have a component stored in the drawing.xml file.
 impl DrawingObject for Image {
     fn x_offset(&self) -> u32 {
         self.x_offset

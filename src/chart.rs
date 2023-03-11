@@ -4,6 +4,8 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+#![warn(missing_docs)]
+
 use regex::Regex;
 
 use crate::{
@@ -13,17 +15,94 @@ use crate::{
     ColNum, ObjectMovement, RowNum,
 };
 
-// TODO remove all the dead_code attributes.
-
 #[derive(Clone)]
-#[allow(dead_code)] // TODO
+/// The Chart struct is used to create an object to represent an chart that can
+/// be inserted into a worksheet.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_intro.png">
+///
+/// Code the generate the above file:
+///
+/// ```
+/// # // This code is available in examples/doc_chart_intro.rs
+/// #
+/// use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Add some test data for the charts.
+///     worksheet.write(0, 0, 10)?;
+///     worksheet.write(1, 0, 60)?;
+///     worksheet.write(2, 0, 30)?;
+///     worksheet.write(3, 0, 10)?;
+///     worksheet.write(4, 0, 50)?;
+///
+///     // Create a simple Column chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series using Excel formula syntax to describe the range.
+///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+///
+///    // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+///     // Save the file.
+///     workbook.save("chart.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// # Chart Value and Category Axes
+///
+/// When working with charts it is important to understand how Excel
+/// differentiates between a chart axis that is used for series categories and a
+/// chart axis that is used for series values.
+///
+/// In the majority of Excel charts the X axis is the **category** axis and each
+/// of the values is evenly spaced and sequential. The Y axis is the **value**
+/// axis and points are displayed according to their value:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_axes01.png">
+///
+/// Excel treats these two types of axis differently and exposes different
+/// properties for each. For example, here are the properties for a category
+/// axis:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_axes02.png">
+///
+/// Here are properties for a value axis:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_axes03.png">
+///
+/// As such, some of the `rust_xlsxwriter` axis properties can be set for a
+/// value axis, some can be set for a category axis and some properties can be
+/// set for both. For example `reverse` can be set for either category or value
+/// axes while the `min` and `max` properties can only be set for value axes
+/// (and date axes). The documentation calls out the type of axis to which
+/// properties apply.
+///
+/// For a Bar chart the Category and Value axes are reversed:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_axes04.png">
+///
+/// A Scatter chart (but not a Line chart) has 2 value axes:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_axes05.png">
+///
+/// Date category axes are a special type of category axis that give them some
+/// of the properties of values axes such as `min` and `max` when used with date
+/// or time values. These aren't currently supported but will be in a future
+/// release.
+///
 pub struct Chart {
     pub(crate) id: u32,
     pub(crate) writer: XMLWriter,
     pub(crate) x_offset: u32,
     pub(crate) y_offset: u32,
     pub(crate) alt_text: String,
-    pub(crate) vml_name: String,
     pub(crate) object_movement: ObjectMovement,
     pub(crate) decorative: bool,
     pub(crate) drawing_type: DrawingType,
@@ -47,14 +126,55 @@ pub struct Chart {
     style: u8,
 }
 
-/// TODO
-#[allow(dead_code)] // TODO
 impl Chart {
     // -----------------------------------------------------------------------
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    // Create a new Chart struct.
+    /// Create a new Chart struct.
+    ///
+    /// Create a new [`Chart`] object that can be configured and inserted into a
+    /// worksheet using the
+    /// [worksheet.insert_chart()][crate::Worksheet::insert_chart].
+    ///
+    /// # Examples
+    ///
+    /// A simple chart example using the rust_xlsxwriter library.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_simple.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
+    ///
     #[allow(clippy::new_without_default)]
     pub fn new(chart_type: ChartType) -> Chart {
         let writer = XMLWriter::new();
@@ -69,7 +189,6 @@ impl Chart {
             x_offset: 0,
             y_offset: 0,
             alt_text: "".to_string(),
-            vml_name: "image".to_string(),
             object_movement: ObjectMovement::MoveAndSizeWithCells,
             decorative: false,
             drawing_type: DrawingType::Chart,
@@ -123,7 +242,56 @@ impl Chart {
         }
     }
 
-    // TODO.
+    /// Add a new chart series to a chart.
+    ///
+    /// Create and add a new chart series to a chart. The chart series
+    /// represents the Category and Value ranges as well as formatting and
+    /// display options. A chart in Excel must contain one of more data series.
+    /// A series is represented by a [`ChartSeries`] struct.
+    ///
+    /// A chart series is usually created via the `chart.add_series()`] method.
+    /// However, if required you can create a standalone `ChartSeries` object
+    /// and add it to a chart via the
+    /// [`chart.push_series()`](Chart::push_series) method, see below.
+    ///
+    /// # Examples
+    ///
+    /// An example of creating a chart series via `chart.add_series()`.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_add_series.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
+    ///
     pub fn add_series(&mut self) -> &mut ChartSeries {
         let series = ChartSeries::new();
         self.series.push(series);
@@ -131,13 +299,253 @@ impl Chart {
         self.series.last_mut().unwrap()
     }
 
-    // TODO.
+    /// Add a new chart series to a chart.
+    ///
+    /// Create and add a new chart series to a chart. The chart series
+    /// represents the Category and Value ranges as well as formatting and
+    /// display options. A chart in Excel must contain one of more data series.
+    /// A series is represented by a [`ChartSeries`] struct.
+    ///
+    /// A chart series is usually created via the
+    /// [`chart.add_series()`](Chart::add_series) method, see above. However, if
+    /// required you can create a standalone `ChartSeries` object and add it to
+    /// a chart via the `chart.push_series()` method.
+    ///
+    /// # Examples
+    ///
+    /// An example of creating a chart series as a standalone object and then
+    /// adding it to a chart via the `chart.push_series()` method.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_push_series.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, ChartSeries, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Create a chart series and set the range for the values.
+    ///     let mut series = ChartSeries::new();
+    ///     series.set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add the data series to the chart.
+    ///     chart.push_series(&series);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file for both examples:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
+    ///
     pub fn push_series(&mut self, series: &ChartSeries) -> &mut Chart {
         self.series.push(series.clone());
         self
     }
 
-    // TODO.
+    /// Get the chart title object in order to set its properties.
+    ///
+    /// Get a reference to the charts X-Axis [`ChartTitle`] object in order to
+    /// set its properties.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting properties of the chart title.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_title_set_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Set the chart title.
+    ///     chart.title().set_name("This is the chart title");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_title_set_name.png">
+    ///
+    pub fn title(&mut self) -> &mut ChartTitle {
+        &mut self.title
+    }
+
+    /// Get the chart X-Axis object in order to set its properties.
+    ///
+    /// Get a reference to the charts X-Axis [`ChartAxis`] object in order to
+    /// set its properties.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting properties of the axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Set the chart axis titles.
+    ///     chart.x_axis().set_name("Test number");
+    ///     chart.y_axis().set_name("Sample length (mm)");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name.png">
+    pub fn x_axis(&mut self) -> &mut ChartAxis {
+        &mut self.x_axis
+    }
+
+    /// Get the chart Y-Axis object in order to set its properties.
+    ///
+    /// Get a reference to the charts Y-Axis [`ChartAxis`] object in order to
+    /// set its properties.
+    ///
+    /// See the [`chart.x_axis()`][Chart::x_axis] method above.
+    ///
+    pub fn y_axis(&mut self) -> &mut ChartAxis {
+        &mut self.y_axis
+    }
+
+    /// Set the chart style type.
+    ///
+    /// The `set_style()` method is used to set the style of the chart to one of
+    /// 48 built-in styles.
+    ///
+    /// These styles were available in the original Excel 2007 interface. In
+    /// later versions they have been replaced with "layouts" on the "Chart
+    /// Design" tab. These layouts are not defined in the file format. They are
+    /// a collection of modifications to the base chart type. They can be
+    /// replicated using the Chart APIs (when complete) but they cannot be defined by
+    /// the `set_style()` method.
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - A integer value in the range 1-48.
+    ///
+    /// # Examples
+    ///
+    /// # An example showing all 48 default chart styles available in Excel 2007
+    /// using rust_xlsxwriter. Note, these styles are not the same as the styles
+    /// available in Excel 2013.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_chart_styles.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     let chart_types = vec![
+    ///         ("Column", ChartType::Column),
+    ///         ("Area", ChartType::Area),
+    ///         ("Line", ChartType::Line),
+    ///         ("Pie", ChartType::Pie),
+    ///     ];
+    ///
+    ///     // Create a worksheet with 48 charts in each of the available styles, for
+    ///     // each of the chart types above.
+    ///     for (name, chart_type) in chart_types {
+    ///         let worksheet = workbook.add_worksheet().set_name(name)?.set_zoom(30);
+    ///         let mut chart = Chart::new(chart_type);
+    ///         chart.add_series().set_values("Data!$A$1:$A$6");
+    ///         let mut style = 1;
+    ///
+    ///         for row_num in (0..90).step_by(15) {
+    ///             for col_num in (0..64).step_by(8) {
+    ///                 chart.set_style(style);
+    ///                 chart.title().set_name(&format!("Style {style}"));
+    ///                 worksheet.insert_chart(row_num as u32, col_num as u16, &chart)?;
+    ///                 style += 1;
+    ///             }
+    ///         }
+    ///     }
+    ///
+    /// #     // Create a worksheet with data for the charts.
+    /// #     let data_worksheet = workbook.add_worksheet().set_name("Data")?;
+    /// #     data_worksheet.write(0, 0, 10)?;
+    /// #     data_worksheet.write(1, 0, 40)?;
+    /// #     data_worksheet.write(2, 0, 50)?;
+    /// #     data_worksheet.write(3, 0, 20)?;
+    /// #     data_worksheet.write(4, 0, 10)?;
+    /// #     data_worksheet.write(5, 0, 50)?;
+    /// #     data_worksheet.set_hidden(true);
+    /// #
+    /// #     workbook.save("chart_styles.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_styles.png">
+    ///
     pub fn set_style(&mut self, style: u8) -> &mut Chart {
         if (1..=48).contains(&style) {
             self.style = style;
@@ -146,21 +554,6 @@ impl Chart {
         }
 
         self
-    }
-
-    // TODO.
-    pub fn title(&mut self) -> &mut ChartTitle {
-        &mut self.title
-    }
-
-    // TODO.
-    pub fn x_axis(&mut self) -> &mut ChartAxis {
-        &mut self.x_axis
-    }
-
-    // TODO.
-    pub fn y_axis(&mut self) -> &mut ChartAxis {
-        &mut self.y_axis
     }
 
     /// Set default values for the chart axis ids.
@@ -1583,7 +1976,28 @@ impl Chart {
 // Traits.
 // -----------------------------------------------------------------------
 
+/// Trait to map types into an Excel chart range.
+///
+/// The 2 most common types of range used in rust_xlsxwriter charts are:
+///
+/// - A string with an Excel like range formula such as `"Sheet1!$A$1:$A$3"`.
+/// - A 5 value tuple that can be used to create the range programmatically
+///   using a sheet name and zero indexed row and column values like:
+///   `("Sheet1", 0, 0, 2, 0)` (this gives the same range as the previous string
+///   value).
+///
+/// For single cell ranges used in chart items such as chart or axis titles you
+/// can also use:
+///
+/// - A simple string title.
+/// - A string with an Excel like cell formula such as `"Sheet1!$A$1"`.
+/// - A 3 value tuple that can be used to create the cell range programmatically
+///   using a sheet name and zero indexed row and column values like:
+///   `("Sheet1", 0, 0)` (this gives the same range as the previous string
+///   value).
+///
 pub trait IntoChartRange {
+    /// Trait function to turn a type into [`ChartRange`].
     fn new_chart_range(&self) -> ChartRange;
 }
 
@@ -1605,7 +2019,13 @@ impl IntoChartRange for &str {
     }
 }
 
-// TODO
+impl IntoChartRange for &String {
+    fn new_chart_range(&self) -> ChartRange {
+        ChartRange::new_from_string(self)
+    }
+}
+
+// Trait for objects that have a component stored in the drawing.xml file.
 impl DrawingObject for Chart {
     fn x_offset(&self) -> u32 {
         self.x_offset
@@ -1644,8 +2064,51 @@ impl DrawingObject for Chart {
 // Secondary structs.
 // -----------------------------------------------------------------------
 
-/// TODO
-#[allow(dead_code)] // todo
+/// A struct to represent a Chart series.
+///
+/// A chart in Excel can contain one of more data series. The `ChartSeries`
+/// struct represents the Category and Value ranges, and the formatting and
+/// options for the chart series.
+///
+///
+/// # Examples
+///
+/// A simple chart example using the rust_xlsxwriter library.
+///
+/// ```
+/// // This code is available in examples/doc_chart_simple.rs
+///
+/// use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Add some data for the chart.
+///     worksheet.write(0, 0, 50)?;
+///     worksheet.write(1, 0, 30)?;
+///     worksheet.write(2, 0, 40)?;
+///
+///     // Create a simple Column chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series using Excel formula syntax to describe the range.
+///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+///     // Save the file.
+///     workbook.save("chart.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
+///
 #[derive(Clone)]
 pub struct ChartSeries {
     pub(crate) value_range: ChartRange,
@@ -1657,6 +2120,95 @@ pub struct ChartSeries {
 
 #[allow(clippy::new_without_default)]
 impl ChartSeries {
+    /// Create a new chart series object.
+    ///
+    /// Create a new chart series object. A chart in Excel can contain one of
+    /// more data series. The `ChartSeries` struct represents the Category and
+    /// Value ranges, and the formatting and options for the chart series.
+    ///
+    /// A chart series is usually created via the
+    /// [`chart.add_series()`](Chart::add_series) method, see the first example
+    /// below. However, if required you can create a standalone `ChartSeries`
+    /// object and add it to a chart via the
+    /// [`chart.push_series()`](Chart::push_series) method, see the second
+    /// example below.
+    ///
+    /// # Examples
+    ///
+    /// An example of creating a chart series via
+    /// [`chart.add_series()`](Chart::add_series).
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_add_series.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// An example of creating a chart series as a standalone object and then adding
+    /// it to a chart via the [`chart.push_series()`](Chart::add_series) method.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_push_series.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, ChartSeries, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Create a chart series and set the range for the values.
+    ///     let mut series = ChartSeries::new();
+    ///     series.set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add the data series to the chart.
+    ///     chart.push_series(&series);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file for both examples:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
+    ///
     pub fn new() -> ChartSeries {
         ChartSeries {
             value_range: ChartRange::new_from_range("", 0, 0, 0, 0),
@@ -1666,6 +2218,76 @@ impl ChartSeries {
             title: ChartTitle::new(),
         }
     }
+
+    /// Add a values range to a chart series.
+    ///
+    /// All chart series in Excel must have a data range that defines the range
+    /// of values for the series. In Excel this is typically a range like
+    /// `"Sheet1!$B$1:$B$5"`.
+    ///
+    /// This is the most important property of a series and is the only
+    /// mandatory option for every chart object. This series values links the
+    /// chart with the worksheet data that it displays. The data range can be
+    /// set using a formula as shown in the first part of the example below or
+    /// using a list of values as shown in the second part.
+    ///
+    /// # Arguments
+    ///
+    /// * `range` - The range property which can be one of two generic types:
+    ///    - A string with an Excel like range formula such as
+    ///      `"Sheet1!$A$1:$A$3"`.
+    ///    - A tuple that can be used to create the range programmatically using
+    ///      a sheet name and zero indexed row and column values like:
+    ///      `("Sheet1", 0, 0, 2, 0)` (this gives the same range as the previous
+    ///      string value).
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the chart series values.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_set_values.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(0, 1, 30)?;
+    /// #     worksheet.write(1, 1, 40)?;
+    /// #     worksheet.write(2, 1, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add another data series to the chart using the alternative tuple syntax
+    ///     // to describe the range. This method is better when you need to create the
+    ///     // ranges programmatically to match the data range in the worksheet.
+    ///     chart.add_series().set_values(("Sheet1", 0, 1, 2, 1));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 3, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_values.png">
+    ///
     pub fn set_values<T>(&mut self, range: T) -> &mut ChartSeries
     where
         T: IntoChartRange,
@@ -1674,6 +2296,84 @@ impl ChartSeries {
         self
     }
 
+    /// Add a category range chart series.
+    ///
+    /// This method sets the chart category labels. The category is more or less
+    /// the same as the X axis. In most chart types the categories property is
+    /// optional and the chart will just assume a sequential series from `1..n`.
+    /// The exception to this is the Scatter chart types for which a category
+    /// range is mandatory in Excel.
+    ///
+    /// The data range can be set using a formula as shown in the first part of
+    /// the example below or using a list of values as shown in the second part.
+    ///
+    /// # Arguments
+    ///
+    /// * `range` - The range property which can be one of two generic types:
+    ///    - A string with an Excel like range formula such as
+    ///      `"Sheet1!$A$1:$A$3"`.
+    ///    - A tuple that can be used to create the range programmatically using
+    ///      a sheet name and zero indexed row and column values like:
+    ///      `("Sheet1", 0, 0, 2, 0)` (this gives the same range as the previous
+    ///      string value).
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the chart series categories and
+    /// values.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_set_categories.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, "Jan")?;
+    /// #     worksheet.write(1, 0, "Feb")?;
+    /// #     worksheet.write(2, 0, "Mar")?;
+    /// #     worksheet.write(0, 1, 50)?;
+    /// #     worksheet.write(1, 1, 30)?;
+    /// #     worksheet.write(2, 1, 40)?;
+    /// #     worksheet.write(0, 2, 30)?;
+    /// #     worksheet.write(1, 2, 40)?;
+    /// #     worksheet.write(2, 2, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories("Sheet1!$A$1:$A$3")
+    ///         .set_values("Sheet1!$B$1:$B$3");
+    ///
+    ///     // Add another data series to the chart using the alternative tuple syntax
+    ///     // to describe the range. This method is better when you need to create the
+    ///     // ranges programmatically to match the data range in the worksheet.
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 1, 2, 1))
+    ///         .set_values(("Sheet1", 0, 2, 2, 2));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_categories.png">
+    ///
     pub fn set_categories<T>(&mut self, range: T) -> &mut ChartSeries
     where
         T: IntoChartRange,
@@ -1682,6 +2382,98 @@ impl ChartSeries {
         self
     }
 
+    /// Add a name for a chart series.
+    ///
+    /// Set the name for the series. The name is displayed in the formula bar.
+    /// For non-Pie/Doughnut charts it is also displayed in the legend. The name
+    /// property is optional and if it isn’t supplied it will default to `Series
+    /// 1..n`. The name can be a simple string, a formula such as `Sheet1!$A$1`
+    /// or a tuple with a sheet name, row and column such as `('Sheet1', 0, 0)`.
+    ///
+    /// # Arguments
+    ///
+    /// * `range` - The range property which can be one of the following generic
+    ///   types:
+    ///    - A simple string title.
+    ///    - A string with an Excel like range formula such as `"Sheet1!$A$1"`.
+    ///    - A tuple that can be used to create the range programmatically using
+    ///      a sheet name and zero indexed row and column values like:
+    ///      `("Sheet1", 0, 0)` (this gives the same range as the previous
+    ///      string value).
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the chart series name.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_set_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, "Month")?;
+    /// #     worksheet.write(1, 0, "Jan")?;
+    /// #     worksheet.write(2, 0, "Feb")?;
+    /// #     worksheet.write(3, 0, "Mar")?;
+    /// #     worksheet.write(0, 1, "Total")?;
+    /// #     worksheet.write(1, 1, 30)?;
+    /// #     worksheet.write(2, 1, 20)?;
+    /// #     worksheet.write(3, 1, 40)?;
+    /// #     worksheet.write(0, 2, "Q1")?;
+    /// #     worksheet.write(1, 2, 10)?;
+    /// #     worksheet.write(2, 2, 10)?;
+    /// #     worksheet.write(3, 2, 10)?;
+    /// #     worksheet.write(0, 3, "Q2")?;
+    /// #     worksheet.write(1, 3, 20)?;
+    /// #     worksheet.write(2, 3, 10)?;
+    /// #     worksheet.write(3, 3, 30)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with a simple string name.
+    ///     chart
+    ///         .add_series()
+    ///         .set_name("Year to date")
+    ///         .set_categories("Sheet1!$A$2:$A$4")
+    ///         .set_values("Sheet1!$B$2:$B$4");
+    ///
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range/name.
+    ///     chart
+    ///         .add_series()
+    ///         .set_name("Sheet1!$C$1")
+    ///         .set_categories("Sheet1!$A$2:$A$4")
+    ///         .set_values("Sheet1!$C$2:$C$4");
+    ///
+    ///     // Add another data series to the chart using the alternative tuple syntax
+    ///     // to describe the range/name. This method is better when you need to create
+    ///     // the ranges programmatically to match the data range in the worksheet.
+    ///     chart
+    ///         .add_series()
+    ///         .set_name(("Sheet1", 0, 3))
+    ///         .set_categories(("Sheet1", 1, 0, 3, 0))
+    ///         .set_values(("Sheet1", 1, 3, 3, 3));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 5, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_name.png">
+    ///
     pub fn set_name<T>(&mut self, name: T) -> &mut ChartSeries
     where
         T: IntoChartRange,
@@ -1690,6 +2482,11 @@ impl ChartSeries {
         self
     }
 
+    /// Add data to the chart values cache.
+    ///
+    /// This method is only used to populate the chart data caches in test code.
+    /// The library reads and populates the cache automatically in most cases.
+    #[doc(hidden)]
     pub fn set_value_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
         self.value_cache_data = ChartSeriesCacheData {
             is_numeric,
@@ -1698,6 +2495,11 @@ impl ChartSeries {
         self
     }
 
+    /// Add data to the chart categories cache.
+    ///
+    /// This method is only used to populate the chart data caches in test code.
+    /// The library reads and populates the cache automatically in most cases.
+    #[doc(hidden)]
     pub fn set_category_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
         self.category_cache_data = ChartSeriesCacheData {
             is_numeric,
@@ -1707,9 +2509,12 @@ impl ChartSeries {
     }
 }
 
-/// TODO
-#[allow(dead_code)]
 #[derive(Clone)]
+/// A struct to represent a Chart range.
+///
+/// A struct to represent a chart range like `"Sheet1!$A$1:$A$4"`. The struct is
+/// public to allow for the [`IntoChartRange`] trait but it isn't required to be
+/// manipulated by the end user.
 pub struct ChartRange {
     sheet_name: String,
     first_row: RowNum,
@@ -1720,7 +2525,7 @@ pub struct ChartRange {
 }
 
 impl ChartRange {
-    pub fn new_from_range(
+    pub(crate) fn new_from_range(
         sheet_name: &str,
         first_row: RowNum,
         first_col: ColNum,
@@ -1805,7 +2610,6 @@ impl ChartRange {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Clone)]
 pub(crate) struct ChartSeriesCacheData {
     pub(crate) is_numeric: bool,
@@ -1825,41 +2629,133 @@ impl ChartSeriesCacheData {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Clone, Copy, PartialEq, Eq)]
+/// The ChartType enum define the type of a Chart object.
+///
+/// The main original chart types are supported, see below.
+///
+/// Stock chart variants will be supported at a later date. Support for newer
+/// Excel chart types such as Treemap, Sunburst, Box and Whisker, Statistical
+/// Histogram, Waterfall, Funnel and Maps is not currently planned.
+///
 pub enum ChartType {
+    /// An Area chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_area1.png">
     Area,
+
+    /// A stacked Area chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_area2.png">
     AreaStacked,
+
+    /// A percent stacked Area chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_area3.png">
     AreaPercentStacked,
 
+    /// A Bar (horizontal histogram) chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_bar1.png">
     Bar,
+
+    /// A stacked Bar chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_bar2.png">
     BarStacked,
+
+    /// A percent stacked Bar chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_bar3.png">
     BarPercentStacked,
 
+    /// A Column (vertical histogram) chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_column1.png">
     Column,
+
+    /// A stacked Column chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_column2.png">
     ColumnStacked,
+
+    /// A percent stacked Column chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_column3.png">
     ColumnPercentStacked,
 
+    /// A Doughnut chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_doughnut1.png">
     Doughnut,
 
+    /// An Line chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line1.png">
     Line,
+
+    /// A stacked Line chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line2.png">
     LineStacked,
+
+    /// A percent stacked Line chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line3.png">
     LinePercentStacked,
 
+    /// A Pie chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pie1.png">
     Pie,
 
+    /// A Radar chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_radar1.png">
     Radar,
+
+    /// A Radar with markers chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_radar2.png">
     RadarWithMarkers,
+
+    /// A filled Radar chart type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_radar3.png">
     RadarFilled,
 
+    /// A Scatter chart type. Scatter charts, and their variant, are the only
+    /// type that have values (as opposed to categories) for their X-Axis. The
+    /// default scatter chart in Excel has markers for each point but no
+    /// connecting lines.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter1.png">
     Scatter,
+
+    /// A Scatter chart type where the points are connected by straight lines.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter3.png">
     ScatterStraight,
+
+    /// A Scatter chart type where the points have markers and are connected by
+    /// straight lines.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter2.png">
     ScatterStraightWithMarkers,
+
+    /// A Scatter chart type where the points are connected by smoothed lines.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter5.png">
     ScatterSmooth,
+
+    /// A Scatter chart type where the points have markers and are connected by
+    /// smoothed lines.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter4.png">
     ScatterSmoothWithMarkers,
 }
 
-#[allow(dead_code)]
+/// A struct to represent a Chart title.
 #[derive(Clone)]
 pub struct ChartTitle {
     pub(crate) range: ChartRange,
@@ -1880,6 +2776,66 @@ impl ChartTitle {
         }
     }
 
+    /// Add a title for a chart.
+    ///
+    /// Set the name (title) for the chart. The name is displayed above the
+    /// chart.
+    ///
+    /// The name can be a simple string, a formula such as `Sheet1!$A$1` or a
+    /// tuple with a sheet name, row and column such as `('Sheet1', 0, 0)`.
+    ///
+    /// # Arguments
+    ///
+    /// * `range` - The range property which can be one of the following generic
+    ///   types:
+    ///    - A simple string title.
+    ///    - A string with an Excel like range formula such as `"Sheet1!$A$1"`.
+    ///    - A tuple that can be used to create the range programmatically using
+    ///      a sheet name and zero indexed row and column values like:
+    ///      `("Sheet1", 0, 0)` (this gives the same range as the previous
+    ///      string value).
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the chart title.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_title_set_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Set the chart title.
+    ///     chart.title().set_name("This is the chart title");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_title_set_name.png">
+    ///
     pub fn set_name<T>(&mut self, name: T) -> &mut ChartTitle
     where
         T: IntoChartRange,
@@ -1895,13 +2851,66 @@ impl ChartTitle {
         self
     }
 
+    /// Hide the chart title.
+    ///
+    /// By default Excel adds an automatic chart title to charts with a single
+    /// series and a user defined series name. The none `set_hidden()` method
+    /// turns this default title off.
+    ///
+    /// # Examples
+    ///
+    /// A simple chart example using the rust_xlsxwriter library.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_title_set_hidden.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$3")
+    ///         .set_name("Yearly results");
+    ///
+    ///     // Hide the default chart title.
+    ///     chart.title().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file is shown below. Note how there is a default title of
+    /// `"Yearly results"` in the `"=SERIES("Yearly
+    /// results",,Sheet1!$A$1:$A$3,1)"` formula in Excel but that it isn't
+    /// displayed on the chart.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_title_set_hidden.png">
+    ///
     pub fn set_hidden(&mut self) -> &mut ChartTitle {
         self.hidden = true;
         self
     }
 }
-
-#[allow(dead_code)]
+/// A struct to represent a Chart axis.
 #[derive(Clone)]
 pub struct ChartAxis {
     axis_type: ChartAxisType,
@@ -1918,6 +2927,66 @@ impl ChartAxis {
         }
     }
 
+    /// Add a title for a chart axis.
+    ///
+    /// Set the name (title) for the chart axis.
+    ///
+    /// The name can be a simple string, a formula such as `Sheet1!$A$1` or a
+    /// tuple with a sheet name, row and column such as `('Sheet1', 0, 0)`.
+    ///
+    /// # Arguments
+    ///
+    /// * `range` - The range property which can be one of the following generic
+    ///   types:
+    ///    - A simple string title.
+    ///    - A string with an Excel like range formula such as `"Sheet1!$A$1"`.
+    ///    - A tuple that can be used to create the range programmatically using
+    ///      a sheet name and zero indexed row and column values like:
+    ///      `("Sheet1", 0, 0)` (this gives the same range as the previous
+    ///      string value).
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the title of chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Set the chart axis titles.
+    ///     chart.x_axis().set_name("Test number");
+    ///     chart.y_axis().set_name("Sample length (mm)");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name.png">
+    ///
     pub fn set_name<T>(&mut self, name: T) -> &mut ChartAxis
     where
         T: IntoChartRange,
@@ -1927,14 +2996,12 @@ impl ChartAxis {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Clone)]
 pub(crate) enum ChartAxisType {
     Category,
     Value,
 }
 
-#[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub(crate) enum ChartAxisPosition {
     Bottom,
@@ -1950,7 +3017,6 @@ impl ToString for ChartAxisPosition {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Clone, Copy)]
 pub(crate) enum ChartGrouping {
     Stacked,

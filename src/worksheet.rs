@@ -2809,7 +2809,59 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
+    /// Add a chart to a worksheet.
+    ///
+    /// Add a [`Chart`] to a worksheet at a cell location.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `image` - The [`Image`] to insert into the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// Insert a chart object into a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_simple.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
+    ///
     pub fn insert_chart(
         &mut self,
         row: RowNum,
@@ -2821,7 +2873,49 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
+    /// Add a chart to a worksheet at an offset.
+    ///
+    /// Add a [`Chart`] to a worksheet  at a pixel offset within a cell
+    /// location.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a chart to a worksheet with a pixel offset within the
+    /// cell.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_chart_with_offset.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart_with_offset(0, 2, &chart, 10, 5)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_insert_chart_with_offset.png">
     ///
     pub fn insert_chart_with_offset(
         &mut self,
