@@ -34,8 +34,8 @@ pub type RowNum = u32;
 /// columns in a worksheet is 16,384.
 pub type ColNum = u16;
 
-const COL_MAX: ColNum = 16_384;
-const ROW_MAX: RowNum = 1_048_576;
+pub(crate) const COL_MAX: ColNum = 16_384;
+pub(crate) const ROW_MAX: RowNum = 1_048_576;
 const MAX_URL_LEN: usize = 2_080;
 const MAX_STRING_LEN: usize = 32_767;
 const MAX_PARAMETER_LEN: usize = 255;
@@ -2931,6 +2931,10 @@ impl Worksheet {
         }
 
         let mut chart = chart.clone();
+
+        // Check that the chart has been set up correctly.
+        chart.validate()?;
+
         chart.x_offset = x_offset;
         chart.y_offset = y_offset;
 

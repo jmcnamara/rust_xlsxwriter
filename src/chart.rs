@@ -12,7 +12,7 @@ use crate::{
     drawing::{DrawingObject, DrawingType},
     utility,
     xmlwriter::XMLWriter,
-    ColNum, ObjectMovement, RowNum,
+    ColNum, ObjectMovement, RowNum, XlsxError, COL_MAX, ROW_MAX,
 };
 
 #[derive(Clone)]
@@ -20,6 +20,15 @@ use crate::{
 /// be inserted into a worksheet.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/chart_intro.png">
+///
+/// The `Chart` struct exposes other chart related structs that allow you to
+/// configure the chart such as [`ChartSeries`], [`ChartAxis`] and
+/// [`ChartTitle`].
+///
+/// Charts are added to the worksheets using the the
+/// [`worksheet.insert_chart()`](crate::Worksheet::insert_chart) or
+/// [`worksheet.insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
+/// methods.
 ///
 /// Code the generate the above file:
 ///
@@ -137,6 +146,11 @@ impl Chart {
     /// worksheet using the
     /// [worksheet.insert_chart()][crate::Worksheet::insert_chart].
     ///
+    /// Once you have create a chart you will need to add at least one data
+    /// series via [chart.add_series()](Chart::add_series) and set a value range
+    /// for that series using [series.set_values()][ChartSeries::set_values].
+    /// See the example below.
+    ///
     /// # Examples
     ///
     /// A simple chart example using the rust_xlsxwriter library.
@@ -242,14 +256,14 @@ impl Chart {
         }
     }
 
-    /// Add a new chart series to a chart.
+    /// Create and add a new chart series to a chart.
     ///
     /// Create and add a new chart series to a chart. The chart series
-    /// represents the Category and Value ranges as well as formatting and
-    /// display options. A chart in Excel must contain one of more data series.
+    /// represents the category and value ranges as well as formatting and
+    /// display options. A chart in Excel must contain at least one data series.
     /// A series is represented by a [`ChartSeries`] struct.
     ///
-    /// A chart series is usually created via the `chart.add_series()`] method.
+    /// A chart series is usually created via this `add_series()` method.
     /// However, if required you can create a standalone `ChartSeries` object
     /// and add it to a chart via the
     /// [`chart.push_series()`](Chart::push_series) method, see below.
@@ -299,17 +313,17 @@ impl Chart {
         self.series.last_mut().unwrap()
     }
 
-    /// Add a new chart series to a chart.
+    /// Add a chart series to a chart.
     ///
-    /// Create and add a new chart series to a chart. The chart series
-    /// represents the Category and Value ranges as well as formatting and
-    /// display options. A chart in Excel must contain one of more data series.
-    /// A series is represented by a [`ChartSeries`] struct.
+    /// Add a standalone chart series to a chart. The chart series represents
+    /// the category and value ranges as well as formatting and display options.
+    /// A chart in Excel must contain at least one data series. A series is
+    /// represented by a [`ChartSeries`] struct.
     ///
     /// A chart series is usually created via the
     /// [`chart.add_series()`](Chart::add_series) method, see above. However, if
     /// required you can create a standalone `ChartSeries` object and add it to
-    /// a chart via the `chart.push_series()` method.
+    /// a chart via this `chart.push_series()` method.
     ///
     /// # Examples
     ///
@@ -489,9 +503,8 @@ impl Chart {
     ///
     /// # Examples
     ///
-    /// # An example showing all 48 default chart styles available in Excel 2007
-    /// using rust_xlsxwriter. Note, these styles are not the same as the styles
-    /// available in Excel 2013.
+    /// An example showing all 48 default chart styles available in Excel 2007
+    /// using rust_xlsxwriter.
     ///
     /// ```
     /// # // This code is available in examples/app_chart_styles.rs
@@ -554,6 +567,50 @@ impl Chart {
         }
 
         self
+    }
+
+    /// Check a chart instance for configuration errors.
+    ///
+    /// Charts are validated using this methods when they are added to a
+    /// worksheet using the
+    /// [`worksheet.insert_chart()`](crate::Worksheet::insert_chart) or
+    /// [`worksheet.insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
+    /// methods. However, you can also call `chart.validate()` directly.
+    ///
+    pub fn validate(&mut self) -> Result<&mut Chart, XlsxError> {
+        // Check for chart without series.
+        if self.series.is_empty() {
+            return Err(XlsxError::ChartError(
+                "Chart must contain at least one series".to_string(),
+            ));
+        }
+
+        for series in self.series.iter() {
+            // Check for a series without a values range.
+            if !series.value_range.has_data() {
+                return Err(XlsxError::ChartError(
+                    "Chart series must contain a values range".to_string(),
+                ));
+            }
+
+            // Check for scatter charts without category ranges. It is optional
+            // for all other types.
+            if self.chart_group_type == ChartType::Scatter && !series.category_range.has_data() {
+                return Err(XlsxError::ChartError(
+                    "Scatter style charts must contain a categories range".to_string(),
+                ));
+            }
+
+            // Validate the series values range.
+            series.value_range.validate()?;
+
+            // Validate the series category range.
+            if series.category_range.has_data() {
+                series.category_range.validate()?;
+            }
+        }
+
+        Ok(self)
     }
 
     /// Set default values for the chart axis ids.
@@ -2122,9 +2179,9 @@ pub struct ChartSeries {
 impl ChartSeries {
     /// Create a new chart series object.
     ///
-    /// Create a new chart series object. A chart in Excel can contain one of
-    /// more data series. The `ChartSeries` struct represents the Category and
-    /// Value ranges, and the formatting and options for the chart series.
+    /// Create a new chart series object. A chart in Excel must contain at least
+    /// one data series. The `ChartSeries` struct represents the category and
+    /// value ranges, and the formatting and options for the chart series.
     ///
     /// A chart series is usually created via the
     /// [`chart.add_series()`](Chart::add_series) method, see the first example
@@ -2168,8 +2225,9 @@ impl ChartSeries {
     /// # }
     /// ```
     ///
-    /// An example of creating a chart series as a standalone object and then adding
-    /// it to a chart via the [`chart.push_series()`](Chart::add_series) method.
+    /// An example of creating a chart series as a standalone object and then
+    /// adding it to a chart via the [`chart.push_series()`](Chart::add_series)
+    /// method.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_push_series.rs
@@ -2525,6 +2583,7 @@ pub struct ChartRange {
 }
 
 impl ChartRange {
+    // Create a new range from a sheet 5 tuple.
     pub(crate) fn new_from_range(
         sheet_name: &str,
         first_row: RowNum,
@@ -2542,6 +2601,7 @@ impl ChartRange {
         }
     }
 
+    // Create a new range from an Excel range formula.
     pub(crate) fn new_from_string(range_string: &str) -> ChartRange {
         lazy_static! {
             static ref CHART_CELL: Regex = Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+)").unwrap();
@@ -2585,6 +2645,7 @@ impl ChartRange {
         }
     }
 
+    // Convert the row/col range into a chart range string.
     pub(crate) fn formula(&self) -> String {
         utility::chart_range_abs(
             &self.sheet_name,
@@ -2595,6 +2656,7 @@ impl ChartRange {
         )
     }
 
+    // Unique key to identify/find the range of values to build the cache.
     pub(crate) fn key(&self) -> (String, RowNum, ColNum, RowNum, ColNum) {
         (
             self.sheet_name.clone(),
@@ -2605,8 +2667,40 @@ impl ChartRange {
         )
     }
 
+    // Check that the range has data.
     pub(crate) fn has_data(&self) -> bool {
         !self.sheet_name.is_empty()
+    }
+
+    // Check that the row/column values in the range are valid.
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        let range = self.formula();
+
+        if self.first_row > self.last_row {
+            return Err(XlsxError::ChartError(format!(
+                "Chart series range '{range}' has a first row greater than the last row"
+            )));
+        }
+
+        if self.first_col > self.last_col {
+            return Err(XlsxError::ChartError(format!(
+                "Chart series range '{range}' has a first column greater than the last column"
+            )));
+        }
+
+        if self.first_row >= ROW_MAX || self.last_row >= ROW_MAX {
+            return Err(XlsxError::ChartError(format!(
+                "Chart series range '{range}' has a first row greater than Excel limit of 1048576"
+            )));
+        }
+
+        if self.first_col >= COL_MAX || self.last_col >= COL_MAX {
+            return Err(XlsxError::ChartError(
+                format!("Chart series range '{range}' has a first column greater than Excel limit of XFD/16384"),
+            ));
+        }
+
+        Ok(())
     }
 }
 
@@ -2854,8 +2948,8 @@ impl ChartTitle {
     /// Hide the chart title.
     ///
     /// By default Excel adds an automatic chart title to charts with a single
-    /// series and a user defined series name. The none `set_hidden()` method
-    /// turns this default title off.
+    /// series and a user defined series name. The `set_hidden()` method turns
+    /// this default title off.
     ///
     /// # Examples
     ///
@@ -2897,10 +2991,9 @@ impl ChartTitle {
     /// # }
     /// ```
     ///
-    /// Output file is shown below. Note how there is a default title of
-    /// `"Yearly results"` in the `"=SERIES("Yearly
-    /// results",,Sheet1!$A$1:$A$3,1)"` formula in Excel but that it isn't
-    /// displayed on the chart.
+    ///  The output file is shown below. Note how there is a default title of
+    /// "Yearly results" in the `"=SERIES("Yearly results",,Sheet1!$A$1:$A$3,1)"`
+    /// formula in Excel but that it isn't displayed on the chart.
     ///
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/chart_title_set_hidden.png">
@@ -3042,10 +3135,75 @@ impl ToString for ChartGrouping {
 #[cfg(test)]
 mod tests {
 
-    use crate::chart::{Chart, ChartType};
+    use crate::chart::{Chart, ChartRange, ChartSeries, ChartType, XlsxError};
     use crate::test_functions::xml_to_vec;
-    use crate::{ChartRange, ChartSeries};
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_validation() {
+        // Check for chart without series.
+        let mut chart = Chart::new(ChartType::Scatter);
+        let result = chart.validate();
+        assert!(matches!(result, Err(XlsxError::ChartError(_))));
+
+        // Check for chart with empty series.
+        let mut chart = Chart::new(ChartType::Scatter);
+        let mut series = ChartSeries::new();
+        chart.push_series(&mut series);
+        let result = chart.validate();
+        assert!(matches!(result, Err(XlsxError::ChartError(_))));
+
+        // Check for Scatter chart with empty categories.
+        let mut chart = Chart::new(ChartType::Scatter);
+        chart.add_series().set_values("Sheet1!$B$1:$B$3");
+        let result = chart.validate();
+        assert!(matches!(result, Err(XlsxError::ChartError(_))));
+
+        // Check the value range for rows reversed.
+        let mut chart = Chart::new(ChartType::Scatter);
+        chart
+            .add_series()
+            .set_categories("Sheet1!$A$1:$A$3")
+            .set_values("Sheet1!$B$3:$B$1");
+        let result = chart.validate();
+        assert!(matches!(result, Err(XlsxError::ChartError(_))));
+
+        // Check the value range for rows reversed.
+        let mut chart = Chart::new(ChartType::Scatter);
+        chart
+            .add_series()
+            .set_categories("Sheet1!$A$1:$A$3")
+            .set_values("Sheet1!$C$1:$B$3");
+        let result = chart.validate();
+        assert!(matches!(result, Err(XlsxError::ChartError(_))));
+
+        // Check the value range for row out of range.
+        let mut chart = Chart::new(ChartType::Scatter);
+        chart
+            .add_series()
+            .set_categories("Sheet1!$A$1:$A$3")
+            .set_values("Sheet1!$B$1:$B$1048577");
+        let result = chart.validate();
+        assert!(matches!(result, Err(XlsxError::ChartError(_))));
+
+        // Check the value range for col out of range.
+        let mut chart = Chart::new(ChartType::Scatter);
+        chart
+            .add_series()
+            .set_categories("Sheet1!$A$1:$A$3")
+            .set_values("Sheet1!$B$1:$XFE$10");
+        let result = chart.validate();
+        assert!(matches!(result, Err(XlsxError::ChartError(_))));
+
+        // Check the category range for validation error.
+        let mut chart = Chart::new(ChartType::Scatter);
+        chart
+            .add_series()
+            .set_categories("Sheet1!$A$3:$A$1")
+            .set_values("Sheet1!$B$1:$B$3");
+        let result = chart.validate();
+        assert!(matches!(result, Err(XlsxError::ChartError(_))));
+    }
 
     #[test]
     fn test_assemble() {

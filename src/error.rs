@@ -64,6 +64,10 @@ pub enum XlsxError {
     /// Image has 0 width or height, or the dimensions couldn't be read.
     ImageDimensionError,
 
+    /// A general error that is raised when a chart parameter is incorrect or a
+    /// chart is configured incorrectly.
+    ChartError(String),
+
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -84,6 +88,7 @@ impl fmt::Display for XlsxError {
             XlsxError::ParameterError(error) => {
                 write!(f, "Parameter error: \"{error}\".")
             }
+
             XlsxError::RowColumnLimitError => write!(
                 f,
                 "Row or column exceeds Excel's allowed limits (1,048,576 x 16,384)."
@@ -153,6 +158,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::ImageDimensionError => {
                 write!(f, "Image with or height couldn't be read from file.")
+            }
+
+            XlsxError::ChartError(error) => {
+                write!(f, "Chart error: \"{error}\".")
             }
 
             XlsxError::IoError(error) => {
