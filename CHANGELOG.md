@@ -5,14 +5,36 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.0] - 2023-03-13
+
+### Added
+
+- Added support for Charts via the [`Chart`] class and the
+  [`worksheet.insert_chart()`] method. See also the [Chart Examples] in the user
+  guide.
+
+- Added a generic [`worksheet.write()`] method that writes string or number
+  types. This will be extended in an upcoming release to provide a single
+  `write()` method for all of the currently supported types.
+
+  It also allows the user to extend [`worksheet.write()`] to handle user defined
+  types via the [`IntoExcelData`] trait. See also the [Writing Generic data]
+  example in the user guide.
+
+[`Chart`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html
+[Chart Examples]: https://rustxlsxwriter.github.io/examples/simple_chart.html
+[`IntoExcelData`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoExcelData.html
+[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write
+[Writing Generic data]: https://rustxlsxwriter.github.io/examples/generic_write.html
+[`worksheet.insert_chart()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.insert_chart
 
 
 ## [0.26.0] - 2023-02-03
 
-  **Note: this version contains a major refactoring/renaming of some of the main
+  Note: this version contains a major refactoring/renaming of some of the main
   data writing functions and some of the enums and secondary structs. This will
   require code changes from all current users but will allow more consistent
-  APIs in future releases. Nevertheless, I apologize for this level of change.**
+  APIs in future releases. Nevertheless, I apologize for this level of change.
 
 
 ### Changed
