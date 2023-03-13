@@ -81,6 +81,7 @@ features are:
 - Support for writing all basic Excel data types.
 - Full cell formatting support.
 - Formula support, including new Excel 365 dynamic functions.
+- Charts.
 - Hyperlink support.
 - Page/Printing Setup support.
 - Merged ranges.
