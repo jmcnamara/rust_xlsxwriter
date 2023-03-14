@@ -30,6 +30,7 @@ fn main() -> Result<(), XlsxError> {
             for col_num in (0..64).step_by(8) {
                 chart.set_style(style);
                 chart.title().set_name(&format!("Style {style}"));
+                chart.legend().set_hidden();
                 worksheet.insert_chart(row_num as u32, col_num as u16, &chart)?;
                 style += 1;
             }

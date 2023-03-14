@@ -140,6 +140,15 @@ documentation and generally show how an individual function works.
 * doc_chart_intro.rs - A simple chart example using the rust_xlsxwriter
   library.
 
+* doc_chart_legend.rs - An example of getting the chart legend object and
+  setting some of its properties.
+
+* doc_chart_legend_set_hidden.rs - An example of hiding a default chart
+  legend.
+
+* doc_chart_legend_set_overlay.rs - An example of overlaying the chart
+  legend on the plot area.
+
 * doc_chart_push_series.rs - An example of creating a chart series as a
   standalone object and then adding it to a chart via the
   [`chart.push_series()`](Chart::add_series) method.

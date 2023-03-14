@@ -127,6 +127,7 @@ pub struct Chart {
     pub(crate) title: ChartTitle,
     pub(crate) x_axis: ChartAxis,
     pub(crate) y_axis: ChartAxis,
+    pub(crate) legend: ChartLegend,
     grouping: ChartGrouping,
     default_cross_between: bool,
     default_num_format: String,
@@ -215,6 +216,7 @@ impl Chart {
             title: ChartTitle::new(),
             x_axis: ChartAxis::new(),
             y_axis: ChartAxis::new(),
+            legend: ChartLegend::new(),
             grouping: ChartGrouping::Standard,
             default_cross_between: true,
             default_num_format: "General".to_string(),
@@ -375,7 +377,7 @@ impl Chart {
 
     /// Get the chart title object in order to set its properties.
     ///
-    /// Get a reference to the charts X-Axis [`ChartTitle`] object in order to
+    /// Get a reference to the chart's X-Axis [`ChartTitle`] object in order to
     /// set its properties.
     ///
     /// # Examples
@@ -426,7 +428,7 @@ impl Chart {
 
     /// Get the chart X-Axis object in order to set its properties.
     ///
-    /// Get a reference to the charts X-Axis [`ChartAxis`] object in order to
+    /// Get a reference to the chart's X-Axis [`ChartAxis`] object in order to
     /// set its properties.
     ///
     /// # Examples
@@ -476,13 +478,68 @@ impl Chart {
 
     /// Get the chart Y-Axis object in order to set its properties.
     ///
-    /// Get a reference to the charts Y-Axis [`ChartAxis`] object in order to
+    /// Get a reference to the chart's Y-Axis [`ChartAxis`] object in order to
     /// set its properties.
     ///
     /// See the [`chart.x_axis()`][Chart::x_axis] method above.
     ///
     pub fn y_axis(&mut self) -> &mut ChartAxis {
         &mut self.y_axis
+    }
+
+    /// Get the chart legend object in order to set its properties.
+    ///
+    /// Get a reference to the chart's [`ChartLegend`] object in order to set
+    /// its properties.
+    ///
+    /// # Examples
+    ///
+    /// An example of getting the chart legend object and setting some of its
+    /// properties.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_legend.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(0, 1, 30)?;
+    /// #     worksheet.write(1, 1, 35)?;
+    /// #     worksheet.write(2, 1, 45)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///     chart.add_series().set_values("Sheet1!$B$1:$B$3");
+    ///
+    ///     // Turn on the chart legend and place it at the bottom of the chart.
+    ///     chart.legend().set_position(ChartLegendPosition::Bottom);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 3, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_legend.png">
+    ///
+    pub fn legend(&mut self) -> &mut ChartLegend {
+        &mut self.legend
     }
 
     /// Set the chart style type.
@@ -1600,6 +1657,10 @@ impl Chart {
 
     // Write the <c:legend> element.
     fn write_legend(&mut self) {
+        if self.legend.hidden {
+            return;
+        }
+
         self.writer.xml_start_tag("c:legend");
 
         // Write the c:legendPos element.
@@ -1607,6 +1668,9 @@ impl Chart {
 
         // Write the c:layout element.
         self.write_layout();
+
+        // Write the c:overlay element.
+        self.write_overlay();
 
         if self.chart_type == ChartType::Pie || self.chart_type == ChartType::Doughnut {
             // Write the c:txPr element.
@@ -1618,9 +1682,20 @@ impl Chart {
 
     // Write the <c:legendPos> element.
     fn write_legend_pos(&mut self) {
-        let attributes = vec![("val", "r".to_string())];
+        let attributes = vec![("val", self.legend.position.to_string())];
 
         self.writer.xml_empty_tag_attr("c:legendPos", &attributes);
+    }
+
+    // Write the <c:overlay> element.
+    fn write_overlay(&mut self) {
+        if !self.legend.has_overlay {
+            return;
+        }
+
+        let attributes = vec![("val", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:overlay", &attributes);
     }
 
     // Write the <c:plotVisOnly> element.
@@ -3125,6 +3200,288 @@ impl ToString for ChartGrouping {
             ChartGrouping::Standard => "standard".to_string(),
             ChartGrouping::Clustered => "clustered".to_string(),
             ChartGrouping::PercentStacked => "percentStacked".to_string(),
+        }
+    }
+}
+
+/// Struct to represent a Chart legend.
+///
+/// The `ChartLegend` struct is a representation of a legend on an Excel chart.
+/// The legend is a rectangular box that identifies the name and color of each
+/// of the series in the chart.
+///
+/// `ChartLegend` can be used to configure properties of the chart legend and is
+/// usually obtained via the [`chart.legend()`][Chart::legend] method.
+///
+/// # Examples
+///
+/// An example of getting the chart legend object and setting some of its
+/// properties.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_legend.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 50)?;
+/// #     worksheet.write(1, 0, 30)?;
+/// #     worksheet.write(2, 0, 40)?;
+/// #     worksheet.write(0, 1, 30)?;
+/// #     worksheet.write(1, 1, 35)?;
+/// #     worksheet.write(2, 1, 45)?;
+/// #
+/// #     // Create a simple Column chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series using Excel formula syntax to describe the range.
+///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+///     chart.add_series().set_values("Sheet1!$B$1:$B$3");
+///
+///     // Turn on the chart legend and place it at the bottom of the chart.
+///     chart.legend().set_position(ChartLegendPosition::Bottom);
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 3, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_legend.png">
+///
+#[derive(Clone)]
+pub struct ChartLegend {
+    position: ChartLegendPosition,
+    hidden: bool,
+    has_overlay: bool,
+}
+
+impl ChartLegend {
+    pub(crate) fn new() -> ChartLegend {
+        ChartLegend {
+            position: ChartLegendPosition::Right,
+            hidden: false,
+            has_overlay: false,
+        }
+    }
+
+    /// Hide the legend for a Chart.
+    ///
+    /// The legend if usually on by default for an Excel chart. The
+    /// `set_hidden()` method can be used to turn it off.
+    ///
+    /// # Examples
+    ///
+    /// An example of hiding a default chart legend.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_legend_set_hidden.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    /// #     let mut chart = Chart::new(ChartType::Column);
+    /// #
+    /// #     // Add a data series using Excel formula syntax to describe the range.
+    /// #     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    /// #
+    /// #     // Hide the chart legend.
+    /// #     chart.legend().set_hidden();
+    /// #
+    /// #     // Add the chart to the worksheet.
+    /// #     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_legend_set_hidden.png">
+    ///
+    pub fn set_hidden(&mut self) -> &mut ChartLegend {
+        self.hidden = true;
+        self
+    }
+
+    /// Set the chart legend position.
+    ///
+    /// Set the position of the legend on the chart. The available positions in
+    /// Excel are:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/legend_position.png">
+    ///
+    /// The equivalent positions in rust_xlsxwriter charts are defined by
+    /// [`ChartLegendPosition`]. The default chart position in Excel is to have
+    /// the legend at the right.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the position of the chart legend.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_legend.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(0, 1, 30)?;
+    /// #     worksheet.write(1, 1, 35)?;
+    /// #     worksheet.write(2, 1, 45)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///     chart.add_series().set_values("Sheet1!$B$1:$B$3");
+    ///
+    ///     // Turn on the chart legend and place it at the bottom of the chart.
+    ///     chart.legend().set_position(ChartLegendPosition::Bottom);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 3, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_legend.png">
+    ///
+    pub fn set_position(&mut self, position: ChartLegendPosition) -> &mut ChartLegend {
+        self.position = position;
+        self
+    }
+
+    /// Set the chart legend as overlaid on the chart.
+    ///
+    /// In the Excel "Format Legend" dialog there is a default option of "Show
+    /// the legend without overlapping the chart":
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/legend_position.png">
+    ///
+    /// This can be turned off using the `set_overlay()` method.
+    ///
+    /// # Examples
+    ///
+    /// An example of overlaying the chart legend on the plot area.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_legend_set_overlay.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, ChartLegendPosition, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    /// #     let mut chart = Chart::new(ChartType::Column);
+    /// #
+    /// #     // Add a data series using Excel formula syntax to describe the range.
+    /// #     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    /// #
+    /// #     // Turn on the chart legend and place it at the top of the chart.
+    /// #     chart.legend().set_position(ChartLegendPosition::Top);
+    /// #
+    /// #     // Overlay the chart legend on the plot area.
+    /// #     chart.legend().set_overlay();
+    /// #
+    /// #     // Add the chart to the worksheet.
+    /// #     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_legend_set_overlay.png">
+    ///
+    pub fn set_overlay(&mut self) -> &mut ChartLegend {
+        self.has_overlay = true;
+        self
+    }
+}
+
+/// Enum used to specify the position of the Chart legend.
+///
+/// Excel allows the following positions of the chart legend:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/legend_position.png">
+///
+/// These positions can be set using the
+/// [`chart.legend().set_position()`](ChartLegend::set_position) method and the
+/// `ChartLegendPosition` enum values.
+///
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ChartLegendPosition {
+    /// Chart legend positioned at the right side. The default.
+    Right,
+
+    /// Chart legend positioned at the left side.
+    Left,
+
+    /// Chart legend positioned at the top.
+    Top,
+
+    /// Chart legend positioned at the bottom.
+    Bottom,
+
+    /// Chart legend positioned at the top right.
+    TopRight,
+}
+
+impl ToString for ChartLegendPosition {
+    fn to_string(&self) -> String {
+        match self {
+            ChartLegendPosition::Top => "t".to_string(),
+            ChartLegendPosition::Left => "l".to_string(),
+            ChartLegendPosition::Right => "r".to_string(),
+            ChartLegendPosition::Bottom => "b".to_string(),
+            ChartLegendPosition::TopRight => "tr".to_string(),
         }
     }
 }
