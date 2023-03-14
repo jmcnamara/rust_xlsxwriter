@@ -51,8 +51,9 @@ impl UnixTime {
 // 25569.0. For Unix times beyond that we divide by the number of seconds in the
 // day (24 * 60 * 60) to get the Excel serial date.
 //
-// We must also supply a number format if one isn't specified since dates in
-// Excel must have a number/date format.
+// For this data type we must also supply a number format in `write()` since
+// dates in Excel must have a number/date format. However, in general, you won't
+// need to handle a format in the `write()` method.
 //
 impl IntoExcelData for UnixTime {
     fn write(
