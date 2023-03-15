@@ -322,6 +322,10 @@ impl Image {
     /// src="https://rustxlsxwriter.github.io/images/image_set_scale_width.png">
     ///
     pub fn set_scale_height(&mut self, scale: f64) -> &mut Image {
+        if scale <= 0.0 {
+            return self;
+        }
+
         self.scale_height = scale;
         self
     }
@@ -336,6 +340,10 @@ impl Image {
     /// * `scale` - The scale ratio.
     ///
     pub fn set_scale_width(&mut self, scale: f64) -> &mut Image {
+        if scale <= 0.0 {
+            return self;
+        }
+
         self.scale_width = scale;
         self
     }
@@ -347,7 +355,7 @@ impl Image {
     ///
     /// See the following Microsoft documentation on [Everything you need to
     /// know to write effective alt
-    /// text](https://support.microsoft.com/en-us/office/everything-you-need-to-know-to-write-effective-alt-text-df98f884-ca3d-456c-807b-1a1fa82f5dc2)
+    /// text](https://support.microsoft.com/en-us/office/everything-you-need-to-know-to-write-effective-alt-text-df98f884-ca3d-456c-807b-1a1fa82f5dc2).
     ///
     /// # Arguments
     ///
@@ -461,9 +469,9 @@ impl Image {
     /// under the image are moved, deleted, or have their size changed. In Excel
     /// the options are:
     ///
-    /// 1. Move and size with cells
-    /// 2. Move but don't size with cells
-    /// 3. Don't move or size with cells
+    /// 1. Move and size with cells.
+    /// 2. Move but don't size with cells.
+    /// 3. Don't move or size with cells.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
     ///

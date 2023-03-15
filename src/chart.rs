@@ -626,6 +626,176 @@ impl Chart {
         self
     }
 
+    /// Set the width of the chart.
+    ///
+    /// The default width of an Excel chart is 480 pixels. The `set_width()`
+    /// method allows you to set it to some other non-zero size.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - The chart width in pixels.
+    ///
+    /// # Examples
+    ///
+    /// A simple chart example using the rust_xlsxwriter library.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_width.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Hide the legend, for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Resize the chart.
+    ///     chart.set_height(200).set_width(240);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_width.png">
+    ///
+    pub fn set_width(&mut self, width: u32) -> &mut Chart {
+        if width == 0 {
+            return self;
+        }
+
+        self.width = width as f64;
+        self
+    }
+
+    /// Set the height of the chart.
+    ///
+    /// The default height of an Excel chart is 480 pixels. The `set_height()`
+    /// method allows you to set it to some other non-zero size. See the example
+    /// above.
+    ///
+    /// # Arguments
+    ///
+    /// * `height` - The chart height in pixels.
+    ///
+    pub fn set_height(&mut self, height: u32) -> &mut Chart {
+        if height == 0 {
+            return self;
+        }
+
+        self.height = height as f64;
+        self
+    }
+
+    /// Set the height scale for the chart.
+    ///
+    /// Set the height scale for the chart relative to 1.0/100%. This is a
+    /// syntactic alternative to [`chart.set_height()`](Chart::set_height).
+    ///
+    /// # Arguments
+    ///
+    /// * `scale` - The scale ratio.
+    ///
+    pub fn set_scale_height(&mut self, scale: f64) -> &mut Chart {
+        if scale <= 0.0 {
+            return self;
+        }
+
+        self.scale_height = scale;
+        self
+    }
+
+    /// Set the width scale for the chart.
+    ///
+    /// Set the width scale for the chart relative to 1.0/100%. This is a
+    /// syntactic alternative to [`chart.set_width()`](Chart::set_width).
+    ///
+    /// # Arguments
+    ///
+    /// * `scale` - The scale ratio.
+    ///
+    pub fn set_scale_width(&mut self, scale: f64) -> &mut Chart {
+        if scale <= 0.0 {
+            return self;
+        }
+
+        self.scale_width = scale;
+        self
+    }
+
+    /// Set the alt text for the chart.
+    ///
+    /// Set the alt text for the chart to help accessibility. The alt text is
+    /// used with screen readers to help people with visual disabilities.
+    ///
+    /// See the following Microsoft documentation on [Everything you need to
+    /// know to write effective alt
+    /// text](https://support.microsoft.com/en-us/office/everything-you-need-to-know-to-write-effective-alt-text-df98f884-ca3d-456c-807b-1a1fa82f5dc2).
+    ///
+    /// # Arguments
+    ///
+    /// * `alt_text` - The alt text string to add to the chart.
+    ///
+    pub fn set_alt_text(&mut self, alt_text: &str) -> &mut Chart {
+        self.alt_text = alt_text.to_string();
+        self
+    }
+
+    /// Mark a chart as decorative.
+    ///
+    /// Charts don't always need an alt text description. Some charts may contain
+    /// little or no useful visual information. Such charts can be marked as
+    /// "decorative" so that screen readers can inform the users that they don't
+    /// contain important information.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_decorative(&mut self, enable: bool) -> &mut Chart {
+        self.decorative = enable;
+        self
+    }
+
+    /// Set the object movement options for a chart.
+    ///
+    /// Set the option to define how an chart will behave in Excel if the cells
+    /// under the chart are moved, deleted, or have their size changed. In Excel
+    /// the options are:
+    ///
+    /// 1. Move and size with cells. Default for charts.
+    /// 2. Move but don't size with cells.
+    /// 3. Don't move or size with cells.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
+    ///
+    /// These values are defined in the [`ObjectMovement`] enum.
+    ///
+    pub fn set_object_movement(&mut self, option: ObjectMovement) -> &mut Chart {
+        self.object_movement = option;
+        self
+    }
+
     /// Check a chart instance for configuration errors.
     ///
     /// Charts are validated using this methods when they are added to a
