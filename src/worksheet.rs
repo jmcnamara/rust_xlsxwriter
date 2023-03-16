@@ -519,10 +519,21 @@ impl Worksheet {
     /// Write generic data to a cell.
     ///
     /// The `write()` method writes data that implements [`IntoExcelData`] to a
-    /// worksheet cell. Currently only [`str`] and numbers that convert into a
-    /// [`f64`] are supported. This will be extended in the next version to
-    /// cover all the other Excel types that are handled by the type specific
-    /// `write*()` methods.
+    /// worksheet cell.
+    ///
+    /// The types currently supported are:
+    /// - [`&str`].
+    /// - Numbers that convert [`Into`] [`f64`].
+    /// - [`chrono::NaiveDateTime`].
+    /// - [`chrono::NaiveDate`].
+    /// - [`chrono::NaiveTime`].
+    ///
+    /// Note, default date/time number formats are provided for the [`chrono`]
+    /// types since Excel requires that date have a format.
+    ///
+    /// This method will be extended in the upcoming versions to cover all the
+    /// other Excel types that are handled by the type specific `write*()`
+    /// methods.
     ///
     /// User can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
@@ -542,10 +553,18 @@ impl Worksheet {
     /// Write formatted generic data to a cell.
     ///
     /// The `write_with_format()` method writes formatted data that implements
-    /// [`IntoExcelData`] to a worksheet cell. Currently only [`str`] and
-    /// numbers that convert into a [`f64`] are supported. This will be extended
-    /// in the next version to cover all the other Excel types that are handled
-    /// by the type specific `write*()` methods.
+    /// [`IntoExcelData`] to a worksheet cell.
+    ///
+    /// The types currently supported are:
+    /// - [`&str`].
+    /// - Numbers that convert [`Into`] [`f64`].
+    /// - [`chrono::NaiveDateTime`].
+    /// - [`chrono::NaiveDate`].
+    /// - [`chrono::NaiveTime`].
+    ///
+    /// This method will be extended in the upcoming versions to cover all the
+    /// other Excel types that are handled by the type specific `write*()`
+    /// methods.
     ///
     /// User can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
@@ -9616,6 +9635,81 @@ macro_rules! write_number_trait_impl {
     )*)
 }
 write_number_trait_impl!(u8 i8 u16 i16 u32 i32 f32 f64);
+
+// Note, for the date/time type traits below we add a default number format for
+// the `write()` variants since Excel dates/times require a number format or
+// else they will appear as a number.
+impl IntoExcelData for &NaiveDateTime {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = worksheet.datetime_to_excel(self);
+        let format = &Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let number = worksheet.datetime_to_excel(self);
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
+impl IntoExcelData for &NaiveDate {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = worksheet.date_to_excel(self);
+        let format = &Format::new().set_num_format("yyyy\\-mm\\-dd;@");
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let number = worksheet.date_to_excel(self);
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
+impl IntoExcelData for &NaiveTime {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = worksheet.time_to_excel(self);
+        let format = &Format::new().set_num_format("hh:mm:ss;@");
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let number = worksheet.time_to_excel(self);
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
 
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
