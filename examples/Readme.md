@@ -162,6 +162,9 @@ documentation and generally show how an individual function works.
 * doc_chart_series_set_values.rs - A chart example demonstrating setting
   the chart series values.
 
+* doc_chart_set_width.rs - A simple chart example using the rust_xlsxwriter
+  library.
+
 * doc_chart_simple.rs - A simple chart example using the rust_xlsxwriter
   library.
 
