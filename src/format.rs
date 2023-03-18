@@ -604,7 +604,7 @@ impl Format {
             "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
             self.bold,
             self.font_charset,
-            self.font_color.rgb_hex_value(),
+            self.font_color.argb_hex_value(),
             self.font_condense,
             self.font_extend,
             self.font_family,
@@ -623,16 +623,16 @@ impl Format {
         format!(
             "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
             self.border_bottom.value(),
-            self.border_bottom_color.rgb_hex_value(),
+            self.border_bottom_color.argb_hex_value(),
             self.border_diagonal.value(),
-            self.border_diagonal_color.rgb_hex_value(),
+            self.border_diagonal_color.argb_hex_value(),
             self.border_diagonal_type as u8,
             self.border_left.value(),
-            self.border_left_color.rgb_hex_value(),
+            self.border_left_color.argb_hex_value(),
             self.border_right.value(),
-            self.border_right_color.rgb_hex_value(),
+            self.border_right_color.argb_hex_value(),
             self.border_top.value(),
-            self.border_top_color.rgb_hex_value(),
+            self.border_top_color.argb_hex_value(),
         )
     }
 
@@ -640,8 +640,8 @@ impl Format {
         format!(
             "{}:{}:{}",
             self.pattern.value(),
-            self.background_color.rgb_hex_value(),
-            self.foreground_color.rgb_hex_value(),
+            self.background_color.argb_hex_value(),
+            self.foreground_color.argb_hex_value(),
         )
     }
 
@@ -944,13 +944,13 @@ impl Format {
 
     /// Set the color property for the Format font.
     ///
-    /// The `set_font_color()` method is used to set the font color in a
-    /// cell. To set the color of a cell background use the `set_bg_color()` and
+    /// The `set_font_color()` method is used to set the font color in a cell.
+    /// To set the color of a cell background use the `set_bg_color()` and
     /// `set_pattern()` methods.
     ///
     /// # Arguments
     ///
-    /// * `font_color` - The font color property defined by a [`XlsxColor`] enum
+    /// * `color` - The font color property defined by a [`XlsxColor`] enum
     ///   value.
     ///
     /// # Examples
@@ -980,14 +980,15 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_color.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_font_color.png">
     ///
-    pub fn set_font_color(mut self, font_color: XlsxColor) -> Format {
-        if !font_color.is_valid() {
+    pub fn set_font_color(mut self, color: XlsxColor) -> Format {
+        if !color.is_valid() {
             return self;
         }
 
-        self.font_color = font_color;
+        self.font_color = color;
         self
     }
 
@@ -1641,8 +1642,8 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `background_color` - The background color property defined by a
-    ///   [`XlsxColor`] enum value.
+    /// * `color` - The background color property defined by a [`XlsxColor`]
+    ///   enum value.
     ///
     /// # Examples
     ///
@@ -1673,16 +1674,17 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_background_color.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_background_color.png">
     ///
     ///
     ///
-    pub fn set_background_color(mut self, background_color: XlsxColor) -> Format {
-        if !background_color.is_valid() {
+    pub fn set_background_color(mut self, color: XlsxColor) -> Format {
+        if !color.is_valid() {
             return self;
         }
 
-        self.background_color = background_color;
+        self.background_color = color;
         self
     }
 
@@ -1694,8 +1696,8 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `foreground_color` - The foreground color property defined by a
-    ///   [`XlsxColor`] enum value.
+    /// * `color` - The foreground color property defined by a [`XlsxColor`]
+    ///   enum value.
     ///
     /// # Examples
     ///
@@ -1728,16 +1730,17 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_foreground_color.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_foreground_color.png">
     ///
     ///
     ///
-    pub fn set_foreground_color(mut self, foreground_color: XlsxColor) -> Format {
-        if !foreground_color.is_valid() {
+    pub fn set_foreground_color(mut self, color: XlsxColor) -> Format {
+        if !color.is_valid() {
             return self;
         }
 
-        self.foreground_color = foreground_color;
+        self.foreground_color = color;
         self
     }
 
@@ -2436,13 +2439,18 @@ impl XlsxColor {
         }
     }
 
-    // Get the RGB hex value for a color. The alpha channel is always FF.
-    fn rgb_hex_value(self) -> String {
+    // Get the ARGB hex value for a color. The alpha channel is always FF.
+    fn argb_hex_value(self) -> String {
         format!("FF{:06X}", self.value())
     }
 
+    // Get the RGB hex value for a color.
+    pub(crate) fn rgb_hex_value(self) -> String {
+        format!("{:06X}", self.value())
+    }
+
     // Convert the color in a set of "rgb" or "theme/tint" attributes used in
-    // color related XML elements.
+    // color related Style XML elements.
     pub(crate) fn attributes(self) -> Vec<(&'static str, String)> {
         match self {
             Self::Theme(color, shade) => match color {
@@ -2547,7 +2555,7 @@ impl XlsxColor {
             },
 
             // Handle RGB color.
-            _ => vec![("rgb", self.rgb_hex_value())],
+            _ => vec![("rgb", self.argb_hex_value())],
         }
     }
 
@@ -2902,25 +2910,25 @@ mod tests {
 
     #[test]
     fn test_hex_value() {
-        assert_eq!("FFFFFFFFFF", XlsxColor::Automatic.rgb_hex_value());
-        assert_eq!("FF000000", XlsxColor::Black.rgb_hex_value());
-        assert_eq!("FF0000FF", XlsxColor::Blue.rgb_hex_value());
-        assert_eq!("FF800000", XlsxColor::Brown.rgb_hex_value());
-        assert_eq!("FF00FFFF", XlsxColor::Cyan.rgb_hex_value());
-        assert_eq!("FF808080", XlsxColor::Gray.rgb_hex_value());
-        assert_eq!("FF008000", XlsxColor::Green.rgb_hex_value());
-        assert_eq!("FF00FF00", XlsxColor::Lime.rgb_hex_value());
-        assert_eq!("FFFF00FF", XlsxColor::Magenta.rgb_hex_value());
-        assert_eq!("FF000080", XlsxColor::Navy.rgb_hex_value());
-        assert_eq!("FFFF6600", XlsxColor::Orange.rgb_hex_value());
-        assert_eq!("FFFF00FF", XlsxColor::Pink.rgb_hex_value());
-        assert_eq!("FF800080", XlsxColor::Purple.rgb_hex_value());
-        assert_eq!("FFFF0000", XlsxColor::Red.rgb_hex_value());
-        assert_eq!("FFC0C0C0", XlsxColor::Silver.rgb_hex_value());
-        assert_eq!("FFFFFFFF", XlsxColor::White.rgb_hex_value());
-        assert_eq!("FFFFFF00", XlsxColor::Yellow.rgb_hex_value());
-        assert_eq!("FFABCDEF", XlsxColor::RGB(0xABCDEF).rgb_hex_value());
-        assert_eq!("FFFE000201", XlsxColor::Theme(2, 1).rgb_hex_value());
+        assert_eq!("FFFFFFFFFF", XlsxColor::Automatic.argb_hex_value());
+        assert_eq!("FF000000", XlsxColor::Black.argb_hex_value());
+        assert_eq!("FF0000FF", XlsxColor::Blue.argb_hex_value());
+        assert_eq!("FF800000", XlsxColor::Brown.argb_hex_value());
+        assert_eq!("FF00FFFF", XlsxColor::Cyan.argb_hex_value());
+        assert_eq!("FF808080", XlsxColor::Gray.argb_hex_value());
+        assert_eq!("FF008000", XlsxColor::Green.argb_hex_value());
+        assert_eq!("FF00FF00", XlsxColor::Lime.argb_hex_value());
+        assert_eq!("FFFF00FF", XlsxColor::Magenta.argb_hex_value());
+        assert_eq!("FF000080", XlsxColor::Navy.argb_hex_value());
+        assert_eq!("FFFF6600", XlsxColor::Orange.argb_hex_value());
+        assert_eq!("FFFF00FF", XlsxColor::Pink.argb_hex_value());
+        assert_eq!("FF800080", XlsxColor::Purple.argb_hex_value());
+        assert_eq!("FFFF0000", XlsxColor::Red.argb_hex_value());
+        assert_eq!("FFC0C0C0", XlsxColor::Silver.argb_hex_value());
+        assert_eq!("FFFFFFFF", XlsxColor::White.argb_hex_value());
+        assert_eq!("FFFFFF00", XlsxColor::Yellow.argb_hex_value());
+        assert_eq!("FFABCDEF", XlsxColor::RGB(0xABCDEF).argb_hex_value());
+        assert_eq!("FFFE000201", XlsxColor::Theme(2, 1).argb_hex_value());
     }
 
     #[test]

@@ -12,7 +12,7 @@ use crate::{
     drawing::{DrawingObject, DrawingType},
     utility,
     xmlwriter::XMLWriter,
-    ColNum, ObjectMovement, RowNum, XlsxError, COL_MAX, ROW_MAX,
+    ColNum, ObjectMovement, RowNum, XlsxColor, XlsxError, COL_MAX, ROW_MAX,
 };
 
 #[derive(Clone)]
@@ -1383,6 +1383,9 @@ impl Chart {
 
             self.write_series_title(&series.title);
 
+            // Write the c:spPr element.
+            self.write_sp_pr(&series.format);
+
             // Write the c:marker element.
             if self.chart_group_type == ChartType::Line || self.chart_type == ChartType::Radar {
                 self.write_marker();
@@ -1403,7 +1406,7 @@ impl Chart {
 
     // Write the <c:ser> element for scatter charts.
     fn write_scatter_series(&mut self) {
-        for (index, series) in self.series.clone().iter().enumerate() {
+        for (index, series) in self.series.clone().iter_mut().enumerate() {
             self.writer.xml_start_tag("c:ser");
 
             // Write the c:idx element.
@@ -1420,9 +1423,17 @@ impl Chart {
                 self.write_marker();
             }
 
+            // Add default scatter chart formatting to the series data unless it
+            // has already been specified by the user.
+            if series.format.line.is_none() {
+                let mut line = ChartLine::new();
+                line.set_width(2.25);
+                series.format.line = Some(line);
+            }
+
             if self.chart_type == ChartType::Scatter {
                 // Write the c:spPr element.
-                self.write_sp_pr();
+                self.write_sp_pr(&series.format);
             }
 
             self.write_x_val(&series.category_range, &series.category_cache_data);
@@ -2076,24 +2087,92 @@ impl Chart {
     }
 
     // Write the <c:spPr> element.
-    fn write_sp_pr(&mut self) {
+    fn write_sp_pr(&mut self, format: &ChartFormat) {
+        if !format.has_formatting() {
+            return;
+        }
+
         self.writer.xml_start_tag("c:spPr");
 
-        // Write the a:ln element.
-        self.write_a_ln();
+        if let Some(solid_fill) = &format.solid_fill {
+            // Write the a:solidFill element.
+            self.write_a_solid_fill(solid_fill.color, solid_fill.transparency);
+        }
+
+        if let Some(line) = &format.line {
+            // Write the a:ln element.
+            self.write_a_ln(line);
+        }
 
         self.writer.xml_end_tag("c:spPr");
     }
 
     // Write the <a:ln> element.
-    fn write_a_ln(&mut self) {
-        let attributes = vec![("w", "28575".to_string())];
+    fn write_a_ln(&mut self, line: &ChartLine) {
+        let mut attributes = vec![];
+        let mut width = line.width;
+
+        /* Round width to nearest 0.25, like Excel. */
+        width = ((width + 0.125) * 4.0).floor() / 4.0;
+
+        /* Convert to Excel internal units. */
+        let width = (12700.0 * width).ceil() as u32;
+
+        if width > 0 {
+            attributes.push(("w", width.to_string()));
+        }
 
         self.writer.xml_start_tag_attr("a:ln", &attributes);
 
-        // Write the a:noFill element.
-        self.write_a_no_fill();
+        if line.color.is_default() {
+            // Write the a:noFill element.
+            self.write_a_no_fill();
+        } else {
+            // Write the a:solidFill element.
+            self.write_a_solid_fill(line.color, line.transparency);
+        }
+
         self.writer.xml_end_tag("a:ln");
+    }
+
+    // Write the <a:solidFill> element.
+    fn write_a_solid_fill(&mut self, color: XlsxColor, transparency: u8) {
+        self.writer.xml_start_tag("a:solidFill");
+
+        // Write the a:srgbClr element.
+        self.write_a_srgb_clr(color, transparency);
+
+        self.writer.xml_end_tag("a:solidFill");
+    }
+
+    // Write the <a:srgbClr> element.
+    fn write_a_srgb_clr(&mut self, color: XlsxColor, transparency: u8) {
+        match color {
+            XlsxColor::Theme(_, _) => {}
+            _ => {
+                let attributes = vec![("val", color.rgb_hex_value())];
+
+                if transparency > 0 {
+                    self.writer.xml_start_tag_attr("a:srgbClr", &attributes);
+
+                    // Write the a:alpha element.
+                    self.write_a_alpha(transparency);
+
+                    self.writer.xml_end_tag("a:srgbClr");
+                } else {
+                    self.writer.xml_empty_tag_attr("a:srgbClr", &attributes);
+                }
+            }
+        }
+    }
+
+    // Write the <a:alpha> element.
+    fn write_a_alpha(&mut self, transparency: u8) {
+        let transparency = (100 - transparency) as u16 * 1000;
+
+        let attributes = vec![("val", transparency.to_string())];
+
+        self.writer.xml_empty_tag_attr("a:alpha", &attributes);
     }
 
     // Write the <a:noFill> element.
@@ -2418,6 +2497,7 @@ pub struct ChartSeries {
     pub(crate) value_cache_data: ChartSeriesCacheData,
     pub(crate) category_cache_data: ChartSeriesCacheData,
     pub(crate) title: ChartTitle,
+    pub(crate) format: ChartFormat,
 }
 
 #[allow(clippy::new_without_default)]
@@ -2519,6 +2599,7 @@ impl ChartSeries {
             value_cache_data: ChartSeriesCacheData::new(),
             category_cache_data: ChartSeriesCacheData::new(),
             title: ChartTitle::new(),
+            format: ChartFormat::new(),
         }
     }
 
@@ -2782,6 +2863,25 @@ impl ChartSeries {
         T: IntoChartRange,
     {
         self.title.set_name(name);
+        self
+    }
+
+    /// TODO
+    pub fn set_line(&mut self, line: &ChartLine) -> &mut ChartSeries {
+        self.format.line = Some(line.clone());
+
+        self
+    }
+
+    /// TODO
+    pub fn set_border(&mut self, line: &ChartLine) -> &mut ChartSeries {
+        self.set_line(line)
+    }
+
+    /// TODO
+    pub fn set_solid_fill(&mut self, fill: &ChartSolidFill) -> &mut ChartSeries {
+        self.format.solid_fill = Some(fill.clone());
+
         self
     }
 
@@ -3653,6 +3753,110 @@ impl ToString for ChartLegendPosition {
             ChartLegendPosition::Bottom => "b".to_string(),
             ChartLegendPosition::TopRight => "tr".to_string(),
         }
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct ChartFormat {
+    line: Option<ChartLine>,
+    solid_fill: Option<ChartSolidFill>,
+}
+
+impl ChartFormat {
+    fn new() -> ChartFormat {
+        ChartFormat {
+            line: None,
+            solid_fill: None,
+        }
+    }
+
+    fn has_formatting(&self) -> bool {
+        self.line.is_some() || self.solid_fill.is_some()
+    }
+}
+
+/// Todo
+#[derive(Clone)]
+pub struct ChartLine {
+    color: XlsxColor,
+    width: f64,
+    transparency: u8,
+}
+
+impl ChartLine {
+    /// TODO
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ChartLine {
+        ChartLine {
+            color: XlsxColor::Automatic,
+            width: 0.0,
+            transparency: 0,
+        }
+    }
+
+    /// TODO
+    pub fn set_color(&mut self, color: XlsxColor) -> &mut ChartLine {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.color = color;
+        self
+    }
+
+    /// TODO
+    pub fn set_width(&mut self, width: f64) -> &mut ChartLine {
+        if width >= 0.0 {
+            self.width = width;
+        }
+
+        self
+    }
+
+    /// TODO
+    pub fn set_transparency(&mut self, transparency: u8) -> &mut ChartLine {
+        if transparency <= 100 {
+            self.transparency = transparency;
+        }
+
+        self
+    }
+}
+
+/// Todo
+#[derive(Clone)]
+pub struct ChartSolidFill {
+    color: XlsxColor,
+    transparency: u8,
+}
+
+impl ChartSolidFill {
+    /// TODO
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ChartSolidFill {
+        ChartSolidFill {
+            color: XlsxColor::Automatic,
+            transparency: 0,
+        }
+    }
+
+    /// TODO
+    pub fn set_color(&mut self, color: XlsxColor) -> &mut ChartSolidFill {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.color = color;
+        self
+    }
+
+    /// TODO
+    pub fn set_transparency(&mut self, transparency: u8) -> &mut ChartSolidFill {
+        if transparency <= 100 {
+            self.transparency = transparency;
+        }
+
+        self
     }
 }
 
