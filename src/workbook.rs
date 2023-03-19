@@ -613,8 +613,8 @@ impl Workbook {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates creating a simple workbook, with one
-    /// unused worksheet.
+    /// The following example demonstrates creating a simple workbook using a
+    /// string path.
     ///
     /// ```
     /// # // This code is available in examples/doc_workbook_save.rs
@@ -627,6 +627,26 @@ impl Workbook {
     ///     let _worksheet = workbook.add_worksheet();
     ///
     ///     workbook.save("workbook.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// The following example demonstrates creating a simple workbook using a
+    /// Rust [`std::path`] Path.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_save_to_path.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     let _worksheet = workbook.add_worksheet();
+    ///
+    ///     let path = std::path::Path::new("workbook.xlsx");
+    ///     workbook.save(&path)?;
     ///
     ///     Ok(())
     /// }
