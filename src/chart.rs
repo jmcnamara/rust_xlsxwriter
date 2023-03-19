@@ -1431,6 +1431,7 @@ impl Chart {
                 series.format.line = Some(line);
             }
 
+            // TODO- Check
             if self.chart_type == ChartType::Scatter {
                 // Write the c:spPr element.
                 self.write_sp_pr(&series.format);
@@ -2094,12 +2095,17 @@ impl Chart {
 
         self.writer.xml_start_tag("c:spPr");
 
-        if let Some(solid_fill) = &format.solid_fill {
+        if format.no_fill {
+            self.writer.xml_empty_tag("a:noFill");
+        } else if let Some(solid_fill) = &format.solid_fill {
             // Write the a:solidFill element.
             self.write_a_solid_fill(solid_fill.color, solid_fill.transparency);
         }
 
-        if let Some(line) = &format.line {
+        if format.no_line {
+            // Write a default line with no fill.
+            self.write_a_ln(&ChartLine::new());
+        } else if let Some(line) = &format.line {
             // Write the a:ln element.
             self.write_a_ln(line);
         }
@@ -2130,6 +2136,11 @@ impl Chart {
         } else {
             // Write the a:solidFill element.
             self.write_a_solid_fill(line.color, line.transparency);
+        }
+
+        if line.dash_type != ChartLineDashType::Solid {
+            // Write the a:prstDash element.
+            self.write_a_prst_dash(line);
         }
 
         self.writer.xml_end_tag("a:ln");
@@ -2168,7 +2179,7 @@ impl Chart {
 
     // Write the <a:alpha> element.
     fn write_a_alpha(&mut self, transparency: u8) {
-        let transparency = (100 - transparency) as u16 * 1000;
+        let transparency = (100 - transparency) as u32 * 1000;
 
         let attributes = vec![("val", transparency.to_string())];
 
@@ -2178,6 +2189,13 @@ impl Chart {
     // Write the <a:noFill> element.
     fn write_a_no_fill(&mut self) {
         self.writer.xml_empty_tag("a:noFill");
+    }
+
+    // Write the <a:prstDash> element.
+    fn write_a_prst_dash(&mut self, line: &ChartLine) {
+        let attributes = vec![("val", line.dash_type.to_string())];
+
+        self.writer.xml_empty_tag_attr("a:prstDash", &attributes);
     }
 
     // Write the <c:radarStyle> element.
@@ -2869,7 +2887,6 @@ impl ChartSeries {
     /// TODO
     pub fn set_line(&mut self, line: &ChartLine) -> &mut ChartSeries {
         self.format.line = Some(line.clone());
-
         self
     }
 
@@ -2879,9 +2896,25 @@ impl ChartSeries {
     }
 
     /// TODO
+    pub fn set_no_line(&mut self) -> &mut ChartSeries {
+        self.format.no_line = true;
+        self
+    }
+
+    /// TODO
+    pub fn set_no_border(&mut self) -> &mut ChartSeries {
+        self.set_no_line()
+    }
+
+    /// TODO
+    pub fn set_no_fill(&mut self) -> &mut ChartSeries {
+        self.format.no_fill = true;
+        self
+    }
+
+    /// TODO
     pub fn set_solid_fill(&mut self, fill: &ChartSolidFill) -> &mut ChartSeries {
         self.format.solid_fill = Some(fill.clone());
-
         self
     }
 
@@ -3758,20 +3791,30 @@ impl ToString for ChartLegendPosition {
 
 #[derive(Clone)]
 pub(crate) struct ChartFormat {
+    no_fill: bool,
+    no_line: bool,
     line: Option<ChartLine>,
     solid_fill: Option<ChartSolidFill>,
+    pattern_fill: Option<ChartPatternFill>,
 }
 
 impl ChartFormat {
     fn new() -> ChartFormat {
         ChartFormat {
+            no_fill: false,
+            no_line: false,
             line: None,
             solid_fill: None,
+            pattern_fill: None,
         }
     }
 
     fn has_formatting(&self) -> bool {
-        self.line.is_some() || self.solid_fill.is_some()
+        self.line.is_some()
+            || self.solid_fill.is_some()
+            || self.pattern_fill.is_some()
+            || self.no_fill
+            || self.no_line
     }
 }
 
@@ -3781,6 +3824,7 @@ pub struct ChartLine {
     color: XlsxColor,
     width: f64,
     transparency: u8,
+    dash_type: ChartLineDashType,
 }
 
 impl ChartLine {
@@ -3791,6 +3835,7 @@ impl ChartLine {
             color: XlsxColor::Automatic,
             width: 0.0,
             transparency: 0,
+            dash_type: ChartLineDashType::Solid,
         }
     }
 
@@ -3809,6 +3854,13 @@ impl ChartLine {
         if width >= 0.0 {
             self.width = width;
         }
+
+        self
+    }
+
+    /// TODO
+    pub fn set_dash_type(&mut self, dash_type: ChartLineDashType) -> &mut ChartLine {
+        self.dash_type = dash_type;
 
         self
     }
@@ -3857,6 +3909,310 @@ impl ChartSolidFill {
         }
 
         self
+    }
+}
+
+/// Todo
+#[derive(Clone)]
+pub struct ChartPatternFill {
+    background_color: XlsxColor,
+    foreground_color: XlsxColor,
+    pattern: ChartPatternFillType,
+}
+
+impl ChartPatternFill {
+    /// TODO
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ChartPatternFill {
+        ChartPatternFill {
+            background_color: XlsxColor::Automatic,
+            foreground_color: XlsxColor::Automatic,
+            pattern: ChartPatternFillType::Dotted5Percent,
+        }
+    }
+
+    /// TODO
+    pub fn set_pattern(&mut self, pattern: ChartPatternFillType) -> &mut ChartPatternFill {
+        self.pattern = pattern;
+        self
+    }
+
+    /// TODO
+    pub fn set_background_color(&mut self, color: XlsxColor) -> &mut ChartPatternFill {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.background_color = color;
+        self
+    }
+
+    /// TODO
+    pub fn set_foreground_color(&mut self, color: XlsxColor) -> &mut ChartPatternFill {
+        if !color.is_valid() {
+            return self;
+        }
+
+        self.foreground_color = color;
+        self
+    }
+}
+
+/// TODO
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ChartLineDashType {
+    /// Solid - chart line/border dash type.
+    Solid,
+
+    /// Round dot - chart line/border dash type.
+    RoundDot,
+
+    /// Square dot - chart line/border dash type.
+    SquareDot,
+
+    /// Dash - chart line/border dash type.
+    Dash,
+
+    /// Dash dot - chart line/border dash type.
+    DashDot,
+
+    /// Long dash - chart line/border dash type.
+    LongDash,
+
+    /// Long dash dot - chart line/border dash type.
+    LongDashDot,
+
+    /// Long dash dot dot - chart line/border dash type.
+    LongDashDotDot,
+
+    /// Dot - chart line/border dash type.
+    Dot,
+
+    /// System dash dot - chart line/border dash type.
+    SystemDashDot,
+
+    /// System dash dot dot - chart line/border dash type.
+    SystemDashDotDot,
+}
+
+impl ToString for ChartLineDashType {
+    fn to_string(&self) -> String {
+        match self {
+            ChartLineDashType::Dot => "dot".to_string(),
+            ChartLineDashType::Dash => "dash".to_string(),
+            ChartLineDashType::Solid => "solid".to_string(),
+            ChartLineDashType::DashDot => "dashDot".to_string(),
+            ChartLineDashType::LongDash => "lgDash".to_string(),
+            ChartLineDashType::RoundDot => "sysDot".to_string(),
+            ChartLineDashType::SquareDot => "sysDash".to_string(),
+            ChartLineDashType::LongDashDot => "lgDashDot".to_string(),
+            ChartLineDashType::SystemDashDot => "sysDashDot".to_string(),
+            ChartLineDashType::LongDashDotDot => "lgDashDotDot".to_string(),
+            ChartLineDashType::SystemDashDotDot => "sysDashDotDot".to_string(),
+        }
+    }
+}
+
+/// TODO
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ChartPatternFillType {
+    /// Dotted 5 percent - chart fill pattern.
+    Dotted5Percent,
+
+    /// Dotted 10 percent - chart fill pattern.
+    Dotted10Percent,
+
+    /// Dotted 20 percent - chart fill pattern.
+    Dotted20Percent,
+
+    /// Dotted 25 percent - chart fill pattern.
+    Dotted25Percent,
+
+    /// Dotted 30 percent - chart fill pattern.
+    Dotted30Percent,
+
+    /// Dotted 40 percent - chart fill pattern.
+    Dotted40Percent,
+
+    /// Dotted 50 percent - chart fill pattern.
+    Dotted50Percent,
+
+    /// Dotted 60 percent - chart fill pattern.
+    Dotted60Percent,
+
+    /// Dotted 70 percent - chart fill pattern.
+    Dotted70Percent,
+
+    /// Dotted 75 percent - chart fill pattern.
+    Dotted75Percent,
+
+    /// Dotted 80 percent - chart fill pattern.
+    Dotted80Percent,
+
+    /// Dotted 90 percent - chart fill pattern.
+    Dotted90Percent,
+
+    /// Diagonal stripes light downwards - chart fill pattern.
+    DiagonalStripesLightDownwards,
+
+    /// Diagonal stripes light upwards - chart fill pattern.
+    DiagonalStripesLightUpwards,
+
+    /// Diagonal stripes dark downwards - chart fill pattern.
+    DiagonalStripesDarkDownwards,
+
+    /// Diagonal stripes dark upwards - chart fill pattern.
+    DiagonalStripesDarkUpwards,
+
+    /// Diagonal stripes wide downwards - chart fill pattern.
+    DiagonalStripesWideDownwards,
+
+    /// Diagonal stripes wide upwards - chart fill pattern.
+    DiagonalStripesWideUpwards,
+
+    /// Vertical stripes light - chart fill pattern.
+    VerticalStripesLight,
+
+    /// Horizontal stripes light - chart fill pattern.
+    HorizontalStripesLight,
+
+    /// Vertical stripes narrow - chart fill pattern.
+    VerticalStripesNarrow,
+
+    /// Horizontal stripes narrow - chart fill pattern.
+    HorizontalStripesNarrow,
+
+    /// Vertical stripes dark - chart fill pattern.
+    VerticalStripesDark,
+
+    /// Horizontal stripes dark - chart fill pattern.
+    HorizontalStripesDark,
+
+    /// Stripes backslashes - chart fill pattern.
+    StripesBackslashes,
+
+    /// Stripes forward slashes - chart fill pattern.
+    StripesForwardSlashes,
+
+    /// Horizontal stripes alternating - chart fill pattern.
+    HorizontalStripesAlternating,
+
+    /// Vertical stripes alternating - chart fill pattern.
+    VerticalStripesAlternating,
+
+    /// Small confetti - chart fill pattern.
+    SmallConfetti,
+
+    /// Large confetti - chart fill pattern.
+    LargeConfetti,
+
+    /// Zigzag - chart fill pattern.
+    Zigzag,
+
+    /// Wave - chart fill pattern.
+    Wave,
+
+    /// Diagonal brick - chart fill pattern.
+    DiagonalBrick,
+
+    /// Horizontal brick - chart fill pattern.
+    HorizontalBrick,
+
+    /// Weave - chart fill pattern.
+    Weave,
+
+    /// Plaid - chart fill pattern.
+    Plaid,
+
+    /// Divot - chart fill pattern.
+    Divot,
+
+    /// Dotted grid - chart fill pattern.
+    DottedGrid,
+
+    /// Dotted diamond - chart fill pattern.
+    DottedDiamond,
+
+    /// Shingle - chart fill pattern.
+    Shingle,
+
+    /// Trellis - chart fill pattern.
+    Trellis,
+
+    /// Sphere - chart fill pattern.
+    Sphere,
+
+    /// Small grid - chart fill pattern.
+    SmallGrid,
+
+    /// Large grid - chart fill pattern.
+    LargeGrid,
+
+    /// Small checkerboard - chart fill pattern.
+    SmallCheckerboard,
+
+    /// Large checkerboard - chart fill pattern.
+    LargeCheckerboard,
+
+    /// Outlined diamond grid - chart fill pattern.
+    OutlinedDiamondGrid,
+
+    /// Solid diamond grid - chart fill pattern.
+    SolidDiamondGrid,
+}
+
+impl ToString for ChartPatternFillType {
+    fn to_string(&self) -> String {
+        match self {
+            ChartPatternFillType::Wave => "wave".to_string(),
+            ChartPatternFillType::Weave => "weave".to_string(),
+            ChartPatternFillType::Plaid => "plaid".to_string(),
+            ChartPatternFillType::Divot => "divot".to_string(),
+            ChartPatternFillType::Zigzag => "zigZag".to_string(),
+            ChartPatternFillType::Sphere => "sphere".to_string(),
+            ChartPatternFillType::Shingle => "shingle".to_string(),
+            ChartPatternFillType::Trellis => "trellis".to_string(),
+            ChartPatternFillType::SmallGrid => "smGrid".to_string(),
+            ChartPatternFillType::LargeGrid => "lgGrid".to_string(),
+            ChartPatternFillType::DottedGrid => "dotGrid".to_string(),
+            ChartPatternFillType::DottedDiamond => "dotDmnd".to_string(),
+            ChartPatternFillType::DiagonalBrick => "diagBrick".to_string(),
+            ChartPatternFillType::LargeConfetti => "lgConfetti".to_string(),
+            ChartPatternFillType::SmallConfetti => "smConfetti".to_string(),
+            ChartPatternFillType::Dotted5Percent => "pct5".to_string(),
+            ChartPatternFillType::Dotted10Percent => "pct10".to_string(),
+            ChartPatternFillType::Dotted20Percent => "pct20".to_string(),
+            ChartPatternFillType::Dotted25Percent => "pct25".to_string(),
+            ChartPatternFillType::Dotted30Percent => "pct30".to_string(),
+            ChartPatternFillType::Dotted40Percent => "pct40".to_string(),
+            ChartPatternFillType::Dotted50Percent => "pct50".to_string(),
+            ChartPatternFillType::Dotted60Percent => "pct60".to_string(),
+            ChartPatternFillType::Dotted70Percent => "pct70".to_string(),
+            ChartPatternFillType::Dotted75Percent => "pct75".to_string(),
+            ChartPatternFillType::Dotted80Percent => "pct80".to_string(),
+            ChartPatternFillType::Dotted90Percent => "pct90".to_string(),
+            ChartPatternFillType::HorizontalBrick => "horzBrick".to_string(),
+            ChartPatternFillType::SolidDiamondGrid => "solidDmnd".to_string(),
+            ChartPatternFillType::SmallCheckerboard => "smCheck".to_string(),
+            ChartPatternFillType::LargeCheckerboard => "lgCheck".to_string(),
+            ChartPatternFillType::StripesBackslashes => "dashDnDiag".to_string(),
+            ChartPatternFillType::VerticalStripesDark => "dkVert".to_string(),
+            ChartPatternFillType::OutlinedDiamondGrid => "openDmnd".to_string(),
+            ChartPatternFillType::VerticalStripesLight => "ltVert".to_string(),
+            ChartPatternFillType::HorizontalStripesDark => "dkHorz".to_string(),
+            ChartPatternFillType::StripesForwardSlashes => "dashUpDiag".to_string(),
+            ChartPatternFillType::VerticalStripesNarrow => "narVert".to_string(),
+            ChartPatternFillType::HorizontalStripesLight => "ltHorz".to_string(),
+            ChartPatternFillType::HorizontalStripesNarrow => "narHorz".to_string(),
+            ChartPatternFillType::DiagonalStripesDarkUpwards => "dkUpDiag".to_string(),
+            ChartPatternFillType::DiagonalStripesWideUpwards => "wdUpDiag".to_string(),
+            ChartPatternFillType::VerticalStripesAlternating => "dashVert".to_string(),
+            ChartPatternFillType::DiagonalStripesLightUpwards => "ltUpDiag".to_string(),
+            ChartPatternFillType::DiagonalStripesDarkDownwards => "dkDnDiag".to_string(),
+            ChartPatternFillType::DiagonalStripesWideDownwards => "wdDnDiag".to_string(),
+            ChartPatternFillType::HorizontalStripesAlternating => "dashHorz".to_string(),
+            ChartPatternFillType::DiagonalStripesLightDownwards => "ltDnDiag".to_string(),
+        }
     }
 }
 
