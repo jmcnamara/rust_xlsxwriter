@@ -2150,16 +2150,22 @@ impl Chart {
     fn write_a_solid_fill(&mut self, color: XlsxColor, transparency: u8) {
         self.writer.xml_start_tag("a:solidFill");
 
-        // Write the a:srgbClr element.
-        self.write_a_srgb_clr(color, transparency);
+        // Write the color element.
+        self.write_color(color, transparency);
 
         self.writer.xml_end_tag("a:solidFill");
     }
 
     // Write the <a:srgbClr> element.
-    fn write_a_srgb_clr(&mut self, color: XlsxColor, transparency: u8) {
+    fn write_color(&mut self, color: XlsxColor, transparency: u8) {
         match color {
-            XlsxColor::Theme(_, _) => {}
+            XlsxColor::Theme(_, _) => {
+                let (scheme, lum_mod, lum_off) = color.chart_scheme();
+                if !scheme.is_empty() {
+                    // Write the a:schemeClr element.
+                    self.write_a_scheme_clr(scheme, lum_mod, lum_off, transparency);
+                }
+            }
             _ => {
                 let attributes = vec![("val", color.rgb_hex_value())];
 
@@ -2175,6 +2181,48 @@ impl Chart {
                 }
             }
         }
+    }
+
+    // Write the <a:schemeClr> element.
+    fn write_a_scheme_clr(&mut self, scheme: String, lum_mod: u32, lum_off: u32, transparency: u8) {
+        let attributes = vec![("val", scheme)];
+
+        if lum_mod > 0 || lum_off > 0 || transparency > 0 {
+            self.writer.xml_start_tag_attr("a:schemeClr", &attributes);
+
+            if lum_mod > 0 {
+                // Write the a:lumMod element.
+                self.write_a_lum_mod(lum_mod);
+            }
+
+            if lum_off > 0 {
+                // Write the a:lumOff element.
+                self.write_a_lum_off(lum_off);
+            }
+
+            if transparency > 0 {
+                // Write the a:alpha element.
+                self.write_a_alpha(transparency);
+            }
+
+            self.writer.xml_end_tag("a:schemeClr");
+        } else {
+            self.writer.xml_empty_tag_attr("a:schemeClr", &attributes);
+        }
+    }
+
+    // Write the <a:lumMod> element.
+    fn write_a_lum_mod(&mut self, lum_mod: u32) {
+        let attributes = vec![("val", lum_mod.to_string())];
+
+        self.writer.xml_empty_tag_attr("a:lumMod", &attributes);
+    }
+
+    // Write the <a:lumOff> element.
+    fn write_a_lum_off(&mut self, lum_off: u32) {
+        let attributes = vec![("val", lum_off.to_string())];
+
+        self.writer.xml_empty_tag_attr("a:lumOff", &attributes);
     }
 
     // Write the <a:alpha> element.
@@ -2885,37 +2933,8 @@ impl ChartSeries {
     }
 
     /// TODO
-    pub fn set_line(&mut self, line: &ChartLine) -> &mut ChartSeries {
-        self.format.line = Some(line.clone());
-        self
-    }
-
-    /// TODO
-    pub fn set_border(&mut self, line: &ChartLine) -> &mut ChartSeries {
-        self.set_line(line)
-    }
-
-    /// TODO
-    pub fn set_no_line(&mut self) -> &mut ChartSeries {
-        self.format.no_line = true;
-        self
-    }
-
-    /// TODO
-    pub fn set_no_border(&mut self) -> &mut ChartSeries {
-        self.set_no_line()
-    }
-
-    /// TODO
-    pub fn set_no_fill(&mut self) -> &mut ChartSeries {
-        self.format.no_fill = true;
-        self
-    }
-
-    /// TODO
-    pub fn set_solid_fill(&mut self, fill: &ChartSolidFill) -> &mut ChartSeries {
-        self.format.solid_fill = Some(fill.clone());
-        self
+    pub fn format(&mut self) -> &mut ChartFormat {
+        &mut self.format
     }
 
     /// Add data to the chart values cache.
@@ -3790,7 +3809,8 @@ impl ToString for ChartLegendPosition {
 }
 
 #[derive(Clone)]
-pub(crate) struct ChartFormat {
+/// TODO
+pub struct ChartFormat {
     no_fill: bool,
     no_line: bool,
     line: Option<ChartLine>,
@@ -3807,6 +3827,40 @@ impl ChartFormat {
             solid_fill: None,
             pattern_fill: None,
         }
+    }
+
+    /// TODO
+    pub fn set_line(&mut self, line: &ChartLine) -> &mut ChartFormat {
+        self.line = Some(line.clone());
+        self
+    }
+
+    /// TODO
+    pub fn set_border(&mut self, line: &ChartLine) -> &mut ChartFormat {
+        self.set_line(line)
+    }
+
+    /// TODO
+    pub fn set_no_line(&mut self) -> &mut ChartFormat {
+        self.no_line = true;
+        self
+    }
+
+    /// TODO
+    pub fn set_no_border(&mut self) -> &mut ChartFormat {
+        self.set_no_line()
+    }
+
+    /// TODO
+    pub fn set_no_fill(&mut self) -> &mut ChartFormat {
+        self.no_fill = true;
+        self
+    }
+
+    /// TODO
+    pub fn set_solid_fill(&mut self, fill: &ChartSolidFill) -> &mut ChartFormat {
+        self.solid_fill = Some(fill.clone());
+        self
     }
 
     fn has_formatting(&self) -> bool {

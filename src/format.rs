@@ -2559,6 +2559,108 @@ impl XlsxColor {
         }
     }
 
+    // TODO
+    pub(crate) fn chart_scheme(self) -> (String, u32, u32) {
+        match self {
+            Self::Theme(color, shade) => match color {
+                0 => match shade {
+                    0 => ("bg1".to_string(), 0, 0),
+                    1 => ("bg1".to_string(), 95000, 0),
+                    2 => ("bg1".to_string(), 85000, 0),
+                    3 => ("bg1".to_string(), 75000, 0),
+                    4 => ("bg1".to_string(), 65000, 0),
+                    5 => ("bg1".to_string(), 50000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                1 => match shade {
+                    0 => ("tx1".to_string(), 0, 0),
+                    1 => ("tx1".to_string(), 50000, 50000),
+                    2 => ("tx1".to_string(), 65000, 35000),
+                    3 => ("tx1".to_string(), 75000, 25000),
+                    4 => ("tx1".to_string(), 85000, 15000),
+                    5 => ("tx1".to_string(), 95000, 5000),
+                    _ => ("".to_string(), 0, 0),
+                },
+                2 => match shade {
+                    0 => ("bg2".to_string(), 0, 0),
+                    1 => ("bg2".to_string(), 90000, 0),
+                    2 => ("bg2".to_string(), 75000, 0),
+                    3 => ("bg2".to_string(), 50000, 0),
+                    4 => ("bg2".to_string(), 25000, 0),
+                    5 => ("bg2".to_string(), 10000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                3 => match shade {
+                    0 => ("tx2".to_string(), 0, 0),
+                    1 => ("tx2".to_string(), 20000, 80000),
+                    2 => ("tx2".to_string(), 40000, 60000),
+                    3 => ("tx2".to_string(), 60000, 40000),
+                    4 => ("tx2".to_string(), 75000, 0),
+                    5 => ("tx2".to_string(), 50000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                4 => match shade {
+                    0 => ("accent1".to_string(), 0, 0),
+                    1 => ("accent1".to_string(), 20000, 80000),
+                    2 => ("accent1".to_string(), 40000, 60000),
+                    3 => ("accent1".to_string(), 60000, 40000),
+                    4 => ("accent1".to_string(), 75000, 0),
+                    5 => ("accent1".to_string(), 50000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                5 => match shade {
+                    0 => ("accent2".to_string(), 0, 0),
+                    1 => ("accent2".to_string(), 20000, 80000),
+                    2 => ("accent2".to_string(), 40000, 60000),
+                    3 => ("accent2".to_string(), 60000, 40000),
+                    4 => ("accent2".to_string(), 75000, 0),
+                    5 => ("accent2".to_string(), 50000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                6 => match shade {
+                    0 => ("accent3".to_string(), 0, 0),
+                    1 => ("accent3".to_string(), 20000, 80000),
+                    2 => ("accent3".to_string(), 40000, 60000),
+                    3 => ("accent3".to_string(), 60000, 40000),
+                    4 => ("accent3".to_string(), 75000, 0),
+                    5 => ("accent3".to_string(), 50000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                7 => match shade {
+                    0 => ("accent4".to_string(), 0, 0),
+                    1 => ("accent4".to_string(), 20000, 80000),
+                    2 => ("accent4".to_string(), 40000, 60000),
+                    3 => ("accent4".to_string(), 60000, 40000),
+                    4 => ("accent4".to_string(), 75000, 0),
+                    5 => ("accent4".to_string(), 50000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                8 => match shade {
+                    0 => ("accent5".to_string(), 0, 0),
+                    1 => ("accent5".to_string(), 20000, 80000),
+                    2 => ("accent5".to_string(), 40000, 60000),
+                    3 => ("accent5".to_string(), 60000, 40000),
+                    4 => ("accent5".to_string(), 75000, 0),
+                    5 => ("accent5".to_string(), 50000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                9 => match shade {
+                    0 => ("accent6".to_string(), 0, 0),
+                    1 => ("accent6".to_string(), 20000, 80000),
+                    2 => ("accent6".to_string(), 40000, 60000),
+                    3 => ("accent6".to_string(), 60000, 40000),
+                    4 => ("accent6".to_string(), 75000, 0),
+                    5 => ("accent6".to_string(), 50000, 0),
+                    _ => ("".to_string(), 0, 0),
+                },
+                _ => ("".to_string(), 0, 0),
+            },
+
+            // Handle RGB color with an empty default.
+            _ => ("".to_string(), 0, 0),
+        }
+    }
+
     // Check if the RGB and Theme values are in the correct range. Any of the
     // simple enum will be by default.
     pub(crate) fn is_valid(self) -> bool {
