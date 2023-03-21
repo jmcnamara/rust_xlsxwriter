@@ -1423,19 +1423,16 @@ impl Chart {
                 self.write_marker();
             }
 
-            // Add default scatter chart formatting to the series data unless it
+            // Add default scatter line formatting to the series data unless it
             // has already been specified by the user.
-            if series.format.line.is_none() {
+            if self.chart_type == ChartType::Scatter && series.format.line.is_none() {
                 let mut line = ChartLine::new();
                 line.set_width(2.25);
                 series.format.line = Some(line);
             }
 
-            // TODO- Check
-            if self.chart_type == ChartType::Scatter {
-                // Write the c:spPr element.
-                self.write_sp_pr(&series.format);
-            }
+            // Write the c:spPr element.
+            self.write_sp_pr(&series.format);
 
             self.write_x_val(&series.category_range, &series.category_cache_data);
 
