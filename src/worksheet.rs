@@ -2828,6 +2828,30 @@ impl Worksheet {
         Ok(self)
     }
 
+    ///
+    pub fn insert_image_fit_to_cell(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+        keep_aspect_ratio: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let width = self.column_pixel_width(col, &image.object_movement);
+        let height = self.row_pixel_height(row, &image.object_movement);
+
+        let mut image = image.clone();
+        image.set_scale_to_size(width as f64, height as f64, keep_aspect_ratio);
+
+        self.images.insert((row, col), image);
+
+        Ok(self)
+    }
+
     /// Add a chart to a worksheet.
     ///
     /// Add a [`Chart`] to a worksheet at a cell location.

@@ -10,7 +10,7 @@ use rust_xlsxwriter::{Image, Workbook, XlsxError};
 mod common;
 
 // Test to demonstrate adding images to worksheets.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -29,11 +29,43 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test to demonstrate adding images to worksheets.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    let mut image = Image::new("tests/input/images/grey.png")?;
+
+    image
+        .set_alt_text("grey.png")
+        .set_scale_to_size(99.0 / 2.0, 69.0 / 2.0, false);
+
+    worksheet.insert_image(2, 1, &image)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_image08() {
+fn test_image08_1() {
     let test_runner = common::TestRunner::new()
         .set_name("image08")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_image08_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("image08")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

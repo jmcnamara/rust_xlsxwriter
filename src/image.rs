@@ -348,6 +348,34 @@ impl Image {
         self
     }
 
+    /// todo
+    pub fn set_scale_to_size(
+        &mut self,
+        width: f64,
+        height: f64,
+        keep_aspect_ratio: bool,
+    ) -> &mut Image {
+        if width == 0.0 || height == 0.0 {
+            return self;
+        }
+
+        let mut scale_width = (width / self.width()) * (self.width_dpi() / 96.0);
+        let mut scale_height = (height / self.height()) * (self.height_dpi() / 96.0);
+
+        if keep_aspect_ratio {
+            if scale_width < scale_height {
+                scale_height = scale_width;
+            } else {
+                scale_width = scale_height;
+            }
+        }
+
+        self.set_scale_width(scale_width);
+        self.set_scale_height(scale_height);
+
+        self
+    }
+
     /// Set the alt text for the image.
     ///
     /// Set the alt text for the image to help accessibility. The alt text is
