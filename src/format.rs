@@ -2559,7 +2559,8 @@ impl XlsxColor {
         }
     }
 
-    // TODO
+    // Convert theme colors into the luminance modulation and offset values used
+    // in chart theme colors.
     pub(crate) fn chart_scheme(self) -> (String, u32, u32) {
         match self {
             Self::Theme(color, shade) => match color {

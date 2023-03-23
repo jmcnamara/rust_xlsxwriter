@@ -2828,6 +2828,93 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// Add an image to a worksheet and fit it to a cell.
+    ///
+    /// Add an image to a worksheet and scale it so that it fits in a cell. This
+    /// method can be useful when creating a product spreadsheet with a column
+    /// of images for each product. The image should be encapsulated in an
+    /// [`Image`] object. See [`insert_image()`](Worksheet::insert_image) above
+    /// for details on the supported image types. The scaling calculation for
+    /// this method takes into account the DPI of the image in the same way that
+    /// Excel does.
+    ///
+    /// There are two options, which are controlled by the `keep_aspect_ratio`
+    /// parameter. The image can be scaled vertically and horizontally to occupy
+    /// the entire cell or the aspect ratio of the image can be maintained so
+    /// that the image is scaled to the lesser of the horizontal or vertical
+    /// sizes. See the example below.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `image` - The [`Image`] to insert into the cell.
+    /// * `keep_aspect_ratio` - Boolean value to maintain the aspect ratio of
+    ///   the image if `true` or scale independently in the horizontal and
+    ///   vertical directions if `false`.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// An example of inserting images into a worksheet using rust_xlsxwriter so
+    /// that they are scaled to a cell. This approach can be useful if you are
+    /// building up a spreadsheet of products with a column of images for each
+    /// product.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_images_fit_to_cell.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, FormatAlign, Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let center = Format::new().set_align(FormatAlign::VerticalCenter);
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Widen the first column to make the text clearer.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Set larger cells to accommodate the images.
+    ///     worksheet.set_column_width_pixels(1, 200)?;
+    ///     worksheet.set_row_height_pixels(0, 140)?;
+    ///     worksheet.set_row_height_pixels(2, 140)?;
+    ///     worksheet.set_row_height_pixels(4, 140)?;
+    ///
+    ///     // Create a new image object.
+    ///     let image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///     // Insert the image as standard, without scaling.
+    ///     worksheet.write_with_format(0, 0, "Unscaled image inserted into cell:", &center)?;
+    ///     worksheet.insert_image(0, 1, &image)?;
+    ///
+    ///     // Insert the image and scale it to fit the entire cell.
+    ///     worksheet.write_with_format(2, 0, "Image scaled to fit cell:", &center)?;
+    ///     worksheet.insert_image_fit_to_cell(2, 1, &image, false)?;
+    ///
+    ///     // Insert the image and scale it to the cell while maintaining the aspect ratio.
+    ///     // In this case it is scaled to the smaller of the width or height scales.
+    ///     worksheet.write_with_format(4, 0, "Image scaled with a fixed aspect ratio:", &center)?;
+    ///     worksheet.insert_image_fit_to_cell(4, 1, &image, true)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("images_fit_to_cell.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/app_images_fit_to_cell.png">
     ///
     pub fn insert_image_fit_to_cell(
         &mut self,
@@ -2845,7 +2932,7 @@ impl Worksheet {
         let height = self.row_pixel_height(row, &image.object_movement);
 
         let mut image = image.clone();
-        image.set_scale_to_size(width as f64, height as f64, keep_aspect_ratio);
+        image.set_scale_to_size(width, height, keep_aspect_ratio);
 
         self.images.insert((row, col), image);
 

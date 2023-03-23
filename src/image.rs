@@ -348,19 +348,110 @@ impl Image {
         self
     }
 
-    /// todo
-    pub fn set_scale_to_size(
+    /// Set the width and height scale to achieve a specific size.
+    ///
+    /// Calculate and set the horizontal and vertical scales for an image in
+    /// order to display it at a fixed width and height in a worksheet. This is
+    /// most commonly used to scale an image so that it fits within a cell or a
+    /// specific region in a worksheet. The scaling calculation takes into
+    /// account the DPI of the image in the same way that Excel does.
+    ///
+    /// There are two options, which are controlled by the `keep_aspect_ratio`
+    /// parameter. The image can be scaled vertically and horizontally to give
+    /// the specified with and height or the aspect ratio of the image can be
+    /// maintained so that the image is scaled to the lesser of the horizontal
+    /// or vertical sizes. See the example below.
+    ///
+    /// See also the
+    /// [`worksheet.insert_image_fit_to_cell()`](crate::Worksheet::insert_image_fit_to_cell)
+    /// method.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - The target width in pixels to scale the image to.
+    /// * `height` - The target height in pixels to scale the image to.
+    /// * `keep_aspect_ratio` - Boolean value to maintain the aspect ratio of
+    ///   the image if `true` or scale independently in the horizontal and
+    ///   vertical directions if `false`.
+    ///
+    /// Note: the `width` and `height` can mainly be considered as pixel sizes.
+    /// However, f64 values are allowed for cases where a fractional size is
+    /// required
+    ///
+    /// # Examples
+    ///
+    /// An example of scaling images to a fixed width and height. See also the
+    /// `worksheet.insert_image_fit_to_cell()` method.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_image_set_scale_to_size.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, FormatAlign, Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let center = Format::new().set_align(FormatAlign::VerticalCenter);
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Widen the first column to make the text clearer.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Set larger cells to accommodate the images.
+    ///     worksheet.set_column_width_pixels(1, 200)?;
+    ///     worksheet.set_row_height_pixels(0, 140)?;
+    ///     worksheet.set_row_height_pixels(2, 140)?;
+    ///     worksheet.set_row_height_pixels(4, 140)?;
+    ///
+    ///     // Create a new image object.
+    ///     let mut image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///     // Insert the image as standard, without scaling.
+    ///     worksheet.write_with_format(0, 0, "Unscaled image inserted into cell:", &center)?;
+    ///     worksheet.insert_image(0, 1, &image)?;
+    ///
+    ///     // Scale the image to fit the entire cell.
+    ///     image.set_scale_to_size(200, 140, false);
+    ///     worksheet.write_with_format(2, 0, "Image scaled to fit cell:", &center)?;
+    ///     worksheet.insert_image(2, 1, &image)?;
+    ///
+    ///     // Scale the image to fit the defined size region while maintaining the
+    ///     // aspect ratio. In this case it is scaled to the smaller of the width or
+    ///     // height scales.
+    ///     image.set_scale_to_size(200, 140, true);
+    ///     worksheet.write_with_format(4, 0, "Image scaled with a fixed aspect ratio:", &center)?;
+    ///     worksheet.insert_image(4, 1, &image)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/image_set_scale_to_size.png">
+    ///
+    ///
+    pub fn set_scale_to_size<T>(
         &mut self,
-        width: f64,
-        height: f64,
+        width: T,
+        height: T,
         keep_aspect_ratio: bool,
-    ) -> &mut Image {
-        if width == 0.0 || height == 0.0 {
+    ) -> &mut Image
+    where
+        T: Into<f64> + Copy,
+    {
+        if width.into() == 0.0 || height.into() == 0.0 {
             return self;
         }
 
-        let mut scale_width = (width / self.width()) * (self.width_dpi() / 96.0);
-        let mut scale_height = (height / self.height()) * (self.height_dpi() / 96.0);
+        let mut scale_width = (width.into() / self.width()) * (self.width_dpi() / 96.0);
+        let mut scale_height = (height.into() / self.height()) * (self.height_dpi() / 96.0);
 
         if keep_aspect_ratio {
             if scale_width < scale_height {
