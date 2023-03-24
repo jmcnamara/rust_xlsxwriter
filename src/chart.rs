@@ -2097,6 +2097,9 @@ impl Chart {
         } else if let Some(solid_fill) = &format.solid_fill {
             // Write the a:solidFill element.
             self.write_a_solid_fill(solid_fill.color, solid_fill.transparency);
+        } else if let Some(pattern_fill) = &format.pattern_fill {
+            // Write the a:pattFill element.
+            self.write_a_patt_fill(pattern_fill);
         }
 
         if format.no_line {
@@ -2151,6 +2154,29 @@ impl Chart {
         self.write_color(color, transparency);
 
         self.writer.xml_end_tag("a:solidFill");
+    }
+
+    // Write the <a:pattFill> element.
+    fn write_a_patt_fill(&mut self, fill: &ChartPatternFill) {
+        let attributes = vec![("prst", fill.pattern.to_string())];
+
+        self.writer.xml_start_tag_attr("a:pattFill", &attributes);
+
+        if fill.foreground_color.is_not_default() {
+            // Write the <a:fgClr> element.
+            self.writer.xml_start_tag("a:fgClr");
+            self.write_color(fill.foreground_color, 0);
+            self.writer.xml_end_tag("a:fgClr");
+        }
+
+        if fill.background_color.is_not_default() {
+            // Write the <a:bgClr> element.
+            self.writer.xml_start_tag("a:bgClr");
+            self.write_color(fill.background_color, 0);
+            self.writer.xml_end_tag("a:bgClr");
+        }
+
+        self.writer.xml_end_tag("a:pattFill");
     }
 
     // Write the <a:srgbClr> element.
@@ -3857,6 +3883,12 @@ impl ChartFormat {
     /// TODO
     pub fn set_solid_fill(&mut self, fill: &ChartSolidFill) -> &mut ChartFormat {
         self.solid_fill = Some(fill.clone());
+        self
+    }
+
+    /// TODO
+    pub fn set_pattern_fill(&mut self, fill: &ChartPatternFill) -> &mut ChartFormat {
+        self.pattern_fill = Some(fill.clone());
         self
     }
 
