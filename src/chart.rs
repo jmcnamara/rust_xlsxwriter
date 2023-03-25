@@ -133,6 +133,7 @@ pub struct Chart {
     default_num_format: String,
     has_overlap: bool,
     overlap: i8,
+    gap: u16,
     style: u8,
 }
 
@@ -222,6 +223,7 @@ impl Chart {
             default_num_format: "General".to_string(),
             has_overlap: false,
             overlap: 0,
+            gap: 150,
             style: 2,
         };
 
@@ -1046,6 +1048,11 @@ impl Chart {
         // Write the c:ser elements.
         self.write_series();
 
+        if self.gap != 150 {
+            // Write the c:gapWidth element.
+            self.write_gap_width(self.gap);
+        }
+
         if self.has_overlap {
             // Write the c:overlap element.
             self.write_overlap();
@@ -1070,7 +1077,12 @@ impl Chart {
         // Write the c:ser elements.
         self.write_series();
 
-        if self.has_overlap {
+        if self.gap != 150 {
+            // Write the c:gapWidth element.
+            self.write_gap_width(self.gap);
+        }
+
+        if self.overlap != 0 {
             // Write the c:overlap element.
             self.write_overlap();
         }
@@ -1374,6 +1386,16 @@ impl Chart {
     fn write_series(&mut self) {
         for (index, series) in self.series.clone().iter().enumerate() {
             self.writer.xml_start_tag("c:ser");
+
+            // Copy a series overlap to the parent chart.
+            if series.overlap != 0 {
+                self.overlap = series.overlap;
+            }
+
+            // Copy a series gap to the parent chart.
+            if series.gap != 150 {
+                self.gap = series.gap;
+            }
 
             // Write the c:idx element.
             self.write_idx(index);
@@ -2290,9 +2312,16 @@ impl Chart {
             .xml_empty_tag_attr("c:majorTickMark", &attributes);
     }
 
+    // Write the <c:gapWidth> element.
+    fn write_gap_width(&mut self, gap: u16) {
+        let attributes = vec![("val", gap.to_string())];
+
+        self.writer.xml_empty_tag_attr("c:gapWidth", &attributes);
+    }
+
     // Write the <c:overlap> element.
     fn write_overlap(&mut self) {
-        let attributes = vec![("val", "100".to_string())];
+        let attributes = vec![("val", self.overlap.to_string())];
 
         self.writer.xml_empty_tag_attr("c:overlap", &attributes);
     }
@@ -2587,6 +2616,8 @@ pub struct ChartSeries {
     pub(crate) category_cache_data: ChartSeriesCacheData,
     pub(crate) title: ChartTitle,
     pub(crate) format: ChartFormat,
+    pub(crate) gap: u16,
+    pub(crate) overlap: i8,
 }
 
 #[allow(clippy::new_without_default)]
@@ -2689,6 +2720,8 @@ impl ChartSeries {
             category_cache_data: ChartSeriesCacheData::new(),
             title: ChartTitle::new(),
             format: ChartFormat::new(),
+            gap: 150,
+            overlap: 0,
         }
     }
 
@@ -2952,6 +2985,24 @@ impl ChartSeries {
         T: IntoChartRange,
     {
         self.title.set_name(name);
+        self
+    }
+
+    /// TODO
+    pub fn set_gap(&mut self, gap: u16) -> &mut ChartSeries {
+        if gap <= 500 {
+            self.gap = gap;
+        }
+
+        self
+    }
+
+    /// TODO
+    pub fn set_overlap(&mut self, overlap: i8) -> &mut ChartSeries {
+        if (-100..=100).contains(&overlap) {
+            self.overlap = overlap;
+        }
+
         self
     }
 

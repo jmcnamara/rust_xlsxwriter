@@ -4,7 +4,10 @@
 
 //! A example of creating column charts using the rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    Chart, ChartLine, ChartPatternFill, ChartPatternFillType, ChartType, Format, Workbook,
+    XlsxColor, XlsxError,
+};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -29,12 +32,29 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_name("Sheet1!$A$1")
-        .set_values("Sheet1!$A$2:$A$5");
+        .set_values("Sheet1!$A$2:$A$5")
+        .set_gap(70)
+        .format()
+        .set_pattern_fill(
+            &ChartPatternFill::new()
+                .set_pattern(ChartPatternFillType::Shingle)
+                .set_foreground_color(XlsxColor::RGB(0x804000))
+                .set_background_color(XlsxColor::RGB(0xC68C53)),
+        )
+        .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0x804000)));
 
     chart
         .add_series()
         .set_name("Sheet1!$B$1")
-        .set_values("Sheet1!$B$2:$B$5");
+        .set_values("Sheet1!$B$2:$B$5")
+        .format()
+        .set_pattern_fill(
+            &ChartPatternFill::new()
+                .set_pattern(ChartPatternFillType::HorizontalBrick)
+                .set_foreground_color(XlsxColor::RGB(0xB30000))
+                .set_background_color(XlsxColor::RGB(0xFF6666)),
+        )
+        .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0xB30000)));
 
     // Add a chart title and some axis labels.
     chart.title().set_name("Cladding types");

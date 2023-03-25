@@ -38,6 +38,9 @@ documentation and generally show how an individual function works.
 * app_chart_line.rs - A example of creating line charts using the
   rust_xlsxwriter library.
 
+* app_chart_pattern.rs - A example of creating column charts using the
+  rust_xlsxwriter library.
+
 * app_chart_pie.rs - A example of creating pie charts using the
   rust_xlsxwriter library.
 
@@ -89,6 +92,11 @@ documentation and generally show how an individual function works.
 
 * app_images.rs - An example of inserting images into a worksheet using
   rust_xlsxwriter.
+
+* app_images_fit_to_cell.rs - An example of inserting images into a
+  worksheet using rust_xlsxwriter so that they are scaled to a cell. This
+  approach can be useful if you are building up a spreadsheet of products
+  with a column of images for each product.
 
 * app_lambda.rs - An example of using the new Excel LAMBDA() function with
   the rust_xlsxwriter library.
@@ -286,6 +294,10 @@ documentation and generally show how an individual function works.
   image object and set the option to control how it behaves when the cells
   underneath it are changed.
 
+* doc_image_set_scale_to_size.rs - An example of scaling images to a fixed
+  width and height. See also the `worksheet.insert_image_fit_to_cell()`
+  method.
+
 * doc_image_set_scale_width.rs - This example shows how to create an image
   object and use it to insert the image into a worksheet. The image in this
   case is scaled.
@@ -319,7 +331,7 @@ documentation and generally show how an individual function works.
   to a Vec<u8> buffer.
 
 * doc_workbook_save_to_path.rs - Demonstrates creating a simple workbook
-  using a rust Path reference.
+  using a Rust Path reference.
 
 * doc_workbook_worksheet_from_index.rs - Demonstrates getting worksheet
   reference by index.
