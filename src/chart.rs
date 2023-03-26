@@ -2988,25 +2988,114 @@ impl ChartSeries {
         self
     }
 
-    /// TODO
-    pub fn set_gap(&mut self, gap: u16) -> &mut ChartSeries {
-        if gap <= 500 {
-            self.gap = gap;
-        }
-
-        self
-    }
-
-    /// TODO
+    /// Set the series overlap for a chart/bar chart.
+    ///
+    /// Set the overlap between series in a Bar/Column chart. The range is -100
+    /// <= overlap <= 100 and the default is 0.
+    ///
+    /// Note, In Excel this property is only available for Bar and Column charts
+    /// and also only needs to be applied to one of the data series of the
+    /// chart.
+    ///
+    /// # Arguments
+    ///
+    /// * `overlap`: Overlap percentage of columns in Bar/Column charts. The
+    /// range is -100 <= overlap <= 100 and the default is 0.
+    ///
+    /// # Examples
+    ///
+    /// A example of setting the chart series gap and overlap. Note that it only
+    /// needs to be applied to one of the series in the chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_set_overlap.rs
+    /// #
+    /// # use rust_xlsxwriter::*;
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add the worksheet data that the charts will refer to.
+    /// #     let data = [[105, 150, 130, 90], [50, 120, 100, 110]];
+    /// #     for (col_num, col_data) in data.iter().enumerate() {
+    /// #         for (row_num, row_data) in col_data.iter().enumerate() {
+    /// #             worksheet.write(row_num as u32, col_num as u16, *row_data)?;
+    /// #         }
+    /// #     }
+    /// #
+    /// #     // Create a new column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Configure the data series and add a gap/overlap. Note that it only needs
+    ///     // to be applied to one of the series in the chart.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$4")
+    ///         .set_overlap(37)
+    ///         .set_gap(70);
+    ///
+    ///     chart.add_series().set_values("Sheet1!$B$1:$B$4");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(1, 3, &chart)?;
+    ///
+    ///     workbook.save("chart.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_overlap.png">
+    ///
     pub fn set_overlap(&mut self, overlap: i8) -> &mut ChartSeries {
         if (-100..=100).contains(&overlap) {
             self.overlap = overlap;
         }
-
         self
     }
 
-    /// TODO
+    /// Set the gap width for a chart/bar chart.
+    ///
+    /// Set the gap width between series in a Bar/Column chart. The range is 0
+    /// <= gap <= 500 and the default is 150.
+    ///
+    /// Note, In Excel this property is only available for Bar and Column charts
+    /// and also only needs to be applied to one of the data series of the
+    /// chart.
+    ///
+    /// # Arguments
+    ///
+    /// * `gap`: Gap percentage of columns in Bar/Column charts. The range is 0
+    /// <= gap <= 500 and the default is 150.
+    ///
+    /// See the example for [`series.set_overlap()`](ChartSeries::set_overlap)
+    /// above.
+    ///
+    pub fn set_gap(&mut self, gap: u16) -> &mut ChartSeries {
+        if gap <= 500 {
+            self.gap = gap;
+        }
+        self
+    }
+
+    /// Access the chart series format object to apply formatting.
+    ///
+    /// Access the [`ChartFormat`] object for a chart series in order to apply
+    /// formatting to it.
+    ///
+    /// The `format()` method returns a reference to the chart series
+    /// [`ChartFormat`] object. This can be used to apply formatting such as:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
     pub fn format(&mut self) -> &mut ChartFormat {
         &mut self.format
     }
@@ -3883,7 +3972,104 @@ impl ToString for ChartLegendPosition {
 }
 
 #[derive(Clone)]
-/// TODO
+/// A struct to represent formatting for various Chart objects.
+///
+/// Excel uses a standard formatting dialog for the elements of a chart such as
+/// data series, the plot area, the chart area, the legend or individual points.
+/// It looks like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_format_dialog.png">
+///
+/// The [`ChartFormat`] struct represents many of these format options and just
+/// like Excel it offers a similar formatting interface for a number of the
+/// chart sub-elements supported by rust_xlsxwriter.
+///
+/// The [`ChartFormat`] struct is accessed by using the `format()` method of a
+/// chart element to obtain a reference to the formatting struct for that
+/// element. After that it can be used to apply formatting such as:
+///
+/// - `no_fill`: Turn of the fill for the chart object.
+/// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+/// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+/// - `no_line`: Turn off the line/border for the chart object.
+/// - `line`: Set the [`ChartLine`] properties for lines or borders.
+///
+/// # Examples
+///
+/// A example of accessing the [`ChartFormat`] for data series in a chart and
+/// using them to apply formatting.
+///
+/// ```
+/// # // This code is available in examples/app_chart_pattern.rs
+/// #
+/// # use rust_xlsxwriter::*;
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #     let bold = Format::new().set_bold();
+/// #
+/// #     // Add the worksheet data that the charts will refer to.
+/// #     worksheet.write_with_format(0, 0, "Shingle", &bold)?;
+/// #     worksheet.write_with_format(0, 1, "Brick", &bold)?;
+/// #
+/// #     let data = [[105, 150, 130, 90], [50, 120, 100, 110]];
+/// #     for (col_num, col_data) in data.iter().enumerate() {
+/// #         for (row_num, row_data) in col_data.iter().enumerate() {
+/// #             worksheet.write(row_num as u32 + 1, col_num as u16, *row_data)?;
+/// #         }
+/// #     }
+/// #
+/// #     // Create a new column chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Configure the first data series and add fill patterns.
+///     chart
+///         .add_series()
+///         .set_name("Sheet1!$A$1")
+///         .set_values("Sheet1!$A$2:$A$5")
+///         .set_gap(70)
+///         .format()
+///         .set_pattern_fill(
+///             &ChartPatternFill::new()
+///                 .set_pattern(ChartPatternFillType::Shingle)
+///                 .set_foreground_color(XlsxColor::RGB(0x804000))
+///                 .set_background_color(XlsxColor::RGB(0xC68C53)),
+///         )
+///         .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0x804000)));
+///
+///     chart
+///         .add_series()
+///         .set_name("Sheet1!$B$1")
+///         .set_values("Sheet1!$B$2:$B$5")
+///         .format()
+///         .set_pattern_fill(
+///             &ChartPatternFill::new()
+///                 .set_pattern(ChartPatternFillType::HorizontalBrick)
+///                 .set_foreground_color(XlsxColor::RGB(0xB30000))
+///                 .set_background_color(XlsxColor::RGB(0xFF6666)),
+///         )
+///         .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0xB30000)));
+///
+///     // Add a chart title and some axis labels.
+///     chart.title().set_name("Cladding types");
+///     chart.x_axis().set_name("Region");
+///     chart.y_axis().set_name("Number of houses");
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(1, 3, &chart)?;
+///
+/// #     workbook.save("chart_pattern.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/app_chart_pattern.png">
+///
+///
 pub struct ChartFormat {
     no_fill: bool,
     no_line: bool,
@@ -3903,46 +4089,94 @@ impl ChartFormat {
         }
     }
 
-    /// TODO
+    /// Set the line formatting for a chart element.
+    ///
+    /// See the [`ChartLine`] struct for details on the line properties that can
+    /// be set.
+    ///
     pub fn set_line(&mut self, line: &ChartLine) -> &mut ChartFormat {
         self.line = Some(line.clone());
         self
     }
 
-    /// TODO
+    /// Set the border formatting for a chart element.
+    ///
+    /// See the [`ChartLine`] struct for details on the border properties that
+    /// can be set.
+    ///
     pub fn set_border(&mut self, line: &ChartLine) -> &mut ChartFormat {
         self.set_line(line)
     }
 
-    /// TODO
+    /// Turn off the line property for a chart element.
+    ///
+    /// The line property for a chart element can be turned off if you wish to
+    /// hide it.
+    ///
+    /// For example this line chart with the line turned off for a data series:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_formatting3.png">
+    ///
     pub fn set_no_line(&mut self) -> &mut ChartFormat {
         self.no_line = true;
         self
     }
 
-    /// TODO
+    /// Turn off the border property for a chart element.
+    ///
+    /// The border property for a chart element can be turned off if you wish to
+    /// hide it.
+    ///
     pub fn set_no_border(&mut self) -> &mut ChartFormat {
         self.set_no_line()
     }
 
-    /// TODO
+    /// Turn off the fill property for a chart element.
+    ///
+    /// The fill property for a chart element can be turned off if you wish to
+    /// hide it and display only the border.
+    ///
+    /// For example this Column chart with the internal fill turned off for a
+    /// data series:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_fill1.png">
+    ///
     pub fn set_no_fill(&mut self) -> &mut ChartFormat {
         self.no_fill = true;
         self
     }
 
-    /// TODO
+    /// Set the solid fill formatting for a chart element.
+    ///
+    /// See the [`ChartSolidFill`] struct for details on the solid fill
+    /// properties that can be set.
+    ///
+    /// For example this Column chart with the solid fill set to a non-default
+    /// color for a data series:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_fill2.png">
+    ///
     pub fn set_solid_fill(&mut self, fill: &ChartSolidFill) -> &mut ChartFormat {
         self.solid_fill = Some(fill.clone());
         self
     }
 
-    /// TODO
+    /// Set the pattern fill formatting for a chart element.
+    ///
+    /// See the [`ChartPatternFill`] struct for details on the pattern fill
+    /// properties that can be set.
+    ///
+    /// For example this Column chart with the pattern fills for the data series:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/app_chart_pattern.png">
+    ///
     pub fn set_pattern_fill(&mut self, fill: &ChartPatternFill) -> &mut ChartFormat {
         self.pattern_fill = Some(fill.clone());
         self
     }
 
+    // Check if formatting has been set for the struct.
     fn has_formatting(&self) -> bool {
         self.line.is_some()
             || self.solid_fill.is_some()

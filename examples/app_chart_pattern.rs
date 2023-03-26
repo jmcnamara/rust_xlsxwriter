@@ -2,12 +2,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! A example of creating column charts using the rust_xlsxwriter library.
+//! A example of creating column charts with fill patterns using the
+//! rust_xlsxwriter library.
 
-use rust_xlsxwriter::{
-    Chart, ChartLine, ChartPatternFill, ChartPatternFillType, ChartType, Format, Workbook,
-    XlsxColor, XlsxError,
-};
+use rust_xlsxwriter::*;
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
