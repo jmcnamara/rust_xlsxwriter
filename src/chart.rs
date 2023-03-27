@@ -311,7 +311,15 @@ impl Chart {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
     ///
     pub fn add_series(&mut self) -> &mut ChartSeries {
-        let series = ChartSeries::new();
+        let mut series = ChartSeries::new();
+
+        // The default Scatter chart has a hidden line with a standard width.
+        if self.chart_type == ChartType::Scatter {
+            series
+                .format()
+                .set_line(ChartLine::new().set_width(2.25).set_hidden());
+        }
+
         self.series.push(series);
 
         self.series.last_mut().unwrap()
@@ -2126,7 +2134,7 @@ impl Chart {
 
         if format.no_line {
             // Write a default line with no fill.
-            self.write_a_ln(&ChartLine::new());
+            self.write_a_ln_none();
         } else if let Some(line) = &format.line {
             // Write the a:ln element.
             self.write_a_ln(line);
@@ -2138,32 +2146,48 @@ impl Chart {
     // Write the <a:ln> element.
     fn write_a_ln(&mut self, line: &ChartLine) {
         let mut attributes = vec![];
-        let mut width = line.width;
 
-        /* Round width to nearest 0.25, like Excel. */
-        width = ((width + 0.125) * 4.0).floor() / 4.0;
+        if let Some(width) = &line.width {
+            /* Round width to nearest 0.25, like Excel. */
+            let width = ((*width + 0.125) * 4.0).floor() / 4.0;
 
-        /* Convert to Excel internal units. */
-        let width = (12700.0 * width).ceil() as u32;
+            /* Convert to Excel internal units. */
+            let width = (12700.0 * width).ceil() as u32;
 
-        if width > 0 {
             attributes.push(("w", width.to_string()));
         }
 
-        self.writer.xml_start_tag_attr("a:ln", &attributes);
+        if line.color.is_not_default() || line.dash_type != ChartLineDashType::Solid || line.hidden
+        {
+            self.writer.xml_start_tag_attr("a:ln", &attributes);
 
-        if line.color.is_default() {
-            // Write the a:noFill element.
-            self.write_a_no_fill();
+            if line.hidden {
+                // Write the a:noFill element.
+                self.write_a_no_fill();
+            } else {
+                if line.color.is_not_default() {
+                    // Write the a:solidFill element.
+                    self.write_a_solid_fill(line.color, line.transparency);
+                }
+
+                if line.dash_type != ChartLineDashType::Solid {
+                    // Write the a:prstDash element.
+                    self.write_a_prst_dash(line);
+                }
+            }
+
+            self.writer.xml_end_tag("a:ln");
         } else {
-            // Write the a:solidFill element.
-            self.write_a_solid_fill(line.color, line.transparency);
+            self.writer.xml_empty_tag_attr("a:ln", &attributes);
         }
+    }
 
-        if line.dash_type != ChartLineDashType::Solid {
-            // Write the a:prstDash element.
-            self.write_a_prst_dash(line);
-        }
+    // Write the <a:ln> element.
+    fn write_a_ln_none(&mut self) {
+        self.writer.xml_start_tag("a:ln");
+
+        // Write the a:noFill element.
+        self.write_a_no_fill();
 
         self.writer.xml_end_tag("a:ln");
     }
@@ -3689,7 +3713,7 @@ impl ToString for ChartGrouping {
     }
 }
 
-/// Struct to represent a Chart legend.
+/// A struct to represent a Chart legend.
 ///
 /// The `ChartLegend` struct is a representation of a legend on an Excel chart.
 /// The legend is a rectangular box that identifies the name and color of each
@@ -4186,59 +4210,344 @@ impl ChartFormat {
     }
 }
 
-/// Todo
+/// A struct to represent a Chart line/border.
+///
+/// The [`ChartLine`] struct represents the formatting properties for a line or
+/// border for a Chart element. It is a sub property of the [`ChartFormat`]
+/// struct and is used with the [`format().set_line()`](ChartFormat::set_line)
+/// or [`format().set_border()`](ChartFormat::set_border) methods.
+///
+/// Excel uses the element names "Line" and "Border" depending on the context.
+/// For a Line chart the line is represented by a line property but for a Column
+/// chart the line becomes the border. Both of these share the same properties
+/// and are both represented in rust_xlsxwriter by the [`ChartLine`] struct.
+///
+///
+/// # Examples
+///
+/// An example of formatting a line/border in a chart element.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_line_formatting.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxColor, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a simple Column chart.
+///     let mut chart = Chart::new(ChartType::Line);
+///
+///     // Add a data series with formatting.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .format()
+///         .set_line(
+///             &ChartLine::new()
+///                 .set_color(XlsxColor::RGB(0xFF9900))
+///                 .set_width(5.25)
+///                 .set_dash_type(ChartLineDashType::SquareDot)
+///                 .set_transparency(30),
+///         );
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
+///
 #[derive(Clone)]
 pub struct ChartLine {
     color: XlsxColor,
-    width: f64,
+    width: Option<f64>,
     transparency: u8,
     dash_type: ChartLineDashType,
+    hidden: bool,
 }
 
 impl ChartLine {
-    /// TODO
+    /// Create a new ChartLine object to represent a Chart line/border.
+    ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartLine {
         ChartLine {
             color: XlsxColor::Automatic,
-            width: 0.0,
+            width: None,
             transparency: 0,
             dash_type: ChartLineDashType::Solid,
+            hidden: false,
         }
     }
 
-    /// TODO
+    /// Set the color of a line/border.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The color property defined by a [`XlsxColor`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the line color in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_line_set_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_line(&ChartLine::new().set_color(XlsxColor::RGB(0xFF9900)));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_color.png">
+    ///
     pub fn set_color(&mut self, color: XlsxColor) -> &mut ChartLine {
-        if !color.is_valid() {
-            return self;
+        if color.is_valid() {
+            self.color = color;
         }
 
-        self.color = color;
         self
     }
 
-    /// TODO
+    /// Set the width of the line or border.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - The width should be specified in increments of 0.25 of a
+    /// point as in Excel.
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the line width in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_line_set_width.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_line(&ChartLine::new().set_width(10.0));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_line_set_width.png">
+    ///
     pub fn set_width(&mut self, width: f64) -> &mut ChartLine {
-        if width >= 0.0 {
-            self.width = width;
+        if width <= 1584.0 {
+            self.width = Some(width);
         }
 
         self
     }
 
-    /// TODO
+    /// Set the dash type of the line or border.
+    ///
+    /// # Arguments
+    ///
+    /// * `dash_type` - A [`ChartLineDashType`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the line dash type in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_line_set_dash_type.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_line(&ChartLine::new().set_dash_type(ChartLineDashType::DashDot));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_dash_type.png">
+    ///
     pub fn set_dash_type(&mut self, dash_type: ChartLineDashType) -> &mut ChartLine {
         self.dash_type = dash_type;
-
         self
     }
 
-    /// TODO
+    /// Set the transparency of a line/border.
+    ///
+    /// Set the transparency of a line/border for a Chart element. You must also
+    /// specify a line color in order for the transparency to be applied.
+    ///
+    /// # Arguments
+    ///
+    /// * `transparency` - The color transparency in the range 0 <= transparency
+    ///   <= 100. The default value is 0.
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the line transparency in a chart element. Note, you
+    /// must set also set a color in order to set the transparency.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_line_set_transparency.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_line(
+    ///             &ChartLine::new()
+    ///                 .set_color(XlsxColor::RGB(0xFF9900))
+    ///                 .set_transparency(50),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_transparency.png">
+    ///
     pub fn set_transparency(&mut self, transparency: u8) -> &mut ChartLine {
         if transparency <= 100 {
             self.transparency = transparency;
         }
 
+        self
+    }
+
+    // Internal method for some chart types such as Scatter that set a line
+    // width but also set the line hidden.
+    pub(crate) fn set_hidden(&mut self) -> &mut ChartLine {
+        self.hidden = true;
         self
     }
 }
