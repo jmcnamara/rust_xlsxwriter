@@ -22,7 +22,9 @@ use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::XMLWriter;
-use crate::{utility, HeaderImagePosition, Image, ObjectMovement, ProtectionOptions, XlsxColor};
+use crate::{
+    utility, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions, XlsxColor,
+};
 use crate::{Chart, ChartSeriesCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
 
@@ -5073,12 +5075,15 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_tab_color.png">
     ///
-    pub fn set_tab_color(&mut self, color: XlsxColor) -> &mut Worksheet {
-        if !color.is_valid() {
-            return self;
+    pub fn set_tab_color<T>(&mut self, color: T) -> &mut Worksheet
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.tab_color = color;
         }
 
-        self.tab_color = color;
         self
     }
 

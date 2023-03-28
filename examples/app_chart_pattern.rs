@@ -36,10 +36,10 @@ fn main() -> Result<(), XlsxError> {
         .set_pattern_fill(
             &ChartPatternFill::new()
                 .set_pattern(ChartPatternFillType::Shingle)
-                .set_foreground_color(XlsxColor::RGB(0x804000))
-                .set_background_color(XlsxColor::RGB(0xC68C53)),
+                .set_foreground_color("#804000")
+                .set_background_color("#C68C53"),
         )
-        .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0x804000)));
+        .set_border(&ChartLine::new().set_color("#804000"));
 
     chart
         .add_series()
@@ -49,10 +49,10 @@ fn main() -> Result<(), XlsxError> {
         .set_pattern_fill(
             &ChartPatternFill::new()
                 .set_pattern(ChartPatternFillType::HorizontalBrick)
-                .set_foreground_color(XlsxColor::RGB(0xB30000))
-                .set_background_color(XlsxColor::RGB(0xFF6666)),
+                .set_foreground_color("#B30000")
+                .set_background_color("#FF6666"),
         )
-        .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0xB30000)));
+        .set_border(&ChartLine::new().set_color("#B30000"));
 
     // Add a chart title and some axis labels.
     chart.title().set_name("Cladding types");

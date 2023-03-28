@@ -4,7 +4,7 @@
 
 //! An example of formatting the line color in a chart element.
 
-use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -26,7 +26,7 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
         .format()
-        .set_line(&ChartLine::new().set_color(XlsxColor::RGB(0xFF9900)));
+        .set_line(&ChartLine::new().set_color("#FF9900"));
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

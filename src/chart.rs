@@ -12,7 +12,7 @@ use crate::{
     drawing::{DrawingObject, DrawingType},
     utility,
     xmlwriter::XMLWriter,
-    ColNum, ObjectMovement, RowNum, XlsxColor, XlsxError, COL_MAX, ROW_MAX,
+    ColNum, IntoColor, ObjectMovement, RowNum, XlsxColor, XlsxError, COL_MAX, ROW_MAX,
 };
 
 #[derive(Clone)]
@@ -4057,10 +4057,10 @@ impl ToString for ChartLegendPosition {
 ///         .set_pattern_fill(
 ///             &ChartPatternFill::new()
 ///                 .set_pattern(ChartPatternFillType::Shingle)
-///                 .set_foreground_color(XlsxColor::RGB(0x804000))
-///                 .set_background_color(XlsxColor::RGB(0xC68C53)),
+///                 .set_foreground_color("#804000")
+///                 .set_background_color("#C68C53"),
 ///         )
-///         .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0x804000)));
+///         .set_border(&ChartLine::new().set_color("#804000"));
 ///
 ///     chart
 ///         .add_series()
@@ -4070,10 +4070,10 @@ impl ToString for ChartLegendPosition {
 ///         .set_pattern_fill(
 ///             &ChartPatternFill::new()
 ///                 .set_pattern(ChartPatternFillType::HorizontalBrick)
-///                 .set_foreground_color(XlsxColor::RGB(0xB30000))
-///                 .set_background_color(XlsxColor::RGB(0xFF6666)),
+///                 .set_foreground_color("#B30000")
+///                 .set_background_color("#FF6666"),
 ///         )
-///         .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0xB30000)));
+///         .set_border(&ChartLine::new().set_color("#B30000"));
 ///
 ///     // Add a chart title and some axis labels.
 ///     chart.title().set_name("Cladding types");
@@ -4230,9 +4230,7 @@ impl ChartFormat {
 /// ```
 /// # // This code is available in examples/doc_chart_line_formatting.rs
 /// #
-/// # use rust_xlsxwriter::{
-/// #     Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxColor, XlsxError,
-/// # };
+/// # use rust_xlsxwriter::{Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     let mut workbook = Workbook::new();
@@ -4256,7 +4254,7 @@ impl ChartFormat {
 ///         .format()
 ///         .set_line(
 ///             &ChartLine::new()
-///                 .set_color(XlsxColor::RGB(0xFF9900))
+///                 .set_color("#FF9900")
 ///                 .set_width(5.25)
 ///                 .set_dash_type(ChartLineDashType::SquareDot)
 ///                 .set_transparency(30),
@@ -4304,7 +4302,8 @@ impl ChartLine {
     ///
     /// # Arguments
     ///
-    /// * `color` - The color property defined by a [`XlsxColor`] enum value.
+    /// * `color` - The color property defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
     ///
@@ -4313,7 +4312,7 @@ impl ChartLine {
     /// ```
     /// # // This code is available in examples/doc_chart_line_set_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4335,7 +4334,7 @@ impl ChartLine {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .format()
-    ///         .set_line(&ChartLine::new().set_color(XlsxColor::RGB(0xFF9900)));
+    ///         .set_line(&ChartLine::new().set_color("#FF9900"));
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4349,9 +4348,14 @@ impl ChartLine {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_color.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_line_set_color.png">
     ///
-    pub fn set_color(&mut self, color: XlsxColor) -> &mut ChartLine {
+    pub fn set_color<T>(&mut self, color: T) -> &mut ChartLine
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
         if color.is_valid() {
             self.color = color;
         }
@@ -4494,7 +4498,7 @@ impl ChartLine {
     /// ```
     /// # // This code is available in examples/doc_chart_line_set_transparency.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4518,7 +4522,7 @@ impl ChartLine {
     ///         .format()
     ///         .set_line(
     ///             &ChartLine::new()
-    ///                 .set_color(XlsxColor::RGB(0xFF9900))
+    ///                 .set_color("#FF9900")
     ///                 .set_transparency(50),
     ///         );
     ///
@@ -4570,12 +4574,15 @@ impl ChartSolidFill {
     }
 
     /// TODO
-    pub fn set_color(&mut self, color: XlsxColor) -> &mut ChartSolidFill {
-        if !color.is_valid() {
-            return self;
+    pub fn set_color<T>(&mut self, color: T) -> &mut ChartSolidFill
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.color = color;
         }
 
-        self.color = color;
         self
     }
 
@@ -4615,22 +4622,28 @@ impl ChartPatternFill {
     }
 
     /// TODO
-    pub fn set_background_color(&mut self, color: XlsxColor) -> &mut ChartPatternFill {
-        if !color.is_valid() {
-            return self;
+    pub fn set_background_color<T>(&mut self, color: T) -> &mut ChartPatternFill
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.background_color = color;
         }
 
-        self.background_color = color;
         self
     }
 
     /// TODO
-    pub fn set_foreground_color(&mut self, color: XlsxColor) -> &mut ChartPatternFill {
-        if !color.is_valid() {
-            return self;
+    pub fn set_foreground_color<T>(&mut self, color: T) -> &mut ChartPatternFill
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.foreground_color = color;
         }
 
-        self.foreground_color = color;
         self
     }
 }

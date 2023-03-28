@@ -4,9 +4,7 @@
 
 //! An example of formatting a line/border in a chart element.
 
-use rust_xlsxwriter::{
-    Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxColor, XlsxError,
-};
+use rust_xlsxwriter::{Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -30,7 +28,7 @@ fn main() -> Result<(), XlsxError> {
         .format()
         .set_line(
             &ChartLine::new()
-                .set_color(XlsxColor::RGB(0xFF9900))
+                .set_color("#FF9900")
                 .set_width(5.25)
                 .set_dash_type(ChartLineDashType::SquareDot)
                 .set_transparency(70),

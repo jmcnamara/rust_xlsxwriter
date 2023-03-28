@@ -983,12 +983,15 @@ impl Format {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/format_set_font_color.png">
     ///
-    pub fn set_font_color(mut self, color: XlsxColor) -> Format {
-        if !color.is_valid() {
-            return self;
+    pub fn set_font_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.font_color = color;
         }
 
-        self.font_color = color;
         self
     }
 
@@ -1643,7 +1646,7 @@ impl Format {
     /// # Arguments
     ///
     /// * `color` - The background color property defined by a [`XlsxColor`]
-    ///   enum value.
+    ///   enum value or a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
     ///
@@ -1679,12 +1682,15 @@ impl Format {
     ///
     ///
     ///
-    pub fn set_background_color(mut self, color: XlsxColor) -> Format {
-        if !color.is_valid() {
-            return self;
+    pub fn set_background_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.background_color = color;
         }
 
-        self.background_color = color;
         self
     }
 
@@ -1697,7 +1703,7 @@ impl Format {
     /// # Arguments
     ///
     /// * `color` - The foreground color property defined by a [`XlsxColor`]
-    ///   enum value.
+    ///   enum value or a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
     ///
@@ -1735,12 +1741,15 @@ impl Format {
     ///
     ///
     ///
-    pub fn set_foreground_color(mut self, color: XlsxColor) -> Format {
-        if !color.is_valid() {
-            return self;
+    pub fn set_foreground_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.foreground_color = color;
         }
 
-        self.foreground_color = color;
         self
     }
 
@@ -1818,7 +1827,8 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
     ///
@@ -1858,9 +1868,14 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_border_color.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_border_color.png">
     ///
-    pub fn set_border_color(mut self, color: XlsxColor) -> Format {
+    pub fn set_border_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
         if !color.is_valid() {
             return self;
         }
@@ -1890,14 +1905,18 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
     ///
-    pub fn set_border_top_color(mut self, color: XlsxColor) -> Format {
-        if !color.is_valid() {
-            return self;
+    pub fn set_border_top_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.border_top_color = color;
         }
 
-        self.border_top_color = color;
         self
     }
 
@@ -1919,14 +1938,18 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
     ///
-    pub fn set_border_bottom_color(mut self, color: XlsxColor) -> Format {
-        if !color.is_valid() {
-            return self;
+    pub fn set_border_bottom_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.border_bottom_color = color;
         }
 
-        self.border_bottom_color = color;
         self
     }
 
@@ -1948,14 +1971,18 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
     ///
-    pub fn set_border_left_color(mut self, color: XlsxColor) -> Format {
-        if !color.is_valid() {
-            return self;
+    pub fn set_border_left_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.border_left_color = color;
         }
 
-        self.border_left_color = color;
         self
     }
 
@@ -1977,14 +2004,18 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
     ///
-    pub fn set_border_right_color(mut self, color: XlsxColor) -> Format {
-        if !color.is_valid() {
-            return self;
+    pub fn set_border_right_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.border_right_color = color;
         }
 
-        self.border_right_color = color;
         self
     }
 
@@ -2056,14 +2087,18 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value.
+    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
     ///
-    pub fn set_border_diagonal_color(mut self, color: XlsxColor) -> Format {
-        if !color.is_valid() {
-            return self;
+    pub fn set_border_diagonal_color<T>(mut self, color: T) -> Format
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.border_diagonal_color = color;
         }
 
-        self.border_diagonal_color = color;
         self
     }
 
@@ -2668,18 +2703,20 @@ impl XlsxColor {
         match self {
             XlsxColor::RGB(color) => {
                 if color > 0xFFFFFF {
-                    eprintln!("RGB color must be in the the range 0x000000 - 0xFFFFFF.");
+                    eprintln!(
+                        "RGB color '{color:#X}' must be in the the range 0x000000 - 0xFFFFFF."
+                    );
                     return false;
                 }
                 true
             }
             XlsxColor::Theme(color, shade) => {
                 if color > 9 {
-                    eprintln!("Theme color must be in the the range 0 - 9.");
+                    eprintln!("Theme color '{color}' must be in the the range 0 - 9.");
                     return false;
                 }
                 if shade > 5 {
-                    eprintln!("Theme shade must be in the the range 0 - 5.");
+                    eprintln!("Theme shade '{shade}' must be in the the range 0 - 5.");
                     return false;
                 }
                 true
@@ -2696,6 +2733,123 @@ impl XlsxColor {
     // Check if the color has changed from its default.
     pub(crate) fn is_not_default(self) -> bool {
         self != XlsxColor::Automatic
+    }
+}
+
+/// Trait to map types into an XlsxColor value.
+///
+/// The `IntoColor` trait is used to map strings and other types, including
+/// `XlsxColor` itself into [`XlsxColor`] enum values. This allows syntactic
+/// shorthand such as using Html "#RRGGBB" style strings as method arguments.
+///
+/// The types that support `IntoColor` are:
+///
+/// - [`XlsxColor`] enum variants:
+///   - Named colors such as `XlsxColor::Green`.
+///   - RBG colors such as `XlsxColor::RGB(0xFF7F50)`.
+///   - Theme colors such as `XlsxColor::Theme(4, 3)`.
+/// - Html string variants such as `"#6495ED"` or `"6495ED"`.
+/// - [u32] variants such as 0xDAA520.
+///
+/// See the example below.
+///
+/// # Examples
+///
+/// An example of the different types of color syntax that is supported by the
+/// [`IntoColor`] trait.
+///
+/// ```
+/// # // This code is available in examples/doc_into_color.rs
+/// #
+/// use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Widen the column for clarity.
+///     worksheet.set_column_width_pixels(0, 80)?;
+///
+///     // Some examples with named color enum values.
+///     let color_format = Format::new().set_background_color(XlsxColor::Green);
+///     worksheet.write_string(0, 0, "Green")?;
+///     worksheet.write_blank(0, 1, &color_format)?;
+///
+///     let color_format = Format::new().set_background_color(XlsxColor::Red);
+///     worksheet.write_string(1, 0, "Red")?;
+///     worksheet.write_blank(1, 1, &color_format)?;
+///
+///     // Write a RGB color using the XlsxColor::RGB() enum method.
+///     let color_format = Format::new().set_background_color(XlsxColor::RGB(0xFF7F50));
+///     worksheet.write_string(2, 0, "#FF7F50")?;
+///     worksheet.write_blank(2, 1, &color_format)?;
+///
+///     // Write a RGB color with the shorter Html string variant.
+///     let color_format = Format::new().set_background_color("#6495ED");
+///     worksheet.write_string(3, 0, "#6495ED")?;
+///     worksheet.write_blank(3, 1, &color_format)?;
+///
+///     // Write a RGB color with a Html string (but without the `#`).
+///     let color_format = Format::new().set_background_color("DCDCDC");
+///     worksheet.write_string(4, 0, "#DCDCDC")?;
+///     worksheet.write_blank(4, 1, &color_format)?;
+///
+///     // Write a RGB color with the optional u32 variant.
+///     let color_format = Format::new().set_background_color(0xDAA520);
+///     worksheet.write_string(5, 0, "#DAA520")?;
+///     worksheet.write_blank(5, 1, &color_format)?;
+///
+///     // Add a Theme color.
+///     let color_format = Format::new().set_background_color(XlsxColor::Theme(4, 3));
+///     worksheet.write_string(6, 0, "Theme(4, 3)")?;
+///     worksheet.write_blank(6, 1, &color_format)?;
+///
+///     // Save the file to disk.
+///     workbook.save("into_color.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/into_color.png">
+///
+pub trait IntoColor {
+    /// Function to turn types into a [`XlsxColor`] enum.
+    fn new_color(self) -> XlsxColor;
+}
+
+impl IntoColor for XlsxColor {
+    fn new_color(self) -> XlsxColor {
+        self
+    }
+}
+
+impl IntoColor for u32 {
+    fn new_color(self) -> XlsxColor {
+        XlsxColor::RGB(self)
+    }
+}
+
+impl IntoColor for &str {
+    fn new_color(self) -> XlsxColor {
+        let color = if let Some(hex_string) = self.strip_prefix('#') {
+            u32::from_str_radix(hex_string, 16)
+        } else {
+            u32::from_str_radix(self, 16)
+        };
+
+        match color {
+            Ok(color) => XlsxColor::RGB(color),
+            Err(_) => {
+                eprintln!("Error parsing '{self}' to RGB color.");
+                XlsxColor::Automatic
+            }
+        }
     }
 }
 

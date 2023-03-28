@@ -88,11 +88,13 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(17, 0, "#DCDCDC")?;
     worksheet.write_blank(17, 1, &color_format)?;
 
-    let color_format = Format::new().set_background_color(XlsxColor::RGB(0x6495ED));
+    // Write a RGB color with the shorter Html string variant.
+    let color_format = Format::new().set_background_color("#6495ED");
     worksheet.write_string(18, 0, "#6495ED")?;
     worksheet.write_blank(18, 1, &color_format)?;
 
-    let color_format = Format::new().set_background_color(XlsxColor::RGB(0xDAA520));
+    // Write a RGB color with the optional u32 variant.
+    let color_format = Format::new().set_background_color(0xDAA520);
     worksheet.write_string(19, 0, "#DAA520")?;
     worksheet.write_blank(19, 1, &color_format)?;
 

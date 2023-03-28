@@ -38,8 +38,8 @@ documentation and generally show how an individual function works.
 * app_chart_line.rs - A example of creating line charts using the
   rust_xlsxwriter library.
 
-* app_chart_pattern.rs - A example of creating column charts using the
-  rust_xlsxwriter library.
+* app_chart_pattern.rs - A example of creating column charts with fill
+  patterns using the rust_xlsxwriter library.
 
 * app_chart_pie.rs - A example of creating pie charts using the
   rust_xlsxwriter library.
@@ -145,6 +145,8 @@ documentation and generally show how an individual function works.
 * doc_chart_axis_set_name.rs - A chart example demonstrating setting the
   title of chart axes.
 
+* doc_chart_formatting.rs - An example of chart formatting.
+
 * doc_chart_intro.rs - A simple chart example using the rust_xlsxwriter
   library.
 
@@ -157,6 +159,22 @@ documentation and generally show how an individual function works.
 * doc_chart_legend_set_overlay.rs - An example of overlaying the chart
   legend on the plot area.
 
+* doc_chart_line_formatting.rs - An example of formatting a line/border in
+  a chart element.
+
+* doc_chart_line_set_color.rs - An example of formatting the line color in
+  a chart element.
+
+* doc_chart_line_set_dash_type.rs - An example of formatting the line dash
+  type in a chart element.
+
+* doc_chart_line_set_transparency.rs - An example of formatting the line
+  transparency in a chart element. Note, you must set also set a color in
+  order to set the transparency.
+
+* doc_chart_line_set_width.rs - An example of formatting the line width in
+  a chart element.
+
 * doc_chart_push_series.rs - An example of creating a chart series as a
   standalone object and then adding it to a chart via the
   [`chart.push_series()`](Chart::add_series) method.
@@ -166,6 +184,10 @@ documentation and generally show how an individual function works.
 
 * doc_chart_series_set_name.rs - A chart example demonstrating setting the
   chart series name.
+
+* doc_chart_series_set_overlap.rs - A example of setting the chart series
+  gap and overlap. Note that it only needs to be applied to one of the
+  series in the chart.
 
 * doc_chart_series_set_values.rs - A chart example demonstrating setting
   the chart series values.
@@ -301,6 +323,9 @@ documentation and generally show how an individual function works.
 * doc_image_set_scale_width.rs - This example shows how to create an image
   object and use it to insert the image into a worksheet. The image in this
   case is scaled.
+
+* doc_into_color.rs - An example of the different types of color syntax
+  that is supported by the [`IntoColor`] trait.
 
 * doc_properties_checksum1.rs - Create a simple workbook to demonstrate the
   changing checksum due to the changing creation date.
