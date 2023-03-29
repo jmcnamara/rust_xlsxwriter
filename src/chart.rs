@@ -3319,87 +3319,87 @@ impl ChartSeriesCacheData {
 pub enum ChartType {
     /// An Area chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_area1.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_area.png">
     Area,
 
     /// A stacked Area chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_area2.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_area_stacked.png">
     AreaStacked,
 
     /// A percent stacked Area chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_area3.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_area_percent_stacked.png">
     AreaPercentStacked,
 
     /// A Bar (horizontal histogram) chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_bar1.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_bar.png">
     Bar,
 
     /// A stacked Bar chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_bar2.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_bar_stacked.png">
     BarStacked,
 
     /// A percent stacked Bar chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_bar3.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_bar_percent_stacked.png">
     BarPercentStacked,
 
     /// A Column (vertical histogram) chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_column1.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_column.png">
     Column,
 
     /// A stacked Column chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_column2.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_column_stacked.png">
     ColumnStacked,
 
     /// A percent stacked Column chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_column3.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_column_percent_stacked.png">
     ColumnPercentStacked,
 
     /// A Doughnut chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_doughnut1.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_doughnut.png">
     Doughnut,
 
     /// An Line chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line1.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_line.png">
     Line,
 
     /// A stacked Line chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line2.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_line_stacked.png">
     LineStacked,
 
     /// A percent stacked Line chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line3.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_line_percent_stacked.png">
     LinePercentStacked,
 
     /// A Pie chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_pie1.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_pie.png">
     Pie,
 
     /// A Radar chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_radar1.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_radar.png">
     Radar,
 
     /// A Radar with markers chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_radar2.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_radar_with_markers.png">
     RadarWithMarkers,
 
     /// A filled Radar chart type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_radar3.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_radar_filled.png">
     RadarFilled,
 
     /// A Scatter chart type. Scatter charts, and their variant, are the only
@@ -3407,29 +3407,29 @@ pub enum ChartType {
     /// default scatter chart in Excel has markers for each point but no
     /// connecting lines.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter1.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_scatter.png">
     Scatter,
 
     /// A Scatter chart type where the points are connected by straight lines.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter3.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_scatter_straight.png">
     ScatterStraight,
 
     /// A Scatter chart type where the points have markers and are connected by
     /// straight lines.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter2.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_scatter_straight_with_markers.png">
     ScatterStraightWithMarkers,
 
     /// A Scatter chart type where the points are connected by smoothed lines.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter5.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_scatter_smooth.png">
     ScatterSmooth,
 
     /// A Scatter chart type where the points have markers and are connected by
     /// smoothed lines.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_scatter4.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_scatter_smooth_with_markers.png">
     ScatterSmoothWithMarkers,
 }
 
@@ -4648,47 +4648,53 @@ impl ChartPatternFill {
     }
 }
 
-/// TODO
+/// Enum to define the chart line dash type.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartLineDashType {
     /// Solid - chart line/border dash type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_solid.png">
     Solid,
 
     /// Round dot - chart line/border dash type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_round_dot.png">
     RoundDot,
 
     /// Square dot - chart line/border dash type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_square_dot.png">
     SquareDot,
 
     /// Dash - chart line/border dash type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_dash.png">
     Dash,
 
     /// Dash dot - chart line/border dash type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_dash_dot.png">
     DashDot,
 
     /// Long dash - chart line/border dash type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_longdash.png">
     LongDash,
 
     /// Long dash dot - chart line/border dash type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_longdash_dot.png">
     LongDashDot,
 
     /// Long dash dot dot - chart line/border dash type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_longdash_dot_dot.png">
     LongDashDotDot,
-
-    /// Dot - chart line/border dash type.
-    Dot,
-
-    /// System dash dot - chart line/border dash type.
-    SystemDashDot,
-
-    /// System dash dot dot - chart line/border dash type.
-    SystemDashDotDot,
 }
 
 impl ToString for ChartLineDashType {
     fn to_string(&self) -> String {
         match self {
-            ChartLineDashType::Dot => "dot".to_string(),
             ChartLineDashType::Dash => "dash".to_string(),
             ChartLineDashType::Solid => "solid".to_string(),
             ChartLineDashType::DashDot => "dashDot".to_string(),
@@ -4696,158 +4702,252 @@ impl ToString for ChartLineDashType {
             ChartLineDashType::RoundDot => "sysDot".to_string(),
             ChartLineDashType::SquareDot => "sysDash".to_string(),
             ChartLineDashType::LongDashDot => "lgDashDot".to_string(),
-            ChartLineDashType::SystemDashDot => "sysDashDot".to_string(),
             ChartLineDashType::LongDashDotDot => "lgDashDotDot".to_string(),
-            ChartLineDashType::SystemDashDotDot => "sysDashDotDot".to_string(),
         }
     }
 }
 
-/// TODO
+/// Enum to define the chart pattern fill type.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartPatternFillType {
     /// Dotted 5 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_5_percent.png">
     Dotted5Percent,
 
     /// Dotted 10 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_10_percent.png">
     Dotted10Percent,
 
     /// Dotted 20 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_20_percent.png">
     Dotted20Percent,
 
     /// Dotted 25 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_25_percent.png">
     Dotted25Percent,
 
     /// Dotted 30 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_30_percent.png">
     Dotted30Percent,
 
     /// Dotted 40 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_40_percent.png">
     Dotted40Percent,
 
     /// Dotted 50 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_50_percent.png">
     Dotted50Percent,
 
     /// Dotted 60 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_60_percent.png">
     Dotted60Percent,
 
     /// Dotted 70 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_70_percent.png">
     Dotted70Percent,
 
     /// Dotted 75 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_75_percent.png">
     Dotted75Percent,
 
     /// Dotted 80 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_80_percent.png">
     Dotted80Percent,
 
     /// Dotted 90 percent - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_90_percent.png">
     Dotted90Percent,
 
     /// Diagonal stripes light downwards - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_light_downwards.png">
     DiagonalStripesLightDownwards,
 
     /// Diagonal stripes light upwards - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_light_upwards.png">
     DiagonalStripesLightUpwards,
 
     /// Diagonal stripes dark downwards - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_dark_downwards.png">
     DiagonalStripesDarkDownwards,
 
     /// Diagonal stripes dark upwards - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_dark_upwards.png">
     DiagonalStripesDarkUpwards,
 
     /// Diagonal stripes wide downwards - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_wide_downwards.png">
     DiagonalStripesWideDownwards,
 
     /// Diagonal stripes wide upwards - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_wide_upwards.png">
     DiagonalStripesWideUpwards,
 
     /// Vertical stripes light - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_vertical_stripes_light.png">
     VerticalStripesLight,
 
     /// Horizontal stripes light - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_stripes_light.png">
     HorizontalStripesLight,
 
     /// Vertical stripes narrow - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_vertical_stripes_narrow.png">
     VerticalStripesNarrow,
 
     /// Horizontal stripes narrow - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_stripes_narrow.png">
     HorizontalStripesNarrow,
 
     /// Vertical stripes dark - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_vertical_stripes_dark.png">
     VerticalStripesDark,
 
     /// Horizontal stripes dark - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_stripes_dark.png">
     HorizontalStripesDark,
 
     /// Stripes backslashes - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_stripes_backslashes.png">
     StripesBackslashes,
 
     /// Stripes forward slashes - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_stripes_forward_slashes.png">
     StripesForwardSlashes,
 
     /// Horizontal stripes alternating - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_stripes_alternating.png">
     HorizontalStripesAlternating,
 
     /// Vertical stripes alternating - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_vertical_stripes_alternating.png">
     VerticalStripesAlternating,
 
     /// Small confetti - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_small_confetti.png">
     SmallConfetti,
 
     /// Large confetti - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_large_confetti.png">
     LargeConfetti,
 
     /// Zigzag - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_zigzag.png">
     Zigzag,
 
     /// Wave - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_wave.png">
     Wave,
 
     /// Diagonal brick - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_brick.png">
     DiagonalBrick,
 
     /// Horizontal brick - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_brick.png">
     HorizontalBrick,
 
     /// Weave - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_weave.png">
     Weave,
 
     /// Plaid - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_plaid.png">
     Plaid,
 
     /// Divot - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_divot.png">
     Divot,
 
     /// Dotted grid - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_grid.png">
     DottedGrid,
 
     /// Dotted diamond - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_diamond.png">
     DottedDiamond,
 
     /// Shingle - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_shingle.png">
     Shingle,
 
     /// Trellis - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_trellis.png">
     Trellis,
 
     /// Sphere - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_sphere.png">
     Sphere,
 
     /// Small grid - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_small_grid.png">
     SmallGrid,
 
     /// Large grid - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_large_grid.png">
     LargeGrid,
 
     /// Small checkerboard - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_small_checkerboard.png">
     SmallCheckerboard,
 
     /// Large checkerboard - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_large_checkerboard.png">
     LargeCheckerboard,
 
     /// Outlined diamond grid - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_outlined_diamond_grid.png">
     OutlinedDiamondGrid,
 
     /// Solid diamond grid - chart fill pattern.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_solid_diamond_grid.png">
     SolidDiamondGrid,
 }
 

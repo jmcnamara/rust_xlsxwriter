@@ -2739,7 +2739,7 @@ impl XlsxColor {
 /// Trait to map types into an XlsxColor value.
 ///
 /// The `IntoColor` trait is used to map strings and other types, including
-/// `XlsxColor` itself into [`XlsxColor`] enum values. This allows syntactic
+/// `XlsxColor` itself, into [`XlsxColor`] enum values. This allows syntactic
 /// shorthand such as using Html "#RRGGBB" style strings as method arguments.
 ///
 /// The types that support `IntoColor` are:
