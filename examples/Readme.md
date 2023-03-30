@@ -145,6 +145,15 @@ documentation and generally show how an individual function works.
 * doc_chart_axis_set_name.rs - A chart example demonstrating setting the
   title of chart axes.
 
+* doc_chart_format_set_no_border.rs - An example of turning off the border
+  of a chart element.
+
+* doc_chart_format_set_no_fill.rs - An example of turning off the fill of a
+  chart element.
+
+* doc_chart_format_set_no_line.rs - An example of turning off a default
+  line in a chart format.
+
 * doc_chart_formatting.rs - An example of chart formatting.
 
 * doc_chart_intro.rs - A simple chart example using the rust_xlsxwriter
@@ -175,6 +184,12 @@ documentation and generally show how an individual function works.
 * doc_chart_line_set_width.rs - An example of formatting the line width in
   a chart element.
 
+* doc_chart_pattern_fill.rs - An example of setting a pattern fill for a
+  chart element.
+
+* doc_chart_pattern_fill_set_pattern.rs - An example of setting a pattern
+  fill for a chart element.
+
 * doc_chart_push_series.rs - An example of creating a chart series as a
   standalone object and then adding it to a chart via the
   [`chart.push_series()`](Chart::add_series) method.
@@ -197,6 +212,12 @@ documentation and generally show how an individual function works.
 
 * doc_chart_simple.rs - A simple chart example using the rust_xlsxwriter
   library.
+
+* doc_chart_solid_fill.rs - An example of setting a solid fill for a chart
+  element.
+
+* doc_chart_solid_fill_set_color.rs - An example of setting a solid fill
+  color for a chart element.
 
 * doc_chart_title_set_hidden.rs - A simple chart example using the
   rust_xlsxwriter library.

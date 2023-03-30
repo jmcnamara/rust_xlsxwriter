@@ -4128,6 +4128,58 @@ impl ChartFormat {
     /// See the [`ChartLine`] struct for details on the border properties that
     /// can be set.
     ///
+    /// # Examples
+    ///
+    /// An example of formatting a line/border in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_line_formatting.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_line(
+    ///             &ChartLine::new()
+    ///                 .set_color("#FF9900")
+    ///                 .set_width(5.25)
+    ///                 .set_dash_type(ChartLineDashType::SquareDot)
+    ///                 .set_transparency(30),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
+    ///
     pub fn set_border(&mut self, line: &ChartLine) -> &mut ChartFormat {
         self.set_line(line)
     }
@@ -4137,10 +4189,57 @@ impl ChartFormat {
     /// The line property for a chart element can be turned off if you wish to
     /// hide it.
     ///
-    /// For example this line chart with the line turned off for a data series:
+    /// # Examples
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_formatting3.png">
+    /// An example of turning off a default line in a chart format.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_format_set_no_line.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 1)?;
+    /// #     worksheet.write(1, 0, 2)?;
+    /// #     worksheet.write(2, 0, 3)?;
+    /// #     worksheet.write(3, 0, 4)?;
+    /// #     worksheet.write(4, 0, 5)?;
+    /// #     worksheet.write(5, 0, 6)?;
+    /// #     worksheet.write(0, 1, 10)?;
+    /// #     worksheet.write(1, 1, 40)?;
+    /// #     worksheet.write(2, 1, 50)?;
+    /// #     worksheet.write(3, 1, 20)?;
+    /// #     worksheet.write(4, 1, 10)?;
+    /// #     worksheet.write(5, 1, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::ScatterStraightWithMarkers);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories("Sheet1!$A$1:$A$6")
+    ///         .set_values("Sheet1!$B$1:$B$6")
+    ///         .format()
+    ///         .set_no_line();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_line.png">
     ///
     pub fn set_no_line(&mut self) -> &mut ChartFormat {
         self.no_line = true;
@@ -4152,6 +4251,51 @@ impl ChartFormat {
     /// The border property for a chart element can be turned off if you wish to
     /// hide it.
     ///
+    /// # Examples
+    ///
+    /// An example of turning off the border of a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_format_set_no_border.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_no_border();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_border.png">
+    ///
     pub fn set_no_border(&mut self) -> &mut ChartFormat {
         self.set_no_line()
     }
@@ -4159,12 +4303,54 @@ impl ChartFormat {
     /// Turn off the fill property for a chart element.
     ///
     /// The fill property for a chart element can be turned off if you wish to
-    /// hide it and display only the border.
+    /// hide it and display only the border (if set).
     ///
-    /// For example this Column chart with the internal fill turned off for a
-    /// data series:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_fill1.png">
+    /// # Examples
+    ///
+    /// An example of turning off the fill of a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_format_set_no_fill.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError, XlsxColor};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_border(&ChartLine::new().set_color(XlsxColor::Black))
+    ///         .set_no_fill();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_fill.png">
     ///
     pub fn set_no_fill(&mut self) -> &mut ChartFormat {
         self.no_fill = true;
@@ -4176,10 +4362,54 @@ impl ChartFormat {
     /// See the [`ChartSolidFill`] struct for details on the solid fill
     /// properties that can be set.
     ///
-    /// For example this Column chart with the solid fill set to a non-default
-    /// color for a data series:
+    /// # Examples
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_fill2.png">
+    /// An example of setting a solid fill for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_solid_fill.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_solid_fill(
+    ///             &ChartSolidFill::new()
+    ///                 .set_color("#FF9900")
+    ///                 .set_transparency(60),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
     ///
     pub fn set_solid_fill(&mut self, fill: &ChartSolidFill) -> &mut ChartFormat {
         self.solid_fill = Some(fill.clone());
@@ -4191,9 +4421,57 @@ impl ChartFormat {
     /// See the [`ChartPatternFill`] struct for details on the pattern fill
     /// properties that can be set.
     ///
-    /// For example this Column chart with the pattern fills for the data series:
+    /// # Examples
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/app_chart_pattern.png">
+    /// An example of setting a pattern fill for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_pattern_fill.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_pattern_fill(
+    ///             &ChartPatternFill::new()
+    ///                 .set_pattern(ChartPatternFillType::Dotted20Percent)
+    ///                 .set_background_color(XlsxColor::Yellow)
+    ///                 .set_foreground_color(XlsxColor::Red),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
     ///
     pub fn set_pattern_fill(&mut self, fill: &ChartPatternFill) -> &mut ChartFormat {
         self.pattern_fill = Some(fill.clone());
@@ -4556,7 +4834,64 @@ impl ChartLine {
     }
 }
 
-/// Todo
+/// A struct to represent a the solid fill for a Chart element.
+///
+/// The [`ChartSolidFill`] struct represents the formatting properties for the
+/// solid fill of a Chart element. In Excel a solid fill is a single color fill
+/// without a pattern or gradient.
+///
+/// `ChartSolidFill` is a sub property of the [`ChartFormat`] struct and is used
+/// with the [`format().set_solid_fill()`](ChartFormat::set_solid_fill) method.
+///
+/// # Examples
+///
+/// An example of setting a solid fill for a chart element.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_solid_fill.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a simple Column chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series with formatting.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .format()
+///         .set_solid_fill(
+///             &ChartSolidFill::new()
+///                 .set_color("#FF9900")
+///                 .set_transparency(60),
+///         );
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
+///
 #[derive(Clone)]
 pub struct ChartSolidFill {
     color: XlsxColor,
@@ -4564,7 +4899,8 @@ pub struct ChartSolidFill {
 }
 
 impl ChartSolidFill {
-    /// TODO
+    /// Create a new ChartSolidFill object to represent a Chart solid fill.
+    ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartSolidFill {
         ChartSolidFill {
@@ -4573,7 +4909,58 @@ impl ChartSolidFill {
         }
     }
 
-    /// TODO
+    /// Set the color of a solid fill.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The color property defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a solid fill color for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_solid_fill_set_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_solid_fill(&ChartSolidFill::new().set_color("#B5A401"));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill_set_color.png">
+    ///
     pub fn set_color<T>(&mut self, color: T) -> &mut ChartSolidFill
     where
         T: IntoColor,
@@ -4586,7 +4973,65 @@ impl ChartSolidFill {
         self
     }
 
-    /// TODO
+    /// Set the transparency of a solid fill.
+    ///
+    /// Set the transparency of a solid fill color for a Chart element. You must
+    /// also specify a line color in order for the transparency to be applied.
+    ///
+    /// # Arguments
+    ///
+    /// * `transparency` - The color transparency in the range 0 <= transparency
+    ///   <= 100. The default value is 0.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a solid fill with transparency for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_solid_fill.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_solid_fill(
+    ///             &ChartSolidFill::new()
+    ///                 .set_color("#FF9900")
+    ///                 .set_transparency(60),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
+    ///
     pub fn set_transparency(&mut self, transparency: u8) -> &mut ChartSolidFill {
         if transparency <= 100 {
             self.transparency = transparency;
@@ -4596,7 +5041,69 @@ impl ChartSolidFill {
     }
 }
 
-/// Todo
+/// A struct to represent a the pattern fill for a Chart element.
+///
+/// The [`ChartPatternFill`] struct represents the formatting properties for the
+/// pattern fill of a Chart element. In Excel a pattern fill is comprised of a
+/// simple pixelated pattern and background and foreground colors
+///
+/// `ChartPatternFill` is a sub property of the [`ChartFormat`] struct and is
+/// used with the [`format().set_pattern_fill()`](ChartFormat::set_pattern_fill)
+/// method.
+///
+///
+/// # Examples
+///
+/// An example of setting a pattern fill for a chart element.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_pattern_fill.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a simple Column chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series with formatting.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .format()
+///         .set_pattern_fill(
+///             &ChartPatternFill::new()
+///                 .set_pattern(ChartPatternFillType::Dotted20Percent)
+///                 .set_background_color(XlsxColor::Yellow)
+///                 .set_foreground_color(XlsxColor::Red),
+///         );
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
+///
 #[derive(Clone)]
 pub struct ChartPatternFill {
     background_color: XlsxColor,
@@ -4605,7 +5112,8 @@ pub struct ChartPatternFill {
 }
 
 impl ChartPatternFill {
-    /// TODO
+    /// Create a new ChartPatternFill object to represent a Chart pattern fill.
+    ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartPatternFill {
         ChartPatternFill {
@@ -4615,13 +5123,130 @@ impl ChartPatternFill {
         }
     }
 
-    /// TODO
+    /// Set the pattern of a Chart pattern fill element.
+    ///
+    /// See the example above.
+    ///
+    /// # Arguments
+    ///
+    /// * `pattern` - The pattern property defined by a [`ChartPatternFillType`] enum value.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a pattern fill for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_pattern_fill_set_pattern.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_pattern_fill(
+    ///             &ChartPatternFill::new()
+    ///                 .set_pattern(ChartPatternFillType::DiagonalBrick));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_set_pattern.png">
+    ///
     pub fn set_pattern(&mut self, pattern: ChartPatternFillType) -> &mut ChartPatternFill {
         self.pattern = pattern;
         self
     }
 
-    /// TODO
+    /// Set the background color of a Chart pattern fill element.
+    ///
+    /// See the example above.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The color property defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a pattern fill for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_pattern_fill.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .format()
+    ///         .set_pattern_fill(
+    ///             &ChartPatternFill::new()
+    ///                 .set_pattern(ChartPatternFillType::Dotted20Percent)
+    ///                 .set_background_color(XlsxColor::Yellow)
+    ///                 .set_foreground_color(XlsxColor::Red),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
+    ///
     pub fn set_background_color<T>(&mut self, color: T) -> &mut ChartPatternFill
     where
         T: IntoColor,
@@ -4634,7 +5259,15 @@ impl ChartPatternFill {
         self
     }
 
-    /// TODO
+    /// Set the foreground color of a Chart pattern fill element.
+    ///
+    /// See the example above.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The color property defined by a [`XlsxColor`] enum value or
+    ///   a type that implements the [`IntoColor`] trait.
+    ///
     pub fn set_foreground_color<T>(&mut self, color: T) -> &mut ChartPatternFill
     where
         T: IntoColor,
