@@ -5281,7 +5281,7 @@ impl ChartPatternFill {
     }
 }
 
-/// Enum to define the chart line dash type.
+/// Enum to define the Chart line dash type.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartLineDashType {
     /// Solid - chart line/border dash type.
@@ -5340,7 +5340,7 @@ impl ToString for ChartLineDashType {
     }
 }
 
-/// Enum to define the chart pattern fill type.
+/// Enum to define the Chart pattern fill type.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartPatternFillType {
     /// Dotted 5 percent - chart fill pattern.

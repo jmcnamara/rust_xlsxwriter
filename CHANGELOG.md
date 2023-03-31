@@ -5,6 +5,40 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.0] - 2023-03-31
+
+### Added
+
+- Added chart formatting for Lines, Borders, Solid fills and Pattern fills via
+  the [`ChartFormat`] struct. This is currently only available for chart series
+  but it will be extended in the next release for most other chart elements.
+
+  See also the [Chart Fill Pattern] example in the user guide.
+
+- Added [`IntoColor`] trait to allow syntactic shortcuts for [`XlsxColor`]
+  parameters in methods. So now you can set a RGB color like this
+  `object.set_color("#FF7F50")` instead of the more verbose
+  `object.set_color(XlsxColor::RGB(0xFF7F50))`. This addition doesn't require
+  any API changes from the end user.
+
+- Added [`worksheet.insert_image_fit_to_cell()`] method to add an image to a
+  worksheet and scale it so that it fits in a cell. This method can be useful
+  when creating a product spreadsheet with a column of images for each product.
+
+  See also the [insert_image_to_fit] example in the user guide.
+
+- Added [`chart.set_gap()`] and [`chart.set_overlap()`] method to control layout
+  of histogram style charts.
+
+[`IntoColor`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoColor.html
+[`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartFormat.html
+[`chart.set_gap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_gap
+[Chart Fill Pattern]: https://rustxlsxwriter.github.io/examples/chart_pattern.html
+[insert_image_to_fit]: https://rustxlsxwriter.github.io/examples/insert_image_to_fit..html
+[`chart.set_overlap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_overlap
+[`worksheet.insert_image_fit_to_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.insert_image_fit_to_cell
+
+
 ## [0.29.0] - 2023-03-16
 
 ### Added

@@ -96,6 +96,10 @@ frequently.
 [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
 [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 
+## Release notes
+
+[Release Notes and Changelog].
+
 ## See also
 
 - [User Guide]: Working with the `rust_xlsxwriter` library.
@@ -107,7 +111,6 @@ frequently.
 - [The rust_xlsxwriter crate]
 - [The rust_xlsxwriter API docs at docs.rs]
 - [The rust_xlsxwriter repository]
-- [Release Notes]
 
 [User Guide]: https://rustxlsxwriter.github.io/index.html
 [Getting started]: https://rustxlsxwriter.github.io/getting_started.html
