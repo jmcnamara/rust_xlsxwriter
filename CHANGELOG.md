@@ -33,15 +33,15 @@ Fixed broken Changelog link.
 
   See also the [insert_image_to_fit] example in the user guide.
 
-- Added [`chart.set_gap()`] and [`chart.set_overlap()`] method to control layout
+- Added [`chart.series.set_gap()`] and [`chart.series.set_overlap()`] method to control layout
   of histogram style charts.
 
 [`IntoColor`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoColor.html
 [`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartFormat.html
-[`chart.set_gap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_gap
 [Chart Fill Pattern]: https://rustxlsxwriter.github.io/examples/chart_pattern.html
-[insert_image_to_fit]: https://rustxlsxwriter.github.io/examples/insert_image_to_fit..html
-[`chart.set_overlap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_overlap
+[insert_image_to_fit]: https://rustxlsxwriter.github.io/examples/insert_image_to_fit.html
+[`chart.series.set_gap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartSeries.html#method.set_gap
+[`chart.series.set_overlap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartSeries.html#method.set_overlap
 [`worksheet.insert_image_fit_to_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.insert_image_fit_to_cell
 
 
@@ -385,7 +385,7 @@ See also the [hyperlinks example] in the user guide.
 - Added support for Theme colors to [`XlsxColor`]. See also [Working with
   Colors] in the user guide.
 
-[`XlsxColor`]: https://docs.rs/rust_xlsxwriter/0.11.0/rust_xlsxwriter/enum.XlsxColor.html
+[`XlsxColor`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.XlsxColor.html
 [Working with Colors]: https://rustxlsxwriter.github.io/colors/intro.html
 [`worksheet.merge_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.merge_range
 
