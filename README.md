@@ -119,4 +119,4 @@ frequently.
 [The rust_xlsxwriter crate]: https://crates.io/crates/rust_xlsxwriter
 [The rust_xlsxwriter API docs at docs.rs]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
 [The rust_xlsxwriter repository]: https://github.com/jmcnamara/rust_xlsxwriter
-[Release Notes]: https://rustxlsxwriter.github.io/changelog.html
+[Release Notes and Changelog]: https://rustxlsxwriter.github.io/changelog.html
