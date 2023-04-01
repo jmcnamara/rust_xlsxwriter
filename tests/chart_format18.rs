@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartFormat, ChartType, Workbook, XlsxError};
 
 mod common;
 
@@ -28,9 +28,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values(("Sheet1", 0, 0, 4, 0))
-        .format()
-        .set_no_border()
-        .set_no_fill();
+        .set_format(&ChartFormat::new().set_no_border().set_no_fill());
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 

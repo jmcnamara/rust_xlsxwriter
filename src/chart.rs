@@ -315,9 +315,9 @@ impl Chart {
 
         // The default Scatter chart has a hidden line with a standard width.
         if self.chart_type == ChartType::Scatter {
-            series
-                .format()
-                .set_line(ChartLine::new().set_width(2.25).set_hidden());
+            series.set_format(
+                ChartFormat::new().set_line(ChartLine::new().set_width(2.25).set_hidden()),
+            );
         }
 
         self.series.push(series);
@@ -3106,22 +3106,21 @@ impl ChartSeries {
         self
     }
 
-    /// Access the chart series format object to apply formatting.
+    /// Set the formatting properties for a chart series.
     ///
-    /// Access the [`ChartFormat`] object for a chart series in order to apply
-    /// formatting to it.
+    /// Set the formatting properties for a chart series via a [`ChartFormat`]
+    /// object.
     ///
-    /// The `format()` method returns a reference to the chart series
-    /// [`ChartFormat`] object. This can be used to apply formatting such as:
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
     /// - `no_fill`: Turn of the fill for the chart object.
     /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
     /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
-    ///
-    pub fn format(&mut self) -> &mut ChartFormat {
-        &mut self.format
+    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartSeries {
+        self.format = format.clone();
+        self
     }
 
     /// Add data to the chart values cache.
@@ -4053,27 +4052,31 @@ impl ToString for ChartLegendPosition {
 ///         .set_name("Sheet1!$A$1")
 ///         .set_values("Sheet1!$A$2:$A$5")
 ///         .set_gap(70)
-///         .format()
-///         .set_pattern_fill(
-///             &ChartPatternFill::new()
-///                 .set_pattern(ChartPatternFillType::Shingle)
-///                 .set_foreground_color("#804000")
-///                 .set_background_color("#C68C53"),
-///         )
-///         .set_border(&ChartLine::new().set_color("#804000"));
+///         .set_format(
+///             &ChartFormat::new()
+///                 .set_pattern_fill(
+///                     &ChartPatternFill::new()
+///                         .set_pattern(ChartPatternFillType::Shingle)
+///                         .set_foreground_color("#804000")
+///                         .set_background_color("#C68C53"),
+///                 )
+///                 .set_border(&ChartLine::new().set_color("#804000")),
+///         );
 ///
 ///     chart
 ///         .add_series()
 ///         .set_name("Sheet1!$B$1")
 ///         .set_values("Sheet1!$B$2:$B$5")
-///         .format()
-///         .set_pattern_fill(
-///             &ChartPatternFill::new()
-///                 .set_pattern(ChartPatternFillType::HorizontalBrick)
-///                 .set_foreground_color("#B30000")
-///                 .set_background_color("#FF6666"),
-///         )
-///         .set_border(&ChartLine::new().set_color("#B30000"));
+///         .set_format(
+///             &ChartFormat::new()
+///                 .set_pattern_fill(
+///                     &ChartPatternFill::new()
+///                         .set_pattern(ChartPatternFillType::HorizontalBrick)
+///                         .set_foreground_color("#B30000")
+///                         .set_background_color("#FF6666"),
+///                 )
+///                 .set_border(&ChartLine::new().set_color("#B30000")),
+///         );
 ///
 ///     // Add a chart title and some axis labels.
 ///     chart.title().set_name("Cladding types");
@@ -4083,16 +4086,15 @@ impl ToString for ChartLegendPosition {
 ///     // Add the chart to the worksheet.
 ///     worksheet.insert_chart(1, 3, &chart)?;
 ///
-/// #     workbook.save("chart_pattern.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
+///     workbook.save("chart_pattern.xlsx")?;
+///
+///     Ok(())
+/// }
 /// ```
 ///
 /// Output file:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/app_chart_pattern.png">
-///
 ///
 pub struct ChartFormat {
     no_fill: bool,
@@ -4103,7 +4105,10 @@ pub struct ChartFormat {
 }
 
 impl ChartFormat {
-    fn new() -> ChartFormat {
+    /// Create a new ChartFormat instance to set formatting for a chart element.
+    ///
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ChartFormat {
         ChartFormat {
             no_fill: false,
             no_line: false,
@@ -4135,7 +4140,9 @@ impl ChartFormat {
     /// ```
     /// # // This code is available in examples/doc_chart_line_formatting.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartFormat, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError,
+    /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4156,13 +4163,14 @@ impl ChartFormat {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_line(
-    ///             &ChartLine::new()
-    ///                 .set_color("#FF9900")
-    ///                 .set_width(5.25)
-    ///                 .set_dash_type(ChartLineDashType::SquareDot)
-    ///                 .set_transparency(30),
+    ///         .set_format(
+    ///             &ChartFormat::new().set_line(
+    ///                 &ChartLine::new()
+    ///                     .set_color("#FF9900")
+    ///                     .set_width(5.25)
+    ///                     .set_dash_type(ChartLineDashType::SquareDot)
+    ///                     .set_transparency(70),
+    ///             ),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -4177,8 +4185,7 @@ impl ChartFormat {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
     ///
     pub fn set_border(&mut self, line: &ChartLine) -> &mut ChartFormat {
         self.set_line(line)
@@ -4196,7 +4203,7 @@ impl ChartFormat {
     /// ```
     /// # // This code is available in examples/doc_chart_format_set_no_line.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4224,8 +4231,7 @@ impl ChartFormat {
     ///         .add_series()
     ///         .set_categories("Sheet1!$A$1:$A$6")
     ///         .set_values("Sheet1!$B$1:$B$6")
-    ///         .format()
-    ///         .set_no_line();
+    ///         .set_format(&ChartFormat::new().set_no_line());
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4258,7 +4264,7 @@ impl ChartFormat {
     /// ```
     /// # // This code is available in examples/doc_chart_format_set_no_border.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4279,8 +4285,7 @@ impl ChartFormat {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_no_border();
+    ///         .set_format(&ChartFormat::new().set_no_border());
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4305,7 +4310,6 @@ impl ChartFormat {
     /// The fill property for a chart element can be turned off if you wish to
     /// hide it and display only the border (if set).
     ///
-    ///
     /// # Examples
     ///
     /// An example of turning off the fill of a chart element.
@@ -4313,7 +4317,7 @@ impl ChartFormat {
     /// ```
     /// # // This code is available in examples/doc_chart_format_set_no_fill.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError, XlsxColor};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4334,9 +4338,11 @@ impl ChartFormat {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_border(&ChartLine::new().set_color(XlsxColor::Black))
-    ///         .set_no_fill();
+    ///         .set_format(
+    ///             &ChartFormat::new()
+    ///                 .set_border(&ChartLine::new().set_color(XlsxColor::Black))
+    ///                 .set_no_fill(),
+    ///         );
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4369,7 +4375,7 @@ impl ChartFormat {
     /// ```
     /// # // This code is available in examples/doc_chart_solid_fill.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4390,11 +4396,12 @@ impl ChartFormat {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_solid_fill(
-    ///             &ChartSolidFill::new()
-    ///                 .set_color("#FF9900")
-    ///                 .set_transparency(60),
+    ///         .set_format(
+    ///             &ChartFormat::new().set_solid_fill(
+    ///                 &ChartSolidFill::new()
+    ///                     .set_color("#FF9900")
+    ///                     .set_transparency(60),
+    ///             ),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -4429,7 +4436,8 @@ impl ChartFormat {
     /// # // This code is available in examples/doc_chart_pattern_fill.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor, XlsxError,
+    /// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor,
+    /// #     XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -4451,12 +4459,13 @@ impl ChartFormat {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_pattern_fill(
-    ///             &ChartPatternFill::new()
-    ///                 .set_pattern(ChartPatternFillType::Dotted20Percent)
-    ///                 .set_background_color(XlsxColor::Yellow)
-    ///                 .set_foreground_color(XlsxColor::Red),
+    ///         .set_format(
+    ///             &ChartFormat::new().set_pattern_fill(
+    ///                 &ChartPatternFill::new()
+    ///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
+    ///                     .set_background_color(XlsxColor::Yellow)
+    ///                     .set_foreground_color(XlsxColor::Red),
+    ///             ),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -4508,7 +4517,9 @@ impl ChartFormat {
 /// ```
 /// # // This code is available in examples/doc_chart_line_formatting.rs
 /// #
-/// # use rust_xlsxwriter::{Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError};
+/// # use rust_xlsxwriter::{
+/// #     Chart, ChartFormat, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError,
+/// # };
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     let mut workbook = Workbook::new();
@@ -4529,13 +4540,14 @@ impl ChartFormat {
 ///     chart
 ///         .add_series()
 ///         .set_values("Sheet1!$A$1:$A$6")
-///         .format()
-///         .set_line(
-///             &ChartLine::new()
-///                 .set_color("#FF9900")
-///                 .set_width(5.25)
-///                 .set_dash_type(ChartLineDashType::SquareDot)
-///                 .set_transparency(30),
+///         .set_format(
+///             &ChartFormat::new().set_line(
+///                 &ChartLine::new()
+///                     .set_color("#FF9900")
+///                     .set_width(5.25)
+///                     .set_dash_type(ChartLineDashType::SquareDot)
+///                     .set_transparency(70),
+///             ),
 ///         );
 ///
 ///     // Add the chart to the worksheet.
@@ -4550,8 +4562,7 @@ impl ChartFormat {
 ///
 /// Output file:
 ///
-/// <img
-/// src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
+/// <img src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
 ///
 #[derive(Clone)]
 pub struct ChartLine {
@@ -4590,7 +4601,7 @@ impl ChartLine {
     /// ```
     /// # // This code is available in examples/doc_chart_line_set_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4611,8 +4622,7 @@ impl ChartLine {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_line(&ChartLine::new().set_color("#FF9900"));
+    ///         .set_format(&ChartFormat::new().set_line(&ChartLine::new().set_color("#FF9900")));
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4626,8 +4636,7 @@ impl ChartLine {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_line_set_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_color.png">
     ///
     pub fn set_color<T>(&mut self, color: T) -> &mut ChartLine
     where
@@ -4655,7 +4664,7 @@ impl ChartLine {
     /// ```
     /// # // This code is available in examples/doc_chart_line_set_width.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4676,8 +4685,7 @@ impl ChartLine {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_line(&ChartLine::new().set_width(10.0));
+    ///         .set_format(&ChartFormat::new().set_line(&ChartLine::new().set_width(10.0)));
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4691,8 +4699,7 @@ impl ChartLine {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_line_set_width.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_width.png">
     ///
     pub fn set_width(&mut self, width: f64) -> &mut ChartLine {
         if width <= 1584.0 {
@@ -4715,7 +4722,9 @@ impl ChartLine {
     /// ```
     /// # // This code is available in examples/doc_chart_line_set_dash_type.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartFormat, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError,
+    /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4736,8 +4745,10 @@ impl ChartLine {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_line(&ChartLine::new().set_dash_type(ChartLineDashType::DashDot));
+    ///         .set_format(
+    ///             &ChartFormat::new()
+    ///                 .set_line(&ChartLine::new().set_dash_type(ChartLineDashType::DashDot)),
+    ///         );
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4776,7 +4787,7 @@ impl ChartLine {
     /// ```
     /// # // This code is available in examples/doc_chart_line_set_transparency.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4797,11 +4808,9 @@ impl ChartLine {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_line(
-    ///             &ChartLine::new()
-    ///                 .set_color("#FF9900")
-    ///                 .set_transparency(50),
+    ///         .set_format(
+    ///             &ChartFormat::new()
+    ///                 .set_line(&ChartLine::new().set_color("#FF9900").set_transparency(50)),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -4850,7 +4859,7 @@ impl ChartLine {
 /// ```
 /// # // This code is available in examples/doc_chart_solid_fill.rs
 /// #
-/// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+/// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     let mut workbook = Workbook::new();
@@ -4871,11 +4880,12 @@ impl ChartLine {
 ///     chart
 ///         .add_series()
 ///         .set_values("Sheet1!$A$1:$A$6")
-///         .format()
-///         .set_solid_fill(
-///             &ChartSolidFill::new()
-///                 .set_color("#FF9900")
-///                 .set_transparency(60),
+///         .set_format(
+///             &ChartFormat::new().set_solid_fill(
+///                 &ChartSolidFill::new()
+///                     .set_color("#FF9900")
+///                     .set_transparency(60),
+///             ),
 ///         );
 ///
 ///     // Add the chart to the worksheet.
@@ -4923,7 +4933,7 @@ impl ChartSolidFill {
     /// ```
     /// # // This code is available in examples/doc_chart_solid_fill_set_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4944,8 +4954,9 @@ impl ChartSolidFill {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_solid_fill(&ChartSolidFill::new().set_color("#B5A401"));
+    ///         .set_format(
+    ///             &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#B5A401")),
+    ///         );
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4985,12 +4996,12 @@ impl ChartSolidFill {
     ///
     /// # Examples
     ///
-    /// An example of setting a solid fill with transparency for a chart element.
+    /// An example of setting a solid fill for a chart element.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_solid_fill.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -5011,11 +5022,12 @@ impl ChartSolidFill {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_solid_fill(
-    ///             &ChartSolidFill::new()
-    ///                 .set_color("#FF9900")
-    ///                 .set_transparency(60),
+    ///         .set_format(
+    ///             &ChartFormat::new().set_solid_fill(
+    ///                 &ChartSolidFill::new()
+    ///                     .set_color("#FF9900")
+    ///                     .set_transparency(60),
+    ///             ),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -5060,7 +5072,7 @@ impl ChartSolidFill {
 /// # // This code is available in examples/doc_chart_pattern_fill.rs
 /// #
 /// # use rust_xlsxwriter::{
-/// #     Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor, XlsxError,
+/// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor, XlsxError,
 /// # };
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -5082,12 +5094,13 @@ impl ChartSolidFill {
 ///     chart
 ///         .add_series()
 ///         .set_values("Sheet1!$A$1:$A$6")
-///         .format()
-///         .set_pattern_fill(
-///             &ChartPatternFill::new()
-///                 .set_pattern(ChartPatternFillType::Dotted20Percent)
-///                 .set_background_color(XlsxColor::Yellow)
-///                 .set_foreground_color(XlsxColor::Red),
+///         .set_format(
+///             &ChartFormat::new().set_pattern_fill(
+///                 &ChartPatternFill::new()
+///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
+///                     .set_background_color(XlsxColor::Yellow)
+///                     .set_foreground_color(XlsxColor::Red),
+///             ),
 ///         );
 ///
 ///     // Add the chart to the worksheet.
@@ -5140,7 +5153,7 @@ impl ChartPatternFill {
     /// # // This code is available in examples/doc_chart_pattern_fill_set_pattern.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxError,
+    /// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -5162,10 +5175,9 @@ impl ChartPatternFill {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_pattern_fill(
-    ///             &ChartPatternFill::new()
-    ///                 .set_pattern(ChartPatternFillType::DiagonalBrick));
+    ///         .set_format(&ChartFormat::new().set_pattern_fill(
+    ///             &ChartPatternFill::new().set_pattern(ChartPatternFillType::DiagonalBrick),
+    ///         ));
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -5203,7 +5215,8 @@ impl ChartPatternFill {
     /// # // This code is available in examples/doc_chart_pattern_fill.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor, XlsxError,
+    /// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor,
+    /// #     XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -5225,12 +5238,13 @@ impl ChartPatternFill {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .format()
-    ///         .set_pattern_fill(
-    ///             &ChartPatternFill::new()
-    ///                 .set_pattern(ChartPatternFillType::Dotted20Percent)
-    ///                 .set_background_color(XlsxColor::Yellow)
-    ///                 .set_foreground_color(XlsxColor::Red),
+    ///         .set_format(
+    ///             &ChartFormat::new().set_pattern_fill(
+    ///                 &ChartPatternFill::new()
+    ///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
+    ///                     .set_background_color(XlsxColor::Yellow)
+    ///                     .set_foreground_color(XlsxColor::Red),
+    ///             ),
     ///         );
     ///
     ///     // Add the chart to the worksheet.

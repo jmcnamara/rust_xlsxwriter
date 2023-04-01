@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use rust_xlsxwriter::{
-    Chart, ChartLine, ChartSolidFill, ChartType, Workbook, XlsxColor, XlsxError,
+    Chart, ChartFormat, ChartLine, ChartSolidFill, ChartType, Workbook, XlsxColor, XlsxError,
 };
 
 mod common;
@@ -31,9 +31,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 1, 4, 1))
-        .format()
-        .set_border(&ChartLine::new().set_color(XlsxColor::Yellow))
-        .set_solid_fill(&ChartSolidFill::new().set_color(XlsxColor::Red));
+        .set_format(
+            &ChartFormat::new()
+                .set_border(&ChartLine::new().set_color(XlsxColor::Yellow))
+                .set_solid_fill(&ChartSolidFill::new().set_color(XlsxColor::Red)),
+        );
 
     chart
         .add_series()

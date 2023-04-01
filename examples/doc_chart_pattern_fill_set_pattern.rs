@@ -5,7 +5,7 @@
 //! An example of setting a pattern fill for a chart element.
 
 use rust_xlsxwriter::{
-    Chart, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxError,
+    Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -27,10 +27,9 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .format()
-        .set_pattern_fill(
+        .set_format(&ChartFormat::new().set_pattern_fill(
             &ChartPatternFill::new().set_pattern(ChartPatternFillType::DiagonalBrick),
-        );
+        ));
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

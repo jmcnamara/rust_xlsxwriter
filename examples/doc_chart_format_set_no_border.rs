@@ -4,7 +4,7 @@
 
 //! An example of turning off the border of a chart element.
 
-use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartFormat, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -25,8 +25,7 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .format()
-        .set_no_border();
+        .set_format(&ChartFormat::new().set_no_border());
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

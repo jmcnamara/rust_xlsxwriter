@@ -4,7 +4,7 @@
 
 //! An example of turning off the fill of a chart element.
 
-use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -25,9 +25,11 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .format()
-        .set_border(&ChartLine::new().set_color(XlsxColor::Black))
-        .set_no_fill();
+        .set_format(
+            &ChartFormat::new()
+                .set_border(&ChartLine::new().set_color(XlsxColor::Black))
+                .set_no_fill(),
+        );
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

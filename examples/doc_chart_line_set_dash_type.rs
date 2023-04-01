@@ -4,7 +4,9 @@
 
 //! An example of formatting the line dash type in a chart element.
 
-use rust_xlsxwriter::{Chart, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    Chart, ChartFormat, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError,
+};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -25,8 +27,10 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .format()
-        .set_line(&ChartLine::new().set_dash_type(ChartLineDashType::DashDot));
+        .set_format(
+            &ChartFormat::new()
+                .set_line(&ChartLine::new().set_dash_type(ChartLineDashType::DashDot)),
+        );
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

@@ -4,7 +4,7 @@
 
 //! An example of chart formatting.
 
-use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartFormat, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -22,7 +22,10 @@ fn main() -> Result<(), XlsxError> {
     let mut chart = Chart::new(ChartType::Column);
 
     // Add a data series with formatting.
-    chart.add_series().set_values("Sheet1!$A$1:$A$6").format();
+    chart
+        .add_series()
+        .set_values("Sheet1!$A$1:$A$6")
+        .set_format(&ChartFormat::new());
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

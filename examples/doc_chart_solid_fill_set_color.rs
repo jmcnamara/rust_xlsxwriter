@@ -4,7 +4,7 @@
 
 //! An example of setting a solid fill color for a chart element.
 
-use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -25,8 +25,9 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .format()
-        .set_solid_fill(&ChartSolidFill::new().set_color("#B5A401"));
+        .set_format(
+            &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#B5A401")),
+        );
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;
