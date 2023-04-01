@@ -128,6 +128,8 @@ pub struct Chart {
     pub(crate) x_axis: ChartAxis,
     pub(crate) y_axis: ChartAxis,
     pub(crate) legend: ChartLegend,
+    pub(crate) chartarea_format: ChartFormat,
+    pub(crate) plotarea_format: ChartFormat,
     grouping: ChartGrouping,
     default_cross_between: bool,
     default_num_format: String,
@@ -218,6 +220,8 @@ impl Chart {
             x_axis: ChartAxis::new(),
             y_axis: ChartAxis::new(),
             legend: ChartLegend::new(),
+            chartarea_format: ChartFormat::new(),
+            plotarea_format: ChartFormat::new(),
             grouping: ChartGrouping::Standard,
             default_cross_between: true,
             default_num_format: "General".to_string(),
@@ -633,6 +637,18 @@ impl Chart {
             eprintln!("Style id {style} outside Excel range: 1 <= style <= 48.");
         }
 
+        self
+    }
+
+    /// TODO
+    pub fn set_chartarea_format(&mut self, format: &ChartFormat) -> &mut Chart {
+        self.chartarea_format = format.clone();
+        self
+    }
+
+    /// TODO
+    pub fn set_plotarea_format(&mut self, format: &ChartFormat) -> &mut Chart {
+        self.plotarea_format = format.clone();
         self
     }
 
@@ -1209,6 +1225,9 @@ impl Chart {
         // Write the c:chart element.
         self.write_chart();
 
+        // Write the c:spPr element.
+        self.write_sp_pr(&self.chartarea_format.clone());
+
         // Write the c:printSettings element.
         self.write_print_settings();
 
@@ -1351,6 +1370,9 @@ impl Chart {
         if self.chart_group_type == ChartType::Bar {
             std::mem::swap(&mut self.x_axis, &mut self.y_axis);
         }
+
+        // Write the c:spPr element.
+        self.write_sp_pr(&self.plotarea_format.clone());
 
         self.writer.xml_end_tag("c:plotArea");
     }
@@ -1877,6 +1899,9 @@ impl Chart {
 
         // Write the c:layout element.
         self.write_layout();
+
+        // Write the c:spPr element.
+        self.write_sp_pr(&self.legend.format.clone());
 
         // Write the c:overlay element.
         self.write_overlay();
@@ -3118,6 +3143,11 @@ impl ChartSeries {
     /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
     pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartSeries {
         self.format = format.clone();
         self
@@ -3772,6 +3802,7 @@ pub struct ChartLegend {
     position: ChartLegendPosition,
     hidden: bool,
     has_overlay: bool,
+    pub(crate) format: ChartFormat,
 }
 
 impl ChartLegend {
@@ -3780,6 +3811,7 @@ impl ChartLegend {
             position: ChartLegendPosition::Right,
             hidden: false,
             has_overlay: false,
+            format: ChartFormat::new(),
         }
     }
 
@@ -3950,6 +3982,28 @@ impl ChartLegend {
     ///
     pub fn set_overlay(&mut self) -> &mut ChartLegend {
         self.has_overlay = true;
+        self
+    }
+
+    /// Set the formatting properties for a chart legend.
+    ///
+    /// Set the formatting properties for a chart legend via a [`ChartFormat`]
+    /// object.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
+    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartLegend {
+        self.format = format.clone();
         self
     }
 }
@@ -4655,7 +4709,8 @@ impl ChartLine {
     /// # Arguments
     ///
     /// * `width` - The width should be specified in increments of 0.25 of a
-    /// point as in Excel.
+    /// point as in Excel. The width can be an number type that convert [`Into`]
+    /// [`f64`].
     ///
     /// # Examples
     ///
@@ -4699,9 +4754,14 @@ impl ChartLine {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_width.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_line_set_width.png">
     ///
-    pub fn set_width(&mut self, width: f64) -> &mut ChartLine {
+    pub fn set_width<T>(&mut self, width: T) -> &mut ChartLine
+    where
+        T: Into<f64>,
+    {
+        let width = width.into();
         if width <= 1584.0 {
             self.width = Some(width);
         }
