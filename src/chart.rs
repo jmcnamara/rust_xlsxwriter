@@ -1413,6 +1413,8 @@ impl Chart {
             self.write_title_rich(title);
         } else if title.range.has_data() {
             self.write_title_formula(title);
+        } else if title.format.has_formatting() {
+            self.write_title_format_only(title);
         }
     }
 
@@ -1811,6 +1813,11 @@ impl Chart {
         // Write the c:tickLblPos element.
         self.write_tick_label_position();
 
+        if self.x_axis.format.has_formatting() {
+            // Write the c:spPr element.
+            self.write_sp_pr(&self.x_axis.format.clone());
+        }
+
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.1);
 
@@ -1858,6 +1865,11 @@ impl Chart {
         // Write the c:tickLblPos element.
         self.write_tick_label_position();
 
+        if self.y_axis.format.has_formatting() {
+            // Write the c:spPr element.
+            self.write_sp_pr(&self.y_axis.format.clone());
+        }
+
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.0);
 
@@ -1890,6 +1902,11 @@ impl Chart {
 
         // Write the c:tickLblPos element.
         self.write_tick_label_position();
+
+        if self.x_axis.format.has_formatting() {
+            // Write the c:spPr element.
+            self.write_sp_pr(&self.x_axis.format.clone());
+        }
 
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.1);
@@ -2529,8 +2546,13 @@ impl Chart {
         // Write the c:layout element.
         self.write_layout();
 
-        // Write the c:txPr element.
-        self.write_tx_pr(title.is_horizontal);
+        if title.format.has_formatting() {
+            // Write the c:spPr element.
+            self.write_sp_pr(&title.format.clone());
+        } else {
+            // Write the c:txPr element.
+            self.write_tx_pr(title.is_horizontal);
+        }
 
         self.writer.xml_end_tag("c:title");
     }
@@ -2554,6 +2576,24 @@ impl Chart {
 
         // Write the c:layout element.
         self.write_layout();
+
+        if title.format.has_formatting() {
+            // Write the c:spPr element.
+            self.write_sp_pr(&title.format.clone());
+        }
+
+        self.writer.xml_end_tag("c:title");
+    }
+
+    // Write the <c:title> element.
+    fn write_title_format_only(&mut self, title: &ChartTitle) {
+        self.writer.xml_start_tag("c:title");
+
+        // Write the c:layout element.
+        self.write_layout();
+
+        // Write the c:spPr element.
+        self.write_sp_pr(&title.format.clone());
 
         self.writer.xml_end_tag("c:title");
     }
@@ -3589,6 +3629,7 @@ pub enum ChartType {
 pub struct ChartTitle {
     pub(crate) range: ChartRange,
     pub(crate) cache_data: ChartSeriesCacheData,
+    pub(crate) format: ChartFormat,
     name: String,
     hidden: bool,
     is_horizontal: bool,
@@ -3599,6 +3640,7 @@ impl ChartTitle {
         ChartTitle {
             range: ChartRange::new_from_range("", 0, 0, 0, 0),
             cache_data: ChartSeriesCacheData::new(),
+            format: ChartFormat::new(),
             name: "".to_string(),
             hidden: false,
             is_horizontal: false,
@@ -3737,6 +3779,28 @@ impl ChartTitle {
         self.hidden = true;
         self
     }
+
+    /// Set the formatting properties for a chart title.
+    ///
+    /// Set the formatting properties for a chart title via a [`ChartFormat`]
+    /// object.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
+    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartTitle {
+        self.format = format.clone();
+        self
+    }
 }
 /// A struct to represent a Chart axis.
 #[derive(Clone)]
@@ -3744,6 +3808,7 @@ pub struct ChartAxis {
     axis_type: ChartAxisType,
     axis_position: ChartAxisPosition,
     pub(crate) title: ChartTitle,
+    pub(crate) format: ChartFormat,
 }
 
 impl ChartAxis {
@@ -3752,6 +3817,7 @@ impl ChartAxis {
             axis_type: ChartAxisType::Value,
             axis_position: ChartAxisPosition::Bottom,
             title: ChartTitle::new(),
+            format: ChartFormat::new(),
         }
     }
 
@@ -3820,6 +3886,28 @@ impl ChartAxis {
         T: IntoChartRange,
     {
         self.title.set_name(name);
+        self
+    }
+
+    /// Set the formatting properties for a chart axis.
+    ///
+    /// Set the formatting properties for a chart axis via a [`ChartFormat`]
+    /// object.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
+    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartAxis {
+        self.format = format.clone();
         self
     }
 }
