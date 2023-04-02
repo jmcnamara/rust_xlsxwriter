@@ -128,8 +128,8 @@ pub struct Chart {
     pub(crate) x_axis: ChartAxis,
     pub(crate) y_axis: ChartAxis,
     pub(crate) legend: ChartLegend,
-    pub(crate) chartarea_format: ChartFormat,
-    pub(crate) plotarea_format: ChartFormat,
+    pub(crate) chart_area_format: ChartFormat,
+    pub(crate) plot_area_format: ChartFormat,
     grouping: ChartGrouping,
     default_cross_between: bool,
     default_num_format: String,
@@ -220,8 +220,8 @@ impl Chart {
             x_axis: ChartAxis::new(),
             y_axis: ChartAxis::new(),
             legend: ChartLegend::new(),
-            chartarea_format: ChartFormat::new(),
-            plotarea_format: ChartFormat::new(),
+            chart_area_format: ChartFormat::new(),
+            plot_area_format: ChartFormat::new(),
             grouping: ChartGrouping::Standard,
             default_cross_between: true,
             default_num_format: "General".to_string(),
@@ -640,15 +640,137 @@ impl Chart {
         self
     }
 
-    /// TODO
-    pub fn set_chartarea_format(&mut self, format: &ChartFormat) -> &mut Chart {
-        self.chartarea_format = format.clone();
+    /// Set the formatting properties for the chart area.
+    ///
+    /// Set the formatting properties for a chart area via a [`ChartFormat`]
+    /// object. In Excel the chart area is the background area behind the chart.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the chart "area" of a chart. In Excel the chart
+    /// area is the background area behind the chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_chart_area_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(&ChartFormat::new());
+    ///
+    ///         chart.set_chart_area_format(
+    ///             &ChartFormat::new().set_solid_fill(
+    ///                 &ChartSolidFill::new()
+    ///                     .set_color("#FFFFB3")
+    ///             ),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_chart_area_format.png">
+    ///
+    pub fn set_chart_area_format(&mut self, format: &ChartFormat) -> &mut Chart {
+        self.chart_area_format = format.clone();
         self
     }
 
-    /// TODO
-    pub fn set_plotarea_format(&mut self, format: &ChartFormat) -> &mut Chart {
-        self.plotarea_format = format.clone();
+    /// Set the formatting properties for the plot area.
+    ///
+    /// Set the formatting properties for a chart plot area via a
+    /// [`ChartFormat`] object. In Excel the plot area is the area between the
+    /// axes on which the chart series are plotted.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the chart "area" of a chart. In Excel the plot area
+    /// is the area between the axes on which the chart series are plotted.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_plot_area_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a simple Column chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(&ChartFormat::new());
+    ///
+    ///         chart.set_plot_area_format(
+    ///             &ChartFormat::new().set_solid_fill(
+    ///                 &ChartSolidFill::new()
+    ///                     .set_color("#FFFFB3")
+    ///             ),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_plot_area_format.png">
+    ///
+    pub fn set_plot_area_format(&mut self, format: &ChartFormat) -> &mut Chart {
+        self.plot_area_format = format.clone();
         self
     }
 
@@ -1226,7 +1348,7 @@ impl Chart {
         self.write_chart();
 
         // Write the c:spPr element.
-        self.write_sp_pr(&self.chartarea_format.clone());
+        self.write_sp_pr(&self.chart_area_format.clone());
 
         // Write the c:printSettings element.
         self.write_print_settings();
@@ -1372,7 +1494,7 @@ impl Chart {
         }
 
         // Write the c:spPr element.
-        self.write_sp_pr(&self.plotarea_format.clone());
+        self.write_sp_pr(&self.plot_area_format.clone());
 
         self.writer.xml_end_tag("c:plotArea");
     }
@@ -4061,7 +4183,7 @@ impl ToString for ChartLegendPosition {
 /// like Excel it offers a similar formatting interface for a number of the
 /// chart sub-elements supported by rust_xlsxwriter.
 ///
-/// The [`ChartFormat`] struct is accessed by using the `format()` method of a
+/// The [`ChartFormat`] struct is accessed by using the `set_format()` method of a
 /// chart element to obtain a reference to the formatting struct for that
 /// element. After that it can be used to apply formatting such as:
 ///
@@ -4555,8 +4677,8 @@ impl ChartFormat {
 ///
 /// The [`ChartLine`] struct represents the formatting properties for a line or
 /// border for a Chart element. It is a sub property of the [`ChartFormat`]
-/// struct and is used with the [`format().set_line()`](ChartFormat::set_line)
-/// or [`format().set_border()`](ChartFormat::set_border) methods.
+/// struct and is used with the [`ChartFormat::set_line()`](ChartFormat::set_line)
+/// or [`ChartFormat::set_border()`](ChartFormat::set_border) methods.
 ///
 /// Excel uses the element names "Line" and "Border" depending on the context.
 /// For a Line chart the line is represented by a line property but for a Column
@@ -4910,7 +5032,7 @@ impl ChartLine {
 /// without a pattern or gradient.
 ///
 /// `ChartSolidFill` is a sub property of the [`ChartFormat`] struct and is used
-/// with the [`format().set_solid_fill()`](ChartFormat::set_solid_fill) method.
+/// with the [`ChartFormat::set_solid_fill()`](ChartFormat::set_solid_fill) method.
 ///
 /// # Examples
 ///
@@ -5120,7 +5242,7 @@ impl ChartSolidFill {
 /// simple pixelated pattern and background and foreground colors
 ///
 /// `ChartPatternFill` is a sub property of the [`ChartFormat`] struct and is
-/// used with the [`format().set_pattern_fill()`](ChartFormat::set_pattern_fill)
+/// used with the [`ChartFormat::set_pattern_fill()`](ChartFormat::set_pattern_fill)
 /// method.
 ///
 ///

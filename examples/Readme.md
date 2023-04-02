@@ -207,6 +207,14 @@ documentation and generally show how an individual function works.
 * doc_chart_series_set_values.rs - A chart example demonstrating setting
   the chart series values.
 
+* doc_chart_set_chart_area_format.rs - An example of formatting the chart
+  "area" of a chart. In Excel the chart area is the background area behind
+  the chart.
+
+* doc_chart_set_plot_area_format.rs - An example of formatting the chart
+  "area" of a chart. In Excel the plot area is the area between the axes on
+  which the chart series are plotted.
+
 * doc_chart_set_width.rs - A simple chart example using the rust_xlsxwriter
   library.
 

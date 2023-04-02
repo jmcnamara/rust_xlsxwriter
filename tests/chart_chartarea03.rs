@@ -37,13 +37,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 2, 4, 2));
 
-    chart.set_chartarea_format(
+    chart.set_chart_area_format(
         &ChartFormat::new()
             .set_border(&ChartLine::new().set_dash_type(ChartLineDashType::RoundDot))
             .set_solid_fill(&ChartSolidFill::new().set_color("#9999FF")),
     );
 
-    chart.set_plotarea_format(
+    chart.set_plot_area_format(
         &ChartFormat::new()
             .set_border(&ChartLine::new().set_dash_type(ChartLineDashType::SquareDot))
             .set_solid_fill(&ChartSolidFill::new().set_color("#FFC000")),
