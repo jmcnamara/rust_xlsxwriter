@@ -2362,7 +2362,7 @@ impl Worksheet {
     ///     worksheet.set_column_width(0, 30)?;
     ///
     ///     // Create a time object.
-    ///     let time = NaiveTime::from_hms_milli(2, 59, 3, 456);
+    ///     let time = NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap();
     ///
     ///     // Write the time with different Excel formats.
     ///     worksheet.write_time(0, 0, &time, &format1)?;
