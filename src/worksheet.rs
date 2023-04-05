@@ -8288,13 +8288,13 @@ impl Worksheet {
                                     is_numeric = false;
                                 }
                                 CellType::Number { number, .. } => data.push(number.to_string()),
-                                _ => return cache,
+                                _ => data.push("".to_string()),
                             },
-                            None => return cache,
+                            None => data.push("".to_string()),
                         }
                     }
                 }
-                None => return cache,
+                None => data.push("".to_string()),
             }
         }
 

@@ -137,6 +137,8 @@ pub struct Chart {
     overlap: i8,
     gap: u16,
     style: u8,
+    hole_size: u8,
+    rotation: u16,
 }
 
 impl Chart {
@@ -229,6 +231,8 @@ impl Chart {
             overlap: 0,
             gap: 150,
             style: 2,
+            hole_size: 50,
+            rotation: 0,
         };
 
         match chart_type {
@@ -795,6 +799,44 @@ impl Chart {
     ///
     pub fn set_plot_area_format(&mut self, format: &ChartFormat) -> &mut Chart {
         self.plot_area_format = format.clone();
+        self
+    }
+
+    /// Set the Pie/Doughnut chart rotation.
+    ///
+    /// The `set_rotation()` method is used to set the rotation of the first
+    /// segment of a Pie/Doughnut chart. This has the effect of rotating the
+    /// entire chart.
+    ///
+    /// # Arguments
+    ///
+    /// * `rotation`: The rotation of the first segment of a Pie/Doughnut chart.
+    /// The range is 0 <= rotation <= 360 and the default is 0.
+    ///
+    ///  TODO
+    ///
+    pub fn set_rotation(&mut self, rotation: u16) -> &mut Chart {
+        if (0..=360).contains(&rotation) {
+            self.rotation = rotation;
+        }
+        self
+    }
+
+    /// Set the hole size for a Doughnut chart.
+    ///
+    /// Set the center hole size for a Doughnut chart.
+    ///
+    /// # Arguments
+    ///
+    /// * `hole_size`: The hole size for a Doughnut chart. The range is 0 <=
+    /// hole_size <= 90 and the default is 50.
+    ///
+    ///  TODO
+    ///
+    pub fn set_hole_size(&mut self, hole_size: u8) -> &mut Chart {
+        if (0..=90).contains(&hole_size) {
+            self.hole_size = hole_size;
+        }
         self
     }
 
@@ -1669,7 +1711,6 @@ impl Chart {
 
         // Write the point formatting for the series.
         for (index, point) in points.iter().enumerate() {
-            // TODO: upper limit check.
             if point.is_not_default() {
                 self.writer.xml_start_tag("c:dPt");
                 self.write_idx(index);
@@ -1793,7 +1834,9 @@ impl Chart {
 
         // Write the c:pt elements.
         for (index, value) in cache.data.iter().enumerate() {
-            self.write_pt(index, value);
+            if !value.is_empty() {
+                self.write_pt(index, value);
+            }
         }
 
         self.writer.xml_end_tag("c:numCache");
@@ -2241,7 +2284,7 @@ impl Chart {
 
     // Write the <c:firstSliceAng> element.
     fn write_first_slice_ang(&mut self) {
-        let attributes = vec![("val", "0".to_string())];
+        let attributes = vec![("val", self.rotation.to_string())];
 
         self.writer
             .xml_empty_tag_attr("c:firstSliceAng", &attributes);
@@ -2249,7 +2292,7 @@ impl Chart {
 
     // Write the <c:holeSize> element.
     fn write_hole_size(&mut self) {
-        let attributes = vec![("val", "50".to_string())];
+        let attributes = vec![("val", self.hole_size.to_string())];
 
         self.writer.xml_empty_tag_attr("c:holeSize", &attributes);
     }
@@ -3983,34 +4026,52 @@ impl ChartMarker {
     }
 }
 
-/// Enum to define the Chart pattern fill type.
+/// Enum to define the Chart marker types.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartMarkerType {
     /// Square marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_square.png">
     Square,
 
     /// Diamond marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_diamond.png">
     Diamond,
 
     /// Triangle marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_triangle.png">
     Triangle,
 
     /// X shape marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_x.png">
     X,
 
     /// Star (X overlaid on vertical dash) marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_star.png">
     Star,
 
     /// Short dash marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_short_dash.png">
     ShortDash,
 
     /// Long dash marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_long_dash.png">
     LongDash,
 
     /// Circle marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_circle.png">
     Circle,
 
     /// Plus sign marker type.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_plus_sign.png">
     PlusSign,
 }
 
