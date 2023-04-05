@@ -324,6 +324,16 @@ impl Chart {
             );
         }
 
+        // Turn off markers for chart types that can have markers but don't have
+        // them by default.
+        if self.chart_type == ChartType::ScatterStraight
+            || self.chart_type == ChartType::ScatterSmooth
+            || self.chart_group_type == ChartType::Line
+            || self.chart_type == ChartType::Radar
+        {
+            series.marker = Some(ChartMarker::new().set_none().clone());
+        }
+
         self.series.push(series);
 
         self.series.last_mut().unwrap()
@@ -385,7 +395,27 @@ impl Chart {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
     ///
     pub fn push_series(&mut self, series: &ChartSeries) -> &mut Chart {
-        self.series.push(series.clone());
+        let mut series = series.clone();
+
+        // The default Scatter chart has a hidden line with a standard width.
+        if self.chart_type == ChartType::Scatter {
+            series.set_format(
+                ChartFormat::new().set_line(ChartLine::new().set_width(2.25).set_hidden()),
+            );
+        }
+
+        // Turn off markers for chart types that can have markers but don't have
+        // them by default.
+        if self.chart_type == ChartType::ScatterStraight
+            || self.chart_type == ChartType::ScatterSmooth
+            || self.chart_group_type == ChartType::Line
+            || self.chart_type == ChartType::Radar
+        {
+            series.marker = Some(ChartMarker::new().set_none().clone());
+        }
+
+        self.series.push(series);
+
         self
     }
 
@@ -1538,7 +1568,7 @@ impl Chart {
 
     // Write the <c:ser> element.
     fn write_series(&mut self) {
-        for (index, series) in self.series.clone().iter().enumerate() {
+        for (index, series) in self.series.clone().iter_mut().enumerate() {
             self.writer.xml_start_tag("c:ser");
 
             // Copy a series overlap to the parent chart.
@@ -1562,9 +1592,16 @@ impl Chart {
             // Write the c:spPr element.
             self.write_sp_pr(&series.format);
 
-            // Write the c:marker element.
-            if self.chart_group_type == ChartType::Line || self.chart_type == ChartType::Radar {
-                self.write_marker();
+            if let Some(marker) = &series.marker {
+                if !marker.automatic {
+                    // Write the c:marker element.
+                    self.write_marker(marker);
+                }
+            }
+
+            // Write the point formatting for the series.
+            if !series.points.is_empty() {
+                self.write_d_pt(&series.points);
             }
 
             // Write the c:cat element.
@@ -1593,10 +1630,11 @@ impl Chart {
 
             self.write_series_title(&series.title);
 
-            if self.chart_type == ChartType::ScatterStraight
-                || self.chart_type == ChartType::ScatterSmooth
-            {
-                self.write_marker();
+            if let Some(marker) = &series.marker {
+                if !marker.automatic {
+                    // Write the c:marker element.
+                    self.write_marker(marker);
+                }
             }
 
             // Add default scatter line formatting to the series data unless it
@@ -1607,8 +1645,13 @@ impl Chart {
                 series.format.line = Some(line);
             }
 
-            // Write the c:spPr element.
+            // Write the c:spPr formatting element.
             self.write_sp_pr(&series.format);
+
+            // Write the point formatting for the series.
+            if !series.points.is_empty() {
+                self.write_d_pt(&series.points);
+            }
 
             self.write_x_val(&series.category_range, &series.category_cache_data);
 
@@ -1622,6 +1665,36 @@ impl Chart {
             }
 
             self.writer.xml_end_tag("c:ser");
+        }
+    }
+
+    // Write the <c:dPt> element.
+    fn write_d_pt(&mut self, points: &[ChartPoint]) {
+        let has_marker =
+            self.chart_group_type == ChartType::Scatter || self.chart_group_type == ChartType::Line;
+
+        // Write the point formatting for the series.
+        for (index, point) in points.iter().enumerate() {
+            // TODO: upper limit check.
+            if point.is_not_default() {
+                self.writer.xml_start_tag("c:dPt");
+                self.write_idx(index);
+
+                if has_marker {
+                    self.writer.xml_start_tag("c:marker");
+                }
+
+                if point.format.has_formatting() {
+                    // Write the c:spPr formatting element.
+                    self.write_sp_pr(&point.format);
+                }
+
+                if has_marker {
+                    self.writer.xml_end_tag("c:marker");
+                }
+
+                self.writer.xml_end_tag("c:dPt");
+            }
         }
     }
 
@@ -1814,7 +1887,7 @@ impl Chart {
         self.write_tick_label_position();
 
         if self.x_axis.format.has_formatting() {
-            // Write the c:spPr element.
+            // Write the c:spPr formatting element.
             self.write_sp_pr(&self.x_axis.format.clone());
         }
 
@@ -1866,7 +1939,7 @@ impl Chart {
         self.write_tick_label_position();
 
         if self.y_axis.format.has_formatting() {
-            // Write the c:spPr element.
+            // Write the c:spPr formatting element.
             self.write_sp_pr(&self.y_axis.format.clone());
         }
 
@@ -1904,7 +1977,7 @@ impl Chart {
         self.write_tick_label_position();
 
         if self.x_axis.format.has_formatting() {
-            // Write the c:spPr element.
+            // Write the c:spPr formatting element.
             self.write_sp_pr(&self.x_axis.format.clone());
         }
 
@@ -2039,7 +2112,7 @@ impl Chart {
         // Write the c:layout element.
         self.write_layout();
 
-        // Write the c:spPr element.
+        // Write the c:spPr formatting element.
         self.write_sp_pr(&self.legend.format.clone());
 
         // Write the c:overlay element.
@@ -2126,20 +2199,43 @@ impl Chart {
     }
 
     // Write the <c:marker> element.
-    fn write_marker(&mut self) {
+    fn write_marker(&mut self, marker: &ChartMarker) {
         self.writer.xml_start_tag("c:marker");
 
         // Write the c:symbol element.
-        self.write_symbol();
+        self.write_symbol(marker);
+
+        if marker.size != 0 {
+            // Write the c:size element.
+            self.write_size(marker.size);
+        }
+
+        if marker.format.has_formatting() {
+            // Write the c:spPr formatting element.
+            self.write_sp_pr(&marker.format);
+        }
 
         self.writer.xml_end_tag("c:marker");
     }
 
     // Write the <c:symbol> element.
-    fn write_symbol(&mut self) {
-        let attributes = vec![("val", "none".to_string())];
+    fn write_symbol(&mut self, marker: &ChartMarker) {
+        let mut attributes = vec![];
+
+        if let Some(marker_type) = marker.marker_type {
+            attributes.push(("val", marker_type.to_string()));
+        } else if marker.none {
+            attributes.push(("val", "none".to_string()));
+        }
 
         self.writer.xml_empty_tag_attr("c:symbol", &attributes);
+    }
+
+    // Write the <c:size> element.
+    fn write_size(&mut self, size: u8) {
+        let attributes = vec![("val", size.to_string())];
+
+        self.writer.xml_empty_tag_attr("c:size", &attributes);
     }
 
     // Write the <c:varyColors> element.
@@ -2547,7 +2643,7 @@ impl Chart {
         self.write_layout();
 
         if title.format.has_formatting() {
-            // Write the c:spPr element.
+            // Write the c:spPr formatting element.
             self.write_sp_pr(&title.format.clone());
         } else {
             // Write the c:txPr element.
@@ -2827,6 +2923,8 @@ pub struct ChartSeries {
     pub(crate) category_cache_data: ChartSeriesCacheData,
     pub(crate) title: ChartTitle,
     pub(crate) format: ChartFormat,
+    pub(crate) marker: Option<ChartMarker>,
+    pub(crate) points: Vec<ChartPoint>,
     pub(crate) gap: u16,
     pub(crate) overlap: i8,
 }
@@ -2931,6 +3029,8 @@ impl ChartSeries {
             category_cache_data: ChartSeriesCacheData::new(),
             title: ChartTitle::new(),
             format: ChartFormat::new(),
+            marker: None,
+            points: vec![],
             gap: 150,
             overlap: 0,
         }
@@ -3199,6 +3299,40 @@ impl ChartSeries {
         self
     }
 
+    /// Set the formatting properties for a chart series.
+    ///
+    /// Set the formatting properties for a chart series via a [`ChartFormat`]
+    /// object.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
+    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartSeries {
+        self.format = format.clone();
+        self
+    }
+
+    /// todo
+    pub fn set_marker(&mut self, marker: &ChartMarker) -> &mut ChartSeries {
+        self.marker = Some(marker.clone());
+        self
+    }
+
+    /// todo
+    pub fn set_points(&mut self, points: &[ChartPoint]) -> &mut ChartSeries {
+        self.points = points.to_vec();
+        self
+    }
+
     /// Set the series overlap for a chart/bar chart.
     ///
     /// Set the overlap between series in a Bar/Column chart. The range is -100
@@ -3290,28 +3424,6 @@ impl ChartSeries {
         if gap <= 500 {
             self.gap = gap;
         }
-        self
-    }
-
-    /// Set the formatting properties for a chart series.
-    ///
-    /// Set the formatting properties for a chart series via a [`ChartFormat`]
-    /// object.
-    ///
-    /// The formatting that can be applied via a [`ChartFormat`] object are:
-    ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
-    ///
-    /// # Arguments
-    ///
-    /// `format`: A [`ChartFormat`] struct reference.
-    ///
-    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartSeries {
-        self.format = format.clone();
         self
     }
 
@@ -3802,6 +3914,175 @@ impl ChartTitle {
         self
     }
 }
+
+/// A struct to represent a Chart marker.
+#[derive(Clone)]
+pub struct ChartMarker {
+    pub(crate) automatic: bool,
+    pub(crate) none: bool,
+    pub(crate) size: u8,
+    pub(crate) marker_type: Option<ChartMarkerType>,
+    pub(crate) format: ChartFormat,
+}
+
+#[allow(clippy::new_without_default)]
+impl ChartMarker {
+    /// todo
+    pub fn new() -> ChartMarker {
+        ChartMarker {
+            automatic: false,
+            none: false,
+            marker_type: None,
+            size: 0,
+            format: ChartFormat::new(),
+        }
+    }
+
+    /// TODO
+    pub fn set_automatic(&mut self) -> &mut ChartMarker {
+        self.automatic = true;
+        self
+    }
+
+    /// TODO
+    pub fn set_none(&mut self) -> &mut ChartMarker {
+        self.none = true;
+        self
+    }
+
+    /// TODO
+    pub fn set_type(&mut self, marker_type: ChartMarkerType) -> &mut ChartMarker {
+        self.marker_type = Some(marker_type);
+        self.automatic = false;
+        self
+    }
+
+    /// TODO
+    pub fn set_size(&mut self, size: u8) -> &mut ChartMarker {
+        if (2..=72).contains(&size) {
+            self.size = size;
+            self.automatic = false;
+        }
+        self
+    }
+
+    /// Set the formatting properties for a chart marker.
+    ///
+    /// Set the formatting properties for a chart marker via a [`ChartFormat`]
+    /// object.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
+    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartMarker {
+        self.format = format.clone();
+        self
+    }
+}
+
+/// Enum to define the Chart pattern fill type.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ChartMarkerType {
+    /// Square marker type.
+    Square,
+
+    /// Diamond marker type.
+    Diamond,
+
+    /// Triangle marker type.
+    Triangle,
+
+    /// X shape marker type.
+    X,
+
+    /// Star (X overlaid on vertical dash) marker type.
+    Star,
+
+    /// Short dash marker type.
+    ShortDash,
+
+    /// Long dash marker type.
+    LongDash,
+
+    /// Circle marker type.
+    Circle,
+
+    /// Plus sign marker type.
+    PlusSign,
+}
+
+impl ToString for ChartMarkerType {
+    fn to_string(&self) -> String {
+        match self {
+            ChartMarkerType::X => "x".to_string(),
+            ChartMarkerType::Star => "star".to_string(),
+            ChartMarkerType::Circle => "circle".to_string(),
+            ChartMarkerType::Square => "square".to_string(),
+            ChartMarkerType::Diamond => "diamond".to_string(),
+            ChartMarkerType::PlusSign => "plus".to_string(),
+            ChartMarkerType::Triangle => "triangle".to_string(),
+            ChartMarkerType::LongDash => "long_dash".to_string(),
+            ChartMarkerType::ShortDash => "short_dash".to_string(),
+        }
+    }
+}
+
+/// A struct to represent a Chart point.
+#[derive(Clone)]
+pub struct ChartPoint {
+    pub(crate) format: ChartFormat,
+}
+
+impl Default for ChartPoint {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartPoint {
+    /// todo
+    pub fn new() -> ChartPoint {
+        ChartPoint {
+            format: ChartFormat::new(),
+        }
+    }
+
+    /// Set the formatting properties for a chart point.
+    ///
+    /// Set the formatting properties for a chart point via a [`ChartFormat`]
+    /// object.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference.
+    ///
+    pub fn set_format(mut self, format: &ChartFormat) -> ChartPoint {
+        self.format = format.clone();
+        self
+    }
+
+    pub(crate) fn is_not_default(&self) -> bool {
+        self.format.has_formatting()
+    }
+}
+
 /// A struct to represent a Chart axis.
 #[derive(Clone)]
 pub struct ChartAxis {
