@@ -38,7 +38,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let _worksheet = workbook.add_worksheet();
 
-    workbook.save(&path)?;
+    workbook.save(path)?;
 
     Ok(())
 }
@@ -51,7 +51,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let _worksheet = workbook.add_worksheet();
 
-    workbook.save(&path)?;
+    workbook.save(path)?;
 
     Ok(())
 }

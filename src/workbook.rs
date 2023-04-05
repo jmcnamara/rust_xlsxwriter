@@ -646,7 +646,7 @@ impl Workbook {
     ///     let _worksheet = workbook.add_worksheet();
     ///
     ///     let path = std::path::Path::new("workbook.xlsx");
-    ///     workbook.save(&path)?;
+    ///     workbook.save(path)?;
     ///
     ///     Ok(())
     /// }

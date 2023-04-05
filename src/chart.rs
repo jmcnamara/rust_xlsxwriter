@@ -705,14 +705,11 @@ impl Chart {
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
-    ///     chart
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(&ChartFormat::new());
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
     ///
     ///         chart.set_chart_area_format(
-    ///             &ChartFormat::new().set_solid_fill(
-    ///                 &ChartSolidFill::new()
+    ///             ChartFormat::new().set_solid_fill(
+    ///                 ChartSolidFill::new()
     ///                     .set_color("#FFFFB3")
     ///             ),
     ///         );
@@ -773,14 +770,11 @@ impl Chart {
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
-    ///     chart
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(&ChartFormat::new());
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
     ///
     ///         chart.set_plot_area_format(
-    ///             &ChartFormat::new().set_solid_fill(
-    ///                 &ChartSolidFill::new()
+    ///             ChartFormat::new().set_solid_fill(
+    ///                 ChartSolidFill::new()
     ///                     .set_color("#FFFFB3")
     ///             ),
     ///         );
@@ -4598,14 +4592,14 @@ impl ToString for ChartLegendPosition {
 ///         .set_values("Sheet1!$A$2:$A$5")
 ///         .set_gap(70)
 ///         .set_format(
-///             &ChartFormat::new()
+///             ChartFormat::new()
 ///                 .set_pattern_fill(
-///                     &ChartPatternFill::new()
+///                     ChartPatternFill::new()
 ///                         .set_pattern(ChartPatternFillType::Shingle)
 ///                         .set_foreground_color("#804000")
 ///                         .set_background_color("#C68C53"),
 ///                 )
-///                 .set_border(&ChartLine::new().set_color("#804000")),
+///                 .set_border(ChartLine::new().set_color("#804000")),
 ///         );
 ///
 ///     chart
@@ -4613,14 +4607,14 @@ impl ToString for ChartLegendPosition {
 ///         .set_name("Sheet1!$B$1")
 ///         .set_values("Sheet1!$B$2:$B$5")
 ///         .set_format(
-///             &ChartFormat::new()
+///             ChartFormat::new()
 ///                 .set_pattern_fill(
-///                     &ChartPatternFill::new()
+///                     ChartPatternFill::new()
 ///                         .set_pattern(ChartPatternFillType::HorizontalBrick)
 ///                         .set_foreground_color("#B30000")
 ///                         .set_background_color("#FF6666"),
 ///                 )
-///                 .set_border(&ChartLine::new().set_color("#B30000")),
+///                 .set_border(ChartLine::new().set_color("#B30000")),
 ///         );
 ///
 ///     // Add a chart title and some axis labels.
@@ -4709,8 +4703,8 @@ impl ChartFormat {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             &ChartFormat::new().set_line(
-    ///                 &ChartLine::new()
+    ///             ChartFormat::new().set_line(
+    ///                 ChartLine::new()
     ///                     .set_color("#FF9900")
     ///                     .set_width(5.25)
     ///                     .set_dash_type(ChartLineDashType::SquareDot)
@@ -4776,7 +4770,7 @@ impl ChartFormat {
     ///         .add_series()
     ///         .set_categories("Sheet1!$A$1:$A$6")
     ///         .set_values("Sheet1!$B$1:$B$6")
-    ///         .set_format(&ChartFormat::new().set_no_line());
+    ///         .set_format(ChartFormat::new().set_no_line());
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4830,7 +4824,7 @@ impl ChartFormat {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(&ChartFormat::new().set_no_border());
+    ///         .set_format(ChartFormat::new().set_no_border());
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -4884,8 +4878,8 @@ impl ChartFormat {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             &ChartFormat::new()
-    ///                 .set_border(&ChartLine::new().set_color(XlsxColor::Black))
+    ///             ChartFormat::new()
+    ///                 .set_border(ChartLine::new().set_color(XlsxColor::Black))
     ///                 .set_no_fill(),
     ///         );
     ///
@@ -4942,8 +4936,8 @@ impl ChartFormat {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             &ChartFormat::new().set_solid_fill(
-    ///                 &ChartSolidFill::new()
+    ///             ChartFormat::new().set_solid_fill(
+    ///                 ChartSolidFill::new()
     ///                     .set_color("#FF9900")
     ///                     .set_transparency(60),
     ///             ),
@@ -5005,8 +4999,8 @@ impl ChartFormat {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             &ChartFormat::new().set_pattern_fill(
-    ///                 &ChartPatternFill::new()
+    ///             ChartFormat::new().set_pattern_fill(
+    ///                 ChartPatternFill::new()
     ///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
     ///                     .set_background_color(XlsxColor::Yellow)
     ///                     .set_foreground_color(XlsxColor::Red),
@@ -5086,8 +5080,8 @@ impl ChartFormat {
 ///         .add_series()
 ///         .set_values("Sheet1!$A$1:$A$6")
 ///         .set_format(
-///             &ChartFormat::new().set_line(
-///                 &ChartLine::new()
+///             ChartFormat::new().set_line(
+///                 ChartLine::new()
 ///                     .set_color("#FF9900")
 ///                     .set_width(5.25)
 ///                     .set_dash_type(ChartLineDashType::SquareDot)
@@ -5167,7 +5161,7 @@ impl ChartLine {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(&ChartFormat::new().set_line(&ChartLine::new().set_color("#FF9900")));
+    ///         .set_format(ChartFormat::new().set_line(ChartLine::new().set_color("#FF9900")));
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -5231,7 +5225,7 @@ impl ChartLine {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(&ChartFormat::new().set_line(&ChartLine::new().set_width(10.0)));
+    ///         .set_format(ChartFormat::new().set_line(ChartLine::new().set_width(10.0)));
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -5297,8 +5291,7 @@ impl ChartLine {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             &ChartFormat::new()
-    ///                 .set_line(&ChartLine::new().set_dash_type(ChartLineDashType::DashDot)),
+    ///             ChartFormat::new().set_line(ChartLine::new().set_dash_type(ChartLineDashType::DashDot)),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -5360,8 +5353,7 @@ impl ChartLine {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             &ChartFormat::new()
-    ///                 .set_line(&ChartLine::new().set_color("#FF9900").set_transparency(50)),
+    ///             ChartFormat::new().set_line(ChartLine::new().set_color("#FF9900").set_transparency(50)),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -5432,8 +5424,8 @@ impl ChartLine {
 ///         .add_series()
 ///         .set_values("Sheet1!$A$1:$A$6")
 ///         .set_format(
-///             &ChartFormat::new().set_solid_fill(
-///                 &ChartSolidFill::new()
+///             ChartFormat::new().set_solid_fill(
+///                 ChartSolidFill::new()
 ///                     .set_color("#FF9900")
 ///                     .set_transparency(60),
 ///             ),
@@ -5505,9 +5497,7 @@ impl ChartSolidFill {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#B5A401")),
-    ///         );
+    ///         .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#B5A401")));
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
@@ -5574,8 +5564,8 @@ impl ChartSolidFill {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             &ChartFormat::new().set_solid_fill(
-    ///                 &ChartSolidFill::new()
+    ///             ChartFormat::new().set_solid_fill(
+    ///                 ChartSolidFill::new()
     ///                     .set_color("#FF9900")
     ///                     .set_transparency(60),
     ///             ),
@@ -5646,8 +5636,8 @@ impl ChartSolidFill {
 ///         .add_series()
 ///         .set_values("Sheet1!$A$1:$A$6")
 ///         .set_format(
-///             &ChartFormat::new().set_pattern_fill(
-///                 &ChartPatternFill::new()
+///             ChartFormat::new().set_pattern_fill(
+///                 ChartPatternFill::new()
 ///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
 ///                     .set_background_color(XlsxColor::Yellow)
 ///                     .set_foreground_color(XlsxColor::Red),
@@ -5726,8 +5716,8 @@ impl ChartPatternFill {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(&ChartFormat::new().set_pattern_fill(
-    ///             &ChartPatternFill::new().set_pattern(ChartPatternFillType::DiagonalBrick),
+    ///         .set_format(ChartFormat::new().set_pattern_fill(
+    ///             ChartPatternFill::new().set_pattern(ChartPatternFillType::DiagonalBrick),
     ///         ));
     ///
     ///     // Add the chart to the worksheet.
@@ -5790,8 +5780,8 @@ impl ChartPatternFill {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             &ChartFormat::new().set_pattern_fill(
-    ///                 &ChartPatternFill::new()
+    ///             ChartFormat::new().set_pattern_fill(
+    ///                 ChartPatternFill::new()
     ///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
     ///                     .set_background_color(XlsxColor::Yellow)
     ///                     .set_foreground_color(XlsxColor::Red),

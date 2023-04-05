@@ -28,8 +28,8 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
         .set_format(
-            &ChartFormat::new().set_line(
-                &ChartLine::new()
+            ChartFormat::new().set_line(
+                ChartLine::new()
                     .set_color("#FF9900")
                     .set_width(5.25)
                     .set_dash_type(ChartLineDashType::SquareDot)

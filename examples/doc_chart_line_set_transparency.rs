@@ -27,8 +27,7 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
         .set_format(
-            &ChartFormat::new()
-                .set_line(&ChartLine::new().set_color("#FF9900").set_transparency(50)),
+            ChartFormat::new().set_line(ChartLine::new().set_color("#FF9900").set_transparency(50)),
         );
 
     // Add the chart to the worksheet.

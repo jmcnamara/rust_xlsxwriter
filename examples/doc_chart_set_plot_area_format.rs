@@ -23,13 +23,10 @@ fn main() -> Result<(), XlsxError> {
     let mut chart = Chart::new(ChartType::Column);
 
     // Add a data series with formatting.
-    chart
-        .add_series()
-        .set_values("Sheet1!$A$1:$A$6")
-        .set_format(&ChartFormat::new());
+    chart.add_series().set_values("Sheet1!$A$1:$A$6");
 
     chart.set_plot_area_format(
-        &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#FFFFB3")),
+        ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFFB3")),
     );
 
     // Add the chart to the worksheet.

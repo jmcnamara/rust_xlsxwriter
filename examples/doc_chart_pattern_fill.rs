@@ -29,8 +29,8 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Dotted20Percent)
                     .set_background_color(XlsxColor::Yellow)
                     .set_foreground_color(XlsxColor::Red),

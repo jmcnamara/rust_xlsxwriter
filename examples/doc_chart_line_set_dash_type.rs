@@ -28,8 +28,7 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
         .set_format(
-            &ChartFormat::new()
-                .set_line(&ChartLine::new().set_dash_type(ChartLineDashType::DashDot)),
+            ChartFormat::new().set_line(ChartLine::new().set_dash_type(ChartLineDashType::DashDot)),
         );
 
     // Add the chart to the worksheet.

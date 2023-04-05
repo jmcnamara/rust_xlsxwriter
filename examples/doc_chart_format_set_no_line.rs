@@ -32,7 +32,7 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_categories("Sheet1!$A$1:$A$6")
         .set_values("Sheet1!$B$1:$B$6")
-        .set_format(&ChartFormat::new().set_no_line());
+        .set_format(ChartFormat::new().set_no_line());
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

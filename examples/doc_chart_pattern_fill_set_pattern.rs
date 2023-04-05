@@ -27,8 +27,8 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .set_format(&ChartFormat::new().set_pattern_fill(
-            &ChartPatternFill::new().set_pattern(ChartPatternFillType::DiagonalBrick),
+        .set_format(ChartFormat::new().set_pattern_fill(
+            ChartPatternFill::new().set_pattern(ChartPatternFillType::DiagonalBrick),
         ));
 
     // Add the chart to the worksheet.

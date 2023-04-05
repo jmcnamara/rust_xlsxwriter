@@ -26,8 +26,8 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
         .set_format(
-            &ChartFormat::new()
-                .set_border(&ChartLine::new().set_color(XlsxColor::Black))
+            ChartFormat::new()
+                .set_border(ChartLine::new().set_color(XlsxColor::Black))
                 .set_no_fill(),
         );
 

@@ -254,10 +254,10 @@ fn write_worksheet_data(worksheet: &mut Worksheet, header: &Format) -> Result<()
         ("South", "Hector", "Apple", 9814),
     ];
 
-    worksheet.write_string_with_format(0, 0, "Region", &header)?;
-    worksheet.write_string_with_format(0, 1, "Sales Rep", &header)?;
-    worksheet.write_string_with_format(0, 2, "Product", &header)?;
-    worksheet.write_string_with_format(0, 3, "Units", &header)?;
+    worksheet.write_string_with_format(0, 0, "Region", header)?;
+    worksheet.write_string_with_format(0, 1, "Sales Rep", header)?;
+    worksheet.write_string_with_format(0, 2, "Product", header)?;
+    worksheet.write_string_with_format(0, 3, "Units", header)?;
 
     let mut row = 1;
     for data in worksheet_data.iter() {
