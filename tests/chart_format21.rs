@@ -32,10 +32,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 1, 4, 1))
         .set_format(
-            &ChartFormat::new()
-                .set_border(&ChartLine::new().set_color(XlsxColor::RGB(0xFFFF00)))
+            ChartFormat::new()
+                .set_border(ChartLine::new().set_color(XlsxColor::RGB(0xFFFF00)))
                 .set_solid_fill(
-                    &ChartSolidFill::new()
+                    ChartSolidFill::new()
                         .set_color(XlsxColor::RGB(0xFF0000))
                         .set_transparency(24),
                 ),

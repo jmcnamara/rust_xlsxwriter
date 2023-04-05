@@ -32,9 +32,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
     chart.title().set_format(
-        &ChartFormat::new()
-            .set_border(&ChartLine::new().set_color("#FFFF00"))
-            .set_solid_fill(&ChartSolidFill::new().set_color("#FF0000")),
+        ChartFormat::new()
+            .set_border(ChartLine::new().set_color("#FFFF00"))
+            .set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
     );
 
     worksheet.insert_chart(8, 4, &chart)?;

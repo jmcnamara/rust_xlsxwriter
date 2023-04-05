@@ -39,13 +39,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 1, 4, 1))
-        .set_format(&ChartFormat::new().set_line(&ChartLine::new().set_width(5.0)));
+        .set_format(ChartFormat::new().set_line(ChartLine::new().set_width(5.0)));
 
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 2, 4, 2))
-        .set_format(&ChartFormat::new().set_line(&ChartLine::new().set_width(0.0)));
+        .set_format(ChartFormat::new().set_line(ChartLine::new().set_width(0.0)));
 
     worksheet.insert_chart(8, 4, &chart)?;
 

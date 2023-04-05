@@ -29,15 +29,15 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let points = vec![
         ChartPoint::default(),
         ChartPoint::new().set_format(
-            &ChartFormat::new().set_border(
-                &ChartLine::new()
+            ChartFormat::new().set_border(
+                ChartLine::new()
                     .set_color("#FF0000")
                     .set_dash_type(ChartLineDashType::SquareDot),
             ),
         ),
         ChartPoint::default(),
         ChartPoint::new().set_format(
-            &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#FFFF00")),
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
         ),
     ];
 

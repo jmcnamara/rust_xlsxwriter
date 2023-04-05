@@ -33,19 +33,19 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_values(("Sheet1", 0, 1, 2, 1));
 
     chart.set_chart_area_format(
-        &ChartFormat::new()
+        ChartFormat::new()
             .set_border(
-                &ChartLine::new()
+                ChartLine::new()
                     .set_color("#FFFF00")
                     .set_dash_type(ChartLineDashType::LongDash),
             )
-            .set_solid_fill(&ChartSolidFill::new().set_color("#92D050")),
+            .set_solid_fill(ChartSolidFill::new().set_color("#92D050")),
     );
 
     chart.set_plot_area_format(
-        &ChartFormat::new()
-            .set_border(&ChartLine::new().set_dash_type(ChartLineDashType::SquareDot))
-            .set_solid_fill(&ChartSolidFill::new().set_color("#FF0000")),
+        ChartFormat::new()
+            .set_border(ChartLine::new().set_dash_type(ChartLineDashType::SquareDot))
+            .set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
     );
 
     worksheet.insert_chart(8, 4, &chart)?;

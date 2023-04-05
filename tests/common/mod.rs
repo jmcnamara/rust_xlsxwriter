@@ -378,7 +378,7 @@ fn xml_to_vec(xml_string: &str) -> Vec<String> {
 
     for token in &tokens {
         let mut element = token.trim().to_string();
-        element = element.replace("\r", "");
+        element = element.replace('\r', "");
 
         // Add back the removed brackets.
         if !element.starts_with('<') {

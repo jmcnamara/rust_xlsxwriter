@@ -1147,17 +1147,17 @@ mod tests {
 
     #[test]
     fn unknown_file_format() {
-        let filename = format!("tests/input/images/unknown.img");
+        let filename = "tests/input/images/unknown.img".to_string();
 
-        let image = Image::new(&filename);
+        let image = Image::new(filename);
         assert!(matches!(image, Err(XlsxError::UnknownImageType)));
     }
 
     #[test]
     fn invalid_file_format() {
-        let filename = format!("tests/input/images/no_dimensions.png");
+        let filename = "tests/input/images/no_dimensions.png".to_string();
 
-        let image = Image::new(&filename);
+        let image = Image::new(filename);
         assert!(matches!(image, Err(XlsxError::ImageDimensionError)));
     }
 }

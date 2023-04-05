@@ -6213,8 +6213,8 @@ mod tests {
 
         // Check for chart with empty series.
         let mut chart = Chart::new(ChartType::Scatter);
-        let mut series = ChartSeries::new();
-        chart.push_series(&mut series);
+        let series = ChartSeries::new();
+        chart.push_series(&series);
         let result = chart.validate();
         assert!(matches!(result, Err(XlsxError::ChartError(_))));
 
@@ -6294,7 +6294,7 @@ mod tests {
         chart.assemble_xml_file();
 
         let got = chart.writer.read_to_str();
-        let got = xml_to_vec(&got);
+        let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
             r#"

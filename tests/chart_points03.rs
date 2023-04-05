@@ -27,13 +27,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let points = vec![
         ChartPoint::new().set_format(
-            &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#FF0000")),
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
         ),
         ChartPoint::new().set_format(
-            &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#FFC000")),
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFC000")),
         ),
         ChartPoint::new().set_format(
-            &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#FFFF00")),
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
         ),
     ];
 

@@ -32,20 +32,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
     chart.set_chart_area_format(
-        &ChartFormat::new()
+        ChartFormat::new()
             .set_no_line()
-            .set_solid_fill(&ChartSolidFill::new().set_color(XlsxColor::Red)),
+            .set_solid_fill(ChartSolidFill::new().set_color(XlsxColor::Red)),
     );
 
     chart.set_plot_area_format(
-        &ChartFormat::new()
+        ChartFormat::new()
             .set_border(
-                &ChartLine::new()
+                ChartLine::new()
                     .set_color(XlsxColor::Yellow)
                     .set_width(1)
                     .set_dash_type(ChartLineDashType::Dash),
             )
-            .set_solid_fill(&ChartSolidFill::new().set_color("#92d050")),
+            .set_solid_fill(ChartSolidFill::new().set_color("#92d050")),
     );
 
     worksheet.insert_chart(8, 4, &chart)?;

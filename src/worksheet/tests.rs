@@ -5,7 +5,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 #[cfg(test)]
-mod tests {
+mod worksheet_tests {
 
     use crate::test_functions::xml_to_vec;
     use crate::worksheet::SharedStringsTable;
@@ -24,7 +24,7 @@ mod tests {
         worksheet.assemble_xml_file(&mut string_table);
 
         let got = worksheet.writer.read_to_str();
-        let got = xml_to_vec(&got);
+        let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
             r#"
@@ -779,8 +779,8 @@ mod tests {
         let mut worksheet = Worksheet::new();
         let format = Format::default();
 
-        assert_eq!(worksheet.check_dimensions(ROW_MAX, 0), false);
-        assert_eq!(worksheet.check_dimensions(0, COL_MAX), false);
+        assert!(!worksheet.check_dimensions(ROW_MAX, 0));
+        assert!(!worksheet.check_dimensions(0, COL_MAX));
 
         let result = worksheet.write_string_with_format(ROW_MAX, 0, "Foo", &format);
         assert!(matches!(result, Err(XlsxError::RowColumnLimitError)));
@@ -828,6 +828,7 @@ mod tests {
         let mut worksheet = Worksheet::new();
 
         // Test date and time
+        #[allow(clippy::excessive_precision)]
         let datetimes = vec![
             (1899, 12, 31, 0, 0, 0, 0, 0.0),
             (1982, 8, 25, 0, 15, 20, 213, 30188.010650613425),
@@ -1157,6 +1158,7 @@ mod tests {
         let mut worksheet = Worksheet::new();
 
         // Test time only.
+        #[allow(clippy::excessive_precision)]
         let times = vec![
             (0, 0, 0, 0, 0.0),
             (0, 15, 20, 213, 1.0650613425925924E-2),

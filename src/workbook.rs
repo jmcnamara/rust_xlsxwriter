@@ -1747,7 +1747,7 @@ mod tests {
         workbook.assemble_xml_file();
 
         let got = workbook.writer.read_to_str();
-        let got = xml_to_vec(&got);
+        let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
             r#"

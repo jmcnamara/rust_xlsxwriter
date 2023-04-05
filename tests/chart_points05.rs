@@ -25,9 +25,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let points = vec![ChartPoint::new().set_format(
-        &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#FF0000")),
-    )];
+    let points = vec![ChartPoint::new()
+        .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")))];
 
     let mut chart = Chart::new(ChartType::Line);
     chart.set_axis_ids(45471616, 46804992);
@@ -35,14 +34,14 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 1, 4, 1))
-        .set_marker(&ChartMarker::new().set_automatic())
+        .set_marker(ChartMarker::new().set_automatic())
         .set_points(&points);
 
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 2, 4, 2))
-        .set_marker(&ChartMarker::new().set_automatic());
+        .set_marker(ChartMarker::new().set_automatic());
 
     worksheet.insert_chart(8, 4, &chart)?;
 

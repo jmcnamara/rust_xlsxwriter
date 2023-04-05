@@ -54,9 +54,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let mut chart = Chart::new(ChartType::Column);
     chart
-        .push_series(&ChartSeries::new().set_values("=Sheet1!$A$1:$A$5"))
-        .push_series(&ChartSeries::new().set_values("=Sheet1!$B$1:$B$5"))
-        .push_series(&ChartSeries::new().set_values("=Sheet1!$C$1:$C$5"));
+        .push_series(ChartSeries::new().set_values("=Sheet1!$A$1:$A$5"))
+        .push_series(ChartSeries::new().set_values("=Sheet1!$B$1:$B$5"))
+        .push_series(ChartSeries::new().set_values("=Sheet1!$C$1:$C$5"));
 
     // Set the chart axis ids to match the random values in the Excel file.
     chart.set_axis_ids(43424000, 43434368);

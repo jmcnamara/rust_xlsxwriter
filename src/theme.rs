@@ -299,7 +299,7 @@ mod tests {
         theme.assemble_xml_file();
 
         let got = theme.writer.read_to_str();
-        let got = xml_to_vec(&got);
+        let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n\

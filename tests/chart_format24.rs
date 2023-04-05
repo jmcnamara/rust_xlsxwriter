@@ -35,16 +35,16 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_values(("Sheet1", 0, 2, 4, 2));
 
     chart.set_chart_area_format(
-        &ChartFormat::new().set_solid_fill(
-            &ChartSolidFill::new()
+        ChartFormat::new().set_solid_fill(
+            ChartSolidFill::new()
                 .set_color("#FFFF00")
                 .set_transparency(75),
         ),
     );
 
     chart.set_plot_area_format(
-        &ChartFormat::new().set_solid_fill(
-            &ChartSolidFill::new()
+        ChartFormat::new().set_solid_fill(
+            ChartSolidFill::new()
                 .set_color("#FF0000")
                 .set_transparency(25),
         ),

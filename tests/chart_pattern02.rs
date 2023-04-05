@@ -32,8 +32,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$A$1:$A$3")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Dotted5Percent)
                     .set_foreground_color(XlsxColor::RGB(0xC00000))
                     .set_background_color(XlsxColor::RGB(0xFFFFFF)),
@@ -44,8 +44,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$B$1:$B$3")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Dotted50Percent)
                     .set_foreground_color(XlsxColor::RGB(0xFF0000))
                     .set_background_color(XlsxColor::RGB(0xFFFFFF)),
@@ -55,8 +55,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$C$1:$C$3")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::DiagonalStripesLightDownwards)
                     .set_foreground_color(XlsxColor::RGB(0xFFC000))
                     .set_background_color(XlsxColor::RGB(0xFFFFFF)),
@@ -66,8 +66,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$D$1:$D$3")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::VerticalStripesLight)
                     .set_foreground_color(XlsxColor::RGB(0xFFFF00))
                     .set_background_color(XlsxColor::RGB(0xFFFFFF)),
@@ -77,8 +77,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$E$1:$E$3")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::StripesBackslashes)
                     .set_foreground_color(XlsxColor::RGB(0x92D050))
                     .set_background_color(XlsxColor::RGB(0xFFFFFF)),
@@ -88,8 +88,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$F$1:$F$3")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Zigzag)
                     .set_foreground_color(XlsxColor::RGB(0x00B050))
                     .set_background_color(XlsxColor::RGB(0xFFFFFF)),
@@ -99,8 +99,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$G$1:$G$3")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Divot)
                     .set_foreground_color(XlsxColor::RGB(0x00B0F0))
                     .set_background_color(XlsxColor::RGB(0xFFFFFF)),
@@ -110,8 +110,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$H$1:$H$3")
         .set_format(
-            &ChartFormat::new().set_pattern_fill(
-                &ChartPatternFill::new()
+            ChartFormat::new().set_pattern_fill(
+                ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::SmallGrid)
                     .set_foreground_color(XlsxColor::RGB(0x0070C0))
                     .set_background_color(XlsxColor::RGB(0xFFFFFF)),

@@ -29,37 +29,37 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values(("Sheet1", 0, 0, 7, 0))
         .set_format(
-            &ChartFormat::new().set_line(&ChartLine::new().set_color(XlsxColor::Theme(8, 0))),
+            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(8, 0))),
         );
     chart
         .add_series()
         .set_values(("Sheet1", 0, 1, 7, 1))
         .set_format(
-            &ChartFormat::new().set_line(&ChartLine::new().set_color(XlsxColor::Theme(8, 1))),
+            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(8, 1))),
         );
     chart
         .add_series()
         .set_values(("Sheet1", 0, 2, 7, 2))
         .set_format(
-            &ChartFormat::new().set_line(&ChartLine::new().set_color(XlsxColor::Theme(8, 2))),
+            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(8, 2))),
         );
     chart
         .add_series()
         .set_values(("Sheet1", 0, 3, 7, 3))
         .set_format(
-            &ChartFormat::new().set_line(&ChartLine::new().set_color(XlsxColor::Theme(8, 3))),
+            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(8, 3))),
         );
     chart
         .add_series()
         .set_values(("Sheet1", 0, 4, 7, 4))
         .set_format(
-            &ChartFormat::new().set_line(&ChartLine::new().set_color(XlsxColor::Theme(8, 4))),
+            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(8, 4))),
         );
     chart
         .add_series()
         .set_values(("Sheet1", 0, 5, 7, 5))
         .set_format(
-            &ChartFormat::new().set_line(&ChartLine::new().set_color(XlsxColor::Theme(8, 5))),
+            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(8, 5))),
         );
 
     worksheet.insert_chart(8, 7, &chart)?;

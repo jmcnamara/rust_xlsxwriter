@@ -35,8 +35,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 2, 4, 2));
 
-    chart.x_axis().set_format(&ChartFormat::new().set_no_line());
-    chart.y_axis().set_format(&ChartFormat::new().set_no_line());
+    chart.x_axis().set_format(ChartFormat::new().set_no_line());
+    chart.y_axis().set_format(ChartFormat::new().set_no_line());
 
     worksheet.insert_chart(8, 4, &chart)?;
 

@@ -26,9 +26,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut chart = Chart::new(ChartType::Bar);
     chart.set_axis_ids(66558592, 66569344);
     chart
-        .push_series(&ChartSeries::new().set_values(("Sheet1", 0, 0, 4, 0)))
-        .push_series(&ChartSeries::new().set_values(("Sheet1", 0, 1, 4, 1)))
-        .push_series(&ChartSeries::new().set_values(("Sheet1", 0, 2, 4, 2)));
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 0, 4, 0)))
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 1, 4, 1)))
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 2, 4, 2)));
 
     chart.title().set_name("=Sheet1!$A$1");
     chart.x_axis().set_name("=Sheet1!$A$2");
@@ -58,9 +58,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut chart = Chart::new(ChartType::Bar);
     chart.set_axis_ids(66558592, 66569344);
     chart
-        .push_series(&ChartSeries::new().set_values(("Sheet1", 0, 0, 4, 0)))
-        .push_series(&ChartSeries::new().set_values(("Sheet1", 0, 1, 4, 1)))
-        .push_series(&ChartSeries::new().set_values(("Sheet1", 0, 2, 4, 2)));
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 0, 4, 0)))
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 1, 4, 1)))
+        .push_series(ChartSeries::new().set_values(("Sheet1", 0, 2, 4, 2)));
 
     chart.title().set_name(("Sheet1", 0, 0));
     chart.x_axis().set_name(("Sheet1", 1, 0));

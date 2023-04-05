@@ -133,7 +133,7 @@ mod tests {
         custom.assemble_xml_file();
 
         let got = custom.writer.read_to_str();
-        let got = xml_to_vec(&got);
+        let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
             r#"
@@ -170,7 +170,7 @@ mod tests {
         custom.assemble_xml_file();
 
         let got = custom.writer.read_to_str();
-        let got = xml_to_vec(&got);
+        let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
             r#"

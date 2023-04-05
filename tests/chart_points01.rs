@@ -25,9 +25,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let chart_point = ChartPoint::new().set_format(
-        &ChartFormat::new().set_solid_fill(&ChartSolidFill::new().set_color("#FF0000")),
-    );
+    let chart_point = ChartPoint::new()
+        .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")));
     let points = vec![chart_point];
 
     let mut chart = Chart::new(ChartType::Pie);
