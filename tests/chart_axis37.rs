@@ -34,7 +34,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_format(ChartFormat::new().set_border(ChartLine::new().set_color("#FFFF00")));
     chart
         .y_axis()
-        .set_format(ChartFormat::new().set_border(ChartLine::new().set_color("#FF0000")));
+        .set_format(ChartLine::new().set_color("#FF0000"));
 
     worksheet.insert_chart(8, 4, &chart)?;
 

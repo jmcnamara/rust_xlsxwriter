@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of chart formatting.
+//! An example of formatting the chart border element.
 
 use rust_xlsxwriter::{Chart, ChartFormat, ChartType, Workbook, XlsxError};
 
@@ -25,7 +25,7 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .set_format(&ChartFormat::new());
+        .set_format(ChartFormat::new().set_border_color("#FF0000"));
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;
