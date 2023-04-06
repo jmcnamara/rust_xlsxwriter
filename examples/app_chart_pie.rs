@@ -28,7 +28,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     let mut chart = Chart::new(ChartType::Pie);
 
-    // Configure the first data series for the chart.
+    // Configure the data series for the chart.
     chart
         .add_series()
         .set_categories("Sheet1!$A$2:$A$4")
@@ -42,7 +42,47 @@ fn main() -> Result<(), XlsxError> {
     chart.set_style(10);
 
     // Add the chart to the worksheet.
-    worksheet.insert_chart_with_offset(1, 3, &chart, 25, 10)?;
+    worksheet.insert_chart_with_offset(1, 2, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
+    // Create a Pie chart with user defined segment colors.
+    // -----------------------------------------------------------------------
+    let mut chart = Chart::new(ChartType::Pie);
+
+    // Configure the data series for the chart.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$4")
+        .set_values("Sheet1!$B$2:$B$4")
+        .set_name("Pie sales data")
+        .set_point_colors(&["#5ABA10", "#FE110E", "#CA5C05"]);
+
+    // Add a chart title.
+    chart.title().set_name("Pie Chart with user defined colors");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(17, 2, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
+    // Create a Pie chart with rotation of the segments.
+    // -----------------------------------------------------------------------
+    let mut chart = Chart::new(ChartType::Pie);
+
+    // Configure the data series for the chart.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$4")
+        .set_values("Sheet1!$B$2:$B$4")
+        .set_name("Pie sales data");
+
+    // Change the angle/rotation of the first segment.
+    chart.set_rotation(90);
+
+    // Add a chart title.
+    chart.title().set_name("Pie Chart with segment rotation");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(33, 2, &chart, 25, 10)?;
 
     workbook.save("chart_pie.xlsx")?;
 
