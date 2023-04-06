@@ -110,12 +110,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_values("=Sheet1!$H$1:$H$3")
         .set_format(
-            ChartFormat::new().set_pattern_fill(
-                ChartPatternFill::new()
-                    .set_pattern(ChartPatternFillType::SmallGrid)
-                    .set_foreground_color(XlsxColor::RGB(0x0070C0))
-                    .set_background_color(XlsxColor::RGB(0xFFFFFF)),
-            ),
+            ChartPatternFill::new()
+                .set_pattern(ChartPatternFillType::SmallGrid)
+                .set_foreground_color(XlsxColor::RGB(0x0070C0))
+                .set_background_color(XlsxColor::RGB(0xFFFFFF)),
         );
 
     worksheet.insert_chart(8, 4, &chart)?;

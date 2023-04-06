@@ -732,8 +732,11 @@ impl Chart {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_set_chart_area_format.png">
     ///
-    pub fn set_chart_area_format(&mut self, format: &ChartFormat) -> &mut Chart {
-        self.chart_area_format = format.clone();
+    pub fn set_chart_area_format<T>(&mut self, format: T) -> &mut Chart
+    where
+        T: IntoChartFormat,
+    {
+        self.chart_area_format = format.new_chart_format();
         self
     }
 
@@ -797,8 +800,11 @@ impl Chart {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_set_plot_area_format.png">
     ///
-    pub fn set_plot_area_format(&mut self, format: &ChartFormat) -> &mut Chart {
-        self.plot_area_format = format.clone();
+    pub fn set_plot_area_format<T>(&mut self, format: T) -> &mut Chart
+    where
+        T: IntoChartFormat,
+    {
+        self.plot_area_format = format.new_chart_format();
         self
     }
 
@@ -2868,6 +2874,39 @@ impl IntoChartRange for &String {
     }
 }
 
+/// Trait to map types into a ChartFormat.
+///
+/// TODO
+///
+pub trait IntoChartFormat {
+    /// Trait function to turn a type into [`ChartFormat`].
+    fn new_chart_format(&self) -> ChartFormat;
+}
+
+impl IntoChartFormat for &mut ChartFormat {
+    fn new_chart_format(&self) -> ChartFormat {
+        (*self).clone()
+    }
+}
+
+impl IntoChartFormat for &mut ChartLine {
+    fn new_chart_format(&self) -> ChartFormat {
+        ChartFormat::new().set_line(self).clone()
+    }
+}
+
+impl IntoChartFormat for &mut ChartSolidFill {
+    fn new_chart_format(&self) -> ChartFormat {
+        ChartFormat::new().set_solid_fill(self).clone()
+    }
+}
+
+impl IntoChartFormat for &mut ChartPatternFill {
+    fn new_chart_format(&self) -> ChartFormat {
+        ChartFormat::new().set_pattern_fill(self).clone()
+    }
+}
+
 // Trait for objects that have a component stored in the drawing.xml file.
 impl DrawingObject for Chart {
     fn x_offset(&self) -> u32 {
@@ -3353,8 +3392,11 @@ impl ChartSeries {
     ///
     /// `format`: A [`ChartFormat`] struct reference.
     ///
-    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartSeries {
-        self.format = format.clone();
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartSeries
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
         self
     }
 
@@ -3961,8 +4003,11 @@ impl ChartTitle {
     ///
     /// `format`: A [`ChartFormat`] struct reference.
     ///
-    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartTitle {
-        self.format = format.clone();
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartTitle
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
         self
     }
 }
@@ -4035,8 +4080,11 @@ impl ChartMarker {
     ///
     /// `format`: A [`ChartFormat`] struct reference.
     ///
-    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartMarker {
-        self.format = format.clone();
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartMarker
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
         self
     }
 }
@@ -4143,8 +4191,11 @@ impl ChartPoint {
     ///
     /// `format`: A [`ChartFormat`] struct reference.
     ///
-    pub fn set_format(mut self, format: &ChartFormat) -> ChartPoint {
-        self.format = format.clone();
+    pub fn set_format<T>(mut self, format: T) -> ChartPoint
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
         self
     }
 
@@ -4257,8 +4308,11 @@ impl ChartAxis {
     ///
     /// `format`: A [`ChartFormat`] struct reference.
     ///
-    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartAxis {
-        self.format = format.clone();
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartAxis
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
         self
     }
 }
@@ -4563,8 +4617,11 @@ impl ChartLegend {
     ///
     /// `format`: A [`ChartFormat`] struct reference.
     ///
-    pub fn set_format(&mut self, format: &ChartFormat) -> &mut ChartLegend {
-        self.format = format.clone();
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartLegend
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
         self
     }
 }
