@@ -6,8 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use rust_xlsxwriter::{
-    Chart, ChartFormat, ChartLine, ChartMarker, ChartMarkerType, ChartSolidFill, ChartType,
-    Workbook, XlsxError,
+    Chart, ChartFormat, ChartMarker, ChartMarkerType, ChartType, Workbook, XlsxError,
 };
 
 mod common;
@@ -38,8 +37,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_type(ChartMarkerType::Square)
                 .set_format(
                     ChartFormat::new()
-                        .set_border(ChartLine::new().set_color("#FFFF00"))
-                        .set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
+                        .set_border_color("#FFFF00")
+                        .set_solid_fill_color("#FF0000"),
                 ),
         );
 

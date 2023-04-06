@@ -3370,6 +3370,21 @@ impl ChartSeries {
         self
     }
 
+    /// todo
+    pub fn set_point_colors<T>(&mut self, colors: &[T]) -> &mut ChartSeries
+    where
+        T: IntoColor + Copy,
+    {
+        let points = colors
+            .iter()
+            .map(|color| {
+                ChartPoint::new().set_format(ChartFormat::new().set_solid_fill_color(*color))
+            })
+            .collect();
+        self.points = points;
+        self
+    }
+
     /// Set the series overlap for a chart/bar chart.
     ///
     /// Set the overlap between series in a Bar/Column chart. The range is -100
@@ -4728,6 +4743,26 @@ impl ChartFormat {
         self
     }
 
+    /// todo
+    ///
+    pub fn set_line_color<T>(&mut self, color: T) -> &mut ChartFormat
+    where
+        T: IntoColor,
+    {
+        match &mut self.line {
+            Some(line) => {
+                line.set_color(color);
+            }
+            None => {
+                let mut line = ChartLine::new();
+                line.set_color(color);
+                self.line = Some(line);
+            }
+        }
+
+        self
+    }
+
     /// Set the border formatting for a chart element.
     ///
     /// See the [`ChartLine`] struct for details on the border properties that
@@ -4789,6 +4824,26 @@ impl ChartFormat {
     ///
     pub fn set_border(&mut self, line: &ChartLine) -> &mut ChartFormat {
         self.set_line(line)
+    }
+
+    /// todo
+    ///
+    pub fn set_border_color<T>(&mut self, color: T) -> &mut ChartFormat
+    where
+        T: IntoColor,
+    {
+        match &mut self.line {
+            Some(line) => {
+                line.set_color(color);
+            }
+            None => {
+                let mut line = ChartLine::new();
+                line.set_color(color);
+                self.line = Some(line);
+            }
+        }
+
+        self
     }
 
     /// Turn off the line property for a chart element.
@@ -5020,6 +5075,26 @@ impl ChartFormat {
     ///
     pub fn set_solid_fill(&mut self, fill: &ChartSolidFill) -> &mut ChartFormat {
         self.solid_fill = Some(fill.clone());
+        self
+    }
+
+    /// todo
+    ///
+    pub fn set_solid_fill_color<T>(&mut self, color: T) -> &mut ChartFormat
+    where
+        T: IntoColor,
+    {
+        match &mut self.solid_fill {
+            Some(solid_fill) => {
+                solid_fill.set_color(color);
+            }
+            None => {
+                let mut solid_fill = ChartSolidFill::new();
+                solid_fill.set_color(color);
+                self.solid_fill = Some(solid_fill);
+            }
+        }
+
         self
     }
 

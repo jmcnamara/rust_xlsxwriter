@@ -63,7 +63,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 1, 4, 1))
-        .set_format(ChartFormat::new().set_line(ChartLine::new().set_color(0xFF0000)));
+        .set_format(ChartFormat::new().set_line_color(0xFF0000));
 
     chart
         .add_series()
