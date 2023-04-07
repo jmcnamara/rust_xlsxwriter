@@ -26,7 +26,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(6, 0, "Pear")?;
 
     let mut chart = Chart::new(ChartType::Bar);
-    chart.set_axis_ids(45925120, 45927040);
+    chart.set_axis_ids(45_925_120, 45_927_040);
     chart.add_series().set_values(("Sheet1", 0, 0, 4, 0));
     chart
         .add_series()
@@ -61,7 +61,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(6, 0, "Pear")?;
 
     let mut chart = Chart::new(ChartType::Bar);
-    chart.set_axis_ids(45925120, 45927040);
+    chart.set_axis_ids(45_925_120, 45_927_040);
     chart.add_series().set_values(("Sheet1", 0, 0, 4, 0));
     chart
         .add_series()

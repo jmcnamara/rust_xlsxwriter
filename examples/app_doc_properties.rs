@@ -3,7 +3,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! An example of setting workbook document properties for a file created using
-//! the rust_xlsxwriter library.
+//! the `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 

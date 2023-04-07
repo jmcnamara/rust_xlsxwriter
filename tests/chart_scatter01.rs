@@ -24,7 +24,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::Scatter);
-    chart.set_axis_ids(40262272, 40260352);
+    chart.set_axis_ids(40_262_272, 40_260_352);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
@@ -57,7 +57,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::Scatter);
-    chart.set_axis_ids(40262272, 40260352);
+    chart.set_axis_ids(40_262_272, 40_260_352);
     chart
         .add_series()
         .set_categories("=Sheet1!$A$1:$A$5")

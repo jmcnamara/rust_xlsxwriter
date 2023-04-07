@@ -6,7 +6,7 @@
 
 #![warn(missing_docs)]
 
-/// The ProtectionOptions struct is use to set the elements that can or
+/// The `ProtectionOptions` struct is use to set the elements that can or
 /// can't be changed in a protected worksheet.
 ///
 /// You can specify which worksheet elements protection should be on or off via
@@ -128,9 +128,10 @@ impl Default for ProtectionOptions {
 }
 
 impl ProtectionOptions {
-    /// Create a new ProtectionOptions object to use with the
+    /// Create a new `ProtectionOptions` object to use with the
     /// [`worksheet.protect_with_options()`](crate::Worksheet::protect_with_options) method.
     ///
+    #[must_use]
     pub fn new() -> ProtectionOptions {
         ProtectionOptions {
             select_locked_cells: true,

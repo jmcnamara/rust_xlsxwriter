@@ -3,7 +3,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates writing an Excel "Future Function" with
-//! an implicit prefix and the use_future_functions() method.
+//! an implicit prefix and the `use_future_functions` method.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 

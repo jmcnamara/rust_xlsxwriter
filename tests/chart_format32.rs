@@ -29,12 +29,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
     // Set the chart axis ids to match the random values in the Excel file.
-    chart.set_axis_ids(43424000, 43434368);
+    chart.set_axis_ids(43_424_000, 43_434_368);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
     let mut chart = Chart::new(ChartType::Line);
-    chart.set_axis_ids(87626496, 87628032);
+    chart.set_axis_ids(87_626_496, 87_628_032);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))

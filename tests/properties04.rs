@@ -24,7 +24,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_custom_property("Source", true)
         .set_custom_property("Status", false)
         .set_custom_property("Department", "Finance")
-        .set_custom_property("Group", 1.2345678901234);
+        .set_custom_property("Group", 1.234_567_890_123_4);
 
     workbook.set_properties(&properties);
 

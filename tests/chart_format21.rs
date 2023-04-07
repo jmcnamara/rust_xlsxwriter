@@ -26,17 +26,17 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::Column);
-    chart.set_axis_ids(115390336, 115417856);
+    chart.set_axis_ids(115_390_336, 115_417_856);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 1, 4, 1))
         .set_format(
             ChartFormat::new()
-                .set_border(ChartLine::new().set_color(XlsxColor::RGB(0xFFFF00)))
+                .set_border(ChartLine::new().set_color(XlsxColor::RGB(0xFF_FF_00)))
                 .set_solid_fill(
                     ChartSolidFill::new()
-                        .set_color(XlsxColor::RGB(0xFF0000))
+                        .set_color(XlsxColor::RGB(0xFF_00_00))
                         .set_transparency(24),
                 ),
         );

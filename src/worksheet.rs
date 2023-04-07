@@ -216,7 +216,7 @@ impl Worksheet {
     /// worksheet object. This can be used to write data to a worksheet prior to
     /// adding it to a workbook.
     ///
-    /// There are two way of creating a worksheet object with rust_xlsxwriter:
+    /// There are two way of creating a worksheet object with `rust_xlsxwriter`:
     /// via the [`workbook.add_worksheet()`](crate::Workbook::add_worksheet)
     /// method and via the [`Worksheet::new()`] constructor. The first method
     /// ties the worksheet to the workbook object that will write it
@@ -276,6 +276,7 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_new.png">
     ///
+    #[must_use]
     pub fn new() -> Worksheet {
         let writer = XMLWriter::new();
 
@@ -297,7 +298,7 @@ impl Worksheet {
 
         Worksheet {
             writer,
-            name: "".to_string(),
+            name: String::new(),
             active: false,
             selected: false,
             hidden: false,
@@ -307,7 +308,7 @@ impl Worksheet {
             print_area_defined_name: DefinedName::new(),
             repeat_row_cols_defined_name: DefinedName::new(),
             autofilter_defined_name: DefinedName::new(),
-            autofilter_area: "".to_string(),
+            autofilter_area: String::new(),
             table: HashMap::new(),
             col_names: HashMap::new(),
             dimensions,
@@ -337,8 +338,8 @@ impl Worksheet {
             print_black_and_white: false,
             print_draft: false,
             print_headings: false,
-            header: "".to_string(),
-            footer: "".to_string(),
+            header: String::new(),
+            footer: String::new(),
             head_footer_changed: false,
             header_footer_scale_with_doc: true,
             header_footer_align_with_page: true,
@@ -368,8 +369,8 @@ impl Worksheet {
             protection_hash: 0,
             protection_options: ProtectionOptions::new(),
             unprotected_ranges: vec![],
-            selected_range: ("".to_string(), "".to_string()),
-            top_left_cell: "".to_string(),
+            selected_range: (String::new(), String::new()),
+            top_left_cell: String::new(),
             horizontal_breaks: vec![],
             vertical_breaks: vec![],
             filter_conditions: HashMap::new(),
@@ -514,6 +515,7 @@ impl Worksheet {
     /// # }
     /// ```
     ///
+    #[must_use]
     pub fn name(&self) -> String {
         self.name.clone()
     }
@@ -1969,7 +1971,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// A simple, getting started, example of some of the features of the
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_url_with_text.rs
@@ -2545,7 +2547,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// An example of creating merged ranges in a worksheet using the
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/app_merge_range.rs
@@ -2862,7 +2864,7 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// An example of inserting images into a worksheet using rust_xlsxwriter so
+    /// An example of inserting images into a worksheet using `rust_xlsxwriter` so
     /// that they are scaled to a cell. This approach can be useful if you are
     /// building up a spreadsheet of products with a column of images for each
     /// product.
@@ -3217,7 +3219,7 @@ impl Worksheet {
         row: RowNum,
         height: u16,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let height = 0.75 * height as f64;
+        let height = 0.75 * f64::from(height);
 
         self.set_row_height(row, height)
     }
@@ -3580,7 +3582,7 @@ impl Worksheet {
         // Properties for Calibri 11.
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
-        let mut width = width as f64;
+        let mut width = f64::from(width);
 
         if width < 12.0 {
             width /= max_digit_width + padding;
@@ -4054,7 +4056,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// Example of cell locking and formula hiding in an Excel worksheet
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/app_worksheet_protection.rs
@@ -4117,7 +4119,7 @@ impl Worksheet {
     /// **Note**: Worksheet level passwords in Excel offer very weak protection.
     /// They do not encrypt your data and are very easy to deactivate. Full
     /// workbook encryption is not supported by `rust_xlsxwriter`. However, it
-    /// is possible to encrypt an rust_xlsxwriter file using a third party open
+    /// is possible to encrypt an `rust_xlsxwriter` file using a third party open
     /// source tool called [msoffice-crypt](https://github.com/herumi/msoffice).
     /// This works for macOS, Linux and Windows:
     ///
@@ -4303,9 +4305,9 @@ impl Worksheet {
     /// Unprotect a range of cells in a protected worksheet, with options.
     ///
     /// This method is similar to
-    /// `unprotect_range()`[Worksheet::unprotect_range], see above, expect that
+    /// `unprotect_range()`[`Worksheet::unprotect_range`], see above, expect that
     /// it allows you to specify two additional parameters to set the name of
-    /// the range (instead of the default Range1 .. RangeN) and also a optional
+    /// the range (instead of the default Range1 .. `RangeN`) and also a optional
     /// weak password (see
     /// [`protect_with_password()`](Worksheet::protect_with_password) for an
     /// explanation of what weak means here).
@@ -4316,7 +4318,7 @@ impl Worksheet {
     /// * `first_col` - The first row of the range.
     /// * `last_row` - The last row of the range.
     /// * `last_col` - The last row of the range.
-    /// * `name` - The name of the range instead of RangeN. Can be blank if not
+    /// * `name` - The name of the range instead of `RangeN`. Can be blank if not
     ///   required.
     /// * `password` - The password to prevent modification of the range. Can be
     ///   blank if not required.
@@ -4650,7 +4652,7 @@ impl Worksheet {
     /// the xlsx file to say that all formulas and functions should be
     /// recalculated when the file is opened.
     ///
-    /// However, for LibreOffice the default formula result should be set to the
+    /// However, for `LibreOffice` the default formula result should be set to the
     /// empty string literal `""`, via the `set_formula_result_default()`
     /// method, to force calculation of the result.
     ///
@@ -4708,7 +4710,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// The following example demonstrates writing an Excel "Future Function"
-    /// with an implicit prefix and the use_future_functions() method.
+    /// with an implicit prefix and the `use_future_functions` method.
     ///
     /// ```
     /// # // This code is available in examples/doc_working_with_formulas_future3.rs
@@ -5410,7 +5412,7 @@ impl Worksheet {
         let breaks = self.process_pagebreaks(breaks)?;
 
         // Check max break value is within Excel col limit.
-        if *breaks.last().unwrap() >= COL_MAX as u32 {
+        if *breaks.last().unwrap() >= u32::from(COL_MAX) {
             return Err(XlsxError::RowColumnLimitError);
         }
 
@@ -5482,7 +5484,7 @@ impl Worksheet {
     /// want either the vertical or horizontal split. See the example below.
     ///
     /// In Excel it is also possible to set "split" panes without freezing them.
-    /// That feature isn't currently supported by rust_xlsxwriter.
+    /// That feature isn't currently supported by `rust_xlsxwriter`.
     ///
     /// # Arguments
     ///
@@ -5866,13 +5868,13 @@ impl Worksheet {
     ///
     /// Insert an image in a worksheet header in one of the 3 sections supported
     /// by Excel: Left, Center and Right. This needs to be preceded by a call to
-    /// [worksheet.set_header()](Worksheet::set_header) where a corresponding
+    /// [`worksheet.set_header`](Worksheet::set_header) where a corresponding
     /// `&[Picture]` element is added to the header formatting string such as
     /// `"&L&[Picture]"`.
     ///
     /// # Arguments
     ///
-    /// * `position` - The image position as defined by the [HeaderImagePosition]
+    /// * `position` - The image position as defined by the [`HeaderImagePosition`]
     ///   enum.
     ///
     /// # Errors
@@ -5924,7 +5926,7 @@ impl Worksheet {
     /// src="https://rustxlsxwriter.github.io/images/worksheet_set_header_image.png">
     ///
     /// An example of adding a worksheet watermark image using the
-    /// rust_xlsxwriter library. This is based on the method of putting an image
+    /// `rust_xlsxwriter` library. This is based on the method of putting an image
     /// in the worksheet header as suggested in the [Microsoft documentation].
     ///
     /// [Microsoft documentation]:
@@ -5992,7 +5994,7 @@ impl Worksheet {
     ///
     /// # Arguments
     ///
-    /// * `position` - The image position as defined by the [HeaderImagePosition]
+    /// * `position` - The image position as defined by the [`HeaderImagePosition`]
     ///   enum.
     ///
     /// # Errors
@@ -6501,7 +6503,7 @@ impl Worksheet {
     /// - `(0, 0, 31, 16_383) == 1:32`.
     /// - `(0, 0, 1_048_575, 12) == A:M`.
     ///
-    /// In these examples 16_383 is the maximum column and 1_048_575 is the
+    /// In these examples `16_383` is the maximum column and `1_048_575` is the
     /// maximum row (zero indexed).
     ///
     /// See also the example below and the `rust_xlsxwriter` documentation on
@@ -6925,7 +6927,7 @@ impl Worksheet {
         }
 
         // Set the max character width for each column.
-        for (col, pixels) in max_widths.iter() {
+        for (col, pixels) in &max_widths {
             let width = self.pixels_to_width(*pixels + 7);
             self.store_column_width(*col, width, true);
         }
@@ -6945,7 +6947,7 @@ impl Worksheet {
         }
 
         // Get the range that the autofilter applies to.
-        let filter_columns: Vec<ColNum> = self.filter_conditions.keys().cloned().collect();
+        let filter_columns: Vec<ColNum> = self.filter_conditions.keys().copied().collect();
         let first_row = self.autofilter_defined_name.first_row + 1; // Skip header.
         let last_row = self.autofilter_defined_name.last_row;
 
@@ -7167,7 +7169,7 @@ impl Worksheet {
     pub(crate) fn process_pagebreaks(&mut self, breaks: &[u32]) -> Result<Vec<u32>, XlsxError> {
         let unique_breaks: HashSet<u32> = breaks.iter().copied().collect();
         let mut breaks: Vec<u32> = unique_breaks.into_iter().collect();
-        breaks.sort();
+        breaks.sort_unstable();
 
         // Remove invalid 0 row/col.
         if breaks[0] == 0 {
@@ -7548,7 +7550,7 @@ impl Worksheet {
         // Create a Style struct object to generate the font xml.
         let xf_formats: Vec<Format> = vec![];
         let mut styler = Styles::new(&xf_formats, 0, 0, 0, vec![], false, true);
-        let mut raw_string = "".to_string();
+        let mut raw_string = String::new();
 
         let mut first_segment = true;
         for (format, string) in segments {
@@ -7810,7 +7812,7 @@ impl Worksheet {
     ) {
         let mut rel_ids: HashMap<u64, u32> = HashMap::new();
 
-        for (cell, image) in self.images.clone().iter() {
+        for (cell, image) in &self.images.clone() {
             let row = cell.0;
             let col = cell.1;
 
@@ -7835,7 +7837,7 @@ impl Worksheet {
                     self.drawing_relationships.push((
                         "image".to_string(),
                         image_name,
-                        "".to_string(),
+                        String::new(),
                     ));
 
                     rel_id
@@ -7857,7 +7859,7 @@ impl Worksheet {
         self.drawing_object_relationships.push((
             "drawing".to_string(),
             drawing_name,
-            "".to_string(),
+            String::new(),
         ));
 
         self.has_drawing_object_linkage = true;
@@ -7895,7 +7897,7 @@ impl Worksheet {
                     self.vml_drawing_relationships.push((
                         "image".to_string(),
                         image_name,
-                        "".to_string(),
+                        String::new(),
                     ));
 
                     rel_id
@@ -7925,20 +7927,20 @@ impl Worksheet {
         self.drawing_object_relationships.push((
             "vmlDrawing".to_string(),
             vml_drawing_name,
-            "".to_string(),
+            String::new(),
         ));
     }
 
     // Convert the chart dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
     pub(crate) fn prepare_worksheet_charts(&mut self, mut chart_id: u32, drawing_id: u32) -> u32 {
-        for (_, chart) in self.charts.iter_mut() {
+        for chart in self.charts.values_mut() {
             chart.id = chart_id;
             chart.add_axis_ids();
             chart_id += 1;
         }
 
-        for (cell, chart) in self.charts.clone().iter_mut() {
+        for (cell, chart) in &mut self.charts.clone() {
             let row = cell.0;
             let col = cell.1;
 
@@ -7947,7 +7949,7 @@ impl Worksheet {
             // Store the linkage to the charts rels file.
             let chart_name = format!("../charts/chart{chart_id}.xml");
             self.drawing_relationships
-                .push(("chart".to_string(), chart_name, "".to_string()));
+                .push(("chart".to_string(), chart_name, String::new()));
 
             // Convert the chart dimensions to drawing dimensions and store the
             // drawing object.
@@ -7962,7 +7964,7 @@ impl Worksheet {
             self.drawing_object_relationships.push((
                 "drawing".to_string(),
                 drawing_name,
-                "".to_string(),
+                String::new(),
             ));
         }
 
@@ -8090,12 +8092,12 @@ impl Worksheet {
         row_end = row_start;
 
         // Calculate the end vertices.
-        x2 = width + x1 as f64;
-        y2 = height + y1 as f64;
+        x2 = width + f64::from(x1);
+        y2 = height + f64::from(y1);
 
         // Subtract the underlying cell widths to find the end cell.
         loop {
-            let col_size = self.column_pixel_width(col_end, &object.object_movement()) as f64;
+            let col_size = f64::from(self.column_pixel_width(col_end, &object.object_movement()));
             if x2 >= col_size {
                 x2 -= col_size;
                 col_end += 1;
@@ -8106,7 +8108,7 @@ impl Worksheet {
 
         //Subtract the underlying cell heights to find the end cell.
         loop {
-            let row_size = self.row_pixel_height(row_end, &object.object_movement()) as f64;
+            let row_size = f64::from(self.row_pixel_height(row_end, &object.object_movement()));
             if y2 >= row_size {
                 y2 -= row_size;
                 row_end += 1;
@@ -8117,14 +8119,14 @@ impl Worksheet {
 
         // Create structs to hold the drawing information.
         let from = DrawingCoordinates {
-            col: col_start as u32,
+            col: u32::from(col_start),
             row: row_start,
-            col_offset: x1 as f64,
-            row_offset: y1 as f64,
+            col_offset: f64::from(x1),
+            row_offset: f64::from(y1),
         };
 
         let to = DrawingCoordinates {
-            col: col_end as u32,
+            col: u32::from(col_end),
             row: row_end,
             col_offset: x2,
             row_offset: y2,
@@ -8252,7 +8254,7 @@ impl Worksheet {
         // Properties for Calibri 11.
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
-        let mut width = pixels as f64;
+        let mut width = f64::from(pixels);
 
         if width < 12.0 {
             width /= max_digit_width + padding;
@@ -8288,13 +8290,13 @@ impl Worksheet {
                                     is_numeric = false;
                                 }
                                 CellType::Number { number, .. } => data.push(number.to_string()),
-                                _ => data.push("".to_string()),
+                                _ => data.push(String::new()),
                             },
-                            None => data.push("".to_string()),
+                            None => data.push(String::new()),
                         }
                     }
                 }
-                None => data.push("".to_string()),
+                None => data.push(String::new()),
             }
         }
 
@@ -9089,7 +9091,7 @@ impl Worksheet {
     // Write the <c> element for a number.
     fn write_number_cell(&mut self, row: RowNum, col: ColNum, number: &f64, xf_index: &u32) {
         let col_name = self.col_to_name(col);
-        let mut style = String::from("");
+        let mut style = String::new();
 
         if *xf_index > 0 {
             style = format!(r#" s="{}""#, *xf_index);
@@ -9109,7 +9111,7 @@ impl Worksheet {
     // Write the <c> element for a string.
     fn write_string_cell(&mut self, row: RowNum, col: ColNum, string_index: &u32, xf_index: &u32) {
         let col_name = self.col_to_name(col);
-        let mut style = String::from("");
+        let mut style = String::new();
 
         if *xf_index > 0 {
             style = format!(r#" s="{}""#, *xf_index);
@@ -9136,8 +9138,8 @@ impl Worksheet {
         result: &str,
     ) {
         let col_name = self.col_to_name(col);
-        let mut style = String::from("");
-        let mut result_type = String::from("");
+        let mut style = String::new();
+        let mut result_type = String::new();
 
         if *xf_index > 0 {
             style = format!(r#" s="{}""#, *xf_index);
@@ -9173,9 +9175,9 @@ impl Worksheet {
         range: &str,
     ) {
         let col_name = self.col_to_name(col);
-        let mut style = String::from("");
-        let mut cm = String::from("");
-        let mut result_type = String::from("");
+        let mut style = String::new();
+        let mut cm = String::new();
+        let mut result_type = String::new();
 
         if *xf_index > 0 {
             style = format!(r#" s="{}""#, *xf_index);
@@ -9227,7 +9229,7 @@ impl Worksheet {
     // Write the <c> element for a boolean cell.
     fn write_boolean_cell(&mut self, row: RowNum, col: ColNum, boolean: &bool, xf_index: &u32) {
         let col_name = self.col_to_name(col);
-        let mut style = String::from("");
+        let mut style = String::new();
         let boolean = i32::from(*boolean);
 
         if *xf_index > 0 {
@@ -9267,7 +9269,7 @@ impl Worksheet {
         let mut prev_col_options = first_col_options.1;
         let mut last_col = first_col;
 
-        for (col_num, col_options) in col_options.iter() {
+        for (col_num, col_options) in &col_options {
             // Check if the column number is contiguous with the previous column
             // and if the format is the same.
             if **col_num == *last_col + 1 && col_options == &prev_col_options {
@@ -9593,7 +9595,7 @@ impl Worksheet {
 ///
 /// # Examples
 ///
-/// Example of how to extend the the rust_xlsxwriter `write()` method using the
+/// Example of how to extend the the `rust_xlsxwriter` `write` method using the
 /// `IntoExcelData` trait to handle arbitrary user data that can be mapped to
 /// one of the main Excel data types.
 ///
@@ -9833,7 +9835,7 @@ impl IntoExcelData for &NaiveTime {
 
 // Round to the closest integer number of emu units.
 fn round_to_emus(dimension: f64) -> f64 {
-    ((0.5 + dimension * 9525.0) as u32) as f64
+    f64::from((0.5 + dimension * 9525.0) as u32)
 }
 
 // Utility method to strip equal sign and array braces from a formula and
@@ -10033,7 +10035,7 @@ impl Hyperlink {
             url: url.to_string(),
             text: text.to_string(),
             tip: tip.to_string(),
-            location: "".to_string(),
+            location: String::new(),
             link_type: HyperlinkType::Unknown,
             ref_id: 0,
         };
@@ -10160,10 +10162,10 @@ impl DefinedName {
     pub(crate) fn new() -> DefinedName {
         DefinedName {
             in_use: false,
-            name: "".to_string(),
-            sort_name: "".to_string(),
-            range: "".to_string(),
-            quoted_sheet_name: "".to_string(),
+            name: String::new(),
+            sort_name: String::new(),
+            range: String::new(),
+            quoted_sheet_name: String::new(),
             index: 0,
             name_type: DefinedNameType::Global,
             first_row: ROW_MAX,
@@ -10185,13 +10187,13 @@ impl DefinedName {
         match self.name_type {
             DefinedNameType::Local => format!("{}!{}", self.quoted_sheet_name, self.name),
             DefinedNameType::PrintArea => format!("{}!Print_Area", self.quoted_sheet_name),
-            DefinedNameType::Autofilter => "".to_string(),
+            DefinedNameType::Autofilter => String::new(),
             DefinedNameType::PrintTitles => format!("{}!Print_Titles", self.quoted_sheet_name),
             DefinedNameType::Global => {
                 if self.range.contains('!') {
                     self.name.clone()
                 } else {
-                    "".to_string()
+                    String::new()
                 }
             }
         }
@@ -10257,7 +10259,7 @@ impl DefinedName {
                 self.range = format!("{}!{}", self.quoted_sheet_name, range);
             }
             DefinedNameType::PrintTitles => {
-                let mut range = "".to_string();
+                let mut range = String::new();
 
                 if self.first_col != COL_MAX || self.last_col != 0 {
                     // Repeat columns.

@@ -3,7 +3,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! An example of creating merged ranges in a worksheet using the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Workbook, XlsxColor, XlsxError};
 

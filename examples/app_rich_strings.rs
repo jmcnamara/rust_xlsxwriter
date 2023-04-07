@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of using the rust_xlsxwriter library to write "rich" multi-format
+//! An example of using the `rust_xlsxwriter` library to write "rich" multi-format
 //! strings in worksheet cells.
 
 use rust_xlsxwriter::{Format, FormatAlign, FormatScript, Workbook, XlsxColor, XlsxError};

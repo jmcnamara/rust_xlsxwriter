@@ -27,7 +27,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_blank(1, 1, &color_format)?;
 
     // Write a RGB color using the XlsxColor::RGB() enum method.
-    let color_format = Format::new().set_background_color(XlsxColor::RGB(0xFF7F50));
+    let color_format = Format::new().set_background_color(XlsxColor::RGB(0xFF_7F_50));
     worksheet.write_string(2, 0, "#FF7F50")?;
     worksheet.write_blank(2, 1, &color_format)?;
 
@@ -42,7 +42,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_blank(4, 1, &color_format)?;
 
     // Write a RGB color with the optional u32 variant.
-    let color_format = Format::new().set_background_color(0xDAA520);
+    let color_format = Format::new().set_background_color(0xDA_A5_20);
     worksheet.write_string(5, 0, "#DAA520")?;
     worksheet.write_blank(5, 1, &color_format)?;
 

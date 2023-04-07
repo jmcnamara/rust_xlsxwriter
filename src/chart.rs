@@ -150,16 +150,16 @@ impl Chart {
     ///
     /// Create a new [`Chart`] object that can be configured and inserted into a
     /// worksheet using the
-    /// [worksheet.insert_chart()][crate::Worksheet::insert_chart].
+    /// [`worksheet.insert_chart`][crate::Worksheet::insert_chart].
     ///
     /// Once you have create a chart you will need to add at least one data
-    /// series via [chart.add_series()](Chart::add_series) and set a value range
-    /// for that series using [series.set_values()][ChartSeries::set_values].
+    /// series via [`chart.add_series`](Chart::add_series) and set a value range
+    /// for that series using [`series.set_values`][ChartSeries::set_values].
     /// See the example below.
     ///
     /// # Examples
     ///
-    /// A simple chart example using the rust_xlsxwriter library.
+    /// A simple chart example using the `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_simple.rs
@@ -196,6 +196,7 @@ impl Chart {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
     ///
     #[allow(clippy::new_without_default)]
+    #[must_use]
     pub fn new(chart_type: ChartType) -> Chart {
         let writer = XMLWriter::new();
 
@@ -208,7 +209,7 @@ impl Chart {
             scale_height: 1.0,
             x_offset: 0,
             y_offset: 0,
-            alt_text: "".to_string(),
+            alt_text: String::new(),
             object_movement: ObjectMovement::MoveAndSizeWithCells,
             decorative: false,
             drawing_type: DrawingType::Chart,
@@ -609,7 +610,7 @@ impl Chart {
     /// # Examples
     ///
     /// An example showing all 48 default chart styles available in Excel 2007
-    /// using rust_xlsxwriter.
+    /// using `rust_xlsxwriter`.
     ///
     /// ```
     /// # // This code is available in examples/app_chart_styles.rs
@@ -835,7 +836,7 @@ impl Chart {
     /// # Arguments
     ///
     /// * `hole_size`: The hole size for a Doughnut chart. The range is 0 <=
-    /// hole_size <= 90 and the default is 50.
+    /// `hole_size` <= 90 and the default is 50.
     ///
     ///  TODO
     ///
@@ -857,7 +858,7 @@ impl Chart {
     ///
     /// # Examples
     ///
-    /// A simple chart example using the rust_xlsxwriter library.
+    /// A simple chart example using the `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_set_width.rs
@@ -904,7 +905,7 @@ impl Chart {
             return self;
         }
 
-        self.width = width as f64;
+        self.width = f64::from(width);
         self
     }
 
@@ -923,7 +924,7 @@ impl Chart {
             return self;
         }
 
-        self.height = height as f64;
+        self.height = f64::from(height);
         self
     }
 
@@ -1032,7 +1033,7 @@ impl Chart {
             ));
         }
 
-        for series in self.series.iter() {
+        for series in &self.series {
             // Check for a series without a values range.
             if !series.value_range.has_data() {
                 return Err(XlsxError::ChartError(
@@ -2364,7 +2365,7 @@ impl Chart {
         let mut rotation = 0;
 
         if is_horizontal {
-            rotation = -5400000;
+            rotation = -5_400_000;
         }
 
         if rotation != 0 {
@@ -2599,7 +2600,7 @@ impl Chart {
 
     // Write the <a:alpha> element.
     fn write_a_alpha(&mut self, transparency: u8) {
-        let transparency = (100 - transparency) as u32 * 1000;
+        let transparency = u32::from(100 - transparency) * 1000;
 
         let attributes = vec![("val", transparency.to_string())];
 
@@ -2827,7 +2828,7 @@ impl Chart {
 
 /// Trait to map types into an Excel chart range.
 ///
-/// The 2 most common types of range used in rust_xlsxwriter charts are:
+/// The 2 most common types of range used in `rust_xlsxwriter` charts are:
 ///
 /// - A string with an Excel like range formula such as `"Sheet1!$A$1:$A$3"`.
 /// - A 5 value tuple that can be used to create the range programmatically
@@ -2874,7 +2875,7 @@ impl IntoChartRange for &String {
     }
 }
 
-/// Trait to map types into a ChartFormat.
+/// Trait to map types into a `ChartFormat`.
 ///
 /// TODO
 ///
@@ -2955,7 +2956,7 @@ impl DrawingObject for Chart {
 ///
 /// # Examples
 ///
-/// A simple chart example using the rust_xlsxwriter library.
+/// A simple chart example using the `rust_xlsxwriter` library.
 ///
 /// ```
 /// // This code is available in examples/doc_chart_simple.rs
@@ -3097,6 +3098,7 @@ impl ChartSeries {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_simple.png">
     ///
+    #[must_use]
     pub fn new() -> ChartSeries {
         ChartSeries {
             value_range: ChartRange::new_from_range("", 0, 0, 0, 0),
@@ -3578,7 +3580,7 @@ impl ChartRange {
             first_col,
             last_row,
             last_col,
-            range_string: "".to_string(),
+            range_string: String::new(),
         }
     }
 
@@ -3705,7 +3707,7 @@ impl ChartSeriesCacheData {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-/// The ChartType enum define the type of a Chart object.
+/// The `ChartType` enum define the type of a Chart object.
 ///
 /// The main original chart types are supported, see below.
 ///
@@ -3847,7 +3849,7 @@ impl ChartTitle {
             range: ChartRange::new_from_range("", 0, 0, 0, 0),
             cache_data: ChartSeriesCacheData::new(),
             format: ChartFormat::new(),
-            name: "".to_string(),
+            name: String::new(),
             hidden: false,
             is_horizontal: false,
         }
@@ -3936,7 +3938,7 @@ impl ChartTitle {
     ///
     /// # Examples
     ///
-    /// A simple chart example using the rust_xlsxwriter library.
+    /// A simple chart example using the `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_title_set_hidden.rs
@@ -4025,6 +4027,7 @@ pub struct ChartMarker {
 #[allow(clippy::new_without_default)]
 impl ChartMarker {
     /// todo
+    #[must_use]
     pub fn new() -> ChartMarker {
         ChartMarker {
             automatic: false,
@@ -4168,6 +4171,7 @@ impl Default for ChartPoint {
 
 impl ChartPoint {
     /// todo
+    #[must_use]
     pub fn new() -> ChartPoint {
         ChartPoint {
             format: ChartFormat::new(),
@@ -4191,6 +4195,7 @@ impl ChartPoint {
     ///
     /// `format`: A [`ChartFormat`] struct reference.
     ///
+    #[must_use]
     pub fn set_format<T>(mut self, format: T) -> ChartPoint
     where
         T: IntoChartFormat,
@@ -4488,7 +4493,7 @@ impl ChartLegend {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/legend_position.png">
     ///
-    /// The equivalent positions in rust_xlsxwriter charts are defined by
+    /// The equivalent positions in `rust_xlsxwriter` charts are defined by
     /// [`ChartLegendPosition`]. The default chart position in Excel is to have
     /// the legend at the right.
     ///
@@ -4677,7 +4682,7 @@ impl ToString for ChartLegendPosition {
 ///
 /// The [`ChartFormat`] struct represents many of these format options and just
 /// like Excel it offers a similar formatting interface for a number of the
-/// chart sub-elements supported by rust_xlsxwriter.
+/// chart sub-elements supported by `rust_xlsxwriter`.
 ///
 /// The [`ChartFormat`] struct is accessed by using the `set_format()` method of a
 /// chart element to obtain a reference to the formatting struct for that
@@ -4777,9 +4782,10 @@ pub struct ChartFormat {
 }
 
 impl ChartFormat {
-    /// Create a new ChartFormat instance to set formatting for a chart element.
+    /// Create a new `ChartFormat` instance to set formatting for a chart element.
     ///
     #[allow(clippy::new_without_default)]
+    #[must_use]
     pub fn new() -> ChartFormat {
         ChartFormat {
             no_fill: false,
@@ -5239,7 +5245,7 @@ impl ChartFormat {
 /// Excel uses the element names "Line" and "Border" depending on the context.
 /// For a Line chart the line is represented by a line property but for a Column
 /// chart the line becomes the border. Both of these share the same properties
-/// and are both represented in rust_xlsxwriter by the [`ChartLine`] struct.
+/// and are both represented in `rust_xlsxwriter` by the [`ChartLine`] struct.
 ///
 ///
 /// # Examples
@@ -5306,9 +5312,10 @@ pub struct ChartLine {
 }
 
 impl ChartLine {
-    /// Create a new ChartLine object to represent a Chart line/border.
+    /// Create a new `ChartLine` object to represent a Chart line/border.
     ///
     #[allow(clippy::new_without_default)]
+    #[must_use]
     pub fn new() -> ChartLine {
         ChartLine {
             color: XlsxColor::Automatic,
@@ -5645,9 +5652,10 @@ pub struct ChartSolidFill {
 }
 
 impl ChartSolidFill {
-    /// Create a new ChartSolidFill object to represent a Chart solid fill.
+    /// Create a new `ChartSolidFill` object to represent a Chart solid fill.
     ///
     #[allow(clippy::new_without_default)]
+    #[must_use]
     pub fn new() -> ChartSolidFill {
         ChartSolidFill {
             color: XlsxColor::Automatic,
@@ -5859,9 +5867,10 @@ pub struct ChartPatternFill {
 }
 
 impl ChartPatternFill {
-    /// Create a new ChartPatternFill object to represent a Chart pattern fill.
+    /// Create a new `ChartPatternFill` object to represent a Chart pattern fill.
     ///
     #[allow(clippy::new_without_default)]
+    #[must_use]
     pub fn new() -> ChartPatternFill {
         ChartPatternFill {
             background_color: XlsxColor::Automatic,
@@ -6482,7 +6491,7 @@ mod tests {
         let mut chart = Chart::new(ChartType::Bar);
         chart.push_series(&series1).push_series(&series2);
 
-        chart.set_axis_ids(64052224, 64055552);
+        chart.set_axis_ids(64_052_224, 64_055_552);
 
         chart.assemble_xml_file();
 

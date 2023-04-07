@@ -53,8 +53,8 @@ where
             test_name: "",
             test_function: None,
             unique: "",
-            input_filename: "".to_string(),
-            output_filename: "".to_string(),
+            input_filename: String::new(),
+            output_filename: String::new(),
             ignore_files: HashSet::new(),
             ignore_elements: HashMap::new(),
         }

@@ -32,7 +32,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.set_style(1);
 
     // Set the chart axis ids to match the random values in the Excel file.
-    chart.set_axis_ids(46847488, 46849408);
+    chart.set_axis_ids(46_847_488, 46_849_408);
 
     worksheet.insert_chart(8, 4, &chart)?;
 

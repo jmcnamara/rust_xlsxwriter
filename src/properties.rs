@@ -8,25 +8,25 @@
 
 use chrono::{DateTime, Utc};
 
-/// The DocProperties struct is used to create an object to represent document
+/// The `DocProperties` struct is used to create an object to represent document
 /// metadata properties.
 ///
-/// The DocProperties struct is used to create an object to represent various
+/// The `DocProperties` struct is used to create an object to represent various
 /// document properties for an Excel file such as the Author's name or the
 /// Creation Date.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/app_doc_properties.png">
 ///
-/// DocProperties can be set for the "Summary" section and also for the "Custom"
+/// `DocProperties` can be set for the "Summary" section and also for the "Custom"
 /// section of the Excel document properties. See the examples below.
 ///
-/// The DocProperties struct is used in conjunction with the
+/// The `DocProperties` struct is used in conjunction with the
 /// [`workbook.set_properties()`](crate::Workbook::set_properties) method.
 ///
 /// # Examples
 ///
 /// An example of setting workbook document properties for a file created using
-/// the rust_xlsxwriter library. This creates the file used to generate the
+/// the `rust_xlsxwriter` library. This creates the file used to generate the
 /// above image.
 ///
 /// ```
@@ -218,19 +218,20 @@ impl Default for DocProperties {
 }
 
 impl DocProperties {
-    /// Create a new DocProperties struct.
+    /// Create a new `DocProperties` struct.
+    #[must_use]
     pub fn new() -> DocProperties {
         DocProperties {
-            title: "".to_string(),
-            status: "".to_string(),
-            author: "".to_string(),
-            comment: "".to_string(),
-            company: "".to_string(),
-            manager: "".to_string(),
-            subject: "".to_string(),
-            category: "".to_string(),
-            keywords: "".to_string(),
-            hyperlink_base: "".to_string(),
+            title: String::new(),
+            status: String::new(),
+            author: String::new(),
+            comment: String::new(),
+            company: String::new(),
+            manager: String::new(),
+            subject: String::new(),
+            category: String::new(),
+            keywords: String::new(),
+            hyperlink_base: String::new(),
             creation_time: Utc::now(),
             custom_properties: vec![],
         }
@@ -245,6 +246,7 @@ impl DocProperties {
     ///
     /// * `title` - The title string property.
     ///
+    #[must_use]
     pub fn set_title(mut self, title: &str) -> DocProperties {
         self.title = title.to_string();
 
@@ -260,6 +262,7 @@ impl DocProperties {
     ///
     /// * `subject` - The subject string property.
     ///
+    #[must_use]
     pub fn set_subject(mut self, subject: &str) -> DocProperties {
         self.subject = subject.to_string();
 
@@ -275,6 +278,7 @@ impl DocProperties {
     ///
     /// * `manager` - The manager string property.
     ///
+    #[must_use]
     pub fn set_manager(mut self, manager: &str) -> DocProperties {
         self.manager = manager.to_string();
 
@@ -290,6 +294,7 @@ impl DocProperties {
     ///
     /// * `company` - The company string property.
     ///
+    #[must_use]
     pub fn set_company(mut self, company: &str) -> DocProperties {
         self.company = company.to_string();
 
@@ -305,6 +310,7 @@ impl DocProperties {
     ///
     /// * `category` - The category string property.
     ///
+    #[must_use]
     pub fn set_category(mut self, category: &str) -> DocProperties {
         self.category = category.to_string();
 
@@ -320,6 +326,7 @@ impl DocProperties {
     ///
     /// * `author` - The author string property.
     ///
+    #[must_use]
     pub fn set_author(mut self, author: &str) -> DocProperties {
         self.author = author.to_string();
 
@@ -335,6 +342,7 @@ impl DocProperties {
     ///
     /// * `keywords` - The keywords string property.
     ///
+    #[must_use]
     pub fn set_keywords(mut self, keywords: &str) -> DocProperties {
         self.keywords = keywords.to_string();
 
@@ -351,6 +359,7 @@ impl DocProperties {
     ///
     /// * `comment` - The comment string property.
     ///
+    #[must_use]
     pub fn set_comment(mut self, comment: &str) -> DocProperties {
         self.comment = comment.to_string();
 
@@ -366,21 +375,23 @@ impl DocProperties {
     ///
     /// * `status` - The status string property.
     ///
+    #[must_use]
     pub fn set_status(mut self, status: &str) -> DocProperties {
         self.status = status.to_string();
 
         self
     }
 
-    /// Set the Hyperlink_base field of the document properties.
+    /// Set the `Hyperlink_base` field of the document properties.
     ///
-    /// Set the "Hyperlink_base" field of the document properties to have a
+    /// Set the `Hyperlink_base` field of the document properties to have a
     /// default base url.
     ///
     /// # Arguments
     ///
     /// * `hyperlink_base` - The hyperlink base string property.
     ///
+    #[must_use]
     pub fn set_hyperlink_base(mut self, hyperlink_base: &str) -> DocProperties {
         self.hyperlink_base = hyperlink_base.to_string();
 
@@ -395,11 +406,12 @@ impl DocProperties {
     ///
     /// # Arguments
     ///
-    /// * `datetime` - The hyperlink_base string property. [`chrono::DateTime`]
+    /// * `datetime` - The `hyperlink_base` string property. [`chrono::DateTime`]
     ///
     /// [`chrono::DateTime`]:
     ///     https://docs.rs/chrono/latest/chrono/struct.DateTime.html
     ///
+    #[must_use]
     pub fn set_creation_datetime(mut self, create_time: &DateTime<Utc>) -> DocProperties {
         self.creation_time = *create_time;
 
@@ -484,8 +496,8 @@ impl Default for CustomProperty {
     fn default() -> Self {
         CustomProperty {
             property_type: CustomPropertyType::Text,
-            name: "".to_string(),
-            text: "".to_string(),
+            name: String::new(),
+            text: String::new(),
             number_int: 0,
             number_real: 0.0,
             boolean: true,
@@ -554,7 +566,7 @@ pub(crate) enum CustomPropertyType {
 ///
 pub trait IntoCustomProperty {
     /// Types/objects supporting this trait must be able to convert to a
-    /// CustomProperty struct.
+    /// `CustomProperty` struct.
     fn new_custom_property(&self, name: &str) -> CustomProperty;
 }
 

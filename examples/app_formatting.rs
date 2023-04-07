@@ -3,10 +3,13 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! An example of the various cell formatting options that are available in the
-//! rust_xlsxwriter library. These are laid out on worksheets that correspond to
+//! `rust_xlsxwriter` library. These are laid out on worksheets that correspond to
 //! the sections of the Excel "Format Cells" dialog.
 
-use rust_xlsxwriter::*;
+use rust_xlsxwriter::{
+    Format, FormatAlign, FormatBorder, FormatPattern, FormatUnderline, Workbook, XlsxColor,
+    XlsxError,
+};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -17,7 +20,7 @@ fn main() -> Result<(), XlsxError> {
         .set_bold()
         .set_align(FormatAlign::Top)
         .set_border(FormatBorder::Thin)
-        .set_background_color(XlsxColor::RGB(0xC6EFCE));
+        .set_background_color(XlsxColor::RGB(0xC6_EF_CE));
 
     // -----------------------------------------------------------------------
     // Create a worksheet that demonstrates number formatting.

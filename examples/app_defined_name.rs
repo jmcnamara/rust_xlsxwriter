@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! Example of how to create defined names using the rust_xlsxwriter library.
+//! Example of how to create defined names using the `rust_xlsxwriter` library.
 //!
 //! This functionality is used to define user friendly variable names to
 //! represent a value, a single cell,  or a range of cells in a workbook.

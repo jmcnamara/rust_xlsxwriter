@@ -295,7 +295,7 @@ impl Drawing {
 
     // Write the <xdr:graphicFrame> element.
     fn write_graphic_frame(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        let attributes = vec![("macro", "".to_string())];
+        let attributes = vec![("macro", String::new())];
 
         self.writer
             .xml_start_tag_attr("xdr:graphicFrame", &attributes);
@@ -450,7 +450,7 @@ pub(crate) trait DrawingObject {
 #[cfg(test)]
 mod tests {
 
-    use crate::drawing::*;
+    use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingType, ObjectMovement};
     use crate::test_functions::xml_to_vec;
     use pretty_assertions::assert_eq;
 
@@ -468,17 +468,17 @@ mod tests {
         let to = DrawingCoordinates {
             col: 3,
             row: 6,
-            col_offset: 533257.0,
-            row_offset: 190357.0,
+            col_offset: 533_257.0,
+            row_offset: 190_357.0,
         };
 
         let drawing_info = DrawingInfo {
             from,
             to,
-            col_absolute: 1219200,
-            row_absolute: 190500,
-            width: 1142857.0,
-            height: 1142857.0,
+            col_absolute: 1_219_200,
+            row_absolute: 190_500,
+            width: 1_142_857.0,
+            height: 1_142_857.0,
             description: "rust.png".to_string(),
             decorative: false,
             rel_id: 1,

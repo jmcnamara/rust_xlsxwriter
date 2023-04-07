@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of using the new Excel LAMBDA() function with the rust_xlsxwriter
+//! An example of using the new Excel LAMBDA() function with the `rust_xlsxwriter`
 //! library.
 
 use rust_xlsxwriter::{Workbook, XlsxError};

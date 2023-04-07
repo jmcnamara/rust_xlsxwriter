@@ -37,7 +37,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_values(("Sheet2", 0, 2, 4, 2));
 
     let mut chart = Chart::new(ChartType::Bar);
-    chart.set_axis_ids(93218304, 93219840);
+    chart.set_axis_ids(93_218_304, 93_219_840);
 
     chart.push_series(&series1).push_series(&series2);
 

@@ -3,7 +3,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! A simple program to write some data to an Excel spreadsheet using
-//! rust_xlsxwriter. Part 1 of a tutorial.
+//! `rust_xlsxwriter`. Part 1 of a tutorial.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 
@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Iterate over the data and write it out row by row.
     let mut row = 0;
-    for expense in expenses.iter() {
+    for expense in &expenses {
         worksheet.write_string(row, 0, expense.0)?;
         worksheet.write_number(row, 1, expense.1)?;
         row += 1;

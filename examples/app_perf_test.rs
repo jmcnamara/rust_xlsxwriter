@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! Simple performance test for rust_xlsxwriter.
+//! Simple performance test for `rust_xlsxwriter`.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 

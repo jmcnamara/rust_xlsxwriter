@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of inserting images into a worksheet using rust_xlsxwriter so
+//! An example of inserting images into a worksheet using `rust_xlsxwriter` so
 //! that they are scaled to a cell. This approach can be useful if you are
 //! building up a spreadsheet of products with a column of images for each
 //! product.

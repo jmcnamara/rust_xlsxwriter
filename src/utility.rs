@@ -9,7 +9,7 @@ use crate::worksheet::RowNum;
 
 // Convert a zero indexed column cell reference to a string.
 pub fn col_to_name(col_num: ColNum) -> String {
-    let mut col_name = "".to_string();
+    let mut col_name = String::new();
 
     let mut col_num = col_num + 1;
 
@@ -22,7 +22,7 @@ pub fn col_to_name(col_num: ColNum) -> String {
         }
 
         // Convert the remainder to a character.
-        let col_letter = char::from_u32(64u32 + remainder as u32).unwrap();
+        let col_letter = char::from_u32(64 + u32::from(remainder)).unwrap();
 
         // Accumulate the column letters, right to left.
         col_name = format!("{col_letter}{col_name}");
@@ -183,7 +183,7 @@ pub(crate) fn hash_password(password: &str) -> u16 {
 
     for byte in password.as_bytes().iter().rev() {
         hash = ((hash >> 14) & 0x01) | ((hash << 1) & 0x7fff);
-        hash ^= *byte as u16;
+        hash ^= u16::from(*byte);
     }
 
     hash = ((hash >> 14) & 0x01) | ((hash << 1) & 0x7fff);
@@ -315,7 +315,7 @@ mod tests {
             (1, 255, "IV2"),
             (1, 256, "IW2"),
             (0, 16383, "XFD1"),
-            (1048576, 16384, "XFE1048577"),
+            (1_048_576, 16384, "XFE1048577"),
         ];
 
         for (row_num, col_num, cell_string) in tests {
@@ -337,7 +337,7 @@ mod tests {
             (7, 25, 9, 26, "Z8:AA10"),
             (1, 254, 1, 255, "IU2:IV2"),
             (1, 256, 0, 16383, "IW2:XFD1"),
-            (0, 0, 1048576, 16384, "A1:XFE1048577"),
+            (0, 0, 1_048_576, 16384, "A1:XFE1048577"),
         ];
 
         for (start_row, start_col, end_row, end_col, cell_range) in tests {

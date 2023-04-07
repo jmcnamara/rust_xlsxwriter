@@ -24,7 +24,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_background_color(XlsxColor::Yellow)
         .set_foreground_color(XlsxColor::Red)
         .set_pattern(FormatPattern::DarkVertical);
-    let format5 = Format::new().set_background_color(XlsxColor::RGB(0x00B050));
+    let format5 = Format::new().set_background_color(XlsxColor::RGB(0x00_B0_50));
 
     worksheet.write_blank(0, 0, &format1)?;
     worksheet.write_blank(1, 0, &format2)?;

@@ -6,7 +6,7 @@
 
 #![warn(missing_docs)]
 
-/// The FilterCondition struct is used to define autofilter rules.
+/// The `FilterCondition` struct is used to define autofilter rules.
 ///
 /// Autofilter rules are associated with ranges created using
 /// [`autofilter()`](crate::Worksheet::autofilter()).
@@ -405,13 +405,14 @@ pub struct FilterCondition {
 
 #[allow(clippy::new_without_default)]
 impl FilterCondition {
-    /// Create a new FilterCondition struct to define autofilter rules
+    /// Create a new `FilterCondition` struct to define autofilter rules
     /// associated with an [`autofilter()`](crate::Worksheet::autofilter())
     /// range and the the [`filter_column`](crate::Worksheet::filter_column)
     /// method.
     ///
     /// See the examples above.
     ///
+    #[must_use]
     pub fn new() -> FilterCondition {
         FilterCondition {
             is_list_filter: true,
@@ -621,6 +622,7 @@ impl FilterCondition {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_filter_column7.png">
     ///
+    #[must_use]
     pub fn add_list_blanks_filter(mut self) -> FilterCondition {
         self.should_match_blanks = true;
         self.is_list_filter = true;
@@ -719,6 +721,7 @@ impl FilterCondition {
     /// [`add_custom_boolean_or`](FilterCondition::add_custom_boolean_or) method
     /// to get an "or" logical condition.
     ///
+    #[must_use]
     pub fn add_custom_boolean_or(mut self) -> FilterCondition {
         self.apply_logical_or = true;
         self.is_list_filter = false;
@@ -726,7 +729,7 @@ impl FilterCondition {
     }
 }
 
-/// The FilterCriteria enum defines logical filter criteria used in an
+/// The `FilterCriteria` enum defines logical filter criteria used in an
 /// autofilter.
 ///
 /// These filter criteria are used with the [`FilterCondition`]
@@ -779,15 +782,15 @@ pub enum FilterCriteria {
 impl FilterCriteria {
     pub(crate) fn operator(&self) -> String {
         match self {
-            FilterCriteria::EqualTo => "".to_string(),
+            FilterCriteria::EqualTo => String::new(),
             FilterCriteria::LessThan => "lessThan".to_string(),
             FilterCriteria::NotEqualTo => "notEqual".to_string(),
             FilterCriteria::GreaterThan => "greaterThan".to_string(),
             FilterCriteria::LessThanOrEqualTo => "lessThanOrEqual".to_string(),
             FilterCriteria::GreaterThanOrEqualTo => "greaterThanOrEqual".to_string(),
-            FilterCriteria::EndsWith => "".to_string(),
-            FilterCriteria::Contains => "".to_string(),
-            FilterCriteria::BeginsWith => "".to_string(),
+            FilterCriteria::EndsWith => String::new(),
+            FilterCriteria::Contains => String::new(),
+            FilterCriteria::BeginsWith => String::new(),
             FilterCriteria::DoesNotEndWith => "notEqual".to_string(),
             FilterCriteria::DoesNotContain => "notEqual".to_string(),
             FilterCriteria::DoesNotBeginWith => "notEqual".to_string(),
@@ -853,7 +856,7 @@ impl FilterData {
 /// Currently only string and number like types are supported.
 pub trait IntoFilterData {
     /// Types/objects supporting this trait must be able to convert to a
-    /// FilterData struct.
+    /// `FilterData` struct.
     fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData;
 }
 
@@ -865,7 +868,7 @@ impl IntoFilterData for f64 {
 
 impl IntoFilterData for i32 {
     fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData {
-        FilterData::new_number_and_criteria(*self as f64, criteria)
+        FilterData::new_number_and_criteria(f64::from(*self), criteria)
     }
 }
 

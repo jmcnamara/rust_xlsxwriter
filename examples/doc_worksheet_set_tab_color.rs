@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
 
     worksheet1.set_tab_color(XlsxColor::Red);
     worksheet2.set_tab_color(XlsxColor::Green);
-    worksheet3.set_tab_color(XlsxColor::RGB(0xFF9900));
+    worksheet3.set_tab_color(XlsxColor::RGB(0xFF_99_00));
 
     // worksheet4 will have the default color.
     worksheet4.set_active(true);

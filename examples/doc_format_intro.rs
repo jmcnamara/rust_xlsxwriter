@@ -33,7 +33,7 @@ fn main() -> Result<(), XlsxError> {
     let format5 = Format::new().set_font_color(XlsxColor::Red);
     worksheet.write_string_with_format(4, 0, "Font color", &format5)?;
 
-    let format6 = Format::new().set_background_color(XlsxColor::RGB(0xDAA520));
+    let format6 = Format::new().set_background_color(XlsxColor::RGB(0xDA_A5_20));
     worksheet.write_string_with_format(5, 0, "Fills", &format6)?;
 
     let format7 = Format::new().set_border(FormatBorder::Thin);

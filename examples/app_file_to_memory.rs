@@ -3,7 +3,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! An example of creating a simple Excel xlsx file in an in memory Vec<u8>
-//! buffer using the rust_xlsxwriter library.
+//! buffer using the `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 

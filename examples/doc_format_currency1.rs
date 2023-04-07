@@ -4,7 +4,7 @@
 
 //! The following example demonstrates setting a currency format for a worksheet
 //! cell. This example doesn't actually set a currency format, for that see the
-//! followup example in doc_format_currency2.rs.
+//! followup example in `doc_format_currency2.rs`.
 
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 

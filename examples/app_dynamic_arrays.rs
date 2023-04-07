@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of how to use the rust_xlsxwriter library to write formulas and
+//! An example of how to use the `rust_xlsxwriter` library to write formulas and
 //! functions that create dynamic arrays. These functions are new to Excel
 //! 365. The examples mirror the examples in the Excel documentation for these
 //! functions.
@@ -14,12 +14,12 @@ fn main() -> Result<(), XlsxError> {
 
     // Create some header formats to use in the worksheets.
     let header1 = Format::new()
-        .set_foreground_color(XlsxColor::RGB(0x74AC4C))
-        .set_font_color(XlsxColor::RGB(0xFFFFFF));
+        .set_foreground_color(XlsxColor::RGB(0x74_AC_4C))
+        .set_font_color(XlsxColor::RGB(0xFF_FF_FF));
 
     let header2 = Format::new()
-        .set_foreground_color(XlsxColor::RGB(0x528FD3))
-        .set_font_color(XlsxColor::RGB(0xFFFFFF));
+        .set_foreground_color(XlsxColor::RGB(0x52_8F_D3))
+        .set_font_color(XlsxColor::RGB(0xFF_FF_FF));
 
     // -----------------------------------------------------------------------
     // Example of using the FILTER() function.
@@ -260,7 +260,7 @@ fn write_worksheet_data(worksheet: &mut Worksheet, header: &Format) -> Result<()
     worksheet.write_string_with_format(0, 3, "Units", header)?;
 
     let mut row = 1;
-    for data in worksheet_data.iter() {
+    for data in &worksheet_data {
         worksheet.write_string(row, 0, data.0)?;
         worksheet.write_string(row, 1, data.1)?;
         worksheet.write_string(row, 2, data.2)?;

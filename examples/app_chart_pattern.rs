@@ -3,9 +3,12 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! A example of creating column charts with fill patterns using the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
-use rust_xlsxwriter::*;
+use rust_xlsxwriter::{
+    Chart, ChartFormat, ChartLine, ChartPatternFill, ChartPatternFillType, ChartType, Format,
+    Workbook, XlsxError,
+};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();

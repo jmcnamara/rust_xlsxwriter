@@ -24,7 +24,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::ScatterStraight);
-    chart.set_axis_ids(69216512, 69214976);
+    chart.set_axis_ids(69_216_512, 69_214_976);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))

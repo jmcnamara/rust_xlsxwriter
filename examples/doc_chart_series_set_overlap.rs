@@ -5,7 +5,7 @@
 //! A example of setting the chart series gap and overlap. Note that it only
 //! needs to be applied to one of the series in the chart.
 
-use rust_xlsxwriter::*;
+use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();

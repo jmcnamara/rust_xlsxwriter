@@ -2,11 +2,11 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! Example of how to extend the the rust_xlsxwriter write() method using the
-//! IntoExcelData trait to handle arbitrary user data that can be mapped to one
+//! Example of how to extend the the `rust_xlsxwriter` write() method using the
+//! `IntoExcelData` trait to handle arbitrary user data that can be mapped to one
 //! of the main Excel data types.
 
-use rust_xlsxwriter::*;
+use rust_xlsxwriter::{ColNum, Format, IntoExcelData, RowNum, Workbook, Worksheet, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -20,8 +20,8 @@ fn main() -> Result<(), XlsxError> {
 
     // Write user defined type instances that implement the IntoExcelData trait.
     worksheet.write(0, 0, UnixTime::new(0))?;
-    worksheet.write(1, 0, UnixTime::new(946598400))?;
-    worksheet.write(2, 0, UnixTime::new(1672531200))?;
+    worksheet.write(1, 0, UnixTime::new(946_598_400))?;
+    worksheet.write(2, 0, UnixTime::new(1_672_531_200))?;
 
     // Save the file to disk.
     workbook.save("write_generic.xlsx")?;
@@ -38,6 +38,7 @@ pub struct UnixTime {
 }
 
 impl UnixTime {
+    #[must_use]
     pub fn new(seconds: u64) -> UnixTime {
         UnixTime { seconds }
     }

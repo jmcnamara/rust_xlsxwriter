@@ -403,7 +403,7 @@
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/format_currency7.png">
 ///
-/// In order to replicate Excel's behavior all rust_xlsxwriter programs should
+/// In order to replicate Excel's behavior all `rust_xlsxwriter` programs should
 /// use US locale formatting which will then be rendered in the settings of your
 /// host OS.
 ///
@@ -502,6 +502,7 @@ impl Format {
     ///
     /// }
     /// ```
+    #[must_use]
     pub fn new() -> Format {
         let mut format = Format {
             xf_index: 0,
@@ -512,7 +513,7 @@ impl Format {
             has_fill: false,
             has_border: false,
 
-            num_format: "".to_string(),
+            num_format: String::new(),
             num_format_index: 0,
             bold: false,
             italic: false,
@@ -553,7 +554,7 @@ impl Format {
             shrink: false,
             reading_direction: 0,
             quote_prefix: false,
-            default_format_key: "".to_string(),
+            default_format_key: String::new(),
         };
 
         format.default_format_key = format.format_key();
@@ -769,6 +770,7 @@ impl Format {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/format_set_num_format.png">
     ///
+    #[must_use]
     pub fn set_num_format(mut self, num_format: &str) -> Format {
         self.num_format = num_format.to_string();
         self
@@ -833,8 +835,8 @@ impl Format {
     ///    formats may also vary depending on system settings.
     ///  - The dollar sign in the above format appears as the defined local
     ///    currency symbol.
-    ///  - These formats can also be set via format_set_num_format().
-    ///  - See also formats_categories.
+    ///  - These formats can also be set via `format_set_num_format`.
+    ///  - See also `formats_categories`.
     ///
     /// # Arguments
     ///
@@ -870,8 +872,9 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_num_format_index.png">
     ///
+    #[must_use]
     pub fn set_num_format_index(mut self, num_format_index: u8) -> Format {
-        self.num_format_index = num_format_index as u16;
+        self.num_format_index = u16::from(num_format_index);
         self
     }
 
@@ -905,6 +908,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_bold.png">
     ///
+    #[must_use]
     pub fn set_bold(mut self) -> Format {
         self.bold = true;
         self
@@ -940,6 +944,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_italic.png">
     ///
+    #[must_use]
     pub fn set_italic(mut self) -> Format {
         self.italic = true;
         self
@@ -1036,11 +1041,12 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_name.png">
     ///
+    #[must_use]
     pub fn set_font_name(mut self, font_name: &str) -> Format {
         self.font_name = font_name.to_string();
 
         if font_name != "Calibri" {
-            self.font_scheme = "".to_string();
+            self.font_scheme = String::new();
         }
 
         self
@@ -1098,6 +1104,7 @@ impl Format {
     ///
     /// This function is implemented for completeness but is rarely used in
     /// practice.
+    #[must_use]
     pub fn set_font_scheme(mut self, font_scheme: &str) -> Format {
         self.font_scheme = font_scheme.to_string();
         self
@@ -1112,6 +1119,7 @@ impl Format {
     ///
     /// * `font_family` - The font family property.
     ///
+    #[must_use]
     pub fn set_font_family(mut self, font_family: u8) -> Format {
         self.font_family = font_family;
         self
@@ -1126,6 +1134,7 @@ impl Format {
     ///
     /// * `font_charset` - The font character set property.
     ///
+    #[must_use]
     pub fn set_font_charset(mut self, font_charset: u8) -> Format {
         self.font_charset = font_charset;
         self
@@ -1179,6 +1188,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_underline.png">
     ///
+    #[must_use]
     pub fn set_underline(mut self, underline: FormatUnderline) -> Format {
         self.underline = underline;
         self
@@ -1215,6 +1225,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_strikethrough.png">
     ///
+    #[must_use]
     pub fn set_font_strikethrough(mut self) -> Format {
         self.font_strikethrough = true;
         self
@@ -1232,6 +1243,7 @@ impl Format {
     ///   [`FormatScript`] enum.
     ///
     ///
+    #[must_use]
     pub fn set_font_script(mut self, font_script: FormatScript) -> Format {
         self.font_script = font_script;
         self
@@ -1298,6 +1310,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_align.png">
     ///
+    #[must_use]
     pub fn set_align(mut self, align: FormatAlign) -> Format {
         match align {
             FormatAlign::General => {
@@ -1366,6 +1379,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_text_wrap.png">
     ///
+    #[must_use]
     pub fn set_text_wrap(mut self) -> Format {
         self.text_wrap = true;
         self
@@ -1417,6 +1431,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_indent.png">
     ///
+    #[must_use]
     pub fn set_indent(mut self, indent: u8) -> Format {
         self.indent = indent;
         self
@@ -1470,6 +1485,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_rotation.png">
     ///
+    #[must_use]
     pub fn set_rotation(mut self, rotation: i16) -> Format {
         match rotation {
             270 => self.rotation = 255,
@@ -1533,6 +1549,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_reading_direction.png">
     ///
+    #[must_use]
     pub fn set_reading_direction(mut self, reading_direction: u8) -> Format {
         if reading_direction > 2 {
             eprintln!("Reading direction must be 0, 1 or 2.");
@@ -1576,6 +1593,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_shrink.png">
     ///
+    #[must_use]
     pub fn set_shrink(mut self) -> Format {
         self.shrink = true;
         self
@@ -1634,6 +1652,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_pattern.png">
     ///
+    #[must_use]
     pub fn set_pattern(mut self, pattern: FormatPattern) -> Format {
         self.pattern = pattern;
         self
@@ -1803,6 +1822,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_border.png">
     ///
+    #[must_use]
     pub fn set_border(mut self, border: FormatBorder) -> Format {
         self.border_top = border;
         self.border_left = border;
@@ -1898,6 +1918,7 @@ impl Format {
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
+    #[must_use]
     pub fn set_border_top(mut self, border: FormatBorder) -> Format {
         self.border_top = border;
         self
@@ -1931,6 +1952,7 @@ impl Format {
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
+    #[must_use]
     pub fn set_border_bottom(mut self, border: FormatBorder) -> Format {
         self.border_bottom = border;
         self
@@ -1964,6 +1986,7 @@ impl Format {
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
+    #[must_use]
     pub fn set_border_left(mut self, border: FormatBorder) -> Format {
         self.border_left = border;
         self
@@ -1997,6 +2020,7 @@ impl Format {
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
+    #[must_use]
     pub fn set_border_right(mut self, border: FormatBorder) -> Format {
         self.border_right = border;
         self
@@ -2080,6 +2104,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_border_diagonal.png">
     ///
+    #[must_use]
     pub fn set_border_diagonal(mut self, border: FormatBorder) -> Format {
         self.border_diagonal = border;
         self
@@ -2113,6 +2138,7 @@ impl Format {
     /// * `border_type` - The diagonal border type as defined by a
     ///   [`FormatDiagonalBorder`] enum value.
     ///
+    #[must_use]
     pub fn set_border_diagonal_type(mut self, border_type: FormatDiagonalBorder) -> Format {
         self.border_diagonal_type = border_type;
         self
@@ -2123,11 +2149,12 @@ impl Format {
     /// Set the hyperlink style for use with urls. This is usually set
     /// automatically when writing urls without a format applied.
     ///
+    #[must_use]
     pub fn set_hyperlink(mut self) -> Format {
         self.is_hyperlink = true;
         self.font_color = XlsxColor::Theme(10, 0);
         self.underline = FormatUnderline::Single;
-        self.font_scheme = "".to_string();
+        self.font_scheme = String::new();
 
         self
     }
@@ -2142,7 +2169,7 @@ impl Format {
     /// # Examples
     ///
     /// Example of cell locking and formula hiding in an Excel worksheet
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/app_worksheet_protection.rs
@@ -2190,6 +2217,7 @@ impl Format {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/app_worksheet_protection.png">
     ///
+    #[must_use]
     pub fn set_unlocked(mut self) -> Format {
         self.locked = false;
         self
@@ -2205,12 +2233,13 @@ impl Format {
     ///
     /// See the example above.
     ///
+    #[must_use]
     pub fn set_hidden(mut self) -> Format {
         self.hidden = true;
         self
     }
 
-    /// Set the quote_prefix property for a Format.
+    /// Set the `quote_prefix` property for a Format.
     ///
     /// Set the quote prefix property of a format to ensure a string is treated
     /// as a string after editing. This is the same as prefixing the string with
@@ -2249,6 +2278,7 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_quote_prefix.png">
     ///
+    #[must_use]
     pub fn set_quote_prefix(mut self) -> Format {
         self.quote_prefix = true;
         self
@@ -2256,6 +2286,7 @@ impl Format {
 
     /// Unset the bold Format property back to its default "off" state.
     /// The opposite of [`set_bold()`](Format::set_bold()).
+    #[must_use]
     pub fn unset_bold(mut self) -> Format {
         self.bold = false;
         self
@@ -2263,6 +2294,7 @@ impl Format {
 
     /// Unset the italic Format property back to its default "off" state.
     /// The opposite of [`set_italic()`](Format::set_italic()).
+    #[must_use]
     pub fn unset_italic(mut self) -> Format {
         self.italic = false;
         self
@@ -2270,6 +2302,7 @@ impl Format {
 
     /// Unset the font strikethrough Format property back to its default "off" state.
     /// The opposite of [`set_font_strikethrough()`](Format::set_font_strikethrough()).
+    #[must_use]
     pub fn unset_font_strikethrough(mut self) -> Format {
         self.font_strikethrough = false;
         self
@@ -2277,6 +2310,7 @@ impl Format {
 
     /// Unset the text wrap Format property back to its default "off" state.
     /// The opposite of [`set_text_wrap()`](Format::set_text_wrap()).
+    #[must_use]
     pub fn unset_text_wrap(mut self) -> Format {
         self.text_wrap = false;
         self
@@ -2284,6 +2318,7 @@ impl Format {
 
     /// Unset the shrink Format property back to its default "off" state.
     /// The opposite of [`set_shrink()`](Format::set_shrink()).
+    #[must_use]
     pub fn unset_shrink(mut self) -> Format {
         self.shrink = false;
         self
@@ -2291,6 +2326,7 @@ impl Format {
 
     /// Set the locked Format property back to its default "on" state.
     /// The opposite of [`set_unlocked()`](Format::set_unlocked()).
+    #[must_use]
     pub fn set_locked(mut self) -> Format {
         self.locked = true;
         self
@@ -2298,20 +2334,23 @@ impl Format {
 
     /// Unset the hidden Format property back to its default "off" state.
     /// The opposite of [`set_hidden()`](Format::set_hidden()).
+    #[must_use]
     pub fn unset_hidden(mut self) -> Format {
         self.hidden = false;
         self
     }
 
     /// Unset the hyperlink style.
+    #[must_use]
     pub fn unset_hyperlink_style(mut self) -> Format {
         self.is_hyperlink = true;
 
         self
     }
 
-    /// Unset the quote_prefix Format property back to its default "off" state.
+    /// Unset the `quote_prefix` Format property back to its default "off" state.
     /// The opposite of [`set_quote_prefix()`](Format::set_quote_prefix()).
+    #[must_use]
     pub fn unset_quote_prefix(mut self) -> Format {
         self.quote_prefix = false;
         self
@@ -2323,8 +2362,8 @@ impl Format {
 // -----------------------------------------------------------------------
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxColor enum defines Excel colors the can be used throughout the
-/// rust_xlsxwriter.
+/// The `XlsxColor` enum defines Excel colors the can be used throughout the
+/// `rust_xlsxwriter`.
 ///
 /// There are 3 types of colors within the enum:
 ///
@@ -2337,7 +2376,7 @@ impl Format {
 ///    <img
 ///    src="https://rustxlsxwriter.github.io/images/theme_color_palette.png">
 ///
-///    The syntax for theme colors in XlsxColor is `Theme(color, shade)` where
+///    The syntax for theme colors in `XlsxColor` is `Theme(color, shade)` where
 ///    `color` is one of the 0-9 values on the top row and `shade` is the
 ///    variant in the associated column from 0-5. For example "White, background
 ///    1" in the top left is `Theme(0, 0)` and "Orange, Accent 6, Darker 50%" in
@@ -2348,7 +2387,7 @@ impl Format {
 ///
 /// # Examples
 ///
-/// The following example demonstrates using different XlsxColor enum values to
+/// The following example demonstrates using different `XlsxColor` enum values to
 /// set the color of some text in a worksheet.
 ///
 /// ```
@@ -2454,26 +2493,28 @@ impl XlsxColor {
     // Get the u32 RGB value for a color.
     pub(crate) fn value(self) -> u32 {
         match self {
-            XlsxColor::Automatic => 0xFFFFFFFF,
-            XlsxColor::Black => 0x000000,
-            XlsxColor::Blue => 0x0000FF,
-            XlsxColor::Brown => 0x800000,
-            XlsxColor::Cyan => 0x00FFFF,
-            XlsxColor::Gray => 0x808080,
-            XlsxColor::Green => 0x008000,
-            XlsxColor::Lime => 0x00FF00,
-            XlsxColor::Magenta => 0xFF00FF,
-            XlsxColor::Navy => 0x000080,
-            XlsxColor::Orange => 0xFF6600,
-            XlsxColor::Pink => 0xFF00FF,
-            XlsxColor::Purple => 0x800080,
-            XlsxColor::Red => 0xFF0000,
-            XlsxColor::Silver => 0xC0C0C0,
-            XlsxColor::White => 0xFFFFFF,
-            XlsxColor::Yellow => 0xFFFF00,
+            XlsxColor::Automatic => 0xFF_FF_FF_FF,
+            XlsxColor::Black => 0x00_00_00,
+            XlsxColor::Blue => 0x00_00_FF,
+            XlsxColor::Brown => 0x80_00_00,
+            XlsxColor::Cyan => 0x00_FF_FF,
+            XlsxColor::Gray => 0x80_80_80,
+            XlsxColor::Green => 0x00_80_00,
+            XlsxColor::Lime => 0x00_FF_00,
+            XlsxColor::Magenta => 0xFF_00_FF,
+            XlsxColor::Navy => 0x00_00_80,
+            XlsxColor::Orange => 0xFF_66_00,
+            XlsxColor::Pink => 0xFF_00_FF,
+            XlsxColor::Purple => 0x80_00_80,
+            XlsxColor::Red => 0xFF_00_00,
+            XlsxColor::Silver => 0xC0_C0_C0,
+            XlsxColor::White => 0xFF_FF_FF,
+            XlsxColor::Yellow => 0xFF_FF_00,
             XlsxColor::RGB(color) => color,
             // Use a pseudo RGB color for Theme to differentiate in comparison testing.
-            XlsxColor::Theme(color, shade) => 0xFE000000 + ((color as u32) << 8) + shade as u32,
+            XlsxColor::Theme(color, shade) => {
+                0xFE_00_00_00 + (u32::from(color) << 8) + u32::from(shade)
+            }
         }
     }
 
@@ -2609,7 +2650,7 @@ impl XlsxColor {
                     3 => ("bg1".to_string(), 75000, 0),
                     4 => ("bg1".to_string(), 65000, 0),
                     5 => ("bg1".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 1 => match shade {
                     0 => ("tx1".to_string(), 0, 0),
@@ -2618,7 +2659,7 @@ impl XlsxColor {
                     3 => ("tx1".to_string(), 75000, 25000),
                     4 => ("tx1".to_string(), 85000, 15000),
                     5 => ("tx1".to_string(), 95000, 5000),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 2 => match shade {
                     0 => ("bg2".to_string(), 0, 0),
@@ -2627,7 +2668,7 @@ impl XlsxColor {
                     3 => ("bg2".to_string(), 50000, 0),
                     4 => ("bg2".to_string(), 25000, 0),
                     5 => ("bg2".to_string(), 10000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 3 => match shade {
                     0 => ("tx2".to_string(), 0, 0),
@@ -2636,7 +2677,7 @@ impl XlsxColor {
                     3 => ("tx2".to_string(), 60000, 40000),
                     4 => ("tx2".to_string(), 75000, 0),
                     5 => ("tx2".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 4 => match shade {
                     0 => ("accent1".to_string(), 0, 0),
@@ -2645,7 +2686,7 @@ impl XlsxColor {
                     3 => ("accent1".to_string(), 60000, 40000),
                     4 => ("accent1".to_string(), 75000, 0),
                     5 => ("accent1".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 5 => match shade {
                     0 => ("accent2".to_string(), 0, 0),
@@ -2654,7 +2695,7 @@ impl XlsxColor {
                     3 => ("accent2".to_string(), 60000, 40000),
                     4 => ("accent2".to_string(), 75000, 0),
                     5 => ("accent2".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 6 => match shade {
                     0 => ("accent3".to_string(), 0, 0),
@@ -2663,7 +2704,7 @@ impl XlsxColor {
                     3 => ("accent3".to_string(), 60000, 40000),
                     4 => ("accent3".to_string(), 75000, 0),
                     5 => ("accent3".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 7 => match shade {
                     0 => ("accent4".to_string(), 0, 0),
@@ -2672,7 +2713,7 @@ impl XlsxColor {
                     3 => ("accent4".to_string(), 60000, 40000),
                     4 => ("accent4".to_string(), 75000, 0),
                     5 => ("accent4".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 8 => match shade {
                     0 => ("accent5".to_string(), 0, 0),
@@ -2681,7 +2722,7 @@ impl XlsxColor {
                     3 => ("accent5".to_string(), 60000, 40000),
                     4 => ("accent5".to_string(), 75000, 0),
                     5 => ("accent5".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 9 => match shade {
                     0 => ("accent6".to_string(), 0, 0),
@@ -2690,13 +2731,13 @@ impl XlsxColor {
                     3 => ("accent6".to_string(), 60000, 40000),
                     4 => ("accent6".to_string(), 75000, 0),
                     5 => ("accent6".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
-                _ => ("".to_string(), 0, 0),
+                _ => (String::new(), 0, 0),
             },
 
             // Handle RGB color with an empty default.
-            _ => ("".to_string(), 0, 0),
+            _ => (String::new(), 0, 0),
         }
     }
 
@@ -2705,7 +2746,7 @@ impl XlsxColor {
     pub(crate) fn is_valid(self) -> bool {
         match self {
             XlsxColor::RGB(color) => {
-                if color > 0xFFFFFF {
+                if color > 0xFF_FF_FF {
                     eprintln!(
                         "RGB color '{color:#X}' must be in the the range 0x000000 - 0xFFFFFF."
                     );
@@ -2739,7 +2780,7 @@ impl XlsxColor {
     }
 }
 
-/// Trait to map types into an XlsxColor value.
+/// Trait to map types into an `XlsxColor` value.
 ///
 /// The `IntoColor` trait is used to map strings and other types, including
 /// `XlsxColor` itself, into [`XlsxColor`] enum values. This allows syntactic
@@ -2857,7 +2898,7 @@ impl IntoColor for &str {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatPattern enum defines the Excel pattern types that can be added to
+/// The `FormatPattern` enum defines the Excel pattern types that can be added to
 /// a [`Format`].
 pub enum FormatPattern {
     /// Automatic or Empty pattern.
@@ -2946,7 +2987,7 @@ impl FormatPattern {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatBorder enum defines the Excel border types that can be added to
+/// The `FormatBorder` enum defines the Excel border types that can be added to
 /// a [`Format`] pattern.
 pub enum FormatBorder {
     /// No border.
@@ -3015,7 +3056,7 @@ impl FormatBorder {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatDiagonalBorder enum defines [`Format`] diagonal border types.
+/// The `FormatDiagonalBorder` enum defines [`Format`] diagonal border types.
 ///
 /// This is used with the
 /// [`Format::set_border_diagonal()`](Format::set_border_diagonal()) method.
@@ -3035,7 +3076,7 @@ pub enum FormatDiagonalBorder {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatUnderline enum defines the font underline type in a [`Format`].
+/// The `FormatUnderline` enum defines the font underline type in a [`Format`].
 ///
 /// The difference between a normal underline and an "accounting" underline is
 /// that a normal underline only underlines the text/number in a cell whereas an
@@ -3096,7 +3137,7 @@ pub enum FormatUnderline {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatScript enum defines the [`Format`] font superscript and subscript
+/// The `FormatScript` enum defines the [`Format`] font superscript and subscript
 /// properties.
 ///
 pub enum FormatScript {
@@ -3111,7 +3152,7 @@ pub enum FormatScript {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatAlign enum defines the vertical and horizontal alignment properties
+/// The `FormatAlign` enum defines the vertical and horizontal alignment properties
 /// of a [`Format`].
 ///
 pub enum FormatAlign {
@@ -3187,7 +3228,7 @@ mod tests {
         assert_eq!("FFC0C0C0", XlsxColor::Silver.argb_hex_value());
         assert_eq!("FFFFFFFF", XlsxColor::White.argb_hex_value());
         assert_eq!("FFFFFF00", XlsxColor::Yellow.argb_hex_value());
-        assert_eq!("FFABCDEF", XlsxColor::RGB(0xABCDEF).argb_hex_value());
+        assert_eq!("FFABCDEF", XlsxColor::RGB(0xAB_CD_EF).argb_hex_value());
         assert_eq!("FFFE000201", XlsxColor::Theme(2, 1).argb_hex_value());
     }
 

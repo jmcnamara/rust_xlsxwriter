@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! A simple chart example using the rust_xlsxwriter library.
+//! A simple chart example using the `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
 

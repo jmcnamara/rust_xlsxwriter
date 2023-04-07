@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(0, 0, "Hello")?;
     worksheet.write_string(0, 1, "World")?;
     worksheet.write_number(0, 2, 123)?;
-    worksheet.write_number(0, 3, 1234567)?;
+    worksheet.write_number(0, 3, 1_234_567)?;
 
     worksheet.autofit();
 

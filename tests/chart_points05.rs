@@ -29,7 +29,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")))];
 
     let mut chart = Chart::new(ChartType::Line);
-    chart.set_axis_ids(45471616, 46804992);
+    chart.set_axis_ids(45_471_616, 46_804_992);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))

@@ -107,7 +107,7 @@ impl Image {
     /// # Arguments
     ///
     /// * `path` - The path of the image file to read e as a `&str` or as a
-    ///   [`std::path`] Path or PathBuf instance.
+    ///   [`std::path`] Path or `PathBuf` instance.
     ///
     /// # Errors
     ///
@@ -252,7 +252,7 @@ impl Image {
             y_offset: 0,
             has_default_dpi: true,
             image_type: XlsxImageType::Unknown,
-            alt_text: "".to_string(),
+            alt_text: String::new(),
             vml_name: "image".to_string(),
             header_position: HeaderImagePosition::Center,
             object_movement: ObjectMovement::MoveButDontSizeWithCells,
@@ -276,7 +276,7 @@ impl Image {
     ///
     /// **Note for macOS Excel users**: the scale shown on Excel for macOS is
     /// different from the scale on Windows. This is an Excel issue and not a
-    /// rust_xlsxwriter issue.
+    /// `rust_xlsxwriter` issue.
     ///
     /// # Arguments
     ///
@@ -333,7 +333,7 @@ impl Image {
     /// Set the width scale for the image.
     ///
     /// Set the width scale for the image relative to 1.0/100%. See the
-    /// [set_scale_height()](Image::set_scale_height) method for details.
+    /// [`set_scale_height`](Image::set_scale_height) method for details.
     ///
     /// # Arguments
     ///
@@ -672,6 +672,7 @@ impl Image {
     /// #     Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn width(&self) -> f64 {
         self.width
     }
@@ -679,6 +680,7 @@ impl Image {
     /// Get the height of the image used for the size calculations in Excel. See
     /// the example above.
     ///
+    #[must_use]
     pub fn height(&self) -> f64 {
         self.height
     }
@@ -689,6 +691,7 @@ impl Image {
     /// Excel assumes a default image DPI of 96.0 and scales all other DPIs
     /// relative to that.
     ///
+    #[must_use]
     pub fn width_dpi(&self) -> f64 {
         self.width_dpi
     }
@@ -699,6 +702,7 @@ impl Image {
     /// Excel assumes a default image DPI of 96.0 and scales all other DPIs
     /// relative to that.
     ///
+    #[must_use]
     pub fn height_dpi(&self) -> f64 {
         self.height_dpi
     }
@@ -829,8 +833,8 @@ impl Image {
                 let y_density = unpack_u32_from_be_bytes(data, offset + 12);
 
                 if *units == 1 {
-                    width_dpi = x_density as f64 * 0.0254;
-                    height_dpi = y_density as f64 * 0.0254;
+                    width_dpi = f64::from(x_density) * 0.0254;
+                    height_dpi = f64::from(y_density) * 0.0254;
                     self.has_default_dpi = false;
                 }
             }
@@ -842,8 +846,8 @@ impl Image {
             offset = offset + length as usize + 12;
         }
 
-        self.width = width as f64;
-        self.height = height as f64;
+        self.width = f64::from(width);
+        self.height = f64::from(height);
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Png;
@@ -871,8 +875,8 @@ impl Image {
                 && marker != 0xFFC8
                 && marker != 0xFFCC
             {
-                height = unpack_u16_from_be_bytes(data, offset + 5) as u32;
-                width = unpack_u16_from_be_bytes(data, offset + 7) as u32;
+                height = u32::from(unpack_u16_from_be_bytes(data, offset + 5));
+                width = u32::from(unpack_u16_from_be_bytes(data, offset + 7));
             }
 
             // Read the DPI in the 0xFFE0 element.
@@ -882,13 +886,13 @@ impl Image {
                 let y_density = unpack_u16_from_be_bytes(data, offset + 14);
 
                 if *units == 1 {
-                    width_dpi = x_density as f64;
-                    height_dpi = y_density as f64;
+                    width_dpi = f64::from(x_density);
+                    height_dpi = f64::from(y_density);
                 }
 
                 if *units == 2 {
-                    width_dpi = x_density as f64 * 2.54;
-                    height_dpi = y_density as f64 * 2.54;
+                    width_dpi = f64::from(x_density) * 2.54;
+                    height_dpi = f64::from(y_density) * 2.54;
                     self.has_default_dpi = false;
                 }
 
@@ -908,8 +912,8 @@ impl Image {
             offset = offset + length as usize + 2;
         }
 
-        self.width = width as f64;
-        self.height = height as f64;
+        self.width = f64::from(width);
+        self.height = f64::from(height);
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Jpg;
@@ -923,8 +927,8 @@ impl Image {
         let width = unpack_u32_from_le_bytes(data, 18);
         let height = unpack_u32_from_le_bytes(data, 22);
 
-        self.width = width as f64;
-        self.height = height as f64;
+        self.width = f64::from(width);
+        self.height = f64::from(height);
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Bmp;
@@ -932,11 +936,11 @@ impl Image {
 
     // Extract width and height information from a GIF file.
     fn process_gif(&mut self, data: &[u8]) {
-        let width = unpack_u16_from_le_bytes(data, 6) as u32;
-        let height = unpack_u16_from_le_bytes(data, 8) as u32;
+        let width = u32::from(unpack_u16_from_le_bytes(data, 6));
+        let height = u32::from(unpack_u16_from_le_bytes(data, 8));
 
-        self.width = width as f64;
-        self.height = height as f64;
+        self.width = f64::from(width);
+        self.height = f64::from(height);
         self.width_dpi = 96.0;
         self.height_dpi = 96.0;
         self.image_type = XlsxImageType::Gif;
@@ -1118,16 +1122,16 @@ mod tests {
                 "black_150.png",
                 64,
                 64,
-                150.01239999999999,
-                150.01239999999999,
+                150.012_399_999_999_99,
+                150.012_399_999_999_99,
                 "png",
             ),
             (
                 "black_150e.png",
                 64,
                 64,
-                150.01239999999999,
-                150.01239999999999,
+                150.012_399_999_999_99,
+                150.012_399_999_999_99,
                 "png",
             ),
         ];
@@ -1137,8 +1141,8 @@ mod tests {
             let filename = format!("tests/input/images/{filename}");
 
             let image = Image::new(&filename).unwrap();
-            assert_eq!(width as f64, image.width());
-            assert_eq!(height as f64, image.height());
+            assert_eq!(f64::from(width), image.width());
+            assert_eq!(f64::from(height), image.height());
             assert_eq!(width_dpi, image.width_dpi());
             assert_eq!(height_dpi, image.height_dpi());
             assert_eq!(image_type, image.image_type.extension());

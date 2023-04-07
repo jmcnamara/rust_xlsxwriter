@@ -4,7 +4,7 @@
 
 //! The following example demonstrates a static function which generally returns
 //! one value. Compare this with the dynamic function output of
-//! doc_working_with_formulas_dynamic_len.rs.
+//! `doc_working_with_formulas_dynamic_len.rs`.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 

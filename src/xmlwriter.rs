@@ -64,7 +64,7 @@ impl XMLWriter {
 
     // Write an XML start tag with attributes.
     pub(crate) fn xml_start_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, String)>) {
-        let mut attribute_str = "".to_string();
+        let mut attribute_str = String::new();
 
         for attribute in attributes {
             let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));
@@ -86,7 +86,7 @@ impl XMLWriter {
 
     // Write an empty XML tag with attributes.
     pub(crate) fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, String)>) {
-        let mut attribute_str = "".to_string();
+        let mut attribute_str = String::new();
 
         for attribute in attributes {
             let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));
@@ -114,7 +114,7 @@ impl XMLWriter {
         data: &str,
         attributes: &Vec<(&str, String)>,
     ) {
-        let mut attribute_str = "".to_string();
+        let mut attribute_str = String::new();
 
         for attribute in attributes {
             let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));

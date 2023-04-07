@@ -23,7 +23,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::LineStacked);
-    chart.set_axis_ids(68411392, 68414848);
+    chart.set_axis_ids(68_411_392, 68_414_848);
 
     chart
         .add_series()

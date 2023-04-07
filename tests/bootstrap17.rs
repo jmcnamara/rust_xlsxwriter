@@ -15,9 +15,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     // Add an error color and duplicate to the test.
     let format = Format::new()
-        .set_font_color(XlsxColor::RGB(0xFFEEEEEE)) // Error color.
-        .set_font_color(XlsxColor::RGB(0xFF0000))
-        .set_font_color(XlsxColor::RGB(0xFF0000)); // Duplicate.
+        .set_font_color(XlsxColor::RGB(0xFF_EE_EE_EE)) // Error color.
+        .set_font_color(XlsxColor::RGB(0xFF_00_00))
+        .set_font_color(XlsxColor::RGB(0xFF_00_00)); // Duplicate.
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string_with_format(0, 0, "Hello", &format)?;

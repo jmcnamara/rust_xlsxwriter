@@ -9,7 +9,7 @@
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/demo.png">
 //!
-//! Rust_xlsxwriter is a rust library that can be used to write text, numbers,
+//! `Rust_xlsxwriter` is a rust library that can be used to write text, numbers,
 //! dates and formulas to multiple worksheets in a new Excel 2007+ xlsx file. It
 //! has a focus on performance and on fidelity with the file format created by
 //! Excel. It cannot be used to modify an existing file.
@@ -80,7 +80,7 @@
 //! }
 //! ```
 //!
-//! Rust_xlsxwriter is a port of the [XlsxWriter] Python module by the same
+//! Rust_xlsxwriter is a port of the XlsxWriter Python module by the same
 //! author. Feature porting is a work in progress. The currently supported
 //! features are:
 //!

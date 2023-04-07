@@ -3,9 +3,9 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! A demonstration of the RGB and Theme colors palettes available in the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
-use rust_xlsxwriter::*;
+use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxColor, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -80,11 +80,11 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_blank(15, 1, &color_format)?;
 
     // Write some user defined RGB colors to cells.
-    let color_format = Format::new().set_background_color(XlsxColor::RGB(0xFF7F50));
+    let color_format = Format::new().set_background_color(XlsxColor::RGB(0xFF_7F_50));
     worksheet.write_string(16, 0, "#FF7F50")?;
     worksheet.write_blank(16, 1, &color_format)?;
 
-    let color_format = Format::new().set_background_color(XlsxColor::RGB(0xDCDCDC));
+    let color_format = Format::new().set_background_color(XlsxColor::RGB(0xDC_DC_DC));
     worksheet.write_string(17, 0, "#DCDCDC")?;
     worksheet.write_blank(17, 1, &color_format)?;
 
@@ -94,7 +94,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_blank(18, 1, &color_format)?;
 
     // Write a RGB color with the optional u32 variant.
-    let color_format = Format::new().set_background_color(0xDAA520);
+    let color_format = Format::new().set_background_color(0xDA_A5_20);
     worksheet.write_string(19, 0, "#DAA520")?;
     worksheet.write_blank(19, 1, &color_format)?;
 

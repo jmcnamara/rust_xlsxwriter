@@ -21,7 +21,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string(3, 0, "Froody")?;
 
     worksheet.write_number(0, 1, 12345)?;
-    worksheet.write_number(1, 1, 12345678)?;
+    worksheet.write_number(1, 1, 12_345_678)?;
     worksheet.write_number(2, 1, 12345)?;
 
     worksheet.write_string(0, 2, "Some longer text")?;

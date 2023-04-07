@@ -26,7 +26,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::Column);
-    chart.set_axis_ids(108321024, 108328448);
+    chart.set_axis_ids(108_321_024, 108_328_448);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))

@@ -3,7 +3,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! # An example showing all 48 default chart styles available in Excel 2007
-//! using rust_xlsxwriter. Note, these styles are not the same as the styles
+//! using `rust_xlsxwriter`. Note, these styles are not the same as the styles
 //! available in Excel 2013 and later.
 
 use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};

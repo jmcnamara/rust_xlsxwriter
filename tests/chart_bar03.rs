@@ -24,7 +24,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::Bar);
-    chart.set_axis_ids(64265216, 64447616);
+    chart.set_axis_ids(64_265_216, 64_447_616);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
@@ -38,7 +38,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.insert_chart(8, 4, &chart)?;
 
     let mut chart = Chart::new(ChartType::Bar);
-    chart.set_axis_ids(86048128, 86058112);
+    chart.set_axis_ids(86_048_128, 86_058_112);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 3, 0))
