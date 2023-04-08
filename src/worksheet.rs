@@ -540,6 +540,13 @@ impl Worksheet {
     /// User can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
     pub fn write<T>(
         &mut self,
         row: RowNum,
@@ -570,6 +577,13 @@ impl Worksheet {
     ///
     /// User can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
     ///
     pub fn write_with_format<'a, T>(
         &'a mut self,
@@ -1029,7 +1043,7 @@ impl Worksheet {
         col: ColNum,
         rich_string: &[(&Format, &str)],
     ) -> Result<&mut Worksheet, XlsxError> {
-        let (string, raw_string) = self.get_rich_string(rich_string)?;
+        let (string, raw_string) = Self::get_rich_string(rich_string)?;
 
         self.store_rich_string(row, col, &string, &raw_string, None)
     }
@@ -1131,7 +1145,7 @@ impl Worksheet {
         rich_string: &[(&Format, &str)],
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let (string, raw_string) = self.get_rich_string(rich_string)?;
+        let (string, raw_string) = Self::get_rich_string(rich_string)?;
 
         self.store_rich_string(row, col, &string, &raw_string, Some(format))
     }
@@ -2208,7 +2222,7 @@ impl Worksheet {
         datetime: &NaiveDateTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = self.datetime_to_excel(datetime);
+        let number = Self::datetime_to_excel(datetime);
 
         // Store the cell data.
         self.store_datetime(row, col, number, Some(format))
@@ -2298,7 +2312,7 @@ impl Worksheet {
         date: &NaiveDate,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = self.date_to_excel(date);
+        let number = Self::date_to_excel(date);
 
         // Store the cell data.
         self.store_datetime(row, col, number, Some(format))
@@ -2388,7 +2402,7 @@ impl Worksheet {
         time: &NaiveTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = self.time_to_excel(time);
+        let number = Self::time_to_excel(time);
 
         // Store the cell data.
         self.store_datetime(row, col, number, Some(format))
@@ -2955,6 +2969,8 @@ impl Worksheet {
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// * [`XlsxError::ChartError`] - A general error that is raised when a
+    /// chart parameter is incorrect or a chart is configured incorrectly.
     ///
     /// # Examples
     ///
@@ -3009,6 +3025,13 @@ impl Worksheet {
     ///
     /// Add a [`Chart`] to a worksheet  at a pixel offset within a cell
     /// location.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::ChartError`] - A general error that is raised when a
+    /// chart parameter is incorrect or a chart is configured incorrectly.
     ///
     /// # Examples
     ///
@@ -3585,7 +3608,7 @@ impl Worksheet {
         if width < 12.0 {
             width /= max_digit_width + padding;
         } else {
-            width = (width - padding) / max_digit_width
+            width = (width - padding) / max_digit_width;
         }
 
         self.set_column_width(col, width)
@@ -4303,7 +4326,7 @@ impl Worksheet {
     /// Unprotect a range of cells in a protected worksheet, with options.
     ///
     /// This method is similar to
-    /// `unprotect_range()`[Worksheet::unprotect_range], see above, expect that
+    /// [`unprotect_range()`](Worksheet::unprotect_range), see above, expect that
     /// it allows you to specify two additional parameters to set the name of
     /// the range (instead of the default Range1 .. RangeN) and also a optional
     /// weak password (see
@@ -4619,10 +4642,8 @@ impl Worksheet {
                         formula: _,
                         xf_index: _,
                         result: cell_result,
-                    } => {
-                        *cell_result = result.to_string();
                     }
-                    CellType::ArrayFormula {
+                    | CellType::ArrayFormula {
                         formula: _,
                         xf_index: _,
                         result: cell_result,
@@ -4708,7 +4729,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// The following example demonstrates writing an Excel "Future Function"
-    /// with an implicit prefix and the use_future_functions() method.
+    /// with an implicit prefix and the `use_future_functions()` method.
     ///
     /// ```
     /// # // This code is available in examples/doc_working_with_formulas_future3.rs
@@ -5367,7 +5388,7 @@ impl Worksheet {
         }
 
         // Sort list and remove any duplicates and 0.
-        let breaks = self.process_pagebreaks(breaks)?;
+        let breaks = Self::process_pagebreaks(breaks)?;
 
         // Check max break value is within Excel column limit.
         if *breaks.last().unwrap() >= ROW_MAX {
@@ -5407,7 +5428,7 @@ impl Worksheet {
         }
 
         // Sort list and remove any duplicates and 0.
-        let breaks = self.process_pagebreaks(breaks)?;
+        let breaks = Self::process_pagebreaks(breaks)?;
 
         // Check max break value is within Excel col limit.
         if *breaks.last().unwrap() >= COL_MAX as u32 {
@@ -5866,13 +5887,13 @@ impl Worksheet {
     ///
     /// Insert an image in a worksheet header in one of the 3 sections supported
     /// by Excel: Left, Center and Right. This needs to be preceded by a call to
-    /// [worksheet.set_header()](Worksheet::set_header) where a corresponding
+    /// [`worksheet.set_header()`](Worksheet::set_header) where a corresponding
     /// `&[Picture]` element is added to the header formatting string such as
     /// `"&L&[Picture]"`.
     ///
     /// # Arguments
     ///
-    /// * `position` - The image position as defined by the [HeaderImagePosition]
+    /// * `position` - The image position as defined by the [`HeaderImagePosition`]
     ///   enum.
     ///
     /// # Errors
@@ -5969,7 +5990,7 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check that there is a matching  &[Picture]/&[G] variable in the
         // header string.
-        if !self.verify_header_footer_image(&self.header, &position) {
+        if !Self::verify_header_footer_image(&self.header, &position) {
             let error = format!(
                 "No &[Picture] or &[G] variable in header string: '{}' for position = '{:?}'",
                 self.header, position
@@ -5992,7 +6013,7 @@ impl Worksheet {
     ///
     /// # Arguments
     ///
-    /// * `position` - The image position as defined by the [HeaderImagePosition]
+    /// * `position` - The image position as defined by the [`HeaderImagePosition`]
     ///   enum.
     ///
     /// # Errors
@@ -6007,7 +6028,7 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check that there is a matching  &[Picture]/&[G] variable in the
         // footer string.
-        if !self.verify_header_footer_image(&self.footer, &position) {
+        if !Self::verify_header_footer_image(&self.footer, &position) {
             let error = format!(
                 "No &[Picture] or &[G] variable in footer string: '{}' for position = '{:?}'",
                 self.footer, position
@@ -6063,7 +6084,7 @@ impl Worksheet {
     /// # Arguments
     ///
     /// * `enable` - Turn the property on/off. It is on by default.
-    ///`
+    ///S
     pub fn set_header_footer_align_with_page(&mut self, enable: bool) -> &mut Worksheet {
         self.header_footer_align_with_page = enable;
 
@@ -6910,8 +6931,8 @@ impl Worksheet {
                                 // Update the max for the column.
                                 Some(max) => {
                                     if pixel_width > *max {
-                                        *max = pixel_width
-                                    }
+                                        *max = pixel_width;
+                                    };
                                 }
                                 None => {
                                     // Add a new column entry and maximum.
@@ -6926,7 +6947,7 @@ impl Worksheet {
 
         // Set the max character width for each column.
         for (col, pixels) in max_widths.iter() {
-            let width = self.pixels_to_width(*pixels + 7);
+            let width = Self::pixels_to_width(*pixels + 7);
             self.store_column_width(*col, width, true);
         }
 
@@ -6945,7 +6966,7 @@ impl Worksheet {
         }
 
         // Get the range that the autofilter applies to.
-        let filter_columns: Vec<ColNum> = self.filter_conditions.keys().cloned().collect();
+        let filter_columns: Vec<ColNum> = self.filter_conditions.keys().copied().collect();
         let first_row = self.autofilter_defined_name.first_row + 1; // Skip header.
         let last_row = self.autofilter_defined_name.last_row;
 
@@ -7164,7 +7185,7 @@ impl Worksheet {
 
     // Process pagebreaks to sort them, remove duplicates and check the number
     // is within the Excel limit.
-    pub(crate) fn process_pagebreaks(&mut self, breaks: &[u32]) -> Result<Vec<u32>, XlsxError> {
+    pub(crate) fn process_pagebreaks(breaks: &[u32]) -> Result<Vec<u32>, XlsxError> {
         let unique_breaks: HashSet<u32> = breaks.iter().copied().collect();
         let mut breaks: Vec<u32> = unique_breaks.into_iter().collect();
         breaks.sort();
@@ -7535,10 +7556,7 @@ impl Worksheet {
     // A rich string is handled in Excel like any other shared string except
     // that it has inline font markup within the string. To generate the
     // required font xml we use an instance of the Style struct.
-    fn get_rich_string(
-        &mut self,
-        segments: &[(&Format, &str)],
-    ) -> Result<(String, String), XlsxError> {
+    fn get_rich_string(segments: &[(&Format, &str)]) -> Result<(String, String), XlsxError> {
         // Check that there is at least one segment tuple.
         if segments.is_empty() {
             let error = "Rich string must contain at least 1 (&Format, &str) tuple.";
@@ -7665,6 +7683,7 @@ impl Worksheet {
 
     // Check that row and col are within the allowed Excel range but don't
     // modify the worksheet cell range.
+    #[allow(clippy::unused_self)]
     fn check_dimensions_only(&mut self, row: RowNum, col: ColNum) -> bool {
         // Check that the row an column number are within Excel's ranges.
         if row >= ROW_MAX {
@@ -7766,9 +7785,9 @@ impl Worksheet {
     //   information in any way.
 
     // Convert a chrono::NaiveTime to an Excel serial datetime.
-    fn datetime_to_excel(&mut self, datetime: &NaiveDateTime) -> f64 {
-        let excel_date = self.date_to_excel(&datetime.date());
-        let excel_time = self.time_to_excel(&datetime.time());
+    fn datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
+        let excel_date = Self::date_to_excel(&datetime.date());
+        let excel_time = Self::time_to_excel(&datetime.time());
 
         excel_date + excel_time
     }
@@ -7776,7 +7795,7 @@ impl Worksheet {
     // Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
     // is the number of days since the epoch, which is either 1899-12-31 or
     // 1904-01-01.
-    fn date_to_excel(&mut self, date: &NaiveDate) -> f64 {
+    fn date_to_excel(date: &NaiveDate) -> f64 {
         let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
         let duration = *date - epoch;
@@ -7794,7 +7813,7 @@ impl Worksheet {
     // Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
     // datetime is the number of milliseconds divided by the total number of
     // milliseconds in the day.
-    fn time_to_excel(&mut self, time: &NaiveTime) -> f64 {
+    fn time_to_excel(time: &NaiveTime) -> f64 {
         let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
         let duration = *time - midnight;
 
@@ -8196,7 +8215,7 @@ impl Worksheet {
         self.drawing.writer.reset();
 
         for chart in self.charts.values_mut() {
-            chart.writer.reset()
+            chart.writer.reset();
         }
 
         self.rel_count = 0;
@@ -8225,7 +8244,7 @@ impl Worksheet {
 
     // Check that there is a header/footer &[Picture] variable in the correct
     // position to match the corresponding image object.
-    fn verify_header_footer_image(&self, string: &str, position: &HeaderImagePosition) -> bool {
+    fn verify_header_footer_image(string: &str, position: &HeaderImagePosition) -> bool {
         lazy_static! {
             static ref LEFT: Regex = Regex::new(r"(&[L].*)(:?&[CR])?").unwrap();
             static ref RIGHT: Regex = Regex::new(r"(&[R].*)(:?&[LC])?").unwrap();
@@ -8248,7 +8267,7 @@ impl Worksheet {
     }
 
     // Convert column pixel width to character width.
-    pub(crate) fn pixels_to_width(&mut self, pixels: u16) -> f64 {
+    pub(crate) fn pixels_to_width(pixels: u16) -> f64 {
         // Properties for Calibri 11.
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
@@ -8257,7 +8276,7 @@ impl Worksheet {
         if width < 12.0 {
             width /= max_digit_width + padding;
         } else {
-            width = (width - padding) / max_digit_width
+            width = (width - padding) / max_digit_width;
         }
 
         width
@@ -8717,7 +8736,7 @@ impl Worksheet {
 
                 attributes.push(("display", hyperlink.text.to_string()));
             }
-            _ => {}
+            HyperlinkType::Unknown => {}
         }
 
         self.writer.xml_empty_tag_attr("hyperlink", &attributes);
@@ -8838,7 +8857,7 @@ impl Worksheet {
         if filter_condition.is_list_filter {
             self.write_list_filters(filter_condition);
         } else {
-            self.write_custom_filters(filter_condition)
+            self.write_custom_filters(filter_condition);
         }
 
         self.writer.xml_end_tag("filterColumn");
@@ -8934,7 +8953,7 @@ impl Worksheet {
                                 | CellType::DateTime { number, xf_index } => {
                                     let xf_index =
                                         self.get_cell_xf_index(xf_index, row_options, col_num);
-                                    self.write_number_cell(row_num, col_num, number, &xf_index)
+                                    self.write_number_cell(row_num, col_num, number, &xf_index);
                                 }
                                 CellType::String { string, xf_index }
                                 | CellType::RichString {
@@ -8959,7 +8978,7 @@ impl Worksheet {
                                         self.get_cell_xf_index(xf_index, row_options, col_num);
                                     self.write_formula_cell(
                                         row_num, col_num, formula, &xf_index, result,
-                                    )
+                                    );
                                 }
                                 CellType::ArrayFormula {
                                     formula,
@@ -8973,7 +8992,7 @@ impl Worksheet {
                                     self.write_array_formula_cell(
                                         row_num, col_num, formula, &xf_index, result, is_dynamic,
                                         range,
-                                    )
+                                    );
                                 }
                                 CellType::Blank { xf_index } => {
                                     let xf_index =
@@ -9688,6 +9707,14 @@ impl Worksheet {
 ///
 pub trait IntoExcelData {
     /// Trait method to handle writing an unformatted type to Excel.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
     fn write(
         self,
         worksheet: &mut Worksheet,
@@ -9696,6 +9723,14 @@ pub trait IntoExcelData {
     ) -> Result<&mut Worksheet, XlsxError>;
 
     /// Trait method to handle writing a formatted type to Excel.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
     fn write_with_format<'a>(
         self,
         worksheet: &'a mut Worksheet,
@@ -9762,7 +9797,7 @@ impl IntoExcelData for &NaiveDateTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = worksheet.datetime_to_excel(self);
+        let number = Worksheet::datetime_to_excel(self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -9774,7 +9809,7 @@ impl IntoExcelData for &NaiveDateTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = worksheet.datetime_to_excel(self);
+        let number = Worksheet::datetime_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -9786,7 +9821,7 @@ impl IntoExcelData for &NaiveDate {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = worksheet.date_to_excel(self);
+        let number = Worksheet::date_to_excel(self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -9798,7 +9833,7 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = worksheet.date_to_excel(self);
+        let number = Worksheet::date_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -9810,7 +9845,7 @@ impl IntoExcelData for &NaiveTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = worksheet.time_to_excel(self);
+        let number = Worksheet::time_to_excel(self);
         let format = &Format::new().set_num_format("hh:mm:ss;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -9822,7 +9857,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = worksheet.time_to_excel(self);
+        let number = Worksheet::time_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }

@@ -268,7 +268,7 @@ impl<'a> Styles<'a> {
             FormatScript::Subscript => {
                 attributes.push(("val", "subscript".to_string()));
             }
-            _ => {}
+            FormatScript::None => {}
         }
 
         self.writer.xml_empty_tag_attr("vertAlign", &attributes);

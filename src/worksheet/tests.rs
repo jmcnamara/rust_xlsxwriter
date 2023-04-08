@@ -46,8 +46,6 @@ mod worksheet_tests {
 
     #[test]
     fn verify_header_footer_images() {
-        let worksheet = Worksheet::new();
-
         let strings = [
             ("", HeaderImagePosition::Left, false),
             ("&L&[Picture]", HeaderImagePosition::Left, true),
@@ -68,7 +66,10 @@ mod worksheet_tests {
         ];
 
         for (string, position, exp) in strings {
-            assert_eq!(exp, worksheet.verify_header_footer_image(string, &position));
+            assert_eq!(
+                exp,
+                Worksheet::verify_header_footer_image(string, &position)
+            );
         }
     }
 
@@ -142,20 +143,20 @@ mod worksheet_tests {
         let mut worksheet = Worksheet::new();
 
         // Test removing duplicates.
-        let got = worksheet.process_pagebreaks(&[1, 1, 1, 1]).unwrap();
+        let got = Worksheet::process_pagebreaks(&[1, 1, 1, 1]).unwrap();
         assert_eq!(vec![1], got);
 
         // Test removing 0.
-        let got = worksheet.process_pagebreaks(&[0, 1, 2, 3, 4]).unwrap();
+        let got = Worksheet::process_pagebreaks(&[0, 1, 2, 3, 4]).unwrap();
         assert_eq!(vec![1, 2, 3, 4], got);
 
         // Test sort order.
-        let got = worksheet.process_pagebreaks(&[1, 12, 2, 13, 3, 4]).unwrap();
+        let got = Worksheet::process_pagebreaks(&[1, 12, 2, 13, 3, 4]).unwrap();
         assert_eq!(vec![1, 2, 3, 4, 12, 13], got);
 
         // Exceed the number of allow breaks.
         let breaks = (1u32..=1024).collect::<Vec<u32>>();
-        let result = worksheet.process_pagebreaks(&breaks);
+        let result = Worksheet::process_pagebreaks(&breaks);
         assert!(matches!(result, Err(XlsxError::ParameterError(_))));
 
         // Test row and column limits.
@@ -825,8 +826,6 @@ mod worksheet_tests {
 
     #[test]
     fn dates_and_times() {
-        let mut worksheet = Worksheet::new();
-
         // Test date and time
         #[allow(clippy::excessive_precision)]
         let datetimes = vec![
@@ -936,14 +935,12 @@ mod worksheet_tests {
                 .unwrap()
                 .and_hms_milli_opt(hour, min, seconds, millis)
                 .unwrap();
-            assert_eq!(expected, worksheet.datetime_to_excel(&datetime));
+            assert_eq!(expected, Worksheet::datetime_to_excel(&datetime));
         }
     }
 
     #[test]
     fn dates_only() {
-        let mut worksheet = Worksheet::new();
-
         // Test date only.
         let dates = vec![
             (1899, 12, 31, 0.0),
@@ -1149,14 +1146,12 @@ mod worksheet_tests {
         for test_data in dates {
             let (year, month, day, expected) = test_data;
             let datetime = NaiveDate::from_ymd_opt(year, month, day).unwrap();
-            assert_eq!(expected, worksheet.date_to_excel(&datetime));
+            assert_eq!(expected, Worksheet::date_to_excel(&datetime));
         }
     }
 
     #[test]
     fn times_only() {
-        let mut worksheet = Worksheet::new();
-
         // Test time only.
         #[allow(clippy::excessive_precision)]
         let times = vec![
@@ -1263,7 +1258,7 @@ mod worksheet_tests {
         for test_data in times {
             let (hour, min, seconds, millis, expected) = test_data;
             let datetime = NaiveTime::from_hms_milli_opt(hour, min, seconds, millis).unwrap();
-            let mut diff = worksheet.time_to_excel(&datetime) - expected;
+            let mut diff = Worksheet::time_to_excel(&datetime) - expected;
             diff = diff.abs();
             assert!(diff < 0.00000000001);
         }

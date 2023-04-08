@@ -8,19 +8,19 @@
 
 use chrono::{DateTime, Utc};
 
-/// The DocProperties struct is used to create an object to represent document
+/// The `DocProperties` struct is used to create an object to represent document
 /// metadata properties.
 ///
-/// The DocProperties struct is used to create an object to represent various
+/// The `DocProperties` struct is used to create an object to represent various
 /// document properties for an Excel file such as the Author's name or the
 /// Creation Date.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/app_doc_properties.png">
 ///
-/// DocProperties can be set for the "Summary" section and also for the "Custom"
-/// section of the Excel document properties. See the examples below.
+/// Document Properties can be set for the "Summary" section and also for the
+/// "Custom" section of the Excel document properties. See the examples below.
 ///
-/// The DocProperties struct is used in conjunction with the
+/// The `DocProperties` struct is used in conjunction with the
 /// [`workbook.set_properties()`](crate::Workbook::set_properties) method.
 ///
 /// # Examples
@@ -218,7 +218,7 @@ impl Default for DocProperties {
 }
 
 impl DocProperties {
-    /// Create a new DocProperties struct.
+    /// Create a new `DocProperties` struct.
     pub fn new() -> DocProperties {
         DocProperties {
             title: "".to_string(),
@@ -554,7 +554,7 @@ pub(crate) enum CustomPropertyType {
 ///
 pub trait IntoCustomProperty {
     /// Types/objects supporting this trait must be able to convert to a
-    /// CustomProperty struct.
+    /// [`CustomProperty`] struct.
     fn new_custom_property(&self, name: &str) -> CustomProperty;
 }
 

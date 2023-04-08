@@ -133,6 +133,7 @@ pub fn quote_sheetname(sheetname: &str) -> String {
 
 // Get the pixel width of a string based on character widths taken from Excel.
 // Non-ascii characters are given a default width of 8 pixels.
+#[allow(clippy::match_same_arms)]
 pub fn pixel_width(string: &str) -> u16 {
     let mut length = 0;
 

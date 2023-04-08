@@ -146,15 +146,15 @@ impl Chart {
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    /// Create a new Chart struct.
+    /// Create a new `Chart` struct.
     ///
     /// Create a new [`Chart`] object that can be configured and inserted into a
     /// worksheet using the
-    /// [worksheet.insert_chart()][crate::Worksheet::insert_chart].
+    /// [`worksheet.insert_chart()`][crate::Worksheet::insert_chart].
     ///
     /// Once you have create a chart you will need to add at least one data
-    /// series via [chart.add_series()](Chart::add_series) and set a value range
-    /// for that series using [series.set_values()][ChartSeries::set_values].
+    /// series via [`chart.add_series()`](Chart::add_series) and set a value range
+    /// for that series using [`series.set_values()`][ChartSeries::set_values].
     /// See the example below.
     ///
     /// # Examples
@@ -897,7 +897,7 @@ impl Chart {
     /// # Arguments
     ///
     /// * `hole_size`: The hole size for a Doughnut chart. The range is 0 <=
-    /// hole_size <= 90 and the default is 50.
+    /// `hole_size` <= 90 and the default is 50.
     ///
     ///
     /// # Examples
@@ -1125,6 +1125,11 @@ impl Chart {
     /// [`worksheet.insert_chart()`](crate::Worksheet::insert_chart) or
     /// [`worksheet.insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
     /// methods. However, you can also call `chart.validate()` directly.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::ChartError`] - A general error that is raised when a
+    /// chart parameter is incorrect or a chart is configured incorrectly.
     ///
     pub fn validate(&mut self) -> Result<&mut Chart, XlsxError> {
         // Check for chart without series.
@@ -1610,27 +1615,27 @@ impl Chart {
 
         match self.chart_type {
             ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
-                self.write_area_chart()
+                self.write_area_chart();
             }
 
             ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
-                self.write_bar_chart()
+                self.write_bar_chart();
             }
 
             ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
-                self.write_column_chart()
+                self.write_column_chart();
             }
 
             ChartType::Doughnut => self.write_doughnut_chart(),
 
             ChartType::Line | ChartType::LineStacked | ChartType::LinePercentStacked => {
-                self.write_line_chart()
+                self.write_line_chart();
             }
 
             ChartType::Pie => self.write_pie_chart(),
 
             ChartType::Radar | ChartType::RadarWithMarkers | ChartType::RadarFilled => {
-                self.write_radar_chart()
+                self.write_radar_chart();
             }
 
             ChartType::Scatter
@@ -1701,9 +1706,9 @@ impl Chart {
         if self.chart_type == ChartType::ScatterSmooth
             || self.chart_type == ChartType::ScatterSmoothWithMarkers
         {
-            attributes.push(("val", "smoothMarker".to_string()))
+            attributes.push(("val", "smoothMarker".to_string()));
         } else {
-            attributes.push(("val", "lineMarker".to_string()))
+            attributes.push(("val", "lineMarker".to_string()));
         }
 
         self.writer
@@ -2976,7 +2981,7 @@ impl IntoChartRange for &String {
     }
 }
 
-/// Trait to map types into a ChartFormat.
+/// Trait to map types into a `ChartFormat`.
 ///
 /// The `IntoChartFormat` trait provides a syntactic shortcut for the
 /// `chart.*.set_format()` methods that take [`ChartFormat`] as a parameter.
@@ -3939,7 +3944,7 @@ impl ChartSeries {
     pub fn set_value_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
         self.value_cache_data = ChartSeriesCacheData {
             is_numeric,
-            data: data.iter().map(|s| s.to_string()).collect(),
+            data: data.iter().map(std::string::ToString::to_string).collect(),
         };
         self
     }
@@ -3952,7 +3957,7 @@ impl ChartSeries {
     pub fn set_category_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
         self.category_cache_data = ChartSeriesCacheData {
             is_numeric,
-            data: data.iter().map(|s| s.to_string()).collect(),
+            data: data.iter().map(|s| (*s).to_string()).collect(),
         };
         self
     }
@@ -4115,7 +4120,7 @@ impl ChartSeriesCacheData {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-/// The ChartType enum define the type of a Chart object.
+/// The `ChartType` enum define the type of a Chart object.
 ///
 /// The main original chart types are supported, see below.
 ///
@@ -4496,7 +4501,7 @@ pub struct ChartMarker {
 
 #[allow(clippy::new_without_default)]
 impl ChartMarker {
-    /// Create a new ChartMarker object to represent a Chart marker.
+    /// Create a new `ChartMarker` object to represent a Chart marker.
     ///
     pub fn new() -> ChartMarker {
         ChartMarker {
@@ -4823,7 +4828,7 @@ impl Default for ChartPoint {
 }
 
 impl ChartPoint {
-    /// Create a new ChartPoint object to represent a Chart point.
+    /// Create a new `ChartPoint` object to represent a Chart point.
     ///
     pub fn new() -> ChartPoint {
         ChartPoint {
@@ -5440,7 +5445,7 @@ pub struct ChartFormat {
 }
 
 impl ChartFormat {
-    /// Create a new ChartFormat instance to set formatting for a chart element.
+    /// Create a new `ChartFormat` instance to set formatting for a chart element.
     ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartFormat {
@@ -5908,7 +5913,7 @@ pub struct ChartLine {
 }
 
 impl ChartLine {
-    /// Create a new ChartLine object to represent a Chart line/border.
+    /// Create a new `ChartLine` object to represent a Chart line/border.
     ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartLine {
@@ -6247,7 +6252,7 @@ pub struct ChartSolidFill {
 }
 
 impl ChartSolidFill {
-    /// Create a new ChartSolidFill object to represent a Chart solid fill.
+    /// Create a new `ChartSolidFill` object to represent a Chart solid fill.
     ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartSolidFill {
@@ -6461,7 +6466,7 @@ pub struct ChartPatternFill {
 }
 
 impl ChartPatternFill {
-    /// Create a new ChartPatternFill object to represent a Chart pattern fill.
+    /// Create a new `ChartPatternFill` object to represent a Chart pattern fill.
     ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartPatternFill {

@@ -107,7 +107,7 @@ impl Image {
     /// # Arguments
     ///
     /// * `path` - The path of the image file to read e as a `&str` or as a
-    ///   [`std::path`] Path or PathBuf instance.
+    ///   [`std::path`] Path or `PathBuf` instance.
     ///
     /// # Errors
     ///
@@ -333,7 +333,7 @@ impl Image {
     /// Set the width scale for the image.
     ///
     /// Set the width scale for the image relative to 1.0/100%. See the
-    /// [set_scale_height()](Image::set_scale_height) method for details.
+    /// [`set_scale_height()`](Image::set_scale_height) method for details.
     ///
     /// # Arguments
     ///
@@ -894,10 +894,10 @@ impl Image {
 
                 // Workaround for incorrect dpi.
                 if width_dpi == 0.0 || width_dpi == 1.0 {
-                    width_dpi = 96.0
+                    width_dpi = 96.0;
                 }
                 if height_dpi == 0.0 || height_dpi == 1.0 {
-                    height_dpi = 96.0
+                    height_dpi = 96.0;
                 }
             }
 

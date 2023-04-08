@@ -600,7 +600,7 @@ impl Workbook {
     /// # Arguments
     ///
     /// * `path` - The path of the new Excel file to create as a `&str` or as a
-    ///   [`std::path`] Path or PathBuf instance.
+    ///   [`std::path`] Path or `PathBuf` instance.
     ///
     /// # Errors
     ///
@@ -1109,7 +1109,7 @@ impl Workbook {
         package_options = self.set_package_options(package_options)?;
 
         // Create the Packager object that will assemble the zip/xlsx file.
-        let mut packager = Packager::new(writer)?;
+        let mut packager = Packager::new(writer);
         packager.assemble_file(self, &package_options)?;
 
         Ok(())
@@ -1425,7 +1425,7 @@ impl Workbook {
                     unique_num_formats.insert(num_format_string.clone(), index);
                     xf_format.set_num_format_index_u16(index);
                     index += 1;
-                    num_formats.push(num_format_string)
+                    num_formats.push(num_format_string);
                 }
             }
         }

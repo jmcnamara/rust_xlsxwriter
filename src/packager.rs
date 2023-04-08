@@ -74,7 +74,7 @@ impl<W: Write + Seek> Packager<W> {
     // -----------------------------------------------------------------------
 
     // Create a new Packager struct.
-    pub(crate) fn new(writer: W) -> Result<Packager<W>, XlsxError> {
+    pub(crate) fn new(writer: W) -> Packager<W> {
         let zip = zip::ZipWriter::new(writer);
 
         let zip_options = FileOptions::default()
@@ -83,7 +83,7 @@ impl<W: Write + Seek> Packager<W> {
             .last_modified_time(DateTime::default())
             .large_file(false);
 
-        Ok(Packager { zip, zip_options })
+        Packager { zip, zip_options }
     }
 
     // Write the xml files that make up the xlsx OPC package.

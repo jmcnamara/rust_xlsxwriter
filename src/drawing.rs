@@ -68,10 +68,10 @@ impl Drawing {
 
         match drawing_info.object_movement {
             ObjectMovement::MoveButDontSizeWithCells => {
-                attributes.push(("editAs", "oneCell".to_string()))
+                attributes.push(("editAs", "oneCell".to_string()));
             }
             ObjectMovement::DontMoveOrSizeWithCells => {
-                attributes.push(("editAs", "absolute".to_string()))
+                attributes.push(("editAs", "absolute".to_string()));
             }
             ObjectMovement::MoveAndSizeWithCells | ObjectMovement::MoveAndSizeWithCellsAfter => (),
         }
@@ -163,7 +163,7 @@ impl Drawing {
         let mut attributes = vec![("id", id.to_string()), ("name", name)];
 
         if !drawing_info.description.is_empty() {
-            attributes.push(("descr", drawing_info.description.clone()))
+            attributes.push(("descr", drawing_info.description.clone()));
         }
 
         if drawing_info.decorative {

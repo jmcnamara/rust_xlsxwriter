@@ -51,3 +51,7 @@ release_check = {cmd = ["../release/release_check.sh"]}
 
 # Profile
 # cargo instruments -t time --example app_perf_test
+
+# Clippy commands
+# cargo clippy --all-targets -- -Dwarnings
+# cargo +nightly rustdoc-clippy

@@ -19,6 +19,7 @@ impl Theme {
     }
 
     //  Assemble and write the XML file.
+    #[allow(clippy::too_many_lines)]
     pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.write_theme(
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n\

@@ -833,8 +833,8 @@ impl Format {
     ///    formats may also vary depending on system settings.
     ///  - The dollar sign in the above format appears as the defined local
     ///    currency symbol.
-    ///  - These formats can also be set via format_set_num_format().
-    ///  - See also formats_categories.
+    ///  - These formats can also be set via
+    ///    [`set_num_format()`](Format::set_num_format).
     ///
     /// # Arguments
     ///
@@ -868,7 +868,8 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_num_format_index.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_num_format_index.png">
     ///
     pub fn set_num_format_index(mut self, num_format_index: u8) -> Format {
         self.num_format_index = num_format_index as u16;
@@ -2210,7 +2211,7 @@ impl Format {
         self
     }
 
-    /// Set the quote_prefix property for a Format.
+    /// Set the `quote_prefix` property for a Format.
     ///
     /// Set the quote prefix property of a format to ensure a string is treated
     /// as a string after editing. This is the same as prefixing the string with
@@ -2310,7 +2311,7 @@ impl Format {
         self
     }
 
-    /// Unset the quote_prefix Format property back to its default "off" state.
+    /// Unset the `quote_prefix` Format property back to its default "off" state.
     /// The opposite of [`set_quote_prefix()`](Format::set_quote_prefix()).
     pub fn unset_quote_prefix(mut self) -> Format {
         self.quote_prefix = false;
@@ -2323,7 +2324,7 @@ impl Format {
 // -----------------------------------------------------------------------
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The XlsxColor enum defines Excel colors the can be used throughout the
+/// The `XlsxColor` enum defines Excel colors the can be used throughout the
 /// rust_xlsxwriter.
 ///
 /// There are 3 types of colors within the enum:
@@ -2337,7 +2338,7 @@ impl Format {
 ///    <img
 ///    src="https://rustxlsxwriter.github.io/images/theme_color_palette.png">
 ///
-///    The syntax for theme colors in XlsxColor is `Theme(color, shade)` where
+///    The syntax for theme colors in `XlsxColor` is `Theme(color, shade)` where
 ///    `color` is one of the 0-9 values on the top row and `shade` is the
 ///    variant in the associated column from 0-5. For example "White, background
 ///    1" in the top left is `Theme(0, 0)` and "Orange, Accent 6, Darker 50%" in
@@ -2348,7 +2349,7 @@ impl Format {
 ///
 /// # Examples
 ///
-/// The following example demonstrates using different XlsxColor enum values to
+/// The following example demonstrates using different `XlsxColor` enum values to
 /// set the color of some text in a worksheet.
 ///
 /// ```
@@ -2431,7 +2432,7 @@ pub enum XlsxColor {
     /// The color Orange with a RGB value of 0xFF6600.
     Orange,
 
-    /// The color Pink with a RGB value of 0xFF00FF.
+    /// The color Pink with a RGB value of 0xFFC0CB.
     Pink,
 
     /// The color Purple with a RGB value of 0x800080.
@@ -2465,7 +2466,7 @@ impl XlsxColor {
             XlsxColor::Magenta => 0xFF00FF,
             XlsxColor::Navy => 0x000080,
             XlsxColor::Orange => 0xFF6600,
-            XlsxColor::Pink => 0xFF00FF,
+            XlsxColor::Pink => 0xFFC0CB,
             XlsxColor::Purple => 0x800080,
             XlsxColor::Red => 0xFF0000,
             XlsxColor::Silver => 0xC0C0C0,
@@ -2739,7 +2740,7 @@ impl XlsxColor {
     }
 }
 
-/// Trait to map types into an XlsxColor value.
+/// Trait to map types into an `XlsxColor` value.
 ///
 /// The `IntoColor` trait is used to map strings and other types, including
 /// `XlsxColor` itself, into [`XlsxColor`] enum values. This allows syntactic
@@ -2857,7 +2858,7 @@ impl IntoColor for &str {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatPattern enum defines the Excel pattern types that can be added to
+/// The `FormatPattern` enum defines the Excel pattern types that can be added to
 /// a [`Format`].
 pub enum FormatPattern {
     /// Automatic or Empty pattern.
@@ -2946,7 +2947,7 @@ impl FormatPattern {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatBorder enum defines the Excel border types that can be added to
+/// The `FormatBorder` enum defines the Excel border types that can be added to
 /// a [`Format`] pattern.
 pub enum FormatBorder {
     /// No border.
@@ -3015,7 +3016,7 @@ impl FormatBorder {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatDiagonalBorder enum defines [`Format`] diagonal border types.
+/// The `FormatDiagonalBorder` enum defines [`Format`] diagonal border types.
 ///
 /// This is used with the
 /// [`Format::set_border_diagonal()`](Format::set_border_diagonal()) method.
@@ -3035,7 +3036,7 @@ pub enum FormatDiagonalBorder {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatUnderline enum defines the font underline type in a [`Format`].
+/// The `FormatUnderline` enum defines the font underline type in a [`Format`].
 ///
 /// The difference between a normal underline and an "accounting" underline is
 /// that a normal underline only underlines the text/number in a cell whereas an
@@ -3096,7 +3097,7 @@ pub enum FormatUnderline {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatScript enum defines the [`Format`] font superscript and subscript
+/// The `FormatScript` enum defines the [`Format`] font superscript and subscript
 /// properties.
 ///
 pub enum FormatScript {
@@ -3111,7 +3112,7 @@ pub enum FormatScript {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-/// The FormatAlign enum defines the vertical and horizontal alignment properties
+/// The `FormatAlign` enum defines the vertical and horizontal alignment properties
 /// of a [`Format`].
 ///
 pub enum FormatAlign {
@@ -3181,7 +3182,7 @@ mod tests {
         assert_eq!("FFFF00FF", XlsxColor::Magenta.argb_hex_value());
         assert_eq!("FF000080", XlsxColor::Navy.argb_hex_value());
         assert_eq!("FFFF6600", XlsxColor::Orange.argb_hex_value());
-        assert_eq!("FFFF00FF", XlsxColor::Pink.argb_hex_value());
+        assert_eq!("FFFFC0CB", XlsxColor::Pink.argb_hex_value());
         assert_eq!("FF800080", XlsxColor::Purple.argb_hex_value());
         assert_eq!("FFFF0000", XlsxColor::Red.argb_hex_value());
         assert_eq!("FFC0C0C0", XlsxColor::Silver.argb_hex_value());

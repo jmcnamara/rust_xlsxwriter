@@ -6,7 +6,7 @@
 
 #![warn(missing_docs)]
 
-/// The FilterCondition struct is used to define autofilter rules.
+/// The `FilterCondition` struct is used to define autofilter rules.
 ///
 /// Autofilter rules are associated with ranges created using
 /// [`autofilter()`](crate::Worksheet::autofilter()).
@@ -405,7 +405,7 @@ pub struct FilterCondition {
 
 #[allow(clippy::new_without_default)]
 impl FilterCondition {
-    /// Create a new FilterCondition struct to define autofilter rules
+    /// Create a new `FilterCondition` struct to define autofilter rules
     /// associated with an [`autofilter()`](crate::Worksheet::autofilter())
     /// range and the the [`filter_column`](crate::Worksheet::filter_column)
     /// method.
@@ -726,7 +726,7 @@ impl FilterCondition {
     }
 }
 
-/// The FilterCriteria enum defines logical filter criteria used in an
+/// The `FilterCriteria` enum defines logical filter criteria used in an
 /// autofilter.
 ///
 /// These filter criteria are used with the [`FilterCondition`]
@@ -776,6 +776,7 @@ pub enum FilterCriteria {
     DoesNotContain,
 }
 
+#[allow(clippy::match_same_arms)]
 impl FilterCriteria {
     pub(crate) fn operator(&self) -> String {
         match self {
@@ -853,7 +854,7 @@ impl FilterData {
 /// Currently only string and number like types are supported.
 pub trait IntoFilterData {
     /// Types/objects supporting this trait must be able to convert to a
-    /// FilterData struct.
+    /// `FilterData` struct.
     fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData;
 }
 
