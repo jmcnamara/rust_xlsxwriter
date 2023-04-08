@@ -2,9 +2,9 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of setting a solid fill for a chart element.
+//! An example of adding automatic markers to a line chart.
 
-use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartMarker, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -19,19 +19,13 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(5, 0, 50)?;
 
     // Create a new chart.
-    let mut chart = Chart::new(ChartType::Column);
+    let mut chart = Chart::new(ChartType::Line);
 
     // Add a data series with formatting.
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .set_format(
-            ChartFormat::new().set_solid_fill(
-                ChartSolidFill::new()
-                    .set_color("#FF9900")
-                    .set_transparency(60),
-            ),
-        );
+        .set_marker(ChartMarker::new().set_automatic());
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

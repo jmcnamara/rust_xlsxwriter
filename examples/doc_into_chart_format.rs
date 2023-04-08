@@ -2,7 +2,8 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of setting a solid fill for a chart element.
+//! An example of passing chart formatting parameters via the
+//! [`IntoChartFormat`] trait.
 
 use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
 
@@ -14,24 +15,24 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(0, 0, 10)?;
     worksheet.write(1, 0, 40)?;
     worksheet.write(2, 0, 50)?;
-    worksheet.write(3, 0, 20)?;
-    worksheet.write(4, 0, 10)?;
-    worksheet.write(5, 0, 50)?;
+    worksheet.write(0, 1, 20)?;
+    worksheet.write(1, 1, 10)?;
+    worksheet.write(2, 1, 50)?;
 
     // Create a new chart.
     let mut chart = Chart::new(ChartType::Column);
 
-    // Add a data series with formatting.
+    // Add formatting via ChartFormat and a ChartSolidFill sub struct.
     chart
         .add_series()
-        .set_values("Sheet1!$A$1:$A$6")
-        .set_format(
-            ChartFormat::new().set_solid_fill(
-                ChartSolidFill::new()
-                    .set_color("#FF9900")
-                    .set_transparency(60),
-            ),
-        );
+        .set_values("Sheet1!$A$1:$A$3")
+        .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#40EABB")));
+
+    // Add formatting using a ChartSolidFill struct directly.
+    chart
+        .add_series()
+        .set_values("Sheet1!$B$1:$B$3")
+        .set_format(ChartSolidFill::new().set_color("#AAC3F2"));
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

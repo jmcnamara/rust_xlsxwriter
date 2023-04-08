@@ -22,7 +22,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(1, 2, 40)?;
     worksheet.write(2, 2, 50)?;
 
-    // Create a simple Column chart.
+    // Create a new chart.
     let mut chart = Chart::new(ChartType::Column);
 
     // Add a data series using Excel formula syntax to describe the range.

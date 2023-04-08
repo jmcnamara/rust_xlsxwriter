@@ -28,7 +28,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(2, 3, 10)?;
     worksheet.write(3, 3, 30)?;
 
-    // Create a simple Column chart.
+    // Create a new chart.
     let mut chart = Chart::new(ChartType::Column);
 
     // Add a data series with a simple string name.

@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(1, 0, 30)?;
     worksheet.write(2, 0, 40)?;
 
-    // Create a simple Column chart.
+    // Create a new chart.
     let mut chart = Chart::new(ChartType::Column);
 
     // Create a chart series and set the range for the values.

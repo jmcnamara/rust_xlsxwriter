@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(4, 0, 10)?;
     worksheet.write(5, 0, 50)?;
 
-    // Create a simple Column chart.
+    // Create a new chart.
     let mut chart = Chart::new(ChartType::Column);
 
     // Add a data series with formatting.

@@ -2,30 +2,27 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! An example of formatting the line width in a chart element.
+//! An example of setting the individual segment colors of a Pie chart.
 
-use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     // Add some data for the chart.
-    worksheet.write(0, 0, 10)?;
-    worksheet.write(1, 0, 40)?;
-    worksheet.write(2, 0, 50)?;
-    worksheet.write(3, 0, 20)?;
-    worksheet.write(4, 0, 10)?;
-    worksheet.write(5, 0, 50)?;
+    worksheet.write(0, 0, 15)?;
+    worksheet.write(1, 0, 15)?;
+    worksheet.write(2, 0, 30)?;
 
     // Create a new chart.
-    let mut chart = Chart::new(ChartType::Line);
+    let mut chart = Chart::new(ChartType::Pie);
 
     // Add a data series with formatting.
     chart
         .add_series()
-        .set_values("Sheet1!$A$1:$A$6")
-        .set_format(ChartFormat::new().set_line(ChartLine::new().set_width(10.0)));
+        .set_values("Sheet1!$A$1:$A$3")
+        .set_point_colors(&["#FF000", "#FFC000", "#FFFF00"]);
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // -----------------------------------------------------------------------
-    // Create a simple Column chart.
+    // Create a new chart.
     // -----------------------------------------------------------------------
     let mut chart = Chart::new(ChartType::Column);
 

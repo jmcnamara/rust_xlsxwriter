@@ -24,7 +24,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(4, 1, 10)?;
     worksheet.write(5, 1, 50)?;
 
-    // Create a simple Column chart.
+    // Create a new chart.
     let mut chart = Chart::new(ChartType::ScatterStraightWithMarkers);
 
     // Add a data series with formatting.

@@ -18,14 +18,14 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(4, 0, 10)?;
     worksheet.write(5, 0, 50)?;
 
-    // Create a simple Column chart.
+    // Create a new chart.
     let mut chart = Chart::new(ChartType::Column);
 
     // Add a data series with formatting.
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")
-        .set_format(ChartFormat::new().set_border_color("#FF0000"));
+        .set_format(ChartFormat::new().set_no_fill());
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

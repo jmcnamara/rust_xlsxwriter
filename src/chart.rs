@@ -48,7 +48,7 @@ use crate::{
 ///     worksheet.write(3, 0, 10)?;
 ///     worksheet.write(4, 0, 50)?;
 ///
-///     // Create a simple Column chart.
+///     // Create a new chart.
 ///     let mut chart = Chart::new(ChartType::Column);
 ///
 ///     // Add a data series using Excel formula syntax to describe the range.
@@ -175,7 +175,7 @@ impl Chart {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -298,7 +298,7 @@ impl Chart {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -374,7 +374,7 @@ impl Chart {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Create a chart series and set the range for the values.
@@ -446,7 +446,7 @@ impl Chart {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -497,7 +497,7 @@ impl Chart {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -562,7 +562,7 @@ impl Chart {
     /// #     worksheet.write(1, 1, 35)?;
     /// #     worksheet.write(2, 1, 45)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -677,11 +677,22 @@ impl Chart {
     /// Set the formatting properties for the chart area.
     ///
     /// Set the formatting properties for a chart area via a [`ChartFormat`]
-    /// object. In Excel the chart area is the background area behind the chart.
+    /// object or a sub struct that implements [`IntoChartFormat`]. In Excel the
+    /// chart area is the background area behind the chart.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
     ///
     /// # Arguments
     ///
-    /// `format`: A [`ChartFormat`] struct reference.
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
     ///
     /// # Examples
     ///
@@ -705,7 +716,7 @@ impl Chart {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -730,7 +741,8 @@ impl Chart {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_chart_area_format.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_chart_area_format.png">
     ///
     pub fn set_chart_area_format<T>(&mut self, format: T) -> &mut Chart
     where
@@ -746,15 +758,24 @@ impl Chart {
     /// [`ChartFormat`] object. In Excel the plot area is the area between the
     /// axes on which the chart series are plotted.
     ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
     /// # Arguments
     ///
-    /// `format`: A [`ChartFormat`] struct reference.
-    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
     ///
     /// # Examples
     ///
-    /// An example of formatting the chart "area" of a chart. In Excel the plot area
-    /// is the area between the axes on which the chart series are plotted.
+    /// An example of formatting the chart "area" of a chart. In Excel the plot
+    /// area is the area between the axes on which the chart series are plotted.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_set_plot_area_format.rs
@@ -773,7 +794,7 @@ impl Chart {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -798,7 +819,8 @@ impl Chart {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_plot_area_format.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_plot_area_format.png">
     ///
     pub fn set_plot_area_format<T>(&mut self, format: T) -> &mut Chart
     where
@@ -819,7 +841,47 @@ impl Chart {
     /// * `rotation`: The rotation of the first segment of a Pie/Doughnut chart.
     /// The range is 0 <= rotation <= 360 and the default is 0.
     ///
-    ///  TODO
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the chart rotation for pie and doughnut charts.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_rotation.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Pie);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Set the rotation of the chart.
+    ///     chart.set_rotation(270);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_rotation.png">
     ///
     pub fn set_rotation(&mut self, rotation: u16) -> &mut Chart {
         if (0..=360).contains(&rotation) {
@@ -837,7 +899,47 @@ impl Chart {
     /// * `hole_size`: The hole size for a Doughnut chart. The range is 0 <=
     /// hole_size <= 90 and the default is 50.
     ///
-    ///  TODO
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the chart hole size for doughnut charts.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_hole_size.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Doughnut);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Set the home size of the chart.
+    ///     chart.set_hole_size(80);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_hole_size.png">
     ///
     pub fn set_hole_size(&mut self, hole_size: u8) -> &mut Chart {
         if (0..=90).contains(&hole_size) {
@@ -873,7 +975,7 @@ impl Chart {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -2876,7 +2978,122 @@ impl IntoChartRange for &String {
 
 /// Trait to map types into a ChartFormat.
 ///
-/// TODO
+/// The `IntoChartFormat` trait provides a syntactic shortcut for the
+/// `chart.*.set_format()` methods that take [`ChartFormat`] as a parameter.
+///
+/// The [`ChartFormat`] struct mirrors the Excel Chart element formatting dialog
+/// and has several sub-structs such as:
+///
+/// - [`ChartLine`]
+/// - [`ChartSolidFill`]
+/// - [`ChartPatternFill`]
+///
+/// In order to pass one of these sub-structs as a parameter you would normally
+/// have to create a [`ChartFormat`] first and then add the sub-struct, as shown
+/// in the first part of the example below. However, since this is a little
+/// verbose if you just want to format one of the sub-properties the
+/// `IntoChartFormat` trait will accept the sub-structs listed above and create
+/// a parent [`ChartFormat`] instance to wrap it in, see the second part of the
+/// example below.
+///
+/// # Examples
+///
+/// An example of passing chart formatting parameters via the
+/// [`IntoChartFormat`] trait
+///
+/// ```
+/// # // This code is available in examples/doc_into_chart_format.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(0, 1, 20)?;
+/// #     worksheet.write(1, 1, 10)?;
+/// #     worksheet.write(2, 1, 50)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add formatting via ChartFormat and a ChartSolidFill sub struct.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$3")
+///         .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#40EABB")));
+///
+///     // Add formatting using a ChartSolidFill struct directly.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$B$1:$B$3")
+///         .set_format(ChartSolidFill::new().set_color("#AAC3F2"));
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/into_chart_format.png">
+///
+///
+/// ```
+/// # // This code is available in examples/doc_into_chart_format.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(0, 1, 20)?;
+/// #     worksheet.write(1, 1, 10)?;
+/// #     worksheet.write(2, 1, 50)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add formatting via ChartFormat and a ChartSolidFill sub struct.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$3")
+///         .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#40EABB")));
+///
+///     // Add formatting using a ChartSolidFill struct directly.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$B$1:$B$3")
+///         .set_format(ChartSolidFill::new().set_color("#AAC3F2"));
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/into_chart_format.png">
+///
 ///
 pub trait IntoChartFormat {
     /// Trait function to turn a type into [`ChartFormat`].
@@ -2971,7 +3188,7 @@ impl DrawingObject for Chart {
 ///     worksheet.write(1, 0, 30)?;
 ///     worksheet.write(2, 0, 40)?;
 ///
-///     // Create a simple Column chart.
+///     // Create a new chart.
 ///     let mut chart = Chart::new(ChartType::Column);
 ///
 ///     // Add a data series using Excel formula syntax to describe the range.
@@ -3039,7 +3256,7 @@ impl ChartSeries {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -3073,7 +3290,7 @@ impl ChartSeries {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Create a chart series and set the range for the values.
@@ -3155,7 +3372,7 @@ impl ChartSeries {
     /// #     worksheet.write(1, 1, 40)?;
     /// #     worksheet.write(2, 1, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -3235,7 +3452,7 @@ impl ChartSeries {
     /// #     worksheet.write(1, 2, 40)?;
     /// #     worksheet.write(2, 2, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -3325,7 +3542,7 @@ impl ChartSeries {
     /// #     worksheet.write(2, 3, 10)?;
     /// #     worksheet.write(3, 3, 30)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with a simple string name.
@@ -3378,7 +3595,7 @@ impl ChartSeries {
     /// Set the formatting properties for a chart series.
     ///
     /// Set the formatting properties for a chart series via a [`ChartFormat`]
-    /// object.
+    /// object or a sub struct that implements [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
@@ -3390,7 +3607,9 @@ impl ChartSeries {
     ///
     /// # Arguments
     ///
-    /// `format`: A [`ChartFormat`] struct reference.
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
     ///
     pub fn set_format<T>(&mut self, format: T) -> &mut ChartSeries
     where
@@ -3400,30 +3619,221 @@ impl ChartSeries {
         self
     }
 
-    /// todo
+    /// Set the markers for a chart series.
+    ///
+    /// Set the markers and marker properties for a data series using a
+    /// [`ChartMarker`] instance. In general only Line, Scatter and Radar chart
+    /// support markers.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding markers to a line chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_marker.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartFormat, ChartMarker, ChartMarkerType, ChartSolidFill, ChartType, Workbook,
+    /// #     XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_marker(
+    ///             ChartMarker::new()
+    ///                 .set_type(ChartMarkerType::Square)
+    ///                 .set_size(10)
+    ///                 .set_format(
+    ///                     ChartFormat::new().set_solid_fill(
+    ///                         ChartSolidFill::new().set_color("#FF0000")),
+    ///                 ),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker.png">
+    ///
     pub fn set_marker(&mut self, marker: &ChartMarker) -> &mut ChartSeries {
         self.marker = Some(marker.clone());
         self
     }
 
-    /// todo
+    /// Set the formatting and properties for points in a chart series.
+    ///
+    /// The meaning of "point" varies between chart types. For a Line chart a point
+    /// is a line segment; in a Column chart a point is a an individual bar; and in
+    /// a Pie chart a point is a pie segment.
+    ///
+    /// A point is represented by the [`ChartPoint`] struct.
+    ///
+    /// Chart points are most commonly used for Pie and Doughnut charts to format
+    /// individual segments of the chart. In all other chart types the formatting
+    /// happens at the chart series level.
+    ///
+    ///
+    /// # Arguments
+    ///
+    /// `points`: A slice of [`ChartPoint`] objects.
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the individual segments of a Pie chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_points.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartFormat, ChartPoint, ChartSolidFill, ChartType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 15)?;
+    /// #     worksheet.write(1, 0, 15)?;
+    /// #     worksheet.write(2, 0, 30)?;
+    /// #
+    ///     // Some point object with formatting to use in the Pie chart.
+    ///     let points = vec![
+    ///         ChartPoint::new().set_format(
+    ///             ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
+    ///         ),
+    ///         ChartPoint::new().set_format(
+    ///             ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFC000")),
+    ///         ),
+    ///         ChartPoint::new().set_format(
+    ///             ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
+    ///         ),
+    ///     ];
+    ///
+    ///     // Create a simple Pie chart.
+    ///     let mut chart = Chart::new(ChartType::Pie);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$3")
+    ///         .set_points(&points);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_points.png">
+    ///
     pub fn set_points(&mut self, points: &[ChartPoint]) -> &mut ChartSeries {
         self.points = points.to_vec();
         self
     }
 
-    /// todo
+    /// Set the colors for points in a chart series.
+    ///
+    /// As explained above, in the section on
+    /// [`set_points`](ChartSeries::set_points), the most common use case for
+    /// point formatting is to set the formatting of individual segments of Pie
+    /// charts, or in particular to set the colors of pie segments. For this
+    /// simple use case the [`set_points`](ChartSeries::set_points) method can be
+    /// overly verbose.
+    ///
+    /// As a syntactic shortcut the `set_point_colors()` method allow you to set
+    /// the colors of chart points with a simpler interface.
+    ///
+    /// Compare the example below with the previous more general example which
+    /// both produce the same result.
+    ///
+    /// # Arguments
+    ///
+    /// `colors`: a slice of [`XlsxColor`] enum values or types that will
+    /// convert into [`XlsxColor`] via [`IntoColor`].
+    ///
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the individual segment colors of a Pie chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_point_colors.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 15)?;
+    /// #     worksheet.write(1, 0, 15)?;
+    /// #     worksheet.write(2, 0, 30)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Pie);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$3")
+    ///         .set_point_colors(&["#FF000", "#FFC000", "#FFFF00"]);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_points.png">
+    ///
     pub fn set_point_colors<T>(&mut self, colors: &[T]) -> &mut ChartSeries
     where
         T: IntoColor + Copy,
     {
-        let points = colors
+        self.points = colors
             .iter()
-            .map(|color| {
-                ChartPoint::new().set_format(ChartFormat::new().set_solid_fill_color(*color))
-            })
+            .map(|color| ChartPoint::new().set_format(ChartSolidFill::new().set_color(*color)))
             .collect();
-        self.points = points;
         self
     }
 
@@ -3890,7 +4300,7 @@ impl ChartTitle {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -3952,7 +4362,7 @@ impl ChartTitle {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -3989,7 +4399,7 @@ impl ChartTitle {
     /// Set the formatting properties for a chart title.
     ///
     /// Set the formatting properties for a chart title via a [`ChartFormat`]
-    /// object.
+    /// object or a sub struct that implements [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
@@ -4001,7 +4411,9 @@ impl ChartTitle {
     ///
     /// # Arguments
     ///
-    /// `format`: A [`ChartFormat`] struct reference.
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
     ///
     pub fn set_format<T>(&mut self, format: T) -> &mut ChartTitle
     where
@@ -4013,6 +4425,66 @@ impl ChartTitle {
 }
 
 /// A struct to represent a Chart marker.
+///
+/// The [`ChartMarker`] struct represents the properties of a marker on a Line,
+/// Scatter or Radar chart. In Excel a marker is a shape that represents a data
+/// point in a chart series.
+///
+/// # Examples
+///
+/// An example of adding markers to a line chart.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_marker.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     Chart, ChartFormat, ChartMarker, ChartMarkerType, ChartSolidFill, ChartType, Workbook,
+/// #     XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Line);
+///
+///     // Add a data series with formatting.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .set_marker(
+///             ChartMarker::new()
+///                 .set_type(ChartMarkerType::Square)
+///                 .set_size(10)
+///                 .set_format(
+///                     ChartFormat::new().set_solid_fill(
+///                         ChartSolidFill::new().set_color("#FF0000")),
+///                 ),
+///         );
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_marker.png">
+///
 #[derive(Clone)]
 pub struct ChartMarker {
     pub(crate) automatic: bool,
@@ -4024,7 +4496,8 @@ pub struct ChartMarker {
 
 #[allow(clippy::new_without_default)]
 impl ChartMarker {
-    /// todo
+    /// Create a new ChartMarker object to represent a Chart marker.
+    ///
     pub fn new() -> ChartMarker {
         ChartMarker {
             automatic: false,
@@ -4035,26 +4508,136 @@ impl ChartMarker {
         }
     }
 
-    /// TODO
+    /// Set the automatic/default marker type.
+    ///
+    /// Allow the marker type to be set automatically by Excel.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding automatic markers to a line chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_marker_set_automatic.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartMarker, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_marker(ChartMarker::new().set_automatic());
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_set_automatic.png">
+    ///
     pub fn set_automatic(&mut self) -> &mut ChartMarker {
         self.automatic = true;
         self
     }
 
-    /// TODO
+    /// Turn off/hide a chart marker.
+    ///
+    /// This method can be use to turn off markers for an individual data series
+    /// in a chart that has default markers for all series.
+    ///
     pub fn set_none(&mut self) -> &mut ChartMarker {
         self.none = true;
         self
     }
 
-    /// TODO
+    /// Set the type of the marker.
+    ///
+    /// Change the default type of the marker to one of the shapes supported by
+    /// Excel.
+    ///
+    /// # Arguments
+    ///
+    /// `marker_type`: a [`ChartMarkerType`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding markers to a line chart with user defined marker
+    /// types.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_marker_set_type.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartMarker, ChartMarkerType, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_marker(ChartMarker::new().set_type(ChartMarkerType::Circle));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_marker_set_type.png">
+    ///
     pub fn set_type(&mut self, marker_type: ChartMarkerType) -> &mut ChartMarker {
         self.marker_type = Some(marker_type);
         self.automatic = false;
         self
     }
 
-    /// TODO
+    /// Set the size of the marker.
+    ///
+    /// Change the default size of the marker.
+    ///
+    ///
+    ///
     pub fn set_size(&mut self, size: u8) -> &mut ChartMarker {
         if (2..=72).contains(&size) {
             self.size = size;
@@ -4066,7 +4649,7 @@ impl ChartMarker {
     /// Set the formatting properties for a chart marker.
     ///
     /// Set the formatting properties for a chart marker via a [`ChartFormat`]
-    /// object.
+    /// object or a sub struct that implements [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
@@ -4078,7 +4661,9 @@ impl ChartMarker {
     ///
     /// # Arguments
     ///
-    /// `format`: A [`ChartFormat`] struct reference.
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
     ///
     pub fn set_format<T>(&mut self, format: T) -> &mut ChartMarker
     where
@@ -4155,6 +4740,77 @@ impl ToString for ChartMarkerType {
 }
 
 /// A struct to represent a Chart point.
+///
+/// The [`ChartPoint`] struct represents a "point" in a data series which is the
+/// element you get in Excel if you right click on an individual data point or
+/// segment and select "Format Data Point".
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_point_dialog.png">
+///
+/// The meaning of "point" varies between chart types. For a Line chart a point
+/// is a line segment; in a Column chart a point is a an individual bar; and in
+/// a Pie chart a point is a pie segment.
+///
+/// Chart points are most commonly used for Pie and Doughnut charts to format
+/// individual segments of the chart. In all other chart types the formatting
+/// happens at the chart series level.
+///
+/// # Examples
+///
+/// An example of formatting the individual segments of a Pie chart.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_set_points.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     Chart, ChartFormat, ChartPoint, ChartSolidFill, ChartType, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 15)?;
+/// #     worksheet.write(1, 0, 15)?;
+/// #     worksheet.write(2, 0, 30)?;
+/// #
+/// #     // Some point object with formatting to use in the Pie chart.
+/// #     let points = vec![
+/// #         ChartPoint::new().set_format(
+/// #             ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
+/// #         ),
+/// #         ChartPoint::new().set_format(
+/// #             ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFC000")),
+/// #         ),
+/// #         ChartPoint::new().set_format(
+/// #             ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
+/// #         ),
+/// #     ];
+/// #
+/// #     // Create a simple Pie chart.
+///     let mut chart = Chart::new(ChartType::Pie);
+///
+///     // Add a data series with formatting.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$3")
+///         .set_points(&points);
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_set_points.png">
+///
 #[derive(Clone)]
 pub struct ChartPoint {
     pub(crate) format: ChartFormat,
@@ -4167,7 +4823,8 @@ impl Default for ChartPoint {
 }
 
 impl ChartPoint {
-    /// todo
+    /// Create a new ChartPoint object to represent a Chart point.
+    ///
     pub fn new() -> ChartPoint {
         ChartPoint {
             format: ChartFormat::new(),
@@ -4177,7 +4834,7 @@ impl ChartPoint {
     /// Set the formatting properties for a chart point.
     ///
     /// Set the formatting properties for a chart point via a [`ChartFormat`]
-    /// object.
+    /// object or a sub struct that implements [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
@@ -4189,7 +4846,9 @@ impl ChartPoint {
     ///
     /// # Arguments
     ///
-    /// `format`: A [`ChartFormat`] struct reference.
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
     ///
     pub fn set_format<T>(mut self, format: T) -> ChartPoint
     where
@@ -4259,7 +4918,7 @@ impl ChartAxis {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -4294,7 +4953,7 @@ impl ChartAxis {
     /// Set the formatting properties for a chart axis.
     ///
     /// Set the formatting properties for a chart axis via a [`ChartFormat`]
-    /// object.
+    /// object or a sub struct that implements [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
@@ -4306,7 +4965,9 @@ impl ChartAxis {
     ///
     /// # Arguments
     ///
-    /// `format`: A [`ChartFormat`] struct reference.
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
     ///
     pub fn set_format<T>(&mut self, format: T) -> &mut ChartAxis
     where
@@ -4388,7 +5049,7 @@ impl ToString for ChartGrouping {
 /// #     worksheet.write(1, 1, 35)?;
 /// #     worksheet.write(2, 1, 45)?;
 /// #
-/// #     // Create a simple Column chart.
+/// #     // Create a new chart.
 ///     let mut chart = Chart::new(ChartType::Column);
 ///
 ///     // Add a data series using Excel formula syntax to describe the range.
@@ -4453,7 +5114,7 @@ impl ChartLegend {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     /// #     let mut chart = Chart::new(ChartType::Column);
     /// #
     /// #     // Add a data series using Excel formula syntax to describe the range.
@@ -4513,7 +5174,7 @@ impl ChartLegend {
     /// #     worksheet.write(1, 1, 35)?;
     /// #     worksheet.write(2, 1, 45)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series using Excel formula syntax to describe the range.
@@ -4569,7 +5230,7 @@ impl ChartLegend {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     /// #     let mut chart = Chart::new(ChartType::Column);
     /// #
     /// #     // Add a data series using Excel formula syntax to describe the range.
@@ -4603,7 +5264,7 @@ impl ChartLegend {
     /// Set the formatting properties for a chart legend.
     ///
     /// Set the formatting properties for a chart legend via a [`ChartFormat`]
-    /// object.
+    /// object or a sub struct that implements [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
@@ -4615,7 +5276,9 @@ impl ChartLegend {
     ///
     /// # Arguments
     ///
-    /// `format`: A [`ChartFormat`] struct reference.
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
     ///
     pub fn set_format<T>(&mut self, format: T) -> &mut ChartLegend
     where
@@ -4800,26 +5463,6 @@ impl ChartFormat {
         self
     }
 
-    /// todo
-    ///
-    pub fn set_line_color<T>(&mut self, color: T) -> &mut ChartFormat
-    where
-        T: IntoColor,
-    {
-        match &mut self.line {
-            Some(line) => {
-                line.set_color(color);
-            }
-            None => {
-                let mut line = ChartLine::new();
-                line.set_color(color);
-                self.line = Some(line);
-            }
-        }
-
-        self
-    }
-
     /// Set the border formatting for a chart element.
     ///
     /// See the [`ChartLine`] struct for details on the border properties that
@@ -4848,7 +5491,7 @@ impl ChartFormat {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
     ///     // Add a data series with formatting.
@@ -4883,26 +5526,6 @@ impl ChartFormat {
         self.set_line(line)
     }
 
-    /// todo
-    ///
-    pub fn set_border_color<T>(&mut self, color: T) -> &mut ChartFormat
-    where
-        T: IntoColor,
-    {
-        match &mut self.line {
-            Some(line) => {
-                line.set_color(color);
-            }
-            None => {
-                let mut line = ChartLine::new();
-                line.set_color(color);
-                self.line = Some(line);
-            }
-        }
-
-        self
-    }
-
     /// Turn off the line property for a chart element.
     ///
     /// The line property for a chart element can be turned off if you wish to
@@ -4935,7 +5558,7 @@ impl ChartFormat {
     /// #     worksheet.write(4, 1, 10)?;
     /// #     worksheet.write(5, 1, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::ScatterStraightWithMarkers);
     ///
     ///     // Add a data series with formatting.
@@ -4990,7 +5613,7 @@ impl ChartFormat {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -5043,7 +5666,7 @@ impl ChartFormat {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -5101,7 +5724,7 @@ impl ChartFormat {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -5135,26 +5758,6 @@ impl ChartFormat {
         self
     }
 
-    /// todo
-    ///
-    pub fn set_solid_fill_color<T>(&mut self, color: T) -> &mut ChartFormat
-    where
-        T: IntoColor,
-    {
-        match &mut self.solid_fill {
-            Some(solid_fill) => {
-                solid_fill.set_color(color);
-            }
-            None => {
-                let mut solid_fill = ChartSolidFill::new();
-                solid_fill.set_color(color);
-                self.solid_fill = Some(solid_fill);
-            }
-        }
-
-        self
-    }
-
     /// Set the pattern fill formatting for a chart element.
     ///
     /// See the [`ChartPatternFill`] struct for details on the pattern fill
@@ -5184,7 +5787,7 @@ impl ChartFormat {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -5241,7 +5844,6 @@ impl ChartFormat {
 /// chart the line becomes the border. Both of these share the same properties
 /// and are both represented in rust_xlsxwriter by the [`ChartLine`] struct.
 ///
-///
 /// # Examples
 ///
 /// An example of formatting a line/border in a chart element.
@@ -5265,7 +5867,7 @@ impl ChartFormat {
 /// #     worksheet.write(4, 0, 10)?;
 /// #     worksheet.write(5, 0, 50)?;
 /// #
-/// #     // Create a simple Column chart.
+/// #     // Create a new chart.
 ///     let mut chart = Chart::new(ChartType::Line);
 ///
 ///     // Add a data series with formatting.
@@ -5347,7 +5949,7 @@ impl ChartLine {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
     ///     // Add a data series with formatting.
@@ -5411,7 +6013,7 @@ impl ChartLine {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
     ///     // Add a data series with formatting.
@@ -5476,7 +6078,7 @@ impl ChartLine {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
     ///     // Add a data series with formatting.
@@ -5538,7 +6140,7 @@ impl ChartLine {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
     ///     // Add a data series with formatting.
@@ -5609,7 +6211,7 @@ impl ChartLine {
 /// #     worksheet.write(4, 0, 10)?;
 /// #     worksheet.write(5, 0, 50)?;
 /// #
-/// #     // Create a simple Column chart.
+/// #     // Create a new chart.
 ///     let mut chart = Chart::new(ChartType::Column);
 ///
 ///     // Add a data series with formatting.
@@ -5683,7 +6285,7 @@ impl ChartSolidFill {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -5749,7 +6351,7 @@ impl ChartSolidFill {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -5821,7 +6423,7 @@ impl ChartSolidFill {
 /// #     worksheet.write(4, 0, 10)?;
 /// #     worksheet.write(5, 0, 50)?;
 /// #
-/// #     // Create a simple Column chart.
+/// #     // Create a new chart.
 ///     let mut chart = Chart::new(ChartType::Column);
 ///
 ///     // Add a data series with formatting.
@@ -5902,7 +6504,7 @@ impl ChartPatternFill {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
@@ -5965,7 +6567,7 @@ impl ChartPatternFill {
     /// #     worksheet.write(4, 0, 10)?;
     /// #     worksheet.write(5, 0, 50)?;
     /// #
-    /// #     // Create a simple Column chart.
+    /// #     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
