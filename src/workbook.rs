@@ -1328,8 +1328,8 @@ impl Workbook {
             // For a solid fill (pattern == "solid") Excel reverses the role of
             // foreground and background colors, and
             if xf_format.pattern == FormatPattern::Solid
-                && xf_format.background_color.is_not_default()
-                && xf_format.foreground_color.is_not_default()
+                && xf_format.background_color != XlsxColor::Default
+                && xf_format.foreground_color != XlsxColor::Default
             {
                 mem::swap(
                     &mut xf_format.foreground_color,
@@ -1342,20 +1342,20 @@ impl Workbook {
             // defaults.
             if (xf_format.pattern == FormatPattern::None
                 || xf_format.pattern == FormatPattern::Solid)
-                && xf_format.background_color.is_not_default()
-                && xf_format.foreground_color.is_default()
+                && xf_format.background_color != XlsxColor::Default
+                && xf_format.foreground_color == XlsxColor::Default
             {
                 xf_format.foreground_color = xf_format.background_color;
-                xf_format.background_color = XlsxColor::Automatic;
+                xf_format.background_color = XlsxColor::Default;
                 xf_format.pattern = FormatPattern::Solid;
             }
 
             if (xf_format.pattern == FormatPattern::None
                 || xf_format.pattern == FormatPattern::Solid)
-                && xf_format.background_color.is_default()
-                && xf_format.foreground_color.is_not_default()
+                && xf_format.background_color == XlsxColor::Default
+                && xf_format.foreground_color != XlsxColor::Default
             {
-                xf_format.background_color = XlsxColor::Automatic;
+                xf_format.background_color = XlsxColor::Default;
                 xf_format.pattern = FormatPattern::Solid;
             }
 

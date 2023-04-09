@@ -189,14 +189,17 @@ impl<'a> Styles<'a> {
 
         match xf_format.font_color {
             XlsxColor::Automatic => {
+                // The color element is omitted for an Automatic color.
+            }
+            XlsxColor::Default => {
                 attributes.push(("theme", "1".to_string()));
+                self.writer.xml_empty_tag_attr("color", &attributes);
             }
             _ => {
                 attributes.append(&mut xf_format.font_color.attributes());
+                self.writer.xml_empty_tag_attr("color", &attributes);
             }
         }
-
-        self.writer.xml_empty_tag_attr("color", &attributes);
     }
 
     // Write the <name> element.
@@ -308,8 +311,10 @@ impl<'a> Styles<'a> {
     fn write_fill(&mut self, xf_format: &Format) {
         // Special handling for pattern only case.
         if xf_format.pattern != FormatPattern::None
-            && xf_format.background_color.is_default()
-            && xf_format.foreground_color.is_default()
+            && (xf_format.background_color == XlsxColor::Default
+                || xf_format.background_color == XlsxColor::Automatic)
+            && (xf_format.foreground_color == XlsxColor::Default
+                || xf_format.foreground_color == XlsxColor::Automatic)
         {
             self.write_default_fill(xf_format.pattern.value().to_string());
             return;
@@ -323,17 +328,21 @@ impl<'a> Styles<'a> {
         self.writer.xml_start_tag_attr("patternFill", &attributes);
 
         // Write the foreground color.
-        if xf_format.foreground_color.is_not_default() {
+        if xf_format.foreground_color != XlsxColor::Default
+            && xf_format.foreground_color != XlsxColor::Automatic
+        {
             let attributes = xf_format.foreground_color.attributes();
             self.writer.xml_empty_tag_attr("fgColor", &attributes);
         }
 
         // Write the background color.
-        if xf_format.background_color.is_not_default() {
-            let attributes = xf_format.background_color.attributes();
+        if xf_format.background_color == XlsxColor::Default
+            || xf_format.background_color == XlsxColor::Automatic
+        {
+            let attributes = vec![("indexed", "64".to_string())];
             self.writer.xml_empty_tag_attr("bgColor", &attributes);
         } else {
-            let attributes = vec![("indexed", "64".to_string())];
+            let attributes = xf_format.background_color.attributes();
             self.writer.xml_empty_tag_attr("bgColor", &attributes);
         }
 
@@ -418,7 +427,7 @@ impl<'a> Styles<'a> {
         let mut attributes = vec![("style", border_style.value().to_string())];
         self.writer.xml_start_tag_attr(border_type, &attributes);
 
-        if border_color.is_not_default() {
+        if border_color != XlsxColor::Default && border_color != XlsxColor::Automatic {
             attributes = border_color.attributes();
         } else {
             attributes = vec![("auto", "1".to_string())];

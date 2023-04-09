@@ -519,7 +519,7 @@ impl Format {
             underline: FormatUnderline::None,
             font_name: "Calibri".to_string(),
             font_size: 11.0,
-            font_color: XlsxColor::Automatic,
+            font_color: XlsxColor::Default,
             font_strikethrough: false,
             font_script: FormatScript::None,
             font_family: 2,
@@ -535,8 +535,8 @@ impl Format {
             text_wrap: false,
             justify_last: false,
             rotation: 0,
-            foreground_color: XlsxColor::Automatic,
-            background_color: XlsxColor::Automatic,
+            foreground_color: XlsxColor::Default,
+            background_color: XlsxColor::Default,
             pattern: FormatPattern::None,
             border_bottom: FormatBorder::None,
             border_top: FormatBorder::None,
@@ -544,11 +544,11 @@ impl Format {
             border_right: FormatBorder::None,
             border_diagonal: FormatBorder::None,
             border_diagonal_type: FormatDiagonalBorder::None,
-            border_bottom_color: XlsxColor::Automatic,
-            border_top_color: XlsxColor::Automatic,
-            border_left_color: XlsxColor::Automatic,
-            border_right_color: XlsxColor::Automatic,
-            border_diagonal_color: XlsxColor::Automatic,
+            border_bottom_color: XlsxColor::Default,
+            border_top_color: XlsxColor::Default,
+            border_left_color: XlsxColor::Default,
+            border_right_color: XlsxColor::Default,
+            border_diagonal_color: XlsxColor::Default,
             indent: 0,
             shrink: false,
             reading_direction: 0,
@@ -2399,7 +2399,11 @@ pub enum XlsxColor {
     /// a warning.
     Theme(u8, u8),
 
-    /// The default/automatic color for an Excel property.
+    /// The default color for an Excel property.
+    Default,
+
+    /// The Automatic color for an Excel property. This is usually the same as
+    /// the `Default` color but can vary according to system settings.
     Automatic,
 
     /// The color Black with a RGB value of 0x000000.
@@ -2455,7 +2459,8 @@ impl XlsxColor {
     // Get the u32 RGB value for a color.
     pub(crate) fn value(self) -> u32 {
         match self {
-            XlsxColor::Automatic => 0xFFFFFFFF,
+            XlsxColor::Default => 0xFFFFFFFF,
+            XlsxColor::Automatic => 0xFFFFFFFE,
             XlsxColor::Black => 0x000000,
             XlsxColor::Blue => 0x0000FF,
             XlsxColor::Brown => 0x800000,
@@ -2728,16 +2733,6 @@ impl XlsxColor {
             _ => true,
         }
     }
-
-    // Check if the color is unchanged from its default.
-    pub(crate) fn is_default(self) -> bool {
-        self == XlsxColor::Automatic
-    }
-
-    // Check if the color has changed from its default.
-    pub(crate) fn is_not_default(self) -> bool {
-        self != XlsxColor::Automatic
-    }
 }
 
 /// Trait to map types into an `XlsxColor` value.
@@ -2851,7 +2846,7 @@ impl IntoColor for &str {
             Ok(color) => XlsxColor::RGB(color),
             Err(_) => {
                 eprintln!("Error parsing '{self}' to RGB color.");
-                XlsxColor::Automatic
+                XlsxColor::Default
             }
         }
     }
@@ -3171,7 +3166,7 @@ mod tests {
 
     #[test]
     fn test_hex_value() {
-        assert_eq!("FFFFFFFFFF", XlsxColor::Automatic.argb_hex_value());
+        assert_eq!("FFFFFFFFFF", XlsxColor::Default.argb_hex_value());
         assert_eq!("FF000000", XlsxColor::Black.argb_hex_value());
         assert_eq!("FF0000FF", XlsxColor::Blue.argb_hex_value());
         assert_eq!("FF800000", XlsxColor::Brown.argb_hex_value());

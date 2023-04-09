@@ -111,7 +111,7 @@ fn main() -> Result<(), XlsxError> {
 
             let mut font_color = XlsxColor::White;
             if col == 0 {
-                font_color = XlsxColor::Automatic;
+                font_color = XlsxColor::Default;
             }
 
             let color_format = Format::new()

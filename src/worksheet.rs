@@ -320,7 +320,7 @@ impl Worksheet {
             changed_cols: HashMap::new(),
             page_setup_changed: false,
             fit_to_page: false,
-            tab_color: XlsxColor::Automatic,
+            tab_color: XlsxColor::Default,
             fit_width: 1,
             fit_height: 1,
             paper_size: 0,
@@ -8431,7 +8431,10 @@ impl Worksheet {
 
     // Write the <sheetPr> element.
     fn write_sheet_pr(&mut self) {
-        if self.filter_conditions.is_empty() && !self.fit_to_page && self.tab_color.is_default() {
+        if self.filter_conditions.is_empty()
+            && !self.fit_to_page
+            && self.tab_color == XlsxColor::Default
+        {
             return;
         }
 
@@ -8440,7 +8443,7 @@ impl Worksheet {
             attributes.push(("filterMode", "1".to_string()));
         }
 
-        if self.fit_to_page || self.tab_color.is_not_default() {
+        if self.fit_to_page || self.tab_color != XlsxColor::Default {
             self.writer.xml_start_tag_attr("sheetPr", &attributes);
 
             // Write the pageSetUpPr element.
@@ -8468,7 +8471,7 @@ impl Worksheet {
 
     // Write the <tabColor> element.
     fn write_tab_color(&mut self) {
-        if self.tab_color.is_default() {
+        if self.tab_color == XlsxColor::Default {
             return;
         }
 

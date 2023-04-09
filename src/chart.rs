@@ -2567,7 +2567,9 @@ impl Chart {
             attributes.push(("w", width.to_string()));
         }
 
-        if line.color.is_not_default() || line.dash_type != ChartLineDashType::Solid || line.hidden
+        if line.color != XlsxColor::Default
+            || line.dash_type != ChartLineDashType::Solid
+            || line.hidden
         {
             self.writer.xml_start_tag_attr("a:ln", &attributes);
 
@@ -2575,7 +2577,7 @@ impl Chart {
                 // Write the a:noFill element.
                 self.write_a_no_fill();
             } else {
-                if line.color.is_not_default() {
+                if line.color != XlsxColor::Default {
                     // Write the a:solidFill element.
                     self.write_a_solid_fill(line.color, line.transparency);
                 }
@@ -2618,14 +2620,14 @@ impl Chart {
 
         self.writer.xml_start_tag_attr("a:pattFill", &attributes);
 
-        if fill.foreground_color.is_not_default() {
+        if fill.foreground_color != XlsxColor::Default {
             // Write the <a:fgClr> element.
             self.writer.xml_start_tag("a:fgClr");
             self.write_color(fill.foreground_color, 0);
             self.writer.xml_end_tag("a:fgClr");
         }
 
-        if fill.background_color.is_not_default() {
+        if fill.background_color != XlsxColor::Default {
             // Write the <a:bgClr> element.
             self.writer.xml_start_tag("a:bgClr");
             self.write_color(fill.background_color, 0);
@@ -5918,7 +5920,7 @@ impl ChartLine {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartLine {
         ChartLine {
-            color: XlsxColor::Automatic,
+            color: XlsxColor::Default,
             width: None,
             transparency: 0,
             dash_type: ChartLineDashType::Solid,
@@ -6257,7 +6259,7 @@ impl ChartSolidFill {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartSolidFill {
         ChartSolidFill {
-            color: XlsxColor::Automatic,
+            color: XlsxColor::Default,
             transparency: 0,
         }
     }
@@ -6471,8 +6473,8 @@ impl ChartPatternFill {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartPatternFill {
         ChartPatternFill {
-            background_color: XlsxColor::Automatic,
-            foreground_color: XlsxColor::Automatic,
+            background_color: XlsxColor::Default,
+            foreground_color: XlsxColor::Default,
             pattern: ChartPatternFillType::Dotted5Percent,
         }
     }
