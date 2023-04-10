@@ -154,7 +154,8 @@ documentation and generally show how an individual function works.
 * doc_chart_format_set_no_line.rs - An example of turning off a default
   line in a chart format.
 
-* doc_chart_formatting.rs - An example of chart formatting.
+* doc_chart_formatting.rs - An example of formatting the chart border
+  element.
 
 * doc_chart_intro.rs - A simple chart example using the rust_xlsxwriter
   library.
@@ -184,6 +185,17 @@ documentation and generally show how an individual function works.
 * doc_chart_line_set_width.rs - An example of formatting the line width in
   a chart element.
 
+* doc_chart_marker.rs - An example of adding markers to a line chart.
+
+* doc_chart_marker_set_automatic.rs - An example of adding automatic
+  markers to a line chart.
+
+* doc_chart_marker_set_size.rs - An example of adding markers to a line
+  chart with user defined size.
+
+* doc_chart_marker_set_type.rs - An example of adding markers to a line
+  chart with user defined marker types.
+
 * doc_chart_pattern_fill.rs - An example of setting a pattern fill for a
   chart element.
 
@@ -211,9 +223,21 @@ documentation and generally show how an individual function works.
   "area" of a chart. In Excel the chart area is the background area behind
   the chart.
 
+* doc_chart_set_hole_size.rs - An example of formatting the chart hole size
+  for doughnut charts.
+
 * doc_chart_set_plot_area_format.rs - An example of formatting the chart
   "area" of a chart. In Excel the plot area is the area between the axes on
   which the chart series are plotted.
+
+* doc_chart_set_point_colors.rs - An example of setting the individual
+  segment colors of a Pie chart.
+
+* doc_chart_set_points.rs - An example of formatting the chart rotation for
+  pie and doughnut charts.
+
+* doc_chart_set_rotation.rs - An example of formatting the chart rotation
+  for pie and doughnut charts.
 
 * doc_chart_set_width.rs - A simple chart example using the rust_xlsxwriter
   library.
@@ -352,6 +376,9 @@ documentation and generally show how an individual function works.
 * doc_image_set_scale_width.rs - This example shows how to create an image
   object and use it to insert the image into a worksheet. The image in this
   case is scaled.
+
+* doc_into_chart_format.rs - An example of passing chart formatting
+  parameters via the [`IntoChartFormat`] trait.
 
 * doc_into_color.rs - An example of the different types of color syntax
   that is supported by the [`IntoColor`] trait.

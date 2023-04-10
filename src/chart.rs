@@ -3062,54 +3062,6 @@ impl IntoChartRange for &String {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/into_chart_format.png">
 ///
-///
-/// ```
-/// # // This code is available in examples/doc_into_chart_format.rs
-/// #
-/// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     let mut workbook = Workbook::new();
-/// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Add some data for the chart.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(0, 1, 20)?;
-/// #     worksheet.write(1, 1, 10)?;
-/// #     worksheet.write(2, 1, 50)?;
-/// #
-/// #     // Create a new chart.
-///     let mut chart = Chart::new(ChartType::Column);
-///
-///     // Add formatting via ChartFormat and a ChartSolidFill sub struct.
-///     chart
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$3")
-///         .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#40EABB")));
-///
-///     // Add formatting using a ChartSolidFill struct directly.
-///     chart
-///         .add_series()
-///         .set_values("Sheet1!$B$1:$B$3")
-///         .set_format(ChartSolidFill::new().set_color("#AAC3F2"));
-///
-///     // Add the chart to the worksheet.
-///     worksheet.insert_chart(0, 2, &chart)?;
-///
-/// #     // Save the file.
-/// #     workbook.save("chart.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
-/// ```
-///
-/// Output file:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/into_chart_format.png">
-///
-///
 pub trait IntoChartFormat {
     /// Trait function to turn a type into [`ChartFormat`].
     fn new_chart_format(&self) -> ChartFormat;

@@ -5,6 +5,32 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.33.0] - 2023-04-10
+
+### Added
+
+- Added support for formatting and setting chart points via the [`ChartPoint`]
+  struct. This is mainly useful as the way of specifying segment colors in Pie
+  charts.
+
+  See the undated [Pie Chart] example in the user guide.
+
+- Added support for formatting and setting chart markers via the [`ChartMarker`]
+  struct.
+
+- Added [`chart.set_rotation()`] and [`chart.set_hole_size()`] methods for Pie and Doughnut charts.
+
+- Added support to differentiate between `XlsxColor::Default` and
+  `XlsxColor::Automatic` colors for Excel elements. These are usually equivalent
+  but there are some cases where the "Automatic" color, which can be set at a
+  system level, is different from the Default color.
+
+[Pie Chart]: https://rustxlsxwriter.github.io/examples/pie_chart.html
+[`ChartPoint`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartPoint.html
+[`ChartMarker`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartMarker.html
+[`chart.set_rotation()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_rotation
+[`chart.set_hole_size()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_hole_size
+
 
 ## [0.32.0] - 2023-04-03
 
