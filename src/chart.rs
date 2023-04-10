@@ -2647,6 +2647,14 @@ impl Chart {
                     self.write_a_scheme_clr(scheme, lum_mod, lum_off, transparency);
                 }
             }
+            XlsxColor::Automatic => {
+                let attributes = vec![
+                    ("val", "window".to_string()),
+                    ("lastClr", "FFFFFF".to_string()),
+                ];
+
+                self.writer.xml_empty_tag_attr("a:sysClr", &attributes);
+            }
             _ => {
                 let attributes = vec![("val", color.rgb_hex_value())];
 

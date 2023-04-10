@@ -8433,7 +8433,7 @@ impl Worksheet {
     fn write_sheet_pr(&mut self) {
         if self.filter_conditions.is_empty()
             && !self.fit_to_page
-            && self.tab_color == XlsxColor::Default
+            && (self.tab_color == XlsxColor::Default || self.tab_color == XlsxColor::Automatic)
         {
             return;
         }
@@ -8443,7 +8443,9 @@ impl Worksheet {
             attributes.push(("filterMode", "1".to_string()));
         }
 
-        if self.fit_to_page || self.tab_color != XlsxColor::Default {
+        if self.fit_to_page
+            || (self.tab_color != XlsxColor::Default && self.tab_color != XlsxColor::Automatic)
+        {
             self.writer.xml_start_tag_attr("sheetPr", &attributes);
 
             // Write the pageSetUpPr element.
