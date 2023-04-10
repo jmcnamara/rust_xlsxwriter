@@ -316,7 +316,7 @@ impl<'a> Styles<'a> {
             && (xf_format.foreground_color == XlsxColor::Default
                 || xf_format.foreground_color == XlsxColor::Automatic)
         {
-            self.write_default_fill(xf_format.pattern.value().to_string());
+            self.write_default_fill(xf_format.pattern.to_string());
             return;
         }
 
@@ -324,7 +324,7 @@ impl<'a> Styles<'a> {
         self.writer.xml_start_tag("fill");
 
         // Write the fill pattern.
-        let attributes = vec![("patternType", xf_format.pattern.value().to_string())];
+        let attributes = vec![("patternType", xf_format.pattern.to_string())];
         self.writer.xml_start_tag_attr("patternFill", &attributes);
 
         // Write the foreground color.
@@ -424,7 +424,7 @@ impl<'a> Styles<'a> {
             return;
         }
 
-        let mut attributes = vec![("style", border_style.value().to_string())];
+        let mut attributes = vec![("style", border_style.to_string())];
         self.writer.xml_start_tag_attr(border_type, &attributes);
 
         if border_color != XlsxColor::Default && border_color != XlsxColor::Automatic {

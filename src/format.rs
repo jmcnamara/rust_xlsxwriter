@@ -604,7 +604,7 @@ impl Format {
             "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
             self.bold,
             self.font_charset,
-            self.font_color.argb_hex_value(),
+            self.font_color.unique_id(),
             self.font_condense,
             self.font_extend,
             self.font_family,
@@ -622,26 +622,26 @@ impl Format {
     pub(crate) fn border_key(&self) -> String {
         format!(
             "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
-            self.border_bottom.value(),
-            self.border_bottom_color.argb_hex_value(),
-            self.border_diagonal.value(),
-            self.border_diagonal_color.argb_hex_value(),
+            self.border_bottom.to_string(),
+            self.border_bottom_color.unique_id(),
+            self.border_diagonal.to_string(),
+            self.border_diagonal_color.unique_id(),
             self.border_diagonal_type as u8,
-            self.border_left.value(),
-            self.border_left_color.argb_hex_value(),
-            self.border_right.value(),
-            self.border_right_color.argb_hex_value(),
-            self.border_top.value(),
-            self.border_top_color.argb_hex_value(),
+            self.border_left.to_string(),
+            self.border_left_color.unique_id(),
+            self.border_right.to_string(),
+            self.border_right_color.unique_id(),
+            self.border_top.to_string(),
+            self.border_top_color.unique_id(),
         )
     }
 
     pub(crate) fn fill_key(&self) -> String {
         format!(
             "{}:{}:{}",
-            self.pattern.value(),
-            self.background_color.argb_hex_value(),
-            self.foreground_color.argb_hex_value(),
+            self.pattern.to_string(),
+            self.background_color.unique_id(),
+            self.foreground_color.unique_id(),
         )
     }
 
@@ -2456,41 +2456,64 @@ pub enum XlsxColor {
 }
 
 impl XlsxColor {
-    // Get the u32 RGB value for a color.
-    pub(crate) fn value(self) -> u32 {
+    // Get a unique u32 RGB value for a color to allow comparison.
+    pub(crate) fn unique_id(self) -> u32 {
         match self {
-            XlsxColor::Default => 0xFFFFFFFF,
-            XlsxColor::Automatic => 0xFFFFFFFE,
-            XlsxColor::Black => 0x000000,
+            XlsxColor::Red => 0xFF0000,
             XlsxColor::Blue => 0x0000FF,
-            XlsxColor::Brown => 0x800000,
             XlsxColor::Cyan => 0x00FFFF,
             XlsxColor::Gray => 0x808080,
-            XlsxColor::Green => 0x008000,
             XlsxColor::Lime => 0x00FF00,
-            XlsxColor::Magenta => 0xFF00FF,
             XlsxColor::Navy => 0x000080,
-            XlsxColor::Orange => 0xFF6600,
             XlsxColor::Pink => 0xFFC0CB,
-            XlsxColor::Purple => 0x800080,
-            XlsxColor::Red => 0xFF0000,
-            XlsxColor::Silver => 0xC0C0C0,
+            XlsxColor::Black => 0x000000,
+            XlsxColor::Brown => 0x800000,
+            XlsxColor::Green => 0x008000,
             XlsxColor::White => 0xFFFFFF,
+            XlsxColor::Orange => 0xFF6600,
+            XlsxColor::Purple => 0x800080,
+            XlsxColor::Silver => 0xC0C0C0,
             XlsxColor::Yellow => 0xFFFF00,
+            XlsxColor::Magenta => 0xFF00FF,
+
+            XlsxColor::Default => 0xFFFFFFFF,
+            XlsxColor::Automatic => 0xFFFFFFFE,
+
             XlsxColor::RGB(color) => color,
+
             // Use a pseudo RGB color for Theme to differentiate in comparison testing.
             XlsxColor::Theme(color, shade) => 0xFE000000 + ((color as u32) << 8) + shade as u32,
         }
     }
 
-    // Get the ARGB hex value for a color. The alpha channel is always FF.
-    fn argb_hex_value(self) -> String {
-        format!("FF{:06X}", self.value())
-    }
-
     // Get the RGB hex value for a color.
     pub(crate) fn rgb_hex_value(self) -> String {
-        format!("{:06X}", self.value())
+        match self {
+            XlsxColor::Red => "FF0000".to_string(),
+            XlsxColor::Blue => "0000FF".to_string(),
+            XlsxColor::Cyan => "00FFFF".to_string(),
+            XlsxColor::Gray => "808080".to_string(),
+            XlsxColor::Lime => "00FF00".to_string(),
+            XlsxColor::Navy => "000080".to_string(),
+            XlsxColor::Pink => "FFC0CB".to_string(),
+            XlsxColor::Brown => "800000".to_string(),
+            XlsxColor::Green => "008000".to_string(),
+            XlsxColor::White => "FFFFFF".to_string(),
+            XlsxColor::Orange => "FF6600".to_string(),
+            XlsxColor::Purple => "800080".to_string(),
+            XlsxColor::Silver => "C0C0C0".to_string(),
+            XlsxColor::Yellow => "FFFF00".to_string(),
+            XlsxColor::Magenta => "FF00FF".to_string(),
+            XlsxColor::RGB(color) => format!("{color:06X}"),
+
+            // Default to black for ::Black and any accidentally unhandled colors.
+            _ => "000000".to_string(),
+        }
+    }
+
+    // Get the ARGB hex value for a color. The alpha channel is always FF.
+    fn argb_hex_value(self) -> String {
+        format!("FF{}", self.rgb_hex_value())
     }
 
     // Convert the color in a set of "rgb" or "theme/tint" attributes used in
@@ -2914,29 +2937,29 @@ pub enum FormatPattern {
     Gray0625,
 }
 
-impl FormatPattern {
+impl ToString for FormatPattern {
     // Get the Excel string value for the pattern type.
-    pub(crate) fn value(&self) -> &str {
+    fn to_string(&self) -> String {
         match self {
-            FormatPattern::None => "none",
-            FormatPattern::Solid => "solid",
-            FormatPattern::MediumGray => "mediumGray",
-            FormatPattern::DarkGray => "darkGray",
-            FormatPattern::LightGray => "lightGray",
-            FormatPattern::DarkHorizontal => "darkHorizontal",
-            FormatPattern::DarkVertical => "darkVertical",
-            FormatPattern::DarkDown => "darkDown",
-            FormatPattern::DarkUp => "darkUp",
-            FormatPattern::DarkGrid => "darkGrid",
-            FormatPattern::DarkTrellis => "darkTrellis",
-            FormatPattern::LightHorizontal => "lightHorizontal",
-            FormatPattern::LightVertical => "lightVertical",
-            FormatPattern::LightDown => "lightDown",
-            FormatPattern::LightUp => "lightUp",
-            FormatPattern::LightGrid => "lightGrid",
-            FormatPattern::LightTrellis => "lightTrellis",
-            FormatPattern::Gray125 => "gray125",
-            FormatPattern::Gray0625 => "gray0625",
+            FormatPattern::None => "none".to_string(),
+            FormatPattern::Solid => "solid".to_string(),
+            FormatPattern::DarkUp => "darkUp".to_string(),
+            FormatPattern::LightUp => "lightUp".to_string(),
+            FormatPattern::Gray125 => "gray125".to_string(),
+            FormatPattern::DarkGray => "darkGray".to_string(),
+            FormatPattern::DarkDown => "darkDown".to_string(),
+            FormatPattern::DarkGrid => "darkGrid".to_string(),
+            FormatPattern::Gray0625 => "gray0625".to_string(),
+            FormatPattern::LightGray => "lightGray".to_string(),
+            FormatPattern::LightDown => "lightDown".to_string(),
+            FormatPattern::LightGrid => "lightGrid".to_string(),
+            FormatPattern::MediumGray => "mediumGray".to_string(),
+            FormatPattern::DarkTrellis => "darkTrellis".to_string(),
+            FormatPattern::DarkVertical => "darkVertical".to_string(),
+            FormatPattern::LightTrellis => "lightTrellis".to_string(),
+            FormatPattern::LightVertical => "lightVertical".to_string(),
+            FormatPattern::DarkHorizontal => "darkHorizontal".to_string(),
+            FormatPattern::LightHorizontal => "lightHorizontal".to_string(),
         }
     }
 }
@@ -2988,24 +3011,24 @@ pub enum FormatBorder {
     SlantDashDot,
 }
 
-impl FormatBorder {
+impl ToString for FormatBorder {
     // Get the Excel string value for the border type.
-    pub(crate) fn value(&self) -> &str {
+    fn to_string(&self) -> String {
         match self {
-            FormatBorder::None => "none",
-            FormatBorder::Thin => "thin",
-            FormatBorder::Medium => "medium",
-            FormatBorder::Dashed => "dashed",
-            FormatBorder::Dotted => "dotted",
-            FormatBorder::Thick => "thick",
-            FormatBorder::Double => "double",
-            FormatBorder::Hair => "hair",
-            FormatBorder::MediumDashed => "mediumDashed",
-            FormatBorder::DashDot => "dashDot",
-            FormatBorder::MediumDashDot => "mediumDashDot",
-            FormatBorder::DashDotDot => "dashDotDot",
-            FormatBorder::MediumDashDotDot => "mediumDashDotDot",
-            FormatBorder::SlantDashDot => "slantDashDot",
+            FormatBorder::None => "none".to_string(),
+            FormatBorder::Thin => "thin".to_string(),
+            FormatBorder::Hair => "hair".to_string(),
+            FormatBorder::Thick => "thick".to_string(),
+            FormatBorder::Medium => "medium".to_string(),
+            FormatBorder::Dashed => "dashed".to_string(),
+            FormatBorder::Dotted => "dotted".to_string(),
+            FormatBorder::Double => "double".to_string(),
+            FormatBorder::DashDot => "dashDot".to_string(),
+            FormatBorder::DashDotDot => "dashDotDot".to_string(),
+            FormatBorder::MediumDashed => "mediumDashed".to_string(),
+            FormatBorder::SlantDashDot => "slantDashDot".to_string(),
+            FormatBorder::MediumDashDot => "mediumDashDot".to_string(),
+            FormatBorder::MediumDashDotDot => "mediumDashDotDot".to_string(),
         }
     }
 }
@@ -3166,7 +3189,7 @@ mod tests {
 
     #[test]
     fn test_hex_value() {
-        assert_eq!("FFFFFFFFFF", XlsxColor::Default.argb_hex_value());
+        assert_eq!("FF000000", XlsxColor::Default.argb_hex_value());
         assert_eq!("FF000000", XlsxColor::Black.argb_hex_value());
         assert_eq!("FF0000FF", XlsxColor::Blue.argb_hex_value());
         assert_eq!("FF800000", XlsxColor::Brown.argb_hex_value());
@@ -3184,7 +3207,7 @@ mod tests {
         assert_eq!("FFFFFFFF", XlsxColor::White.argb_hex_value());
         assert_eq!("FFFFFF00", XlsxColor::Yellow.argb_hex_value());
         assert_eq!("FFABCDEF", XlsxColor::RGB(0xABCDEF).argb_hex_value());
-        assert_eq!("FFFE000201", XlsxColor::Theme(2, 1).argb_hex_value());
+        assert_eq!("FF000000", XlsxColor::Theme(2, 1).argb_hex_value());
     }
 
     #[test]
