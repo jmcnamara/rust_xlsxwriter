@@ -12,6 +12,8 @@ use std::str;
 
 use regex::Regex;
 
+const XML_WRITE_ERROR: &str = "Couldn't write to xml file";
+
 #[derive(Clone)]
 pub struct XMLWriter {
     pub(crate) xmlfile: Cursor<Vec<u8>>,
@@ -54,82 +56,89 @@ impl XMLWriter {
             &mut self.xmlfile,
             r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>"#
         )
-        .expect("Couldn't write to file");
+        .expect(XML_WRITE_ERROR);
     }
 
     // Write an XML start tag without attributes.
     pub(crate) fn xml_start_tag(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, r"<{tag}>").expect("Couldn't write to file");
+        write!(&mut self.xmlfile, "<{tag}>").expect(XML_WRITE_ERROR);
     }
 
     // Write an XML start tag with attributes.
-    pub(crate) fn xml_start_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, String)>) {
-        let mut attribute_str = "".to_string();
+    pub(crate) fn xml_start_tag_attr(&mut self, tag: &str, attributes: &[(&str, String)]) {
+        write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
-            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));
-            attribute_str.push_str(&pair);
+            write!(
+                &mut self.xmlfile,
+                r#" {}="{}""#,
+                attribute.0,
+                escape_attributes(&attribute.1)
+            )
+            .expect(XML_WRITE_ERROR);
         }
 
-        write!(&mut self.xmlfile, r"<{tag}{attribute_str}>").expect("Couldn't write to file");
+        write!(&mut self.xmlfile, ">").expect(XML_WRITE_ERROR);
     }
 
     // Write an XML end tag.
     pub(crate) fn xml_end_tag(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, r"</{tag}>").expect("Couldn't write to file");
+        write!(&mut self.xmlfile, "</{tag}>").expect(XML_WRITE_ERROR);
     }
 
     // Write an empty XML tag without attributes.
     pub(crate) fn xml_empty_tag(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, r"<{tag}/>").expect("Couldn't write to file");
+        write!(&mut self.xmlfile, "<{tag}/>").expect(XML_WRITE_ERROR);
     }
 
     // Write an empty XML tag with attributes.
-    pub(crate) fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &Vec<(&str, String)>) {
-        let mut attribute_str = "".to_string();
+    pub(crate) fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &[(&str, String)]) {
+        write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
-            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));
-            attribute_str.push_str(&pair);
+            write!(
+                &mut self.xmlfile,
+                r#" {}="{}""#,
+                attribute.0,
+                escape_attributes(&attribute.1)
+            )
+            .expect(XML_WRITE_ERROR);
         }
 
-        write!(&mut self.xmlfile, r"<{tag}{attribute_str}/>").expect("Couldn't write to file");
+        write!(&mut self.xmlfile, "/>").expect(XML_WRITE_ERROR);
     }
 
     // Write an XML element containing data without attributes.
     pub(crate) fn xml_data_element(&mut self, tag: &str, data: &str) {
         write!(
             &mut self.xmlfile,
-            r"<{}>{}</{}>",
+            "<{}>{}</{}>",
             tag,
             escape_data(data),
             tag
         )
-        .expect("Couldn't write to file");
+        .expect(XML_WRITE_ERROR);
     }
     // Write an XML element containing data with attributes.
     pub(crate) fn xml_data_element_attr(
         &mut self,
         tag: &str,
         data: &str,
-        attributes: &Vec<(&str, String)>,
+        attributes: &[(&str, String)],
     ) {
-        let mut attribute_str = "".to_string();
+        write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
-            let pair = format!(r#" {}="{}""#, attribute.0, escape_attributes(&attribute.1));
-            attribute_str.push_str(&pair);
+            write!(
+                &mut self.xmlfile,
+                r#" {}="{}""#,
+                attribute.0,
+                escape_attributes(&attribute.1)
+            )
+            .expect(XML_WRITE_ERROR);
         }
 
-        write!(
-            &mut self.xmlfile,
-            r"<{}{}>{}</{}>",
-            tag,
-            attribute_str,
-            escape_data(data),
-            tag
-        )
-        .expect("Couldn't write to file");
+        write!(&mut self.xmlfile, ">{}</{}>", escape_data(data), tag).expect(XML_WRITE_ERROR);
     }
 
     // Optimized tag writer for shared strings <si> elements.
@@ -140,25 +149,25 @@ impl XMLWriter {
                 r#"<si><t xml:space="preserve">{}</t></si>"#,
                 escape_si_data(&escape_xml_escapes(string))
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         } else {
             write!(
                 &mut self.xmlfile,
                 "<si><t>{}</t></si>",
                 escape_si_data(&escape_xml_escapes(string))
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         }
     }
 
     // Write <si> element for rich strings.
     pub(crate) fn xml_rich_si_element(&mut self, string: &str) {
-        write!(&mut self.xmlfile, r#"<si>{string}</si>"#).expect("Couldn't write to file");
+        write!(&mut self.xmlfile, r#"<si>{string}</si>"#).expect(XML_WRITE_ERROR);
     }
 
     // Write the theme string to the theme file.
     pub(crate) fn write_theme(&mut self, theme: &str) {
-        writeln!(&mut self.xmlfile, "{theme}").expect("Couldn't write to file");
+        writeln!(&mut self.xmlfile, "{theme}").expect(XML_WRITE_ERROR);
     }
 }
 
@@ -302,7 +311,7 @@ where
 // and "_x0000_" -> _x005F_x0000_.
 fn escape_xml_escapes(si_string: &str) -> Cow<str> {
     lazy_static! {
-        static ref XML_ESCAPE: Regex = Regex::new(r"(_x[0-9a-fA-F]{4}_)").unwrap();
+        static ref XML_ESCAPE: Regex = Regex::new("(_x[0-9a-fA-F]{4}_)").unwrap();
     }
     XML_ESCAPE.replace_all(si_string, "_x005F$1")
 }
@@ -388,7 +397,7 @@ mod tests {
     #[test]
     fn test_xml_empty_tag_with_attributes() {
         let expected = r#"<foo span="8"/>"#;
-        let attributes = vec![("span", "8".to_string())];
+        let attributes = [("span", "8".to_string())];
 
         let mut writer = XMLWriter::new();
 
@@ -412,7 +421,7 @@ mod tests {
     #[test]
     fn test_xml_data_element_with_attributes() {
         let expected = r#"<foo span="8">bar</foo>"#;
-        let attributes = vec![("span", "8".to_string())];
+        let attributes = [("span", "8".to_string())];
 
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "bar", &attributes);
