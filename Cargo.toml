@@ -22,9 +22,9 @@ pretty_assertions = "1.3.0"
 
 [features]
 default = []
+zlib = ["zip/deflate-zlib"]
+test-resave = []
 
-# Config to test double/multiple saves for all test cases.
-test_resave = []
 
 # Some local package management and release check commands.
 # Uses Cargo Commander.
