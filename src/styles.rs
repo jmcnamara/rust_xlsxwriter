@@ -95,7 +95,7 @@ impl<'a> Styles<'a> {
 
     // Write the <styleSheet> element.
     fn write_style_sheet(&mut self) {
-        let attributes = vec![(
+        let attributes = [(
             "xmlns",
             "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string(),
         )];
@@ -105,7 +105,7 @@ impl<'a> Styles<'a> {
 
     // Write the <fonts> element.
     fn write_fonts(&mut self) {
-        let attributes = vec![("count", self.font_count.to_string())];
+        let attributes = [("count", self.font_count.to_string())];
 
         self.writer.xml_start_tag_attr("fonts", &attributes);
 
@@ -178,7 +178,7 @@ impl<'a> Styles<'a> {
 
     // Write the <sz> element.
     fn write_font_size(&mut self, xf_format: &Format) {
-        let attributes = vec![("val", xf_format.font_size.to_string())];
+        let attributes = [("val", xf_format.font_size.to_string())];
 
         self.writer.xml_empty_tag_attr("sz", &attributes);
     }
@@ -204,7 +204,7 @@ impl<'a> Styles<'a> {
 
     // Write the <name> element.
     fn write_font_name(&mut self, xf_format: &Format) {
-        let attributes = vec![("val", xf_format.font_name.clone())];
+        let attributes = [("val", xf_format.font_name.clone())];
 
         if self.is_rich_string_style {
             self.writer.xml_empty_tag_attr("rFont", &attributes);
@@ -215,14 +215,14 @@ impl<'a> Styles<'a> {
 
     // Write the <family> element.
     fn write_font_family(&mut self, xf_format: &Format) {
-        let attributes = vec![("val", xf_format.font_family.to_string())];
+        let attributes = [("val", xf_format.font_family.to_string())];
 
         self.writer.xml_empty_tag_attr("family", &attributes);
     }
 
     // Write the <charset> element.
     fn write_font_charset(&mut self, xf_format: &Format) {
-        let attributes = vec![("val", xf_format.font_charset.to_string())];
+        let attributes = [("val", xf_format.font_charset.to_string())];
 
         self.writer.xml_empty_tag_attr("charset", &attributes);
     }
@@ -279,7 +279,7 @@ impl<'a> Styles<'a> {
 
     // Write the <fills> element.
     fn write_fills(&mut self) {
-        let attributes = vec![("count", self.fill_count.to_string())];
+        let attributes = [("count", self.fill_count.to_string())];
 
         self.writer.xml_start_tag_attr("fills", &attributes);
 
@@ -300,7 +300,7 @@ impl<'a> Styles<'a> {
 
     // Write the default <fill> element.
     fn write_default_fill(&mut self, pattern: String) {
-        let attributes = vec![("patternType", pattern)];
+        let attributes = [("patternType", pattern)];
 
         self.writer.xml_start_tag("fill");
         self.writer.xml_empty_tag_attr("patternFill", &attributes);
@@ -324,7 +324,7 @@ impl<'a> Styles<'a> {
         self.writer.xml_start_tag("fill");
 
         // Write the fill pattern.
-        let attributes = vec![("patternType", xf_format.pattern.to_string())];
+        let attributes = [("patternType", xf_format.pattern.to_string())];
         self.writer.xml_start_tag_attr("patternFill", &attributes);
 
         // Write the foreground color.
@@ -339,7 +339,7 @@ impl<'a> Styles<'a> {
         if xf_format.background_color == XlsxColor::Default
             || xf_format.background_color == XlsxColor::Automatic
         {
-            let attributes = vec![("indexed", "64".to_string())];
+            let attributes = [("indexed", "64".to_string())];
             self.writer.xml_empty_tag_attr("bgColor", &attributes);
         } else {
             let attributes = xf_format.background_color.attributes();
@@ -352,7 +352,7 @@ impl<'a> Styles<'a> {
 
     // Write the <borders> element.
     fn write_borders(&mut self) {
-        let attributes = vec![("count", self.border_count.to_string())];
+        let attributes = [("count", self.border_count.to_string())];
 
         self.writer.xml_start_tag_attr("borders", &attributes);
 
@@ -374,15 +374,15 @@ impl<'a> Styles<'a> {
                 self.writer.xml_start_tag("border");
             }
             FormatDiagonalBorder::BorderUp => {
-                let attributes = vec![("diagonalUp", "1".to_string())];
+                let attributes = [("diagonalUp", "1".to_string())];
                 self.writer.xml_start_tag_attr("border", &attributes);
             }
             FormatDiagonalBorder::BorderDown => {
-                let attributes = vec![("diagonalDown", "1".to_string())];
+                let attributes = [("diagonalDown", "1".to_string())];
                 self.writer.xml_start_tag_attr("border", &attributes);
             }
             FormatDiagonalBorder::BorderUpDown => {
-                let attributes = vec![
+                let attributes = [
                     ("diagonalUp", "1".to_string()),
                     ("diagonalDown", "1".to_string()),
                 ];
@@ -445,7 +445,7 @@ impl<'a> Styles<'a> {
             count = 2;
         }
 
-        let attributes = vec![("count", count.to_string())];
+        let attributes = [("count", count.to_string())];
 
         self.writer.xml_start_tag_attr("cellStyleXfs", &attributes);
 
@@ -461,7 +461,7 @@ impl<'a> Styles<'a> {
 
     // Write the style <xf> element for the "Normal" style.
     fn write_normal_style_xf(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("numFmtId", "0".to_string()),
             ("fontId", "0".to_string()),
             ("fillId", "0".to_string()),
@@ -473,7 +473,7 @@ impl<'a> Styles<'a> {
 
     // Write the style <xf> element for the "Hyperlink" style.
     fn write_hyperlink_style_xf(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("numFmtId", "0".to_string()),
             ("fontId", "1".to_string()),
             ("fillId", "0".to_string()),
@@ -493,14 +493,14 @@ impl<'a> Styles<'a> {
 
     // Write the <alignment> element for hyperlinks.
     fn write_hyperlink_alignment(&mut self) {
-        let attributes = vec![("vertical", "top".to_string())];
+        let attributes = [("vertical", "top".to_string())];
 
         self.writer.xml_empty_tag_attr("alignment", &attributes);
     }
 
     // Write the <protection> element for hyperlinks.
     fn write_hyperlink_protection(&mut self) {
-        let attributes = vec![("locked", "0".to_string())];
+        let attributes = [("locked", "0".to_string())];
 
         self.writer.xml_empty_tag_attr("protection", &attributes);
     }
@@ -508,7 +508,7 @@ impl<'a> Styles<'a> {
     // Write the <cellXfs> element.
     fn write_cell_xfs(&mut self) {
         let xf_count = format!("{}", self.xf_formats.len());
-        let attributes = vec![("count", xf_count)];
+        let attributes = [("count", xf_count)];
 
         self.writer.xml_start_tag_attr("cellXfs", &attributes);
 
@@ -698,7 +698,7 @@ impl<'a> Styles<'a> {
             count = 2;
         }
 
-        let attributes = vec![("count", count.to_string())];
+        let attributes = [("count", count.to_string())];
 
         self.writer.xml_start_tag_attr("cellStyles", &attributes);
 
@@ -713,7 +713,7 @@ impl<'a> Styles<'a> {
 
     // Write the <cellStyle> element for the "Normal" style.
     fn write_normal_cell_style(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("name", "Normal".to_string()),
             ("xfId", "0".to_string()),
             ("builtinId", "0".to_string()),
@@ -724,7 +724,7 @@ impl<'a> Styles<'a> {
 
     // Write the <cellStyle> element for the "Hyperlink" style.
     fn write_hyperlink_cell_style(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("name", "Hyperlink".to_string()),
             ("xfId", "1".to_string()),
             ("builtinId", "8".to_string()),
@@ -735,14 +735,14 @@ impl<'a> Styles<'a> {
 
     // Write the <dxfs> element.
     fn write_dxfs(&mut self) {
-        let attributes = vec![("count", "0".to_string())];
+        let attributes = [("count", "0".to_string())];
 
         self.writer.xml_empty_tag_attr("dxfs", &attributes);
     }
 
     // Write the <tableStyles> element.
     fn write_table_styles(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("count", "0".to_string()),
             ("defaultTableStyle", "TableStyleMedium9".to_string()),
             ("defaultPivotStyle", "PivotStyleLight16".to_string()),
@@ -757,7 +757,7 @@ impl<'a> Styles<'a> {
             return;
         }
 
-        let attributes = vec![("count", self.num_formats.len().to_string())];
+        let attributes = [("count", self.num_formats.len().to_string())];
         self.writer.xml_start_tag_attr("numFmts", &attributes);
 
         // Write the numFmt elements.
@@ -770,7 +770,7 @@ impl<'a> Styles<'a> {
 
     // Write the <numFmt> element.
     fn write_num_fmt(&mut self, num_format_index: u16, num_format: &str) {
-        let attributes = vec![
+        let attributes = [
             ("numFmtId", num_format_index.to_string()),
             ("formatCode", num_format.to_string()),
         ];

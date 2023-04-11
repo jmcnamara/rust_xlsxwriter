@@ -48,7 +48,7 @@ impl SharedStrings {
         let xmls = "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string();
         let count = string_table.count.to_string();
         let unique = string_table.unique_count.to_string();
-        let attributes = vec![("xmlns", xmls), ("count", count), ("uniqueCount", unique)];
+        let attributes = [("xmlns", xmls), ("count", count), ("uniqueCount", unique)];
 
         self.writer.xml_start_tag_attr("sst", &attributes);
     }

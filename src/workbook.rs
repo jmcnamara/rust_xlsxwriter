@@ -1592,14 +1592,14 @@ impl Workbook {
         let xmlns_r =
             "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string();
 
-        let attributes = vec![("xmlns", xmlns), ("xmlns:r", xmlns_r)];
+        let attributes = [("xmlns", xmlns), ("xmlns:r", xmlns_r)];
 
         self.writer.xml_start_tag_attr("workbook", &attributes);
     }
 
     // Write the <fileVersion> element.
     fn write_file_version(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("appName", "xl".to_string()),
             ("lastEdited", "4".to_string()),
             ("lowestEdited", "4".to_string()),
@@ -1611,14 +1611,14 @@ impl Workbook {
 
     // Write the <fileSharing> element.
     fn write_file_sharing(&mut self) {
-        let attributes = vec![("readOnlyRecommended", "1".to_string())];
+        let attributes = [("readOnlyRecommended", "1".to_string())];
 
         self.writer.xml_empty_tag_attr("fileSharing", &attributes);
     }
 
     // Write the <workbookPr> element.
     fn write_workbook_pr(&mut self) {
-        let attributes = vec![("defaultThemeVersion", "124226".to_string())];
+        let attributes = [("defaultThemeVersion", "124226".to_string())];
 
         self.writer.xml_empty_tag_attr("workbookPr", &attributes);
     }
@@ -1716,7 +1716,7 @@ impl Workbook {
 
     // Write the <calcPr> element.
     fn write_calc_pr(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("calcId", "124519".to_string()),
             ("fullCalcOnLoad", "1".to_string()),
         ];

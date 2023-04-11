@@ -55,7 +55,7 @@ impl Custom {
         let xmlns = format!("{schema}/custom-properties");
         let xmlns_vt = format!("{schema}/docPropsVTypes");
 
-        let attributes = vec![("xmlns", xmlns), ("xmlns:vt", xmlns_vt)];
+        let attributes = [("xmlns", xmlns), ("xmlns:vt", xmlns_vt)];
 
         self.writer.xml_start_tag_attr("Properties", &attributes);
     }
@@ -63,7 +63,7 @@ impl Custom {
     // Write the <property> element.
     fn write_property(&mut self, property: &CustomProperty, pid: usize) {
         let fmtid = "{D5CDD505-2E9C-101B-9397-08002B2CF9AE}".to_string();
-        let attributes = vec![
+        let attributes = [
             ("fmtid", fmtid),
             ("pid", pid.to_string()),
             ("name", property.name.to_string()),

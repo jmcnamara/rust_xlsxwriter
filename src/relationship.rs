@@ -73,7 +73,7 @@ impl Relationship {
     // Write the <Relationships> element.
     fn write_relationships(&mut self) {
         let xmlns = "http://schemas.openxmlformats.org/package/2006/relationships".to_string();
-        let attributes = vec![("xmlns", xmlns)];
+        let attributes = [("xmlns", xmlns)];
 
         self.writer.xml_start_tag_attr("Relationships", &attributes);
 

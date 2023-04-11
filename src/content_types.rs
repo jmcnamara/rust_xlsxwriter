@@ -144,7 +144,7 @@ impl ContentTypes {
     // Write the <Types> element.
     fn write_types(&mut self) {
         let xmlns = "http://schemas.openxmlformats.org/package/2006/content-types".to_string();
-        let attributes = vec![("xmlns", xmlns)];
+        let attributes = [("xmlns", xmlns)];
 
         self.writer.xml_start_tag_attr("Types", &attributes);
     }
@@ -157,7 +157,7 @@ impl ContentTypes {
 
     // Write the <Default> element.
     fn write_default(&mut self, extension: String, content_type: String) {
-        let attributes = vec![("Extension", extension), ("ContentType", content_type)];
+        let attributes = [("Extension", extension), ("ContentType", content_type)];
 
         self.writer.xml_empty_tag_attr("Default", &attributes);
     }
@@ -171,7 +171,7 @@ impl ContentTypes {
 
     // Write the <Override> element.
     fn write_override(&mut self, part_name: String, content_type: String) {
-        let attributes = vec![("PartName", part_name), ("ContentType", content_type)];
+        let attributes = [("PartName", part_name), ("ContentType", content_type)];
 
         self.writer.xml_empty_tag_attr("Override", &attributes);
     }

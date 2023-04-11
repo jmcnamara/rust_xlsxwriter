@@ -48,7 +48,7 @@ impl Drawing {
 
     // Write the <xdr:wsDr> element.
     fn write_ws_dr(&mut self) {
-        let attributes = vec![
+        let attributes = [
             (
                 "xmlns:xdr",
                 "http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing".to_string(),
@@ -179,10 +179,10 @@ impl Drawing {
     fn write_decorative(&mut self) {
         self.writer.xml_start_tag("a:extLst");
 
-        let attributes = vec![("uri", "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}".to_string())];
+        let attributes = [("uri", "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}".to_string())];
         self.writer.xml_start_tag_attr("a:ext", &attributes);
 
-        let attributes = vec![
+        let attributes = [
             (
                 "xmlns:a16",
                 "http://schemas.microsoft.com/office/drawing/2014/main".to_string(),
@@ -194,10 +194,10 @@ impl Drawing {
 
         self.writer.xml_end_tag("a:ext");
 
-        let attributes = vec![("uri", "{C183D7F6-B498-43B3-948B-1728B52AA6E4}".to_string())];
+        let attributes = [("uri", "{C183D7F6-B498-43B3-948B-1728B52AA6E4}".to_string())];
         self.writer.xml_start_tag_attr("a:ext", &attributes);
 
-        let attributes = vec![
+        let attributes = [
             (
                 "xmlns:adec",
                 "http://schemas.microsoft.com/office/drawing/2017/decorative".to_string(),
@@ -213,7 +213,7 @@ impl Drawing {
 
     // Write the <a:picLocks> element.
     fn write_a_pic_locks(&mut self) {
-        let attributes = vec![("noChangeAspect", "1".to_string())];
+        let attributes = [("noChangeAspect", "1".to_string())];
 
         self.writer.xml_empty_tag_attr("a:picLocks", &attributes);
     }
@@ -234,7 +234,7 @@ impl Drawing {
 
     // Write the <a:blip> element.
     fn write_a_blip(&mut self, index: u32) {
-        let attributes = vec![
+        let attributes = [
             (
                 "xmlns:r",
                 "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string(),
@@ -266,7 +266,7 @@ impl Drawing {
 
     // Write the <a:off> element.
     fn write_a_off(&mut self, drawing_info: &DrawingInfo) {
-        let attributes = vec![
+        let attributes = [
             ("x", drawing_info.col_absolute.to_string()),
             ("y", drawing_info.row_absolute.to_string()),
         ];
@@ -276,7 +276,7 @@ impl Drawing {
 
     // Write the <a:ext> element.
     fn write_a_ext(&mut self, drawing_info: &DrawingInfo) {
-        let attributes = vec![
+        let attributes = [
             ("cx", drawing_info.width.to_string()),
             ("cy", drawing_info.height.to_string()),
         ];
@@ -286,7 +286,7 @@ impl Drawing {
 
     // Write the <a:prstGeom> element.
     fn write_a_prst_geom(&mut self) {
-        let attributes = vec![("prst", "rect".to_string())];
+        let attributes = [("prst", "rect".to_string())];
 
         self.writer.xml_start_tag_attr("a:prstGeom", &attributes);
         self.writer.xml_empty_tag("a:avLst");
@@ -295,7 +295,7 @@ impl Drawing {
 
     // Write the <xdr:graphicFrame> element.
     fn write_graphic_frame(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        let attributes = vec![("macro", "".to_string())];
+        let attributes = [("macro", "".to_string())];
 
         self.writer
             .xml_start_tag_attr("xdr:graphicFrame", &attributes);
@@ -345,14 +345,14 @@ impl Drawing {
 
     // Write the <a:off> element.
     fn write_chart_a_off(&mut self) {
-        let attributes = vec![("x", "0".to_string()), ("y", "0".to_string())];
+        let attributes = [("x", "0".to_string()), ("y", "0".to_string())];
 
         self.writer.xml_empty_tag_attr("a:off", &attributes);
     }
 
     // Write the <a:ext> element.
     fn write_chart_a_ext(&mut self) {
-        let attributes = vec![("cx", "0".to_string()), ("cy", "0".to_string())];
+        let attributes = [("cx", "0".to_string()), ("cy", "0".to_string())];
 
         self.writer.xml_empty_tag_attr("a:ext", &attributes);
     }
@@ -369,7 +369,7 @@ impl Drawing {
 
     // Write the <a:graphicData> element.
     fn write_a_graphic_data(&mut self, index: u32) {
-        let attributes = vec![(
+        let attributes = [(
             "uri",
             "http://schemas.openxmlformats.org/drawingml/2006/chart".to_string(),
         )];
@@ -384,7 +384,7 @@ impl Drawing {
 
     // Write the <c:chart> element.
     fn write_chart(&mut self, index: u32) {
-        let attributes = vec![
+        let attributes = [
             (
                 "xmlns:c",
                 "http://schemas.openxmlformats.org/drawingml/2006/chart".to_string(),

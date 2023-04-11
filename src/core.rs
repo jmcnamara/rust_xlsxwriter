@@ -79,7 +79,7 @@ impl Core {
         let xmlns_dcmitype = "http://purl.org/dc/dcmitype/".to_string();
         let xmlns_xsi = "http://www.w3.org/2001/XMLSchema-instance".to_string();
 
-        let attributes = vec![
+        let attributes = [
             ("xmlns:cp", xmlns_cp),
             ("xmlns:dc", xmlns_dc),
             ("xmlns:dcterms", xmlns_dcterms),
@@ -137,7 +137,7 @@ impl Core {
 
     // Write the <dcterms:created> element.
     fn write_dcterms_created(&mut self) {
-        let attributes = vec![("xsi:type", "dcterms:W3CDTF".to_string())];
+        let attributes = [("xsi:type", "dcterms:W3CDTF".to_string())];
         let datetime = self
             .properties
             .creation_time
@@ -149,7 +149,7 @@ impl Core {
 
     // Write the <dcterms:modified> element.
     fn write_dcterms_modified(&mut self) {
-        let attributes = vec![("xsi:type", "dcterms:W3CDTF".to_string())];
+        let attributes = [("xsi:type", "dcterms:W3CDTF".to_string())];
 
         let datetime = self
             .properties

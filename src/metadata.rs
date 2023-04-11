@@ -48,7 +48,7 @@ impl Metadata {
 
     // Write the <metadata> element.
     fn write_metadata(&mut self) {
-        let attributes = vec![
+        let attributes = [
             (
                 "xmlns",
                 "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string(),
@@ -64,7 +64,7 @@ impl Metadata {
 
     // Write the <metadataTypes> element.
     fn write_metadata_types(&mut self) {
-        let attributes = vec![("count", "1".to_string())];
+        let attributes = [("count", "1".to_string())];
 
         self.writer.xml_start_tag_attr("metadataTypes", &attributes);
 
@@ -76,7 +76,7 @@ impl Metadata {
 
     // Write the <metadataType> element.
     fn write_metadata_type(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("name", "XLDAPR".to_string()),
             ("minSupportedVersion", "120000".to_string()),
             ("copy", "1".to_string()),
@@ -97,7 +97,7 @@ impl Metadata {
 
     // Write the <futureMetadata> element.
     fn write_future_metadata(&mut self) {
-        let attributes = vec![("name", "XLDAPR".to_string()), ("count", "1".to_string())];
+        let attributes = [("name", "XLDAPR".to_string()), ("count", "1".to_string())];
 
         self.writer
             .xml_start_tag_attr("futureMetadata", &attributes);
@@ -114,7 +114,7 @@ impl Metadata {
 
     // Write the <ext> element.
     fn write_ext(&mut self) {
-        let attributes = vec![("uri", "{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}".to_string())];
+        let attributes = [("uri", "{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}".to_string())];
 
         self.writer.xml_start_tag_attr("ext", &attributes);
 
@@ -126,7 +126,7 @@ impl Metadata {
 
     // Write the <xda:dynamicArrayProperties> element.
     fn write_xda_dynamic_array_properties(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("fDynamic", "1".to_string()),
             ("fCollapsed", "0".to_string()),
         ];
@@ -137,7 +137,7 @@ impl Metadata {
 
     // Write the <cellMetadata> element.
     fn write_cell_metadata(&mut self) {
-        let attributes = vec![("count", "1".to_string())];
+        let attributes = [("count", "1".to_string())];
 
         self.writer.xml_start_tag_attr("cellMetadata", &attributes);
         self.writer.xml_start_tag("bk");
@@ -151,7 +151,7 @@ impl Metadata {
 
     // Write the <rc> element.
     fn write_rc(&mut self) {
-        let attributes = vec![("t", "1".to_string()), ("v", "0".to_string())];
+        let attributes = [("t", "1".to_string()), ("v", "0".to_string())];
 
         self.writer.xml_empty_tag_attr("rc", &attributes);
     }

@@ -8422,7 +8422,7 @@ impl Worksheet {
         let xmlns_r =
             "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string();
 
-        let attributes = vec![("xmlns", xmlns), ("xmlns:r", xmlns_r)];
+        let attributes = [("xmlns", xmlns), ("xmlns:r", xmlns_r)];
 
         self.writer.xml_start_tag_attr("worksheet", &attributes);
     }
@@ -8464,7 +8464,7 @@ impl Worksheet {
             return;
         }
 
-        let attributes = vec![("fitToPage", "1".to_string())];
+        let attributes = [("fitToPage", "1".to_string())];
 
         self.writer.xml_empty_tag_attr("pageSetUpPr", &attributes);
     }
@@ -8653,7 +8653,7 @@ impl Worksheet {
 
     // Write the <sheetFormatPr> element.
     fn write_sheet_format_pr(&mut self) {
-        let attributes = vec![("defaultRowHeight", "15".to_string())];
+        let attributes = [("defaultRowHeight", "15".to_string())];
 
         self.writer.xml_empty_tag_attr("sheetFormatPr", &attributes);
     }
@@ -8671,7 +8671,7 @@ impl Worksheet {
 
     // Write the <mergeCells> element.
     fn write_merge_cells(&mut self) {
-        let attributes = vec![("count", self.merged_ranges.len().to_string())];
+        let attributes = [("count", self.merged_ranges.len().to_string())];
 
         self.writer.xml_start_tag_attr("mergeCells", &attributes);
 
@@ -8685,7 +8685,7 @@ impl Worksheet {
 
     // Write the <mergeCell> element.
     fn write_merge_cell(&mut self, merge_range: &CellRange) {
-        let attributes = vec![("ref", merge_range.to_range_string())];
+        let attributes = [("ref", merge_range.to_range_string())];
 
         self.writer.xml_empty_tag_attr("mergeCell", &attributes);
     }
@@ -8770,7 +8770,7 @@ impl Worksheet {
 
     // Write the <pageMargins> element.
     fn write_page_margins(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("left", self.margin_left.to_string()),
             ("right", self.margin_right.to_string()),
             ("top", self.margin_top.to_string()),
@@ -8833,7 +8833,7 @@ impl Worksheet {
 
     // Write the <autoFilter> element.
     fn write_auto_filter(&mut self) {
-        let attributes = vec![("ref", self.autofilter_area.clone())];
+        let attributes = [("ref", self.autofilter_area.clone())];
 
         if self.filter_conditions.is_empty() {
             self.writer.xml_empty_tag_attr("autoFilter", &attributes);
@@ -8853,7 +8853,7 @@ impl Worksheet {
 
     // Write the <filterColumn> element.
     fn write_filter_column(&mut self, col: ColNum, filter_condition: &FilterCondition) {
-        let attributes = vec![("colId", col.to_string())];
+        let attributes = [("colId", col.to_string())];
 
         self.writer.xml_start_tag_attr("filterColumn", &attributes);
 
@@ -8890,7 +8890,7 @@ impl Worksheet {
 
     // Write the <filter> element.
     fn write_filter(&mut self, value: String) {
-        let attributes = vec![("val", value)];
+        let attributes = [("val", value)];
 
         self.writer.xml_empty_tag_attr("filter", &attributes);
     }
@@ -9438,7 +9438,7 @@ impl Worksheet {
     // Write the <drawing> element.
     fn write_drawing(&mut self) {
         self.rel_count += 1;
-        let attributes = vec![("r:id", format!("rId{}", self.rel_count))];
+        let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
         self.writer.xml_empty_tag_attr("drawing", &attributes);
     }
@@ -9446,7 +9446,7 @@ impl Worksheet {
     // Write the <legacyDrawingHF> element.
     fn write_legacy_drawing_hf(&mut self) {
         self.rel_count += 1;
-        let attributes = vec![("r:id", format!("rId{}", self.rel_count))];
+        let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
         self.writer
             .xml_empty_tag_attr("legacyDrawingHF", &attributes);
@@ -9554,7 +9554,7 @@ impl Worksheet {
 
     // Write the <rowBreaks> element.
     fn write_row_breaks(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("count", self.horizontal_breaks.len().to_string()),
             ("manualBreakCount", self.horizontal_breaks.len().to_string()),
         ];
@@ -9571,7 +9571,7 @@ impl Worksheet {
 
     // Write the row <brk> element.
     fn write_row_brk(&mut self, row_num: u32) {
-        let attributes = vec![
+        let attributes = [
             ("id", row_num.to_string()),
             ("max", "16383".to_string()),
             ("man", "1".to_string()),
@@ -9582,7 +9582,7 @@ impl Worksheet {
 
     // Write the <colBreaks> element.
     fn write_col_breaks(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("count", self.vertical_breaks.len().to_string()),
             ("manualBreakCount", self.vertical_breaks.len().to_string()),
         ];
@@ -9599,7 +9599,7 @@ impl Worksheet {
 
     // Write the col <brk> element.
     fn write_col_brk(&mut self, col_num: u32) {
-        let attributes = vec![
+        let attributes = [
             ("id", col_num.to_string()),
             ("max", "1048575".to_string()),
             ("man", "1".to_string()),

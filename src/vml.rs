@@ -60,7 +60,7 @@ impl Vml {
 
     // Write the <xml> element.
     fn write_xml_namespace(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("xmlns:v", "urn:schemas-microsoft-com:vml".to_string()),
             (
                 "xmlns:o",
@@ -77,7 +77,7 @@ impl Vml {
 
     // Write the <o:shapelayout> element.
     fn write_shapelayout(&mut self) {
-        let attributes = vec![("v:ext", "edit".to_string())];
+        let attributes = [("v:ext", "edit".to_string())];
 
         self.writer.xml_start_tag_attr("o:shapelayout", &attributes);
 
@@ -89,7 +89,7 @@ impl Vml {
 
     // Write the <o:idmap> element.
     fn write_idmap(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("v:ext", "edit".to_string()),
             ("data", self.data_id.to_string()),
         ];
@@ -99,7 +99,7 @@ impl Vml {
 
     // Write the <v:shapetype> element.
     fn write_image_shapetype(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("id", "_x0000_t75".to_string()),
             ("coordsize", "21600,21600".to_string()),
             ("o:spt", "75".to_string()),
@@ -128,7 +128,7 @@ impl Vml {
 
     // Write the <v:stroke> element.
     fn write_stroke(&mut self) {
-        let attributes = vec![("joinstyle", "miter".to_string())];
+        let attributes = [("joinstyle", "miter".to_string())];
 
         self.writer.xml_empty_tag_attr("v:stroke", &attributes);
     }
@@ -154,14 +154,14 @@ impl Vml {
     }
     // Write the <v:f> element.
     fn write_formula_with_format(&mut self, equation: &str) {
-        let attributes = vec![("eqn", equation.to_string())];
+        let attributes = [("eqn", equation.to_string())];
 
         self.writer.xml_empty_tag_attr("v:f", &attributes);
     }
 
     // Write the <v:path> element.
     fn write_path(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("o:extrusionok", "f".to_string()),
             ("gradientshapeok", "t".to_string()),
             ("o:connecttype", "rect".to_string()),
@@ -172,7 +172,7 @@ impl Vml {
 
     // Write the <o:lock> element.
     fn write_shapetype_lock(&mut self) {
-        let attributes = vec![
+        let attributes = [
             ("v:ext", "edit".to_string()),
             ("aspectratio", "t".to_string()),
         ];
@@ -196,7 +196,7 @@ impl Vml {
 
         let shape_id = format!("_x0000_s{}", self.shape_id);
 
-        let attributes = vec![
+        let attributes = [
             ("id", vml_info.position.to_string()),
             ("o:spid", shape_id),
             ("type", "#_x0000_t75".to_string()),
@@ -216,7 +216,7 @@ impl Vml {
 
     // Write the <v:imagedata> element.
     fn write_imagedata(&mut self, vml_info: &VmlInfo) {
-        let attributes = vec![
+        let attributes = [
             ("o:relid", format!("rId{}", vml_info.rel_id)),
             ("o:title", vml_info.title.to_string()),
         ];
