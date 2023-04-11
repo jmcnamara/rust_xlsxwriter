@@ -46,8 +46,8 @@ impl XMLWriter {
 
     // Reset the memory buffer, usually between saves.
     pub(crate) fn reset(&mut self) {
-        let buf: Vec<u8> = Vec::with_capacity(2048);
-        self.xmlfile = Cursor::new(buf);
+        self.xmlfile.get_mut().clear();
+        self.xmlfile.set_position(0);
     }
 
     // Write an XML file declaration.
@@ -66,6 +66,9 @@ impl XMLWriter {
 
     // Write an XML start tag with attributes.
     pub(crate) fn xml_start_tag_attr(&mut self, tag: &str, attributes: &[(&str, String)]) {
+        let approx_len = tag.len() + 6 * attributes.len() + 2;
+        self.xmlfile.get_mut().reserve(approx_len);
+
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
@@ -93,6 +96,9 @@ impl XMLWriter {
 
     // Write an empty XML tag with attributes.
     pub(crate) fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &[(&str, String)]) {
+        let approx_len = tag.len() + 6 * attributes.len() + 3;
+        self.xmlfile.get_mut().reserve(approx_len);
+
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
@@ -126,6 +132,9 @@ impl XMLWriter {
         data: &str,
         attributes: &[(&str, String)],
     ) {
+        let approx_len = 2 * tag.len() + 6 * attributes.len() + data.len() + 5;
+        self.xmlfile.get_mut().reserve(approx_len);
+
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
@@ -286,13 +295,13 @@ fn escape_string<F>(original: &str, char_handler: F) -> Cow<str>
 where
     F: FnOnce(char) -> Option<&'static str> + Copy,
 {
-    for (i, ch) in original.chars().enumerate() {
+    for (i, ch) in original.char_indices() {
         if char_handler(ch).is_some() {
-            let consumed_chars = original.chars().take(i);
-            let remaining_chars = original.chars().skip(i);
-            let mut escaped_string: String = consumed_chars.collect();
+            let mut escaped_string = original[..i].to_string();
+            let remaining = &original[i..];
+            escaped_string.reserve(remaining.len());
 
-            for ch in remaining_chars {
+            for ch in remaining.chars() {
                 match char_handler(ch) {
                     Some(escaped_char) => escaped_string.push_str(escaped_char),
                     None => escaped_string.push(ch),
