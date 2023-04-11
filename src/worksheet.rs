@@ -11,6 +11,7 @@ use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Write;
 use std::mem;
+use std::rc::Rc;
 
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 use itertools::Itertools;
@@ -182,7 +183,7 @@ pub struct Worksheet {
     margin_header: f64,
     margin_footer: f64,
     first_page_number: u16,
-    default_result: String,
+    default_result: Box<str>,
     use_future_functions: bool,
     panes: Panes,
     hyperlinks: BTreeMap<(RowNum, ColNum), Hyperlink>,
@@ -350,7 +351,7 @@ impl Worksheet {
             margin_header: 0.3,
             margin_footer: 0.3,
             first_page_number: 0,
-            default_result: "0".to_string(),
+            default_result: Box::from("0"),
             use_future_functions: false,
             panes,
             has_hyperlink_style: false,
@@ -4651,7 +4652,7 @@ impl Worksheet {
                         is_dynamic: _,
                         range: _,
                     } => {
-                        *cell_result = result.to_string();
+                        *cell_result = Box::from(result);
                     }
                     _ => {
                         eprintln!("Cell ({row}, {col}) doesn't contain a formula.");
@@ -4705,7 +4706,7 @@ impl Worksheet {
     /// # }
     /// #
     pub fn set_formula_result_default(&mut self, result: &str) -> &mut Worksheet {
-        self.default_result = result.to_string();
+        self.default_result = Box::from(result);
         self
     }
 
@@ -6908,7 +6909,7 @@ impl Worksheet {
                                 result,
                                 ..
                             } => {
-                                if result == "0" || result.is_empty() {
+                                if result.as_ref() == "0" || result.is_empty() {
                                     0
                                 } else {
                                     utility::pixel_width(result)
@@ -7310,7 +7311,7 @@ impl Worksheet {
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::String {
-            string: string.to_string(),
+            string: Rc::from(string),
             xf_index,
         };
 
@@ -7356,9 +7357,9 @@ impl Worksheet {
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::RichString {
-            string: string.to_string(),
+            string: Rc::from(string),
             xf_index,
-            raw_string: raw_string.to_string(),
+            raw_string: Rc::from(raw_string),
         };
 
         self.insert_cell(row, col, cell);
@@ -7456,7 +7457,7 @@ impl Worksheet {
             xf_index,
             result: self.default_result.clone(),
             is_dynamic,
-            range,
+            range: range.into_boxed_str(),
         };
 
         self.insert_cell(first_row, first_col, cell);
@@ -8964,7 +8965,7 @@ impl Worksheet {
                         string, xf_index, ..
                     } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        let string_index = string_table.shared_string_index(string);
+                        let string_index = string_table.shared_string_index(Rc::clone(string));
                         self.write_string_cell(row_num, col_num, string_index, xf_index);
                     }
                     CellType::Formula {
@@ -9882,34 +9883,34 @@ fn round_to_emus(dimension: f64) -> f64 {
 
 // Utility method to strip equal sign and array braces from a formula and
 // also expand out future and dynamic array formulas.
-fn prepare_formula(formula: &str, expand_future_functions: bool) -> String {
-    let mut formula = formula.to_string();
-
+fn prepare_formula(mut formula: &str, expand_future_functions: bool) -> Box<str> {
     // Remove array formula braces and the leading = if they exist.
-    if formula.starts_with('{') {
-        formula.remove(0);
+    if let Some(f) = formula.strip_prefix('{') {
+        formula = f;
     }
-    if formula.starts_with('=') {
-        formula.remove(0);
+    if let Some(f) = formula.strip_prefix('=') {
+        formula = f;
     }
-    if formula.ends_with('}') {
-        formula.pop();
+    if let Some(f) = formula.strip_suffix('}') {
+        formula = f;
     }
 
     // Exit if formula is already expanded by the user.
     if formula.contains("_xlfn.") {
-        return formula;
+        return Box::from(formula);
     }
 
     // Expand dynamic formulas.
-    formula = escape_dynamic_formulas1(&formula).into();
-    formula = escape_dynamic_formulas2(&formula).into();
+    let escaped_formula1 = escape_dynamic_formulas1(formula);
+    let escaped_formula2 = escape_dynamic_formulas2(&escaped_formula1);
 
-    if expand_future_functions {
-        formula = escape_future_functions(&formula).into();
-    }
+    let formula = if expand_future_functions {
+        escape_future_functions(&escaped_formula2)
+    } else {
+        escaped_formula2
+    };
 
-    formula
+    Box::from(formula)
 }
 
 // Escape/expand the dynamic formula _xlfn functions.
@@ -9996,11 +9997,11 @@ struct ColOptions {
 #[derive(Clone)]
 enum CellType {
     ArrayFormula {
-        formula: String,
+        formula: Box<str>,
         xf_index: u32,
-        result: String,
+        result: Box<str>,
         is_dynamic: bool,
-        range: String,
+        range: Box<str>,
     },
     Blank {
         xf_index: u32,
@@ -10010,9 +10011,9 @@ enum CellType {
         xf_index: u32,
     },
     Formula {
-        formula: String,
+        formula: Box<str>,
         xf_index: u32,
-        result: String,
+        result: Box<str>,
     },
     Number {
         number: f64,
@@ -10023,13 +10024,13 @@ enum CellType {
         xf_index: u32,
     },
     String {
-        string: String,
+        string: Rc<str>,
         xf_index: u32,
     },
     RichString {
-        string: String,
+        string: Rc<str>,
         xf_index: u32,
-        raw_string: String,
+        raw_string: Rc<str>,
     },
 }
 

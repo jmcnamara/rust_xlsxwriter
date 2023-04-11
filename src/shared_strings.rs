@@ -85,13 +85,13 @@ mod tests {
 
         let mut shared_strings = SharedStrings::new();
 
-        string_table.shared_string_index("neptune");
-        string_table.shared_string_index("neptune");
-        string_table.shared_string_index("neptune");
-        string_table.shared_string_index("neptune");
-        string_table.shared_string_index("mars");
-        string_table.shared_string_index("venus");
-        string_table.shared_string_index("mars");
+        string_table.shared_string_index("neptune".into());
+        string_table.shared_string_index("neptune".into());
+        string_table.shared_string_index("neptune".into());
+        string_table.shared_string_index("neptune".into());
+        string_table.shared_string_index("mars".into());
+        string_table.shared_string_index("venus".into());
+        string_table.shared_string_index("mars".into());
 
         shared_strings.assemble_xml_file(&string_table);
 
@@ -124,9 +124,9 @@ mod tests {
 
         let mut shared_strings = SharedStrings::new();
 
-        string_table.shared_string_index("abcdefg");
-        string_table.shared_string_index("   abcdefg");
-        string_table.shared_string_index("abcdefg   ");
+        string_table.shared_string_index("abcdefg".into());
+        string_table.shared_string_index("   abcdefg".into());
+        string_table.shared_string_index("abcdefg   ".into());
 
         shared_strings.assemble_xml_file(&string_table);
 
