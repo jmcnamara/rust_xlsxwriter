@@ -7,6 +7,7 @@
 #![warn(missing_docs)]
 use std::borrow::Cow;
 use std::cmp;
+use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Write;
 use std::mem;
@@ -141,7 +142,7 @@ pub struct Worksheet {
     pub(crate) header_footer_images: [Option<Image>; 6],
     pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
 
-    table: HashMap<RowNum, HashMap<ColNum, CellType>>,
+    table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
     col_names: HashMap<ColNum, String>,
@@ -308,7 +309,7 @@ impl Worksheet {
             repeat_row_cols_defined_name: DefinedName::new(),
             autofilter_defined_name: DefinedName::new(),
             autofilter_area: "".to_string(),
-            table: HashMap::new(),
+            table: BTreeMap::new(),
             col_names: HashMap::new(),
             dimensions,
             merged_ranges: vec![],
@@ -7609,17 +7610,17 @@ impl Worksheet {
 
     // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
-        match self.table.get_mut(&row) {
-            Some(columns) => {
+        match self.table.entry(row) {
+            Entry::Occupied(mut entry) => {
                 // The row already exists. Insert/replace column value.
+                let columns = entry.get_mut();
                 columns.insert(col, cell);
             }
-            None => {
+            Entry::Vacant(entry) => {
                 // The row doesn't exist, create a new row with columns and insert
                 // the cell value.
-                let mut columns: HashMap<ColNum, CellType> = HashMap::new();
-                columns.insert(col, cell);
-                self.table.insert(row, columns);
+                let columns = BTreeMap::from([(col, cell)]);
+                entry.insert(columns);
             }
         }
     }
@@ -7697,14 +7698,10 @@ impl Worksheet {
     }
 
     // Cached/faster version of utility.col_to_name() to use in the inner loop.
-    fn col_to_name(&mut self, col_num: ColNum) -> String {
-        if let Some(col_name) = self.col_names.get(&col_num) {
-            col_name.clone()
-        } else {
-            let col_name = utility::col_to_name(col_num);
-            self.col_names.insert(col_num, col_name.clone());
-            col_name
-        }
+    fn col_to_name(col_names: &mut HashMap<u16, String>, col_num: ColNum) -> &str {
+        col_names
+            .entry(col_num)
+            .or_insert_with(|| utility::col_to_name(col_num))
     }
 
     // Store local copies of unique formats passed to the write methods. These
@@ -7739,12 +7736,12 @@ impl Worksheet {
     // exists).
     fn get_cell_xf_index(
         &mut self,
-        xf_index: &u32,
+        xf_index: u32,
         row_options: Option<&RowOptions>,
         col_num: ColNum,
     ) -> u32 {
         // The local cell format index.
-        let mut xf_index = *xf_index;
+        let mut xf_index = xf_index;
 
         // If it is zero the cell is unformatted and we check for a row format.
         if xf_index == 0 {
@@ -8936,87 +8933,77 @@ impl Worksheet {
 
         // Swap out the worksheet data structures so we can iterate over it and
         // still call self.write_xml() methods.
-        let mut temp_table: HashMap<RowNum, HashMap<ColNum, CellType>> = HashMap::new();
+        let mut temp_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>> = BTreeMap::new();
         let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
         mem::swap(&mut temp_table, &mut self.table);
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
 
         for row_num in self.dimensions.first_row..=self.dimensions.last_row {
             let span_index = row_num / 16;
-            let span = spans.get(&span_index);
+            let span = spans.get(&span_index).map(AsRef::as_ref);
 
-            let columns = temp_table.get(&row_num);
             let row_options = temp_changed_rows.get(&row_num);
 
-            if columns.is_some() || row_options.is_some() {
-                if let Some(columns) = columns {
-                    self.write_row(row_num, span, row_options, true);
-                    for col_num in self.dimensions.first_col..=self.dimensions.last_col {
-                        if let Some(cell) = columns.get(&col_num) {
-                            match cell {
-                                CellType::Number { number, xf_index }
-                                | CellType::DateTime { number, xf_index } => {
-                                    let xf_index =
-                                        self.get_cell_xf_index(xf_index, row_options, col_num);
-                                    self.write_number_cell(row_num, col_num, number, &xf_index);
-                                }
-                                CellType::String { string, xf_index }
-                                | CellType::RichString {
-                                    string, xf_index, ..
-                                } => {
-                                    let xf_index =
-                                        self.get_cell_xf_index(xf_index, row_options, col_num);
-                                    let string_index = string_table.shared_string_index(string);
-                                    self.write_string_cell(
-                                        row_num,
-                                        col_num,
-                                        &string_index,
-                                        &xf_index,
-                                    );
-                                }
-                                CellType::Formula {
-                                    formula,
-                                    xf_index,
-                                    result,
-                                } => {
-                                    let xf_index =
-                                        self.get_cell_xf_index(xf_index, row_options, col_num);
-                                    self.write_formula_cell(
-                                        row_num, col_num, formula, &xf_index, result,
-                                    );
-                                }
-                                CellType::ArrayFormula {
-                                    formula,
-                                    xf_index,
-                                    result,
-                                    is_dynamic,
-                                    range,
-                                } => {
-                                    let xf_index =
-                                        self.get_cell_xf_index(xf_index, row_options, col_num);
-                                    self.write_array_formula_cell(
-                                        row_num, col_num, formula, &xf_index, result, is_dynamic,
-                                        range,
-                                    );
-                                }
-                                CellType::Blank { xf_index } => {
-                                    let xf_index =
-                                        self.get_cell_xf_index(xf_index, row_options, col_num);
-                                    self.write_blank_cell(row_num, col_num, &xf_index);
-                                }
-                                CellType::Boolean { boolean, xf_index } => {
-                                    let xf_index =
-                                        self.get_cell_xf_index(xf_index, row_options, col_num);
-                                    self.write_boolean_cell(row_num, col_num, boolean, &xf_index);
-                                }
-                            }
-                        }
-                    }
-                    self.writer.xml_end_tag("row");
-                } else {
+            let Some(columns) = temp_table.get(&row_num) else {
+                if row_options.is_some() {
                     self.write_row(row_num, span, row_options, false);
                 }
+                continue;
+            };
+
+            self.write_row(row_num, span, row_options, true);
+            for (&col_num, cell) in columns {
+                match cell {
+                    CellType::Number { number, xf_index }
+                    | CellType::DateTime { number, xf_index } => {
+                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                        self.write_number_cell(row_num, col_num, *number, xf_index);
+                    }
+                    CellType::String { string, xf_index }
+                    | CellType::RichString {
+                        string, xf_index, ..
+                    } => {
+                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                        let string_index = string_table.shared_string_index(string);
+                        self.write_string_cell(row_num, col_num, string_index, xf_index);
+                    }
+                    CellType::Formula {
+                        formula,
+                        xf_index,
+                        result,
+                    } => {
+                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                        self.write_formula_cell(row_num, col_num, formula, xf_index, result);
+                    }
+                    CellType::ArrayFormula {
+                        formula,
+                        xf_index,
+                        result,
+                        is_dynamic,
+                        range,
+                    } => {
+                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                        self.write_array_formula_cell(
+                            row_num,
+                            col_num,
+                            formula,
+                            xf_index,
+                            result,
+                            *is_dynamic,
+                            range,
+                        );
+                    }
+                    CellType::Blank { xf_index } => {
+                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                        self.write_blank_cell(row_num, col_num, xf_index);
+                    }
+                    CellType::Boolean { boolean, xf_index } => {
+                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                        self.write_boolean_cell(row_num, col_num, *boolean, xf_index);
+                    }
+                }
             }
+            self.writer.xml_end_tag("row");
         }
 
         // Swap back in data.
@@ -9034,18 +9021,13 @@ impl Worksheet {
 
         for row_num in self.dimensions.first_row..=self.dimensions.last_row {
             if let Some(columns) = self.table.get(&row_num) {
-                for col_num in self.dimensions.first_col..=self.dimensions.last_col {
-                    match columns.get(&col_num) {
-                        Some(_) => {
-                            if span_min == COL_MAX {
-                                span_min = col_num;
-                                span_max = col_num;
-                            } else {
-                                span_min = cmp::min(span_min, col_num);
-                                span_max = cmp::max(span_max, col_num);
-                            }
-                        }
-                        _ => continue,
+                for &col_num in columns.keys() {
+                    if span_min == COL_MAX {
+                        span_min = col_num;
+                        span_max = col_num;
+                    } else {
+                        span_min = cmp::min(span_min, col_num);
+                        span_max = cmp::max(span_max, col_num);
                     }
                 }
             }
@@ -9070,22 +9052,22 @@ impl Worksheet {
     fn write_row(
         &mut self,
         row_num: RowNum,
-        span: Option<&String>,
+        span: Option<&str>,
         row_options: Option<&RowOptions>,
         has_data: bool,
     ) {
-        let row_num = format!("{}", row_num + 1);
+        let row_num = (row_num + 1).to_string();
         let mut attributes = vec![("r", row_num)];
 
         if let Some(span_range) = span {
-            attributes.push(("spans", span_range.clone()));
+            attributes.push(("spans", span_range.to_string()));
         }
 
         if let Some(row_options) = row_options {
-            let mut xf_index = row_options.xf_index;
+            let xf_index = row_options.xf_index;
 
             if xf_index != 0 {
-                xf_index = self.global_xf_indices[xf_index as usize];
+                let xf_index = self.global_xf_indices[xf_index as usize];
                 attributes.push(("s", xf_index.to_string()));
                 attributes.push(("customFormat", "1".to_string()));
             }
@@ -9111,43 +9093,55 @@ impl Worksheet {
     }
 
     // Write the <c> element for a number.
-    fn write_number_cell(&mut self, row: RowNum, col: ColNum, number: &f64, xf_index: &u32) {
-        let col_name = self.col_to_name(col);
-        let mut style = String::from("");
+    fn write_number_cell(&mut self, row: RowNum, col: ColNum, number: f64, xf_index: u32) {
+        let col_name = Self::col_to_name(&mut self.col_names, col);
 
-        if *xf_index > 0 {
-            style = format!(r#" s="{}""#, *xf_index);
+        if xf_index > 0 {
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}" s="{}"><v>{}</v></c>"#,
+                col_name,
+                row + 1,
+                xf_index,
+                number
+            )
+            .expect("Couldn't write to file");
+        } else {
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}"><v>{}</v></c>"#,
+                col_name,
+                row + 1,
+                number
+            )
+            .expect("Couldn't write to file");
         }
-
-        write!(
-            &mut self.writer.xmlfile,
-            r#"<c r="{}{}"{}><v>{}</v></c>"#,
-            col_name,
-            row + 1,
-            style,
-            number
-        )
-        .expect("Couldn't write to file");
     }
 
     // Write the <c> element for a string.
-    fn write_string_cell(&mut self, row: RowNum, col: ColNum, string_index: &u32, xf_index: &u32) {
-        let col_name = self.col_to_name(col);
-        let mut style = String::from("");
+    fn write_string_cell(&mut self, row: RowNum, col: ColNum, string_index: u32, xf_index: u32) {
+        let col_name = Self::col_to_name(&mut self.col_names, col);
 
-        if *xf_index > 0 {
-            style = format!(r#" s="{}""#, *xf_index);
+        if xf_index > 0 {
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}" s="{}" t="s"><v>{}</v></c>"#,
+                col_name,
+                row + 1,
+                xf_index,
+                string_index
+            )
+            .expect("Couldn't write to file");
+        } else {
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}" t="s"><v>{}</v></c>"#,
+                col_name,
+                row + 1,
+                string_index
+            )
+            .expect("Couldn't write to file");
         }
-
-        write!(
-            &mut self.writer.xmlfile,
-            r#"<c r="{}{}"{} t="s"><v>{}</v></c>"#,
-            col_name,
-            row + 1,
-            style,
-            string_index
-        )
-        .expect("Couldn't write to file");
     }
 
     // Write the <c> element for a formula.
@@ -9156,20 +9150,22 @@ impl Worksheet {
         row: RowNum,
         col: ColNum,
         formula: &str,
-        xf_index: &u32,
+        xf_index: u32,
         result: &str,
     ) {
-        let col_name = self.col_to_name(col);
-        let mut style = String::from("");
-        let mut result_type = String::from("");
+        let col_name = Self::col_to_name(&mut self.col_names, col);
 
-        if *xf_index > 0 {
-            style = format!(r#" s="{}""#, *xf_index);
-        }
+        let style = if xf_index > 0 {
+            format!(r#" s="{xf_index}""#)
+        } else {
+            String::new()
+        };
 
-        if result.parse::<f64>().is_err() {
-            result_type = String::from(r#" t="str""#);
-        }
+        let result_type = if result.parse::<f64>().is_err() {
+            r#" t="str""#
+        } else {
+            ""
+        };
 
         write!(
             &mut self.writer.xmlfile,
@@ -9191,27 +9187,26 @@ impl Worksheet {
         row: RowNum,
         col: ColNum,
         formula: &str,
-        xf_index: &u32,
+        xf_index: u32,
         result: &str,
-        is_dynamic: &bool,
+        is_dynamic: bool,
         range: &str,
     ) {
-        let col_name = self.col_to_name(col);
-        let mut style = String::from("");
-        let mut cm = String::from("");
-        let mut result_type = String::from("");
+        let col_name = Self::col_to_name(&mut self.col_names, col);
 
-        if *xf_index > 0 {
-            style = format!(r#" s="{}""#, *xf_index);
-        }
+        let style = if xf_index > 0 {
+            format!(r#" s="{xf_index}""#)
+        } else {
+            String::new()
+        };
 
-        if *is_dynamic {
-            cm = String::from(r#" cm="1""#);
-        }
+        let cm = if is_dynamic { r#" cm="1""# } else { "" };
 
-        if result.parse::<f64>().is_err() {
-            result_type = String::from(r#" t="str""#);
-        }
+        let result_type = if result.parse::<f64>().is_err() {
+            r#" t="str""#
+        } else {
+            ""
+        };
 
         write!(
             &mut self.writer.xmlfile,
@@ -9229,44 +9224,48 @@ impl Worksheet {
     }
 
     // Write the <c> element for a blank cell.
-    fn write_blank_cell(&mut self, row: RowNum, col: ColNum, xf_index: &u32) {
-        let col_name = self.col_to_name(col);
+    fn write_blank_cell(&mut self, row: RowNum, col: ColNum, xf_index: u32) {
+        let col_name = Self::col_to_name(&mut self.col_names, col);
 
         // Write formatted blank cells and ignore unformatted blank cells (like
         // Excel does).
-        if *xf_index > 0 {
-            let style = format!(r#" s="{}""#, *xf_index);
-
+        if xf_index > 0 {
             write!(
                 &mut self.writer.xmlfile,
-                r#"<c r="{}{}"{}/>"#,
+                r#"<c r="{}{}" s="{}"/>"#,
                 col_name,
                 row + 1,
-                style
+                xf_index
             )
             .expect("Couldn't write to file");
         }
     }
 
     // Write the <c> element for a boolean cell.
-    fn write_boolean_cell(&mut self, row: RowNum, col: ColNum, boolean: &bool, xf_index: &u32) {
-        let col_name = self.col_to_name(col);
-        let mut style = String::from("");
-        let boolean = i32::from(*boolean);
+    fn write_boolean_cell(&mut self, row: RowNum, col: ColNum, boolean: bool, xf_index: u32) {
+        let col_name = Self::col_to_name(&mut self.col_names, col);
+        let boolean = i32::from(boolean);
 
-        if *xf_index > 0 {
-            style = format!(r#" s="{}""#, *xf_index);
+        if xf_index > 0 {
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}" s="{}" t="b"><v>{}</v></c>"#,
+                col_name,
+                row + 1,
+                xf_index,
+                boolean
+            )
+            .expect("Couldn't write to file");
+        } else {
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}" t="b"><v>{}</v></c>"#,
+                col_name,
+                row + 1,
+                boolean
+            )
+            .expect("Couldn't write to file");
         }
-
-        write!(
-            &mut self.writer.xmlfile,
-            r#"<c r="{}{}"{} t="b"><v>{}</v></c>"#,
-            col_name,
-            row + 1,
-            style,
-            boolean
-        )
-        .expect("Couldn't write to file");
     }
 
     // Write the <cols> element.
@@ -9280,44 +9279,47 @@ impl Worksheet {
         // We need to write contiguous equivalent columns as a range with first
         // and last columns, so we convert the HashMap to a sorted vector and
         // iterate over that.
-        let changed_cols = self.changed_cols.clone();
-        let mut col_options: Vec<_> = changed_cols.iter().collect();
-        col_options.sort_by_key(|x| x.0);
+        let mut col_options: Vec<_> = self
+            .changed_cols
+            .iter()
+            .map(|(k, v)| (*k, v.clone()))
+            .collect();
+        col_options.sort_unstable_by_key(|x| x.0);
+        let mut col_options = col_options.into_iter();
 
         // Remove the first (key, value) tuple in the vector and use it to set
         // the initial/previous properties.
-        let first_col_options = col_options.remove(0);
+        let first_col_options = col_options.next().unwrap();
         let mut first_col = first_col_options.0;
         let mut prev_col_options = first_col_options.1;
         let mut last_col = first_col;
 
-        for (col_num, col_options) in col_options.iter() {
+        for (col_num, col_options) in col_options {
             // Check if the column number is contiguous with the previous column
             // and if the format is the same.
-            if **col_num == *last_col + 1 && col_options == &prev_col_options {
+            if col_num == last_col + 1 && col_options == prev_col_options {
                 last_col = col_num;
             } else {
                 // If not write out the current range of columns and start again.
-                self.write_col(first_col, last_col, prev_col_options);
-                first_col = *col_num;
+                self.write_col(first_col, last_col, &prev_col_options);
+                first_col = col_num;
                 last_col = first_col;
-                prev_col_options = *col_options;
+                prev_col_options = col_options;
             }
         }
 
         // We will exit the previous loop with one unhandled column range.
-        self.write_col(first_col, last_col, prev_col_options);
+        self.write_col(first_col, last_col, &prev_col_options);
 
         self.writer.xml_end_tag("cols");
     }
 
     // Write the <col> element.
-    fn write_col(&mut self, first_col: &ColNum, last_col: &ColNum, col_options: &ColOptions) {
-        let mut attributes = vec![];
-        let first_col = *first_col + 1;
-        let last_col = *last_col + 1;
+    fn write_col(&mut self, first_col: ColNum, last_col: ColNum, col_options: &ColOptions) {
+        let first_col = first_col + 1;
+        let last_col = last_col + 1;
         let mut width = col_options.width;
-        let mut xf_index = col_options.xf_index;
+        let xf_index = col_options.xf_index;
         let has_custom_width = width != DEFAULT_COL_WIDTH;
         let hidden = col_options.hidden;
 
@@ -9343,12 +9345,14 @@ impl Worksheet {
             }
         }
 
-        attributes.push(("min", first_col.to_string()));
-        attributes.push(("max", last_col.to_string()));
-        attributes.push(("width", width.to_string()));
+        let mut attributes = vec![
+            ("min", first_col.to_string()),
+            ("max", last_col.to_string()),
+            ("width", width.to_string()),
+        ];
 
         if xf_index > 0 {
-            xf_index = self.global_xf_indices[xf_index as usize];
+            let xf_index = self.global_xf_indices[xf_index as usize];
             attributes.push(("style", xf_index.to_string()));
         }
 
