@@ -23,7 +23,7 @@ use crate::format::Format;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
-use crate::xmlwriter::XMLWriter;
+use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
     utility, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions, XlsxColor,
 };
@@ -7728,7 +7728,7 @@ impl Worksheet {
     // Set the mapping between the local format indices and the global/workbook
     // indices.
     pub(crate) fn set_global_xf_indices(&mut self, workbook_indices: &[u32]) {
-        self.global_xf_indices = workbook_indices.to_owned();
+        self.global_xf_indices = workbook_indices.to_vec();
     }
 
     // Translate the cell xf_index into a global/workbook format index. We also
@@ -9106,7 +9106,7 @@ impl Worksheet {
                 xf_index,
                 number
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         } else {
             write!(
                 &mut self.writer.xmlfile,
@@ -9115,7 +9115,7 @@ impl Worksheet {
                 row + 1,
                 number
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         }
     }
 
@@ -9132,7 +9132,7 @@ impl Worksheet {
                 xf_index,
                 string_index
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         } else {
             write!(
                 &mut self.writer.xmlfile,
@@ -9141,7 +9141,7 @@ impl Worksheet {
                 row + 1,
                 string_index
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         }
     }
 
@@ -9178,7 +9178,7 @@ impl Worksheet {
             crate::xmlwriter::escape_data(formula),
             crate::xmlwriter::escape_data(result),
         )
-        .expect("Couldn't write to file");
+        .expect(XML_WRITE_ERROR);
     }
 
     // Write the <c> element for an array formula.
@@ -9221,7 +9221,7 @@ impl Worksheet {
             crate::xmlwriter::escape_data(formula),
             crate::xmlwriter::escape_data(result),
         )
-        .expect("Couldn't write to file");
+        .expect(XML_WRITE_ERROR);
     }
 
     // Write the <c> element for a blank cell.
@@ -9238,7 +9238,7 @@ impl Worksheet {
                 row + 1,
                 xf_index
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         }
     }
 
@@ -9256,7 +9256,7 @@ impl Worksheet {
                 xf_index,
                 boolean
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         } else {
             write!(
                 &mut self.writer.xmlfile,
@@ -9265,7 +9265,7 @@ impl Worksheet {
                 row + 1,
                 boolean
             )
-            .expect("Couldn't write to file");
+            .expect(XML_WRITE_ERROR);
         }
     }
 
@@ -9885,14 +9885,14 @@ fn round_to_emus(dimension: f64) -> f64 {
 // also expand out future and dynamic array formulas.
 fn prepare_formula(mut formula: &str, expand_future_functions: bool) -> Box<str> {
     // Remove array formula braces and the leading = if they exist.
-    if let Some(f) = formula.strip_prefix('{') {
-        formula = f;
+    if let Some(stripped) = formula.strip_prefix('{') {
+        formula = stripped;
     }
-    if let Some(f) = formula.strip_prefix('=') {
-        formula = f;
+    if let Some(stripped) = formula.strip_prefix('=') {
+        formula = stripped;
     }
-    if let Some(f) = formula.strip_suffix('}') {
-        formula = f;
+    if let Some(stripped) = formula.strip_suffix('}') {
+        formula = stripped;
     }
 
     // Exit if formula is already expanded by the user.
@@ -9901,13 +9901,13 @@ fn prepare_formula(mut formula: &str, expand_future_functions: bool) -> Box<str>
     }
 
     // Expand dynamic formulas.
-    let escaped_formula1 = escape_dynamic_formulas1(formula);
-    let escaped_formula2 = escape_dynamic_formulas2(&escaped_formula1);
+    let escaped_formula = escape_dynamic_formulas1(formula);
+    let escaped_formula = escape_dynamic_formulas2(&escaped_formula);
 
     let formula = if expand_future_functions {
-        escape_future_functions(&escaped_formula2)
+        escape_future_functions(&escaped_formula)
     } else {
-        escaped_formula2
+        escaped_formula
     };
 
     Box::from(formula)

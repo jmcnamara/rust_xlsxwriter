@@ -12,7 +12,7 @@ use std::str;
 
 use regex::Regex;
 
-const XML_WRITE_ERROR: &str = "Couldn't write to xml file";
+pub(crate) const XML_WRITE_ERROR: &str = "Couldn't write to xml file";
 
 #[derive(Clone)]
 pub struct XMLWriter {
@@ -445,7 +445,7 @@ mod tests {
     #[test]
     fn test_xml_data_element_with_escapes_non_ascii() {
         let expected = r#"<foo span="8" text="Ы&amp;&lt;&gt;&quot;&#xA;">Ы&amp;&lt;&gt;"</foo>"#;
-        let attributes = vec![("span", "8".to_string()), ("text", "Ы&<>\"\n".to_owned())];
+        let attributes = vec![("span", "8".to_string()), ("text", "Ы&<>\"\n".to_string())];
 
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "Ы&<>\"", &attributes);
