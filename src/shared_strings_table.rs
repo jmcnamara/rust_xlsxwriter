@@ -8,7 +8,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 //
 // A metadata struct to store Excel unique strings between worksheets.
@@ -16,7 +16,7 @@ use std::collections::HashMap;
 pub struct SharedStringsTable {
     pub count: u32,
     pub unique_count: u32,
-    pub strings: HashMap<String, u32>,
+    pub strings: HashMap<Rc<str>, u32>,
 }
 
 impl SharedStringsTable {
@@ -34,20 +34,14 @@ impl SharedStringsTable {
     }
 
     // Get the index of the string in the Shared String table.
-    pub(crate) fn shared_string_index(&mut self, key: &str) -> u32 {
-        match self.strings.get(key) {
-            Some(value) => {
-                self.count += 1;
-                *value
-            }
-            None => {
-                let index = self.unique_count;
-                self.strings.insert(key.to_string(), self.unique_count);
-                self.count += 1;
-                self.unique_count += 1;
-                index
-            }
-        }
+    pub(crate) fn shared_string_index(&mut self, key: Rc<str>) -> u32 {
+        let index = *self.strings.entry(key).or_insert_with(|| {
+            let index = self.unique_count;
+            self.unique_count += 1;
+            index
+        });
+        self.count += 1;
+        index
     }
 }
 
@@ -63,26 +57,26 @@ mod tests {
     fn test_shared_string_table() {
         let mut string_table = SharedStringsTable::new();
 
-        let index = string_table.shared_string_index("neptune");
+        let index = string_table.shared_string_index("neptune".into());
         assert_eq!(index, 0);
 
-        let index = string_table.shared_string_index("neptune");
+        let index = string_table.shared_string_index("neptune".into());
         assert_eq!(index, 0);
 
-        let index = string_table.shared_string_index("neptune");
+        let index = string_table.shared_string_index("neptune".into());
         assert_eq!(index, 0);
 
-        let index = string_table.shared_string_index("mars");
+        let index = string_table.shared_string_index("mars".into());
         assert_eq!(index, 1);
 
-        let index = string_table.shared_string_index("venus");
+        let index = string_table.shared_string_index("venus".into());
         assert_eq!(index, 2);
 
-        let index = string_table.shared_string_index("mars");
+        let index = string_table.shared_string_index("mars".into());
 
         assert_eq!(index, 1);
 
-        let index = string_table.shared_string_index("venus");
+        let index = string_table.shared_string_index("venus".into());
         assert_eq!(index, 2);
     }
 }

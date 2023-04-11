@@ -366,13 +366,10 @@ mod worksheet_tests {
             ),
         ];
 
-        for test_data in formulas.iter() {
-            let mut formula = test_data.0.to_string();
-            let expected = test_data.1;
+        for &(formula, expected) in &formulas {
+            let prepared_formula = prepare_formula(formula, true);
 
-            formula = prepare_formula(&formula, true);
-
-            assert_eq!(formula, expected);
+            assert_eq!(prepared_formula.as_ref(), expected);
         }
     }
 
