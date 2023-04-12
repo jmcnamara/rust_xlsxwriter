@@ -116,6 +116,7 @@ pub struct Chart {
     pub(crate) decorative: bool,
     pub(crate) drawing_type: DrawingType,
     pub(crate) series: Vec<ChartSeries>,
+    pub(crate) default_label_position: ChartDataLabelPosition,
     height: f64,
     width: f64,
     scale_width: f64,
@@ -233,6 +234,7 @@ impl Chart {
             style: 2,
             hole_size: 50,
             rotation: 0,
+            default_label_position: ChartDataLabelPosition::Default,
         };
 
         match chart_type {
@@ -1219,6 +1221,8 @@ impl Chart {
             self.default_num_format = "0%".to_string();
         }
 
+        self.default_label_position = ChartDataLabelPosition::Center;
+
         self
     }
 
@@ -1248,6 +1252,8 @@ impl Chart {
             self.overlap = 100;
         }
 
+        self.default_label_position = ChartDataLabelPosition::OutsideEnd;
+
         self
     }
 
@@ -1274,12 +1280,16 @@ impl Chart {
             self.overlap = 100;
         }
 
+        self.default_label_position = ChartDataLabelPosition::OutsideEnd;
+
         self
     }
 
     // Initialize doughnut charts.
     fn initialize_doughnut_chart(mut self) -> Chart {
         self.chart_group_type = ChartType::Doughnut;
+
+        self.default_label_position = ChartDataLabelPosition::BestFit;
 
         self
     }
@@ -1305,12 +1315,16 @@ impl Chart {
             self.default_num_format = "0%".to_string();
         }
 
+        self.default_label_position = ChartDataLabelPosition::Right;
+
         self
     }
 
     // Initialize pie charts.
     fn initialize_pie_chart(mut self) -> Chart {
         self.chart_group_type = ChartType::Pie;
+
+        self.default_label_position = ChartDataLabelPosition::BestFit;
 
         self
     }
@@ -1324,6 +1338,8 @@ impl Chart {
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
         self.chart_group_type = ChartType::Radar;
+
+        self.default_label_position = ChartDataLabelPosition::Center;
 
         self
     }
@@ -1340,6 +1356,8 @@ impl Chart {
 
         self.chart_group_type = ChartType::Scatter;
         self.default_cross_between = false;
+
+        self.default_label_position = ChartDataLabelPosition::Right;
 
         self
     }
@@ -1753,6 +1771,11 @@ impl Chart {
                 self.write_d_pt(&series.points);
             }
 
+            if let Some(data_label) = &series.data_label {
+                // Write the c:dLbls element.
+                self.write_data_labels(data_label);
+            }
+
             // Write the c:cat element.
             if series.category_range.has_data() {
                 self.category_has_num_format = true;
@@ -1802,6 +1825,11 @@ impl Chart {
                 self.write_d_pt(&series.points);
             }
 
+            if let Some(data_label) = &series.data_label {
+                // Write the c:dLbls element.
+                self.write_data_labels(data_label);
+            }
+
             self.write_x_val(&series.category_range, &series.category_cache_data);
 
             self.write_y_val(&series.value_range, &series.value_cache_data);
@@ -1832,10 +1860,8 @@ impl Chart {
                     self.writer.xml_start_tag("c:marker");
                 }
 
-                if point.format.has_formatting() {
-                    // Write the c:spPr formatting element.
-                    self.write_sp_pr(&point.format);
-                }
+                // Write the c:spPr formatting element.
+                self.write_sp_pr(&point.format);
 
                 if has_marker {
                     self.writer.xml_end_tag("c:marker");
@@ -2368,6 +2394,102 @@ impl Chart {
         self.writer.xml_end_tag("c:marker");
     }
 
+    // Write the <c:dLbls> element.
+    fn write_data_labels(&mut self, data_label: &ChartDataLabel) {
+        self.writer.xml_start_tag("c:dLbls");
+
+        // Write the c:spPr formatting element.
+        self.write_sp_pr(&data_label.format);
+
+        if data_label.position != ChartDataLabelPosition::Default
+            && data_label.position != self.default_label_position
+        {
+            // Write the c:dLblPos element.
+            self.write_d_lbl_pos(data_label.position);
+        }
+
+        if data_label.show_value {
+            // Write the c:showVal element.
+            self.write_show_val();
+        }
+
+        if data_label.show_category_name {
+            // Write the c:showCatName element.
+            self.write_show_category_name();
+        }
+
+        if data_label.show_series_name {
+            // Write the c:showSerName element.
+            self.write_show_series_name();
+        }
+
+        if data_label.show_percentage {
+            // Write the c:showPercent element.
+            self.write_show_percent();
+        }
+
+        if data_label.separator != ',' {
+            // Write the c:separator element.
+            self.write_separator(data_label.separator);
+        }
+
+        if data_label.show_leader_lines {
+            // Write the c:showLeaderLines element.
+            self.write_show_leader_lines();
+        }
+
+        self.writer.xml_end_tag("c:dLbls");
+    }
+
+    // Write the <c:showVal> element.
+    fn write_show_val(&mut self) {
+        let attributes = [("val", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:showVal", &attributes);
+    }
+
+    // Write the <c:showCatName> element.
+    fn write_show_category_name(&mut self) {
+        let attributes = [("val", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:showCatName", &attributes);
+    }
+
+    // Write the <c:showSerName> element.
+    fn write_show_series_name(&mut self) {
+        let attributes = [("val", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:showSerName", &attributes);
+    }
+
+    // Write the <c:showPercent> element.
+    fn write_show_percent(&mut self) {
+        let attributes = [("val", "1".to_string())];
+
+        self.writer.xml_empty_tag_attr("c:showPercent", &attributes);
+    }
+
+    // Write the <c:separator> element.
+    fn write_separator(&mut self, separator: char) {
+        self.writer
+            .xml_data_element("c:separator", &format!("{separator} "));
+    }
+
+    // Write the <c:showLeaderLines> element.
+    fn write_show_leader_lines(&mut self) {
+        let attributes = [("val", "1".to_string())];
+
+        self.writer
+            .xml_empty_tag_attr("c:showLeaderLines", &attributes);
+    }
+
+    // Write the <c:dLblPos> element.
+    fn write_d_lbl_pos(&mut self, position: ChartDataLabelPosition) {
+        let attributes = [("val", position.to_string())];
+
+        self.writer.xml_empty_tag_attr("c:dLblPos", &attributes);
+    }
+
     // Write the <c:symbol> element.
     fn write_symbol(&mut self, marker: &ChartMarker) {
         let mut attributes = vec![];
@@ -2631,6 +2753,14 @@ impl Chart {
             // Write the <a:bgClr> element.
             self.writer.xml_start_tag("a:bgClr");
             self.write_color(fill.background_color, 0);
+            self.writer.xml_end_tag("a:bgClr");
+        } else if fill.background_color == XlsxColor::Default
+            && fill.foreground_color != XlsxColor::Default
+        {
+            // If there is a foreground color but no background color then we
+            // need to write a default background color.
+            self.writer.xml_start_tag("a:bgClr");
+            self.write_color(XlsxColor::White, 0);
             self.writer.xml_end_tag("a:bgClr");
         }
 
@@ -3184,6 +3314,7 @@ pub struct ChartSeries {
     pub(crate) title: ChartTitle,
     pub(crate) format: ChartFormat,
     pub(crate) marker: Option<ChartMarker>,
+    pub(crate) data_label: Option<ChartDataLabel>,
     pub(crate) points: Vec<ChartPoint>,
     pub(crate) gap: u16,
     pub(crate) overlap: i8,
@@ -3290,6 +3421,7 @@ impl ChartSeries {
             title: ChartTitle::new(),
             format: ChartFormat::new(),
             marker: None,
+            data_label: None,
             points: vec![],
             gap: 150,
             overlap: 0,
@@ -3649,6 +3781,13 @@ impl ChartSeries {
     ///
     pub fn set_marker(&mut self, marker: &ChartMarker) -> &mut ChartSeries {
         self.marker = Some(marker.clone());
+        self
+    }
+
+    /// TODO
+    ///
+    pub fn set_data_label(&mut self, data_label: &ChartDataLabel) -> &mut ChartSeries {
+        self.data_label = Some(data_label.clone());
         self
     }
 
@@ -4702,6 +4841,231 @@ impl ToString for ChartMarkerType {
             ChartMarkerType::Triangle => "triangle".to_string(),
             ChartMarkerType::LongDash => "long_dash".to_string(),
             ChartMarkerType::ShortDash => "short_dash".to_string(),
+        }
+    }
+}
+
+/// A struct to represent a Chart data label.
+///
+/// The [`ChartDataLabel`] struct represents the properties of the data labels
+/// for a Radar chart. In Excel a data label can be added to a chart series to
+/// indicate the values of the plotted data points.
+///
+/// TODO
+///
+#[derive(Clone)]
+pub struct ChartDataLabel {
+    pub(crate) format: ChartFormat,
+    pub(crate) show_value: bool,
+    pub(crate) show_category_name: bool,
+    pub(crate) show_series_name: bool,
+    pub(crate) show_leader_lines: bool,
+    pub(crate) show_percentage: bool,
+    pub(crate) position: ChartDataLabelPosition,
+    pub(crate) separator: char,
+}
+
+#[allow(clippy::new_without_default)]
+impl ChartDataLabel {
+    /// Create a new `ChartDataLabel` object to represent a Chart data label.
+    ///
+    pub fn new() -> ChartDataLabel {
+        ChartDataLabel {
+            format: ChartFormat::new(),
+            show_value: false,
+            show_category_name: false,
+            show_series_name: false,
+            show_leader_lines: false,
+            show_percentage: false,
+            position: ChartDataLabelPosition::Default,
+            separator: ',',
+        }
+    }
+
+    /// todo
+    pub fn show_value(&mut self) -> &mut ChartDataLabel {
+        self.show_value = true;
+        self
+    }
+
+    /// todo
+    pub fn show_series_name(&mut self) -> &mut ChartDataLabel {
+        self.show_series_name = true;
+        self
+    }
+
+    /// todo
+    pub fn show_category_name(&mut self) -> &mut ChartDataLabel {
+        self.show_category_name = true;
+        self
+    }
+
+    /// todo
+    pub fn show_leader_lines(&mut self) -> &mut ChartDataLabel {
+        self.show_leader_lines = true;
+        self
+    }
+
+    /// todo
+    pub fn set_position(&mut self, position: ChartDataLabelPosition) -> &mut ChartDataLabel {
+        self.position = position;
+        self
+    }
+
+    /// todo
+    pub fn set_separator(&mut self, separator: char) -> &mut ChartDataLabel {
+        // Accept valid separators only apart from comma which is the default.
+        if ";. \n".contains(separator) {
+            self.separator = separator;
+        }
+
+        self
+    }
+
+    /// Display the chart value as a percentage.
+    ///
+    /// This method is used to turn on the display of data labels as a
+    /// percentage for a series. It is mainly used for pie charts.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the percentage for the data labels of a chart
+    /// series. Usually this only applies to a Pie or Doughnut chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_data_labels_show_percentage.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 15)?;
+    /// #     worksheet.write(1, 0, 15)?;
+    /// #     worksheet.write(2, 0, 30)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Pie);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$3")
+    ///         .set_data_label(ChartDataLabel::new().show_percentage());
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_data_labels_show_percentage.png">
+    ///
+    pub fn show_percentage(&mut self) -> &mut ChartDataLabel {
+        self.show_percentage = true;
+        self
+    }
+
+    /// Set the formatting properties for a chart data label.
+    ///
+    /// Set the formatting properties for a chart data label via a [`ChartFormat`]
+    /// object or a sub struct that implements [`IntoChartFormat`].
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Arguments
+    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
+    ///
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartDataLabel
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
+        self
+    }
+}
+
+/// Enum to define the Chart Data Label Position.
+///
+/// In Excel the available data label positions vary for different chart
+/// types. The available, and default, positions are:
+///
+/// | Position      | Line, Scatter | Bar, Column   | Pie, Doughnut | Area, Radar   |
+/// | :------------ | :------------ | :------------ | :------------ | :------------ |
+/// | `Center`      | Yes           | Yes           | Yes           | Yes (default) |
+/// | `Right`       | Yes (default) |               |               |               |
+/// | `Left`        | Yes           |               |               |               |
+/// | `Above`       | Yes           |               |               |               |
+/// | `Below`       | Yes           |               |               |               |
+/// | `InsideBase`  |               | Yes           |               |               |
+/// | `InsideEnd`   |               | Yes           | Yes           |               |
+/// | `OutsideEnd`  |               | Yes (default) | Yes           |               |
+/// | `BestFit`     |               |               | Yes (default) |               |
+///
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ChartDataLabelPosition {
+    /// Series data label position: Default position.
+    Default,
+
+    /// Series data label position: Center.
+    Center,
+
+    /// Series data label position: Right.
+    Right,
+
+    /// Series data label position: Left.
+    Left,
+
+    /// Series data label position: Above.
+    Above,
+
+    /// Series data label position: Below.
+    Below,
+
+    /// Series data label position: Inside base.
+    InsideBase,
+
+    /// Series data label position: Inside end.
+    InsideEnd,
+
+    /// Series data label position: Outside end.
+    OutsideEnd,
+
+    /// Series data label position: Best fit.
+    BestFit,
+}
+
+impl ToString for ChartDataLabelPosition {
+    fn to_string(&self) -> String {
+        match self {
+            ChartDataLabelPosition::Left => "l".to_string(),
+            ChartDataLabelPosition::Right => "r".to_string(),
+            ChartDataLabelPosition::Above => "t".to_string(),
+            ChartDataLabelPosition::Below => "b".to_string(),
+            ChartDataLabelPosition::Center => "ctr".to_string(),
+            ChartDataLabelPosition::Default => "".to_string(),
+            ChartDataLabelPosition::BestFit => "bestFit".to_string(),
+            ChartDataLabelPosition::InsideEnd => "inEnd".to_string(),
+            ChartDataLabelPosition::InsideBase => "inBase".to_string(),
+            ChartDataLabelPosition::OutsideEnd => "outEnd".to_string(),
         }
     }
 }
