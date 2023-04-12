@@ -102,6 +102,13 @@
 //! [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
 //! [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 //!
+//! ## Features
+//!
+//! - `default`: Includes all the standard functionality. Has dependencies on `zip`
+//! and `chrono` and on `regex`, `itertools` and `lazy_static`.
+//! - `zlib`: Adds dependency on zlib and a C compiler. This includes the same
+//! features as `default` but is 1.5x faster for large files.
+//! - `test-resave`: Developer only testing feature.
 //!
 //! # See also
 //!
@@ -112,12 +119,14 @@
 //!        expense data to a spreadsheet.
 //!     - [Cookbook Examples].
 //! - [Release Notes].
+//! - [Roadmap of planned features].
 //!
 //! [User Guide]: https://rustxlsxwriter.github.io/index.html
 //! [Getting started]: https://rustxlsxwriter.github.io/getting_started.html
 //! [Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
 //! [Cookbook Examples]: https://rustxlsxwriter.github.io/examples/intro.html
 //! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
+//! [Roadmap of planned features]: https://github.com/jmcnamara/rust_xlsxwriter/issues/1
 //!
 mod app;
 mod chart;

@@ -5,6 +5,27 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.34.0] - 2023-04-12
+
+Performance improvement release.
+
+## Added
+
+- Added optimizations across the library. For larger files this version is 10%
+  faster than previous versions.
+
+  These optimizations were provided by Adrián Delgado, see [GitHub Issue #23].
+
+- Added crate feature `zlib` which adds a dependency on zlib and a C compiler
+  but is around 1.6x faster for larger files. With this feature enabled it is
+  even faster than the native C version libxlsxwriter by around 1.4x for large
+  files.
+
+  See also the [Performance] section of the user guide.
+
+[GitHub Issue #23]: https://github.com/jmcnamara/rust_xlsxwriter/issues/23
+[Performance]: https://rustxlsxwriter.github.io/performance.html
+
 ## [0.33.0] - 2023-04-10
 
 ### Added

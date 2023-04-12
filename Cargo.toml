@@ -7,7 +7,7 @@ repository = "https://github.com/jmcnamara/rust_xlsxwriter"
 keywords = ["excel", "xlsx"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.33.0"
+version = "0.34.0"
 edition = "2021"
 
 [dependencies]
@@ -21,14 +21,20 @@ lazy_static = "1.4.0"
 pretty_assertions = "1.3.0"
 
 [features]
+# `default`: Includes all the standard functionality.
 default = []
+
+# `zlib`: Adds dependency on zlib and a C compiler. This includes the same
+#  features as `default` but is 1.5x faster for large files.
 zlib = ["zip/deflate-zlib"]
+
+# `test-resave`: Developer only testing feature.
 test-resave = []
 
-
+[package.metadata.commands]
 # Some local package management and release check commands.
 # Uses Cargo Commander.
-[package.metadata.commands]
+
 spellcheck = {cmd = [
     "for f in src/*.rs; do aspell --lang=en_US --check $f; done",
     "for f in examples/*.rs; do aspell --lang=en_US --check $f; done",

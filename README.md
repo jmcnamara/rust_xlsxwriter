@@ -96,9 +96,17 @@ frequently.
 [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
 [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 
+## Features
+
+- `default`: Includes all the standard functionality. Has dependencies on `zip`
+  and `chrono` and on `regex`, `itertools` and `lazy_static`.
+- `zlib`: Adds dependency on zlib and a C compiler. This includes the same
+  features as `default` but is 1.5x faster for large files.
+- `test-resave`: Developer only testing feature.
+
 ## Release notes
 
-[Release Notes and Changelog].
+[Release Notes and Changelog]
 
 ## See also
 
@@ -108,9 +116,10 @@ frequently.
     - [Tutorial]: A larger example of using `rust_xlsxwriter` to write some
        expense data to a spreadsheet.
     - [Cookbook Examples].
-- [The rust_xlsxwriter crate]
-- [The rust_xlsxwriter API docs at docs.rs]
-- [The rust_xlsxwriter repository]
+- [The rust_xlsxwriter crate].
+- [The rust_xlsxwriter API docs at docs.rs].
+- [The rust_xlsxwriter repository].
+- [Roadmap of planned features].
 
 [User Guide]: https://rustxlsxwriter.github.io/index.html
 [Getting started]: https://rustxlsxwriter.github.io/getting_started.html
@@ -120,3 +129,4 @@ frequently.
 [The rust_xlsxwriter API docs at docs.rs]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
 [The rust_xlsxwriter repository]: https://github.com/jmcnamara/rust_xlsxwriter
 [Release Notes and Changelog]: https://rustxlsxwriter.github.io/changelog.html
+[Roadmap of planned features]: https://github.com/jmcnamara/rust_xlsxwriter/issues/1
