@@ -31,7 +31,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_data_label(
             ChartDataLabel::new()
                 .show_value()
-                .show_category_name()
+                .show_x_value() // Alternative method name.
                 .set_separator('Z'), // Should be ignored.
         );
 

@@ -37,6 +37,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .show_value()
                 .show_category_name()
                 .show_series_name()
+                .show_legend_key()
                 .set_separator(';')
                 .set_position(ChartDataLabelPosition::OutsideEnd),
         );

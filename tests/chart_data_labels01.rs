@@ -12,7 +12,7 @@ use rust_xlsxwriter::{
 mod common;
 
 // Test to demonstrate charts.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -52,11 +52,110 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test to demonstrate charts. Test default values.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    // Add some test data for the chart(s).
+    let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
+    for (row_num, row_data) in data.iter().enumerate() {
+        for (col_num, col_data) in row_data.iter().enumerate() {
+            worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+        }
+    }
+
+    let mut chart = Chart::new(ChartType::Column);
+    chart.set_axis_ids(45848832, 47718784);
+    chart
+        .add_series()
+        .set_values(("Sheet1", 0, 0, 4, 0))
+        .set_data_label(ChartDataLabel::new().set_position(ChartDataLabelPosition::OutsideEnd));
+    chart
+        .add_series()
+        .set_values(("Sheet1", 0, 1, 4, 1))
+        .set_data_label(ChartDataLabel::new().set_position(ChartDataLabelPosition::InsideBase));
+    chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
+
+    worksheet.insert_chart(8, 4, &chart)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test to demonstrate charts. Test alternative method name.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    // Add some test data for the chart(s).
+    let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
+    for (row_num, row_data) in data.iter().enumerate() {
+        for (col_num, col_data) in row_data.iter().enumerate() {
+            worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+        }
+    }
+
+    let mut chart = Chart::new(ChartType::Column);
+    chart.set_axis_ids(45848832, 47718784);
+    chart
+        .add_series()
+        .set_values(("Sheet1", 0, 0, 4, 0))
+        .set_data_label(
+            ChartDataLabel::new()
+                .show_y_value()
+                .set_position(ChartDataLabelPosition::OutsideEnd),
+        );
+    chart
+        .add_series()
+        .set_values(("Sheet1", 0, 1, 4, 1))
+        .set_data_label(
+            ChartDataLabel::new()
+                .show_y_value()
+                .set_position(ChartDataLabelPosition::InsideBase),
+        );
+    chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
+
+    worksheet.insert_chart(8, 4, &chart)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_chart_data_labels01() {
+fn test_chart_data_labels01_1() {
     let test_runner = common::TestRunner::new()
         .set_name("chart_data_labels01")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_chart_data_labels01_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("chart_data_labels01")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_chart_data_labels01_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("chart_data_labels01")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

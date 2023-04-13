@@ -145,6 +145,22 @@ documentation and generally show how an individual function works.
 * doc_chart_axis_set_name.rs - A chart example demonstrating setting the
   title of chart axes.
 
+* doc_chart_data_labels.rs - An example of adding data labels to a chart
+  series.
+
+* doc_chart_data_labels_set_format.rs - An example of adding data labels to
+  a chart series with formatting.
+
+* doc_chart_data_labels_set_position.rs - An example of adding data labels
+  to a chart series and changing their default position.
+
+* doc_chart_data_labels_show_category_name.rs - An example of adding data
+  labels to a chart series with value and category details.
+
+* doc_chart_data_labels_show_percentage.rs - An example of setting the
+  percentage for the data labels of a chart series. Usually this only
+  applies to a Pie or Doughnut chart.
+
 * doc_chart_format_set_no_border.rs - An example of turning off the border
   of a chart element.
 
