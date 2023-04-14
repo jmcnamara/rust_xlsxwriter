@@ -52,11 +52,9 @@ impl XMLWriter {
 
     // Write an XML file declaration.
     pub(crate) fn xml_declaration(&mut self) {
-        writeln!(
-            &mut self.xmlfile,
-            r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>"#
-        )
-        .expect(XML_WRITE_ERROR);
+        self.xmlfile
+            .write_all(b"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n")
+            .expect(XML_WRITE_ERROR);
     }
 
     // Write an XML start tag without attributes.
@@ -69,16 +67,13 @@ impl XMLWriter {
     where
         T: IntoAttribute,
     {
-        let approx_len = tag.len() + 6 * attributes.len() + 2;
-        self.xmlfile.get_mut().reserve(approx_len);
-
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
             attribute.write_to(&mut self.xmlfile);
         }
 
-        write!(&mut self.xmlfile, ">").expect(XML_WRITE_ERROR);
+        self.xmlfile.write_all(b">").expect(XML_WRITE_ERROR);
     }
 
     // Write an XML end tag.
@@ -96,16 +91,13 @@ impl XMLWriter {
     where
         T: IntoAttribute,
     {
-        let approx_len = tag.len() + 6 * attributes.len() + 3;
-        self.xmlfile.get_mut().reserve(approx_len);
-
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
             attribute.write_to(&mut self.xmlfile);
         }
 
-        write!(&mut self.xmlfile, "/>").expect(XML_WRITE_ERROR);
+        self.xmlfile.write_all(b"/>").expect(XML_WRITE_ERROR);
     }
 
     // Write an XML element containing data without attributes.
@@ -128,9 +120,6 @@ impl XMLWriter {
     ) where
         T: IntoAttribute,
     {
-        let approx_len = 2 * tag.len() + 6 * attributes.len() + data.len() + 5;
-        self.xmlfile.get_mut().reserve(approx_len);
-
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
