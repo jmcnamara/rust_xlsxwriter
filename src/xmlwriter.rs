@@ -65,20 +65,17 @@ impl XMLWriter {
     }
 
     // Write an XML start tag with attributes.
-    pub(crate) fn xml_start_tag_attr(&mut self, tag: &str, attributes: &[(&str, String)]) {
+    pub(crate) fn xml_start_tag_attr<T>(&mut self, tag: &str, attributes: &[T])
+    where
+        T: IntoAttribute,
+    {
         let approx_len = tag.len() + 6 * attributes.len() + 2;
         self.xmlfile.get_mut().reserve(approx_len);
 
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
-            write!(
-                &mut self.xmlfile,
-                r#" {}="{}""#,
-                attribute.0,
-                escape_attributes(&attribute.1)
-            )
-            .expect(XML_WRITE_ERROR);
+            attribute.write_to(&mut self.xmlfile);
         }
 
         write!(&mut self.xmlfile, ">").expect(XML_WRITE_ERROR);
@@ -95,20 +92,17 @@ impl XMLWriter {
     }
 
     // Write an empty XML tag with attributes.
-    pub(crate) fn xml_empty_tag_attr(&mut self, tag: &str, attributes: &[(&str, String)]) {
+    pub(crate) fn xml_empty_tag_attr<T>(&mut self, tag: &str, attributes: &[T])
+    where
+        T: IntoAttribute,
+    {
         let approx_len = tag.len() + 6 * attributes.len() + 3;
         self.xmlfile.get_mut().reserve(approx_len);
 
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
-            write!(
-                &mut self.xmlfile,
-                r#" {}="{}""#,
-                attribute.0,
-                escape_attributes(&attribute.1)
-            )
-            .expect(XML_WRITE_ERROR);
+            attribute.write_to(&mut self.xmlfile);
         }
 
         write!(&mut self.xmlfile, "/>").expect(XML_WRITE_ERROR);
@@ -325,6 +319,23 @@ fn escape_xml_escapes(si_string: &str) -> Cow<str> {
     XML_ESCAPE.replace_all(si_string, "_x005F$1")
 }
 
+// Trait to write attribute tuple values to an XML file.
+pub(crate) trait IntoAttribute {
+    fn write_to(&self, xmlfile: &mut Cursor<Vec<u8>>);
+}
+
+impl IntoAttribute for (&str, &str) {
+    fn write_to(&self, xmlfile: &mut Cursor<Vec<u8>>) {
+        write!(xmlfile, r#" {}="{}""#, self.0, escape_attributes(self.1)).expect(XML_WRITE_ERROR);
+    }
+}
+
+impl IntoAttribute for (&str, String) {
+    fn write_to(&self, xmlfile: &mut Cursor<Vec<u8>>) {
+        write!(xmlfile, r#" {}="{}""#, self.0, escape_attributes(&self.1)).expect(XML_WRITE_ERROR);
+    }
+}
+
 // -----------------------------------------------------------------------
 // Tests.
 // -----------------------------------------------------------------------
@@ -358,7 +369,7 @@ mod tests {
     #[test]
     fn test_xml_start_tag_without_attributes_implicit() {
         let expected = "<foo>";
-        let attributes = vec![];
+        let attributes: Vec<(&str, &str)> = vec![];
 
         let mut writer = XMLWriter::new();
         writer.xml_start_tag_attr("foo", &attributes);
