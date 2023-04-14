@@ -61,15 +61,9 @@ impl Vml {
     // Write the <xml> element.
     fn write_xml_namespace(&mut self) {
         let attributes = [
-            ("xmlns:v", "urn:schemas-microsoft-com:vml".to_string()),
-            (
-                "xmlns:o",
-                "urn:schemas-microsoft-com:office:office".to_string(),
-            ),
-            (
-                "xmlns:x",
-                "urn:schemas-microsoft-com:office:excel".to_string(),
-            ),
+            ("xmlns:v", "urn:schemas-microsoft-com:vml"),
+            ("xmlns:o", "urn:schemas-microsoft-com:office:office"),
+            ("xmlns:x", "urn:schemas-microsoft-com:office:excel"),
         ];
 
         self.writer.xml_start_tag_attr("xml", &attributes);
@@ -77,7 +71,7 @@ impl Vml {
 
     // Write the <o:shapelayout> element.
     fn write_shapelayout(&mut self) {
-        let attributes = [("v:ext", "edit".to_string())];
+        let attributes = [("v:ext", "edit")];
 
         self.writer.xml_start_tag_attr("o:shapelayout", &attributes);
 
@@ -100,13 +94,13 @@ impl Vml {
     // Write the <v:shapetype> element.
     fn write_image_shapetype(&mut self) {
         let attributes = [
-            ("id", "_x0000_t75".to_string()),
-            ("coordsize", "21600,21600".to_string()),
-            ("o:spt", "75".to_string()),
-            ("o:preferrelative", "t".to_string()),
-            ("path", "m@4@5l@4@11@9@11@9@5xe".to_string()),
-            ("filled", "f".to_string()),
-            ("stroked", "f".to_string()),
+            ("id", "_x0000_t75"),
+            ("coordsize", "21600,21600"),
+            ("o:spt", "75"),
+            ("o:preferrelative", "t"),
+            ("path", "m@4@5l@4@11@9@11@9@5xe"),
+            ("filled", "f"),
+            ("stroked", "f"),
         ];
 
         self.writer.xml_start_tag_attr("v:shapetype", &attributes);
@@ -128,7 +122,7 @@ impl Vml {
 
     // Write the <v:stroke> element.
     fn write_stroke(&mut self) {
-        let attributes = [("joinstyle", "miter".to_string())];
+        let attributes = [("joinstyle", "miter")];
 
         self.writer.xml_empty_tag_attr("v:stroke", &attributes);
     }
@@ -162,9 +156,9 @@ impl Vml {
     // Write the <v:path> element.
     fn write_path(&mut self) {
         let attributes = [
-            ("o:extrusionok", "f".to_string()),
-            ("gradientshapeok", "t".to_string()),
-            ("o:connecttype", "rect".to_string()),
+            ("o:extrusionok", "f"),
+            ("gradientshapeok", "t"),
+            ("o:connecttype", "rect"),
         ];
 
         self.writer.xml_empty_tag_attr("v:path", &attributes);
@@ -172,10 +166,7 @@ impl Vml {
 
     // Write the <o:lock> element.
     fn write_shapetype_lock(&mut self) {
-        let attributes = [
-            ("v:ext", "edit".to_string()),
-            ("aspectratio", "t".to_string()),
-        ];
+        let attributes = [("v:ext", "edit"), ("aspectratio", "t")];
 
         self.writer.xml_empty_tag_attr("o:lock", &attributes);
     }

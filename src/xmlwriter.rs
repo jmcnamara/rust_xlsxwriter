@@ -120,25 +120,17 @@ impl XMLWriter {
         .expect(XML_WRITE_ERROR);
     }
     // Write an XML element containing data with attributes.
-    pub(crate) fn xml_data_element_attr(
-        &mut self,
-        tag: &str,
-        data: &str,
-        attributes: &[(&str, String)],
-    ) {
+    pub(crate) fn xml_data_element_attr<T>(&mut self, tag: &str, data: &str, attributes: &[T])
+    where
+        T: IntoAttribute,
+    {
         let approx_len = 2 * tag.len() + 6 * attributes.len() + data.len() + 5;
         self.xmlfile.get_mut().reserve(approx_len);
 
         write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
 
         for attribute in attributes {
-            write!(
-                &mut self.xmlfile,
-                r#" {}="{}""#,
-                attribute.0,
-                escape_attributes(&attribute.1)
-            )
-            .expect(XML_WRITE_ERROR);
+            attribute.write_to(&mut self.xmlfile);
         }
 
         write!(&mut self.xmlfile, ">{}</{}>", escape_data(data), tag).expect(XML_WRITE_ERROR);
@@ -381,7 +373,7 @@ mod tests {
     #[test]
     fn test_xml_start_tag_with_attributes() {
         let expected = r#"<foo span="8" baz="7">"#;
-        let attributes = vec![("span", "8".to_string()), ("baz", "7".to_string())];
+        let attributes = vec![("span", "8"), ("baz", "7")];
 
         let mut writer = XMLWriter::new();
         writer.xml_start_tag_attr("foo", &attributes);
@@ -417,7 +409,7 @@ mod tests {
     #[test]
     fn test_xml_empty_tag_with_attributes() {
         let expected = r#"<foo span="8"/>"#;
-        let attributes = [("span", "8".to_string())];
+        let attributes = [("span", "8")];
 
         let mut writer = XMLWriter::new();
 
@@ -441,7 +433,7 @@ mod tests {
     #[test]
     fn test_xml_data_element_with_attributes() {
         let expected = r#"<foo span="8">bar</foo>"#;
-        let attributes = [("span", "8".to_string())];
+        let attributes = [("span", "8")];
 
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "bar", &attributes);
@@ -453,7 +445,7 @@ mod tests {
     #[test]
     fn test_xml_data_element_with_escapes() {
         let expected = r#"<foo span="8">&amp;&lt;&gt;"</foo>"#;
-        let attributes = vec![("span", "8".to_string())];
+        let attributes = vec![("span", "8")];
 
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "&<>\"", &attributes);
@@ -465,7 +457,7 @@ mod tests {
     #[test]
     fn test_xml_data_element_with_escapes_non_ascii() {
         let expected = r#"<foo span="8" text="Ы&amp;&lt;&gt;&quot;&#xA;">Ы&amp;&lt;&gt;"</foo>"#;
-        let attributes = vec![("span", "8".to_string()), ("text", "Ы&<>\"\n".to_string())];
+        let attributes = vec![("span", "8"), ("text", "Ы&<>\"\n")];
 
         let mut writer = XMLWriter::new();
         writer.xml_data_element_attr("foo", "Ы&<>\"", &attributes);

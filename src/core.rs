@@ -137,7 +137,7 @@ impl Core {
 
     // Write the <dcterms:created> element.
     fn write_dcterms_created(&mut self) {
-        let attributes = [("xsi:type", "dcterms:W3CDTF".to_string())];
+        let attributes = [("xsi:type", "dcterms:W3CDTF")];
         let datetime = self
             .properties
             .creation_time
@@ -149,7 +149,7 @@ impl Core {
 
     // Write the <dcterms:modified> element.
     fn write_dcterms_modified(&mut self) {
-        let attributes = [("xsi:type", "dcterms:W3CDTF".to_string())];
+        let attributes = [("xsi:type", "dcterms:W3CDTF")];
 
         let datetime = self
             .properties

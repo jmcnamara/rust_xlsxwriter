@@ -7583,7 +7583,7 @@ impl Worksheet {
 
             let attributes =
                 if string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']) {
-                    vec![("xml:space", "preserve".to_string())]
+                    vec![("xml:space", "preserve")]
                 } else {
                     vec![]
                 };
@@ -8418,9 +8418,8 @@ impl Worksheet {
 
     // Write the <worksheet> element.
     fn write_worksheet(&mut self) {
-        let xmlns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string();
-        let xmlns_r =
-            "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string();
+        let xmlns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+        let xmlns_r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 
         let attributes = [("xmlns", xmlns), ("xmlns:r", xmlns_r)];
 
@@ -8464,7 +8463,7 @@ impl Worksheet {
             return;
         }
 
-        let attributes = [("fitToPage", "1".to_string())];
+        let attributes = [("fitToPage", "1")];
 
         self.writer.xml_empty_tag_attr("pageSetUpPr", &attributes);
     }
@@ -8653,7 +8652,7 @@ impl Worksheet {
 
     // Write the <sheetFormatPr> element.
     fn write_sheet_format_pr(&mut self) {
-        let attributes = [("defaultRowHeight", "15".to_string())];
+        let attributes = [("defaultRowHeight", "15")];
 
         self.writer.xml_empty_tag_attr("sheetFormatPr", &attributes);
     }

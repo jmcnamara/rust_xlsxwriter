@@ -51,11 +51,11 @@ impl Drawing {
         let attributes = [
             (
                 "xmlns:xdr",
-                "http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing".to_string(),
+                "http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing",
             ),
             (
                 "xmlns:a",
-                "http://schemas.openxmlformats.org/drawingml/2006/main".to_string(),
+                "http://schemas.openxmlformats.org/drawingml/2006/main",
             ),
         ];
 
@@ -179,30 +179,30 @@ impl Drawing {
     fn write_decorative(&mut self) {
         self.writer.xml_start_tag("a:extLst");
 
-        let attributes = [("uri", "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}".to_string())];
+        let attributes = [("uri", "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}")];
         self.writer.xml_start_tag_attr("a:ext", &attributes);
 
         let attributes = [
             (
                 "xmlns:a16",
-                "http://schemas.microsoft.com/office/drawing/2014/main".to_string(),
+                "http://schemas.microsoft.com/office/drawing/2014/main",
             ),
-            ("id", "{00000000-0008-0000-0000-000002000000}".to_string()),
+            ("id", "{00000000-0008-0000-0000-000002000000}"),
         ];
         self.writer
             .xml_empty_tag_attr("a16:creationId", &attributes);
 
         self.writer.xml_end_tag("a:ext");
 
-        let attributes = [("uri", "{C183D7F6-B498-43B3-948B-1728B52AA6E4}".to_string())];
+        let attributes = [("uri", "{C183D7F6-B498-43B3-948B-1728B52AA6E4}")];
         self.writer.xml_start_tag_attr("a:ext", &attributes);
 
         let attributes = [
             (
                 "xmlns:adec",
-                "http://schemas.microsoft.com/office/drawing/2017/decorative".to_string(),
+                "http://schemas.microsoft.com/office/drawing/2017/decorative",
             ),
-            ("val", "1".to_string()),
+            ("val", "1"),
         ];
         self.writer
             .xml_empty_tag_attr("adec:decorative", &attributes);
@@ -213,7 +213,7 @@ impl Drawing {
 
     // Write the <a:picLocks> element.
     fn write_a_pic_locks(&mut self) {
-        let attributes = [("noChangeAspect", "1".to_string())];
+        let attributes = [("noChangeAspect", "1")];
 
         self.writer.xml_empty_tag_attr("a:picLocks", &attributes);
     }
@@ -286,7 +286,7 @@ impl Drawing {
 
     // Write the <a:prstGeom> element.
     fn write_a_prst_geom(&mut self) {
-        let attributes = [("prst", "rect".to_string())];
+        let attributes = [("prst", "rect")];
 
         self.writer.xml_start_tag_attr("a:prstGeom", &attributes);
         self.writer.xml_empty_tag("a:avLst");
@@ -295,7 +295,7 @@ impl Drawing {
 
     // Write the <xdr:graphicFrame> element.
     fn write_graphic_frame(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        let attributes = [("macro", "".to_string())];
+        let attributes = [("macro", "")];
 
         self.writer
             .xml_start_tag_attr("xdr:graphicFrame", &attributes);
@@ -345,14 +345,14 @@ impl Drawing {
 
     // Write the <a:off> element.
     fn write_chart_a_off(&mut self) {
-        let attributes = [("x", "0".to_string()), ("y", "0".to_string())];
+        let attributes = [("x", "0"), ("y", "0")];
 
         self.writer.xml_empty_tag_attr("a:off", &attributes);
     }
 
     // Write the <a:ext> element.
     fn write_chart_a_ext(&mut self) {
-        let attributes = [("cx", "0".to_string()), ("cy", "0".to_string())];
+        let attributes = [("cx", "0"), ("cy", "0")];
 
         self.writer.xml_empty_tag_attr("a:ext", &attributes);
     }
@@ -371,7 +371,7 @@ impl Drawing {
     fn write_a_graphic_data(&mut self, index: u32) {
         let attributes = [(
             "uri",
-            "http://schemas.openxmlformats.org/drawingml/2006/chart".to_string(),
+            "http://schemas.openxmlformats.org/drawingml/2006/chart",
         )];
 
         self.writer.xml_start_tag_attr("a:graphicData", &attributes);

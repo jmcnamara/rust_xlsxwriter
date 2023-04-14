@@ -97,7 +97,7 @@ impl<'a> Styles<'a> {
     fn write_style_sheet(&mut self) {
         let attributes = [(
             "xmlns",
-            "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string(),
+            "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
         )];
 
         self.writer.xml_start_tag_attr("styleSheet", &attributes);
@@ -339,7 +339,7 @@ impl<'a> Styles<'a> {
         if xf_format.background_color == XlsxColor::Default
             || xf_format.background_color == XlsxColor::Automatic
         {
-            let attributes = [("indexed", "64".to_string())];
+            let attributes = [("indexed", "64")];
             self.writer.xml_empty_tag_attr("bgColor", &attributes);
         } else {
             let attributes = xf_format.background_color.attributes();
@@ -374,18 +374,15 @@ impl<'a> Styles<'a> {
                 self.writer.xml_start_tag("border");
             }
             FormatDiagonalBorder::BorderUp => {
-                let attributes = [("diagonalUp", "1".to_string())];
+                let attributes = [("diagonalUp", "1")];
                 self.writer.xml_start_tag_attr("border", &attributes);
             }
             FormatDiagonalBorder::BorderDown => {
-                let attributes = [("diagonalDown", "1".to_string())];
+                let attributes = [("diagonalDown", "1")];
                 self.writer.xml_start_tag_attr("border", &attributes);
             }
             FormatDiagonalBorder::BorderUpDown => {
-                let attributes = [
-                    ("diagonalUp", "1".to_string()),
-                    ("diagonalDown", "1".to_string()),
-                ];
+                let attributes = [("diagonalUp", "1"), ("diagonalDown", "1")];
                 self.writer.xml_start_tag_attr("border", &attributes);
             }
         }
@@ -462,10 +459,10 @@ impl<'a> Styles<'a> {
     // Write the style <xf> element for the "Normal" style.
     fn write_normal_style_xf(&mut self) {
         let attributes = [
-            ("numFmtId", "0".to_string()),
-            ("fontId", "0".to_string()),
-            ("fillId", "0".to_string()),
-            ("borderId", "0".to_string()),
+            ("numFmtId", "0"),
+            ("fontId", "0"),
+            ("fillId", "0"),
+            ("borderId", "0"),
         ];
 
         self.writer.xml_empty_tag_attr("xf", &attributes);
@@ -474,15 +471,15 @@ impl<'a> Styles<'a> {
     // Write the style <xf> element for the "Hyperlink" style.
     fn write_hyperlink_style_xf(&mut self) {
         let attributes = [
-            ("numFmtId", "0".to_string()),
-            ("fontId", "1".to_string()),
-            ("fillId", "0".to_string()),
-            ("borderId", "0".to_string()),
-            ("applyNumberFormat", "0".to_string()),
-            ("applyFill", "0".to_string()),
-            ("applyBorder", "0".to_string()),
-            ("applyAlignment", "0".to_string()),
-            ("applyProtection", "0".to_string()),
+            ("numFmtId", "0"),
+            ("fontId", "1"),
+            ("fillId", "0"),
+            ("borderId", "0"),
+            ("applyNumberFormat", "0"),
+            ("applyFill", "0"),
+            ("applyBorder", "0"),
+            ("applyAlignment", "0"),
+            ("applyProtection", "0"),
         ];
 
         self.writer.xml_start_tag_attr("xf", &attributes);
@@ -493,14 +490,14 @@ impl<'a> Styles<'a> {
 
     // Write the <alignment> element for hyperlinks.
     fn write_hyperlink_alignment(&mut self) {
-        let attributes = [("vertical", "top".to_string())];
+        let attributes = [("vertical", "top")];
 
         self.writer.xml_empty_tag_attr("alignment", &attributes);
     }
 
     // Write the <protection> element for hyperlinks.
     fn write_hyperlink_protection(&mut self) {
-        let attributes = [("locked", "0".to_string())];
+        let attributes = [("locked", "0")];
 
         self.writer.xml_empty_tag_attr("protection", &attributes);
     }
@@ -713,29 +710,21 @@ impl<'a> Styles<'a> {
 
     // Write the <cellStyle> element for the "Normal" style.
     fn write_normal_cell_style(&mut self) {
-        let attributes = [
-            ("name", "Normal".to_string()),
-            ("xfId", "0".to_string()),
-            ("builtinId", "0".to_string()),
-        ];
+        let attributes = [("name", "Normal"), ("xfId", "0"), ("builtinId", "0")];
 
         self.writer.xml_empty_tag_attr("cellStyle", &attributes);
     }
 
     // Write the <cellStyle> element for the "Hyperlink" style.
     fn write_hyperlink_cell_style(&mut self) {
-        let attributes = [
-            ("name", "Hyperlink".to_string()),
-            ("xfId", "1".to_string()),
-            ("builtinId", "8".to_string()),
-        ];
+        let attributes = [("name", "Hyperlink"), ("xfId", "1"), ("builtinId", "8")];
 
         self.writer.xml_empty_tag_attr("cellStyle", &attributes);
     }
 
     // Write the <dxfs> element.
     fn write_dxfs(&mut self) {
-        let attributes = [("count", "0".to_string())];
+        let attributes = [("count", "0")];
 
         self.writer.xml_empty_tag_attr("dxfs", &attributes);
     }
@@ -743,9 +732,9 @@ impl<'a> Styles<'a> {
     // Write the <tableStyles> element.
     fn write_table_styles(&mut self) {
         let attributes = [
-            ("count", "0".to_string()),
-            ("defaultTableStyle", "TableStyleMedium9".to_string()),
-            ("defaultPivotStyle", "PivotStyleLight16".to_string()),
+            ("count", "0"),
+            ("defaultTableStyle", "TableStyleMedium9"),
+            ("defaultPivotStyle", "PivotStyleLight16"),
         ];
 
         self.writer.xml_empty_tag_attr("tableStyles", &attributes);

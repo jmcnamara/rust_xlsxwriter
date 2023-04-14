@@ -51,11 +51,11 @@ impl Metadata {
         let attributes = [
             (
                 "xmlns",
-                "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string(),
+                "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
             ),
             (
                 "xmlns:xda",
-                "http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray".to_string(),
+                "http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray",
             ),
         ];
 
@@ -64,7 +64,7 @@ impl Metadata {
 
     // Write the <metadataTypes> element.
     fn write_metadata_types(&mut self) {
-        let attributes = [("count", "1".to_string())];
+        let attributes = [("count", "1")];
 
         self.writer.xml_start_tag_attr("metadataTypes", &attributes);
 
@@ -77,19 +77,19 @@ impl Metadata {
     // Write the <metadataType> element.
     fn write_metadata_type(&mut self) {
         let attributes = [
-            ("name", "XLDAPR".to_string()),
-            ("minSupportedVersion", "120000".to_string()),
-            ("copy", "1".to_string()),
-            ("pasteAll", "1".to_string()),
-            ("pasteValues", "1".to_string()),
-            ("merge", "1".to_string()),
-            ("splitFirst", "1".to_string()),
-            ("rowColShift", "1".to_string()),
-            ("clearFormats", "1".to_string()),
-            ("clearComments", "1".to_string()),
-            ("assign", "1".to_string()),
-            ("coerce", "1".to_string()),
-            ("cellMeta", "1".to_string()),
+            ("name", "XLDAPR"),
+            ("minSupportedVersion", "120000"),
+            ("copy", "1"),
+            ("pasteAll", "1"),
+            ("pasteValues", "1"),
+            ("merge", "1"),
+            ("splitFirst", "1"),
+            ("rowColShift", "1"),
+            ("clearFormats", "1"),
+            ("clearComments", "1"),
+            ("assign", "1"),
+            ("coerce", "1"),
+            ("cellMeta", "1"),
         ];
 
         self.writer.xml_empty_tag_attr("metadataType", &attributes);
@@ -97,7 +97,7 @@ impl Metadata {
 
     // Write the <futureMetadata> element.
     fn write_future_metadata(&mut self) {
-        let attributes = [("name", "XLDAPR".to_string()), ("count", "1".to_string())];
+        let attributes = [("name", "XLDAPR"), ("count", "1")];
 
         self.writer
             .xml_start_tag_attr("futureMetadata", &attributes);
@@ -114,7 +114,7 @@ impl Metadata {
 
     // Write the <ext> element.
     fn write_ext(&mut self) {
-        let attributes = [("uri", "{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}".to_string())];
+        let attributes = [("uri", "{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}")];
 
         self.writer.xml_start_tag_attr("ext", &attributes);
 
@@ -126,10 +126,7 @@ impl Metadata {
 
     // Write the <xda:dynamicArrayProperties> element.
     fn write_xda_dynamic_array_properties(&mut self) {
-        let attributes = [
-            ("fDynamic", "1".to_string()),
-            ("fCollapsed", "0".to_string()),
-        ];
+        let attributes = [("fDynamic", "1"), ("fCollapsed", "0")];
 
         self.writer
             .xml_empty_tag_attr("xda:dynamicArrayProperties", &attributes);
@@ -137,7 +134,7 @@ impl Metadata {
 
     // Write the <cellMetadata> element.
     fn write_cell_metadata(&mut self) {
-        let attributes = [("count", "1".to_string())];
+        let attributes = [("count", "1")];
 
         self.writer.xml_start_tag_attr("cellMetadata", &attributes);
         self.writer.xml_start_tag("bk");
@@ -151,7 +148,7 @@ impl Metadata {
 
     // Write the <rc> element.
     fn write_rc(&mut self) {
-        let attributes = [("t", "1".to_string()), ("v", "0".to_string())];
+        let attributes = [("t", "1"), ("v", "0")];
 
         self.writer.xml_empty_tag_attr("rc", &attributes);
     }

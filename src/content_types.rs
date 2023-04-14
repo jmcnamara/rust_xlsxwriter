@@ -143,7 +143,7 @@ impl ContentTypes {
 
     // Write the <Types> element.
     fn write_types(&mut self) {
-        let xmlns = "http://schemas.openxmlformats.org/package/2006/content-types".to_string();
+        let xmlns = "http://schemas.openxmlformats.org/package/2006/content-types";
         let attributes = [("xmlns", xmlns)];
 
         self.writer.xml_start_tag_attr("Types", &attributes);
