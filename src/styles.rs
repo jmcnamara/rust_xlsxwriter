@@ -100,14 +100,16 @@ impl<'a> Styles<'a> {
             "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
         )];
 
-        self.writer.xml_start_tag_attr("styleSheet", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("styleSheet", &attributes);
     }
 
     // Write the <fonts> element.
     fn write_fonts(&mut self) {
         let attributes = [("count", self.font_count.to_string())];
 
-        self.writer.xml_start_tag_attr("fonts", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("fonts", &attributes);
 
         // Write the cell font elements.
         for xf_format in self.xf_formats {
@@ -180,7 +182,7 @@ impl<'a> Styles<'a> {
     fn write_font_size(&mut self, xf_format: &Format) {
         let attributes = [("val", xf_format.font_size.to_string())];
 
-        self.writer.xml_empty_tag_attr("sz", &attributes);
+        self.writer.xml_empty_tag_with_attributes("sz", &attributes);
     }
 
     // Write the <color> element.
@@ -193,11 +195,13 @@ impl<'a> Styles<'a> {
             }
             XlsxColor::Default => {
                 attributes.push(("theme", "1".to_string()));
-                self.writer.xml_empty_tag_attr("color", &attributes);
+                self.writer
+                    .xml_empty_tag_with_attributes("color", &attributes);
             }
             _ => {
                 attributes.append(&mut xf_format.font_color.attributes());
-                self.writer.xml_empty_tag_attr("color", &attributes);
+                self.writer
+                    .xml_empty_tag_with_attributes("color", &attributes);
             }
         }
     }
@@ -207,9 +211,11 @@ impl<'a> Styles<'a> {
         let attributes = [("val", xf_format.font_name.clone())];
 
         if self.is_rich_string_style {
-            self.writer.xml_empty_tag_attr("rFont", &attributes);
+            self.writer
+                .xml_empty_tag_with_attributes("rFont", &attributes);
         } else {
-            self.writer.xml_empty_tag_attr("name", &attributes);
+            self.writer
+                .xml_empty_tag_with_attributes("name", &attributes);
         }
     }
 
@@ -217,14 +223,16 @@ impl<'a> Styles<'a> {
     fn write_font_family(&mut self, xf_format: &Format) {
         let attributes = [("val", xf_format.font_family.to_string())];
 
-        self.writer.xml_empty_tag_attr("family", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("family", &attributes);
     }
 
     // Write the <charset> element.
     fn write_font_charset(&mut self, xf_format: &Format) {
         let attributes = [("val", xf_format.font_charset.to_string())];
 
-        self.writer.xml_empty_tag_attr("charset", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("charset", &attributes);
     }
 
     // Write the <scheme> element.
@@ -237,7 +245,8 @@ impl<'a> Styles<'a> {
             return;
         }
 
-        self.writer.xml_empty_tag_attr("scheme", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("scheme", &attributes);
     }
 
     // Write the <u> underline element.
@@ -257,7 +266,7 @@ impl<'a> Styles<'a> {
             _ => {}
         }
 
-        self.writer.xml_empty_tag_attr("u", &attributes);
+        self.writer.xml_empty_tag_with_attributes("u", &attributes);
     }
 
     // Write the <vertAlign> element.
@@ -274,14 +283,16 @@ impl<'a> Styles<'a> {
             FormatScript::None => {}
         }
 
-        self.writer.xml_empty_tag_attr("vertAlign", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("vertAlign", &attributes);
     }
 
     // Write the <fills> element.
     fn write_fills(&mut self) {
         let attributes = [("count", self.fill_count.to_string())];
 
-        self.writer.xml_start_tag_attr("fills", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("fills", &attributes);
 
         // Write the default fill elements.
         self.write_default_fill("none".to_string());
@@ -303,7 +314,8 @@ impl<'a> Styles<'a> {
         let attributes = [("patternType", pattern)];
 
         self.writer.xml_start_tag("fill");
-        self.writer.xml_empty_tag_attr("patternFill", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("patternFill", &attributes);
         self.writer.xml_end_tag("fill");
     }
 
@@ -325,14 +337,16 @@ impl<'a> Styles<'a> {
 
         // Write the fill pattern.
         let attributes = [("patternType", xf_format.pattern.to_string())];
-        self.writer.xml_start_tag_attr("patternFill", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("patternFill", &attributes);
 
         // Write the foreground color.
         if xf_format.foreground_color != XlsxColor::Default
             && xf_format.foreground_color != XlsxColor::Automatic
         {
             let attributes = xf_format.foreground_color.attributes();
-            self.writer.xml_empty_tag_attr("fgColor", &attributes);
+            self.writer
+                .xml_empty_tag_with_attributes("fgColor", &attributes);
         }
 
         // Write the background color.
@@ -340,10 +354,12 @@ impl<'a> Styles<'a> {
             || xf_format.background_color == XlsxColor::Automatic
         {
             let attributes = [("indexed", "64")];
-            self.writer.xml_empty_tag_attr("bgColor", &attributes);
+            self.writer
+                .xml_empty_tag_with_attributes("bgColor", &attributes);
         } else {
             let attributes = xf_format.background_color.attributes();
-            self.writer.xml_empty_tag_attr("bgColor", &attributes);
+            self.writer
+                .xml_empty_tag_with_attributes("bgColor", &attributes);
         }
 
         self.writer.xml_end_tag("patternFill");
@@ -354,7 +370,8 @@ impl<'a> Styles<'a> {
     fn write_borders(&mut self) {
         let attributes = [("count", self.border_count.to_string())];
 
-        self.writer.xml_start_tag_attr("borders", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("borders", &attributes);
 
         // Write the cell border elements.
         for xf_format in self.xf_formats {
@@ -375,15 +392,18 @@ impl<'a> Styles<'a> {
             }
             FormatDiagonalBorder::BorderUp => {
                 let attributes = [("diagonalUp", "1")];
-                self.writer.xml_start_tag_attr("border", &attributes);
+                self.writer
+                    .xml_start_tag_with_attributes("border", &attributes);
             }
             FormatDiagonalBorder::BorderDown => {
                 let attributes = [("diagonalDown", "1")];
-                self.writer.xml_start_tag_attr("border", &attributes);
+                self.writer
+                    .xml_start_tag_with_attributes("border", &attributes);
             }
             FormatDiagonalBorder::BorderUpDown => {
                 let attributes = [("diagonalUp", "1"), ("diagonalDown", "1")];
-                self.writer.xml_start_tag_attr("border", &attributes);
+                self.writer
+                    .xml_start_tag_with_attributes("border", &attributes);
             }
         }
 
@@ -422,7 +442,8 @@ impl<'a> Styles<'a> {
         }
 
         let mut attributes = vec![("style", border_style.to_string())];
-        self.writer.xml_start_tag_attr(border_type, &attributes);
+        self.writer
+            .xml_start_tag_with_attributes(border_type, &attributes);
 
         if border_color != XlsxColor::Default && border_color != XlsxColor::Automatic {
             attributes = border_color.attributes();
@@ -430,7 +451,8 @@ impl<'a> Styles<'a> {
             attributes = vec![("auto", "1".to_string())];
         }
 
-        self.writer.xml_empty_tag_attr("color", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("color", &attributes);
 
         self.writer.xml_end_tag(border_type);
     }
@@ -444,7 +466,8 @@ impl<'a> Styles<'a> {
 
         let attributes = [("count", count.to_string())];
 
-        self.writer.xml_start_tag_attr("cellStyleXfs", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("cellStyleXfs", &attributes);
 
         // Write the style xf elements.
         self.write_normal_style_xf();
@@ -465,7 +488,7 @@ impl<'a> Styles<'a> {
             ("borderId", "0"),
         ];
 
-        self.writer.xml_empty_tag_attr("xf", &attributes);
+        self.writer.xml_empty_tag_with_attributes("xf", &attributes);
     }
 
     // Write the style <xf> element for the "Hyperlink" style.
@@ -482,7 +505,7 @@ impl<'a> Styles<'a> {
             ("applyProtection", "0"),
         ];
 
-        self.writer.xml_start_tag_attr("xf", &attributes);
+        self.writer.xml_start_tag_with_attributes("xf", &attributes);
         self.write_hyperlink_alignment();
         self.write_hyperlink_protection();
         self.writer.xml_end_tag("xf");
@@ -492,14 +515,16 @@ impl<'a> Styles<'a> {
     fn write_hyperlink_alignment(&mut self) {
         let attributes = [("vertical", "top")];
 
-        self.writer.xml_empty_tag_attr("alignment", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("alignment", &attributes);
     }
 
     // Write the <protection> element for hyperlinks.
     fn write_hyperlink_protection(&mut self) {
         let attributes = [("locked", "0")];
 
-        self.writer.xml_empty_tag_attr("protection", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("protection", &attributes);
     }
 
     // Write the <cellXfs> element.
@@ -507,7 +532,8 @@ impl<'a> Styles<'a> {
         let xf_count = format!("{}", self.xf_formats.len());
         let attributes = [("count", xf_count)];
 
-        self.writer.xml_start_tag_attr("cellXfs", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("cellXfs", &attributes);
 
         // Write the cell xf element.
         for xf_format in self.xf_formats {
@@ -562,7 +588,7 @@ impl<'a> Styles<'a> {
         }
 
         if has_alignment || has_protection {
-            self.writer.xml_start_tag_attr("xf", &attributes);
+            self.writer.xml_start_tag_with_attributes("xf", &attributes);
 
             if has_alignment {
                 // Write the alignment element.
@@ -576,7 +602,7 @@ impl<'a> Styles<'a> {
 
             self.writer.xml_end_tag("xf");
         } else {
-            self.writer.xml_empty_tag_attr("xf", &attributes);
+            self.writer.xml_empty_tag_with_attributes("xf", &attributes);
         }
     }
 
@@ -592,7 +618,8 @@ impl<'a> Styles<'a> {
             attributes.push(("hidden", "1".to_string()));
         }
 
-        self.writer.xml_empty_tag_attr("protection", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("protection", &attributes);
     }
 
     // Write the <alignment> element.
@@ -685,7 +712,8 @@ impl<'a> Styles<'a> {
             attributes.push(("readingOrder", xf_format.reading_direction.to_string()));
         }
 
-        self.writer.xml_empty_tag_attr("alignment", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("alignment", &attributes);
     }
 
     // Write the <cellStyles> element.
@@ -697,7 +725,8 @@ impl<'a> Styles<'a> {
 
         let attributes = [("count", count.to_string())];
 
-        self.writer.xml_start_tag_attr("cellStyles", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("cellStyles", &attributes);
 
         // Write the cellStyle elements.
         if self.has_hyperlink_style {
@@ -712,21 +741,24 @@ impl<'a> Styles<'a> {
     fn write_normal_cell_style(&mut self) {
         let attributes = [("name", "Normal"), ("xfId", "0"), ("builtinId", "0")];
 
-        self.writer.xml_empty_tag_attr("cellStyle", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("cellStyle", &attributes);
     }
 
     // Write the <cellStyle> element for the "Hyperlink" style.
     fn write_hyperlink_cell_style(&mut self) {
         let attributes = [("name", "Hyperlink"), ("xfId", "1"), ("builtinId", "8")];
 
-        self.writer.xml_empty_tag_attr("cellStyle", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("cellStyle", &attributes);
     }
 
     // Write the <dxfs> element.
     fn write_dxfs(&mut self) {
         let attributes = [("count", "0")];
 
-        self.writer.xml_empty_tag_attr("dxfs", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("dxfs", &attributes);
     }
 
     // Write the <tableStyles> element.
@@ -737,7 +769,8 @@ impl<'a> Styles<'a> {
             ("defaultPivotStyle", "PivotStyleLight16"),
         ];
 
-        self.writer.xml_empty_tag_attr("tableStyles", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("tableStyles", &attributes);
     }
 
     // Write the <numFmts> element.
@@ -747,7 +780,8 @@ impl<'a> Styles<'a> {
         }
 
         let attributes = [("count", self.num_formats.len().to_string())];
-        self.writer.xml_start_tag_attr("numFmts", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("numFmts", &attributes);
 
         // Write the numFmt elements.
         for (index, num_format) in self.num_formats.clone().iter().enumerate() {
@@ -764,7 +798,8 @@ impl<'a> Styles<'a> {
             ("formatCode", num_format.to_string()),
         ];
 
-        self.writer.xml_empty_tag_attr("numFmt", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("numFmt", &attributes);
     }
 }
 

@@ -146,7 +146,8 @@ impl ContentTypes {
         let xmlns = "http://schemas.openxmlformats.org/package/2006/content-types";
         let attributes = [("xmlns", xmlns)];
 
-        self.writer.xml_start_tag_attr("Types", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("Types", &attributes);
     }
     // Write all the <Default> elements.
     fn write_defaults(&mut self) {
@@ -159,7 +160,8 @@ impl ContentTypes {
     fn write_default(&mut self, extension: String, content_type: String) {
         let attributes = [("Extension", extension), ("ContentType", content_type)];
 
-        self.writer.xml_empty_tag_attr("Default", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("Default", &attributes);
     }
 
     // Write all the <Default> elements.
@@ -173,7 +175,8 @@ impl ContentTypes {
     fn write_override(&mut self, part_name: String, content_type: String) {
         let attributes = [("PartName", part_name), ("ContentType", content_type)];
 
-        self.writer.xml_empty_tag_attr("Override", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("Override", &attributes);
     }
 }
 

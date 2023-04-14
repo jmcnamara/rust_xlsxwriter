@@ -102,7 +102,8 @@ impl App {
 
         let attributes = vec![("xmlns", xmlns), ("xmlns:vt", xmlns_vt)];
 
-        self.writer.xml_start_tag_attr("Properties", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("Properties", &attributes);
     }
 
     // Write the <Application> element.
@@ -138,7 +139,8 @@ impl App {
         let size = size.to_string();
         let attributes = vec![("size", size), ("baseType", "variant".to_string())];
 
-        self.writer.xml_start_tag_attr("vt:vector", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("vt:vector", &attributes);
 
         for heading_pair in self.heading_pairs.clone() {
             self.writer.xml_start_tag("vt:variant");
@@ -168,7 +170,8 @@ impl App {
         let size = size.to_string();
         let attributes = vec![("size", size), ("baseType", String::from("lpstr"))];
 
-        self.writer.xml_start_tag_attr("vt:vector", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("vt:vector", &attributes);
 
         for part_name in self.table_parts.clone() {
             self.write_vt_lpstr(&part_name);

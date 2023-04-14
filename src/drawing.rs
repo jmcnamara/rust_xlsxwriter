@@ -59,7 +59,8 @@ impl Drawing {
             ),
         ];
 
-        self.writer.xml_start_tag_attr("xdr:wsDr", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("xdr:wsDr", &attributes);
     }
 
     // Write the <xdr:twoCellAnchor> element.
@@ -77,7 +78,7 @@ impl Drawing {
         }
 
         self.writer
-            .xml_start_tag_attr("xdr:twoCellAnchor", &attributes);
+            .xml_start_tag_with_attributes("xdr:twoCellAnchor", &attributes);
 
         // Write the xdr:from and xdr:to elements
         self.write_from(&drawing_info.from);
@@ -167,11 +168,13 @@ impl Drawing {
         }
 
         if drawing_info.decorative {
-            self.writer.xml_start_tag_attr("xdr:cNvPr", &attributes);
+            self.writer
+                .xml_start_tag_with_attributes("xdr:cNvPr", &attributes);
             self.write_decorative();
             self.writer.xml_end_tag("xdr:cNvPr");
         } else {
-            self.writer.xml_empty_tag_attr("xdr:cNvPr", &attributes);
+            self.writer
+                .xml_empty_tag_with_attributes("xdr:cNvPr", &attributes);
         }
     }
 
@@ -180,7 +183,8 @@ impl Drawing {
         self.writer.xml_start_tag("a:extLst");
 
         let attributes = [("uri", "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}")];
-        self.writer.xml_start_tag_attr("a:ext", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("a:ext", &attributes);
 
         let attributes = [
             (
@@ -190,12 +194,13 @@ impl Drawing {
             ("id", "{00000000-0008-0000-0000-000002000000}"),
         ];
         self.writer
-            .xml_empty_tag_attr("a16:creationId", &attributes);
+            .xml_empty_tag_with_attributes("a16:creationId", &attributes);
 
         self.writer.xml_end_tag("a:ext");
 
         let attributes = [("uri", "{C183D7F6-B498-43B3-948B-1728B52AA6E4}")];
-        self.writer.xml_start_tag_attr("a:ext", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("a:ext", &attributes);
 
         let attributes = [
             (
@@ -205,7 +210,7 @@ impl Drawing {
             ("val", "1"),
         ];
         self.writer
-            .xml_empty_tag_attr("adec:decorative", &attributes);
+            .xml_empty_tag_with_attributes("adec:decorative", &attributes);
 
         self.writer.xml_end_tag("a:ext");
         self.writer.xml_end_tag("a:extLst");
@@ -215,7 +220,8 @@ impl Drawing {
     fn write_a_pic_locks(&mut self) {
         let attributes = [("noChangeAspect", "1")];
 
-        self.writer.xml_empty_tag_attr("a:picLocks", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:picLocks", &attributes);
     }
 
     // Write the <xdr:blipFill> element.
@@ -242,7 +248,8 @@ impl Drawing {
             ("r:embed", format!("rId{index}")),
         ];
 
-        self.writer.xml_empty_tag_attr("a:blip", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:blip", &attributes);
     }
 
     // Write the <xdr:spPr> element.
@@ -271,7 +278,8 @@ impl Drawing {
             ("y", drawing_info.row_absolute.to_string()),
         ];
 
-        self.writer.xml_empty_tag_attr("a:off", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:off", &attributes);
     }
 
     // Write the <a:ext> element.
@@ -281,14 +289,16 @@ impl Drawing {
             ("cy", drawing_info.height.to_string()),
         ];
 
-        self.writer.xml_empty_tag_attr("a:ext", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:ext", &attributes);
     }
 
     // Write the <a:prstGeom> element.
     fn write_a_prst_geom(&mut self) {
         let attributes = [("prst", "rect")];
 
-        self.writer.xml_start_tag_attr("a:prstGeom", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("a:prstGeom", &attributes);
         self.writer.xml_empty_tag("a:avLst");
         self.writer.xml_end_tag("a:prstGeom");
     }
@@ -298,7 +308,7 @@ impl Drawing {
         let attributes = [("macro", "")];
 
         self.writer
-            .xml_start_tag_attr("xdr:graphicFrame", &attributes);
+            .xml_start_tag_with_attributes("xdr:graphicFrame", &attributes);
 
         // Write the xdr:nvGraphicFramePr element.
         self.write_nv_graphic_frame_pr(index, drawing_info);
@@ -347,14 +357,16 @@ impl Drawing {
     fn write_chart_a_off(&mut self) {
         let attributes = [("x", "0"), ("y", "0")];
 
-        self.writer.xml_empty_tag_attr("a:off", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:off", &attributes);
     }
 
     // Write the <a:ext> element.
     fn write_chart_a_ext(&mut self) {
         let attributes = [("cx", "0"), ("cy", "0")];
 
-        self.writer.xml_empty_tag_attr("a:ext", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:ext", &attributes);
     }
 
     // Write the <a:graphic> element.
@@ -374,7 +386,8 @@ impl Drawing {
             "http://schemas.openxmlformats.org/drawingml/2006/chart",
         )];
 
-        self.writer.xml_start_tag_attr("a:graphicData", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("a:graphicData", &attributes);
 
         // Write the c:chart element.
         self.write_chart(index);
@@ -396,7 +409,8 @@ impl Drawing {
             ("r:id", format!("rId{index}")),
         ];
 
-        self.writer.xml_empty_tag_attr("c:chart", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:chart", &attributes);
     }
 }
 

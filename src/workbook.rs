@@ -1594,7 +1594,8 @@ impl Workbook {
 
         let attributes = [("xmlns", xmlns), ("xmlns:r", xmlns_r)];
 
-        self.writer.xml_start_tag_attr("workbook", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("workbook", &attributes);
     }
 
     // Write the <fileVersion> element.
@@ -1606,21 +1607,24 @@ impl Workbook {
             ("rupBuild", "4505"),
         ];
 
-        self.writer.xml_empty_tag_attr("fileVersion", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("fileVersion", &attributes);
     }
 
     // Write the <fileSharing> element.
     fn write_file_sharing(&mut self) {
         let attributes = [("readOnlyRecommended", "1")];
 
-        self.writer.xml_empty_tag_attr("fileSharing", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("fileSharing", &attributes);
     }
 
     // Write the <workbookPr> element.
     fn write_workbook_pr(&mut self) {
         let attributes = [("defaultThemeVersion", "124226")];
 
-        self.writer.xml_empty_tag_attr("workbookPr", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("workbookPr", &attributes);
     }
 
     // Write the <bookViews> element.
@@ -1653,7 +1657,8 @@ impl Workbook {
             attributes.push(("activeTab", self.active_tab.to_string()));
         }
 
-        self.writer.xml_empty_tag_attr("workbookView", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("workbookView", &attributes);
     }
 
     // Write the <sheets> element.
@@ -1686,7 +1691,8 @@ impl Workbook {
 
         attributes.push(("r:id", ref_id));
 
-        self.writer.xml_empty_tag_attr("sheet", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("sheet", &attributes);
     }
 
     // Write the <definedNames> element.
@@ -1707,8 +1713,11 @@ impl Workbook {
                 attributes.push(("hidden", "1".to_string()));
             }
 
-            self.writer
-                .xml_data_element_attr("definedName", &defined_name.range, &attributes);
+            self.writer.xml_data_element_with_attributes(
+                "definedName",
+                &defined_name.range,
+                &attributes,
+            );
         }
 
         self.writer.xml_end_tag("definedNames");
@@ -1718,7 +1727,8 @@ impl Workbook {
     fn write_calc_pr(&mut self) {
         let attributes = [("calcId", "124519"), ("fullCalcOnLoad", "1")];
 
-        self.writer.xml_empty_tag_attr("calcPr", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("calcPr", &attributes);
     }
 }
 

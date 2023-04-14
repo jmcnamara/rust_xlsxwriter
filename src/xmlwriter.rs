@@ -65,7 +65,7 @@ impl XMLWriter {
     }
 
     // Write an XML start tag with attributes.
-    pub(crate) fn xml_start_tag_attr<T>(&mut self, tag: &str, attributes: &[T])
+    pub(crate) fn xml_start_tag_with_attributes<T>(&mut self, tag: &str, attributes: &[T])
     where
         T: IntoAttribute,
     {
@@ -92,7 +92,7 @@ impl XMLWriter {
     }
 
     // Write an empty XML tag with attributes.
-    pub(crate) fn xml_empty_tag_attr<T>(&mut self, tag: &str, attributes: &[T])
+    pub(crate) fn xml_empty_tag_with_attributes<T>(&mut self, tag: &str, attributes: &[T])
     where
         T: IntoAttribute,
     {
@@ -120,8 +120,12 @@ impl XMLWriter {
         .expect(XML_WRITE_ERROR);
     }
     // Write an XML element containing data with attributes.
-    pub(crate) fn xml_data_element_attr<T>(&mut self, tag: &str, data: &str, attributes: &[T])
-    where
+    pub(crate) fn xml_data_element_with_attributes<T>(
+        &mut self,
+        tag: &str,
+        data: &str,
+        attributes: &[T],
+    ) where
         T: IntoAttribute,
     {
         let approx_len = 2 * tag.len() + 6 * attributes.len() + data.len() + 5;
@@ -364,7 +368,7 @@ mod tests {
         let attributes: Vec<(&str, &str)> = vec![];
 
         let mut writer = XMLWriter::new();
-        writer.xml_start_tag_attr("foo", &attributes);
+        writer.xml_start_tag_with_attributes("foo", &attributes);
 
         let got = writer.read_to_str();
         assert_eq!(expected, got);
@@ -376,7 +380,7 @@ mod tests {
         let attributes = vec![("span", "8"), ("baz", "7")];
 
         let mut writer = XMLWriter::new();
-        writer.xml_start_tag_attr("foo", &attributes);
+        writer.xml_start_tag_with_attributes("foo", &attributes);
 
         let got = writer.read_to_str();
         assert_eq!(expected, got);
@@ -413,7 +417,7 @@ mod tests {
 
         let mut writer = XMLWriter::new();
 
-        writer.xml_empty_tag_attr("foo", &attributes);
+        writer.xml_empty_tag_with_attributes("foo", &attributes);
 
         let got = writer.read_to_str();
         assert_eq!(expected, got);
@@ -436,7 +440,7 @@ mod tests {
         let attributes = [("span", "8")];
 
         let mut writer = XMLWriter::new();
-        writer.xml_data_element_attr("foo", "bar", &attributes);
+        writer.xml_data_element_with_attributes("foo", "bar", &attributes);
 
         let got = writer.read_to_str();
         assert_eq!(expected, got);
@@ -448,7 +452,7 @@ mod tests {
         let attributes = vec![("span", "8")];
 
         let mut writer = XMLWriter::new();
-        writer.xml_data_element_attr("foo", "&<>\"", &attributes);
+        writer.xml_data_element_with_attributes("foo", "&<>\"", &attributes);
 
         let got = writer.read_to_str();
         assert_eq!(expected, got);
@@ -460,7 +464,7 @@ mod tests {
         let attributes = vec![("span", "8"), ("text", "Ы&<>\"\n")];
 
         let mut writer = XMLWriter::new();
-        writer.xml_data_element_attr("foo", "Ы&<>\"", &attributes);
+        writer.xml_data_element_with_attributes("foo", "Ы&<>\"", &attributes);
 
         let got = writer.read_to_str();
         assert_eq!(expected, got);

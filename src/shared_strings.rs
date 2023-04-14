@@ -50,7 +50,8 @@ impl SharedStrings {
         let unique = string_table.unique_count.to_string();
         let attributes = [("xmlns", xmls), ("count", count), ("uniqueCount", unique)];
 
-        self.writer.xml_start_tag_attr("sst", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("sst", &attributes);
     }
 
     // Write the sst string elements.

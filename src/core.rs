@@ -88,7 +88,7 @@ impl Core {
         ];
 
         self.writer
-            .xml_start_tag_attr("cp:coreProperties", &attributes);
+            .xml_start_tag_with_attributes("cp:coreProperties", &attributes);
     }
 
     // Write the <dc:title> element.
@@ -144,7 +144,7 @@ impl Core {
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
         self.writer
-            .xml_data_element_attr("dcterms:created", &datetime, &attributes);
+            .xml_data_element_with_attributes("dcterms:created", &datetime, &attributes);
     }
 
     // Write the <dcterms:modified> element.
@@ -157,7 +157,7 @@ impl Core {
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
         self.writer
-            .xml_data_element_attr("dcterms:modified", &datetime, &attributes);
+            .xml_data_element_with_attributes("dcterms:modified", &datetime, &attributes);
     }
 
     // Write the <cp:category> element.

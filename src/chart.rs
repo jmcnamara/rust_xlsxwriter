@@ -1571,14 +1571,16 @@ impl Chart {
             ),
         ];
 
-        self.writer.xml_start_tag_attr("c:chartSpace", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("c:chartSpace", &attributes);
     }
 
     // Write the <c:lang> element.
     fn write_lang(&mut self) {
         let attributes = [("val", "en-US")];
 
-        self.writer.xml_empty_tag_attr("c:lang", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:lang", &attributes);
     }
 
     // Write the <c:chart> element.
@@ -1707,14 +1709,16 @@ impl Chart {
     fn write_bar_dir(&mut self, direction: &str) {
         let attributes = [("val", direction.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:barDir", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:barDir", &attributes);
     }
 
     // Write the <c:grouping> element.
     fn write_grouping(&mut self) {
         let attributes = [("val", self.grouping.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:grouping", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:grouping", &attributes);
     }
 
     // Write the <c:scatterStyle> element.
@@ -1730,7 +1734,7 @@ impl Chart {
         }
 
         self.writer
-            .xml_empty_tag_attr("c:scatterStyle", &attributes);
+            .xml_empty_tag_with_attributes("c:scatterStyle", &attributes);
     }
 
     // Write the <c:ser> element.
@@ -1876,14 +1880,16 @@ impl Chart {
     fn write_idx(&mut self, index: usize) {
         let attributes = [("val", index.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:idx", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:idx", &attributes);
     }
 
     // Write the <c:order> element.
     fn write_order(&mut self, index: usize) {
         let attributes = [("val", index.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:order", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:order", &attributes);
     }
 
     // Write the <c:cat> element.
@@ -2010,14 +2016,16 @@ impl Chart {
     fn write_pt_count(&mut self, count: usize) {
         let attributes = [("val", count.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:ptCount", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:ptCount", &attributes);
     }
 
     // Write the <c:pt> element.
     fn write_pt(&mut self, index: usize, value: &str) {
         let attributes = [("idx", index.to_string())];
 
-        self.writer.xml_start_tag_attr("c:pt", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("c:pt", &attributes);
         self.writer.xml_data_element("c:v", value);
         self.writer.xml_end_tag("c:pt");
     }
@@ -2032,7 +2040,8 @@ impl Chart {
     fn write_ax_id(&mut self, axis_id: u32) {
         let attributes = [("val", axis_id.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:axId", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:axId", &attributes);
     }
 
     // Write the <c:catAx> element.
@@ -2183,21 +2192,24 @@ impl Chart {
     fn write_orientation(&mut self) {
         let attributes = [("val", "minMax")];
 
-        self.writer.xml_empty_tag_attr("c:orientation", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:orientation", &attributes);
     }
 
     // Write the <c:axPos> element.
     fn write_ax_pos(&mut self, position: ChartAxisPosition) {
         let attributes = [("val", position.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:axPos", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:axPos", &attributes);
     }
 
     // Write the <c:numFmt> element.
     fn write_category_num_fmt(&mut self) {
         let attributes = [("formatCode", "General"), ("sourceLinked", "1")];
 
-        self.writer.xml_empty_tag_attr("c:numFmt", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:numFmt", &attributes);
     }
 
     // Write the <c:numFmt> element.
@@ -2207,7 +2219,8 @@ impl Chart {
             ("sourceLinked", "1".to_string()),
         ];
 
-        self.writer.xml_empty_tag_attr("c:numFmt", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:numFmt", &attributes);
     }
 
     // Write the <c:majorGridlines> element.
@@ -2219,42 +2232,48 @@ impl Chart {
     fn write_tick_label_position(&mut self) {
         let attributes = [("val", "nextTo")];
 
-        self.writer.xml_empty_tag_attr("c:tickLblPos", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:tickLblPos", &attributes);
     }
 
     // Write the <c:crossAx> element.
     fn write_cross_ax(&mut self, axis_id: u32) {
         let attributes = [("val", axis_id.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:crossAx", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:crossAx", &attributes);
     }
 
     // Write the <c:crosses> element.
     fn write_crosses(&mut self) {
         let attributes = [("val", "autoZero")];
 
-        self.writer.xml_empty_tag_attr("c:crosses", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:crosses", &attributes);
     }
 
     // Write the <c:auto> element.
     fn write_auto(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:auto", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:auto", &attributes);
     }
 
     // Write the <c:lblAlgn> element.
     fn write_lbl_algn(&mut self) {
         let attributes = [("val", "ctr")];
 
-        self.writer.xml_empty_tag_attr("c:lblAlgn", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:lblAlgn", &attributes);
     }
 
     // Write the <c:lblOffset> element.
     fn write_lbl_offset(&mut self) {
         let attributes = [("val", "100")];
 
-        self.writer.xml_empty_tag_attr("c:lblOffset", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:lblOffset", &attributes);
     }
 
     // Write the <c:crossBetween> element.
@@ -2268,7 +2287,7 @@ impl Chart {
         }
 
         self.writer
-            .xml_empty_tag_attr("c:crossBetween", &attributes);
+            .xml_empty_tag_with_attributes("c:crossBetween", &attributes);
     }
 
     // Write the <c:legend> element.
@@ -2303,7 +2322,8 @@ impl Chart {
     fn write_legend_pos(&mut self) {
         let attributes = [("val", self.legend.position.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:legendPos", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:legendPos", &attributes);
     }
 
     // Write the <c:overlay> element.
@@ -2314,14 +2334,16 @@ impl Chart {
 
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:overlay", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:overlay", &attributes);
     }
 
     // Write the <c:plotVisOnly> element.
     fn write_plot_vis_only(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:plotVisOnly", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:plotVisOnly", &attributes);
     }
 
     // Write the <c:printSettings> element.
@@ -2356,7 +2378,8 @@ impl Chart {
             ("footer", "0.3"),
         ];
 
-        self.writer.xml_empty_tag_attr("c:pageMargins", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:pageMargins", &attributes);
     }
 
     // Write the <c:pageSetup> element.
@@ -2368,7 +2391,8 @@ impl Chart {
     fn write_marker_value(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:marker", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:marker", &attributes);
     }
 
     // Write the <c:marker> element.
@@ -2452,28 +2476,32 @@ impl Chart {
     fn write_show_val(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:showVal", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:showVal", &attributes);
     }
 
     // Write the <c:showCatName> element.
     fn write_show_category_name(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:showCatName", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:showCatName", &attributes);
     }
 
     // Write the <c:showSerName> element.
     fn write_show_series_name(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:showSerName", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:showSerName", &attributes);
     }
 
     // Write the <c:showPercent> element.
     fn write_show_percent(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:showPercent", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:showPercent", &attributes);
     }
 
     // Write the <c:separator> element.
@@ -2487,7 +2515,7 @@ impl Chart {
         let attributes = [("val", "1")];
 
         self.writer
-            .xml_empty_tag_attr("c:showLeaderLines", &attributes);
+            .xml_empty_tag_with_attributes("c:showLeaderLines", &attributes);
     }
 
     // Write the <c:showLegendKey> element.
@@ -2495,14 +2523,15 @@ impl Chart {
         let attributes = [("val", "1")];
 
         self.writer
-            .xml_empty_tag_attr("c:showLegendKey", &attributes);
+            .xml_empty_tag_with_attributes("c:showLegendKey", &attributes);
     }
 
     // Write the <c:dLblPos> element.
     fn write_d_lbl_pos(&mut self, position: ChartDataLabelPosition) {
         let attributes = [("val", position.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:dLblPos", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:dLblPos", &attributes);
     }
 
     // Write the <c:symbol> element.
@@ -2515,21 +2544,24 @@ impl Chart {
             attributes.push(("val", "none".to_string()));
         }
 
-        self.writer.xml_empty_tag_attr("c:symbol", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:symbol", &attributes);
     }
 
     // Write the <c:size> element.
     fn write_size(&mut self, size: u8) {
         let attributes = [("val", size.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:size", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:size", &attributes);
     }
 
     // Write the <c:varyColors> element.
     fn write_vary_colors(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:varyColors", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:varyColors", &attributes);
     }
 
     // Write the <c:firstSliceAng> element.
@@ -2537,14 +2569,15 @@ impl Chart {
         let attributes = [("val", self.rotation.to_string())];
 
         self.writer
-            .xml_empty_tag_attr("c:firstSliceAng", &attributes);
+            .xml_empty_tag_with_attributes("c:firstSliceAng", &attributes);
     }
 
     // Write the <c:holeSize> element.
     fn write_hole_size(&mut self) {
         let attributes = [("val", self.hole_size.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:holeSize", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:holeSize", &attributes);
     }
 
     // Write the <c:txPr> element.
@@ -2616,7 +2649,8 @@ impl Chart {
             attributes.push(("vert", "horz".to_string()));
         }
 
-        self.writer.xml_empty_tag_attr("a:bodyPr", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:bodyPr", &attributes);
     }
 
     // Write the <a:lstStyle> element.
@@ -2641,7 +2675,8 @@ impl Chart {
     fn write_pie_a_p_pr(&mut self) {
         let attributes = [("rtl", "0")];
 
-        self.writer.xml_start_tag_attr("a:pPr", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("a:pPr", &attributes);
 
         // Write the a:defRPr element.
         self.write_a_def_rpr();
@@ -2658,7 +2693,8 @@ impl Chart {
     fn write_a_end_para_rpr(&mut self) {
         let attributes = [("lang", "en-US")];
 
-        self.writer.xml_empty_tag_attr("a:endParaRPr", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:endParaRPr", &attributes);
     }
 
     // Write the <c:spPr> element.
@@ -2708,7 +2744,8 @@ impl Chart {
             || line.dash_type != ChartLineDashType::Solid
             || line.hidden
         {
-            self.writer.xml_start_tag_attr("a:ln", &attributes);
+            self.writer
+                .xml_start_tag_with_attributes("a:ln", &attributes);
 
             if line.hidden {
                 // Write the a:noFill element.
@@ -2727,7 +2764,8 @@ impl Chart {
 
             self.writer.xml_end_tag("a:ln");
         } else {
-            self.writer.xml_empty_tag_attr("a:ln", &attributes);
+            self.writer
+                .xml_empty_tag_with_attributes("a:ln", &attributes);
         }
     }
 
@@ -2755,7 +2793,8 @@ impl Chart {
     fn write_a_patt_fill(&mut self, fill: &ChartPatternFill) {
         let attributes = [("prst", fill.pattern.to_string())];
 
-        self.writer.xml_start_tag_attr("a:pattFill", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("a:pattFill", &attributes);
 
         if fill.foreground_color != XlsxColor::Default {
             // Write the <a:fgClr> element.
@@ -2795,20 +2834,23 @@ impl Chart {
             XlsxColor::Automatic => {
                 let attributes = [("val", "window"), ("lastClr", "FFFFFF")];
 
-                self.writer.xml_empty_tag_attr("a:sysClr", &attributes);
+                self.writer
+                    .xml_empty_tag_with_attributes("a:sysClr", &attributes);
             }
             _ => {
                 let attributes = [("val", color.rgb_hex_value())];
 
                 if transparency > 0 {
-                    self.writer.xml_start_tag_attr("a:srgbClr", &attributes);
+                    self.writer
+                        .xml_start_tag_with_attributes("a:srgbClr", &attributes);
 
                     // Write the a:alpha element.
                     self.write_a_alpha(transparency);
 
                     self.writer.xml_end_tag("a:srgbClr");
                 } else {
-                    self.writer.xml_empty_tag_attr("a:srgbClr", &attributes);
+                    self.writer
+                        .xml_empty_tag_with_attributes("a:srgbClr", &attributes);
                 }
             }
         }
@@ -2819,7 +2861,8 @@ impl Chart {
         let attributes = [("val", scheme)];
 
         if lum_mod > 0 || lum_off > 0 || transparency > 0 {
-            self.writer.xml_start_tag_attr("a:schemeClr", &attributes);
+            self.writer
+                .xml_start_tag_with_attributes("a:schemeClr", &attributes);
 
             if lum_mod > 0 {
                 // Write the a:lumMod element.
@@ -2838,7 +2881,8 @@ impl Chart {
 
             self.writer.xml_end_tag("a:schemeClr");
         } else {
-            self.writer.xml_empty_tag_attr("a:schemeClr", &attributes);
+            self.writer
+                .xml_empty_tag_with_attributes("a:schemeClr", &attributes);
         }
     }
 
@@ -2846,14 +2890,16 @@ impl Chart {
     fn write_a_lum_mod(&mut self, lum_mod: u32) {
         let attributes = [("val", lum_mod.to_string())];
 
-        self.writer.xml_empty_tag_attr("a:lumMod", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:lumMod", &attributes);
     }
 
     // Write the <a:lumOff> element.
     fn write_a_lum_off(&mut self, lum_off: u32) {
         let attributes = [("val", lum_off.to_string())];
 
-        self.writer.xml_empty_tag_attr("a:lumOff", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:lumOff", &attributes);
     }
 
     // Write the <a:alpha> element.
@@ -2862,7 +2908,8 @@ impl Chart {
 
         let attributes = [("val", transparency.to_string())];
 
-        self.writer.xml_empty_tag_attr("a:alpha", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:alpha", &attributes);
     }
 
     // Write the <a:noFill> element.
@@ -2874,7 +2921,8 @@ impl Chart {
     fn write_a_prst_dash(&mut self, line: &ChartLine) {
         let attributes = [("val", line.dash_type.to_string())];
 
-        self.writer.xml_empty_tag_attr("a:prstDash", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:prstDash", &attributes);
     }
 
     // Write the <c:radarStyle> element.
@@ -2887,7 +2935,8 @@ impl Chart {
             attributes.push(("val", "marker".to_string()));
         }
 
-        self.writer.xml_empty_tag_attr("c:radarStyle", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:radarStyle", &attributes);
     }
 
     // Write the <c:majorTickMark> element.
@@ -2895,35 +2944,39 @@ impl Chart {
         let attributes = [("val", "cross")];
 
         self.writer
-            .xml_empty_tag_attr("c:majorTickMark", &attributes);
+            .xml_empty_tag_with_attributes("c:majorTickMark", &attributes);
     }
 
     // Write the <c:gapWidth> element.
     fn write_gap_width(&mut self, gap: u16) {
         let attributes = [("val", gap.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:gapWidth", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:gapWidth", &attributes);
     }
 
     // Write the <c:overlap> element.
     fn write_overlap(&mut self) {
         let attributes = [("val", self.overlap.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:overlap", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:overlap", &attributes);
     }
 
     // Write the <c:smooth> element.
     fn write_smooth(&mut self) {
         let attributes = [("val", "1")];
 
-        self.writer.xml_empty_tag_attr("c:smooth", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:smooth", &attributes);
     }
 
     // Write the <c:style> element.
     fn write_style(&mut self) {
         let attributes = [("val", self.style.to_string())];
 
-        self.writer.xml_empty_tag_attr("c:style", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("c:style", &attributes);
     }
 
     // Write the <c:autoTitleDeleted> element.
@@ -2931,7 +2984,7 @@ impl Chart {
         let attributes = [("val", "1")];
 
         self.writer
-            .xml_empty_tag_attr("c:autoTitleDeleted", &attributes);
+            .xml_empty_tag_with_attributes("c:autoTitleDeleted", &attributes);
     }
 
     // Write the <c:title> element.
@@ -3071,7 +3124,8 @@ impl Chart {
     fn write_a_r_pr(&mut self) {
         let attributes = [("lang", "en-US")];
 
-        self.writer.xml_empty_tag_attr("a:rPr", &attributes);
+        self.writer
+            .xml_empty_tag_with_attributes("a:rPr", &attributes);
     }
 
     // Write the <a:t> element.

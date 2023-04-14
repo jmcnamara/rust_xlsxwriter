@@ -57,7 +57,8 @@ impl Custom {
 
         let attributes = [("xmlns", xmlns), ("xmlns:vt", xmlns_vt)];
 
-        self.writer.xml_start_tag_attr("Properties", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("Properties", &attributes);
     }
 
     // Write the <property> element.
@@ -69,7 +70,8 @@ impl Custom {
             ("name", property.name.to_string()),
         ];
 
-        self.writer.xml_start_tag_attr("property", &attributes);
+        self.writer
+            .xml_start_tag_with_attributes("property", &attributes);
 
         match property.property_type {
             CustomPropertyType::Int => self.write_vt_i_4(property.number_int),
