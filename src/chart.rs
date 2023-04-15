@@ -1775,9 +1775,9 @@ impl Chart {
                 self.write_d_pt(&series.points);
             }
 
-            if let Some(data_label) = &mut series.data_label {
+            if let Some(data_label) = &series.data_label {
                 // Write the c:dLbls element.
-                self.write_data_labels(data_label);
+                self.write_data_labels(data_label, &series.custom_data_labels);
             }
 
             // Write the c:cat element.
@@ -1829,9 +1829,9 @@ impl Chart {
                 self.write_d_pt(&series.points);
             }
 
-            if let Some(data_label) = &mut series.data_label {
+            if let Some(data_label) = &series.data_label {
                 // Write the c:dLbls element.
-                self.write_data_labels(data_label);
+                self.write_data_labels(data_label, &series.custom_data_labels);
             }
 
             self.write_x_val(&series.category_range, &series.category_cache_data);
@@ -2416,14 +2416,57 @@ impl Chart {
     }
 
     // Write the <c:dLbls> element.
-    fn write_data_labels(&mut self, data_label: &mut ChartDataLabel) {
+    fn write_data_labels(
+        &mut self,
+        data_label: &ChartDataLabel,
+        custom_data_labels: &[ChartDataLabel],
+    ) {
         self.writer.xml_start_tag("c:dLbls");
 
-        // Ensure at least one display option is set.
-        if !data_label.has_display_option() {
-            data_label.show_value();
+        if !custom_data_labels.is_empty() {
+            self.write_custom_data_labels(custom_data_labels)
         }
 
+        // Write the main elements of a data label.
+        self.write_data_label(data_label);
+
+        self.writer.xml_end_tag("c:dLbls");
+    }
+
+    // Write the <c:dLbl> element.
+    fn write_custom_data_labels(&mut self, data_labels: &[ChartDataLabel]) {
+        // Write the point formatting for the series.
+        for (index, data_label) in data_labels.iter().enumerate() {
+            if data_label.is_default {
+                continue;
+            }
+
+            self.writer.xml_start_tag("c:dLbl");
+            self.write_idx(index);
+
+            if data_label.is_hidden {
+                // Write the c:delete element.
+                self.write_delete();
+            } else {
+                // Write the c:layout element.
+                self.write_layout();
+
+                // Write the c:tx element.
+                if !data_label.title.name.is_empty() {
+                    self.write_tx_rich(&data_label.title);
+                } else if data_label.title.range.has_data() {
+                    self.write_tx_formula(&data_label.title);
+                }
+
+                // Write the main elements of a data label.
+                self.write_data_label(data_label);
+            }
+
+            self.writer.xml_end_tag("c:dLbl");
+        }
+    }
+
+    fn write_data_label(&mut self, data_label: &ChartDataLabel) {
         // Write the c:spPr formatting element.
         self.write_sp_pr(&data_label.format);
 
@@ -2439,7 +2482,9 @@ impl Chart {
             self.write_show_legend_key();
         }
 
-        if data_label.show_value {
+        // Ensure at least one display option is set.
+        if data_label.show_value || (!data_label.show_category_name && !data_label.show_percentage)
+        {
             // Write the c:showVal element.
             self.write_show_val();
         }
@@ -2468,8 +2513,6 @@ impl Chart {
             // Write the c:showLeaderLines element.
             self.write_show_leader_lines();
         }
-
-        self.writer.xml_end_tag("c:dLbls");
     }
 
     // Write the <c:showVal> element.
@@ -2532,6 +2575,14 @@ impl Chart {
 
         self.writer
             .xml_empty_tag_with_attributes("c:dLblPos", &attributes);
+    }
+
+    // Write the <c:delete> element.
+    fn write_delete(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer
+            .xml_empty_tag_with_attributes("c:delete", &attributes);
     }
 
     // Write the <c:symbol> element.
@@ -3088,8 +3139,10 @@ impl Chart {
     fn write_a_p_rich(&mut self, title: &ChartTitle) {
         self.writer.xml_start_tag("a:p");
 
-        // Write the a:pPr element.
-        self.write_a_p_pr_rich();
+        if !title.ignore_rich_para {
+            // Write the a:pPr element.
+            self.write_a_p_pr_rich();
+        }
 
         // Write the a:r element.
         self.write_a_r(title);
@@ -3381,6 +3434,7 @@ pub struct ChartSeries {
     pub(crate) format: ChartFormat,
     pub(crate) marker: Option<ChartMarker>,
     pub(crate) data_label: Option<ChartDataLabel>,
+    pub(crate) custom_data_labels: Vec<ChartDataLabel>,
     pub(crate) points: Vec<ChartPoint>,
     pub(crate) gap: u16,
     pub(crate) overlap: i8,
@@ -3489,6 +3543,7 @@ impl ChartSeries {
             marker: None,
             data_label: None,
             points: vec![],
+            custom_data_labels: vec![],
             gap: 150,
             overlap: 0,
         }
@@ -3909,6 +3964,341 @@ impl ChartSeries {
     ///
     pub fn set_data_label(&mut self, data_label: &ChartDataLabel) -> &mut ChartSeries {
         self.data_label = Some(data_label.clone());
+        self
+    }
+
+    /// Set custom data labels for a data series.
+    ///
+    /// The [`set_data_label()`](ChartSeries::set_data_label) sets the data
+    /// label properties for every label in a series but it is occasionally
+    /// required to set separate properties for individual data labels, or set a
+    /// custom display value, or format or hide some of the labels. This can be
+    /// achieved with the `set_custom_data_labels()` method, see the examples
+    /// below.
+    ///
+    /// # Arguments
+    ///
+    /// `data_labels`: A slice of [`ChartDataLabel`] objects.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding custom data labels to a chart series. This is
+    /// useful when you want to label the points of a data series with
+    /// information that isn't contained in the value or category names.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_custom_data_labels1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Create some custom data labels.
+    ///     let data_labels = [
+    ///         ChartDataLabel::new().set_value("Alice").to_custom(),
+    ///         ChartDataLabel::new().set_value("Bob").to_custom(),
+    ///         ChartDataLabel::new().set_value("Carol").to_custom(),
+    ///         ChartDataLabel::new().set_value("Dave").to_custom(),
+    ///         ChartDataLabel::new().set_value("Eve").to_custom(),
+    ///         ChartDataLabel::new().set_value("Frank").to_custom(),
+    ///     ];
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_custom_data_labels(&data_labels);
+    ///
+    ///     // Turn legend off for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels1.png">
+    ///
+    /// This example shows how to get the data from cells. In Excel this is a
+    /// single command called "Value from Cells" but in `rust_xlsxwriter` it
+    /// needs to be broken down into a cell reference for each data label.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_custom_data_labels2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #     worksheet.write(0, 1, "Asia")?;
+    /// #     worksheet.write(1, 1, "Africa")?;
+    /// #     worksheet.write(2, 1, "Europe")?;
+    /// #     worksheet.write(3, 1, "Americas")?;
+    /// #     worksheet.write(4, 1, "Oceania")?;
+    /// #     worksheet.write(5, 1, "Antarctic")?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Create some custom data labels.
+    ///     let data_labels = [
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$1").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$2").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$3").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$4").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$5").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$6").to_custom(),
+    ///     ];
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_custom_data_labels(&data_labels);
+    ///
+    ///     // Turn legend off for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels2.png">
+    ///
+    /// This example shows how to add default/non-custom data labels along with
+    /// custom data labels. This is done in two ways: with an explicit
+    /// `default()` data label and with an implicit default for points that
+    /// aren't covered at the end of the list.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_custom_data_labels3.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Create some custom data labels.
+    ///     let data_labels = [
+    ///         ChartDataLabel::default(),
+    ///         ChartDataLabel::default(),
+    ///         ChartDataLabel::new().set_value("Alice").to_custom(),
+    ///         ChartDataLabel::new().set_value("Bob").to_custom(),
+    ///         // All other points after this will get a default label.
+    ///     ];
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_custom_data_labels(&data_labels);
+    ///
+    ///     // Turn legend off for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels3.png">
+    ///
+    /// This example shows how to hide some of the data labels and keep others
+    /// visible.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_custom_data_labels4.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Create some custom data labels.
+    ///     let data_labels = [
+    ///         ChartDataLabel::default(),
+    ///         ChartDataLabel::new().set_hidden().to_custom(),
+    ///         ChartDataLabel::new().set_hidden().to_custom(),
+    ///         ChartDataLabel::new().set_hidden().to_custom(),
+    ///         ChartDataLabel::new().set_hidden().to_custom(),
+    ///         ChartDataLabel::default(),
+    ///     ];
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_custom_data_labels(&data_labels);
+    ///
+    ///     // Turn legend off for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels4.png">
+    ///
+    /// This example shows how to format some of the data labels and leave the
+    /// rest with the default formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_custom_data_labels5.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartDataLabel, ChartFormat, ChartLine, ChartSolidFill, ChartType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Create some custom data labels.
+    ///     let data_labels = [
+    ///         ChartDataLabel::new()
+    ///             .set_value("Start")
+    ///             .set_format(
+    ///                 ChartFormat::new()
+    ///                     .set_border(ChartLine::new().set_color("#FF0000"))
+    ///                     .set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
+    ///             )
+    ///             .to_custom(),
+    ///         ChartDataLabel::new().set_hidden().to_custom(),
+    ///         ChartDataLabel::new().set_hidden().to_custom(),
+    ///         ChartDataLabel::new().set_hidden().to_custom(),
+    ///         ChartDataLabel::new().set_hidden().to_custom(),
+    ///         ChartDataLabel::new()
+    ///             .set_value("End")
+    ///             .set_format(
+    ///                 ChartFormat::new()
+    ///                     .set_border(ChartLine::new().set_color("#FF0000"))
+    ///                     .set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
+    ///             )
+    ///             .to_custom(),
+    ///     ];
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_custom_data_labels(&data_labels);
+    ///
+    ///     // Turn legend off for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels5.png">
+    ///
+    pub fn set_custom_data_labels(&mut self, data_labels: &[ChartDataLabel]) -> &mut ChartSeries {
+        if self.data_label.is_none() {
+            self.data_label = Some(ChartDataLabel::default());
+        }
+
+        self.custom_data_labels = data_labels.to_vec();
+
         self
     }
 
@@ -4476,6 +4866,7 @@ pub struct ChartTitle {
     name: String,
     hidden: bool,
     is_horizontal: bool,
+    ignore_rich_para: bool,
 }
 
 impl ChartTitle {
@@ -4487,6 +4878,7 @@ impl ChartTitle {
             name: "".to_string(),
             hidden: false,
             is_horizontal: false,
+            ignore_rich_para: false,
         }
     }
 
@@ -5033,6 +5425,9 @@ pub struct ChartDataLabel {
     pub(crate) show_percentage: bool,
     pub(crate) position: ChartDataLabelPosition,
     pub(crate) separator: char,
+    pub(crate) title: ChartTitle,
+    pub(crate) is_hidden: bool,
+    pub(crate) is_default: bool,
 }
 
 impl Default for ChartDataLabel {
@@ -5055,6 +5450,9 @@ impl ChartDataLabel {
             show_percentage: false,
             position: ChartDataLabelPosition::Default,
             separator: ',',
+            title: ChartTitle::new(),
+            is_hidden: false,
+            is_default: true,
         }
     }
 
@@ -5111,6 +5509,7 @@ impl ChartDataLabel {
     ///
     pub fn show_value(&mut self) -> &mut ChartDataLabel {
         self.show_value = true;
+        self.is_default = false;
         self
     }
 
@@ -5166,6 +5565,7 @@ impl ChartDataLabel {
     ///
     pub fn show_category_name(&mut self) -> &mut ChartDataLabel {
         self.show_category_name = true;
+        self.is_default = false;
         self
     }
 
@@ -5173,6 +5573,7 @@ impl ChartDataLabel {
     ///
     pub fn show_series_name(&mut self) -> &mut ChartDataLabel {
         self.show_series_name = true;
+        self.is_default = false;
         self
     }
 
@@ -5185,6 +5586,7 @@ impl ChartDataLabel {
     ///
     pub fn show_leader_lines(&mut self) -> &mut ChartDataLabel {
         self.show_leader_lines = true;
+        self.is_default = false;
         self
     }
 
@@ -5192,6 +5594,7 @@ impl ChartDataLabel {
     ///
     pub fn show_legend_key(&mut self) -> &mut ChartDataLabel {
         self.show_legend_key = true;
+        self.is_default = false;
         self
     }
 
@@ -5245,6 +5648,7 @@ impl ChartDataLabel {
     ///
     pub fn show_percentage(&mut self) -> &mut ChartDataLabel {
         self.show_percentage = true;
+        self.is_default = false;
         self
     }
 
@@ -5324,6 +5728,7 @@ impl ChartDataLabel {
     ///
     pub fn set_position(&mut self, position: ChartDataLabelPosition) -> &mut ChartDataLabel {
         self.position = position;
+        self.is_default = false;
         self
     }
 
@@ -5403,6 +5808,8 @@ impl ChartDataLabel {
         T: IntoChartFormat,
     {
         self.format = format.new_chart_format();
+        self.is_default = false;
+        self.title.ignore_rich_para = false;
         self
     }
 
@@ -5415,6 +5822,7 @@ impl ChartDataLabel {
         // Accept valid separators only apart from comma which is the default.
         if ";. \n".contains(separator) {
             self.separator = separator;
+            self.is_default = false;
         }
 
         self
@@ -5423,29 +5831,263 @@ impl ChartDataLabel {
     /// Display the point Y value on the data label.
     ///
     /// This is the same as [`show_value()`](ChartDataLabel::show_value) except
-    /// it is named differently for Scatter charts. The methods are equivalent
+    /// it is named differently in Excel for Scatter charts. The methods are
+    /// equivalent
     /// and either one can be used for any chart type.
     ///
     pub fn show_y_value(&mut self) -> &mut ChartDataLabel {
-        self.show_value = true;
-        self
+        self.show_value()
     }
 
     /// Display the point X value on the data label.
     ///
     /// This is the same as
     /// [`show_category_name()`](ChartDataLabel::show_category_name) except it
-    /// is named differently for Scatter charts. The methods are equivalent and
-    /// either one can be used for any chart type.
+    /// is named differently in Excel for Scatter charts. The methods are
+    /// equivalent and either one can be used for any chart type.
     ///
     pub fn show_x_value(&mut self) -> &mut ChartDataLabel {
-        self.show_category_name = true;
+        self.show_category_name()
+    }
+
+    /// Set the value for a custom data label.
+    ///
+    /// This method sets the value of a custom data label used with the
+    /// [`set_custom_data_labels()`](ChartSeries::set_custom_data_labels)
+    /// method. It is ignored if used with a series [`ChartDataLabel`].
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - A [`IntoChartRange`] property which can be one of the
+    ///   following generic types:
+    ///    - A simple string title.
+    ///    - A string with an Excel like range formula such as `"Sheet1!$A$1"`.
+    ///    - A tuple that can be used to create the range programmatically using
+    ///      a sheet name and zero indexed row and column values like:
+    ///      `("Sheet1", 0, 0)` (this gives the same range as the previous
+    ///      string value).
+    ///
+    /// # Examples
+    ///
+    /// An example of adding custom data labels to a chart series. This is
+    /// useful when you want to label the points of a data series with
+    /// information that isn't contained in the value or category names.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_custom_data_labels1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Create some custom data labels.
+    ///     let data_labels = [
+    ///         ChartDataLabel::new().set_value("Alice").to_custom(),
+    ///         ChartDataLabel::new().set_value("Bob").to_custom(),
+    ///         ChartDataLabel::new().set_value("Carol").to_custom(),
+    ///         ChartDataLabel::new().set_value("Dave").to_custom(),
+    ///         ChartDataLabel::new().set_value("Eve").to_custom(),
+    ///         ChartDataLabel::new().set_value("Frank").to_custom(),
+    ///     ];
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_custom_data_labels(&data_labels);
+    ///
+    ///     // Turn legend off for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels1.png">
+    ///
+    ///
+    /// This example shows how to get the data from cells. In Excel this is a
+    /// single command called "Value from Cells" but in `rust_xlsxwriter` it
+    /// needs to be broken down into a cell reference for each data label.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_custom_data_labels2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #     worksheet.write(0, 1, "Asia")?;
+    /// #     worksheet.write(1, 1, "Africa")?;
+    /// #     worksheet.write(2, 1, "Europe")?;
+    /// #     worksheet.write(3, 1, "Americas")?;
+    /// #     worksheet.write(4, 1, "Oceania")?;
+    /// #     worksheet.write(5, 1, "Antarctic")?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Create some custom data labels.
+    ///     let data_labels = [
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$1").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$2").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$3").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$4").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$5").to_custom(),
+    ///         ChartDataLabel::new().set_value("=Sheet1!$B$6").to_custom(),
+    ///     ];
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_custom_data_labels(&data_labels);
+    ///
+    ///     // Turn legend off for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels2.png">
+    ///
+    ///
+    pub fn set_value<T>(&mut self, value: T) -> &mut ChartDataLabel
+    where
+        T: IntoChartRange,
+    {
+        self.title.set_name(value);
+        self.title.ignore_rich_para = true;
+        self.is_default = false;
         self
     }
 
-    // Check if some display option has been set.
-    pub(crate) fn has_display_option(&mut self) -> bool {
-        self.show_value || self.show_category_name || self.show_percentage
+    /// Set a custom data label as hidden.
+    ///
+    /// This method hides a custom data label used with the
+    /// [`set_custom_data_labels()`](ChartSeries::set_custom_data_labels)
+    /// method. It is ignored if used with a series [`ChartDataLabel`].
+    ///
+    /// # Examples
+    ///
+    /// An example of adding custom data labels to a chart series.
+    ///
+    /// This example shows how to add default/non-custom data labels along with
+    /// custom data labels. This is done in two ways: with an explicit
+    /// `default()` data label and with an implicit default for points that
+    /// aren't covered at the end of the list.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_custom_data_labels3.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Create some custom data labels.
+    ///     let data_labels = [
+    ///         ChartDataLabel::default(),
+    ///         ChartDataLabel::default(),
+    ///         ChartDataLabel::new().set_value("Alice").to_custom(),
+    ///         ChartDataLabel::new().set_value("Bob").to_custom(),
+    ///         // All other points after this will get a default label.
+    ///     ];
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_custom_data_labels(&data_labels);
+    ///
+    ///     // Turn legend off for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_custom_data_labels3.png">
+    ///
+    pub fn set_hidden(&mut self) -> &mut ChartDataLabel {
+        self.is_hidden = true;
+        self.is_default = false;
+        self
+    }
+
+    /// Turn a data label reference into a custom data label.
+    ///
+    /// Converts a `&ChartDataLabel` reference into a [`ChartDataLabel`] so that
+    /// it can be used as a custom data label with the
+    /// [`set_custom_data_labels()`](ChartSeries::set_custom_data_labels)
+    /// method.
+    ///
+    /// This is a syntactic shortcut for a simple `clone()`.
+    ///
+    pub fn to_custom(&mut self) -> ChartDataLabel {
+        self.clone()
     }
 }
 

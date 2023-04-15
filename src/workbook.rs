@@ -1173,8 +1173,7 @@ impl Workbook {
 
     // Add worksheet number/string cache data to chart series. This isn't
     // strictly necessary but it helps non-Excel apps to render charts
-    // correctly. However, if any non-number/string data is encountered or any
-    // of the cells are blanks then the cache will be empty.
+    // correctly.
     fn prepare_chart_cache_data(&mut self) {
         // First build up a hash of the chart data ranges. The data may not be
         // in the same worksheet as the chart so we need to do the lookup at the
@@ -1212,6 +1211,14 @@ impl Workbook {
                             chart_caches
                                 .insert(series.category_range.key(), ChartSeriesCacheData::new());
                         }
+                        for data_label in series.custom_data_labels.iter() {
+                            if data_label.title.range.has_data() {
+                                chart_caches.insert(
+                                    data_label.title.range.key(),
+                                    ChartSeriesCacheData::new(),
+                                );
+                            }
+                        }
                     }
                 }
             }
@@ -1247,6 +1254,12 @@ impl Workbook {
                         }
                         if let Some(cache) = chart_caches.get(&series.category_range.key()) {
                             series.category_cache_data = cache.clone();
+                        }
+
+                        for data_label in &mut series.custom_data_labels {
+                            if let Some(cache) = chart_caches.get(&data_label.title.range.key()) {
+                                data_label.title.cache_data = cache.clone();
+                            }
                         }
                     }
                 }
