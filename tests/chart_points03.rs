@@ -12,7 +12,7 @@ use rust_xlsxwriter::{
 mod common;
 
 // Test to demonstrate charts.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -50,11 +50,67 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test to demonstrate charts. Test too many points
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    // Add some test data for the chart(s).
+    let data = [[2, 5, 4]];
+    for (col_num, col_data) in data.iter().enumerate() {
+        for (row_num, row_data) in col_data.iter().enumerate() {
+            worksheet.write_number(row_num as u32, col_num as u16, *row_data)?;
+        }
+    }
+
+    let points = vec![
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
+        ),
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFC000")),
+        ),
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
+        ),
+        // Should be ignored.
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
+        ),
+    ];
+
+    let mut chart = Chart::new(ChartType::Pie);
+    chart
+        .add_series()
+        .set_values("=Sheet1!$A$1:$A$3")
+        .set_points(&points);
+
+    worksheet.insert_chart(8, 4, &chart)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_chart_points03() {
+fn test_chart_points03_1() {
     let test_runner = common::TestRunner::new()
         .set_name("chart_points03")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_chart_points03_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("chart_points03")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

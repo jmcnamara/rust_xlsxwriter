@@ -1740,6 +1740,8 @@ impl Chart {
     // Write the <c:ser> element.
     fn write_series(&mut self) {
         for (index, series) in self.series.clone().iter_mut().enumerate() {
+            let max_points = series.value_range.number_of_points();
+
             self.writer.xml_start_tag("c:ser");
 
             // Copy a series overlap to the parent chart.
@@ -1772,12 +1774,12 @@ impl Chart {
 
             // Write the point formatting for the series.
             if !series.points.is_empty() {
-                self.write_d_pt(&series.points);
+                self.write_d_pt(&series.points, max_points);
             }
 
             if let Some(data_label) = &series.data_label {
                 // Write the c:dLbls element.
-                self.write_data_labels(data_label, &series.custom_data_labels);
+                self.write_data_labels(data_label, &series.custom_data_labels, max_points);
             }
 
             // Write the c:cat element.
@@ -1796,6 +1798,8 @@ impl Chart {
     // Write the <c:ser> element for scatter charts.
     fn write_scatter_series(&mut self) {
         for (index, series) in self.series.clone().iter_mut().enumerate() {
+            let max_points = series.value_range.number_of_points();
+
             self.writer.xml_start_tag("c:ser");
 
             // Write the c:idx element.
@@ -1826,12 +1830,12 @@ impl Chart {
 
             // Write the point formatting for the series.
             if !series.points.is_empty() {
-                self.write_d_pt(&series.points);
+                self.write_d_pt(&series.points, max_points);
             }
 
             if let Some(data_label) = &series.data_label {
                 // Write the c:dLbls element.
-                self.write_data_labels(data_label, &series.custom_data_labels);
+                self.write_data_labels(data_label, &series.custom_data_labels, max_points);
             }
 
             self.write_x_val(&series.category_range, &series.category_cache_data);
@@ -1850,12 +1854,16 @@ impl Chart {
     }
 
     // Write the <c:dPt> element.
-    fn write_d_pt(&mut self, points: &[ChartPoint]) {
+    fn write_d_pt(&mut self, points: &[ChartPoint], max_points: usize) {
         let has_marker =
             self.chart_group_type == ChartType::Scatter || self.chart_group_type == ChartType::Line;
 
         // Write the point formatting for the series.
         for (index, point) in points.iter().enumerate() {
+            if index >= max_points {
+                break;
+            }
+
             if point.is_not_default() {
                 self.writer.xml_start_tag("c:dPt");
                 self.write_idx(index);
@@ -2420,11 +2428,12 @@ impl Chart {
         &mut self,
         data_label: &ChartDataLabel,
         custom_data_labels: &[ChartDataLabel],
+        max_points: usize,
     ) {
         self.writer.xml_start_tag("c:dLbls");
 
         if !custom_data_labels.is_empty() {
-            self.write_custom_data_labels(custom_data_labels)
+            self.write_custom_data_labels(custom_data_labels, max_points)
         }
 
         // Write the main elements of a data label.
@@ -2434,9 +2443,13 @@ impl Chart {
     }
 
     // Write the <c:dLbl> element.
-    fn write_custom_data_labels(&mut self, data_labels: &[ChartDataLabel]) {
+    fn write_custom_data_labels(&mut self, data_labels: &[ChartDataLabel], max_points: usize) {
         // Write the point formatting for the series.
         for (index, data_label) in data_labels.iter().enumerate() {
+            if index >= max_points {
+                break;
+            }
+
             if data_label.is_default {
                 continue;
             }
@@ -4678,6 +4691,14 @@ impl ChartRange {
     // Check that the range has data.
     pub(crate) fn has_data(&self) -> bool {
         !self.sheet_name.is_empty()
+    }
+
+    // Get the number of data points in the range.
+    pub(crate) fn number_of_points(&self) -> usize {
+        let row_range = (self.last_row - self.first_row + 1) as usize;
+        let col_range = (self.last_col - self.first_col + 1) as usize;
+
+        std::cmp::max(row_range, col_range)
     }
 
     // Check that the row/column values in the range are valid.

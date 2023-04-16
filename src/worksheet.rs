@@ -46,6 +46,7 @@ const MAX_PARAMETER_LEN: usize = 255;
 const DEFAULT_COL_WIDTH: f64 = 8.43;
 const DEFAULT_ROW_HEIGHT: f64 = 15.0;
 pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
+const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 /// The Worksheet struct represents an Excel worksheet. It handles operations
 /// such as writing data to cells or formatting the worksheet layout.
@@ -7700,9 +7701,13 @@ impl Worksheet {
 
     // Cached/faster version of utility.col_to_name() to use in the inner loop.
     fn col_to_name(col_names: &mut HashMap<u16, String>, col_num: ColNum) -> &str {
-        col_names
-            .entry(col_num)
-            .or_insert_with(|| utility::col_to_name(col_num))
+        if col_num < 26 {
+            &COLUMN_LETTERS[col_num as usize..(col_num + 1) as usize]
+        } else {
+            col_names
+                .entry(col_num)
+                .or_insert_with(|| utility::col_to_name(col_num))
+        }
     }
 
     // Store local copies of unique formats passed to the write methods. These
