@@ -5,11 +5,24 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.35.0] - 2023-04-16
+
+### Added
+
+- Added support for Chart Series data labels including custom data labels. See
+  [`ChartDataLabel`], [`chart.series.set_data_label()`] and [`chart.series.set_custom_data_labels()`].
+
+[`ChartDataLabel`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartDataLabel.html
+[`chart.series.set_data_label()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartSeries.html#method.set_data_label
+[`chart.series.set_custom_data_labels()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartSeries.html#method.set_custom_data_labels
+
+
 ## [0.34.0] - 2023-04-12
 
-Performance improvement release.
+### Added
 
-## Added
+Performance improvement release.
 
 - Added optimizations across the library. For larger files this version is 10%
   faster than previous versions.
@@ -34,7 +47,7 @@ Performance improvement release.
   struct. This is mainly useful as the way of specifying segment colors in Pie
   charts.
 
-  See the undated [Pie Chart] example in the user guide.
+  See the updated [Pie Chart] example in the user guide.
 
 - Added support for formatting and setting chart markers via the [`ChartMarker`]
   struct.

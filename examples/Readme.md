@@ -239,6 +239,31 @@ documentation and generally show how an individual function works.
   "area" of a chart. In Excel the chart area is the background area behind
   the chart.
 
+* doc_chart_set_custom_data_labels1.rs - An example of adding custom data
+  labels to a chart series. This is useful when you want to label the
+  points of a data series with information that isn't contained in the
+  value or category names.
+
+* doc_chart_set_custom_data_labels2.rs - An example of adding custom data
+  labels to a chart series. This example shows how to get the data from
+  cells. In Excel this is a single command called "Value from Cells" but in
+  `rust_xlsxwriter` it needs to be broken down into a cell reference for
+  each data label.
+
+* doc_chart_set_custom_data_labels3.rs - An example of adding custom data
+  labels to a chart series. This example shows how to add
+  default/non-custom data labels along with custom data labels. This is
+  done in two ways: with an explicit `default()` data label and with an
+  implicit default for points that aren't covered at the end of the list.
+
+* doc_chart_set_custom_data_labels4.rs - An example of adding custom data
+  labels to a chart series. This example shows how to hide some of the data
+  labels and keep others visible.
+
+* doc_chart_set_custom_data_labels5.rs - An example of adding custom data
+  labels to a chart series. This example shows how to format some of the
+  data labels and leave the rest with the default formatting.
+
 * doc_chart_set_hole_size.rs - An example of formatting the chart hole size
   for doughnut charts.
 
@@ -695,4 +720,7 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_write_url_with_text.rs - Demonstrates writing a url with
   alternative text.
+
+* doc_xmlwriter_perf_test.rs - Simple performance test to exercise
+  xmlwriter without hitting the worksheet::write_data_table() fast path.
 

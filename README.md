@@ -106,7 +106,12 @@ frequently.
 
 ## Release notes
 
-[Release Notes and Changelog]
+Recent changes:
+
+- Added Chart Series data labels, including custom labels.
+- Added performance improvements.
+
+See the full [Release Notes and Changelog].
 
 ## See also
 
