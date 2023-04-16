@@ -59,8 +59,7 @@ impl Drawing {
             ),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("xdr:wsDr", &attributes);
+        self.writer.xml_start_tag("xdr:wsDr", &attributes);
     }
 
     // Write the <xdr:twoCellAnchor> element.
@@ -77,8 +76,7 @@ impl Drawing {
             ObjectMovement::MoveAndSizeWithCells | ObjectMovement::MoveAndSizeWithCellsAfter => (),
         }
 
-        self.writer
-            .xml_start_tag_with_attributes("xdr:twoCellAnchor", &attributes);
+        self.writer.xml_start_tag("xdr:twoCellAnchor", &attributes);
 
         // Write the xdr:from and xdr:to elements
         self.write_from(&drawing_info.from);
@@ -89,45 +87,45 @@ impl Drawing {
             DrawingType::Chart => self.write_graphic_frame(index, drawing_info),
         }
 
-        self.writer.xml_empty_tag("xdr:clientData");
+        self.writer.xml_empty_tag_only("xdr:clientData");
         self.writer.xml_end_tag("xdr:twoCellAnchor");
     }
 
     // Write the <xdr:from> element.
     fn write_from(&mut self, coords: &DrawingCoordinates) {
-        self.writer.xml_start_tag("xdr:from");
+        self.writer.xml_start_tag_only("xdr:from");
 
         self.writer
-            .xml_data_element("xdr:col", &coords.col.to_string());
+            .xml_data_element_only("xdr:col", &coords.col.to_string());
         self.writer
-            .xml_data_element("xdr:colOff", &coords.col_offset.to_string());
+            .xml_data_element_only("xdr:colOff", &coords.col_offset.to_string());
         self.writer
-            .xml_data_element("xdr:row", &coords.row.to_string());
+            .xml_data_element_only("xdr:row", &coords.row.to_string());
         self.writer
-            .xml_data_element("xdr:rowOff", &coords.row_offset.to_string());
+            .xml_data_element_only("xdr:rowOff", &coords.row_offset.to_string());
 
         self.writer.xml_end_tag("xdr:from");
     }
 
     // Write the <xdr:to> element.
     fn write_to(&mut self, coords: &DrawingCoordinates) {
-        self.writer.xml_start_tag("xdr:to");
+        self.writer.xml_start_tag_only("xdr:to");
 
         self.writer
-            .xml_data_element("xdr:col", &coords.col.to_string());
+            .xml_data_element_only("xdr:col", &coords.col.to_string());
         self.writer
-            .xml_data_element("xdr:colOff", &coords.col_offset.to_string());
+            .xml_data_element_only("xdr:colOff", &coords.col_offset.to_string());
         self.writer
-            .xml_data_element("xdr:row", &coords.row.to_string());
+            .xml_data_element_only("xdr:row", &coords.row.to_string());
         self.writer
-            .xml_data_element("xdr:rowOff", &coords.row_offset.to_string());
+            .xml_data_element_only("xdr:rowOff", &coords.row_offset.to_string());
 
         self.writer.xml_end_tag("xdr:to");
     }
 
     // Write the <xdr:pic> element.
     fn write_pic(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag("xdr:pic");
+        self.writer.xml_start_tag_only("xdr:pic");
 
         // Write the xdr:nvPicPr element.
         self.write_nv_pic_pr(index, drawing_info);
@@ -143,13 +141,13 @@ impl Drawing {
 
     // Write the <xdr:nvPicPr> element.
     fn write_nv_pic_pr(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag("xdr:nvPicPr");
+        self.writer.xml_start_tag_only("xdr:nvPicPr");
 
         // Write the xdr:cNvPr element.
         self.write_c_nv_pr(index, drawing_info, "Picture");
 
         // Write the xdr:cNvPicPr element.
-        self.writer.xml_start_tag("xdr:cNvPicPr");
+        self.writer.xml_start_tag_only("xdr:cNvPicPr");
         self.write_a_pic_locks();
         self.writer.xml_end_tag("xdr:cNvPicPr");
 
@@ -168,23 +166,20 @@ impl Drawing {
         }
 
         if drawing_info.decorative {
-            self.writer
-                .xml_start_tag_with_attributes("xdr:cNvPr", &attributes);
+            self.writer.xml_start_tag("xdr:cNvPr", &attributes);
             self.write_decorative();
             self.writer.xml_end_tag("xdr:cNvPr");
         } else {
-            self.writer
-                .xml_empty_tag_with_attributes("xdr:cNvPr", &attributes);
+            self.writer.xml_empty_tag("xdr:cNvPr", &attributes);
         }
     }
 
     // Write the decorative sub elements.
     fn write_decorative(&mut self) {
-        self.writer.xml_start_tag("a:extLst");
+        self.writer.xml_start_tag_only("a:extLst");
 
         let attributes = [("uri", "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}")];
-        self.writer
-            .xml_start_tag_with_attributes("a:ext", &attributes);
+        self.writer.xml_start_tag("a:ext", &attributes);
 
         let attributes = [
             (
@@ -193,14 +188,12 @@ impl Drawing {
             ),
             ("id", "{00000000-0008-0000-0000-000002000000}"),
         ];
-        self.writer
-            .xml_empty_tag_with_attributes("a16:creationId", &attributes);
+        self.writer.xml_empty_tag("a16:creationId", &attributes);
 
         self.writer.xml_end_tag("a:ext");
 
         let attributes = [("uri", "{C183D7F6-B498-43B3-948B-1728B52AA6E4}")];
-        self.writer
-            .xml_start_tag_with_attributes("a:ext", &attributes);
+        self.writer.xml_start_tag("a:ext", &attributes);
 
         let attributes = [
             (
@@ -209,8 +202,7 @@ impl Drawing {
             ),
             ("val", "1"),
         ];
-        self.writer
-            .xml_empty_tag_with_attributes("adec:decorative", &attributes);
+        self.writer.xml_empty_tag("adec:decorative", &attributes);
 
         self.writer.xml_end_tag("a:ext");
         self.writer.xml_end_tag("a:extLst");
@@ -220,19 +212,18 @@ impl Drawing {
     fn write_a_pic_locks(&mut self) {
         let attributes = [("noChangeAspect", "1")];
 
-        self.writer
-            .xml_empty_tag_with_attributes("a:picLocks", &attributes);
+        self.writer.xml_empty_tag("a:picLocks", &attributes);
     }
 
     // Write the <xdr:blipFill> element.
     fn write_blip_fill(&mut self, index: u32) {
-        self.writer.xml_start_tag("xdr:blipFill");
+        self.writer.xml_start_tag_only("xdr:blipFill");
 
         // Write the a:blip element.
         self.write_a_blip(index);
 
-        self.writer.xml_start_tag("a:stretch");
-        self.writer.xml_empty_tag("a:fillRect");
+        self.writer.xml_start_tag_only("a:stretch");
+        self.writer.xml_empty_tag_only("a:fillRect");
         self.writer.xml_end_tag("a:stretch");
 
         self.writer.xml_end_tag("xdr:blipFill");
@@ -248,14 +239,13 @@ impl Drawing {
             ("r:embed", format!("rId{index}")),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("a:blip", &attributes);
+        self.writer.xml_empty_tag("a:blip", &attributes);
     }
 
     // Write the <xdr:spPr> element.
     fn write_sp_pr(&mut self, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag("xdr:spPr");
-        self.writer.xml_start_tag("a:xfrm");
+        self.writer.xml_start_tag_only("xdr:spPr");
+        self.writer.xml_start_tag_only("a:xfrm");
 
         // Write the a:off element.
         self.write_a_off(drawing_info);
@@ -278,8 +268,7 @@ impl Drawing {
             ("y", drawing_info.row_absolute.to_string()),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("a:off", &attributes);
+        self.writer.xml_empty_tag("a:off", &attributes);
     }
 
     // Write the <a:ext> element.
@@ -289,17 +278,15 @@ impl Drawing {
             ("cy", drawing_info.height.to_string()),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("a:ext", &attributes);
+        self.writer.xml_empty_tag("a:ext", &attributes);
     }
 
     // Write the <a:prstGeom> element.
     fn write_a_prst_geom(&mut self) {
         let attributes = [("prst", "rect")];
 
-        self.writer
-            .xml_start_tag_with_attributes("a:prstGeom", &attributes);
-        self.writer.xml_empty_tag("a:avLst");
+        self.writer.xml_start_tag("a:prstGeom", &attributes);
+        self.writer.xml_empty_tag_only("a:avLst");
         self.writer.xml_end_tag("a:prstGeom");
     }
 
@@ -307,8 +294,7 @@ impl Drawing {
     fn write_graphic_frame(&mut self, index: u32, drawing_info: &DrawingInfo) {
         let attributes = [("macro", "")];
 
-        self.writer
-            .xml_start_tag_with_attributes("xdr:graphicFrame", &attributes);
+        self.writer.xml_start_tag("xdr:graphicFrame", &attributes);
 
         // Write the xdr:nvGraphicFramePr element.
         self.write_nv_graphic_frame_pr(index, drawing_info);
@@ -324,7 +310,7 @@ impl Drawing {
 
     // Write the <xdr:nvGraphicFramePr> element.
     fn write_nv_graphic_frame_pr(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag("xdr:nvGraphicFramePr");
+        self.writer.xml_start_tag_only("xdr:nvGraphicFramePr");
 
         // Write the xdr:cNvPr element.
         self.write_c_nv_pr(index, drawing_info, "Chart");
@@ -337,12 +323,12 @@ impl Drawing {
 
     // Write the <xdr:cNvGraphicFramePr> element.
     fn write_c_nv_graphic_frame_pr(&mut self) {
-        self.writer.xml_empty_tag("xdr:cNvGraphicFramePr");
+        self.writer.xml_empty_tag_only("xdr:cNvGraphicFramePr");
     }
 
     // Write the <xdr:xfrm> element.
     fn write_xfrm(&mut self) {
-        self.writer.xml_start_tag("xdr:xfrm");
+        self.writer.xml_start_tag_only("xdr:xfrm");
 
         // Write the a:off element.
         self.write_chart_a_off();
@@ -357,21 +343,19 @@ impl Drawing {
     fn write_chart_a_off(&mut self) {
         let attributes = [("x", "0"), ("y", "0")];
 
-        self.writer
-            .xml_empty_tag_with_attributes("a:off", &attributes);
+        self.writer.xml_empty_tag("a:off", &attributes);
     }
 
     // Write the <a:ext> element.
     fn write_chart_a_ext(&mut self) {
         let attributes = [("cx", "0"), ("cy", "0")];
 
-        self.writer
-            .xml_empty_tag_with_attributes("a:ext", &attributes);
+        self.writer.xml_empty_tag("a:ext", &attributes);
     }
 
     // Write the <a:graphic> element.
     fn write_a_graphic(&mut self, index: u32) {
-        self.writer.xml_start_tag("a:graphic");
+        self.writer.xml_start_tag_only("a:graphic");
 
         // Write the a:graphicData element.
         self.write_a_graphic_data(index);
@@ -386,8 +370,7 @@ impl Drawing {
             "http://schemas.openxmlformats.org/drawingml/2006/chart",
         )];
 
-        self.writer
-            .xml_start_tag_with_attributes("a:graphicData", &attributes);
+        self.writer.xml_start_tag("a:graphicData", &attributes);
 
         // Write the c:chart element.
         self.write_chart(index);
@@ -409,8 +392,7 @@ impl Drawing {
             ("r:id", format!("rId{index}")),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("c:chart", &attributes);
+        self.writer.xml_empty_tag("c:chart", &attributes);
     }
 }
 

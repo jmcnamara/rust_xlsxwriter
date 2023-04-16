@@ -75,8 +75,7 @@ impl Relationship {
         let xmlns = "http://schemas.openxmlformats.org/package/2006/relationships";
         let attributes = [("xmlns", xmlns)];
 
-        self.writer
-            .xml_start_tag_with_attributes("Relationships", &attributes);
+        self.writer.xml_start_tag("Relationships", &attributes);
 
         for relationship in self.relationships.clone() {
             // Write the Relationship element.
@@ -97,8 +96,7 @@ impl Relationship {
             attributes.push(("TargetMode", target_mode));
         }
 
-        self.writer
-            .xml_empty_tag_with_attributes("Relationship", &attributes);
+        self.writer.xml_empty_tag("Relationship", &attributes);
     }
 }
 

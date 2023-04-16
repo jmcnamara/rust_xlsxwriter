@@ -57,8 +57,7 @@ impl Custom {
 
         let attributes = [("xmlns", xmlns), ("xmlns:vt", xmlns_vt)];
 
-        self.writer
-            .xml_start_tag_with_attributes("Properties", &attributes);
+        self.writer.xml_start_tag("Properties", &attributes);
     }
 
     // Write the <property> element.
@@ -70,8 +69,7 @@ impl Custom {
             ("name", property.name.to_string()),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("property", &attributes);
+        self.writer.xml_start_tag("property", &attributes);
 
         match property.property_type {
             CustomPropertyType::Int => self.write_vt_i_4(property.number_int),
@@ -86,30 +84,32 @@ impl Custom {
 
     // Write the <vt:lpwstr> element.
     fn write_vt_lpwstr(&mut self, text: &str) {
-        self.writer.xml_data_element("vt:lpwstr", text);
+        self.writer.xml_data_element_only("vt:lpwstr", text);
     }
 
     // Write the <vt:filetime> element.
     fn write_vt_filetime(&mut self, datetime: &DateTime<Utc>) {
         let utc_date = datetime.to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
-        self.writer.xml_data_element("vt:filetime", &utc_date);
+        self.writer.xml_data_element_only("vt:filetime", &utc_date);
     }
 
     // Write the <vt:i4> element.
     fn write_vt_i_4(&mut self, number: i32) {
-        self.writer.xml_data_element("vt:i4", &number.to_string());
+        self.writer
+            .xml_data_element_only("vt:i4", &number.to_string());
     }
 
     // Write the <vt:r8> element.
     fn write_vt_r_8(&mut self, number: f64) {
-        self.writer.xml_data_element("vt:r8", &number.to_string());
+        self.writer
+            .xml_data_element_only("vt:r8", &number.to_string());
     }
 
     // Write the <vt:bool> element.
     fn write_vt_bool(&mut self, boolean: bool) {
         self.writer
-            .xml_data_element("vt:bool", &boolean.to_string());
+            .xml_data_element_only("vt:bool", &boolean.to_string());
     }
 }
 

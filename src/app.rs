@@ -102,30 +102,29 @@ impl App {
 
         let attributes = vec![("xmlns", xmlns), ("xmlns:vt", xmlns_vt)];
 
-        self.writer
-            .xml_start_tag_with_attributes("Properties", &attributes);
+        self.writer.xml_start_tag("Properties", &attributes);
     }
 
     // Write the <Application> element.
     fn write_application(&mut self) {
         self.writer
-            .xml_data_element("Application", "Microsoft Excel");
+            .xml_data_element_only("Application", "Microsoft Excel");
     }
 
     // Write the <DocSecurity> element.
     fn write_doc_security(&mut self) {
         self.writer
-            .xml_data_element("DocSecurity", &self.doc_security.to_string());
+            .xml_data_element_only("DocSecurity", &self.doc_security.to_string());
     }
 
     // Write the <ScaleCrop> element.
     fn write_scale_crop(&mut self) {
-        self.writer.xml_data_element("ScaleCrop", "false");
+        self.writer.xml_data_element_only("ScaleCrop", "false");
     }
 
     // Write the <HeadingPairs> element.
     fn write_heading_pairs(&mut self) {
-        self.writer.xml_start_tag("HeadingPairs");
+        self.writer.xml_start_tag_only("HeadingPairs");
 
         // Write the vt:vector element for headings.
         self.write_heading_vector();
@@ -139,15 +138,14 @@ impl App {
         let size = size.to_string();
         let attributes = vec![("size", size), ("baseType", "variant".to_string())];
 
-        self.writer
-            .xml_start_tag_with_attributes("vt:vector", &attributes);
+        self.writer.xml_start_tag("vt:vector", &attributes);
 
         for heading_pair in self.heading_pairs.clone() {
-            self.writer.xml_start_tag("vt:variant");
+            self.writer.xml_start_tag_only("vt:variant");
             self.write_vt_lpstr(&heading_pair.0);
             self.writer.xml_end_tag("vt:variant");
 
-            self.writer.xml_start_tag("vt:variant");
+            self.writer.xml_start_tag_only("vt:variant");
             self.write_vt_i4(heading_pair.1);
             self.writer.xml_end_tag("vt:variant");
         }
@@ -157,7 +155,7 @@ impl App {
 
     // Write the <TitlesOfParts> element.
     fn write_titles_of_parts(&mut self) {
-        self.writer.xml_start_tag("TitlesOfParts");
+        self.writer.xml_start_tag_only("TitlesOfParts");
 
         self.write_title_parts_vector();
 
@@ -170,8 +168,7 @@ impl App {
         let size = size.to_string();
         let attributes = vec![("size", size), ("baseType", String::from("lpstr"))];
 
-        self.writer
-            .xml_start_tag_with_attributes("vt:vector", &attributes);
+        self.writer.xml_start_tag("vt:vector", &attributes);
 
         for part_name in self.table_parts.clone() {
             self.write_vt_lpstr(&part_name);
@@ -182,54 +179,56 @@ impl App {
 
     // Write the <vt:lpstr> element.
     fn write_vt_lpstr(&mut self, data: &str) {
-        self.writer.xml_data_element("vt:lpstr", data);
+        self.writer.xml_data_element_only("vt:lpstr", data);
     }
 
     // Write the <vt:i4> element.
     fn write_vt_i4(&mut self, count: u16) {
-        self.writer.xml_data_element("vt:i4", &count.to_string());
+        self.writer
+            .xml_data_element_only("vt:i4", &count.to_string());
     }
 
     // Write the <Manager> element.
     fn write_manager(&mut self) {
         if !self.properties.manager.is_empty() {
             self.writer
-                .xml_data_element("Manager", &self.properties.manager);
+                .xml_data_element_only("Manager", &self.properties.manager);
         }
     }
 
     // Write the <Company> element.
     fn write_company(&mut self) {
         self.writer
-            .xml_data_element("Company", &self.properties.company);
+            .xml_data_element_only("Company", &self.properties.company);
     }
 
     // Write the <LinksUpToDate> element.
     fn write_links_up_to_date(&mut self) {
-        self.writer.xml_data_element("LinksUpToDate", "false");
+        self.writer.xml_data_element_only("LinksUpToDate", "false");
     }
 
     // Write the <SharedDoc> element.
     fn write_shared_doc(&mut self) {
-        self.writer.xml_data_element("SharedDoc", "false");
+        self.writer.xml_data_element_only("SharedDoc", "false");
     }
 
     // Write the <HyperlinkBase> element.
     fn write_hyperlink_base(&mut self) {
         if !self.properties.hyperlink_base.is_empty() {
             self.writer
-                .xml_data_element("HyperlinkBase", &self.properties.hyperlink_base);
+                .xml_data_element_only("HyperlinkBase", &self.properties.hyperlink_base);
         }
     }
 
     // Write the <HyperlinksChanged> element.
     fn write_hyperlinks_changed(&mut self) {
-        self.writer.xml_data_element("HyperlinksChanged", "false");
+        self.writer
+            .xml_data_element_only("HyperlinksChanged", "false");
     }
 
     // Write the <AppVersion> element.
     fn write_app_version(&mut self) {
-        self.writer.xml_data_element("AppVersion", "12.0000");
+        self.writer.xml_data_element_only("AppVersion", "12.0000");
     }
 }
 

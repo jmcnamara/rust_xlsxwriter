@@ -66,16 +66,14 @@ impl Vml {
             ("xmlns:x", "urn:schemas-microsoft-com:office:excel"),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("xml", &attributes);
+        self.writer.xml_start_tag("xml", &attributes);
     }
 
     // Write the <o:shapelayout> element.
     fn write_shapelayout(&mut self) {
         let attributes = [("v:ext", "edit")];
 
-        self.writer
-            .xml_start_tag_with_attributes("o:shapelayout", &attributes);
+        self.writer.xml_start_tag("o:shapelayout", &attributes);
 
         // Write the o:idmap element.
         self.write_idmap();
@@ -90,8 +88,7 @@ impl Vml {
             ("data", self.data_id.to_string()),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("o:idmap", &attributes);
+        self.writer.xml_empty_tag("o:idmap", &attributes);
     }
 
     // Write the <v:shapetype> element.
@@ -106,8 +103,7 @@ impl Vml {
             ("stroked", "f"),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("v:shapetype", &attributes);
+        self.writer.xml_start_tag("v:shapetype", &attributes);
 
         // Write the v:stroke element.
         self.write_stroke();
@@ -128,13 +124,12 @@ impl Vml {
     fn write_stroke(&mut self) {
         let attributes = [("joinstyle", "miter")];
 
-        self.writer
-            .xml_empty_tag_with_attributes("v:stroke", &attributes);
+        self.writer.xml_empty_tag("v:stroke", &attributes);
     }
 
     // Write the <v:formulas> element.
     fn write_formulas(&mut self) {
-        self.writer.xml_start_tag("v:formulas");
+        self.writer.xml_start_tag_only("v:formulas");
 
         self.write_formula_with_format("if lineDrawn pixelLineWidth 0");
         self.write_formula_with_format("sum @0 1 0");
@@ -155,8 +150,7 @@ impl Vml {
     fn write_formula_with_format(&mut self, equation: &str) {
         let attributes = [("eqn", equation.to_string())];
 
-        self.writer
-            .xml_empty_tag_with_attributes("v:f", &attributes);
+        self.writer.xml_empty_tag("v:f", &attributes);
     }
 
     // Write the <v:path> element.
@@ -167,16 +161,14 @@ impl Vml {
             ("o:connecttype", "rect"),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("v:path", &attributes);
+        self.writer.xml_empty_tag("v:path", &attributes);
     }
 
     // Write the <o:lock> element.
     fn write_shapetype_lock(&mut self) {
         let attributes = [("v:ext", "edit"), ("aspectratio", "t")];
 
-        self.writer
-            .xml_empty_tag_with_attributes("o:lock", &attributes);
+        self.writer.xml_empty_tag("o:lock", &attributes);
     }
 
     // Write the <v:shape> element.
@@ -202,8 +194,7 @@ impl Vml {
             ("style", style),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("v:shape", &attributes);
+        self.writer.xml_start_tag("v:shape", &attributes);
 
         // Write the v:imagedata element.
         self.write_imagedata(vml_info);
@@ -221,8 +212,7 @@ impl Vml {
             ("o:title", vml_info.title.to_string()),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("v:imagedata", &attributes);
+        self.writer.xml_empty_tag("v:imagedata", &attributes);
     }
 
     // Write the <o:lock> element.
@@ -233,8 +223,7 @@ impl Vml {
             attributes.push(("aspectratio", "f".to_string()));
         }
 
-        self.writer
-            .xml_empty_tag_with_attributes("o:lock", &attributes);
+        self.writer.xml_empty_tag("o:lock", &attributes);
     }
 }
 

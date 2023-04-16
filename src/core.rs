@@ -87,15 +87,14 @@ impl Core {
             ("xmlns:xsi", xmlns_xsi),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("cp:coreProperties", &attributes);
+        self.writer.xml_start_tag("cp:coreProperties", &attributes);
     }
 
     // Write the <dc:title> element.
     fn write_dc_title(&mut self) {
         if !self.properties.title.is_empty() {
             self.writer
-                .xml_data_element("dc:title", &self.properties.title);
+                .xml_data_element_only("dc:title", &self.properties.title);
         }
     }
 
@@ -103,21 +102,21 @@ impl Core {
     fn write_dc_subject(&mut self) {
         if !self.properties.subject.is_empty() {
             self.writer
-                .xml_data_element("dc:subject", &self.properties.subject);
+                .xml_data_element_only("dc:subject", &self.properties.subject);
         }
     }
 
     // Write the <dc:creator> element.
     fn write_dc_creator(&mut self) {
         self.writer
-            .xml_data_element("dc:creator", &self.properties.author);
+            .xml_data_element_only("dc:creator", &self.properties.author);
     }
 
     // Write the <cp:keywords> element.
     fn write_cp_keywords(&mut self) {
         if !self.properties.keywords.is_empty() {
             self.writer
-                .xml_data_element("cp:keywords", &self.properties.keywords);
+                .xml_data_element_only("cp:keywords", &self.properties.keywords);
         }
     }
 
@@ -125,14 +124,14 @@ impl Core {
     fn write_dc_description(&mut self) {
         if !self.properties.comment.is_empty() {
             self.writer
-                .xml_data_element("dc:description", &self.properties.comment);
+                .xml_data_element_only("dc:description", &self.properties.comment);
         }
     }
 
     // Write the <cp:lastModifiedBy> element.
     fn write_cp_last_modified_by(&mut self) {
         self.writer
-            .xml_data_element("cp:lastModifiedBy", &self.properties.author);
+            .xml_data_element_only("cp:lastModifiedBy", &self.properties.author);
     }
 
     // Write the <dcterms:created> element.
@@ -144,7 +143,7 @@ impl Core {
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
         self.writer
-            .xml_data_element_with_attributes("dcterms:created", &datetime, &attributes);
+            .xml_data_element("dcterms:created", &datetime, &attributes);
     }
 
     // Write the <dcterms:modified> element.
@@ -157,14 +156,14 @@ impl Core {
             .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
 
         self.writer
-            .xml_data_element_with_attributes("dcterms:modified", &datetime, &attributes);
+            .xml_data_element("dcterms:modified", &datetime, &attributes);
     }
 
     // Write the <cp:category> element.
     fn write_cp_category(&mut self) {
         if !self.properties.category.is_empty() {
             self.writer
-                .xml_data_element("cp:category", &self.properties.category);
+                .xml_data_element_only("cp:category", &self.properties.category);
         }
     }
 
@@ -172,7 +171,7 @@ impl Core {
     fn write_cp_content_status(&mut self) {
         if !self.properties.status.is_empty() {
             self.writer
-                .xml_data_element("cp:contentStatus", &self.properties.status);
+                .xml_data_element_only("cp:contentStatus", &self.properties.status);
         }
     }
 }

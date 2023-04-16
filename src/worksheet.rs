@@ -7591,17 +7591,13 @@ impl Worksheet {
 
             // First segment doesn't require a font run for the default format.
             if format.is_default() && first_segment {
-                styler.writer.xml_start_tag("r");
-                styler
-                    .writer
-                    .xml_data_element_with_attributes("t", string, &attributes);
+                styler.writer.xml_start_tag_only("r");
+                styler.writer.xml_data_element("t", string, &attributes);
                 styler.writer.xml_end_tag("r");
             } else {
-                styler.writer.xml_start_tag("r");
+                styler.writer.xml_start_tag_only("r");
                 styler.write_font(format);
-                styler
-                    .writer
-                    .xml_data_element_with_attributes("t", string, &attributes);
+                styler.writer.xml_data_element("t", string, &attributes);
                 styler.writer.xml_end_tag("r");
             }
             first_segment = false;
@@ -8428,8 +8424,7 @@ impl Worksheet {
 
         let attributes = [("xmlns", xmlns), ("xmlns:r", xmlns_r)];
 
-        self.writer
-            .xml_start_tag_with_attributes("worksheet", &attributes);
+        self.writer.xml_start_tag("worksheet", &attributes);
     }
 
     // Write the <sheetPr> element.
@@ -8449,8 +8444,7 @@ impl Worksheet {
         if self.fit_to_page
             || (self.tab_color != XlsxColor::Default && self.tab_color != XlsxColor::Automatic)
         {
-            self.writer
-                .xml_start_tag_with_attributes("sheetPr", &attributes);
+            self.writer.xml_start_tag("sheetPr", &attributes);
 
             // Write the pageSetUpPr element.
             self.write_page_set_up_pr();
@@ -8460,8 +8454,7 @@ impl Worksheet {
 
             self.writer.xml_end_tag("sheetPr");
         } else {
-            self.writer
-                .xml_empty_tag_with_attributes("sheetPr", &attributes);
+            self.writer.xml_empty_tag("sheetPr", &attributes);
         }
     }
 
@@ -8473,8 +8466,7 @@ impl Worksheet {
 
         let attributes = [("fitToPage", "1")];
 
-        self.writer
-            .xml_empty_tag_with_attributes("pageSetUpPr", &attributes);
+        self.writer.xml_empty_tag("pageSetUpPr", &attributes);
     }
 
     // Write the <tabColor> element.
@@ -8485,8 +8477,7 @@ impl Worksheet {
 
         let attributes = self.tab_color.attributes();
 
-        self.writer
-            .xml_empty_tag_with_attributes("tabColor", &attributes);
+        self.writer.xml_empty_tag("tabColor", &attributes);
     }
 
     // Write the <dimension> element.
@@ -8509,13 +8500,12 @@ impl Worksheet {
 
         attributes.push(("ref", range));
 
-        self.writer
-            .xml_empty_tag_with_attributes("dimension", &attributes);
+        self.writer.xml_empty_tag("dimension", &attributes);
     }
 
     // Write the <sheetViews> element.
     fn write_sheet_views(&mut self) {
-        self.writer.xml_start_tag("sheetViews");
+        self.writer.xml_start_tag_only("sheetViews");
 
         // Write the sheetView element.
         self.write_sheet_view();
@@ -8568,11 +8558,9 @@ impl Worksheet {
         attributes.push(("workbookViewId", "0".to_string()));
 
         if self.panes.is_empty() && self.selected_range.0.is_empty() {
-            self.writer
-                .xml_empty_tag_with_attributes("sheetView", &attributes);
+            self.writer.xml_empty_tag("sheetView", &attributes);
         } else {
-            self.writer
-                .xml_start_tag_with_attributes("sheetView", &attributes);
+            self.writer.xml_start_tag("sheetView", &attributes);
             self.write_panes();
             self.write_selections();
             self.writer.xml_end_tag("sheetView");
@@ -8641,8 +8629,7 @@ impl Worksheet {
         attributes.push(("activePane", active_pane.to_string()));
         attributes.push(("state", "frozen".to_string()));
 
-        self.writer
-            .xml_empty_tag_with_attributes("pane", &attributes);
+        self.writer.xml_empty_tag("pane", &attributes);
     }
 
     // Write the <selection> element.
@@ -8661,24 +8648,22 @@ impl Worksheet {
             attributes.push(("sqref", range.to_string()));
         }
 
-        self.writer
-            .xml_empty_tag_with_attributes("selection", &attributes);
+        self.writer.xml_empty_tag("selection", &attributes);
     }
 
     // Write the <sheetFormatPr> element.
     fn write_sheet_format_pr(&mut self) {
         let attributes = [("defaultRowHeight", "15")];
 
-        self.writer
-            .xml_empty_tag_with_attributes("sheetFormatPr", &attributes);
+        self.writer.xml_empty_tag("sheetFormatPr", &attributes);
     }
 
     // Write the <sheetData> element.
     fn write_sheet_data(&mut self, string_table: &mut SharedStringsTable) {
         if self.table.is_empty() && self.changed_rows.is_empty() {
-            self.writer.xml_empty_tag("sheetData");
+            self.writer.xml_empty_tag_only("sheetData");
         } else {
-            self.writer.xml_start_tag("sheetData");
+            self.writer.xml_start_tag_only("sheetData");
             self.write_data_table(string_table);
             self.writer.xml_end_tag("sheetData");
         }
@@ -8688,8 +8673,7 @@ impl Worksheet {
     fn write_merge_cells(&mut self) {
         let attributes = [("count", self.merged_ranges.len().to_string())];
 
-        self.writer
-            .xml_start_tag_with_attributes("mergeCells", &attributes);
+        self.writer.xml_start_tag("mergeCells", &attributes);
 
         for merge_range in &self.merged_ranges.clone() {
             // Write the mergeCell element.
@@ -8703,13 +8687,12 @@ impl Worksheet {
     fn write_merge_cell(&mut self, merge_range: &CellRange) {
         let attributes = [("ref", merge_range.to_range_string())];
 
-        self.writer
-            .xml_empty_tag_with_attributes("mergeCell", &attributes);
+        self.writer.xml_empty_tag("mergeCell", &attributes);
     }
 
     // Write the <hyperlinks> element.
     fn write_hyperlinks(&mut self) {
-        self.writer.xml_start_tag("hyperlinks");
+        self.writer.xml_start_tag_only("hyperlinks");
 
         let mut ref_id = 1u16;
         for (cell, hyperlink) in &mut self.hyperlinks.clone() {
@@ -8759,8 +8742,7 @@ impl Worksheet {
             HyperlinkType::Unknown => {}
         }
 
-        self.writer
-            .xml_empty_tag_with_attributes("hyperlink", &attributes);
+        self.writer.xml_empty_tag("hyperlink", &attributes);
     }
 
     // Write the <printOptions> element.
@@ -8783,8 +8765,7 @@ impl Worksheet {
             attributes.push(("gridLines", "1".to_string()));
         }
 
-        self.writer
-            .xml_empty_tag_with_attributes("printOptions", &attributes);
+        self.writer.xml_empty_tag("printOptions", &attributes);
     }
 
     // Write the <pageMargins> element.
@@ -8798,8 +8779,7 @@ impl Worksheet {
             ("footer", self.margin_footer.to_string()),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("pageMargins", &attributes);
+        self.writer.xml_empty_tag("pageMargins", &attributes);
     }
 
     // Write the <pageSetup> element.
@@ -8848,8 +8828,7 @@ impl Worksheet {
         attributes.push(("horizontalDpi", "200".to_string()));
         attributes.push(("verticalDpi", "200".to_string()));
 
-        self.writer
-            .xml_empty_tag_with_attributes("pageSetup", &attributes);
+        self.writer.xml_empty_tag("pageSetup", &attributes);
     }
 
     // Write the <autoFilter> element.
@@ -8857,11 +8836,9 @@ impl Worksheet {
         let attributes = [("ref", self.autofilter_area.clone())];
 
         if self.filter_conditions.is_empty() {
-            self.writer
-                .xml_empty_tag_with_attributes("autoFilter", &attributes);
+            self.writer.xml_empty_tag("autoFilter", &attributes);
         } else {
-            self.writer
-                .xml_start_tag_with_attributes("autoFilter", &attributes);
+            self.writer.xml_start_tag("autoFilter", &attributes);
             let col_offset = self.autofilter_defined_name.first_col;
 
             for col in self.filter_conditions.clone().keys().sorted() {
@@ -8878,8 +8855,7 @@ impl Worksheet {
     fn write_filter_column(&mut self, col: ColNum, filter_condition: &FilterCondition) {
         let attributes = [("colId", col.to_string())];
 
-        self.writer
-            .xml_start_tag_with_attributes("filterColumn", &attributes);
+        self.writer.xml_start_tag("filterColumn", &attributes);
 
         if filter_condition.is_list_filter {
             self.write_list_filters(filter_condition);
@@ -8899,11 +8875,9 @@ impl Worksheet {
         }
 
         if filter_condition.list.is_empty() {
-            self.writer
-                .xml_empty_tag_with_attributes("filters", &attributes);
+            self.writer.xml_empty_tag("filters", &attributes);
         } else {
-            self.writer
-                .xml_start_tag_with_attributes("filters", &attributes);
+            self.writer.xml_start_tag("filters", &attributes);
 
             for data in &filter_condition.list {
                 // Write the filter element.
@@ -8918,8 +8892,7 @@ impl Worksheet {
     fn write_filter(&mut self, value: String) {
         let attributes = [("val", value)];
 
-        self.writer
-            .xml_empty_tag_with_attributes("filter", &attributes);
+        self.writer.xml_empty_tag("filter", &attributes);
     }
 
     // Write the <customFilters> element.
@@ -8930,8 +8903,7 @@ impl Worksheet {
             attributes.push(("and", "1".to_string()));
         }
 
-        self.writer
-            .xml_start_tag_with_attributes("customFilters", &attributes);
+        self.writer.xml_start_tag("customFilters", &attributes);
 
         if let Some(data) = filter_condition.custom1.as_ref() {
             self.write_custom_filter(data);
@@ -8953,8 +8925,7 @@ impl Worksheet {
 
         attributes.push(("val", data.value()));
 
-        self.writer
-            .xml_empty_tag_with_attributes("customFilter", &attributes);
+        self.writer.xml_empty_tag("customFilter", &attributes);
     }
 
     // Write out all the row and cell data in the worksheet data table.
@@ -9116,11 +9087,9 @@ impl Worksheet {
         }
 
         if has_data {
-            self.writer
-                .xml_start_tag_with_attributes("row", &attributes);
+            self.writer.xml_start_tag("row", &attributes);
         } else {
-            self.writer
-                .xml_empty_tag_with_attributes("row", &attributes);
+            self.writer.xml_empty_tag("row", &attributes);
         }
     }
 
@@ -9306,7 +9275,7 @@ impl Worksheet {
             return;
         }
 
-        self.writer.xml_start_tag("cols");
+        self.writer.xml_start_tag_only("cols");
 
         // We need to write contiguous equivalent columns as a range with first
         // and last columns, so we convert the HashMap to a sorted vector and
@@ -9400,8 +9369,7 @@ impl Worksheet {
             attributes.push(("customWidth", "1".to_string()));
         }
 
-        self.writer
-            .xml_empty_tag_with_attributes("col", &attributes);
+        self.writer.xml_empty_tag("col", &attributes);
     }
 
     // Write the <headerFooter> element.
@@ -9417,11 +9385,9 @@ impl Worksheet {
         }
 
         if self.header.is_empty() && self.footer.is_empty() {
-            self.writer
-                .xml_empty_tag_with_attributes("headerFooter", &attributes);
+            self.writer.xml_empty_tag("headerFooter", &attributes);
         } else {
-            self.writer
-                .xml_start_tag_with_attributes("headerFooter", &attributes);
+            self.writer.xml_start_tag("headerFooter", &attributes);
 
             // Write the oddHeader element.
             if !self.header.is_empty() {
@@ -9450,7 +9416,7 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        self.writer.xml_data_element("oddHeader", &header);
+        self.writer.xml_data_element_only("oddHeader", &header);
     }
 
     // Write the <oddFooter> element.
@@ -9466,7 +9432,7 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        self.writer.xml_data_element("oddFooter", &footer);
+        self.writer.xml_data_element_only("oddFooter", &footer);
     }
 
     // Write the <drawing> element.
@@ -9474,8 +9440,7 @@ impl Worksheet {
         self.rel_count += 1;
         let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
-        self.writer
-            .xml_empty_tag_with_attributes("drawing", &attributes);
+        self.writer.xml_empty_tag("drawing", &attributes);
     }
 
     // Write the <legacyDrawingHF> element.
@@ -9483,8 +9448,7 @@ impl Worksheet {
         self.rel_count += 1;
         let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
-        self.writer
-            .xml_empty_tag_with_attributes("legacyDrawingHF", &attributes);
+        self.writer.xml_empty_tag("legacyDrawingHF", &attributes);
     }
 
     // Write the <sheetProtection> element.
@@ -9557,13 +9521,12 @@ impl Worksheet {
             attributes.push(("selectUnlockedCells", "1".to_string()));
         }
 
-        self.writer
-            .xml_empty_tag_with_attributes("sheetProtection", &attributes);
+        self.writer.xml_empty_tag("sheetProtection", &attributes);
     }
 
     // Write the <protectedRanges> element.
     fn write_protected_ranges(&mut self) {
-        self.writer.xml_start_tag("protectedRanges");
+        self.writer.xml_start_tag_only("protectedRanges");
 
         for (range, name, hash) in self.unprotected_ranges.clone() {
             self.write_protected_range(range, name, hash);
@@ -9583,8 +9546,7 @@ impl Worksheet {
         attributes.push(("sqref", range));
         attributes.push(("name", name));
 
-        self.writer
-            .xml_empty_tag_with_attributes("protectedRange", &attributes);
+        self.writer.xml_empty_tag("protectedRange", &attributes);
     }
 
     // Write the <rowBreaks> element.
@@ -9594,8 +9556,7 @@ impl Worksheet {
             ("manualBreakCount", self.horizontal_breaks.len().to_string()),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("rowBreaks", &attributes);
+        self.writer.xml_start_tag("rowBreaks", &attributes);
 
         for row_num in self.horizontal_breaks.clone() {
             // Write the brk element.
@@ -9613,8 +9574,7 @@ impl Worksheet {
             ("man", "1".to_string()),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("brk", &attributes);
+        self.writer.xml_empty_tag("brk", &attributes);
     }
 
     // Write the <colBreaks> element.
@@ -9624,8 +9584,7 @@ impl Worksheet {
             ("manualBreakCount", self.vertical_breaks.len().to_string()),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("colBreaks", &attributes);
+        self.writer.xml_start_tag("colBreaks", &attributes);
 
         for col_num in self.vertical_breaks.clone() {
             // Write the brk element.
@@ -9643,8 +9602,7 @@ impl Worksheet {
             ("man", "1".to_string()),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("brk", &attributes);
+        self.writer.xml_empty_tag("brk", &attributes);
     }
 }
 

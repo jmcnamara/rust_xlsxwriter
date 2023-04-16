@@ -59,16 +59,14 @@ impl Metadata {
             ),
         ];
 
-        self.writer
-            .xml_start_tag_with_attributes("metadata", &attributes);
+        self.writer.xml_start_tag("metadata", &attributes);
     }
 
     // Write the <metadataTypes> element.
     fn write_metadata_types(&mut self) {
         let attributes = [("count", "1")];
 
-        self.writer
-            .xml_start_tag_with_attributes("metadataTypes", &attributes);
+        self.writer.xml_start_tag("metadataTypes", &attributes);
 
         // Write the metadataType element.
         self.write_metadata_type();
@@ -94,18 +92,16 @@ impl Metadata {
             ("cellMeta", "1"),
         ];
 
-        self.writer
-            .xml_empty_tag_with_attributes("metadataType", &attributes);
+        self.writer.xml_empty_tag("metadataType", &attributes);
     }
 
     // Write the <futureMetadata> element.
     fn write_future_metadata(&mut self) {
         let attributes = [("name", "XLDAPR"), ("count", "1")];
 
-        self.writer
-            .xml_start_tag_with_attributes("futureMetadata", &attributes);
-        self.writer.xml_start_tag("bk");
-        self.writer.xml_start_tag("extLst");
+        self.writer.xml_start_tag("futureMetadata", &attributes);
+        self.writer.xml_start_tag_only("bk");
+        self.writer.xml_start_tag_only("extLst");
 
         // Write the ext element.
         self.write_ext();
@@ -119,8 +115,7 @@ impl Metadata {
     fn write_ext(&mut self) {
         let attributes = [("uri", "{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}")];
 
-        self.writer
-            .xml_start_tag_with_attributes("ext", &attributes);
+        self.writer.xml_start_tag("ext", &attributes);
 
         // Write the xda:dynamicArrayProperties element.
         self.write_xda_dynamic_array_properties();
@@ -133,16 +128,15 @@ impl Metadata {
         let attributes = [("fDynamic", "1"), ("fCollapsed", "0")];
 
         self.writer
-            .xml_empty_tag_with_attributes("xda:dynamicArrayProperties", &attributes);
+            .xml_empty_tag("xda:dynamicArrayProperties", &attributes);
     }
 
     // Write the <cellMetadata> element.
     fn write_cell_metadata(&mut self) {
         let attributes = [("count", "1")];
 
-        self.writer
-            .xml_start_tag_with_attributes("cellMetadata", &attributes);
-        self.writer.xml_start_tag("bk");
+        self.writer.xml_start_tag("cellMetadata", &attributes);
+        self.writer.xml_start_tag_only("bk");
 
         // Write the rc element.
         self.write_rc();
@@ -155,6 +149,6 @@ impl Metadata {
     fn write_rc(&mut self) {
         let attributes = [("t", "1"), ("v", "0")];
 
-        self.writer.xml_empty_tag_with_attributes("rc", &attributes);
+        self.writer.xml_empty_tag("rc", &attributes);
     }
 }
