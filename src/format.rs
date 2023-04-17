@@ -438,7 +438,6 @@ pub struct Format {
 
 impl Hash for Format {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        // skip: xf_index,font_index,fill_index,border_index,has_font,has_fill,has_border
         self.font.hash(state);
         self.alignment.hash(state);
         self.borders.hash(state);
@@ -454,7 +453,6 @@ impl Hash for Format {
 
 impl PartialEq for Format {
     fn eq(&self, other: &Self) -> bool {
-        // skip: xf_index,font_index,fill_index,border_index,has_font,has_fill,has_border
         self.font == other.font
             && self.alignment == other.alignment
             && self.borders == other.borders
@@ -976,7 +974,7 @@ impl Format {
     where
         T: Into<f64>,
     {
-        self.font.font_size = FontSize(font_size.into());
+        self.font.font_size = font_size.into().to_string();
         self
     }
 
@@ -2237,7 +2235,7 @@ pub(crate) struct Font {
     pub(crate) italic: bool,
     pub(crate) underline: FormatUnderline,
     pub(crate) font_name: String,
-    pub(crate) font_size: FontSize,
+    pub(crate) font_size: String,
     pub(crate) font_color: XlsxColor,
     pub(crate) font_strikethrough: bool,
     pub(crate) font_script: FormatScript,
@@ -2253,7 +2251,7 @@ impl Default for Font {
     fn default() -> Self {
         Self {
             font_name: "Calibri".to_string(),
-            font_size: FontSize(11.0),
+            font_size: "11".to_string(),
             font_family: 2,
             font_scheme: "minor".to_string(),
 
@@ -2276,29 +2274,6 @@ pub(crate) struct Fill {
     pub(crate) foreground_color: XlsxColor,
     pub(crate) background_color: XlsxColor,
     pub(crate) pattern: FormatPattern,
-}
-
-// Newtype around f64 that implements Hash + Eq
-#[derive(Debug, Clone, Copy)]
-pub(crate) struct FontSize(pub(crate) f64);
-
-impl PartialEq for FontSize {
-    fn eq(&self, other: &Self) -> bool {
-        (self.0.is_nan() && other.0.is_nan()) || (self.0 - other.0).abs() < 0.1
-    }
-}
-
-impl Eq for FontSize {}
-
-impl Hash for FontSize {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        let bits = if self.0.is_nan() {
-            f64::NAN.to_bits()
-        } else {
-            self.0.abs().to_bits()
-        };
-        bits.hash(state);
-    }
 }
 
 // -----------------------------------------------------------------------
@@ -2459,7 +2434,7 @@ impl XlsxColor {
             XlsxColor::Magenta => "FF00FF".to_string(),
             XlsxColor::RGB(color) => format!("{color:06X}"),
 
-            // Default to black.
+            // Default to black for non RGB colors.
             XlsxColor::Theme(_, _)
             | XlsxColor::Default
             | XlsxColor::Automatic

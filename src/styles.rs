@@ -178,7 +178,7 @@ impl<'a> Styles<'a> {
 
     // Write the <sz> element.
     fn write_font_size(&mut self, font: &Font) {
-        let attributes = [("val", font.font_size.0.to_string())];
+        let attributes = [("val", font.font_size.as_str())];
 
         self.writer.xml_empty_tag("sz", &attributes);
     }
