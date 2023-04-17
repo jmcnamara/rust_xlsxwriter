@@ -149,7 +149,7 @@ pub struct Worksheet {
     merged_cells: HashMap<(RowNum, ColNum), usize>,
     col_names: HashMap<ColNum, String>,
     dimensions: CellRange,
-    xf_indices: HashMap<String, u32>,
+    xf_indices: HashMap<Format, u32>,
     global_xf_indices: Vec<u32>,
     changed_rows: HashMap<RowNum, RowOptions>,
     changed_cols: HashMap<ColNum, ColOptions>,
@@ -282,8 +282,7 @@ impl Worksheet {
     pub fn new() -> Worksheet {
         let writer = XMLWriter::new();
 
-        let default_format = Format::default();
-        let xf_indices = HashMap::from([(default_format.format_key(), 0)]);
+        let xf_indices = HashMap::from([(Format::default(), 0)]);
 
         // Initialize the min and max dimensions with their opposite value.
         let dimensions = CellRange {
@@ -316,7 +315,7 @@ impl Worksheet {
             dimensions,
             merged_ranges: vec![],
             merged_cells: HashMap::new(),
-            xf_formats: vec![default_format],
+            xf_formats: vec![Format::default()],
             xf_indices,
             global_xf_indices: vec![],
             changed_rows: HashMap::new(),
@@ -7595,7 +7594,7 @@ impl Worksheet {
                 styler.writer.xml_end_tag("r");
             } else {
                 styler.writer.xml_start_tag_only("r");
-                styler.write_font(format);
+                styler.write_font(&format.font);
                 styler.writer.xml_data_element("t", string, &attributes);
                 styler.writer.xml_end_tag("r");
             }
@@ -7709,15 +7708,13 @@ impl Worksheet {
     // indexes will be replaced by global/workbook indices before the worksheet
     // is saved.
     fn format_index(&mut self, format: &Format) -> u32 {
-        let format_key = format.format_key();
-
-        match self.xf_indices.get_mut(&format_key) {
+        match self.xf_indices.get_mut(format) {
             Some(xf_index) => *xf_index,
             None => {
                 let xf_index = self.xf_formats.len() as u32;
                 self.xf_formats.push(format.clone());
-                self.xf_indices.insert(format_key, xf_index);
-                if format.is_hyperlink {
+                self.xf_indices.insert(format.clone(), xf_index);
+                if format.font.is_hyperlink {
                     self.has_hyperlink_style = true;
                 }
                 xf_index

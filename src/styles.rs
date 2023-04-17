@@ -7,8 +7,8 @@
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
 use crate::{
-    FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern, FormatScript, FormatUnderline,
-    XlsxColor,
+    Alignment, Border, Fill, Font, FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern,
+    FormatScript, FormatUnderline, XlsxColor,
 };
 
 pub struct Styles<'a> {
@@ -113,7 +113,7 @@ impl<'a> Styles<'a> {
         for xf_format in self.xf_formats {
             // Write the font element.
             if xf_format.has_font {
-                self.write_font(xf_format);
+                self.write_font(&xf_format.font);
             }
         }
 
@@ -121,53 +121,53 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <font> element.
-    pub(crate) fn write_font(&mut self, xf_format: &Format) {
+    pub(crate) fn write_font(&mut self, font: &Font) {
         if self.is_rich_string_style {
             self.writer.xml_start_tag_only("rPr");
         } else {
             self.writer.xml_start_tag_only("font");
         }
 
-        if xf_format.bold {
+        if font.bold {
             self.writer.xml_empty_tag_only("b");
         }
 
-        if xf_format.italic {
+        if font.italic {
             self.writer.xml_empty_tag_only("i");
         }
 
-        if xf_format.font_strikethrough {
+        if font.font_strikethrough {
             self.writer.xml_empty_tag_only("strike");
         }
 
-        if xf_format.underline != FormatUnderline::None {
-            self.write_font_underline(xf_format);
+        if font.underline != FormatUnderline::None {
+            self.write_font_underline(font);
         }
 
-        if xf_format.font_script != FormatScript::None {
-            self.write_vert_align(xf_format);
+        if font.font_script != FormatScript::None {
+            self.write_vert_align(font);
         }
         // Write the sz element.
-        self.write_font_size(xf_format);
+        self.write_font_size(font);
 
         // Write the color element.
-        self.write_font_color(xf_format);
+        self.write_font_color(font);
 
         // Write the name element.
-        self.write_font_name(xf_format);
+        self.write_font_name(font);
 
         // Write the family element.
-        if xf_format.font_family > 0 {
-            self.write_font_family(xf_format);
+        if font.font_family > 0 {
+            self.write_font_family(font);
         }
 
         // Write the charset element.
-        if xf_format.font_charset > 0 {
-            self.write_font_charset(xf_format);
+        if font.font_charset > 0 {
+            self.write_font_charset(font);
         }
 
         // Write the scheme element.
-        self.write_font_scheme(xf_format);
+        self.write_font_scheme(font);
 
         if self.is_rich_string_style {
             self.writer.xml_end_tag("rPr");
@@ -177,17 +177,17 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <sz> element.
-    fn write_font_size(&mut self, xf_format: &Format) {
-        let attributes = [("val", xf_format.font_size.to_string())];
+    fn write_font_size(&mut self, font: &Font) {
+        let attributes = [("val", font.font_size.0.to_string())];
 
         self.writer.xml_empty_tag("sz", &attributes);
     }
 
     // Write the <color> element.
-    fn write_font_color(&mut self, xf_format: &Format) {
+    fn write_font_color(&mut self, font: &Font) {
         let mut attributes = vec![];
 
-        match xf_format.font_color {
+        match font.font_color {
             XlsxColor::Automatic => {
                 // The color element is omitted for an Automatic color.
             }
@@ -196,15 +196,15 @@ impl<'a> Styles<'a> {
                 self.writer.xml_empty_tag("color", &attributes);
             }
             _ => {
-                attributes.append(&mut xf_format.font_color.attributes());
+                attributes.append(&mut font.font_color.attributes());
                 self.writer.xml_empty_tag("color", &attributes);
             }
         }
     }
 
     // Write the <name> element.
-    fn write_font_name(&mut self, xf_format: &Format) {
-        let attributes = [("val", xf_format.font_name.clone())];
+    fn write_font_name(&mut self, font: &Font) {
+        let attributes = [("val", font.font_name.clone())];
 
         if self.is_rich_string_style {
             self.writer.xml_empty_tag("rFont", &attributes);
@@ -214,25 +214,25 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <family> element.
-    fn write_font_family(&mut self, xf_format: &Format) {
-        let attributes = [("val", xf_format.font_family.to_string())];
+    fn write_font_family(&mut self, font: &Font) {
+        let attributes = [("val", font.font_family.to_string())];
 
         self.writer.xml_empty_tag("family", &attributes);
     }
 
     // Write the <charset> element.
-    fn write_font_charset(&mut self, xf_format: &Format) {
-        let attributes = [("val", xf_format.font_charset.to_string())];
+    fn write_font_charset(&mut self, font: &Font) {
+        let attributes = [("val", font.font_charset.to_string())];
 
         self.writer.xml_empty_tag("charset", &attributes);
     }
 
     // Write the <scheme> element.
-    fn write_font_scheme(&mut self, xf_format: &Format) {
+    fn write_font_scheme(&mut self, font: &Font) {
         let mut attributes = vec![];
 
-        if !xf_format.font_scheme.is_empty() {
-            attributes.push(("val", xf_format.font_scheme.to_string()));
+        if !font.font_scheme.is_empty() {
+            attributes.push(("val", font.font_scheme.to_string()));
         } else {
             return;
         }
@@ -241,10 +241,10 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <u> underline element.
-    fn write_font_underline(&mut self, xf_format: &Format) {
+    fn write_font_underline(&mut self, font: &Font) {
         let mut attributes = vec![];
 
-        match xf_format.underline {
+        match font.underline {
             FormatUnderline::Double => {
                 attributes.push(("val", "double".to_string()));
             }
@@ -261,10 +261,10 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <vertAlign> element.
-    fn write_vert_align(&mut self, xf_format: &Format) {
+    fn write_vert_align(&mut self, font: &Font) {
         let mut attributes = vec![];
 
-        match xf_format.font_script {
+        match font.font_script {
             FormatScript::Superscript => {
                 attributes.push(("val", "superscript".to_string()));
             }
@@ -291,7 +291,7 @@ impl<'a> Styles<'a> {
         for xf_format in self.xf_formats {
             // Write the fill element.
             if xf_format.has_fill {
-                self.write_fill(xf_format);
+                self.write_fill(&xf_format.fill);
             }
         }
 
@@ -308,15 +308,15 @@ impl<'a> Styles<'a> {
     }
 
     // Write the user defined <fill> element.
-    fn write_fill(&mut self, xf_format: &Format) {
+    fn write_fill(&mut self, fill: &Fill) {
         // Special handling for pattern only case.
-        if xf_format.pattern != FormatPattern::None
-            && (xf_format.background_color == XlsxColor::Default
-                || xf_format.background_color == XlsxColor::Automatic)
-            && (xf_format.foreground_color == XlsxColor::Default
-                || xf_format.foreground_color == XlsxColor::Automatic)
+        if fill.pattern != FormatPattern::None
+            && (fill.background_color == XlsxColor::Default
+                || fill.background_color == XlsxColor::Automatic)
+            && (fill.foreground_color == XlsxColor::Default
+                || fill.foreground_color == XlsxColor::Automatic)
         {
-            self.write_default_fill(xf_format.pattern.to_string());
+            self.write_default_fill(fill.pattern.to_string());
             return;
         }
 
@@ -324,25 +324,25 @@ impl<'a> Styles<'a> {
         self.writer.xml_start_tag_only("fill");
 
         // Write the fill pattern.
-        let attributes = [("patternType", xf_format.pattern.to_string())];
+        let attributes = [("patternType", fill.pattern.to_string())];
         self.writer.xml_start_tag("patternFill", &attributes);
 
         // Write the foreground color.
-        if xf_format.foreground_color != XlsxColor::Default
-            && xf_format.foreground_color != XlsxColor::Automatic
+        if fill.foreground_color != XlsxColor::Default
+            && fill.foreground_color != XlsxColor::Automatic
         {
-            let attributes = xf_format.foreground_color.attributes();
+            let attributes = fill.foreground_color.attributes();
             self.writer.xml_empty_tag("fgColor", &attributes);
         }
 
         // Write the background color.
-        if xf_format.background_color == XlsxColor::Default
-            || xf_format.background_color == XlsxColor::Automatic
+        if fill.background_color == XlsxColor::Default
+            || fill.background_color == XlsxColor::Automatic
         {
             let attributes = [("indexed", "64")];
             self.writer.xml_empty_tag("bgColor", &attributes);
         } else {
-            let attributes = xf_format.background_color.attributes();
+            let attributes = fill.background_color.attributes();
             self.writer.xml_empty_tag("bgColor", &attributes);
         }
 
@@ -360,7 +360,7 @@ impl<'a> Styles<'a> {
         for xf_format in self.xf_formats {
             // Write the border element.
             if xf_format.has_border {
-                self.write_border(xf_format);
+                self.write_border(&xf_format.borders);
             }
         }
 
@@ -368,8 +368,8 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <border> element.
-    fn write_border(&mut self, xf_format: &Format) {
-        match xf_format.border_diagonal_type {
+    fn write_border(&mut self, borders: &Border) {
+        match borders.diagonal_type {
             FormatDiagonalBorder::None => {
                 self.writer.xml_start_tag_only("border");
             }
@@ -388,23 +388,11 @@ impl<'a> Styles<'a> {
         }
 
         // Write the four border elements.
-        self.write_sub_border("left", xf_format.border_left, xf_format.border_left_color);
-        self.write_sub_border(
-            "right",
-            xf_format.border_right,
-            xf_format.border_right_color,
-        );
-        self.write_sub_border("top", xf_format.border_top, xf_format.border_top_color);
-        self.write_sub_border(
-            "bottom",
-            xf_format.border_bottom,
-            xf_format.border_bottom_color,
-        );
-        self.write_sub_border(
-            "diagonal",
-            xf_format.border_diagonal,
-            xf_format.border_diagonal_color,
-        );
+        self.write_sub_border("left", borders.left_style, borders.left_color);
+        self.write_sub_border("right", borders.right_style, borders.right_color);
+        self.write_sub_border("top", borders.top_style, borders.top_color);
+        self.write_sub_border("bottom", borders.bottom_style, borders.bottom_color);
+        self.write_sub_border("diagonal", borders.diagonal_style, borders.diagonal_color);
 
         self.writer.xml_end_tag("border");
     }
@@ -522,7 +510,7 @@ impl<'a> Styles<'a> {
         let has_protection = xf_format.has_protection();
         let has_alignment = xf_format.has_alignment();
         let apply_alignment = xf_format.apply_alignment();
-        let is_hyperlink = xf_format.is_hyperlink;
+        let is_hyperlink = xf_format.font.is_hyperlink;
         let xf_id = i32::from(is_hyperlink);
 
         let mut attributes = vec![
@@ -566,7 +554,7 @@ impl<'a> Styles<'a> {
 
             if has_alignment {
                 // Write the alignment element.
-                self.write_alignment(xf_format);
+                self.write_alignment(xf_format.alignment);
             }
 
             if has_protection {
@@ -596,15 +584,15 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <alignment> element.
-    fn write_alignment(&mut self, xf_format: &Format) {
+    fn write_alignment(&mut self, alignment: Alignment) {
         let mut attributes = vec![];
-        let mut horizontal_align = xf_format.horizontal_align;
-        let mut shrink = xf_format.shrink;
+        let mut horizontal_align = alignment.horizontal_align;
+        let mut shrink = alignment.shrink;
 
         // Indent is only allowed for horizontal "left", "right" and
         // "distributed". If it is defined for any other alignment or no
         // alignment has been set then default to left alignment.
-        if xf_format.indent > 0
+        if alignment.indent > 0
             && horizontal_align != FormatAlign::Left
             && horizontal_align != FormatAlign::Right
             && horizontal_align != FormatAlign::Distributed
@@ -613,7 +601,7 @@ impl<'a> Styles<'a> {
         }
 
         // Check for properties that are mutually exclusive with "shrink".
-        if xf_format.text_wrap
+        if alignment.text_wrap
             || horizontal_align == FormatAlign::Fill
             || horizontal_align == FormatAlign::Justify
             || horizontal_align == FormatAlign::Distributed
@@ -648,7 +636,7 @@ impl<'a> Styles<'a> {
         }
 
         // Set the various attributes for vertical alignment.
-        match xf_format.vertical_align {
+        match alignment.vertical_align {
             FormatAlign::VerticalCenter => {
                 attributes.push(("vertical", "center".to_string()));
             }
@@ -665,15 +653,15 @@ impl<'a> Styles<'a> {
         }
 
         // Set other alignment properties.
-        if xf_format.indent != 0 {
-            attributes.push(("indent", xf_format.indent.to_string()));
+        if alignment.indent != 0 {
+            attributes.push(("indent", alignment.indent.to_string()));
         }
 
-        if xf_format.rotation != 0 {
-            attributes.push(("textRotation", xf_format.rotation.to_string()));
+        if alignment.rotation != 0 {
+            attributes.push(("textRotation", alignment.rotation.to_string()));
         }
 
-        if xf_format.text_wrap {
+        if alignment.text_wrap {
             attributes.push(("wrapText", "1".to_string()));
         }
 
@@ -681,8 +669,8 @@ impl<'a> Styles<'a> {
             attributes.push(("shrinkToFit", "1".to_string()));
         }
 
-        if xf_format.reading_direction > 0 && xf_format.reading_direction <= 2 {
-            attributes.push(("readingOrder", xf_format.reading_direction.to_string()));
+        if alignment.reading_direction > 0 && alignment.reading_direction <= 2 {
+            attributes.push(("readingOrder", alignment.reading_direction.to_string()));
         }
 
         self.writer.xml_empty_tag("alignment", &attributes);

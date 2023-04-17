@@ -6,7 +6,8 @@
 
 #![warn(missing_docs)]
 
-#[derive(Clone)]
+use std::hash::Hash;
+
 /// The Format struct is used to define cell formatting for data in a worksheet.
 ///
 /// The properties of a cell that can be formatted include: fonts, colors,
@@ -407,6 +408,7 @@
 /// use US locale formatting which will then be rendered in the settings of your
 /// host OS.
 ///
+#[derive(Debug, Clone, Eq)]
 
 pub struct Format {
     pub(crate) xf_index: u32,
@@ -416,55 +418,15 @@ pub struct Format {
     pub(crate) has_font: bool,
     pub(crate) has_fill: bool,
     pub(crate) has_border: bool,
-    default_format_key: String,
 
     // Number properties.
     pub(crate) num_format: String,
     pub(crate) num_format_index: u16,
 
-    // Font properties.
-    pub(crate) bold: bool,
-    pub(crate) italic: bool,
-    pub(crate) underline: FormatUnderline,
-    pub(crate) font_name: String,
-    pub(crate) font_size: f64,
-    pub(crate) font_color: XlsxColor,
-    pub(crate) font_strikethrough: bool,
-    pub(crate) font_script: FormatScript,
-    pub(crate) font_family: u8,
-    pub(crate) font_charset: u8,
-    pub(crate) font_scheme: String,
-    pub(crate) font_condense: bool,
-    pub(crate) font_extend: bool,
-    pub(crate) is_hyperlink: bool,
-
-    // Alignment properties.
-    pub(crate) horizontal_align: FormatAlign,
-    pub(crate) vertical_align: FormatAlign,
-    pub(crate) text_wrap: bool,
-    pub(crate) justify_last: bool,
-    pub(crate) rotation: i16,
-    pub(crate) indent: u8,
-    pub(crate) shrink: bool,
-    pub(crate) reading_direction: u8,
-
-    // Border properties.
-    pub(crate) border_bottom: FormatBorder,
-    pub(crate) border_top: FormatBorder,
-    pub(crate) border_left: FormatBorder,
-    pub(crate) border_right: FormatBorder,
-    pub(crate) border_bottom_color: XlsxColor,
-    pub(crate) border_top_color: XlsxColor,
-    pub(crate) border_left_color: XlsxColor,
-    pub(crate) border_right_color: XlsxColor,
-    pub(crate) border_diagonal: FormatBorder,
-    pub(crate) border_diagonal_color: XlsxColor,
-    pub(crate) border_diagonal_type: FormatDiagonalBorder,
-
-    // Fill properties.
-    pub(crate) foreground_color: XlsxColor,
-    pub(crate) background_color: XlsxColor,
-    pub(crate) pattern: FormatPattern,
+    pub(crate) font: Font,
+    pub(crate) alignment: Alignment,
+    pub(crate) borders: Border,
+    pub(crate) fill: Fill,
 
     // Protection properties.
     pub(crate) hidden: bool,
@@ -472,6 +434,37 @@ pub struct Format {
 
     // Non-UI properties.
     pub(crate) quote_prefix: bool,
+}
+
+impl Hash for Format {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        // skip: xf_index,font_index,fill_index,border_index,has_font,has_fill,has_border
+        self.font.hash(state);
+        self.alignment.hash(state);
+        self.borders.hash(state);
+        self.fill.hash(state);
+
+        self.num_format.hash(state);
+        self.num_format_index.hash(state);
+        self.hidden.hash(state);
+        self.locked.hash(state);
+        self.quote_prefix.hash(state);
+    }
+}
+
+impl PartialEq for Format {
+    fn eq(&self, other: &Self) -> bool {
+        // skip: xf_index,font_index,fill_index,border_index,has_font,has_fill,has_border
+        self.font == other.font
+            && self.alignment == other.alignment
+            && self.borders == other.borders
+            && self.fill == other.fill
+            && self.num_format == other.num_format
+            && self.num_format_index == other.num_format_index
+            && self.hidden == other.hidden
+            && self.locked == other.locked
+            && self.quote_prefix == other.quote_prefix
+    }
 }
 
 impl Default for Format {
@@ -503,7 +496,7 @@ impl Format {
     /// }
     /// ```
     pub fn new() -> Format {
-        let mut format = Format {
+        Format {
             xf_index: 0,
             font_index: 0,
             fill_index: 0,
@@ -512,53 +505,17 @@ impl Format {
             has_fill: false,
             has_border: false,
 
-            num_format: "".to_string(),
-            num_format_index: 0,
-            bold: false,
-            italic: false,
-            underline: FormatUnderline::None,
-            font_name: "Calibri".to_string(),
-            font_size: 11.0,
-            font_color: XlsxColor::Default,
-            font_strikethrough: false,
-            font_script: FormatScript::None,
-            font_family: 2,
-            font_charset: 0,
-            font_scheme: "minor".to_string(),
-            font_condense: false,
-            font_extend: false,
-            is_hyperlink: false,
+            font: Font::default(),
+            alignment: Alignment::default(),
+            fill: Fill::default(),
+            borders: Border::default(),
+
             hidden: false,
             locked: true,
-            horizontal_align: FormatAlign::General,
-            vertical_align: FormatAlign::General,
-            text_wrap: false,
-            justify_last: false,
-            rotation: 0,
-            foreground_color: XlsxColor::Default,
-            background_color: XlsxColor::Default,
-            pattern: FormatPattern::None,
-            border_bottom: FormatBorder::None,
-            border_top: FormatBorder::None,
-            border_left: FormatBorder::None,
-            border_right: FormatBorder::None,
-            border_diagonal: FormatBorder::None,
-            border_diagonal_type: FormatDiagonalBorder::None,
-            border_bottom_color: XlsxColor::Default,
-            border_top_color: XlsxColor::Default,
-            border_left_color: XlsxColor::Default,
-            border_right_color: XlsxColor::Default,
-            border_diagonal_color: XlsxColor::Default,
-            indent: 0,
-            shrink: false,
-            reading_direction: 0,
+            num_format: String::new(),
+            num_format_index: 0,
             quote_prefix: false,
-            default_format_key: "".to_string(),
-        };
-
-        format.default_format_key = format.format_key();
-
-        format
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -584,81 +541,6 @@ impl Format {
         self.has_border = has_border;
     }
 
-    pub(crate) fn format_key(&self) -> String {
-        format!(
-            "{}:{}:{}:{}:{}:{}:{}:{}:{}",
-            self.alignment_key(),
-            self.border_key(),
-            self.fill_key(),
-            self.font_key(),
-            self.hidden,
-            self.locked,
-            self.num_format,
-            self.num_format_index,
-            self.quote_prefix,
-        )
-    }
-
-    pub(crate) fn font_key(&self) -> String {
-        format!(
-            "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
-            self.bold,
-            self.font_charset,
-            self.font_color.unique_id(),
-            self.font_condense,
-            self.font_extend,
-            self.font_family,
-            self.font_name,
-            self.font_scheme,
-            self.font_script as u8,
-            self.font_size,
-            self.font_strikethrough,
-            self.italic,
-            self.is_hyperlink,
-            self.underline as u8,
-        )
-    }
-
-    pub(crate) fn border_key(&self) -> String {
-        format!(
-            "{}:{}:{}:{}:{}:{}:{}:{}:{}:{}:{}",
-            self.border_bottom.to_string(),
-            self.border_bottom_color.unique_id(),
-            self.border_diagonal.to_string(),
-            self.border_diagonal_color.unique_id(),
-            self.border_diagonal_type as u8,
-            self.border_left.to_string(),
-            self.border_left_color.unique_id(),
-            self.border_right.to_string(),
-            self.border_right_color.unique_id(),
-            self.border_top.to_string(),
-            self.border_top_color.unique_id(),
-        )
-    }
-
-    pub(crate) fn fill_key(&self) -> String {
-        format!(
-            "{}:{}:{}",
-            self.pattern.to_string(),
-            self.background_color.unique_id(),
-            self.foreground_color.unique_id(),
-        )
-    }
-
-    pub(crate) fn alignment_key(&self) -> String {
-        format!(
-            "{}:{}:{}:{}:{}:{}:{}:{}",
-            self.indent,
-            self.reading_direction,
-            self.rotation,
-            self.shrink,
-            self.horizontal_align as u8,
-            self.vertical_align as u8,
-            self.justify_last,
-            self.text_wrap,
-        )
-    }
-
     pub(crate) fn set_num_format_index_u16(&mut self, num_format_index: u16) {
         self.num_format_index = num_format_index;
     }
@@ -667,26 +549,26 @@ impl Format {
     // <alignment> element. This also handles a special case where Excel ignore
     // Bottom as a default.
     pub(crate) fn has_alignment(&self) -> bool {
-        self.horizontal_align != FormatAlign::General
-            || !(self.vertical_align == FormatAlign::General
-                || self.vertical_align == FormatAlign::Bottom)
-            || self.indent != 0
-            || self.rotation != 0
-            || self.text_wrap
-            || self.shrink
-            || self.reading_direction != 0
+        self.alignment.horizontal_align != FormatAlign::General
+            || !(self.alignment.vertical_align == FormatAlign::General
+                || self.alignment.vertical_align == FormatAlign::Bottom)
+            || self.alignment.indent != 0
+            || self.alignment.rotation != 0
+            || self.alignment.text_wrap
+            || self.alignment.shrink
+            || self.alignment.reading_direction != 0
     }
 
     // Check if the format has an alignment property set and requires a Styles
     // "applyAlignment" attribute.
     pub(crate) fn apply_alignment(&self) -> bool {
-        self.horizontal_align != FormatAlign::General
-            || self.vertical_align != FormatAlign::General
-            || self.indent != 0
-            || self.rotation != 0
-            || self.text_wrap
-            || self.shrink
-            || self.reading_direction != 0
+        self.alignment.horizontal_align != FormatAlign::General
+            || self.alignment.vertical_align != FormatAlign::General
+            || self.alignment.indent != 0
+            || self.alignment.rotation != 0
+            || self.alignment.text_wrap
+            || self.alignment.shrink
+            || self.alignment.reading_direction != 0
     }
 
     // Check if the format has protection properties set.
@@ -696,7 +578,10 @@ impl Format {
 
     // Check if the format is in the default/unmodified condition.
     pub(crate) fn is_default(&self) -> bool {
-        self.default_format_key == self.format_key()
+        lazy_static! {
+            static ref DEFAULT_FORMAT: Format = Format::default();
+        };
+        self == &*DEFAULT_FORMAT
     }
 
     // -----------------------------------------------------------------------
@@ -907,7 +792,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_bold.png">
     ///
     pub fn set_bold(mut self) -> Format {
-        self.bold = true;
+        self.font.bold = true;
         self
     }
 
@@ -942,7 +827,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_italic.png">
     ///
     pub fn set_italic(mut self) -> Format {
-        self.italic = true;
+        self.font.italic = true;
         self
     }
 
@@ -993,7 +878,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.font_color = color;
+            self.font.font_color = color;
         }
 
         self
@@ -1038,10 +923,10 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_name.png">
     ///
     pub fn set_font_name(mut self, font_name: &str) -> Format {
-        self.font_name = font_name.to_string();
+        self.font.font_name = font_name.to_string();
 
         if font_name != "Calibri" {
-            self.font_scheme = "".to_string();
+            self.font.font_scheme = "".to_string();
         }
 
         self
@@ -1091,7 +976,7 @@ impl Format {
     where
         T: Into<f64>,
     {
-        self.font_size = font_size.into();
+        self.font.font_size = FontSize(font_size.into());
         self
     }
 
@@ -1100,7 +985,7 @@ impl Format {
     /// This function is implemented for completeness but is rarely used in
     /// practice.
     pub fn set_font_scheme(mut self, font_scheme: &str) -> Format {
-        self.font_scheme = font_scheme.to_string();
+        self.font.font_scheme = font_scheme.to_string();
         self
     }
 
@@ -1114,7 +999,7 @@ impl Format {
     /// * `font_family` - The font family property.
     ///
     pub fn set_font_family(mut self, font_family: u8) -> Format {
-        self.font_family = font_family;
+        self.font.font_family = font_family;
         self
     }
 
@@ -1128,7 +1013,7 @@ impl Format {
     /// * `font_charset` - The font character set property.
     ///
     pub fn set_font_charset(mut self, font_charset: u8) -> Format {
-        self.font_charset = font_charset;
+        self.font.font_charset = font_charset;
         self
     }
 
@@ -1181,7 +1066,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_underline.png">
     ///
     pub fn set_underline(mut self, underline: FormatUnderline) -> Format {
-        self.underline = underline;
+        self.font.underline = underline;
         self
     }
 
@@ -1217,7 +1102,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_strikethrough.png">
     ///
     pub fn set_font_strikethrough(mut self) -> Format {
-        self.font_strikethrough = true;
+        self.font.font_strikethrough = true;
         self
     }
 
@@ -1234,7 +1119,7 @@ impl Format {
     ///
     ///
     pub fn set_font_script(mut self, font_script: FormatScript) -> Format {
-        self.font_script = font_script;
+        self.font.font_script = font_script;
         self
     }
 
@@ -1302,8 +1187,8 @@ impl Format {
     pub fn set_align(mut self, align: FormatAlign) -> Format {
         match align {
             FormatAlign::General => {
-                self.horizontal_align = FormatAlign::General;
-                self.vertical_align = FormatAlign::General;
+                self.alignment.horizontal_align = FormatAlign::General;
+                self.alignment.vertical_align = FormatAlign::General;
             }
             FormatAlign::Center
             | FormatAlign::CenterAcross
@@ -1312,14 +1197,14 @@ impl Format {
             | FormatAlign::Justify
             | FormatAlign::Left
             | FormatAlign::Right => {
-                self.horizontal_align = align;
+                self.alignment.horizontal_align = align;
             }
             FormatAlign::Bottom
             | FormatAlign::Top
             | FormatAlign::VerticalCenter
             | FormatAlign::VerticalDistributed
             | FormatAlign::VerticalJustify => {
-                self.vertical_align = align;
+                self.alignment.vertical_align = align;
             }
         }
 
@@ -1368,7 +1253,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_text_wrap.png">
     ///
     pub fn set_text_wrap(mut self) -> Format {
-        self.text_wrap = true;
+        self.alignment.text_wrap = true;
         self
     }
 
@@ -1419,7 +1304,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_indent.png">
     ///
     pub fn set_indent(mut self, indent: u8) -> Format {
-        self.indent = indent;
+        self.alignment.indent = indent;
         self
     }
 
@@ -1473,9 +1358,9 @@ impl Format {
     ///
     pub fn set_rotation(mut self, rotation: i16) -> Format {
         match rotation {
-            270 => self.rotation = 255,
-            -90..=-1 => self.rotation = -rotation + 90,
-            0..=90 => self.rotation = rotation,
+            270 => self.alignment.rotation = 255,
+            -90..=-1 => self.alignment.rotation = -rotation + 90,
+            0..=90 => self.alignment.rotation = rotation,
             _ => eprintln!("Rotation rotation outside range: -90 <= angle <= 90."),
         }
 
@@ -1540,7 +1425,7 @@ impl Format {
             return self;
         }
 
-        self.reading_direction = reading_direction;
+        self.alignment.reading_direction = reading_direction;
         self
     }
 
@@ -1578,7 +1463,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_shrink.png">
     ///
     pub fn set_shrink(mut self) -> Format {
-        self.shrink = true;
+        self.alignment.shrink = true;
         self
     }
 
@@ -1636,7 +1521,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_pattern.png">
     ///
     pub fn set_pattern(mut self, pattern: FormatPattern) -> Format {
-        self.pattern = pattern;
+        self.fill.pattern = pattern;
         self
     }
 
@@ -1692,7 +1577,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.background_color = color;
+            self.fill.background_color = color;
         }
 
         self
@@ -1751,7 +1636,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.foreground_color = color;
+            self.fill.foreground_color = color;
         }
 
         self
@@ -1805,10 +1690,10 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_border.png">
     ///
     pub fn set_border(mut self, border: FormatBorder) -> Format {
-        self.border_top = border;
-        self.border_left = border;
-        self.border_right = border;
-        self.border_bottom = border;
+        self.borders.top_style = border;
+        self.borders.left_style = border;
+        self.borders.right_style = border;
+        self.borders.bottom_style = border;
 
         self
     }
@@ -1884,10 +1769,10 @@ impl Format {
             return self;
         }
 
-        self.border_top_color = color;
-        self.border_left_color = color;
-        self.border_right_color = color;
-        self.border_bottom_color = color;
+        self.borders.top_color = color;
+        self.borders.left_color = color;
+        self.borders.right_color = color;
+        self.borders.bottom_color = color;
         self
     }
 
@@ -1900,7 +1785,7 @@ impl Format {
     ///   value.
     ///
     pub fn set_border_top(mut self, border: FormatBorder) -> Format {
-        self.border_top = border;
+        self.borders.top_style = border;
         self
     }
 
@@ -1918,7 +1803,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.border_top_color = color;
+            self.borders.top_color = color;
         }
 
         self
@@ -1933,7 +1818,7 @@ impl Format {
     ///   value.
     ///
     pub fn set_border_bottom(mut self, border: FormatBorder) -> Format {
-        self.border_bottom = border;
+        self.borders.bottom_style = border;
         self
     }
 
@@ -1951,7 +1836,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.border_bottom_color = color;
+            self.borders.bottom_color = color;
         }
 
         self
@@ -1966,7 +1851,7 @@ impl Format {
     ///   value.
     ///
     pub fn set_border_left(mut self, border: FormatBorder) -> Format {
-        self.border_left = border;
+        self.borders.left_style = border;
         self
     }
 
@@ -1984,7 +1869,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.border_left_color = color;
+            self.borders.left_color = color;
         }
 
         self
@@ -1999,7 +1884,7 @@ impl Format {
     ///   value.
     ///
     pub fn set_border_right(mut self, border: FormatBorder) -> Format {
-        self.border_right = border;
+        self.borders.right_style = border;
         self
     }
 
@@ -2017,7 +1902,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.border_right_color = color;
+            self.borders.right_color = color;
         }
 
         self
@@ -2082,7 +1967,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_border_diagonal.png">
     ///
     pub fn set_border_diagonal(mut self, border: FormatBorder) -> Format {
-        self.border_diagonal = border;
+        self.borders.diagonal_style = border;
         self
     }
 
@@ -2100,7 +1985,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.border_diagonal_color = color;
+            self.borders.diagonal_color = color;
         }
 
         self
@@ -2115,7 +2000,7 @@ impl Format {
     ///   [`FormatDiagonalBorder`] enum value.
     ///
     pub fn set_border_diagonal_type(mut self, border_type: FormatDiagonalBorder) -> Format {
-        self.border_diagonal_type = border_type;
+        self.borders.diagonal_type = border_type;
         self
     }
 
@@ -2125,10 +2010,10 @@ impl Format {
     /// automatically when writing urls without a format applied.
     ///
     pub fn set_hyperlink(mut self) -> Format {
-        self.is_hyperlink = true;
-        self.font_color = XlsxColor::Theme(10, 0);
-        self.underline = FormatUnderline::Single;
-        self.font_scheme = "".to_string();
+        self.font.is_hyperlink = true;
+        self.font.font_color = XlsxColor::Theme(10, 0);
+        self.font.underline = FormatUnderline::Single;
+        self.font.font_scheme = "".to_string();
 
         self
     }
@@ -2258,35 +2143,35 @@ impl Format {
     /// Unset the bold Format property back to its default "off" state.
     /// The opposite of [`set_bold()`](Format::set_bold()).
     pub fn unset_bold(mut self) -> Format {
-        self.bold = false;
+        self.font.bold = false;
         self
     }
 
     /// Unset the italic Format property back to its default "off" state.
     /// The opposite of [`set_italic()`](Format::set_italic()).
     pub fn unset_italic(mut self) -> Format {
-        self.italic = false;
+        self.font.italic = false;
         self
     }
 
     /// Unset the font strikethrough Format property back to its default "off" state.
     /// The opposite of [`set_font_strikethrough()`](Format::set_font_strikethrough()).
     pub fn unset_font_strikethrough(mut self) -> Format {
-        self.font_strikethrough = false;
+        self.font.font_strikethrough = false;
         self
     }
 
     /// Unset the text wrap Format property back to its default "off" state.
     /// The opposite of [`set_text_wrap()`](Format::set_text_wrap()).
     pub fn unset_text_wrap(mut self) -> Format {
-        self.text_wrap = false;
+        self.alignment.text_wrap = false;
         self
     }
 
     /// Unset the shrink Format property back to its default "off" state.
     /// The opposite of [`set_shrink()`](Format::set_shrink()).
     pub fn unset_shrink(mut self) -> Format {
-        self.shrink = false;
+        self.alignment.shrink = false;
         self
     }
 
@@ -2306,7 +2191,7 @@ impl Format {
 
     /// Unset the hyperlink style.
     pub fn unset_hyperlink_style(mut self) -> Format {
-        self.is_hyperlink = true;
+        self.font.is_hyperlink = true;
 
         self
     }
@@ -2319,11 +2204,107 @@ impl Format {
     }
 }
 
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Default)]
+pub(crate) struct Alignment {
+    pub(crate) horizontal_align: FormatAlign,
+    pub(crate) vertical_align: FormatAlign,
+    pub(crate) text_wrap: bool,
+    pub(crate) justify_last: bool,
+    pub(crate) rotation: i16,
+    pub(crate) indent: u8,
+    pub(crate) shrink: bool,
+    pub(crate) reading_direction: u8,
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Default)]
+pub(crate) struct Border {
+    pub(crate) bottom_style: FormatBorder,
+    pub(crate) top_style: FormatBorder,
+    pub(crate) left_style: FormatBorder,
+    pub(crate) right_style: FormatBorder,
+    pub(crate) bottom_color: XlsxColor,
+    pub(crate) top_color: XlsxColor,
+    pub(crate) left_color: XlsxColor,
+    pub(crate) right_color: XlsxColor,
+    pub(crate) diagonal_style: FormatBorder,
+    pub(crate) diagonal_color: XlsxColor,
+    pub(crate) diagonal_type: FormatDiagonalBorder,
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub(crate) struct Font {
+    pub(crate) bold: bool,
+    pub(crate) italic: bool,
+    pub(crate) underline: FormatUnderline,
+    pub(crate) font_name: String,
+    pub(crate) font_size: FontSize,
+    pub(crate) font_color: XlsxColor,
+    pub(crate) font_strikethrough: bool,
+    pub(crate) font_script: FormatScript,
+    pub(crate) font_family: u8,
+    pub(crate) font_charset: u8,
+    pub(crate) font_scheme: String,
+    pub(crate) font_condense: bool,
+    pub(crate) font_extend: bool,
+    pub(crate) is_hyperlink: bool,
+}
+
+impl Default for Font {
+    fn default() -> Self {
+        Self {
+            font_name: "Calibri".to_string(),
+            font_size: FontSize(11.0),
+            font_family: 2,
+            font_scheme: "minor".to_string(),
+
+            bold: Default::default(),
+            italic: Default::default(),
+            underline: FormatUnderline::default(),
+            font_color: XlsxColor::default(),
+            font_strikethrough: Default::default(),
+            font_script: FormatScript::default(),
+            font_charset: Default::default(),
+            font_condense: Default::default(),
+            font_extend: Default::default(),
+            is_hyperlink: Default::default(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Default)]
+pub(crate) struct Fill {
+    pub(crate) foreground_color: XlsxColor,
+    pub(crate) background_color: XlsxColor,
+    pub(crate) pattern: FormatPattern,
+}
+
+// Newtype around f64 that implements Hash + Eq
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct FontSize(pub(crate) f64);
+
+impl PartialEq for FontSize {
+    fn eq(&self, other: &Self) -> bool {
+        (self.0.is_nan() && other.0.is_nan()) || (self.0 - other.0).abs() < 0.1
+    }
+}
+
+impl Eq for FontSize {}
+
+impl Hash for FontSize {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        let bits = if self.0.is_nan() {
+            f64::NAN.to_bits()
+        } else {
+            self.0.abs().to_bits()
+        };
+        bits.hash(state);
+    }
+}
+
 // -----------------------------------------------------------------------
 // Helper enums/structs
 // -----------------------------------------------------------------------
 
-#[derive(Clone, Copy, Eq, PartialEq)]
 /// The `XlsxColor` enum defines Excel colors the can be used throughout the
 /// rust_xlsxwriter.
 ///
@@ -2387,6 +2368,7 @@ impl Format {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/enum_xlsxcolor.png">
 ///
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 pub enum XlsxColor {
     /// A user defined RGB color in the range 0x000000 (black) to 0xFFFFFF
     /// (white). Any values outside this range will be ignored with a a warning.
@@ -2400,6 +2382,7 @@ pub enum XlsxColor {
     Theme(u8, u8),
 
     /// The default color for an Excel property.
+    #[default]
     Default,
 
     /// The Automatic color for an Excel property. This is usually the same as
@@ -2456,36 +2439,6 @@ pub enum XlsxColor {
 }
 
 impl XlsxColor {
-    // Get a unique u32 RGB value for a color to allow comparison.
-    pub(crate) fn unique_id(self) -> u32 {
-        match self {
-            XlsxColor::Red => 0xFF0000,
-            XlsxColor::Blue => 0x0000FF,
-            XlsxColor::Cyan => 0x00FFFF,
-            XlsxColor::Gray => 0x808080,
-            XlsxColor::Lime => 0x00FF00,
-            XlsxColor::Navy => 0x000080,
-            XlsxColor::Pink => 0xFFC0CB,
-            XlsxColor::Black => 0x000000,
-            XlsxColor::Brown => 0x800000,
-            XlsxColor::Green => 0x008000,
-            XlsxColor::White => 0xFFFFFF,
-            XlsxColor::Orange => 0xFF6600,
-            XlsxColor::Purple => 0x800080,
-            XlsxColor::Silver => 0xC0C0C0,
-            XlsxColor::Yellow => 0xFFFF00,
-            XlsxColor::Magenta => 0xFF00FF,
-
-            XlsxColor::Default => 0xFFFFFFFF,
-            XlsxColor::Automatic => 0xFFFFFFFE,
-
-            XlsxColor::RGB(color) => color,
-
-            // Use a pseudo RGB color for Theme to differentiate in comparison testing.
-            XlsxColor::Theme(color, shade) => 0xFE000000 + ((color as u32) << 8) + shade as u32,
-        }
-    }
-
     // Get the RGB hex value for a color.
     pub(crate) fn rgb_hex_value(self) -> String {
         match self {
@@ -2506,8 +2459,11 @@ impl XlsxColor {
             XlsxColor::Magenta => "FF00FF".to_string(),
             XlsxColor::RGB(color) => format!("{color:06X}"),
 
-            // Default to black for ::Black and any accidentally unhandled colors.
-            _ => "000000".to_string(),
+            // Default to black.
+            XlsxColor::Theme(_, _)
+            | XlsxColor::Default
+            | XlsxColor::Automatic
+            | XlsxColor::Black => "000000".to_string(),
         }
     }
 
@@ -2875,11 +2831,12 @@ impl IntoColor for &str {
     }
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
 /// The `FormatPattern` enum defines the Excel pattern types that can be added to
 /// a [`Format`].
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 pub enum FormatPattern {
     /// Automatic or Empty pattern.
+    #[default]
     None,
 
     /// Solid pattern.
@@ -2964,11 +2921,12 @@ impl ToString for FormatPattern {
     }
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 /// The `FormatBorder` enum defines the Excel border types that can be added to
 /// a [`Format`] pattern.
 pub enum FormatBorder {
     /// No border.
+    #[default]
     None,
 
     /// Thin border style.
@@ -3033,14 +2991,15 @@ impl ToString for FormatBorder {
     }
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
 /// The `FormatDiagonalBorder` enum defines [`Format`] diagonal border types.
 ///
 /// This is used with the
 /// [`Format::set_border_diagonal()`](Format::set_border_diagonal()) method.
 ///
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 pub enum FormatDiagonalBorder {
     /// The default/automatic format for an Excel font.
+    #[default]
     None,
 
     /// Cell diagonal border from bottom left to top right.
@@ -3053,7 +3012,6 @@ pub enum FormatDiagonalBorder {
     BorderUpDown,
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
 /// The `FormatUnderline` enum defines the font underline type in a [`Format`].
 ///
 /// The difference between a normal underline and an "accounting" underline is
@@ -3097,8 +3055,10 @@ pub enum FormatDiagonalBorder {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/format_set_underline.png">
 ///
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 pub enum FormatUnderline {
     /// The default/automatic underline for an Excel font.
+    #[default]
     None,
 
     /// A single underline under the text/number in a cell.
@@ -3114,12 +3074,13 @@ pub enum FormatUnderline {
     DoubleAccounting,
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
 /// The `FormatScript` enum defines the [`Format`] font superscript and subscript
 /// properties.
 ///
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 pub enum FormatScript {
     /// The default/automatic format for an Excel font.
+    #[default]
     None,
 
     /// The cell text is superscripted.
@@ -3129,13 +3090,14 @@ pub enum FormatScript {
     Subscript,
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 /// The `FormatAlign` enum defines the vertical and horizontal alignment properties
 /// of a [`Format`].
 ///
 pub enum FormatAlign {
     /// General/default alignment. The cell will use Excel's default for the
     /// data type, for example Left for text and Right for numbers.
+    #[default]
     General,
 
     /// Align text to the left.
@@ -3229,6 +3191,6 @@ mod tests {
             .set_locked()
             .unset_hidden();
 
-        assert_eq!(format1.format_key(), format2.format_key());
+        assert_eq!(format1, format2);
     }
 }
