@@ -461,8 +461,7 @@ impl Worksheet {
         }
 
         // Check that sheetname doesn't contain any invalid characters.
-        let re = Regex::new(r"[\[\]:*?/\\]").unwrap();
-        if re.is_match(name) {
+        if name.contains(['*', '?', ':', '[', ']', '\\', '/']) {
             return Err(XlsxError::SheetnameContainsInvalidCharacter(
                 name.to_string(),
             ));
