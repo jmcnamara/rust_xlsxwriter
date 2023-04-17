@@ -18,8 +18,8 @@ use crate::packager::PackagerOptions;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 use crate::{
-    utility, ChartSeriesCacheData, ColNum, DefinedName, DefinedNameType, DocProperties, RowNum,
-    NUM_IMAGE_FORMATS,
+    utility, Border, ChartSeriesCacheData, ColNum, DefinedName, DefinedNameType, DocProperties,
+    Fill, Font, RowNum, NUM_IMAGE_FORMATS,
 };
 use crate::{FormatPattern, XlsxColor};
 
@@ -103,7 +103,7 @@ pub struct Workbook {
     pub(crate) border_count: u16,
     pub(crate) num_formats: Vec<String>,
     pub(crate) has_hyperlink_style: bool,
-    xf_indices: HashMap<String, u32>,
+    xf_indices: HashMap<Format, u32>,
     active_tab: u16,
     first_sheet: u16,
     defined_names: Vec<DefinedName>,
@@ -715,9 +715,7 @@ impl Workbook {
     // may be used publicly at a later stage.
     #[doc(hidden)]
     pub fn register_format(&mut self, format: &mut Format) {
-        let format_key = format.format_key();
-
-        match self.xf_indices.get_mut(&format_key) {
+        match self.xf_indices.get_mut(format) {
             Some(xf_index) => {
                 format.set_xf_index(*xf_index);
             }
@@ -726,7 +724,7 @@ impl Workbook {
                 self.xf_formats.push(format.clone());
                 format.set_xf_index(xf_index);
 
-                self.xf_indices.insert(format_key, xf_index);
+                self.xf_indices.insert(format.clone(), xf_index);
             }
         }
     }
@@ -1033,9 +1031,8 @@ impl Workbook {
     fn reset(&mut self) {
         self.writer.reset();
 
-        let default_format = Format::new();
-        self.xf_indices = HashMap::from([(default_format.format_key(), 0)]);
-        self.xf_formats = vec![default_format];
+        self.xf_indices = HashMap::from([(Format::default(), 0)]);
+        self.xf_formats = vec![Format::default()];
         self.font_count = 0;
         self.fill_count = 0;
         self.border_count = 0;
@@ -1064,7 +1061,7 @@ impl Workbook {
         for worksheet in self.worksheets.iter() {
             if worksheet.has_hyperlink_style {
                 let format = Format::new().set_hyperlink();
-                self.xf_indices.insert(format.format_key(), 1);
+                self.xf_indices.insert(format.clone(), 1);
                 self.xf_formats.push(format);
                 self.has_hyperlink_style = true;
                 break;
@@ -1079,7 +1076,7 @@ impl Workbook {
         }
 
         let mut worksheet_indices: Vec<Vec<u32>> = vec![];
-        for formats in &mut worksheet_formats {
+        for formats in &worksheet_formats {
             let mut indices = vec![];
             for format in formats {
                 let index = self.format_index(format);
@@ -1271,14 +1268,12 @@ impl Workbook {
     // of unique formats. Also return the index for use in remapping worksheet
     // format indices.
     fn format_index(&mut self, format: &Format) -> u32 {
-        let format_key = format.format_key();
-
-        match self.xf_indices.get_mut(&format_key) {
+        match self.xf_indices.get_mut(format) {
             Some(xf_index) => *xf_index,
             None => {
                 let xf_index = self.xf_formats.len() as u32;
                 self.xf_formats.push(format.clone());
-                self.xf_indices.insert(format_key, xf_index);
+                self.xf_indices.insert(format.clone(), xf_index);
                 xf_index
             }
         }
@@ -1302,17 +1297,15 @@ impl Workbook {
     // Set the font index for the format objects.
     fn prepare_fonts(&mut self) {
         let mut font_count: u16 = 0;
-        let mut font_indices: HashMap<String, u16> = HashMap::new();
+        let mut font_indices: HashMap<Font, u16> = HashMap::new();
 
         for xf_format in &mut self.xf_formats {
-            let font_key = xf_format.font_key();
-
-            match font_indices.get(&font_key) {
+            match font_indices.get(&xf_format.font) {
                 Some(font_index) => {
                     xf_format.set_font_index(*font_index, false);
                 }
                 None => {
-                    font_indices.insert(font_key, font_count);
+                    font_indices.insert(xf_format.font.clone(), font_count);
                     xf_format.set_font_index(font_count, true);
                     font_count += 1;
                 }
@@ -1323,66 +1316,60 @@ impl Workbook {
 
     // Set the fill index for the format objects.
     fn prepare_fills(&mut self) {
-        let mut fill_indices: HashMap<String, u16> = HashMap::new();
-
         // The user defined fill properties start from 2 since there are 2
         // default fills: patternType="none" and patternType="gray125". The
         // following code adds these 2 default fills.
         let mut fill_count: u16 = 2;
 
-        let temp_format = Format::new();
-        let mut fill_key = temp_format.fill_key();
-        fill_indices.insert(fill_key, 0);
-        fill_key = temp_format
-            .set_pattern(crate::FormatPattern::Gray125)
-            .fill_key();
-        fill_indices.insert(fill_key, 1);
+        let mut fill_indices = HashMap::from([
+            (Fill::default(), 0),
+            (
+                Fill {
+                    pattern: crate::FormatPattern::Gray125,
+                    ..Default::default()
+                },
+                1,
+            ),
+        ]);
 
         for xf_format in &mut self.xf_formats {
+            let fill = &mut xf_format.fill;
             // For a solid fill (pattern == "solid") Excel reverses the role of
             // foreground and background colors, and
-            if xf_format.pattern == FormatPattern::Solid
-                && xf_format.background_color != XlsxColor::Default
-                && xf_format.foreground_color != XlsxColor::Default
+            if fill.pattern == FormatPattern::Solid
+                && fill.background_color != XlsxColor::Default
+                && fill.foreground_color != XlsxColor::Default
             {
-                mem::swap(
-                    &mut xf_format.foreground_color,
-                    &mut xf_format.background_color,
-                );
+                mem::swap(&mut fill.foreground_color, &mut fill.background_color);
             }
 
             // If the user specifies a foreground or background color without a
             // pattern they probably wanted a solid fill, so we fill in the
             // defaults.
-            if (xf_format.pattern == FormatPattern::None
-                || xf_format.pattern == FormatPattern::Solid)
-                && xf_format.background_color != XlsxColor::Default
-                && xf_format.foreground_color == XlsxColor::Default
+            if (fill.pattern == FormatPattern::None || fill.pattern == FormatPattern::Solid)
+                && fill.background_color != XlsxColor::Default
+                && fill.foreground_color == XlsxColor::Default
             {
-                xf_format.foreground_color = xf_format.background_color;
-                xf_format.background_color = XlsxColor::Default;
-                xf_format.pattern = FormatPattern::Solid;
+                fill.foreground_color = fill.background_color;
+                fill.background_color = XlsxColor::Default;
+                fill.pattern = FormatPattern::Solid;
             }
 
-            if (xf_format.pattern == FormatPattern::None
-                || xf_format.pattern == FormatPattern::Solid)
-                && xf_format.background_color == XlsxColor::Default
-                && xf_format.foreground_color != XlsxColor::Default
+            if (fill.pattern == FormatPattern::None || fill.pattern == FormatPattern::Solid)
+                && fill.background_color == XlsxColor::Default
+                && fill.foreground_color != XlsxColor::Default
             {
-                xf_format.background_color = XlsxColor::Default;
-                xf_format.pattern = FormatPattern::Solid;
+                fill.background_color = XlsxColor::Default;
+                fill.pattern = FormatPattern::Solid;
             }
-
-            // Get a unique fill identifier.
-            let fill_key = xf_format.fill_key();
 
             // Find unique or repeated fill ids.
-            match fill_indices.get(&fill_key) {
+            match fill_indices.get(fill) {
                 Some(fill_index) => {
                     xf_format.set_fill_index(*fill_index, false);
                 }
                 None => {
-                    fill_indices.insert(fill_key, fill_count);
+                    fill_indices.insert(fill.clone(), fill_count);
                     xf_format.set_fill_index(fill_count, true);
                     fill_count += 1;
                 }
@@ -1394,17 +1381,15 @@ impl Workbook {
     // Set the border index for the format objects.
     fn prepare_borders(&mut self) {
         let mut border_count: u16 = 0;
-        let mut border_indices: HashMap<String, u16> = HashMap::new();
+        let mut border_indices: HashMap<Border, u16> = HashMap::new();
 
         for xf_format in &mut self.xf_formats {
-            let border_key = xf_format.border_key();
-
-            match border_indices.get(&border_key) {
+            match border_indices.get(&xf_format.borders) {
                 Some(border_index) => {
                     xf_format.set_border_index(*border_index, false);
                 }
                 None => {
-                    border_indices.insert(border_key, border_count);
+                    border_indices.insert(xf_format.borders.clone(), border_count);
                     xf_format.set_border_index(border_count, true);
                     border_count += 1;
                 }
