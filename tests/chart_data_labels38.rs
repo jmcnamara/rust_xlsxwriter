@@ -10,6 +10,9 @@ use rust_xlsxwriter::{
     ChartPatternFillType, ChartType, Workbook, XlsxError,
 };
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test to demonstrate charts.

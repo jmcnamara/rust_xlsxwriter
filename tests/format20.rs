@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test to demonstrate use of the Automatic color.

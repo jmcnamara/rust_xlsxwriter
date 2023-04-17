@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test to demonstrate setting the first visible tab in a group of worksheets.

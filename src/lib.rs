@@ -146,13 +146,15 @@ mod relationship;
 mod shared_strings;
 mod shared_strings_table;
 mod styles;
-mod test_functions;
 mod theme;
 mod utility;
 mod vml;
 mod workbook;
 mod worksheet;
 mod xmlwriter;
+
+#[cfg(test)]
+mod test_functions;
 
 // Re-export the public APIs.
 pub use chart::*;

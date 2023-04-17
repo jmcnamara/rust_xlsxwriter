@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test case to demonstrate creating a basic file with 3 worksheets and no data.

@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test case to test dynamic array formula: with explicit prefix.

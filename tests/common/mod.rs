@@ -53,8 +53,8 @@ where
             test_name: "",
             test_function: None,
             unique: "",
-            input_filename: "".to_string(),
-            output_filename: "".to_string(),
+            input_filename: String::new(),
+            output_filename: String::new(),
             ignore_files: HashSet::new(),
             ignore_elements: HashMap::new(),
         }
@@ -290,32 +290,42 @@ fn compare_xlsx_files(
             exp_xml_string = exp_xml_string.replace("John", "");
 
             // Remove creation date from core.xml file.
-            let re = Regex::new(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z").unwrap();
-            exp_xml_string = re.replace_all(&exp_xml_string, "").to_string();
-            got_xml_string = re.replace_all(&got_xml_string, "").to_string();
+            lazy_static! {
+                static ref UTC_DATE: Regex =
+                    Regex::new(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z").unwrap();
+            }
+            exp_xml_string = UTC_DATE.replace_all(&exp_xml_string, "").to_string();
+            got_xml_string = UTC_DATE.replace_all(&got_xml_string, "").to_string();
         }
 
         // Remove workbookView dimensions which are almost always different and
         // calcPr which can have different Excel version ids.
         if filename == "xl/workbook.xml" {
-            let re = Regex::new(
-                r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#,
-            )
-            .unwrap();
-            exp_xml_string = re.replace(&exp_xml_string, "<workbookView").to_string();
-            got_xml_string = re.replace(&got_xml_string, "<workbookView").to_string();
+            lazy_static! {
+                static ref WORKBOOK_VIEW: Regex = Regex::new(r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#).unwrap();
+            }
+            exp_xml_string = WORKBOOK_VIEW
+                .replace(&exp_xml_string, "<workbookView")
+                .to_string();
+            got_xml_string = WORKBOOK_VIEW
+                .replace(&got_xml_string, "<workbookView")
+                .to_string();
 
-            let re = Regex::new(r"<calcPr[^>]*>").unwrap();
-            exp_xml_string = re.replace(&exp_xml_string, "<calcPr/>").to_string();
-            got_xml_string = re.replace(&got_xml_string, "<calcPr/>").to_string();
+            lazy_static! {
+                static ref CALC_PARA: Regex = Regex::new(r"<calcPr[^>]*>").unwrap();
+            }
+            exp_xml_string = CALC_PARA.replace(&exp_xml_string, "<calcPr/>").to_string();
+            got_xml_string = CALC_PARA.replace(&got_xml_string, "<calcPr/>").to_string();
         }
 
         // The pageMargins element in chart files often contain values like
         // "0.75000000000000011" instead of "0.75". We simplify/round these to
         // make comparison easier.
         if filename.starts_with("xl/charts/chart") {
-            let re = Regex::new(r"000000000000\d+").unwrap();
-            exp_xml_string = re.replace_all(&exp_xml_string, "").to_string();
+            lazy_static! {
+                static ref DIGITS: Regex = Regex::new(r"000000000000\d+").unwrap();
+            }
+            exp_xml_string = DIGITS.replace_all(&exp_xml_string, "").to_string();
         }
 
         // Convert the xml strings to vectors for easier comparison.
@@ -372,9 +382,12 @@ fn compare_xlsx_files(
 
 // Convert XML string/doc into a vector for comparison testing.
 fn xml_to_vec(xml_string: &str) -> Vec<String> {
+    lazy_static! {
+        static ref ELEMENT_DIVIDES: Regex = Regex::new(r">\s*<").unwrap();
+    }
+
     let mut xml_elements: Vec<String> = Vec::new();
-    let re = regex::Regex::new(r">\s*<").unwrap();
-    let tokens: Vec<&str> = re.split(xml_string).collect();
+    let tokens: Vec<&str> = ELEMENT_DIVIDES.split(xml_string).collect();
 
     for token in &tokens {
         let mut element = token.trim().to_string();
@@ -382,10 +395,10 @@ fn xml_to_vec(xml_string: &str) -> Vec<String> {
 
         // Add back the removed brackets.
         if !element.starts_with('<') {
-            element = format!("<{}", element);
+            element = format!("<{element}");
         }
         if !element.ends_with('>') {
-            element = format!("{}>", element);
+            element = format!("{element}>");
         }
 
         xml_elements.push(element);
@@ -396,14 +409,17 @@ fn xml_to_vec(xml_string: &str) -> Vec<String> {
 // Convert VML string/doc into a vector for comparison testing. Excel VML tends
 // to be less structured than other XML so it needs more massaging.
 pub(crate) fn vml_to_vec(vml_string: &str) -> Vec<String> {
+    lazy_static! {
+        static ref WHITESPACE: Regex = Regex::new(r"\s+").unwrap();
+    }
+
     let mut vml_string = vml_string.replace(['\r', '\n'], "");
+    vml_string = WHITESPACE.replace_all(&vml_string, " ").into();
 
-    let re = regex::Regex::new(r"\s+").unwrap();
-    vml_string = re.replace_all(&vml_string, " ").into();
-
-    vml_string = vml_string.replace("; ", ";");
-    vml_string = vml_string.replace('\'', "\"");
-    vml_string = vml_string.replace("<x:Anchor> ", "<x:Anchor>");
+    vml_string = vml_string
+        .replace("; ", ";")
+        .replace('\'', "\"")
+        .replace("<x:Anchor> ", "<x:Anchor>");
 
     xml_to_vec(&vml_string)
 }

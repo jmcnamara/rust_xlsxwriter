@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test case to test simple formatting.

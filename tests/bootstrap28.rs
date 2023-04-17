@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test case to demonstrate creating a basic file with user defined column.

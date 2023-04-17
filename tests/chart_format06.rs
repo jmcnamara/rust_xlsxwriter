@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Chart, ChartMarker, ChartMarkerType, ChartType, Workbook, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test to demonstrate charts.

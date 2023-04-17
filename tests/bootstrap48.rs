@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Format, FormatBorder, FormatPattern, Workbook, XlsxColor, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test case to demonstrate creating a basic file with theme colors.

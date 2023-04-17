@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Format, Workbook, Worksheet, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test to demonstrate activated and selected worksheets.

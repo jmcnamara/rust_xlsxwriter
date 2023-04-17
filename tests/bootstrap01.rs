@@ -9,6 +9,9 @@ use std::path::{Path, PathBuf};
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test case to demonstrate creating a basic file with 1 worksheet and no data.

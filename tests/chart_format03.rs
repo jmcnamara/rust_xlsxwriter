@@ -9,6 +9,9 @@ use rust_xlsxwriter::{
     Chart, ChartFormat, ChartLine, ChartSolidFill, ChartType, Workbook, XlsxColor, XlsxError,
 };
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test to demonstrate charts.

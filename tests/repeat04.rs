@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test the creation of a simple rust_xlsxwriter file with repeat rows/cols.

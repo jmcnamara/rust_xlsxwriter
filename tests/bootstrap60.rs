@@ -7,6 +7,9 @@
 
 use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
 
+#[macro_use]
+extern crate lazy_static;
+
 mod common;
 
 // Test to check rust_xlsxwriter generated chart_ids.
