@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## [0.36.0] - 2023-04-18
+
+### Added
+
+- Added performance improvement for applications that use a lot of `Format`
+  objects. [GitHub Issue #30].
+
+
+### Fixed
+
+- Fixed issue introduced in v0.34.0 where `Rc<>` value was blocking `Send` in
+  multithreaded applications. [GitHub Issue #29].
+
+[GitHub Issue #29]: https://github.com/jmcnamara/rust_xlsxwriter/issues/29
+[GitHub Issue #30]: https://github.com/jmcnamara/rust_xlsxwriter/issues/30
+
+
 ## [0.35.0] - 2023-04-16
 
 ### Added
