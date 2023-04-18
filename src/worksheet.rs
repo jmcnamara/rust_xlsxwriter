@@ -11,7 +11,7 @@ use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Write;
 use std::mem;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 use itertools::Itertools;
@@ -7310,7 +7310,7 @@ impl Worksheet {
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::String {
-            string: Rc::from(string),
+            string: Arc::from(string),
             xf_index,
         };
 
@@ -7356,9 +7356,9 @@ impl Worksheet {
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::RichString {
-            string: Rc::from(string),
+            string: Arc::from(string),
             xf_index,
-            raw_string: Rc::from(raw_string),
+            raw_string: Arc::from(raw_string),
         };
 
         self.insert_cell(row, col, cell);
@@ -8961,7 +8961,7 @@ impl Worksheet {
                         string, xf_index, ..
                     } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        let string_index = string_table.shared_string_index(Rc::clone(string));
+                        let string_index = string_table.shared_string_index(Arc::clone(string));
                         self.write_string_cell(row_num, col_num, string_index, xf_index);
                     }
                     CellType::Formula {
@@ -10017,13 +10017,13 @@ enum CellType {
         xf_index: u32,
     },
     String {
-        string: Rc<str>,
+        string: Arc<str>,
         xf_index: u32,
     },
     RichString {
-        string: Rc<str>,
+        string: Arc<str>,
         xf_index: u32,
-        raw_string: Rc<str>,
+        raw_string: Arc<str>,
     },
 }
 

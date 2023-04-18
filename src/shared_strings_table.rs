@@ -8,7 +8,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, sync::Arc};
 
 //
 // A metadata struct to store Excel unique strings between worksheets.
@@ -16,7 +16,7 @@ use std::{collections::HashMap, rc::Rc};
 pub struct SharedStringsTable {
     pub count: u32,
     pub unique_count: u32,
-    pub strings: HashMap<Rc<str>, u32>,
+    pub strings: HashMap<Arc<str>, u32>,
 }
 
 impl SharedStringsTable {
@@ -34,7 +34,7 @@ impl SharedStringsTable {
     }
 
     // Get the index of the string in the Shared String table.
-    pub(crate) fn shared_string_index(&mut self, key: Rc<str>) -> u32 {
+    pub(crate) fn shared_string_index(&mut self, key: Arc<str>) -> u32 {
         let index = *self.strings.entry(key).or_insert_with(|| {
             let index = self.unique_count;
             self.unique_count += 1;
