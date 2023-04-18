@@ -419,13 +419,22 @@ pub struct Format {
     pub(crate) has_fill: bool,
     pub(crate) has_border: bool,
 
+    // Properties listed in terms of the Excel dialog.
+
     // Number properties.
     pub(crate) num_format: String,
     pub(crate) num_format_index: u16,
 
+    // Font properties.
     pub(crate) font: Font,
+
+    // Alignment properties
     pub(crate) alignment: Alignment,
+
+    // Border properties
     pub(crate) borders: Border,
+
+    // Fill properties
     pub(crate) fill: Fill,
 
     // Protection properties.
@@ -544,12 +553,12 @@ impl Format {
     }
 
     // Check if the format has an alignment property set and requires a Styles
-    // <alignment> element. This also handles a special case where Excel ignore
+    // <alignment> element. This also handles a special case where Excel ignores
     // Bottom as a default.
     pub(crate) fn has_alignment(&self) -> bool {
-        self.alignment.horizontal_align != FormatAlign::General
-            || !(self.alignment.vertical_align == FormatAlign::General
-                || self.alignment.vertical_align == FormatAlign::Bottom)
+        self.alignment.horizontal != FormatAlign::General
+            || !(self.alignment.vertical == FormatAlign::General
+                || self.alignment.vertical == FormatAlign::Bottom)
             || self.alignment.indent != 0
             || self.alignment.rotation != 0
             || self.alignment.text_wrap
@@ -560,8 +569,8 @@ impl Format {
     // Check if the format has an alignment property set and requires a Styles
     // "applyAlignment" attribute.
     pub(crate) fn apply_alignment(&self) -> bool {
-        self.alignment.horizontal_align != FormatAlign::General
-            || self.alignment.vertical_align != FormatAlign::General
+        self.alignment.horizontal != FormatAlign::General
+            || self.alignment.vertical != FormatAlign::General
             || self.alignment.indent != 0
             || self.alignment.rotation != 0
             || self.alignment.text_wrap
@@ -876,7 +885,7 @@ impl Format {
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.font.font_color = color;
+            self.font.color = color;
         }
 
         self
@@ -921,10 +930,10 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_name.png">
     ///
     pub fn set_font_name(mut self, font_name: &str) -> Format {
-        self.font.font_name = font_name.to_string();
+        self.font.name = font_name.to_string();
 
         if font_name != "Calibri" {
-            self.font.font_scheme = "".to_string();
+            self.font.scheme = "".to_string();
         }
 
         self
@@ -974,7 +983,7 @@ impl Format {
     where
         T: Into<f64>,
     {
-        self.font.font_size = font_size.into().to_string();
+        self.font.size = font_size.into().to_string();
         self
     }
 
@@ -983,7 +992,7 @@ impl Format {
     /// This function is implemented for completeness but is rarely used in
     /// practice.
     pub fn set_font_scheme(mut self, font_scheme: &str) -> Format {
-        self.font.font_scheme = font_scheme.to_string();
+        self.font.scheme = font_scheme.to_string();
         self
     }
 
@@ -997,7 +1006,7 @@ impl Format {
     /// * `font_family` - The font family property.
     ///
     pub fn set_font_family(mut self, font_family: u8) -> Format {
-        self.font.font_family = font_family;
+        self.font.family = font_family;
         self
     }
 
@@ -1011,7 +1020,7 @@ impl Format {
     /// * `font_charset` - The font character set property.
     ///
     pub fn set_font_charset(mut self, font_charset: u8) -> Format {
-        self.font.font_charset = font_charset;
+        self.font.charset = font_charset;
         self
     }
 
@@ -1100,7 +1109,7 @@ impl Format {
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_strikethrough.png">
     ///
     pub fn set_font_strikethrough(mut self) -> Format {
-        self.font.font_strikethrough = true;
+        self.font.strikethrough = true;
         self
     }
 
@@ -1117,7 +1126,7 @@ impl Format {
     ///
     ///
     pub fn set_font_script(mut self, font_script: FormatScript) -> Format {
-        self.font.font_script = font_script;
+        self.font.script = font_script;
         self
     }
 
@@ -1185,8 +1194,8 @@ impl Format {
     pub fn set_align(mut self, align: FormatAlign) -> Format {
         match align {
             FormatAlign::General => {
-                self.alignment.horizontal_align = FormatAlign::General;
-                self.alignment.vertical_align = FormatAlign::General;
+                self.alignment.horizontal = FormatAlign::General;
+                self.alignment.vertical = FormatAlign::General;
             }
             FormatAlign::Center
             | FormatAlign::CenterAcross
@@ -1195,14 +1204,14 @@ impl Format {
             | FormatAlign::Justify
             | FormatAlign::Left
             | FormatAlign::Right => {
-                self.alignment.horizontal_align = align;
+                self.alignment.horizontal = align;
             }
             FormatAlign::Bottom
             | FormatAlign::Top
             | FormatAlign::VerticalCenter
             | FormatAlign::VerticalDistributed
             | FormatAlign::VerticalJustify => {
-                self.alignment.vertical_align = align;
+                self.alignment.vertical = align;
             }
         }
 
@@ -2009,9 +2018,9 @@ impl Format {
     ///
     pub fn set_hyperlink(mut self) -> Format {
         self.font.is_hyperlink = true;
-        self.font.font_color = XlsxColor::Theme(10, 0);
+        self.font.color = XlsxColor::Theme(10, 0);
         self.font.underline = FormatUnderline::Single;
-        self.font.font_scheme = "".to_string();
+        self.font.scheme = "".to_string();
 
         self
     }
@@ -2155,7 +2164,7 @@ impl Format {
     /// Unset the font strikethrough Format property back to its default "off" state.
     /// The opposite of [`set_font_strikethrough()`](Format::set_font_strikethrough()).
     pub fn unset_font_strikethrough(mut self) -> Format {
-        self.font.font_strikethrough = false;
+        self.font.strikethrough = false;
         self
     }
 
@@ -2204,8 +2213,8 @@ impl Format {
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Default)]
 pub(crate) struct Alignment {
-    pub(crate) horizontal_align: FormatAlign,
-    pub(crate) vertical_align: FormatAlign,
+    pub(crate) horizontal: FormatAlign,
+    pub(crate) vertical: FormatAlign,
     pub(crate) text_wrap: bool,
     pub(crate) justify_last: bool,
     pub(crate) rotation: i16,
@@ -2234,36 +2243,35 @@ pub(crate) struct Font {
     pub(crate) bold: bool,
     pub(crate) italic: bool,
     pub(crate) underline: FormatUnderline,
-    pub(crate) font_name: String,
-    pub(crate) font_size: String,
-    pub(crate) font_color: XlsxColor,
-    pub(crate) font_strikethrough: bool,
-    pub(crate) font_script: FormatScript,
-    pub(crate) font_family: u8,
-    pub(crate) font_charset: u8,
-    pub(crate) font_scheme: String,
-    pub(crate) font_condense: bool,
-    pub(crate) font_extend: bool,
+    pub(crate) name: String,
+    pub(crate) size: String,
+    pub(crate) color: XlsxColor,
+    pub(crate) strikethrough: bool,
+    pub(crate) script: FormatScript,
+    pub(crate) family: u8,
+    pub(crate) charset: u8,
+    pub(crate) scheme: String,
+    pub(crate) condense: bool,
+    pub(crate) extend: bool,
     pub(crate) is_hyperlink: bool,
 }
 
 impl Default for Font {
     fn default() -> Self {
         Self {
-            font_name: "Calibri".to_string(),
-            font_size: "11".to_string(),
-            font_family: 2,
-            font_scheme: "minor".to_string(),
-
+            name: "Calibri".to_string(),
+            size: "11".to_string(),
+            family: 2,
+            scheme: "minor".to_string(),
             bold: Default::default(),
             italic: Default::default(),
             underline: FormatUnderline::default(),
-            font_color: XlsxColor::default(),
-            font_strikethrough: Default::default(),
-            font_script: FormatScript::default(),
-            font_charset: Default::default(),
-            font_condense: Default::default(),
-            font_extend: Default::default(),
+            color: XlsxColor::default(),
+            strikethrough: Default::default(),
+            script: FormatScript::default(),
+            charset: Default::default(),
+            condense: Default::default(),
+            extend: Default::default(),
             is_hyperlink: Default::default(),
         }
     }

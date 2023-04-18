@@ -136,7 +136,7 @@ impl<'a> Styles<'a> {
             self.writer.xml_empty_tag_only("i");
         }
 
-        if font.font_strikethrough {
+        if font.strikethrough {
             self.writer.xml_empty_tag_only("strike");
         }
 
@@ -144,7 +144,7 @@ impl<'a> Styles<'a> {
             self.write_font_underline(font);
         }
 
-        if font.font_script != FormatScript::None {
+        if font.script != FormatScript::None {
             self.write_vert_align(font);
         }
         // Write the sz element.
@@ -157,12 +157,12 @@ impl<'a> Styles<'a> {
         self.write_font_name(font);
 
         // Write the family element.
-        if font.font_family > 0 {
+        if font.family > 0 {
             self.write_font_family(font);
         }
 
         // Write the charset element.
-        if font.font_charset > 0 {
+        if font.charset > 0 {
             self.write_font_charset(font);
         }
 
@@ -178,7 +178,7 @@ impl<'a> Styles<'a> {
 
     // Write the <sz> element.
     fn write_font_size(&mut self, font: &Font) {
-        let attributes = [("val", font.font_size.as_str())];
+        let attributes = [("val", font.size.as_str())];
 
         self.writer.xml_empty_tag("sz", &attributes);
     }
@@ -187,7 +187,7 @@ impl<'a> Styles<'a> {
     fn write_font_color(&mut self, font: &Font) {
         let mut attributes = vec![];
 
-        match font.font_color {
+        match font.color {
             XlsxColor::Automatic => {
                 // The color element is omitted for an Automatic color.
             }
@@ -196,7 +196,7 @@ impl<'a> Styles<'a> {
                 self.writer.xml_empty_tag("color", &attributes);
             }
             _ => {
-                attributes.append(&mut font.font_color.attributes());
+                attributes.append(&mut font.color.attributes());
                 self.writer.xml_empty_tag("color", &attributes);
             }
         }
@@ -204,7 +204,7 @@ impl<'a> Styles<'a> {
 
     // Write the <name> element.
     fn write_font_name(&mut self, font: &Font) {
-        let attributes = [("val", font.font_name.clone())];
+        let attributes = [("val", font.name.clone())];
 
         if self.is_rich_string_style {
             self.writer.xml_empty_tag("rFont", &attributes);
@@ -215,14 +215,14 @@ impl<'a> Styles<'a> {
 
     // Write the <family> element.
     fn write_font_family(&mut self, font: &Font) {
-        let attributes = [("val", font.font_family.to_string())];
+        let attributes = [("val", font.family.to_string())];
 
         self.writer.xml_empty_tag("family", &attributes);
     }
 
     // Write the <charset> element.
     fn write_font_charset(&mut self, font: &Font) {
-        let attributes = [("val", font.font_charset.to_string())];
+        let attributes = [("val", font.charset.to_string())];
 
         self.writer.xml_empty_tag("charset", &attributes);
     }
@@ -231,8 +231,8 @@ impl<'a> Styles<'a> {
     fn write_font_scheme(&mut self, font: &Font) {
         let mut attributes = vec![];
 
-        if !font.font_scheme.is_empty() {
-            attributes.push(("val", font.font_scheme.to_string()));
+        if !font.scheme.is_empty() {
+            attributes.push(("val", font.scheme.to_string()));
         } else {
             return;
         }
@@ -264,7 +264,7 @@ impl<'a> Styles<'a> {
     fn write_vert_align(&mut self, font: &Font) {
         let mut attributes = vec![];
 
-        match font.font_script {
+        match font.script {
             FormatScript::Superscript => {
                 attributes.push(("val", "superscript".to_string()));
             }
@@ -586,7 +586,7 @@ impl<'a> Styles<'a> {
     // Write the <alignment> element.
     fn write_alignment(&mut self, alignment: Alignment) {
         let mut attributes = vec![];
-        let mut horizontal_align = alignment.horizontal_align;
+        let mut horizontal_align = alignment.horizontal;
         let mut shrink = alignment.shrink;
 
         // Indent is only allowed for horizontal "left", "right" and
@@ -636,7 +636,7 @@ impl<'a> Styles<'a> {
         }
 
         // Set the various attributes for vertical alignment.
-        match alignment.vertical_align {
+        match alignment.vertical {
             FormatAlign::VerticalCenter => {
                 attributes.push(("vertical", "center".to_string()));
             }
