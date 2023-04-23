@@ -35,12 +35,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart
         .title()
         .set_name("Title")
-        .set_font(ChartFont::new().set_italic());
+        .set_font(ChartFont::new().set_italic().unset_bold());
 
     chart
         .x_axis()
         .set_name("XXX")
-        .set_name_font(ChartFont::new().set_italic())
+        .set_name_font(ChartFont::new().set_italic().unset_bold())
         .set_font(ChartFont::new().set_size(11).set_bold().set_italic());
     chart
         .y_axis()

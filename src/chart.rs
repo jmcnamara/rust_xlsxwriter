@@ -2633,7 +2633,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:txPr");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr(font.rotation, false);
+        self.write_a_body_pr(font, false);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
@@ -2656,7 +2656,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:txPr");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr(0, false);
+        self.write_a_body_pr(font, false);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
@@ -2672,7 +2672,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:txPr");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr(font.rotation, is_horizontal);
+        self.write_a_body_pr(font, is_horizontal);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
@@ -2707,16 +2707,23 @@ impl Chart {
     }
 
     // Write the <a:bodyPr> element.
-    fn write_a_body_pr(&mut self, rotation: i32, is_horizontal: bool) {
+    fn write_a_body_pr(&mut self, font: &ChartFont, is_horizontal: bool) {
         let mut attributes = vec![];
-        let mut rotation = rotation;
 
-        if rotation == 0 && is_horizontal {
-            rotation = -90;
-        }
+        let rotation = match font.rotation {
+            Some(rotation) => rotation,
+            None => {
+                // Handle defaults for vertical and horizontal rotations.
+                if is_horizontal {
+                    -90
+                } else {
+                    360 // To distinguish from user defined 0.
+                }
+            }
+        };
 
         match rotation {
-            0 => {}
+            360 => {}
             270 => {
                 // Stacked text.
                 attributes.push(("rot", "0".to_string()));
@@ -2729,8 +2736,7 @@ impl Chart {
             }
             _ => {
                 // Convert the rotation angle to Excel's units.
-                rotation *= 60_000;
-
+                let rotation = rotation as i32 * 60_000;
                 attributes.push(("rot", rotation.to_string()));
                 attributes.push(("vert", "horz".to_string()));
             }
@@ -2791,11 +2797,11 @@ impl Chart {
             attributes.push(("sz", font.size.to_string()));
         }
 
-        if font.bold || font.italic {
-            attributes.push(("b", u8::from(font.bold).to_string()));
+        if let Some(boolean) = font.bold {
+            attributes.push(("b", u8::from(boolean).to_string()));
         }
 
-        if font.italic || font.bold {
+        if font.italic || (font.bold.is_some() && !font.has_default_bold) {
             attributes.push(("i", u8::from(font.italic).to_string()));
         }
 
@@ -3213,7 +3219,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:rich");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr(title.font.rotation, title.is_horizontal);
+        self.write_a_body_pr(&title.font, title.is_horizontal);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
@@ -5131,8 +5137,9 @@ impl ChartTitle {
     /// TODO
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartTitle {
         let mut font = font.clone();
+        font.has_default_bold = true;
 
-        if font.bold || font.italic || font.is_latin() {
+        if font.italic || font.is_latin() {
             font.has_baseline = true;
         }
 
@@ -6505,7 +6512,14 @@ impl ChartAxis {
     /// TODO
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartAxis {
         let mut font = font.clone();
-        font.has_baseline = true;
+
+        if font.italic || font.is_latin() {
+            font.has_baseline = true;
+        }
+
+        if font.italic && font.bold.is_none() {
+            font.bold = Some(false);
+        }
 
         self.font = Some(font);
         self
@@ -8534,7 +8548,11 @@ impl ToString for ChartPatternFillType {
 #[derive(Clone)]
 /// TODO
 pub struct ChartFont {
-    pub(crate) bold: bool,
+    // Chart/axis titles have a default bold font so we need to handle that as
+    // an option.
+    pub(crate) bold: Option<bool>,
+    pub(crate) has_default_bold: bool,
+
     pub(crate) italic: bool,
     pub(crate) underline: bool,
     pub(crate) name: String,
@@ -8543,7 +8561,7 @@ pub struct ChartFont {
     pub(crate) strikethrough: bool,
     pub(crate) pitch_family: u8,
     pub(crate) charset: u8,
-    pub(crate) rotation: i32,
+    pub(crate) rotation: Option<i16>,
     pub(crate) has_baseline: bool,
 }
 
@@ -8557,7 +8575,7 @@ impl ChartFont {
     /// TODO
     pub fn new() -> ChartFont {
         ChartFont {
-            bold: false,
+            bold: None,
             italic: false,
             underline: false,
             name: "".to_string(),
@@ -8566,8 +8584,9 @@ impl ChartFont {
             strikethrough: false,
             pitch_family: 0,
             charset: 0,
-            rotation: 0,
+            rotation: None,
             has_baseline: false,
+            has_default_bold: false,
         }
     }
 
@@ -8576,7 +8595,7 @@ impl ChartFont {
     /// todo
     ///
     pub fn set_bold(&mut self) -> &mut ChartFont {
-        self.bold = true;
+        self.bold = Some(true);
         self
     }
 
@@ -8700,10 +8719,17 @@ impl ChartFont {
     ///
     pub fn set_rotation(&mut self, rotation: i16) -> &mut ChartFont {
         match rotation {
-            270..=271 | -90..=90 => self.rotation = rotation as i32,
+            270..=271 | -90..=90 => self.rotation = Some(rotation),
             _ => eprintln!("Rotation outside range: -90 <= angle <= 90."),
         }
 
+        self
+    }
+
+    /// todo
+    ///
+    pub fn unset_bold(&mut self) -> &mut ChartFont {
+        self.bold = Some(false);
         self
     }
 

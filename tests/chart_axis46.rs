@@ -27,23 +27,22 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::Bar);
-    chart.set_axis_ids(43945344, 45705856);
+    chart.set_axis_ids(108178048, 108321408);
     chart.add_series().set_values(("Sheet1", 0, 0, 4, 0));
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
-    chart.title().set_name("Title");
-
     chart
         .x_axis()
         .set_name("XXX")
-        .set_name_font(ChartFont::new().set_italic().unset_bold())
-        .set_font(ChartFont::new().set_size(11).set_bold().set_italic());
+        .set_name_font(ChartFont::new().set_rotation(271))
+        .set_font(ChartFont::new().set_rotation(271));
+
     chart
         .y_axis()
         .set_name("YYY")
-        .set_name_font(ChartFont::new().set_bold().set_italic())
-        .set_font(ChartFont::new().set_size(9).set_italic());
+        .set_name_font(ChartFont::new().set_rotation(271))
+        .set_font(ChartFont::new().set_rotation(271));
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -53,9 +52,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_font02() {
+fn test_chart_axis46() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_font02")
+        .set_name("chart_axis46")
         .set_function(create_new_xlsx_file)
         .initialize();
 
