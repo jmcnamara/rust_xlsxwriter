@@ -1368,7 +1368,7 @@ impl Format {
             270 => self.alignment.rotation = 255,
             -90..=-1 => self.alignment.rotation = -rotation + 90,
             0..=90 => self.alignment.rotation = rotation,
-            _ => eprintln!("Rotation rotation outside range: -90 <= angle <= 90."),
+            _ => eprintln!("Rotation outside range: -90 <= angle <= 90."),
         }
 
         self
@@ -2694,6 +2694,11 @@ impl XlsxColor {
             }
             _ => true,
         }
+    }
+
+    // Check if the color has been set to a non default/automatic color.
+    pub(crate) fn is_auto_or_default(self) -> bool {
+        self == XlsxColor::Automatic || self == XlsxColor::Default
     }
 }
 

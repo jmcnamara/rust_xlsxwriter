@@ -2074,6 +2074,11 @@ impl Chart {
             self.write_sp_pr(&self.x_axis.format.clone());
         }
 
+        // Write the axis font elements.
+        if let Some(font) = &self.x_axis.font {
+            self.write_axis_font(&font.clone());
+        }
+
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.1);
 
@@ -2126,6 +2131,11 @@ impl Chart {
             self.write_sp_pr(&self.y_axis.format.clone());
         }
 
+        // Write the axis font elements.
+        if let Some(font) = &self.y_axis.font {
+            self.write_axis_font(&font.clone());
+        }
+
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.0);
 
@@ -2162,6 +2172,11 @@ impl Chart {
         if self.x_axis.format.has_formatting() {
             // Write the c:spPr formatting element.
             self.write_sp_pr(&self.x_axis.format.clone());
+        }
+
+        // Write the axis font elements.
+        if let Some(font) = &self.x_axis.font {
+            self.write_axis_font(&font.clone());
         }
 
         // Write the c:crossAx element.
@@ -2298,8 +2313,16 @@ impl Chart {
         self.write_overlay();
 
         if self.chart_type == ChartType::Pie || self.chart_type == ChartType::Doughnut {
+            let font = match &self.legend.font {
+                Some(font) => font.clone(),
+                None => ChartFont::default(),
+            };
+
             // Write the c:txPr element.
-            self.write_tx_pr_pie();
+            self.write_tx_pr_pie(&font);
+        } else if let Some(font) = &self.legend.font {
+            // Write the c:txPr element.
+            self.write_tx_pr(&font.clone(), false);
         }
 
         self.writer.xml_end_tag("c:legend");
@@ -2606,43 +2629,66 @@ impl Chart {
     }
 
     // Write the <c:txPr> element.
-    fn write_tx_pr_pie(&mut self) {
+    fn write_axis_font(&mut self, font: &ChartFont) {
         self.writer.xml_start_tag_only("c:txPr");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr(false);
+        self.write_a_body_pr(font.rotation, false);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
 
-        // Write the a:p element.
-        self.write_a_p_pie();
+        self.writer.xml_start_tag_only("a:p");
+
+        // Write the a:pPr element.
+        self.write_a_p_pr_rich(font);
+
+        // Write the a:endParaRPr element.
+        self.write_a_end_para_rpr();
+
+        self.writer.xml_end_tag("a:p");
 
         self.writer.xml_end_tag("c:txPr");
     }
 
     // Write the <c:txPr> element.
-    fn write_tx_pr(&mut self, is_horizontal: bool) {
+    fn write_tx_pr_pie(&mut self, font: &ChartFont) {
         self.writer.xml_start_tag_only("c:txPr");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr(is_horizontal);
+        self.write_a_body_pr(0, false);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
 
         // Write the a:p element.
-        self.write_a_p_formula();
+        self.write_a_p_pie(font);
+
+        self.writer.xml_end_tag("c:txPr");
+    }
+
+    // Write the <c:txPr> element.
+    fn write_tx_pr(&mut self, font: &ChartFont, is_horizontal: bool) {
+        self.writer.xml_start_tag_only("c:txPr");
+
+        // Write the a:bodyPr element.
+        self.write_a_body_pr(font.rotation, is_horizontal);
+
+        // Write the a:lstStyle element.
+        self.write_a_lst_style();
+
+        // Write the a:p element.
+        self.write_a_p_formula(font);
 
         self.writer.xml_end_tag("c:txPr");
     }
 
     // Write the <a:p> element.
-    fn write_a_p_formula(&mut self) {
+    fn write_a_p_formula(&mut self, font: &ChartFont) {
         self.writer.xml_start_tag_only("a:p");
 
         // Write the a:pPr element.
-        self.write_a_p_pr();
+        self.write_a_p_pr(font);
 
         // Write the a:endParaRPr element.
         self.write_a_end_para_rpr();
@@ -2651,27 +2697,43 @@ impl Chart {
     }
 
     // Write the <a:pPr> element.
-    fn write_a_p_pr(&mut self) {
+    fn write_a_p_pr(&mut self, font: &ChartFont) {
         self.writer.xml_start_tag_only("a:pPr");
 
         // Write the a:defRPr element.
-        self.write_a_def_rpr();
+        self.write_a_def_rpr(font);
 
         self.writer.xml_end_tag("a:pPr");
     }
 
     // Write the <a:bodyPr> element.
-    fn write_a_body_pr(&mut self, is_horizontal: bool) {
+    fn write_a_body_pr(&mut self, rotation: i32, is_horizontal: bool) {
         let mut attributes = vec![];
-        let mut rotation = 0;
+        let mut rotation = rotation;
 
-        if is_horizontal {
-            rotation = -5400000;
+        if rotation == 0 && is_horizontal {
+            rotation = -90;
         }
 
-        if rotation != 0 {
-            attributes.push(("rot", rotation.to_string()));
-            attributes.push(("vert", "horz".to_string()));
+        match rotation {
+            0 => {}
+            270 => {
+                // Stacked text.
+                attributes.push(("rot", "0".to_string()));
+                attributes.push(("vert", "wordArtVert".to_string()));
+            }
+            271 => {
+                // East Asian vertical.
+                attributes.push(("rot", "0".to_string()));
+                attributes.push(("vert", "eaVert".to_string()));
+            }
+            _ => {
+                // Convert the rotation angle to Excel's units.
+                rotation *= 60_000;
+
+                attributes.push(("rot", rotation.to_string()));
+                attributes.push(("vert", "horz".to_string()));
+            }
         }
 
         self.writer.xml_empty_tag("a:bodyPr", &attributes);
@@ -2683,11 +2745,11 @@ impl Chart {
     }
 
     // Write the <a:p> element.
-    fn write_a_p_pie(&mut self) {
+    fn write_a_p_pie(&mut self, font: &ChartFont) {
         self.writer.xml_start_tag_only("a:p");
 
         // Write the a:pPr element.
-        self.write_pie_a_p_pr();
+        self.write_pie_a_p_pr(font);
 
         // Write the a:endParaRPr element.
         self.write_a_end_para_rpr();
@@ -2696,20 +2758,95 @@ impl Chart {
     }
 
     // Write the <a:pPr> element.
-    fn write_pie_a_p_pr(&mut self) {
+    fn write_pie_a_p_pr(&mut self, font: &ChartFont) {
         let attributes = [("rtl", "0")];
 
         self.writer.xml_start_tag("a:pPr", &attributes);
 
         // Write the a:defRPr element.
-        self.write_a_def_rpr();
+        self.write_a_def_rpr(font);
 
         self.writer.xml_end_tag("a:pPr");
     }
 
     // Write the <a:defRPr> element.
-    fn write_a_def_rpr(&mut self) {
-        self.writer.xml_empty_tag_only("a:defRPr");
+    fn write_a_def_rpr(&mut self, font: &ChartFont) {
+        self.write_font_elements("a:defRPr", font);
+    }
+
+    // Write the <a:rPr> element.
+    fn write_a_r_pr(&mut self, font: &ChartFont) {
+        self.write_font_elements("a:rPr", font);
+    }
+
+    // Write font sub-elements shared between <a:defRPr> and <a:rPr> elements.
+    fn write_font_elements(&mut self, tag: &str, font: &ChartFont) {
+        let mut attributes = vec![];
+
+        if tag == "a:rPr" {
+            attributes.push(("lang", "en-US".to_string()));
+        }
+
+        if font.size > 0.0 {
+            attributes.push(("sz", font.size.to_string()));
+        }
+
+        if font.bold || font.italic {
+            attributes.push(("b", u8::from(font.bold).to_string()));
+        }
+
+        if font.italic || font.bold {
+            attributes.push(("i", u8::from(font.italic).to_string()));
+        }
+
+        if font.underline {
+            attributes.push(("u", "sng".to_string()));
+        }
+
+        if font.has_baseline {
+            attributes.push(("baseline", "0".to_string()));
+        }
+
+        if font.is_latin() || !font.color.is_auto_or_default() {
+            self.writer.xml_start_tag(tag, &attributes);
+
+            if !font.color.is_auto_or_default() {
+                self.write_a_solid_fill(font.color, 0);
+            }
+
+            if font.is_latin() {
+                // Write the a:latin element.
+                self.write_a_latin(font);
+            }
+
+            self.writer.xml_end_tag(tag);
+        } else {
+            self.writer.xml_empty_tag(tag, &attributes);
+        }
+    }
+
+    // Write the <a:latin> element.
+    fn write_a_latin(&mut self, font: &ChartFont) {
+        let mut attributes = vec![];
+
+        if !font.name.is_empty() {
+            attributes.push(("typeface", font.name.to_string()));
+        }
+
+        if font.pitch_family > 0 {
+            attributes.push(("pitchFamily", font.pitch_family.to_string()));
+        }
+
+        if font.charset > 0 || font.pitch_family > 0 {
+            attributes.push(("charset", font.charset.to_string()));
+        }
+
+        self.writer.xml_empty_tag("a:latin", &attributes);
+    }
+
+    // Write the <a:t> element.
+    fn write_a_t(&mut self, name: &str) {
+        self.writer.xml_data_element_only("a:t", name);
     }
 
     // Write the <a:endParaRPr> element.
@@ -3005,7 +3142,7 @@ impl Chart {
             self.write_sp_pr(&title.format.clone());
         } else {
             // Write the c:txPr element.
-            self.write_tx_pr(title.is_horizontal);
+            self.write_tx_pr(&title.font, title.is_horizontal);
         }
 
         self.writer.xml_end_tag("c:title");
@@ -3076,7 +3213,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:rich");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr(title.is_horizontal);
+        self.write_a_body_pr(title.font.rotation, title.is_horizontal);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
@@ -3093,7 +3230,7 @@ impl Chart {
 
         if !title.ignore_rich_para {
             // Write the a:pPr element.
-            self.write_a_p_pr_rich();
+            self.write_a_p_pr_rich(&title.font);
         }
 
         // Write the a:r element.
@@ -3103,11 +3240,11 @@ impl Chart {
     }
 
     // Write the <a:pPr> element.
-    fn write_a_p_pr_rich(&mut self) {
+    fn write_a_p_pr_rich(&mut self, font: &ChartFont) {
         self.writer.xml_start_tag_only("a:pPr");
 
         // Write the a:defRPr element.
-        self.write_a_def_rpr();
+        self.write_a_def_rpr(font);
 
         self.writer.xml_end_tag("a:pPr");
     }
@@ -3117,24 +3254,12 @@ impl Chart {
         self.writer.xml_start_tag_only("a:r");
 
         // Write the a:rPr element.
-        self.write_a_r_pr();
+        self.write_a_r_pr(&title.font);
 
         // Write the a:t element.
         self.write_a_t(&title.name);
 
         self.writer.xml_end_tag("a:r");
-    }
-
-    // Write the <a:rPr> element.
-    fn write_a_r_pr(&mut self) {
-        let attributes = [("lang", "en-US")];
-
-        self.writer.xml_empty_tag("a:rPr", &attributes);
-    }
-
-    // Write the <a:t> element.
-    fn write_a_t(&mut self, name: &str) {
-        self.writer.xml_data_element_only("a:t", name);
     }
 }
 
@@ -4822,6 +4947,7 @@ pub struct ChartTitle {
     pub(crate) range: ChartRange,
     pub(crate) cache_data: ChartSeriesCacheData,
     pub(crate) format: ChartFormat,
+    pub(crate) font: ChartFont,
     name: String,
     hidden: bool,
     is_horizontal: bool,
@@ -4834,6 +4960,7 @@ impl ChartTitle {
             range: ChartRange::new_from_range("", 0, 0, 0, 0),
             cache_data: ChartSeriesCacheData::new(),
             format: ChartFormat::new(),
+            font: ChartFont::new(),
             name: "".to_string(),
             hidden: false,
             is_horizontal: false,
@@ -4998,6 +5125,18 @@ impl ChartTitle {
         T: IntoChartFormat,
     {
         self.format = format.new_chart_format();
+        self
+    }
+
+    /// TODO
+    pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartTitle {
+        let mut font = font.clone();
+
+        if font.bold || font.italic || font.is_latin() {
+            font.has_baseline = true;
+        }
+
+        self.font = font;
         self
     }
 }
@@ -6248,6 +6387,7 @@ pub struct ChartAxis {
     axis_position: ChartAxisPosition,
     pub(crate) title: ChartTitle,
     pub(crate) format: ChartFormat,
+    pub(crate) font: Option<ChartFont>,
 }
 
 impl ChartAxis {
@@ -6257,6 +6397,7 @@ impl ChartAxis {
             axis_position: ChartAxisPosition::Bottom,
             title: ChartTitle::new(),
             format: ChartFormat::new(),
+            font: None,
         }
     }
 
@@ -6328,6 +6469,12 @@ impl ChartAxis {
         self
     }
 
+    /// TODO
+    pub fn set_name_font(&mut self, font: &ChartFont) -> &mut ChartAxis {
+        self.title.set_font(font);
+        self
+    }
+
     /// Set the formatting properties for a chart axis.
     ///
     /// Set the formatting properties for a chart axis via a [`ChartFormat`]
@@ -6352,6 +6499,15 @@ impl ChartAxis {
         T: IntoChartFormat,
     {
         self.format = format.new_chart_format();
+        self
+    }
+
+    /// TODO
+    pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartAxis {
+        let mut font = font.clone();
+        font.has_baseline = true;
+
+        self.font = Some(font);
         self
     }
 }
@@ -6457,6 +6613,7 @@ pub struct ChartLegend {
     hidden: bool,
     has_overlay: bool,
     pub(crate) format: ChartFormat,
+    pub(crate) font: Option<ChartFont>,
 }
 
 impl ChartLegend {
@@ -6466,6 +6623,7 @@ impl ChartLegend {
             hidden: false,
             has_overlay: false,
             format: ChartFormat::new(),
+            font: None,
         }
     }
 
@@ -6663,6 +6821,12 @@ impl ChartLegend {
         T: IntoChartFormat,
     {
         self.format = format.new_chart_format();
+        self
+    }
+
+    /// TODO
+    pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartLegend {
+        self.font = Some(font.clone());
         self
     }
 }
@@ -8364,6 +8528,188 @@ impl ToString for ChartPatternFillType {
             ChartPatternFillType::HorizontalStripesAlternating => "dashHorz".to_string(),
             ChartPatternFillType::DiagonalStripesLightDownwards => "ltDnDiag".to_string(),
         }
+    }
+}
+
+#[derive(Clone)]
+/// TODO
+pub struct ChartFont {
+    pub(crate) bold: bool,
+    pub(crate) italic: bool,
+    pub(crate) underline: bool,
+    pub(crate) name: String,
+    pub(crate) size: f64,
+    pub(crate) color: XlsxColor,
+    pub(crate) strikethrough: bool,
+    pub(crate) pitch_family: u8,
+    pub(crate) charset: u8,
+    pub(crate) rotation: i32,
+    pub(crate) has_baseline: bool,
+}
+
+impl Default for ChartFont {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartFont {
+    /// TODO
+    pub fn new() -> ChartFont {
+        ChartFont {
+            bold: false,
+            italic: false,
+            underline: false,
+            name: "".to_string(),
+            size: 0.0,
+            color: XlsxColor::Default,
+            strikethrough: false,
+            pitch_family: 0,
+            charset: 0,
+            rotation: 0,
+            has_baseline: false,
+        }
+    }
+
+    /// Set the bold property for a ChartFont font.
+    ///
+    /// todo
+    ///
+    pub fn set_bold(&mut self) -> &mut ChartFont {
+        self.bold = true;
+        self
+    }
+
+    /// Set the italic property for the ChartFont font.
+    ///
+    pub fn set_italic(&mut self) -> &mut ChartFont {
+        self.italic = true;
+        self
+    }
+
+    /// Set the color property for the ChartFont font.
+    ///
+    /// The `set_color()` method is used to set the font color.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The font color property defined by a [`XlsxColor`] enum
+    ///   value.
+    ///
+    pub fn set_color<T>(&mut self, color: T) -> &mut ChartFont
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.color = color;
+        }
+
+        self
+    }
+
+    /// Set the ChartFont font name property.
+    ///
+    /// Set the font for a cell format. Excel can only display fonts that are
+    /// installed on the system that it is running on. Therefore it is generally
+    /// best to use standard Excel fonts.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_name` - The font name property.
+    ///
+    pub fn set_name(&mut self, font_name: &str) -> &mut ChartFont {
+        self.name = font_name.to_string();
+        self
+    }
+
+    /// Set the ChartFont font size property.
+    ///
+    /// Set the font size of the cell format. The size is generally an integer
+    /// value but Excel allows x.5 values (hence the property is a f64 or
+    /// types that can convert [`Into`] a f64).
+    ///
+    /// Excel adjusts the height of a row to accommodate the largest font size
+    /// in the row.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_size` - The font size property.
+    ///
+    pub fn set_size<T>(&mut self, font_size: T) -> &mut ChartFont
+    where
+        T: Into<f64>,
+    {
+        self.size = font_size.into() * 100.0;
+        self
+    }
+
+    /// Set the ChartFont font family property.
+    ///
+    /// Set the font family. This
+    /// function is implemented for completeness but is rarely used in practice.
+    ///
+    /// # Arguments
+    ///
+    /// * `family` - The font family property.
+    ///
+    pub fn set_pitch_family(&mut self, family: u8) -> &mut ChartFont {
+        self.pitch_family = family;
+        self
+    }
+
+    /// Set the ChartFont font character set property.
+    ///
+    /// Set the font character set. This function is implemented for completeness
+    /// but is rarely used in practice.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_charset` - The font character set property.
+    ///
+    pub fn set_charset(&mut self, font_charset: u8) -> &mut ChartFont {
+        self.charset = font_charset;
+        self
+    }
+
+    /// Set the underline properties for a font.
+    ///
+    /// TODO
+    ///
+    pub fn set_underline(&mut self) -> &mut ChartFont {
+        self.underline = true;
+        self
+    }
+
+    /// Set the ChartFont font strikethrough property.
+    ///
+    pub fn set_strikethrough(&mut self) -> &mut ChartFont {
+        self.strikethrough = true;
+        self
+    }
+
+    /// Set the ChartFont rotation property.
+    ///
+    /// Set the rotation angle of the text in a cell. The rotation can be any
+    /// angle in the range -90 to 90 degrees, or 270 to indicate text where the
+    /// letters run from top to bottom.
+    ///
+    /// # Arguments
+    ///
+    /// * `rotation` - The rotation angle.
+    ///
+    pub fn set_rotation(&mut self, rotation: i16) -> &mut ChartFont {
+        match rotation {
+            270..=271 | -90..=90 => self.rotation = rotation as i32,
+            _ => eprintln!("Rotation outside range: -90 <= angle <= 90."),
+        }
+
+        self
+    }
+
+    // Internal check for font properties that need a sub-element.
+    pub(crate) fn is_latin(&self) -> bool {
+        !self.name.is_empty() || self.pitch_family > 0 || self.charset > 0
     }
 }
 
