@@ -2063,7 +2063,7 @@ impl Chart {
 
         // Write the c:numFmt element.
         if self.category_has_num_format {
-            self.write_category_num_fmt();
+            self.write_category_num_fmt("General", true);
         }
 
         // Write the c:tickLblPos element.
@@ -2216,8 +2216,11 @@ impl Chart {
     }
 
     // Write the <c:numFmt> element.
-    fn write_category_num_fmt(&mut self) {
-        let attributes = [("formatCode", "General"), ("sourceLinked", "1")];
+    fn write_category_num_fmt(&mut self, format: &str, linked: bool) {
+        let attributes = [
+            ("formatCode", format.to_string()),
+            ("sourceLinked", u8::from(linked).to_string()),
+        ];
 
         self.writer.xml_empty_tag("c:numFmt", &attributes);
     }
@@ -2443,6 +2446,8 @@ impl Chart {
     fn write_custom_data_labels(&mut self, data_labels: &[ChartDataLabel], max_points: usize) {
         // Write the point formatting for the series.
         for (index, data_label) in data_labels.iter().enumerate() {
+            let mut write_layout = true;
+
             if index >= max_points {
                 break;
             }
@@ -2458,8 +2463,42 @@ impl Chart {
                 // Write the c:delete element.
                 self.write_delete();
             } else {
-                // Write the c:layout element.
-                self.write_layout();
+                // Add empty "c:spPr", as required, for Excel compatibility.
+                if !data_label.format.has_formatting() {
+                    if let Some(font) = &data_label.font {
+                        if font.color.is_auto_or_default() {
+                            self.writer.xml_empty_tag_only("c:spPr");
+                        }
+                    }
+                }
+
+                // If a custom point has a font then it may need to be applied
+                // to the title and/or the label.
+                let mut data_label = data_label.clone();
+                data_label.is_custom = true;
+
+                if let Some(font) = &mut data_label.font {
+                    font.has_baseline = false;
+                    write_layout = false;
+                }
+
+                if !data_label.title.name.is_empty() || data_label.title.range.has_data() {
+                    if let Some(font) = &data_label.font {
+                        data_label.title.set_font(font);
+                        data_label.title.font.has_baseline = false;
+
+                        if !data_label.title.name.is_empty() {
+                            data_label.font = None;
+                        }
+
+                        write_layout = true;
+                    }
+                }
+
+                if write_layout {
+                    // Write the c:layout element.
+                    self.write_layout();
+                }
 
                 // Write the c:tx element.
                 if !data_label.title.name.is_empty() {
@@ -2469,7 +2508,7 @@ impl Chart {
                 }
 
                 // Write the main elements of a data label.
-                self.write_data_label(data_label);
+                self.write_data_label(&data_label);
             }
 
             self.writer.xml_end_tag("c:dLbl");
@@ -2477,8 +2516,18 @@ impl Chart {
     }
 
     fn write_data_label(&mut self, data_label: &ChartDataLabel) {
+        if !data_label.num_format.is_empty() {
+            // Write the c:numFmt element.
+            self.write_category_num_fmt(&data_label.num_format, false);
+        }
+
         // Write the c:spPr formatting element.
         self.write_sp_pr(&data_label.format);
+
+        if let Some(font) = &data_label.font {
+            // Write the c:txPr element.
+            self.write_tx_pr(&font.clone(), false);
+        }
 
         if data_label.position != ChartDataLabelPosition::Default
             && data_label.position != self.default_label_position
@@ -2493,7 +2542,10 @@ impl Chart {
         }
 
         // Ensure at least one display option is set.
-        if data_label.show_value || (!data_label.show_category_name && !data_label.show_percentage)
+        if data_label.show_value
+            || (!data_label.is_custom
+                && !data_label.show_category_name
+                && !data_label.show_percentage)
         {
             // Write the c:showVal element.
             self.write_show_val();
@@ -5533,6 +5585,10 @@ pub struct ChartDataLabel {
     pub(crate) title: ChartTitle,
     pub(crate) is_hidden: bool,
     pub(crate) is_default: bool,
+    pub(crate) is_custom: bool,
+    pub(crate) font: Option<ChartFont>,
+    pub(crate) num_format: String,
+    pub(crate) num_format_linked: bool,
 }
 
 impl Default for ChartDataLabel {
@@ -5558,6 +5614,10 @@ impl ChartDataLabel {
             title: ChartTitle::new(),
             is_hidden: false,
             is_default: true,
+            is_custom: false,
+            font: None,
+            num_format: "".to_string(),
+            num_format_linked: true,
         }
     }
 
@@ -5918,6 +5978,27 @@ impl ChartDataLabel {
         self
     }
 
+    /// TODO
+    pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartDataLabel {
+        let mut font = font.clone();
+
+        if font.italic {
+            font.has_baseline = true;
+        }
+
+        self.font = Some(font);
+        self.is_default = false;
+        self
+    }
+
+    /// todo
+    pub fn set_num_format(&mut self, num_format: &str) -> &mut ChartDataLabel {
+        self.num_format = num_format.to_string();
+        self.num_format_linked = false;
+        self.is_default = false;
+        self
+    }
+
     /// Set the separator for the displayed values of the data label.
     ///
     /// The allowable separators are `','` (comma), `';'` (semicolon), `'.'`
@@ -6105,6 +6186,7 @@ impl ChartDataLabel {
         self.title.set_name(value);
         self.title.ignore_rich_para = true;
         self.is_default = false;
+        self.show_value = true;
         self
     }
 

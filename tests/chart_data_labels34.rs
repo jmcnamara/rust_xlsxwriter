@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartDataLabel, ChartFont, ChartType, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -33,22 +33,22 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let data_labels = vec![ChartDataLabel::new()
-        .set_value("33")
-        .show_category_name()
-        .show_series_name()
+        .set_value("=Sheet1!$D$1")
+        .show_value()
+        .set_font(
+            ChartFont::new()
+                .set_color("#FF0000")
+                .set_bold()
+                .set_italic(),
+        )
         .to_custom()];
 
     let mut chart = Chart::new(ChartType::Column);
-    chart.set_axis_ids(71248896, 71373568);
+    chart.set_axis_ids(48497792, 48499712);
     chart
         .add_series()
         .set_values(("Sheet1", 0, 0, 4, 0))
-        .set_data_label(
-            ChartDataLabel::new()
-                .show_value()
-                .show_category_name()
-                .show_series_name(),
-        )
+        .set_data_label(ChartDataLabel::new().show_value())
         .set_custom_data_labels(&data_labels);
 
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
@@ -62,10 +62,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_data_labels31() {
+fn test_chart_data_labels34() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_data_labels31")
+        .set_name("chart_data_labels34")
         .set_function(create_new_xlsx_file)
+        .ignore_elements("xl/charts/chart1.xml", "<c:spPr/>")
         .initialize();
 
     test_runner.assert_eq();

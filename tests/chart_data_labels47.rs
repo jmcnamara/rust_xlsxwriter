@@ -5,7 +5,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    Chart, ChartDataLabel, ChartFont, ChartFormat, ChartLine, ChartSolidFill, ChartType, Workbook,
+    XlsxError,
+};
 
 #[macro_use]
 extern crate lazy_static;
@@ -19,13 +22,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Add some test data for the chart(s).
-    let data = [
-        [1, 2, 3, 10],
-        [2, 4, 6, 20],
-        [3, 6, 9, 30],
-        [4, 8, 12, 40],
-        [5, 10, 15, 50],
-    ];
+    let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
     for (row_num, row_data) in data.iter().enumerate() {
         for (col_num, col_data) in row_data.iter().enumerate() {
             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
@@ -33,22 +30,25 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let data_labels = vec![ChartDataLabel::new()
-        .set_value("33")
-        .show_category_name()
-        .show_series_name()
+        .set_font(
+            ChartFont::new()
+                .set_color("#FF0000")
+                .set_bold()
+                .set_italic(),
+        )
+        .set_format(
+            ChartFormat::new()
+                .set_line(ChartLine::new().set_color("#FF0000"))
+                .set_solid_fill(ChartSolidFill::new().set_color("#00B050")),
+        )
         .to_custom()];
 
     let mut chart = Chart::new(ChartType::Column);
-    chart.set_axis_ids(71248896, 71373568);
+    chart.set_axis_ids(92672768, 92674304);
     chart
         .add_series()
         .set_values(("Sheet1", 0, 0, 4, 0))
-        .set_data_label(
-            ChartDataLabel::new()
-                .show_value()
-                .show_category_name()
-                .show_series_name(),
-        )
+        .set_data_label(ChartDataLabel::new().show_value())
         .set_custom_data_labels(&data_labels);
 
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
@@ -62,9 +62,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_data_labels31() {
+fn test_chart_data_labels47() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_data_labels31")
+        .set_name("chart_data_labels47")
         .set_function(create_new_xlsx_file)
         .initialize();
 
