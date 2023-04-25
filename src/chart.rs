@@ -2062,8 +2062,10 @@ impl Chart {
         self.write_chart_title(&self.x_axis.title.clone());
 
         // Write the c:numFmt element.
-        if self.category_has_num_format {
-            self.write_category_num_fmt("General", true);
+        if !self.x_axis.num_format.is_empty() {
+            self.write_number_format(&self.x_axis.num_format.clone(), false);
+        } else if self.category_has_num_format {
+            self.write_number_format("General", true);
         }
 
         // Write the c:tickLblPos element.
@@ -2116,7 +2118,11 @@ impl Chart {
         self.write_chart_title(&self.y_axis.title.clone());
 
         // Write the c:numFmt element.
-        self.write_value_num_fmt();
+        if !self.y_axis.num_format.is_empty() {
+            self.write_number_format(&self.y_axis.num_format.clone(), false);
+        } else {
+            self.write_number_format(&self.default_num_format.clone(), true);
+        }
 
         // Write the c:majorTickMark element.
         if self.chart_group_type == ChartType::Radar {
@@ -2164,7 +2170,11 @@ impl Chart {
         self.write_chart_title(&self.x_axis.title.clone());
 
         // Write the c:numFmt element.
-        self.write_value_num_fmt();
+        if !self.x_axis.num_format.is_empty() {
+            self.write_number_format(&self.x_axis.num_format.clone(), false);
+        } else {
+            self.write_number_format(&self.default_num_format.clone(), true);
+        }
 
         // Write the c:tickLblPos element.
         self.write_tick_label_position();
@@ -2216,20 +2226,10 @@ impl Chart {
     }
 
     // Write the <c:numFmt> element.
-    fn write_category_num_fmt(&mut self, format: &str, linked: bool) {
+    fn write_number_format(&mut self, format: &str, linked: bool) {
         let attributes = [
             ("formatCode", format.to_string()),
             ("sourceLinked", u8::from(linked).to_string()),
-        ];
-
-        self.writer.xml_empty_tag("c:numFmt", &attributes);
-    }
-
-    // Write the <c:numFmt> element.
-    fn write_value_num_fmt(&mut self) {
-        let attributes = [
-            ("formatCode", self.default_num_format.clone()),
-            ("sourceLinked", "1".to_string()),
         ];
 
         self.writer.xml_empty_tag("c:numFmt", &attributes);
@@ -2518,7 +2518,7 @@ impl Chart {
     fn write_data_label(&mut self, data_label: &ChartDataLabel) {
         if !data_label.num_format.is_empty() {
             // Write the c:numFmt element.
-            self.write_category_num_fmt(&data_label.num_format, false);
+            self.write_number_format(&data_label.num_format, false);
         }
 
         // Write the c:spPr formatting element.
@@ -5588,7 +5588,6 @@ pub struct ChartDataLabel {
     pub(crate) is_custom: bool,
     pub(crate) font: Option<ChartFont>,
     pub(crate) num_format: String,
-    pub(crate) num_format_linked: bool,
 }
 
 impl Default for ChartDataLabel {
@@ -5617,7 +5616,6 @@ impl ChartDataLabel {
             is_custom: false,
             font: None,
             num_format: "".to_string(),
-            num_format_linked: true,
         }
     }
 
@@ -5994,7 +5992,6 @@ impl ChartDataLabel {
     /// todo
     pub fn set_num_format(&mut self, num_format: &str) -> &mut ChartDataLabel {
         self.num_format = num_format.to_string();
-        self.num_format_linked = false;
         self.is_default = false;
         self
     }
@@ -6477,6 +6474,7 @@ pub struct ChartAxis {
     pub(crate) title: ChartTitle,
     pub(crate) format: ChartFormat,
     pub(crate) font: Option<ChartFont>,
+    pub(crate) num_format: String,
 }
 
 impl ChartAxis {
@@ -6487,6 +6485,7 @@ impl ChartAxis {
             title: ChartTitle::new(),
             format: ChartFormat::new(),
             font: None,
+            num_format: "".to_string(),
         }
     }
 
@@ -6604,6 +6603,12 @@ impl ChartAxis {
         }
 
         self.font = Some(font);
+        self
+    }
+
+    /// todo
+    pub fn set_num_format(&mut self, num_format: &str) -> &mut ChartAxis {
+        self.num_format = num_format.to_string();
         self
     }
 }
