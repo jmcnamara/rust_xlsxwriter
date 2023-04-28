@@ -36,7 +36,7 @@ use crate::{FormatPattern, XlsxColor};
 /// # // This code is available in examples/app_demo.rs
 /// #
 /// use chrono::NaiveDate;
-/// use rust_xlsxwriter::{Format, Image, Workbook, FormatAlign, FormatBorder, XlsxError};
+/// use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Image, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
@@ -57,24 +57,24 @@ use crate::{FormatPattern, XlsxColor};
 ///     worksheet.set_column_width(0, 22)?;
 ///
 ///     // Write a string without formatting.
-///     worksheet.write_string(0, 0, "Hello")?;
+///     worksheet.write(0, 0, &"Hello".to_string())?;
 ///
 ///     // Write a string with the bold format defined above.
-///     worksheet.write_string_with_format(1, 0, "World", &bold_format)?;
+///     worksheet.write_with_format(1, 0, "World", &bold_format)?;
 ///
 ///     // Write some numbers.
-///     worksheet.write_number(2, 0, 1)?;
-///     worksheet.write_number(3, 0, 2.34)?;
+///     worksheet.write(2, 0, 1)?;
+///     worksheet.write(3, 0, 2.34)?;
 ///
 ///     // Write a number with formatting.
-///     worksheet.write_number_with_format(4, 0, 3.00, &decimal_format)?;
+///     worksheet.write_with_format(4, 0, 3.00, &decimal_format)?;
 ///
 ///     // Write a formula.
 ///     worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
 ///
 ///     // Write a date.
 ///     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
-///     worksheet.write_date(6, 0, &date, &date_format)?;
+///     worksheet.write_with_format(6, 0, &date, &date_format)?;
 ///
 ///     // Write some links.
 ///     worksheet.write_url(7, 0, "https://www.rust-lang.org")?;
