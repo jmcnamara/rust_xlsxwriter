@@ -9743,26 +9743,31 @@ pub trait IntoExcelData {
     ) -> Result<&'a mut Worksheet, XlsxError>;
 }
 
-impl IntoExcelData for &str {
-    fn write(
-        self,
-        worksheet: &mut Worksheet,
-        row: RowNum,
-        col: ColNum,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        worksheet.store_string(row, col, self, None)
-    }
+macro_rules! write_string_trait_impl {
+    ($($t:ty)*) => ($(
+        impl IntoExcelData for &$t {
+            fn write(
+                self,
+                worksheet: &mut Worksheet,
+                row: RowNum,
+                col: ColNum,
+            ) -> Result<&mut Worksheet, XlsxError> {
+                worksheet.store_string(row, col, self, None)
+            }
 
-    fn write_with_format<'a>(
-        self,
-        worksheet: &'a mut Worksheet,
-        row: RowNum,
-        col: ColNum,
-        format: &'a Format,
-    ) -> Result<&'a mut Worksheet, XlsxError> {
-        worksheet.store_string(row, col, self, Some(format))
-    }
+            fn write_with_format<'a>(
+                self,
+                worksheet: &'a mut Worksheet,
+                row: RowNum,
+                col: ColNum,
+                format: &'a Format,
+            ) -> Result<&'a mut Worksheet, XlsxError> {
+                worksheet.store_string(row, col, self, Some(format))
+            }
+        }
+    )*)
 }
+write_string_trait_impl!(str String);
 
 macro_rules! write_number_trait_impl {
     ($($t:ty)*) => ($(

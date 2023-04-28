@@ -57,10 +57,10 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    worksheet.write_string(0, 0, "Hello")?;
-    worksheet.write_string(1, 0, "World")?;
-    worksheet.write_string(2, 0, "Hello")?;
-    worksheet.write_string(3, 0, "World")?;
+    worksheet.write(0, 0, "Hello")?;
+    worksheet.write(1, 0, "World")?;
+    worksheet.write(2, 0, &"Hello".to_string())?;
+    worksheet.write(3, 0, &"World".to_string())?;
 
     workbook.save(filename)?;
 
