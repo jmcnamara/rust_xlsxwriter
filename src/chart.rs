@@ -7109,17 +7109,19 @@ impl ChartFormat {
     /// Set the border formatting for a chart element.
     ///
     /// See the [`ChartLine`] struct for details on the border properties that
-    /// can be set.
+    /// can be set. As a syntactic shortcut you can use the type alias
+    /// [`ChartBorder`] instead
+    /// of `ChartLine`.
     ///
     /// # Examples
     ///
-    /// An example of formatting a line/border in a chart element.
+    /// An example of formatting the border in a chart element.
     ///
     /// ```
-    /// # // This code is available in examples/doc_chart_line_formatting.rs
+    /// # // This code is available in examples/doc_chart_border_formatting.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Chart, ChartFormat, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxError,
+    /// #     Chart, ChartBorder, ChartFormat, ChartLineDashType, ChartType, Workbook, XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -7135,20 +7137,22 @@ impl ChartFormat {
     /// #     worksheet.write(5, 0, 50)?;
     /// #
     /// #     // Create a new chart.
-    ///     let mut chart = Chart::new(ChartType::Line);
+    ///     let mut chart = Chart::new(ChartType::Column);
     ///
     ///     // Add a data series with formatting.
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             ChartFormat::new().set_line(
-    ///                 ChartLine::new()
-    ///                     .set_color("#FF9900")
-    ///                     .set_width(5.25)
-    ///                     .set_dash_type(ChartLineDashType::SquareDot)
-    ///                     .set_transparency(70),
-    ///             ),
+    ///             ChartFormat::new()
+    ///                 .set_border(
+    ///                     ChartBorder::new()
+    ///                         .set_color("#FF9900")
+    ///                         .set_width(5.25)
+    ///                         .set_dash_type(ChartLineDashType::SquareDot)
+    ///                         .set_transparency(70),
+    ///                 )
+    ///                 .set_no_fill(),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -7163,7 +7167,7 @@ impl ChartFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png">
     ///
     pub fn set_border(&mut self, line: &ChartLine) -> &mut ChartFormat {
         self.set_line(line)
@@ -7479,13 +7483,18 @@ impl ChartFormat {
 ///
 /// The [`ChartLine`] struct represents the formatting properties for a line or
 /// border for a Chart element. It is a sub property of the [`ChartFormat`]
-/// struct and is used with the [`ChartFormat::set_line()`](ChartFormat::set_line)
-/// or [`ChartFormat::set_border()`](ChartFormat::set_border) methods.
+/// struct and is used with the
+/// [`ChartFormat::set_line()`](ChartFormat::set_line) or
+/// [`ChartFormat::set_border()`](ChartFormat::set_border) methods.
 ///
-/// Excel uses the element names "Line" and "Border" depending on the context.
-/// For a Line chart the line is represented by a line property but for a Column
-/// chart the line becomes the border. Both of these share the same properties
-/// and are both represented in rust_xlsxwriter by the [`ChartLine`] struct.
+/// /// Excel uses the element names "Line" and "Border" depending on the
+/// context. For a Line chart the line is represented by a line property but for
+/// a Column chart the line becomes the border. Both of these share the same
+/// properties and are both represented in rust_xlsxwriter by the [`ChartLine`]
+/// struct.
+///
+/// As a syntactic shortcut you can use the type alias [`ChartBorder`] instead
+/// of `ChartLine`.
 ///
 /// # Examples
 ///
@@ -7539,7 +7548,8 @@ impl ChartFormat {
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
 ///
 #[derive(Clone)]
 pub struct ChartLine {
@@ -7823,6 +7833,76 @@ impl ChartLine {
         self
     }
 }
+
+/// A type to represent a Chart border.
+///
+/// Excel uses the chart element names "Line" and "Border" depending on the
+/// context. For a Line chart the line is represented by a line property but for
+/// a Column chart the line becomes the border. Both of these share the same
+/// properties and are both represented in rust_xlsxwriter by the [`ChartLine`]
+/// struct.
+///
+/// The `ChartBorder` type is a type alias of [`ChartLine`] for use as a
+/// syntactic shortcut where you would expect to write `ChartLine` instead of
+/// ChartLine.
+///
+/// # Examples
+///
+/// An example of formatting the border in a chart element.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_border_formatting.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     Chart, ChartBorder, ChartFormat, ChartLineDashType, ChartType, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series with formatting.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .set_format(
+///             ChartFormat::new()
+///                 .set_border(
+///                     ChartBorder::new()
+///                         .set_color("#FF9900")
+///                         .set_width(5.25)
+///                         .set_dash_type(ChartLineDashType::SquareDot)
+///                         .set_transparency(70),
+///                 )
+///                 .set_no_fill(),
+///         );
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png">
+///
+pub type ChartBorder = ChartLine;
 
 /// A struct to represent a the solid fill for a Chart element.
 ///
