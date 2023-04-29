@@ -5189,7 +5189,15 @@ impl ChartTitle {
     /// Set the font properties of a chart title.
     ///
     /// Set the font properties of a chart title using a [`ChartFont`]
-    /// reference.
+    /// reference. Example font properties that can be set are:
+    ///
+    /// - [`ChartFont::set_bold()`]
+    /// - [`ChartFont::set_italic()`]
+    /// - [`ChartFont::set_name()`]
+    /// - [`ChartFont::set_size()`]
+    /// - [`ChartFont::set_rotation()`]
+    ///
+    /// See [`ChartFont`] for full details.
     ///
     /// # Arguments
     ///
@@ -6039,8 +6047,15 @@ impl ChartDataLabel {
     /// Set the font properties of a chart data label.
     ///
     /// Set the font properties of a chart data labels using a [`ChartFont`]
-    /// reference.
+    /// reference. Example font properties that can be set are:
     ///
+    /// - [`ChartFont::set_bold()`]
+    /// - [`ChartFont::set_italic()`]
+    /// - [`ChartFont::set_name()`]
+    /// - [`ChartFont::set_size()`]
+    /// - [`ChartFont::set_rotation()`]
+    ///
+    /// See [`ChartFont`] for full details. ///
     /// # Arguments
     ///
     /// `font`: A [`ChartFont`] struct reference to represent the font
@@ -6109,7 +6124,70 @@ impl ChartDataLabel {
         self
     }
 
-    /// todo
+    /// Set the number format for a chart data label.
+    ///
+    /// Excel plots/displays data in charts with the same number formatting that
+    /// it has in the worksheet. The `set_num_format()` method allows you to
+    /// override this and controls whether a number is displayed as an integer,
+    /// a floating point number, a date, a currency value or some other user
+    /// defined format.
+    ///
+    /// See also [Number Format Categories] and [Number Formats in different
+    /// locales] in the documentation for [`Format`](crate::Format).
+    ///
+    /// [Number Format Categories]: struct.Format.html#number-format-categories
+    /// [Number Formats in different locales]:
+    ///     struct.Format.html#number-formats-in-different-locales
+    ///
+    /// # Arguments
+    ///
+    /// * `num_format` - The number format property.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of adding data labels to a chart series with number formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_data_labels_set_num_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 0.1)?;
+    /// #     worksheet.write(1, 0, 0.4)?;
+    /// #     worksheet.write(2, 0, 0.5)?;
+    /// #     worksheet.write(3, 0, 0.2)?;
+    /// #     worksheet.write(4, 0, 0.1)?;
+    /// #     worksheet.write(5, 0, 0.5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_data_label(ChartDataLabel::new().show_value().set_num_format("0.00%"));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_data_labels_set_num_format.png">
+    ///
     pub fn set_num_format(&mut self, num_format: &str) -> &mut ChartDataLabel {
         self.num_format = num_format.to_string();
         self.is_default = false;
@@ -6680,7 +6758,18 @@ impl ChartAxis {
     /// Set the font properties of a chart axis title.
     ///
     /// Set the font properties of a chart axis name/title using a [`ChartFont`]
-    /// reference. The name font property for an axis represents the font for
+    /// reference. Example font properties that can be set are:
+    ///
+    /// - [`ChartFont::set_bold()`]
+    /// - [`ChartFont::set_italic()`]
+    /// - [`ChartFont::set_name()`]
+    /// - [`ChartFont::set_size()`]
+    /// - [`ChartFont::set_rotation()`]
+    ///
+    /// See [`ChartFont`] for full details.
+    ///
+    ///
+    /// The name font property for an axis represents the font for
     /// the axis title. To set the font for the category or value numbers use
     /// the [`set_font()`](ChartAxis::set_font) method.
     ///
@@ -6775,6 +6864,16 @@ impl ChartAxis {
     /// Set the font properties of a chart axis.
     ///
     /// Set the font properties of a chart axis using a [`ChartFont`] reference.
+    /// Example font properties that can be set are:
+    ///
+    /// - [`ChartFont::set_bold()`]
+    /// - [`ChartFont::set_italic()`]
+    /// - [`ChartFont::set_name()`]
+    /// - [`ChartFont::set_size()`]
+    /// - [`ChartFont::set_rotation()`]
+    ///
+    /// See [`ChartFont`] for full details.
+    ///
     /// The font property for an axis represents the font for the category or
     /// value names or numbers. To set the font for the axis name/title use the
     /// [`set_name_font()`](ChartAxis::set_name_font) method.
@@ -6852,7 +6951,70 @@ impl ChartAxis {
         self
     }
 
-    /// todo
+    /// Set the number format for a chart axis.
+    ///
+    /// Excel plots/displays data in charts with the same number formatting that
+    /// it has in the worksheet. The `set_num_format()` method allows you to
+    /// override this and controls whether a number is displayed as an integer,
+    /// a floating point number, a date, a currency value or some other user
+    /// defined format.
+    ///
+    /// See also [Number Format Categories] and [Number Formats in different
+    /// locales] in the documentation for [`Format`](crate::Format).
+    ///
+    /// [Number Format Categories]: struct.Format.html#number-format-categories
+    /// [Number Formats in different locales]:
+    ///     struct.Format.html#number-formats-in-different-locales
+    ///
+    /// # Arguments
+    ///
+    /// * `num_format` - The number format property.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the number format a chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_num_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 0.1)?;
+    /// #     worksheet.write(1, 0, 0.4)?;
+    /// #     worksheet.write(2, 0, 0.5)?;
+    /// #     worksheet.write(3, 0, 0.2)?;
+    /// #     worksheet.write(4, 0, 0.1)?;
+    /// #     worksheet.write(5, 0, 0.5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the chart axis number format.
+    ///     chart.y_axis().set_num_format("0.00%");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_num_format.png">
+    ///
     pub fn set_num_format(&mut self, num_format: &str) -> &mut ChartAxis {
         self.num_format = num_format.to_string();
         self
@@ -7173,7 +7335,15 @@ impl ChartLegend {
     /// Set the font properties of a chart legend.
     ///
     /// Set the font properties of a chart legend using a [`ChartFont`]
-    /// reference.
+    /// reference. Example font properties that can be set are:
+    ///
+    /// - [`ChartFont::set_bold()`]
+    /// - [`ChartFont::set_italic()`]
+    /// - [`ChartFont::set_name()`]
+    /// - [`ChartFont::set_size()`]
+    /// - [`ChartFont::set_rotation()`]
+    ///
+    /// See [`ChartFont`] for full details.
     ///
     /// # Arguments
     ///
