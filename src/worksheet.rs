@@ -840,10 +840,10 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        string: &str,
+        string: impl Into<String>,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_string(row, col, string, None)
+        self.store_string(row, col, string.into(), None)
     }
 
     /// Write a formatted string to a worksheet cell.
@@ -909,11 +909,11 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        string: &str,
+        string: impl Into<String>,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_string(row, col, string, Some(format))
+        self.store_string(row, col, string.into(), Some(format))
     }
 
     /// Write a "rich" string with multiple formats to a worksheet cell.
@@ -7249,12 +7249,12 @@ impl Worksheet {
 
         // Excel doesn't have a NAN type/value so write a string instead.
         if number.is_nan() {
-            return self.store_string(row, col, "#NUM!", None);
+            return self.store_string(row, col, "#NUM!".to_string(), None);
         }
 
         // Excel doesn't have an Infinity type/value so write a string instead.
         if number.is_infinite() {
-            self.store_string(row, col, "#DIV/0", None)?;
+            self.store_string(row, col, "#DIV/0".to_string(), None)?;
         }
 
         // Get the index of the format object, if any.
@@ -7280,7 +7280,7 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        string: &str,
+        string: String,
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Empty strings are ignored by Excel unless they have a format in which
@@ -9745,14 +9745,14 @@ pub trait IntoExcelData {
 
 macro_rules! write_string_trait_impl {
     ($($t:ty)*) => ($(
-        impl IntoExcelData for &$t {
+        impl IntoExcelData for $t {
             fn write(
                 self,
                 worksheet: &mut Worksheet,
                 row: RowNum,
                 col: ColNum,
             ) -> Result<&mut Worksheet, XlsxError> {
-                worksheet.store_string(row, col, self, None)
+                worksheet.store_string(row, col, self.into(), None)
             }
 
             fn write_with_format<'a>(
@@ -9762,12 +9762,12 @@ macro_rules! write_string_trait_impl {
                 col: ColNum,
                 format: &'a Format,
             ) -> Result<&'a mut Worksheet, XlsxError> {
-                worksheet.store_string(row, col, self, Some(format))
+                worksheet.store_string(row, col, self.into(), Some(format))
             }
         }
     )*)
 }
-write_string_trait_impl!(str String);
+write_string_trait_impl!(&str &String String Cow<'_, str>);
 
 macro_rules! write_number_trait_impl {
     ($($t:ty)*) => ($(

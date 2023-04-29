@@ -58,9 +58,9 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     worksheet.write(0, 0, "Hello")?;
-    worksheet.write(1, 0, "World")?;
+    worksheet.write(1, 0, "World".to_string())?;
     worksheet.write(2, 0, &"Hello".to_string())?;
-    worksheet.write(3, 0, &"World".to_string())?;
+    worksheet.write(3, 0, std::borrow::Cow::from("World"))?;
 
     workbook.save(filename)?;
 
