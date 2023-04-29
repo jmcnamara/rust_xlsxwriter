@@ -5186,7 +5186,67 @@ impl ChartTitle {
         self
     }
 
-    /// TODO
+    /// Set the font properties of a chart title.
+    ///
+    /// Set the font properties of a chart title using a [`ChartFont`]
+    /// reference.
+    ///
+    /// # Arguments
+    ///
+    /// `font`: A [`ChartFont`] struct reference to represent the font
+    /// properties.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the font for a chart title.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_title_set_font.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font.
+    ///     chart
+    ///         .title()
+    ///         .set_name("Title")
+    ///         .set_font(ChartFont::new().set_bold().set_color("#FF0000"));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_title_set_font.png">
+    ///
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartTitle {
         let mut font = font.clone();
         font.has_default_bold = true;
@@ -5976,7 +6036,67 @@ impl ChartDataLabel {
         self
     }
 
-    /// TODO
+    /// Set the font properties of a chart data label.
+    ///
+    /// Set the font properties of a chart data labels using a [`ChartFont`]
+    /// reference.
+    ///
+    /// # Arguments
+    ///
+    /// `font`: A [`ChartFont`] struct reference to represent the font
+    /// properties.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of adding data labels to a chart series with font formatting.
+    ///
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_data_labels_set_font.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_data_label(
+    ///             ChartDataLabel::new()
+    ///                 .show_value()
+    ///                 .set_font(ChartFont::new().set_bold().set_color("#FF0000")),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_data_labels_set_font.png">
+    ///
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartDataLabel {
         let mut font = font.clone();
 
@@ -6557,7 +6677,69 @@ impl ChartAxis {
         self
     }
 
-    /// TODO
+    /// Set the font properties of a chart axis title.
+    ///
+    /// Set the font properties of a chart axis name/title using a [`ChartFont`]
+    /// reference. The name font property for an axis represents the font for
+    /// the axis title. To set the font for the category or value numbers use
+    /// the [`set_font()`](ChartAxis::set_font) method.
+    ///
+    /// # Arguments
+    ///
+    /// `font`: A [`ChartFont`] struct reference to represent the font
+    /// properties.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the font for a chart axis title.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_name_font.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font.
+    ///     chart
+    ///         .x_axis()
+    ///         .set_name("X-Axis")
+    ///         .set_name_font(ChartFont::new().set_bold().set_color("#FF0000"));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name_font.png">
+    ///
     pub fn set_name_font(&mut self, font: &ChartFont) -> &mut ChartAxis {
         self.title.set_font(font);
         self
@@ -6590,7 +6772,71 @@ impl ChartAxis {
         self
     }
 
-    /// TODO
+    /// Set the font properties of a chart axis.
+    ///
+    /// Set the font properties of a chart axis using a [`ChartFont`] reference.
+    /// The font property for an axis represents the font for the category or
+    /// value names or numbers. To set the font for the axis name/title use the
+    /// [`set_name_font()`](ChartAxis::set_name_font) method.
+    ///
+    /// # Arguments
+    ///
+    /// `font`: A [`ChartFont`] struct reference to represent the font
+    /// properties.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the font for a chart axis.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_font.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font for an axis.
+    ///     chart.x_axis().set_font(
+    ///         ChartFont::new()
+    ///             .set_bold()
+    ///             .set_italic()
+    ///             .set_name("Consolas")
+    ///             .set_color("#FF0000"),
+    ///     );
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font.png">
+    ///
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartAxis {
         let mut font = font.clone();
 
@@ -6924,8 +7170,64 @@ impl ChartLegend {
         self.format = format.new_chart_format();
         self
     }
-
-    /// TODO
+    /// Set the font properties of a chart legend.
+    ///
+    /// Set the font properties of a chart legend using a [`ChartFont`]
+    /// reference.
+    ///
+    /// # Arguments
+    ///
+    /// `font`: A [`ChartFont`] struct reference to represent the font
+    /// properties.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the font for a chart legend.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_legend_set_font.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font.
+    ///     chart
+    ///         .legend()
+    ///         .set_font(ChartFont::new().set_bold().set_color("#FF0000"));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_legend_set_font.png">
+    ///
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartLegend {
         self.font = Some(font.clone());
         self
@@ -8713,7 +9015,71 @@ impl ToString for ChartPatternFillType {
 }
 
 #[derive(Clone)]
-/// TODO
+/// A struct to represent the font format for various Chart objects.
+///
+/// Excel uses a standard font dialog for text elements of a chart such as the
+/// chart title or axes data labels. It looks like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_font_dialog.png">
+///
+/// The [`ChartFont`] struct represents many of these font options such as font
+/// type, size, color and properties such as bold and italic. It is generally
+/// used in conjunction with a `set_font()` method for a chart element.
+///
+///
+/// # Examples
+///
+/// An example of setting the font for a chart element.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_font.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series.
+///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+///
+///     // Set the font for an axis.
+///     chart.x_axis().set_font(
+///         ChartFont::new()
+///             .set_bold()
+///             .set_italic()
+///             .set_name("Consolas")
+///             .set_color("#FF0000"),
+///     );
+///
+///     // Hide legend for clarity.
+///     chart.legend().set_hidden();
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_font.png">
+///
 pub struct ChartFont {
     // Chart/axis titles have a default bold font so we need to handle that as
     // an option.
@@ -8739,7 +9105,8 @@ impl Default for ChartFont {
 }
 
 impl ChartFont {
-    /// TODO
+    /// Create a new `ChartFont` object to represent a Chart font.
+    ///
     pub fn new() -> ChartFont {
         ChartFont {
             bold: None,
@@ -8757,30 +9124,167 @@ impl ChartFont {
         }
     }
 
-    /// Set the bold property for a ChartFont font.
+    /// Set the bold property for the font of a chart element.
     ///
-    /// todo
+    /// # Examples
+    ///
+    /// An example of setting the bold property for the font in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_font_set_bold.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font for an axis.
+    ///     chart.x_axis().set_font(ChartFont::new().set_bold());
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_bold.png">
     ///
     pub fn set_bold(&mut self) -> &mut ChartFont {
         self.bold = Some(true);
         self
     }
 
-    /// Set the italic property for the ChartFont font.
+    /// Set the italic property for the font of a chart element.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the italic property for the font in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_font_set_italic.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font for an axis.
+    ///     chart.x_axis().set_font(ChartFont::new().set_italic());
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_italic.png">
     ///
     pub fn set_italic(&mut self) -> &mut ChartFont {
         self.italic = true;
         self
     }
 
-    /// Set the color property for the ChartFont font.
-    ///
-    /// The `set_color()` method is used to set the font color.
+    /// Set the color property for the font of a chart element.
     ///
     /// # Arguments
     ///
     /// * `color` - The font color property defined by a [`XlsxColor`] enum
     ///   value.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the color property for the font in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_font_set_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font for an axis.
+    ///     chart.x_axis().set_font(ChartFont::new().set_color("#FF0000"));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_color.png">
     ///
     pub fn set_color<T>(&mut self, color: T) -> &mut ChartFont
     where
@@ -8794,33 +9298,121 @@ impl ChartFont {
         self
     }
 
-    /// Set the ChartFont font name property.
+    /// Set the chart font name property.
     ///
-    /// Set the font for a cell format. Excel can only display fonts that are
-    /// installed on the system that it is running on. Therefore it is generally
-    /// best to use standard Excel fonts.
+    /// Set the name/type of a font for a chart element.
     ///
     /// # Arguments
     ///
     /// * `font_name` - The font name property.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the font name property for the font in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_font_set_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font for an axis.
+    ///     chart
+    ///         .x_axis()
+    ///         .set_font(ChartFont::new().set_name("American Typewriter"));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_name.png">
     ///
     pub fn set_name(&mut self, font_name: &str) -> &mut ChartFont {
         self.name = font_name.to_string();
         self
     }
 
-    /// Set the ChartFont font size property.
-    ///
-    /// Set the font size of the cell format. The size is generally an integer
-    /// value but Excel allows x.5 values (hence the property is a f64 or
-    /// types that can convert [`Into`] a f64).
-    ///
-    /// Excel adjusts the height of a row to accommodate the largest font size
-    /// in the row.
+    /// Set the size property for the font of a chart element.
     ///
     /// # Arguments
     ///
     /// * `font_size` - The font size property.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the font size property for the font in a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_font_set_size.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font for an axis.
+    ///     chart.x_axis().set_font(ChartFont::new().set_size(20));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_size.png">
     ///
     pub fn set_size<T>(&mut self, font_size: T) -> &mut ChartFont
     where
@@ -8830,59 +9422,67 @@ impl ChartFont {
         self
     }
 
-    /// Set the ChartFont font family property.
-    ///
-    /// Set the font family. This
-    /// function is implemented for completeness but is rarely used in practice.
-    ///
-    /// # Arguments
-    ///
-    /// * `family` - The font family property.
-    ///
-    pub fn set_pitch_family(&mut self, family: u8) -> &mut ChartFont {
-        self.pitch_family = family;
-        self
-    }
-
-    /// Set the ChartFont font character set property.
-    ///
-    /// Set the font character set. This function is implemented for completeness
-    /// but is rarely used in practice.
-    ///
-    /// # Arguments
-    ///
-    /// * `font_charset` - The font character set property.
-    ///
-    pub fn set_charset(&mut self, font_charset: u8) -> &mut ChartFont {
-        self.charset = font_charset;
-        self
-    }
-
-    /// Set the underline properties for a font.
-    ///
-    /// TODO
-    ///
-    pub fn set_underline(&mut self) -> &mut ChartFont {
-        self.underline = true;
-        self
-    }
-
-    /// Set the ChartFont font strikethrough property.
-    ///
-    pub fn set_strikethrough(&mut self) -> &mut ChartFont {
-        self.strikethrough = true;
-        self
-    }
-
-    /// Set the ChartFont rotation property.
+    /// Set the text rotation property for the font of a chart element.
     ///
     /// Set the rotation angle of the text in a cell. The rotation can be any
-    /// angle in the range -90 to 90 degrees, or 270 to indicate text where the
-    /// letters run from top to bottom.
+    /// angle in the range -90 to 90 degrees, or 270-271 to indicate text where
+    /// the letters run from top to bottom, see below.
     ///
     /// # Arguments
     ///
-    /// * `rotation` - The rotation angle.
+    /// * `rotation` - The rotation angle in the range `-90 <= rotation <= 90`.
+    ///   Two special case values are supported:
+    ///   - `270`: Stacked text, where the text runs from top to bottom.
+    ///   - `271`: A special variant of stacked text for East Asian fonts.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the font text rotation for the font in a chart
+    /// element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_font_set_rotation.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFont, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Set the font for an axis.
+    ///     chart.x_axis().set_font(ChartFont::new().set_rotation(45));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_font_set_rotation.png">
     ///
     pub fn set_rotation(&mut self, rotation: i16) -> &mut ChartFont {
         match rotation {
@@ -8893,10 +9493,59 @@ impl ChartFont {
         self
     }
 
-    /// todo
+    /// Set the underline property for the font of a chart element.
+    ///
+    /// The default underline type is the only type supported.
+    ///
+    pub fn set_underline(&mut self) -> &mut ChartFont {
+        self.underline = true;
+        self
+    }
+
+    /// Set the strikethrough property for the font of a chart element.
+    ///
+    pub fn set_strikethrough(&mut self) -> &mut ChartFont {
+        self.strikethrough = true;
+        self
+    }
+
+    /// Unset the bold property for a font.
+    ///
+    /// Some chart elements such as titles have a default bold property in
+    /// Excel. This method can be used to turn it off.
     ///
     pub fn unset_bold(&mut self) -> &mut ChartFont {
         self.bold = Some(false);
+        self
+    }
+
+    /// Set the pitch family property for the font of a chart element.
+    ///
+    /// This function is implemented for completeness but is rarely used in
+    /// practice.
+    ///
+    /// # Arguments
+    ///
+    /// * `family` - The font family property.
+    ///
+    #[doc(hidden)]
+    pub fn set_pitch_family(&mut self, family: u8) -> &mut ChartFont {
+        self.pitch_family = family;
+        self
+    }
+
+    /// Set the character set property for the font of a chart element.
+    ///
+    /// Set the font character set. This function is implemented for
+    /// completeness but is rarely used in practice.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_charset` - The font character set property.
+    ///
+    #[doc(hidden)]
+    pub fn set_charset(&mut self, font_charset: u8) -> &mut ChartFont {
+        self.charset = font_charset;
         self
     }
 
