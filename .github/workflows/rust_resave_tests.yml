@@ -17,5 +17,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Free some extra build space on test instance.
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
     - name: Run the tests for the resave feature set
       run: cargo test --features test-resave --test '*'
