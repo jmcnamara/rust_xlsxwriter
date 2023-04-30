@@ -2433,7 +2433,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:dLbls");
 
         if !custom_data_labels.is_empty() {
-            self.write_custom_data_labels(custom_data_labels, max_points)
+            self.write_custom_data_labels(custom_data_labels, max_points);
         }
 
         // Write the main elements of a data label.

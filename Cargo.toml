@@ -60,3 +60,4 @@ release_check = {cmd = ["../release/release_check.sh"]}
 # Clippy commands
 # cargo clippy --all-targets -- -Dwarnings
 # cargo +nightly rustdoc-clippy
+# cargo clippy -- -W clippy::pedantic -A clippy::cast_possible_truncation -A clippy::cast_sign_loss -A clippy::single_match_else -A clippy::float_cmp -A clippy::missing_panics_doc -A clippy::must_use_candidate -A clippy::needless_pass_by_value -A clippy::struct_excessive_bools -A clippy::module_name_repetitions -A clippy::return_self_not_must_use

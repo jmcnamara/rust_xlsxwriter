@@ -2670,6 +2670,7 @@ impl XlsxColor {
 
     // Check if the RGB and Theme values are in the correct range. Any of the
     // simple enum will be by default.
+    #[allow(clippy::unreadable_literal)]
     pub(crate) fn is_valid(self) -> bool {
         match self {
             XlsxColor::RGB(color) => {
