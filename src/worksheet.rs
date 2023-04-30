@@ -8175,9 +8175,9 @@ impl Worksheet {
                     // the "object_movement" is MoveAndSizeWithCellsAfter.
                     0u32
                 } else if pixel_width < 1.0 {
-                    (pixel_width * (max_digit_width + padding) + 0.5) as u32
+                    (pixel_width * (max_digit_width + padding)).round() as u32
                 } else {
-                    (pixel_width * max_digit_width + 0.5) as u32 + padding as u32
+                    (pixel_width * max_digit_width).round() as u32 + padding as u32
                 }
             }
             // If the width hasn't been set we use the default value.
@@ -9876,7 +9876,7 @@ impl IntoExcelData for &NaiveTime {
 
 // Round to the closest integer number of emu units.
 fn round_to_emus(dimension: f64) -> f64 {
-    ((0.5 + dimension * 9525.0) as u32) as f64
+    (dimension * 9525.0).round()
 }
 
 // Utility method to strip equal sign and array braces from a formula and
