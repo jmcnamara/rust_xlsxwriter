@@ -4,7 +4,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-// This library is used by rust_xlsxwriter to create an Excel xlsx container
+// This library is used by `rust_xlsxwriter` to create an Excel xlsx container
 // file.
 //
 // From Wikipedia: The Open Packaging Conventions (OPC) is a container-file

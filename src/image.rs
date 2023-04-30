@@ -276,7 +276,7 @@ impl Image {
     ///
     /// **Note for macOS Excel users**: the scale shown on Excel for macOS is
     /// different from the scale on Windows. This is an Excel issue and not a
-    /// rust_xlsxwriter issue.
+    /// `rust_xlsxwriter` issue.
     ///
     /// # Arguments
     ///

@@ -1,14 +1,14 @@
 # rust_xlsxwriter
 
-The `rust_xlsxwriter` library is a rust library for writing Excel files in
+The `rust_xlsxwriter` library is a Rust library for writing Excel files in
 the xlsx format.
 
 <img src="https://rustxlsxwriter.github.io/images/demo.png">
 
-Rust_xlsxwriter is a rust library that can be used to write text, numbers,
-dates and formulas to multiple worksheets in a new Excel 2007+ xlsx file. It
-has a focus on performance and on fidelity with the file format created by
-Excel. It cannot be used to modify an existing file.
+The `rust_xlsxwriter` library can be used to write text, numbers, dates and
+formulas to multiple worksheets in a new Excel 2007+ xlsx file. It has a focus
+on performance and on fidelity with the file format created by Excel. It cannot
+be used to modify an existing file.
 
 ## Example
 
@@ -74,7 +74,7 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-Rust_xlsxwriter is a port of the [XlsxWriter] Python module by the same
+`rust_xlsxwriter` is a port of the [`XlsxWriter`] Python module by the same
 author. Feature porting is a work in progress. The currently supported
 features are:
 
@@ -90,10 +90,10 @@ features are:
 - Defined names.
 - Autofilters.
 
-Rust_xlsxwriter is under active development and new features will be added
+`rust_xlsxwriter` is under active development and new features will be added
 frequently.
 
-[XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
+[`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
 [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 
 ## Features

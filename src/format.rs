@@ -404,7 +404,7 @@ use std::hash::Hash;
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/format_currency7.png">
 ///
-/// In order to replicate Excel's behavior all rust_xlsxwriter programs should
+/// In order to replicate Excel's behavior all `rust_xlsxwriter` programs should
 /// use US locale formatting which will then be rendered in the settings of your
 /// host OS.
 ///
@@ -2035,7 +2035,7 @@ impl Format {
     /// # Examples
     ///
     /// Example of cell locking and formula hiding in an Excel worksheet
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/app_worksheet_protection.rs
@@ -2289,7 +2289,7 @@ pub(crate) struct Fill {
 // -----------------------------------------------------------------------
 
 /// The `XlsxColor` enum defines Excel colors the can be used throughout the
-/// rust_xlsxwriter.
+/// `rust_xlsxwriter`.
 ///
 /// There are 3 types of colors within the enum:
 ///

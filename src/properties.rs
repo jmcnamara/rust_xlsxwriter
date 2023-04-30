@@ -26,7 +26,7 @@ use chrono::{DateTime, Utc};
 /// # Examples
 ///
 /// An example of setting workbook document properties for a file created using
-/// the rust_xlsxwriter library. This creates the file used to generate the
+/// the `rust_xlsxwriter` library. This creates the file used to generate the
 /// above image.
 ///
 /// ```
@@ -372,9 +372,9 @@ impl DocProperties {
         self
     }
 
-    /// Set the Hyperlink_base field of the document properties.
+    /// Set the hyperlink base field of the document properties.
     ///
-    /// Set the "Hyperlink_base" field of the document properties to have a
+    /// Set the "Hyperlink base" field of the document properties to have a
     /// default base url.
     ///
     /// # Arguments
@@ -395,7 +395,7 @@ impl DocProperties {
     ///
     /// # Arguments
     ///
-    /// * `datetime` - The hyperlink_base string property. [`chrono::DateTime`]
+    /// * `datetime` - The creation date property. [`chrono::DateTime`]
     ///
     /// [`chrono::DateTime`]:
     ///     https://docs.rs/chrono/latest/chrono/struct.DateTime.html

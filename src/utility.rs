@@ -1,4 +1,4 @@
-// Some utility functions for the rust_xlsxwriter module.
+// Some utility functions for the `rust_xlsxwriter` module.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //

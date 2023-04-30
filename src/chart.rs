@@ -160,7 +160,7 @@ impl Chart {
     ///
     /// # Examples
     ///
-    /// A simple chart example using the rust_xlsxwriter library.
+    /// A simple chart example using the `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_simple.rs
@@ -611,7 +611,7 @@ impl Chart {
     /// # Examples
     ///
     /// An example showing all 48 default chart styles available in Excel 2007
-    /// using rust_xlsxwriter.
+    /// using `rust_xlsxwriter`.
     ///
     /// ```
     /// # // This code is available in examples/app_chart_styles.rs
@@ -961,7 +961,7 @@ impl Chart {
     ///
     /// # Examples
     ///
-    /// A simple chart example using the rust_xlsxwriter library.
+    /// A simple chart example using the `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_set_width.rs
@@ -3327,7 +3327,7 @@ impl Chart {
 
 /// Trait to map types into an Excel chart range.
 ///
-/// The 2 most common types of range used in rust_xlsxwriter charts are:
+/// The 2 most common types of range used in `rust_xlsxwriter` charts are:
 ///
 /// - A string with an Excel like range formula such as `"Sheet1!$A$1:$A$3"`.
 /// - A 5 value tuple that can be used to create the range programmatically
@@ -3522,7 +3522,7 @@ impl DrawingObject for Chart {
 ///
 /// # Examples
 ///
-/// A simple chart example using the rust_xlsxwriter library.
+/// A simple chart example using the `rust_xlsxwriter` library.
 ///
 /// ```
 /// // This code is available in examples/doc_chart_simple.rs
@@ -5109,7 +5109,7 @@ impl ChartTitle {
     ///
     /// # Examples
     ///
-    /// A simple chart example using the rust_xlsxwriter library.
+    /// A simple chart example using the `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_title_set_hidden.rs
@@ -7194,7 +7194,7 @@ impl ChartLegend {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/legend_position.png">
     ///
-    /// The equivalent positions in rust_xlsxwriter charts are defined by
+    /// The equivalent positions in `rust_xlsxwriter` charts are defined by
     /// [`ChartLegendPosition`]. The default chart position in Excel is to have
     /// the legend at the right.
     ///
@@ -7455,7 +7455,7 @@ impl ToString for ChartLegendPosition {
 ///
 /// The [`ChartFormat`] struct represents many of these format options and just
 /// like Excel it offers a similar formatting interface for a number of the
-/// chart sub-elements supported by rust_xlsxwriter.
+/// chart sub-elements supported by `rust_xlsxwriter`.
 ///
 /// The [`ChartFormat`] struct is accessed by using the `set_format()` method of a
 /// chart element to obtain a reference to the formatting struct for that
@@ -7962,7 +7962,7 @@ impl ChartFormat {
 /// /// Excel uses the element names "Line" and "Border" depending on the
 /// context. For a Line chart the line is represented by a line property but for
 /// a Column chart the line becomes the border. Both of these share the same
-/// properties and are both represented in rust_xlsxwriter by the [`ChartLine`]
+/// properties and are both represented in `rust_xlsxwriter` by the [`ChartLine`]
 /// struct.
 ///
 /// As a syntactic shortcut you can use the type alias [`ChartBorder`] instead
@@ -8311,12 +8311,12 @@ impl ChartLine {
 /// Excel uses the chart element names "Line" and "Border" depending on the
 /// context. For a Line chart the line is represented by a line property but for
 /// a Column chart the line becomes the border. Both of these share the same
-/// properties and are both represented in rust_xlsxwriter by the [`ChartLine`]
+/// properties and are both represented in `rust_xlsxwriter` by the [`ChartLine`]
 /// struct.
 ///
 /// The `ChartBorder` type is a type alias of [`ChartLine`] for use as a
-/// syntactic shortcut where you would expect to write `ChartLine` instead of
-/// ChartLine.
+/// syntactic shortcut where you would expect to write `ChartBorder` instead of
+/// `ChartLine`.
 ///
 /// # Examples
 ///

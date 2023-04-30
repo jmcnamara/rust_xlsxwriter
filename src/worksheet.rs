@@ -219,7 +219,7 @@ impl Worksheet {
     /// worksheet object. This can be used to write data to a worksheet prior to
     /// adding it to a workbook.
     ///
-    /// There are two way of creating a worksheet object with rust_xlsxwriter:
+    /// There are two way of creating a worksheet object with `rust_xlsxwriter`:
     /// via the [`workbook.add_worksheet()`](crate::Workbook::add_worksheet)
     /// method and via the [`Worksheet::new()`] constructor. The first method
     /// ties the worksheet to the workbook object that will write it
@@ -1984,7 +1984,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// A simple, getting started, example of some of the features of the
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_url_with_text.rs
@@ -2560,7 +2560,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// An example of creating merged ranges in a worksheet using the
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/app_merge_range.rs
@@ -2877,7 +2877,7 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// An example of inserting images into a worksheet using rust_xlsxwriter so
+    /// An example of inserting images into a worksheet using `rust_xlsxwriter` so
     /// that they are scaled to a cell. This approach can be useful if you are
     /// building up a spreadsheet of products with a column of images for each
     /// product.
@@ -4078,7 +4078,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// Example of cell locking and formula hiding in an Excel worksheet
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/app_worksheet_protection.rs
@@ -4141,7 +4141,7 @@ impl Worksheet {
     /// **Note**: Worksheet level passwords in Excel offer very weak protection.
     /// They do not encrypt your data and are very easy to deactivate. Full
     /// workbook encryption is not supported by `rust_xlsxwriter`. However, it
-    /// is possible to encrypt an rust_xlsxwriter file using a third party open
+    /// is possible to encrypt an `rust_xlsxwriter` file using a third party open
     /// source tool called [msoffice-crypt](https://github.com/herumi/msoffice).
     /// This works for macOS, Linux and Windows:
     ///
@@ -4329,7 +4329,7 @@ impl Worksheet {
     /// This method is similar to
     /// [`unprotect_range()`](Worksheet::unprotect_range), see above, expect that
     /// it allows you to specify two additional parameters to set the name of
-    /// the range (instead of the default Range1 .. RangeN) and also a optional
+    /// the range (instead of the default `Range1` .. `RangeN`) and also a optional
     /// weak password (see
     /// [`protect_with_password()`](Worksheet::protect_with_password) for an
     /// explanation of what weak means here).
@@ -4340,7 +4340,7 @@ impl Worksheet {
     /// * `first_col` - The first row of the range.
     /// * `last_row` - The last row of the range.
     /// * `last_col` - The last row of the range.
-    /// * `name` - The name of the range instead of RangeN. Can be blank if not
+    /// * `name` - The name of the range instead of `RangeN`. Can be blank if not
     ///   required.
     /// * `password` - The password to prevent modification of the range. Can be
     ///   blank if not required.
@@ -4672,7 +4672,7 @@ impl Worksheet {
     /// the xlsx file to say that all formulas and functions should be
     /// recalculated when the file is opened.
     ///
-    /// However, for LibreOffice the default formula result should be set to the
+    /// However, for `LibreOffice` the default formula result should be set to the
     /// empty string literal `""`, via the `set_formula_result_default()`
     /// method, to force calculation of the result.
     ///
@@ -5504,7 +5504,7 @@ impl Worksheet {
     /// want either the vertical or horizontal split. See the example below.
     ///
     /// In Excel it is also possible to set "split" panes without freezing them.
-    /// That feature isn't currently supported by rust_xlsxwriter.
+    /// That feature isn't currently supported by `rust_xlsxwriter`.
     ///
     /// # Arguments
     ///
@@ -5946,7 +5946,7 @@ impl Worksheet {
     /// src="https://rustxlsxwriter.github.io/images/worksheet_set_header_image.png">
     ///
     /// An example of adding a worksheet watermark image using the
-    /// rust_xlsxwriter library. This is based on the method of putting an image
+    /// `rust_xlsxwriter` library. This is based on the method of putting an image
     /// in the worksheet header as suggested in the [Microsoft documentation].
     ///
     /// [Microsoft documentation]:
@@ -6523,7 +6523,7 @@ impl Worksheet {
     /// - `(0, 0, 31, 16_383) == 1:32`.
     /// - `(0, 0, 1_048_575, 12) == A:M`.
     ///
-    /// In these examples 16_383 is the maximum column and 1_048_575 is the
+    /// In these examples 16,383 is the maximum column and 1,048,575 is the
     /// maximum row (zero indexed).
     ///
     /// See also the example below and the `rust_xlsxwriter` documentation on
@@ -8266,7 +8266,7 @@ impl Worksheet {
         // Properties for Calibri 11.
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
-        let mut width = pixels as f64;
+        let mut width = f64::from(pixels);
 
         if width < 12.0 {
             width /= max_digit_width + padding;
@@ -9615,7 +9615,7 @@ impl Worksheet {
 ///
 /// # Examples
 ///
-/// Example of how to extend the the rust_xlsxwriter `write()` method using the
+/// Example of how to extend the the `rust_xlsxwriter` `write()` method using the
 /// `IntoExcelData` trait to handle arbitrary user data that can be mapped to
 /// one of the main Excel data types.
 ///
@@ -9648,7 +9648,7 @@ impl Worksheet {
 /// // For this example we create a simple struct type to represent a Unix time.
 /// // This is the number of elapsed seconds since the epoch of January 1970 (UTC).
 /// // See https://en.wikipedia.org/wiki/Unix_time. This type isn't handled by
-/// // default by rust_xlsxwriter.
+/// // default by `rust_xlsxwriter`.
 /// pub struct UnixTime {
 ///     seconds: u64,
 /// }

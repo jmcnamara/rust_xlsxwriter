@@ -1,18 +1,18 @@
-// Entry point for rust_xlsxwriter library.
+// Entry point for `rust_xlsxwriter` library.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! The `rust_xlsxwriter` library is a rust library for writing Excel files in
+//! The `rust_xlsxwriter` library is a Rust library for writing Excel files in
 //! the xlsx format.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/demo.png">
 //!
-//! Rust_xlsxwriter is a rust library that can be used to write text, numbers,
-//! dates and formulas to multiple worksheets in a new Excel 2007+ xlsx file. It
-//! has a focus on performance and on fidelity with the file format created by
-//! Excel. It cannot be used to modify an existing file.
+//! The `rust_xlsxwriter` library can be used to write text, numbers, dates and
+//! formulas to multiple worksheets in a new Excel 2007+ xlsx file. It has a
+//! focus on performance and on fidelity with the file format created by Excel.
+//! It cannot be used to modify an existing file.
 //!
 //! # Examples
 //!
@@ -80,7 +80,7 @@
 //! }
 //! ```
 //!
-//! Rust_xlsxwriter is a port of the [XlsxWriter] Python module by the same
+//! `rust_xlsxwriter` is a port of the [`XlsxWriter`] Python module by the same
 //! author. Feature porting is a work in progress. The currently supported
 //! features are:
 //!
@@ -96,16 +96,16 @@
 //! - Defined names.
 //! - Autofilters.
 //!
-//! Rust_xlsxwriter is under active development and new features will be added
+//! `rust_xlsxwriter` is under active development and new features will be added
 //! frequently. See the [rust_xlsxwriter GitHub] for details.
 //!
-//! [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
+//! [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
 //! [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 //!
 //! ## Features
 //!
-//! - `default`: Includes all the standard functionality. Has dependencies on `zip`
-//! and `chrono` and on `regex`, `itertools` and `lazy_static`.
+//! - `default`: Includes all the standard functionality. Has dependencies on
+//! `zip` and `chrono` and on `regex`, `itertools` and `lazy_static`.
 //! - `zlib`: Adds dependency on zlib and a C compiler. This includes the same
 //! features as `default` but is 1.5x faster for large files.
 //! - `test-resave`: Developer only testing feature.
@@ -126,7 +126,8 @@
 //! [Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
 //! [Cookbook Examples]: https://rustxlsxwriter.github.io/examples/intro.html
 //! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
-//! [Roadmap of planned features]: https://github.com/jmcnamara/rust_xlsxwriter/issues/1
+//! [Roadmap of planned features]:
+//!     https://github.com/jmcnamara/rust_xlsxwriter/issues/1
 //!
 mod app;
 mod chart;
