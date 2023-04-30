@@ -778,7 +778,7 @@ pub enum FilterCriteria {
 
 #[allow(clippy::match_same_arms)]
 impl FilterCriteria {
-    pub(crate) fn operator(&self) -> String {
+    pub(crate) fn operator(self) -> String {
         match self {
             FilterCriteria::EqualTo => String::new(),
             FilterCriteria::LessThan => "lessThan".to_string(),

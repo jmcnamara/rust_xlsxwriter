@@ -2313,7 +2313,7 @@ impl Worksheet {
         date: &NaiveDate,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Self::date_to_excel(date);
+        let number = Self::date_to_excel(*date);
 
         // Store the cell data.
         self.store_datetime(row, col, number, Some(format))
@@ -2403,7 +2403,7 @@ impl Worksheet {
         time: &NaiveTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Self::time_to_excel(time);
+        let number = Self::time_to_excel(*time);
 
         // Store the cell data.
         self.store_datetime(row, col, number, Some(format))
@@ -2945,8 +2945,8 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        let width = self.column_pixel_width(col, &image.object_movement);
-        let height = self.row_pixel_height(row, &image.object_movement);
+        let width = self.column_pixel_width(col, image.object_movement);
+        let height = self.row_pixel_height(row, image.object_movement);
 
         let mut image = image.clone();
         image.set_scale_to_size(width, height, keep_aspect_ratio);
@@ -7781,8 +7781,8 @@ impl Worksheet {
 
     // Convert a chrono::NaiveTime to an Excel serial datetime.
     fn datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
-        let excel_date = Self::date_to_excel(&datetime.date());
-        let excel_time = Self::time_to_excel(&datetime.time());
+        let excel_date = Self::date_to_excel(datetime.date());
+        let excel_time = Self::time_to_excel(datetime.time());
 
         excel_date + excel_time
     }
@@ -7790,10 +7790,10 @@ impl Worksheet {
     // Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
     // is the number of days since the epoch, which is either 1899-12-31 or
     // 1904-01-01.
-    fn date_to_excel(date: &NaiveDate) -> f64 {
+    fn date_to_excel(date: NaiveDate) -> f64 {
         let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
-        let duration = *date - epoch;
+        let duration = date - epoch;
         let mut excel_date = duration.num_days() as f64;
 
         // For legacy reasons Excel treats 1900 as a leap year. We add an additional
@@ -7808,9 +7808,9 @@ impl Worksheet {
     // Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
     // datetime is the number of milliseconds divided by the total number of
     // milliseconds in the day.
-    fn time_to_excel(time: &NaiveTime) -> f64 {
+    fn time_to_excel(time: NaiveTime) -> f64 {
         let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
-        let duration = *time - midnight;
+        let duration = time - midnight;
 
         duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
     }
@@ -8067,19 +8067,19 @@ impl Worksheet {
 
         // Calculate the absolute x offset of the top-left vertex.
         for col in 0..col_start {
-            x_abs += self.column_pixel_width(col, &object.object_movement());
+            x_abs += self.column_pixel_width(col, object.object_movement());
         }
         x_abs += x1;
 
         // Calculate the absolute y offset of the top-left vertex.
         for row in 0..row_start {
-            y_abs += self.row_pixel_height(row, &object.object_movement());
+            y_abs += self.row_pixel_height(row, object.object_movement());
         }
         y_abs += y1;
 
         // Adjust start col for offsets that are greater than the col width.
         loop {
-            let col_size = self.column_pixel_width(col_start, &object.object_movement());
+            let col_size = self.column_pixel_width(col_start, object.object_movement());
             if x1 >= col_size {
                 x1 -= col_size;
                 col_start += 1;
@@ -8090,7 +8090,7 @@ impl Worksheet {
 
         // Adjust start row for offsets that are greater than the row height.
         loop {
-            let row_size = self.row_pixel_height(row_start, &object.object_movement());
+            let row_size = self.row_pixel_height(row_start, object.object_movement());
             if y1 >= row_size {
                 y1 -= row_size;
                 row_start += 1;
@@ -8109,7 +8109,7 @@ impl Worksheet {
 
         // Subtract the underlying cell widths to find the end cell.
         loop {
-            let col_size = self.column_pixel_width(col_end, &object.object_movement()) as f64;
+            let col_size = self.column_pixel_width(col_end, object.object_movement()) as f64;
             if x2 >= col_size {
                 x2 -= col_size;
                 col_end += 1;
@@ -8120,7 +8120,7 @@ impl Worksheet {
 
         //Subtract the underlying cell heights to find the end cell.
         loop {
-            let row_size = self.row_pixel_height(row_end, &object.object_movement()) as f64;
+            let row_size = self.row_pixel_height(row_end, object.object_movement()) as f64;
             if y2 >= row_size {
                 y2 -= row_size;
                 row_end += 1;
@@ -8161,7 +8161,7 @@ impl Worksheet {
 
     // Convert the width of a cell from character units to pixels. Excel rounds
     // the column width to the nearest pixel.
-    fn column_pixel_width(&mut self, col: ColNum, position: &ObjectMovement) -> u32 {
+    fn column_pixel_width(&mut self, col: ColNum, position: ObjectMovement) -> u32 {
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
 
@@ -8170,7 +8170,7 @@ impl Worksheet {
                 let pixel_width = col_options.width;
                 let hidden = col_options.hidden;
 
-                if hidden && *position != ObjectMovement::MoveAndSizeWithCellsAfter {
+                if hidden && position != ObjectMovement::MoveAndSizeWithCellsAfter {
                     // A hidden column is treated as having a width of zero unless
                     // the "object_movement" is MoveAndSizeWithCellsAfter.
                     0u32
@@ -8187,12 +8187,12 @@ impl Worksheet {
 
     // Convert the height of a cell from character units to pixels. If the
     // height hasn't been set by the user we use the default value.
-    fn row_pixel_height(&mut self, row: RowNum, position: &ObjectMovement) -> u32 {
+    fn row_pixel_height(&mut self, row: RowNum, position: ObjectMovement) -> u32 {
         match self.changed_rows.get(&row) {
             Some(row_options) => {
                 let hidden = row_options.hidden;
 
-                if hidden && *position != ObjectMovement::MoveAndSizeWithCellsAfter {
+                if hidden && position != ObjectMovement::MoveAndSizeWithCellsAfter {
                     // A hidden row is treated as having a height of zero unless
                     // the "object_movement" is MoveAndSizeWithCellsAfter.
                     0u32
@@ -9829,7 +9829,7 @@ impl IntoExcelData for &NaiveDate {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Worksheet::date_to_excel(self);
+        let number = Worksheet::date_to_excel(*self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -9841,7 +9841,7 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = Worksheet::date_to_excel(self);
+        let number = Worksheet::date_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -9853,7 +9853,7 @@ impl IntoExcelData for &NaiveTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Worksheet::time_to_excel(self);
+        let number = Worksheet::time_to_excel(*self);
         let format = &Format::new().set_num_format("hh:mm:ss;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -9865,7 +9865,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = Worksheet::time_to_excel(self);
+        let number = Worksheet::time_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }

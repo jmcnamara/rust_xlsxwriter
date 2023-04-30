@@ -1143,7 +1143,7 @@ mod worksheet_tests {
         for test_data in dates {
             let (year, month, day, expected) = test_data;
             let datetime = NaiveDate::from_ymd_opt(year, month, day).unwrap();
-            assert_eq!(expected, Worksheet::date_to_excel(&datetime));
+            assert_eq!(expected, Worksheet::date_to_excel(datetime));
         }
     }
 
@@ -1255,7 +1255,7 @@ mod worksheet_tests {
         for test_data in times {
             let (hour, min, seconds, millis, expected) = test_data;
             let datetime = NaiveTime::from_hms_milli_opt(hour, min, seconds, millis).unwrap();
-            let mut diff = Worksheet::time_to_excel(&datetime) - expected;
+            let mut diff = Worksheet::time_to_excel(datetime) - expected;
             diff = diff.abs();
             assert!(diff < 0.00000000001);
         }
