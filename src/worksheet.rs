@@ -7189,7 +7189,7 @@ impl Worksheet {
     pub(crate) fn process_pagebreaks(breaks: &[u32]) -> Result<Vec<u32>, XlsxError> {
         let unique_breaks: HashSet<u32> = breaks.iter().copied().collect();
         let mut breaks: Vec<u32> = unique_breaks.into_iter().collect();
-        breaks.sort();
+        breaks.sort_unstable();
 
         // Remove invalid 0 row/col.
         if breaks[0] == 0 {
@@ -7790,6 +7790,7 @@ impl Worksheet {
     // Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
     // is the number of days since the epoch, which is either 1899-12-31 or
     // 1904-01-01.
+    #[allow(clippy::cast_precision_loss)]
     fn date_to_excel(date: NaiveDate) -> f64 {
         let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
@@ -7808,6 +7809,7 @@ impl Worksheet {
     // Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
     // datetime is the number of milliseconds divided by the total number of
     // milliseconds in the day.
+    #[allow(clippy::cast_precision_loss)]
     fn time_to_excel(time: NaiveTime) -> f64 {
         let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
         let duration = time - midnight;
