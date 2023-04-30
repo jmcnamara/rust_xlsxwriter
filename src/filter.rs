@@ -866,7 +866,7 @@ impl IntoFilterData for f64 {
 
 impl IntoFilterData for i32 {
     fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData {
-        FilterData::new_number_and_criteria(*self as f64, criteria)
+        FilterData::new_number_and_criteria(f64::from(*self), criteria)
     }
 }
 

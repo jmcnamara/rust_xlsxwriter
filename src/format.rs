@@ -764,7 +764,7 @@ impl Format {
     /// src="https://rustxlsxwriter.github.io/images/format_set_num_format_index.png">
     ///
     pub fn set_num_format_index(mut self, num_format_index: u8) -> Format {
-        self.num_format_index = num_format_index as u16;
+        self.num_format_index = u16::from(num_format_index);
         self
     }
 

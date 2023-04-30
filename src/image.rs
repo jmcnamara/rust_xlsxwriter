@@ -829,8 +829,8 @@ impl Image {
                 let y_density = unpack_u32_from_be_bytes(data, offset + 12);
 
                 if *units == 1 {
-                    width_dpi = x_density as f64 * 0.0254;
-                    height_dpi = y_density as f64 * 0.0254;
+                    width_dpi = f64::from(x_density) * 0.0254;
+                    height_dpi = f64::from(y_density) * 0.0254;
                     self.has_default_dpi = false;
                 }
             }
@@ -842,8 +842,8 @@ impl Image {
             offset = offset + length as usize + 12;
         }
 
-        self.width = width as f64;
-        self.height = height as f64;
+        self.width = f64::from(width);
+        self.height = f64::from(height);
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Png;
@@ -871,8 +871,8 @@ impl Image {
                 && marker != 0xFFC8
                 && marker != 0xFFCC
             {
-                height = unpack_u16_from_be_bytes(data, offset + 5) as u32;
-                width = unpack_u16_from_be_bytes(data, offset + 7) as u32;
+                height = u32::from(unpack_u16_from_be_bytes(data, offset + 5));
+                width = u32::from(unpack_u16_from_be_bytes(data, offset + 7));
             }
 
             // Read the DPI in the 0xFFE0 element.
@@ -882,13 +882,13 @@ impl Image {
                 let y_density = unpack_u16_from_be_bytes(data, offset + 14);
 
                 if *units == 1 {
-                    width_dpi = x_density as f64;
-                    height_dpi = y_density as f64;
+                    width_dpi = f64::from(x_density);
+                    height_dpi = f64::from(y_density);
                 }
 
                 if *units == 2 {
-                    width_dpi = x_density as f64 * 2.54;
-                    height_dpi = y_density as f64 * 2.54;
+                    width_dpi = f64::from(x_density) * 2.54;
+                    height_dpi = f64::from(y_density) * 2.54;
                     self.has_default_dpi = false;
                 }
 
@@ -908,8 +908,8 @@ impl Image {
             offset = offset + length as usize + 2;
         }
 
-        self.width = width as f64;
-        self.height = height as f64;
+        self.width = f64::from(width);
+        self.height = f64::from(height);
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Jpg;
@@ -923,8 +923,8 @@ impl Image {
         let width = unpack_u32_from_le_bytes(data, 18);
         let height = unpack_u32_from_le_bytes(data, 22);
 
-        self.width = width as f64;
-        self.height = height as f64;
+        self.width = f64::from(width);
+        self.height = f64::from(height);
         self.width_dpi = width_dpi;
         self.height_dpi = height_dpi;
         self.image_type = XlsxImageType::Bmp;
@@ -932,11 +932,11 @@ impl Image {
 
     // Extract width and height information from a GIF file.
     fn process_gif(&mut self, data: &[u8]) {
-        let width = unpack_u16_from_le_bytes(data, 6) as u32;
-        let height = unpack_u16_from_le_bytes(data, 8) as u32;
+        let width = u32::from(unpack_u16_from_le_bytes(data, 6));
+        let height = u32::from(unpack_u16_from_le_bytes(data, 8));
 
-        self.width = width as f64;
-        self.height = height as f64;
+        self.width = f64::from(width);
+        self.height = f64::from(height);
         self.width_dpi = 96.0;
         self.height_dpi = 96.0;
         self.image_type = XlsxImageType::Gif;

@@ -22,7 +22,7 @@ pub fn col_to_name(col_num: ColNum) -> String {
         }
 
         // Convert the remainder to a character.
-        let col_letter = char::from_u32(64u32 + remainder as u32).unwrap();
+        let col_letter = char::from_u32(64u32 + u32::from(remainder)).unwrap();
 
         // Accumulate the column letters, right to left.
         col_name = format!("{col_letter}{col_name}");
@@ -184,7 +184,7 @@ pub(crate) fn hash_password(password: &str) -> u16 {
 
     for byte in password.as_bytes().iter().rev() {
         hash = ((hash >> 14) & 0x01) | ((hash << 1) & 0x7fff);
-        hash ^= *byte as u16;
+        hash ^= u16::from(*byte);
     }
 
     hash = ((hash >> 14) & 0x01) | ((hash << 1) & 0x7fff);

@@ -3241,7 +3241,7 @@ impl Worksheet {
         row: RowNum,
         height: u16,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let height = 0.75 * height as f64;
+        let height = 0.75 * f64::from(height);
 
         self.set_row_height(row, height)
     }
@@ -3604,7 +3604,7 @@ impl Worksheet {
         // Properties for Calibri 11.
         let max_digit_width = 7.0_f64;
         let padding = 5.0_f64;
-        let mut width = width as f64;
+        let mut width = f64::from(width);
 
         if width < 12.0 {
             width /= max_digit_width + padding;
@@ -5432,7 +5432,7 @@ impl Worksheet {
         let breaks = Self::process_pagebreaks(breaks)?;
 
         // Check max break value is within Excel col limit.
-        if *breaks.last().unwrap() >= COL_MAX as u32 {
+        if *breaks.last().unwrap() >= u32::from(COL_MAX) {
             return Err(XlsxError::RowColumnLimitError);
         }
 
@@ -8104,12 +8104,12 @@ impl Worksheet {
         row_end = row_start;
 
         // Calculate the end vertices.
-        x2 = width + x1 as f64;
-        y2 = height + y1 as f64;
+        x2 = width + f64::from(x1);
+        y2 = height + f64::from(y1);
 
         // Subtract the underlying cell widths to find the end cell.
         loop {
-            let col_size = self.column_pixel_width(col_end, object.object_movement()) as f64;
+            let col_size = f64::from(self.column_pixel_width(col_end, object.object_movement()));
             if x2 >= col_size {
                 x2 -= col_size;
                 col_end += 1;
@@ -8120,7 +8120,7 @@ impl Worksheet {
 
         //Subtract the underlying cell heights to find the end cell.
         loop {
-            let row_size = self.row_pixel_height(row_end, object.object_movement()) as f64;
+            let row_size = f64::from(self.row_pixel_height(row_end, object.object_movement()));
             if y2 >= row_size {
                 y2 -= row_size;
                 row_end += 1;
@@ -8131,14 +8131,14 @@ impl Worksheet {
 
         // Create structs to hold the drawing information.
         let from = DrawingCoordinates {
-            col: col_start as u32,
+            col: u32::from(col_start),
             row: row_start,
-            col_offset: x1 as f64,
-            row_offset: y1 as f64,
+            col_offset: f64::from(x1),
+            row_offset: f64::from(y1),
         };
 
         let to = DrawingCoordinates {
-            col: col_end as u32,
+            col: u32::from(col_end),
             row: row_end,
             col_offset: x2,
             row_offset: y2,

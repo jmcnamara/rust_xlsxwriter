@@ -1008,7 +1008,7 @@ impl Chart {
             return self;
         }
 
-        self.width = width as f64;
+        self.width = f64::from(width);
         self
     }
 
@@ -1027,7 +1027,7 @@ impl Chart {
             return self;
         }
 
-        self.height = height as f64;
+        self.height = f64::from(height);
         self
     }
 
@@ -2788,7 +2788,7 @@ impl Chart {
             }
             _ => {
                 // Convert the rotation angle to Excel's units.
-                let rotation = rotation as i32 * 60_000;
+                let rotation = i32::from(rotation) * 60_000;
                 attributes.push(("rot", rotation.to_string()));
                 attributes.push(("vert", "horz".to_string()));
             }
@@ -3111,7 +3111,7 @@ impl Chart {
 
     // Write the <a:alpha> element.
     fn write_a_alpha(&mut self, transparency: u8) {
-        let transparency = (100 - transparency) as u32 * 1000;
+        let transparency = u32::from(100 - transparency) * 1000;
 
         let attributes = [("val", transparency.to_string())];
 
