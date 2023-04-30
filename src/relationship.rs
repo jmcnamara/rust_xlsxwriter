@@ -51,7 +51,7 @@ impl Relationship {
         self.relationships.push((
             format!("{package_schema}/{rel_type}"),
             target.to_string(),
-            "".to_string(),
+            String::new(),
         ));
     }
 

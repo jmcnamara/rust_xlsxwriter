@@ -933,7 +933,7 @@ impl Format {
         self.font.name = font_name.to_string();
 
         if font_name != "Calibri" {
-            self.font.scheme = "".to_string();
+            self.font.scheme = String::new();
         }
 
         self
@@ -2020,7 +2020,7 @@ impl Format {
         self.font.is_hyperlink = true;
         self.font.color = XlsxColor::Theme(10, 0);
         self.font.underline = FormatUnderline::Single;
-        self.font.scheme = "".to_string();
+        self.font.scheme = String::new();
 
         self
     }
@@ -2577,7 +2577,7 @@ impl XlsxColor {
                     3 => ("bg1".to_string(), 75000, 0),
                     4 => ("bg1".to_string(), 65000, 0),
                     5 => ("bg1".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 1 => match shade {
                     0 => ("tx1".to_string(), 0, 0),
@@ -2586,7 +2586,7 @@ impl XlsxColor {
                     3 => ("tx1".to_string(), 75000, 25000),
                     4 => ("tx1".to_string(), 85000, 15000),
                     5 => ("tx1".to_string(), 95000, 5000),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 2 => match shade {
                     0 => ("bg2".to_string(), 0, 0),
@@ -2595,7 +2595,7 @@ impl XlsxColor {
                     3 => ("bg2".to_string(), 50000, 0),
                     4 => ("bg2".to_string(), 25000, 0),
                     5 => ("bg2".to_string(), 10000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 3 => match shade {
                     0 => ("tx2".to_string(), 0, 0),
@@ -2604,7 +2604,7 @@ impl XlsxColor {
                     3 => ("tx2".to_string(), 60000, 40000),
                     4 => ("tx2".to_string(), 75000, 0),
                     5 => ("tx2".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 4 => match shade {
                     0 => ("accent1".to_string(), 0, 0),
@@ -2613,7 +2613,7 @@ impl XlsxColor {
                     3 => ("accent1".to_string(), 60000, 40000),
                     4 => ("accent1".to_string(), 75000, 0),
                     5 => ("accent1".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 5 => match shade {
                     0 => ("accent2".to_string(), 0, 0),
@@ -2622,7 +2622,7 @@ impl XlsxColor {
                     3 => ("accent2".to_string(), 60000, 40000),
                     4 => ("accent2".to_string(), 75000, 0),
                     5 => ("accent2".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 6 => match shade {
                     0 => ("accent3".to_string(), 0, 0),
@@ -2631,7 +2631,7 @@ impl XlsxColor {
                     3 => ("accent3".to_string(), 60000, 40000),
                     4 => ("accent3".to_string(), 75000, 0),
                     5 => ("accent3".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 7 => match shade {
                     0 => ("accent4".to_string(), 0, 0),
@@ -2640,7 +2640,7 @@ impl XlsxColor {
                     3 => ("accent4".to_string(), 60000, 40000),
                     4 => ("accent4".to_string(), 75000, 0),
                     5 => ("accent4".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 8 => match shade {
                     0 => ("accent5".to_string(), 0, 0),
@@ -2649,7 +2649,7 @@ impl XlsxColor {
                     3 => ("accent5".to_string(), 60000, 40000),
                     4 => ("accent5".to_string(), 75000, 0),
                     5 => ("accent5".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
                 9 => match shade {
                     0 => ("accent6".to_string(), 0, 0),
@@ -2658,13 +2658,13 @@ impl XlsxColor {
                     3 => ("accent6".to_string(), 60000, 40000),
                     4 => ("accent6".to_string(), 75000, 0),
                     5 => ("accent6".to_string(), 50000, 0),
-                    _ => ("".to_string(), 0, 0),
+                    _ => (String::new(), 0, 0),
                 },
-                _ => ("".to_string(), 0, 0),
+                _ => (String::new(), 0, 0),
             },
 
             // Handle RGB color with an empty default.
-            _ => ("".to_string(), 0, 0),
+            _ => (String::new(), 0, 0),
         }
     }
 

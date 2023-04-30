@@ -221,16 +221,16 @@ impl DocProperties {
     /// Create a new `DocProperties` struct.
     pub fn new() -> DocProperties {
         DocProperties {
-            title: "".to_string(),
-            status: "".to_string(),
-            author: "".to_string(),
-            comment: "".to_string(),
-            company: "".to_string(),
-            manager: "".to_string(),
-            subject: "".to_string(),
-            category: "".to_string(),
-            keywords: "".to_string(),
-            hyperlink_base: "".to_string(),
+            title: String::new(),
+            status: String::new(),
+            author: String::new(),
+            comment: String::new(),
+            company: String::new(),
+            manager: String::new(),
+            subject: String::new(),
+            category: String::new(),
+            keywords: String::new(),
+            hyperlink_base: String::new(),
             creation_time: Utc::now(),
             custom_properties: vec![],
         }
@@ -484,8 +484,8 @@ impl Default for CustomProperty {
     fn default() -> Self {
         CustomProperty {
             property_type: CustomPropertyType::Text,
-            name: "".to_string(),
-            text: "".to_string(),
+            name: String::new(),
+            text: String::new(),
             number_int: 0,
             number_real: 0.0,
             boolean: true,

@@ -299,7 +299,7 @@ impl Worksheet {
 
         Worksheet {
             writer,
-            name: "".to_string(),
+            name: String::new(),
             active: false,
             selected: false,
             hidden: false,
@@ -309,7 +309,7 @@ impl Worksheet {
             print_area_defined_name: DefinedName::new(),
             repeat_row_cols_defined_name: DefinedName::new(),
             autofilter_defined_name: DefinedName::new(),
-            autofilter_area: "".to_string(),
+            autofilter_area: String::new(),
             table: BTreeMap::new(),
             col_names: HashMap::new(),
             dimensions,
@@ -339,8 +339,8 @@ impl Worksheet {
             print_black_and_white: false,
             print_draft: false,
             print_headings: false,
-            header: "".to_string(),
-            footer: "".to_string(),
+            header: String::new(),
+            footer: String::new(),
             head_footer_changed: false,
             header_footer_scale_with_doc: true,
             header_footer_align_with_page: true,
@@ -370,8 +370,8 @@ impl Worksheet {
             protection_hash: 0,
             protection_options: ProtectionOptions::new(),
             unprotected_ranges: vec![],
-            selected_range: ("".to_string(), "".to_string()),
-            top_left_cell: "".to_string(),
+            selected_range: (String::new(), String::new()),
+            top_left_cell: String::new(),
             horizontal_breaks: vec![],
             vertical_breaks: vec![],
             filter_conditions: HashMap::new(),
@@ -7567,7 +7567,7 @@ impl Worksheet {
         // Create a Style struct object to generate the font xml.
         let xf_formats: Vec<Format> = vec![];
         let mut styler = Styles::new(&xf_formats, 0, 0, 0, vec![], false, true);
-        let mut raw_string = "".to_string();
+        let mut raw_string = String::new();
 
         let mut first_segment = true;
         for (format, string) in segments {
@@ -7849,7 +7849,7 @@ impl Worksheet {
                     self.drawing_relationships.push((
                         "image".to_string(),
                         image_name,
-                        "".to_string(),
+                        String::new(),
                     ));
 
                     rel_id
@@ -7871,7 +7871,7 @@ impl Worksheet {
         self.drawing_object_relationships.push((
             "drawing".to_string(),
             drawing_name,
-            "".to_string(),
+            String::new(),
         ));
 
         self.has_drawing_object_linkage = true;
@@ -7909,7 +7909,7 @@ impl Worksheet {
                     self.vml_drawing_relationships.push((
                         "image".to_string(),
                         image_name,
-                        "".to_string(),
+                        String::new(),
                     ));
 
                     rel_id
@@ -7939,7 +7939,7 @@ impl Worksheet {
         self.drawing_object_relationships.push((
             "vmlDrawing".to_string(),
             vml_drawing_name,
-            "".to_string(),
+            String::new(),
         ));
     }
 
@@ -7961,7 +7961,7 @@ impl Worksheet {
             // Store the linkage to the charts rels file.
             let chart_name = format!("../charts/chart{chart_id}.xml");
             self.drawing_relationships
-                .push(("chart".to_string(), chart_name, "".to_string()));
+                .push(("chart".to_string(), chart_name, String::new()));
 
             // Convert the chart dimensions to drawing dimensions and store the
             // drawing object.
@@ -7976,7 +7976,7 @@ impl Worksheet {
             self.drawing_object_relationships.push((
                 "drawing".to_string(),
                 drawing_name,
-                "".to_string(),
+                String::new(),
             ));
         }
 
@@ -8302,13 +8302,13 @@ impl Worksheet {
                                     is_numeric = false;
                                 }
                                 CellType::Number { number, .. } => data.push(number.to_string()),
-                                _ => data.push("".to_string()),
+                                _ => data.push(String::new()),
                             },
-                            None => data.push("".to_string()),
+                            None => data.push(String::new()),
                         }
                     }
                 }
-                None => data.push("".to_string()),
+                None => data.push(String::new()),
             }
         }
 
@@ -10076,7 +10076,7 @@ impl Hyperlink {
             url: url.to_string(),
             text: text.to_string(),
             tip: tip.to_string(),
-            location: "".to_string(),
+            location: String::new(),
             link_type: HyperlinkType::Unknown,
             ref_id: 0,
         };
@@ -10203,10 +10203,10 @@ impl DefinedName {
     pub(crate) fn new() -> DefinedName {
         DefinedName {
             in_use: false,
-            name: "".to_string(),
-            sort_name: "".to_string(),
-            range: "".to_string(),
-            quoted_sheet_name: "".to_string(),
+            name: String::new(),
+            sort_name: String::new(),
+            range: String::new(),
+            quoted_sheet_name: String::new(),
             index: 0,
             name_type: DefinedNameType::Global,
             first_row: ROW_MAX,
@@ -10228,13 +10228,13 @@ impl DefinedName {
         match self.name_type {
             DefinedNameType::Local => format!("{}!{}", self.quoted_sheet_name, self.name),
             DefinedNameType::PrintArea => format!("{}!Print_Area", self.quoted_sheet_name),
-            DefinedNameType::Autofilter => "".to_string(),
+            DefinedNameType::Autofilter => String::new(),
             DefinedNameType::PrintTitles => format!("{}!Print_Titles", self.quoted_sheet_name),
             DefinedNameType::Global => {
                 if self.range.contains('!') {
                     self.name.clone()
                 } else {
-                    "".to_string()
+                    String::new()
                 }
             }
         }
@@ -10300,7 +10300,7 @@ impl DefinedName {
                 self.range = format!("{}!{}", self.quoted_sheet_name, range);
             }
             DefinedNameType::PrintTitles => {
-                let mut range = "".to_string();
+                let mut range = String::new();
 
                 if self.first_col != COL_MAX || self.last_col != 0 {
                     // Repeat columns.

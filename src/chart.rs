@@ -209,7 +209,7 @@ impl Chart {
             scale_height: 1.0,
             x_offset: 0,
             y_offset: 0,
-            alt_text: "".to_string(),
+            alt_text: String::new(),
             object_movement: ObjectMovement::MoveAndSizeWithCells,
             decorative: false,
             drawing_type: DrawingType::Chart,
@@ -4739,7 +4739,7 @@ impl ChartRange {
             first_col,
             last_row,
             last_col,
-            range_string: "".to_string(),
+            range_string: String::new(),
         }
     }
 
@@ -5019,7 +5019,7 @@ impl ChartTitle {
             cache_data: ChartSeriesCacheData::new(),
             format: ChartFormat::new(),
             font: ChartFont::new(),
-            name: "".to_string(),
+            name: String::new(),
             hidden: false,
             is_horizontal: false,
             ignore_rich_para: false,
@@ -5683,7 +5683,7 @@ impl ChartDataLabel {
             is_default: true,
             is_custom: false,
             font: None,
-            num_format: "".to_string(),
+            num_format: String::new(),
         }
     }
 
@@ -6531,7 +6531,7 @@ impl ToString for ChartDataLabelPosition {
             ChartDataLabelPosition::Above => "t".to_string(),
             ChartDataLabelPosition::Below => "b".to_string(),
             ChartDataLabelPosition::Center => "ctr".to_string(),
-            ChartDataLabelPosition::Default => "".to_string(),
+            ChartDataLabelPosition::Default => String::new(),
             ChartDataLabelPosition::BestFit => "bestFit".to_string(),
             ChartDataLabelPosition::InsideEnd => "inEnd".to_string(),
             ChartDataLabelPosition::InsideBase => "inBase".to_string(),
@@ -6683,7 +6683,7 @@ impl ChartAxis {
             title: ChartTitle::new(),
             format: ChartFormat::new(),
             font: None,
-            num_format: "".to_string(),
+            num_format: String::new(),
         }
     }
 
@@ -9282,7 +9282,7 @@ impl ChartFont {
             bold: None,
             italic: false,
             underline: false,
-            name: "".to_string(),
+            name: String::new(),
             size: 0.0,
             color: XlsxColor::Default,
             strikethrough: false,

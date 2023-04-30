@@ -780,15 +780,15 @@ pub enum FilterCriteria {
 impl FilterCriteria {
     pub(crate) fn operator(&self) -> String {
         match self {
-            FilterCriteria::EqualTo => "".to_string(),
+            FilterCriteria::EqualTo => String::new(),
             FilterCriteria::LessThan => "lessThan".to_string(),
             FilterCriteria::NotEqualTo => "notEqual".to_string(),
             FilterCriteria::GreaterThan => "greaterThan".to_string(),
             FilterCriteria::LessThanOrEqualTo => "lessThanOrEqual".to_string(),
             FilterCriteria::GreaterThanOrEqualTo => "greaterThanOrEqual".to_string(),
-            FilterCriteria::EndsWith => "".to_string(),
-            FilterCriteria::Contains => "".to_string(),
-            FilterCriteria::BeginsWith => "".to_string(),
+            FilterCriteria::EndsWith => String::new(),
+            FilterCriteria::Contains => String::new(),
+            FilterCriteria::BeginsWith => String::new(),
             FilterCriteria::DoesNotEndWith => "notEqual".to_string(),
             FilterCriteria::DoesNotContain => "notEqual".to_string(),
             FilterCriteria::DoesNotBeginWith => "notEqual".to_string(),

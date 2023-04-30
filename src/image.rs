@@ -252,7 +252,7 @@ impl Image {
             y_offset: 0,
             has_default_dpi: true,
             image_type: XlsxImageType::Unknown,
-            alt_text: "".to_string(),
+            alt_text: String::new(),
             vml_name: "image".to_string(),
             header_position: HeaderImagePosition::Center,
             object_movement: ObjectMovement::MoveButDontSizeWithCells,
