@@ -1141,7 +1141,7 @@ impl Chart {
             ));
         }
 
-        for series in self.series.iter() {
+        for series in &self.series {
             // Check for a series without a values range.
             if !series.value_range.has_data() {
                 return Err(XlsxError::ChartError(

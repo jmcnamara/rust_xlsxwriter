@@ -125,7 +125,7 @@ impl<W: Write + Seek> Packager<W> {
         let mut image_index = 1;
         let mut vml_index = 1;
 
-        for worksheet in workbook.worksheets.iter_mut() {
+        for worksheet in &mut workbook.worksheets {
             if !worksheet.drawing_relationships.is_empty() {
                 self.write_drawing_rels_file(&worksheet.drawing_relationships, image_index)?;
                 image_index += 1;
@@ -285,11 +285,11 @@ impl<W: Write + Seek> Packager<W> {
     ) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
-        for relationship in worksheet.hyperlink_relationships.iter() {
+        for relationship in &worksheet.hyperlink_relationships {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
-        for relationship in worksheet.drawing_object_relationships.iter() {
+        for relationship in &worksheet.drawing_object_relationships {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
@@ -453,7 +453,7 @@ impl<W: Write + Seek> Packager<W> {
         if !options.defined_names.is_empty() {
             app.add_heading_pair("Named Ranges", options.defined_names.len() as u16);
 
-            for defined_name in options.defined_names.iter() {
+            for defined_name in &options.defined_names {
                 app.add_part_name(defined_name);
             }
         }
@@ -481,7 +481,7 @@ impl<W: Write + Seek> Packager<W> {
     // Write the drawing files.
     fn write_drawing_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut index = 1;
-        for worksheet in workbook.worksheets.iter_mut() {
+        for worksheet in &mut workbook.worksheets {
             if !worksheet.drawing.drawings.is_empty() {
                 let filename = format!("xl/drawings/drawing{index}.xml");
                 self.zip.start_file(filename, self.zip_options)?;
@@ -499,7 +499,7 @@ impl<W: Write + Seek> Packager<W> {
     // Write the vml files.
     fn write_vml_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut index = 1;
-        for worksheet in workbook.worksheets.iter_mut() {
+        for worksheet in &mut workbook.worksheets {
             if worksheet.has_header_footer_images() {
                 let filename = format!("xl/drawings/vmlDrawing{index}.vml");
                 self.zip.start_file(filename, self.zip_options)?;
@@ -525,8 +525,8 @@ impl<W: Write + Seek> Packager<W> {
         let mut unique_worksheet_images = HashSet::new();
         let mut unique_header_footer_images = HashSet::new();
 
-        for worksheet in workbook.worksheets.iter_mut() {
-            for (_, image) in worksheet.images.iter() {
+        for worksheet in &mut workbook.worksheets {
+            for image in worksheet.images.values() {
                 if !unique_worksheet_images.contains(&image.hash) {
                     let filename =
                         format!("xl/media/image{index}.{}", image.image_type.extension());
@@ -559,8 +559,8 @@ impl<W: Write + Seek> Packager<W> {
     fn write_chart_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut index = 1;
 
-        for worksheet in workbook.worksheets.iter_mut() {
-            for (_, chart) in worksheet.charts.iter_mut() {
+        for worksheet in &mut workbook.worksheets {
+            for chart in worksheet.charts.values_mut() {
                 let filename = format!("xl/charts/chart{index}.xml");
                 self.zip.start_file(filename, self.zip_options)?;
                 chart.assemble_xml_file();

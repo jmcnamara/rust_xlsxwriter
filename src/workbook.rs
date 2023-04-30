@@ -1038,7 +1038,7 @@ impl Workbook {
         self.border_count = 0;
         self.num_formats = vec![];
 
-        for worksheet in self.worksheets.iter_mut() {
+        for worksheet in &mut self.worksheets {
             worksheet.reset();
         }
     }
@@ -1058,7 +1058,7 @@ impl Workbook {
 
         // Check for the use of hyperlink style in the worksheets and if so add
         // a hyperlink style to the global formats.
-        for worksheet in self.worksheets.iter() {
+        for worksheet in &self.worksheets {
             if worksheet.has_hyperlink_style {
                 let format = Format::new().set_hyperlink();
                 self.xf_indices.insert(format.clone(), 1);
@@ -1070,7 +1070,7 @@ impl Workbook {
 
         // Convert any worksheet local formats to workbook/global formats.
         let mut worksheet_formats: Vec<Vec<Format>> = vec![];
-        for worksheet in self.worksheets.iter() {
+        for worksheet in &self.worksheets {
             let formats = worksheet.xf_formats.clone();
             worksheet_formats.push(formats);
         }
@@ -1140,7 +1140,7 @@ impl Workbook {
         let mut worksheet_image_ids: HashMap<u64, u32> = HashMap::new();
         let mut header_footer_image_ids: HashMap<u64, u32> = HashMap::new();
 
-        for worksheet in self.worksheets.iter_mut() {
+        for worksheet in &mut self.worksheets {
             if !worksheet.images.is_empty() {
                 worksheet.prepare_worksheet_images(&mut worksheet_image_ids, drawing_id);
             }
@@ -1180,7 +1180,7 @@ impl Workbook {
             ChartSeriesCacheData,
         > = HashMap::new();
 
-        for worksheet in self.worksheets.iter() {
+        for worksheet in &self.worksheets {
             if !worksheet.charts.is_empty() {
                 for chart in worksheet.charts.values() {
                     if chart.title.range.has_data() {
@@ -1195,7 +1195,7 @@ impl Workbook {
                             .insert(chart.y_axis.title.range.key(), ChartSeriesCacheData::new());
                     }
 
-                    for series in chart.series.iter() {
+                    for series in &chart.series {
                         if series.title.range.has_data() {
                             chart_caches
                                 .insert(series.title.range.key(), ChartSeriesCacheData::new());
@@ -1208,7 +1208,7 @@ impl Workbook {
                             chart_caches
                                 .insert(series.category_range.key(), ChartSeriesCacheData::new());
                         }
-                        for data_label in series.custom_data_labels.iter() {
+                        for data_label in &series.custom_data_labels {
                             if data_label.title.range.has_data() {
                                 chart_caches.insert(
                                     data_label.title.range.key(),
@@ -1229,7 +1229,7 @@ impl Workbook {
         }
 
         // Fill the caches back into the chart series.
-        for worksheet in self.worksheets.iter_mut() {
+        for worksheet in &mut self.worksheets {
             if !worksheet.charts.is_empty() {
                 for chart in worksheet.charts.values_mut() {
                     if let Some(cache) = chart_caches.get(&chart.title.range.key()) {
@@ -1512,7 +1512,7 @@ impl Workbook {
 
         // Map the sheet name and associated index so that we can map a sheet
         // reference in a Local/Sheet defined name to a worksheet index.
-        for defined_name in defined_names.iter_mut() {
+        for defined_name in &mut defined_names {
             let sheet_name = defined_name.unquoted_sheet_name();
 
             if !sheet_name.is_empty() {
@@ -1533,7 +1533,7 @@ impl Workbook {
         defined_names.sort_by_key(|n| (n.sort_name.clone(), n.range.clone()));
 
         // Map the non-Global defined names to App.xml entries.
-        for defined_name in defined_names.iter() {
+        for defined_name in &defined_names {
             let app_name = defined_name.app_name();
             if !app_name.is_empty() {
                 package_options.defined_names.push(app_name);
@@ -1659,7 +1659,7 @@ impl Workbook {
         self.writer.xml_start_tag_only("sheets");
 
         let mut worksheet_data = vec![];
-        for worksheet in self.worksheets.iter() {
+        for worksheet in &self.worksheets {
             worksheet_data.push((worksheet.name.clone(), worksheet.hidden));
         }
 
@@ -1691,7 +1691,7 @@ impl Workbook {
     fn write_defined_names(&mut self) {
         self.writer.xml_start_tag_only("definedNames");
 
-        for defined_name in self.defined_names.iter() {
+        for defined_name in &self.defined_names {
             let mut attributes = vec![("name", defined_name.name())];
 
             match defined_name.name_type {

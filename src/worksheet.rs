@@ -6947,7 +6947,7 @@ impl Worksheet {
         }
 
         // Set the max character width for each column.
-        for (col, pixels) in max_widths.iter() {
+        for (col, pixels) in &max_widths {
             let width = Self::pixels_to_width(*pixels + 7);
             self.store_column_width(*col, width, true);
         }
@@ -7824,7 +7824,7 @@ impl Worksheet {
     ) {
         let mut rel_ids: HashMap<u64, u32> = HashMap::new();
 
-        for (cell, image) in self.images.clone().iter() {
+        for (cell, image) in &self.images.clone() {
             let row = cell.0;
             let col = cell.1;
 
@@ -7946,13 +7946,13 @@ impl Worksheet {
     // Convert the chart dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
     pub(crate) fn prepare_worksheet_charts(&mut self, mut chart_id: u32, drawing_id: u32) -> u32 {
-        for (_, chart) in self.charts.iter_mut() {
+        for chart in self.charts.values_mut() {
             chart.id = chart_id;
             chart.add_axis_ids();
             chart_id += 1;
         }
 
-        for (cell, chart) in self.charts.clone().iter_mut() {
+        for (cell, chart) in &mut self.charts.clone() {
             let row = cell.0;
             let col = cell.1;
 
