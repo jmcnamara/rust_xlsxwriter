@@ -145,11 +145,26 @@ documentation and generally show how an individual function works.
 * doc_chart_axis_set_name.rs - A chart example demonstrating setting the
   title of chart axes.
 
+* doc_chart_axis_set_name_font.rs - An example of setting the font for a
+  chart axis title.
+
+* doc_chart_axis_set_num_format.rs - A chart example demonstrating setting
+  the number format a chart axes.
+
+* doc_chart_border_formatting.rs - An example of formatting the border in a
+  chart element.
+
 * doc_chart_data_labels.rs - An example of adding data labels to a chart
   series.
 
+* doc_chart_data_labels_set_font.rs - An example of adding data labels to a
+  chart series with font formatting.
+
 * doc_chart_data_labels_set_format.rs - An example of adding data labels to
   a chart series with formatting.
+
+* doc_chart_data_labels_set_num_format.rs - An example of adding data
+  labels to a chart series with number formatting.
 
 * doc_chart_data_labels_set_position.rs - An example of adding data labels
   to a chart series and changing their default position.
@@ -160,6 +175,26 @@ documentation and generally show how an individual function works.
 * doc_chart_data_labels_show_percentage.rs - An example of setting the
   percentage for the data labels of a chart series. Usually this only
   applies to a Pie or Doughnut chart.
+
+* doc_chart_font.rs - An example of setting the font for a chart element.
+
+* doc_chart_font_set_bold.rs - An example of setting the bold property for
+  the font in a chart element.
+
+* doc_chart_font_set_color.rs - An example of setting the color property
+  for the font in a chart element.
+
+* doc_chart_font_set_italic.rs - An example of setting the italic property
+  for the font in a chart element.
+
+* doc_chart_font_set_name.rs - An example of setting the font name property
+  for the font in a chart element.
+
+* doc_chart_font_set_rotation.rs - An example of setting the font text
+  rotation for the font in a chart element.
+
+* doc_chart_font_set_size.rs - An example of setting the font size property
+  for the font in a chart element.
 
 * doc_chart_format_set_no_border.rs - An example of turning off the border
   of a chart element.
@@ -178,6 +213,9 @@ documentation and generally show how an individual function works.
 
 * doc_chart_legend.rs - An example of getting the chart legend object and
   setting some of its properties.
+
+* doc_chart_legend_set_font.rs - An example of setting the font for a chart
+  legend.
 
 * doc_chart_legend_set_hidden.rs - An example of hiding a default chart
   legend.
@@ -291,6 +329,9 @@ documentation and generally show how an individual function works.
 
 * doc_chart_solid_fill_set_color.rs - An example of setting a solid fill
   color for a chart element.
+
+* doc_chart_title_set_font.rs - An example of setting the font for a chart
+  title.
 
 * doc_chart_title_set_hidden.rs - A simple chart example using the
   rust_xlsxwriter library.

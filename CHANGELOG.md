@@ -5,10 +5,28 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.37.0] - 2023-04-30
+
+### Added
+
+- Added font formatting support to chart titles, legends, axes and data labels
+  via [`ChartFont`] and various `set_font()` methods.
+
+- Made [`worksheet.write_string()`] and [`worksheet.write()`] more generic via
+  `impl Into<String>` to allow them to handle `&str`, `&String`, `String`, and
+  `Cow<>` types.
+
+  See [GitHub Feature Request #35].
+
+[`ChartFont`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartFont.html
+[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_string
+[`worksheet.write_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_string
+[GitHub Feature Request #35]: https://github.com/jmcnamara/rust_xlsxwriter/issues/35
+
 
 ## [0.36.1] - 2023-04-18
 
-Fix cargo/release issue with 0.36.0 release. Use this version instead.
+Fix cargo/release issue with 0.36.0 release.
 
 ## [0.36.0] - 2023-04-18
 

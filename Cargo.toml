@@ -7,7 +7,7 @@ repository = "https://github.com/jmcnamara/rust_xlsxwriter"
 keywords = ["excel", "xlsx"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.36.1"
+version = "0.37.0"
 edition = "2021"
 
 [dependencies]
