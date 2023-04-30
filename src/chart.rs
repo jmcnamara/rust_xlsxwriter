@@ -2118,10 +2118,10 @@ impl Chart {
         self.write_chart_title(&self.y_axis.title.clone());
 
         // Write the c:numFmt element.
-        if !self.y_axis.num_format.is_empty() {
-            self.write_number_format(&self.y_axis.num_format.clone(), false);
-        } else {
+        if self.y_axis.num_format.is_empty() {
             self.write_number_format(&self.default_num_format.clone(), true);
+        } else {
+            self.write_number_format(&self.y_axis.num_format.clone(), false);
         }
 
         // Write the c:majorTickMark element.
@@ -2170,10 +2170,10 @@ impl Chart {
         self.write_chart_title(&self.x_axis.title.clone());
 
         // Write the c:numFmt element.
-        if !self.x_axis.num_format.is_empty() {
-            self.write_number_format(&self.x_axis.num_format.clone(), false);
-        } else {
+        if self.x_axis.num_format.is_empty() {
             self.write_number_format(&self.default_num_format.clone(), true);
+        } else {
+            self.write_number_format(&self.x_axis.num_format.clone(), false);
         }
 
         // Write the c:tickLblPos element.

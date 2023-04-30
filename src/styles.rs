@@ -233,11 +233,8 @@ impl<'a> Styles<'a> {
 
         if !font.scheme.is_empty() {
             attributes.push(("val", font.scheme.to_string()));
-        } else {
-            return;
+            self.writer.xml_empty_tag("scheme", &attributes);
         }
-
-        self.writer.xml_empty_tag("scheme", &attributes);
     }
 
     // Write the <u> underline element.

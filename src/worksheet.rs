@@ -3161,11 +3161,7 @@ impl Worksheet {
         }
 
         // Set a suitable column range for the row dimension check/set.
-        let min_col = if self.dimensions.first_col != COL_MAX {
-            self.dimensions.first_col
-        } else {
-            0
-        };
+        let min_col = self.get_min_col();
 
         // Check row is in the allowed range.
         if !self.check_dimensions(row, min_col) {
@@ -3309,11 +3305,7 @@ impl Worksheet {
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Set a suitable column range for the row dimension check/set.
-        let min_col = if self.dimensions.first_col != COL_MAX {
-            self.dimensions.first_col
-        } else {
-            0
-        };
+        let min_col = self.get_min_col();
 
         // Check row is in the allowed range.
         if !self.check_dimensions(row, min_col) {
@@ -3386,11 +3378,7 @@ impl Worksheet {
     ///
     pub fn set_row_hidden(&mut self, row: RowNum) -> Result<&mut Worksheet, XlsxError> {
         // Set a suitable column range for the row dimension check/set.
-        let min_col = if self.dimensions.first_col != COL_MAX {
-            self.dimensions.first_col
-        } else {
-            0
-        };
+        let min_col = self.get_min_col();
 
         // Check row is in the allowed range.
         if !self.check_dimensions(row, min_col) {
@@ -3430,11 +3418,7 @@ impl Worksheet {
     ///
     pub fn set_row_unhidden(&mut self, row: RowNum) -> Result<&mut Worksheet, XlsxError> {
         // Set a suitable column range for the row dimension check/set.
-        let min_col = if self.dimensions.first_col != COL_MAX {
-            self.dimensions.first_col
-        } else {
-            0
-        };
+        let min_col = self.get_min_col();
 
         // Check row is in the allowed range.
         if !self.check_dimensions(row, min_col) {
@@ -3680,11 +3664,7 @@ impl Worksheet {
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Set a suitable row range for the dimension check/set.
-        let min_row = if self.dimensions.first_row != ROW_MAX {
-            self.dimensions.first_row
-        } else {
-            0
-        };
+        let min_row = self.get_min_row();
 
         // Check column is in the allowed range.
         if !self.check_dimensions(min_row, col) {
@@ -6866,15 +6846,15 @@ impl Worksheet {
                                 xf_index: _,
                                 raw_string: string,
                             } => {
-                                if !string.contains('\n') {
-                                    utility::pixel_width(string)
-                                } else {
+                                if string.contains('\n') {
                                     let mut max = 0;
                                     for segment in string.split('\n') {
                                         let length = utility::pixel_width(segment);
                                         max = cmp::max(max, length);
                                     }
                                     max
+                                } else {
+                                    utility::pixel_width(string)
                                 }
                             }
 
@@ -6958,6 +6938,24 @@ impl Worksheet {
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
+
+    // Get the minimum row number for the dimension check/set.
+    fn get_min_row(&self) -> RowNum {
+        if self.dimensions.first_row == ROW_MAX {
+            0
+        } else {
+            self.dimensions.first_row
+        }
+    }
+
+    // Get the minimum col number for the dimension check/set.
+    fn get_min_col(&self) -> ColNum {
+        if self.dimensions.first_col == COL_MAX {
+            0
+        } else {
+            self.dimensions.first_col
+        }
+    }
 
     // Hide any rows in the autofilter range that don't match the autofilter
     // conditions, like Excel does at runtime.
