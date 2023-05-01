@@ -151,6 +151,9 @@ documentation and generally show how an individual function works.
 * doc_chart_axis_set_num_format.rs - A chart example demonstrating setting
   the number format a chart axes.
 
+* doc_chart_axis_set_reverse.rs - A chart example demonstrating reversing
+  the plotting direction of the chart axes.
+
 * doc_chart_border_formatting.rs - An example of formatting the border in a
   chart element.
 

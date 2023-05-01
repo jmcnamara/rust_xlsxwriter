@@ -2049,10 +2049,10 @@ impl Chart {
         self.write_ax_id(self.axis_ids.0);
 
         // Write the c:scaling element.
-        self.write_scaling();
+        self.write_scaling(&self.x_axis.clone());
 
         // Write the c:axPos element.
-        self.write_ax_pos(self.x_axis.axis_position);
+        self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
 
         if self.chart_group_type == ChartType::Radar {
             self.write_major_gridlines();
@@ -2106,10 +2106,10 @@ impl Chart {
         self.write_ax_id(self.axis_ids.1);
 
         // Write the c:scaling element.
-        self.write_scaling();
+        self.write_scaling(&self.y_axis.clone());
 
         // Write the c:axPos element.
-        self.write_ax_pos(self.y_axis.axis_position);
+        self.write_ax_pos(self.y_axis.axis_position, self.x_axis.reverse);
 
         // Write the c:majorGridlines element.
         self.write_major_gridlines();
@@ -2161,10 +2161,10 @@ impl Chart {
         self.write_ax_id(self.axis_ids.0);
 
         // Write the c:scaling element.
-        self.write_scaling();
+        self.write_scaling(&self.x_axis.clone());
 
         // Write the c:axPos element.
-        self.write_ax_pos(self.x_axis.axis_position);
+        self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
 
         // Write the c:title element.
         self.write_chart_title(&self.x_axis.title.clone());
@@ -2202,24 +2202,34 @@ impl Chart {
     }
 
     // Write the <c:scaling> element.
-    fn write_scaling(&mut self) {
+    fn write_scaling(&mut self, axis: &ChartAxis) {
         self.writer.xml_start_tag_only("c:scaling");
 
         // Write the c:orientation element.
-        self.write_orientation();
+        self.write_orientation(axis.reverse);
 
         self.writer.xml_end_tag("c:scaling");
     }
 
     // Write the <c:orientation> element.
-    fn write_orientation(&mut self) {
-        let attributes = [("val", "minMax")];
+    fn write_orientation(&mut self, reverse: bool) {
+        let attributes = if reverse {
+            [("val", "maxMin")]
+        } else {
+            [("val", "minMax")]
+        };
 
         self.writer.xml_empty_tag("c:orientation", &attributes);
     }
 
     // Write the <c:axPos> element.
-    fn write_ax_pos(&mut self, position: ChartAxisPosition) {
+    fn write_ax_pos(&mut self, position: ChartAxisPosition, reverse: bool) {
+        let mut position = position;
+
+        if reverse {
+            position = position.reverse();
+        }
+
         let attributes = [("val", position.to_string())];
 
         self.writer.xml_empty_tag("c:axPos", &attributes);
@@ -6673,6 +6683,7 @@ pub struct ChartAxis {
     pub(crate) format: ChartFormat,
     pub(crate) font: Option<ChartFont>,
     pub(crate) num_format: String,
+    pub(crate) reverse: bool,
 }
 
 impl ChartAxis {
@@ -6684,6 +6695,7 @@ impl ChartAxis {
             format: ChartFormat::new(),
             font: None,
             num_format: String::new(),
+            reverse: false,
         }
     }
 
@@ -7019,6 +7031,61 @@ impl ChartAxis {
         self.num_format = num_format.to_string();
         self
     }
+
+    /// Reverse the direction of the axis categories or values.
+    ///
+    /// Reverse the direction that the axis data is plotted in from left to
+    /// right or top to bottom.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating reversing the plotting direction of the
+    /// chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_reverse.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Reverse the axis.
+    ///     chart.x_axis().set_reverse();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_reverse.png">
+    ///
+    pub fn set_reverse(&mut self) -> &mut ChartAxis {
+        self.reverse = true;
+        self
+    }
 }
 
 #[derive(Clone)]
@@ -7029,15 +7096,30 @@ pub(crate) enum ChartAxisType {
 
 #[derive(Clone, Copy)]
 pub(crate) enum ChartAxisPosition {
+    Top,
     Bottom,
     Left,
+    Right,
+}
+
+impl ChartAxisPosition {
+    pub(crate) fn reverse(self) -> ChartAxisPosition {
+        match self {
+            ChartAxisPosition::Top => ChartAxisPosition::Bottom,
+            ChartAxisPosition::Left => ChartAxisPosition::Right,
+            ChartAxisPosition::Right => ChartAxisPosition::Left,
+            ChartAxisPosition::Bottom => ChartAxisPosition::Top,
+        }
+    }
 }
 
 impl ToString for ChartAxisPosition {
     fn to_string(&self) -> String {
         match self {
-            ChartAxisPosition::Bottom => "b".to_string(),
+            ChartAxisPosition::Top => "t".to_string(),
             ChartAxisPosition::Left => "l".to_string(),
+            ChartAxisPosition::Right => "r".to_string(),
+            ChartAxisPosition::Bottom => "b".to_string(),
         }
     }
 }
