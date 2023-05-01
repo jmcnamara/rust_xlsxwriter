@@ -156,25 +156,25 @@ impl XMLWriter {
 }
 
 // Escape XML characters in attributes.
-pub fn escape_attributes(attribute: &str) -> Cow<str> {
+pub(crate) fn escape_attributes(attribute: &str) -> Cow<str> {
     escape_string(attribute, match_attribute_html_char)
 }
 
 // Escape XML characters in data sections of tags.  Note, this
 // is different from escape_attributes() because double quotes
 // and newline are not escaped by Excel.
-pub fn escape_data(data: &str) -> Cow<str> {
+pub(crate) fn escape_data(data: &str) -> Cow<str> {
     escape_string(data, match_data_html_char)
 }
 
 // Escape XML characters in shared strings. In particular we need to escape
 // control and non-printing characters in the range '\x00' - '\x1F'.
-pub fn escape_si_data(data: &str) -> Cow<str> {
+pub(crate) fn escape_si_data(data: &str) -> Cow<str> {
     escape_string(data, match_shared_string_char)
 }
 
 // Escape non-url characters in a hyperlink/url.
-pub fn escape_url(data: &str) -> Cow<str> {
+pub(crate) fn escape_url(data: &str) -> Cow<str> {
     escape_string(data, match_url_char)
 }
 
