@@ -1208,6 +1208,7 @@ impl Chart {
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
         self.y_axis.title.is_horizontal = true;
+        self.y_axis.major_gridlines = true;
 
         self.chart_group_type = ChartType::Area;
         self.default_cross_between = false;
@@ -1231,6 +1232,7 @@ impl Chart {
     fn initialize_bar_chart(mut self) -> Chart {
         self.x_axis.axis_type = ChartAxisType::Value;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
+        self.x_axis.major_gridlines = true;
 
         self.y_axis.axis_type = ChartAxisType::Category;
         self.y_axis.axis_position = ChartAxisPosition::Left;
@@ -1264,6 +1266,7 @@ impl Chart {
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
+        self.y_axis.major_gridlines = true;
 
         self.chart_group_type = ChartType::Column;
 
@@ -1303,6 +1306,7 @@ impl Chart {
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
         self.y_axis.title.is_horizontal = true;
+        self.y_axis.major_gridlines = true;
 
         self.chart_group_type = ChartType::Line;
 
@@ -1333,6 +1337,8 @@ impl Chart {
     fn initialize_radar_chart(mut self) -> Chart {
         self.x_axis.axis_type = ChartAxisType::Category;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
+        self.x_axis.major_gridlines = true;
+        self.y_axis.major_gridlines = true;
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
@@ -1353,6 +1359,7 @@ impl Chart {
         self.y_axis.axis_position = ChartAxisPosition::Left;
 
         self.y_axis.title.is_horizontal = true;
+        self.y_axis.major_gridlines = true;
 
         self.chart_group_type = ChartType::Scatter;
         self.default_cross_between = false;
@@ -2054,9 +2061,8 @@ impl Chart {
         // Write the c:axPos element.
         self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
 
-        if self.chart_group_type == ChartType::Radar {
-            self.write_major_gridlines();
-        }
+        self.write_major_gridlines(self.x_axis.clone());
+        self.write_minor_gridlines(self.x_axis.clone());
 
         // Write the c:title element.
         self.write_chart_title(&self.x_axis.title.clone());
@@ -2111,8 +2117,9 @@ impl Chart {
         // Write the c:axPos element.
         self.write_ax_pos(self.y_axis.axis_position, self.x_axis.reverse);
 
-        // Write the c:majorGridlines element.
-        self.write_major_gridlines();
+        // Write the Gridlines elements.
+        self.write_major_gridlines(self.y_axis.clone());
+        self.write_minor_gridlines(self.y_axis.clone());
 
         // Write the c:title element.
         self.write_chart_title(&self.y_axis.title.clone());
@@ -2175,6 +2182,10 @@ impl Chart {
 
         // Write the c:axPos element.
         self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
+
+        // Write the Gridlines elements.
+        self.write_major_gridlines(self.x_axis.clone());
+        self.write_minor_gridlines(self.x_axis.clone());
 
         // Write the c:title element.
         self.write_chart_title(&self.x_axis.title.clone());
@@ -2290,8 +2301,39 @@ impl Chart {
     }
 
     // Write the <c:majorGridlines> element.
-    fn write_major_gridlines(&mut self) {
-        self.writer.xml_empty_tag_only("c:majorGridlines");
+    fn write_major_gridlines(&mut self, axis: ChartAxis) {
+        if axis.major_gridlines {
+            if let Some(line) = &axis.major_gridlines_line {
+                self.writer.xml_start_tag_only("c:majorGridlines");
+                self.writer.xml_start_tag_only("c:spPr");
+
+                // Write the a:ln element.
+                self.write_a_ln(line);
+
+                self.writer.xml_end_tag("c:spPr");
+                self.writer.xml_end_tag("c:majorGridlines");
+            } else {
+                self.writer.xml_empty_tag_only("c:majorGridlines");
+            }
+        }
+    }
+
+    // Write the <c:minorGridlines> element.
+    fn write_minor_gridlines(&mut self, axis: ChartAxis) {
+        if axis.minor_gridlines {
+            if let Some(line) = &axis.minor_gridlines_line {
+                self.writer.xml_start_tag_only("c:minorGridlines");
+                self.writer.xml_start_tag_only("c:spPr");
+
+                // Write the a:ln element.
+                self.write_a_ln(line);
+
+                self.writer.xml_end_tag("c:spPr");
+                self.writer.xml_end_tag("c:minorGridlines");
+            } else {
+                self.writer.xml_empty_tag_only("c:minorGridlines");
+            }
+        }
     }
 
     // Write the <c:tickLblPos> element.
@@ -6746,6 +6788,10 @@ pub struct ChartAxis {
     pub(crate) min: String,
     pub(crate) major_unit: String,
     pub(crate) minor_unit: String,
+    pub(crate) major_gridlines: bool,
+    pub(crate) minor_gridlines: bool,
+    pub(crate) major_gridlines_line: Option<ChartLine>,
+    pub(crate) minor_gridlines_line: Option<ChartLine>,
 }
 
 impl ChartAxis {
@@ -6762,6 +6808,10 @@ impl ChartAxis {
             min: String::new(),
             major_unit: String::new(),
             minor_unit: String::new(),
+            major_gridlines: false,
+            minor_gridlines: false,
+            major_gridlines_line: None,
+            minor_gridlines_line: None,
         }
     }
 
@@ -7251,13 +7301,18 @@ impl ChartAxis {
     /// category values are numbers. See [Chart Value and Category Axes] for an
     /// explanation of the difference between Value and Category axes in Excel.
     ///
+    /// [Chart Value and Category Axes]:
+    ///     struct.Chart.html#chart-value-and-category-axes
+    ///
     /// # Arguments
     ///
     /// `value` - The major unit for the axes.
     ///
+    ///
+    ///
     /// # Examples
     ///
-    /// A chart example demonstrating setting the axes bounds for chart axes.
+    /// A chart example demonstrating setting the units for chart axes.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_axis_set_major_unit.rs
@@ -7281,8 +7336,93 @@ impl ChartAxis {
     ///     // Add a data series using Excel formula syntax to describe the range.
     ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
     ///
-    ///     // Set the value axes major units.
+    ///     // Turn on the minor gridlines.
+    ///     chart.y_axis().set_minor_gridlines(true);
+    ///
+    ///     // Set the value axes major and minor units.
     ///     chart.y_axis().set_major_unit(20);
+    ///     chart.y_axis().set_minor_unit(5);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_unit.png">
+    ///
+    pub fn set_major_unit<T>(&mut self, value: T) -> &mut ChartAxis
+    where
+        T: Into<f64>,
+    {
+        self.major_unit = value.into().to_string();
+        self
+    }
+
+    /// Set the increment of the minor units in the axis range.
+    ///
+    /// See [`ChartAxis::set_major_unit()`](ChartAxis::set_major_unit) above for
+    /// a full explanation and example.
+    ///
+    /// # Arguments
+    ///
+    /// `value` - The major unit for the axes.
+    ///
+    pub fn set_minor_unit<T>(&mut self, value: T) -> &mut ChartAxis
+    where
+        T: Into<f64>,
+    {
+        self.minor_unit = value.into().to_string();
+        self
+    }
+
+    /// Turn on/off major gridlines for a chart axis.
+    ///
+    /// Major gridlines are on by default for Y/Value axes but off for
+    /// X/Category axes.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default for X axes.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating turning off the major gridlines for chart
+    /// axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_major_gridlines.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Turn off the major gridlines, they are on by default.
+    ///     chart.y_axis().set_major_gridlines(false);
     ///
     ///     // Hide legend for clarity.
     ///     chart.legend().set_hidden();
@@ -7300,30 +7440,196 @@ impl ChartAxis {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_unit.png">
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_gridlines.png">
     ///
-    pub fn set_major_unit<T>(&mut self, value: T) -> &mut ChartAxis
-    where
-        T: Into<f64>,
-    {
-        self.major_unit = value.into().to_string();
+    pub fn set_major_gridlines(&mut self, enable: bool) -> &mut ChartAxis {
+        self.major_gridlines = enable;
         self
     }
 
-    /// Set the increment of the minor units in the axis range.
+    /// Turn on/off minor gridlines for a chart axis.
     ///
-    /// See [`ChartAxis::set_major_unit()`](ChartAxis::set_major_unit) above for
-    /// a full explanation.
+    /// Minor gridlines are off by default.
     ///
     /// # Arguments
     ///
-    /// `value` - The major unit for the axes.
+    /// * `enable` - Turn the property on/off. It is off by default.
     ///
-    pub fn set_minor_unit<T>(&mut self, value: T) -> &mut ChartAxis
-    where
-        T: Into<f64>,
-    {
-        self.minor_unit = value.into().to_string();
+    /// # Examples
+    ///
+    /// A chart example demonstrating turning on the minor gridlines for chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_minor_gridlines.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Turn on the minor gridlines. The Y-axis major gridlines are on by
+    ///     // default.
+    ///     chart.y_axis().set_minor_gridlines(true);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_minor_gridlines.png">
+    ///
+    pub fn set_minor_gridlines(&mut self, enable: bool) -> &mut ChartAxis {
+        self.minor_gridlines = enable;
+        self
+    }
+
+    /// Set the line formatting for a chart axis major gridlines.
+    ///
+    /// See the [`ChartLine`] struct for details on the line properties that can
+    /// be set.
+    ///
+    /// # Arguments
+    ///
+    /// * `line` - A [`ChartLine`] struct reference.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating formatting the major gridlines for chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_major_gridlines_line.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Format the major gridlines.
+    ///     chart
+    ///         .y_axis()
+    ///         .set_major_gridlines_line(ChartLine::new().set_color("#FF0000"));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_gridlines_line.png">
+    ///
+    pub fn set_major_gridlines_line(&mut self, line: &ChartLine) -> &mut ChartAxis {
+        self.major_gridlines_line = Some(line.clone());
+        self.major_gridlines = true;
+        self
+    }
+
+    /// Set the line formatting for a chart axis minor gridlines.
+    ///
+    /// See the [`ChartLine`] struct for details on the line properties that can
+    /// be set.
+    ///
+    /// # Arguments
+    ///
+    /// * `line` - A [`ChartLine`] struct reference.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating formatting the minor gridlines for chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_minor_gridlines_line.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Format the minor gridlines.
+    ///     chart
+    ///         .y_axis()
+    ///         .set_minor_gridlines_line(ChartLine::new().set_color("#FF0000"));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_minor_gridlines_line.png">
+    ///
+    pub fn set_minor_gridlines_line(&mut self, line: &ChartLine) -> &mut ChartAxis {
+        self.minor_gridlines_line = Some(line.clone());
+        self.minor_gridlines = true;
         self
     }
 }
@@ -7895,6 +8201,10 @@ impl ChartFormat {
     /// See the [`ChartLine`] struct for details on the line properties that can
     /// be set.
     ///
+    /// # Arguments
+    ///
+    /// * `line` - A [`ChartLine`] struct reference.
+    ///
     pub fn set_line(&mut self, line: &ChartLine) -> &mut ChartFormat {
         self.line = Some(line.clone());
         self
@@ -7906,6 +8216,10 @@ impl ChartFormat {
     /// can be set. As a syntactic shortcut you can use the type alias
     /// [`ChartBorder`] instead
     /// of `ChartLine`.
+    ///
+    /// # Arguments
+    ///
+    /// * `line` - A [`ChartLine`] struct reference.
     ///
     /// # Examples
     ///
@@ -8144,6 +8458,10 @@ impl ChartFormat {
     /// See the [`ChartSolidFill`] struct for details on the solid fill
     /// properties that can be set.
     ///
+    /// # Arguments
+    ///
+    /// * `fill` - A [`ChartSolidFill`] struct reference.
+    ///
     /// # Examples
     ///
     /// An example of setting a solid fill for a chart element.
@@ -8203,6 +8521,10 @@ impl ChartFormat {
     ///
     /// See the [`ChartPatternFill`] struct for details on the pattern fill
     /// properties that can be set.
+    ///
+    /// # Arguments
+    ///
+    /// * `fill` - A [`ChartPatternFill`] struct reference.
     ///
     /// # Examples
     ///

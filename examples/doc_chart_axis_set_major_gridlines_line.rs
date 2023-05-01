@@ -2,9 +2,9 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! A chart example demonstrating setting the units for chart axes.
+//! A chart example demonstrating formatting the major gridlines for chart axes.
 
-use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -23,12 +23,10 @@ fn main() -> Result<(), XlsxError> {
     // Add a data series using Excel formula syntax to describe the range.
     chart.add_series().set_values("Sheet1!$A$1:$A$5");
 
-    // Turn on the minor gridlines.
-    chart.y_axis().set_minor_gridlines(true);
-
-    // Set the value axes major and minor units.
-    chart.y_axis().set_major_unit(20);
-    chart.y_axis().set_minor_unit(5);
+    // Format the major gridlines.
+    chart
+        .y_axis()
+        .set_major_gridlines_line(ChartLine::new().set_color("#FF0000"));
 
     // Hide legend for clarity.
     chart.legend().set_hidden();
