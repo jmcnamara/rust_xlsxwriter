@@ -2151,6 +2151,16 @@ impl Chart {
         // Write the c:crossBetween element.
         self.write_cross_between();
 
+        // Write the c:majorUnit element.
+        if self.y_axis.axis_type == ChartAxisType::Value && !self.y_axis.major_unit.is_empty() {
+            self.write_major_unit(self.y_axis.major_unit.clone());
+        }
+
+        // Write the c:minorUnit element.
+        if self.y_axis.axis_type == ChartAxisType::Value && !self.y_axis.minor_unit.is_empty() {
+            self.write_minor_unit(self.y_axis.minor_unit.clone());
+        }
+
         self.writer.xml_end_tag("c:valAx");
     }
 
@@ -2197,6 +2207,16 @@ impl Chart {
 
         // Write the c:crossBetween element.
         self.write_cross_between();
+
+        // Write the c:majorUnit element.
+        if self.x_axis.axis_type == ChartAxisType::Value && !self.x_axis.major_unit.is_empty() {
+            self.write_major_unit(self.x_axis.major_unit.clone());
+        }
+
+        // Write the c:minorUnit element.
+        if self.x_axis.axis_type == ChartAxisType::Value && !self.x_axis.minor_unit.is_empty() {
+            self.write_minor_unit(self.x_axis.minor_unit.clone());
+        }
 
         self.writer.xml_end_tag("c:valAx");
     }
@@ -2321,12 +2341,26 @@ impl Chart {
         let mut attributes = vec![];
 
         if self.default_cross_between {
-            attributes.push(("val", "between".to_string()));
+            attributes.push(("val", "between"));
         } else {
-            attributes.push(("val", "midCat".to_string()));
+            attributes.push(("val", "midCat"));
         }
 
         self.writer.xml_empty_tag("c:crossBetween", &attributes);
+    }
+
+    // Write the <c:majorUnit> element.
+    fn write_major_unit(&mut self, value: String) {
+        let attributes = [("val", value)];
+
+        self.writer.xml_empty_tag("c:majorUnit", &attributes);
+    }
+
+    // Write the <c:minorUnit> element.
+    fn write_minor_unit(&mut self, value: String) {
+        let attributes = [("val", value)];
+
+        self.writer.xml_empty_tag("c:minorUnit", &attributes);
     }
 
     // Write the <c:legend> element.
@@ -6710,6 +6744,8 @@ pub struct ChartAxis {
     pub(crate) reverse: bool,
     pub(crate) max: String,
     pub(crate) min: String,
+    pub(crate) major_unit: String,
+    pub(crate) minor_unit: String,
 }
 
 impl ChartAxis {
@@ -6724,6 +6760,8 @@ impl ChartAxis {
             reverse: false,
             max: String::new(),
             min: String::new(),
+            major_unit: String::new(),
+            minor_unit: String::new(),
         }
     }
 
@@ -7203,6 +7241,89 @@ impl ChartAxis {
         T: Into<f64>,
     {
         self.min = min.into().to_string();
+        self
+    }
+
+    /// Set the increment of the major units in the axis range.
+    ///
+    /// Note, Excel only supports major/minor units for "Value" axes. In general
+    /// you cannot set major/minor units for a X/Category axis even if the
+    /// category values are numbers. See [Chart Value and Category Axes] for an
+    /// explanation of the difference between Value and Category axes in Excel.
+    ///
+    /// # Arguments
+    ///
+    /// `value` - The major unit for the axes.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the axes bounds for chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_major_unit.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Set the value axes major units.
+    ///     chart.y_axis().set_major_unit(20);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_unit.png">
+    ///
+    pub fn set_major_unit<T>(&mut self, value: T) -> &mut ChartAxis
+    where
+        T: Into<f64>,
+    {
+        self.major_unit = value.into().to_string();
+        self
+    }
+
+    /// Set the increment of the minor units in the axis range.
+    ///
+    /// See [`ChartAxis::set_major_unit()`](ChartAxis::set_major_unit) above for
+    /// a full explanation.
+    ///
+    /// # Arguments
+    ///
+    /// `value` - The major unit for the axes.
+    ///
+    pub fn set_minor_unit<T>(&mut self, value: T) -> &mut ChartAxis
+    where
+        T: Into<f64>,
+    {
+        self.minor_unit = value.into().to_string();
         self
     }
 }
