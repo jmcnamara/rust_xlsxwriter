@@ -1346,7 +1346,7 @@ impl Chart {
 
     // Initialize scatter charts.
     fn initialize_scatter_chart(mut self) -> Chart {
-        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_type = ChartAxisType::Value;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
 
         self.y_axis.axis_type = ChartAxisType::Value;
@@ -2208,6 +2208,16 @@ impl Chart {
         // Write the c:orientation element.
         self.write_orientation(axis.reverse);
 
+        // Write the c:max element.
+        if axis.axis_type == ChartAxisType::Value && !axis.max.is_empty() {
+            self.write_max(&axis.max);
+        }
+
+        // Write the c:min element.
+        if axis.axis_type == ChartAxisType::Value && !axis.min.is_empty() {
+            self.write_min(&axis.min);
+        }
+
         self.writer.xml_end_tag("c:scaling");
     }
 
@@ -2220,6 +2230,20 @@ impl Chart {
         };
 
         self.writer.xml_empty_tag("c:orientation", &attributes);
+    }
+
+    // Write the <c:max> element.
+    fn write_max(&mut self, max: &str) {
+        let attributes = [("val", max.to_string())];
+
+        self.writer.xml_empty_tag("c:max", &attributes);
+    }
+
+    // Write the <c:min> element.
+    fn write_min(&mut self, min: &str) {
+        let attributes = [("val", min.to_string())];
+
+        self.writer.xml_empty_tag("c:min", &attributes);
     }
 
     // Write the <c:axPos> element.
@@ -6684,6 +6708,8 @@ pub struct ChartAxis {
     pub(crate) font: Option<ChartFont>,
     pub(crate) num_format: String,
     pub(crate) reverse: bool,
+    pub(crate) max: String,
+    pub(crate) min: String,
 }
 
 impl ChartAxis {
@@ -6696,6 +6722,8 @@ impl ChartAxis {
             font: None,
             num_format: String::new(),
             reverse: false,
+            max: String::new(),
+            min: String::new(),
         }
     }
 
@@ -7086,9 +7114,100 @@ impl ChartAxis {
         self.reverse = true;
         self
     }
+
+    /// Set the maximum value for an axis.
+    ///
+    /// Set the maximum bound to be displayed for an axis.
+    ///
+    /// Note, Excel only supports maximum/minimum values for "Value" axes. In
+    /// general you cannot set a maximum or minimum value for a X/Category axis
+    /// even if the category values are numbers. See [Chart Value and Category
+    /// Axes] for an explanation of the difference between Value and Category
+    /// axes in Excel.
+    ///
+    /// [Chart Value and Category Axes]:
+    ///     struct.Chart.html#chart-value-and-category-axes
+    ///
+    /// # Arguments
+    ///
+    /// `max` - The maximum bound for the axes.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the axes bounds for chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_max.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, -30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, -30)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Set the value axes bounds.
+    ///     chart.y_axis().set_min(-60);
+    ///     chart.y_axis().set_max(60);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_max.png">
+    ///
+    pub fn set_max<T>(&mut self, max: T) -> &mut ChartAxis
+    where
+        T: Into<f64>,
+    {
+        self.max = max.into().to_string();
+        self
+    }
+
+    /// Set the minimum value for an axis.
+    ///
+    /// Set the minimum bound to be displayed for an axis.
+    ///
+    /// See [`ChartAxis::set_min()`](ChartAxis::set_min) above for a full
+    /// explanation and example.
+    ///
+    /// # Arguments
+    ///
+    /// `min` - The minimum bound for the axes.
+    ///
+    pub fn set_min<T>(&mut self, min: T) -> &mut ChartAxis
+    where
+        T: Into<f64>,
+    {
+        self.min = min.into().to_string();
+        self
+    }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub(crate) enum ChartAxisType {
     Category,
     Value,
@@ -7429,7 +7548,7 @@ impl ChartLegend {
     ///
     /// # Arguments
     ///
-    /// `font`: A [`ChartFont`] struct reference to represent the font
+    /// `font` - A [`ChartFont`] struct reference to represent the font
     /// properties.
     ///
     ///
