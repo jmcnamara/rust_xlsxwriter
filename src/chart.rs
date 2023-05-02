@@ -2058,6 +2058,10 @@ impl Chart {
         // Write the c:scaling element.
         self.write_scaling(&self.x_axis.clone());
 
+        if self.x_axis.is_hidden {
+            self.write_delete();
+        }
+
         // Write the c:axPos element.
         self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
 
@@ -2114,6 +2118,9 @@ impl Chart {
         // Write the c:scaling element.
         self.write_scaling(&self.y_axis.clone());
 
+        if self.y_axis.is_hidden {
+            self.write_delete();
+        }
         // Write the c:axPos element.
         self.write_ax_pos(self.y_axis.axis_position, self.x_axis.reverse);
 
@@ -2179,6 +2186,10 @@ impl Chart {
 
         // Write the c:scaling element.
         self.write_scaling(&self.x_axis.clone());
+
+        if self.x_axis.is_hidden {
+            self.write_delete();
+        }
 
         // Write the c:axPos element.
         self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
@@ -6796,6 +6807,7 @@ pub struct ChartAxis {
     pub(crate) font: Option<ChartFont>,
     pub(crate) num_format: String,
     pub(crate) reverse: bool,
+    pub(crate) is_hidden: bool,
     pub(crate) max: String,
     pub(crate) min: String,
     pub(crate) major_unit: String,
@@ -6817,6 +6829,7 @@ impl ChartAxis {
             font: None,
             num_format: String::new(),
             reverse: false,
+            is_hidden: false,
             max: String::new(),
             min: String::new(),
             major_unit: String::new(),
@@ -7649,7 +7662,7 @@ impl ChartAxis {
 
     /// Set the log base of the axis range.
     ///
-    /// This property is only applicable to value axes, ee [Chart Value and
+    /// This property is only applicable to value axes, see [Chart Value and
     /// Category Axes] for an explanation of the difference between Value and
     /// Category axes in Excel.
     ///
@@ -7711,6 +7724,62 @@ impl ChartAxis {
         if base >= 2 {
             self.log_base = base;
         }
+        self
+    }
+
+    /// Hide the chart axis.
+    ///
+    /// Hide the number or label section of the chart axis.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating hiding the chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_hidden.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 5)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Hide both axes.
+    ///     chart.x_axis().set_hidden();
+    ///     chart.y_axis().set_hidden();
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_hidden.png">
+    ///
+    pub fn set_hidden(&mut self) -> &mut ChartAxis {
+        self.is_hidden = true;
         self
     }
 }
