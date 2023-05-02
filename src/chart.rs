@@ -2236,6 +2236,11 @@ impl Chart {
     fn write_scaling(&mut self, axis: &ChartAxis) {
         self.writer.xml_start_tag_only("c:scaling");
 
+        // Write the c:logBase element.
+        if axis.axis_type == ChartAxisType::Value && axis.log_base >= 2 {
+            self.write_log_base(axis.log_base);
+        }
+
         // Write the c:orientation element.
         self.write_orientation(axis.reverse);
 
@@ -2250,6 +2255,13 @@ impl Chart {
         }
 
         self.writer.xml_end_tag("c:scaling");
+    }
+
+    // Write the <c:logBase> element.
+    fn write_log_base(&mut self, base: u16) {
+        let attributes = [("val", base.to_string())];
+
+        self.writer.xml_empty_tag("c:logBase", &attributes);
     }
 
     // Write the <c:orientation> element.
@@ -6792,6 +6804,7 @@ pub struct ChartAxis {
     pub(crate) minor_gridlines: bool,
     pub(crate) major_gridlines_line: Option<ChartLine>,
     pub(crate) minor_gridlines_line: Option<ChartLine>,
+    pub(crate) log_base: u16,
 }
 
 impl ChartAxis {
@@ -6812,6 +6825,7 @@ impl ChartAxis {
             minor_gridlines: false,
             major_gridlines_line: None,
             minor_gridlines_line: None,
+            log_base: 0,
         }
     }
 
@@ -7630,6 +7644,73 @@ impl ChartAxis {
     pub fn set_minor_gridlines_line(&mut self, line: &ChartLine) -> &mut ChartAxis {
         self.minor_gridlines_line = Some(line.clone());
         self.minor_gridlines = true;
+        self
+    }
+
+    /// Set the log base of the axis range.
+    ///
+    /// This property is only applicable to value axes, ee [Chart Value and
+    /// Category Axes] for an explanation of the difference between Value and
+    /// Category axes in Excel.
+    ///
+    /// [Chart Value and Category Axes]:
+    ///     struct.Chart.html#chart-value-and-category-axes
+    ///
+    /// # Arguments
+    ///
+    /// * `base` - The logarithm base. Should be >= 2.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the logarithm base for chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_log_base.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 5)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Change the default logarithm base for the Y-axis.
+    ///     chart.y_axis().set_log_base(10);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_log_base.png">
+    ///
+    pub fn set_log_base(&mut self, base: u16) -> &mut ChartAxis {
+        if base >= 2 {
+            self.log_base = base;
+        }
         self
     }
 }
