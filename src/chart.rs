@@ -2123,7 +2123,7 @@ impl Chart {
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_label_position();
+        self.write_tick_label_position(self.x_axis.label_position);
 
         if self.x_axis.format.has_formatting() {
             // Write the c:spPr formatting element.
@@ -2188,7 +2188,7 @@ impl Chart {
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_label_position();
+        self.write_tick_label_position(self.y_axis.label_position);
 
         if self.y_axis.format.has_formatting() {
             // Write the c:spPr formatting element.
@@ -2253,7 +2253,7 @@ impl Chart {
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_label_position();
+        self.write_tick_label_position(self.x_axis.label_position);
 
         if self.x_axis.format.has_formatting() {
             // Write the c:spPr formatting element.
@@ -2404,8 +2404,8 @@ impl Chart {
     }
 
     // Write the <c:tickLblPos> element.
-    fn write_tick_label_position(&mut self) {
-        let attributes = [("val", "nextTo")];
+    fn write_tick_label_position(&mut self, position: ChartAxisLabelPosition) {
+        let attributes = [("val", position.to_string())];
 
         self.writer.xml_empty_tag("c:tickLblPos", &attributes);
     }
@@ -6991,6 +6991,7 @@ impl ChartPoint {
 pub struct ChartAxis {
     axis_type: ChartAxisType,
     axis_position: ChartAxisPosition,
+    label_position: ChartAxisLabelPosition,
     pub(crate) title: ChartTitle,
     pub(crate) format: ChartFormat,
     pub(crate) font: Option<ChartFont>,
@@ -7013,6 +7014,7 @@ impl ChartAxis {
         ChartAxis {
             axis_type: ChartAxisType::Value,
             axis_position: ChartAxisPosition::Bottom,
+            label_position: ChartAxisLabelPosition::NextTo,
             title: ChartTitle::new(),
             format: ChartFormat::new(),
             font: None,
@@ -7849,6 +7851,68 @@ impl ChartAxis {
         self
     }
 
+    /// Set the label position for the axis.
+    ///
+    /// The label position defines where the values/categories for the axis are
+    /// displayed. The position is controlled via [`ChartAxisLabelPosition`] enum.
+    ///
+    /// # Arguments
+    ///
+    /// * `position` - A [`ChartAxisLabelPosition`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the label position for an axis.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_label_position.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartAxisLabelPosition, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 5)?;
+    /// #     worksheet.write(1, 0, -30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, -30)?;
+    /// #     worksheet.write(4, 0, 5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Set the axis label position to the bottom of the chart.
+    ///     chart
+    ///         .x_axis()
+    ///         .set_label_position(ChartAxisLabelPosition::Low);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_label_position.png">
+    ///
+    pub fn set_label_position(&mut self, position: ChartAxisLabelPosition) -> &mut ChartAxis {
+        self.label_position = position;
+        self
+    }
+
     /// Set the log base of the axis range.
     ///
     /// This property is only applicable to value axes, see [Chart Value and
@@ -8005,6 +8069,88 @@ impl ToString for ChartAxisPosition {
             ChartAxisPosition::Left => "l".to_string(),
             ChartAxisPosition::Right => "r".to_string(),
             ChartAxisPosition::Bottom => "b".to_string(),
+        }
+    }
+}
+
+/// Enum to define the Chart Axis Label Position.
+///
+/// This property is used in conjunction with
+/// [`ChartAxis::set_label_position()`](ChartAxis::set_label_position).
+///
+/// # Examples
+///
+/// A chart example demonstrating setting the label position for an axis.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_axis_set_label_position.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartAxisLabelPosition, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 5)?;
+/// #     worksheet.write(1, 0, -30)?;
+/// #     worksheet.write(2, 0, 40)?;
+/// #     worksheet.write(3, 0, -30)?;
+/// #     worksheet.write(4, 0, 5)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series using Excel formula syntax to describe the range.
+///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+///
+///     // Set the axis label position to the bottom of the chart.
+///     chart
+///         .x_axis()
+///         .set_label_position(ChartAxisLabelPosition::Low);
+///
+///     // Hide legend for clarity.
+///     chart.legend().set_hidden();
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_axis_set_label_position.png">
+///
+#[derive(Clone, Copy)]
+pub enum ChartAxisLabelPosition {
+    ///  Position the axis labels next to the axis. The default.
+    NextTo,
+
+    ///  Position the axis labels at the top of the chart, for horizontal axes,
+    ///  or to the right for vertical axes.
+    High,
+
+    /// Position the axis labels at the bottom of the chart, for horizontal
+    /// axes, or to the left for vertical axes.
+    Low,
+
+    /// Turn off the the axis labels.
+    None,
+}
+
+impl ToString for ChartAxisLabelPosition {
+    fn to_string(&self) -> String {
+        match self {
+            ChartAxisLabelPosition::Low => "low".to_string(),
+            ChartAxisLabelPosition::High => "high".to_string(),
+            ChartAxisLabelPosition::None => "none".to_string(),
+            ChartAxisLabelPosition::NextTo => "nextTo".to_string(),
         }
     }
 }
