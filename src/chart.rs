@@ -1774,6 +1774,11 @@ impl Chart {
                 }
             }
 
+            // Write the c:invertIfNegative element.
+            if series.invert_if_negative {
+                self.write_invert_if_negative();
+            }
+
             // Write the point formatting for the series.
             if !series.points.is_empty() {
                 self.write_d_pt(&series.points, max_points);
@@ -1792,6 +1797,11 @@ impl Chart {
 
             // Write the c:val element.
             self.write_val(&series.value_range, &series.value_cache_data);
+
+            if !series.inverted_color.is_auto_or_default() {
+                // Write the c:extLst element for the inverted fill color.
+                self.write_extension_list(series.inverted_color);
+            }
 
             self.writer.xml_end_tag("c:ser");
         }
@@ -1898,6 +1908,40 @@ impl Chart {
         let attributes = [("val", index.to_string())];
 
         self.writer.xml_empty_tag("c:order", &attributes);
+    }
+
+    // Write the <c:invertIfNegative> element.
+    fn write_invert_if_negative(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer.xml_empty_tag("c:invertIfNegative", &attributes);
+    }
+
+    // Write the <c:extLst> element for inverted fill colors.
+    fn write_extension_list(&mut self, color: XlsxColor) {
+        let attributes1 = [
+            ("uri", "{6F2FDCE9-48DA-4B69-8628-5D25D57E5C99}"),
+            (
+                "xmlns:c14",
+                "http://schemas.microsoft.com/office/drawing/2007/8/2/chart",
+            ),
+        ];
+        let attributes2 = [(
+            "xmlns:c14",
+            "http://schemas.microsoft.com/office/drawing/2007/8/2/chart",
+        )];
+
+        self.writer.xml_start_tag_only("c:extLst");
+        self.writer.xml_start_tag("c:ext", &attributes1);
+        self.writer.xml_start_tag_only("c14:invertSolidFillFmt");
+        self.writer.xml_start_tag("c14:spPr", &attributes2);
+
+        self.write_a_solid_fill(color, 0);
+
+        self.writer.xml_end_tag("c14:spPr");
+        self.writer.xml_end_tag("c14:invertSolidFillFmt");
+        self.writer.xml_end_tag("c:ext");
+        self.writer.xml_end_tag("c:extLst");
     }
 
     // Write the <c:cat> element.
@@ -3705,6 +3749,8 @@ pub struct ChartSeries {
     pub(crate) points: Vec<ChartPoint>,
     pub(crate) gap: u16,
     pub(crate) overlap: i8,
+    pub(crate) invert_if_negative: bool,
+    pub(crate) inverted_color: XlsxColor,
 }
 
 #[allow(clippy::new_without_default)]
@@ -3813,6 +3859,8 @@ impl ChartSeries {
             custom_data_labels: vec![],
             gap: 150,
             overlap: 0,
+            invert_if_negative: false,
+            inverted_color: XlsxColor::Default,
         }
     }
 
@@ -4811,6 +4859,147 @@ impl ChartSeries {
     pub fn set_gap(&mut self, gap: u16) -> &mut ChartSeries {
         if gap <= 500 {
             self.gap = gap;
+        }
+        self
+    }
+
+    /// Invert the color for negative values in a column/bar chart series.
+    ///
+    /// Bar and Column charts in Excel offer a series property called "Invert if
+    /// negative". This isn't available for other types of charts.
+    ///
+    /// The negative values are shown as a white solid fill with a black border.
+    /// To set the color of the negative part of the bar/column see
+    /// [`set_invert_if_negative_color()`](ChartSeries::set_invert_if_negative_color)
+    /// below.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the "Invert if negative" property
+    /// for a chart series.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_set_invert_if_negative.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, -5)?;
+    /// #     worksheet.write(2, 0, 20)?;
+    /// #     worksheet.write(3, 0, -15)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series and set the "Invert if negative" property.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$5")
+    ///         .set_invert_if_negative();
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_invert_if_negative.png">
+    ///
+    pub fn set_invert_if_negative(&mut self) -> &mut ChartSeries {
+        self.invert_if_negative = true;
+        self
+    }
+
+    /// Set the inverted color for negative values in a column/bar chart series.
+    ///
+    /// Bar and Column charts in Excel offer a series property called "Invert if
+    /// negative" (see
+    /// [`set_invert_if_negative()`](ChartSeries::set_invert_if_negative)
+    /// above).
+    ///
+    /// The negative values are usually shown as a white solid fill with a black
+    /// border but the `set_invert_if_negative_color()` method can be use to set
+    /// a user defined color. This also requires that you set a
+    /// [`ChartSolidFill`] for the series.
+    ///
+    /// # Arguments
+    ///
+    /// * `color` - The inverse color property defined by a [`XlsxColor`] enum
+    ///   value.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the "Invert if negative" property and
+    /// associated color for a chart series. This also requires that you set a solid
+    /// fill color for the series.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_set_invert_if_negative_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, -5)?;
+    /// #     worksheet.write(2, 0, 20)?;
+    /// #     worksheet.write(3, 0, -15)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series and set the "Invert if negative" property and color.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$5")
+    ///         .set_format(ChartSolidFill::new().set_color("#4C9900"))
+    ///         .set_invert_if_negative_color("#FF6666");
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_series_set_invert_if_negative_color.png">
+    ///
+    pub fn set_invert_if_negative_color<T>(&mut self, color: T) -> &mut ChartSeries
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.invert_if_negative = true;
+            self.inverted_color = color;
         }
         self
     }
