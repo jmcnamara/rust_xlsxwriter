@@ -520,6 +520,7 @@ impl Chart {
     /// Output file:
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name.png">
+    ///
     pub fn x_axis(&mut self) -> &mut ChartAxis {
         &mut self.x_axis
     }
@@ -1337,6 +1338,7 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
         self.y_axis.major_gridlines = true;
+        self.y_axis.major_tick_type = Some(ChartAxisTickType::Cross);
 
         self.chart_group_type = ChartType::Radar;
 
@@ -2117,6 +2119,16 @@ impl Chart {
             self.write_number_format("General", true);
         }
 
+        // Write the c:majorTickMark element.
+        if let Some(tick_type) = self.x_axis.major_tick_type {
+            self.write_major_tick_mark(tick_type);
+        }
+
+        // Write the c:minorTickMark element.
+        if let Some(tick_type) = self.x_axis.minor_tick_type {
+            self.write_minor_tick_mark(tick_type);
+        }
+
         // Write the c:tickLblPos element.
         self.write_tick_label_position(self.x_axis.label_position);
 
@@ -2144,6 +2156,16 @@ impl Chart {
 
         // Write the c:lblOffset element.
         self.write_lbl_offset();
+
+        // Write the c:tickLblSkip element.
+        if self.x_axis.label_interval > 1 {
+            self.write_tick_lbl_skip(self.x_axis.label_interval);
+        }
+
+        // Write the c:tickMarkSkip element.
+        if self.x_axis.tick_interval > 1 {
+            self.write_tick_mark_skip(self.x_axis.tick_interval);
+        }
 
         self.writer.xml_end_tag("c:catAx");
     }
@@ -2178,8 +2200,13 @@ impl Chart {
         }
 
         // Write the c:majorTickMark element.
-        if self.chart_group_type == ChartType::Radar {
-            self.write_major_tick_mark();
+        if let Some(position) = self.y_axis.major_tick_type {
+            self.write_major_tick_mark(position);
+        }
+
+        // Write the c:minorTickMark element.
+        if let Some(position) = self.y_axis.minor_tick_type {
+            self.write_minor_tick_mark(position);
         }
 
         // Write the c:tickLblPos element.
@@ -2245,6 +2272,16 @@ impl Chart {
             self.write_number_format(&self.default_num_format.clone(), true);
         } else {
             self.write_number_format(&self.x_axis.num_format.clone(), false);
+        }
+
+        // Write the c:majorTickMark element.
+        if let Some(position) = self.x_axis.major_tick_type {
+            self.write_major_tick_mark(position);
+        }
+
+        // Write the c:minorTickMark element.
+        if let Some(position) = self.x_axis.minor_tick_type {
+            self.write_minor_tick_mark(position);
         }
 
         // Write the c:tickLblPos element.
@@ -2449,6 +2486,20 @@ impl Chart {
         };
 
         self.writer.xml_empty_tag("c:crossBetween", &attributes);
+    }
+
+    // Write the <c:tickLblSkip> element.
+    fn write_tick_lbl_skip(&mut self, unit: u16) {
+        let attributes = [("val", unit.to_string())];
+
+        self.writer.xml_empty_tag("c:tickLblSkip", &attributes);
+    }
+
+    // Write the <c:tickMarkSkip> element.
+    fn write_tick_mark_skip(&mut self, unit: u16) {
+        let attributes = [("val", unit.to_string())];
+
+        self.writer.xml_empty_tag("c:tickMarkSkip", &attributes);
     }
 
     // Write the <c:majorUnit> element.
@@ -3314,10 +3365,17 @@ impl Chart {
     }
 
     // Write the <c:majorTickMark> element.
-    fn write_major_tick_mark(&mut self) {
-        let attributes = [("val", "cross")];
+    fn write_major_tick_mark(&mut self, position: ChartAxisTickType) {
+        let attributes = [("val", position.to_string())];
 
         self.writer.xml_empty_tag("c:majorTickMark", &attributes);
+    }
+
+    // Write the <c:minorTickMark> element.
+    fn write_minor_tick_mark(&mut self, tick_type: ChartAxisTickType) {
+        let attributes = [("val", tick_type.to_string())];
+
+        self.writer.xml_empty_tag("c:minorTickMark", &attributes);
     }
 
     // Write the <c:gapWidth> element.
@@ -6980,6 +7038,52 @@ impl ChartPoint {
 }
 
 /// A struct to represent a Chart axis.
+///
+/// Used in conjunction with the [`Chart::x_axis()`](Chart::x_axis) and
+/// [`Chart::y_axis()`](Chart::y_axis).
+///
+/// # Examples
+///
+/// A chart example demonstrating setting properties of the axes.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_axis_set_name.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 50)?;
+/// #     worksheet.write(1, 0, 30)?;
+/// #     worksheet.write(2, 0, 40)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series using Excel formula syntax to describe the range.
+///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+///
+///     // Set the chart axis titles.
+///     chart.x_axis().set_name("Test number");
+///     chart.y_axis().set_name("Sample length (mm)");
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name.png">
+///
 #[derive(Clone)]
 pub struct ChartAxis {
     axis_type: ChartAxisType,
@@ -7001,6 +7105,10 @@ pub struct ChartAxis {
     pub(crate) major_gridlines_line: Option<ChartLine>,
     pub(crate) minor_gridlines_line: Option<ChartLine>,
     pub(crate) log_base: u16,
+    pub(crate) label_interval: u16,
+    pub(crate) tick_interval: u16,
+    pub(crate) major_tick_type: Option<ChartAxisTickType>,
+    pub(crate) minor_tick_type: Option<ChartAxisTickType>,
 }
 
 impl ChartAxis {
@@ -7025,6 +7133,10 @@ impl ChartAxis {
             major_gridlines_line: None,
             minor_gridlines_line: None,
             log_base: 0,
+            label_interval: 0,
+            tick_interval: 0,
+            major_tick_type: None,
+            minor_tick_type: None,
         }
     }
 
@@ -7982,6 +8094,220 @@ impl ChartAxis {
         self
     }
 
+    /// Set the interval of the axis labels.
+    ///
+    /// Set the interval of the axis labels for Category axes. This value is 1
+    /// by default, i.e., there is one label shown per category. If needed it
+    /// can be set to another value.
+    ///
+    /// Note, this property is only applicable to Category axes, see [Chart
+    /// Value and Category Axes] for an explanation of the difference between
+    /// Value and Category axes in Excel.
+    ///
+    /// # Arguments
+    ///
+    /// * `interval` - The interval for the category labels. The default is 1.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the label interval for an axis.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_label_interval.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 5)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Set the interval for the axis labels.
+    ///     chart.x_axis().set_label_interval(2);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_label_interval.png">
+    ///
+    pub fn set_label_interval(&mut self, interval: u16) -> &mut ChartAxis {
+        self.label_interval = interval;
+        self
+    }
+
+    /// Set the interval of the axis ticks.
+    ///
+    /// Set the interval of the axis ticks for Category axes. This value is 1
+    /// by default, i.e., there is one tick shown per category. If needed it
+    /// can be set to another value.
+    ///
+    /// Note, this property is only applicable to Category axes, see [Chart
+    /// Value and Category Axes] for an explanation of the difference between
+    /// Value and Category axes in Excel.
+    ///
+    /// # Arguments
+    ///
+    /// * `interval` - The interval for the category ticks. The default is 1.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the tick interval for an axis.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_tick_interval.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 5)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Set the interval for the axis ticks.
+    ///     chart.x_axis().set_tick_interval(2);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_tick_interval.png">
+    ///
+    pub fn set_tick_interval(&mut self, interval: u16) -> &mut ChartAxis {
+        self.tick_interval = interval;
+        self
+    }
+
+    /// Set the type of major tick for the axis.
+    ///
+    /// Excel supports 4 types of tick position:
+    ///
+    /// - None
+    /// - Inside only
+    /// - Outside only
+    /// - Cross - inside and outside
+    ///
+    /// # Arguments
+    ///
+    /// * `tick_type` - a [`ChartAxisTickType`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the tick types for chart axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_major_tick_type.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartAxisTickType, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 5)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Set the tick types for chart axes.
+    ///     chart
+    ///         .x_axis()
+    ///         .set_major_tick_type(ChartAxisTickType::None);
+    ///     chart
+    ///         .y_axis()
+    ///         .set_major_tick_type(ChartAxisTickType::Outside)
+    ///         .set_minor_tick_type(ChartAxisTickType::Cross);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_tick_type.png">
+    ///
+    pub fn set_major_tick_type(&mut self, tick_type: ChartAxisTickType) -> &mut ChartAxis {
+        self.major_tick_type = Some(tick_type);
+        self
+    }
+
+    /// Set the type of minor tick for the axis.
+    ///
+    /// See [`set_major_tick_type()`](ChartAxis::set_major_tick_type) above for
+    /// an explanation and example.
+    ///
+    /// # Arguments
+    ///
+    /// * `tick_type` - a [`ChartAxisTickType`] enum value.
+    ///
+    pub fn set_minor_tick_type(&mut self, tick_type: ChartAxisTickType) -> &mut ChartAxis {
+        self.minor_tick_type = Some(tick_type);
+        self
+    }
+
     /// Set the log base of the axis range.
     ///
     /// This property is only applicable to value axes, see [Chart Value and
@@ -8220,6 +8546,98 @@ impl ToString for ChartAxisLabelPosition {
             ChartAxisLabelPosition::High => "high".to_string(),
             ChartAxisLabelPosition::None => "none".to_string(),
             ChartAxisLabelPosition::NextTo => "nextTo".to_string(),
+        }
+    }
+}
+
+/// Enum to define the Chart Axis Tick type.
+///
+/// Excel supports 4 types of tick position:
+///
+/// - None
+/// - Inside only
+/// - Outside only
+/// - Cross - inside and outside
+///
+/// Used in conjunction with
+/// [`set_major_tick_type()`](ChartAxis::set_major_tick_type) and
+/// [`set_minor_tick_type()`](ChartAxis::set_minor_tick_type).
+///
+/// # Examples
+///
+/// A chart example demonstrating setting the tick types for chart axes.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_axis_set_major_tick_type.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartAxisTickType, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 5)?;
+/// #     worksheet.write(1, 0, 30)?;
+/// #     worksheet.write(2, 0, 40)?;
+/// #     worksheet.write(3, 0, 30)?;
+/// #     worksheet.write(4, 0, 5)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series using Excel formula syntax to describe the range.
+///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+///
+///     // Set the tick types for chart axes.
+///     chart
+///         .x_axis()
+///         .set_major_tick_type(ChartAxisTickType::None);
+///     chart
+///         .y_axis()
+///         .set_major_tick_type(ChartAxisTickType::Outside)
+///         .set_minor_tick_type(ChartAxisTickType::Cross);
+///
+///     // Hide legend for clarity.
+///     chart.legend().set_hidden();
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_axis_set_major_tick_type.png">
+///
+#[derive(Clone, Copy)]
+pub enum ChartAxisTickType {
+    ///  No tick mark for the axis.
+    None,
+
+    ///  The tick mark is inside the axis only.
+    Inside,
+
+    /// The tick mark is outside the axis only.
+    Outside,
+
+    /// The tick mark crosses inside and outside the axis.
+    Cross,
+}
+
+impl ToString for ChartAxisTickType {
+    fn to_string(&self) -> String {
+        match self {
+            ChartAxisTickType::None => "none".to_string(),
+            ChartAxisTickType::Cross => "cross".to_string(),
+            ChartAxisTickType::Inside => "in".to_string(),
+            ChartAxisTickType::Outside => "out".to_string(),
         }
     }
 }
