@@ -142,6 +142,39 @@ documentation and generally show how an individual function works.
 * doc_chart_add_series.rs - An example of creating a chart series via
   [`chart.add_series()`](Chart::add_series).
 
+* doc_chart_axis_set_hidden.rs - A chart example demonstrating hiding the
+  chart axes.
+
+* doc_chart_axis_set_label_interval.rs - A chart example demonstrating
+  setting the label interval for an axis.
+
+* doc_chart_axis_set_label_position.rs - A chart example demonstrating
+  setting the label position for an axis.
+
+* doc_chart_axis_set_log_base.rs - A chart example demonstrating setting
+  the logarithm base for chart axes.
+
+* doc_chart_axis_set_major_gridlines.rs - A chart example demonstrating
+  turning off the major gridlines for chart axes.
+
+* doc_chart_axis_set_major_gridlines_line.rs - A chart example
+  demonstrating formatting the major gridlines for chart axes.
+
+* doc_chart_axis_set_major_tick_type.rs - A chart example demonstrating
+  setting the tick types for chart axes.
+
+* doc_chart_axis_set_major_unit.rs - A chart example demonstrating setting
+  the units for chart axes.
+
+* doc_chart_axis_set_max.rs - A chart example demonstrating setting the
+  axes bounds for chart axes.
+
+* doc_chart_axis_set_minor_gridlines.rs - A chart example demonstrating
+  turning on the minor gridlines for chart axes.
+
+* doc_chart_axis_set_minor_gridlines_line.rs - A chart example
+  demonstrating formatting the minor gridlines for chart axes.
+
 * doc_chart_axis_set_name.rs - A chart example demonstrating setting the
   title of chart axes.
 
@@ -151,8 +184,16 @@ documentation and generally show how an individual function works.
 * doc_chart_axis_set_num_format.rs - A chart example demonstrating setting
   the number format a chart axes.
 
+* doc_chart_axis_set_position_between_ticks.rs - A chart example
+  demonstrating setting the axes data position relative to the tick marks.
+  Notice that by setting the data columns "on" the tick the first and last
+  columns are cut off by the plot area.
+
 * doc_chart_axis_set_reverse.rs - A chart example demonstrating reversing
   the plotting direction of the chart axes.
+
+* doc_chart_axis_set_tick_interval.rs - A chart example demonstrating
+  setting the tick interval for an axis.
 
 * doc_chart_border_formatting.rs - An example of formatting the border in a
   chart element.
@@ -265,6 +306,15 @@ documentation and generally show how an individual function works.
 
 * doc_chart_series_set_categories.rs - A chart example demonstrating
   setting the chart series categories and values.
+
+* doc_chart_series_set_invert_if_negative.rs - A chart example
+  demonstrating setting the "Invert if negative" property for a chart
+  series.
+
+* doc_chart_series_set_invert_if_negative_color.rs - A chart example
+  demonstrating setting the "Invert if negative" property and associated
+  color for a chart series. This also requires that you set a solid fill
+  color for the series.
 
 * doc_chart_series_set_name.rs - A chart example demonstrating setting the
   chart series name.

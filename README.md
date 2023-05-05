@@ -108,8 +108,8 @@ frequently.
 
 Recent changes:
 
+- Added Chart axis and series methods.
 - Added Chart font formatting support.
-- Added Chart Series data labels, including custom labels.
 
 See the full [Release Notes and Changelog].
 
