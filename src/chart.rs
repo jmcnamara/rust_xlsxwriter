@@ -132,7 +132,6 @@ pub struct Chart {
     pub(crate) chart_area_format: ChartFormat,
     pub(crate) plot_area_format: ChartFormat,
     grouping: ChartGrouping,
-    default_cross_between: bool,
     default_num_format: String,
     has_overlap: bool,
     overlap: i8,
@@ -226,7 +225,6 @@ impl Chart {
             chart_area_format: ChartFormat::new(),
             plot_area_format: ChartFormat::new(),
             grouping: ChartGrouping::Standard,
-            default_cross_between: true,
             default_num_format: "General".to_string(),
             has_overlap: false,
             overlap: 0,
@@ -1203,15 +1201,14 @@ impl Chart {
     fn initialize_area_chart(mut self) -> Chart {
         self.x_axis.axis_type = ChartAxisType::Category;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
+        self.x_axis.position_between_ticks = false;
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
-
         self.y_axis.title.is_horizontal = true;
         self.y_axis.major_gridlines = true;
 
         self.chart_group_type = ChartType::Area;
-        self.default_cross_between = false;
 
         if self.chart_type == ChartType::Area {
             self.grouping = ChartGrouping::Standard;
@@ -1236,7 +1233,6 @@ impl Chart {
 
         self.y_axis.axis_type = ChartAxisType::Category;
         self.y_axis.axis_position = ChartAxisPosition::Left;
-
         self.y_axis.title.is_horizontal = true;
 
         self.chart_group_type = ChartType::Bar;
@@ -1304,7 +1300,6 @@ impl Chart {
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
-
         self.y_axis.title.is_horizontal = true;
         self.y_axis.major_gridlines = true;
 
@@ -1338,10 +1333,10 @@ impl Chart {
         self.x_axis.axis_type = ChartAxisType::Category;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
         self.x_axis.major_gridlines = true;
-        self.y_axis.major_gridlines = true;
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
+        self.y_axis.major_gridlines = true;
 
         self.chart_group_type = ChartType::Radar;
 
@@ -1354,15 +1349,15 @@ impl Chart {
     fn initialize_scatter_chart(mut self) -> Chart {
         self.x_axis.axis_type = ChartAxisType::Value;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
+        self.x_axis.position_between_ticks = false;
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
-
+        self.y_axis.position_between_ticks = false;
         self.y_axis.title.is_horizontal = true;
         self.y_axis.major_gridlines = true;
 
         self.chart_group_type = ChartType::Scatter;
-        self.default_cross_between = false;
 
         self.default_label_position = ChartDataLabelPosition::Right;
 
@@ -2207,7 +2202,7 @@ impl Chart {
         self.write_crosses();
 
         // Write the c:crossBetween element.
-        self.write_cross_between();
+        self.write_cross_between(self.x_axis.position_between_ticks);
 
         // Write the c:majorUnit element.
         if self.y_axis.axis_type == ChartAxisType::Value && !self.y_axis.major_unit.is_empty() {
@@ -2272,7 +2267,7 @@ impl Chart {
         self.write_crosses();
 
         // Write the c:crossBetween element.
-        self.write_cross_between();
+        self.write_cross_between(self.y_axis.position_between_ticks);
 
         // Write the c:majorUnit element.
         if self.x_axis.axis_type == ChartAxisType::Value && !self.x_axis.major_unit.is_empty() {
@@ -2446,14 +2441,12 @@ impl Chart {
     }
 
     // Write the <c:crossBetween> element.
-    fn write_cross_between(&mut self) {
-        let mut attributes = vec![];
-
-        if self.default_cross_between {
-            attributes.push(("val", "between"));
+    fn write_cross_between(&mut self, position_between_ticks: bool) {
+        let attributes = if position_between_ticks {
+            [("val", "between")]
         } else {
-            attributes.push(("val", "midCat"));
-        }
+            [("val", "midCat")]
+        };
 
         self.writer.xml_empty_tag("c:crossBetween", &attributes);
     }
@@ -6998,6 +6991,7 @@ pub struct ChartAxis {
     pub(crate) num_format: String,
     pub(crate) reverse: bool,
     pub(crate) is_hidden: bool,
+    pub(crate) position_between_ticks: bool,
     pub(crate) max: String,
     pub(crate) min: String,
     pub(crate) major_unit: String,
@@ -7021,6 +7015,7 @@ impl ChartAxis {
             num_format: String::new(),
             reverse: false,
             is_hidden: false,
+            position_between_ticks: true,
             max: String::new(),
             min: String::new(),
             major_unit: String::new(),
@@ -7910,6 +7905,80 @@ impl ChartAxis {
     ///
     pub fn set_label_position(&mut self, position: ChartAxisLabelPosition) -> &mut ChartAxis {
         self.label_position = position;
+        self
+    }
+
+    /// Set the axis position on or between the tick marks.
+    ///
+    /// In Excel there are two "Axis position" options for Category axes: "On
+    /// tick marks" and "Between tick marks". This property has different
+    /// default value for different chart types and isn't available for some
+    /// chart types like Scatter. The `set_position_between_ticks()` method can
+    /// be used to change the default value.
+    ///
+    /// Note, this property is only applicable to Category axes, see [Chart
+    /// Value and Category Axes] for an explanation of the difference between
+    /// Value and Category axes in Excel.
+    ///
+    /// [Chart Value and Category Axes]:
+    ///     struct.Chart.html#chart-value-and-category-axes
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. Its default value depends on the
+    ///   chart type.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the axes data position relative to
+    /// the tick marks. Notice that by setting the data columns "on" the tick
+    /// the first and last columns are cut off by the plot area.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_position_between_ticks.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 5)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(3, 0, 30)?;
+    /// #     worksheet.write(4, 0, 5)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Set the axes data position relative to the tick marks.
+    ///     chart.x_axis().set_position_between_ticks(false);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_position_between_ticks.png">
+    ///
+    pub fn set_position_between_ticks(&mut self, enable: bool) -> &mut ChartAxis {
+        self.position_between_ticks = enable;
         self
     }
 
