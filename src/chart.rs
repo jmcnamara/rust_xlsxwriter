@@ -1079,8 +1079,8 @@ impl Chart {
     ///
     /// * `alt_text` - The alt text string to add to the chart.
     ///
-    pub fn set_alt_text(&mut self, alt_text: &str) -> &mut Chart {
-        self.alt_text = alt_text.to_string();
+    pub fn set_alt_text(&mut self, alt_text: impl Into<String>) -> &mut Chart {
+        self.alt_text = alt_text.into();
         self
     }
 
@@ -6561,8 +6561,8 @@ impl ChartDataLabel {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_data_labels_set_num_format.png">
     ///
-    pub fn set_num_format(&mut self, num_format: &str) -> &mut ChartDataLabel {
-        self.num_format = num_format.to_string();
+    pub fn set_num_format(&mut self, num_format: impl Into<String>) -> &mut ChartDataLabel {
+        self.num_format = num_format.into();
         self.is_default = false;
         self
     }
@@ -7468,8 +7468,8 @@ impl ChartAxis {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_num_format.png">
     ///
-    pub fn set_num_format(&mut self, num_format: &str) -> &mut ChartAxis {
-        self.num_format = num_format.to_string();
+    pub fn set_num_format(&mut self, num_format: impl Into<String>) -> &mut ChartAxis {
+        self.num_format = num_format.into();
         self
     }
 
@@ -11142,8 +11142,8 @@ impl ChartFont {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_name.png">
     ///
-    pub fn set_name(&mut self, font_name: &str) -> &mut ChartFont {
-        self.name = font_name.to_string();
+    pub fn set_name(&mut self, font_name: impl Into<String>) -> &mut ChartFont {
+        self.name = font_name.into();
         self
     }
 
