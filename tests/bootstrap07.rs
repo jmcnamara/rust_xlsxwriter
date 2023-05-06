@@ -67,6 +67,20 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case to demonstrate creating a basic file with some string cell data.
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    let data = ["Hello", "World", "Hello", "World"];
+
+    worksheet.write_column(0, 0, data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap07_write_repeated_strings() {
     let test_runner = common::TestRunner::new()
@@ -97,6 +111,18 @@ fn bootstrap07_with_generic_write() {
         .set_name("bootstrap07")
         .set_function(create_new_xlsx_file_3)
         .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap07_with_generic_write_row() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap07")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();

@@ -599,6 +599,362 @@ impl Worksheet {
         data.write_with_format(self, row, col, format)
     }
 
+    /// Write an array like data structure as a row of data to a worksheet.
+    ///
+    /// Write an array of data horizontally rightwards starting from the initial
+    /// `row, col` cell.
+    ///
+    /// This methods works for arrays or array-like data structures that
+    /// implement [`IntoIterator`] and that contain a data type that implements
+    /// [`IntoExcelData`].
+    ///
+    /// See also [`worksheet.write_column()`](Worksheet::write_column) for a
+    /// similar function that works in an orthogonal direction.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing an array of data as a row to
+    /// a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_row.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Some array data to write.
+    ///     let data = [1, 2, 3, 4, 5];
+    ///
+    ///     // Write the array data as a row.
+    ///     worksheet.write_row(0, 0, data)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_row.png">
+    ///
+    /// An example of writing arrays of data using the `rust_xlsxwriter`
+    /// library. Array in this context means Rust arrays or arrays like data
+    /// types that implement [`IntoIterator`]. The array must also contain data
+    /// types that implement `rust_xlsxwriter`'s [`IntoExcelData`].
+    ///
+    /// ```
+    /// # // This code is available in examples/app_write_arrays.rs
+    /// #
+    /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a format for the headings.
+    ///     let heading = Format::new().set_bold().set_font_color("#0000CC");
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Some array data to write.
+    ///     let numbers = [1, 2, 3, 4, 5];
+    ///     let words = ["Hello"; 5];
+    ///     let matrix = [
+    ///         [10, 11, 12, 13, 14],
+    ///         [20, 21, 22, 23, 24],
+    ///         [30, 31, 32, 33, 34],
+    ///     ];
+    ///
+    ///     // Write the array data as columns.
+    ///     worksheet.write_with_format(0, 0, "Column data", &heading)?;
+    ///     worksheet.write_column(1, 0, numbers)?;
+    ///     worksheet.write_column(1, 1, words)?;
+    ///
+    ///     // Write the array data as rows.
+    ///     worksheet.write_with_format(0, 4, "Row data", &heading)?;
+    ///     worksheet.write_row(1, 4, numbers)?;
+    ///     worksheet.write_row(2, 4, words)?;
+    ///
+    ///     // Write the matrix data as an array or rows and as an array of columns.
+    ///     worksheet.write_with_format(7, 4, "Row matrix", &heading)?;
+    ///     worksheet.write_row_matrix(8, 4, matrix)?;
+    ///
+    ///     worksheet.write_with_format(7, 0, "Column matrix", &heading)?;
+    ///     worksheet.write_column_matrix(8, 0, matrix)?;
+    ///
+    ///     // Save the file to disk.
+    ///     workbook.save("arrays.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/app_write_arrays.png">
+    ///
+    pub fn write_row<I>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        data: I,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        I: IntoIterator,
+        I::Item: IntoExcelData,
+    {
+        let mut col = col;
+        for item in data {
+            self.write(row, col, item)?;
+            col += 1;
+        }
+
+        Ok(self)
+    }
+
+    /// Write an array like data structure as a column of data to a worksheet.
+    ///
+    /// Write an array of data vertically downwards starting from the initial
+    /// `row, col` cell.
+    ///
+    /// This methods works for arrays or array-like data structures that
+    /// implement [`IntoIterator`] and that contain a data type that implements
+    /// [`IntoExcelData`].
+    ///
+    /// See also [`worksheet.write_row()`](Worksheet::write_row) for a similar
+    /// function that works in an orthogonal direction.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing an array of data as a column
+    /// to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_column.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Some array data to write.
+    ///     let data = [1, 2, 3, 4, 5];
+    ///
+    ///     // Write the array data as a column.
+    ///     worksheet.write_column(0, 0, data)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_column.png">
+    ///
+    pub fn write_column<I>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        data: I,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        I: IntoIterator,
+        I::Item: IntoExcelData,
+    {
+        let mut row = row;
+        for item in data {
+            self.write(row, col, item)?;
+            row += 1;
+        }
+
+        Ok(self)
+    }
+
+    /// Write an array of row arrays to a worksheet.
+    ///
+    /// Write an array of row arrays vertically downwards starting from the
+    /// initial `row, col` cell.
+    ///
+    /// This methods works for 2D arrays or array-like data structures that
+    /// implement [`IntoIterator`] and that contain a data type that implements
+    /// [`IntoExcelData`].
+    ///
+    /// See also
+    /// [`worksheet.write_column_matrix()`](Worksheet::write_column_matrix) for
+    /// a similar function that works in an orthogonal direction.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing an array of row arrays to a
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_row_matrix.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Some array data to write.
+    ///     let data = [
+    ///         [10, 11, 12, 13, 14],
+    ///         [20, 21, 22, 23, 24],
+    ///         [30, 31, 32, 33, 34],
+    ///     ];
+    ///
+    ///     // Write the array data as a series of rows.
+    ///     worksheet.write_row_matrix(0, 0, data)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_row_matrix.png">
+    ///
+    pub fn write_row_matrix<I, II>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        data: I,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        I: IntoIterator,
+        I::Item: IntoIterator<Item = II>,
+        II: IntoExcelData,
+    {
+        let mut row = row;
+        for item in data {
+            self.write_row(row, col, item)?;
+            row += 1;
+        }
+
+        Ok(self)
+    }
+
+    /// Write an array of column arrays to a worksheet.
+    ///
+    /// Write an array of column arrays horizontally rightwards starting from
+    /// the initial `row, col` cell.
+    ///
+    /// This methods works for 2D arrays or array-like data structures that
+    /// implement [`IntoIterator`] and that contain a data type that implements
+    /// [`IntoExcelData`].
+    ///
+    /// See also [`worksheet.write_row_matrix()`](Worksheet::write_row_matrix)
+    /// for a similar function that works in an orthogonal direction.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing an array of column arrays to
+    /// a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_column_matrix.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Some array data to write.
+    ///     let data = [
+    ///         [10, 11, 12, 13, 14],
+    ///         [20, 21, 22, 23, 24],
+    ///         [30, 31, 32, 33, 34],
+    ///     ];
+    ///
+    ///     // Write the array data as a series of columns.
+    ///     worksheet.write_column_matrix(0, 0, data)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_column_matrix.png">
+    ///
+    pub fn write_column_matrix<I, II>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        data: I,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        I: IntoIterator,
+        I::Item: IntoIterator<Item = II>,
+        II: IntoExcelData,
+    {
+        let mut col = col;
+        for item in data {
+            self.write_column(row, col, item)?;
+            col += 1;
+        }
+
+        Ok(self)
+    }
+
     /// Write an unformatted number to a cell.
     ///
     /// Write an unformatted number to a worksheet cell. To write a formatted
@@ -8943,12 +9299,12 @@ impl Worksheet {
 
             let Some(columns) = temp_table.get(&row_num) else {
                 if row_options.is_some() {
-                    self.write_row(row_num, span, row_options, false);
+                    self.write_table_row(row_num, span, row_options, false);
                 }
                 continue;
             };
 
-            self.write_row(row_num, span, row_options, true);
+            self.write_table_row(row_num, span, row_options, true);
             for (&col_num, cell) in columns {
                 match cell {
                     CellType::Number { number, xf_index }
@@ -9046,7 +9402,7 @@ impl Worksheet {
     }
 
     // Write the <row> element.
-    fn write_row(
+    fn write_table_row(
         &mut self,
         row_num: RowNum,
         span: Option<&str>,
@@ -9298,7 +9654,7 @@ impl Worksheet {
                 last_col = col_num;
             } else {
                 // If not write out the current range of columns and start again.
-                self.write_col(first_col, last_col, &prev_col_options);
+                self.write_col_element(first_col, last_col, &prev_col_options);
                 first_col = col_num;
                 last_col = first_col;
                 prev_col_options = col_options;
@@ -9306,13 +9662,13 @@ impl Worksheet {
         }
 
         // We will exit the previous loop with one unhandled column range.
-        self.write_col(first_col, last_col, &prev_col_options);
+        self.write_col_element(first_col, last_col, &prev_col_options);
 
         self.writer.xml_end_tag("cols");
     }
 
     // Write the <col> element.
-    fn write_col(&mut self, first_col: ColNum, last_col: ColNum, col_options: &ColOptions) {
+    fn write_col_element(&mut self, first_col: ColNum, last_col: ColNum, col_options: &ColOptions) {
         let first_col = first_col + 1;
         let last_col = last_col + 1;
         let mut width = col_options.width;

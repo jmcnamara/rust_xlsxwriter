@@ -134,6 +134,11 @@ documentation and generally show how an individual function works.
 * app_worksheet_protection.rs - Example of cell locking and formula hiding
   in an Excel worksheet rust_xlsxwriter library.
 
+* app_write_arrays.rs - An example of writing arrays of data using the
+  `rust_xlsxwriter` library. Array in this context means Rust arrays or
+  arrays like data types that implement `IntoIterator`. The array must also
+  contain data types that implement `rust_xlsxwriter`'s `IntoExcelData`.
+
 * app_write_generic_data.rs - Example of how to extend the the
   rust_xlsxwriter write() method using the IntoExcelData trait to handle
   arbitrary user data that can be mapped to one of the main Excel data
@@ -766,6 +771,12 @@ documentation and generally show how an individual function works.
 * doc_worksheet_write_boolean_with_format.rs - Demonstrates writing
   formatted boolean values to a worksheet.
 
+* doc_worksheet_write_column.rs - Demonstrates writing an array of data as
+  a column to a worksheet.
+
+* doc_worksheet_write_column_matrix.rs - Demonstrates writing an array of
+  column arrays to a worksheet.
+
 * doc_worksheet_write_date.rs - Demonstrates writing formatted dates in an
   Excel worksheet.
 
@@ -798,6 +809,12 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_write_rich_string_with_format.rs - Demonstrates writing a
   "rich" string with multiple formats, and an additional cell format.
+
+* doc_worksheet_write_row.rs - Demonstrates writing an array of data as a
+  row to a worksheet.
+
+* doc_worksheet_write_row_matrix.rs - Demonstrates writing an array of row
+  arrays to a worksheet.
 
 * doc_worksheet_write_string.rs - Demonstrates writing some UTF-8 strings
   to a worksheet. The UTF-8 encoding is the only encoding supported by the
