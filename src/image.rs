@@ -522,8 +522,8 @@ impl Image {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/image_set_alt_text.png">
     ///
-    pub fn set_alt_text(&mut self, alt_text: &str) -> &mut Image {
-        self.alt_text = alt_text.to_string();
+    pub fn set_alt_text(&mut self, alt_text: impl Into<String>) -> &mut Image {
+        self.alt_text = alt_text.into();
         self
     }
 
@@ -755,8 +755,8 @@ impl Image {
     /// This method sets an internal image name used by header/footer VML. It is
     /// mainly used for completeness in testing. It isn't useful to the end user.
     #[doc(hidden)]
-    pub fn set_vml_name(&mut self, name: &str) -> &mut Image {
-        self.vml_name = name.to_string();
+    pub fn set_vml_name(&mut self, name: impl Into<String>) -> &mut Image {
+        self.vml_name = name.into();
         self
     }
 
