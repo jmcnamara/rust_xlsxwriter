@@ -20,11 +20,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let date = Utc.with_ymd_and_hms(2016, 12, 12, 23, 0, 0).unwrap();
 
     let properties = DocProperties::new()
-        .set_custom_property("Checked by", "Adam")
+        .set_custom_property("Checked by".to_string(), "Adam".to_string())
         .set_custom_property("Date completed", &date)
         .set_custom_property("Document number", 12345)
         .set_custom_property("Reference", 1.2345)
-        .set_custom_property("Source", true)
+        .set_custom_property("Source".to_string(), true)
         .set_custom_property("Status", false)
         .set_custom_property("Department", "Finance")
         .set_custom_property("Group", 1.2345678901234);

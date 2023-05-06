@@ -17,8 +17,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let properties = DocProperties::new()
-        .set_title("This is an example spreadsheet")
-        .set_subject("With document properties")
+        .set_title("This is an example spreadsheet".to_string())
+        .set_subject("With document properties".to_string())
         .set_author("Someone")
         .set_manager("Dr. Heinz Doofenshmirtz")
         .set_company("of Wolves")

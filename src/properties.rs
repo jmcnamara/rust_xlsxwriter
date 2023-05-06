@@ -245,8 +245,8 @@ impl DocProperties {
     ///
     /// * `title` - The title string property.
     ///
-    pub fn set_title(mut self, title: &str) -> DocProperties {
-        self.title = title.to_string();
+    pub fn set_title(mut self, title: impl Into<String>) -> DocProperties {
+        self.title = title.into();
 
         self
     }
@@ -260,8 +260,8 @@ impl DocProperties {
     ///
     /// * `subject` - The subject string property.
     ///
-    pub fn set_subject(mut self, subject: &str) -> DocProperties {
-        self.subject = subject.to_string();
+    pub fn set_subject(mut self, subject: impl Into<String>) -> DocProperties {
+        self.subject = subject.into();
 
         self
     }
@@ -275,8 +275,8 @@ impl DocProperties {
     ///
     /// * `manager` - The manager string property.
     ///
-    pub fn set_manager(mut self, manager: &str) -> DocProperties {
-        self.manager = manager.to_string();
+    pub fn set_manager(mut self, manager: impl Into<String>) -> DocProperties {
+        self.manager = manager.into();
 
         self
     }
@@ -290,8 +290,8 @@ impl DocProperties {
     ///
     /// * `company` - The company string property.
     ///
-    pub fn set_company(mut self, company: &str) -> DocProperties {
-        self.company = company.to_string();
+    pub fn set_company(mut self, company: impl Into<String>) -> DocProperties {
+        self.company = company.into();
 
         self
     }
@@ -305,8 +305,8 @@ impl DocProperties {
     ///
     /// * `category` - The category string property.
     ///
-    pub fn set_category(mut self, category: &str) -> DocProperties {
-        self.category = category.to_string();
+    pub fn set_category(mut self, category: impl Into<String>) -> DocProperties {
+        self.category = category.into();
 
         self
     }
@@ -320,8 +320,8 @@ impl DocProperties {
     ///
     /// * `author` - The author string property.
     ///
-    pub fn set_author(mut self, author: &str) -> DocProperties {
-        self.author = author.to_string();
+    pub fn set_author(mut self, author: impl Into<String>) -> DocProperties {
+        self.author = author.into();
 
         self
     }
@@ -335,8 +335,8 @@ impl DocProperties {
     ///
     /// * `keywords` - The keywords string property.
     ///
-    pub fn set_keywords(mut self, keywords: &str) -> DocProperties {
-        self.keywords = keywords.to_string();
+    pub fn set_keywords(mut self, keywords: impl Into<String>) -> DocProperties {
+        self.keywords = keywords.into();
 
         self
     }
@@ -351,8 +351,8 @@ impl DocProperties {
     ///
     /// * `comment` - The comment string property.
     ///
-    pub fn set_comment(mut self, comment: &str) -> DocProperties {
-        self.comment = comment.to_string();
+    pub fn set_comment(mut self, comment: impl Into<String>) -> DocProperties {
+        self.comment = comment.into();
 
         self
     }
@@ -366,8 +366,8 @@ impl DocProperties {
     ///
     /// * `status` - The status string property.
     ///
-    pub fn set_status(mut self, status: &str) -> DocProperties {
-        self.status = status.to_string();
+    pub fn set_status(mut self, status: impl Into<String>) -> DocProperties {
+        self.status = status.into();
 
         self
     }
@@ -381,8 +381,8 @@ impl DocProperties {
     ///
     /// * `hyperlink_base` - The hyperlink base string property.
     ///
-    pub fn set_hyperlink_base(mut self, hyperlink_base: &str) -> DocProperties {
-        self.hyperlink_base = hyperlink_base.to_string();
+    pub fn set_hyperlink_base(mut self, hyperlink_base: impl Into<String>) -> DocProperties {
+        self.hyperlink_base = hyperlink_base.into();
 
         self
     }
@@ -452,7 +452,7 @@ impl DocProperties {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/doc_properties_custom.png">
     ///
-    pub fn set_custom_property<T>(mut self, name: &str, value: T) -> DocProperties
+    pub fn set_custom_property<T>(mut self, name: impl Into<String>, value: T) -> DocProperties
     where
         T: IntoCustomProperty,
     {
@@ -495,46 +495,46 @@ impl Default for CustomProperty {
 }
 
 impl CustomProperty {
-    pub(crate) fn new_property_string(name: &str, value: &str) -> CustomProperty {
+    pub(crate) fn new_property_string(name: String, value: String) -> CustomProperty {
         CustomProperty {
             property_type: CustomPropertyType::Text,
-            name: name.to_string(),
-            text: value.to_string(),
+            name,
+            text: value,
             ..Default::default()
         }
     }
 
-    pub(crate) fn new_property_i32(name: &str, value: i32) -> CustomProperty {
+    pub(crate) fn new_property_i32(name: String, value: i32) -> CustomProperty {
         CustomProperty {
             property_type: CustomPropertyType::Int,
-            name: name.to_string(),
+            name,
             number_int: value,
             ..Default::default()
         }
     }
 
-    pub(crate) fn new_property_f64(name: &str, value: f64) -> CustomProperty {
+    pub(crate) fn new_property_f64(name: String, value: f64) -> CustomProperty {
         CustomProperty {
             property_type: CustomPropertyType::Real,
-            name: name.to_string(),
+            name,
             number_real: value,
             ..Default::default()
         }
     }
 
-    pub(crate) fn new_property_bool(name: &str, value: bool) -> CustomProperty {
+    pub(crate) fn new_property_bool(name: String, value: bool) -> CustomProperty {
         CustomProperty {
             property_type: CustomPropertyType::Bool,
-            name: name.to_string(),
+            name,
             boolean: value,
             ..Default::default()
         }
     }
 
-    pub(crate) fn new_property_datetime(name: &str, value: &DateTime<Utc>) -> CustomProperty {
+    pub(crate) fn new_property_datetime(name: String, value: &DateTime<Utc>) -> CustomProperty {
         CustomProperty {
             property_type: CustomPropertyType::DateTime,
-            name: name.to_string(),
+            name,
             datetime: *value,
             ..Default::default()
         }
@@ -555,35 +555,47 @@ pub(crate) enum CustomPropertyType {
 pub trait IntoCustomProperty {
     /// Types/objects supporting this trait must be able to convert to a
     /// [`CustomProperty`] struct.
-    fn new_custom_property(&self, name: &str) -> CustomProperty;
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty;
 }
 
 impl IntoCustomProperty for &str {
-    fn new_custom_property(&self, name: &str) -> CustomProperty {
-        CustomProperty::new_property_string(name, self)
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_string(name.into(), self.into())
+    }
+}
+
+impl IntoCustomProperty for String {
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_string(name.into(), self)
+    }
+}
+
+impl IntoCustomProperty for &String {
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_string(name.into(), self.into())
     }
 }
 
 impl IntoCustomProperty for i32 {
-    fn new_custom_property(&self, name: &str) -> CustomProperty {
-        CustomProperty::new_property_i32(name, *self)
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_i32(name.into(), self)
     }
 }
 
 impl IntoCustomProperty for f64 {
-    fn new_custom_property(&self, name: &str) -> CustomProperty {
-        CustomProperty::new_property_f64(name, *self)
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_f64(name.into(), self)
     }
 }
 
 impl IntoCustomProperty for bool {
-    fn new_custom_property(&self, name: &str) -> CustomProperty {
-        CustomProperty::new_property_bool(name, *self)
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_bool(name.into(), self)
     }
 }
 
 impl IntoCustomProperty for &DateTime<Utc> {
-    fn new_custom_property(&self, name: &str) -> CustomProperty {
-        CustomProperty::new_property_datetime(name, self)
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_datetime(name.into(), self)
     }
 }
