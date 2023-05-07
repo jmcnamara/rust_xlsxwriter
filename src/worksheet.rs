@@ -448,7 +448,9 @@ impl Worksheet {
     /// [Microsoft Office documentation]:
     ///     https://support.office.com/en-ie/article/rename-a-worksheet-3f1f7148-ee83-404d-8ef0-9ff99fbad1f9
     ///
-    pub fn set_name(&mut self, name: &str) -> Result<&mut Worksheet, XlsxError> {
+    pub fn set_name(&mut self, name: impl Into<String>) -> Result<&mut Worksheet, XlsxError> {
+        let name = name.into();
+
         // Check that the sheet name isn't blank.
         if name.is_empty() {
             return Err(XlsxError::SheetnameCannotBeBlank);
@@ -456,24 +458,20 @@ impl Worksheet {
 
         // Check that sheet sheetname is <= 31, an Excel limit.
         if name.chars().count() > 31 {
-            return Err(XlsxError::SheetnameLengthExceeded(name.to_string()));
+            return Err(XlsxError::SheetnameLengthExceeded(name));
         }
 
         // Check that sheetname doesn't contain any invalid characters.
         if name.contains(['*', '?', ':', '[', ']', '\\', '/']) {
-            return Err(XlsxError::SheetnameContainsInvalidCharacter(
-                name.to_string(),
-            ));
+            return Err(XlsxError::SheetnameContainsInvalidCharacter(name));
         }
 
         // Check that sheetname doesn't start or end with an apostrophe.
         if name.starts_with('\'') || name.ends_with('\'') {
-            return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(
-                name.to_string(),
-            ));
+            return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(name));
         }
 
-        self.name = name.to_string();
+        self.name = name;
 
         Ok(self)
     }
@@ -4971,7 +4969,12 @@ impl Worksheet {
     /// # }
     /// ```
     ///
-    pub fn set_formula_result(&mut self, row: RowNum, col: ColNum, result: &str) -> &mut Worksheet {
+    pub fn set_formula_result(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        result: impl Into<String>,
+    ) -> &mut Worksheet {
         if let Some(columns) = self.table.get_mut(&row) {
             if let Some(cell) = columns.get_mut(&col) {
                 match cell {
@@ -4987,7 +4990,7 @@ impl Worksheet {
                         is_dynamic: _,
                         range: _,
                     } => {
-                        *cell_result = Box::from(result);
+                        *cell_result = Box::from(result.into());
                     }
                     _ => {
                         eprintln!("Cell ({row}, {col}) doesn't contain a formula.");
@@ -5040,8 +5043,8 @@ impl Worksheet {
     /// #     Ok(())
     /// # }
     /// #
-    pub fn set_formula_result_default(&mut self, result: &str) -> &mut Worksheet {
-        self.default_result = Box::from(result);
+    pub fn set_formula_result_default(&mut self, result: impl Into<String>) -> &mut Worksheet {
+        self.default_result = Box::from(result.into());
         self
     }
 
@@ -6165,8 +6168,9 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_set_header.png">
     ///
-    pub fn set_header(&mut self, header: &str) -> &mut Worksheet {
-        let header_copy = header
+    pub fn set_header(&mut self, header: impl Into<String>) -> &mut Worksheet {
+        let header = header.into();
+        let header_expanded = header
             .replace("&[Tab]", "&A")
             .replace("&[Date]", "&D")
             .replace("&[File]", "&F")
@@ -6176,12 +6180,12 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        if header_copy.chars().count() > 255 {
+        if header_expanded.chars().count() > 255 {
             eprintln!("Header string exceeds Excel's limit of 255 characters.");
             return self;
         }
 
-        self.header = header.to_string();
+        self.header = header;
         self.page_setup_changed = true;
         self.head_footer_changed = true;
         self
@@ -6198,8 +6202,9 @@ impl Worksheet {
     ///
     /// * `footer` - The footer string with optional control characters.
     ///
-    pub fn set_footer(&mut self, footer: &str) -> &mut Worksheet {
-        let footer_copy = footer
+    pub fn set_footer(&mut self, footer: impl Into<String>) -> &mut Worksheet {
+        let footer = footer.into();
+        let footer_expanded = footer
             .replace("&[Tab]", "&A")
             .replace("&[Date]", "&D")
             .replace("&[File]", "&F")
@@ -6209,12 +6214,12 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        if footer_copy.chars().count() > 255 {
+        if footer_expanded.chars().count() > 255 {
             eprintln!("Footer string exceeds Excel's limit of 255 characters.");
             return self;
         }
 
-        self.footer = footer.to_string();
+        self.footer = footer;
         self.page_setup_changed = true;
         self.head_footer_changed = true;
         self
