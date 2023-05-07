@@ -32,25 +32,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [`chartseries.set_invert_if_negative()`]
   - [`chartseries.set_invert_if_negative_color()`]
 
-[`chartaxis.set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_hidden
-[`chartaxis.set_label_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_label_interval
-[`chartaxis.set_label_position()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_label_position
-[`chartaxis.set_log_base()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_log_base
-[`chartaxis.set_major_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_major_gridlines
-[`chartaxis.set_major_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_major_gridlines_line
-[`chartaxis.set_major_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_major_tick_type
-[`chartaxis.set_major_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_major_unit
-[`chartaxis.set_max()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_max
-[`chartaxis.set_min()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_min
-[`chartaxis.set_minor_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_minor_gridlines
-[`chartaxis.set_minor_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_minor_gridlines_line
-[`chartaxis.set_minor_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_minor_tick_type
-[`chartaxis.set_minor_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_minor_unit
-[`chartaxis.set_position_between_ticks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_position_between_ticks
-[`chartaxis.set_reverse()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_reverse
-[`chartaxis.set_tick_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartaxis.html#method.set_tick_interval
-[`chartseries.set_invert_if_negative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartseries.html#method.set_invert_if_negative
-[`chartseries.set_invert_if_negative_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chartseries.html#method.set_invert_if_negative_color
+[`chartaxis.set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_hidden
+[`chartaxis.set_label_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_label_interval
+[`chartaxis.set_label_position()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_label_position
+[`chartaxis.set_log_base()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_log_base
+[`chartaxis.set_major_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_major_gridlines
+[`chartaxis.set_major_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_major_gridlines_line
+[`chartaxis.set_major_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_major_tick_type
+[`chartaxis.set_major_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_major_unit
+[`chartaxis.set_max()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_max
+[`chartaxis.set_min()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_min
+[`chartaxis.set_minor_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_minor_gridlines
+[`chartaxis.set_minor_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_minor_gridlines_line
+[`chartaxis.set_minor_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_minor_tick_type
+[`chartaxis.set_minor_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_minor_unit
+[`chartaxis.set_position_between_ticks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_position_between_ticks
+[`chartaxis.set_reverse()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_reverse
+[`chartaxis.set_tick_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_tick_interval
+[`chartseries.set_invert_if_negative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartSeries.html#method.set_invert_if_negative
+[`chartseries.set_invert_if_negative_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartSeries.html#method.set_invert_if_negative_color
 
 
 ## [0.37.0] - 2023-04-30
