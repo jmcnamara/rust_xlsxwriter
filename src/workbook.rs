@@ -843,8 +843,13 @@ impl Workbook {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/app_defined_name2.png">
     ///
-    pub fn define_name(&mut self, name: &str, formula: &str) -> Result<&mut Workbook, XlsxError> {
+    pub fn define_name(
+        &mut self,
+        name: impl Into<String>,
+        formula: &str,
+    ) -> Result<&mut Workbook, XlsxError> {
         let mut defined_name = DefinedName::new();
+        let name = name.into();
 
         // Match Global/Workbook or Local/Worksheet defined names.
         match name.find('!') {
