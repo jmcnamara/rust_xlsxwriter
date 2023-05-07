@@ -661,8 +661,8 @@ impl Format {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/format_set_num_format.png">
     ///
-    pub fn set_num_format(mut self, num_format: &str) -> Format {
-        self.num_format = num_format.to_string();
+    pub fn set_num_format(mut self, num_format: impl Into<String>) -> Format {
+        self.num_format = num_format.into();
         self
     }
 
@@ -929,10 +929,10 @@ impl Format {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/format_set_font_name.png">
     ///
-    pub fn set_font_name(mut self, font_name: &str) -> Format {
-        self.font.name = font_name.to_string();
+    pub fn set_font_name(mut self, font_name: impl Into<String>) -> Format {
+        self.font.name = font_name.into();
 
-        if font_name != "Calibri" {
+        if self.font.name != "Calibri" {
             self.font.scheme = String::new();
         }
 
@@ -991,8 +991,8 @@ impl Format {
     ///
     /// This function is implemented for completeness but is rarely used in
     /// practice.
-    pub fn set_font_scheme(mut self, font_scheme: &str) -> Format {
-        self.font.scheme = font_scheme.to_string();
+    pub fn set_font_scheme(mut self, font_scheme: impl Into<String>) -> Format {
+        self.font.scheme = font_scheme.into();
         self
     }
 
