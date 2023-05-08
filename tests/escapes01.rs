@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Formula, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -13,7 +13,7 @@ extern crate lazy_static;
 mod common;
 
 // Test strings that need XML escaping.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet().set_name("5&4")?;
@@ -44,12 +44,50 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test strings that need XML escaping, with Formula struct.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet().set_name("5&4")?;
+
+    worksheet.write_formula(0, 0, Formula::new(r#"=IF(1>2,0,1)"#).set_result("1"))?;
+    worksheet.write_formula(
+        1,
+        0,
+        Formula::new(r#"=CONCATENATE("'","<>&")"#).set_result("'<>&"),
+    )?;
+    worksheet.write_formula(2, 0, Formula::new(r#"=1&"b""#).set_result("1b"))?;
+    worksheet.write_formula(3, 0, Formula::new(r#"="'""#).set_result(r#"'"#))?;
+    worksheet.write_formula(4, 0, Formula::new(r#"="""""#).set_result(r#"""#))?;
+    worksheet.write_formula(5, 0, Formula::new(r#"="&" & "&""#).set_result("&&"))?;
+
+    worksheet.write_string(7, 0, r#""&<>"#)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_escapes01() {
     let test_runner = common::TestRunner::new()
         .set_name("escapes01")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
         .ignore_calc_chain()
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_escapes01_with_formula_struct() {
+    let test_runner = common::TestRunner::new()
+        .set_name("escapes01")
+        .set_function(create_new_xlsx_file_2)
+        .ignore_calc_chain()
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

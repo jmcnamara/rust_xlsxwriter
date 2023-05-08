@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Formula, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -69,6 +69,20 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case to test dynamic array formula: with generics
+fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write(0, 1, Formula::new("=UNIQUE(A1)"))?;
+    worksheet.write_number(0, 0, 0)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_dynamic_array02_1() {
     let test_runner = common::TestRunner::new()
@@ -111,6 +125,18 @@ fn test_dynamic_array02_4() {
         .set_name("dynamic_array02")
         .set_function(create_new_xlsx_file_4)
         .unique("4")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_dynamic_array02_5() {
+    let test_runner = common::TestRunner::new()
+        .set_name("dynamic_array02")
+        .set_function(create_new_xlsx_file_5)
+        .unique("5")
         .initialize();
 
     test_runner.assert_eq();

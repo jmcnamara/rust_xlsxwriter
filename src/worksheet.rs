@@ -20,6 +20,7 @@ use regex::Regex;
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
+use crate::formula::Formula;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
@@ -1560,14 +1561,17 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_formula.png">
     ///
-    pub fn write_formula(
+    pub fn write_formula<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: &str,
-    ) -> Result<&mut Worksheet, XlsxError> {
+        formula: T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Formula>,
+    {
         // Store the cell data.
-        self.store_formula(row, col, formula, None)
+        self.store_formula(row, col, formula.into(), None)
     }
 
     /// Write a formatted formula to a worksheet cell.
@@ -1630,15 +1634,18 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_formula_with_format.png">
     ///
-    pub fn write_formula_with_format(
+    pub fn write_formula_with_format<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: &str,
+        formula: T,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Formula>,
+    {
         // Store the cell data.
-        self.store_formula(row, col, formula, Some(format))
+        self.store_formula(row, col, formula.into(), Some(format))
     }
 
     /// Write an  array formula to a worksheet cell.
@@ -1713,17 +1720,26 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula.png">
     ///
-    pub fn write_array_formula(
+    pub fn write_array_formula<T>(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: &str,
-    ) -> Result<&mut Worksheet, XlsxError> {
+        formula: T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Formula>,
+    {
         // Store the cell data.
         self.store_array_formula(
-            first_row, first_col, last_row, last_col, formula, None, false,
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+            formula.into(),
+            None,
+            false,
         )
     }
 
@@ -1807,22 +1823,25 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula_with_format.png">
     ///
-    pub fn write_array_formula_with_format(
+    pub fn write_array_formula_with_format<T>(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: &str,
+        formula: T,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Formula>,
+    {
         // Store the cell data.
         self.store_array_formula(
             first_row,
             first_col,
             last_row,
             last_col,
-            formula,
+            formula.into(),
             Some(format),
             false,
         )
@@ -1900,17 +1919,26 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula.png">
     ///
-    pub fn write_dynamic_array_formula(
+    pub fn write_dynamic_array_formula<T>(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: &str,
-    ) -> Result<&mut Worksheet, XlsxError> {
+        formula: T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Formula>,
+    {
         // Store the cell data.
         self.store_array_formula(
-            first_row, first_col, last_row, last_col, formula, None, true,
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+            formula.into(),
+            None,
+            true,
         )
     }
 
@@ -2000,22 +2028,25 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula_with_format.png">
     ///
-    pub fn write_dynamic_array_formula_with_format(
+    pub fn write_dynamic_array_formula_with_format<T>(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: &str,
+        formula: T,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Formula>,
+    {
         // Store the cell data.
         self.store_array_formula(
             first_row,
             first_col,
             last_row,
             last_col,
-            formula,
+            formula.into(),
             Some(format),
             true,
         )
@@ -2049,14 +2080,17 @@ impl Worksheet {
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
-    pub fn write_dynamic_formula(
+    pub fn write_dynamic_formula<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: &str,
-    ) -> Result<&mut Worksheet, XlsxError> {
+        formula: T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Formula>,
+    {
         // Store the cell data.
-        self.store_array_formula(row, col, row, col, formula, None, true)
+        self.store_array_formula(row, col, row, col, formula.into(), None, true)
     }
 
     /// Write a formatted dynamic formula to a worksheet cell.
@@ -2088,15 +2122,18 @@ impl Worksheet {
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
-    pub fn write_dynamic_formula_with_format(
+    pub fn write_dynamic_formula_with_format<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: &str,
+        formula: T,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Formula>,
+    {
         // Store the cell data.
-        self.store_array_formula(row, col, row, col, formula, Some(format), true)
+        self.store_array_formula(row, col, row, col, formula.into(), Some(format), true)
     }
 
     /// Write a blank formatted worksheet cell.
@@ -7731,11 +7768,11 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: &str,
+        formula: Formula,
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Transfer to dynamic formula handling function.
-        if is_dynamic_function(formula) {
+        if formula.is_dynamic_function() {
             return self.store_array_formula(row, col, row, col, formula, None, true);
         }
 
@@ -7750,13 +7787,18 @@ impl Worksheet {
             None => 0,
         };
 
-        let formula = prepare_formula(formula, self.use_future_functions);
+        // Set the formula result to the default or user defined
+        let result = if formula.result.is_empty() {
+            self.default_result.clone()
+        } else {
+            formula.result.clone()
+        };
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::Formula {
-            formula,
+            formula: formula.expand_formula(self.use_future_functions),
             xf_index,
-            result: self.default_result.clone(),
+            result,
         };
 
         self.insert_cell(row, col, cell);
@@ -7772,7 +7814,7 @@ impl Worksheet {
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: &str,
+        formula: Formula,
         format: Option<&Format>,
         is_dynamic: bool,
     ) -> Result<&mut Worksheet, XlsxError> {
@@ -7794,14 +7836,12 @@ impl Worksheet {
             None => 0,
         };
 
-        let formula = prepare_formula(formula, self.use_future_functions);
-
         // Create the array range reference.
         let range = utility::cell_range(first_row, first_col, last_row, last_col);
 
         // Check for a dynamic function in a standard static array formula.
         let mut is_dynamic = is_dynamic;
-        if !is_dynamic && is_dynamic_function(&formula) {
+        if !is_dynamic && formula.is_dynamic_function() {
             is_dynamic = true;
         }
 
@@ -7809,11 +7849,18 @@ impl Worksheet {
             self.has_dynamic_arrays = true;
         }
 
+        // Set the formula result to the default or user defined
+        let result = if formula.result.is_empty() {
+            self.default_result.clone()
+        } else {
+            formula.result.clone()
+        };
+
         // Create the appropriate cell type to hold the data.
         let cell = CellType::ArrayFormula {
-            formula,
+            formula: formula.expand_formula(self.use_future_functions),
             xf_index,
-            result: self.default_result.clone(),
+            result,
             is_dynamic,
             range: range.into_boxed_str(),
         };
@@ -7885,10 +7932,10 @@ impl Worksheet {
         Ok(self)
     }
 
-    // Store a url and associated properties. Urls in Excel are handled in a
-    // number of ways: they are written as a string similar to write_string_with_format(),
-    // they are written in the <hyperlinks> element within the worksheet, and
-    // they are referenced in the worksheet.rels file.
+    // Store a url and associated properties. Urls in Excel are stored in a
+    // number of places: they are written as a string similar to
+    // write_string_with_format(), they are written in the <hyperlinks> element
+    // within the worksheet, and they are referenced in the worksheet.rels file.
     fn store_url(
         &mut self,
         row: RowNum,
@@ -8125,17 +8172,17 @@ impl Worksheet {
 
     // Notes for the date/time handling functions below.
     //
-    // * Datetimes in Excel are a serial date with days counted from an epoch
+    // - Datetimes in Excel are a serial date with days counted from an epoch
     //   (generally 1899-12-31) and the time as a percentage/decimal of the
     //   milliseconds in the day.
     //
-    // * Both are stored in the same f64 value, for example, 2023/01/01 12:00:00 is
+    // - Both are stored in the same f64 value, for example, 2023/01/01 12:00:00 is
     //   stored as 44927.5 with a separate numeric format like yyyy/mm/dd hh:mm.
     //
-    // * Excel can also save dates in a text ISO 8601 format in "Strict Open XML
+    // - Excel can also save dates in a text ISO 8601 format in "Strict Open XML
     //   Spreadsheet" format but this is rarely used in practice.
     //
-    // * Excel also doesn't use timezones or try to convert or encode timezone
+    // - Excel also doesn't use timezones or try to convert or encode timezone
     //   information in any way.
 
     // Convert a chrono::NaiveTime to an Excel serial datetime.
@@ -8389,7 +8436,7 @@ impl Worksheet {
     //
     // Example of an object that covers some of the area from cell A1 to  B2.
     //
-    // Based on the width and height of the object we need to calculate 8 vars:
+    // Based on the width and height of the object we need to calculate 8 values:
     //
     //     col_start, row_start, col_end, row_end, x1, y1, x2, y2.
     //
@@ -10231,6 +10278,27 @@ impl IntoExcelData for &NaiveTime {
     }
 }
 
+impl IntoExcelData for Formula {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        worksheet.store_formula(row, col, self, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        worksheet.store_formula(row, col, self, Some(format))
+    }
+}
+
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
@@ -10238,79 +10306,6 @@ impl IntoExcelData for &NaiveTime {
 // Round to the closest integer number of emu units.
 fn round_to_emus(dimension: f64) -> f64 {
     (dimension * 9525.0).round()
-}
-
-// Utility method to strip equal sign and array braces from a formula and
-// also expand out future and dynamic array formulas.
-fn prepare_formula(mut formula: &str, expand_future_functions: bool) -> Box<str> {
-    // Remove array formula braces and the leading = if they exist.
-    if let Some(stripped) = formula.strip_prefix('{') {
-        formula = stripped;
-    }
-    if let Some(stripped) = formula.strip_prefix('=') {
-        formula = stripped;
-    }
-    if let Some(stripped) = formula.strip_suffix('}') {
-        formula = stripped;
-    }
-
-    // Exit if formula is already expanded by the user.
-    if formula.contains("_xlfn.") {
-        return Box::from(formula);
-    }
-
-    // Expand dynamic formulas.
-    let escaped_formula = escape_dynamic_formulas1(formula);
-    let escaped_formula = escape_dynamic_formulas2(&escaped_formula);
-
-    let formula = if expand_future_functions {
-        escape_future_functions(&escaped_formula)
-    } else {
-        escaped_formula
-    };
-
-    Box::from(formula)
-}
-
-// Escape/expand the dynamic formula _xlfn functions.
-fn escape_dynamic_formulas1(formula: &str) -> Cow<str> {
-    lazy_static! {
-        static ref XLFN: Regex = Regex::new(
-            r"\b(ANCHORARRAY|LAMBDA|LET|RANDARRAY|SEQUENCE|SINGLE|SORTBY|UNIQUE|XLOOKUP|XMATCH)\("
-        )
-        .unwrap();
-    }
-    XLFN.replace_all(formula, "_xlfn.$1(")
-}
-
-// Escape/expand the dynamic formula _xlfn._xlws. functions.
-fn escape_dynamic_formulas2(formula: &str) -> Cow<str> {
-    lazy_static! {
-        static ref XLWS: Regex = Regex::new(r"\b(FILTER|SORT)\(").unwrap();
-    }
-    XLWS.replace_all(formula, "_xlfn._xlws.$1(")
-}
-
-// Escape/expand future/_xlfn functions.
-fn escape_future_functions(formula: &str) -> Cow<str> {
-    lazy_static! {
-        static ref FUTURE: Regex = Regex::new(
-            r"\b(ACOTH|ACOT|AGGREGATE|ARABIC|BASE|BETA\.DIST|BETA\.INV|BINOM\.DIST\.RANGE|BINOM\.DIST|BINOM\.INV|BITAND|BITLSHIFT|BITOR|BITRSHIFT|BITXOR|CEILING\.MATH|CEILING\.PRECISE|CHISQ\.DIST\.RT|CHISQ\.DIST|CHISQ\.INV\.RT|CHISQ\.INV|CHISQ\.TEST|COMBINA|CONCAT|CONFIDENCE\.NORM|CONFIDENCE\.T|COTH|COT|COVARIANCE\.P|COVARIANCE\.S|CSCH|CSC|DAYS|DECIMAL|ERF\.PRECISE|ERFC\.PRECISE|EXPON\.DIST|F\.DIST\.RT|F\.DIST|F\.INV\.RT|F\.INV|F\.TEST|FILTERXML|FLOOR\.MATH|FLOOR\.PRECISE|FORECAST\.ETS\.CONFINT|FORECAST\.ETS\.SEASONALITY|FORECAST\.ETS\.STAT|FORECAST\.ETS|FORECAST\.LINEAR|FORMULATEXT|GAMMA\.DIST|GAMMA\.INV|GAMMALN\.PRECISE|GAMMA|GAUSS|HYPGEOM\.DIST|IFNA|IFS|IMCOSH|IMCOT|IMCSCH|IMCSC|IMSECH|IMSEC|IMSINH|IMTAN|ISFORMULA|ISOWEEKNUM|LOGNORM\.DIST|LOGNORM\.INV|MAXIFS|MINIFS|MODE\.MULT|MODE\.SNGL|MUNIT|NEGBINOM\.DIST|NORM\.DIST|NORM\.INV|NORM\.S\.DIST|NORM\.S\.INV|NUMBERVALUE|PDURATION|PERCENTILE\.EXC|PERCENTILE\.INC|PERCENTRANK\.EXC|PERCENTRANK\.INC|PERMUTATIONA|PHI|POISSON\.DIST|QUARTILE\.EXC|QUARTILE\.INC|QUERYSTRING|RANK\.AVG|RANK\.EQ|RRI|SECH|SEC|SHEETS|SHEET|SKEW\.P|STDEV\.P|STDEV\.S|SWITCH|T\.DIST\.2T|T\.DIST\.RT|T\.DIST|T\.INV\.2T|T\.INV|T\.TEST|TEXTJOIN|UNICHAR|UNICODE|VAR\.P|VAR\.S|WEBSERVICE|WEIBULL\.DIST|XOR|Z\.TEST)\("
-        )
-        .unwrap();
-    }
-    FUTURE.replace_all(formula, "_xlfn.$1(")
-}
-
-// Check of a dynamic function/formula.
-fn is_dynamic_function(formula: &str) -> bool {
-    lazy_static! {
-        static ref DYNAMIC_FUNCTION: Regex = Regex::new(
-            r"\b(ANCHORARRAY|FILTER|LAMBDA|LET|RANDARRAY|SEQUENCE|SINGLE|SORTBY|SORT|UNIQUE|XLOOKUP|XMATCH)\("
-        )
-        .unwrap();
-    }
-    DYNAMIC_FUNCTION.is_match(formula)
 }
 
 #[derive(Clone)]
