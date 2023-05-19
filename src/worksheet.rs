@@ -529,6 +529,7 @@ impl Worksheet {
     /// - [`chrono::NaiveDateTime`].
     /// - [`chrono::NaiveDate`].
     /// - [`chrono::NaiveTime`].
+    /// - [`Formula`].
     ///
     /// Note, default date/time number formats are provided for the [`chrono`]
     /// types since Excel requires that date have a format.
@@ -570,6 +571,7 @@ impl Worksheet {
     /// - [`chrono::NaiveDateTime`].
     /// - [`chrono::NaiveDate`].
     /// - [`chrono::NaiveTime`].
+    /// - [`Formula`].
     ///
     /// This method will be extended in the upcoming versions to cover all the
     /// other Excel types that are handled by the type specific `write*()`
@@ -1509,16 +1511,13 @@ impl Worksheet {
     /// Write an unformatted formula to a worksheet cell.
     ///
     /// Write an unformatted Excel formula to a worksheet cell. See also the
-    /// `rust_xlsxwriter` documentation on [Working with Formulas].
-    ///
-    /// [Working with Formulas]:
-    ///     https://rustxlsxwriter.github.io/formulas/intro.html
+    /// documentation on working with formulas at [`Formula`].
     ///
     /// # Arguments
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell.
+    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
@@ -1580,16 +1579,13 @@ impl Worksheet {
     /// via a [`Format`] struct which can control the font or color or
     /// properties such as bold and italic.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Working with Formulas].
-    ///
-    /// [Working with Formulas]: https://rustxlsxwriter.github.io/formulas/intro.html
-    ///
+    /// See also the documentation on working with formulas at [`Formula`].
     ///
     /// # Arguments
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell.
+    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
     /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -1673,7 +1669,7 @@ impl Worksheet {
     /// * `first_col` - The first row of the range.
     /// * `last_row` - The last row of the range.
     /// * `last_col` - The last row of the range.
-    /// * `formula` - The formula to write to the cell.
+    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
@@ -1772,7 +1768,7 @@ impl Worksheet {
     /// * `first_col` - The first row of the range.
     /// * `last_row` - The last row of the range.
     /// * `last_col` - The last row of the range.
-    /// * `formula` - The formula to write to the cell.
+    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
     /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -1876,7 +1872,7 @@ impl Worksheet {
     /// * `first_col` - The first row of the range.
     /// * `last_row` - The last row of the range.
     /// * `last_col` - The last row of the range.
-    /// * `formula` - The formula to write to the cell.
+    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
@@ -1982,7 +1978,7 @@ impl Worksheet {
     /// * `first_col` - The first row of the range.
     /// * `last_row` - The last row of the range.
     /// * `last_col` - The last row of the range.
-    /// * `formula` - The formula to write to the cell.
+    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
     /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -2073,7 +2069,7 @@ impl Worksheet {
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell.
+    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
@@ -2114,7 +2110,7 @@ impl Worksheet {
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell.
+    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
     /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -4981,13 +4977,14 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates manually setting the result of a
-    /// formula.
+    /// The following example demonstrates manually setting the result of a formula.
+    /// Note, this is only required for non-Excel applications that don't calculate
+    /// formula results.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_formula_result.rs
     /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Formula, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -4996,10 +4993,14 @@ impl Worksheet {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
+    ///     // Using string syntax.
     ///     worksheet
     ///         .write_formula(0, 0, "1+1")?
     ///         .set_formula_result(0, 0, "2");
     ///
+    ///     // Or using a Formula type.
+    ///     worksheet.write_formula(1, 0, Formula::new("2+2").set_result("4"))?;
+    /// #
     /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
@@ -5079,7 +5080,8 @@ impl Worksheet {
     /// #
     /// #     Ok(())
     /// # }
-    /// #
+    /// ```
+    ///
     pub fn set_formula_result_default(&mut self, result: impl Into<String>) -> &mut Worksheet {
         self.default_result = Box::from(result.into());
         self
@@ -5096,39 +5098,48 @@ impl Worksheet {
     /// `CHISQ.DIST.RT` , `CONFIDENCE.NORM`, `STDEV.P`, `STDEV.S` and
     /// `WORKDAY.INTL`.
     ///
-    /// When written using [`write_formula_with_format()`](Worksheet::write_formula_with_format()) these
+    /// When written using [`write_formula()`](Worksheet::write_formula()) these
     /// functions need to be fully qualified with a prefix such as `_xlfn.`
     ///
     /// Alternatively you can use the `worksheet.use_future_functions()`
     /// function to have `rust_xlsxwriter` automatically handle future functions
-    /// for you, see below.
+    /// for you, or use a [`Formula`] struct and the
+    /// [`Formula::use_future_functions()`](Formula::use_future_functions)
+    /// method, see below.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates writing an Excel "Future Function"
-    /// with an implicit prefix and the `use_future_functions()` method.
+    /// The following example demonstrates different ways to handle writing
+    /// Future Functions to a worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_working_with_formulas_future3.rs
+    /// # // This code is available in examples/doc_worksheet_use_future_functions.rs
     /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Formula, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Write a future function and automatically add the required prefix.
+    ///     // The following is a "Future" function and will generate a "#NAME?" warning
+    ///     // in Excel.
+    ///     worksheet.write_formula(0, 0, "=ISFORMULA($B$1)")?;
+    ///
+    ///     // The following adds the required prefix. This will work without a warning.
+    ///     worksheet.write_formula(1, 0, "=_xlfn.ISFORMULA($B$1)")?;
+    ///
+    ///     // The following uses a Formula object and expands out any future functions.
+    ///     // This also works without a warning.
+    ///     worksheet.write_formula(2, 0, Formula::new("=ISFORMULA($B$1)").use_future_functions())?;
+    ///
+    ///     // The following expands out all future functions used in the worksheet from
+    ///     // this point forward. This also works without a warning.
     ///     worksheet.use_future_functions(true);
-    ///     worksheet.write_formula(0, 0, "=STDEV.S(B1:B5)")?;
+    ///     worksheet.write_formula(3, 0, "=ISFORMULA($B$1)")?;
     /// #
-    /// #     // Write some data for the function to operate on.
-    /// #     worksheet.write_number(0, 1, 1.23)?;
-    /// #     worksheet.write_number(1, 1, 1.03)?;
-    /// #     worksheet.write_number(2, 1, 1.20)?;
-    /// #     worksheet.write_number(3, 1, 1.15)?;
-    /// #     worksheet.write_number(4, 1, 1.22)?;
-    /// #
-    /// #     workbook.save("future_function.xlsx")?;
+    /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
     /// # }
@@ -5137,7 +5148,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/working_with_formulas2.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_use_future_functions.png">
     ///
     pub fn use_future_functions(&mut self, enable: bool) {
         self.use_future_functions = enable;
