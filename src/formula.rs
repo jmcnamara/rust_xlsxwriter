@@ -216,14 +216,33 @@ use std::borrow::Cow;
 /// In Office 365 Excel introduced the concept of "Dynamic Arrays" and new
 /// functions that use them. The new functions are:
 ///
+/// - `BYCOL`
+/// - `BYROW`
+/// - `CHOOSECOLS`
+/// - `CHOOSEROWS`
+/// - `DROP`
+/// - `EXPAND`
 /// - `FILTER`
+/// - `HSTACK`
+/// - `LAMBDA`
+/// - `MAKEARRAY`
+/// - `MAP`
 /// - `RANDARRAY`
+/// - `REDUCE`
+/// - `SCAN`
 /// - `SEQUENCE`
-/// - `SORTBY`
 /// - `SORT`
+/// - `SORTBY`
+/// - `SWITCH`
+/// - `TAKE`
+/// - `TEXTSPLIT`
+/// - `TOCOL`
+/// - `TOROW`
 /// - `UNIQUE`
+/// - `VSTACK`
+/// - `WRAPCOLS`
+/// - `WRAPROWS`
 /// - `XLOOKUP`
-/// - `XMATCH`
 ///
 /// The following special case functions were also added with Dynamic Arrays:
 ///
@@ -536,15 +555,16 @@ use std::borrow::Cow;
 ///
 /// | Future Functions                 |
 /// | -------------------------------- |
-/// | `_xlfn.ACOT`                     |
 /// | `_xlfn.ACOTH`                    |
+/// | `_xlfn.ACOT`                     |
 /// | `_xlfn.AGGREGATE`                |
 /// | `_xlfn.ARABIC`                   |
+/// | `_xlfn.ARRAYTOTEXT`              |
 /// | `_xlfn.BASE`                     |
 /// | `_xlfn.BETA.DIST`                |
 /// | `_xlfn.BETA.INV`                 |
-/// | `_xlfn.BINOM.DIST`               |
 /// | `_xlfn.BINOM.DIST.RANGE`         |
+/// | `_xlfn.BINOM.DIST`               |
 /// | `_xlfn.BINOM.INV`                |
 /// | `_xlfn.BITAND`                   |
 /// | `_xlfn.BITLSHIFT`                |
@@ -553,60 +573,61 @@ use std::borrow::Cow;
 /// | `_xlfn.BITXOR`                   |
 /// | `_xlfn.CEILING.MATH`             |
 /// | `_xlfn.CEILING.PRECISE`          |
-/// | `_xlfn.CHISQ.DIST`               |
 /// | `_xlfn.CHISQ.DIST.RT`            |
-/// | `_xlfn.CHISQ.INV`                |
+/// | `_xlfn.CHISQ.DIST`               |
 /// | `_xlfn.CHISQ.INV.RT`             |
+/// | `_xlfn.CHISQ.INV`                |
 /// | `_xlfn.CHISQ.TEST`               |
 /// | `_xlfn.COMBINA`                  |
 /// | `_xlfn.CONCAT`                   |
 /// | `_xlfn.CONFIDENCE.NORM`          |
 /// | `_xlfn.CONFIDENCE.T`             |
-/// | `_xlfn.COT`                      |
 /// | `_xlfn.COTH`                     |
+/// | `_xlfn.COT`                      |
 /// | `_xlfn.COVARIANCE.P`             |
 /// | `_xlfn.COVARIANCE.S`             |
-/// | `_xlfn.CSC`                      |
 /// | `_xlfn.CSCH`                     |
+/// | `_xlfn.CSC`                      |
 /// | `_xlfn.DAYS`                     |
 /// | `_xlfn.DECIMAL`                  |
 /// | `ECMA.CEILING`                   |
 /// | `_xlfn.ERF.PRECISE`              |
 /// | `_xlfn.ERFC.PRECISE`             |
 /// | `_xlfn.EXPON.DIST`               |
-/// | `_xlfn.F.DIST`                   |
 /// | `_xlfn.F.DIST.RT`                |
-/// | `_xlfn.F.INV`                    |
+/// | `_xlfn.F.DIST`                   |
 /// | `_xlfn.F.INV.RT`                 |
+/// | `_xlfn.F.INV`                    |
 /// | `_xlfn.F.TEST`                   |
 /// | `_xlfn.FILTERXML`                |
 /// | `_xlfn.FLOOR.MATH`               |
 /// | `_xlfn.FLOOR.PRECISE`            |
-/// | `_xlfn.FORECAST.ETS`             |
 /// | `_xlfn.FORECAST.ETS.CONFINT`     |
 /// | `_xlfn.FORECAST.ETS.SEASONALITY` |
 /// | `_xlfn.FORECAST.ETS.STAT`        |
+/// | `_xlfn.FORECAST.ETS`             |
 /// | `_xlfn.FORECAST.LINEAR`          |
 /// | `_xlfn.FORMULATEXT`              |
-/// | `_xlfn.GAMMA`                    |
 /// | `_xlfn.GAMMA.DIST`               |
 /// | `_xlfn.GAMMA.INV`                |
 /// | `_xlfn.GAMMALN.PRECISE`          |
+/// | `_xlfn.GAMMA`                    |
 /// | `_xlfn.GAUSS`                    |
 /// | `_xlfn.HYPGEOM.DIST`             |
 /// | `_xlfn.IFNA`                     |
 /// | `_xlfn.IFS`                      |
 /// | `_xlfn.IMCOSH`                   |
 /// | `_xlfn.IMCOT`                    |
-/// | `_xlfn.IMCSC`                    |
 /// | `_xlfn.IMCSCH`                   |
-/// | `_xlfn.IMSEC`                    |
+/// | `_xlfn.IMCSC`                    |
 /// | `_xlfn.IMSECH`                   |
+/// | `_xlfn.IMSEC`                    |
 /// | `_xlfn.IMSINH`                   |
 /// | `_xlfn.IMTAN`                    |
 /// | `_xlfn.ISFORMULA`                |
-/// | `ISO.CEILING`                    |
+/// | `_xlfn.ISOMITTED`                |
 /// | `_xlfn.ISOWEEKNUM`               |
+/// | `_xlfn.LET`                      |
 /// | `_xlfn.LOGNORM.DIST`             |
 /// | `_xlfn.LOGNORM.INV`              |
 /// | `_xlfn.MAXIFS`                   |
@@ -635,28 +656,31 @@ use std::borrow::Cow;
 /// | `_xlfn.RANK.AVG`                 |
 /// | `_xlfn.RANK.EQ`                  |
 /// | `_xlfn.RRI`                      |
-/// | `_xlfn.SEC`                      |
 /// | `_xlfn.SECH`                     |
-/// | `_xlfn.SHEET`                    |
+/// | `_xlfn.SEC`                      |
 /// | `_xlfn.SHEETS`                   |
+/// | `_xlfn.SHEET`                    |
 /// | `_xlfn.SKEW.P`                   |
 /// | `_xlfn.STDEV.P`                  |
 /// | `_xlfn.STDEV.S`                  |
-/// | `_xlfn.SWITCH`                   |
-/// | `_xlfn.T.DIST`                   |
 /// | `_xlfn.T.DIST.2T`                |
 /// | `_xlfn.T.DIST.RT`                |
-/// | `_xlfn.T.INV`                    |
+/// | `_xlfn.T.DIST`                   |
 /// | `_xlfn.T.INV.2T`                 |
+/// | `_xlfn.T.INV`                    |
 /// | `_xlfn.T.TEST`                   |
+/// | `_xlfn.TEXTAFTER`                |
+/// | `_xlfn.TEXTBEFORE`               |
 /// | `_xlfn.TEXTJOIN`                 |
 /// | `_xlfn.UNICHAR`                  |
 /// | `_xlfn.UNICODE`                  |
+/// | `_xlfn.VALUETOTEXT`              |
 /// | `_xlfn.VAR.P`                    |
 /// | `_xlfn.VAR.S`                    |
 /// | `_xlfn.WEBSERVICE`               |
 /// | `_xlfn.WEIBULL.DIST`             |
 /// | `WORKDAY.INTL`                   |
+/// | `_xlfn.XMATCH`                   |
 /// | `_xlfn.XOR`                      |
 /// | `_xlfn.Z.TEST`                   |
 ///
@@ -670,16 +694,34 @@ use std::borrow::Cow;
 /// | Dynamic Array Functions          |
 /// | -------------------------------- |
 /// | `_xlfn.ANCHORARRAY`              |
-/// | `_xlfn.LAMBDA`                   |
-/// | `_xlfn.RANDARRAY`                |
-/// | `_xlfn.SEQUENCE`                 |
-/// | `_xlfn.SINGLE`                   |
-/// | `_xlfn.SORTBY`                   |
-/// | `_xlfn.UNIQUE`                   |
-/// | `_xlfn.XLOOKUP`                  |
-/// | `_xlfn.XMATCH`                   |
+/// | `_xlfn.BYCOL`                    |
+/// | `_xlfn.BYROW`                    |
+/// | `_xlfn.CHOOSECOLS`               |
+/// | `_xlfn.CHOOSEROWS`               |
+/// | `_xlfn.DROP`                     |
+/// | `_xlfn.EXPAND`                   |
 /// | `_xlfn._xlws.FILTER`             |
+/// | `_xlfn.HSTACK`                   |
+/// | `_xlfn.LAMBDA`                   |
+/// | `_xlfn.MAKEARRAY`                |
+/// | `_xlfn.MAP`                      |
+/// | `_xlfn.RANDARRAY`                |
+/// | `_xlfn.REDUCE`                   |
+/// | `_xlfn.SCAN`                     |
+/// | `_xlfn.SINGLE`                   |
+/// | `_xlfn.SEQUENCE`                 |
 /// | `_xlfn._xlws.SORT`               |
+/// | `_xlfn.SORTBY`                   |
+/// | `_xlfn.SWITCH`                   |
+/// | `_xlfn.TAKE`                     |
+/// | `_xlfn.TEXTSPLIT`                |
+/// | `_xlfn.TOCOL`                    |
+/// | `_xlfn.TOROW`                    |
+/// | `_xlfn.UNIQUE`                   |
+/// | `_xlfn.VSTACK`                   |
+/// | `_xlfn.WRAPCOLS`                 |
+/// | `_xlfn.WRAPROWS`                 |
+/// | `_xlfn.XLOOKUP`                  |
 ///
 
 /// # Dealing with formula errors
@@ -864,7 +906,7 @@ impl Formula {
     pub(crate) fn is_dynamic_function(&self) -> bool {
         lazy_static! {
             static ref DYNAMIC_FUNCTION: Regex = Regex::new(
-                r"\b(ANCHORARRAY|FILTER|LAMBDA|LET|RANDARRAY|SEQUENCE|SINGLE|SORTBY|SORT|UNIQUE|XLOOKUP|XMATCH)\("
+                r"\b(ANCHORARRAY|BYCOL|BYROW|CHOOSECOLS|CHOOSEROWS|DROP|EXPAND|FILTER|HSTACK|LAMBDA|MAKEARRAY|MAP|RANDARRAY|REDUCE|SCAN|SEQUENCE|SINGLE|SORT|SORTBY|SWITCH|TAKE|TEXTSPLIT|TOCOL|TOROW|UNIQUE|VSTACK|WRAPCOLS|WRAPROWS|XLOOKUP)\("
             )
             .unwrap();
         }
@@ -909,7 +951,7 @@ impl Formula {
     fn escape_dynamic_formulas1(formula: &str) -> Cow<str> {
         lazy_static! {
             static ref XLFN: Regex = Regex::new(
-                r"\b(ANCHORARRAY|LAMBDA|LET|RANDARRAY|SEQUENCE|SINGLE|SORTBY|UNIQUE|XLOOKUP|XMATCH)\("
+                r"\b(ANCHORARRAY|BYCOL|BYROW|CHOOSECOLS|CHOOSEROWS|DROP|EXPAND|HSTACK|LAMBDA|MAKEARRAY|MAP|RANDARRAY|REDUCE|SCAN|SEQUENCE|SINGLE|SORTBY|SWITCH|TAKE|TEXTSPLIT|TOCOL|TOROW|UNIQUE|VSTACK|WRAPCOLS|WRAPROWS|XLOOKUP)\("
             )
             .unwrap();
         }
@@ -928,7 +970,7 @@ impl Formula {
     fn escape_future_functions(formula: &str) -> Cow<str> {
         lazy_static! {
             static ref FUTURE: Regex = Regex::new(
-                r"\b(ACOTH|ACOT|AGGREGATE|ARABIC|BASE|BETA\.DIST|BETA\.INV|BINOM\.DIST\.RANGE|BINOM\.DIST|BINOM\.INV|BITAND|BITLSHIFT|BITOR|BITRSHIFT|BITXOR|CEILING\.MATH|CEILING\.PRECISE|CHISQ\.DIST\.RT|CHISQ\.DIST|CHISQ\.INV\.RT|CHISQ\.INV|CHISQ\.TEST|COMBINA|CONCAT|CONFIDENCE\.NORM|CONFIDENCE\.T|COTH|COT|COVARIANCE\.P|COVARIANCE\.S|CSCH|CSC|DAYS|DECIMAL|ERF\.PRECISE|ERFC\.PRECISE|EXPON\.DIST|F\.DIST\.RT|F\.DIST|F\.INV\.RT|F\.INV|F\.TEST|FILTERXML|FLOOR\.MATH|FLOOR\.PRECISE|FORECAST\.ETS\.CONFINT|FORECAST\.ETS\.SEASONALITY|FORECAST\.ETS\.STAT|FORECAST\.ETS|FORECAST\.LINEAR|FORMULATEXT|GAMMA\.DIST|GAMMA\.INV|GAMMALN\.PRECISE|GAMMA|GAUSS|HYPGEOM\.DIST|IFNA|IFS|IMCOSH|IMCOT|IMCSCH|IMCSC|IMSECH|IMSEC|IMSINH|IMTAN|ISFORMULA|ISOWEEKNUM|LOGNORM\.DIST|LOGNORM\.INV|MAXIFS|MINIFS|MODE\.MULT|MODE\.SNGL|MUNIT|NEGBINOM\.DIST|NORM\.DIST|NORM\.INV|NORM\.S\.DIST|NORM\.S\.INV|NUMBERVALUE|PDURATION|PERCENTILE\.EXC|PERCENTILE\.INC|PERCENTRANK\.EXC|PERCENTRANK\.INC|PERMUTATIONA|PHI|POISSON\.DIST|QUARTILE\.EXC|QUARTILE\.INC|QUERYSTRING|RANK\.AVG|RANK\.EQ|RRI|SECH|SEC|SHEETS|SHEET|SKEW\.P|STDEV\.P|STDEV\.S|SWITCH|T\.DIST\.2T|T\.DIST\.RT|T\.DIST|T\.INV\.2T|T\.INV|T\.TEST|TEXTJOIN|UNICHAR|UNICODE|VAR\.P|VAR\.S|WEBSERVICE|WEIBULL\.DIST|XOR|Z\.TEST)\("
+                r"\b(ACOTH|ACOT|AGGREGATE|ARABIC|ARRAYTOTEXT|BASE|BETA.DIST|BETA.INV|BINOM.DIST.RANGE|BINOM.DIST|BINOM.INV|BITAND|BITLSHIFT|BITOR|BITRSHIFT|BITXOR|CEILING.MATH|CEILING.PRECISE|CHISQ.DIST.RT|CHISQ.DIST|CHISQ.INV.RT|CHISQ.INV|CHISQ.TEST|COMBINA|CONCAT|CONFIDENCE.NORM|CONFIDENCE.T|COTH|COT|COVARIANCE.P|COVARIANCE.S|CSCH|CSC|DAYS|DECIMAL|ERF.PRECISE|ERFC.PRECISE|EXPON.DIST|F.DIST.RT|F.DIST|F.INV.RT|F.INV|F.TEST|FILTERXML|FLOOR.MATH|FLOOR.PRECISE|FORECAST.ETS.CONFINT|FORECAST.ETS.SEASONALITY|FORECAST.ETS.STAT|FORECAST.ETS|FORECAST.LINEAR|FORMULATEXT|GAMMA.DIST|GAMMA.INV|GAMMALN.PRECISE|GAMMA|GAUSS|HYPGEOM.DIST|IFNA|IFS|IMCOSH|IMCOT|IMCSCH|IMCSC|IMSECH|IMSEC|IMSINH|IMTAN|ISFORMULA|ISOMITTED|ISOWEEKNUM|LET|LOGNORM.DIST|LOGNORM.INV|MAXIFS|MINIFS|MODE.MULT|MODE.SNGL|MUNIT|NEGBINOM.DIST|NORM.DIST|NORM.INV|NORM.S.DIST|NORM.S.INV|NUMBERVALUE|PDURATION|PERCENTILE.EXC|PERCENTILE.INC|PERCENTRANK.EXC|PERCENTRANK.INC|PERMUTATIONA|PHI|POISSON.DIST|QUARTILE.EXC|QUARTILE.INC|QUERYSTRING|RANK.AVG|RANK.EQ|RRI|SECH|SEC|SHEETS|SHEET|SKEW.P|STDEV.P|STDEV.S|T.DIST.2T|T.DIST.RT|T.DIST|T.INV.2T|T.INV|T.TEST|TEXTAFTER|TEXTBEFORE|TEXTJOIN|UNICHAR|UNICODE|VALUETOTEXT|VAR.P|VAR.S|WEBSERVICE|WEIBULL.DIST|XMATCH|XOR|Z.TEST)\("
             )
             .unwrap();
         }
@@ -958,7 +1000,6 @@ mod tests {
             ("{foo()}", "foo()"),
             ("{=foo()}", "foo()"),
             // Dynamic functions.
-            ("LET()", "_xlfn.LET()"),
             ("SEQUENCE(10)", "_xlfn.SEQUENCE(10)"),
             ("UNIQUES(A1:A10)", "UNIQUES(A1:A10)"),
             ("UUNIQUE(A1:A10)", "UUNIQUE(A1:A10)"),
@@ -988,10 +1029,57 @@ mod tests {
                 "LAMBDA(_xlpm.number, _xlpm.number + 1)(1)",
                 "_xlfn.LAMBDA(_xlpm.number, _xlpm.number + 1)(1)",
             ),
+            // Newer dynamic functions (some duplicates with above).
+            ("BYCOL(E1:G2)", "_xlfn.BYCOL(E1:G2)"),
+            ("BYROW(E1:G2)", "_xlfn.BYROW(E1:G2)"),
+            ("CHOOSECOLS(E1:G2,1)", "_xlfn.CHOOSECOLS(E1:G2,1)"),
+            ("CHOOSEROWS(E1:G2,1)", "_xlfn.CHOOSEROWS(E1:G2,1)"),
+            ("DROP(E1:G2,1)", "_xlfn.DROP(E1:G2,1)"),
+            ("EXPAND(E1:G2,2)", "_xlfn.EXPAND(E1:G2,2)"),
+            ("FILTER(E1:G2,H1:H2)", "_xlfn._xlws.FILTER(E1:G2,H1:H2)"),
+            ("HSTACK(E1:G2)", "_xlfn.HSTACK(E1:G2)"),
+            (
+                "LAMBDA(_xlpm.number, _xlpm.number + 1)",
+                "_xlfn.LAMBDA(_xlpm.number, _xlpm.number + 1)",
+            ),
+            (
+                "MAKEARRAY(1,1,LAMBDA(_xlpm.row,_xlpm.col,TRUE)",
+                "_xlfn.MAKEARRAY(1,1,_xlfn.LAMBDA(_xlpm.row,_xlpm.col,TRUE)",
+            ),
+            ("MAP(E1:G2,LAMBDA()", "_xlfn.MAP(E1:G2,_xlfn.LAMBDA()"),
+            ("RANDARRAY(1)", "_xlfn.RANDARRAY(1)"),
+            (
+                "REDUCE(\"1,2,3\",E1:G2,LAMBDA()",
+                "_xlfn.REDUCE(\"1,2,3\",E1:G2,_xlfn.LAMBDA()",
+            ),
+            (
+                "SCAN(\"1,2,3\",E1:G2,LAMBDA()",
+                "_xlfn.SCAN(\"1,2,3\",E1:G2,_xlfn.LAMBDA()",
+            ),
+            ("SEQUENCE(E1:E2)", "_xlfn.SEQUENCE(E1:E2)"),
+            ("SORT(F1)", "_xlfn._xlws.SORT(F1)"),
+            ("SORTBY(E1:G1,E2:G2)", "_xlfn.SORTBY(E1:G1,E2:G2)"),
+            ("SWITCH(WEEKDAY(E1)", "_xlfn.SWITCH(WEEKDAY(E1)"),
+            ("TAKE(E1:G2,1)", "_xlfn.TAKE(E1:G2,1)"),
+            (
+                "TEXTSPLIT(\"foo bar\", \" \")",
+                "_xlfn.TEXTSPLIT(\"foo bar\", \" \")",
+            ),
+            ("TOCOL(E1:G1)", "_xlfn.TOCOL(E1:G1)"),
+            ("TOROW(E1:E2)", "_xlfn.TOROW(E1:E2)"),
+            ("UNIQUE(E1:G1)", "_xlfn.UNIQUE(E1:G1)"),
+            ("VSTACK(E1:G2)", "_xlfn.VSTACK(E1:G2)"),
+            ("WRAPCOLS(E1:F1,2)", "_xlfn.WRAPCOLS(E1:F1,2)"),
+            ("WRAPROWS(E1:F1,2)", "_xlfn.WRAPROWS(E1:F1,2)"),
+            (
+                "XLOOKUP(M34,I35:I42,J35:K42)",
+                "_xlfn.XLOOKUP(M34,I35:I42,J35:K42)",
+            ),
             // Future functions.
             ("COT()", "_xlfn.COT()"),
             ("CSC()", "_xlfn.CSC()"),
             ("IFS()", "_xlfn.IFS()"),
+            ("LET()", "_xlfn.LET()"),
             ("PHI()", "_xlfn.PHI()"),
             ("RRI()", "_xlfn.RRI()"),
             ("SEC()", "_xlfn.SEC()"),
@@ -1035,6 +1123,7 @@ mod tests {
             ("T.DIST()", "_xlfn.T.DIST()"),
             ("T.TEST()", "_xlfn.T.TEST()"),
             ("Z.TEST()", "_xlfn.Z.TEST()"),
+            ("XMATCH()", "_xlfn.XMATCH()"),
             ("COMBINA()", "_xlfn.COMBINA()"),
             ("DECIMAL()", "_xlfn.DECIMAL()"),
             ("RANK.EQ()", "_xlfn.RANK.EQ()"),
@@ -1048,6 +1137,7 @@ mod tests {
             ("NORM.INV()", "_xlfn.NORM.INV()"),
             ("RANK.AVG()", "_xlfn.RANK.AVG()"),
             ("T.INV.2T()", "_xlfn.T.INV.2T()"),
+            ("TEXTJOIN()", "_xlfn.TEXTJOIN()"),
             ("TEXTJOIN()", "_xlfn.TEXTJOIN()"),
             ("AGGREGATE()", "_xlfn.AGGREGATE()"),
             ("BETA.DIST()", "_xlfn.BETA.DIST()"),
@@ -1067,6 +1157,8 @@ mod tests {
             ("T.DIST.2T()", "_xlfn.T.DIST.2T()"),
             ("T.DIST.RT()", "_xlfn.T.DIST.RT()"),
             ("WORKDAY.INTL()", "WORKDAY.INTL()"),
+            ("ISOMITTED()", "_xlfn.ISOMITTED()"),
+            ("TEXTAFTER()", "_xlfn.TEXTAFTER()"),
             ("BINOM.DIST()", "_xlfn.BINOM.DIST()"),
             ("CHISQ.DIST()", "_xlfn.CHISQ.DIST()"),
             ("CHISQ.TEST()", "_xlfn.CHISQ.TEST()"),
@@ -1076,12 +1168,15 @@ mod tests {
             ("ISOWEEKNUM()", "_xlfn.ISOWEEKNUM()"),
             ("NORM.S.INV()", "_xlfn.NORM.S.INV()"),
             ("WEBSERVICE()", "_xlfn.WEBSERVICE()"),
+            ("TEXTBEFORE()", "_xlfn.TEXTBEFORE()"),
             ("ERF.PRECISE()", "_xlfn.ERF.PRECISE()"),
             ("FORMULATEXT()", "_xlfn.FORMULATEXT()"),
             ("LOGNORM.INV()", "_xlfn.LOGNORM.INV()"),
             ("NORM.S.DIST()", "_xlfn.NORM.S.DIST()"),
             ("NUMBERVALUE()", "_xlfn.NUMBERVALUE()"),
             ("QUERYSTRING()", "_xlfn.QUERYSTRING()"),
+            ("ARRAYTOTEXT()", "_xlfn.ARRAYTOTEXT()"),
+            ("VALUETOTEXT()", "_xlfn.VALUETOTEXT()"),
             ("CEILING.MATH()", "_xlfn.CEILING.MATH()"),
             ("CHISQ.INV.RT()", "_xlfn.CHISQ.INV.RT()"),
             ("CONFIDENCE.T()", "_xlfn.CONFIDENCE.T()"),
