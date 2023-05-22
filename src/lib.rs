@@ -149,6 +149,7 @@ mod shared_strings;
 mod shared_strings_table;
 mod styles;
 mod theme;
+mod url;
 mod utility;
 mod vml;
 mod workbook;
@@ -167,6 +168,7 @@ pub use formula::*;
 pub use image::*;
 pub use properties::*;
 pub use protection::*;
+pub use url::*;
 pub use workbook::*;
 pub use worksheet::*;
 

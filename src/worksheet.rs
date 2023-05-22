@@ -26,7 +26,8 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions, XlsxColor,
+    utility, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions, Url,
+    XlsxColor,
 };
 use crate::{Chart, ChartSeriesCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
@@ -530,6 +531,7 @@ impl Worksheet {
     /// - [`chrono::NaiveDate`].
     /// - [`chrono::NaiveTime`].
     /// - [`Formula`].
+    /// - [`Url`].
     ///
     /// Note, default date/time number formats are provided for the [`chrono`]
     /// types since Excel requires that date have a format.
@@ -572,6 +574,7 @@ impl Worksheet {
     /// - [`chrono::NaiveDate`].
     /// - [`chrono::NaiveTime`].
     /// - [`Formula`].
+    /// - [`Url`].
     ///
     /// This method will be extended in the upcoming versions to cover all the
     /// other Excel types that are handled by the type specific `write*()`
@@ -2266,6 +2269,7 @@ impl Worksheet {
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
     /// * `string` - The url string to write to the cell.
+    /// * `link` - The url/hyperlink to write to the cell as a string or [`Url`].
     ///
     /// # Errors
     ///
@@ -2329,14 +2333,45 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/app_hyperlinks.png">
     ///
-    pub fn write_url(
+    /// You can also write the url using a [`Url`] struct:
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_url_intro2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Url, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write a url with a Url struct.
+    ///     worksheet.write_url(0, 0, Url::new("https://www.rust-lang.org"))?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/url_intro1.png">
+    ///
+    pub fn write_url<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        string: &str,
-    ) -> Result<&mut Worksheet, XlsxError> {
+        link: T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Url>,
+    {
         // Store the cell data.
-        self.store_url(row, col, string, "", "", None)
+        self.store_url(row, col, link.into(), None)
     }
 
     /// Write a url/hyperlink to a worksheet cell with an alternative text.
@@ -2354,7 +2389,7 @@ impl Worksheet {
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `string` - The url string to write to the cell.
+    /// * `link` - The url/hyperlink to write to the cell as a string or [`Url`].
     /// * `text` - The alternative string to write to the cell.
     ///
     /// # Errors
@@ -2399,15 +2434,43 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_text.png">
     ///
-    pub fn write_url_with_text(
+    /// You can also write the url using a [`Url`] struct:
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_url_set_text.rs
+    /// #
+    /// # use rust_xlsxwriter::{Url, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write a url with a Url struct and alternative text.
+    ///     worksheet.write(0, 0, Url::new("https://www.rust-lang.org").set_text("Learn Rust"))?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn write_url_with_text<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        string: &str,
-        text: &str,
-    ) -> Result<&mut Worksheet, XlsxError> {
+        link: T,
+        text: impl Into<String>,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Url>,
+    {
         // Store the cell data.
-        self.store_url(row, col, string, text, "", None)
+        let link = link.into().set_text(text.into());
+        self.store_url(row, col, link, None)
     }
 
     /// Write a url/hyperlink to a worksheet cell with a user defined format
@@ -2422,7 +2485,7 @@ impl Worksheet {
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `string` - The url string to write to the cell.
+    /// * `link` - The url/hyperlink to write to the cell as a string or [`Url`].
     /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -2469,17 +2532,22 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_format.png">
     ///
-    pub fn write_url_with_format(
+    pub fn write_url_with_format<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        string: &str,
+        link: T,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Url>,
+    {
         // Store the cell data.
-        self.store_url(row, col, string, "", "", Some(format))
+        self.store_url(row, col, link.into(), Some(format))
     }
 
+    #[doc(hidden)] // Hide the docs since this is more easily done with a Url struct.
+    ///
     /// Write a url/hyperlink to a worksheet cell with various options
     ///
     /// This method is similar to [`write_url()`](Worksheet::write_url()) and
@@ -2490,7 +2558,7 @@ impl Worksheet {
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `string` - The url string to write to the cell.
+    /// * `link` - The url/hyperlink to write to the cell as a string or [`Url`].
     /// * `text` - The alternative string to write to the cell.
     /// * `tip` - The screen tip string to display when the user hovers over the
     ///   url cell.
@@ -2510,17 +2578,21 @@ impl Worksheet {
     /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
     ///
-    pub fn write_url_with_options(
+    pub fn write_url_with_options<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        string: &str,
-        text: &str,
-        tip: &str,
+        link: T,
+        text: impl Into<String>,
+        tip: impl Into<String>,
         format: Option<&Format>,
-    ) -> Result<&mut Worksheet, XlsxError> {
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Into<Url>,
+    {
         // Store the cell data.
-        self.store_url(row, col, string, text, tip, format)
+        let link = link.into().set_text(text.into()).set_tip(tip.into());
+        self.store_url(row, col, link, format)
     }
 
     /// Write a formatted date and time to a worksheet cell.
@@ -7951,12 +8023,10 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        url: &str,
-        text: &str,
-        tip: &str,
+        url: Url,
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let hyperlink = Hyperlink::new(url, text, tip)?;
+        let hyperlink = Hyperlink::new(url)?;
 
         match format {
             Some(format) => self.write_string_with_format(row, col, &hyperlink.text, format)?,
@@ -10310,6 +10380,27 @@ impl IntoExcelData for Formula {
     }
 }
 
+impl IntoExcelData for Url {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        worksheet.store_url(row, col, self, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        worksheet.store_url(row, col, self, Some(format))
+    }
+}
+
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
@@ -10438,11 +10529,11 @@ struct Hyperlink {
 }
 
 impl Hyperlink {
-    fn new(url: &str, text: &str, tip: &str) -> Result<Hyperlink, XlsxError> {
+    fn new(url: Url) -> Result<Hyperlink, XlsxError> {
         let mut hyperlink = Hyperlink {
-            url: url.to_string(),
-            text: text.to_string(),
-            tip: tip.to_string(),
+            url: url.link,
+            text: url.text,
+            tip: url.tip,
             location: String::new(),
             link_type: HyperlinkType::Unknown,
             ref_id: 0,

@@ -6,7 +6,7 @@
 //! rust_xlsxwriter library.
 
 use chrono::NaiveDate;
-use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Image, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Image, Url, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -47,8 +47,12 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_with_format(6, 0, &date, &date_format)?;
 
     // Write some links.
-    worksheet.write_url(7, 0, "https://www.rust-lang.org")?;
-    worksheet.write_url_with_text(8, 0, "https://www.rust-lang.org", "Learn Rust")?;
+    worksheet.write(7, 0, Url::new("https://www.rust-lang.org"))?;
+    worksheet.write(
+        8,
+        0,
+        Url::new("https://www.rust-lang.org").set_text("Learn Rust"),
+    )?;
 
     // Write some merged cells.
     worksheet.merge_range(9, 0, 9, 1, "Merged cells", &merge_format)?;

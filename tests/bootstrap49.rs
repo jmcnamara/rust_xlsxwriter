@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Url, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -13,7 +13,7 @@ extern crate lazy_static;
 mod common;
 
 // Test to demonstrate simple hyperlinks.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     let format = Format::new().set_hyperlink();
@@ -27,11 +27,70 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test with Url struct.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let format = Format::new().set_hyperlink();
+
+    worksheet.write_url(0, 0, Url::new("https://www.rust-lang.org/"))?;
+    worksheet.write_url_with_text(2, 0, Url::new("https://www.rust-lang.org/"), "Rust")?;
+    worksheet.write_url_with_format(4, 0, Url::new("https://www.rust-lang.org/"), &format)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test with Url struct and generics.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let format = Format::new().set_hyperlink();
+
+    worksheet.write(0, 0, Url::new("https://www.rust-lang.org/"))?;
+    worksheet.write(
+        2,
+        0,
+        Url::new(String::from("https://www.rust-lang.org/")).set_text("Rust"),
+    )?;
+    worksheet.write_with_format(4, 0, Url::new("https://www.rust-lang.org/"), &format)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn bootstrap49_hyperlinks() {
+fn bootstrap49_hyperlinks_1() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap49")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap49_hyperlinks_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap49")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap49_hyperlinks_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap49")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

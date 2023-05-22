@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Url, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -13,7 +13,7 @@ extern crate lazy_static;
 mod common;
 
 // Test to demonstrate simple hyperlinks.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -26,11 +26,38 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test with Url struct and generics.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+    let format = Format::default();
+
+    worksheet.write_with_format(0, 0, Url::new("http://www.perl.org/"), &format)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_hyperlink01() {
+fn test_hyperlink01_1() {
     let test_runner = common::TestRunner::new()
         .set_name("hyperlink01")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_hyperlink01_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("hyperlink01")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();
