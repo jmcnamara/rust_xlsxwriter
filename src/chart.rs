@@ -6,6 +6,8 @@
 
 #![warn(missing_docs)]
 
+use std::fmt;
+
 use regex::Regex;
 
 use crate::{
@@ -5940,18 +5942,18 @@ pub enum ChartMarkerType {
     PlusSign,
 }
 
-impl ToString for ChartMarkerType {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartMarkerType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartMarkerType::X => "x".to_string(),
-            ChartMarkerType::Star => "star".to_string(),
-            ChartMarkerType::Circle => "circle".to_string(),
-            ChartMarkerType::Square => "square".to_string(),
-            ChartMarkerType::Diamond => "diamond".to_string(),
-            ChartMarkerType::PlusSign => "plus".to_string(),
-            ChartMarkerType::Triangle => "triangle".to_string(),
-            ChartMarkerType::LongDash => "long_dash".to_string(),
-            ChartMarkerType::ShortDash => "short_dash".to_string(),
+            ChartMarkerType::X => write!(f, "x"),
+            ChartMarkerType::Star => write!(f, "star"),
+            ChartMarkerType::Circle => write!(f, "circle"),
+            ChartMarkerType::Square => write!(f, "square"),
+            ChartMarkerType::Diamond => write!(f, "diamond"),
+            ChartMarkerType::PlusSign => write!(f, "plus"),
+            ChartMarkerType::Triangle => write!(f, "triangle"),
+            ChartMarkerType::LongDash => write!(f, "long_dash"),
+            ChartMarkerType::ShortDash => write!(f, "short_dash"),
         }
     }
 }
@@ -6896,19 +6898,19 @@ pub enum ChartDataLabelPosition {
     BestFit,
 }
 
-impl ToString for ChartDataLabelPosition {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartDataLabelPosition {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartDataLabelPosition::Left => "l".to_string(),
-            ChartDataLabelPosition::Right => "r".to_string(),
-            ChartDataLabelPosition::Above => "t".to_string(),
-            ChartDataLabelPosition::Below => "b".to_string(),
-            ChartDataLabelPosition::Center => "ctr".to_string(),
-            ChartDataLabelPosition::Default => String::new(),
-            ChartDataLabelPosition::BestFit => "bestFit".to_string(),
-            ChartDataLabelPosition::InsideEnd => "inEnd".to_string(),
-            ChartDataLabelPosition::InsideBase => "inBase".to_string(),
-            ChartDataLabelPosition::OutsideEnd => "outEnd".to_string(),
+            ChartDataLabelPosition::Left => write!(f, "l"),
+            ChartDataLabelPosition::Right => write!(f, "r"),
+            ChartDataLabelPosition::Above => write!(f, "t"),
+            ChartDataLabelPosition::Below => write!(f, "b"),
+            ChartDataLabelPosition::Center => write!(f, "ctr"),
+            ChartDataLabelPosition::Default => write!(f, ""),
+            ChartDataLabelPosition::BestFit => write!(f, "bestFit"),
+            ChartDataLabelPosition::InsideEnd => write!(f, "inEnd"),
+            ChartDataLabelPosition::InsideBase => write!(f, "inBase"),
+            ChartDataLabelPosition::OutsideEnd => write!(f, "outEnd"),
         }
     }
 }
@@ -8457,13 +8459,13 @@ impl ChartAxisPosition {
     }
 }
 
-impl ToString for ChartAxisPosition {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartAxisPosition {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisPosition::Top => "t".to_string(),
-            ChartAxisPosition::Left => "l".to_string(),
-            ChartAxisPosition::Right => "r".to_string(),
-            ChartAxisPosition::Bottom => "b".to_string(),
+            ChartAxisPosition::Top => write!(f, "t"),
+            ChartAxisPosition::Left => write!(f, "l"),
+            ChartAxisPosition::Right => write!(f, "r"),
+            ChartAxisPosition::Bottom => write!(f, "b"),
         }
     }
 }
@@ -8539,13 +8541,13 @@ pub enum ChartAxisLabelPosition {
     None,
 }
 
-impl ToString for ChartAxisLabelPosition {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartAxisLabelPosition {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisLabelPosition::Low => "low".to_string(),
-            ChartAxisLabelPosition::High => "high".to_string(),
-            ChartAxisLabelPosition::None => "none".to_string(),
-            ChartAxisLabelPosition::NextTo => "nextTo".to_string(),
+            ChartAxisLabelPosition::Low => write!(f, "low"),
+            ChartAxisLabelPosition::High => write!(f, "high"),
+            ChartAxisLabelPosition::None => write!(f, "none"),
+            ChartAxisLabelPosition::NextTo => write!(f, "nextTo"),
         }
     }
 }
@@ -8631,13 +8633,13 @@ pub enum ChartAxisTickType {
     Cross,
 }
 
-impl ToString for ChartAxisTickType {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartAxisTickType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisTickType::None => "none".to_string(),
-            ChartAxisTickType::Cross => "cross".to_string(),
-            ChartAxisTickType::Inside => "in".to_string(),
-            ChartAxisTickType::Outside => "out".to_string(),
+            ChartAxisTickType::None => write!(f, "none"),
+            ChartAxisTickType::Cross => write!(f, "cross"),
+            ChartAxisTickType::Inside => write!(f, "in"),
+            ChartAxisTickType::Outside => write!(f, "out"),
         }
     }
 }
@@ -8650,13 +8652,13 @@ pub(crate) enum ChartGrouping {
     PercentStacked,
 }
 
-impl ToString for ChartGrouping {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartGrouping {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartGrouping::Stacked => "stacked".to_string(),
-            ChartGrouping::Standard => "standard".to_string(),
-            ChartGrouping::Clustered => "clustered".to_string(),
-            ChartGrouping::PercentStacked => "percentStacked".to_string(),
+            ChartGrouping::Stacked => write!(f, "stacked"),
+            ChartGrouping::Standard => write!(f, "standard"),
+            ChartGrouping::Clustered => write!(f, "clustered"),
+            ChartGrouping::PercentStacked => write!(f, "percentStacked"),
         }
     }
 }
@@ -9032,14 +9034,14 @@ pub enum ChartLegendPosition {
     TopRight,
 }
 
-impl ToString for ChartLegendPosition {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartLegendPosition {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartLegendPosition::Top => "t".to_string(),
-            ChartLegendPosition::Left => "l".to_string(),
-            ChartLegendPosition::Right => "r".to_string(),
-            ChartLegendPosition::Bottom => "b".to_string(),
-            ChartLegendPosition::TopRight => "tr".to_string(),
+            ChartLegendPosition::Top => write!(f, "t"),
+            ChartLegendPosition::Left => write!(f, "l"),
+            ChartLegendPosition::Right => write!(f, "r"),
+            ChartLegendPosition::Bottom => write!(f, "b"),
+            ChartLegendPosition::TopRight => write!(f, "tr"),
         }
     }
 }
@@ -10486,17 +10488,17 @@ pub enum ChartLineDashType {
     LongDashDotDot,
 }
 
-impl ToString for ChartLineDashType {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartLineDashType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartLineDashType::Dash => "dash".to_string(),
-            ChartLineDashType::Solid => "solid".to_string(),
-            ChartLineDashType::DashDot => "dashDot".to_string(),
-            ChartLineDashType::LongDash => "lgDash".to_string(),
-            ChartLineDashType::RoundDot => "sysDot".to_string(),
-            ChartLineDashType::SquareDot => "sysDash".to_string(),
-            ChartLineDashType::LongDashDot => "lgDashDot".to_string(),
-            ChartLineDashType::LongDashDotDot => "lgDashDotDot".to_string(),
+            ChartLineDashType::Dash => write!(f, "dash"),
+            ChartLineDashType::Solid => write!(f, "solid"),
+            ChartLineDashType::DashDot => write!(f, "dashDot"),
+            ChartLineDashType::LongDash => write!(f, "lgDash"),
+            ChartLineDashType::RoundDot => write!(f, "sysDot"),
+            ChartLineDashType::SquareDot => write!(f, "sysDash"),
+            ChartLineDashType::LongDashDot => write!(f, "lgDashDot"),
+            ChartLineDashType::LongDashDotDot => write!(f, "lgDashDotDot"),
         }
     }
 }
@@ -10745,57 +10747,57 @@ pub enum ChartPatternFillType {
     SolidDiamondGrid,
 }
 
-impl ToString for ChartPatternFillType {
-    fn to_string(&self) -> String {
+impl fmt::Display for ChartPatternFillType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartPatternFillType::Wave => "wave".to_string(),
-            ChartPatternFillType::Weave => "weave".to_string(),
-            ChartPatternFillType::Plaid => "plaid".to_string(),
-            ChartPatternFillType::Divot => "divot".to_string(),
-            ChartPatternFillType::Zigzag => "zigZag".to_string(),
-            ChartPatternFillType::Sphere => "sphere".to_string(),
-            ChartPatternFillType::Shingle => "shingle".to_string(),
-            ChartPatternFillType::Trellis => "trellis".to_string(),
-            ChartPatternFillType::SmallGrid => "smGrid".to_string(),
-            ChartPatternFillType::LargeGrid => "lgGrid".to_string(),
-            ChartPatternFillType::DottedGrid => "dotGrid".to_string(),
-            ChartPatternFillType::DottedDiamond => "dotDmnd".to_string(),
-            ChartPatternFillType::DiagonalBrick => "diagBrick".to_string(),
-            ChartPatternFillType::LargeConfetti => "lgConfetti".to_string(),
-            ChartPatternFillType::SmallConfetti => "smConfetti".to_string(),
-            ChartPatternFillType::Dotted5Percent => "pct5".to_string(),
-            ChartPatternFillType::Dotted10Percent => "pct10".to_string(),
-            ChartPatternFillType::Dotted20Percent => "pct20".to_string(),
-            ChartPatternFillType::Dotted25Percent => "pct25".to_string(),
-            ChartPatternFillType::Dotted30Percent => "pct30".to_string(),
-            ChartPatternFillType::Dotted40Percent => "pct40".to_string(),
-            ChartPatternFillType::Dotted50Percent => "pct50".to_string(),
-            ChartPatternFillType::Dotted60Percent => "pct60".to_string(),
-            ChartPatternFillType::Dotted70Percent => "pct70".to_string(),
-            ChartPatternFillType::Dotted75Percent => "pct75".to_string(),
-            ChartPatternFillType::Dotted80Percent => "pct80".to_string(),
-            ChartPatternFillType::Dotted90Percent => "pct90".to_string(),
-            ChartPatternFillType::HorizontalBrick => "horzBrick".to_string(),
-            ChartPatternFillType::SolidDiamondGrid => "solidDmnd".to_string(),
-            ChartPatternFillType::SmallCheckerboard => "smCheck".to_string(),
-            ChartPatternFillType::LargeCheckerboard => "lgCheck".to_string(),
-            ChartPatternFillType::StripesBackslashes => "dashDnDiag".to_string(),
-            ChartPatternFillType::VerticalStripesDark => "dkVert".to_string(),
-            ChartPatternFillType::OutlinedDiamondGrid => "openDmnd".to_string(),
-            ChartPatternFillType::VerticalStripesLight => "ltVert".to_string(),
-            ChartPatternFillType::HorizontalStripesDark => "dkHorz".to_string(),
-            ChartPatternFillType::StripesForwardSlashes => "dashUpDiag".to_string(),
-            ChartPatternFillType::VerticalStripesNarrow => "narVert".to_string(),
-            ChartPatternFillType::HorizontalStripesLight => "ltHorz".to_string(),
-            ChartPatternFillType::HorizontalStripesNarrow => "narHorz".to_string(),
-            ChartPatternFillType::DiagonalStripesDarkUpwards => "dkUpDiag".to_string(),
-            ChartPatternFillType::DiagonalStripesWideUpwards => "wdUpDiag".to_string(),
-            ChartPatternFillType::VerticalStripesAlternating => "dashVert".to_string(),
-            ChartPatternFillType::DiagonalStripesLightUpwards => "ltUpDiag".to_string(),
-            ChartPatternFillType::DiagonalStripesDarkDownwards => "dkDnDiag".to_string(),
-            ChartPatternFillType::DiagonalStripesWideDownwards => "wdDnDiag".to_string(),
-            ChartPatternFillType::HorizontalStripesAlternating => "dashHorz".to_string(),
-            ChartPatternFillType::DiagonalStripesLightDownwards => "ltDnDiag".to_string(),
+            ChartPatternFillType::Wave => write!(f, "wave"),
+            ChartPatternFillType::Weave => write!(f, "weave"),
+            ChartPatternFillType::Plaid => write!(f, "plaid"),
+            ChartPatternFillType::Divot => write!(f, "divot"),
+            ChartPatternFillType::Zigzag => write!(f, "zigZag"),
+            ChartPatternFillType::Sphere => write!(f, "sphere"),
+            ChartPatternFillType::Shingle => write!(f, "shingle"),
+            ChartPatternFillType::Trellis => write!(f, "trellis"),
+            ChartPatternFillType::SmallGrid => write!(f, "smGrid"),
+            ChartPatternFillType::LargeGrid => write!(f, "lgGrid"),
+            ChartPatternFillType::DottedGrid => write!(f, "dotGrid"),
+            ChartPatternFillType::DottedDiamond => write!(f, "dotDmnd"),
+            ChartPatternFillType::DiagonalBrick => write!(f, "diagBrick"),
+            ChartPatternFillType::LargeConfetti => write!(f, "lgConfetti"),
+            ChartPatternFillType::SmallConfetti => write!(f, "smConfetti"),
+            ChartPatternFillType::Dotted5Percent => write!(f, "pct5"),
+            ChartPatternFillType::Dotted10Percent => write!(f, "pct10"),
+            ChartPatternFillType::Dotted20Percent => write!(f, "pct20"),
+            ChartPatternFillType::Dotted25Percent => write!(f, "pct25"),
+            ChartPatternFillType::Dotted30Percent => write!(f, "pct30"),
+            ChartPatternFillType::Dotted40Percent => write!(f, "pct40"),
+            ChartPatternFillType::Dotted50Percent => write!(f, "pct50"),
+            ChartPatternFillType::Dotted60Percent => write!(f, "pct60"),
+            ChartPatternFillType::Dotted70Percent => write!(f, "pct70"),
+            ChartPatternFillType::Dotted75Percent => write!(f, "pct75"),
+            ChartPatternFillType::Dotted80Percent => write!(f, "pct80"),
+            ChartPatternFillType::Dotted90Percent => write!(f, "pct90"),
+            ChartPatternFillType::HorizontalBrick => write!(f, "horzBrick"),
+            ChartPatternFillType::SolidDiamondGrid => write!(f, "solidDmnd"),
+            ChartPatternFillType::SmallCheckerboard => write!(f, "smCheck"),
+            ChartPatternFillType::LargeCheckerboard => write!(f, "lgCheck"),
+            ChartPatternFillType::StripesBackslashes => write!(f, "dashDnDiag"),
+            ChartPatternFillType::VerticalStripesDark => write!(f, "dkVert"),
+            ChartPatternFillType::OutlinedDiamondGrid => write!(f, "openDmnd"),
+            ChartPatternFillType::VerticalStripesLight => write!(f, "ltVert"),
+            ChartPatternFillType::HorizontalStripesDark => write!(f, "dkHorz"),
+            ChartPatternFillType::StripesForwardSlashes => write!(f, "dashUpDiag"),
+            ChartPatternFillType::VerticalStripesNarrow => write!(f, "narVert"),
+            ChartPatternFillType::HorizontalStripesLight => write!(f, "ltHorz"),
+            ChartPatternFillType::HorizontalStripesNarrow => write!(f, "narHorz"),
+            ChartPatternFillType::DiagonalStripesDarkUpwards => write!(f, "dkUpDiag"),
+            ChartPatternFillType::DiagonalStripesWideUpwards => write!(f, "wdUpDiag"),
+            ChartPatternFillType::VerticalStripesAlternating => write!(f, "dashVert"),
+            ChartPatternFillType::DiagonalStripesLightUpwards => write!(f, "ltUpDiag"),
+            ChartPatternFillType::DiagonalStripesDarkDownwards => write!(f, "dkDnDiag"),
+            ChartPatternFillType::DiagonalStripesWideDownwards => write!(f, "wdDnDiag"),
+            ChartPatternFillType::HorizontalStripesAlternating => write!(f, "dashHorz"),
+            ChartPatternFillType::DiagonalStripesLightDownwards => write!(f, "ltDnDiag"),
         }
     }
 }

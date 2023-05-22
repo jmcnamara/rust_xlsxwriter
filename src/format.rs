@@ -6,7 +6,7 @@
 
 #![warn(missing_docs)]
 
-use std::hash::Hash;
+use std::{fmt, hash::Hash};
 
 /// The Format struct is used to define cell formatting for data in a worksheet.
 ///
@@ -2883,29 +2883,28 @@ pub enum FormatPattern {
     Gray0625,
 }
 
-impl ToString for FormatPattern {
-    // Get the Excel string value for the pattern type.
-    fn to_string(&self) -> String {
+impl fmt::Display for FormatPattern {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FormatPattern::None => "none".to_string(),
-            FormatPattern::Solid => "solid".to_string(),
-            FormatPattern::DarkUp => "darkUp".to_string(),
-            FormatPattern::LightUp => "lightUp".to_string(),
-            FormatPattern::Gray125 => "gray125".to_string(),
-            FormatPattern::DarkGray => "darkGray".to_string(),
-            FormatPattern::DarkDown => "darkDown".to_string(),
-            FormatPattern::DarkGrid => "darkGrid".to_string(),
-            FormatPattern::Gray0625 => "gray0625".to_string(),
-            FormatPattern::LightGray => "lightGray".to_string(),
-            FormatPattern::LightDown => "lightDown".to_string(),
-            FormatPattern::LightGrid => "lightGrid".to_string(),
-            FormatPattern::MediumGray => "mediumGray".to_string(),
-            FormatPattern::DarkTrellis => "darkTrellis".to_string(),
-            FormatPattern::DarkVertical => "darkVertical".to_string(),
-            FormatPattern::LightTrellis => "lightTrellis".to_string(),
-            FormatPattern::LightVertical => "lightVertical".to_string(),
-            FormatPattern::DarkHorizontal => "darkHorizontal".to_string(),
-            FormatPattern::LightHorizontal => "lightHorizontal".to_string(),
+            FormatPattern::None => write!(f, "none"),
+            FormatPattern::Solid => write!(f, "solid"),
+            FormatPattern::DarkUp => write!(f, "darkUp"),
+            FormatPattern::LightUp => write!(f, "lightUp"),
+            FormatPattern::Gray125 => write!(f, "gray125"),
+            FormatPattern::DarkGray => write!(f, "darkGray"),
+            FormatPattern::DarkDown => write!(f, "darkDown"),
+            FormatPattern::DarkGrid => write!(f, "darkGrid"),
+            FormatPattern::Gray0625 => write!(f, "gray0625"),
+            FormatPattern::LightGray => write!(f, "lightGray"),
+            FormatPattern::LightDown => write!(f, "lightDown"),
+            FormatPattern::LightGrid => write!(f, "lightGrid"),
+            FormatPattern::MediumGray => write!(f, "mediumGray"),
+            FormatPattern::DarkTrellis => write!(f, "darkTrellis"),
+            FormatPattern::DarkVertical => write!(f, "darkVertical"),
+            FormatPattern::LightTrellis => write!(f, "lightTrellis"),
+            FormatPattern::LightVertical => write!(f, "lightVertical"),
+            FormatPattern::DarkHorizontal => write!(f, "darkHorizontal"),
+            FormatPattern::LightHorizontal => write!(f, "lightHorizontal"),
         }
     }
 }
@@ -2958,24 +2957,23 @@ pub enum FormatBorder {
     SlantDashDot,
 }
 
-impl ToString for FormatBorder {
-    // Get the Excel string value for the border type.
-    fn to_string(&self) -> String {
+impl fmt::Display for FormatBorder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FormatBorder::None => "none".to_string(),
-            FormatBorder::Thin => "thin".to_string(),
-            FormatBorder::Hair => "hair".to_string(),
-            FormatBorder::Thick => "thick".to_string(),
-            FormatBorder::Medium => "medium".to_string(),
-            FormatBorder::Dashed => "dashed".to_string(),
-            FormatBorder::Dotted => "dotted".to_string(),
-            FormatBorder::Double => "double".to_string(),
-            FormatBorder::DashDot => "dashDot".to_string(),
-            FormatBorder::DashDotDot => "dashDotDot".to_string(),
-            FormatBorder::MediumDashed => "mediumDashed".to_string(),
-            FormatBorder::SlantDashDot => "slantDashDot".to_string(),
-            FormatBorder::MediumDashDot => "mediumDashDot".to_string(),
-            FormatBorder::MediumDashDotDot => "mediumDashDotDot".to_string(),
+            FormatBorder::None => write!(f, "none"),
+            FormatBorder::Thin => write!(f, "thin"),
+            FormatBorder::Hair => write!(f, "hair"),
+            FormatBorder::Thick => write!(f, "thick"),
+            FormatBorder::Medium => write!(f, "medium"),
+            FormatBorder::Dashed => write!(f, "dashed"),
+            FormatBorder::Dotted => write!(f, "dotted"),
+            FormatBorder::Double => write!(f, "double"),
+            FormatBorder::DashDot => write!(f, "dashDot"),
+            FormatBorder::DashDotDot => write!(f, "dashDotDot"),
+            FormatBorder::MediumDashed => write!(f, "mediumDashed"),
+            FormatBorder::SlantDashDot => write!(f, "slantDashDot"),
+            FormatBorder::MediumDashDot => write!(f, "mediumDashDot"),
+            FormatBorder::MediumDashDotDot => write!(f, "mediumDashDotDot"),
         }
     }
 }
