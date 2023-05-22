@@ -26,8 +26,7 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions, Url,
-    XlsxColor,
+    utility, Color, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions, Url,
 };
 use crate::{Chart, ChartSeriesCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
@@ -156,7 +155,7 @@ pub struct Worksheet {
     changed_rows: HashMap<RowNum, RowOptions>,
     changed_cols: HashMap<ColNum, ColOptions>,
     page_setup_changed: bool,
-    tab_color: XlsxColor,
+    tab_color: Color,
     fit_to_page: bool,
     fit_width: u16,
     fit_height: u16,
@@ -324,7 +323,7 @@ impl Worksheet {
             changed_cols: HashMap::new(),
             page_setup_changed: false,
             fit_to_page: false,
-            tab_color: XlsxColor::Default,
+            tab_color: Color::Default,
             fit_width: 1,
             fit_height: 1,
             paper_size: 0,
@@ -1351,7 +1350,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_rich_string.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1364,8 +1363,8 @@ impl Worksheet {
     /// #
     ///     // Add some formats to use in the rich strings.
     ///     let default = Format::default();
-    ///     let red = Format::new().set_font_color(XlsxColor::Red);
-    ///     let blue = Format::new().set_font_color(XlsxColor::Blue);
+    ///     let red = Format::new().set_font_color(Color::Red);
+    ///     let blue = Format::new().set_font_color(Color::Blue);
     ///
     ///     // Write a Rich strings with multiple formats.
     ///     let segments = [
@@ -1455,7 +1454,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_rich_string_with_format.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, FormatAlign, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatAlign, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1468,8 +1467,8 @@ impl Worksheet {
     /// #
     ///     // Add some formats to use in the rich strings.
     ///     let default = Format::default();
-    ///     let red = Format::new().set_font_color(XlsxColor::Red);
-    ///     let blue = Format::new().set_font_color(XlsxColor::Blue);
+    ///     let red = Format::new().set_font_color(Color::Red);
+    ///     let blue = Format::new().set_font_color(Color::Blue);
     ///
     ///     // Write a rich strings with multiple formats.
     ///     let segments = [
@@ -2167,7 +2166,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_blank.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -2176,10 +2175,10 @@ impl Worksheet {
     /// #     // Add a worksheet.
     ///     let worksheet = workbook.add_worksheet();
     ///
-    ///     let format1 = Format::new().set_background_color(XlsxColor::Yellow);
+    ///     let format1 = Format::new().set_background_color(Color::Yellow);
     ///
     ///     let format2 = Format::new()
-    ///         .set_background_color(XlsxColor::Yellow)
+    ///         .set_background_color(Color::Yellow)
     ///         .set_border(FormatBorder::Thin);
     ///
     ///     worksheet.write_blank(1, 1, &format1)?;
@@ -2287,7 +2286,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/app_hyperlinks.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, FormatUnderline};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError, FormatUnderline};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -2295,7 +2294,7 @@ impl Worksheet {
     /// #
     /// #     // Create a format to use in the worksheet.
     /// #     let link_format = Format::new()
-    /// #         .set_font_color(XlsxColor::Red)
+    /// #         .set_font_color(Color::Red)
     /// #         .set_underline(FormatUnderline::Single);
     /// #
     /// #     // Add a worksheet to the workbook.
@@ -2504,7 +2503,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_url_with_format.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, FormatUnderline};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError, FormatUnderline};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -2515,7 +2514,7 @@ impl Worksheet {
     /// #
     ///     // Create a format to use in the worksheet.
     ///     let link_format = Format::new()
-    ///         .set_font_color(XlsxColor::Red)
+    ///         .set_font_color(Color::Red)
     ///         .set_underline(FormatUnderline::Single);
     ///
     ///     // Write a url with an alternative format.
@@ -3024,7 +3023,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/app_merge_range.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, FormatAlign, FormatBorder, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatAlign, FormatBorder, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -3053,7 +3052,7 @@ impl Worksheet {
     ///         .set_align(FormatAlign::Center)
     ///         .set_align(FormatAlign::VerticalCenter)
     ///         .set_border(FormatBorder::Thin)
-    ///         .set_background_color(XlsxColor::Silver);
+    ///         .set_background_color(Color::Silver);
     ///
     ///     worksheet.merge_range(7, 1, 8, 3, "Merged cells", &format)?;
     ///
@@ -3727,7 +3726,7 @@ impl Worksheet {
     /// The following example demonstrates setting the format for a row in Excel.
     ///
     /// ```
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -3737,7 +3736,7 @@ impl Worksheet {
     ///
     ///     // Add for formats.
     ///     let bold_format = Format::new().set_bold();
-    ///     let red_format = Format::new().set_font_color(XlsxColor::Red);
+    ///     let red_format = Format::new().set_font_color(Color::Red);
     ///
     ///     // Set the row format.
     ///     worksheet.set_row_format(1, &red_format)?;
@@ -4086,7 +4085,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_column_format.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4096,7 +4095,7 @@ impl Worksheet {
     ///
     ///     // Add for formats.
     ///     let bold_format = Format::new().set_bold();
-    ///     let red_format = Format::new().set_font_color(XlsxColor::Red);
+    ///     let red_format = Format::new().set_font_color(Color::Red);
     ///
     ///     // Set the column format.
     ///     worksheet.set_column_format(1, &red_format)?;
@@ -5514,7 +5513,7 @@ impl Worksheet {
     ///
     /// # Arguments
     ///
-    /// * `color` - The tab color property defined by a [`XlsxColor`] enum
+    /// * `color` - The tab color property defined by a [`Color`] enum
     ///   value.
     ///
     /// # Examples
@@ -5524,7 +5523,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_tab_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Workbook, Worksheet, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Workbook, Worksheet, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -5534,9 +5533,9 @@ impl Worksheet {
     ///     let mut worksheet3 = Worksheet::new();
     ///     let mut worksheet4 = Worksheet::new();
     ///
-    ///     worksheet1.set_tab_color(XlsxColor::Red);
-    ///     worksheet2.set_tab_color(XlsxColor::Green);
-    ///     worksheet3.set_tab_color(XlsxColor::RGB(0xFF9900));
+    ///     worksheet1.set_tab_color(Color::Red);
+    ///     worksheet2.set_tab_color(Color::Green);
+    ///     worksheet3.set_tab_color(Color::RGB(0xFF9900));
     ///
     ///     // worksheet4 will have the default color.
     ///     worksheet4.set_active(true);
@@ -8916,7 +8915,7 @@ impl Worksheet {
     fn write_sheet_pr(&mut self) {
         if self.filter_conditions.is_empty()
             && !self.fit_to_page
-            && (self.tab_color == XlsxColor::Default || self.tab_color == XlsxColor::Automatic)
+            && (self.tab_color == Color::Default || self.tab_color == Color::Automatic)
         {
             return;
         }
@@ -8927,7 +8926,7 @@ impl Worksheet {
         }
 
         if self.fit_to_page
-            || (self.tab_color != XlsxColor::Default && self.tab_color != XlsxColor::Automatic)
+            || (self.tab_color != Color::Default && self.tab_color != Color::Automatic)
         {
             self.writer.xml_start_tag("sheetPr", &attributes);
 
@@ -8956,7 +8955,7 @@ impl Worksheet {
 
     // Write the <tabColor> element.
     fn write_tab_color(&mut self) {
-        if self.tab_color == XlsxColor::Default {
+        if self.tab_color == Color::Default {
             return;
         }
 

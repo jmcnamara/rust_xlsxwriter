@@ -3,7 +3,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates setting the format for a column in Excel.
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Add for formats.
     let bold_format = Format::new().set_bold();
-    let red_format = Format::new().set_font_color(XlsxColor::Red);
+    let red_format = Format::new().set_font_color(Color::Red);
 
     // Set the column format.
     worksheet.set_column_format(1, &red_format)?;

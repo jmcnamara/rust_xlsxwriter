@@ -5,7 +5,7 @@
 //! A simple example of setting some "freeze" panes in worksheets using the
 //! rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, FormatAlign, FormatBorder, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
         .set_bold()
         .set_align(FormatAlign::Center)
         .set_align(FormatAlign::VerticalCenter)
-        .set_foreground_color(XlsxColor::RGB(0xD7E4BC))
+        .set_foreground_color(Color::RGB(0xD7E4BC))
         .set_border(FormatBorder::Thin);
 
     let center_format = Format::new().set_align(FormatAlign::Center);

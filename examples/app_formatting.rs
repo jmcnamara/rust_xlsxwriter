@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
         .set_bold()
         .set_align(FormatAlign::Top)
         .set_border(FormatBorder::Thin)
-        .set_background_color(XlsxColor::RGB(0xC6EFCE));
+        .set_background_color(Color::RGB(0xC6EFCE));
 
     // -----------------------------------------------------------------------
     // Create a worksheet that demonstrates number formatting.
@@ -181,7 +181,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_string_with_format(8, 0, "Font size 18", &size_format)?;
 
     // Font color.
-    let font_color_format = Format::new().set_font_color(XlsxColor::Red);
+    let font_color_format = Format::new().set_font_color(Color::Red);
     worksheet.write_string_with_format(9, 0, "Font color", &font_color_format)?;
 
     // Font underline.
@@ -216,7 +216,7 @@ fn main() -> Result<(), XlsxError> {
 
     let border_format4 = Format::new()
         .set_border(FormatBorder::Thin)
-        .set_border_color(XlsxColor::Red);
+        .set_border_color(Color::Red);
     worksheet.write_string_with_format(8, 2, "Color Border", &border_format4)?;
 
     // -----------------------------------------------------------------------
@@ -233,13 +233,13 @@ fn main() -> Result<(), XlsxError> {
 
     // Write some cells with pattern fills.
     let fill_format1 = Format::new()
-        .set_background_color(XlsxColor::Yellow)
+        .set_background_color(Color::Yellow)
         .set_pattern(FormatPattern::Solid);
     worksheet.write_string_with_format(2, 1, "Solid fill", &fill_format1)?;
 
     let fill_format2 = Format::new()
-        .set_background_color(XlsxColor::Yellow)
-        .set_foreground_color(XlsxColor::Orange)
+        .set_background_color(Color::Yellow)
+        .set_foreground_color(Color::Orange)
         .set_pattern(FormatPattern::Gray0625);
     worksheet.write_string_with_format(4, 1, "Pattern fill", &fill_format2)?;
 

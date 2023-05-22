@@ -14,7 +14,7 @@ use crate::{
     drawing::{DrawingObject, DrawingType},
     utility,
     xmlwriter::XMLWriter,
-    ColNum, IntoColor, ObjectMovement, RowNum, XlsxColor, XlsxError, COL_MAX, ROW_MAX,
+    ColNum, Color, IntoColor, ObjectMovement, RowNum, XlsxError, COL_MAX, ROW_MAX,
 };
 
 #[derive(Clone)]
@@ -1917,7 +1917,7 @@ impl Chart {
     }
 
     // Write the <c:extLst> element for inverted fill colors.
-    fn write_extension_list(&mut self, color: XlsxColor) {
+    fn write_extension_list(&mut self, color: Color) {
         let attributes1 = [
             ("uri", "{6F2FDCE9-48DA-4B69-8628-5D25D57E5C99}"),
             (
@@ -3180,9 +3180,7 @@ impl Chart {
             attributes.push(("w", width.to_string()));
         }
 
-        if line.color != XlsxColor::Default
-            || line.dash_type != ChartLineDashType::Solid
-            || line.hidden
+        if line.color != Color::Default || line.dash_type != ChartLineDashType::Solid || line.hidden
         {
             self.writer.xml_start_tag("a:ln", &attributes);
 
@@ -3190,7 +3188,7 @@ impl Chart {
                 // Write the a:noFill element.
                 self.write_a_no_fill();
             } else {
-                if line.color != XlsxColor::Default {
+                if line.color != Color::Default {
                     // Write the a:solidFill element.
                     self.write_a_solid_fill(line.color, line.transparency);
                 }
@@ -3218,7 +3216,7 @@ impl Chart {
     }
 
     // Write the <a:solidFill> element.
-    fn write_a_solid_fill(&mut self, color: XlsxColor, transparency: u8) {
+    fn write_a_solid_fill(&mut self, color: Color, transparency: u8) {
         self.writer.xml_start_tag_only("a:solidFill");
 
         // Write the color element.
@@ -3233,25 +3231,24 @@ impl Chart {
 
         self.writer.xml_start_tag("a:pattFill", &attributes);
 
-        if fill.foreground_color != XlsxColor::Default {
+        if fill.foreground_color != Color::Default {
             // Write the <a:fgClr> element.
             self.writer.xml_start_tag_only("a:fgClr");
             self.write_color(fill.foreground_color, 0);
             self.writer.xml_end_tag("a:fgClr");
         }
 
-        if fill.background_color != XlsxColor::Default {
+        if fill.background_color != Color::Default {
             // Write the <a:bgClr> element.
             self.writer.xml_start_tag_only("a:bgClr");
             self.write_color(fill.background_color, 0);
             self.writer.xml_end_tag("a:bgClr");
-        } else if fill.background_color == XlsxColor::Default
-            && fill.foreground_color != XlsxColor::Default
+        } else if fill.background_color == Color::Default && fill.foreground_color != Color::Default
         {
             // If there is a foreground color but no background color then we
             // need to write a default background color.
             self.writer.xml_start_tag_only("a:bgClr");
-            self.write_color(XlsxColor::White, 0);
+            self.write_color(Color::White, 0);
             self.writer.xml_end_tag("a:bgClr");
         }
 
@@ -3259,16 +3256,16 @@ impl Chart {
     }
 
     // Write the <a:srgbClr> element.
-    fn write_color(&mut self, color: XlsxColor, transparency: u8) {
+    fn write_color(&mut self, color: Color, transparency: u8) {
         match color {
-            XlsxColor::Theme(_, _) => {
+            Color::Theme(_, _) => {
                 let (scheme, lum_mod, lum_off) = color.chart_scheme();
                 if !scheme.is_empty() {
                     // Write the a:schemeClr element.
                     self.write_a_scheme_clr(scheme, lum_mod, lum_off, transparency);
                 }
             }
-            XlsxColor::Automatic => {
+            Color::Automatic => {
                 let attributes = [("val", "window"), ("lastClr", "FFFFFF")];
 
                 self.writer.xml_empty_tag("a:sysClr", &attributes);
@@ -3803,7 +3800,7 @@ pub struct ChartSeries {
     pub(crate) gap: u16,
     pub(crate) overlap: i8,
     pub(crate) invert_if_negative: bool,
-    pub(crate) inverted_color: XlsxColor,
+    pub(crate) inverted_color: Color,
 }
 
 #[allow(clippy::new_without_default)]
@@ -3913,7 +3910,7 @@ impl ChartSeries {
             gap: 150,
             overlap: 0,
             invert_if_negative: false,
-            inverted_color: XlsxColor::Default,
+            inverted_color: Color::Default,
         }
     }
 
@@ -4765,8 +4762,8 @@ impl ChartSeries {
     ///
     /// # Arguments
     ///
-    /// `colors`: a slice of [`XlsxColor`] enum values or types that will
-    /// convert into [`XlsxColor`] via [`IntoColor`].
+    /// `colors`: a slice of [`Color`] enum values or types that will
+    /// convert into [`Color`] via [`IntoColor`].
     ///
     ///
     ///
@@ -4993,7 +4990,7 @@ impl ChartSeries {
     ///
     /// # Arguments
     ///
-    /// * `color` - The inverse color property defined by a [`XlsxColor`] enum
+    /// * `color` - The inverse color property defined by a [`Color`] enum
     ///   value.
     ///
     /// # Examples
@@ -9381,7 +9378,7 @@ impl ChartFormat {
     /// ```
     /// # // This code is available in examples/doc_chart_format_set_no_fill.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -9404,7 +9401,7 @@ impl ChartFormat {
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
     ///             ChartFormat::new()
-    ///                 .set_border(ChartLine::new().set_color(XlsxColor::Black))
+    ///                 .set_border(ChartLine::new().set_color(Color::Black))
     ///                 .set_no_fill(),
     ///         );
     ///
@@ -9508,7 +9505,7 @@ impl ChartFormat {
     /// # // This code is available in examples/doc_chart_pattern_fill.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor,
+    /// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, Color,
     /// #     XlsxError,
     /// # };
     /// #
@@ -9535,8 +9532,8 @@ impl ChartFormat {
     ///             ChartFormat::new().set_pattern_fill(
     ///                 ChartPatternFill::new()
     ///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
-    ///                     .set_background_color(XlsxColor::Yellow)
-    ///                     .set_foreground_color(XlsxColor::Red),
+    ///                     .set_background_color(Color::Yellow)
+    ///                     .set_foreground_color(Color::Red),
     ///             ),
     ///         );
     ///
@@ -9643,7 +9640,7 @@ impl ChartFormat {
 ///
 #[derive(Clone)]
 pub struct ChartLine {
-    color: XlsxColor,
+    color: Color,
     width: Option<f64>,
     transparency: u8,
     dash_type: ChartLineDashType,
@@ -9656,7 +9653,7 @@ impl ChartLine {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartLine {
         ChartLine {
-            color: XlsxColor::Default,
+            color: Color::Default,
             width: None,
             transparency: 0,
             dash_type: ChartLineDashType::Solid,
@@ -9668,7 +9665,7 @@ impl ChartLine {
     ///
     /// # Arguments
     ///
-    /// * `color` - The color property defined by a [`XlsxColor`] enum value or
+    /// * `color` - The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -10055,7 +10052,7 @@ pub type ChartBorder = ChartLine;
 ///
 #[derive(Clone)]
 pub struct ChartSolidFill {
-    color: XlsxColor,
+    color: Color,
     transparency: u8,
 }
 
@@ -10065,7 +10062,7 @@ impl ChartSolidFill {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartSolidFill {
         ChartSolidFill {
-            color: XlsxColor::Default,
+            color: Color::Default,
             transparency: 0,
         }
     }
@@ -10074,7 +10071,7 @@ impl ChartSolidFill {
     ///
     /// # Arguments
     ///
-    /// * `color` - The color property defined by a [`XlsxColor`] enum value or
+    /// * `color` - The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -10221,7 +10218,7 @@ impl ChartSolidFill {
 /// # // This code is available in examples/doc_chart_pattern_fill.rs
 /// #
 /// # use rust_xlsxwriter::{
-/// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor, XlsxError,
+/// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, Color, XlsxError,
 /// # };
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -10247,8 +10244,8 @@ impl ChartSolidFill {
 ///             ChartFormat::new().set_pattern_fill(
 ///                 ChartPatternFill::new()
 ///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
-///                     .set_background_color(XlsxColor::Yellow)
-///                     .set_foreground_color(XlsxColor::Red),
+///                     .set_background_color(Color::Yellow)
+///                     .set_foreground_color(Color::Red),
 ///             ),
 ///         );
 ///
@@ -10268,8 +10265,8 @@ impl ChartSolidFill {
 ///
 #[derive(Clone)]
 pub struct ChartPatternFill {
-    background_color: XlsxColor,
-    foreground_color: XlsxColor,
+    background_color: Color,
+    foreground_color: Color,
     pattern: ChartPatternFillType,
 }
 
@@ -10279,8 +10276,8 @@ impl ChartPatternFill {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartPatternFill {
         ChartPatternFill {
-            background_color: XlsxColor::Default,
-            foreground_color: XlsxColor::Default,
+            background_color: Color::Default,
+            foreground_color: Color::Default,
             pattern: ChartPatternFillType::Dotted5Percent,
         }
     }
@@ -10353,7 +10350,7 @@ impl ChartPatternFill {
     ///
     /// # Arguments
     ///
-    /// * `color` - The color property defined by a [`XlsxColor`] enum value or
+    /// * `color` - The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -10364,7 +10361,7 @@ impl ChartPatternFill {
     /// # // This code is available in examples/doc_chart_pattern_fill.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor,
+    /// #     Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, Color,
     /// #     XlsxError,
     /// # };
     /// #
@@ -10391,8 +10388,8 @@ impl ChartPatternFill {
     ///             ChartFormat::new().set_pattern_fill(
     ///                 ChartPatternFill::new()
     ///                     .set_pattern(ChartPatternFillType::Dotted20Percent)
-    ///                     .set_background_color(XlsxColor::Yellow)
-    ///                     .set_foreground_color(XlsxColor::Red),
+    ///                     .set_background_color(Color::Yellow)
+    ///                     .set_foreground_color(Color::Red),
     ///             ),
     ///         );
     ///
@@ -10428,7 +10425,7 @@ impl ChartPatternFill {
     ///
     /// # Arguments
     ///
-    /// * `color` - The color property defined by a [`XlsxColor`] enum value or
+    /// * `color` - The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_foreground_color<T>(&mut self, color: T) -> &mut ChartPatternFill
@@ -10878,7 +10875,7 @@ pub struct ChartFont {
     pub(crate) underline: bool,
     pub(crate) name: String,
     pub(crate) size: f64,
-    pub(crate) color: XlsxColor,
+    pub(crate) color: Color,
     pub(crate) strikethrough: bool,
     pub(crate) pitch_family: u8,
     pub(crate) charset: u8,
@@ -10902,7 +10899,7 @@ impl ChartFont {
             underline: false,
             name: String::new(),
             size: 0.0,
-            color: XlsxColor::Default,
+            color: Color::Default,
             strikethrough: false,
             pitch_family: 0,
             charset: 0,
@@ -11024,7 +11021,7 @@ impl ChartFont {
     ///
     /// # Arguments
     ///
-    /// * `color` - The font color property defined by a [`XlsxColor`] enum
+    /// * `color` - The font color property defined by a [`Color`] enum
     ///   value.
     ///
     /// # Examples

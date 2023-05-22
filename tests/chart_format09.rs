@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use rust_xlsxwriter::{
-    Chart, ChartFormat, ChartLine, ChartLineDashType, ChartType, Workbook, XlsxColor, XlsxError,
+    Chart, ChartFormat, ChartLine, ChartLineDashType, ChartType, Color, Workbook, XlsxError,
 };
 
 #[macro_use]
@@ -37,7 +37,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_format(
             ChartFormat::new().set_line(
                 ChartLine::new()
-                    .set_color(XlsxColor::Red)
+                    .set_color(Color::Red)
                     .set_width(1.25)
                     .set_dash_type(ChartLineDashType::SquareDot),
             ),

@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, FormatBorder, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -19,9 +19,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     let format1 = Format::new()
-        .set_font_color(XlsxColor::Automatic)
+        .set_font_color(Color::Automatic)
         .set_border(FormatBorder::Thin)
-        .set_border_color(XlsxColor::Automatic);
+        .set_border_color(Color::Automatic);
 
     worksheet.write_with_format(0, 0, "Foo", &format1)?;
 

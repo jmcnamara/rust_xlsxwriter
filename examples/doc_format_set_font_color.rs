@@ -4,7 +4,7 @@
 
 //! The following example demonstrates setting the italic property for a format.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet.
     let worksheet = workbook.add_worksheet();
 
-    let format = Format::new().set_font_color(XlsxColor::Red);
+    let format = Format::new().set_font_color(Color::Red);
 
     worksheet.write_string_with_format(0, 0, "Wheelbarrow", &format)?;
 

@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -21,7 +21,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         let col = 0u16;
         let color = (col + 1) as u8;
         let shade = row as u8;
-        let theme_color = XlsxColor::Theme(color, shade);
+        let theme_color = Color::Theme(color, shade);
         let color_format = Format::new().set_background_color(theme_color);
 
         worksheet.write_blank(row, col, &color_format)?;

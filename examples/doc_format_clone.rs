@@ -5,7 +5,7 @@
 //! The following example demonstrates cloning a format and setting the
 //! properties.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
     let format1 = Format::new().set_bold();
 
     // Clone a new format and set some properties.
-    let format2 = format1.clone().set_font_color(XlsxColor::Blue);
+    let format2 = format1.clone().set_font_color(Color::Blue);
 
     worksheet.write_string_with_format(0, 0, "Hello", &format1)?;
     worksheet.write_string_with_format(1, 0, "Hello", &format2)?;

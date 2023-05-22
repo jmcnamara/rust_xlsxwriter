@@ -5,7 +5,7 @@
 //! The following example demonstrates setting the cell background color, with a
 //! default solid pattern.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -14,7 +14,7 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet.
     let worksheet = workbook.add_worksheet();
 
-    let format1 = Format::new().set_background_color(XlsxColor::Green);
+    let format1 = Format::new().set_background_color(Color::Green);
 
     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
 

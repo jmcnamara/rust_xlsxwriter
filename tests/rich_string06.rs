@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let red = Format::new().set_font_color(XlsxColor::Red);
+    let red = Format::new().set_font_color(Color::Red);
     let default = Format::default();
 
     worksheet.write_string_with_format(0, 0, "Foo", &red)?;

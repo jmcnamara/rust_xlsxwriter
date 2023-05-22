@@ -4,7 +4,7 @@
 
 //! The following example demonstrates set the tab color of worksheets.
 
-use rust_xlsxwriter::{Workbook, Worksheet, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Workbook, Worksheet, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -14,9 +14,9 @@ fn main() -> Result<(), XlsxError> {
     let mut worksheet3 = Worksheet::new();
     let mut worksheet4 = Worksheet::new();
 
-    worksheet1.set_tab_color(XlsxColor::Red);
-    worksheet2.set_tab_color(XlsxColor::Green);
-    worksheet3.set_tab_color(XlsxColor::RGB(0xFF9900));
+    worksheet1.set_tab_color(Color::Red);
+    worksheet2.set_tab_color(Color::Green);
+    worksheet3.set_tab_color(Color::RGB(0xFF9900));
 
     // worksheet4 will have the default color.
     worksheet4.set_active(true);

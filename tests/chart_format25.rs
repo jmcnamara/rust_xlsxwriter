@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Color, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -33,11 +33,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 1, 4, 1))
         .set_format(
-            ChartFormat::new().set_border(
-                ChartLine::new()
-                    .set_color(XlsxColor::Red)
-                    .set_transparency(50),
-            ),
+            ChartFormat::new()
+                .set_border(ChartLine::new().set_color(Color::Red).set_transparency(50)),
         );
 
     chart

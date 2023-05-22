@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -21,7 +21,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let format1 = Format::new().set_num_format("hh:mm;@");
     let format2 = Format::new()
         .set_num_format("hh:mm;@")
-        .set_background_color(XlsxColor::Yellow);
+        .set_background_color(Color::Yellow);
 
     worksheet.write_with_format(0, 0, 1, &format1)?;
     worksheet.write_with_format(1, 0, 2, &format2)?;

@@ -5,7 +5,7 @@
 //! An example of setting a pattern fill for a chart element.
 
 use rust_xlsxwriter::{
-    Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor,
+    Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Color, Workbook,
     XlsxError,
 };
 
@@ -32,8 +32,8 @@ fn main() -> Result<(), XlsxError> {
             ChartFormat::new().set_pattern_fill(
                 ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Dotted20Percent)
-                    .set_background_color(XlsxColor::Yellow)
-                    .set_foreground_color(XlsxColor::Red),
+                    .set_background_color(Color::Yellow)
+                    .set_foreground_color(Color::Red),
             ),
         );
 

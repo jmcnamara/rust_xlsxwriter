@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, FormatBorder, FormatPattern, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, FormatBorder, FormatPattern, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -17,20 +17,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    let format1 = Format::new().set_background_color(XlsxColor::Theme(5, 0));
-    let format2 = Format::new().set_background_color(XlsxColor::Theme(5, 1));
-    let format3 = Format::new().set_background_color(XlsxColor::Theme(5, 2));
-    let format4 = Format::new().set_background_color(XlsxColor::Theme(5, 3));
-    let format5 = Format::new().set_background_color(XlsxColor::Theme(5, 4));
-    let format6 = Format::new().set_background_color(XlsxColor::Theme(5, 5));
+    let format1 = Format::new().set_background_color(Color::Theme(5, 0));
+    let format2 = Format::new().set_background_color(Color::Theme(5, 1));
+    let format3 = Format::new().set_background_color(Color::Theme(5, 2));
+    let format4 = Format::new().set_background_color(Color::Theme(5, 3));
+    let format5 = Format::new().set_background_color(Color::Theme(5, 4));
+    let format6 = Format::new().set_background_color(Color::Theme(5, 5));
 
     let format7 = Format::new()
         .set_border(FormatBorder::Thin)
-        .set_border_color(XlsxColor::Theme(9, 0));
+        .set_border_color(Color::Theme(9, 0));
 
     let format8 = Format::new()
-        .set_background_color(XlsxColor::Theme(9, 1))
-        .set_foreground_color(XlsxColor::Theme(9, 5))
+        .set_background_color(Color::Theme(9, 1))
+        .set_foreground_color(Color::Theme(9, 5))
         .set_pattern(FormatPattern::DarkHorizontal);
 
     worksheet.write_blank(1, 1, &format1)?;
@@ -42,7 +42,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_blank(13, 1, &format7)?;
     worksheet.write_blank(15, 1, &format8)?;
 
-    worksheet.set_tab_color(XlsxColor::Theme(4, 0));
+    worksheet.set_tab_color(Color::Theme(4, 0));
 
     workbook.save(filename)?;
 

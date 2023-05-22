@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     worksheet.write_string(0, 0, "Foo")?;
-    worksheet.set_tab_color(XlsxColor::Red);
+    worksheet.set_tab_color(Color::Red);
 
     workbook.save(filename)?;
 

@@ -5,7 +5,7 @@
 //! The following example demonstrates create a new format and setting the
 //! properties.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
     let format = Format::new()
         .set_bold()
         .set_italic()
-        .set_font_color(XlsxColor::Red);
+        .set_font_color(Color::Red);
 
     worksheet.write_string_with_format(0, 0, "Hello", &format)?;
 

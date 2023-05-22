@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use rust_xlsxwriter::{
-    Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Workbook, XlsxColor,
+    Chart, ChartFormat, ChartPatternFill, ChartPatternFillType, ChartType, Color, Workbook,
     XlsxError,
 };
 
@@ -38,8 +38,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             ChartFormat::new().set_pattern_fill(
                 ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Dotted5Percent)
-                    .set_foreground_color(XlsxColor::RGB(0xC00000))
-                    .set_background_color(XlsxColor::RGB(0xFFFFFF)),
+                    .set_foreground_color(Color::RGB(0xC00000))
+                    .set_background_color(Color::RGB(0xFFFFFF)),
             ),
         );
 
@@ -50,8 +50,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             ChartFormat::new().set_pattern_fill(
                 ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Dotted50Percent)
-                    .set_foreground_color(XlsxColor::RGB(0xFF0000))
-                    .set_background_color(XlsxColor::RGB(0xFFFFFF)),
+                    .set_foreground_color(Color::RGB(0xFF0000))
+                    .set_background_color(Color::RGB(0xFFFFFF)),
             ),
         );
     chart
@@ -61,8 +61,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             ChartFormat::new().set_pattern_fill(
                 ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::DiagonalStripesLightDownwards)
-                    .set_foreground_color(XlsxColor::RGB(0xFFC000))
-                    .set_background_color(XlsxColor::RGB(0xFFFFFF)),
+                    .set_foreground_color(Color::RGB(0xFFC000))
+                    .set_background_color(Color::RGB(0xFFFFFF)),
             ),
         );
     chart
@@ -72,8 +72,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             ChartFormat::new().set_pattern_fill(
                 ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::VerticalStripesLight)
-                    .set_foreground_color(XlsxColor::RGB(0xFFFF00))
-                    .set_background_color(XlsxColor::RGB(0xFFFFFF)),
+                    .set_foreground_color(Color::RGB(0xFFFF00))
+                    .set_background_color(Color::RGB(0xFFFFFF)),
             ),
         );
     chart
@@ -83,8 +83,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             ChartFormat::new().set_pattern_fill(
                 ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::StripesBackslashes)
-                    .set_foreground_color(XlsxColor::RGB(0x92D050))
-                    .set_background_color(XlsxColor::RGB(0xFFFFFF)),
+                    .set_foreground_color(Color::RGB(0x92D050))
+                    .set_background_color(Color::RGB(0xFFFFFF)),
             ),
         );
     chart
@@ -94,8 +94,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             ChartFormat::new().set_pattern_fill(
                 ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Zigzag)
-                    .set_foreground_color(XlsxColor::RGB(0x00B050))
-                    .set_background_color(XlsxColor::RGB(0xFFFFFF)),
+                    .set_foreground_color(Color::RGB(0x00B050))
+                    .set_background_color(Color::RGB(0xFFFFFF)),
             ),
         );
     chart
@@ -105,8 +105,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             ChartFormat::new().set_pattern_fill(
                 ChartPatternFill::new()
                     .set_pattern(ChartPatternFillType::Divot)
-                    .set_foreground_color(XlsxColor::RGB(0x00B0F0))
-                    .set_background_color(XlsxColor::RGB(0xFFFFFF)),
+                    .set_foreground_color(Color::RGB(0x00B0F0))
+                    .set_background_color(Color::RGB(0xFFFFFF)),
             ),
         );
     chart
@@ -115,8 +115,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_format(
             ChartPatternFill::new()
                 .set_pattern(ChartPatternFillType::SmallGrid)
-                .set_foreground_color(XlsxColor::RGB(0x0070C0))
-                .set_background_color(XlsxColor::RGB(0xFFFFFF)),
+                .set_foreground_color(Color::RGB(0x0070C0))
+                .set_background_color(Color::RGB(0xFFFFFF)),
         );
 
     worksheet.insert_chart(8, 4, &chart)?;

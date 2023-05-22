@@ -5,7 +5,7 @@
 //! An example of creating merged ranges in a worksheet using the
 //! rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, FormatAlign, FormatBorder, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -34,7 +34,7 @@ fn main() -> Result<(), XlsxError> {
         .set_align(FormatAlign::Center)
         .set_align(FormatAlign::VerticalCenter)
         .set_border(FormatBorder::Thin)
-        .set_background_color(XlsxColor::Silver);
+        .set_background_color(Color::Silver);
 
     worksheet.merge_range(7, 1, 8, 3, "Merged cells", &format)?;
 

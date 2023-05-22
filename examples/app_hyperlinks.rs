@@ -5,7 +5,7 @@
 //! A simple, getting started, example of some of the features of the
 //! rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Format, FormatUnderline, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, FormatUnderline, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Create a format to use in the worksheet.
     let link_format = Format::new()
-        .set_font_color(XlsxColor::Red)
+        .set_font_color(Color::Red)
         .set_underline(FormatUnderline::Single);
 
     // Add a worksheet to the workbook.

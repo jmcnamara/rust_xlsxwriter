@@ -5,7 +5,7 @@
 //! The following example demonstrates writing a "rich" string with multiple
 //! formats, and an additional cell format.
 
-use rust_xlsxwriter::{Format, FormatAlign, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, FormatAlign, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -18,8 +18,8 @@ fn main() -> Result<(), XlsxError> {
 
     // Add some formats to use in the rich strings.
     let default = Format::default();
-    let red = Format::new().set_font_color(XlsxColor::Red);
-    let blue = Format::new().set_font_color(XlsxColor::Blue);
+    let red = Format::new().set_font_color(Color::Red);
+    let blue = Format::new().set_font_color(Color::Blue);
 
     // Write a rich strings with multiple formats.
     let segments = [

@@ -5,7 +5,7 @@
 //! An example of the different types of color syntax that is supported by the
 //! [`IntoColor`] trait.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -18,16 +18,16 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_column_width_pixels(0, 80)?;
 
     // Some examples with named color enum values.
-    let color_format = Format::new().set_background_color(XlsxColor::Green);
+    let color_format = Format::new().set_background_color(Color::Green);
     worksheet.write_string(0, 0, "Green")?;
     worksheet.write_blank(0, 1, &color_format)?;
 
-    let color_format = Format::new().set_background_color(XlsxColor::Red);
+    let color_format = Format::new().set_background_color(Color::Red);
     worksheet.write_string(1, 0, "Red")?;
     worksheet.write_blank(1, 1, &color_format)?;
 
-    // Write a RGB color using the XlsxColor::RGB() enum method.
-    let color_format = Format::new().set_background_color(XlsxColor::RGB(0xFF7F50));
+    // Write a RGB color using the Color::RGB() enum method.
+    let color_format = Format::new().set_background_color(Color::RGB(0xFF7F50));
     worksheet.write_string(2, 0, "#FF7F50")?;
     worksheet.write_blank(2, 1, &color_format)?;
 
@@ -47,7 +47,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_blank(5, 1, &color_format)?;
 
     // Add a Theme color.
-    let color_format = Format::new().set_background_color(XlsxColor::Theme(4, 3));
+    let color_format = Format::new().set_background_color(Color::Theme(4, 3));
     worksheet.write_string(6, 0, "Theme(4, 3)")?;
     worksheet.write_blank(6, 1, &color_format)?;
 

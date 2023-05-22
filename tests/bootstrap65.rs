@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Chart, ChartSolidFill, ChartType, Color, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -30,7 +30,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values(("Sheet1", 0, 0, 4, 0))
-        .set_format(ChartSolidFill::new().set_color(XlsxColor::Automatic));
+        .set_format(ChartSolidFill::new().set_color(Color::Automatic));
 
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));

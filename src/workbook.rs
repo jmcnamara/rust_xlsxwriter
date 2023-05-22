@@ -21,7 +21,7 @@ use crate::{
     utility, Border, ChartSeriesCacheData, ColNum, DefinedName, DefinedNameType, DocProperties,
     Fill, Font, RowNum, NUM_IMAGE_FORMATS,
 };
-use crate::{FormatPattern, XlsxColor};
+use crate::{Color, FormatPattern};
 
 /// The Workbook struct represents an Excel file in it's entirety. It is the
 /// starting point for creating a new Excel xlsx file.
@@ -1342,8 +1342,8 @@ impl Workbook {
             // For a solid fill (pattern == "solid") Excel reverses the role of
             // foreground and background colors, and
             if fill.pattern == FormatPattern::Solid
-                && fill.background_color != XlsxColor::Default
-                && fill.foreground_color != XlsxColor::Default
+                && fill.background_color != Color::Default
+                && fill.foreground_color != Color::Default
             {
                 mem::swap(&mut fill.foreground_color, &mut fill.background_color);
             }
@@ -1352,19 +1352,19 @@ impl Workbook {
             // pattern they probably wanted a solid fill, so we fill in the
             // defaults.
             if (fill.pattern == FormatPattern::None || fill.pattern == FormatPattern::Solid)
-                && fill.background_color != XlsxColor::Default
-                && fill.foreground_color == XlsxColor::Default
+                && fill.background_color != Color::Default
+                && fill.foreground_color == Color::Default
             {
                 fill.foreground_color = fill.background_color;
-                fill.background_color = XlsxColor::Default;
+                fill.background_color = Color::Default;
                 fill.pattern = FormatPattern::Solid;
             }
 
             if (fill.pattern == FormatPattern::None || fill.pattern == FormatPattern::Solid)
-                && fill.background_color == XlsxColor::Default
-                && fill.foreground_color != XlsxColor::Default
+                && fill.background_color == Color::Default
+                && fill.foreground_color != Color::Default
             {
-                fill.background_color = XlsxColor::Default;
+                fill.background_color = Color::Default;
                 fill.pattern = FormatPattern::Solid;
             }
 

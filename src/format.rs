@@ -20,7 +20,7 @@ use std::{fmt, hash::Hash};
 /// ```
 /// # // This code is available in examples/doc_format_intro.rs
 /// #
-/// use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxColor, XlsxError};
+/// use rust_xlsxwriter::{Format, Workbook, FormatBorder, Color, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
@@ -45,10 +45,10 @@ use std::{fmt, hash::Hash};
 ///     let format4 = Format::new().set_font_name("Edwardian Script ITC");
 ///     worksheet.write_string_with_format(3, 0, "Fonts", &format4)?;
 ///
-///     let format5 = Format::new().set_font_color(XlsxColor::Red);
+///     let format5 = Format::new().set_font_color(Color::Red);
 ///     worksheet.write_string_with_format(4, 0, "Font color", &format5)?;
 ///
-///     let format6 = Format::new().set_background_color(XlsxColor::RGB(0xDAA520));
+///     let format6 = Format::new().set_background_color(Color::RGB(0xDAA520));
 ///     worksheet.write_string_with_format(5, 0, "Fills", &format6)?;
 ///
 ///     let format7 = Format::new().set_border(FormatBorder::Thin);
@@ -81,7 +81,7 @@ use std::{fmt, hash::Hash};
 /// ```
 /// # // This code is available in examples/doc_format_create.rs
 /// #
-/// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+/// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     // Create a new Excel file object.
@@ -94,7 +94,7 @@ use std::{fmt, hash::Hash};
 ///     let format = Format::new()
 ///         .set_bold()
 ///         .set_italic()
-///         .set_font_color(XlsxColor::Red);
+///         .set_font_color(Color::Red);
 ///
 ///     worksheet.write_string_with_format(0, 0, "Hello", &format)?;
 ///
@@ -111,7 +111,7 @@ use std::{fmt, hash::Hash};
 /// ```
 /// # // This code is available in examples/doc_format_clone.rs
 /// #
-/// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+/// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     // Create a new Excel file object.
@@ -126,7 +126,7 @@ use std::{fmt, hash::Hash};
 ///
 ///     // Clone a new format and set some properties.
 ///     let format2 = format1.clone()
-///         .set_font_color(XlsxColor::Blue);
+///         .set_font_color(Color::Blue);
 ///
 ///     worksheet.write_string_with_format(0, 0, "Hello", &format1)?;
 ///     worksheet.write_string_with_format(1, 0, "Hello", &format2)?;
@@ -185,24 +185,24 @@ use std::{fmt, hash::Hash};
 ///
 /// # Format Colors
 ///
-/// Format property colors are specified by using the [`XlsxColor`] enum with a
+/// Format property colors are specified by using the [`Color`] enum with a
 /// Html style RGB integer value or a limited number of defined colors:
 ///
 /// ```
-/// # // This code is available in examples/doc_enum_xlsxcolor.rs
+/// # // This code is available in examples/doc_enum_Color.rs
 /// #
-/// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+/// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
 ///     let mut workbook = Workbook::new();
 ///
-///     let format1 = Format::new().set_font_color(XlsxColor::Red);
-///     let format2 = Format::new().set_font_color(XlsxColor::Green);
-///     let format3 = Format::new().set_font_color(XlsxColor::RGB(0x4F026A));
-///     let format4 = Format::new().set_font_color(XlsxColor::RGB(0x73CC5F));
-///     let format5 = Format::new().set_font_color(XlsxColor::RGB(0xFFACFF));
-///     let format6 = Format::new().set_font_color(XlsxColor::RGB(0xCC7E16));
+///     let format1 = Format::new().set_font_color(Color::Red);
+///     let format2 = Format::new().set_font_color(Color::Green);
+///     let format3 = Format::new().set_font_color(Color::RGB(0x4F026A));
+///     let format4 = Format::new().set_font_color(Color::RGB(0x73CC5F));
+///     let format5 = Format::new().set_font_color(Color::RGB(0xFFACFF));
+///     let format6 = Format::new().set_font_color(Color::RGB(0xCC7E16));
 ///
 ///     let worksheet = workbook.add_worksheet();
 ///     worksheet.write_string_with_format(0, 0, "Red", &format1)?;
@@ -846,7 +846,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The font color property defined by a [`XlsxColor`] enum
+    /// * `color` - The font color property defined by a [`Color`] enum
     ///   value.
     ///
     /// # Examples
@@ -857,14 +857,14 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_font_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     let format = Format::new().set_font_color(XlsxColor::Red);
+    ///     let format = Format::new().set_font_color(Color::Red);
     ///
     ///     worksheet.write_string_with_format(0, 0, "Wheelbarrow", &format)?;
     /// #
@@ -1496,7 +1496,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_pattern.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, FormatPattern};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError, FormatPattern};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1506,12 +1506,12 @@ impl Format {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new()
-    ///         .set_background_color(XlsxColor::Green)
+    ///         .set_background_color(Color::Green)
     ///         .set_pattern(FormatPattern::Solid);
     ///
     ///     let format2 = Format::new()
-    ///         .set_background_color(XlsxColor::Yellow)
-    ///         .set_foreground_color(XlsxColor::Red)
+    ///         .set_background_color(Color::Yellow)
+    ///         .set_foreground_color(Color::Red)
     ///         .set_pattern(FormatPattern::DarkVertical);
     ///
     ///     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
@@ -1541,7 +1541,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The background color property defined by a [`XlsxColor`]
+    /// * `color` - The background color property defined by a [`Color`]
     ///   enum value or a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -1552,7 +1552,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_background_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1561,7 +1561,7 @@ impl Format {
     /// #     // Add a worksheet.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     let format1 = Format::new().set_background_color(XlsxColor::Green);
+    ///     let format1 = Format::new().set_background_color(Color::Green);
     ///
     ///     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
     ///
@@ -1598,7 +1598,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The foreground color property defined by a [`XlsxColor`]
+    /// * `color` - The foreground color property defined by a [`Color`]
     ///   enum value or a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -1608,7 +1608,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_foreground_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError, FormatPattern};
+    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError, FormatPattern};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1618,8 +1618,8 @@ impl Format {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     let format1 = Format::new()
-    ///         .set_background_color(XlsxColor::Yellow)
-    ///         .set_foreground_color(XlsxColor::Red)
+    ///         .set_background_color(Color::Yellow)
+    ///         .set_foreground_color(Color::Red)
     ///         .set_pattern(FormatPattern::DarkVertical);
     ///
     ///     worksheet.write_blank(0, 0, &format1)?;
@@ -1723,7 +1723,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -1733,7 +1733,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_border_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxColor, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, Color, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1742,15 +1742,15 @@ impl Format {
     /// #
     ///     let format1 = Format::new()
     ///         .set_border(FormatBorder::Thin)
-    ///         .set_border_color(XlsxColor::Blue);
+    ///         .set_border_color(Color::Blue);
     ///
     ///     let format2 = Format::new()
     ///         .set_border(FormatBorder::Dotted)
-    ///         .set_border_color(XlsxColor::Red);
+    ///         .set_border_color(Color::Red);
     ///
     ///     let format3 = Format::new()
     ///         .set_border(FormatBorder::Double)
-    ///         .set_border_color(XlsxColor::Green);
+    ///         .set_border_color(Color::Green);
     ///
     ///     worksheet.write_blank(1, 1, &format1)?;
     ///     worksheet.write_blank(3, 1, &format2)?;
@@ -1801,7 +1801,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_top_color<T>(mut self, color: T) -> Format
@@ -1834,7 +1834,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_bottom_color<T>(mut self, color: T) -> Format
@@ -1867,7 +1867,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_left_color<T>(mut self, color: T) -> Format
@@ -1900,7 +1900,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_right_color<T>(mut self, color: T) -> Format
@@ -1934,7 +1934,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_set_border_diagonal.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, XlsxColor, FormatDiagonalBorder, XlsxError};
+    /// # use rust_xlsxwriter::{Format, Workbook, FormatBorder, Color, FormatDiagonalBorder, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1956,7 +1956,7 @@ impl Format {
     ///     let format4 = Format::new()
     ///         .set_border_diagonal(FormatBorder::Thin)
     ///         .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown)
-    ///         .set_border_diagonal_color(XlsxColor::Red);
+    ///         .set_border_diagonal_color(Color::Red);
     ///
     ///     worksheet.write_blank(1, 1, &format1)?;
     ///     worksheet.write_blank(3, 1, &format2)?;
@@ -1983,7 +1983,7 @@ impl Format {
     ///
     /// # Arguments
     ///
-    /// * `color` - The border color as defined by a [`XlsxColor`] enum value or
+    /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_diagonal_color<T>(mut self, color: T) -> Format
@@ -2018,7 +2018,7 @@ impl Format {
     ///
     pub fn set_hyperlink(mut self) -> Format {
         self.font.is_hyperlink = true;
-        self.font.color = XlsxColor::Theme(10, 0);
+        self.font.color = Color::Theme(10, 0);
         self.font.underline = FormatUnderline::Single;
         self.font.scheme = String::new();
 
@@ -2229,12 +2229,12 @@ pub(crate) struct Border {
     pub(crate) top_style: FormatBorder,
     pub(crate) left_style: FormatBorder,
     pub(crate) right_style: FormatBorder,
-    pub(crate) bottom_color: XlsxColor,
-    pub(crate) top_color: XlsxColor,
-    pub(crate) left_color: XlsxColor,
-    pub(crate) right_color: XlsxColor,
+    pub(crate) bottom_color: Color,
+    pub(crate) top_color: Color,
+    pub(crate) left_color: Color,
+    pub(crate) right_color: Color,
     pub(crate) diagonal_style: FormatBorder,
-    pub(crate) diagonal_color: XlsxColor,
+    pub(crate) diagonal_color: Color,
     pub(crate) diagonal_type: FormatDiagonalBorder,
 }
 
@@ -2245,7 +2245,7 @@ pub(crate) struct Font {
     pub(crate) underline: FormatUnderline,
     pub(crate) name: String,
     pub(crate) size: String,
-    pub(crate) color: XlsxColor,
+    pub(crate) color: Color,
     pub(crate) strikethrough: bool,
     pub(crate) script: FormatScript,
     pub(crate) family: u8,
@@ -2266,7 +2266,7 @@ impl Default for Font {
             bold: Default::default(),
             italic: Default::default(),
             underline: FormatUnderline::default(),
-            color: XlsxColor::default(),
+            color: Color::default(),
             strikethrough: Default::default(),
             script: FormatScript::default(),
             charset: Default::default(),
@@ -2279,8 +2279,8 @@ impl Default for Font {
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Default)]
 pub(crate) struct Fill {
-    pub(crate) foreground_color: XlsxColor,
-    pub(crate) background_color: XlsxColor,
+    pub(crate) foreground_color: Color,
+    pub(crate) background_color: Color,
     pub(crate) pattern: FormatPattern,
 }
 
@@ -2288,21 +2288,21 @@ pub(crate) struct Fill {
 // Helper enums/structs
 // -----------------------------------------------------------------------
 
-/// The `XlsxColor` enum defines Excel colors the can be used throughout the
+/// The `Color` enum defines Excel colors the can be used throughout the
 /// `rust_xlsxwriter`.
 ///
 /// There are 3 types of colors within the enum:
 ///
-/// 1. Predefined named colors like `XlsxColor::Green`.
-/// 2. User defined RGB colors such as `XlsxColor::RGB(0x4F026A)` using a format
+/// 1. Predefined named colors like `Color::Green`.
+/// 2. User defined RGB colors such as `Color::RGB(0x4F026A)` using a format
 ///    similar to html colors like `#RRGGBB`, except as an integer.
 /// 3. Theme colors from the standard palette of 60 colors like
-///    `XlsxColor::Theme(9, 4)`. The theme colors are shown in the image below.
+///    `Color::Theme(9, 4)`. The theme colors are shown in the image below.
 ///
 ///    <img
 ///    src="https://rustxlsxwriter.github.io/images/theme_color_palette.png">
 ///
-///    The syntax for theme colors in `XlsxColor` is `Theme(color, shade)` where
+///    The syntax for theme colors in `Color` is `Theme(color, shade)` where
 ///    `color` is one of the 0-9 values on the top row and `shade` is the
 ///    variant in the associated column from 0-5. For example "White, background
 ///    1" in the top left is `Theme(0, 0)` and "Orange, Accent 6, Darker 50%" in
@@ -2313,13 +2313,13 @@ pub(crate) struct Fill {
 ///
 /// # Examples
 ///
-/// The following example demonstrates using different `XlsxColor` enum values to
+/// The following example demonstrates using different `Color` enum values to
 /// set the color of some text in a worksheet.
 ///
 /// ```
 /// # // This code is available in examples/doc_enum_xlsxcolor.rs
 /// #
-/// # use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+/// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     // Create a new Excel file object.
@@ -2327,12 +2327,12 @@ pub(crate) struct Fill {
 /// #     let worksheet = workbook.add_worksheet();
 /// #     worksheet.set_column_width(0, 14)?;
 ///
-///     let format1 = Format::new().set_font_color(XlsxColor::Red);
-///     let format2 = Format::new().set_font_color(XlsxColor::Green);
-///     let format3 = Format::new().set_font_color(XlsxColor::RGB(0x4F026A));
-///     let format4 = Format::new().set_font_color(XlsxColor::RGB(0x73CC5F));
-///     let format5 = Format::new().set_font_color(XlsxColor::Theme(4, 0));
-///     let format6 = Format::new().set_font_color(XlsxColor::Theme(9, 4));
+///     let format1 = Format::new().set_font_color(Color::Red);
+///     let format2 = Format::new().set_font_color(Color::Green);
+///     let format3 = Format::new().set_font_color(Color::RGB(0x4F026A));
+///     let format4 = Format::new().set_font_color(Color::RGB(0x73CC5F));
+///     let format5 = Format::new().set_font_color(Color::Theme(4, 0));
+///     let format6 = Format::new().set_font_color(Color::Theme(9, 4));
 ///
 ///     worksheet.write_string_with_format(0, 0, "Red", &format1)?;
 ///     worksheet.write_string_with_format(1, 0, "Green", &format2)?;
@@ -2352,7 +2352,7 @@ pub(crate) struct Fill {
 /// <img src="https://rustxlsxwriter.github.io/images/enum_xlsxcolor.png">
 ///
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
-pub enum XlsxColor {
+pub enum Color {
     /// A user defined RGB color in the range 0x000000 (black) to 0xFFFFFF
     /// (white). Any values outside this range will be ignored with a a warning.
     RGB(u32),
@@ -2421,32 +2421,31 @@ pub enum XlsxColor {
     Yellow,
 }
 
-impl XlsxColor {
+impl Color {
     // Get the RGB hex value for a color.
     pub(crate) fn rgb_hex_value(self) -> String {
         match self {
-            XlsxColor::Red => "FF0000".to_string(),
-            XlsxColor::Blue => "0000FF".to_string(),
-            XlsxColor::Cyan => "00FFFF".to_string(),
-            XlsxColor::Gray => "808080".to_string(),
-            XlsxColor::Lime => "00FF00".to_string(),
-            XlsxColor::Navy => "000080".to_string(),
-            XlsxColor::Pink => "FFC0CB".to_string(),
-            XlsxColor::Brown => "800000".to_string(),
-            XlsxColor::Green => "008000".to_string(),
-            XlsxColor::White => "FFFFFF".to_string(),
-            XlsxColor::Orange => "FF6600".to_string(),
-            XlsxColor::Purple => "800080".to_string(),
-            XlsxColor::Silver => "C0C0C0".to_string(),
-            XlsxColor::Yellow => "FFFF00".to_string(),
-            XlsxColor::Magenta => "FF00FF".to_string(),
-            XlsxColor::RGB(color) => format!("{color:06X}"),
+            Color::Red => "FF0000".to_string(),
+            Color::Blue => "0000FF".to_string(),
+            Color::Cyan => "00FFFF".to_string(),
+            Color::Gray => "808080".to_string(),
+            Color::Lime => "00FF00".to_string(),
+            Color::Navy => "000080".to_string(),
+            Color::Pink => "FFC0CB".to_string(),
+            Color::Brown => "800000".to_string(),
+            Color::Green => "008000".to_string(),
+            Color::White => "FFFFFF".to_string(),
+            Color::Orange => "FF6600".to_string(),
+            Color::Purple => "800080".to_string(),
+            Color::Silver => "C0C0C0".to_string(),
+            Color::Yellow => "FFFF00".to_string(),
+            Color::Magenta => "FF00FF".to_string(),
+            Color::RGB(color) => format!("{color:06X}"),
 
             // Default to black for non RGB colors.
-            XlsxColor::Theme(_, _)
-            | XlsxColor::Default
-            | XlsxColor::Automatic
-            | XlsxColor::Black => "000000".to_string(),
+            Color::Theme(_, _) | Color::Default | Color::Automatic | Color::Black => {
+                "000000".to_string()
+            }
         }
     }
 
@@ -2673,7 +2672,7 @@ impl XlsxColor {
     #[allow(clippy::unreadable_literal)]
     pub(crate) fn is_valid(self) -> bool {
         match self {
-            XlsxColor::RGB(color) => {
+            Color::RGB(color) => {
                 if color > 0xFFFFFF {
                     eprintln!(
                         "RGB color '{color:#X}' must be in the the range 0x000000 - 0xFFFFFF."
@@ -2682,7 +2681,7 @@ impl XlsxColor {
                 }
                 true
             }
-            XlsxColor::Theme(color, shade) => {
+            Color::Theme(color, shade) => {
                 if color > 9 {
                     eprintln!("Theme color '{color}' must be in the the range 0 - 9.");
                     return false;
@@ -2699,22 +2698,22 @@ impl XlsxColor {
 
     // Check if the color has been set to a non default/automatic color.
     pub(crate) fn is_auto_or_default(self) -> bool {
-        self == XlsxColor::Automatic || self == XlsxColor::Default
+        self == Color::Automatic || self == Color::Default
     }
 }
 
-/// Trait to map types into an `XlsxColor` value.
+/// Trait to map types into an `Color` value.
 ///
 /// The `IntoColor` trait is used to map strings and other types, including
-/// `XlsxColor` itself, into [`XlsxColor`] enum values. This allows syntactic
+/// `Color` itself, into [`Color`] enum values. This allows syntactic
 /// shorthand such as using Html "#RRGGBB" style strings as method arguments.
 ///
 /// The types that support `IntoColor` are:
 ///
-/// - [`XlsxColor`] enum variants:
-///   - Named colors such as `XlsxColor::Green`.
-///   - RBG colors such as `XlsxColor::RGB(0xFF7F50)`.
-///   - Theme colors such as `XlsxColor::Theme(4, 3)`.
+/// - [`Color`] enum variants:
+///   - Named colors such as `Color::Green`.
+///   - RBG colors such as `Color::RGB(0xFF7F50)`.
+///   - Theme colors such as `Color::Theme(4, 3)`.
 /// - Html string variants such as `"#6495ED"` or `"6495ED"`.
 /// - [u32] variants such as 0xDAA520.
 ///
@@ -2728,7 +2727,7 @@ impl XlsxColor {
 /// ```
 /// # // This code is available in examples/doc_into_color.rs
 /// #
-/// use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+/// use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
@@ -2741,16 +2740,16 @@ impl XlsxColor {
 ///     worksheet.set_column_width_pixels(0, 80)?;
 ///
 ///     // Some examples with named color enum values.
-///     let color_format = Format::new().set_background_color(XlsxColor::Green);
+///     let color_format = Format::new().set_background_color(Color::Green);
 ///     worksheet.write_string(0, 0, "Green")?;
 ///     worksheet.write_blank(0, 1, &color_format)?;
 ///
-///     let color_format = Format::new().set_background_color(XlsxColor::Red);
+///     let color_format = Format::new().set_background_color(Color::Red);
 ///     worksheet.write_string(1, 0, "Red")?;
 ///     worksheet.write_blank(1, 1, &color_format)?;
 ///
-///     // Write a RGB color using the XlsxColor::RGB() enum method.
-///     let color_format = Format::new().set_background_color(XlsxColor::RGB(0xFF7F50));
+///     // Write a RGB color using the Color::RGB() enum method.
+///     let color_format = Format::new().set_background_color(Color::RGB(0xFF7F50));
 ///     worksheet.write_string(2, 0, "#FF7F50")?;
 ///     worksheet.write_blank(2, 1, &color_format)?;
 ///
@@ -2770,7 +2769,7 @@ impl XlsxColor {
 ///     worksheet.write_blank(5, 1, &color_format)?;
 ///
 ///     // Add a Theme color.
-///     let color_format = Format::new().set_background_color(XlsxColor::Theme(4, 3));
+///     let color_format = Format::new().set_background_color(Color::Theme(4, 3));
 ///     worksheet.write_string(6, 0, "Theme(4, 3)")?;
 ///     worksheet.write_blank(6, 1, &color_format)?;
 ///
@@ -2786,24 +2785,24 @@ impl XlsxColor {
 /// <img src="https://rustxlsxwriter.github.io/images/into_color.png">
 ///
 pub trait IntoColor {
-    /// Function to turn types into a [`XlsxColor`] enum.
-    fn new_color(self) -> XlsxColor;
+    /// Function to turn types into a [`Color`] enum.
+    fn new_color(self) -> Color;
 }
 
-impl IntoColor for XlsxColor {
-    fn new_color(self) -> XlsxColor {
+impl IntoColor for Color {
+    fn new_color(self) -> Color {
         self
     }
 }
 
 impl IntoColor for u32 {
-    fn new_color(self) -> XlsxColor {
-        XlsxColor::RGB(self)
+    fn new_color(self) -> Color {
+        Color::RGB(self)
     }
 }
 
 impl IntoColor for &str {
-    fn new_color(self) -> XlsxColor {
+    fn new_color(self) -> Color {
         let color = if let Some(hex_string) = self.strip_prefix('#') {
             u32::from_str_radix(hex_string, 16)
         } else {
@@ -2811,14 +2810,18 @@ impl IntoColor for &str {
         };
 
         match color {
-            Ok(color) => XlsxColor::RGB(color),
+            Ok(color) => Color::RGB(color),
             Err(_) => {
                 eprintln!("Error parsing '{self}' to RGB color.");
-                XlsxColor::Default
+                Color::Default
             }
         }
     }
 }
+
+#[doc(hidden)]
+/// A backward compatible/alternative name for the Color type.
+pub type XlsxColor = Color;
 
 /// The `FormatPattern` enum defines the Excel pattern types that can be added to
 /// a [`Format`].
@@ -3133,30 +3136,30 @@ pub enum FormatAlign {
 #[cfg(test)]
 mod tests {
 
+    use crate::Color;
     use crate::Format;
-    use crate::XlsxColor;
 
     #[test]
     fn test_hex_value() {
-        assert_eq!("FF000000", XlsxColor::Default.argb_hex_value());
-        assert_eq!("FF000000", XlsxColor::Black.argb_hex_value());
-        assert_eq!("FF0000FF", XlsxColor::Blue.argb_hex_value());
-        assert_eq!("FF800000", XlsxColor::Brown.argb_hex_value());
-        assert_eq!("FF00FFFF", XlsxColor::Cyan.argb_hex_value());
-        assert_eq!("FF808080", XlsxColor::Gray.argb_hex_value());
-        assert_eq!("FF008000", XlsxColor::Green.argb_hex_value());
-        assert_eq!("FF00FF00", XlsxColor::Lime.argb_hex_value());
-        assert_eq!("FFFF00FF", XlsxColor::Magenta.argb_hex_value());
-        assert_eq!("FF000080", XlsxColor::Navy.argb_hex_value());
-        assert_eq!("FFFF6600", XlsxColor::Orange.argb_hex_value());
-        assert_eq!("FFFFC0CB", XlsxColor::Pink.argb_hex_value());
-        assert_eq!("FF800080", XlsxColor::Purple.argb_hex_value());
-        assert_eq!("FFFF0000", XlsxColor::Red.argb_hex_value());
-        assert_eq!("FFC0C0C0", XlsxColor::Silver.argb_hex_value());
-        assert_eq!("FFFFFFFF", XlsxColor::White.argb_hex_value());
-        assert_eq!("FFFFFF00", XlsxColor::Yellow.argb_hex_value());
-        assert_eq!("FFABCDEF", XlsxColor::RGB(0xABCDEF).argb_hex_value());
-        assert_eq!("FF000000", XlsxColor::Theme(2, 1).argb_hex_value());
+        assert_eq!("FF000000", Color::Default.argb_hex_value());
+        assert_eq!("FF000000", Color::Black.argb_hex_value());
+        assert_eq!("FF0000FF", Color::Blue.argb_hex_value());
+        assert_eq!("FF800000", Color::Brown.argb_hex_value());
+        assert_eq!("FF00FFFF", Color::Cyan.argb_hex_value());
+        assert_eq!("FF808080", Color::Gray.argb_hex_value());
+        assert_eq!("FF008000", Color::Green.argb_hex_value());
+        assert_eq!("FF00FF00", Color::Lime.argb_hex_value());
+        assert_eq!("FFFF00FF", Color::Magenta.argb_hex_value());
+        assert_eq!("FF000080", Color::Navy.argb_hex_value());
+        assert_eq!("FFFF6600", Color::Orange.argb_hex_value());
+        assert_eq!("FFFFC0CB", Color::Pink.argb_hex_value());
+        assert_eq!("FF800080", Color::Purple.argb_hex_value());
+        assert_eq!("FFFF0000", Color::Red.argb_hex_value());
+        assert_eq!("FFC0C0C0", Color::Silver.argb_hex_value());
+        assert_eq!("FFFFFFFF", Color::White.argb_hex_value());
+        assert_eq!("FFFFFF00", Color::Yellow.argb_hex_value());
+        assert_eq!("FFABCDEF", Color::RGB(0xABCDEF).argb_hex_value());
+        assert_eq!("FF000000", Color::Theme(2, 1).argb_hex_value());
     }
 
     #[test]

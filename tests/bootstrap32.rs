@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, FormatBorder, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -20,37 +20,37 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let format2 = Format::new()
         .set_border(FormatBorder::Hair)
-        .set_border_color(XlsxColor::Red);
+        .set_border_color(Color::Red);
 
     let format3 = Format::new()
         .set_border_top(FormatBorder::Dotted)
         .set_border_left(FormatBorder::DashDotDot)
         .set_border_right(FormatBorder::Dashed)
         .set_border_bottom(FormatBorder::DashDot)
-        .set_border_top_color(XlsxColor::Red)
-        .set_border_left_color(XlsxColor::Red)
-        .set_border_right_color(XlsxColor::Red)
-        .set_border_bottom_color(XlsxColor::Red);
+        .set_border_top_color(Color::Red)
+        .set_border_left_color(Color::Red)
+        .set_border_right_color(Color::Red)
+        .set_border_bottom_color(Color::Red);
 
     let format4 = Format::new()
         .set_border_top(FormatBorder::MediumDashDotDot)
         .set_border_left(FormatBorder::MediumDashDotDot)
         .set_border_right(FormatBorder::MediumDashDot)
         .set_border_bottom(FormatBorder::SlantDashDot)
-        .set_border_top_color(XlsxColor::Red)
-        .set_border_left_color(XlsxColor::Red)
-        .set_border_right_color(XlsxColor::Red)
-        .set_border_bottom_color(XlsxColor::Red);
+        .set_border_top_color(Color::Red)
+        .set_border_left_color(Color::Red)
+        .set_border_right_color(Color::Red)
+        .set_border_bottom_color(Color::Red);
 
     let format5 = Format::new()
         .set_border_top(FormatBorder::MediumDashed)
         .set_border_left(FormatBorder::Medium)
         .set_border_right(FormatBorder::Double)
         .set_border_bottom(FormatBorder::Thick)
-        .set_border_top_color(XlsxColor::Red)
-        .set_border_left_color(XlsxColor::Red)
-        .set_border_right_color(XlsxColor::Red)
-        .set_border_bottom_color(XlsxColor::Red);
+        .set_border_top_color(Color::Red)
+        .set_border_left_color(Color::Red)
+        .set_border_right_color(Color::Red)
+        .set_border_bottom_color(Color::Red);
 
     let worksheet = workbook.add_worksheet();
 

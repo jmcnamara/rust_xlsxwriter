@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Format, FormatBorder, FormatDiagonalBorder, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, FormatBorder, FormatDiagonalBorder, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -35,10 +35,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let format5 = Format::new()
         .set_border(FormatBorder::Thin)
-        .set_border_color(XlsxColor::RGB(0x00B050))
+        .set_border_color(Color::RGB(0x00B050))
         .set_border_diagonal(FormatBorder::Thin)
         .set_border_diagonal_type(FormatDiagonalBorder::BorderUpDown)
-        .set_border_diagonal_color(XlsxColor::Red);
+        .set_border_diagonal_color(Color::Red);
 
     let worksheet = workbook.add_worksheet();
 

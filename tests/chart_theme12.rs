@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Chart, ChartFormat, ChartLine, ChartType, Color, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -34,7 +34,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_format(
             ChartFormat::new().set_line(
                 ChartLine::new()
-                    .set_color(XlsxColor::Theme(9, 0))
+                    .set_color(Color::Theme(9, 0))
                     .set_transparency(10),
             ),
         );
@@ -44,7 +44,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_format(
             ChartFormat::new().set_line(
                 ChartLine::new()
-                    .set_color(XlsxColor::Theme(9, 1))
+                    .set_color(Color::Theme(9, 1))
                     .set_transparency(20),
             ),
         );
@@ -54,28 +54,22 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_format(
             ChartFormat::new().set_line(
                 ChartLine::new()
-                    .set_color(XlsxColor::Theme(9, 2))
+                    .set_color(Color::Theme(9, 2))
                     .set_transparency(30),
             ),
         );
     chart
         .add_series()
         .set_values(("Sheet1", 0, 3, 7, 3))
-        .set_format(
-            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(9, 3))),
-        );
+        .set_format(ChartFormat::new().set_line(ChartLine::new().set_color(Color::Theme(9, 3))));
     chart
         .add_series()
         .set_values(("Sheet1", 0, 4, 7, 4))
-        .set_format(
-            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(9, 4))),
-        );
+        .set_format(ChartFormat::new().set_line(ChartLine::new().set_color(Color::Theme(9, 4))));
     chart
         .add_series()
         .set_values(("Sheet1", 0, 5, 7, 5))
-        .set_format(
-            ChartFormat::new().set_line(ChartLine::new().set_color(XlsxColor::Theme(9, 5))),
-        );
+        .set_format(ChartFormat::new().set_line(ChartLine::new().set_color(Color::Theme(9, 5))));
 
     worksheet.insert_chart(8, 7, &chart)?;
 

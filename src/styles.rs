@@ -7,8 +7,8 @@
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
 use crate::{
-    Alignment, Border, Fill, Font, FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern,
-    FormatScript, FormatUnderline, XlsxColor,
+    Alignment, Border, Color, Fill, Font, FormatAlign, FormatBorder, FormatDiagonalBorder,
+    FormatPattern, FormatScript, FormatUnderline,
 };
 
 pub struct Styles<'a> {
@@ -188,10 +188,10 @@ impl<'a> Styles<'a> {
         let mut attributes = vec![];
 
         match font.color {
-            XlsxColor::Automatic => {
+            Color::Automatic => {
                 // The color element is omitted for an Automatic color.
             }
-            XlsxColor::Default => {
+            Color::Default => {
                 attributes.push(("theme", "1".to_string()));
                 self.writer.xml_empty_tag("color", &attributes);
             }
@@ -308,10 +308,10 @@ impl<'a> Styles<'a> {
     fn write_fill(&mut self, fill: &Fill) {
         // Special handling for pattern only case.
         if fill.pattern != FormatPattern::None
-            && (fill.background_color == XlsxColor::Default
-                || fill.background_color == XlsxColor::Automatic)
-            && (fill.foreground_color == XlsxColor::Default
-                || fill.foreground_color == XlsxColor::Automatic)
+            && (fill.background_color == Color::Default
+                || fill.background_color == Color::Automatic)
+            && (fill.foreground_color == Color::Default
+                || fill.foreground_color == Color::Automatic)
         {
             self.write_default_fill(fill.pattern.to_string());
             return;
@@ -325,17 +325,13 @@ impl<'a> Styles<'a> {
         self.writer.xml_start_tag("patternFill", &attributes);
 
         // Write the foreground color.
-        if fill.foreground_color != XlsxColor::Default
-            && fill.foreground_color != XlsxColor::Automatic
-        {
+        if fill.foreground_color != Color::Default && fill.foreground_color != Color::Automatic {
             let attributes = fill.foreground_color.attributes();
             self.writer.xml_empty_tag("fgColor", &attributes);
         }
 
         // Write the background color.
-        if fill.background_color == XlsxColor::Default
-            || fill.background_color == XlsxColor::Automatic
-        {
+        if fill.background_color == Color::Default || fill.background_color == Color::Automatic {
             let attributes = [("indexed", "64")];
             self.writer.xml_empty_tag("bgColor", &attributes);
         } else {
@@ -399,7 +395,7 @@ impl<'a> Styles<'a> {
         &mut self,
         border_type: &str,
         border_style: FormatBorder,
-        border_color: XlsxColor,
+        border_color: Color,
     ) {
         if border_style == FormatBorder::None {
             self.writer.xml_empty_tag_only(border_type);
@@ -409,7 +405,7 @@ impl<'a> Styles<'a> {
         let mut attributes = vec![("style", border_style.to_string())];
         self.writer.xml_start_tag(border_type, &attributes);
 
-        if border_color != XlsxColor::Default && border_color != XlsxColor::Automatic {
+        if border_color != Color::Default && border_color != Color::Automatic {
             attributes = border_color.attributes();
         } else {
             attributes = vec![("auto", "1".to_string())];

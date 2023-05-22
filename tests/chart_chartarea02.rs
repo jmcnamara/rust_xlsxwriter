@@ -6,8 +6,8 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use rust_xlsxwriter::{
-    Chart, ChartFormat, ChartLine, ChartLineDashType, ChartSolidFill, ChartType, Workbook,
-    XlsxColor, XlsxError,
+    Chart, ChartFormat, ChartLine, ChartLineDashType, ChartSolidFill, ChartType, Color, Workbook,
+    XlsxError,
 };
 #[macro_use]
 extern crate lazy_static;
@@ -37,14 +37,14 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.set_chart_area_format(
         ChartFormat::new()
             .set_no_line()
-            .set_solid_fill(ChartSolidFill::new().set_color(XlsxColor::Red)),
+            .set_solid_fill(ChartSolidFill::new().set_color(Color::Red)),
     );
 
     chart.set_plot_area_format(
         ChartFormat::new()
             .set_border(
                 ChartLine::new()
-                    .set_color(XlsxColor::Yellow)
+                    .set_color(Color::Yellow)
                     .set_width(1)
                     .set_dash_type(ChartLineDashType::Dash),
             )
