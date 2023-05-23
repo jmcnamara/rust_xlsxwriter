@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.39.0] - 2023-05-23
+
+### Added
+
+- Added [`worksheet.write_row()`] and [`worksheet.write_col()`] methods to write
+  arrays/iterators of data.
+
+- Added [`Formula`] and [`Url`] types to use with generic [`worksheet.write()`].
+
+  [Feature Request #15].
+
+- Make several string handling APIs more generic using `impl Into<String>`.
+
+  [Feature Request #15].
+
+- Renamed/refactored `XlsxColor` to [`Color`] for API consistency. The
+  `XlsxColor` type alias is still available for backward compatibility.
+
+[`Url`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Url.html
+[`Color`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.Color.html
+[`Formula`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Formula.html
+[Feature Request #15]: https://github.com/jmcnamara/rust_xlsxwriter/pull/15
+[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write
+[`worksheet.write_row()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_row
+[`worksheet.write_col()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_col
+
+
 ## [0.38.0] - 2023-05-05
 
 ### Added

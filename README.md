@@ -108,6 +108,7 @@ frequently.
 
 Recent changes:
 
+- Added more generic interfaces and methods.
 - Added Chart axis and series methods.
 - Added Chart font formatting support.
 

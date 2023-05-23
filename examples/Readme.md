@@ -397,8 +397,8 @@ documentation and generally show how an individual function works.
 * doc_chart_title_set_name.rs - A chart example demonstrating setting the
   chart title.
 
-* doc_enum_xlsxcolor.rs - Demonstrates using different XlsxColor enum
-  values to set the color of some text in a worksheet.
+* doc_enum_xlsxcolor.rs - Demonstrates using different Color enum values to
+  set the color of some text in a worksheet.
 
 * doc_format_clone.rs - Demonstrates cloning a format and setting the
   properties.
@@ -532,6 +532,15 @@ documentation and generally show how an individual function works.
 * doc_properties_custom.rs - An example of setting custom/user defined
   workbook document properties.
 
+* doc_url_intro1.rs - Demonstrates writing a url to a worksheet.
+
+* doc_url_intro2.rs - Demonstrates writing a url to a worksheet.
+
+* doc_url_intro3.rs - Demonstrates writing a url to a worksheet.
+
+* doc_url_set_text.rs - Demonstrates writing a url to a worksheet with
+  alternative text.
+
 * doc_workbook_add_worksheet.rs - Demonstrates creating adding worksheets
   to a workbook.
 
@@ -582,7 +591,14 @@ documentation and generally show how an individual function works.
   "Future Function" with an implicit prefix and the use_future_functions()
   method.
 
-* doc_working_with_formulas_intro.rs - Demonstrates a simple formula.
+* doc_working_with_formulas_intro.rs - Demonstrates writing a simple
+  formula.
+
+* doc_working_with_formulas_intro2.rs - Demonstrates writing a simple
+  formula.
+
+* doc_working_with_formulas_intro3.rs - Demonstrates writing a simple
+  formula.
 
 * doc_working_with_formulas_static_len.rs - Demonstrates a static function
   which generally returns one value. Compare this with the dynamic function
@@ -755,6 +771,9 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_unprotect_range_with_options.rs - Demonstrates unprotecting
   ranges in a protected worksheet, with additional options.
+
+* doc_worksheet_use_future_functions.rs - Demonstrates different ways to
+  handle writing Future Functions to a worksheet.
 
 * doc_worksheet_write_array_formula.rs - Demonstrates writing an array
   formulas to a worksheet.

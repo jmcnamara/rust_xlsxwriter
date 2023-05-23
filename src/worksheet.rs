@@ -2260,8 +2260,6 @@ impl Worksheet {
     ///   alternative text to the link.
     /// * [`write_url_with_format()`](Worksheet::write_url_with_format()) to add
     ///   an alternative format to the link.
-    /// * [`write_url_with_options()`](Worksheet::write_url_with_options()) to
-    ///   add a screen tip and all other options to the link.
     ///
     /// # Arguments
     ///
