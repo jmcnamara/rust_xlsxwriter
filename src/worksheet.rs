@@ -535,10 +535,6 @@ impl Worksheet {
     /// Note, default date/time number formats are provided for the [`chrono`]
     /// types since Excel requires that date have a format.
     ///
-    /// This method will be extended in the upcoming versions to cover all the
-    /// other Excel types that are handled by the type specific `write*()`
-    /// methods.
-    ///
     /// User can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
@@ -574,10 +570,6 @@ impl Worksheet {
     /// - [`chrono::NaiveTime`].
     /// - [`Formula`].
     /// - [`Url`].
-    ///
-    /// This method will be extended in the upcoming versions to cover all the
-    /// other Excel types that are handled by the type specific `write*()`
-    /// methods.
     ///
     /// User can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
