@@ -526,6 +526,7 @@ impl Worksheet {
     /// The types currently supported are:
     /// - [`&str`].
     /// - Numbers that convert [`Into`] [`f64`].
+    /// - [`bool`]
     /// - [`chrono::NaiveDateTime`].
     /// - [`chrono::NaiveDate`].
     /// - [`chrono::NaiveTime`].
@@ -565,6 +566,7 @@ impl Worksheet {
     /// The types currently supported are:
     /// - [`&str`].
     /// - Numbers that convert [`Into`] [`f64`].
+    /// - [`bool`]
     /// - [`chrono::NaiveDateTime`].
     /// - [`chrono::NaiveDate`].
     /// - [`chrono::NaiveTime`].
@@ -10272,6 +10274,27 @@ macro_rules! write_number_trait_impl {
     )*)
 }
 write_number_trait_impl!(u8 i8 u16 i16 u32 i32 f32 f64);
+
+impl IntoExcelData for bool {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        worksheet.store_boolean(row, col, self, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        worksheet.store_boolean(row, col, self, Some(format))
+    }
+}
 
 // Note, for the date/time type traits below we add a default number format for
 // the `write()` variants since Excel dates/times require a number format or
