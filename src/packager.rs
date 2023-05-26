@@ -121,6 +121,7 @@ impl<W: Write + Seek> Packager<W> {
         self.write_vml_files(workbook)?;
         self.write_image_files(workbook)?;
         self.write_chart_files(workbook)?;
+        self.write_table_files(workbook)?;
 
         let mut image_index = 1;
         let mut vml_index = 1;
@@ -164,6 +165,10 @@ impl<W: Write + Seek> Packager<W> {
 
         for i in 0..options.num_charts {
             content_types.add_chart_name(i + 1);
+        }
+
+        for i in 0..options.num_tables {
+            content_types.add_table_name(i + 1);
         }
 
         if options.has_sst_table {
@@ -290,6 +295,10 @@ impl<W: Write + Seek> Packager<W> {
         }
 
         for relationship in &worksheet.drawing_object_relationships {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
+        for relationship in &worksheet.table_relationships {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
@@ -571,6 +580,23 @@ impl<W: Write + Seek> Packager<W> {
 
         Ok(())
     }
+
+    // Write the table files.
+    fn write_table_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        let mut index = 1;
+
+        for worksheet in &mut workbook.worksheets {
+            for table in &mut worksheet.tables {
+                let filename = format!("xl/tables/table{index}.xml");
+                self.zip.start_file(filename, self.zip_options)?;
+                table.assemble_xml_file();
+                self.zip.write_all(table.writer.xmlfile.get_ref())?;
+                index += 1;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 // Internal struct to pass options to the Packager struct.
@@ -581,6 +607,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) num_worksheets: u16,
     pub(crate) num_drawings: u16,
     pub(crate) num_charts: u16,
+    pub(crate) num_tables: u16,
     pub(crate) doc_security: u8,
     pub(crate) worksheet_names: Vec<String>,
     pub(crate) defined_names: Vec<String>,
@@ -598,6 +625,7 @@ impl PackagerOptions {
             num_worksheets: 0,
             num_drawings: 0,
             num_charts: 0,
+            num_tables: 0,
             doc_security: 0,
             worksheet_names: vec![],
             defined_names: vec![],

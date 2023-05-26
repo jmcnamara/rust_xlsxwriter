@@ -1107,6 +1107,9 @@ impl Workbook {
         // Prepare the formats for writing with styles.rs.
         self.prepare_format_properties();
 
+        // Prepare worksheet tables.
+        self.prepare_tables();
+
         // Collect workbook level metadata to help generate the xlsx file.
         let mut package_options = PackagerOptions::new();
         package_options = self.set_package_options(package_options)?;
@@ -1169,6 +1172,17 @@ impl Workbook {
                     vml_drawing_id,
                 );
                 vml_drawing_id += 1;
+            }
+        }
+    }
+
+    // TODO
+    fn prepare_tables(&mut self) {
+        let mut table_id = 1;
+
+        for worksheet in &mut self.worksheets {
+            if !worksheet.tables.is_empty() {
+                table_id = worksheet.prepare_worksheet_tables(table_id);
             }
         }
     }
@@ -1483,6 +1497,10 @@ impl Workbook {
 
             if !worksheet.charts.is_empty() {
                 package_options.num_charts += worksheet.charts.len() as u16;
+            }
+
+            if !worksheet.tables.is_empty() {
+                package_options.num_tables += worksheet.tables.len() as u16;
             }
 
             // Store the autofilter areas which are a category of defined name.

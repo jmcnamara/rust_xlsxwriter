@@ -96,6 +96,14 @@ impl ContentTypes {
         self.add_override(&part_name, content_type);
     }
 
+    // Add the name of a table to the ContentTypes overrides.
+    pub(crate) fn add_table_name(&mut self, index: u16) {
+        let content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml";
+        let part_name = format!("/xl/tables/table{index}.xml");
+
+        self.add_override(&part_name, content_type);
+    }
+
     // Add the sharedStrings link to the ContentTypes overrides.
     pub(crate) fn add_share_strings(&mut self) {
         self.add_override(

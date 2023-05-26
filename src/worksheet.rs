@@ -26,7 +26,8 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, Color, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions, Url,
+    utility, Color, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions,
+    Table, TableFunction, Url,
 };
 use crate::{Chart, ChartSeriesCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
@@ -134,6 +135,7 @@ pub struct Worksheet {
     pub(crate) autofilter_area: String,
     pub(crate) xf_formats: Vec<Format>,
     pub(crate) has_hyperlink_style: bool,
+    pub(crate) table_relationships: Vec<(String, String, String)>,
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
     pub(crate) drawing_object_relationships: Vec<(String, String, String)>,
     pub(crate) drawing_relationships: Vec<(String, String, String)>,
@@ -144,10 +146,13 @@ pub struct Worksheet {
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     pub(crate) header_footer_images: [Option<Image>; 6],
     pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
+    pub(crate) tables: Vec<Table>,
 
-    table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
+    data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
+    table_ranges: Vec<CellRange>,
+    table_cells: HashMap<(RowNum, ColNum), usize>,
     col_names: HashMap<ColNum, String>,
     dimensions: CellRange,
     xf_indices: HashMap<Format, u32>,
@@ -311,11 +316,14 @@ impl Worksheet {
             repeat_row_cols_defined_name: DefinedName::new(),
             autofilter_defined_name: DefinedName::new(),
             autofilter_area: String::new(),
-            table: BTreeMap::new(),
+            data_table: BTreeMap::new(),
             col_names: HashMap::new(),
             dimensions,
             merged_ranges: vec![],
             merged_cells: HashMap::new(),
+            tables: vec![],
+            table_ranges: vec![],
+            table_cells: HashMap::new(),
             xf_formats: vec![Format::default()],
             xf_indices,
             global_xf_indices: vec![],
@@ -357,6 +365,7 @@ impl Worksheet {
             panes,
             has_hyperlink_style: false,
             hyperlinks: BTreeMap::new(),
+            table_relationships: vec![],
             hyperlink_relationships: vec![],
             drawing_object_relationships: vec![],
             drawing_relationships: vec![],
@@ -3099,7 +3108,7 @@ impl Worksheet {
             }
         }
 
-        // Create a cell range for storage/testing.
+        // Create a cell range for storage and range testing.
         let cell_range = CellRange {
             first_row,
             first_col,
@@ -3108,7 +3117,8 @@ impl Worksheet {
         };
 
         // Check if the merged range overlaps any previous merged range. This is
-        // a major error in Excel.
+        // a major error in Excel. Note, the ranges are stored in a separate Vec
+        // to the cells to cut down on storage size.
         let new_index = self.merged_ranges.len();
         for row in first_row..=last_row {
             for col in first_col..=last_col {
@@ -4487,6 +4497,90 @@ impl Worksheet {
         self
     }
 
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    ///
+    pub fn add_table(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        table: &Table,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        let mut table = table.clone();
+        table.first_row = first_row;
+        table.first_col = first_col;
+        table.last_row = last_row;
+        table.last_col = last_col;
+        table.initialize_columns()?;
+
+        // Write the column headers.
+        if table.show_header_row {
+            for (offset, column) in table.columns.iter().enumerate() {
+                let col = first_col + offset as u16;
+                self.write_string(first_row, col, &column.name)?;
+
+                // Write the total row if required.
+                if table.show_total_row {
+                    if !column.total_label.is_empty() {
+                        self.write_string(last_row, col, &column.total_label)?;
+                    } else if column.total_function != TableFunction::None {
+                        let formula = column.total_function();
+                        self.write_formula(last_row, col, formula)?;
+                    }
+                }
+            }
+        }
+
+        // Create a cell range for storage and range testing.
+        let cell_range = CellRange {
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+        };
+
+        // Check if the table range overlaps any previous table range. This is a
+        // major error in Excel. Note, the ranges are stored in a separate Vec
+        // to the cells to cut down on storage size.
+        let new_index = self.table_ranges.len();
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                match self.table_cells.get_mut(&(row, col)) {
+                    Some(index) => {
+                        let previous_cell_range = self.table_ranges.get(*index).unwrap();
+                        return Err(XlsxError::TableRangeOverlaps(
+                            cell_range.to_error_string(),
+                            previous_cell_range.to_error_string(),
+                        ));
+                    }
+                    None => self.table_cells.insert((row, col), new_index),
+                };
+            }
+        }
+
+        // Store the table if everything was okay.
+        self.table_ranges.push(cell_range);
+        self.tables.push(table);
+
+        Ok(self)
+    }
+
     /// Protect a worksheet from modification.
     ///
     /// The `protect()` method protects a worksheet from modification. It works
@@ -5076,7 +5170,7 @@ impl Worksheet {
         col: ColNum,
         result: impl Into<String>,
     ) -> &mut Worksheet {
-        if let Some(columns) = self.table.get_mut(&row) {
+        if let Some(columns) = self.data_table.get_mut(&row) {
             if let Some(cell) = columns.get_mut(&col) {
                 match cell {
                     CellType::Formula {
@@ -7303,7 +7397,7 @@ impl Worksheet {
         // Iterate over all of the data in the worksheet and find the max data
         // width for each column.
         for row_num in self.dimensions.first_row..=self.dimensions.last_row {
-            if let Some(columns) = self.table.get(&row_num) {
+            if let Some(columns) = self.data_table.get(&row_num) {
                 for col_num in self.dimensions.first_col..=self.dimensions.last_col {
                     if let Some(cell) = columns.get(&col_num) {
                         let pixel_width = match cell {
@@ -7477,7 +7571,7 @@ impl Worksheet {
     ) -> bool {
         let mut has_cell_data = false;
 
-        if let Some(columns) = self.table.get(&row_num) {
+        if let Some(columns) = self.data_table.get(&row_num) {
             if let Some(cell) = columns.get(&col_num) {
                 has_cell_data = true;
 
@@ -7573,7 +7667,7 @@ impl Worksheet {
         col_num: ColNum,
         filter: &FilterData,
     ) -> bool {
-        if let Some(columns) = self.table.get(&row_num) {
+        if let Some(columns) = self.data_table.get(&row_num) {
             if let Some(cell) = columns.get(&col_num) {
                 match cell {
                     CellType::String { string, .. }
@@ -8084,7 +8178,7 @@ impl Worksheet {
 
     // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
-        match self.table.entry(row) {
+        match self.data_table.entry(row) {
             Entry::Occupied(mut entry) => {
                 // The row already exists. Insert/replace column value.
                 let columns = entry.get_mut();
@@ -8463,6 +8557,23 @@ impl Worksheet {
         chart_id
     }
 
+    // TODO. Also set the rel linkages between the files.
+    pub(crate) fn prepare_worksheet_tables(&mut self, mut table_id: u32) -> u32 {
+        for table in &mut self.tables {
+            table.index = table_id;
+
+            self.table_relationships.push((
+                "table".to_string(),
+                format!("../tables/table{table_id}.xml"),
+                String::new(),
+            ));
+
+            table_id += 1;
+        }
+
+        table_id
+    }
+
     // Calculate the vertices that define the position of a graphical object
     // within the worksheet in EMUs. The vertices are expressed as English
     // Metric Units (EMUs). There are 12,700 EMUs per point. Therefore, 12,700 *
@@ -8693,8 +8804,13 @@ impl Worksheet {
             chart.writer.reset();
         }
 
+        for table in &mut self.tables {
+            table.writer.reset();
+        }
+
         self.rel_count = 0;
         self.drawing.drawings.clear();
+        self.table_relationships.clear();
         self.hyperlink_relationships.clear();
         self.drawing_object_relationships.clear();
         self.drawing_relationships.clear();
@@ -8704,7 +8820,9 @@ impl Worksheet {
 
     // Check if any external relationships are required.
     pub(crate) fn has_relationships(&self) -> bool {
-        !self.hyperlink_relationships.is_empty() || !self.drawing_object_relationships.is_empty()
+        !self.hyperlink_relationships.is_empty()
+            || !self.drawing_object_relationships.is_empty()
+            || !self.table_relationships.is_empty()
     }
 
     // Check if there is a header image.
@@ -8772,7 +8890,7 @@ impl Worksheet {
         let mut is_numeric = true;
 
         for row_num in first_row..=last_row {
-            match self.table.get(&row_num) {
+            match self.data_table.get(&row_num) {
                 Some(columns) => {
                     for col_num in first_col..=last_col {
                         match columns.get(&col_num) {
@@ -8887,6 +9005,11 @@ impl Worksheet {
         // Write the legacyDrawingHF element.
         if self.has_header_footer_images() {
             self.write_legacy_drawing_hf();
+        }
+
+        // Write the tableParts element.
+        if !self.tables.is_empty() {
+            self.write_table_parts();
         }
 
         // Close the worksheet tag.
@@ -9136,7 +9259,7 @@ impl Worksheet {
 
     // Write the <sheetData> element.
     fn write_sheet_data(&mut self, string_table: &mut SharedStringsTable) {
-        if self.table.is_empty() && self.changed_rows.is_empty() {
+        if self.data_table.is_empty() && self.changed_rows.is_empty() {
             self.writer.xml_empty_tag_only("sheetData");
         } else {
             self.writer.xml_start_tag_only("sheetData");
@@ -9412,7 +9535,7 @@ impl Worksheet {
         // still call self.write_xml() methods.
         let mut temp_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>> = BTreeMap::new();
         let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
-        mem::swap(&mut temp_table, &mut self.table);
+        mem::swap(&mut temp_table, &mut self.data_table);
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
 
         for row_num in self.dimensions.first_row..=self.dimensions.last_row {
@@ -9484,7 +9607,7 @@ impl Worksheet {
         }
 
         // Swap back in data.
-        mem::swap(&mut temp_table, &mut self.table);
+        mem::swap(&mut temp_table, &mut self.data_table);
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
     }
 
@@ -9497,7 +9620,7 @@ impl Worksheet {
         let mut span_max = 0;
 
         for row_num in self.dimensions.first_row..=self.dimensions.last_row {
-            if let Some(columns) = self.table.get(&row_num) {
+            if let Some(columns) = self.data_table.get(&row_num) {
                 for &col_num in columns.keys() {
                     if span_min == COL_MAX {
                         span_min = col_num;
@@ -9925,6 +10048,31 @@ impl Worksheet {
         let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
         self.writer.xml_empty_tag("legacyDrawingHF", &attributes);
+    }
+
+    // Write the <tableParts> element.
+    fn write_table_parts(&mut self) {
+        let num_tables = self.tables.len();
+
+        let attributes = [("count", num_tables.to_string())];
+
+        self.writer.xml_start_tag("tableParts", &attributes);
+
+        for _ in 1..=num_tables {
+            self.rel_count += 1;
+
+            // Write the tablePart element.
+            self.write_table_part(self.rel_count);
+        }
+
+        self.writer.xml_end_tag("tableParts");
+    }
+
+    // Write the <tablePart> element.
+    fn write_table_part(&mut self, index: u16) {
+        let attributes = [("r:id", format!("rId{index}"))];
+
+        self.writer.xml_empty_tag("tablePart", &attributes);
     }
 
     // Write the <sheetProtection> element.

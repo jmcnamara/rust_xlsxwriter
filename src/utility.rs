@@ -205,6 +205,17 @@ pub(crate) fn formula_to_string(formula: &str) -> String {
     formula
 }
 
+// Trait to convert bool to XML "0" or "1".
+pub(crate) trait ToXmlBoolean {
+    fn to_xml_bool(self) -> String;
+}
+
+impl ToXmlBoolean for bool {
+    fn to_xml_bool(self) -> String {
+        u8::from(self).to_string()
+    }
+}
+
 //
 // Tests.
 //

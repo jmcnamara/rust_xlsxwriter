@@ -771,6 +771,7 @@ use std::borrow::Cow;
 pub struct Formula {
     formula_string: String,
     expand_future_functions: bool,
+    expand_table_functions: bool,
     pub(crate) result: Box<str>,
 }
 
@@ -780,6 +781,7 @@ impl Formula {
         Formula {
             formula_string: formula.into(),
             expand_future_functions: false,
+            expand_table_functions: false,
             result: Box::from(""),
         }
     }
@@ -902,6 +904,12 @@ impl Formula {
         self
     }
 
+    /// TODO
+    pub fn use_table_functions(mut self) -> Formula {
+        self.expand_table_functions = true;
+        self
+    }
+
     // Check of a dynamic function/formula.
     pub(crate) fn is_dynamic_function(&self) -> bool {
         lazy_static! {
@@ -944,6 +952,12 @@ impl Formula {
             escaped_formula
         };
 
+        let formula = if self.expand_table_functions {
+            Self::escape_table_functions(&formula)
+        } else {
+            formula
+        };
+
         Box::from(formula)
     }
 
@@ -975,6 +989,15 @@ impl Formula {
             .unwrap();
         }
         FUTURE.replace_all(formula, "_xlfn.$1(")
+    }
+
+    // Escape/expand table functions.
+    fn escape_table_functions(formula: &str) -> Cow<str> {
+        // Convert Excel 2010 "@" table ref to 2007 "#This Row".
+        lazy_static! {
+            static ref TABLE: Regex = Regex::new(r"@").unwrap();
+        }
+        TABLE.replace_all(formula, "[#This Row],")
     }
 }
 

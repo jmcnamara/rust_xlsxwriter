@@ -50,6 +50,9 @@ pub enum XlsxError {
     /// The merge range overlaps a previous merge range.
     MergeRangeOverlaps(String, String),
 
+    /// The table range overlaps a previous table range.
+    TableRangeOverlaps(String, String),
+
     /// URL string exceeds Excel's url of 2080 characters.
     MaxUrlLengthExceeded,
 
@@ -67,6 +70,10 @@ pub enum XlsxError {
     /// A general error that is raised when a chart parameter is incorrect or a
     /// chart is configured incorrectly.
     ChartError(String),
+
+    /// A general error that is raised when a table parameter is incorrect or a
+    /// table is configured incorrectly.
+    TableError(String),
 
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
@@ -144,6 +151,13 @@ impl fmt::Display for XlsxError {
                 )
             }
 
+            XlsxError::TableRangeOverlaps(current, previous) => {
+                write!(
+                    f,
+                    "Table range {current} overlaps with previous table range {previous}."
+                )
+            }
+
             XlsxError::MaxUrlLengthExceeded => {
                 write!(f, "URL string exceeds Excel's limit of 2083 characters.")
             }
@@ -162,6 +176,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::ChartError(error) => {
                 write!(f, "Chart error: \"{error}\".")
+            }
+
+            XlsxError::TableError(error) => {
+                write!(f, "Table error: \"{error}\".")
             }
 
             XlsxError::IoError(error) => {

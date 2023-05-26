@@ -12,7 +12,7 @@ use regex::Regex;
 
 use crate::{
     drawing::{DrawingObject, DrawingType},
-    utility,
+    utility::{self, ToXmlBoolean},
     xmlwriter::XMLWriter,
     ColNum, Color, IntoColor, ObjectMovement, RowNum, XlsxError, COL_MAX, ROW_MAX,
 };
@@ -2395,7 +2395,7 @@ impl Chart {
     fn write_number_format(&mut self, format: &str, linked: bool) {
         let attributes = [
             ("formatCode", format.to_string()),
-            ("sourceLinked", u8::from(linked).to_string()),
+            ("sourceLinked", linked.to_xml_bool()),
         ];
 
         self.writer.xml_empty_tag("c:numFmt", &attributes);
@@ -3073,11 +3073,11 @@ impl Chart {
         }
 
         if let Some(boolean) = font.bold {
-            attributes.push(("b", u8::from(boolean).to_string()));
+            attributes.push(("b", boolean.to_xml_bool()));
         }
 
         if font.italic || (font.bold.is_some() && !font.has_default_bold) {
-            attributes.push(("i", u8::from(font.italic).to_string()));
+            attributes.push(("i", font.italic.to_xml_bool()));
         }
 
         if font.underline {
