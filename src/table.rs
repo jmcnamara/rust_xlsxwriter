@@ -256,13 +256,16 @@ impl Table {
 
     // Write the <tableStyleInfo> element.
     fn write_table_style_info(&mut self) {
-        let attributes = vec![
-            ("name", self.style.to_string()),
-            ("showFirstColumn", self.show_first_column.to_xml_bool()),
-            ("showLastColumn", self.show_last_column.to_xml_bool()),
-            ("showRowStripes", self.show_banded_rows.to_xml_bool()),
-            ("showColumnStripes", self.show_banded_columns.to_xml_bool()),
-        ];
+        let mut attributes = vec![];
+
+        if self.style != TableStyle::None {
+            attributes.push(("name", self.style.to_string()));
+        }
+
+        attributes.push(("showFirstColumn", self.show_first_column.to_xml_bool()));
+        attributes.push(("showLastColumn", self.show_last_column.to_xml_bool()));
+        attributes.push(("showRowStripes", self.show_banded_rows.to_xml_bool()));
+        attributes.push(("showColumnStripes", self.show_banded_columns.to_xml_bool()));
 
         self.writer.xml_empty_tag("tableStyleInfo", &attributes);
     }
@@ -289,7 +292,7 @@ impl TableColumn {
     }
 
     /// TODO
-    pub fn set_name(mut self, name: impl Into<String>) -> TableColumn {
+    pub fn set_header(mut self, name: impl Into<String>) -> TableColumn {
         self.name = name.into();
         self
     }
@@ -558,7 +561,7 @@ pub enum TableStyle {
     /// Table Style Dark 6, Blue.
     Dark6,
 
-    /// Table Style Dark 7, DarkGreen.
+    /// Table Style Dark 7, Dark Green.
     Dark7,
 
     /// Table Style Dark 8, Light Grey.
@@ -848,10 +851,10 @@ mod tests {
         table.index = 1;
 
         let columns = vec![
-            TableColumn::new().set_name("Foo"),
+            TableColumn::new().set_header("Foo"),
             TableColumn::default(),
             TableColumn::default(),
-            TableColumn::new().set_name("Baz"),
+            TableColumn::new().set_header("Baz"),
         ];
 
         table.set_columns(&columns);
@@ -891,11 +894,11 @@ mod tests {
         table.index = 1;
 
         let columns = vec![
-            TableColumn::new().set_name("Foo"),
+            TableColumn::new().set_header("Foo"),
             TableColumn::default(),
             TableColumn::default(),
-            TableColumn::new().set_name("Baz"),
-            TableColumn::new().set_name("Too many"),
+            TableColumn::new().set_header("Baz"),
+            TableColumn::new().set_header("Too many"),
         ];
 
         table.set_columns(&columns);

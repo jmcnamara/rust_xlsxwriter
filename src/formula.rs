@@ -768,6 +768,7 @@ use std::borrow::Cow;
 ///             <f>SUM(1, 2, 3)</f>
 /// ```
 ///
+#[derive(Clone)]
 pub struct Formula {
     formula_string: String,
     expand_future_functions: bool,
@@ -1004,6 +1005,12 @@ impl Formula {
 impl From<&str> for Formula {
     fn from(value: &str) -> Formula {
         Formula::new(value)
+    }
+}
+
+impl From<&Formula> for Formula {
+    fn from(value: &Formula) -> Formula {
+        (*value).clone()
     }
 }
 

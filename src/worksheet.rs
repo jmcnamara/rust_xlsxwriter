@@ -10540,6 +10540,27 @@ impl IntoExcelData for Formula {
     }
 }
 
+impl IntoExcelData for &Formula {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        worksheet.store_formula(row, col, (*self).clone(), None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        worksheet.store_formula(row, col, (*self).clone(), Some(format))
+    }
+}
+
 impl IntoExcelData for Url {
     fn write(
         self,
