@@ -8,9 +8,7 @@
 //! Tables in Excel are used to group rows and columns of data into a single
 //! structure that can be referenced in a formula or formatted collectively.
 
-use rust_xlsxwriter::{
-    Formula, Table, TableColumn, TableFunction, TableStyle, Workbook, XlsxError,
-};
+use rust_xlsxwriter::{Table, TableColumn, TableFunction, TableStyle, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -245,13 +243,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(3, 1, items)?;
     worksheet.write_row_matrix(3, 2, data)?;
 
-    // Write some table formulas to sum the rows.
-    let formula = Formula::new("SUM(Table8[@[Quarter 1]:[Quarter 4]])").use_table_functions();
-    worksheet.write(3, 6, &formula)?;
-    worksheet.write(4, 6, &formula)?;
-    worksheet.write(5, 6, &formula)?;
-    worksheet.write(6, 6, &formula)?;
-
     // Create and configure a new table.
     let mut table = Table::new();
     let columns = vec![
@@ -260,7 +251,9 @@ fn main() -> Result<(), XlsxError> {
         TableColumn::new().set_header("Quarter 2"),
         TableColumn::new().set_header("Quarter 3"),
         TableColumn::new().set_header("Quarter 4"),
-        TableColumn::new().set_header("Year"),
+        TableColumn::new()
+            .set_header("Year")
+            .set_formula("SUM(Table8[@[Quarter 1]:[Quarter 4]])"),
     ];
     table.set_columns(&columns);
 
@@ -288,13 +281,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(3, 1, items)?;
     worksheet.write_row_matrix(3, 2, data)?;
 
-    // Write some table formulas to sum the rows.
-    let formula = Formula::new("SUM(Table9[@[Quarter 1]:[Quarter 4]])").use_table_functions();
-    worksheet.write(3, 6, &formula)?;
-    worksheet.write(4, 6, &formula)?;
-    worksheet.write(5, 6, &formula)?;
-    worksheet.write(6, 6, &formula)?;
-
     // Create and configure a new table.
     let mut table = Table::new();
     let columns = vec![
@@ -303,7 +289,9 @@ fn main() -> Result<(), XlsxError> {
         TableColumn::new().set_header("Quarter 2"),
         TableColumn::new().set_header("Quarter 3"),
         TableColumn::new().set_header("Quarter 4"),
-        TableColumn::new().set_header("Year"),
+        TableColumn::new()
+            .set_header("Year")
+            .set_formula("SUM(Table9[@[Quarter 1]:[Quarter 4]])"),
     ];
     table.set_columns(&columns);
     table.set_total_row(true);
@@ -332,13 +320,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(3, 1, items)?;
     worksheet.write_row_matrix(3, 2, data)?;
 
-    // Write some table formulas to sum the rows.
-    let formula = Formula::new("SUM(Table10[@[Quarter 1]:[Quarter 4]])").use_table_functions();
-    worksheet.write(3, 6, &formula)?;
-    worksheet.write(4, 6, &formula)?;
-    worksheet.write(5, 6, &formula)?;
-    worksheet.write(6, 6, &formula)?;
-
     // Create and configure a new table.
     let mut table = Table::new();
     let columns = vec![
@@ -359,7 +340,8 @@ fn main() -> Result<(), XlsxError> {
             .set_total_function(TableFunction::Sum),
         TableColumn::new()
             .set_header("Year")
-            .set_total_function(TableFunction::Sum),
+            .set_total_function(TableFunction::Sum)
+            .set_formula("SUM(Table10[@[Quarter 1]:[Quarter 4]])"),
     ];
     table.set_columns(&columns);
     table.set_total_row(true);
@@ -388,13 +370,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(3, 1, items)?;
     worksheet.write_row_matrix(3, 2, data)?;
 
-    // Write some table formulas to sum the rows.
-    let formula = Formula::new("SUM(Table11[@[Quarter 1]:[Quarter 4]])").use_table_functions();
-    worksheet.write(3, 6, &formula)?;
-    worksheet.write(4, 6, &formula)?;
-    worksheet.write(5, 6, &formula)?;
-    worksheet.write(6, 6, &formula)?;
-
     // Create and configure a new table.
     let mut table = Table::new();
     let columns = vec![
@@ -415,7 +390,8 @@ fn main() -> Result<(), XlsxError> {
             .set_total_function(TableFunction::Sum),
         TableColumn::new()
             .set_header("Year")
-            .set_total_function(TableFunction::Sum),
+            .set_total_function(TableFunction::Sum)
+            .set_formula("SUM(Table11[@[Quarter 1]:[Quarter 4]])"),
     ];
     table.set_columns(&columns);
     table.set_total_row(true);
@@ -445,13 +421,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(3, 1, items)?;
     worksheet.write_row_matrix(3, 2, data)?;
 
-    // Write some table formulas to sum the rows.
-    let formula = Formula::new("SUM(Table12[@[Quarter 1]:[Quarter 4]])").use_table_functions();
-    worksheet.write(3, 6, &formula)?;
-    worksheet.write(4, 6, &formula)?;
-    worksheet.write(5, 6, &formula)?;
-    worksheet.write(6, 6, &formula)?;
-
     // Create and configure a new table.
     let mut table = Table::new();
     let columns = vec![
@@ -472,7 +441,8 @@ fn main() -> Result<(), XlsxError> {
             .set_total_function(TableFunction::Sum),
         TableColumn::new()
             .set_header("Year")
-            .set_total_function(TableFunction::Sum),
+            .set_total_function(TableFunction::Sum)
+            .set_formula("SUM(Table12[@[Quarter 1]:[Quarter 4]])"),
     ];
     table.set_columns(&columns);
     table.set_total_row(true);

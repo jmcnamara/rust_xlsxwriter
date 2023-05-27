@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Formula, Table, TableColumn, TableFunction, Workbook, XlsxError};
+use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -58,13 +58,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(4, 9, 0)?;
     worksheet.write(4, 10, 0)?;
 
-    worksheet.write_formula(3, 10, "SUM(Table1[[#This Row],[Column1]:[Column3]])")?;
-    worksheet.write_formula(
-        4,
-        10,
-        Formula::new("SUM(Table1[@[Column1]:[Column3]])").use_table_functions(),
-    )?;
-
     let columns = vec![
         TableColumn::new().set_total_label("Total"),
         TableColumn::default(),
@@ -75,7 +68,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_total_function(TableFunction::Min),
         TableColumn::new().set_total_function(TableFunction::Sum),
         TableColumn::new().set_total_function(TableFunction::StdDev),
-        TableColumn::new().set_total_function(TableFunction::Var),
+        TableColumn::new()
+            .set_total_function(TableFunction::Var)
+            .set_formula("SUM(Table1[@[Column1]:[Column3]])"),
     ];
 
     let mut table = Table::new();

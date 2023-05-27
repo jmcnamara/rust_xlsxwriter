@@ -154,6 +154,24 @@ impl Table {
         Ok(())
     }
 
+    // Get the first row that can be used to write data.
+    pub(crate) fn first_data_row(&self) -> RowNum {
+        if self.show_header_row {
+            self.first_row + 1
+        } else {
+            self.first_row
+        }
+    }
+
+    // Get the last row that can be used to write data.
+    pub(crate) fn last_data_row(&self) -> RowNum {
+        if self.show_total_row {
+            self.last_row - 1
+        } else {
+            self.last_row
+        }
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -251,7 +269,22 @@ impl Table {
             attributes.push(("totalsRowFunction", column.total_function.to_string()));
         }
 
-        self.writer.xml_empty_tag("tableColumn", &attributes);
+        if let Some(formula) = &column.formula {
+            self.writer.xml_start_tag("tableColumn", &attributes);
+
+            // Write the calculatedColumnFormula element.
+            self.write_calculated_column_formula(&formula.expand_formula(true));
+
+            self.writer.xml_end_tag("tableColumn");
+        } else {
+            self.writer.xml_empty_tag("tableColumn", &attributes);
+        }
+    }
+
+    // Write the <calculatedColumnFormula> element.
+    fn write_calculated_column_formula(&mut self, formula: &str) {
+        self.writer
+            .xml_data_element_only("calculatedColumnFormula", formula);
     }
 
     // Write the <tableStyleInfo> element.
@@ -278,6 +311,7 @@ pub struct TableColumn {
     pub(crate) name: String,
     pub(crate) total_function: TableFunction,
     pub(crate) total_label: String,
+    pub(crate) formula: Option<Formula>,
 }
 
 #[allow(dead_code)] // TODO
@@ -288,6 +322,7 @@ impl TableColumn {
             name: String::new(),
             total_function: TableFunction::None,
             total_label: String::new(),
+            formula: None,
         }
     }
 
@@ -306,6 +341,14 @@ impl TableColumn {
     /// TODO
     pub fn set_total_label(mut self, label: impl Into<String>) -> TableColumn {
         self.total_label = label.into();
+        self
+    }
+
+    /// TODO
+    pub fn set_formula(mut self, formula: impl Into<Formula>) -> TableColumn {
+        let mut formula = formula.into();
+        formula = formula.clone().use_table_functions();
+        self.formula = Some(formula);
         self
     }
 
@@ -655,6 +698,26 @@ mod tests {
     use crate::test_functions::xml_to_vec;
     use crate::{TableColumn, TableFunction};
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn test_row_methods() {
+        let mut table = Table::new();
+        table.first_row = 0;
+        table.first_col = 0;
+        table.last_row = 9;
+        table.last_col = 4;
+
+        assert_eq!(1, table.first_data_row());
+        assert_eq!(9, table.last_data_row());
+
+        table.set_total_row(true);
+        assert_eq!(1, table.first_data_row());
+        assert_eq!(8, table.last_data_row());
+
+        table.set_header_row(false);
+        assert_eq!(0, table.first_data_row());
+        assert_eq!(8, table.last_data_row());
+    }
 
     #[test]
     fn test_assemble1() {

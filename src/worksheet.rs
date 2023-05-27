@@ -4482,20 +4482,29 @@ impl Worksheet {
         table.last_col = last_col;
         table.initialize_columns()?;
 
-        // Write the column headers.
-        if table.show_header_row {
-            for (offset, column) in table.columns.iter().enumerate() {
-                let col = first_col + offset as u16;
-                self.write_string(first_row, col, &column.name)?;
+        // Write the worksheet information required for each column.
+        for (offset, column) in table.columns.iter().enumerate() {
+            let col = first_col + offset as u16;
 
-                // Write the total row if required.
-                if table.show_total_row {
-                    if !column.total_label.is_empty() {
-                        self.write_string(last_row, col, &column.total_label)?;
-                    } else if column.total_function != TableFunction::None {
-                        let formula = column.total_function();
-                        self.write_formula(last_row, col, formula)?;
-                    }
+            // Write the header.
+            if table.show_header_row {
+                self.write_string(first_row, col, &column.name)?;
+            }
+
+            // Write the total row strings or formulas.
+            if table.show_total_row {
+                if !column.total_label.is_empty() {
+                    self.write_string(last_row, col, &column.total_label)?;
+                } else if column.total_function != TableFunction::None {
+                    let formula = column.total_function();
+                    self.write_formula(last_row, col, formula)?;
+                }
+            }
+
+            // Write the column formula as worksheet formulas.
+            if let Some(formula) = &column.formula {
+                for row in table.first_data_row()..=table.last_data_row() {
+                    self.write_formula(row, col, formula)?;
                 }
             }
         }
