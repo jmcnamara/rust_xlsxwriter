@@ -206,6 +206,7 @@ pub struct Worksheet {
     filter_conditions: HashMap<ColNum, FilterCondition>,
     filter_automatic_off: bool,
     has_drawing_object_linkage: bool,
+    cells_with_autofilter: HashSet<(RowNum, ColNum)>,
 }
 
 impl Default for Worksheet {
@@ -388,6 +389,7 @@ impl Worksheet {
             filter_automatic_off: false,
             charts: BTreeMap::new(),
             has_drawing_object_linkage: false,
+            cells_with_autofilter: HashSet::new(),
         }
     }
 
@@ -4277,6 +4279,11 @@ impl Worksheet {
         // Clear any previous filters.
         self.filter_conditions = HashMap::new();
 
+        // Store the cells with the autofilter dropdown for the autofit calc.
+        for col in first_col..=last_col {
+            self.cells_with_autofilter.insert((first_row, col));
+        }
+
         Ok(self)
     }
 
@@ -4533,6 +4540,13 @@ impl Worksheet {
                     }
                     None => self.table_cells.insert((row, col), new_index),
                 };
+            }
+        }
+
+        // Store the cells with the autofilter dropdown for the autofit calc.
+        if table.show_autofilter {
+            for col in first_col..=last_col {
+                self.cells_with_autofilter.insert((first_row, col));
             }
         }
 
@@ -7359,7 +7373,7 @@ impl Worksheet {
             if let Some(columns) = self.data_table.get(&row_num) {
                 for col_num in self.dimensions.first_col..=self.dimensions.last_col {
                     if let Some(cell) = columns.get(&col_num) {
-                        let pixel_width = match cell {
+                        let mut pixel_width = match cell {
                             // For strings we do a calculation based on
                             // character widths taken from Excel. For rich
                             // strings we use the unformatted string. We also
@@ -7430,6 +7444,14 @@ impl Worksheet {
                             // Ignore blank cells, like Excel.
                             CellType::Blank { .. } => 0,
                         };
+
+                        // If the cell is in an autofilter header we add an
+                        // additional 16 pixels for the dropdown arrow.
+                        if pixel_width > 0
+                            && self.cells_with_autofilter.contains(&(row_num, col_num))
+                        {
+                            pixel_width += 16;
+                        }
 
                         // Update the max column width.
                         if pixel_width > 0 {
