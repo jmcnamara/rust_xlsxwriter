@@ -555,15 +555,12 @@ impl Worksheet {
     /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
-    pub fn write<T>(
+    pub fn write(
         &mut self,
         row: RowNum,
         col: ColNum,
-        data: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: IntoExcelData,
-    {
+        data: impl IntoExcelData,
+    ) -> Result<&mut Worksheet, XlsxError> {
         data.write(self, row, col)
     }
 
@@ -1035,15 +1032,12 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_number.png">
     ///
-    pub fn write_number<T>(
+    pub fn write_number(
         &mut self,
         row: RowNum,
         col: ColNum,
-        number: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<f64>,
-    {
+        number: impl Into<f64>,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_number(row, col, number, None)
     }
@@ -1117,16 +1111,13 @@ impl Worksheet {
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_number_with_format.png">
     ///
     ///
-    pub fn write_number_with_format<T>(
+    pub fn write_number_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
-        number: T,
+        number: impl Into<f64>,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<f64>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_number(row, col, number.into(), Some(format))
     }
@@ -1565,15 +1556,12 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_formula.png">
     ///
-    pub fn write_formula<T>(
+    pub fn write_formula(
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Formula>,
-    {
+        formula: impl Into<Formula>,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_formula(row, col, formula.into(), None)
     }
@@ -1635,16 +1623,13 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_formula_with_format.png">
     ///
-    pub fn write_formula_with_format<T>(
+    pub fn write_formula_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: T,
+        formula: impl Into<Formula>,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Formula>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_formula(row, col, formula.into(), Some(format))
     }
@@ -1721,17 +1706,14 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula.png">
     ///
-    pub fn write_array_formula<T>(
+    pub fn write_array_formula(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Formula>,
-    {
+        formula: impl Into<Formula>,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_array_formula(
             first_row,
@@ -1824,18 +1806,15 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_array_formula_with_format.png">
     ///
-    pub fn write_array_formula_with_format<T>(
+    pub fn write_array_formula_with_format(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: T,
+        formula: impl Into<Formula>,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Formula>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_array_formula(
             first_row,
@@ -1920,17 +1899,14 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula.png">
     ///
-    pub fn write_dynamic_array_formula<T>(
+    pub fn write_dynamic_array_formula(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Formula>,
-    {
+        formula: impl Into<Formula>,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_array_formula(
             first_row,
@@ -2029,18 +2005,15 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_dynamic_array_formula_with_format.png">
     ///
-    pub fn write_dynamic_array_formula_with_format<T>(
+    pub fn write_dynamic_array_formula_with_format(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        formula: T,
+        formula: impl Into<Formula>,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Formula>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_array_formula(
             first_row,
@@ -2081,15 +2054,12 @@ impl Worksheet {
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
-    pub fn write_dynamic_formula<T>(
+    pub fn write_dynamic_formula(
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Formula>,
-    {
+        formula: impl Into<Formula>,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_array_formula(row, col, row, col, formula.into(), None, true)
     }
@@ -2123,16 +2093,13 @@ impl Worksheet {
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
-    pub fn write_dynamic_formula_with_format<T>(
+    pub fn write_dynamic_formula_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
-        formula: T,
+        formula: impl Into<Formula>,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Formula>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_array_formula(row, col, row, col, formula.into(), Some(format), true)
     }
@@ -2361,15 +2328,12 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/url_intro1.png">
     ///
-    pub fn write_url<T>(
+    pub fn write_url(
         &mut self,
         row: RowNum,
         col: ColNum,
-        link: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Url>,
-    {
+        link: impl Into<Url>,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_url(row, col, link.into(), None)
     }
@@ -2458,16 +2422,13 @@ impl Worksheet {
     /// # }
     /// ```
     ///
-    pub fn write_url_with_text<T>(
+    pub fn write_url_with_text(
         &mut self,
         row: RowNum,
         col: ColNum,
-        link: T,
+        link: impl Into<Url>,
         text: impl Into<String>,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Url>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         let link = link.into().set_text(text.into());
         self.store_url(row, col, link, None)
@@ -2532,16 +2493,13 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_format.png">
     ///
-    pub fn write_url_with_format<T>(
+    pub fn write_url_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
-        link: T,
+        link: impl Into<Url>,
         format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Url>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         self.store_url(row, col, link.into(), Some(format))
     }
@@ -2578,18 +2536,15 @@ impl Worksheet {
     /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
     ///
-    pub fn write_url_with_options<T>(
+    pub fn write_url_with_options(
         &mut self,
         row: RowNum,
         col: ColNum,
-        link: T,
+        link: impl Into<Url>,
         text: impl Into<String>,
         tip: impl Into<String>,
         format: Option<&Format>,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<Url>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         let link = link.into().set_text(text.into()).set_tip(tip.into());
         self.store_url(row, col, link, format)
@@ -3608,10 +3563,11 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
     ///
-    pub fn set_row_height<T>(&mut self, row: RowNum, height: T) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<f64>,
-    {
+    pub fn set_row_height(
+        &mut self,
+        row: RowNum,
+        height: impl Into<f64>,
+    ) -> Result<&mut Worksheet, XlsxError> {
         let height = height.into();
 
         // If the height is 0 then the Excel treats the row as hidden with
@@ -3957,14 +3913,11 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
     ///
-    pub fn set_column_width<T>(
+    pub fn set_column_width(
         &mut self,
         col: ColNum,
-        width: T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<f64>,
-    {
+        width: impl Into<f64>,
+    ) -> Result<&mut Worksheet, XlsxError> {
         let width = width.into();
 
         // If the width is 0 then the Excel treats the column as hidden with
@@ -5641,10 +5594,7 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_tab_color.png">
     ///
-    pub fn set_tab_color<T>(&mut self, color: T) -> &mut Worksheet
-    where
-        T: IntoColor,
-    {
+    pub fn set_tab_color(&mut self, color: impl IntoColor) -> &mut Worksheet {
         let color = color.new_color();
         if color.is_valid() {
             self.tab_color = color;
@@ -7773,16 +7723,13 @@ impl Worksheet {
     }
 
     // Store a number cell in the worksheet data table structure.
-    fn store_number<T>(
+    fn store_number(
         &mut self,
         row: RowNum,
         col: ColNum,
-        number: T,
+        number: impl Into<f64>,
         format: Option<&Format>,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Into<f64>,
-    {
+    ) -> Result<&mut Worksheet, XlsxError> {
         self.store_number_type(row, col, number.into(), format, false)
     }
 
