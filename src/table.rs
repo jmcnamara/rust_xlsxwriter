@@ -14,10 +14,102 @@ use crate::{
     ColNum, Formula, RowNum, XlsxError, COL_MAX, ROW_MAX,
 };
 
-/// A struct to represent a Table.
+/// A struct to represent a worksheet Table.
 ///
-/// TODO.
-#[allow(dead_code)] // TODO
+/// Tables in Excel are a way of grouping a range of cells into a single entity
+/// that has common formatting or that can be referenced from formulas. Tables
+/// can have column headers, autofilters, total rows, column formulas and
+/// different formatting styles.
+///
+/// The image below shows a default table in Excel with the default properties
+/// shown in the ribbon bar.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/table_intro.png">
+///
+/// A table is added to a worksheet via the
+/// [`worksheet.add_table()`](crate::Worksheet::add_table) method. The headers
+/// and total row of a table should be configured via a `Table` struct but the
+/// table data can be added via standard
+/// [`worksheet.write()`](crate::Worksheet::write) methods:
+///
+/// ```
+/// # // This code is available in examples/doc_table_set_columns.rs
+/// #
+/// use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Some sample data for the table.
+///     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+///     let data = [
+///         [10000, 5000, 8000, 6000],
+///         [2000, 3000, 4000, 5000],
+///         [6000, 6000, 6500, 6000],
+///         [500, 300, 200, 700],
+///     ];
+///
+///     // Write the table data.
+///     worksheet.write_column(3, 1, items)?;
+///     worksheet.write_row_matrix(3, 2, data)?;
+///
+///     // Set the columns widths for clarity.
+///     for col_num in 1..=6u16 {
+///         worksheet.set_column_width(col_num, 12)?;
+///     }
+///
+///     // Create a new table and configure it.
+///     let mut table = Table::new();
+///
+///     let columns = vec![
+///         TableColumn::new()
+///             .set_header("Product")
+///             .set_total_label("Totals"),
+///         TableColumn::new()
+///             .set_header("Quarter 1")
+///             .set_total_function(TableFunction::Sum),
+///         TableColumn::new()
+///             .set_header("Quarter 2")
+///             .set_total_function(TableFunction::Sum),
+///         TableColumn::new()
+///             .set_header("Quarter 3")
+///             .set_total_function(TableFunction::Sum),
+///         TableColumn::new()
+///             .set_header("Quarter 4")
+///             .set_total_function(TableFunction::Sum),
+///         TableColumn::new()
+///             .set_header("Year")
+///             .set_total_function(TableFunction::Sum)
+///             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
+///     ];
+///
+///     table.set_columns(&columns);
+///     table.set_total_row(true);
+///
+///     // Add the table to the worksheet.
+///     worksheet.add_table(2, 1, 7, 6, &table)?;
+///
+///     // Save the file to disk.
+///     workbook.save("tables.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/table_set_columns.png">
+///
+/// For more information on tables see the Microsoft documentation on [Overview
+/// of Excel tables].
+///
+/// [Overview of Excel tables]:
+///     https://support.microsoft.com/en-us/office/overview-of-excel-tables-7ab0bb7d-3a9e-4b56-a3c9-6c94334e492c
+///
 #[derive(Clone)]
 pub struct Table {
     pub(crate) writer: XMLWriter,
@@ -42,13 +134,72 @@ pub struct Table {
     pub(crate) show_autofilter: bool,
 }
 
-#[allow(dead_code)] // TODO
 impl Table {
     // -----------------------------------------------------------------------
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
     /// Create a new Table struct instance.
+    ///
+    /// Create a table that can be added to a data range of a worksheet. The
+    /// headers, totals, formulas and other properties can be set via the
+    /// `Table::*` methods shown below. The data should be added to the table
+    /// region using the standard
+    /// [`Worksheet::write()`](crate::Worksheet::write) methods.
+    ///
+    /// # Examples
+    ///
+    /// Example of creating a new table and adding it to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_header_row2.rs
+    /// #
+    /// use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Some sample data for the table.
+    ///     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    ///     let data = [
+    ///         [10000, 5000, 8000, 6000],
+    ///         [2000, 3000, 4000, 5000],
+    ///         [6000, 6000, 6500, 6000],
+    ///         [500, 300, 200, 700],
+    ///     ];
+    ///
+    ///     // Write the table data.
+    ///     worksheet.write_column(3, 1, items)?;
+    ///     worksheet.write_row_matrix(3, 2, data)?;
+    ///
+    ///     // Set the columns widths for clarity.
+    ///     for col_num in 1..=6u16 {
+    ///         worksheet.set_column_width(col_num, 12)?;
+    ///     }
+    ///
+    ///     // Create a new table.
+    ///     let table = Table::new();
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
+    ///
+    ///     // Save the file to disk.
+    ///     workbook.save("tables.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_header_row2.png">
+    ///
+    ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> Table {
         let writer = XMLWriter::new();
@@ -73,61 +224,936 @@ impl Table {
         }
     }
 
-    /// TODO
-    pub fn set_total_row(&mut self, enable: bool) -> &mut Table {
-        self.show_total_row = enable;
-        self
-    }
-
-    /// TODO
+    /// Turn on/off the header row as a table.
+    ///
+    /// Turn on or off the header row in the table.  The header row displays the
+    /// column names and, unless it is turned off, an autofilter. It is on by
+    /// default.
+    ///
+    /// The header row will display default captions such as `Column 1`, `Column
+    /// 2`, etc. These captions can be overridden using the
+    /// [`set_columns()`](Table::set_columns) method, see the examples below.
+    /// They shouldn't be written, or overwritten using standard
+    /// [`Worksheet::write()`](crate::Worksheet::write) methods since that will
+    /// cause a warning when the file is loaded in Excel.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a worksheet table with a default header.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_header_row2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table.
+    ///     let table = Table::new();
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_header_row2.png">
+    ///
+    ///
+    /// Example of turning off the default header on a worksheet table. Note,
+    /// that the table range has been adjusted in relation to the previous
+    /// example to account for the missing header.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_header_row.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(2, 1, items)?;
+    /// #     worksheet.write_row_matrix(2, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the header.
+    ///     let mut table = Table::new();
+    ///     table.set_header_row(false);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 5, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_header_row.png">
+    ///
+    /// Example of adding a worksheet table with a user defined header captions.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_header_row3.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, TableColumn, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the column headers.
+    ///     let mut table = Table::new();
+    ///
+    ///     // Set the captions for the header row.
+    ///     let columns = vec![
+    ///         TableColumn::new().set_header("Product"),
+    ///         TableColumn::new().set_header("Quarter 1"),
+    ///         TableColumn::new().set_header("Quarter 2"),
+    ///         TableColumn::new().set_header("Quarter 3"),
+    ///         TableColumn::new().set_header("Quarter 4"),
+    ///     ];
+    ///     table.set_columns(&columns);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_header_row3.png">
+    ///
     pub fn set_header_row(&mut self, enable: bool) -> &mut Table {
         self.show_header_row = enable;
         self
     }
 
-    /// TODO
+    /// Turn on a totals row for a table.
+    ///
+    /// The `set_total_row()` method can be used to turn on the total row in the
+    /// last row of a table. The total row is distinguished from the other rows
+    /// by a different formatting and with dropdown `SUBTOTAL()` functions.
+    ///
+    /// Note, you will need to use [`TableColumn`] methods to populate this row.
+    /// Overwriting the total row cells with `worksheet.write()` calls will
+    /// cause Excel to warn that the table is corrupt when loading the file.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// Example of turning on the "totals" row at the bottom of a worksheet
+    /// table. Note, this just turns on the total run it doesn't add captions or
+    /// subtotal functions. See the next example below.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_total_row.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the total row.
+    ///     let mut table = Table::new();
+    ///     table.set_total_row(true);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 7, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_total_row.png">
+    ///
+    /// Example of turning on the "totals" row at the bottom of a worksheet
+    /// table with captions and subtotal functions.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_total_row2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the total row.
+    ///     let mut table = Table::new();
+    ///     table.set_total_row(true);
+    ///
+    ///     // Set the caption and subtotal in the total row.
+    ///     let columns = vec![
+    ///         TableColumn::new().set_total_label("Totals"),
+    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///     ];
+    ///     table.set_columns(&columns);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 7, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_total_row2.png">
+    ///
+    pub fn set_total_row(&mut self, enable: bool) -> &mut Table {
+        self.show_total_row = enable;
+        self
+    }
+
+    /// Turn on/off banded for a table.
+    ///
+    /// By default Excel uses "banded" rows of alternating colors in a table to
+    /// distinguish each data row, like this:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_header_row2.png">
+    ///
+    /// If you prefer not to have this type of formatting you can turn it off,
+    /// see the example below.
+    ///
+    /// Note, you can also select a table style without banded rows using the
+    /// [`table.set_style`](Table::set_style) method.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    /// # Examples
+    ///
+    /// Example of turning off the banded rows property in a worksheet table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_banded_rows.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the banded rows.
+    ///     let mut table = Table::new();
+    ///     table.set_banded_rows(false);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_banded_rows.png">
+    ///
     pub fn set_banded_rows(&mut self, enable: bool) -> &mut Table {
         self.show_banded_rows = enable;
         self
     }
 
-    /// TODO
+    /// Turn on/off banded columns for a table.
+    ///
+    /// By default Excel uses the same format color for each data column in a
+    /// table but alternates the color of rows. If you wish you can set "banded"
+    /// columns of alternating colors in a table to distinguish each data column.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// Example of turning on the banded columns property in a worksheet table. These
+    /// are normally off by default,
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_banded_columns.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the banded columns.
+    ///     let mut table = Table::new();
+    ///     table.set_banded_columns(true);
+    ///
+    ///     // Turn off banded rows for clarity.
+    ///     table.set_banded_rows(false);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/table_set_banded_columns.png">
+    ///
     pub fn set_banded_columns(&mut self, enable: bool) -> &mut Table {
         self.show_banded_columns = enable;
         self
     }
 
-    /// TODO
+    /// Turn on/off the first column highlighting for a table.
+    ///
+    /// The first column of a worksheet table is often used for a list of items
+    /// whereas the other columns are more commonly used for data. In these
+    /// cases it is sometimes desirable to highlight the first column differently.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// Example of turning on the first column highlighting property in a
+    /// worksheet table. This is normally off by default,
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_first_column.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the first column highlighting.
+    ///     let mut table = Table::new();
+    ///     table.set_first_column(true);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_first_column.png">
+    ///
     pub fn set_first_column(&mut self, enable: bool) -> &mut Table {
         self.show_first_column = enable;
         self
     }
 
-    /// TODO
+    /// Turn on/off the last column highlighting for a table.
+    ///
+    /// The last column of a worksheet table is often used for a `SUM()` or
+    /// other formula operating on the  data in the other columns. In these
+    /// cases it is sometimes required to highlight the last column differently.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// Example of turning on the last column highlighting property in a
+    /// worksheet table. This is normally off by default,
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_last_column.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, TableColumn, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the last column highlighting.
+    ///     let mut table = Table::new();
+    ///     table.set_last_column(true);
+    ///
+    ///     // Add a structured reference formula to the last column and set the header
+    ///     // caption. The last column in `add_table()` should be extended to account
+    ///     // for this extra column.
+    ///     let columns = vec![
+    ///         TableColumn::default(),
+    ///         TableColumn::default(),
+    ///         TableColumn::default(),
+    ///         TableColumn::default(),
+    ///         TableColumn::default(),
+    ///         TableColumn::new()
+    ///             .set_header("Totals")
+    ///             .set_formula("SUM(Table1[@[Column2]:[Column5]])"),
+    ///     ];
+    ///     table.set_columns(&columns);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 6, 6, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_last_column.png">
+    ///
     pub fn set_last_column(&mut self, enable: bool) -> &mut Table {
         self.show_last_column = enable;
         self
     }
 
-    /// TODO
+    /// Turn on/off the autofilter for a table.
+    ///
+    /// By default Excel adds an autofilter to the header of a table. This
+    /// method can be used to turn it off if necessary.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    /// # Examples
+    ///
+    /// Example of turning off the autofilter in a worksheet table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_autofilter.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the autofilter.
+    ///     let mut table = Table::new();
+    ///     table.set_autofilter(false);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/table_set_autofilter.png">
+    ///
     pub fn set_autofilter(&mut self, enable: bool) -> &mut Table {
         self.show_autofilter = enable;
         self
     }
 
-    /// TODO
+    /// Set properties for the columns in a table.
+    ///
+    /// Set the properties for columns in a worksheet table via an array of
+    /// [`TableColumn`] structs. This can be used to set the following
+    /// properties of a table column:
+    ///
+    /// - The header caption.
+    /// - The total row caption.
+    /// - The total row subtotal function.
+    /// - A formula for the column.
+    ///
+    ///
+    /// # Arguments
+    ///
+    /// * `columns` - An array reference of [`TableColumn`] structs. Use
+    ///   `TableColumn::default()` to get default values.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// Example of creating a worksheet table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_columns.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure it.
+    ///     let mut table = Table::new();
+    ///
+    ///     let columns = vec![
+    ///         TableColumn::new()
+    ///             .set_header("Product")
+    ///             .set_total_label("Totals"),
+    ///         TableColumn::new()
+    ///             .set_header("Quarter 1")
+    ///             .set_total_function(TableFunction::Sum),
+    ///         TableColumn::new()
+    ///             .set_header("Quarter 2")
+    ///             .set_total_function(TableFunction::Sum),
+    ///         TableColumn::new()
+    ///             .set_header("Quarter 3")
+    ///             .set_total_function(TableFunction::Sum),
+    ///         TableColumn::new()
+    ///             .set_header("Quarter 4")
+    ///             .set_total_function(TableFunction::Sum),
+    ///         TableColumn::new()
+    ///             .set_header("Year")
+    ///             .set_total_function(TableFunction::Sum)
+    ///             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
+    ///     ];
+    ///
+    ///     table.set_columns(&columns);
+    ///     table.set_total_row(true);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 7, 6, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_columns.png">
+    ///
     pub fn set_columns(&mut self, columns: &[TableColumn]) -> &mut Table {
         self.columns = columns.to_vec();
         self
     }
 
-    /// TODO
+    /// Set the name for a table.
+    ///
+    /// The name of a worksheet table in Excel is similar to a defined name
+    /// representing a data region and it can be used in structured reference
+    /// formulas.
+    ///
+    /// By default Excel, and `rust_xlsxwriter` uses a `Table1` .. `TableN`
+    /// naming for tables in a workbook. If required you can set a user defined
+    /// name. However, you need to ensure that this name is unique across the
+    /// workbook, otherwise you will get a warning when you load the file in
+    /// Excel.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the table. It must be unique across the workbook.
+    ///
+    /// # Examples
+    ///
+    /// Example of setting the name of a worksheet table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and set the name.
+    ///     let mut table = Table::new();
+    ///     table.set_name("ProduceSales");
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/table_set_name.png">
+    ///
     pub fn set_name(&mut self, name: impl Into<String>) -> &mut Table {
         self.name = name.into();
         self
     }
 
-    /// TODO
+    /// Set the style for a table.
+    ///
+    /// Excel supports 61 different styles for tables divided into Light, Medium
+    /// and Dark categories.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/table_styles.png">
+    ///
+    /// You can set one of these styles using a [`TableStyle`] enum value. The
+    /// default table style in Excel is equivalent to
+    /// [`TableStyle::Medium9`](TableStyle::Medium9).
+    ///
+    /// # Arguments
+    ///
+    /// * `style` - a [`TableStyle`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// Example of setting the style of a worksheet table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_style.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, TableStyle, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and set the style.
+    ///     let mut table = Table::new();
+    ///     table.set_style(TableStyle::Medium10);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/table_set_style.png">
+    ///
     pub fn set_style(&mut self, style: TableStyle) -> &mut Table {
         self.style = style;
         self
@@ -304,9 +1330,98 @@ impl Table {
     }
 }
 
-#[allow(dead_code)] // TODO
 #[derive(Clone)]
-/// TODO
+/// A struct to represent a Table Column.
+///
+/// The `TableColumn` struct is used to set the properties for columns in a
+/// worksheet table. This can be used to set the following properties of a table
+/// column:
+///
+/// - The header caption.
+/// - The total row caption.
+/// - The total row subtotal function.
+/// - A formula for the column.
+///
+/// This struct is used in conjunction with the
+/// [`table.set_columns()`](Table::set_columns) method.
+///
+/// # Examples
+///
+/// Example of creating a worksheet table.
+///
+/// ```
+/// # // This code is available in examples/doc_table_set_columns.rs
+/// #
+/// use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Some sample data for the table.
+///     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+///     let data = [
+///         [10000, 5000, 8000, 6000],
+///         [2000, 3000, 4000, 5000],
+///         [6000, 6000, 6500, 6000],
+///         [500, 300, 200, 700],
+///     ];
+///
+///     // Write the table data.
+///     worksheet.write_column(3, 1, items)?;
+///     worksheet.write_row_matrix(3, 2, data)?;
+///
+///     // Set the columns widths for clarity.
+///     for col_num in 1..=6u16 {
+///         worksheet.set_column_width(col_num, 12)?;
+///     }
+///
+///     // Create a new table and configure it.
+///     let mut table = Table::new();
+///
+///     let columns = vec![
+///         TableColumn::new()
+///             .set_header("Product")
+///             .set_total_label("Totals"),
+///         TableColumn::new()
+///             .set_header("Quarter 1")
+///             .set_total_function(TableFunction::Sum),
+///         TableColumn::new()
+///             .set_header("Quarter 2")
+///             .set_total_function(TableFunction::Sum),
+///         TableColumn::new()
+///             .set_header("Quarter 3")
+///             .set_total_function(TableFunction::Sum),
+///         TableColumn::new()
+///             .set_header("Quarter 4")
+///             .set_total_function(TableFunction::Sum),
+///         TableColumn::new()
+///             .set_header("Year")
+///             .set_total_function(TableFunction::Sum)
+///             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
+///     ];
+///
+///     table.set_columns(&columns);
+///     table.set_total_row(true);
+///
+///     // Add the table to the worksheet.
+///     worksheet.add_table(2, 1, 7, 6, &table)?;
+///
+///     // Save the file to disk.
+///     workbook.save("tables.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/table_set_columns.png">
+///
+///
 pub struct TableColumn {
     pub(crate) name: String,
     pub(crate) total_function: TableFunction,
@@ -314,9 +1429,9 @@ pub struct TableColumn {
     pub(crate) formula: Option<Formula>,
 }
 
-#[allow(dead_code)] // TODO
 impl TableColumn {
-    /// TODO
+    /// Create a new `TableColumn` to configure a Table column.
+    ///
     pub fn new() -> TableColumn {
         TableColumn {
             name: String::new(),
@@ -326,25 +1441,287 @@ impl TableColumn {
         }
     }
 
-    /// TODO
-    pub fn set_header(mut self, name: impl Into<String>) -> TableColumn {
-        self.name = name.into();
+    /// Set the header caption for a table column.
+    ///
+    /// Excel uses default captions such as `Column 1`, `Column 2`, etc., for
+    /// the headers on a worksheet table. These can be set to a user defined
+    /// value using the `set_header()` method.
+    ///
+    /// The column header names in a table must be different from each other.
+    /// Non-unique names will raise a validation error when using
+    /// [`worksheet.add_table()`](crate::Worksheet::add_table).
+    ///
+    /// # Arguments
+    ///
+    /// * `caption` - The caption/name of the column header. It must be unique
+    ///   for the table.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a worksheet table with a user defined header captions.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_header_row3.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, TableColumn, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the column headers.
+    ///     let mut table = Table::new();
+    ///
+    ///     // Set the captions for the header row.
+    ///     let columns = vec![
+    ///         TableColumn::new().set_header("Product"),
+    ///         TableColumn::new().set_header("Quarter 1"),
+    ///         TableColumn::new().set_header("Quarter 2"),
+    ///         TableColumn::new().set_header("Quarter 3"),
+    ///         TableColumn::new().set_header("Quarter 4"),
+    ///     ];
+    ///     table.set_columns(&columns);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_header_row3.png">
+    ///
+    pub fn set_header(mut self, caption: impl Into<String>) -> TableColumn {
+        self.name = caption.into();
         self
     }
 
-    /// TODO
+    /// Set the total function for the total row of a table column.
+    ///
+    /// Set the `SUBTOTAL()` function for the "totals" row of a table column.
+    ///
+    /// The standard Excel subtotal functions are available via the
+    /// [`TableFunction`] enum values. The Excel functions are:
+    ///
+    /// - Average
+    /// - Count
+    /// - Count Numbers
+    /// - Maximum
+    /// - Minimum
+    /// - Sum
+    /// - Standard Deviation
+    /// - Variance
+    ///
+    /// Excel also supports custom functions. These aren't currently supported
+    /// by `rust_xlsxwriter` but will be added in an upcoming release.
+    ///
+    /// Note, overwriting the total row cells with `worksheet.write()` calls
+    /// will cause Excel to warn that the table is corrupt when loading the
+    /// file.
+    ///
+    /// # Arguments
+    ///
+    /// * `function` - A [`TableFunction`] enum value equivalent to one of the
+    ///   available Excel `SUBTOTAL()` options.
+    ///
+    /// # Examples
+    ///
+    /// Example of turning on the "totals" row at the bottom of a worksheet
+    /// table with captions and subtotal functions.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_table_set_total_row2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the total row.
+    ///     let mut table = Table::new();
+    ///     table.set_total_row(true);
+    ///
+    ///     // Set the caption and subtotal in the total row.
+    ///     let columns = vec![
+    ///         TableColumn::new().set_total_label("Totals"),
+    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///     ];
+    ///     table.set_columns(&columns);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 7, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/table_set_total_row2.png">
+    ///
     pub fn set_total_function(mut self, function: TableFunction) -> TableColumn {
         self.total_function = function;
         self
     }
 
-    /// TODO
+    /// Set a label for the total row of a table column.
+    ///
+    /// It is possible to set a label for the totals row of a column instead of
+    /// a subtotal function. This is most often used to set a caption like
+    /// "Totals", as in the example above.
+    ///
+    /// Note, overwriting the total row cells with `worksheet.write()` calls
+    /// will cause Excel to warn that the table is corrupt when loading the
+    /// file.
+    ///
+    /// # Arguments
+    ///
+    /// * `label` - The label/caption of the total row of the column.
+    ///
     pub fn set_total_label(mut self, label: impl Into<String>) -> TableColumn {
         self.total_label = label.into();
         self
     }
 
-    /// TODO
+    /// Set the formula for a table column.
+    ///
+    /// It is a common usecase to add a summation column as the last column in a
+    /// table. These are constructed with a special class of Excel formulas
+    /// called [Structured References] which can refer to an entire table or
+    /// rows or columns of data within the table. For example to sum the data
+    /// for several columns in a single row might you might use a formula like
+    /// this: `SUM(Table1[@[Quarter 1]:[Quarter 4]])`.
+    ///
+    /// [Structured References]:
+    ///     https://support.microsoft.com/en-us/office/using-structured-references-with-excel-tables-f5ed2452-2337-4f71-bed3-c8ae6d2b276e
+    ///
+    /// # Arguments
+    ///
+    /// * `formula` - The formula to be applied to the column as a string or
+    ///   [`Formula`].
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a formula to a column in a worksheet table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_tablecolumn_set_formula.rs
+    /// #
+    /// # use rust_xlsxwriter::{Table, TableColumn, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the columns.
+    ///     let mut table = Table::new();
+    ///
+    ///     // Add a structured reference formula to the last column and set the header
+    ///     // caption.
+    ///     let columns = vec![
+    ///         TableColumn::new().set_header("Product"),
+    ///         TableColumn::new().set_header("Quarter 1"),
+    ///         TableColumn::new().set_header("Quarter 2"),
+    ///         TableColumn::new().set_header("Quarter 3"),
+    ///         TableColumn::new().set_header("Quarter 4"),
+    ///         TableColumn::new()
+    ///             .set_header("Totals")
+    ///             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
+    ///     ];
+    ///     table.set_columns(&columns);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(3, 1, 6, 6, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/tablecolumn_set_formula.png">
+    ///
     pub fn set_formula(mut self, formula: impl Into<Formula>) -> TableColumn {
         let mut formula = formula.into();
         formula = formula.clone().use_table_functions();
@@ -381,12 +1758,78 @@ impl Default for TableColumn {
     }
 }
 
-/// Standard Excel functions for totals in tables.
+/// Enum to define functions for worksheet table total rows.
 ///
-/// Definitions for the standard Excel functions that are available via the
-/// dropdown in the total row of an Excel table.
+/// The `TableFunction` enum contains definitions for the standard Excel
+/// functions that are available via the dropdown in the total row of an Excel
+/// table.
 ///
-/// TODO
+/// Excel also supports custom functions. These aren't currently supported by
+/// `rust_xlsxwriter` but will be added in an upcoming release.
+///
+/// # Examples
+///
+/// Example of turning on the totals row at the bottom of a worksheet table with
+/// subtotal functions.
+///
+/// ```
+/// # // This code is available in examples/doc_table_set_total_row2.rs
+/// #
+/// # use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Some sample data for the table.
+/// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+/// #     let data = [
+/// #         [10000, 5000, 8000, 6000],
+/// #         [2000, 3000, 4000, 5000],
+/// #         [6000, 6000, 6500, 6000],
+/// #         [500, 300, 200, 700],
+/// #     ];
+/// #
+/// #     // Write the table data.
+/// #     worksheet.write_column(3, 1, items)?;
+/// #     worksheet.write_row_matrix(3, 2, data)?;
+/// #
+/// #     // Set the columns widths for clarity.
+/// #     for col_num in 1..=6u16 {
+/// #         worksheet.set_column_width(col_num, 12)?;
+/// #     }
+/// #
+///     // Create a new table and configure the total row.
+///     let mut table = Table::new();
+///     table.set_total_row(true);
+///
+///     // Set the caption and subtotal in the total row.
+///     let columns = vec![
+///         TableColumn::new().set_total_label("Totals"),
+///         TableColumn::new().set_total_function(TableFunction::Sum),
+///         TableColumn::new().set_total_function(TableFunction::Sum),
+///         TableColumn::new().set_total_function(TableFunction::Sum),
+///         TableColumn::new().set_total_function(TableFunction::Sum),
+///     ];
+///     table.set_columns(&columns);
+///
+///     // Add the table to the worksheet.
+///     worksheet.add_table(3, 1, 7, 5, &table)?;
+///
+/// #     // Save the file to disk.
+/// #     workbook.save("tables.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/table_set_total_row2.png">
+///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum TableFunction {
     /// The "total row" option is enable but there is no total function.
@@ -407,11 +1850,11 @@ pub enum TableFunction {
     /// Use the min function as the table total.
     Min,
 
-    /// Use the standard deviation function as the table total.
-    StdDev,
-
     /// Use the sum function as the table total.
     Sum,
+
+    /// Use the standard deviation function as the table total.
+    StdDev,
 
     /// Use the var function as the table total.
     Var,
@@ -433,7 +1876,70 @@ impl fmt::Display for TableFunction {
     }
 }
 
-/// TODO
+/// Enum to define worksheet table styles.
+///
+/// Excel supports 61 different styles for tables divided into Light, Medium and
+/// Dark categories. You can set one of these styles using a [`TableStyle`] enum
+/// value.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/table_styles.png">
+///
+/// The style is set via the [`table.set_style`](Table::set_style) method. The
+/// default table style in Excel is equivalent to
+/// [`TableStyle::Medium9`](TableStyle::Medium9).
+///
+/// # Examples
+///
+/// Example of setting the style of a worksheet table.
+///
+/// ```
+/// # // This code is available in examples/doc_table_set_style.rs
+/// #
+/// # use rust_xlsxwriter::{Table, TableStyle, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Some sample data for the table.
+/// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+/// #     let data = [
+/// #         [10000, 5000, 8000, 6000],
+/// #         [2000, 3000, 4000, 5000],
+/// #         [6000, 6000, 6500, 6000],
+/// #         [500, 300, 200, 700],
+/// #     ];
+/// #
+/// #     // Write the table data.
+/// #     worksheet.write_column(3, 1, items)?;
+/// #     worksheet.write_row_matrix(3, 2, data)?;
+/// #
+/// #     // Set the columns widths for clarity.
+/// #     for col_num in 1..=6u16 {
+/// #         worksheet.set_column_width(col_num, 12)?;
+/// #     }
+/// #
+///     // Create a new table and set the style.
+///     let mut table = Table::new();
+///     table.set_style(TableStyle::Medium10);
+///
+///     // Add the table to the worksheet.
+///     worksheet.add_table(3, 1, 6, 5, &table)?;
+///
+/// #     // Save the file to disk.
+/// #     workbook.save("tables.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/table_set_style.png">
+///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum TableStyle {
     /// No table style.

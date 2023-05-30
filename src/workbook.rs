@@ -1176,9 +1176,11 @@ impl Workbook {
         }
     }
 
-    // TODO
+    // Set a unique table id for each table and also set the rel linkages.
     fn prepare_tables(&mut self) {
         let mut table_id = 1;
+
+        // TODO check for unique table name.
 
         for worksheet in &mut self.worksheets {
             if !worksheet.tables.is_empty() {

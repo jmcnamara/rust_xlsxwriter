@@ -117,6 +117,11 @@ documentation and generally show how an individual function works.
   left-to-right to right-to-left, as required by some middle eastern
   versions of Excel.
 
+* app_tables.rs - Example of how to add tables to a worksheet using the
+  rust_xlsxwriter library. Tables in Excel are used to group rows and
+  columns of data into a single structure that can be referenced in a
+  formula or formatted collectively.
+
 * app_tutorial1.rs - A simple program to write some data to an Excel
   spreadsheet using rust_xlsxwriter. Part 1 of a tutorial.
 
@@ -531,6 +536,49 @@ documentation and generally show how an individual function works.
 
 * doc_properties_custom.rs - An example of setting custom/user defined
   workbook document properties.
+
+* doc_table_set_autofilter.rs - Example of turning off the autofilter in a
+  worksheet table.
+
+* doc_table_set_banded_columns.rs - Example of turning on the banded
+  columns property in a worksheet table. These are normally off by default,
+
+* doc_table_set_banded_rows.rs - Example of turning off the banded rows
+  property in a worksheet table. These are normally on by default,
+
+* doc_table_set_columns.rs - Example of creating a worksheet table.
+
+* doc_table_set_first_column.rs - Example of turning on the first column
+  highlighting property in a worksheet table. This is normally off by
+  default.
+
+* doc_table_set_header_row.rs - Example of turning off the default header
+  on a worksheet table.
+
+* doc_table_set_header_row2.rs - Example of adding a worksheet table with a
+  default header.
+
+* doc_table_set_header_row3.rs - Example of adding a worksheet table with a
+  user defined header captions.
+
+* doc_table_set_last_column.rs - Example of turning on the last column
+  highlighting property in a worksheet table. This is normally off by
+  default.
+
+* doc_table_set_name.rs - Example of setting the name of a worksheet table.
+
+* doc_table_set_style.rs - Example of setting the style of a worksheet
+  table.
+
+* doc_table_set_total_row.rs - Example of turning on the "totals" row at
+  the bottom of a worksheet table. Note, this just turns on the total run
+  it doesn't add captions or subtotal functions.
+
+* doc_table_set_total_row2.rs - Example of turning on the "totals" row at
+  the bottom of a worksheet table with captions and subtotal functions.
+
+* doc_tablecolumn_set_formula.rs - Example of adding a formula to a column
+  in a worksheet table.
 
 * doc_url_intro1.rs - Demonstrates writing a url to a worksheet.
 

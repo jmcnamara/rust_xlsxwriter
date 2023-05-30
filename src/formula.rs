@@ -905,7 +905,27 @@ impl Formula {
         self
     }
 
-    /// TODO
+    /// Enable backward compatible formulas in table.
+    ///
+    /// Worksheet tables in Excel (see [`Table`](crate::Table)) use "Structured
+    /// References" in formulas like this:
+    ///
+    /// ```text
+    ///    "SUM(Table1[@[Column1]:[Column3]])"
+    /// ```
+    ///
+    /// The `@` is a shorthand for the more explicit, but more verbose, `[#This
+    /// Row],` syntax. Excel automatically converts the structured row reference
+    /// to the shorter version if the table has more than one row. However, it
+    /// **stores** the formula in the longer `[#This Row],` syntax so
+    /// `rust_xlsxwriter` must also store it in that format.
+    ///
+    /// Setting the `use_table_functions()` property will ensure this conversion
+    /// is made automatically when writing the formula. In addition, the
+    /// conversion is done automatically if you add a column formula to a table
+    /// that is passed to
+    /// [`worksheet.add_table()`](crate::Worksheet::add_table()).
+    ///
     pub fn use_table_functions(mut self) -> Formula {
         self.expand_table_functions = true;
         self
