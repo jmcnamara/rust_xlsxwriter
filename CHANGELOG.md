@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [0.40.0] - 2023-05-xx - WIP
+## [0.40.0] - 2023-05-301
+
+- Added support for worksheet tables. See [`Table`] and the
+  [`worksheet.add_table()`] method.
 
 - Added support for the `bool` type in the generic [`worksheet.write()`] method.
+
+[`Table`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Table.html
+[`worksheet.add_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.add_table
 
 
 ## [0.39.0] - 2023-05-23

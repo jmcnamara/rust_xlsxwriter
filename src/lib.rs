@@ -95,6 +95,7 @@
 //! - Rich multi-format strings.
 //! - Defined names.
 //! - Autofilters.
+//! - Worksheet Tables.
 //!
 //! `rust_xlsxwriter` is under active development and new features will be added
 //! frequently. See the [rust_xlsxwriter GitHub] for details.

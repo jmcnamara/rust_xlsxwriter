@@ -89,6 +89,7 @@ features are:
 - Rich multi-format strings.
 - Defined names.
 - Autofilters.
+- Worksheet Tables.
 
 `rust_xlsxwriter` is under active development and new features will be added
 frequently.
@@ -108,9 +109,9 @@ frequently.
 
 Recent changes:
 
+- Added support for worksheet tables.
 - Added more generic interfaces and methods.
 - Added Chart axis and series methods.
-- Added Chart font formatting support.
 
 See the full [Release Notes and Changelog].
 
