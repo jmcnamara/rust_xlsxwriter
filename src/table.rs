@@ -1634,7 +1634,7 @@ impl TableColumn {
 
     /// Set the formula for a table column.
     ///
-    /// It is a common usecase to add a summation column as the last column in a
+    /// It is a common use case to add a summation column as the last column in a
     /// table. These are constructed with a special class of Excel formulas
     /// called [Structured References] which can refer to an entire table or
     /// rows or columns of data within the table. For example to sum the data

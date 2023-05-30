@@ -7389,29 +7389,43 @@ impl Worksheet {
 
     /// Autofit the worksheet column widths, approximately.
     ///
-    /// Simulate column auto-fitting based on the data in the worksheet columns.
-    ///
     /// There is no option in the xlsx file format that can be used to say
     /// "autofit columns on loading". Auto-fitting of columns is something that
     /// Excel does at runtime when it has access to all of the worksheet
     /// information as well as the Windows functions for calculating display
     /// areas based on fonts and formatting.
     ///
-    /// As such `worksheet.autofit()` simulates this behavior by calculating
-    /// string widths using metrics taken from Excel. This isn't perfect but for
-    /// most cases it should be sufficient and if not you can set your own
-    /// widths, see below.
+    /// The `rust_xlsxwriter` library doesn't have access to the Windows
+    /// functions that Excel has so it simulates autofit by calculating string
+    /// widths using metrics taken from Excel.
     ///
-    /// The `autofit()` method ignores columns that already have an explicit
-    /// column width set via
+    /// As such, there are some limitations to be aware of when using this
+    /// method:
+    ///
+    /// - It is a simulated method and may not be accurate in all cases.
+    /// - It is based on the default Excel font type and size of Calibri 11. It
+    ///   will not give accurate results for other fonts or font sizes.
+    /// - It doesn't take number or date formatting into account, although it
+    ///   may try to in a later version.
+    /// - It iterates over all the cells in a worksheet that have been populated
+    ///   with data and performs a length calculation on each one, so it can
+    ///   have a performance overhead for larger worksheets. See Note 1 below.
+    ///
+    /// This isn't perfect but for most cases it should be sufficient and if not
+    /// you can adjust or prompt it by setting your own column widths via
     /// [`set_column_width()`](Worksheet::set_column_width()) or
-    /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()) if
-    /// it is greater than the calculate maximum width. Alternatively, calling
-    /// these methods after `autofit()` will override the autofit value.
+    /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()).
     ///
-    /// **Note**, `autofit()` iterates through all the cells in a worksheet that
-    /// have been populated with data and performs a length calculation on each
-    /// one, so it can have a performance overhead for larger worksheets.
+    /// The `autofit()` method ignores columns that have already been explicitly
+    /// set if the width is greater than the calculated autofit width.
+    /// Alternatively, setting the column width explicitly after calling
+    /// `autofit()` will override the autofit value.
+    ///
+    /// **Note 1**: As a performance optimization when dealing with large data
+    /// sets you can call `autofit()` after writing the first 50 or 100 rows.
+    /// This will produce a reasonably accurate autofit for the first visible
+    /// page of data without incurring the performance penalty of autofitting
+    /// thousands of non-visible rows.
     ///
     /// # Examples
     ///
