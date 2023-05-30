@@ -6,9 +6,8 @@
 
 #![warn(missing_docs)]
 
-use std::fmt;
-
 use regex::Regex;
+use std::fmt;
 
 use crate::{
     drawing::{DrawingObject, DrawingType},

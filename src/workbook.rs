@@ -6,7 +6,7 @@
 
 #![warn(missing_docs)]
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::{Cursor, Seek, Write};
 use std::mem;
 use std::path::Path;
@@ -606,6 +606,8 @@ impl Workbook {
     ///
     /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
     ///   the workbook.
+    /// * [`XlsxError::TableNameReused`] - Worksheet Table name is already in
+    ///   use in the workbook.
     /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
     ///   the xlsx file, or its sub-files.
     /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
@@ -1108,7 +1110,7 @@ impl Workbook {
         self.prepare_format_properties();
 
         // Prepare worksheet tables.
-        self.prepare_tables();
+        self.prepare_tables()?;
 
         // Collect workbook level metadata to help generate the xlsx file.
         let mut package_options = PackagerOptions::new();
@@ -1176,17 +1178,31 @@ impl Workbook {
         }
     }
 
-    // Set a unique table id for each table and also set the rel linkages.
-    fn prepare_tables(&mut self) {
+    // Prepare and check each table in the workbook.
+    fn prepare_tables(&mut self) -> Result<(), XlsxError> {
         let mut table_id = 1;
+        let mut seen_table_names = HashSet::new();
 
-        // TODO check for unique table name.
-
+        // Set a unique table id and table name and also set the .rel file
+        // linkages.
         for worksheet in &mut self.worksheets {
             if !worksheet.tables.is_empty() {
                 table_id = worksheet.prepare_worksheet_tables(table_id);
             }
         }
+
+        // Check for duplicate table names.
+        for worksheet in &self.worksheets {
+            for table in &worksheet.tables {
+                if seen_table_names.contains(&table.name.to_lowercase()) {
+                    return Err(XlsxError::TableNameReused(table.name.to_string()));
+                }
+
+                seen_table_names.insert(table.name.to_lowercase());
+            }
+        }
+
+        Ok(())
     }
 
     // Add worksheet number/string cache data to chart series. This isn't
@@ -1805,5 +1821,34 @@ mod tests {
             let result = workbook.define_name(name, "");
             assert!(matches!(result, Err(XlsxError::ParameterError(_))));
         }
+    }
+
+    #[test]
+    fn duplicate_worksheets() {
+        let mut workbook = Workbook::default();
+
+        let _ = workbook.add_worksheet().set_name("Foo").unwrap();
+        let _ = workbook.add_worksheet().set_name("Foo").unwrap();
+
+        let result = workbook.set_package_options(crate::workbook::PackagerOptions::new());
+        assert!(matches!(result, Err(XlsxError::SheetnameReused(_))));
+    }
+
+    #[test]
+    fn duplicate_tables() {
+        let mut workbook = Workbook::default();
+        let worksheet = workbook.add_worksheet();
+
+        let mut table = crate::Table::new();
+
+        table.set_name("Foo");
+        worksheet.add_table(0, 0, 9, 9, &table).unwrap();
+
+        table.set_name("foo");
+        worksheet.add_table(10, 10, 19, 19, &table).unwrap();
+
+        let result = workbook.prepare_tables();
+
+        assert!(matches!(result, Err(XlsxError::TableNameReused(_))));
     }
 }

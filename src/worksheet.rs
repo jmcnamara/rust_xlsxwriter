@@ -292,12 +292,7 @@ impl Worksheet {
         let xf_indices = HashMap::from([(Format::default(), 0)]);
 
         // Initialize the min and max dimensions with their opposite value.
-        let dimensions = CellRange {
-            first_row: ROW_MAX,
-            first_col: COL_MAX,
-            last_row: 0,
-            last_col: 0,
-        };
+        let dimensions = CellRange::default();
 
         let panes = Panes {
             freeze_cell: (0, 0),
@@ -3066,12 +3061,7 @@ impl Worksheet {
         }
 
         // Create a cell range for storage and range testing.
-        let cell_range = CellRange {
-            first_row,
-            first_col,
-            last_row,
-            last_col,
-        };
+        let cell_range = CellRange::new(first_row, first_col, last_row, last_col);
 
         // Check if the merged range overlaps any previous merged range. This is
         // a major error in Excel. Note, the ranges are stored in a separate Vec
@@ -3388,7 +3378,7 @@ impl Worksheet {
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     /// * [`XlsxError::ChartError`] - A general error that is raised when a
-    /// chart parameter is incorrect or a chart is configured incorrectly.
+    ///   chart parameter is incorrect or a chart is configured incorrectly.
     ///
     /// # Examples
     ///
@@ -4492,7 +4482,8 @@ impl Worksheet {
     ///   worksheet limits.
     /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
-    /// * TODO
+    /// * [`XlsxError::TableError`] - A general error that is raised when a
+    ///   table parameter is incorrect or a table is configured incorrectly.
     ///
     /// # Examples
     ///
@@ -4590,10 +4581,7 @@ impl Worksheet {
         }
 
         let mut table = table.clone();
-        table.first_row = first_row;
-        table.first_col = first_col;
-        table.last_row = last_row;
-        table.last_col = last_col;
+        table.cell_range = CellRange::new(first_row, first_col, last_row, last_col);
         table.initialize_columns()?;
 
         // Write the worksheet information required for each column.
@@ -4624,12 +4612,7 @@ impl Worksheet {
         }
 
         // Create a cell range for storage and range testing.
-        let cell_range = CellRange {
-            first_row,
-            first_col,
-            last_row,
-            last_col,
-        };
+        let cell_range = CellRange::new(first_row, first_col, last_row, last_col);
 
         // Check if the table range overlaps any previous table range. This is a
         // major error in Excel. Note, the ranges are stored in a separate Vec
@@ -8647,6 +8630,9 @@ impl Worksheet {
     pub(crate) fn prepare_worksheet_tables(&mut self, mut table_id: u32) -> u32 {
         for table in &mut self.tables {
             table.index = table_id;
+            if table.name.is_empty() {
+                table.name = format!("Table{table_id}");
+            }
 
             self.table_relationships.push((
                 "table".to_string(),
@@ -10677,20 +10663,35 @@ fn round_to_emus(dimension: f64) -> f64 {
     (dimension * 9525.0).round()
 }
 
+// Struct to contain a cell range with some utility debug and other methods.
 #[derive(Clone)]
-struct CellRange {
-    first_row: RowNum,
-    first_col: ColNum,
-    last_row: RowNum,
-    last_col: ColNum,
+pub(crate) struct CellRange {
+    pub(crate) first_row: RowNum,
+    pub(crate) first_col: ColNum,
+    pub(crate) last_row: RowNum,
+    pub(crate) last_col: ColNum,
 }
 
 impl CellRange {
-    fn to_range_string(&self) -> String {
+    pub(crate) fn new(
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+    ) -> CellRange {
+        CellRange {
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+        }
+    }
+
+    pub(crate) fn to_range_string(&self) -> String {
         utility::cell_range(self.first_row, self.first_col, self.last_row, self.last_col)
     }
 
-    fn to_error_string(&self) -> String {
+    pub(crate) fn to_error_string(&self) -> String {
         format!(
             "({}, {}, {}, {}) / {}",
             self.first_row,
@@ -10699,6 +10700,17 @@ impl CellRange {
             self.last_col,
             utility::cell_range(self.first_row, self.first_col, self.last_row, self.last_col)
         )
+    }
+}
+
+impl Default for CellRange {
+    fn default() -> Self {
+        CellRange {
+            first_row: ROW_MAX,
+            first_col: COL_MAX,
+            last_row: 0,
+            last_col: 0,
+        }
     }
 }
 

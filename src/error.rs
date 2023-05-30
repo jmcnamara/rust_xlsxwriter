@@ -75,6 +75,9 @@ pub enum XlsxError {
     /// table is configured incorrectly.
     TableError(String),
 
+    /// Table name is already in use in the workbook.
+    TableNameReused(String),
+
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -181,6 +184,11 @@ impl fmt::Display for XlsxError {
             XlsxError::TableError(error) => {
                 write!(f, "Table error: \"{error}\".")
             }
+
+            XlsxError::TableNameReused(name) => write!(
+                f,
+                "Table name \"{name}\" has already been used in this workbook.",
+            ),
 
             XlsxError::IoError(error) => {
                 write!(f, "{error}")

@@ -6,13 +6,9 @@
 
 #![warn(missing_docs)]
 
-use std::fmt;
+use std::{collections::HashSet, fmt};
 
-use crate::{
-    utility::{self, ToXmlBoolean},
-    xmlwriter::XMLWriter,
-    ColNum, Formula, RowNum, XlsxError, COL_MAX, ROW_MAX,
-};
+use crate::{utility::ToXmlBoolean, xmlwriter::XMLWriter, CellRange, Formula, RowNum, XlsxError};
 
 /// A struct to represent a worksheet Table.
 ///
@@ -120,10 +116,7 @@ pub struct Table {
     pub(crate) name: String,
     pub(crate) style: TableStyle,
 
-    pub(crate) first_row: RowNum,
-    pub(crate) first_col: ColNum,
-    pub(crate) last_row: RowNum,
-    pub(crate) last_col: ColNum,
+    pub(crate) cell_range: CellRange,
 
     pub(crate) show_header_row: bool,
     pub(crate) show_total_row: bool,
@@ -210,10 +203,7 @@ impl Table {
             index: 0,
             name: String::new(),
             style: TableStyle::Medium9,
-            first_row: ROW_MAX,
-            first_col: COL_MAX,
-            last_row: 0,
-            last_col: 0,
+            cell_range: CellRange::default(),
             show_first_column: false,
             show_last_column: false,
             show_banded_rows: true,
@@ -1161,7 +1151,8 @@ impl Table {
 
     // Truncate or extend (with defaults) the table columns.
     pub(crate) fn initialize_columns(&mut self) -> Result<(), XlsxError> {
-        let num_columns = self.last_col - self.first_col + 1;
+        let mut seen_column_names = HashSet::new();
+        let num_columns = self.cell_range.last_col - self.cell_range.first_col + 1;
 
         self.columns
             .resize_with(num_columns as usize, TableColumn::default);
@@ -1170,11 +1161,16 @@ impl Table {
             if column.name.is_empty() {
                 column.name = format!("Column{}", index + 1);
             }
-        }
 
-        // TODO add check for duplicate column names.
-        if self.columns[0].name == "TODO" {
-            return Err(XlsxError::TableError(String::from("Todo")));
+            if seen_column_names.contains(&column.name.to_lowercase()) {
+                return Err(XlsxError::TableError(format!(
+                    "Column name '{}' already exists in Table at {}",
+                    column.name,
+                    self.cell_range.to_error_string()
+                )));
+            }
+
+            seen_column_names.insert(column.name.to_lowercase().clone());
         }
 
         Ok(())
@@ -1183,18 +1179,18 @@ impl Table {
     // Get the first row that can be used to write data.
     pub(crate) fn first_data_row(&self) -> RowNum {
         if self.show_header_row {
-            self.first_row + 1
+            self.cell_range.first_row + 1
         } else {
-            self.first_row
+            self.cell_range.first_row
         }
     }
 
     // Get the last row that can be used to write data.
     pub(crate) fn last_data_row(&self) -> RowNum {
         if self.show_total_row {
-            self.last_row - 1
+            self.cell_range.last_row - 1
         } else {
-            self.last_row
+            self.cell_range.last_row
         }
     }
 
@@ -1227,8 +1223,7 @@ impl Table {
     // Write the <table> element.
     fn write_table(&mut self) {
         let schema = "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string();
-        let range =
-            utility::cell_range(self.first_row, self.first_col, self.last_row, self.last_col);
+        let range = self.cell_range.to_range_string();
         let name = if self.name.is_empty() {
             format!("Table{}", self.index)
         } else {
@@ -1258,15 +1253,13 @@ impl Table {
 
     // Write the <autoFilter> element.
     fn write_auto_filter(&mut self) {
-        let mut last_row = self.last_row;
+        let mut autofilter_range = self.cell_range.clone();
+
         if self.show_total_row {
-            last_row -= 1;
+            autofilter_range.last_row -= 1;
         }
 
-        let attributes = vec![(
-            "ref",
-            utility::cell_range(self.first_row, self.first_col, last_row, self.last_col),
-        )];
+        let attributes = vec![("ref", autofilter_range.to_range_string())];
 
         self.writer.xml_empty_tag("autoFilter", &attributes);
     }
@@ -2202,16 +2195,16 @@ mod tests {
 
     use crate::table::Table;
     use crate::test_functions::xml_to_vec;
-    use crate::{TableColumn, TableFunction};
+    use crate::{TableColumn, TableFunction, XlsxError};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_row_methods() {
         let mut table = Table::new();
-        table.first_row = 0;
-        table.first_col = 0;
-        table.last_row = 9;
-        table.last_col = 4;
+        table.cell_range.first_row = 0;
+        table.cell_range.first_col = 0;
+        table.cell_range.last_row = 9;
+        table.cell_range.last_col = 4;
 
         assert_eq!(1, table.first_data_row());
         assert_eq!(9, table.last_data_row());
@@ -2226,13 +2219,49 @@ mod tests {
     }
 
     #[test]
+    fn test_column_validation() {
+        // Test the table column validation and checks.
+        let mut table = Table::new();
+
+        table.cell_range.first_row = 0;
+        table.cell_range.first_col = 0;
+        table.cell_range.last_row = 8;
+        table.cell_range.last_col = 4;
+        table.index = 1;
+
+        let columns = vec![
+            TableColumn::new().set_header("Foo"),
+            TableColumn::default(),
+            TableColumn::default(),
+            TableColumn::new().set_header("foo"), // Lowercase duplicate.
+        ];
+
+        table.set_columns(&columns);
+        let result = table.initialize_columns();
+
+        assert!(matches!(result, Err(XlsxError::TableError(_))));
+
+        let columns = vec![
+            TableColumn::default(),
+            TableColumn::default(),
+            TableColumn::default(),
+            TableColumn::new().set_header("column1"), // Lowercase duplicate.
+        ];
+
+        table.set_columns(&columns);
+        let result = table.initialize_columns();
+
+        assert!(matches!(result, Err(XlsxError::TableError(_))));
+    }
+
+    #[test]
     fn test_assemble1() {
         let mut table = Table::new();
 
-        table.first_row = 2;
-        table.first_col = 2;
-        table.last_row = 12;
-        table.last_col = 5;
+        table.cell_range.first_row = 2;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 12;
+        table.cell_range.last_col = 5;
         table.index = 1;
 
         table.initialize_columns().unwrap();
@@ -2264,10 +2293,10 @@ mod tests {
     fn test_assemble2() {
         let mut table = Table::new();
 
-        table.first_row = 3;
-        table.first_col = 3;
-        table.last_row = 14;
-        table.last_col = 8;
+        table.cell_range.first_row = 3;
+        table.cell_range.first_col = 3;
+        table.cell_range.last_row = 14;
+        table.cell_range.last_col = 8;
         table.index = 2;
 
         table.set_style(crate::TableStyle::Light17);
@@ -2303,10 +2332,10 @@ mod tests {
     fn test_assemble3() {
         let mut table = Table::new();
 
-        table.first_row = 4;
-        table.first_col = 2;
-        table.last_row = 15;
-        table.last_col = 3;
+        table.cell_range.first_row = 4;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 15;
+        table.cell_range.last_col = 3;
         table.index = 1;
 
         table.set_first_column(true);
@@ -2341,10 +2370,10 @@ mod tests {
     fn test_assemble4() {
         let mut table = Table::new();
 
-        table.first_row = 2;
-        table.first_col = 2;
-        table.last_row = 12;
-        table.last_col = 5;
+        table.cell_range.first_row = 2;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 12;
+        table.cell_range.last_col = 5;
         table.index = 1;
 
         table.set_autofilter(false);
@@ -2377,10 +2406,10 @@ mod tests {
     fn test_assemble5() {
         let mut table = Table::new();
 
-        table.first_row = 3;
-        table.first_col = 2;
-        table.last_row = 12;
-        table.last_col = 5;
+        table.cell_range.first_row = 3;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 12;
+        table.cell_range.last_col = 5;
         table.index = 1;
 
         table.set_header_row(false);
@@ -2413,10 +2442,10 @@ mod tests {
     fn test_assemble6() {
         let mut table = Table::new();
 
-        table.first_row = 2;
-        table.first_col = 2;
-        table.last_row = 12;
-        table.last_col = 5;
+        table.cell_range.first_row = 2;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 12;
+        table.cell_range.last_col = 5;
         table.index = 1;
 
         let columns = vec![
@@ -2456,10 +2485,10 @@ mod tests {
         // truncated to the actual number of columns.
         let mut table = Table::new();
 
-        table.first_row = 2;
-        table.first_col = 2;
-        table.last_row = 12;
-        table.last_col = 5;
+        table.cell_range.first_row = 2;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 12;
+        table.cell_range.last_col = 5;
         table.index = 1;
 
         let columns = vec![
@@ -2485,10 +2514,10 @@ mod tests {
     fn test_assemble7() {
         let mut table = Table::new();
 
-        table.first_row = 2;
-        table.first_col = 2;
-        table.last_row = 13;
-        table.last_col = 5;
+        table.cell_range.first_row = 2;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 13;
+        table.cell_range.last_col = 5;
         table.index = 1;
 
         table.set_total_row(true);
@@ -2522,10 +2551,10 @@ mod tests {
     fn test_assemble8() {
         let mut table = Table::new();
 
-        table.first_row = 2;
-        table.first_col = 2;
-        table.last_row = 13;
-        table.last_col = 5;
+        table.cell_range.first_row = 2;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 13;
+        table.cell_range.last_col = 5;
         table.index = 1;
 
         let columns = vec![
@@ -2567,10 +2596,10 @@ mod tests {
     fn test_assemble9() {
         let mut table = Table::new();
 
-        table.first_row = 1;
-        table.first_col = 1;
-        table.last_row = 7;
-        table.last_col = 10;
+        table.cell_range.first_row = 1;
+        table.cell_range.first_col = 1;
+        table.cell_range.last_row = 7;
+        table.cell_range.last_col = 10;
         table.index = 1;
 
         let columns = vec![
@@ -2626,10 +2655,10 @@ mod tests {
     fn test_assemble10() {
         let mut table = Table::new();
 
-        table.first_row = 1;
-        table.first_col = 2;
-        table.last_row = 12;
-        table.last_col = 5;
+        table.cell_range.first_row = 1;
+        table.cell_range.first_col = 2;
+        table.cell_range.last_row = 12;
+        table.cell_range.last_col = 5;
         table.index = 1;
 
         table.set_name("MyTable");
