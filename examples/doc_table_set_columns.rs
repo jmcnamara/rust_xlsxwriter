@@ -45,7 +45,7 @@ fn main() -> Result<(), XlsxError> {
             .set_header("Quarter 2")
             .set_total_function(TableFunction::Sum),
         TableColumn::new()
-            .set_header("Quarter 2")
+            .set_header("Quarter 3")
             .set_total_function(TableFunction::Sum),
         TableColumn::new()
             .set_header("Quarter 4")
