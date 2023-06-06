@@ -5142,11 +5142,10 @@ impl ChartRange {
             last_col = first_col;
         }
 
-        let sheet_name: String = if sheet_name.starts_with('\'') && sheet_name.ends_with('\'') {
-            sheet_name[1..sheet_name.len() - 1].to_string()
-        } else {
-            sheet_name.to_string()
-        };
+        let sheet_name: String = sheet_name
+            .strip_prefix('\'').unwrap_or(sheet_name)
+            .strip_suffix('\'').unwrap_or(sheet_name)
+            .to_string();
 
         ChartRange {
             sheet_name,
