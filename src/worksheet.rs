@@ -122,7 +122,7 @@ const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 /// ```
 pub struct Worksheet {
     pub(crate) writer: XMLWriter,
-    pub(crate) name: String,
+    pub(crate) name: Option<Name>,
     pub(crate) active: bool,
     pub(crate) selected: bool,
     pub(crate) hidden: bool,
@@ -301,7 +301,7 @@ impl Worksheet {
 
         Worksheet {
             writer,
-            name: String::new(),
+            name: None,
             active: false,
             selected: false,
             hidden: false,
@@ -409,6 +409,8 @@ impl Worksheet {
     ///   cannot contain invalid characters: `[ ] : * ? / \`
     /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name
     ///   cannot start or end with an apostrophe.
+    /// * [`XlsxError::SheetnameReserved`] - Worksheet name "History" is
+    ///   disallowed
     ///
     /// # Examples
     ///
@@ -456,30 +458,7 @@ impl Worksheet {
     ///     https://support.office.com/en-ie/article/rename-a-worksheet-3f1f7148-ee83-404d-8ef0-9ff99fbad1f9
     ///
     pub fn set_name(&mut self, name: impl Into<String>) -> Result<&mut Worksheet, XlsxError> {
-        let name = name.into();
-
-        // Check that the sheet name isn't blank.
-        if name.is_empty() {
-            return Err(XlsxError::SheetnameCannotBeBlank);
-        }
-
-        // Check that sheet sheetname is <= 31, an Excel limit.
-        if name.chars().count() > 31 {
-            return Err(XlsxError::SheetnameLengthExceeded(name));
-        }
-
-        // Check that sheetname doesn't contain any invalid characters.
-        if name.contains(['*', '?', ':', '[', ']', '\\', '/']) {
-            return Err(XlsxError::SheetnameContainsInvalidCharacter(name));
-        }
-
-        // Check that sheetname doesn't start or end with an apostrophe.
-        if name.starts_with('\'') || name.ends_with('\'') {
-            return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(name));
-        }
-
-        self.name = name;
-
+        self.name = Some(Name::new(name.into())?);
         Ok(self)
     }
 
@@ -521,7 +500,9 @@ impl Worksheet {
     /// ```
     ///
     pub fn name(&self) -> String {
-        self.name.clone()
+        self.name.as_ref()
+            .map(|x| x.to_string())
+            .unwrap_or_default()
     }
 
     /// Write generic data to a cell.
@@ -10671,6 +10652,62 @@ impl IntoExcelData for Url {
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
+
+/// Pre-validated worksheet name
+// This should NOT derive Default, as an Empty String is an invalid sheet name!
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
+pub(crate) struct Name(String);
+impl Name {
+    pub fn new<S: AsRef<str>>(s: S) -> Result<Name, XlsxError> {
+        let name = s.as_ref();  
+        // Check that the sheet name isn't blank.
+        if name.is_empty() {
+            return Err(XlsxError::SheetnameCannotBeBlank);
+        }
+    
+        // Check that sheet sheetname is <= 31, an Excel limit.
+        if name.chars().count() > 31 {
+            return Err(XlsxError::SheetnameLengthExceeded(name.to_string()));
+        }
+    
+        // Check that sheetname doesn't contain any invalid characters.
+        if name.contains(['*', '?', ':', '[', ']', '\\', '/']) {
+            return Err(XlsxError::SheetnameContainsInvalidCharacter(name.to_string()));
+        }
+    
+        // Check that sheetname doesn't start or end with an apostrophe.
+        if name.starts_with('\'') || name.ends_with('\'') {
+            return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(name.to_string()));
+        }
+
+        // Check that it's not named "History" as that name is reserved.
+        if name == "History" {
+            return Err(XlsxError::SheetnameReserved);
+        }
+        Ok(Self(name.to_string()))
+    }
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+    /// Returns the name properly quoted if it's applicable.
+    /// 
+    /// This respects existing quotes and characters of interest inside the sheet name
+    pub(crate) fn properly_quoted(&self) -> String {
+        let double_quoted = self.0.replace('\'', "''");
+        // self cannot be quoted (due to the checks in `new`), so this is enough to check
+        if double_quoted.contains([' ','!','\'','$',',',';','-','{','}']) {
+            format!("'{}'", self.0.replace('\'', "''"))
+        } else {
+            self.0.clone()
+        }
+    }
+}
+
+impl ToString for Name {
+    fn to_string(&self) -> String {
+        self.0.clone()
+    }
+}
 
 // Round to the closest integer number of emu units.
 fn round_to_emus(dimension: f64) -> f64 {

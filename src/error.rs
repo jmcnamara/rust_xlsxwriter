@@ -38,6 +38,9 @@ pub enum XlsxError {
     /// Worksheet name cannot start or end with an apostrophe.
     SheetnameStartsOrEndsWithApostrophe(String),
 
+    /// Worksheet name cannot be "History"
+    SheetnameReserved,
+
     /// String exceeds Excel's limit of 32,767 characters.
     MaxStringLengthExceeded,
 
@@ -132,6 +135,13 @@ impl fmt::Display for XlsxError {
                 write!(
                     f,
                     "Worksheet name \"{name}\" cannot start or end with an apostrophe.",
+                )
+            }
+            
+            XlsxError::SheetnameReserved => {
+                write!(
+                    f,
+                    "\"History\" is a reserved worksheet name"
                 )
             }
 

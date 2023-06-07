@@ -410,8 +410,10 @@ impl Workbook {
     ///
     pub fn worksheet_from_name(&mut self, sheetname: &str) -> Result<&mut Worksheet, XlsxError> {
         for (index, worksheet) in self.worksheets.iter_mut().enumerate() {
-            if sheetname == worksheet.name {
-                return self.worksheet_from_index(index);
+            if let Some(worksheet_name) = &worksheet.name {
+                if worksheet_name.as_str() == sheetname {
+                    return self.worksheet_from_index(index);
+                }
             }
         }
 
@@ -1484,16 +1486,16 @@ impl Workbook {
         // Iterate over the worksheets to capture workbook and update the
         // package options metadata.
         for (sheet_index, worksheet) in self.worksheets.iter().enumerate() {
-            let sheet_name = worksheet.name.clone();
-            let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
-            sheet_names.insert(sheet_name.clone(), sheet_index as u16);
+            let sheet_name = worksheet.name.as_ref().unwrap();
+            let quoted_sheet_name = sheet_name.properly_quoted();
+            sheet_names.insert(sheet_name.to_string(), sheet_index as u16);
 
             // Check for duplicate sheet names, which aren't allowed by Excel.
-            if package_options.worksheet_names.contains(&sheet_name) {
-                return Err(XlsxError::SheetnameReused(sheet_name));
+            if package_options.worksheet_names.contains(&sheet_name.to_string()) {
+                return Err(XlsxError::SheetnameReused(sheet_name.to_string()));
             }
 
-            package_options.worksheet_names.push(sheet_name.clone());
+            package_options.worksheet_names.push(sheet_name.to_string());
 
             package_options.properties = self.properties.clone();
 
@@ -1706,7 +1708,7 @@ impl Workbook {
 
         for (index, data) in worksheet_data.iter().enumerate() {
             // Write the sheet element.
-            self.write_sheet(&data.0, data.1, (index + 1) as u16);
+            self.write_sheet(data.0.as_ref().map(|x| x.as_str()).unwrap_or_default(), data.1, (index + 1) as u16);
         }
 
         self.writer.xml_end_tag("sheets");
