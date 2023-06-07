@@ -13,7 +13,7 @@ use crate::{
     drawing::{DrawingObject, DrawingType},
     utility::{self, ToXmlBoolean},
     xmlwriter::XMLWriter,
-    ColNum, Color, IntoColor, ObjectMovement, RowNum, XlsxError, COL_MAX, ROW_MAX,
+    ColNum, Color, IntoColor, ObjectMovement, RowNum, XlsxError, COL_MAX, ROW_MAX, Name,
 };
 
 #[derive(Clone)]
@@ -5116,37 +5116,40 @@ impl ChartRange {
 
     // Create a new range from an Excel range formula.
     pub(crate) fn new_from_string(range_string: &str) -> ChartRange {
+        /// Only remove apostrophes. Everything else is handled by `Name::new()`
+        fn remove_apostrophes(s: &str) -> &str {
+            s.strip_prefix('\'')
+                // This makes sure the apostrophe is only removed on both ends at once
+                .and_then(|no_front| no_front.strip_suffix('\''))
+                .unwrap_or(s)
+        }
         lazy_static! {
             static ref CHART_CELL: Regex = Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+)").unwrap();
             static ref CHART_RANGE: Regex =
                 Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+):\$?(\w+)\$?(\d+)").unwrap();
         }
 
-        let mut sheet_name = "";
+        let mut sheet_name = None;
         let mut first_row = 0;
         let mut first_col = 0;
         let mut last_row = 0;
         let mut last_col = 0;
 
         if let Some(caps) = CHART_RANGE.captures(range_string) {
-            sheet_name = caps.get(1).unwrap().as_str();
+            sheet_name = caps.get(1).and_then(|x| Name::new(remove_apostrophes(x.as_str())).ok());
             first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
             last_row = caps.get(5).unwrap().as_str().parse::<u32>().unwrap() - 1;
             first_col = utility::name_to_col(caps.get(2).unwrap().as_str());
             last_col = utility::name_to_col(caps.get(4).unwrap().as_str());
         } else if let Some(caps) = CHART_CELL.captures(range_string) {
-            sheet_name = caps.get(1).unwrap().as_str();
+            sheet_name = caps.get(1).and_then(|x| Name::new(remove_apostrophes(x.as_str())).ok());
             first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
             first_col = utility::name_to_col(caps.get(2).unwrap().as_str());
             last_row = first_row;
             last_col = first_col;
         }
-
-        let sheet_name: String = sheet_name
-            .strip_prefix('\'').unwrap_or(sheet_name)
-            .strip_suffix('\'').unwrap_or(sheet_name)
-            .to_string();
-
+        
+        let sheet_name = sheet_name.map(|x| x.to_string()).unwrap_or_default();
         ChartRange {
             sheet_name,
             first_row,
