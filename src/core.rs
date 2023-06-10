@@ -4,7 +4,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use crate::{xmlwriter::XMLWriter, DocProperties};
+use crate::{xmlwriter::XMLWriter, DocProperties, ExcelDateTime};
 
 pub struct Core {
     pub(crate) writer: XMLWriter,
@@ -137,10 +137,7 @@ impl Core {
     // Write the <dcterms:created> element.
     fn write_dcterms_created(&mut self) {
         let attributes = [("xsi:type", "dcterms:W3CDTF")];
-        let datetime = self
-            .properties
-            .creation_time
-            .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+        let datetime = ExcelDateTime::unix_time_to_iso8601(self.properties.creation_time);
 
         self.writer
             .xml_data_element("dcterms:created", &datetime, &attributes);
@@ -149,11 +146,7 @@ impl Core {
     // Write the <dcterms:modified> element.
     fn write_dcterms_modified(&mut self) {
         let attributes = [("xsi:type", "dcterms:W3CDTF")];
-
-        let datetime = self
-            .properties
-            .creation_time
-            .to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
+        let datetime = ExcelDateTime::unix_time_to_iso8601(self.properties.creation_time);
 
         self.writer
             .xml_data_element("dcterms:modified", &datetime, &attributes);

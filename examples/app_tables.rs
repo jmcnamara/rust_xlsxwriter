@@ -319,7 +319,6 @@ fn main() -> Result<(), XlsxError> {
     // Write the table data.
     worksheet.write_column(3, 1, items)?;
     worksheet.write_row_matrix(3, 2, data)?;
-
     // Create and configure a new table.
     let mut table = Table::new();
     let columns = vec![

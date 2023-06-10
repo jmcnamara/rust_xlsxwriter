@@ -135,6 +135,7 @@ mod chart;
 mod content_types;
 mod core;
 mod custom;
+mod datetime;
 mod drawing;
 mod error;
 mod filter;
@@ -163,6 +164,7 @@ mod test_functions;
 
 // Re-export the public APIs.
 pub use chart::*;
+pub use datetime::*;
 pub use error::*;
 pub use filter::*;
 pub use format::*;

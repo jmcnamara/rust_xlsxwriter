@@ -8,6 +8,8 @@
 
 use chrono::{DateTime, Utc};
 
+use crate::ExcelDateTime;
+
 /// The `DocProperties` struct is used to create an object to represent document
 /// metadata properties.
 ///
@@ -207,7 +209,7 @@ pub struct DocProperties {
     pub(crate) category: String,
     pub(crate) keywords: String,
     pub(crate) hyperlink_base: String,
-    pub(crate) creation_time: DateTime<Utc>,
+    pub(crate) creation_time: u64,
     pub(crate) custom_properties: Vec<CustomProperty>,
 }
 
@@ -231,7 +233,7 @@ impl DocProperties {
             category: String::new(),
             keywords: String::new(),
             hyperlink_base: String::new(),
-            creation_time: Utc::now(),
+            creation_time: ExcelDateTime::utc_now(),
             custom_properties: vec![],
         }
     }
@@ -401,8 +403,7 @@ impl DocProperties {
     ///     https://docs.rs/chrono/latest/chrono/struct.DateTime.html
     ///
     pub fn set_creation_datetime(mut self, create_time: &DateTime<Utc>) -> DocProperties {
-        self.creation_time = *create_time;
-
+        self.creation_time = create_time.timestamp() as u64;
         self
     }
 
