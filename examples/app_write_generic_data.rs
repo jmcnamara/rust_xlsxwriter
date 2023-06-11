@@ -66,7 +66,7 @@ impl IntoExcelData for UnixTime {
         let format = Format::new().set_num_format("yyyy-mm-dd");
 
         // Convert the Unix time to an Excel datetime.
-        let datetime = 25569.0 + (self.seconds / (24 * 60 * 60)) as f64;
+        let datetime = 25569.0 + (self.seconds as f64 / (24.0 * 60.0 * 60.0));
 
         // Write the date as a number with a format.
         worksheet.write_number_with_format(row, col, datetime, &format)
@@ -80,7 +80,7 @@ impl IntoExcelData for UnixTime {
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         // Convert the Unix time to an Excel datetime.
-        let datetime = 25569.0 + (self.seconds / (24 * 60 * 60)) as f64;
+        let datetime = 25569.0 + (self.seconds as f64 / (24.0 * 60.0 * 60.0));
 
         // Write the date with the user supplied format.
         worksheet.write_number_with_format(row, col, datetime, format)

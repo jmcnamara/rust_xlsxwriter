@@ -7,11 +7,6 @@
 #![warn(missing_docs)]
 use std::time::SystemTime;
 
-/// A struct to represent an Excel date and/or time.
-///
-/// TODO.
-pub struct ExcelDateTime {}
-
 const DAY_SECONDS: u64 = 24 * 60 * 60;
 const HOUR_SECONDS: u64 = 60 * 60;
 const MINUTE_SECONDS: u64 = 60;
@@ -20,32 +15,213 @@ const YEAR_DAYS_4: u64 = YEAR_DAYS * 4 + 1;
 const YEAR_DAYS_100: u64 = YEAR_DAYS * 100 + 25;
 const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 
+/// A struct to represent an Excel date and/or time.
+///
+/// TODO.
+#[allow(dead_code)] // todo
+pub struct ExcelDateTime {
+    year: u16,
+    month: u8,
+    day: u8,
+    hour: u16,
+    min: u8,
+    sec: f64,
+    is_1904_date: bool,
+    serial_datetime: Option<f64>,
+}
+
 impl ExcelDateTime {
     // -----------------------------------------------------------------------
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    /// Create a new `ExcelDateTime` struct instance.
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> ExcelDateTime {
-        ExcelDateTime {}
+    /// Create a `ExcelDateTime` instance from TODO.
+    pub fn from_ymd(year: u16, month: u8, day: u8) -> ExcelDateTime {
+        ExcelDateTime {
+            year,
+            month,
+            day,
+            ..ExcelDateTime::default()
+        }
     }
 
-    /// Convert a Unix time to a ISO8601 format date.
-    ///
-    /// Convert a Unix time (seconds from 1970) to a human readable date in
-    /// ISO8601 format.
-    ///
-    /// The calculation is deceptively tricky since simple division doesn't work
-    /// due to the 4/100/400 year leap day changes. The basic approach is to
-    /// divide the range into 400 year blocks, 100 year blocks, 4 year blocks
-    /// and 1 year block to calculate the year (relative to the epoch). The
-    /// remaining days and seconds are used to calculate the year day and time.
-    ///
-    /// Works in the range 1970-1-1 to 9999-12-31.
-    ///
-    /// Leap seconds and the time zone aren't taken into account.
-    ///
+    /// Create a `ExcelDateTime` instance from TODO.
+    pub fn from_hms_milli(hour: u16, min: u8, sec: u8, milli: u16) -> ExcelDateTime {
+        ExcelDateTime::default().and_hms_milli(hour, min, sec, milli)
+    }
+
+    /// Create a `ExcelDateTime` instance from TODO.
+    pub fn and_hms(mut self, hour: u16, min: u8, sec: impl Into<f64>) -> ExcelDateTime {
+        self.hour = hour;
+        self.min = min;
+        self.sec = sec.into();
+
+        self
+    }
+
+    /// Create a `ExcelDateTime` instance from TODO.
+    pub fn and_hms_milli(mut self, hour: u16, min: u8, sec: u8, milli: u16) -> ExcelDateTime {
+        let sec = f64::from(sec) + f64::from(milli) / 1000.0;
+
+        self.hour = hour;
+        self.min = min;
+        self.sec = sec;
+
+        self
+    }
+
+    /// Create a `ExcelDateTime` instance from TODO.
+    pub fn from_serial_datetime(datetime: impl Into<f64>) -> ExcelDateTime {
+        ExcelDateTime {
+            serial_datetime: Some(datetime.into()),
+            ..ExcelDateTime::default()
+        }
+    }
+
+    /// Create a `ExcelDateTime` instance from TODO.
+    #[allow(clippy::cast_precision_loss)]
+    pub fn from_timestamp(timestamp: i64) -> ExcelDateTime {
+        let days = (timestamp / (24 * 60 * 60)) as f64;
+        let time = ((timestamp % (24 * 60 * 60)) as f64) / (24.0 * 60.0 * 60.0);
+        let mut datetime = 25568.0 + days + time;
+
+        if datetime >= 60.0 {
+            datetime += 1.0;
+        }
+
+        ExcelDateTime {
+            serial_datetime: Some(datetime),
+            ..ExcelDateTime::default()
+        }
+    }
+
+    // TODO
+    #[allow(dead_code)]
+    pub(crate) fn set_1904_date(mut self) -> ExcelDateTime {
+        self.is_1904_date = true;
+        self
+    }
+
+    // TODO.
+    #[allow(dead_code)] // todo
+    pub(crate) fn to_excel(&self) -> f64 {
+        if let Some(serial_datetime) = self.serial_datetime {
+            serial_datetime
+        } else {
+            self.to_excel_from_ymd_hms()
+        }
+    }
+
+    // We calculate the date by calculating the number of days since the
+    // epoch and adjust for the number of leap days. We calculate the number
+    // of leap days by normalizing the year in relation to the epoch. Thus
+    // the year 2000 becomes 100 for 4-year and 100-year leapdays and 400
+    // for 400-year leapdays.
+    #[allow(dead_code)] // todo
+    pub(crate) fn to_excel_from_ymd_hms(&self) -> f64 {
+        let mut year = self.year;
+        let mut month = self.month;
+        let mut day = self.day;
+        let hour = f64::from(self.hour);
+        let min = f64::from(self.min);
+        let sec = self.sec;
+        let is_1904_date = self.is_1904_date;
+
+        let mut months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        let mut days: u32 = 0;
+        let mut leap_day = 0;
+        let epoch = if is_1904_date { 1904 } else { 1900 };
+        let epoch_offset = if is_1904_date { 4 } else { 0 };
+
+        // For times without dates set the default date for the epoch.
+        if year == 0 {
+            if is_1904_date {
+                year = 1904;
+                month = 1;
+                day = 1;
+            } else {
+                year = 1899;
+                month = 12;
+                day = 31;
+            }
+        }
+
+        // Convert the Excel seconds to a fraction of the seconds in 24 hours.
+        let seconds = (hour * 60.0 * 60.0 + min * 60.0 + sec) / (24.0 * 60.0 * 60.0);
+
+        // Special cases for Excel dates in the 1900 epoch.
+        if !is_1904_date {
+            // The day is on the Excel 1900 epoch (as stored by Excel).
+            if year == 1899 && month == 12 && day == 31 {
+                return seconds;
+            }
+
+            // The day is on the Excel 1900 epoch (another Excel version).
+            if year == 1900 && month == 1 && day == 0 {
+                return seconds;
+            }
+
+            // Excel false leapday. Shortcut the calculations below.
+            if year == 1900 && month == 2 && day == 29 {
+                return 60.0 + seconds;
+            }
+        }
+
+        // Normalize the year to the epoch.
+        let range = u32::from(year - epoch);
+
+        // Adjust February day count for leap yeas.
+        if Self::is_leap_year(u64::from(year)) {
+            months[1] = 29;
+            leap_day = 1;
+        }
+
+        // Add days for previous months.
+        for i in 1..month {
+            days += months[(i - 1) as usize];
+        }
+
+        // Add days for current month.
+        days += u32::from(day);
+
+        // Add days for all previous years.
+        days += range * 365;
+
+        // Add 4 year leapdays.
+        days += range / 4;
+
+        // Remove 100 year leapdays.
+        days -= (range + epoch_offset) / 100;
+
+        // Add 400 year leapdays.
+        days += (range + epoch_offset + 300) / 400;
+
+        // Remove leap days already counted.
+        days -= leap_day;
+
+        // Adjust for Excel erroneously treating 1900 as a leap year.
+        if !is_1904_date && days > 59 {
+            days += 1;
+        }
+
+        f64::from(days) + seconds
+    }
+
+    // Convert a Unix time to a ISO8601 format date.
+    //
+    // Convert a Unix time (seconds from 1970) to a human readable date in
+    // ISO8601 format.
+    //
+    // The calculation is deceptively tricky since simple division doesn't work
+    // due to the 4/100/400 year leap day changes. The basic approach is to
+    // divide the range into 400 year blocks, 100 year blocks, 4 year blocks
+    // and 1 year block to calculate the year (relative to the epoch). The
+    // remaining days and seconds are used to calculate the year day and time.
+    //
+    // Works in the range 1970-1-1 to 9999-12-31.
+    //
+    // Leap seconds and the time zone aren't taken into account.
+    //
     pub(crate) fn unix_time_to_iso8601(timestamp: u64) -> String {
         let mut months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -160,6 +336,21 @@ impl ExcelDateTime {
             Ok(n) => n.as_secs(),
             // TODO add better error handling here.
             Err(_) => panic!("SystemTime before UNIX EPOCH!"),
+        }
+    }
+}
+
+impl Default for ExcelDateTime {
+    fn default() -> Self {
+        ExcelDateTime {
+            year: 0,
+            month: 0,
+            day: 0,
+            hour: 0,
+            min: 0,
+            sec: 0.0,
+            is_1904_date: false,
+            serial_datetime: None,
         }
     }
 }
