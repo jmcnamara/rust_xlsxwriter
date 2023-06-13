@@ -5,9 +5,10 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 #![warn(missing_docs)]
+use regex::Regex;
 use std::time::SystemTime;
 
-use regex::Regex;
+use crate::XlsxError;
 
 const DAY_SECONDS: u64 = 24 * 60 * 60;
 const HOUR_SECONDS: u64 = 60 * 60;
@@ -40,7 +41,12 @@ impl ExcelDateTime {
     // -----------------------------------------------------------------------
 
     /// Create a `ExcelDateTime` instance from TODO.
-    pub fn parse_from_str(datetime: &str) -> ExcelDateTime {
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    pub fn parse_from_str(datetime: &str) -> Result<ExcelDateTime, XlsxError> {
         lazy_static! {
             static ref DATE: Regex = Regex::new(r"(\d\d\d\d)-(\d\d)-(\d\d)").unwrap();
             static ref TIME: Regex = Regex::new(r"(\d+):(\d\d)(:(\d\d(\.\d+)?))?").unwrap();
@@ -54,7 +60,7 @@ impl ExcelDateTime {
 
                 ExcelDateTime::from_ymd(year, month, day)
             }
-            None => ExcelDateTime::default(),
+            None => Ok(ExcelDateTime::default()),
         };
 
         if let Some(caps) = TIME.captures(datetime) {
@@ -66,37 +72,68 @@ impl ExcelDateTime {
                 None => 0.0,
             };
 
-            dt = dt.and_hms(hour, min, sec);
+            dt = dt.unwrap().and_hms(hour, min, sec);
         }
 
         // TODO handle failed parse and unwraps.
-
         dt
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
-    pub fn from_ymd(year: u16, month: u8, day: u8) -> ExcelDateTime {
-        ExcelDateTime {
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    pub fn from_ymd(year: u16, month: u8, day: u8) -> Result<ExcelDateTime, XlsxError> {
+        let dt = ExcelDateTime {
             year,
             month,
             day,
             datetime_type: ExcelDateTimeType::DateOnly,
             ..ExcelDateTime::default()
-        }
+        };
+
+        Ok(dt)
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
-    pub fn from_hms_milli(hour: u16, min: u8, sec: u8, milli: u16) -> ExcelDateTime {
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    pub fn from_hms_milli(
+        hour: u16,
+        min: u8,
+        sec: u8,
+        milli: u16,
+    ) -> Result<ExcelDateTime, XlsxError> {
         ExcelDateTime::default().and_hms_milli(hour, min, sec, milli)
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
-    pub fn from_hms(hour: u16, min: u8, sec: impl Into<f64>) -> ExcelDateTime {
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    pub fn from_hms(hour: u16, min: u8, sec: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
         ExcelDateTime::default().and_hms(hour, min, sec)
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
-    pub fn and_hms(mut self, hour: u16, min: u8, sec: impl Into<f64>) -> ExcelDateTime {
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    pub fn and_hms(
+        mut self,
+        hour: u16,
+        min: u8,
+        sec: impl Into<f64>,
+    ) -> Result<ExcelDateTime, XlsxError> {
         let date_time_type = if self.datetime_type == ExcelDateTimeType::DateOnly {
             ExcelDateTimeType::DateAndTime
         } else {
@@ -108,11 +145,22 @@ impl ExcelDateTime {
         self.sec = sec.into();
         self.datetime_type = date_time_type;
 
-        self
+        Ok(self)
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
-    pub fn and_hms_milli(mut self, hour: u16, min: u8, sec: u8, milli: u16) -> ExcelDateTime {
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    pub fn and_hms_milli(
+        mut self,
+        hour: u16,
+        min: u8,
+        sec: u8,
+        milli: u16,
+    ) -> Result<ExcelDateTime, XlsxError> {
         let date_time_type = if self.datetime_type == ExcelDateTimeType::DateOnly {
             ExcelDateTimeType::DateAndTime
         } else {
@@ -126,20 +174,32 @@ impl ExcelDateTime {
         self.sec = sec;
         self.datetime_type = date_time_type;
 
-        self
+        Ok(self)
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
-    pub fn from_serial_datetime(datetime: impl Into<f64>) -> ExcelDateTime {
-        ExcelDateTime {
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    pub fn from_serial_datetime(datetime: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
+        let dt = ExcelDateTime {
             serial_datetime: Some(datetime.into()),
             ..ExcelDateTime::default()
-        }
+        };
+
+        Ok(dt)
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
     #[allow(clippy::cast_precision_loss)]
-    pub fn from_timestamp(timestamp: i64) -> ExcelDateTime {
+    pub fn from_timestamp(timestamp: i64) -> Result<ExcelDateTime, XlsxError> {
         let days = (timestamp / (24 * 60 * 60)) as f64;
         let time = ((timestamp % (24 * 60 * 60)) as f64) / (24.0 * 60.0 * 60.0);
         let mut datetime = 25568.0 + days + time;
@@ -148,10 +208,12 @@ impl ExcelDateTime {
             datetime += 1.0;
         }
 
-        ExcelDateTime {
+        let dt = ExcelDateTime {
             serial_datetime: Some(datetime),
             ..ExcelDateTime::default()
-        }
+        };
+
+        Ok(dt)
     }
 
     // TODO

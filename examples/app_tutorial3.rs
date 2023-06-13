@@ -5,8 +5,7 @@
 //! A simple program to write some data to an Excel spreadsheet using
 //! rust_xlsxwriter. Part 3 of a tutorial.
 
-use chrono::NaiveDate;
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Some sample data we want to write to a spreadsheet.
@@ -46,7 +45,7 @@ fn main() -> Result<(), XlsxError> {
         worksheet.write_string(row, 0, expense.0)?;
         worksheet.write_number_with_format(row, 1, expense.1, &money_format)?;
 
-        let date = NaiveDate::parse_from_str(expense.2, "%Y-%m-%d").unwrap();
+        let date = ExcelDateTime::parse_from_str(expense.2)?;
         worksheet.write_date(row, 2, &date, &date_format)?;
 
         row += 1;

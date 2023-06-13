@@ -2631,13 +2631,13 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        datetime: &NaiveDateTime,
+        datetime: impl IntoExcelDateTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Self::datetime_to_excel(datetime);
+        let datetime = datetime.to_excel();
 
         // Store the cell data.
-        self.store_datetime(row, col, number, Some(format))
+        self.store_datetime(row, col, datetime, Some(format))
     }
 
     /// Write a formatted date to a worksheet cell.
@@ -2721,13 +2721,13 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        date: &NaiveDate,
+        date: impl IntoExcelDateTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Self::date_to_excel(*date);
+        let datetime = date.to_excel();
 
         // Store the cell data.
-        self.store_datetime(row, col, number, Some(format))
+        self.store_datetime(row, col, datetime, Some(format))
     }
 
     /// Write a formatted time to a worksheet cell.
@@ -2811,13 +2811,13 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        time: &NaiveTime,
+        time: impl IntoExcelDateTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Self::time_to_excel(*time);
+        let datetime = time.to_excel();
 
         // Store the cell data.
-        self.store_datetime(row, col, number, Some(format))
+        self.store_datetime(row, col, datetime, Some(format))
     }
 
     /// Write an unformatted boolean value to a cell.
@@ -8434,9 +8434,9 @@ impl Worksheet {
     //   information in any way.
 
     // Convert a chrono::NaiveTime to an Excel serial datetime.
-    fn datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
-        let excel_date = Self::date_to_excel(datetime.date());
-        let excel_time = Self::time_to_excel(datetime.time());
+    fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
+        let excel_date = Self::chrono_date_to_excel(datetime.date());
+        let excel_time = Self::chrono_time_to_excel(datetime.time());
 
         excel_date + excel_time
     }
@@ -8445,7 +8445,7 @@ impl Worksheet {
     // is the number of days since the epoch, which is either 1899-12-31 or
     // 1904-01-01.
     #[allow(clippy::cast_precision_loss)]
-    fn date_to_excel(date: NaiveDate) -> f64 {
+    fn chrono_date_to_excel(date: NaiveDate) -> f64 {
         let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
         let duration = date - epoch;
@@ -8464,7 +8464,7 @@ impl Worksheet {
     // datetime is the number of milliseconds divided by the total number of
     // milliseconds in the day.
     #[allow(clippy::cast_precision_loss)]
-    fn time_to_excel(time: NaiveTime) -> f64 {
+    fn chrono_time_to_excel(time: NaiveTime) -> f64 {
         let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
         let duration = time - midnight;
 
@@ -10566,7 +10566,7 @@ impl IntoExcelData for &NaiveDateTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Worksheet::datetime_to_excel(self);
+        let number = Worksheet::chrono_datetime_to_excel(self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10578,7 +10578,7 @@ impl IntoExcelData for &NaiveDateTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = Worksheet::datetime_to_excel(self);
+        let number = Worksheet::chrono_datetime_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -10590,7 +10590,7 @@ impl IntoExcelData for &NaiveDate {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Worksheet::date_to_excel(*self);
+        let number = Worksheet::chrono_date_to_excel(*self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10602,7 +10602,7 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = Worksheet::date_to_excel(*self);
+        let number = Worksheet::chrono_date_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -10614,7 +10614,7 @@ impl IntoExcelData for &NaiveTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Worksheet::time_to_excel(*self);
+        let number = Worksheet::chrono_time_to_excel(*self);
         let format = &Format::new().set_num_format("hh:mm:ss;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10626,7 +10626,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = Worksheet::time_to_excel(*self);
+        let number = Worksheet::chrono_time_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -10691,6 +10691,40 @@ impl IntoExcelData for Url {
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         worksheet.store_url(row, col, self, Some(format))
+    }
+}
+
+/// Trait to map user date/time types to and Excel serial datetimes.
+///
+/// Todo
+///
+pub trait IntoExcelDateTime {
+    /// Trait method to convert a
+    ///
+    fn to_excel(self) -> f64;
+}
+
+impl IntoExcelDateTime for &ExcelDateTime {
+    fn to_excel(self) -> f64 {
+        self.to_excel()
+    }
+}
+
+impl IntoExcelDateTime for &NaiveDateTime {
+    fn to_excel(self) -> f64 {
+        Worksheet::chrono_datetime_to_excel(self)
+    }
+}
+
+impl IntoExcelDateTime for &NaiveDate {
+    fn to_excel(self) -> f64 {
+        Worksheet::chrono_date_to_excel(*self)
+    }
+}
+
+impl IntoExcelDateTime for &NaiveTime {
+    fn to_excel(self) -> f64 {
+        Worksheet::chrono_time_to_excel(*self)
     }
 }
 

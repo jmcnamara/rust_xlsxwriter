@@ -118,7 +118,7 @@ mod datetime_tests {
 
         for test_data in dates {
             let (datetime_string, expected) = test_data;
-            let datetime = ExcelDateTime::parse_from_str(datetime_string);
+            let datetime = ExcelDateTime::parse_from_str(datetime_string).unwrap();
             assert_eq!(expected, datetime.to_excel());
         }
     }
@@ -331,7 +331,7 @@ mod datetime_tests {
 
         for test_data in dates {
             let (datetime_string, expected) = test_data;
-            let datetime = ExcelDateTime::parse_from_str(datetime_string);
+            let datetime = ExcelDateTime::parse_from_str(datetime_string).unwrap();
             assert_eq!(expected, datetime.to_excel());
         }
     }
@@ -446,7 +446,7 @@ mod datetime_tests {
 
         for test_data in times {
             let (datetime_string, expected) = test_data;
-            let datetime = ExcelDateTime::parse_from_str(datetime_string);
+            let datetime = ExcelDateTime::parse_from_str(datetime_string).unwrap();
             let mut diff = datetime.to_excel() - expected;
             diff = diff.abs();
             assert!(diff < 0.00000000001);
@@ -560,7 +560,10 @@ mod datetime_tests {
 
         for test_data in datetimes {
             let (year, month, day, hour, min, seconds, expected) = test_data;
-            let datetime = ExcelDateTime::from_ymd(year, month, day).and_hms(hour, min, seconds);
+            let datetime = ExcelDateTime::from_ymd(year, month, day)
+                .unwrap()
+                .and_hms(hour, min, seconds)
+                .unwrap();
             assert_eq!(expected, datetime.to_excel());
         }
     }
@@ -672,8 +675,10 @@ mod datetime_tests {
 
         for test_data in datetimes {
             let (year, month, day, hour, min, seconds, millis, expected) = test_data;
-            let datetime =
-                ExcelDateTime::from_ymd(year, month, day).and_hms_milli(hour, min, seconds, millis);
+            let datetime = ExcelDateTime::from_ymd(year, month, day)
+                .unwrap()
+                .and_hms_milli(hour, min, seconds, millis)
+                .unwrap();
             assert_eq!(expected, datetime.to_excel());
         }
     }
@@ -884,7 +889,7 @@ mod datetime_tests {
 
         for test_data in dates {
             let (year, month, day, expected) = test_data;
-            let datetime = ExcelDateTime::from_ymd(year, month, day);
+            let datetime = ExcelDateTime::from_ymd(year, month, day).unwrap();
             assert_eq!(expected, datetime.to_excel());
         }
     }
@@ -1097,7 +1102,9 @@ mod datetime_tests {
 
         for test_data in dates {
             let (year, month, day, expected) = test_data;
-            let datetime = ExcelDateTime::from_ymd(year, month, day).set_1904_date();
+            let datetime = ExcelDateTime::from_ymd(year, month, day)
+                .unwrap()
+                .set_1904_date();
             assert_eq!(expected, datetime.to_excel());
         }
     }
@@ -1209,7 +1216,7 @@ mod datetime_tests {
 
         for test_data in times {
             let (hour, min, seconds, millis, expected) = test_data;
-            let datetime = ExcelDateTime::from_hms_milli(hour, min, seconds, millis);
+            let datetime = ExcelDateTime::from_hms_milli(hour, min, seconds, millis).unwrap();
             let mut diff = datetime.to_excel() - expected;
             diff = diff.abs();
             assert!(diff < 0.00000000001);
@@ -1219,7 +1226,7 @@ mod datetime_tests {
     #[test]
     fn serial_date() {
         let expected = 2000.75;
-        let datetime = ExcelDateTime::from_serial_datetime(expected);
+        let datetime = ExcelDateTime::from_serial_datetime(expected).unwrap();
         assert_eq!(expected, datetime.to_excel());
     }
 
@@ -1245,7 +1252,7 @@ mod datetime_tests {
 
         for test_data in dates {
             let (timestamp, expected) = test_data;
-            let datetime = ExcelDateTime::from_timestamp(timestamp);
+            let datetime = ExcelDateTime::from_timestamp(timestamp).unwrap();
             assert_eq!(expected, datetime.to_excel());
         }
     }

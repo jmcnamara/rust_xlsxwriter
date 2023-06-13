@@ -42,16 +42,12 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
 
     // Write a date.
-    let date = ExcelDateTime::from_ymd(2023, 1, 25);
+    let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
     worksheet.write_with_format(6, 0, &date, &date_format)?;
 
     // Write some links.
     worksheet.write(7, 0, Url::new("https://www.rust-lang.org"))?;
-    worksheet.write(
-        8,
-        0,
-        Url::new("https://www.rust-lang.org").set_text("Learn Rust"),
-    )?;
+    worksheet.write(8, 0, Url::new("https://www.rust-lang.org").set_text("Rust"))?;
 
     // Write some merged cells.
     worksheet.merge_range(9, 0, 9, 1, "Merged cells", &merge_format)?;
