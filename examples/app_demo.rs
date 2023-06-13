@@ -5,8 +5,7 @@
 //! A simple, getting started, example of some of the features of the
 //! rust_xlsxwriter library.
 
-use chrono::NaiveDate;
-use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Image, Url, Workbook, XlsxError};
+use rust_xlsxwriter::*;
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -43,7 +42,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
 
     // Write a date.
-    let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
+    let date = ExcelDateTime::from_ymd(2023, 1, 25);
     worksheet.write_with_format(6, 0, &date, &date_format)?;
 
     // Write some links.

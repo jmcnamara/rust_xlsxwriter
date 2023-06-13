@@ -7,6 +7,8 @@
 #![warn(missing_docs)]
 use std::time::SystemTime;
 
+use regex::Regex;
+
 const DAY_SECONDS: u64 = 24 * 60 * 60;
 const HOUR_SECONDS: u64 = 60 * 60;
 const MINUTE_SECONDS: u64 = 60;
@@ -28,6 +30,8 @@ pub struct ExcelDateTime {
     sec: f64,
     is_1904_date: bool,
     serial_datetime: Option<f64>,
+    datetime_type: ExcelDateTimeType,
+    num_format: String,
 }
 
 impl ExcelDateTime {
@@ -36,11 +40,47 @@ impl ExcelDateTime {
     // -----------------------------------------------------------------------
 
     /// Create a `ExcelDateTime` instance from TODO.
+    pub fn parse_from_str(datetime: &str) -> ExcelDateTime {
+        lazy_static! {
+            static ref DATE: Regex = Regex::new(r"(\d\d\d\d)-(\d\d)-(\d\d)").unwrap();
+            static ref TIME: Regex = Regex::new(r"(\d+):(\d\d)(:(\d\d(\.\d+)?))?").unwrap();
+        }
+
+        let mut dt = match DATE.captures(datetime) {
+            Some(caps) => {
+                let year = caps.get(1).unwrap().as_str().parse::<u16>().unwrap();
+                let month = caps.get(2).unwrap().as_str().parse::<u8>().unwrap();
+                let day = caps.get(3).unwrap().as_str().parse::<u8>().unwrap();
+
+                ExcelDateTime::from_ymd(year, month, day)
+            }
+            None => ExcelDateTime::default(),
+        };
+
+        if let Some(caps) = TIME.captures(datetime) {
+            let hour = caps.get(1).unwrap().as_str().parse::<u16>().unwrap();
+            let min = caps.get(2).unwrap().as_str().parse::<u8>().unwrap();
+
+            let sec = match caps.get(3) {
+                Some(_) => caps.get(4).unwrap().as_str().parse::<f64>().unwrap(),
+                None => 0.0,
+            };
+
+            dt = dt.and_hms(hour, min, sec);
+        }
+
+        // TODO handle failed parse and unwraps.
+
+        dt
+    }
+
+    /// Create a `ExcelDateTime` instance from TODO.
     pub fn from_ymd(year: u16, month: u8, day: u8) -> ExcelDateTime {
         ExcelDateTime {
             year,
             month,
             day,
+            datetime_type: ExcelDateTimeType::DateOnly,
             ..ExcelDateTime::default()
         }
     }
@@ -51,21 +91,40 @@ impl ExcelDateTime {
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
+    pub fn from_hms(hour: u16, min: u8, sec: impl Into<f64>) -> ExcelDateTime {
+        ExcelDateTime::default().and_hms(hour, min, sec)
+    }
+
+    /// Create a `ExcelDateTime` instance from TODO.
     pub fn and_hms(mut self, hour: u16, min: u8, sec: impl Into<f64>) -> ExcelDateTime {
+        let date_time_type = if self.datetime_type == ExcelDateTimeType::DateOnly {
+            ExcelDateTimeType::DateAndTime
+        } else {
+            ExcelDateTimeType::TimeOnly
+        };
+
         self.hour = hour;
         self.min = min;
         self.sec = sec.into();
+        self.datetime_type = date_time_type;
 
         self
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
     pub fn and_hms_milli(mut self, hour: u16, min: u8, sec: u8, milli: u16) -> ExcelDateTime {
+        let date_time_type = if self.datetime_type == ExcelDateTimeType::DateOnly {
+            ExcelDateTimeType::DateAndTime
+        } else {
+            ExcelDateTimeType::TimeOnly
+        };
+
         let sec = f64::from(sec) + f64::from(milli) / 1000.0;
 
         self.hour = hour;
         self.min = min;
         self.sec = sec;
+        self.datetime_type = date_time_type;
 
         self
     }
@@ -96,10 +155,33 @@ impl ExcelDateTime {
     }
 
     // TODO
+    #[allow(dead_code)] // todo
+    pub(crate) fn set_num_format(mut self, num_format: impl Into<String>) -> ExcelDateTime {
+        self.num_format = num_format.into();
+        self
+    }
+
+    // TODO
     #[allow(dead_code)]
     pub(crate) fn set_1904_date(mut self) -> ExcelDateTime {
         self.is_1904_date = true;
         self
+    }
+
+    // TODO
+    #[allow(dead_code)]
+    pub(crate) fn get_num_format(&self) -> String {
+        if self.num_format.is_empty() {
+            match self.datetime_type {
+                ExcelDateTimeType::DateOnly => String::from("yyyy\\-mm\\-dd;@"),
+                ExcelDateTimeType::TimeOnly => String::from("hh:mm:ss;@"),
+                ExcelDateTimeType::DateAndTime | ExcelDateTimeType::Default => {
+                    String::from("yyyy\\-mm\\-dd\\ hh:mm:ss")
+                }
+            }
+        } else {
+            self.num_format.clone()
+        }
     }
 
     // TODO.
@@ -351,8 +433,18 @@ impl Default for ExcelDateTime {
             sec: 0.0,
             is_1904_date: false,
             serial_datetime: None,
+            datetime_type: ExcelDateTimeType::Default,
+            num_format: String::new(),
         }
     }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum ExcelDateTimeType {
+    Default,
+    DateOnly,
+    TimeOnly,
+    DateAndTime,
 }
 
 // -----------------------------------------------------------------------

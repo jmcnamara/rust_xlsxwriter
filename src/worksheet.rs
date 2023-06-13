@@ -26,8 +26,8 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, Color, HeaderImagePosition, Image, IntoColor, ObjectMovement, ProtectionOptions,
-    Table, TableFunction, Url,
+    utility, Color, ExcelDateTime, HeaderImagePosition, Image, IntoColor, ObjectMovement,
+    ProtectionOptions, Table, TableFunction, Url,
 };
 use crate::{Chart, ChartSeriesCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
@@ -10533,6 +10533,32 @@ impl IntoExcelData for bool {
 // Note, for the date/time type traits below we add a default number format for
 // the `write()` variants since Excel dates/times require a number format or
 // else they will appear as a number.
+
+impl IntoExcelData for &ExcelDateTime {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = self.to_excel();
+        let num_format = self.get_num_format();
+        let format = &Format::new().set_num_format(num_format);
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let number = self.to_excel();
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
 impl IntoExcelData for &NaiveDateTime {
     fn write(
         self,
