@@ -71,6 +71,12 @@ pub enum XlsxError {
     /// chart is configured incorrectly.
     ChartError(String),
 
+    /// TODO
+    DateRangeError(String),
+
+    /// TODO
+    DateParseError(String),
+
     /// A general error that is raised when a table parameter is incorrect or a
     /// table is configured incorrectly.
     TableError(String),
@@ -96,7 +102,7 @@ impl fmt::Display for XlsxError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             XlsxError::ParameterError(error) => {
-                write!(f, "Parameter error: \"{error}\".")
+                write!(f, "Parameter error: '{error}'.")
             }
 
             XlsxError::RowColumnLimitError => write!(
@@ -114,24 +120,24 @@ impl fmt::Display for XlsxError {
             XlsxError::SheetnameLengthExceeded(name) => {
                 write!(
                     f,
-                    "Worksheet name \"{name}\" exceeds Excel's limit of 31 characters."
+                    "Worksheet name '{name}' exceeds Excel's limit of 31 characters."
                 )
             }
 
             XlsxError::SheetnameReused(name) => write!(
                 f,
-                "Worksheet name \"{name}\" has already been used in this workbook.",
+                "Worksheet name '{name}' has already been used in this workbook.",
             ),
 
             XlsxError::SheetnameContainsInvalidCharacter(name) => write!(
                 f,
-                "Worksheet name \"{name}\" cannot contain invalid characters: '[ ] : * ? / \\'.",
+                "Worksheet name '{name}' cannot contain invalid characters: '[ ] : * ? / \\'.",
             ),
 
             XlsxError::SheetnameStartsOrEndsWithApostrophe(name) => {
                 write!(
                     f,
-                    "Worksheet name \"{name}\" cannot start or end with an apostrophe.",
+                    "Worksheet name '{name}' cannot start or end with an apostrophe.",
                 )
             }
 
@@ -140,7 +146,7 @@ impl fmt::Display for XlsxError {
             }
 
             XlsxError::UnknownWorksheetNameOrIndex(name) => {
-                write!(f, "Unknown Worksheet name or index \"{name}\".")
+                write!(f, "Unknown Worksheet name or index '{name}'.")
             }
 
             XlsxError::MergeRangeSingleCell => {
@@ -166,7 +172,7 @@ impl fmt::Display for XlsxError {
             }
 
             XlsxError::UnknownUrlType(url) => {
-                write!(f, "Unknown/unsupported url type: \"{url}\".")
+                write!(f, "Unknown/unsupported url type: '{url}'.")
             }
 
             XlsxError::UnknownImageType => {
@@ -178,17 +184,27 @@ impl fmt::Display for XlsxError {
             }
 
             XlsxError::ChartError(error) => {
-                write!(f, "Chart error: \"{error}\".")
+                write!(f, "Chart error: '{error}'.")
+            }
+
+            XlsxError::DateRangeError(error) => {
+                write!(f, "Date range error: '{error}'")
+            }
+
+            XlsxError::DateParseError(error) => {
+                write!(f, "Date parse error: '{error}'")
             }
 
             XlsxError::TableError(error) => {
-                write!(f, "Table error: \"{error}\".")
+                write!(f, "Table error: '{error}'.")
             }
 
-            XlsxError::TableNameReused(name) => write!(
-                f,
-                "Table name \"{name}\" has already been used in this workbook.",
-            ),
+            XlsxError::TableNameReused(name) => {
+                write!(
+                    f,
+                    "Table name '{name}' has already been used in this workbook.",
+                )
+            }
 
             XlsxError::IoError(error) => {
                 write!(f, "{error}")
@@ -245,19 +261,19 @@ mod tests {
         );
         assert_eq!(
             XlsxError::SheetnameLengthExceeded(name.to_string()).to_string(),
-            "Worksheet name \"ERROR\" exceeds Excel's limit of 31 characters."
+            "Worksheet name 'ERROR' exceeds Excel's limit of 31 characters."
         );
         assert_eq!(
             XlsxError::SheetnameReused(name.to_string()).to_string(),
-            "Worksheet name \"ERROR\" has already been used in this workbook."
+            "Worksheet name 'ERROR' has already been used in this workbook."
         );
         assert_eq!(
             XlsxError::SheetnameContainsInvalidCharacter(name.to_string()).to_string(),
-            "Worksheet name \"ERROR\" cannot contain invalid characters: '[ ] : * ? / \\'."
+            "Worksheet name 'ERROR' cannot contain invalid characters: '[ ] : * ? / \\'."
         );
         assert_eq!(
             XlsxError::SheetnameStartsOrEndsWithApostrophe(name.to_string()).to_string(),
-            "Worksheet name \"ERROR\" cannot start or end with an apostrophe."
+            "Worksheet name 'ERROR' cannot start or end with an apostrophe."
         );
         assert_eq!(
             XlsxError::MaxStringLengthExceeded.to_string(),
@@ -265,7 +281,7 @@ mod tests {
         );
         assert_eq!(
             XlsxError::UnknownWorksheetNameOrIndex(name.to_string()).to_string(),
-            "Unknown Worksheet name or index \"ERROR\"."
+            "Unknown Worksheet name or index 'ERROR'."
         );
         assert_eq!(
             XlsxError::MergeRangeSingleCell.to_string(),

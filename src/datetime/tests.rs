@@ -7,9 +7,66 @@
 #[cfg(test)]
 mod datetime_tests {
 
-    use crate::ExcelDateTime;
+    use crate::{ExcelDateTime, XlsxError};
     //use chrono::prelude::*;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn check_validations() {
+        let result = ExcelDateTime::from_ymd(1899, 12, 30);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_ymd(10000, 1, 1);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_ymd(2000, 0, 1);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_ymd(2000, 13, 1);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_ymd(2000, 1, 0);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_ymd(2000, 1, 32);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_ymd(2000, 4, 31); // Invalid month day.
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_hms(0, 61, 0);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_hms(0, 0, 59.9999);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_hms_milli(0, 61, 0, 0);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_hms_milli(0, 0, 61, 0);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_hms_milli(0, 0, 0, 1000);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::parse_from_str("2000-01");
+        assert!(matches!(result, Err(XlsxError::DateParseError(_))));
+
+        let result = ExcelDateTime::parse_from_str("20000-01-01");
+        assert!(matches!(result, Err(XlsxError::DateParseError(_))));
+
+        let result = ExcelDateTime::from_serial_datetime(-1);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_serial_datetime(2958466);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_timestamp(-2209075201);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+
+        let result = ExcelDateTime::from_timestamp(253402300800);
+        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+    }
 
     #[test]
     fn datetimes_from_str() {
@@ -119,7 +176,7 @@ mod datetime_tests {
         for test_data in dates {
             let (datetime_string, expected) = test_data;
             let datetime = ExcelDateTime::parse_from_str(datetime_string).unwrap();
-            assert_eq!(expected, datetime.to_excel());
+            assert_eq!(expected, datetime.to_excel(), "{datetime_string}");
         }
     }
 
@@ -128,7 +185,6 @@ mod datetime_tests {
         // Test date only.
         let dates = vec![
             ("1899-12-31T", 0.0),
-            ("1900-01-00T", 0.0),
             ("1900-01-01T", 1.0),
             ("1900-02-27T", 58.0),
             ("1900-02-28T", 59.0),
@@ -332,7 +388,7 @@ mod datetime_tests {
         for test_data in dates {
             let (datetime_string, expected) = test_data;
             let datetime = ExcelDateTime::parse_from_str(datetime_string).unwrap();
-            assert_eq!(expected, datetime.to_excel());
+            assert_eq!(expected, datetime.to_excel(), "{datetime_string}");
         }
     }
 
@@ -449,7 +505,7 @@ mod datetime_tests {
             let datetime = ExcelDateTime::parse_from_str(datetime_string).unwrap();
             let mut diff = datetime.to_excel() - expected;
             diff = diff.abs();
-            assert!(diff < 0.00000000001);
+            assert!(diff < 0.00000000001, "{datetime_string}");
         }
     }
 

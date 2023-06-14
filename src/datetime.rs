@@ -21,7 +21,6 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 /// A struct to represent an Excel date and/or time.
 ///
 /// TODO.
-#[allow(dead_code)] // todo
 pub struct ExcelDateTime {
     year: u16,
     month: u8,
@@ -48,9 +47,10 @@ impl ExcelDateTime {
     ///
     pub fn parse_from_str(datetime: &str) -> Result<ExcelDateTime, XlsxError> {
         lazy_static! {
-            static ref DATE: Regex = Regex::new(r"(\d\d\d\d)-(\d\d)-(\d\d)").unwrap();
+            static ref DATE: Regex = Regex::new(r"\b(\d\d\d\d)-(\d\d)-(\d\d)").unwrap();
             static ref TIME: Regex = Regex::new(r"(\d+):(\d\d)(:(\d\d(\.\d+)?))?").unwrap();
         }
+        let mut matched = false;
 
         let mut dt = match DATE.captures(datetime) {
             Some(caps) => {
@@ -58,6 +58,7 @@ impl ExcelDateTime {
                 let month = caps.get(2).unwrap().as_str().parse::<u8>().unwrap();
                 let day = caps.get(3).unwrap().as_str().parse::<u8>().unwrap();
 
+                matched = true;
                 ExcelDateTime::from_ymd(year, month, day)
             }
             None => Ok(ExcelDateTime::default()),
@@ -72,10 +73,14 @@ impl ExcelDateTime {
                 None => 0.0,
             };
 
+            matched = true;
             dt = dt.unwrap().and_hms(hour, min, sec);
         }
 
-        // TODO handle failed parse and unwraps.
+        if !matched {
+            return Err(XlsxError::DateParseError(datetime.to_string()));
+        }
+
         dt
     }
 
@@ -86,6 +91,10 @@ impl ExcelDateTime {
     /// TODO
     ///
     pub fn from_ymd(year: u16, month: u8, day: u8) -> Result<ExcelDateTime, XlsxError> {
+        if let Some(err) = Self::validate_ymd(year, month, day).err() {
+            return Err(err);
+        }
+
         let dt = ExcelDateTime {
             year,
             month,
@@ -95,6 +104,16 @@ impl ExcelDateTime {
         };
 
         Ok(dt)
+    }
+
+    /// Create a `ExcelDateTime` instance from TODO.
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    pub fn from_hms(hour: u16, min: u8, sec: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
+        ExcelDateTime::default().and_hms(hour, min, sec)
     }
 
     /// Create a `ExcelDateTime` instance from TODO.
@@ -118,22 +137,18 @@ impl ExcelDateTime {
     ///
     /// TODO
     ///
-    pub fn from_hms(hour: u16, min: u8, sec: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
-        ExcelDateTime::default().and_hms(hour, min, sec)
-    }
-
-    /// Create a `ExcelDateTime` instance from TODO.
-    ///
-    /// # Errors
-    ///
-    /// TODO
-    ///
     pub fn and_hms(
         mut self,
         hour: u16,
         min: u8,
         sec: impl Into<f64>,
     ) -> Result<ExcelDateTime, XlsxError> {
+        let sec = sec.into();
+
+        if let Some(err) = Self::validate_hms(min, sec).err() {
+            return Err(err);
+        }
+
         let date_time_type = if self.datetime_type == ExcelDateTimeType::DateOnly {
             ExcelDateTimeType::DateAndTime
         } else {
@@ -142,7 +157,7 @@ impl ExcelDateTime {
 
         self.hour = hour;
         self.min = min;
-        self.sec = sec.into();
+        self.sec = sec;
         self.datetime_type = date_time_type;
 
         Ok(self)
@@ -161,6 +176,10 @@ impl ExcelDateTime {
         sec: u8,
         milli: u16,
     ) -> Result<ExcelDateTime, XlsxError> {
+        if let Some(err) = Self::validate_hms_milli(min, sec, milli).err() {
+            return Err(err);
+        }
+
         let date_time_type = if self.datetime_type == ExcelDateTimeType::DateOnly {
             ExcelDateTimeType::DateAndTime
         } else {
@@ -183,9 +202,16 @@ impl ExcelDateTime {
     ///
     /// TODO
     ///
-    pub fn from_serial_datetime(datetime: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
+    pub fn from_serial_datetime(number: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
+        let number = number.into();
+        if !(0.0..2_958_466.0).contains(&number) {
+            return Err(XlsxError::DateRangeError(format!(
+                "Serial datetime: '{number}' outside converted Excel year range of 1900-9999"
+            )));
+        }
+
         let dt = ExcelDateTime {
-            serial_datetime: Some(datetime.into()),
+            serial_datetime: Some(number),
             ..ExcelDateTime::default()
         };
 
@@ -200,6 +226,12 @@ impl ExcelDateTime {
     ///
     #[allow(clippy::cast_precision_loss)]
     pub fn from_timestamp(timestamp: i64) -> Result<ExcelDateTime, XlsxError> {
+        if !(-2_209_075_200..253_402_300_800).contains(&timestamp) {
+            return Err(XlsxError::DateRangeError(format!(
+                "Unix timestamp: '{timestamp}' outside converted Excel year range of 1900-9999"
+            )));
+        }
+
         let days = (timestamp / (24 * 60 * 60)) as f64;
         let time = ((timestamp % (24 * 60 * 60)) as f64) / (24.0 * 60.0 * 60.0);
         let mut datetime = 25568.0 + days + time;
@@ -216,9 +248,8 @@ impl ExcelDateTime {
         Ok(dt)
     }
 
-    // TODO
-    #[allow(dead_code)] // todo
-    pub(crate) fn set_num_format(mut self, num_format: impl Into<String>) -> ExcelDateTime {
+    /// TODO
+    pub fn set_num_format(mut self, num_format: impl Into<String>) -> ExcelDateTime {
         self.num_format = num_format.into();
         self
     }
@@ -231,7 +262,6 @@ impl ExcelDateTime {
     }
 
     // TODO
-    #[allow(dead_code)]
     pub(crate) fn get_num_format(&self) -> String {
         if self.num_format.is_empty() {
             match self.datetime_type {
@@ -246,9 +276,89 @@ impl ExcelDateTime {
         }
     }
 
-    // TODO.
-    #[allow(dead_code)] // todo
-    pub(crate) fn to_excel(&self) -> f64 {
+    // TODO
+    fn validate_ymd(year: u16, month: u8, day: u8) -> Result<(), XlsxError> {
+        let mut months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        // The default epoch is 1900-01-01 but Excel actually uses 1899-12-31.
+        // The upper end of the Excel date range is 9999-12-31.
+        if year > 9999 || year < 1900 && (year != 1899 || month != 12 || day != 31) {
+            return Err(XlsxError::DateRangeError(format!(
+                "Year: '{year}' outside Excel range of 1900-9999"
+            )));
+        }
+
+        if !(1..=12).contains(&month) {
+            return Err(XlsxError::DateRangeError(format!(
+                "Month: '{month}' outside Excel range of 1-12"
+            )));
+        }
+
+        // Change February to account for leap days. Also take Excel's false
+        // 1900 leap day into account.
+        if Self::is_leap_year(u64::from(year)) || year == 1900 {
+            months[1] = 29;
+        }
+
+        if day < 1 || day > months[(month as usize) - 1] {
+            return Err(XlsxError::DateRangeError(format!(
+                "Day: '{day}' is invalid for year '{year}' and month '{month}'"
+            )));
+        }
+
+        Ok(())
+    }
+
+    // TODO
+    fn validate_hms(min: u8, sec: f64) -> Result<(), XlsxError> {
+        // Note, we don't actually validate or restrict the hour. In Excel it
+        // can be greater than 24 hours.
+
+        if min > 60 {
+            return Err(XlsxError::DateRangeError(format!(
+                "Minutes: '{min}' outside Excel range of 0-60"
+            )));
+        }
+
+        // Excel only supports milli-seconds.
+        if sec > 59.999 {
+            return Err(XlsxError::DateRangeError(format!(
+                "Seconds: '{sec}' outside Excel range of 0-59.999"
+            )));
+        }
+
+        Ok(())
+    }
+
+    // TODO
+    fn validate_hms_milli(min: u8, sec: u8, milli: u16) -> Result<(), XlsxError> {
+        // Note, we don't actually validate or restrict the hour. In Excel it
+        // can be greater than 24 hours.
+
+        if min > 60 {
+            return Err(XlsxError::DateRangeError(format!(
+                "Minutes: '{min}' outside Excel range of 0-60"
+            )));
+        }
+
+        if sec > 60 {
+            return Err(XlsxError::DateRangeError(format!(
+                "Seconds: '{sec}' outside Excel range of 0-60"
+            )));
+        }
+
+        // Excel only supports milli-seconds.
+        if milli > 999 {
+            return Err(XlsxError::DateRangeError(format!(
+                "Milliseconds: '{milli}' outside Excel range of 0-999"
+            )));
+        }
+
+        Ok(())
+    }
+
+    /// TODO.
+    pub fn to_excel(&self) -> f64 {
         if let Some(serial_datetime) = self.serial_datetime {
             serial_datetime
         } else {
@@ -261,7 +371,6 @@ impl ExcelDateTime {
     // of leap days by normalizing the year in relation to the epoch. Thus
     // the year 2000 becomes 100 for 4-year and 100-year leapdays and 400
     // for 400-year leapdays.
-    #[allow(dead_code)] // todo
     pub(crate) fn to_excel_from_ymd_hms(&self) -> f64 {
         let mut year = self.year;
         let mut month = self.month;
@@ -474,13 +583,12 @@ impl ExcelDateTime {
     }
 
     // TODO
-    #[allow(clippy::match_wild_err_arm)] // todo
     pub(crate) fn utc_now() -> u64 {
-        match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
-            Ok(n) => n.as_secs(),
-            // TODO add better error handling here.
-            Err(_) => panic!("SystemTime before UNIX EPOCH!"),
-        }
+        let timestamp = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .expect("SystemTime::now() is before Unix epoch");
+
+        timestamp.as_secs()
     }
 }
 
