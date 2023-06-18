@@ -20,7 +20,89 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 
 /// A struct to represent an Excel date and/or time.
 ///
-/// TODO.
+/// The `rust_xlsxwriter` library supports two ways of converting dates and
+/// times to Excel dates and times. The first is  via the external [`Chrono`]
+/// library which has a comprehensive sets of types and functions for dealing
+/// with dates and times. The second is the inbuilt [`ExcelDateTime`] struct
+/// which provides a more limited set of methods and which only targets Excel
+/// specific dates and times.
+///
+/// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+///
+/// Here is an example using `ExcelDateTime` to write some dates and times:
+///
+/// ```
+/// # // This code is available in examples/doc_datetime_intro.rs
+/// #
+/// use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Create some formats to use with the datetimes below.
+///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
+///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
+///     let format3 = Format::new().set_num_format("yyyy-mm-ddThh::mm:ss");
+///     let format4 = Format::new().set_num_format("ddd dd mmm yyyy hh::mm");
+///     let format5 = Format::new().set_num_format("dddd, mmmm dd, yyyy hh::mm");
+///
+///     // Set the column width for clarity.
+///     worksheet.set_column_width(0, 30)?;
+///
+///     // Create a datetime object.
+///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 0)?;
+///
+///     // Write the datetime with different Excel formats.
+///     worksheet.write_with_format(0, 0, &datetime, &format1)?;
+///     worksheet.write_with_format(1, 0, &datetime, &format2)?;
+///     worksheet.write_with_format(2, 0, &datetime, &format3)?;
+///     worksheet.write_with_format(3, 0, &datetime, &format4)?;
+///     worksheet.write_with_format(4, 0, &datetime, &format5)?;
+///
+///     workbook.save("datetime.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/datetime_intro.png">
+///
+/// ## Datetimes in Excel
+///
+/// Datetimes in Excel are a serial date with days counted from an epoch
+/// (generally 1900-01-01) and the time as a percentage/decimal of the
+/// milliseconds in the day. Both the date and time are stored in the same f64
+/// value. For example, 2023/01/01 12:00:00 is stored as 44927.5.
+///
+/// Datetimes in Excel must also be formatted with a number format like
+/// `"yyyy/mm/dd hh:mm"` or otherwise they will appear as a number (which
+/// technically they are).
+///
+/// Excel doesn't use timezones or try to convert or encode timezone information
+/// in any way so they aren't supported by `rust_xlsxwriter`.
+///
+/// Excel can also save dates in a text ISO 8601 format when the file is saved
+/// using the "Strict Open XML Spreadsheet" option in the "Save" dialog. However
+/// this is rarely used in practice and isn't supported by `rust_xlsxwriter`.
+///
+/// ## Chrono vs. native `ExcelDateTime`
+///
+/// The native (to `rust_xlsxwriter`) `ExcelDateTime` struct is mainly provided
+/// to remove the dependency on [`Chrono`] for certain limited cases such as
+/// compiling to WASM for some targets. If you need anything beyond the limited
+/// functionality of `ExcelDateTime` you should use `Chrono`. All date/time APIs
+/// in `rust_xlsxwriter` support both.
+///
+/// The `ExcelDateTime` method names are similar to `Chrono` method names to
+/// allow easier portability between the two structs.
+///
+/// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+///
 pub struct ExcelDateTime {
     year: u16,
     month: u8,
@@ -35,15 +117,101 @@ pub struct ExcelDateTime {
 }
 
 impl ExcelDateTime {
-    // -----------------------------------------------------------------------
-    // Public (and crate public) methods.
-    // -----------------------------------------------------------------------
-
-    /// Create a `ExcelDateTime` instance from TODO.
+    /// Create a `ExcelDateTime` instance from a string reference.
+    ///
+    /// This method provides simple conversions from strings representing dates,
+    /// times and datetimes in approximate ISO 8601 format to `ExcelDateTime`
+    /// instances.
+    ///
+    /// The allowable formats are:
+    ///
+    /// ```text
+    /// Dates:
+    ///     yyyy-mm-dd
+    ///
+    /// Times:
+    ///     hh::mm
+    ///     hh::mm::ss
+    ///     hh::mm::ss.sss
+    ///
+    /// Datetimes:
+    ///     yyyy-mm-ddThh::mm::ss
+    ///     yyyy-mm-dd hh::mm::ss
+    ///
+    /// ```
+    ///
+    /// Notes:
+    ///
+    /// 1. The time portion of `DateTimes` can contain optional or fractional
+    ///    seconds like the `Times` examples.
+    /// 2. Leading or trailing whitespace or text that isn't part of the
+    ///    date/times is ignored. For example a trailing `Z` in the datetime is
+    ///    ignored.
+    /// 3. Timezones aren't handled by Excel and are ignored in the input
+    ///    string.
+    /// 4. The `parse_to_str()` method is deliberately simple and limited. It
+    ///    doesn't implement anything like a `strftime()` method. For more
+    ///    comprehensive date parsing you should use the [`Chrono`] library.
+    ///
+    /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+    ///
+    /// # Arguments
+    ///
+    /// `datetime` - A string representing a date, time or datetime in the
+    /// formats shown above.
     ///
     /// # Errors
     ///
-    /// TODO
+    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
+    ///   date is outside Excel's allowed ranges.
+    /// * [`XlsxError::DateParseError`] - The input string couldn't be parsed
+    ///   into a date/time.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing datetimes parsed from
+    /// strings.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_parse_from_str.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a datetime object.
+    ///     let datetime1 = ExcelDateTime::parse_from_str("12:30")?;
+    ///     let datetime2 = ExcelDateTime::parse_from_str("12:30:45")?;
+    ///     let datetime3 = ExcelDateTime::parse_from_str("12:30:45.5")?;
+    ///     let datetime4 = ExcelDateTime::parse_from_str("2023-01-31")?;
+    ///     let datetime5 = ExcelDateTime::parse_from_str("2023-01-31 12:30:45")?;
+    ///     let datetime6 = ExcelDateTime::parse_from_str("2023-01-31T12:30:45Z")?;
+    ///
+    ///     // Write the dates and times with the default number formats.
+    ///     worksheet.write(0, 0, &datetime1)?;
+    ///     worksheet.write(1, 0, &datetime2)?;
+    ///     worksheet.write(2, 0, &datetime3)?;
+    ///     worksheet.write(3, 0, &datetime4)?;
+    ///     worksheet.write(4, 0, &datetime5)?;
+    ///     worksheet.write(5, 0, &datetime6)?;
+    /// #
+    /// #     workbook.save("datetime.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/datetime_parse_from_str.png">
     ///
     pub fn parse_from_str(datetime: &str) -> Result<ExcelDateTime, XlsxError> {
         lazy_static! {
@@ -84,11 +252,67 @@ impl ExcelDateTime {
         dt
     }
 
-    /// Create a `ExcelDateTime` instance from TODO.
+    /// Create a `ExcelDateTime` instance from years, months and days.
+    ///
+    /// # Arguments
+    ///
+    /// * `year` - Integer year in range 1900-9999.
+    /// * `month` - Integer month in the range 1-12.
+    /// * `day` - Integer day in the range 1-31 (depending on year/month).
     ///
     /// # Errors
     ///
-    /// TODO
+    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
+    ///   date is outside Excel's allowed ranges. Excel dates must be in the
+    ///   range 1900-01-01 to 9999-12-31.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted dates in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_from_ymd.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some formats to use with the datetimes below.
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy");
+    ///     let format3 = Format::new().set_num_format("ddd dd mmm yyyy");
+    ///     let format4 = Format::new().set_num_format("dddd, mmmm dd, yyyy");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a datetime object.
+    ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?;
+    ///
+    ///     // Write the date with the default "yyyy-mm-dd;@" format.
+    ///     worksheet.write(0, 0, &datetime)?;
+    ///
+    ///     // Write the datetime with different Excel formats.
+    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
+    /// #
+    /// #     workbook.save("datetime.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/datetime_from_ymd.png">
     ///
     pub fn from_ymd(year: u16, month: u8, day: u8) -> Result<ExcelDateTime, XlsxError> {
         if let Some(err) = Self::validate_ymd(year, month, day).err() {
@@ -106,21 +330,139 @@ impl ExcelDateTime {
         Ok(dt)
     }
 
-    /// Create a `ExcelDateTime` instance from TODO.
+    /// Create a `ExcelDateTime` instance from hours, minutes and seconds.
+    ///
+    /// # Arguments
+    ///
+    /// * `hour` - Integer hour. Generally in the range 0-23 but can be greater
+    ///   than 24 for time durations.
+    /// * `min` - Integer minutes in the range 0-59.
+    /// * `sec` - Integer or float seconds in the range 0-59.999. Excel only
+    ///   supports millisecond precision.
     ///
     /// # Errors
     ///
-    /// TODO
+    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
+    ///   date is outside Excel's allowed ranges.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted times in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_from_hms.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some formats to use with the datetimes below.
+    ///     let format1 = Format::new().set_num_format("hh::mm");
+    ///     let format2 = Format::new().set_num_format("hh::mm:ss");
+    ///     let format3 = Format::new().set_num_format("hh::mm:ss.0");
+    ///     let format4 = Format::new().set_num_format("hh::mm:ss.000");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a datetime object.
+    ///     let datetime = ExcelDateTime::from_hms(12, 30, 45.5)?;
+    ///
+    ///     // Write the time with the default "hh:mm:ss;@" format.
+    ///     worksheet.write(0, 0, &datetime)?;
+    ///
+    ///     // Write the datetime with different Excel formats.
+    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
+    /// #
+    /// #     workbook.save("datetime.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/datetime_from_hms.png">
+    ///
     ///
     pub fn from_hms(hour: u16, min: u8, sec: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
         ExcelDateTime::default().and_hms(hour, min, sec)
     }
 
-    /// Create a `ExcelDateTime` instance from TODO.
+    /// Create a `ExcelDateTime` instance from hours, minutes, seconds and
+    /// milliseconds.
+    ///
+    /// # Arguments
+    ///
+    /// * `hour` - Integer hour. Generally in the range 0-23 but can be greater
+    ///   than 24 for time durations.
+    /// * `min` - Integer minutes in the range 0-59.
+    /// * `sec` - Integer seconds in the range 0-59.
+    /// * `milli` - Integer milliseconds in the range 0-999. Excel only supports
+    ///   millisecond precision.
     ///
     /// # Errors
     ///
-    /// TODO
+    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
+    ///   date is outside Excel's allowed ranges.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted times in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_from_hms_milli.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some formats to use with the datetimes below.
+    ///     let format1 = Format::new().set_num_format("hh::mm");
+    ///     let format2 = Format::new().set_num_format("hh::mm:ss");
+    ///     let format3 = Format::new().set_num_format("hh::mm:ss.0");
+    ///     let format4 = Format::new().set_num_format("hh::mm:ss.000");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a datetime object.
+    ///     let datetime = ExcelDateTime::from_hms_milli(12, 30, 45, 123)?;
+    ///
+    ///     // Write the time with the default "hh:mm:ss;@" format.
+    ///     worksheet.write(0, 0, &datetime)?;
+    ///
+    ///     // Write the datetime with different Excel formats.
+    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
+    /// #
+    /// #     workbook.save("datetime.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/datetime_from_hms_milli.png">
+    ///
     ///
     pub fn from_hms_milli(
         hour: u16,
@@ -131,11 +473,71 @@ impl ExcelDateTime {
         ExcelDateTime::default().and_hms_milli(hour, min, sec, milli)
     }
 
-    /// Create a `ExcelDateTime` instance from TODO.
+    /// Adds to a `ExcelDateTime` date instance with hours, minutes and seconds.
+    ///
+    /// Adds time to a existing `ExcelDateTime` date instance or creates a new
+    /// one if required.
+    ///
+    /// # Arguments
+    ///
+    /// * `hour` - Integer hours in the range 0-23.
+    /// * `min` - Integer minutes in the range 0-59.
+    /// * `sec` - Integer or float seconds in the range 0-59.999. Excel only
+    ///   supports millisecond precision.
     ///
     /// # Errors
     ///
-    /// TODO
+    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
+    ///   date is outside Excel's allowed ranges.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted datetimes in an
+    /// Excel worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_and_hms.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some formats to use with the datetimes below.
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.0");
+    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.000");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a datetime object.
+    ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 45.195)?;
+    ///
+    ///     // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
+    ///     worksheet.write(0, 0, &datetime)?;
+    ///
+    ///     // Write the datetime with different Excel formats.
+    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
+    ///     worksheet.write_with_format(5, 0, &datetime, &format5)?;
+    /// #
+    /// #     workbook.save("datetime.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/datetime_and_hms.png">
     ///
     pub fn and_hms(
         mut self,
@@ -163,11 +565,74 @@ impl ExcelDateTime {
         Ok(self)
     }
 
-    /// Create a `ExcelDateTime` instance from TODO.
+    /// Adds to a `ExcelDateTime` date instance with hours, minutes, seconds and
+    /// milliseconds.
+    ///
+    /// Adds time to a existing `ExcelDateTime` date instance or creates a new
+    /// one if required.
+    ///
+    /// # Arguments
+    ///
+    /// * `hour` - Integer hours in the range 0-23.
+    /// * `min` - Integer minutes in the range 0-59.
+    /// * `sec` - Integer seconds in the range 0-59.
+    /// * `milli` - Integer milliseconds in the range 0-999. Excel only supports
+    ///   millisecond precision.
     ///
     /// # Errors
     ///
-    /// TODO
+    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
+    ///   date is outside Excel's allowed ranges.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted datetimes in an
+    /// Excel worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_and_hms_milli.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some formats to use with the datetimes below.
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.0");
+    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.000");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a datetime object.
+    ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms_milli(12, 30, 45, 195)?;
+    ///
+    ///     // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
+    ///     worksheet.write(0, 0, &datetime)?;
+    ///
+    ///     // Write the datetime with different Excel formats.
+    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
+    ///     worksheet.write_with_format(5, 0, &datetime, &format5)?;
+    /// #
+    /// #     workbook.save("datetime.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/datetime_and_hms_milli.png">
     ///
     pub fn and_hms_milli(
         mut self,
@@ -196,11 +661,63 @@ impl ExcelDateTime {
         Ok(self)
     }
 
-    /// Create a `ExcelDateTime` instance from TODO.
+    /// Create a `ExcelDateTime` instance from an Excel serial date.
+    ///
+    /// An Excel serial date is a f64 number that represents the time since the
+    /// Excel epoch. The `from_serial_datetime()` method allow you to create a
+    /// `ExcelDateTime` instance from one of these numbers. This is generally
+    /// only required if you are creating your own date handling routines or if
+    /// you want to manipulate the datetime output from one of the other
+    /// routines to account for some offset.
+    ///
+    /// # Arguments
+    ///
+    /// * `number` - Excel serial date in the range 0.0 to 2,958,466.0 (years
+    ///   1900 to 9999).
     ///
     /// # Errors
     ///
-    /// TODO
+    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
+    ///   date is outside Excel's allowed ranges.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted datetimes in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_from_serial_datetime.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Set the column width for clarity.
+    /// #     worksheet.set_column_width(0, 30)?;
+    /// #
+    ///     // Create a datetime object.
+    ///     let datetime1 = ExcelDateTime::from_serial_datetime(1.5)?;
+    ///     let datetime2 = ExcelDateTime::from_serial_datetime(36526.61)?;
+    ///     let datetime3 = ExcelDateTime::from_serial_datetime(44951.72)?;
+    ///
+    ///     // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
+    ///     worksheet.write(0, 0, &datetime1)?;
+    ///     worksheet.write(1, 0, &datetime2)?;
+    ///     worksheet.write(2, 0, &datetime3)?;
+    /// #
+    /// #     workbook.save("datetime.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/datetime_from_serial_datetime.png">
     ///
     pub fn from_serial_datetime(number: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
         let number = number.into();
@@ -218,11 +735,64 @@ impl ExcelDateTime {
         Ok(dt)
     }
 
-    /// Create a `ExcelDateTime` instance from TODO.
+    /// Create a `ExcelDateTime` instance from a Unix time.
+    ///
+    /// Create a `ExcelDateTime` instance from a [Unix Time] which is the number
+    /// of seconds since the 1970-01-01 00:00:00 UTC epoch. This is a common
+    /// format used for system times and timestamps.
+    ///
+    /// Leap seconds are not taken into account.
+    ///
+    /// [Unix Time]: https://en.wikipedia.org/wiki/Unix_time
+    ///
+    /// # Arguments
+    ///
+    /// * `timestamp` - Unix time in the range -2,209,075,200 to 253,402,300,800
+    ///   (years 1900 to 9999).
     ///
     /// # Errors
     ///
-    /// TODO
+    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
+    ///   date is outside Excel's allowed ranges.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing formatted datetimes in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_from_timestamp.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Set the column width for clarity.
+    /// #     worksheet.set_column_width(0, 30)?;
+    /// #
+    ///     // Create a datetime object.
+    ///     let datetime1 = ExcelDateTime::from_timestamp(0)?;
+    ///     let datetime2 = ExcelDateTime::from_timestamp(1000000000)?;
+    ///     let datetime3 = ExcelDateTime::from_timestamp(1687108108)?;
+    ///
+    ///     // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
+    ///     worksheet.write(0, 0, &datetime1)?;
+    ///     worksheet.write(1, 0, &datetime2)?;
+    ///     worksheet.write(2, 0, &datetime3)?;
+    /// #
+    /// #     workbook.save("datetime.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/datetime_from_timestamp.png">
     ///
     #[allow(clippy::cast_precision_loss)]
     pub fn from_timestamp(timestamp: i64) -> Result<ExcelDateTime, XlsxError> {
@@ -248,21 +818,63 @@ impl ExcelDateTime {
         Ok(dt)
     }
 
-    /// TODO
-    pub fn set_num_format(mut self, num_format: impl Into<String>) -> ExcelDateTime {
-        self.num_format = num_format.into();
-        self
+    /// Convert the `ExcelDateTime` to an Excel serial date.
+    ///
+    /// An Excel serial date is a f64 number that represents the time since the
+    /// Excel epoch. This method is mainly used internally when converting an
+    /// `ExcelDateTime` instance to an Excel datetime. The method is exposed
+    /// publicly to allow some limited manipulation of the date/time in
+    /// conjunction with
+    /// [`from_serial_datetime()`](ExcelDateTime::from_serial_datetime).
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates the `ExcelDateTime` `to_excel()`
+    /// method.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_datetime_to_excel.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    ///     let time = ExcelDateTime::from_hms(12, 0, 0)?;
+    ///     let date = ExcelDateTime::from_ymd(2000, 1, 1)?;
+    ///
+    ///     assert_eq!(0.5, time.to_excel());
+    ///     assert_eq!(36526.0, date.to_excel());
+    /// #
+    /// #     Ok(())
+    /// # }
+    ///
+    pub fn to_excel(&self) -> f64 {
+        if let Some(serial_datetime) = self.serial_datetime {
+            serial_datetime
+        } else {
+            self.to_excel_from_ymd_hms()
+        }
     }
 
-    // TODO
+    /// Set the Excel date epoch to 1904.
+    ///
+    /// Excel supports two date epochs: 1900-01-01 and 1904-01-01. The 1904 epoch
+    /// has mainly used with Mac for Excel but is a configuration option for
+    /// other Excel versions.
+    ///
+    /// There is some internal support for the 1904 epoch in `ExcelDateTime`
+    /// since it was implemented for the Python version of the library. However,
+    /// it was almost never used/needed by user so I am omitting it from the
+    /// Rust version for now. I won't accept pull requests to implement/unhide
+    /// it but I may consider feature requests with a good use
+    /// case/justification.
     #[allow(dead_code)]
     pub(crate) fn set_1904_date(mut self) -> ExcelDateTime {
         self.is_1904_date = true;
         self
     }
 
-    // TODO
-    pub(crate) fn get_num_format(&self) -> String {
+    // Get the default number format for the `ExcelDateTime` type.
+    pub(crate) fn num_format(&self) -> String {
         if self.num_format.is_empty() {
             match self.datetime_type {
                 ExcelDateTimeType::DateOnly => String::from("yyyy\\-mm\\-dd;@"),
@@ -276,7 +888,7 @@ impl ExcelDateTime {
         }
     }
 
-    // TODO
+    // Common validation routine for year, month, day methods.
     fn validate_ymd(year: u16, month: u8, day: u8) -> Result<(), XlsxError> {
         let mut months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -309,7 +921,7 @@ impl ExcelDateTime {
         Ok(())
     }
 
-    // TODO
+    // Common validation routine for hour, minute, second methods.
     fn validate_hms(min: u8, sec: f64) -> Result<(), XlsxError> {
         // Note, we don't actually validate or restrict the hour. In Excel it
         // can be greater than 24 hours.
@@ -330,7 +942,7 @@ impl ExcelDateTime {
         Ok(())
     }
 
-    // TODO
+    // Common validation routine for hour, minute, second, millisecond methods.
     fn validate_hms_milli(min: u8, sec: u8, milli: u16) -> Result<(), XlsxError> {
         // Note, we don't actually validate or restrict the hour. In Excel it
         // can be greater than 24 hours.
@@ -355,15 +967,6 @@ impl ExcelDateTime {
         }
 
         Ok(())
-    }
-
-    /// TODO.
-    pub fn to_excel(&self) -> f64 {
-        if let Some(serial_datetime) = self.serial_datetime {
-            serial_datetime
-        } else {
-            self.to_excel_from_ymd_hms()
-        }
     }
 
     // We calculate the date by calculating the number of days since the
@@ -460,10 +1063,10 @@ impl ExcelDateTime {
         f64::from(days) + seconds
     }
 
-    // Convert a Unix time to a ISO8601 format date.
+    // Convert a Unix time to a ISO 8601 format date.
     //
     // Convert a Unix time (seconds from 1970) to a human readable date in
-    // ISO8601 format.
+    // ISO 8601 format.
     //
     // The calculation is deceptively tricky since simple division doesn't work
     // due to the 4/100/400 year leap day changes. The basic approach is to
@@ -573,7 +1176,7 @@ impl ExcelDateTime {
         let min = (seconds - hour * HOUR_SECONDS) / MINUTE_SECONDS;
         let sec = (seconds - hour * HOUR_SECONDS - min * MINUTE_SECONDS) % MINUTE_SECONDS;
 
-        // Return the ISO8601 date.
+        // Return the ISO 8601 date.
         format!("{year}-{month:02}-{day:02}T{hour:02}:{min:02}:{sec:02}Z",)
     }
 
@@ -582,7 +1185,8 @@ impl ExcelDateTime {
         year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
     }
 
-    // TODO
+    // Get the current UTC time. This is used to set some Excel metadata
+    // timestamps.
     pub(crate) fn utc_now() -> u64 {
         let timestamp = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)

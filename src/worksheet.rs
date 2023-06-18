@@ -10542,7 +10542,7 @@ impl IntoExcelData for &ExcelDateTime {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
         let number = self.to_excel();
-        let num_format = self.get_num_format();
+        let num_format = self.num_format();
         let format = &Format::new().set_num_format(num_format);
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10696,10 +10696,17 @@ impl IntoExcelData for Url {
 
 /// Trait to map user date/time types to and Excel serial datetimes.
 ///
-/// Todo
+/// The `rust_xlsxwriter` library supports two ways of converting dates and
+/// times to Excel dates and times. The first is  via the external [`Chrono`]
+/// library which has a comprehensive sets of types and functions for dealing
+/// with dates and times. The second is the inbuilt [`ExcelDateTime`] struct
+/// which provides a more limited set of methods and which only targets Excel
+/// specific dates and times.
+///
+/// [`Chrono`]: https://docs.rs/chrono/latest/chrono
 ///
 pub trait IntoExcelDateTime {
-    /// Trait method to convert a
+    /// Trait method to convert a date or time into an Excel serial datetime.
     ///
     fn to_excel(self) -> f64;
 }

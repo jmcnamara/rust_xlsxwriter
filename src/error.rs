@@ -71,10 +71,42 @@ pub enum XlsxError {
     /// chart is configured incorrectly.
     ChartError(String),
 
-    /// TODO
+    /// A general error when one of the parameters supplied to a
+    /// [`ExcelDateTime`](crate::ExcelDateTime) method is outside Excel's
+    /// allowable ranges.
+    ///
+    /// For dates Excel allows dates in the range 1899-12-31 to 9999-12-31. For
+    /// hours the range is generally 0-24 although larger ranges can be used to
+    /// indicate durations. Minutes should be in the range 0-60 and seconds
+    /// should be in the range 0.0-59.999. Excel only supports millisecond
+    /// resolution.
     DateRangeError(String),
 
-    /// TODO
+    /// A parsing error when trying to convert a string into an
+    /// [`ExcelDateTime`](crate::ExcelDateTime).
+    ///
+    /// The allowable date/time formats supported by
+    /// [`ExcelDateTime::parse_from_str()`](crate::ExcelDateTime::parse_from_str)
+    /// are:
+    ///
+    /// ```text
+    /// Dates:
+    ///     yyyy-mm-dd
+    ///
+    /// Times:
+    ///     hh::mm
+    ///     hh::mm::ss
+    ///     hh::mm::ss.sss
+    ///
+    /// Datetimes:
+    ///     yyyy-mm-ddThh::mm::ss
+    ///     yyyy-mm-dd hh::mm::ss
+    /// ```
+    ///
+    /// The time part of `DateTimes` can contain optional or fractional seconds
+    /// like the time examples. Timezone information is not supported by Excel
+    /// and ignored in the parsing.
+    ///
     DateParseError(String),
 
     /// A general error that is raised when a table parameter is incorrect or a

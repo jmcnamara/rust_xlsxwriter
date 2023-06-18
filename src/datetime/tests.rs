@@ -8,7 +8,7 @@
 mod datetime_tests {
 
     use crate::{ExcelDateTime, XlsxError};
-    //use chrono::prelude::*;
+    use chrono::prelude::*;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -1439,7 +1439,6 @@ mod datetime_tests {
         }
     }
 
-    /* TODO
     #[test]
     fn dates_against_chrono() {
         for year in 1970..=9999 {
@@ -1497,5 +1496,4 @@ mod datetime_tests {
             assert_eq!(expected, got);
         }
     }
-    */
 }

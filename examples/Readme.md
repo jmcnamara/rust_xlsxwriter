@@ -402,6 +402,36 @@ documentation and generally show how an individual function works.
 * doc_chart_title_set_name.rs - A chart example demonstrating setting the
   chart title.
 
+* doc_datetime_and_hms.rs - Demonstrates writing formatted datetimes in an
+  Excel worksheet.
+
+* doc_datetime_and_hms_milli.rs - Demonstrates writing formatted datetimes
+  in an Excel worksheet.
+
+* doc_datetime_from_hms.rs - Demonstrates writing formatted times in an
+  Excel worksheet.
+
+* doc_datetime_from_hms_milli.rs - Demonstrates writing formatted times in
+  an Excel worksheet.
+
+* doc_datetime_from_serial_datetime.rs - Demonstrates writing formatted
+  datetimes in an Excel worksheet.
+
+* doc_datetime_from_timestamp.rs - Demonstrates writing formatted datetimes
+  in an Excel worksheet.
+
+* doc_datetime_from_ymd.rs - Demonstrates writing formatted dates in an
+  Excel worksheet.
+
+* doc_datetime_intro.rs - Demonstrates writing formatted datetimes in an
+  Excel worksheet.
+
+* doc_datetime_parse_from_str.rs - Demonstrates writing formatted datetimes
+  parsed from strings.
+
+* doc_datetime_to_excel.rs - Demonstrates the ExcelDateTime `to_excel()`
+  method.
+
 * doc_enum_xlsxcolor.rs - Demonstrates using different Color enum values to
   set the color of some text in a worksheet.
 
