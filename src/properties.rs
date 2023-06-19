@@ -209,7 +209,7 @@ pub struct DocProperties {
     pub(crate) category: String,
     pub(crate) keywords: String,
     pub(crate) hyperlink_base: String,
-    pub(crate) creation_time: u64,
+    pub(crate) creation_time: String,
     pub(crate) custom_properties: Vec<CustomProperty>,
 }
 
@@ -402,8 +402,11 @@ impl DocProperties {
     /// [`chrono::DateTime`]:
     ///     https://docs.rs/chrono/latest/chrono/struct.DateTime.html
     ///
-    pub fn set_creation_datetime(mut self, create_time: &DateTime<Utc>) -> DocProperties {
-        self.creation_time = create_time.timestamp() as u64;
+    pub fn set_creation_datetime(
+        mut self,
+        create_time: impl IntoCustomDateTimeUtc,
+    ) -> DocProperties {
+        self.creation_time = create_time.utc_datetime();
         self
     }
 
@@ -453,10 +456,11 @@ impl DocProperties {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/doc_properties_custom.png">
     ///
-    pub fn set_custom_property<T>(mut self, name: impl Into<String>, value: T) -> DocProperties
-    where
-        T: IntoCustomProperty,
-    {
+    pub fn set_custom_property(
+        mut self,
+        name: impl Into<String>,
+        value: impl IntoCustomProperty,
+    ) -> DocProperties {
         self.custom_properties.push(value.new_custom_property(name));
 
         self
@@ -478,7 +482,7 @@ pub struct CustomProperty {
     pub(crate) number_int: i32,
     pub(crate) number_real: f64,
     pub(crate) boolean: bool,
-    pub(crate) datetime: DateTime<Utc>,
+    pub(crate) datetime: String,
 }
 
 impl Default for CustomProperty {
@@ -490,7 +494,7 @@ impl Default for CustomProperty {
             number_int: 0,
             number_real: 0.0,
             boolean: true,
-            datetime: Utc::now(),
+            datetime: ExcelDateTime::utc_now(),
         }
     }
 }
@@ -532,11 +536,14 @@ impl CustomProperty {
         }
     }
 
-    pub(crate) fn new_property_datetime(name: String, value: &DateTime<Utc>) -> CustomProperty {
+    pub(crate) fn new_property_datetime(
+        name: String,
+        value: impl IntoCustomDateTimeUtc,
+    ) -> CustomProperty {
         CustomProperty {
             property_type: CustomPropertyType::DateTime,
             name,
-            datetime: *value,
+            datetime: value.utc_datetime(),
             ..Default::default()
         }
     }
@@ -598,5 +605,33 @@ impl IntoCustomProperty for bool {
 impl IntoCustomProperty for &DateTime<Utc> {
     fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
         CustomProperty::new_property_datetime(name.into(), self)
+    }
+}
+
+impl IntoCustomProperty for &ExcelDateTime {
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_datetime(name.into(), self)
+    }
+}
+
+/// Trait to map user date types to an Excel UTC date.
+///
+/// Map a date to the Excel UTC date used in custom document properties.
+///
+pub trait IntoCustomDateTimeUtc {
+    /// Trait method to convert a date into an Excel UTC date.
+    ///
+    fn utc_datetime(self) -> String;
+}
+
+impl IntoCustomDateTimeUtc for &DateTime<Utc> {
+    fn utc_datetime(self) -> String {
+        self.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
+    }
+}
+
+impl IntoCustomDateTimeUtc for &ExcelDateTime {
+    fn utc_datetime(self) -> String {
+        self.to_rfc3339()
     }
 }

@@ -13,7 +13,7 @@ use std::io::Write;
 use std::mem;
 use std::sync::Arc;
 
-use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use itertools::Itertools;
 use regex::Regex;
 
@@ -26,8 +26,8 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, Color, ExcelDateTime, HeaderImagePosition, Image, IntoColor, ObjectMovement,
-    ProtectionOptions, Table, TableFunction, Url,
+    utility, Color, ExcelDateTime, HeaderImagePosition, Image, IntoColor, IntoExcelDateTime,
+    ObjectMovement, ProtectionOptions, Table, TableFunction, Url,
 };
 use crate::{Chart, ChartSeriesCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
@@ -8418,59 +8418,6 @@ impl Worksheet {
         xf_index
     }
 
-    // Notes for the date/time handling functions below.
-    //
-    // - Datetimes in Excel are a serial date with days counted from an epoch
-    //   (generally 1899-12-31) and the time as a percentage/decimal of the
-    //   milliseconds in the day.
-    //
-    // - Both are stored in the same f64 value, for example, 2023/01/01 12:00:00 is
-    //   stored as 44927.5 with a separate numeric format like yyyy/mm/dd hh:mm.
-    //
-    // - Excel can also save dates in a text ISO 8601 format in "Strict Open XML
-    //   Spreadsheet" format but this is rarely used in practice.
-    //
-    // - Excel also doesn't use timezones or try to convert or encode timezone
-    //   information in any way.
-
-    // Convert a chrono::NaiveTime to an Excel serial datetime.
-    fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
-        let excel_date = Self::chrono_date_to_excel(datetime.date());
-        let excel_time = Self::chrono_time_to_excel(datetime.time());
-
-        excel_date + excel_time
-    }
-
-    // Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
-    // is the number of days since the epoch, which is either 1899-12-31 or
-    // 1904-01-01.
-    #[allow(clippy::cast_precision_loss)]
-    fn chrono_date_to_excel(date: NaiveDate) -> f64 {
-        let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
-
-        let duration = date - epoch;
-        let mut excel_date = duration.num_days() as f64;
-
-        // For legacy reasons Excel treats 1900 as a leap year. We add an additional
-        // day for dates after the leapday in the 1899 epoch.
-        if epoch.year() == 1899 && excel_date > 59.0 {
-            excel_date += 1.0;
-        }
-
-        excel_date
-    }
-
-    // Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
-    // datetime is the number of milliseconds divided by the total number of
-    // milliseconds in the day.
-    #[allow(clippy::cast_precision_loss)]
-    fn chrono_time_to_excel(time: NaiveTime) -> f64 {
-        let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
-        let duration = time - midnight;
-
-        duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
-    }
-
     // Convert the image dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
     pub(crate) fn prepare_worksheet_images(
@@ -10566,7 +10513,7 @@ impl IntoExcelData for &NaiveDateTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Worksheet::chrono_datetime_to_excel(self);
+        let number = crate::chrono_datetime_to_excel(self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10578,7 +10525,7 @@ impl IntoExcelData for &NaiveDateTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = Worksheet::chrono_datetime_to_excel(self);
+        let number = crate::chrono_datetime_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -10590,7 +10537,7 @@ impl IntoExcelData for &NaiveDate {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Worksheet::chrono_date_to_excel(*self);
+        let number = crate::chrono_date_to_excel(*self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10602,7 +10549,7 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = Worksheet::chrono_date_to_excel(*self);
+        let number = crate::chrono_date_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -10614,7 +10561,7 @@ impl IntoExcelData for &NaiveTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = Worksheet::chrono_time_to_excel(*self);
+        let number = crate::chrono_time_to_excel(*self);
         let format = &Format::new().set_num_format("hh:mm:ss;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10626,7 +10573,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = Worksheet::chrono_time_to_excel(*self);
+        let number = crate::chrono_time_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -10691,47 +10638,6 @@ impl IntoExcelData for Url {
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         worksheet.store_url(row, col, self, Some(format))
-    }
-}
-
-/// Trait to map user date/time types to and Excel serial datetimes.
-///
-/// The `rust_xlsxwriter` library supports two ways of converting dates and
-/// times to Excel dates and times. The first is  via the external [`Chrono`]
-/// library which has a comprehensive sets of types and functions for dealing
-/// with dates and times. The second is the inbuilt [`ExcelDateTime`] struct
-/// which provides a more limited set of methods and which only targets Excel
-/// specific dates and times.
-///
-/// [`Chrono`]: https://docs.rs/chrono/latest/chrono
-///
-pub trait IntoExcelDateTime {
-    /// Trait method to convert a date or time into an Excel serial datetime.
-    ///
-    fn to_excel(self) -> f64;
-}
-
-impl IntoExcelDateTime for &ExcelDateTime {
-    fn to_excel(self) -> f64 {
-        self.to_excel()
-    }
-}
-
-impl IntoExcelDateTime for &NaiveDateTime {
-    fn to_excel(self) -> f64 {
-        Worksheet::chrono_datetime_to_excel(self)
-    }
-}
-
-impl IntoExcelDateTime for &NaiveDate {
-    fn to_excel(self) -> f64 {
-        Worksheet::chrono_date_to_excel(*self)
-    }
-}
-
-impl IntoExcelDateTime for &NaiveTime {
-    fn to_excel(self) -> f64 {
-        Worksheet::chrono_time_to_excel(*self)
     }
 }
 

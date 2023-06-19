@@ -8,6 +8,8 @@
 use regex::Regex;
 use std::time::SystemTime;
 
+use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
+
 use crate::XlsxError;
 
 const DAY_SECONDS: u64 = 24 * 60 * 60;
@@ -1078,7 +1080,7 @@ impl ExcelDateTime {
     //
     // Leap seconds and the time zone aren't taken into account.
     //
-    pub(crate) fn unix_time_to_iso8601(timestamp: u64) -> String {
+    pub(crate) fn unix_time_to_rfc3339(timestamp: u64) -> String {
         let mut months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
         // Convert the seconds to a whole number of days.
@@ -1187,12 +1189,21 @@ impl ExcelDateTime {
 
     // Get the current UTC time. This is used to set some Excel metadata
     // timestamps.
-    pub(crate) fn utc_now() -> u64 {
+    pub(crate) fn utc_now() -> String {
         let timestamp = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("SystemTime::now() is before Unix epoch");
 
-        timestamp.as_secs()
+        Self::unix_time_to_rfc3339(timestamp.as_secs())
+    }
+
+    // Convert to UTC date in RFC 3339 format. This is used in custom
+    // properties.
+    pub(crate) fn to_rfc3339(&self) -> String {
+        format!(
+            "{}-{:02}-{:02}T{:02}:{:02}:{:02}Z",
+            self.year, self.month, self.day, self.hour, self.min, self.sec
+        )
     }
 }
 
@@ -1219,6 +1230,93 @@ enum ExcelDateTimeType {
     DateOnly,
     TimeOnly,
     DateAndTime,
+}
+
+// -----------------------------------------------------------------------
+// Datetime traits.
+// -----------------------------------------------------------------------
+
+/// Trait to map user date/time types to an Excel serial datetimes.
+///
+/// The `rust_xlsxwriter` library supports two ways of converting dates and
+/// times to Excel dates and times. The first is  via the external [`Chrono`]
+/// library which has a comprehensive sets of types and functions for dealing
+/// with dates and times. The second is the inbuilt [`ExcelDateTime`] struct
+/// which provides a more limited set of methods and which only targets Excel
+/// specific dates and times.
+///
+/// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+///
+pub trait IntoExcelDateTime {
+    /// Trait method to convert a date or time into an Excel serial datetime.
+    ///
+    fn to_excel(self) -> f64;
+}
+
+impl IntoExcelDateTime for &ExcelDateTime {
+    fn to_excel(self) -> f64 {
+        self.to_excel()
+    }
+}
+
+impl IntoExcelDateTime for &NaiveDateTime {
+    fn to_excel(self) -> f64 {
+        chrono_datetime_to_excel(self)
+    }
+}
+
+impl IntoExcelDateTime for &NaiveDate {
+    fn to_excel(self) -> f64 {
+        chrono_date_to_excel(*self)
+    }
+}
+
+impl IntoExcelDateTime for &NaiveTime {
+    fn to_excel(self) -> f64 {
+        chrono_time_to_excel(*self)
+    }
+}
+
+// -----------------------------------------------------------------------
+// Chrono date handling functions.
+// -----------------------------------------------------------------------
+
+// Convert a chrono::NaiveTime to an Excel serial datetime.
+pub(crate) fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
+    let excel_date = chrono_date_to_excel(datetime.date());
+    let excel_time = chrono_time_to_excel(datetime.time());
+
+    excel_date + excel_time
+}
+
+// Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
+// is the number of days since the epoch, which is either 1899-12-31 or
+// 1904-01-01.
+#[allow(clippy::cast_precision_loss)]
+pub(crate) fn chrono_date_to_excel(date: NaiveDate) -> f64 {
+    let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
+
+    let duration = date - epoch;
+    let mut excel_date = duration.num_days() as f64;
+
+    // For legacy reasons Excel treats 1900 as a leap year. We add an additional
+    // day for dates after the leapday in the 1899 epoch.
+    if epoch.year() == 1899 && excel_date > 59.0 {
+        excel_date += 1.0;
+    }
+
+    excel_date
+}
+
+// Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
+// datetime is the number of milliseconds divided by the total number of
+// milliseconds in the day.
+#[allow(clippy::cast_precision_loss)]
+pub(crate) fn chrono_time_to_excel(time: NaiveTime) -> f64 {
+    let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
+    let duration = time - midnight;
+
+    duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
 }
 
 // -----------------------------------------------------------------------

@@ -4,7 +4,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use crate::{xmlwriter::XMLWriter, DocProperties, ExcelDateTime};
+use crate::{xmlwriter::XMLWriter, DocProperties};
 
 pub struct Core {
     pub(crate) writer: XMLWriter,
@@ -137,7 +137,7 @@ impl Core {
     // Write the <dcterms:created> element.
     fn write_dcterms_created(&mut self) {
         let attributes = [("xsi:type", "dcterms:W3CDTF")];
-        let datetime = ExcelDateTime::unix_time_to_iso8601(self.properties.creation_time);
+        let datetime = self.properties.creation_time.clone();
 
         self.writer
             .xml_data_element("dcterms:created", &datetime, &attributes);
@@ -146,7 +146,7 @@ impl Core {
     // Write the <dcterms:modified> element.
     fn write_dcterms_modified(&mut self) {
         let attributes = [("xsi:type", "dcterms:W3CDTF")];
-        let datetime = ExcelDateTime::unix_time_to_iso8601(self.properties.creation_time);
+        let datetime = self.properties.creation_time.clone();
 
         self.writer
             .xml_data_element("dcterms:modified", &datetime, &attributes);
@@ -176,14 +176,14 @@ impl Core {
 mod tests {
 
     use crate::core::Core;
+    use crate::ExcelDateTime;
     use crate::{test_functions::xml_to_vec, DocProperties};
-    use chrono::{TimeZone, Utc};
 
     use pretty_assertions::assert_eq;
 
     #[test]
     fn test_assemble() {
-        let date = Utc.with_ymd_and_hms(2010, 1, 1, 0, 0, 0).unwrap();
+        let date = ExcelDateTime::from_ymd(2010, 1, 1).unwrap();
         let properties = DocProperties::new()
             .set_author("A User")
             .set_creation_datetime(&date);

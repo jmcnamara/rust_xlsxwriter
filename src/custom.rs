@@ -4,8 +4,6 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use chrono::{DateTime, Utc};
-
 use crate::{xmlwriter::XMLWriter, CustomProperty, CustomPropertyType, DocProperties};
 
 pub struct Custom {
@@ -88,10 +86,9 @@ impl Custom {
     }
 
     // Write the <vt:filetime> element.
-    fn write_vt_filetime(&mut self, datetime: &DateTime<Utc>) {
-        let utc_date = datetime.to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
-
-        self.writer.xml_data_element_only("vt:filetime", &utc_date);
+    fn write_vt_filetime(&mut self, utc_datetime: &str) {
+        self.writer
+            .xml_data_element_only("vt:filetime", utc_datetime);
     }
 
     // Write the <vt:i4> element.
@@ -120,8 +117,8 @@ impl Custom {
 mod tests {
 
     use crate::custom::Custom;
+    use crate::ExcelDateTime;
     use crate::{test_functions::xml_to_vec, DocProperties};
-    use chrono::{TimeZone, Utc};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -153,7 +150,10 @@ mod tests {
 
     #[test]
     fn test_assemble2() {
-        let date = Utc.with_ymd_and_hms(2016, 12, 12, 23, 0, 0).unwrap();
+        let date = ExcelDateTime::from_ymd(2016, 12, 12)
+            .unwrap()
+            .and_hms(23, 0, 0)
+            .unwrap();
 
         let mut custom = Custom::new();
 
