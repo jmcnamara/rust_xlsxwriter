@@ -21,7 +21,7 @@ const YEAR_DAYS_4: u64 = YEAR_DAYS * 4 + 1;
 const YEAR_DAYS_100: u64 = YEAR_DAYS * 100 + 25;
 const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 
-/// A struct to represent an Excel date and/or time.
+/// The `ExcelDateTime` struct is used to represent an Excel date and/or time.
 ///
 /// The `rust_xlsxwriter` library supports two ways of converting dates and
 /// times to Excel dates and times. The first is  via the external [`Chrono`]
@@ -78,7 +78,7 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 /// ## Datetimes in Excel
 ///
 /// Datetimes in Excel are a serial date with days counted from an epoch
-/// (generally 1900-01-01) and the time as a percentage/decimal of the
+/// (usually 1900-01-01) and the time as a percentage/decimal of the
 /// milliseconds in the day. Both the date and time are stored in the same f64
 /// value. For example, 2023/01/01 12:00:00 is stored as 44927.5.
 ///
@@ -95,14 +95,16 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 ///
 /// ## Chrono vs. native `ExcelDateTime`
 ///
-/// The native (to `rust_xlsxwriter`) `ExcelDateTime` struct is mainly provided
-/// to remove the dependency on [`Chrono`] for certain limited cases such as
-/// compiling to WASM for some targets. If you need anything beyond the limited
-/// functionality of `ExcelDateTime` you should use `Chrono`. All date/time APIs
-/// in `rust_xlsxwriter` support both.
+/// The `rust_xlsxwriter` native `ExcelDateTime` struct is mainly provided to
+/// avoid a hard dependency on [`Chrono`] for limited use cases. If you need
+/// anything beyond the limited functionality of `ExcelDateTime` you should use
+/// `Chrono`. All date/time APIs in `rust_xlsxwriter` support both and the
+/// `ExcelDateTime` method names are similar to `Chrono` method names to allow
+/// easier portability between the two structs.
 ///
-/// The `ExcelDateTime` method names are similar to `Chrono` method names to
-/// allow easier portability between the two structs.
+/// In order to use [`Chrono`] with `rust_xlsxwriter` APIs you must enable the
+/// optional `chrono` feature when adding `rust_xlsxwriter` to your
+/// `Cargo.toml`.
 ///
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
 ///
@@ -137,7 +139,7 @@ impl ExcelDateTime {
     ///     hh::mm::ss
     ///     hh::mm::ss.sss
     ///
-    /// Datetimes:
+    /// DateTimes:
     ///     yyyy-mm-ddThh::mm::ss
     ///     yyyy-mm-dd hh::mm::ss
     ///
@@ -165,9 +167,9 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
-    ///   date is outside Excel's allowed ranges.
-    /// * [`XlsxError::DateParseError`] - The input string couldn't be parsed
+    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    ///   date or time is outside Excel's allowed ranges.
+    /// * [`XlsxError::DateTimeParseError`] - The input string couldn't be parsed
     ///   into a date/time.
     ///
     /// # Examples
@@ -249,7 +251,7 @@ impl ExcelDateTime {
         }
 
         if !matched {
-            return Err(XlsxError::DateParseError(datetime.to_string()));
+            return Err(XlsxError::DateTimeParseError(datetime.to_string()));
         }
 
         dt
@@ -265,8 +267,8 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
-    ///   date is outside Excel's allowed ranges. Excel dates must be in the
+    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    ///   date or time is outside Excel's allowed ranges. Excel dates must be in the
     ///   range 1900-01-01 to 9999-12-31.
     ///
     /// # Examples
@@ -345,8 +347,8 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
-    ///   date is outside Excel's allowed ranges.
+    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
     ///
@@ -415,8 +417,8 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
-    ///   date is outside Excel's allowed ranges.
+    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    ///   date or time is outside Excel's allowed ranges.
     ///
     ///
     /// # Examples
@@ -490,8 +492,8 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
-    ///   date is outside Excel's allowed ranges.
+    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
     ///
@@ -584,8 +586,8 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
-    ///   date is outside Excel's allowed ranges.
+    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
     ///
@@ -680,8 +682,8 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
-    ///   date is outside Excel's allowed ranges.
+    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
     ///
@@ -725,7 +727,7 @@ impl ExcelDateTime {
     pub fn from_serial_datetime(number: impl Into<f64>) -> Result<ExcelDateTime, XlsxError> {
         let number = number.into();
         if !(0.0..2_958_466.0).contains(&number) {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Serial datetime: '{number}' outside converted Excel year range of 1900-9999"
             )));
         }
@@ -755,8 +757,8 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateRangeError`] - One of the values used to create the
-    ///   date is outside Excel's allowed ranges.
+    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
     ///
@@ -800,7 +802,7 @@ impl ExcelDateTime {
     #[allow(clippy::cast_precision_loss)]
     pub fn from_timestamp(timestamp: i64) -> Result<ExcelDateTime, XlsxError> {
         if !(-2_209_075_200..253_402_300_800).contains(&timestamp) {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Unix timestamp: '{timestamp}' outside converted Excel year range of 1900-9999"
             )));
         }
@@ -898,13 +900,13 @@ impl ExcelDateTime {
         // The default epoch is 1900-01-01 but Excel actually uses 1899-12-31.
         // The upper end of the Excel date range is 9999-12-31.
         if year > 9999 || year < 1900 && (year != 1899 || month != 12 || day != 31) {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Year: '{year}' outside Excel range of 1900-9999"
             )));
         }
 
         if !(1..=12).contains(&month) {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Month: '{month}' outside Excel range of 1-12"
             )));
         }
@@ -916,7 +918,7 @@ impl ExcelDateTime {
         }
 
         if day < 1 || day > months[(month as usize) - 1] {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Day: '{day}' is invalid for year '{year}' and month '{month}'"
             )));
         }
@@ -930,14 +932,14 @@ impl ExcelDateTime {
         // can be greater than 24 hours.
 
         if min > 60 {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Minutes: '{min}' outside Excel range of 0-60"
             )));
         }
 
         // Excel only supports milli-seconds.
         if sec > 59.999 {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Seconds: '{sec}' outside Excel range of 0-59.999"
             )));
         }
@@ -951,20 +953,20 @@ impl ExcelDateTime {
         // can be greater than 24 hours.
 
         if min > 60 {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Minutes: '{min}' outside Excel range of 0-60"
             )));
         }
 
         if sec > 60 {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Seconds: '{sec}' outside Excel range of 0-60"
             )));
         }
 
         // Excel only supports milli-seconds.
         if milli > 999 {
-            return Err(XlsxError::DateRangeError(format!(
+            return Err(XlsxError::DateTimeRangeError(format!(
                 "Milliseconds: '{milli}' outside Excel range of 0-999"
             )));
         }
@@ -1206,6 +1208,49 @@ impl ExcelDateTime {
             self.year, self.month, self.day, self.hour, self.min, self.sec
         )
     }
+
+    // Chrono date handling functions.
+
+    // Convert a chrono::NaiveTime to an Excel serial datetime.
+    #[cfg(feature = "chrono")]
+    pub(crate) fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
+        let excel_date = Self::chrono_date_to_excel(datetime.date());
+        let excel_time = Self::chrono_time_to_excel(datetime.time());
+
+        excel_date + excel_time
+    }
+
+    // Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
+    // is the number of days since the epoch, which is either 1899-12-31 or
+    // 1904-01-01.
+    #[cfg(feature = "chrono")]
+    #[allow(clippy::cast_precision_loss)]
+    pub(crate) fn chrono_date_to_excel(date: NaiveDate) -> f64 {
+        let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
+
+        let duration = date - epoch;
+        let mut excel_date = duration.num_days() as f64;
+
+        // For legacy reasons Excel treats 1900 as a leap year. We add an additional
+        // day for dates after the leapday in the 1899 epoch.
+        if epoch.year() == 1899 && excel_date > 59.0 {
+            excel_date += 1.0;
+        }
+
+        excel_date
+    }
+
+    // Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
+    // datetime is the number of milliseconds divided by the total number of
+    // milliseconds in the day.
+    #[cfg(feature = "chrono")]
+    #[allow(clippy::cast_precision_loss)]
+    pub(crate) fn chrono_time_to_excel(time: NaiveTime) -> f64 {
+        let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
+        let duration = time - midnight;
+
+        duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
+    }
 }
 
 impl Default for ExcelDateTime {
@@ -1233,10 +1278,6 @@ enum ExcelDateTimeType {
     DateAndTime,
 }
 
-// -----------------------------------------------------------------------
-// Datetime traits.
-// -----------------------------------------------------------------------
-
 /// Trait to map user date/time types to an Excel serial datetimes.
 ///
 /// The `rust_xlsxwriter` library supports two ways of converting dates and
@@ -1245,6 +1286,10 @@ enum ExcelDateTimeType {
 /// with dates and times. The second is the inbuilt [`ExcelDateTime`] struct
 /// which provides a more limited set of methods and which only targets Excel
 /// specific dates and times.
+///
+/// In order to use [`Chrono`] with `rust_xlsxwriter` APIs you must enable the
+/// optional `chrono` feature when adding `rust_xlsxwriter` to your
+/// `Cargo.toml`.
 ///
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
 ///
@@ -1263,67 +1308,22 @@ impl IntoExcelDateTime for &ExcelDateTime {
 #[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveDateTime {
     fn to_excel(self) -> f64 {
-        chrono_datetime_to_excel(self)
+        ExcelDateTime::chrono_datetime_to_excel(self)
     }
 }
 
 #[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveDate {
     fn to_excel(self) -> f64 {
-        chrono_date_to_excel(*self)
+        ExcelDateTime::chrono_date_to_excel(*self)
     }
 }
 
 #[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveTime {
     fn to_excel(self) -> f64 {
-        chrono_time_to_excel(*self)
+        ExcelDateTime::chrono_time_to_excel(*self)
     }
-}
-
-// -----------------------------------------------------------------------
-// Chrono date handling functions.
-// -----------------------------------------------------------------------
-
-// Convert a chrono::NaiveTime to an Excel serial datetime.
-#[cfg(feature = "chrono")]
-pub(crate) fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
-    let excel_date = chrono_date_to_excel(datetime.date());
-    let excel_time = chrono_time_to_excel(datetime.time());
-
-    excel_date + excel_time
-}
-
-// Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
-// is the number of days since the epoch, which is either 1899-12-31 or
-// 1904-01-01.
-#[cfg(feature = "chrono")]
-#[allow(clippy::cast_precision_loss)]
-pub(crate) fn chrono_date_to_excel(date: NaiveDate) -> f64 {
-    let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
-
-    let duration = date - epoch;
-    let mut excel_date = duration.num_days() as f64;
-
-    // For legacy reasons Excel treats 1900 as a leap year. We add an additional
-    // day for dates after the leapday in the 1899 epoch.
-    if epoch.year() == 1899 && excel_date > 59.0 {
-        excel_date += 1.0;
-    }
-
-    excel_date
-}
-
-// Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
-// datetime is the number of milliseconds divided by the total number of
-// milliseconds in the day.
-#[cfg(feature = "chrono")]
-#[allow(clippy::cast_precision_loss)]
-pub(crate) fn chrono_time_to_excel(time: NaiveTime) -> f64 {
-    let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
-    let duration = time - midnight;
-
-    duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
 }
 
 // -----------------------------------------------------------------------

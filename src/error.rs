@@ -80,7 +80,7 @@ pub enum XlsxError {
     /// indicate durations. Minutes should be in the range 0-60 and seconds
     /// should be in the range 0.0-59.999. Excel only supports millisecond
     /// resolution.
-    DateRangeError(String),
+    DateTimeRangeError(String),
 
     /// A parsing error when trying to convert a string into an
     /// [`ExcelDateTime`](crate::ExcelDateTime).
@@ -98,7 +98,7 @@ pub enum XlsxError {
     ///     hh::mm::ss
     ///     hh::mm::ss.sss
     ///
-    /// Datetimes:
+    /// DateTimes:
     ///     yyyy-mm-ddThh::mm::ss
     ///     yyyy-mm-dd hh::mm::ss
     /// ```
@@ -107,7 +107,7 @@ pub enum XlsxError {
     /// like the time examples. Timezone information is not supported by Excel
     /// and ignored in the parsing.
     ///
-    DateParseError(String),
+    DateTimeParseError(String),
 
     /// A general error that is raised when a table parameter is incorrect or a
     /// table is configured incorrectly.
@@ -219,11 +219,11 @@ impl fmt::Display for XlsxError {
                 write!(f, "Chart error: '{error}'.")
             }
 
-            XlsxError::DateRangeError(error) => {
+            XlsxError::DateTimeRangeError(error) => {
                 write!(f, "Date range error: '{error}'")
             }
 
-            XlsxError::DateParseError(error) => {
+            XlsxError::DateTimeParseError(error) => {
                 write!(f, "Date parse error: '{error}'")
             }
 

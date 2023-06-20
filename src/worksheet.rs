@@ -531,24 +531,33 @@ impl Worksheet {
     /// worksheet cell.
     ///
     /// The types currently supported are:
-    /// - [`&str`].
+    /// - String types: [`&str`], [`String`], `&String` and `Cow<'_, str>`.
     /// - Numbers that convert [`Into`] [`f64`].
     /// - [`bool`]
-    /// - [`chrono::NaiveDateTime`].
-    /// - [`chrono::NaiveDate`].
-    /// - [`chrono::NaiveTime`].
+    /// - [`ExcelDateTime`].
     /// - [`Formula`].
     /// - [`Url`].
     ///
-    /// [`chrono`]: https://docs.rs/chrono/latest/chrono/index.html
+    /// If the `chrono` feature is enabled you can use the following types:
+    ///
+    /// - [`chrono::NaiveDateTime`].
+    /// - [`chrono::NaiveDate`].
+    /// - [`chrono::NaiveTime`].
+    ///
+    ///
+    /// [`Chrono`]: https://docs.rs/chrono/latest/chrono/index.html
     /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
     /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
     /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
-    /// Note, default date/time number formats are provided for the [`chrono`]
-    /// types since Excel requires that date have a format.
+    /// Note, A default number formats is provided for date/time types since Excel
+    /// requires that date have a format:
     ///
-    /// User can also use this method to write their own data types to Excel by
+    /// - Dates: `"yyyy\\-mm\\-dd;@"`
+    /// - Times: `"hh:mm:ss;@"`
+    /// - Date and times: `"yyyy\\-mm\\-dd\\ hh:mm:ss"`
+    ///
+    /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
     /// # Errors
@@ -573,21 +582,29 @@ impl Worksheet {
     /// [`IntoExcelData`] to a worksheet cell.
     ///
     /// The types currently supported are:
-    /// - [`&str`].
+    /// - String types: [`&str`], [`String`], `&String` and `Cow<'_, str>`.
     /// - Numbers that convert [`Into`] [`f64`].
     /// - [`bool`]
-    /// - [`chrono::NaiveDateTime`].
-    /// - [`chrono::NaiveDate`].
-    /// - [`chrono::NaiveTime`].
+    /// - [`ExcelDateTime`].
     /// - [`Formula`].
     /// - [`Url`].
     ///
-    /// [`chrono`]: https://docs.rs/chrono/latest/chrono/index.html
+    /// If the `chrono` feature is enabled you can use the following types:
+    ///
+    /// - [`chrono::NaiveDateTime`].
+    /// - [`chrono::NaiveDate`].
+    /// - [`chrono::NaiveTime`].
+    ///
+    ///
+    /// [`Chrono`]: https://docs.rs/chrono/latest/chrono/index.html
     /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
     /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
     /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
-    /// User can also use this method to write their own data types to Excel by
+    /// Note, default date/time number formats are provided for the [`Chrono`]
+    /// types since Excel requires that date have a format.
+    ///
+    /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
     /// # Errors
@@ -2558,29 +2575,34 @@ impl Worksheet {
         self.store_url(row, col, link, format)
     }
 
-    /// Write a formatted date and time to a worksheet cell.
+    /// Write a formatted date and/or time to a worksheet cell.
     ///
-    /// Write a [`chrono::NaiveDateTime`] instance as an Excel datetime to a
-    /// worksheet cell. The [chrono] framework provides a comprehensive range of
-    /// functions and types for dealing with times and dates. The serial
-    /// dates/times used by Excel don't support timezones so the `Naive` chrono
-    /// variants are used.
+    /// The method method writes dates/times that implements [`IntoExcelDateTime`]
+    /// to a worksheet cell.
+    ///
+    /// The date/time types supported are:
+    /// - [`ExcelDateTime`].
+    ///
+    /// If the `chrono` feature is enabled you can use the following types:
+    ///
+    /// - [`chrono::NaiveDateTime`].
+    /// - [`chrono::NaiveDate`].
+    /// - [`chrono::NaiveTime`].
+    ///
+    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
     /// Excel stores dates and times as a floating point number with a number
     /// format to defined how it is displayed. The number format is set via a
     /// [`Format`] struct which can also control visual formatting such as bold
     /// and italic text.
     ///
-    /// [`chrono::NaiveDateTime`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
-    ///
-    /// [chrono]: https://docs.rs/chrono/latest/chrono/index.html
-    ///
     /// # Arguments
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `datetime` - A [`chrono::NaiveDateTime`] instance.
+    /// * `datetime` - A date/time instance that implements [`IntoExcelDateTime`].
     /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -2634,6 +2656,93 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_datetime.png">
     ///
+    /// The following example demonstrates writing formatted dates in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create some formats to use with the dates below.
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd");
+    ///     let format4 = Format::new().set_num_format("ddd dd mmm yyyy");
+    ///     let format5 = Format::new().set_num_format("dddd, mmmm dd, yyyy");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a date object.
+    ///     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
+    ///
+    ///     // Write the date with different Excel formats.
+    ///     worksheet.write_datetime(0, 0, &date, &format1)?;
+    ///     worksheet.write_datetime(1, 0, &date, &format2)?;
+    ///     worksheet.write_datetime(2, 0, &date, &format3)?;
+    ///     worksheet.write_datetime(3, 0, &date, &format4)?;
+    ///     worksheet.write_datetime(4, 0, &date, &format5)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_date.png">
+    ///
+    /// The following example demonstrates writing formatted times in an Excel
+    /// worksheet.
+    ///
+    /// ```
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create some formats to use with the times below.
+    ///     let format1 = Format::new().set_num_format("h::mm");
+    ///     let format2 = Format::new().set_num_format("hh::mm");
+    ///     let format3 = Format::new().set_num_format("hh::mm:ss");
+    ///     let format4 = Format::new().set_num_format("hh::mm:ss.000");
+    ///     let format5 = Format::new().set_num_format("h::mm AM/PM");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     // Create a time object.
+    ///     let time = ExcelDateTime::from_hms_milli(2, 59, 3, 456)?;
+    ///
+    ///     // Write the time with different Excel formats.
+    ///     worksheet.write_datetime(0, 0, &time, &format1)?;
+    ///     worksheet.write_datetime(1, 0, &time, &format2)?;
+    ///     worksheet.write_datetime(2, 0, &time, &format3)?;
+    ///     worksheet.write_datetime(3, 0, &time, &format4)?;
+    ///     worksheet.write_datetime(4, 0, &time, &format5)?;
+    ///
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_time.png">
+    ///
+    ///
     pub fn write_datetime(
         &mut self,
         row: RowNum,
@@ -2647,28 +2756,35 @@ impl Worksheet {
         self.store_datetime(row, col, datetime, Some(format))
     }
 
+    #[doc(hidden)] // Hide the docs since this functionality is provided by `write_datetime()`.
     /// Write a formatted date to a worksheet cell.
     ///
-    /// Write a [`chrono::NaiveDateTime`] instance as an Excel datetime to a
-    /// worksheet cell. The [chrono] framework provides a comprehensive range of
-    /// functions and types for dealing with times and dates. The serial
-    /// dates/times used by Excel don't support timezones so the `Naive` chrono
-    /// variants are used.
+    /// The method method writes dates/times that implements [`IntoExcelDateTime`]
+    /// to a worksheet cell.
+    ///
+    /// The date/time types supported are:
+    /// - [`ExcelDateTime`].
+    ///
+    /// If the `chrono` feature is enabled you can use the following types:
+    ///
+    /// - [`chrono::NaiveDateTime`].
+    /// - [`chrono::NaiveDate`].
+    /// - [`chrono::NaiveTime`].
+    ///
+    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
     /// Excel stores dates and times as a floating point number with a number
     /// format to defined how it is displayed. The number format is set via a
     /// [`Format`] struct which can also control visual formatting such as bold
     /// and italic text.
     ///
-    /// [chrono]: https://docs.rs/chrono/latest/chrono/index.html
-    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
-    ///
     /// # Arguments
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `date` - A [`chrono::NaiveDate`] instance.
+    /// * `date` - A date/time instance that implements [`IntoExcelDateTime`].
     /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -2735,29 +2851,35 @@ impl Worksheet {
         self.store_datetime(row, col, datetime, Some(format))
     }
 
+    #[doc(hidden)] // Hide the docs since this functionality is provided by `write_datetime()`.
     /// Write a formatted time to a worksheet cell.
     ///
-    /// Write a [`chrono::NaiveDateTime`] instance as an Excel datetime to a
-    /// worksheet cell. The [chrono] framework provides a comprehensive range of
-    /// functions and types for dealing with times and dates. The serial
-    /// dates/times used by Excel don't support timezones so the `Naive` chrono
-    /// variants are used.
+    /// The method method writes dates/times that implements [`IntoExcelDateTime`]
+    /// to a worksheet cell.
+    ///
+    /// The date/time types supported are:
+    /// - [`ExcelDateTime`].
+    ///
+    /// If the `chrono` feature is enabled you can use the following types:
+    ///
+    /// - [`chrono::NaiveDateTime`].
+    /// - [`chrono::NaiveDate`].
+    /// - [`chrono::NaiveTime`].
+    ///
+    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
     /// Excel stores dates and times as a floating point number with a number
     /// format to defined how it is displayed. The number format is set via a
     /// [`Format`] struct which can also control visual formatting such as bold
     /// and italic text.
     ///
-    /// [chrono]: https://docs.rs/chrono/latest/chrono/index.html
-    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
-    ///
     /// # Arguments
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `time` - A [`chrono::NaiveTime`] instance.
+    /// * `time` - A date/time instance that implements [`IntoExcelDateTime`].
     /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -10518,7 +10640,7 @@ impl IntoExcelData for &NaiveDateTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = crate::chrono_datetime_to_excel(self);
+        let number = ExcelDateTime::chrono_datetime_to_excel(self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10530,7 +10652,7 @@ impl IntoExcelData for &NaiveDateTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = crate::chrono_datetime_to_excel(self);
+        let number = ExcelDateTime::chrono_datetime_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -10543,7 +10665,7 @@ impl IntoExcelData for &NaiveDate {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = crate::chrono_date_to_excel(*self);
+        let number = ExcelDateTime::chrono_date_to_excel(*self);
         let format = &Format::new().set_num_format("yyyy\\-mm\\-dd;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10555,7 +10677,7 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = crate::chrono_date_to_excel(*self);
+        let number = ExcelDateTime::chrono_date_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -10568,7 +10690,7 @@ impl IntoExcelData for &NaiveTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = crate::chrono_time_to_excel(*self);
+        let number = ExcelDateTime::chrono_time_to_excel(*self);
         let format = &Format::new().set_num_format("hh:mm:ss;@");
         worksheet.store_datetime(row, col, number, Some(format))
     }
@@ -10580,7 +10702,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = crate::chrono_time_to_excel(*self);
+        let number = ExcelDateTime::chrono_time_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }

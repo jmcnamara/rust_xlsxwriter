@@ -16,58 +16,58 @@ mod datetime_tests {
     #[test]
     fn check_validations() {
         let result = ExcelDateTime::from_ymd(1899, 12, 30);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_ymd(10000, 1, 1);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_ymd(2000, 0, 1);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_ymd(2000, 13, 1);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_ymd(2000, 1, 0);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_ymd(2000, 1, 32);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_ymd(2000, 4, 31); // Invalid month day.
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_hms(0, 61, 0);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_hms(0, 0, 59.9999);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_hms_milli(0, 61, 0, 0);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_hms_milli(0, 0, 61, 0);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_hms_milli(0, 0, 0, 1000);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::parse_from_str("2000-01");
-        assert!(matches!(result, Err(XlsxError::DateParseError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeParseError(_))));
 
         let result = ExcelDateTime::parse_from_str("20000-01-01");
-        assert!(matches!(result, Err(XlsxError::DateParseError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeParseError(_))));
 
         let result = ExcelDateTime::from_serial_datetime(-1);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_serial_datetime(2958466);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_timestamp(-2209075201);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
         let result = ExcelDateTime::from_timestamp(253402300800);
-        assert!(matches!(result, Err(XlsxError::DateRangeError(_))));
+        assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
     }
 
     #[test]
@@ -1614,7 +1614,7 @@ mod datetime_tests {
                 .unwrap()
                 .and_hms_milli_opt(hour, min, seconds, millis)
                 .unwrap();
-            assert_eq!(expected, crate::chrono_datetime_to_excel(&datetime));
+            assert_eq!(expected, ExcelDateTime::chrono_datetime_to_excel(&datetime));
         }
     }
 
@@ -1826,7 +1826,7 @@ mod datetime_tests {
         for test_data in dates {
             let (year, month, day, expected) = test_data;
             let datetime = NaiveDate::from_ymd_opt(year, month, day).unwrap();
-            assert_eq!(expected, crate::chrono_date_to_excel(datetime));
+            assert_eq!(expected, ExcelDateTime::chrono_date_to_excel(datetime));
         }
     }
 
@@ -1939,7 +1939,7 @@ mod datetime_tests {
         for test_data in times {
             let (hour, min, seconds, millis, expected) = test_data;
             let datetime = NaiveTime::from_hms_milli_opt(hour, min, seconds, millis).unwrap();
-            let mut diff = crate::chrono_time_to_excel(datetime) - expected;
+            let mut diff = ExcelDateTime::chrono_time_to_excel(datetime) - expected;
             diff = diff.abs();
             assert!(diff < 0.00000000001);
         }

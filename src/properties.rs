@@ -397,7 +397,8 @@ impl DocProperties {
     ///
     /// # Arguments
     ///
-    /// * `datetime` - The creation date property. [`chrono::DateTime`]
+    /// * `datetime` - The creation date property. A type that implements
+    ///   [`IntoCustomDateTimeUtc`].
     ///
     /// [`chrono::DateTime`]:
     ///     https://docs.rs/chrono/latest/chrono/struct.DateTime.html
@@ -421,9 +422,13 @@ impl DocProperties {
     /// # Arguments
     ///
     /// * `name` - The user defined name of the custom property.
-    /// * `value` - The value can be a [`&str`], [`f64`], [`i32`] [`bool`] or
-    ///   `&DateTime<Utc>` type for which the `IntoCustomProperty` trait is
-    ///   implemented.
+    /// * `value` - The value can be a [`&str`], [`f64`], [`i32`] [`bool`],
+    ///   [`ExcelDateTime`] or [`chrono::DateTime<Utc>`] type for which the
+    ///   `IntoCustomProperty` trait is implemented.
+    ///
+    /// [`chrono::DateTime<Utc>`]:
+    /// https://docs.rs/chrono/latest/chrono/naive/struct.DateTime.html
+    ///
     ///
     /// # Examples
     ///
@@ -618,6 +623,13 @@ impl IntoCustomProperty for &ExcelDateTime {
 /// Trait to map user date types to an Excel UTC date.
 ///
 /// Map a date to the Excel UTC date used in custom document properties.
+///
+/// This can be either a [`ExcelDateTime`] date instance or, if the `chrono`
+/// feature is enabled, a [`chrono::DateTime<Utc>`] instance.
+///
+/// [`chrono::DateTime<Utc>`]:
+/// https://docs.rs/chrono/latest/chrono/naive/struct.DateTime.html
+///
 ///
 pub trait IntoCustomDateTimeUtc {
     /// Trait method to convert a date into an Excel UTC date.
