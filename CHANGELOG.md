@@ -5,9 +5,28 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.41.0] - 2023-06-20
+
+- Added the native [`ExcelDateTime`] struct to allow handling of dates and times
+  without a dependency on the [`Chrono`] library. The Chrono library is now an
+  optional feature/dependency. It is included by default in this release for
+  compatibility with previous versions but it will be optionally off in the next
+  and subsequent versions.
+
+  All date/time APIs support both the native `ExcelDateTime` and `Chrono` types
+  via the [`IntoExcelDateTime`] trait.
+
+  The `worksheet.write_date()` and `worksheet.write_time()` methods have been
+  moved to "undocumented" since the same functionality is available via
+  [`worksheet.write_datetime()`]. This is a soft deprecation.
+
+[`Chrono`]: https://docs.rs/chrono/latest/chrono
+[`ExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html
+[`IntoExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoExcelDateTime.html
+[`worksheet.write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_datetime
 
 
-## [0.40.0] - 2023-05-301
+## [0.40.0] - 2023-05-31
 
 - Added support for worksheet tables. See [`Table`] and the
   [`worksheet.add_table()`] method.

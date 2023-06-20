@@ -22,7 +22,7 @@ pretty_assertions = "1.3.0"
 
 [features]
 # `default`: Includes all the standard functionality.
-default = []
+default = ["chrono"]
 
 # `zlib`: Adds dependency on zlib and a C compiler. This includes the same
 #  features as `default` but is 1.5x faster for large files.
@@ -36,22 +36,22 @@ chrono = ["dep:chrono"]
 test-resave = []
 
 [[example]]
-name = "doc_worksheet_write_datetime_chrono.rs"
+name = "doc_worksheet_write_datetime_chrono"
 path = "examples/doc_worksheet_write_datetime_chrono.rs"
 required-features = ["chrono"]
 
 [[example]]
-name = "doc_worksheet_write_date_chrono.rs"
+name = "doc_worksheet_write_date_chrono"
 path = "examples/doc_worksheet_write_date_chrono.rs"
 required-features = ["chrono"]
 
 [[example]]
-name = "doc_worksheet_write_time_chrono.rs"
+name = "doc_worksheet_write_time_chrono"
 path = "examples/doc_worksheet_write_time_chrono.rs"
 required-features = ["chrono"]
 
 [[example]]
-name = "doc_properties_checksum2_chrono.rs"
+name = "doc_properties_checksum2_chrono"
 path = "examples/doc_properties_checksum2_chrono.rs"
 required-features = ["chrono"]
 
