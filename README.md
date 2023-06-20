@@ -110,9 +110,8 @@ frequently.
 
 Recent changes:
 
+- Added native date/time support and made `chrono` optional.
 - Added support for worksheet tables.
-- Added more generic interfaces and methods.
-- Added Chart axis and series methods.
 
 See the full [Release Notes and Changelog].
 

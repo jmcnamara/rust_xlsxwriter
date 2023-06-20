@@ -564,6 +564,9 @@ documentation and generally show how an individual function works.
 * doc_properties_checksum2.rs - Create a simple workbook to demonstrate a
   constant checksum due to the a constant creation date.
 
+* doc_properties_checksum2_chrono.rs - Create a simple workbook to
+  demonstrate a constant checksum due to the a constant creation date.
+
 * doc_properties_custom.rs - An example of setting custom/user defined
   workbook document properties.
 
@@ -877,7 +880,13 @@ documentation and generally show how an individual function works.
 * doc_worksheet_write_date.rs - Demonstrates writing formatted dates in an
   Excel worksheet.
 
+* doc_worksheet_write_date_chrono.rs - Demonstrates writing formatted dates
+  in an Excel worksheet.
+
 * doc_worksheet_write_datetime.rs - Demonstrates writing formatted
+  datetimes in an Excel worksheet.
+
+* doc_worksheet_write_datetime_chrono.rs - Demonstrates writing formatted
   datetimes in an Excel worksheet.
 
 * doc_worksheet_write_dynamic_array_formula.rs - Demonstrates a static
@@ -922,6 +931,9 @@ documentation and generally show how an individual function works.
 
 * doc_worksheet_write_time.rs - Demonstrates writing formatted times in an
   Excel worksheet.
+
+* doc_worksheet_write_time_chrono.rs - Demonstrates writing formatted times
+  in an Excel worksheet.
 
 * doc_worksheet_write_url_with_format.rs - Demonstrates writing a url with
   alternative format.
