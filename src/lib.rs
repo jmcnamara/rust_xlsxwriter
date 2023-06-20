@@ -21,8 +21,7 @@
 //! ```rust
 //! # // This code is available in examples/app_demo.rs
 //! #
-//! use chrono::NaiveDate;
-//! use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Image, Workbook, XlsxError};
+//! use rust_xlsxwriter::*;
 //!
 //! fn main() -> Result<(), XlsxError> {
 //!     // Create a new Excel file object.
@@ -43,7 +42,7 @@
 //!     worksheet.set_column_width(0, 22)?;
 //!
 //!     // Write a string without formatting.
-//!     worksheet.write(0, 0, &"Hello".to_string())?;
+//!     worksheet.write(0, 0, "Hello")?;
 //!
 //!     // Write a string with the bold format defined above.
 //!     worksheet.write_with_format(1, 0, "World", &bold_format)?;
@@ -59,12 +58,12 @@
 //!     worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
 //!
 //!     // Write a date.
-//!     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
+//!     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
 //!     worksheet.write_with_format(6, 0, &date, &date_format)?;
 //!
 //!     // Write some links.
-//!     worksheet.write_url(7, 0, "https://www.rust-lang.org")?;
-//!     worksheet.write_url_with_text(8, 0, "https://www.rust-lang.org", "Learn Rust")?;
+//!     worksheet.write(7, 0, Url::new("https://www.rust-lang.org"))?;
+//!     worksheet.write(8, 0, Url::new("https://www.rust-lang.org").set_text("Rust"))?;
 //!
 //!     // Write some merged cells.
 //!     worksheet.merge_range(9, 0, 9, 1, "Merged cells", &merge_format)?;

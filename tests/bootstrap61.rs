@@ -5,8 +5,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+#[cfg(feature = "chrono")]
 use chrono::NaiveDate;
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+
+use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -15,6 +17,59 @@ mod common;
 
 // Test case generic write_with_format().
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let format1 = Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
+    let format2 = Format::new().set_num_format("yyyy\\-mm\\-dd;@");
+    let format3 = Format::new().set_num_format("hh:mm:ss;@");
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_column_width(0, 30)?;
+
+    let datetime = ExcelDateTime::from_ymd(2023, 1, 25)
+        .unwrap()
+        .and_hms(18, 0, 0)
+        .unwrap();
+    let time = ExcelDateTime::from_hms(18, 0, 0)?;
+
+    let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
+
+    worksheet.write_with_format(0, 0, &datetime, &format1)?;
+    worksheet.write_with_format(1, 0, &date, &format2)?;
+    worksheet.write_with_format(2, 0, &time, &format3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case generic write().
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_column_width(0, 30)?;
+
+    let datetime = ExcelDateTime::from_ymd(2023, 1, 25)
+        .unwrap()
+        .and_hms(18, 0, 0)
+        .unwrap();
+    let time = ExcelDateTime::from_hms(18, 0, 0)?;
+
+    let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
+
+    worksheet.write(0, 0, &datetime)?;
+    worksheet.write(1, 0, &date)?;
+    worksheet.write(2, 0, &time)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case generic write_with_format(). With chrono.
+#[cfg(feature = "chrono")]
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let format1 = Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
@@ -45,8 +100,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case generic write().
-fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+// Test case generic write(). With chrono.
+#[cfg(feature = "chrono")]
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -91,6 +147,32 @@ fn bootstrap61_date_time_2() {
         .set_name("bootstrap61")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[cfg(feature = "chrono")]
+#[test]
+fn bootstrap61_date_time_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap61")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[cfg(feature = "chrono")]
+#[test]
+fn bootstrap61_date_time_4() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap61")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();

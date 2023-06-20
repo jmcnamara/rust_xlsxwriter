@@ -5,7 +5,9 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+#[cfg(feature = "chrono")]
 use chrono::NaiveDate;
+
 use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
 
 #[macro_use]
@@ -78,6 +80,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Basic test case. With Chrono.
+#[cfg(feature = "chrono")]
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -116,6 +119,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Version using generic write_with_format(). With Chrono.
+#[cfg(feature = "chrono")]
 fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -177,6 +181,7 @@ fn bootstrap36_date_time_2() {
     test_runner.cleanup();
 }
 
+#[cfg(feature = "chrono")]
 #[test]
 fn bootstrap36_date_time_3() {
     let test_runner = common::TestRunner::new()
@@ -189,6 +194,7 @@ fn bootstrap36_date_time_3() {
     test_runner.cleanup();
 }
 
+#[cfg(feature = "chrono")]
 #[test]
 fn bootstrap36_date_time_4() {
     let test_runner = common::TestRunner::new()

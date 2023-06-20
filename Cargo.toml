@@ -11,7 +11,7 @@ version = "0.40.0"
 edition = "2021"
 
 [dependencies]
-chrono = {version = "0.4.24", default-features = false, features = ["clock"]}
+chrono = {version = "0.4.24", default-features = false, features = ["clock"], optional = true }
 zip = {version = "0.6.4 ", default-features = false, features = ["deflate"]}
 itertools = "0.10.5"
 regex = "1.7.3"
@@ -28,8 +28,33 @@ default = []
 #  features as `default` but is 1.5x faster for large files.
 zlib = ["zip/deflate-zlib"]
 
+# `chrono`: Add support for Chrono dates/times in addition to the native
+# ExcelDateTime types.
+chrono = ["dep:chrono"]
+
 # `test-resave`: Developer only testing feature.
 test-resave = []
+
+[[example]]
+name = "doc_worksheet_write_datetime_chrono.rs"
+path = "examples/doc_worksheet_write_datetime_chrono.rs"
+required-features = ["chrono"]
+
+[[example]]
+name = "doc_worksheet_write_date_chrono.rs"
+path = "examples/doc_worksheet_write_date_chrono.rs"
+required-features = ["chrono"]
+
+[[example]]
+name = "doc_worksheet_write_time_chrono.rs"
+path = "examples/doc_worksheet_write_time_chrono.rs"
+required-features = ["chrono"]
+
+[[example]]
+name = "doc_properties_checksum2_chrono.rs"
+path = "examples/doc_properties_checksum2_chrono.rs"
+required-features = ["chrono"]
+
 
 [package.metadata.commands]
 # Some local package management and release check commands.

@@ -8,6 +8,7 @@
 use regex::Regex;
 use std::time::SystemTime;
 
+#[cfg(feature = "chrono")]
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 
 use crate::XlsxError;
@@ -1259,18 +1260,21 @@ impl IntoExcelDateTime for &ExcelDateTime {
     }
 }
 
+#[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveDateTime {
     fn to_excel(self) -> f64 {
         chrono_datetime_to_excel(self)
     }
 }
 
+#[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveDate {
     fn to_excel(self) -> f64 {
         chrono_date_to_excel(*self)
     }
 }
 
+#[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveTime {
     fn to_excel(self) -> f64 {
         chrono_time_to_excel(*self)
@@ -1282,6 +1286,7 @@ impl IntoExcelDateTime for &NaiveTime {
 // -----------------------------------------------------------------------
 
 // Convert a chrono::NaiveTime to an Excel serial datetime.
+#[cfg(feature = "chrono")]
 pub(crate) fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
     let excel_date = chrono_date_to_excel(datetime.date());
     let excel_time = chrono_time_to_excel(datetime.time());
@@ -1292,6 +1297,7 @@ pub(crate) fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
 // Convert a chrono::NaiveDate to an Excel serial date. In Excel a serial date
 // is the number of days since the epoch, which is either 1899-12-31 or
 // 1904-01-01.
+#[cfg(feature = "chrono")]
 #[allow(clippy::cast_precision_loss)]
 pub(crate) fn chrono_date_to_excel(date: NaiveDate) -> f64 {
     let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
@@ -1311,6 +1317,7 @@ pub(crate) fn chrono_date_to_excel(date: NaiveDate) -> f64 {
 // Convert a chrono::NaiveTime to an Excel time. The time portion of the Excel
 // datetime is the number of milliseconds divided by the total number of
 // milliseconds in the day.
+#[cfg(feature = "chrono")]
 #[allow(clippy::cast_precision_loss)]
 pub(crate) fn chrono_time_to_excel(time: NaiveTime) -> f64 {
     let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();

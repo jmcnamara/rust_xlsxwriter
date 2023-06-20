@@ -13,7 +13,9 @@ use std::io::Write;
 use std::mem;
 use std::sync::Arc;
 
+#[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+
 use itertools::Itertools;
 use regex::Regex;
 
@@ -62,8 +64,7 @@ const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 /// ```rust
 /// # // This code is available in examples/app_demo.rs
 /// #
-/// use chrono::NaiveDate;
-/// use rust_xlsxwriter::{Format, FormatAlign, FormatBorder, Image, Workbook, XlsxError};
+/// use rust_xlsxwriter::*;
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     // Create a new Excel file object.
@@ -84,7 +85,7 @@ const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 ///     worksheet.set_column_width(0, 22)?;
 ///
 ///     // Write a string without formatting.
-///     worksheet.write(0, 0, &"Hello".to_string())?;
+///     worksheet.write(0, 0, "Hello")?;
 ///
 ///     // Write a string with the bold format defined above.
 ///     worksheet.write_with_format(1, 0, "World", &bold_format)?;
@@ -100,12 +101,12 @@ const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 ///     worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
 ///
 ///     // Write a date.
-///     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
+///     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
 ///     worksheet.write_with_format(6, 0, &date, &date_format)?;
 ///
 ///     // Write some links.
-///     worksheet.write_url(7, 0, "https://www.rust-lang.org")?;
-///     worksheet.write_url_with_text(8, 0, "https://www.rust-lang.org", "Learn Rust")?;
+///     worksheet.write(7, 0, Url::new("https://www.rust-lang.org"))?;
+///     worksheet.write(8, 0, Url::new("https://www.rust-lang.org").set_text("Rust"))?;
 ///
 ///     // Write some merged cells.
 ///     worksheet.merge_range(9, 0, 9, 1, "Merged cells", &merge_format)?;
@@ -539,6 +540,11 @@ impl Worksheet {
     /// - [`Formula`].
     /// - [`Url`].
     ///
+    /// [`chrono`]: https://docs.rs/chrono/latest/chrono/index.html
+    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    ///
     /// Note, default date/time number formats are provided for the [`chrono`]
     /// types since Excel requires that date have a format.
     ///
@@ -575,6 +581,11 @@ impl Worksheet {
     /// - [`chrono::NaiveTime`].
     /// - [`Formula`].
     /// - [`Url`].
+    ///
+    /// [`chrono`]: https://docs.rs/chrono/latest/chrono/index.html
+    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
     /// User can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
@@ -2585,8 +2596,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_datetime.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
-    /// # use chrono::NaiveDate;
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -2605,10 +2615,7 @@ impl Worksheet {
     ///     worksheet.set_column_width(0, 30)?;
     ///
     ///     // Create a datetime object.
-    ///     let datetime = NaiveDate::from_ymd_opt(2023, 1, 25)
-    ///         .unwrap()
-    ///         .and_hms_opt(12, 30, 0)
-    ///         .unwrap();
+    ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 0)?;
     ///
     ///     // Write the datetime with different Excel formats.
     ///     worksheet.write_datetime(0, 0, &datetime, &format1)?;
@@ -2653,10 +2660,9 @@ impl Worksheet {
     /// [`Format`] struct which can also control visual formatting such as bold
     /// and italic text.
     ///
-    /// [`chrono::NaiveDate`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    ///
     /// [chrono]: https://docs.rs/chrono/latest/chrono/index.html
+    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
     /// # Arguments
     ///
@@ -2678,8 +2684,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_date.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
-    /// # use chrono::NaiveDate;
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -2698,7 +2703,7 @@ impl Worksheet {
     ///     worksheet.set_column_width(0, 30)?;
     ///
     ///     // Create a date object.
-    ///     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
+    ///     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
     ///
     ///     // Write the date with different Excel formats.
     ///     worksheet.write_date(0, 0, &date, &format1)?;
@@ -2743,10 +2748,10 @@ impl Worksheet {
     /// [`Format`] struct which can also control visual formatting such as bold
     /// and italic text.
     ///
-    /// [`chrono::NaiveTime`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    ///
     /// [chrono]: https://docs.rs/chrono/latest/chrono/index.html
+    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
     /// # Arguments
     ///
@@ -2768,8 +2773,7 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_time.rs
     /// #
-    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
-    /// # use chrono::NaiveTime;
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -2788,7 +2792,7 @@ impl Worksheet {
     ///     worksheet.set_column_width(0, 30)?;
     ///
     ///     // Create a time object.
-    ///     let time = NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap();
+    ///     let time = ExcelDateTime::from_hms_milli(2, 59, 3, 456)?;
     ///
     ///     // Write the time with different Excel formats.
     ///     worksheet.write_time(0, 0, &time, &format1)?;
@@ -10506,6 +10510,7 @@ impl IntoExcelData for &ExcelDateTime {
     }
 }
 
+#[cfg(feature = "chrono")]
 impl IntoExcelData for &NaiveDateTime {
     fn write(
         self,
@@ -10530,6 +10535,7 @@ impl IntoExcelData for &NaiveDateTime {
     }
 }
 
+#[cfg(feature = "chrono")]
 impl IntoExcelData for &NaiveDate {
     fn write(
         self,
@@ -10554,6 +10560,7 @@ impl IntoExcelData for &NaiveDate {
     }
 }
 
+#[cfg(feature = "chrono")]
 impl IntoExcelData for &NaiveTime {
     fn write(
         self,

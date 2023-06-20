@@ -6,6 +6,7 @@
 
 #![warn(missing_docs)]
 
+#[cfg(feature = "chrono")]
 use chrono::{DateTime, Utc};
 
 use crate::ExcelDateTime;
@@ -159,14 +160,13 @@ use crate::ExcelDateTime;
 /// ```
 /// # // This code is available in examples/doc_properties_checksum2.rs
 /// #
-/// use chrono::{TimeZone, Utc};
-/// use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
+/// use rust_xlsxwriter::{DocProperties, ExcelDateTime, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
 ///     let mut workbook = Workbook::new();
 ///
 ///     // Create a file creation date for the file.
-///     let date = Utc.with_ymd_and_hms(2023, 1, 1, 0, 0, 0).unwrap();
+///     let date = ExcelDateTime::from_ymd(2023, 1, 1)?;
 ///
 ///     // Add it to the document metadata.
 ///     let properties = DocProperties::new().set_creation_datetime(&date);
@@ -602,6 +602,7 @@ impl IntoCustomProperty for bool {
     }
 }
 
+#[cfg(feature = "chrono")]
 impl IntoCustomProperty for &DateTime<Utc> {
     fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
         CustomProperty::new_property_datetime(name.into(), self)
@@ -624,6 +625,7 @@ pub trait IntoCustomDateTimeUtc {
     fn utc_datetime(self) -> String;
 }
 
+#[cfg(feature = "chrono")]
 impl IntoCustomDateTimeUtc for &DateTime<Utc> {
     fn utc_datetime(self) -> String {
         self.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)

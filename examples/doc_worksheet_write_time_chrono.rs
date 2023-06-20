@@ -5,7 +5,8 @@
 //! The following example demonstrates writing formatted times in an Excel
 //! worksheet.
 
-use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+use chrono::NaiveTime;
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -24,7 +25,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_column_width(0, 30)?;
 
     // Create a time object.
-    let time = ExcelDateTime::from_hms_milli(2, 59, 3, 456)?;
+    let time = NaiveTime::from_hms_milli_opt(2, 59, 3, 456).unwrap();
 
     // Write the time with different Excel formats.
     worksheet.write_time(0, 0, &time, &format1)?;

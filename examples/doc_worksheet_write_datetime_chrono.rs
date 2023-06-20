@@ -5,7 +5,8 @@
 //! The following example demonstrates writing formatted datetimes in an Excel
 //! worksheet.
 
-use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+use chrono::NaiveDate;
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -24,7 +25,10 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_column_width(0, 30)?;
 
     // Create a datetime object.
-    let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 0)?;
+    let datetime = NaiveDate::from_ymd_opt(2023, 1, 25)
+        .unwrap()
+        .and_hms_opt(12, 30, 0)
+        .unwrap();
 
     // Write the datetime with different Excel formats.
     worksheet.write_datetime(0, 0, &datetime, &format1)?;

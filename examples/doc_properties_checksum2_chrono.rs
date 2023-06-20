@@ -5,13 +5,14 @@
 //! Create a simple workbook to demonstrate a constant checksum due to the a
 //! constant creation date.
 
-use rust_xlsxwriter::{DocProperties, ExcelDateTime, Workbook, XlsxError};
+use chrono::{TimeZone, Utc};
+use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Create a file creation date for the file.
-    let date = ExcelDateTime::from_ymd(2023, 1, 1)?;
+    let date = Utc.with_ymd_and_hms(2023, 1, 1, 0, 0, 0).unwrap();
 
     // Add it to the document metadata.
     let properties = DocProperties::new().set_creation_datetime(&date);

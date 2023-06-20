@@ -5,7 +5,9 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+#[cfg(feature = "chrono")]
 use chrono::NaiveDate;
+
 use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
 
 #[macro_use]
@@ -35,6 +37,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Test to demonstrate autofit. With Chrono date.
+#[cfg(feature = "chrono")]
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -67,6 +70,7 @@ fn test_autofit05_1() {
     test_runner.cleanup();
 }
 
+#[cfg(feature = "chrono")]
 #[test]
 fn test_autofit05_2() {
     let test_runner = common::TestRunner::new()

@@ -7,8 +7,10 @@
 #[cfg(test)]
 mod datetime_tests {
 
-    use crate::{ExcelDateTime, XlsxError};
+    #[cfg(feature = "chrono")]
     use chrono::prelude::*;
+
+    use crate::{ExcelDateTime, XlsxError};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -1439,6 +1441,7 @@ mod datetime_tests {
         }
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn dates_against_chrono() {
         for year in 1970..=9999 {
@@ -1474,6 +1477,7 @@ mod datetime_tests {
         }
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn times_against_chrono() {
         for timestamp in 0..=86_4000 {
@@ -1485,6 +1489,7 @@ mod datetime_tests {
         }
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn days_against_chrono() {
         for days in 0..=366 * 4 {
@@ -1497,6 +1502,7 @@ mod datetime_tests {
         }
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn chrono_dates_and_times() {
         // Test date and time
@@ -1612,6 +1618,7 @@ mod datetime_tests {
         }
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn chrono_dates_only() {
         // Test date only.
@@ -1823,6 +1830,7 @@ mod datetime_tests {
         }
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn chrono_times_only() {
         // Test time only.
