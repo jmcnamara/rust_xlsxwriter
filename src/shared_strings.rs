@@ -4,8 +4,6 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use itertools::Itertools;
-
 use crate::shared_strings_table::SharedStringsTable;
 use crate::xmlwriter::XMLWriter;
 
@@ -54,8 +52,12 @@ impl SharedStrings {
     }
 
     // Write the sst string elements.
+    #[allow(clippy::from_iter_instead_of_collect)] // from_iter() is faster than collect() here.
     fn write_sst_strings(&mut self, string_table: &SharedStringsTable) {
-        for (string, _) in string_table.strings.iter().sorted_by_key(|x| x.1) {
+        let mut insertion_order_strings = Vec::from_iter(string_table.strings.iter());
+        insertion_order_strings.sort_by_key(|x| x.1);
+
+        for (string, _) in insertion_order_strings {
             let preserve_whitespace =
                 string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']);
 
