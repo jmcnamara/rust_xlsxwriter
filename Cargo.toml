@@ -13,7 +13,6 @@ edition = "2021"
 [dependencies]
 chrono = {version = "0.4.24", default-features = false, features = ["clock"], optional = true }
 zip = {version = "0.6.4 ", default-features = false, features = ["deflate"]}
-itertools = "0.10.5"
 regex = "1.7.3"
 lazy_static = "1.4.0"
 

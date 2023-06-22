@@ -38,13 +38,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let filter_condition1 = FilterCondition::new().add_list_filter("East");
 
-    worksheet.filter_column(0, &filter_condition1)?;
-
     let filter_condition2 = FilterCondition::new()
         .add_custom_filter(FilterCriteria::GreaterThan, 3000)
         .add_custom_filter(FilterCriteria::LessThan, 8000);
 
     worksheet.filter_column(2, &filter_condition2)?;
+    worksheet.filter_column(0, &filter_condition1)?;
 
     workbook.save(filename)?;
 

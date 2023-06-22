@@ -16,7 +16,6 @@ use std::sync::Arc;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-use itertools::Itertools;
 use regex::Regex;
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
@@ -204,7 +203,7 @@ pub struct Worksheet {
     top_left_cell: String,
     horizontal_breaks: Vec<u32>,
     vertical_breaks: Vec<u32>,
-    filter_conditions: HashMap<ColNum, FilterCondition>,
+    filter_conditions: BTreeMap<ColNum, FilterCondition>,
     filter_automatic_off: bool,
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashSet<(RowNum, ColNum)>,
@@ -381,7 +380,7 @@ impl Worksheet {
             top_left_cell: String::new(),
             horizontal_breaks: vec![],
             vertical_breaks: vec![],
-            filter_conditions: HashMap::new(),
+            filter_conditions: BTreeMap::new(),
             filter_automatic_off: false,
             charts: BTreeMap::new(),
             has_drawing_object_linkage: false,
@@ -4393,7 +4392,7 @@ impl Worksheet {
         self.autofilter_area = utility::cell_range(first_row, first_col, last_row, last_col);
 
         // Clear any previous filters.
-        self.filter_conditions = HashMap::new();
+        self.filter_conditions = BTreeMap::new();
 
         // Store the cells with the autofilter dropdown for the autofit calc.
         for col in first_col..=last_col {
@@ -7742,22 +7741,21 @@ impl Worksheet {
         }
 
         // Get the range that the autofilter applies to.
-        let filter_columns: Vec<ColNum> = self.filter_conditions.keys().copied().collect();
         let first_row = self.autofilter_defined_name.first_row + 1; // Skip header.
         let last_row = self.autofilter_defined_name.last_row;
 
-        for col_num in filter_columns {
+        for col_num in self.filter_conditions.clone().keys() {
             // Iterate through each column filter conditions.
-            let filter_condition = self.filter_conditions.get(&col_num).unwrap().clone();
+            let filter_condition = self.filter_conditions.get(col_num).unwrap().clone();
             for row_num in first_row..=last_row {
                 if filter_condition.is_list_filter {
                     // Handle list filters.
-                    if !self.row_matches_list_filter(row_num, col_num, &filter_condition) {
+                    if !self.row_matches_list_filter(row_num, *col_num, &filter_condition) {
                         self.set_row_hidden(row_num).unwrap();
                     }
                 } else {
                     // Handle custom filters.
-                    if !self.row_matches_custom_filters(row_num, col_num, &filter_condition) {
+                    if !self.row_matches_custom_filters(row_num, *col_num, &filter_condition) {
                         self.set_row_hidden(row_num).unwrap();
                     }
                 }
@@ -9599,7 +9597,7 @@ impl Worksheet {
             self.writer.xml_start_tag("autoFilter", &attributes);
             let col_offset = self.autofilter_defined_name.first_col;
 
-            for col in self.filter_conditions.clone().keys().sorted() {
+            for col in self.filter_conditions.clone().keys() {
                 let filter_condition = self.filter_conditions.get(col).unwrap().clone();
 
                 self.write_filter_column(*col - col_offset, &filter_condition);
