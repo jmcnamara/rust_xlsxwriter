@@ -586,9 +586,9 @@ impl Format {
     // Check if the format is in the default/unmodified condition.
     pub(crate) fn is_default(&self) -> bool {
         lazy_static! {
-            static ref DEFAULT_FORMAT: Format = Format::default();
+            static ref DEFAULT_STATE: Format = Format::default();
         };
-        self == &*DEFAULT_FORMAT
+        self == &*DEFAULT_STATE
     }
 
     // -----------------------------------------------------------------------

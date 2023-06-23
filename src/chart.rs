@@ -2691,7 +2691,7 @@ impl Chart {
                 break;
             }
 
-            if data_label.is_default {
+            if data_label.is_default() {
                 continue;
             }
 
@@ -5109,7 +5109,7 @@ impl ChartSeries {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 /// A struct to represent a Chart range.
 ///
 /// A struct to represent a chart range like `"Sheet1!$A$1:$A$4"`. The struct is
@@ -5254,7 +5254,7 @@ impl ChartRange {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub(crate) struct ChartSeriesCacheData {
     pub(crate) is_numeric: bool,
     pub(crate) data: Vec<String>,
@@ -5400,7 +5400,7 @@ pub enum ChartType {
 }
 
 /// A struct to represent a Chart title.
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ChartTitle {
     pub(crate) range: ChartRange,
     pub(crate) cache_data: ChartSeriesCacheData,
@@ -6041,7 +6041,7 @@ impl fmt::Display for ChartMarkerType {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/chart_data_labels.png">
 ///
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ChartDataLabel {
     pub(crate) format: ChartFormat,
     pub(crate) show_value: bool,
@@ -6054,7 +6054,6 @@ pub struct ChartDataLabel {
     pub(crate) separator: char,
     pub(crate) title: ChartTitle,
     pub(crate) is_hidden: bool,
-    pub(crate) is_default: bool,
     pub(crate) is_custom: bool,
     pub(crate) font: Option<ChartFont>,
     pub(crate) num_format: String,
@@ -6082,7 +6081,6 @@ impl ChartDataLabel {
             separator: ',',
             title: ChartTitle::new(),
             is_hidden: false,
-            is_default: true,
             is_custom: false,
             font: None,
             num_format: String::new(),
@@ -6142,7 +6140,6 @@ impl ChartDataLabel {
     ///
     pub fn show_value(&mut self) -> &mut ChartDataLabel {
         self.show_value = true;
-        self.is_default = false;
         self
     }
 
@@ -6198,7 +6195,6 @@ impl ChartDataLabel {
     ///
     pub fn show_category_name(&mut self) -> &mut ChartDataLabel {
         self.show_category_name = true;
-        self.is_default = false;
         self
     }
 
@@ -6206,7 +6202,6 @@ impl ChartDataLabel {
     ///
     pub fn show_series_name(&mut self) -> &mut ChartDataLabel {
         self.show_series_name = true;
-        self.is_default = false;
         self
     }
 
@@ -6219,7 +6214,6 @@ impl ChartDataLabel {
     ///
     pub fn show_leader_lines(&mut self) -> &mut ChartDataLabel {
         self.show_leader_lines = true;
-        self.is_default = false;
         self
     }
 
@@ -6227,7 +6221,6 @@ impl ChartDataLabel {
     ///
     pub fn show_legend_key(&mut self) -> &mut ChartDataLabel {
         self.show_legend_key = true;
-        self.is_default = false;
         self
     }
 
@@ -6281,7 +6274,6 @@ impl ChartDataLabel {
     ///
     pub fn show_percentage(&mut self) -> &mut ChartDataLabel {
         self.show_percentage = true;
-        self.is_default = false;
         self
     }
 
@@ -6361,7 +6353,6 @@ impl ChartDataLabel {
     ///
     pub fn set_position(&mut self, position: ChartDataLabelPosition) -> &mut ChartDataLabel {
         self.position = position;
-        self.is_default = false;
         self
     }
 
@@ -6441,7 +6432,6 @@ impl ChartDataLabel {
         T: IntoChartFormat,
     {
         self.format = format.new_chart_format();
-        self.is_default = false;
         self.title.ignore_rich_para = false;
         self
     }
@@ -6522,7 +6512,6 @@ impl ChartDataLabel {
         }
 
         self.font = Some(font);
-        self.is_default = false;
         self
     }
 
@@ -6592,7 +6581,6 @@ impl ChartDataLabel {
     ///
     pub fn set_num_format(&mut self, num_format: impl Into<String>) -> &mut ChartDataLabel {
         self.num_format = num_format.into();
-        self.is_default = false;
         self
     }
 
@@ -6609,7 +6597,6 @@ impl ChartDataLabel {
         // Accept valid separators only apart from comma which is the default.
         if ";. \n".contains(separator) {
             self.separator = separator;
-            self.is_default = false;
         }
 
         self
@@ -6786,7 +6773,6 @@ impl ChartDataLabel {
     {
         self.title.set_name(value);
         self.title.ignore_rich_para = true;
-        self.is_default = false;
         self.show_value = true;
         self
     }
@@ -6861,7 +6847,6 @@ impl ChartDataLabel {
     ///
     pub fn set_hidden(&mut self) -> &mut ChartDataLabel {
         self.is_hidden = true;
-        self.is_default = false;
         self
     }
 
@@ -6876,6 +6861,14 @@ impl ChartDataLabel {
     ///
     pub fn to_custom(&mut self) -> ChartDataLabel {
         self.clone()
+    }
+
+    // Check if the data label is in the default/unmodified condition.
+    pub(crate) fn is_default(&self) -> bool {
+        lazy_static! {
+            static ref DEFAULT_STATE: ChartDataLabel = ChartDataLabel::default();
+        };
+        self == &*DEFAULT_STATE
     }
 }
 
@@ -8465,7 +8458,7 @@ impl ChartAxis {
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq)]
 pub(crate) enum ChartAxisType {
     Category,
     Value,
@@ -9081,7 +9074,7 @@ impl fmt::Display for ChartLegendPosition {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 /// A struct to represent formatting for various Chart objects.
 ///
 /// Excel uses a standard formatting dialog for the elements of a chart such as
@@ -9676,7 +9669,7 @@ impl ChartFormat {
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
 ///
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ChartLine {
     color: Color,
     width: Option<f64>,
@@ -10088,7 +10081,7 @@ pub type ChartBorder = ChartLine;
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
 ///
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ChartSolidFill {
     color: Color,
     transparency: u8,
@@ -10301,7 +10294,7 @@ impl ChartSolidFill {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
 ///
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ChartPatternFill {
     background_color: Color,
     foreground_color: Color,
@@ -10837,7 +10830,7 @@ impl fmt::Display for ChartPatternFillType {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 /// A struct to represent the font format for various Chart objects.
 ///
 /// Excel uses a standard font dialog for text elements of a chart such as the
