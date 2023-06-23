@@ -145,6 +145,11 @@ pub struct Url {
 
 impl Url {
     /// Create a new Url struct.
+    ///
+    /// # Arguments
+    ///
+    /// `link` - A string like type representing a URL.
+    ///
     pub fn new(link: impl Into<String>) -> Url {
         Url {
             link: link.into(),

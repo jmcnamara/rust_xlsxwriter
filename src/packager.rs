@@ -367,7 +367,7 @@ impl<W: Write + Seek> Packager<W> {
     }
 
     // Write the sharedStrings.xml file.
-    pub fn write_shared_strings_file(
+    pub(crate) fn write_shared_strings_file(
         &mut self,
         string_table: &SharedStringsTable,
     ) -> Result<(), XlsxError> {

@@ -754,6 +754,11 @@ impl Image {
     ///
     /// This method sets an internal image name used by header/footer VML. It is
     /// mainly used for completeness in testing. It isn't useful to the end user.
+    ///
+    /// # Arguments
+    ///
+    /// `name` - The VML object name/description.
+    ///
     #[doc(hidden)]
     pub fn set_vml_name(&mut self, name: impl Into<String>) -> &mut Image {
         self.vml_name = name.into();

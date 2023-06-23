@@ -158,6 +158,10 @@ impl Chart {
     /// for that series using [`series.set_values()`][ChartSeries::set_values].
     /// See the example below.
     ///
+    /// # Arguments
+    ///
+    /// `chart_type` - The chart type defined by [`ChartType`].
+    ///
     /// # Examples
     ///
     /// A simple chart example using the `rust_xlsxwriter` library.
@@ -355,6 +359,10 @@ impl Chart {
     /// [`chart.add_series()`](Chart::add_series) method, see above. However, if
     /// required you can create a standalone `ChartSeries` object and add it to
     /// a chart via this `chart.push_series()` method.
+    ///
+    /// # Arguments
+    ///
+    /// `series` - a [`ChartSeries`] instance.
     ///
     /// # Examples
     ///
@@ -1115,6 +1123,10 @@ impl Chart {
     ///
     /// These values are defined in the [`ObjectMovement`] enum.
     ///
+    /// # Arguments
+    ///
+    /// `option` - A [`ObjectMovement`] enum value.
+    ///
     pub fn set_object_movement(&mut self, option: ObjectMovement) -> &mut Chart {
         self.object_movement = option;
         self
@@ -1173,6 +1185,11 @@ impl Chart {
     ///
     /// This is mainly used to ensure that the axis ids used in testing match
     /// the semi-randomized values in the target Excel file.
+    ///
+    /// # Arguments
+    ///
+    /// `axis_id1` - X-axis id.
+    /// `axis_id2` - Y-axis id.
     ///
     #[doc(hidden)]
     pub fn set_axis_ids(&mut self, axis_id1: u32, axis_id2: u32) {
@@ -5057,6 +5074,12 @@ impl ChartSeries {
     ///
     /// This method is only used to populate the chart data caches in test code.
     /// The library reads and populates the cache automatically in most cases.
+    ///
+    /// # Arguments
+    ///
+    /// `data` - Array of string data to populate the chart cache.
+    /// `is_numeric` - The chart cache date is numeric.
+    ///
     #[doc(hidden)]
     pub fn set_value_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
         self.value_cache_data = ChartSeriesCacheData {
@@ -5070,6 +5093,12 @@ impl ChartSeries {
     ///
     /// This method is only used to populate the chart data caches in test code.
     /// The library reads and populates the cache automatically in most cases.
+    ///
+    /// # Arguments
+    ///
+    /// `data` - Array of string data to populate the chart cache.
+    /// `is_numeric` - The chart cache date is numeric.
+    ///
     #[doc(hidden)]
     pub fn set_category_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
         self.category_cache_data = ChartSeriesCacheData {
@@ -5851,7 +5880,9 @@ impl ChartMarker {
     ///
     /// Change the default size of the marker.
     ///
+    /// # Arguments
     ///
+    /// `size` - The size of the marker.
     ///
     pub fn set_size(&mut self, size: u8) -> &mut ChartMarker {
         if (2..=72).contains(&size) {
@@ -6569,6 +6600,10 @@ impl ChartDataLabel {
     ///
     /// The allowable separators are `','` (comma), `';'` (semicolon), `'.'`
     /// (full stop), `'\n'` (new line) and `' '` (space).
+    ///
+    /// # Arguments
+    ///
+    /// `separator` - The label separator character.
     ///
     pub fn set_separator(&mut self, separator: char) -> &mut ChartDataLabel {
         // Accept valid separators only apart from comma which is the default.
@@ -8795,6 +8830,10 @@ impl ChartLegend {
     /// The equivalent positions in `rust_xlsxwriter` charts are defined by
     /// [`ChartLegendPosition`]. The default chart position in Excel is to have
     /// the legend at the right.
+    ///
+    /// # Arguments
+    ///
+    /// `position` - the [`ChartLegendPosition`] position value.
     ///
     /// # Examples
     ///

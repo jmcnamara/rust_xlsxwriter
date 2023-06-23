@@ -779,6 +779,11 @@ pub struct Formula {
 
 impl Formula {
     /// Create a new `Formula` struct instance.
+    ///
+    /// # Arguments
+    ///
+    /// `formula` - A string like type representing an Excel formula.
+    ///
     pub fn new(formula: impl Into<String>) -> Formula {
         Formula {
             formula_string: formula.into(),

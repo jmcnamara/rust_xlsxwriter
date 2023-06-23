@@ -991,6 +991,11 @@ impl Format {
     ///
     /// This function is implemented for completeness but is rarely used in
     /// practice.
+    ///
+    /// # Arguments
+    ///
+    /// * `font_scheme` - The font scheme property.
+    ///
     pub fn set_font_scheme(mut self, font_scheme: impl Into<String>) -> Format {
         self.font.scheme = font_scheme.into();
         self

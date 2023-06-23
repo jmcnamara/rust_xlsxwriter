@@ -712,8 +712,13 @@ impl Workbook {
         Ok(buf)
     }
 
-    // Set the index for the format. This is currently only used in testing but
-    // may be used publicly at a later stage.
+    /// Set the index for the format. This is currently only used in testing but
+    /// may be used publicly at a later stage.
+    ///
+    /// # Arguments
+    ///
+    /// `format` - The [`Format`] instance to register.
+    ///
     #[doc(hidden)]
     pub fn register_format(&mut self, format: &mut Format) {
         match self.xf_indices.get_mut(format) {

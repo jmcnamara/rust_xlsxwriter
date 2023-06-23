@@ -559,6 +559,13 @@ impl Worksheet {
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data` - An type that implements the  [`IntoExcelData`] trait.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
     /// # Errors
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
@@ -606,6 +613,13 @@ impl Worksheet {
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data` - An type that implements the  [`IntoExcelData`] trait.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
     /// # Errors
     ///
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
@@ -637,6 +651,14 @@ impl Worksheet {
     ///
     /// See also [`worksheet.write_column()`](Worksheet::write_column) for a
     /// similar function that works in an orthogonal direction.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data` - Arrays or array-like data structures that implement
+    ///   [`IntoIterator`] and that contain a data type that implements
+    ///   [`IntoExcelData`].
     ///
     /// # Errors
     ///
@@ -774,6 +796,14 @@ impl Worksheet {
     /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data` - Arrays or array-like data structures that implement
+    ///   [`IntoIterator`] and that contain a data type that implements
+    ///   [`IntoExcelData`].
+    ///
     /// # Examples
     ///
     /// The following example demonstrates writing an array of data as a column
@@ -846,6 +876,14 @@ impl Worksheet {
     ///   worksheet limits.
     /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data` - 2D arrays or array-like data structures that implement
+    ///   [`IntoIterator`] and that contain a data type that implements
+    ///   [`IntoExcelData`].
     ///
     /// # Examples
     ///
@@ -923,6 +961,14 @@ impl Worksheet {
     ///   worksheet limits.
     /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data` - 2D arrays or array-like data structures that implement
+    ///   [`IntoIterator`] and that contain a data type that implements
+    ///   [`IntoExcelData`].
     ///
     /// # Examples
     ///
@@ -3566,6 +3612,14 @@ impl Worksheet {
     /// * [`XlsxError::ChartError`] - A general error that is raised when a
     /// chart parameter is incorrect or a chart is configured incorrectly.
     ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `chart` - The [`Chart`] to insert into the cell.
+    /// * `x_offset`: The horizontal offset within the cell in pixels.
+    /// * `y_offset`: The vertical offset within the cell in pixels.
+    ///
     /// # Examples
     ///
     /// Example of adding a chart to a worksheet with a pixel offset within the
@@ -4922,6 +4976,11 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options1.png">
     ///
+    /// # Arguments
+    ///
+    /// `options` - Worksheet protection options as defined by a
+    /// [`ProtectionOptions`] struct reference.
+    ///
     /// # Examples
     ///
     /// The following example demonstrates setting the worksheet properties to
@@ -5454,6 +5513,10 @@ impl Worksheet {
     /// for you, or use a [`Formula`] struct and the
     /// [`Formula::use_future_functions()`](Formula::use_future_functions)
     /// method, see below.
+    ///
+    /// # Arguments
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
