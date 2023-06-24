@@ -23,7 +23,7 @@ use crate::{
 };
 use crate::{Color, FormatPattern};
 
-/// The Workbook struct represents an Excel file in it's entirety. It is the
+/// The `Workbook` struct represents an Excel file in it's entirety. It is the
 /// starting point for creating a new Excel xlsx file.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/demo.png">

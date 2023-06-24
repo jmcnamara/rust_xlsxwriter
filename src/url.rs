@@ -6,7 +6,7 @@
 
 #![warn(missing_docs)]
 
-/// The Url struct is used to define a worksheet url.
+/// The `Url` struct is used to define a worksheet url.
 ///
 /// The `Url` struct creates a url type that can be used to write worksheet
 /// urls.

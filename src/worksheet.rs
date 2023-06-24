@@ -51,7 +51,7 @@ const DEFAULT_ROW_HEIGHT: f64 = 15.0;
 pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-/// The Worksheet struct represents an Excel worksheet. It handles operations
+/// The `Worksheet` struct represents an Excel worksheet. It handles operations
 /// such as writing data to cells or formatting the worksheet layout.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/demo.png">

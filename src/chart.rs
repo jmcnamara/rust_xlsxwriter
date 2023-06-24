@@ -17,8 +17,8 @@ use crate::{
 };
 
 #[derive(Clone)]
-/// The Chart struct is used to create an object to represent an chart that can
-/// be inserted into a worksheet.
+/// The `Chart` struct is used to create an object to represent an chart that
+/// can be inserted into a worksheet.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/chart_intro.png">
 ///
@@ -3568,7 +3568,7 @@ impl Chart {
 // Traits.
 // -----------------------------------------------------------------------
 
-/// Trait to map types into an Excel chart range.
+/// Trait to map types into an `ChartRange`.
 ///
 /// The 2 most common types of range used in `rust_xlsxwriter` charts are:
 ///
@@ -3756,7 +3756,7 @@ impl DrawingObject for Chart {
 // Secondary structs.
 // -----------------------------------------------------------------------
 
-/// A struct to represent a Chart series.
+/// The `ChartSeries` struct represents a chart series.
 ///
 /// A chart in Excel can contain one of more data series. The `ChartSeries`
 /// struct represents the Category and Value ranges, and the formatting and
@@ -5110,7 +5110,7 @@ impl ChartSeries {
 }
 
 #[derive(Clone, PartialEq)]
-/// A struct to represent a Chart range.
+/// The `ChartRange` struct represents a chart range.
 ///
 /// A struct to represent a chart range like `"Sheet1!$A$1:$A$4"`. The struct is
 /// public to allow for the [`IntoChartRange`] trait but it isn't required to be
@@ -5274,7 +5274,7 @@ impl ChartSeriesCacheData {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-/// The `ChartType` enum define the type of a Chart object.
+/// The `ChartType` enum define the type of a [`Chart`] object.
 ///
 /// The main original chart types are supported, see below.
 ///
@@ -5399,7 +5399,7 @@ pub enum ChartType {
     ScatterSmoothWithMarkers,
 }
 
-/// A struct to represent a Chart title.
+/// The `ChartTitle` struct represents a chart title.
 #[derive(Clone, PartialEq)]
 pub struct ChartTitle {
     pub(crate) range: ChartRange,
@@ -5668,7 +5668,7 @@ impl ChartTitle {
     }
 }
 
-/// A struct to represent a Chart marker.
+/// The `ChartMarker` struct represents a chart marker.
 ///
 /// The [`ChartMarker`] struct represents the properties of a marker on a Line,
 /// Scatter or Radar chart. In Excel a marker is a shape that represents a data
@@ -5920,7 +5920,7 @@ impl ChartMarker {
     }
 }
 
-/// Enum to define the Chart marker types.
+/// The `ChartMarkerType` enum defines the [`Chart`] marker types.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartMarkerType {
     /// Square marker type.
@@ -5985,7 +5985,7 @@ impl fmt::Display for ChartMarkerType {
     }
 }
 
-/// A struct to represent a Chart data label.
+/// The `ChartDataLabel` struct represents a chart data label.
 ///
 /// The [`ChartDataLabel`] struct represents the properties of the data labels
 /// for a chart series. In Excel a data label can be added to a chart series to
@@ -6872,7 +6872,7 @@ impl ChartDataLabel {
     }
 }
 
-/// Enum to define the Chart Data Label Position.
+/// The `ChartMarkerType` enum defines the [`Chart`] data label positions.
 ///
 /// In Excel the available data label positions vary for different chart
 /// types. The available, and default, positions are:
@@ -6939,7 +6939,7 @@ impl fmt::Display for ChartDataLabelPosition {
     }
 }
 
-/// A struct to represent a Chart point.
+/// The `ChartPoint` struct represents a chart point.
 ///
 /// The [`ChartPoint`] struct represents a "point" in a data series which is the
 /// element you get in Excel if you right click on an individual data point or
@@ -7063,7 +7063,7 @@ impl ChartPoint {
     }
 }
 
-/// A struct to represent a Chart axis.
+/// The `ChartAxis` struct represents a chart axis.
 ///
 /// Used in conjunction with the [`Chart::x_axis()`](Chart::x_axis) and
 /// [`Chart::y_axis()`](Chart::y_axis).
@@ -8494,7 +8494,7 @@ impl fmt::Display for ChartAxisPosition {
     }
 }
 
-/// Enum to define the Chart Axis Label Position.
+/// The `ChartAxisLabelPosition` enum defines the [`Chart`] axis label positions.
 ///
 /// This property is used in conjunction with
 /// [`ChartAxis::set_label_position()`](ChartAxis::set_label_position).
@@ -8576,7 +8576,7 @@ impl fmt::Display for ChartAxisLabelPosition {
     }
 }
 
-/// Enum to define the Chart Axis Tick type.
+/// The `ChartAxisTickType` enum defines the [`Chart`] axis tick types.
 ///
 /// Excel supports 4 types of tick position:
 ///
@@ -8687,7 +8687,7 @@ impl fmt::Display for ChartGrouping {
     }
 }
 
-/// A struct to represent a Chart legend.
+/// The `ChartLegend` struct represents a chart legend.
 ///
 /// The `ChartLegend` struct is a representation of a legend on an Excel chart.
 /// The legend is a rectangular box that identifies the name and color of each
@@ -9034,7 +9034,7 @@ impl ChartLegend {
     }
 }
 
-/// Enum used to specify the position of the Chart legend.
+/// The `ChartLegendPosition` enum defines the [`Chart`] legend positions.
 ///
 /// Excel allows the following positions of the chart legend:
 ///
@@ -9075,7 +9075,7 @@ impl fmt::Display for ChartLegendPosition {
 }
 
 #[derive(Clone, PartialEq)]
-/// A struct to represent formatting for various Chart objects.
+/// The `ChartFormat` struct represents formatting for various chart objects.
 ///
 /// Excel uses a standard formatting dialog for the elements of a chart such as
 /// data series, the plot area, the chart area, the legend or individual points.
@@ -9597,7 +9597,7 @@ impl ChartFormat {
     }
 }
 
-/// A struct to represent a Chart line/border.
+/// The `ChartLine` struct represents a chart line/border.
 ///
 /// The [`ChartLine`] struct represents the formatting properties for a line or
 /// border for a Chart element. It is a sub property of the [`ChartFormat`]
@@ -10022,7 +10022,7 @@ impl ChartLine {
 ///
 pub type ChartBorder = ChartLine;
 
-/// A struct to represent a the solid fill for a Chart element.
+/// The `ChartSolidFill` struct represents a the solid fill for a chart element.
 ///
 /// The [`ChartSolidFill`] struct represents the formatting properties for the
 /// solid fill of a Chart element. In Excel a solid fill is a single color fill
@@ -10230,7 +10230,7 @@ impl ChartSolidFill {
     }
 }
 
-/// A struct to represent a the pattern fill for a Chart element.
+/// The `ChartPatternFill` struct represents a the pattern fill for a chart element.
 ///
 /// The [`ChartPatternFill`] struct represents the formatting properties for the
 /// pattern fill of a Chart element. In Excel a pattern fill is comprised of a
@@ -10472,7 +10472,7 @@ impl ChartPatternFill {
     }
 }
 
-/// Enum to define the Chart line dash type.
+/// The `ChartLineDashType` enum defines the [`Chart`] line dash types.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartLineDashType {
     /// Solid - chart line/border dash type.
@@ -10531,7 +10531,7 @@ impl fmt::Display for ChartLineDashType {
     }
 }
 
-/// Enum to define the Chart pattern fill type.
+/// The `ChartPatternFillType` enum defines the [`Chart`] pattern fill types.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartPatternFillType {
     /// Dotted 5 percent - chart fill pattern.
@@ -10831,7 +10831,7 @@ impl fmt::Display for ChartPatternFillType {
 }
 
 #[derive(Clone, PartialEq)]
-/// A struct to represent the font format for various Chart objects.
+/// The `ChartFont` struct represents the font format for various chart objects.
 ///
 /// Excel uses a standard font dialog for text elements of a chart such as the
 /// chart title or axes data labels. It looks like this:

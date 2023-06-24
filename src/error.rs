@@ -9,7 +9,8 @@ use std::error::Error;
 use std::fmt;
 
 #[derive(Debug)]
-/// Error values for the `rust_xlsxwriter` library.
+/// The `XlsxError` enum defines the error values for the `rust_xlsxwriter`
+/// library.
 pub enum XlsxError {
     /// A general parameter error that is raised when a parameter conflicts with
     /// an Excel limit or syntax. The nature of the error in on the error string.

@@ -8,7 +8,7 @@
 
 use std::{fmt, hash::Hash};
 
-/// The Format struct is used to define cell formatting for data in a worksheet.
+/// The `Format` struct is used to define cell formatting for data in a worksheet.
 ///
 /// The properties of a cell that can be formatted include: fonts, colors,
 /// patterns, borders, alignment and number formatting.

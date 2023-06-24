@@ -9,7 +9,7 @@
 use regex::Regex;
 use std::borrow::Cow;
 
-/// The Formula struct is used to define a worksheet formula.
+/// The `Formula` struct is used to define a worksheet formula.
 ///
 /// The `Formula` struct creates a formula type that can be used to write
 /// worksheet formulas.

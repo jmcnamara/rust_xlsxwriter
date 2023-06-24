@@ -10,7 +10,7 @@ use std::{collections::HashSet, fmt};
 
 use crate::{utility::ToXmlBoolean, xmlwriter::XMLWriter, CellRange, Formula, RowNum, XlsxError};
 
-/// A struct to represent a worksheet Table.
+/// The `Table` struct represents a worksheet Table.
 ///
 /// Tables in Excel are a way of grouping a range of cells into a single entity
 /// that has common formatting or that can be referenced from formulas. Tables
@@ -1324,7 +1324,7 @@ impl Table {
 }
 
 #[derive(Clone)]
-/// A struct to represent a Table Column.
+/// The `TableColumn` struct represents a table column.
 ///
 /// The `TableColumn` struct is used to set the properties for columns in a
 /// worksheet table. This can be used to set the following properties of a table
@@ -1751,7 +1751,7 @@ impl Default for TableColumn {
     }
 }
 
-/// Enum to define functions for worksheet table total rows.
+/// The `TableFunction` enum defines functions for worksheet table total rows.
 ///
 /// The `TableFunction` enum contains definitions for the standard Excel
 /// functions that are available via the dropdown in the total row of an Excel
@@ -1869,7 +1869,7 @@ impl fmt::Display for TableFunction {
     }
 }
 
-/// Enum to define worksheet table styles.
+/// The `TableStyle` enum defines the worksheet table styles.
 ///
 /// Excel supports 61 different styles for tables divided into Light, Medium and
 /// Dark categories. You can set one of these styles using a [`TableStyle`] enum

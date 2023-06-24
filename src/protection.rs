@@ -6,8 +6,7 @@
 
 #![warn(missing_docs)]
 
-/// The `ProtectionOptions` struct is use to set the elements that can or
-/// can't be changed in a protected worksheet.
+/// The `ProtectionOptions` struct is use to set protected elements in a worksheet.
 ///
 /// You can specify which worksheet elements protection should be on or off via
 /// the `ProtectionOptions` members. The corresponding Excel options with

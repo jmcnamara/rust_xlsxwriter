@@ -18,8 +18,8 @@ use crate::drawing::{DrawingObject, DrawingType};
 use crate::XlsxError;
 
 #[derive(Clone, Debug)]
-/// The Image struct is used to create an object to represent an image that can
-/// be inserted into a worksheet.
+/// The `Image` struct is used to create an object to represent an image that
+/// can be inserted into a worksheet.
 ///
 /// ```rust
 /// # // This code is available in examples/doc_image.rs
@@ -987,8 +987,8 @@ impl DrawingObject for Image {
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
 
-/// Options to control the movement of worksheet objects such as images and
-/// charts.
+/// The `ObjectMovement` enum defines the movement of worksheet objects such as
+/// images and charts.
 ///
 /// This enum defines the way control a worksheet object, such a an images or
 /// charts, moves when the cells underneath it are moved, resized or deleted.
@@ -1016,7 +1016,7 @@ pub enum ObjectMovement {
     MoveAndSizeWithCellsAfter,
 }
 
-/// Enum to represent the image position in a header or footer.
+/// The `HeaderImagePosition` enum defines the image position in a header or footer.
 ///
 /// Used with the
 /// [`worksheet.set_header_image()`](crate::Worksheet::set_header_image) and
