@@ -6,6 +6,7 @@
 
 use crate::worksheet::ColNum;
 use crate::worksheet::RowNum;
+use crate::XlsxError;
 
 // Convert a zero indexed column cell reference to a string.
 pub fn col_to_name(col_num: ColNum) -> String {
@@ -113,7 +114,7 @@ pub fn chart_range_abs(
 
 // Create a quoted version of a worksheet name. Excel single quotes worksheet
 // names that contain spaces and some other characters.
-pub fn quote_sheetname(sheetname: &str) -> String {
+pub(crate) fn quote_sheetname(sheetname: &str) -> String {
     let mut sheetname = sheetname.to_string();
 
     // Ignore strings that are already quoted.
@@ -129,6 +130,34 @@ pub fn quote_sheetname(sheetname: &str) -> String {
     }
 
     sheetname
+}
+
+pub(crate) fn validate_sheetname(name: &str, message: &str) -> Result<(), XlsxError> {
+    // Check that the sheet name isn't blank.
+    if name.is_empty() {
+        return Err(XlsxError::SheetnameCannotBeBlank(message.to_string()));
+    }
+
+    // Check that sheet sheetname is <= 31, an Excel limit.
+    if name.chars().count() > 31 {
+        return Err(XlsxError::SheetnameLengthExceeded(message.to_string()));
+    }
+
+    // Check that sheetname doesn't contain any invalid characters.
+    if name.contains(['*', '?', ':', '[', ']', '\\', '/']) {
+        return Err(XlsxError::SheetnameContainsInvalidCharacter(
+            message.to_string(),
+        ));
+    }
+
+    // Check that sheetname doesn't start or end with an apostrophe.
+    if name.starts_with('\'') || name.ends_with('\'') {
+        return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(
+            message.to_string(),
+        ));
+    }
+
+    Ok(())
 }
 
 // Get the pixel width of a string based on character widths taken from Excel.

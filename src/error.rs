@@ -25,7 +25,7 @@ pub enum XlsxError {
     RowColumnOrderError,
 
     /// Worksheet name cannot be blank.
-    SheetnameCannotBeBlank,
+    SheetnameCannotBeBlank(String),
 
     /// Worksheet name exceeds Excel's limit of 31 characters.
     SheetnameLengthExceeded(String),
@@ -148,7 +148,9 @@ impl fmt::Display for XlsxError {
                 "First row or column in range is greater than last row or column."
             ),
 
-            XlsxError::SheetnameCannotBeBlank => write!(f, "Worksheet name cannot be blank."),
+            XlsxError::SheetnameCannotBeBlank(name) => {
+                write!(f, "Worksheet name '{name}' cannot be blank.")
+            }
 
             XlsxError::SheetnameLengthExceeded(name) => {
                 write!(
@@ -289,8 +291,8 @@ mod tests {
             "First row or column in range is greater than last row or column."
         );
         assert_eq!(
-            XlsxError::SheetnameCannotBeBlank.to_string(),
-            "Worksheet name cannot be blank."
+            XlsxError::SheetnameCannotBeBlank(name.to_string()).to_string(),
+            "Worksheet name 'ERROR' cannot be blank."
         );
         assert_eq!(
             XlsxError::SheetnameLengthExceeded(name.to_string()).to_string(),

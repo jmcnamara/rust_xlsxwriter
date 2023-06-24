@@ -1143,7 +1143,15 @@ impl Chart {
     /// # Errors
     ///
     /// * [`XlsxError::ChartError`] - A general error that is raised when a
-    /// chart parameter is incorrect or a chart is configured incorrectly.
+    ///   chart parameter is incorrect or a chart is configured incorrectly.
+    /// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
+    ///   cannot be blank.
+    /// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
+    ///   exceeds Excel's limit of 31 characters.
+    /// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
+    ///   chart range cannot contain invalid characters: `[ ] : * ? / \`
+    /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
+    ///   chart range cannot start or end with an apostrophe.
     ///
     pub fn validate(&mut self) -> Result<&mut Chart, XlsxError> {
         // Check for chart without series.
@@ -1157,7 +1165,7 @@ impl Chart {
             // Check for a series without a values range.
             if !series.value_range.has_data() {
                 return Err(XlsxError::ChartError(
-                    "Chart series must contain a values range".to_string(),
+                    "Chart series must contain a 'values' range".to_string(),
                 ));
             }
 
@@ -1165,7 +1173,7 @@ impl Chart {
             // for all other types.
             if self.chart_group_type == ChartType::Scatter && !series.category_range.has_data() {
                 return Err(XlsxError::ChartError(
-                    "Scatter style charts must contain a categories range".to_string(),
+                    "Scatter style charts must contain a 'categories' range".to_string(),
                 ));
             }
 
@@ -5225,6 +5233,9 @@ impl ChartRange {
     // Check that the row/column values in the range are valid.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
         let range = self.formula();
+
+        let error_message = format!("Sheet name in chart series range: {range}");
+        utility::validate_sheetname(&self.sheet_name, &error_message)?;
 
         if self.first_row > self.last_row {
             return Err(XlsxError::ChartError(format!(

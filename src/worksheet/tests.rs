@@ -488,7 +488,7 @@ mod worksheet_tests {
         let mut worksheet = Worksheet::new();
 
         let result = worksheet.set_name("");
-        assert!(matches!(result, Err(XlsxError::SheetnameCannotBeBlank)));
+        assert!(matches!(result, Err(XlsxError::SheetnameCannotBeBlank(_))));
 
         let name = "name_that_is_longer_than_thirty_one_characters".to_string();
         let result = worksheet.set_name(&name);

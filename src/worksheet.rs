@@ -458,25 +458,8 @@ impl Worksheet {
     pub fn set_name(&mut self, name: impl Into<String>) -> Result<&mut Worksheet, XlsxError> {
         let name = name.into();
 
-        // Check that the sheet name isn't blank.
-        if name.is_empty() {
-            return Err(XlsxError::SheetnameCannotBeBlank);
-        }
-
-        // Check that sheet sheetname is <= 31, an Excel limit.
-        if name.chars().count() > 31 {
-            return Err(XlsxError::SheetnameLengthExceeded(name));
-        }
-
-        // Check that sheetname doesn't contain any invalid characters.
-        if name.contains(['*', '?', ':', '[', ']', '\\', '/']) {
-            return Err(XlsxError::SheetnameContainsInvalidCharacter(name));
-        }
-
-        // Check that sheetname doesn't start or end with an apostrophe.
-        if name.starts_with('\'') || name.ends_with('\'') {
-            return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(name));
-        }
+        let error_message = format!(r#"worksheet.set_name("{name}")"#);
+        utility::validate_sheetname(&name, &error_message)?;
 
         self.name = name;
 

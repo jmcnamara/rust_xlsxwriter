@@ -1118,7 +1118,7 @@ impl Workbook {
         self.prepare_drawings();
 
         // Fill the chart data caches from worksheet data.
-        self.prepare_chart_cache_data();
+        self.prepare_chart_cache_data()?;
 
         // Prepare the formats for writing with styles.rs.
         self.prepare_format_properties();
@@ -1222,7 +1222,7 @@ impl Workbook {
     // Add worksheet number/string cache data to chart series. This isn't
     // strictly necessary but it helps non-Excel apps to render charts
     // correctly.
-    fn prepare_chart_cache_data(&mut self) {
+    fn prepare_chart_cache_data(&mut self) -> Result<(), XlsxError> {
         // First build up a hash of the chart data ranges. The data may not be
         // in the same worksheet as the chart so we need to do the lookup at the
         // workbook level.
@@ -1276,6 +1276,13 @@ impl Workbook {
         for (key, cache) in &mut chart_caches {
             if let Ok(worksheet) = self.worksheet_from_name(&key.0) {
                 *cache = worksheet.get_cache_data(key.1, key.2, key.3, key.4);
+            } else {
+                let sheet_name = key.0.clone();
+                let range = utility::chart_range_abs(&key.0, key.1, key.2, key.3, key.4);
+                let error =
+                    format!("Unknown worksheet name '{sheet_name}' in chart range '{range}'");
+
+                return Err(XlsxError::UnknownWorksheetNameOrIndex(error));
             }
         }
 
@@ -1313,6 +1320,8 @@ impl Workbook {
                 }
             }
         }
+
+        Ok(())
     }
 
     // Evaluate and clone formats from worksheets into a workbook level vector
