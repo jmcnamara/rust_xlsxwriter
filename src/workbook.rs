@@ -1078,6 +1078,17 @@ impl Workbook {
             }
         }
 
+        // Check for duplicate sheet names, which aren't allowed by Excel
+        let mut unique_worksheet_names = HashSet::new();
+        for worksheet in &self.worksheets {
+            let worksheet_name = worksheet.name.to_lowercase();
+            if unique_worksheet_names.contains(&worksheet_name) {
+                return Err(XlsxError::SheetnameReused(worksheet_name));
+            }
+
+            unique_worksheet_names.insert(worksheet_name);
+        }
+
         // Convert any worksheet local formats to workbook/global formats.
         let mut worksheet_formats: Vec<Vec<Format>> = vec![];
         for worksheet in &self.worksheets {
@@ -1491,11 +1502,6 @@ impl Workbook {
             let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
             sheet_names.insert(sheet_name.clone(), sheet_index as u16);
 
-            // Check for duplicate sheet names, which aren't allowed by Excel.
-            if package_options.worksheet_names.contains(&sheet_name) {
-                return Err(XlsxError::SheetnameReused(sheet_name));
-            }
-
             package_options.worksheet_names.push(sheet_name.clone());
 
             package_options.properties = self.properties.clone();
@@ -1833,7 +1839,18 @@ mod tests {
         let _ = workbook.add_worksheet().set_name("Foo").unwrap();
         let _ = workbook.add_worksheet().set_name("Foo").unwrap();
 
-        let result = workbook.set_package_options(crate::workbook::PackagerOptions::new());
+        let result = workbook.save_to_buffer();
+        assert!(matches!(result, Err(XlsxError::SheetnameReused(_))));
+    }
+
+    #[test]
+    fn duplicate_worksheets_case_insensitive() {
+        let mut workbook = Workbook::default();
+
+        let _ = workbook.add_worksheet().set_name("Foo").unwrap();
+        let _ = workbook.add_worksheet().set_name("foo").unwrap();
+
+        let result = workbook.save_to_buffer();
         assert!(matches!(result, Err(XlsxError::SheetnameReused(_))));
     }
 
