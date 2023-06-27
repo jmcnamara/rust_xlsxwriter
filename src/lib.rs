@@ -114,19 +114,14 @@
 //!
 //! # See also
 //!
+//! - [Tutorial](crate::tutorial): A getting started and tutorial guide.
+//! - [Cookbook](crate::cookbook): Examples of using `rust_xlsxwriter`.
 //! - [User Guide]: Working with the `rust_xlsxwriter` library.
-//!     - [Getting started]: A simple getting started guide on how to use
-//!       `rust_xlsxwriter` in a project and write a Hello World example.
-//!     - [Tutorial]: A larger example of using `rust_xlsxwriter` to write some
-//!        expense data to a spreadsheet.
-//!     - [Cookbook Examples].
 //! - [Release Notes].
 //! - [Roadmap of planned features].
 //!
 //! [User Guide]: https://rustxlsxwriter.github.io/index.html
 //! [Getting started]: https://rustxlsxwriter.github.io/getting_started.html
-//! [Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
-//! [Cookbook Examples]: https://rustxlsxwriter.github.io/examples/intro.html
 //! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
 //! [Roadmap of planned features]:
 //!     https://github.com/jmcnamara/rust_xlsxwriter/issues/1
@@ -153,13 +148,15 @@ mod shared_strings_table;
 mod styles;
 mod table;
 mod theme;
-pub mod tutorial;
 mod url;
 mod utility;
 mod vml;
 mod workbook;
 mod worksheet;
 mod xmlwriter;
+
+pub mod cookbook;
+pub mod tutorial;
 
 #[cfg(test)]
 mod test_functions;

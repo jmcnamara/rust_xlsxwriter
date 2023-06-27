@@ -39,7 +39,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_with_format(4, 0, 3.00, &decimal_format)?;
 
     // Write a formula.
-    worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
+    worksheet.write(5, 0, Formula::new("=SIN(PI()/4)"))?;
 
     // Write a date.
     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
