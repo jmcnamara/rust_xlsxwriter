@@ -107,7 +107,7 @@ impl Image {
     /// # Arguments
     ///
     /// * `path` - The path of the image file to read e as a `&str` or as a
-    ///   [`std::path`] Path or `PathBuf` instance.
+    ///   [`std::path`] `Path` or `PathBuf` instance.
     ///
     /// # Errors
     ///

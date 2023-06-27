@@ -599,7 +599,7 @@ impl Workbook {
     /// # Arguments
     ///
     /// * `path` - The path of the new Excel file to create as a `&str` or as a
-    ///   [`std::path`] Path or `PathBuf` instance.
+    ///   [`std::path`] `Path` or `PathBuf` instance.
     ///
     /// # Errors
     ///

@@ -153,6 +153,7 @@ mod shared_strings_table;
 mod styles;
 mod table;
 mod theme;
+pub mod tutorial;
 mod url;
 mod utility;
 mod vml;

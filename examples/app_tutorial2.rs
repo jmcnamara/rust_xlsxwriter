@@ -5,7 +5,7 @@
 //! A simple program to write some data to an Excel spreadsheet using
 //! rust_xlsxwriter. Part 2 of a tutorial.
 
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Formula, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Some sample data we want to write to a spreadsheet.
@@ -24,20 +24,20 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write some column headers.
-    worksheet.write_string_with_format(0, 0, "Item", &bold)?;
-    worksheet.write_string_with_format(0, 1, "Cost", &bold)?;
+    worksheet.write_with_format(0, 0, "Item", &bold)?;
+    worksheet.write_with_format(0, 1, "Cost", &bold)?;
 
     // Iterate over the data and write it out row by row.
     let mut row = 1;
-    for expense in expenses.iter() {
-        worksheet.write_string(row, 0, expense.0)?;
-        worksheet.write_number_with_format(row, 1, expense.1, &money_format)?;
+    for expense in expenses {
+        worksheet.write(row, 0, expense.0)?;
+        worksheet.write_with_format(row, 1, expense.1, &money_format)?;
         row += 1;
     }
 
     // Write a total using a formula.
-    worksheet.write_string_with_format(row, 0, "Total", &bold)?;
-    worksheet.write_formula_with_format(row, 1, "=SUM(B2:B5)", &money_format)?;
+    worksheet.write_with_format(row, 0, "Total", &bold)?;
+    worksheet.write_with_format(row, 1, Formula::new("=SUM(B2:B5)"), &money_format)?;
 
     // Save the file to disk.
     workbook.save("tutorial2.xlsx")?;
