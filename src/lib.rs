@@ -173,6 +173,7 @@ pub use properties::*;
 pub use protection::*;
 pub use table::*;
 pub use url::*;
+pub use utility::*;
 pub use workbook::*;
 pub use worksheet::*;
 

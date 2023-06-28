@@ -5248,7 +5248,7 @@ impl Worksheet {
         // The first/last order can be reversed to allow a selection to go from
         // the end to the start. We take the active cell from the user first
         // row/col and then reverse them as required for the full range.
-        let active_cell = utility::rowcol_to_cell(first_row, first_col);
+        let active_cell = utility::row_col_to_cell(first_row, first_col);
 
         let mut first_row = first_row;
         let mut first_col = first_col;
@@ -5333,7 +5333,7 @@ impl Worksheet {
             return Ok(self);
         }
 
-        self.top_left_cell = utility::rowcol_to_cell(row, col);
+        self.top_left_cell = utility::row_col_to_cell(row, col);
 
         Ok(self)
     }
@@ -8524,7 +8524,7 @@ impl Worksheet {
         } else {
             col_names
                 .entry(col_num)
-                .or_insert_with(|| utility::col_to_name(col_num))
+                .or_insert_with(|| utility::column_number_to_name(col_num))
         }
     }
 
@@ -9395,13 +9395,13 @@ impl Worksheet {
             self.write_pane("bottomRight");
             self.write_selection(
                 "topRight",
-                &utility::rowcol_to_cell(0, col),
-                &utility::rowcol_to_cell(0, col),
+                &utility::row_col_to_cell(0, col),
+                &utility::row_col_to_cell(0, col),
             );
             self.write_selection(
                 "bottomLeft",
-                &utility::rowcol_to_cell(row, 0),
-                &utility::rowcol_to_cell(row, 0),
+                &utility::row_col_to_cell(row, 0),
+                &utility::row_col_to_cell(row, 0),
             );
             self.write_selection("bottomRight", "", "");
         } else if col > 0 {
@@ -9509,7 +9509,7 @@ impl Worksheet {
 
     // Write the <hyperlink> element.
     fn write_hyperlink(&mut self, row: RowNum, col: ColNum, hyperlink: &Hyperlink) {
-        let mut attributes = vec![("ref", utility::rowcol_to_cell(row, col))];
+        let mut attributes = vec![("ref", utility::row_col_to_cell(row, col))];
 
         match hyperlink.link_type {
             HyperlinkType::Url | HyperlinkType::File => {
@@ -10949,9 +10949,9 @@ impl Panes {
 
     fn top_left(&self) -> String {
         if self.top_cell.0 == 0 && self.top_cell.1 == 0 {
-            utility::rowcol_to_cell(self.freeze_cell.0, self.freeze_cell.1)
+            utility::row_col_to_cell(self.freeze_cell.0, self.freeze_cell.1)
         } else {
-            utility::rowcol_to_cell(self.top_cell.0, self.top_cell.1)
+            utility::row_col_to_cell(self.top_cell.0, self.top_cell.1)
         }
     }
 }
@@ -11181,12 +11181,12 @@ impl DefinedName {
                     // create a column only range.
                     range = format!(
                         "${}:${}",
-                        utility::col_to_name(self.first_col),
-                        utility::col_to_name(self.last_col)
+                        utility::column_number_to_name(self.first_col),
+                        utility::column_number_to_name(self.last_col)
                     );
                 } else {
                     // Otherwise handle it as a standard cell range.
-                    range = utility::cell_range_abs(
+                    range = utility::cell_range_absolute(
                         self.first_row,
                         self.first_col,
                         self.last_row,
@@ -11204,8 +11204,8 @@ impl DefinedName {
                     range = format!(
                         "{}!${}:${}",
                         self.quoted_sheet_name,
-                        utility::col_to_name(self.first_col),
-                        utility::col_to_name(self.last_col)
+                        utility::column_number_to_name(self.first_col),
+                        utility::column_number_to_name(self.last_col)
                     );
                 }
 

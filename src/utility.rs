@@ -4,12 +4,25 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+#![warn(missing_docs)]
 use crate::worksheet::ColNum;
 use crate::worksheet::RowNum;
 use crate::XlsxError;
 
-// Convert a zero indexed column cell reference to a string.
-pub fn col_to_name(col_num: ColNum) -> String {
+/// Convert a zero indexed column cell reference to a string.
+///
+/// Utility function to convert a zero based column reference to a string
+/// representation. This can be useful when constructing ranges for formulas.
+///
+/// ```
+/// use rust_xlsxwriter::column_number_to_name;
+///
+/// assert_eq!(column_number_to_name(0), "A");
+/// assert_eq!(column_number_to_name(1), "B");
+/// assert_eq!(column_number_to_name(702), "AAA");
+/// ```
+///
+pub fn column_number_to_name(col_num: ColNum) -> String {
     let mut col_name = String::new();
 
     let mut col_num = col_num + 1;
@@ -35,8 +48,20 @@ pub fn col_to_name(col_num: ColNum) -> String {
     col_name
 }
 
-// Convert a column string such as "A" to a zero indexed column reference.
-pub fn name_to_col(column: &str) -> ColNum {
+/// Convert a column string such as "A" to a zero indexed column reference.
+///
+/// Utility function to convert a column string representation to a zero based
+/// column reference.
+///
+/// ```
+/// use rust_xlsxwriter::column_name_to_number;
+///
+/// assert_eq!(column_name_to_number("A"), 0);
+/// assert_eq!(column_name_to_number("B"), 1);
+/// assert_eq!(column_name_to_number("AAA"), 702);
+/// ```
+///
+pub fn column_name_to_number(column: &str) -> ColNum {
     let mut col_num = 0;
 
     for char in column.chars() {
@@ -46,26 +71,76 @@ pub fn name_to_col(column: &str) -> ColNum {
     col_num - 1
 }
 
-// Convert a zero indexed row and column cell reference to a A1 style string.
-pub fn rowcol_to_cell(row_num: RowNum, col_num: ColNum) -> String {
-    format!("{}{}", col_to_name(col_num), row_num + 1)
+/// Convert zero indexed row and column cell numbers to a `A1` style string.
+///
+/// Utility function to convert zero indexed row and column cell values to an
+/// `A1` cell reference. This can be useful when constructing ranges for
+/// formulas.
+///
+/// ```
+/// use rust_xlsxwriter::row_col_to_cell;
+///
+/// assert_eq!(row_col_to_cell(0, 0), "A1");
+/// assert_eq!(row_col_to_cell(0, 1), "B1");
+/// assert_eq!(row_col_to_cell(1, 1), "B2");
+/// ```
+///
+pub fn row_col_to_cell(row_num: RowNum, col_num: ColNum) -> String {
+    format!("{}{}", column_number_to_name(col_num), row_num + 1)
 }
 
-// Convert a zero indexed row and column cell reference to an absolute $A$1
-// style string.
-pub fn rowcol_to_cell_abs(row_num: RowNum, col_num: ColNum) -> String {
-    format!("${}${}", col_to_name(col_num), row_num + 1)
+/// Convert zero indexed row and column cell numbers to an absolute `$A$1`
+/// style string.
+///
+/// Utility function to convert zero indexed row and column cell values to an
+/// absolute `$A$1` cell reference. This can be useful when constructing ranges
+/// for formulas.
+///
+/// ```
+/// use rust_xlsxwriter::row_col_to_cell_absolute;
+///
+/// assert_eq!(row_col_to_cell_absolute(0, 0), "$A$1");
+/// assert_eq!(row_col_to_cell_absolute(0, 1), "$B$1");
+/// assert_eq!(row_col_to_cell_absolute(1, 1), "$B$2");
+/// ```
+///
+pub fn row_col_to_cell_absolute(row_num: RowNum, col_num: ColNum) -> String {
+    format!("${}${}", column_number_to_name(col_num), row_num + 1)
 }
 
-// Convert zero indexed row and col cell references to a A1:B1 style range string.
+/// Convert zero indexed row and col cell numbers to a `A1:B1` style range
+/// string.
+///
+/// Utility function to convert zero based row and column cell values to an
+/// `A1:B1` style range reference.
+///
+/// Note, this function should not be used to create a chart range. Use the
+/// 5-tuple version of [`IntoChartRange`](crate::IntoChartRange) instead.
+///
+/// ```
+/// use rust_xlsxwriter::cell_range;
+///
+/// assert_eq!(cell_range(0, 0, 9, 0), "A1:A10");
+/// assert_eq!(cell_range(1, 2, 8, 2), "C2:C9");
+/// assert_eq!(cell_range(0, 0, 3, 4), "A1:E4");
+/// ```
+///
+/// If the start and end cell are the same then a single cell range is created:
+///
+/// ```
+/// use rust_xlsxwriter::cell_range;
+///
+/// assert_eq!(cell_range(0, 0, 0, 0), "A1");
+/// ```
+///
 pub fn cell_range(
     first_row: RowNum,
     first_col: ColNum,
     last_row: RowNum,
     last_col: ColNum,
 ) -> String {
-    let range1 = rowcol_to_cell(first_row, first_col);
-    let range2 = rowcol_to_cell(last_row, last_col);
+    let range1 = row_col_to_cell(first_row, first_col);
+    let range2 = row_col_to_cell(last_row, last_col);
 
     if range1 == range2 {
         range1
@@ -74,16 +149,39 @@ pub fn cell_range(
     }
 }
 
-// Convert zero indexed row and col cell references to an absolute $A$1:$B$1
-// style range string.
-pub fn cell_range_abs(
+/// Convert zero indexed row and col cell numbers to an absolute `$A$1:$B$1`
+/// style range string.
+///
+/// Utility function to convert zero based row and column cell values to an
+/// absolute `$A$1:$B$1` style range reference.
+///
+/// Note, this function should not be used to create a chart range. Use the
+/// 5-tuple version of [`IntoChartRange`](crate::IntoChartRange) instead.
+///
+/// ```
+/// use rust_xlsxwriter::cell_range_absolute;
+///
+/// assert_eq!(cell_range_absolute(0, 0, 9, 0), "$A$1:$A$10");
+/// assert_eq!(cell_range_absolute(1, 2, 8, 2), "$C$2:$C$9");
+/// assert_eq!(cell_range_absolute(0, 0, 3, 4), "$A$1:$E$4");
+/// ```
+///
+/// If the start and end cell are the same then a single cell range is created:
+///
+/// ```
+/// use rust_xlsxwriter::cell_range_absolute;
+///
+/// assert_eq!(cell_range_absolute(0, 0, 0, 0), "$A$1");
+/// ```
+///
+pub fn cell_range_absolute(
     first_row: RowNum,
     first_col: ColNum,
     last_row: RowNum,
     last_col: ColNum,
 ) -> String {
-    let range1 = rowcol_to_cell_abs(first_row, first_col);
-    let range2 = rowcol_to_cell_abs(last_row, last_col);
+    let range1 = row_col_to_cell_absolute(first_row, first_col);
+    let range2 = row_col_to_cell_absolute(last_row, last_col);
 
     if range1 == range2 {
         range1
@@ -94,7 +192,7 @@ pub fn cell_range_abs(
 
 // Convert zero indexed row and col cell references to a chart absolute
 // Sheet1!$A$1:$B$1 style range string.
-pub fn chart_range_abs(
+pub(crate) fn chart_range_abs(
     sheet_name: &str,
     first_row: RowNum,
     first_col: ColNum,
@@ -102,8 +200,8 @@ pub fn chart_range_abs(
     last_col: ColNum,
 ) -> String {
     let sheet_name = quote_sheetname(sheet_name);
-    let range1 = rowcol_to_cell_abs(first_row, first_col);
-    let range2 = rowcol_to_cell_abs(last_row, last_col);
+    let range1 = row_col_to_cell_absolute(first_row, first_col);
+    let range2 = row_col_to_cell_absolute(last_row, last_col);
 
     if range1 == range2 {
         format!("{sheet_name}!{range1}")
@@ -163,7 +261,7 @@ pub(crate) fn validate_sheetname(name: &str, message: &str) -> Result<(), XlsxEr
 // Get the pixel width of a string based on character widths taken from Excel.
 // Non-ascii characters are given a default width of 8 pixels.
 #[allow(clippy::match_same_arms)]
-pub fn pixel_width(string: &str) -> u16 {
+pub(crate) fn pixel_width(string: &str) -> u16 {
     let mut length = 0;
 
     for char in string.chars() {
@@ -313,7 +411,7 @@ mod tests {
         ];
 
         for (col_num, col_string) in tests {
-            assert_eq!(col_string, utility::col_to_name(col_num));
+            assert_eq!(col_string, utility::column_number_to_name(col_num));
         }
     }
 
@@ -335,7 +433,7 @@ mod tests {
         ];
 
         for (col_num, col_string) in tests {
-            assert_eq!(col_num, utility::name_to_col(col_string));
+            assert_eq!(col_num, utility::column_name_to_number(col_string));
         }
     }
 
@@ -360,7 +458,7 @@ mod tests {
         ];
 
         for (row_num, col_num, cell_string) in tests {
-            assert_eq!(cell_string, utility::rowcol_to_cell(row_num, col_num));
+            assert_eq!(cell_string, utility::row_col_to_cell(row_num, col_num));
         }
     }
 

@@ -2,6 +2,15 @@
 
 A cookbook of example programs using `rust_xlsxwriter`.
 
+
+The examples below can be run as follows:
+
+```bash
+git clone git@github.com:jmcnamara/rust_xlsxwriter.git
+cd rust_xlsxwriter/
+cargo run --example app_demo
+```
+
 # Contents
 
 1. [Hello World: Simple getting started example](#hello-world-simple-getting-started-example)

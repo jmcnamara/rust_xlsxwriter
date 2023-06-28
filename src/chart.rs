@@ -5169,12 +5169,12 @@ impl ChartRange {
             sheet_name = caps.get(1).unwrap().as_str();
             first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
             last_row = caps.get(5).unwrap().as_str().parse::<u32>().unwrap() - 1;
-            first_col = utility::name_to_col(caps.get(2).unwrap().as_str());
-            last_col = utility::name_to_col(caps.get(4).unwrap().as_str());
+            first_col = utility::column_name_to_number(caps.get(2).unwrap().as_str());
+            last_col = utility::column_name_to_number(caps.get(4).unwrap().as_str());
         } else if let Some(caps) = CHART_CELL.captures(range_string) {
             sheet_name = caps.get(1).unwrap().as_str();
             first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
-            first_col = utility::name_to_col(caps.get(2).unwrap().as_str());
+            first_col = utility::column_name_to_number(caps.get(2).unwrap().as_str());
             last_row = first_row;
             last_col = first_col;
         }
