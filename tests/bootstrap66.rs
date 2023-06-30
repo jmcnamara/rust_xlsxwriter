@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartDataLabel, Workbook, XlsxError};
 
 #[macro_use]
 extern crate lazy_static;
@@ -26,7 +26,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 2, 0))

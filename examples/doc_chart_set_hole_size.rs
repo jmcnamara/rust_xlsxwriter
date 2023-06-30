@@ -4,7 +4,7 @@
 
 //! An example of formatting the chart hole size for doughnut charts.
 
-use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(2, 0, 50)?;
 
     // Create a new chart.
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Add a data series with formatting.
     chart.add_series().set_values("Sheet1!$A$1:$A$3");

@@ -2658,7 +2658,7 @@ Chart 3 shows how to rotate the segments of the chart:
 // Sample code from examples/app_chart_pie.rs
 
 
-use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -2680,7 +2680,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a new pie chart.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Configure the data series for the chart.
     chart
@@ -2701,7 +2701,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Pie chart with user defined segment colors.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Configure the data series for the chart.
     chart
@@ -2720,7 +2720,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Pie chart with rotation of the segments.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Configure the data series for the chart.
     chart
@@ -2770,7 +2770,7 @@ Chart 4 shows how to set segment colors and other options.
 // Sample code from examples/app_chart_doughnut.rs
 
 
-use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -2792,7 +2792,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a new doughnut chart.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Configure the data series for the chart.
     chart
@@ -2813,7 +2813,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Doughnut chart with user defined segment colors.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Configure the data series for the chart.
     chart
@@ -2834,7 +2834,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Doughnut chart with rotation of the segments.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Configure the data series for the chart.
     chart
@@ -2857,7 +2857,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Doughnut chart with user defined hole size and other options.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Configure the data series for the chart.
     chart

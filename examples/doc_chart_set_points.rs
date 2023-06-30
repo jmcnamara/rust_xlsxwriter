@@ -4,9 +4,7 @@
 
 //! An example of formatting the chart rotation for pie and doughnut charts.
 
-use rust_xlsxwriter::{
-    Chart, ChartFormat, ChartPoint, ChartSolidFill, ChartType, Workbook, XlsxError,
-};
+use rust_xlsxwriter::{Chart, ChartFormat, ChartPoint, ChartSolidFill, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -31,7 +29,7 @@ fn main() -> Result<(), XlsxError> {
     ];
 
     // Create a new chart.
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Add a data series with formatting.
     chart

@@ -4,7 +4,7 @@
 
 //! A example of creating pie charts using the rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -26,7 +26,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a new pie chart.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Configure the data series for the chart.
     chart
@@ -47,7 +47,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Pie chart with user defined segment colors.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Configure the data series for the chart.
     chart
@@ -66,7 +66,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Pie chart with rotation of the segments.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Configure the data series for the chart.
     chart

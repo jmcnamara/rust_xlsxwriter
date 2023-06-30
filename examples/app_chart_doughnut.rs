@@ -4,7 +4,7 @@
 
 //! A example of creating doughnut charts using the rust_xlsxwriter library.
 
-use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -26,7 +26,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a new doughnut chart.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Configure the data series for the chart.
     chart
@@ -47,7 +47,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Doughnut chart with user defined segment colors.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Configure the data series for the chart.
     chart
@@ -68,7 +68,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Doughnut chart with rotation of the segments.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Configure the data series for the chart.
     chart
@@ -91,7 +91,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Create a Doughnut chart with user defined hole size and other options.
     // -----------------------------------------------------------------------
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
 
     // Configure the data series for the chart.
     chart

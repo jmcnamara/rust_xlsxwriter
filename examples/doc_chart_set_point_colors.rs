@@ -4,7 +4,7 @@
 
 //! An example of setting the individual segment colors of a Pie chart.
 
-use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(2, 0, 30)?;
 
     // Create a new chart.
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Add a data series with formatting.
     chart

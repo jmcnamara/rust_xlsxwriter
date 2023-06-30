@@ -5,7 +5,7 @@
 //! An example of setting the percentage for the data labels of a chart series.
 //! Usually this only applies to a Pie or Doughnut chart.
 
-use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartDataLabel, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(2, 0, 30)?;
 
     // Create a new chart.
-    let mut chart = Chart::new(ChartType::Pie);
+    let mut chart = Chart::new_pie();
 
     // Add a data series.
     chart

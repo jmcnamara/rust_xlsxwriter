@@ -6,8 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use rust_xlsxwriter::{
-    Chart, ChartFormat, ChartLine, ChartLineDashType, ChartSolidFill, ChartType, Workbook,
-    XlsxError,
+    Chart, ChartFormat, ChartLine, ChartLineDashType, ChartSolidFill, Workbook, XlsxError,
 };
 
 #[macro_use]
@@ -29,7 +28,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let mut chart = Chart::new(ChartType::Doughnut);
+    let mut chart = Chart::new_doughnut();
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 2, 0))

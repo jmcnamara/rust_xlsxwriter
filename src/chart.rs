@@ -154,9 +154,13 @@ impl Chart {
     /// [`worksheet.insert_chart()`][crate::Worksheet::insert_chart].
     ///
     /// Once you have create a chart you will need to add at least one data
-    /// series via [`chart.add_series()`](Chart::add_series) and set a value range
-    /// for that series using [`series.set_values()`][ChartSeries::set_values].
-    /// See the example below.
+    /// series via [`chart.add_series()`](Chart::add_series) and set a value
+    /// range for that series using
+    /// [`series.set_values()`][ChartSeries::set_values]. See the example below.
+    ///
+    /// There are some shortcut versions of `new()` such as
+    /// [`Chart::new_pie()`](Chart::new_pie) that are more useful/succinct for
+    /// charts that don't have subtypes.
     ///
     /// # Arguments
     ///
@@ -271,6 +275,94 @@ impl Chart {
             | ChartType::ScatterSmooth
             | ChartType::ScatterSmoothWithMarkers => Self::initialize_scatter_chart(chart),
         }
+    }
+
+    /// Create a new Area `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Area)` to
+    /// create a default Area chart.
+    ///
+    /// See [`Chart::new()`](Chart::new) for further details.
+    ///
+    pub fn new_area() -> Chart {
+        Self::new(ChartType::Area)
+    }
+
+    /// Create a new Bar `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Bar)` to
+    /// create a default Bar chart.
+    ///
+    /// See [`Chart::new()`](Chart::new) for further details.
+    ///
+    pub fn new_bar() -> Chart {
+        Self::new(ChartType::Bar)
+    }
+
+    /// Create a new Column `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Column)` to
+    /// create a default Column chart.
+    ///
+    /// See [`Chart::new()`](Chart::new) for further details.
+    ///
+    pub fn new_column() -> Chart {
+        Self::new(ChartType::Column)
+    }
+
+    /// Create a new Doughnut `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new_doughnut()` to
+    /// create a default Doughnut chart.
+    ///
+    /// See [`Chart::new()`](Chart::new) for further details.
+    ///
+    pub fn new_doughnut() -> Chart {
+        Self::new(ChartType::Doughnut)
+    }
+
+    /// Create a new Line `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Line)` to
+    /// create a default Line chart.
+    ///
+    /// See [`Chart::new()`](Chart::new) for further details.
+    ///
+    pub fn new_line() -> Chart {
+        Self::new(ChartType::Line)
+    }
+
+    /// Create a new Pie `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Pie)` to
+    /// create a default Pie chart.
+    ///
+    /// See [`Chart::new()`](Chart::new) for further details.
+    ///
+    pub fn new_pie() -> Chart {
+        Self::new(ChartType::Pie)
+    }
+
+    /// Create a new Radar `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Radar)` to
+    /// create a default Radar chart.
+    ///
+    /// See [`Chart::new()`](Chart::new) for further details.
+    ///
+    pub fn new_radar() -> Chart {
+        Self::new(ChartType::Radar)
+    }
+
+    /// Create a new Scatter `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Scatter)` to
+    /// create a default Scatter chart.
+    ///
+    /// See [`Chart::new()`](Chart::new) for further details.
+    ///
+    pub fn new_scatter() -> Chart {
+        Self::new(ChartType::Scatter)
     }
 
     /// Create and add a new chart series to a chart.
@@ -859,7 +951,7 @@ impl Chart {
     /// ```
     /// # // This code is available in examples/doc_chart_set_rotation.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -871,7 +963,7 @@ impl Chart {
     /// #     worksheet.write(2, 0, 50)?;
     /// #
     /// #     // Create a new chart.
-    ///     let mut chart = Chart::new(ChartType::Pie);
+    ///     let mut chart = Chart::new_pie();
     ///
     ///     // Add a data series with formatting.
     ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
@@ -917,7 +1009,7 @@ impl Chart {
     /// ```
     /// # // This code is available in examples/doc_chart_set_hole_size.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -929,7 +1021,7 @@ impl Chart {
     /// #     worksheet.write(2, 0, 50)?;
     /// #
     /// #     // Create a new chart.
-    ///     let mut chart = Chart::new(ChartType::Doughnut);
+    ///     let mut chart = Chart::new_doughnut();
     ///
     ///     // Add a data series with formatting.
     ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
@@ -4716,7 +4808,7 @@ impl ChartSeries {
     /// # // This code is available in examples/doc_chart_set_points.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Chart, ChartFormat, ChartPoint, ChartSolidFill, ChartType, Workbook, XlsxError,
+    /// #     Chart, ChartFormat, ChartPoint, ChartSolidFill, Workbook, XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -4742,7 +4834,7 @@ impl ChartSeries {
     ///     ];
     ///
     ///     // Create a simple Pie chart.
-    ///     let mut chart = Chart::new(ChartType::Pie);
+    ///     let mut chart = Chart::new_pie();
     ///
     ///     // Add a data series with formatting.
     ///     chart
@@ -4798,7 +4890,7 @@ impl ChartSeries {
     /// ```
     /// # // This code is available in examples/doc_chart_set_point_colors.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -4810,7 +4902,7 @@ impl ChartSeries {
     /// #     worksheet.write(2, 0, 30)?;
     /// #
     /// #     // Create a new chart.
-    ///     let mut chart = Chart::new(ChartType::Pie);
+    ///     let mut chart = Chart::new_pie();
     ///
     ///     // Add a data series with formatting.
     ///     chart
@@ -6248,7 +6340,7 @@ impl ChartDataLabel {
     /// ```
     /// # // This code is available in examples/doc_chart_data_labels_show_percentage.rs
     /// #
-    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, ChartType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Chart, ChartDataLabel, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -6260,7 +6352,7 @@ impl ChartDataLabel {
     /// #     worksheet.write(2, 0, 30)?;
     /// #
     /// #     // Create a new chart.
-    ///     let mut chart = Chart::new(ChartType::Pie);
+    ///     let mut chart = Chart::new_pie();
     ///
     ///     // Add a data series with formatting.
     ///     chart
@@ -6974,7 +7066,7 @@ impl fmt::Display for ChartDataLabelPosition {
 /// # // This code is available in examples/doc_chart_set_points.rs
 /// #
 /// # use rust_xlsxwriter::{
-/// #     Chart, ChartFormat, ChartPoint, ChartSolidFill, ChartType, Workbook, XlsxError,
+/// #     Chart, ChartFormat, ChartPoint, ChartSolidFill, Workbook, XlsxError,
 /// # };
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -7000,7 +7092,7 @@ impl fmt::Display for ChartDataLabelPosition {
 /// #     ];
 /// #
 /// #     // Create a simple Pie chart.
-///     let mut chart = Chart::new(ChartType::Pie);
+///     let mut chart = Chart::new_pie();
 ///
 ///     // Add a data series with formatting.
 ///     chart
@@ -8796,17 +8888,17 @@ impl ChartLegend {
     /// #     worksheet.write(1, 0, 30)?;
     /// #     worksheet.write(2, 0, 40)?;
     /// #
-    /// #     // Create a new chart.
-    /// #     let mut chart = Chart::new(ChartType::Column);
-    /// #
-    /// #     // Add a data series using Excel formula syntax to describe the range.
-    /// #     chart.add_series().set_values("Sheet1!$A$1:$A$3");
-    /// #
-    /// #     // Hide the chart legend.
-    /// #     chart.legend().set_hidden();
-    /// #
-    /// #     // Add the chart to the worksheet.
-    /// #     worksheet.insert_chart(0, 2, &chart)?;
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Hide the chart legend.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
     /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
