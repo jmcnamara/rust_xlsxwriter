@@ -9,7 +9,7 @@ use crate::worksheet::ColNum;
 use crate::worksheet::RowNum;
 use crate::XlsxError;
 
-/// Convert a zero indexed column cell reference to a string.
+/// Convert a zero indexed column cell reference to a string like `"A"`.
 ///
 /// Utility function to convert a zero based column reference to a string
 /// representation. This can be useful when constructing ranges for formulas.
@@ -48,7 +48,7 @@ pub fn column_number_to_name(col_num: ColNum) -> String {
     col_name
 }
 
-/// Convert a column string such as "A" to a zero indexed column reference.
+/// Convert a column string such as `"A"` to a zero indexed column reference.
 ///
 /// Utility function to convert a column string representation to a zero based
 /// column reference.
