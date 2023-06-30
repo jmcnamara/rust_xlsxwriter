@@ -4,6 +4,8 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+#![doc(html_logo_url = "https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png")]
+
 //! The `rust_xlsxwriter` library is a Rust library for writing Excel files in
 //! the xlsx format.
 //!
