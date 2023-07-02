@@ -3,9 +3,9 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! A simple program to write some data to an Excel spreadsheet using
-//! rust_xlsxwriter. Part 4 of a tutorial.
+//! rust_xlsxwriter. Part 5 of a tutorial.
 
-use rust_xlsxwriter::{Chart, ExcelDateTime, Format, Formula, Workbook, XlsxError};
+use rust_xlsxwriter::{cell_range, Chart, ExcelDateTime, Format, Formula, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Some sample data we want to write to a spreadsheet.
@@ -40,20 +40,30 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_column_width(2, 15)?;
 
     // Iterate over the data and write it out row by row.
-    let mut last_row = 1;
+    let mut row = 1;
     for expense in &expenses {
-        worksheet.write(last_row, 0, expense.0)?;
-        worksheet.write_with_format(last_row, 1, expense.1, &money_format)?;
+        worksheet.write(row, 0, expense.0)?;
+        worksheet.write_with_format(row, 1, expense.1, &money_format)?;
 
         let date = ExcelDateTime::parse_from_str(expense.2)?;
-        worksheet.write_with_format(last_row, 2, &date, &date_format)?;
+        worksheet.write_with_format(row, 2, &date, &date_format)?;
 
-        last_row += 1;
+        row += 1;
     }
 
+    // For clarity, define some variables to use in the formula and chart ranges.
+    // Row and column numbers are all zero-indexed.
+    let first_row = 1; // Skip the header row.
+    let last_row = first_row + (expenses.len() as u32) - 1;
+    let item_col = 0;
+    let cost_col = 1;
+
     // Write a total using a formula.
-    worksheet.write_with_format(last_row, 0, "Total", &bold)?;
-    worksheet.write_with_format(last_row, 1, Formula::new("=SUM(B2:B5)"), &money_format)?;
+    worksheet.write_with_format(row, 0, "Total", &bold)?;
+
+    let range = cell_range(first_row, cost_col, last_row, cost_col);
+    let formula = format!("=SUM({range})");
+    worksheet.write_with_format(row, 1, Formula::new(formula), &money_format)?;
 
     // Add a chart to display the expenses.
     let mut chart = Chart::new_pie();
@@ -61,14 +71,14 @@ fn main() -> Result<(), XlsxError> {
     // Configure the data series for the chart.
     chart
         .add_series()
-        .set_categories("Sheet1!$A$2:$A$5")
-        .set_values("Sheet1!$B$2:$B$5");
+        .set_categories(("Sheet1", first_row, item_col, last_row, item_col))
+        .set_values(("Sheet1", first_row, cost_col, last_row, cost_col));
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(1, 4, &chart)?;
 
     // Save the file to disk.
-    workbook.save("tutorial4.xlsx")?;
+    workbook.save("tutorial5.xlsx")?;
 
     Ok(())
 }

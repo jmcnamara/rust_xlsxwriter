@@ -14,6 +14,8 @@ use crate::XlsxError;
 /// Utility function to convert a zero based column reference to a string
 /// representation. This can be useful when constructing ranges for formulas.
 ///
+/// # Examples:
+///
 /// ```
 /// use rust_xlsxwriter::column_number_to_name;
 ///
@@ -21,6 +23,20 @@ use crate::XlsxError;
 /// assert_eq!(column_number_to_name(1), "B");
 /// assert_eq!(column_number_to_name(702), "AAA");
 /// ```
+///
+/// # See also:
+///
+/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
+///   column string such as `"A"` to a zero indexed column reference.
+/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
+///   row and column cell numbers to a `A1` style string.
+/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
+///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
+///   range string.
+/// - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
+///   col cell numbers to a `A1:B1` style range string.
+/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
+///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn column_number_to_name(col_num: ColNum) -> String {
     let mut col_name = String::new();
@@ -53,6 +69,8 @@ pub fn column_number_to_name(col_num: ColNum) -> String {
 /// Utility function to convert a column string representation to a zero based
 /// column reference.
 ///
+/// # Examples:
+///
 /// ```
 /// use rust_xlsxwriter::column_name_to_number;
 ///
@@ -60,6 +78,20 @@ pub fn column_number_to_name(col_num: ColNum) -> String {
 /// assert_eq!(column_name_to_number("B"), 1);
 /// assert_eq!(column_name_to_number("AAA"), 702);
 /// ```
+///
+/// # See also:
+///
+/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
+///   zero indexed column cell reference to a string like `"A"`.
+/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
+///   row and column cell numbers to a `A1` style string.
+/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
+///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
+///   range string.
+/// - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
+///   col cell numbers to a `A1:B1` style range string.
+/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
+///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn column_name_to_number(column: &str) -> ColNum {
     let mut col_num = 0;
@@ -77,6 +109,8 @@ pub fn column_name_to_number(column: &str) -> ColNum {
 /// `A1` cell reference. This can be useful when constructing ranges for
 /// formulas.
 ///
+/// # Examples:
+///
 /// ```
 /// use rust_xlsxwriter::row_col_to_cell;
 ///
@@ -85,16 +119,32 @@ pub fn column_name_to_number(column: &str) -> ColNum {
 /// assert_eq!(row_col_to_cell(1, 1), "B2");
 /// ```
 ///
+/// # See also:
+///
+/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
+///   zero indexed column cell reference to a string like `"A"`.
+/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
+///   column string such as `"A"` to a zero indexed column reference.
+/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
+///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
+///   range string.
+/// - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
+///   col cell numbers to a `A1:B1` style range string.
+/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
+///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
+///
 pub fn row_col_to_cell(row_num: RowNum, col_num: ColNum) -> String {
     format!("{}{}", column_number_to_name(col_num), row_num + 1)
 }
 
 /// Convert zero indexed row and column cell numbers to an absolute `$A$1`
-/// style string.
+/// style range string.
 ///
 /// Utility function to convert zero indexed row and column cell values to an
 /// absolute `$A$1` cell reference. This can be useful when constructing ranges
 /// for formulas.
+///
+/// # Examples:
 ///
 /// ```
 /// use rust_xlsxwriter::row_col_to_cell_absolute;
@@ -103,6 +153,19 @@ pub fn row_col_to_cell(row_num: RowNum, col_num: ColNum) -> String {
 /// assert_eq!(row_col_to_cell_absolute(0, 1), "$B$1");
 /// assert_eq!(row_col_to_cell_absolute(1, 1), "$B$2");
 /// ```
+///
+/// # See also:
+///
+/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
+///   zero indexed column cell reference to a string like `"A"`.
+/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
+///   column string such as `"A"` to a zero indexed column reference.
+/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
+///   row and column cell numbers to a `A1` style string.
+/// - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
+///   col cell numbers to a `A1:B1` style range string.
+/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
+///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn row_col_to_cell_absolute(row_num: RowNum, col_num: ColNum) -> String {
     format!("${}${}", column_number_to_name(col_num), row_num + 1)
@@ -116,6 +179,8 @@ pub fn row_col_to_cell_absolute(row_num: RowNum, col_num: ColNum) -> String {
 ///
 /// Note, this function should not be used to create a chart range. Use the
 /// 5-tuple version of [`IntoChartRange`](crate::IntoChartRange) instead.
+///
+/// # Examples:
 ///
 /// ```
 /// use rust_xlsxwriter::cell_range;
@@ -132,6 +197,20 @@ pub fn row_col_to_cell_absolute(row_num: RowNum, col_num: ColNum) -> String {
 ///
 /// assert_eq!(cell_range(0, 0, 0, 0), "A1");
 /// ```
+///
+/// # See also:
+///
+/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
+///   zero indexed column cell reference to a string like `"A"`.
+/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
+///   column string such as `"A"` to a zero indexed column reference.
+/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
+///   row and column cell numbers to a `A1` style string.
+/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
+///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
+///   range string.
+/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
+///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn cell_range(
     first_row: RowNum,
@@ -158,6 +237,8 @@ pub fn cell_range(
 /// Note, this function should not be used to create a chart range. Use the
 /// 5-tuple version of [`IntoChartRange`](crate::IntoChartRange) instead.
 ///
+/// # Examples:
+///
 /// ```
 /// use rust_xlsxwriter::cell_range_absolute;
 ///
@@ -173,6 +254,20 @@ pub fn cell_range(
 ///
 /// assert_eq!(cell_range_absolute(0, 0, 0, 0), "$A$1");
 /// ```
+///
+/// # See also:
+///
+/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
+///   zero indexed column cell reference to a string like `"A"`.
+/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
+///   column string such as `"A"` to a zero indexed column reference.
+/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
+///   row and column cell numbers to a `A1` style string.
+/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
+///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
+///   range string.
+/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
+///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn cell_range_absolute(
     first_row: RowNum,

@@ -29,7 +29,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Iterate over the data and write it out row by row.
     let mut row = 1;
-    for expense in expenses {
+    for expense in &expenses {
         worksheet.write(row, 0, expense.0)?;
         worksheet.write_with_format(row, 1, expense.1, &money_format)?;
         row += 1;

@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Iterate over the data and write it out row by row.
     let mut row = 0;
-    for expense in expenses {
+    for expense in &expenses {
         worksheet.write(row, 0, expense.0)?;
         worksheet.write(row, 1, expense.1)?;
         row += 1;

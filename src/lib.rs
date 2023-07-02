@@ -123,7 +123,6 @@
 //! - [Roadmap of planned features].
 //!
 //! [User Guide]: https://rustxlsxwriter.github.io/index.html
-//! [Getting started]: https://rustxlsxwriter.github.io/getting_started.html
 //! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
 //! [Roadmap of planned features]:
 //!     https://github.com/jmcnamara/rust_xlsxwriter/issues/1

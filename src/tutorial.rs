@@ -2,6 +2,22 @@
 
 A getting started tutorial for `rust_xlsxwriter`.
 
+- [Introduction](#introduction)
+- [Getting started](#getting-started)
+  - [Create a sample project](#create-a-sample-project)
+  - [Add `rust_xlsxwriter` to Cargo.toml](#add-rust_xlsxwriter-to-cargotoml)
+  - [Modify main.rs](#modify-mainrs)
+  - [Run the application](#run-the-application)
+- [Tutorial](#tutorial)
+  - [Reading ahead](#reading-ahead)
+  - [Tutorial Part 1: Adding data to a worksheet](#tutorial-part-1-adding-data-to-a-worksheet)
+  - [Tutorial Part 2: Adding some formatting](#tutorial-part-2-adding-some-formatting)
+  - [Tutorial Part 3: Adding dates and more formatting](#tutorial-part-3-adding-dates-and-more-formatting)
+  - [Tutorial Part 4: Adding a chart](#tutorial-part-4-adding-a-chart)
+  - [Tutorial Part 5: Making the code more programmatic](#tutorial-part-5-making-the-code-more-programmatic)
+- [Next steps](#next-steps)
+
+
 # Introduction
 
 The `rust_xlsxwriter` library is a Rust library for writing Excel files in
@@ -16,7 +32,7 @@ with the file format created by Excel.
 This document is a tutorial on getting started with `rust_xlsxwriter` and for
 using it to write Excel xlsx files.
 
- # Installation and creating a sample application
+# Getting started
 
 In order to use the `rust_xlsxwriter` in a application or in another library you
 will need add it as a dependency to the `Cargo.toml` file of your project.
@@ -46,7 +62,7 @@ hello-xlsx/
     └── main.rs
 ```
 
-## Add/install `rust_xlsxwriter`
+## Add `rust_xlsxwriter` to Cargo.toml
 
 Add the `rust_xlsxwriter` dependency to the project `Cargo.toml` file:
 
@@ -54,7 +70,7 @@ Add the `rust_xlsxwriter` dependency to the project `Cargo.toml` file:
 $ cargo add rust_xlsxwriter
 ```
 
-## Modify `main.rs`
+## Modify main.rs
 
 Modify the `src/main.rs` file so it looks like this:
 
@@ -101,9 +117,20 @@ slightly more realistic tutorial example.
 # Tutorial
 
 In order to look at some of the basic but more useful features of the
-`rust_xlsxwriter` library will will create an application to summarize some
+`rust_xlsxwriter` library we will create an application to summarize some
 monthly expenses into a spreadsheet.
 
+## Reading ahead
+
+The tutorial will present the simplest direct approach to achieving the goal so
+as not to confuse the reader with information that isn't initially required.
+Whenever there is more advanced material that has been omitted or glossed over
+the documentation will contain an information section like the following that
+the reader can take on board or ignore:
+
+> **Reading ahead**:
+>
+> Some more advanced information.
 
 ## Tutorial Part 1: Adding data to a worksheet
 
@@ -131,7 +158,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Iterate over the data and write it out row by row.
     let mut row = 0;
-    for expense in expenses {
+    for expense in &expenses {
         worksheet.write(row, 0, expense.0)?;
         worksheet.write(row, 1, expense.1)?;
         row += 1;
@@ -161,7 +188,7 @@ The first step is to create a new workbook object using the
 [`Workbook::new()`](crate::Workbook::new):
 
 
-```ignore
+```text
 let mut workbook = Workbook::new();
 ```
 
@@ -171,10 +198,7 @@ existing files.
 The workbook object is then used to add a new worksheet via the
 [`workbook.add_worksheet()`](crate::Workbook::add_worksheet) method:
 
-
-
-
-```ignore
+```text
 let worksheet = workbook.add_worksheet();
 ```
 The worksheet will have a standard Excel name, in this case "Sheet1". You can
@@ -187,36 +211,56 @@ We then iterate over the data and use the
 types to the equivalent Excel types and writes them to the specified `row, col`
 location in the worksheet:
 
-```ignore
-    for expense in expenses {
+```text
+    for expense in &expenses {
         worksheet.write(row, 0, expense.0)?;
         worksheet.write(row, 1, expense.1)?;
         row += 1;
     }
 ```
 
-Throughout `rust_xlsxwriter` rows and columns are zero indexed. So, for example,
-the first cell in a worksheet, `A1`, is `(0, 0)`.
+> **Reading ahead**:
+>
+> There are other type specific write methods such as
+> [`worksheet.write_string()`](crate::Worksheet::write_string) and
+> [`worksheet.write_number()`](crate::Worksheet::write_number). However, these
+> aren't generally required and thanks to Rust's monomorphization the
+> performance of the generic `write()` method is just as fast.
+>
+> There are also worksheet methods for writing arrays of data or arrays of
+> arrays of data that can be useful in cases where you don't need to add
+> specific formatting:
+>
+> - [`worksheet.write_row()`](crate::Worksheet::write_row)
+> - [`worksheet.write_column()`](crate::Worksheet::write_column)
+> - [`worksheet.write_row_matrix()`](crate::Worksheet::write_row_matrix)
+> - [`worksheet.write_column_matrix()`](crate::Worksheet::write_column_matrix)
 
-We then add a [`Formula`](crate::Formula) to calculate the total of the items in
-the second column:
 
-```ignore
+Throughout `rust_xlsxwriter` rows and columns are zero indexed. So the first
+cell in a worksheet `(0, 0)` is equivalent to the Excel notation of `A1`.
+
+To calculate the total of the items in the second column we add a
+[`Formula`](crate::Formula):
+
+```text
     worksheet.write(row, 1, Formula::new("=SUM(B1:B4)"))?;
 ```
 
 Finally, we save and close the Excel file via the
-[`workbook.save()`](crate::Workbook::save) method which take a [`std::path`]
-`Path`, `PathBuf` or filename string as an argument:
+[`workbook.save()`](crate::Workbook::save) method which will generate the
+spreadsheet shown in the image above.:
 
-```ignore
+```text
     workbook.save("tutorial1.xlsx")?;
 ```
 
-This will generate the spreadsheet shown in the image above.
-
-It is also possible to save to a byte vector using
-[`workbook.save_to_buffer()`](crate::Workbook::save_to_buffer).
+> **Reading ahead**:
+>
+> The [`workbook.save()`](crate::Workbook::save) method takes a [`std::path`]
+> argument which can be a `Path`, `PathBuf` or a filename string. It is also
+> possible to save to a byte vector using
+> [`workbook.save_to_buffer()`](crate::Workbook::save_to_buffer).
 
 
 ## Tutorial Part 2: Adding some formatting
@@ -266,7 +310,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Iterate over the data and write it out row by row.
     let mut row = 1;
-    for expense in expenses {
+    for expense in &expenses {
         worksheet.write(row, 0, expense.0)?;
         worksheet.write_with_format(row, 1, expense.1, &money_format)?;
         row += 1;
@@ -291,10 +335,10 @@ spreadsheet.
 to a cell in Excel such as fonts, number formatting, colors and borders. This is
 explained in more detail in the [`Format`](crate::Format) struct documentation.
 
-For now we will avoid getting into the details of Format and just use a limited
-amount of the its functionality to add some simple formatting:
+For now we will avoid getting into the details of `Format` and just use a
+limited amount of the its functionality to add some simple formatting:
 
-```ignore
+```text
     // Add a bold format to use to highlight cells.
     let bold = Format::new().set_bold();
 
@@ -304,9 +348,9 @@ amount of the its functionality to add some simple formatting:
 
 We can use these formats with the
 [`worksheet.write_with_format()`](crate::Worksheet::write_with_format) method
-which write data and formatting together.
+which write data and formatting together, like these examples from the code:
 
-```ignore
+```text
     worksheet.write_with_format(0, 0, "Item", &bold)?;
 
     worksheet.write_with_format(row, 1, expense.1, &money_format)?;
@@ -374,7 +418,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Iterate over the data and write it out row by row.
     let mut row = 1;
-    for expense in expenses {
+    for expense in &expenses {
         worksheet.write(row, 0, expense.0)?;
         worksheet.write_with_format(row, 1, expense.1, &money_format)?;
 
@@ -395,15 +439,16 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-Dates and times in Excel are floating point numbers that have a number format
-applied to display them in the correct format. In order to handle dates and
-times with `rust_xlsxwriter` we create them using a
-[`ExcelDateTime`](crate::ExcelDateTime) instance and format them with an Excel
-number format.
+Dates and times in Excel are floating point numbers that have a format applied
+to display them in the desired way. In order to handle dates and times with
+`rust_xlsxwriter` we create them using a [`ExcelDateTime`](crate::ExcelDateTime)
+instance and format them with an Excel number format.
 
-Alternatively, if you have enable the `chrono` feature in `rust_xlsxwriter`  you
-can use [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or
-[`chrono::NaiveTime`] instances instead.
+> **Reading ahead**:
+
+> If you enable the `chrono` feature in `rust_xlsxwriter`  you can also use
+  [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or [`chrono::NaiveTime`]
+  instances.
 
 [`chrono::NaiveDate`]:
     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
@@ -413,20 +458,305 @@ can use [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or
     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
 
 In the example above we create the `ExcelDateTime` instance from the date
-strings in our input data and then format it, in Excel, with a number format.
+strings in our input data and then add a number format it so that it appears
+correctly in Excel:
 
-```ignore
+```text
         let date = ExcelDateTime::parse_from_str(expense.2)?;
         worksheet.write_date(row, 2, &date, &date_format)?;
 ```
 
-The final addition to our program is the make the "Date" column wider for
+Another addition to our program is the make the "Date" column wider for
 clarity using the
 [`worksheet.set_column_width()`](crate::Worksheet.set_column_width) method.
 
 
-```ignore
+```text
     worksheet.set_column_width(2, 15)?;
 ```
 
- */
+
+## Tutorial Part 4: Adding a chart
+
+To extend our example a little further let's add a Pie chart to show the
+relative sizes of the outgoing expenses to get a spreadsheet that will look like
+this:
+
+<img src="https://rustxlsxwriter.github.io/images/tutorial4.png">
+
+We use the [`Chart`](crate::Chart) struct to represent the chart.
+
+The [`Chart`](crate::Chart) struct has a lot of configuration options and
+sub-structs to replicate Excel's chart features but as an initial demonstration
+we will just add the data series to which the chart refers. Here is the updated
+code with the chart addition at the end.
+
+
+```rust
+// This code is available in examples/app_tutorial4.rs
+use rust_xlsxwriter::{Chart, ExcelDateTime, Format, Formula, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Some sample data we want to write to a spreadsheet.
+    let expenses = vec![
+        ("Rent", 2000, "2022-09-01"),
+        ("Gas", 200, "2022-09-05"),
+        ("Food", 500, "2022-09-21"),
+        ("Gym", 100, "2022-09-28"),
+    ];
+
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a bold format to use to highlight cells.
+    let bold = Format::new().set_bold();
+
+    // Add a number format for cells with money values.
+    let money_format = Format::new().set_num_format("$#,##0");
+
+    // Add a number format for cells with dates.
+    let date_format = Format::new().set_num_format("d mmm yyyy");
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write some column headers.
+    worksheet.write_with_format(0, 0, "Item", &bold)?;
+    worksheet.write_with_format(0, 1, "Cost", &bold)?;
+    worksheet.write_with_format(0, 2, "Date", &bold)?;
+
+    // Adjust the date column width for clarity.
+    worksheet.set_column_width(2, 15)?;
+
+    // Iterate over the data and write it out row by row.
+    let mut row = 1;
+    for expense in &expenses {
+        worksheet.write(row, 0, expense.0)?;
+        worksheet.write_with_format(row, 1, expense.1, &money_format)?;
+
+        let date = ExcelDateTime::parse_from_str(expense.2)?;
+        worksheet.write_with_format(row, 2, &date, &date_format)?;
+
+        row += 1;
+    }
+
+    // Write a total using a formula.
+    worksheet.write_with_format(row, 0, "Total", &bold)?;
+    worksheet.write_with_format(row, 1, Formula::new("=SUM(B2:B5)"), &money_format)?;
+
+    // Add a chart to display the expenses.
+    let mut chart = Chart::new_pie();
+
+    // Configure the data series for the chart.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$5")
+        .set_values("Sheet1!$B$2:$B$5");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart(1, 4, &chart)?;
+
+    // Save the file to disk.
+    workbook.save("tutorial4.xlsx")?;
+
+    Ok(())
+}
+```
+
+See the documentation for [`Chart`](crate::Chart) for more information.
+
+## Tutorial Part 5: Making the code more programmatic
+
+The previous example worked as expected but it contains some hard-coded cell
+ranges like `set_values("Sheet1!$B$2:$B$5")` and `Formula::new("=SUM(B2:B5)")`.
+If our example changed to have a different number of data items then we would
+have to manually change the code to adjust for the new ranges.
+
+Fortunately, these hard-coded values are only used for the sake of a tutorial and
+`rust_xlsxwriter` provides APIs to handle these more programmatically.
+
+Let's start by looking at the chart ranges:
+
+```text
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$5")
+        .set_values("Sheet1!$B$2:$B$5");
+```
+
+In general `rust_xlsxwriter` always numeric APIs for any ranges in Excel but
+sometimes also provides a **secondary** string based option. The previous
+example uses the secondary string based API for demonstration purposes but for
+real applications you would set the chart ranges we can using 5-tuple values
+like this:
+
+```text
+    chart
+        .add_series()
+        .set_categories(("Sheet1", first_row, item_col, last_row, item_col))
+        .set_values(("Sheet1", first_row, cost_col, last_row, cost_col));
+```
+
+Where the range values are set or calculated in the code:
+
+```text
+    let first_row = 1;
+    let last_row = first_row + (expenses.len() as u32) - 1;
+    let item_col = 0;
+    let cost_col = 1;
+```
+
+This allows the range to change dynamically if we add new elements to our `data`
+vector and also ensures that the worksheet name is quoted properly, if required.
+
+The other section of the code that has a hard-coded string is the formula
+`"=SUM(B2:B5)"`. There isn't a single API change that can be applied to ranges
+in formulas but `rust_xlsxwriter` provides several utility functions that can
+convert numbers to string ranges. For example the
+[`cell_range()`](crate::utility::cell_range) function which takes zero indexed
+numbers and converts them to a string range like `B2:B5`:
+
+
+```text
+    let range = cell_range(first_row, cost_col, last_row, cost_col);
+    let formula = format!("=SUM({range})");
+    worksheet.write_with_format(row, 1, Formula::new(formula), &money_format)?;
+```
+
+
+> **Reading ahead**:
+>
+> The `cell_range()` function and other similar functions are detailed elsewhere
+> in the documentation:
+>
+> - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
+>   zero indexed column cell reference to a string like `"A"`.
+> - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
+>   column string such as `"A"` to a zero indexed column reference.
+> - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
+>   row and column cell numbers to a `A1` style string.
+> - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
+>   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
+>   range string.
+> - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
+>   col cell numbers to a `A1:B1` style range string.
+> - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
+>   indexed row and col cell numbers to an absolute `$A$1:$B$1`
+
+Adding these changes our application changes to the following:
+
+```rust
+// This code is available in examples/app_tutorial5.rs
+use rust_xlsxwriter::{cell_range, Chart, ExcelDateTime, Format, Formula, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Some sample data we want to write to a spreadsheet.
+    let expenses = vec![
+        ("Rent", 2000, "2022-09-01"),
+        ("Gas", 200, "2022-09-05"),
+        ("Food", 500, "2022-09-21"),
+        ("Gym", 100, "2022-09-28"),
+    ];
+
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a bold format to use to highlight cells.
+    let bold = Format::new().set_bold();
+
+    // Add a number format for cells with money values.
+    let money_format = Format::new().set_num_format("$#,##0");
+
+    // Add a number format for cells with dates.
+    let date_format = Format::new().set_num_format("d mmm yyyy");
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write some column headers.
+    worksheet.write_with_format(0, 0, "Item", &bold)?;
+    worksheet.write_with_format(0, 1, "Cost", &bold)?;
+    worksheet.write_with_format(0, 2, "Date", &bold)?;
+
+    // Adjust the date column width for clarity.
+    worksheet.set_column_width(2, 15)?;
+
+    // Iterate over the data and write it out row by row.
+    let mut row = 1;
+    for expense in &expenses {
+        worksheet.write(row, 0, expense.0)?;
+        worksheet.write_with_format(row, 1, expense.1, &money_format)?;
+
+        let date = ExcelDateTime::parse_from_str(expense.2)?;
+        worksheet.write_with_format(row, 2, &date, &date_format)?;
+
+        row += 1;
+    }
+
+    // For clarity, define some variables to use in the formula and chart ranges.
+    // Row and column numbers are all zero-indexed.
+    let first_row = 1; // Skip the header row.
+    let last_row = first_row + (expenses.len() as u32) - 1;
+    let item_col = 0;
+    let cost_col = 1;
+
+    // Write a total using a formula.
+    worksheet.write_with_format(row, 0, "Total", &bold)?;
+
+    let range = cell_range(first_row, cost_col, last_row, cost_col);
+    let formula = format!("=SUM({range})");
+    worksheet.write_with_format(row, 1, Formula::new(formula), &money_format)?;
+
+    // Add a chart to display the expenses.
+    let mut chart = Chart::new_pie();
+
+    // Configure the data series for the chart.
+    chart
+        .add_series()
+        .set_categories(("Sheet1", first_row, item_col, last_row, item_col))
+        .set_values(("Sheet1", first_row, cost_col, last_row, cost_col));
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart(1, 4, &chart)?;
+
+    // Save the file to disk.
+    workbook.save("tutorial5.xlsx")?;
+
+    Ok(())
+}
+```
+
+This gives the same output to the previous version but it is now future proof
+for any changes to our input data:
+
+<img src="https://rustxlsxwriter.github.io/images/tutorial5.png">
+
+
+# Next steps
+
+Once you have completed this simple application you can looks through the
+following resources for more information:
+
+- The main API [documentation for the library](../index.html). Click on the
+  `rust_xlsxwriter` logo at the top left to get back to the start.
+
+- [Cookbook](crate::cookbook) to see other examples that you can use to get you
+  started.
+
+- The [`Workbook`](crate::Workbook) APIs and introduction.
+- The [`Worksheet`](crate::Worksheet) APIs and introduction.
+- The [`Format`](crate::Format) APIs and introduction.
+- The [`Chart`](crate::Chart) APIs and introduction.
+- The [`Table`](crate::Table) APIs and introduction.
+
+- [User Guide]: Some longer explanations of parts of `rust_xlsxwriter` API.
+
+- [Release Notes].
+- [Roadmap of planned features].
+
+[User Guide]: https://rustxlsxwriter.github.io/index.html
+[Release Notes]: https://rustxlsxwriter.github.io/changelog.html
+[Roadmap of planned features]:
+    https://github.com/jmcnamara/rust_xlsxwriter/issues/1
+
+*/
