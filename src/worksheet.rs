@@ -526,14 +526,10 @@ impl Worksheet {
     /// - [`chrono::NaiveDate`].
     /// - [`chrono::NaiveTime`].
     ///
-    ///
     /// [`Chrono`]: https://docs.rs/chrono/latest/chrono/index.html
     /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
     /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
     /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
-    ///
-    /// Note, A default number formats is provided for date/time types since Excel
-    /// requires that date have a format:
     ///
     /// - Dates: `"yyyy\\-mm\\-dd;@"`
     /// - Times: `"hh:mm:ss;@"`
@@ -584,14 +580,10 @@ impl Worksheet {
     /// - [`chrono::NaiveDate`].
     /// - [`chrono::NaiveTime`].
     ///
-    ///
     /// [`Chrono`]: https://docs.rs/chrono/latest/chrono/index.html
     /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
     /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
     /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
-    ///
-    /// Note, default date/time number formats are provided for the [`Chrono`]
-    /// types since Excel requires that date have a format.
     ///
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
@@ -2668,11 +2660,11 @@ impl Worksheet {
     ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 0)?;
     ///
     ///     // Write the datetime with different Excel formats.
-    ///     worksheet.write_datetime(0, 0, &datetime, &format1)?;
-    ///     worksheet.write_datetime(1, 0, &datetime, &format2)?;
-    ///     worksheet.write_datetime(2, 0, &datetime, &format3)?;
-    ///     worksheet.write_datetime(3, 0, &datetime, &format4)?;
-    ///     worksheet.write_datetime(4, 0, &datetime, &format5)?;
+    ///     worksheet.write_datetime_with_format(0, 0, &datetime, &format1)?;
+    ///     worksheet.write_datetime_with_format(1, 0, &datetime, &format2)?;
+    ///     worksheet.write_datetime_with_format(2, 0, &datetime, &format3)?;
+    ///     worksheet.write_datetime_with_format(3, 0, &datetime, &format4)?;
+    ///     worksheet.write_datetime_with_format(4, 0, &datetime, &format5)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2711,11 +2703,11 @@ impl Worksheet {
     ///     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
     ///
     ///     // Write the date with different Excel formats.
-    ///     worksheet.write_datetime(0, 0, &date, &format1)?;
-    ///     worksheet.write_datetime(1, 0, &date, &format2)?;
-    ///     worksheet.write_datetime(2, 0, &date, &format3)?;
-    ///     worksheet.write_datetime(3, 0, &date, &format4)?;
-    ///     worksheet.write_datetime(4, 0, &date, &format5)?;
+    ///     worksheet.write_datetime_with_format(0, 0, &date, &format1)?;
+    ///     worksheet.write_datetime_with_format(1, 0, &date, &format2)?;
+    ///     worksheet.write_datetime_with_format(2, 0, &date, &format3)?;
+    ///     worksheet.write_datetime_with_format(3, 0, &date, &format4)?;
+    ///     worksheet.write_datetime_with_format(4, 0, &date, &format5)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2754,11 +2746,11 @@ impl Worksheet {
     ///     let time = ExcelDateTime::from_hms_milli(2, 59, 3, 456)?;
     ///
     ///     // Write the time with different Excel formats.
-    ///     worksheet.write_datetime(0, 0, &time, &format1)?;
-    ///     worksheet.write_datetime(1, 0, &time, &format2)?;
-    ///     worksheet.write_datetime(2, 0, &time, &format3)?;
-    ///     worksheet.write_datetime(3, 0, &time, &format4)?;
-    ///     worksheet.write_datetime(4, 0, &time, &format5)?;
+    ///     worksheet.write_datetime_with_format(0, 0, &time, &format1)?;
+    ///     worksheet.write_datetime_with_format(1, 0, &time, &format2)?;
+    ///     worksheet.write_datetime_with_format(2, 0, &time, &format3)?;
+    ///     worksheet.write_datetime_with_format(3, 0, &time, &format4)?;
+    ///     worksheet.write_datetime_with_format(4, 0, &time, &format5)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2771,7 +2763,7 @@ impl Worksheet {
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_time.png">
     ///
     ///
-    pub fn write_datetime(
+    pub fn write_datetime_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -2784,7 +2776,7 @@ impl Worksheet {
         self.store_datetime(row, col, datetime, Some(format))
     }
 
-    #[doc(hidden)] // Hide the docs since this functionality is provided by `write_datetime()`.
+    #[doc(hidden)] // Hide the docs since this functionality is provided by `write_datetime_with_format()`.
     /// Write a formatted date to a worksheet cell.
     ///
     /// The method method writes dates/times that implements [`IntoExcelDateTime`]
@@ -2850,11 +2842,11 @@ impl Worksheet {
     ///     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
     ///
     ///     // Write the date with different Excel formats.
-    ///     worksheet.write_date(0, 0, &date, &format1)?;
-    ///     worksheet.write_date(1, 0, &date, &format2)?;
-    ///     worksheet.write_date(2, 0, &date, &format3)?;
-    ///     worksheet.write_date(3, 0, &date, &format4)?;
-    ///     worksheet.write_date(4, 0, &date, &format5)?;
+    ///     worksheet.write_date_with_format(0, 0, &date, &format1)?;
+    ///     worksheet.write_date_with_format(1, 0, &date, &format2)?;
+    ///     worksheet.write_date_with_format(2, 0, &date, &format3)?;
+    ///     worksheet.write_date_with_format(3, 0, &date, &format4)?;
+    ///     worksheet.write_date_with_format(4, 0, &date, &format5)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2866,7 +2858,7 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_date.png">
     ///
-    pub fn write_date(
+    pub fn write_date_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -2879,7 +2871,7 @@ impl Worksheet {
         self.store_datetime(row, col, datetime, Some(format))
     }
 
-    #[doc(hidden)] // Hide the docs since this functionality is provided by `write_datetime()`.
+    #[doc(hidden)] // Hide the docs since this functionality is provided by `write_datetime_with_format()`.
     /// Write a formatted time to a worksheet cell.
     ///
     /// The method method writes dates/times that implements [`IntoExcelDateTime`]
@@ -2945,11 +2937,11 @@ impl Worksheet {
     ///     let time = ExcelDateTime::from_hms_milli(2, 59, 3, 456)?;
     ///
     ///     // Write the time with different Excel formats.
-    ///     worksheet.write_time(0, 0, &time, &format1)?;
-    ///     worksheet.write_time(1, 0, &time, &format2)?;
-    ///     worksheet.write_time(2, 0, &time, &format3)?;
-    ///     worksheet.write_time(3, 0, &time, &format4)?;
-    ///     worksheet.write_time(4, 0, &time, &format5)?;
+    ///     worksheet.write_time_with_format(0, 0, &time, &format1)?;
+    ///     worksheet.write_time_with_format(1, 0, &time, &format2)?;
+    ///     worksheet.write_time_with_format(2, 0, &time, &format3)?;
+    ///     worksheet.write_time_with_format(3, 0, &time, &format4)?;
+    ///     worksheet.write_time_with_format(4, 0, &time, &format5)?;
     ///
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2961,7 +2953,7 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_time.png">
     ///
-    pub fn write_time(
+    pub fn write_time_with_format(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -10462,13 +10454,16 @@ impl Worksheet {
 ///     // Add a worksheet to the workbook.
 ///     let worksheet = workbook.add_worksheet();
 ///
+///     // Add a format for the dates.
+///     let format = Format::new().set_num_format("yyyy-mm-dd");
+///
 ///     // Make the first column wider for clarity.
 ///     worksheet.set_column_width(0, 12)?;
 ///
 ///     // Write user defined type instances that implement the IntoExcelData trait.
-///     worksheet.write(0, 0, UnixTime::new(0))?;
-///     worksheet.write(1, 0, UnixTime::new(946598400))?;
-///     worksheet.write(2, 0, UnixTime::new(1672531200))?;
+///     worksheet.write_with_format(0, 0, UnixTime::new(0), &format)?;
+///     worksheet.write_with_format(1, 0, UnixTime::new(946598400), &format)?;
+///     worksheet.write_with_format(2, 0, UnixTime::new(1672531200), &format)?;
 ///
 ///     // Save the file to disk.
 ///     workbook.save("write_generic.xlsx")?;
@@ -10478,8 +10473,9 @@ impl Worksheet {
 ///
 /// // For this example we create a simple struct type to represent a Unix time.
 /// // This is the number of elapsed seconds since the epoch of January 1970 (UTC).
-/// // See https://en.wikipedia.org/wiki/Unix_time. This type isn't handled by
-/// // default by `rust_xlsxwriter`.
+/// // See https://en.wikipedia.org/wiki/Unix_time. Note, this is for demonstration
+/// // purposes only. The `ExcelDateTime` struct in `rust_xlsxwriter` can handle
+/// // Unix timestamps.
 /// pub struct UnixTime {
 ///     seconds: u64,
 /// }
@@ -10498,9 +10494,8 @@ impl Worksheet {
 /// // 25569.0. For Unix times beyond that we divide by the number of seconds in the
 /// // day (24 * 60 * 60) to get the Excel serial date.
 /// //
-/// // For this data type we must also supply a number format in `write()` since
-/// // dates in Excel must have a number/date format. However, in general, you won't
-/// // need to handle a format in the `write()` method.
+/// // We need to implement two methods for the trait in order to write data with
+/// // and without a format.
 /// //
 /// impl IntoExcelData for UnixTime {
 ///     fn write(
@@ -10509,14 +10504,11 @@ impl Worksheet {
 ///         row: RowNum,
 ///         col: ColNum,
 ///     ) -> Result<&mut Worksheet, XlsxError> {
-///         // Create a default date format.
-///         let format = Format::new().set_num_format("yyyy-mm-dd");
-///
 ///         // Convert the Unix time to an Excel datetime.
 ///         let datetime = 25569.0 + (self.seconds as f64 / (24.0 * 60.0 * 60.0));
 ///
 ///         // Write the date as a number with a format.
-///         worksheet.write_number_with_format(row, col, datetime, &format)
+///         worksheet.write_number(row, col, datetime)
 ///     }
 ///
 ///     fn write_with_format<'a>(
@@ -10647,10 +10639,6 @@ impl IntoExcelData for bool {
     }
 }
 
-// Note, for the date/time type traits below we add a default number format for
-// the `write()` variants since Excel dates/times require a number format or
-// else they will appear as a number.
-
 impl IntoExcelData for &ExcelDateTime {
     fn write(
         self,
@@ -10659,9 +10647,7 @@ impl IntoExcelData for &ExcelDateTime {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
         let number = self.to_excel();
-        let num_format = self.num_format();
-        let format = &Format::new().set_num_format(num_format);
-        worksheet.store_datetime(row, col, number, Some(format))
+        worksheet.store_datetime(row, col, number, None)
     }
 
     fn write_with_format<'a>(
@@ -10685,8 +10671,7 @@ impl IntoExcelData for &NaiveDateTime {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_datetime_to_excel(self);
-        let format = &Format::new().set_num_format("yyyy\\-mm\\-dd\\ hh:mm:ss");
-        worksheet.store_datetime(row, col, number, Some(format))
+        worksheet.store_datetime(row, col, number, None)
     }
 
     fn write_with_format<'a>(
@@ -10710,8 +10695,7 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_date_to_excel(*self);
-        let format = &Format::new().set_num_format("yyyy\\-mm\\-dd;@");
-        worksheet.store_datetime(row, col, number, Some(format))
+        worksheet.store_datetime(row, col, number, None)
     }
 
     fn write_with_format<'a>(
@@ -10735,8 +10719,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_time_to_excel(*self);
-        let format = &Format::new().set_num_format("hh:mm:ss;@");
-        worksheet.store_datetime(row, col, number, Some(format))
+        worksheet.store_datetime(row, col, number, None)
     }
 
     fn write_with_format<'a>(

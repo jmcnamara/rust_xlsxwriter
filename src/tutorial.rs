@@ -463,7 +463,7 @@ correctly in Excel:
 
 ```text
         let date = ExcelDateTime::parse_from_str(expense.2)?;
-        worksheet.write_date(row, 2, &date, &date_format)?;
+        worksheet.write_with_format(row, 2, &date, &date_format)?;
 ```
 
 Another addition to our program is the make the "Date" column wider for

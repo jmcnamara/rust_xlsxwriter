@@ -118,7 +118,6 @@ pub struct ExcelDateTime {
     is_1904_date: bool,
     serial_datetime: Option<f64>,
     datetime_type: ExcelDateTimeType,
-    num_format: String,
 }
 
 impl ExcelDateTime {
@@ -878,21 +877,6 @@ impl ExcelDateTime {
         self
     }
 
-    // Get the default number format for the `ExcelDateTime` type.
-    pub(crate) fn num_format(&self) -> String {
-        if self.num_format.is_empty() {
-            match self.datetime_type {
-                ExcelDateTimeType::DateOnly => String::from("yyyy\\-mm\\-dd;@"),
-                ExcelDateTimeType::TimeOnly => String::from("hh:mm:ss;@"),
-                ExcelDateTimeType::DateAndTime | ExcelDateTimeType::Default => {
-                    String::from("yyyy\\-mm\\-dd\\ hh:mm:ss")
-                }
-            }
-        } else {
-            self.num_format.clone()
-        }
-    }
-
     // Common validation routine for year, month, day methods.
     fn validate_ymd(year: u16, month: u8, day: u8) -> Result<(), XlsxError> {
         let mut months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -1265,7 +1249,6 @@ impl Default for ExcelDateTime {
             is_1904_date: false,
             serial_datetime: None,
             datetime_type: ExcelDateTimeType::Default,
-            num_format: String::new(),
         }
     }
 }

@@ -28,11 +28,11 @@ fn main() -> Result<(), XlsxError> {
     let date = NaiveDate::from_ymd_opt(2023, 1, 25).unwrap();
 
     // Write the date with different Excel formats.
-    worksheet.write_date(0, 0, &date, &format1)?;
-    worksheet.write_date(1, 0, &date, &format2)?;
-    worksheet.write_date(2, 0, &date, &format3)?;
-    worksheet.write_date(3, 0, &date, &format4)?;
-    worksheet.write_date(4, 0, &date, &format5)?;
+    worksheet.write_date_with_format(0, 0, &date, &format1)?;
+    worksheet.write_date_with_format(1, 0, &date, &format2)?;
+    worksheet.write_date_with_format(2, 0, &date, &format3)?;
+    worksheet.write_date_with_format(3, 0, &date, &format4)?;
+    worksheet.write_date_with_format(4, 0, &date, &format5)?;
 
     workbook.save("worksheet.xlsx")?;
 

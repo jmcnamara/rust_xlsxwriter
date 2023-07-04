@@ -27,11 +27,11 @@ fn main() -> Result<(), XlsxError> {
     let time = ExcelDateTime::from_hms_milli(2, 59, 3, 456)?;
 
     // Write the time with different Excel formats.
-    worksheet.write_time(0, 0, &time, &format1)?;
-    worksheet.write_time(1, 0, &time, &format2)?;
-    worksheet.write_time(2, 0, &time, &format3)?;
-    worksheet.write_time(3, 0, &time, &format4)?;
-    worksheet.write_time(4, 0, &time, &format5)?;
+    worksheet.write_time_with_format(0, 0, &time, &format1)?;
+    worksheet.write_time_with_format(1, 0, &time, &format2)?;
+    worksheet.write_time_with_format(2, 0, &time, &format3)?;
+    worksheet.write_time_with_format(3, 0, &time, &format4)?;
+    worksheet.write_time_with_format(4, 0, &time, &format5)?;
 
     workbook.save("worksheet.xlsx")?;
 
