@@ -2636,7 +2636,7 @@ impl Worksheet {
     /// Excel worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_write_datetime.rs
+    /// # // This code is available in examples/doc_worksheet_write_datetime_with_format.rs
     /// #
     /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
     /// #
@@ -2774,6 +2774,108 @@ impl Worksheet {
 
         // Store the cell data.
         self.store_datetime(row, col, datetime, Some(format))
+    }
+
+    /// Write an unformatted date and/or time to a worksheet cell.
+    ///
+    /// In general an unformatted date/time isn't very useful since a date in
+    /// Excel without a format is just a number. However, this method is
+    /// provided for cases where an implicit format is derived from the column
+    /// or row format.
+    ///
+    /// However, for most use cases you should use the
+    /// [`write_datetime_with_format()`][Worksheet::write_datetime_with_format]
+    /// method with an explicit format.
+    ///
+    /// The date/time types supported are:
+    /// - [`ExcelDateTime`].
+    ///
+    /// If the `chrono` feature is enabled you can use the following types:
+    ///
+    /// - [`chrono::NaiveDateTime`].
+    /// - [`chrono::NaiveDate`].
+    /// - [`chrono::NaiveTime`].
+    ///
+    /// [`chrono::NaiveDate`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `datetime` - A date/time instance that implements
+    ///   [`IntoExcelDateTime`].
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates writing datetimes that take an
+    /// implicit format from the column formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_write_datetime.rs
+    /// #
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some formats to use with the datetimes below.
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-ddThh::mm:ss");
+    ///
+    ///     // Set the column formats.
+    ///     worksheet.set_column_format(0, &format1)?;
+    ///     worksheet.set_column_format(1, &format2)?;
+    ///     worksheet.set_column_format(2, &format3)?;
+    ///
+    ///     // Set the column widths for clarity.
+    ///     worksheet.set_column_width(0, 20)?;
+    ///     worksheet.set_column_width(1, 20)?;
+    ///     worksheet.set_column_width(2, 20)?;
+    ///
+    ///     // Create a datetime object.
+    ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 0)?;
+    ///
+    ///     // Write the datetime without a formats. The dates will get the column
+    ///     // format instead.
+    ///     worksheet.write_datetime(0, 0, &datetime)?;
+    ///     worksheet.write_datetime(0, 1, &datetime)?;
+    ///     worksheet.write_datetime(0, 2, &datetime)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_datetime_v2.png">
+    ///
+    pub fn write_datetime(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        datetime: impl IntoExcelDateTime,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let datetime = datetime.to_excel();
+
+        // Store the cell data.
+        self.store_datetime(row, col, datetime, None)
     }
 
     #[doc(hidden)] // Hide the docs since this functionality is provided by `write_datetime_with_format()`.

@@ -5,6 +5,66 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.42.0] - In progress
+
+### Changed
+
+- Made the `chrono` feature optionally off instead of optionally on. The
+  `chrono` feature must now be explicitly enabled to allow support for
+  [`Chrono`] types.
+
+- Renamed the worksheet `write_datetime()` method to the API consistent
+  [`write_datetime_with_format()`] and introduced a new
+  [`write_datetime()`] method that doesn't take a format. This is
+  required to fix a error in the APIs that prevented an unformatted datetime
+  from taking the row or column format.
+
+  **Note**: This is a backwards incompatible change.
+
+  See [GitHub Issue #47].
+
+
+### Added
+
+- Added a [Tutorial] amd [Cookbook] section to the `doc.rs` documentation.
+
+- Added a check, and and error result, for case-insensitive duplicate sheet
+  names. Also added sheet name validation to chart series.
+
+  See [GitHub Issue #45].
+
+- Added cell range name handling utility functions:
+
+  - [`column_number_to_name()`] - Convert a zero indexed column cell reference
+    to a string like `"A"`.
+  - [`column_name_to_number()`] - Convert a column string such as `"A"` to a
+    zero indexed column reference.
+  - [`row_col_to_cell()`] - Convert zero indexed row and column cell numbers to
+    a `A1` style string.
+  - [`row_col_to_cell_absolute()`] - Convert zero indexed row and column cell
+    numbers to an absolute `$A$1` style range string.
+  - [`cell_range()`] - Convert zero indexed row and col cell numbers to a
+    `A1:B1` style range string.
+  - [`cell_range_absolute()`] - Convert zero indexed row and col cell numbers to
+    an absolute `$A$1:$B$1`
+
+[`cell_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/fn.cell_range.html
+[`row_col_to_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/fn.row_col_to_cell.html
+[`cell_range_absolute()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/fn.cell_range_absolute.html
+[`column_number_to_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/fn.column_number_to_name.html
+[`column_name_to_number()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/fn.column_name_to_number.html
+[`row_col_to_cell_absolute()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/fn.row_col_to_cell_absolute.html
+
+[GitHub Issue #45]: https://github.com/jmcnamara/rust_xlsxwriter/issues/45
+[GitHub Issue #47]: https://github.com/jmcnamara/rust_xlsxwriter/issues/47
+
+[Tutorial]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/tutorial/index.html
+[Cookbook]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html
+[`write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_datetime
+[`write_datetime_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_datetime
+
+
 ## [0.41.0] - 2023-06-20
 
 - Added the native [`ExcelDateTime`] struct to allow handling of dates and times
