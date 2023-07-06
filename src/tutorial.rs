@@ -122,11 +122,10 @@ monthly expenses into a spreadsheet.
 
 ## Reading ahead
 
-The tutorial will present the simplest direct approach to achieving the goal so
-as not to confuse the reader with information that isn't initially required.
-Whenever there is more advanced material that has been omitted or glossed over
-the documentation will contain an information section like the following that
-the reader can take on board or ignore:
+The tutorial presents a simple direct approach so as not to confuse the reader
+with information that isn't required for an initial understanding. If there is
+more advanced information that might be interesting at a later stage it will be
+highlighted in a "Reading ahead" section like this:
 
 > **Reading ahead**:
 >
@@ -348,7 +347,7 @@ limited amount of the its functionality to add some simple formatting:
 
 We can use these formats with the
 [`worksheet.write_with_format()`](crate::Worksheet::write_with_format) method
-which write data and formatting together, like these examples from the code:
+which writes data and formatting together, like these examples from the code:
 
 ```text
     worksheet.write_with_format(0, 0, "Item", &bold)?;
@@ -643,7 +642,7 @@ numbers and converts them to a string range like `B2:B5`:
 > - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
 >   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 
-Adding these changes our application changes to the following:
+Adding these improvements our application changes to the following:
 
 ```rust
 // This code is available in examples/app_tutorial5.rs

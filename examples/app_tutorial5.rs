@@ -51,8 +51,8 @@ fn main() -> Result<(), XlsxError> {
         row += 1;
     }
 
-    // For clarity, define some variables to use in the formula and chart ranges.
-    // Row and column numbers are all zero-indexed.
+    // For clarity, define some variables to use in the formula and chart
+    // ranges. Row and column numbers are all zero-indexed.
     let first_row = 1; // Skip the header row.
     let last_row = first_row + (expenses.len() as u32) - 1;
     let item_col = 0;
