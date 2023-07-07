@@ -162,7 +162,7 @@ impl Chart {
     /// [`Chart::new_pie()`](Chart::new_pie) that are more useful/succinct for
     /// charts that don't have subtypes.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `chart_type` - The chart type defined by [`ChartType`].
     ///
@@ -452,7 +452,7 @@ impl Chart {
     /// required you can create a standalone `ChartSeries` object and add it to
     /// a chart via this `chart.push_series()` method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `series` - a [`ChartSeries`] instance.
     ///
@@ -704,7 +704,7 @@ impl Chart {
     /// replicated using the Chart APIs (when complete) but they cannot be defined by
     /// the `set_style()` method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `style` - A integer value in the range 1-48.
     ///
@@ -790,7 +790,7 @@ impl Chart {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -868,7 +868,7 @@ impl Chart {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -938,7 +938,7 @@ impl Chart {
     /// segment of a Pie/Doughnut chart. This has the effect of rotating the
     /// entire chart.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `rotation`: The rotation of the first segment of a Pie/Doughnut chart.
     /// The range is 0 <= rotation <= 360 and the default is 0.
@@ -996,7 +996,7 @@ impl Chart {
     ///
     /// Set the center hole size for a Doughnut chart.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `hole_size`: The hole size for a Doughnut chart. The range is 0 <=
     /// `hole_size` <= 90 and the default is 50.
@@ -1055,7 +1055,7 @@ impl Chart {
     /// The default width of an Excel chart is 480 pixels. The `set_width()`
     /// method allows you to set it to some other non-zero size.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `width` - The chart width in pixels.
     ///
@@ -1118,7 +1118,7 @@ impl Chart {
     /// method allows you to set it to some other non-zero size. See the example
     /// above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `height` - The chart height in pixels.
     ///
@@ -1136,7 +1136,7 @@ impl Chart {
     /// Set the height scale for the chart relative to 1.0/100%. This is a
     /// syntactic alternative to [`chart.set_height()`](Chart::set_height).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `scale` - The scale ratio.
     ///
@@ -1154,7 +1154,7 @@ impl Chart {
     /// Set the width scale for the chart relative to 1.0/100%. This is a
     /// syntactic alternative to [`chart.set_width()`](Chart::set_width).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `scale` - The scale ratio.
     ///
@@ -1176,7 +1176,7 @@ impl Chart {
     /// know to write effective alt
     /// text](https://support.microsoft.com/en-us/office/everything-you-need-to-know-to-write-effective-alt-text-df98f884-ca3d-456c-807b-1a1fa82f5dc2).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `alt_text` - The alt text string to add to the chart.
     ///
@@ -1192,7 +1192,7 @@ impl Chart {
     /// "decorative" so that screen readers can inform the users that they don't
     /// contain important information.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -1215,7 +1215,7 @@ impl Chart {
     ///
     /// These values are defined in the [`ObjectMovement`] enum.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `option` - A [`ObjectMovement`] enum value.
     ///
@@ -1286,7 +1286,7 @@ impl Chart {
     /// This is mainly used to ensure that the axis ids used in testing match
     /// the semi-randomized values in the target Excel file.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `axis_id1` - X-axis id.
     /// `axis_id2` - Y-axis id.
@@ -4042,7 +4042,7 @@ impl ChartSeries {
     /// set using a formula as shown in the first part of the example below or
     /// using a list of values as shown in the second part.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `range` - The range property which can be one of two generic types:
     ///    - A string with an Excel like range formula such as
@@ -4118,7 +4118,7 @@ impl ChartSeries {
     /// The data range can be set using a formula as shown in the first part of
     /// the example below or using a list of values as shown in the second part.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `range` - The range property which can be one of two generic types:
     ///    - A string with an Excel like range formula such as
@@ -4201,7 +4201,7 @@ impl ChartSeries {
     /// 1..n`. The name can be a simple string, a formula such as `Sheet1!$A$1`
     /// or a tuple with a sheet name, row and column such as `('Sheet1', 0, 0)`.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `range` - The range property which can be one of the following generic
     ///   types:
@@ -4306,7 +4306,7 @@ impl ChartSeries {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -4326,7 +4326,7 @@ impl ChartSeries {
     /// [`ChartMarker`] instance. In general only Line, Scatter and Radar chart
     /// support markers.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `marker`: A [`ChartMarker`] instance.
     ///
@@ -4395,7 +4395,7 @@ impl ChartSeries {
     /// Set the data labels and marker properties for a data series using a
     /// [`ChartDataLabel`] instance.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `data_label`: A [`ChartDataLabel`] instance.
     ///
@@ -4457,7 +4457,7 @@ impl ChartSeries {
     /// achieved with the `set_custom_data_labels()` method, see the examples
     /// below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `data_labels`: A slice of [`ChartDataLabel`] objects.
     ///
@@ -4796,7 +4796,7 @@ impl ChartSeries {
     /// happens at the chart series level.
     ///
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `points`: A slice of [`ChartPoint`] objects.
     ///
@@ -4876,7 +4876,7 @@ impl ChartSeries {
     /// Compare the example below with the previous more general example which
     /// both produce the same result.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `colors`: a slice of [`Color`] enum values or types that will
     /// convert into [`Color`] via [`IntoColor`].
@@ -4944,7 +4944,7 @@ impl ChartSeries {
     /// and also only needs to be applied to one of the data series of the
     /// chart.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `overlap`: Overlap percentage of columns in Bar/Column charts. The
     /// range is -100 <= overlap <= 100 and the default is 0.
@@ -5014,7 +5014,7 @@ impl ChartSeries {
     /// and also only needs to be applied to one of the data series of the
     /// chart.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `gap`: Gap percentage of columns in Bar/Column charts. The range is 0
     /// <= gap <= 500 and the default is 150.
@@ -5104,7 +5104,7 @@ impl ChartSeries {
     /// a user defined color. This also requires that you set a
     /// [`ChartSolidFill`] for the series.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The inverse color property defined by a [`Color`] enum
     ///   value.
@@ -5175,7 +5175,7 @@ impl ChartSeries {
     /// This method is only used to populate the chart data caches in test code.
     /// The library reads and populates the cache automatically in most cases.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `data` - Array of string data to populate the chart cache.
     /// `is_numeric` - The chart cache date is numeric.
@@ -5194,7 +5194,7 @@ impl ChartSeries {
     /// This method is only used to populate the chart data caches in test code.
     /// The library reads and populates the cache automatically in most cases.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `data` - Array of string data to populate the chart cache.
     /// `is_numeric` - The chart cache date is numeric.
@@ -5537,7 +5537,7 @@ impl ChartTitle {
     /// The name can be a simple string, a formula such as `Sheet1!$A$1` or a
     /// tuple with a sheet name, row and column such as `('Sheet1', 0, 0)`.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `range` - The range property which can be one of the following generic
     ///   types:
@@ -5675,7 +5675,7 @@ impl ChartTitle {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -5702,7 +5702,7 @@ impl ChartTitle {
     ///
     /// See [`ChartFont`] for full details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `font`: A [`ChartFont`] struct reference to represent the font
     /// properties.
@@ -5923,7 +5923,7 @@ impl ChartMarker {
     /// Change the default type of the marker to one of the shapes supported by
     /// Excel.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `marker_type`: a [`ChartMarkerType`] enum value.
     ///
@@ -5983,7 +5983,7 @@ impl ChartMarker {
     ///
     /// Change the default size of the marker.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `size` - The size of the marker.
     ///
@@ -6008,7 +6008,7 @@ impl ChartMarker {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -6398,7 +6398,7 @@ impl ChartDataLabel {
     /// | `OutsideEnd` |               | Yes (default) | Yes           |               |
     /// | `BestFit`    |               |               | Yes (default) |               |
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `position`: The label position as defined by the [`ChartDataLabel`] values.
     ///
@@ -6472,7 +6472,7 @@ impl ChartDataLabel {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -6551,7 +6551,7 @@ impl ChartDataLabel {
     /// - [`ChartFont::set_rotation()`]
     ///
     /// See [`ChartFont`] for full details. ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `font`: A [`ChartFont`] struct reference to represent the font
     /// properties.
@@ -6633,7 +6633,7 @@ impl ChartDataLabel {
     /// [Number Formats in different locales]:
     ///     struct.Format.html#number-formats-in-different-locales
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `num_format` - The number format property.
     ///
@@ -6692,7 +6692,7 @@ impl ChartDataLabel {
     /// The allowable separators are `','` (comma), `';'` (semicolon), `'.'`
     /// (full stop), `'\n'` (new line) and `' '` (space).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `separator` - The label separator character.
     ///
@@ -6733,7 +6733,7 @@ impl ChartDataLabel {
     /// [`set_custom_data_labels()`](ChartSeries::set_custom_data_labels)
     /// method. It is ignored if used with a series [`ChartDataLabel`].
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `value` - A [`IntoChartRange`] property which can be one of the
     ///   following generic types:
@@ -7147,7 +7147,7 @@ impl ChartPoint {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -7276,7 +7276,7 @@ impl ChartAxis {
     /// The name can be a simple string, a formula such as `Sheet1!$A$1` or a
     /// tuple with a sheet name, row and column such as `('Sheet1', 0, 0)`.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `range` - The range property which can be one of the following generic
     ///   types:
@@ -7355,7 +7355,7 @@ impl ChartAxis {
     /// the axis title. To set the font for the category or value numbers use
     /// the [`set_font()`](ChartAxis::set_font) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `font`: A [`ChartFont`] struct reference to represent the font
     /// properties.
@@ -7429,7 +7429,7 @@ impl ChartAxis {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -7460,7 +7460,7 @@ impl ChartAxis {
     /// value names or numbers. To set the font for the axis name/title use the
     /// [`set_name_font()`](ChartAxis::set_name_font) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `font`: A [`ChartFont`] struct reference to represent the font
     /// properties.
@@ -7548,7 +7548,7 @@ impl ChartAxis {
     /// [Number Formats in different locales]:
     ///     struct.Format.html#number-formats-in-different-locales
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `num_format` - The number format property.
     ///
@@ -7670,7 +7670,7 @@ impl ChartAxis {
     /// [Chart Value and Category Axes]:
     ///     struct.Chart.html#chart-value-and-category-axes
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `max` - The maximum bound for the axes.
     ///
@@ -7736,7 +7736,7 @@ impl ChartAxis {
     /// See [`ChartAxis::set_min()`](ChartAxis::set_min) above for a full
     /// explanation and example.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `min` - The minimum bound for the axes.
     ///
@@ -7758,7 +7758,7 @@ impl ChartAxis {
     /// [Chart Value and Category Axes]:
     ///     struct.Chart.html#chart-value-and-category-axes
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `value` - The major unit for the axes.
     ///
@@ -7827,7 +7827,7 @@ impl ChartAxis {
     /// See [`ChartAxis::set_major_unit()`](ChartAxis::set_major_unit) above for
     /// a full explanation and example.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `value` - The major unit for the axes.
     ///
@@ -7844,7 +7844,7 @@ impl ChartAxis {
     /// Major gridlines are on by default for Y/Value axes but off for
     /// X/Category axes.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default for X axes.
     ///
@@ -7905,7 +7905,7 @@ impl ChartAxis {
     ///
     /// Minor gridlines are off by default.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -7966,7 +7966,7 @@ impl ChartAxis {
     /// See the [`ChartLine`] struct for details on the line properties that can
     /// be set.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `line` - A [`ChartLine`] struct reference.
     ///
@@ -8029,7 +8029,7 @@ impl ChartAxis {
     /// See the [`ChartLine`] struct for details on the line properties that can
     /// be set.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `line` - A [`ChartLine`] struct reference.
     ///
@@ -8092,7 +8092,7 @@ impl ChartAxis {
     /// The label position defines where the values/categories for the axis are
     /// displayed. The position is controlled via [`ChartAxisLabelPosition`] enum.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `position` - A [`ChartAxisLabelPosition`] enum value.
     ///
@@ -8164,7 +8164,7 @@ impl ChartAxis {
     /// [Chart Value and Category Axes]:
     ///     struct.Chart.html#chart-value-and-category-axes
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. Its default value depends on the
     ///   chart type.
@@ -8233,7 +8233,7 @@ impl ChartAxis {
     /// Value and Category Axes] for an explanation of the difference between
     /// Value and Category axes in Excel.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `interval` - The interval for the category labels. The default is 1.
     ///
@@ -8298,7 +8298,7 @@ impl ChartAxis {
     /// Value and Category Axes] for an explanation of the difference between
     /// Value and Category axes in Excel.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `interval` - The interval for the category ticks. The default is 1.
     ///
@@ -8362,7 +8362,7 @@ impl ChartAxis {
     /// - Outside only
     /// - Cross - inside and outside
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `tick_type` - a [`ChartAxisTickType`] enum value.
     ///
@@ -8428,7 +8428,7 @@ impl ChartAxis {
     /// See [`set_major_tick_type()`](ChartAxis::set_major_tick_type) above for
     /// an explanation and example.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `tick_type` - a [`ChartAxisTickType`] enum value.
     ///
@@ -8446,7 +8446,7 @@ impl ChartAxis {
     /// [Chart Value and Category Axes]:
     ///     struct.Chart.html#chart-value-and-category-axes
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `base` - The logarithm base. Should be >= 2.
     ///
@@ -8927,7 +8927,7 @@ impl ChartLegend {
     /// [`ChartLegendPosition`]. The default chart position in Excel is to have
     /// the legend at the right.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `position` - the [`ChartLegendPosition`] position value.
     ///
@@ -9052,7 +9052,7 @@ impl ChartLegend {
     /// - `no_line`: Turn off the line/border for the chart object.
     /// - `line`: Set the [`ChartLine`] properties.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
@@ -9078,7 +9078,7 @@ impl ChartLegend {
     ///
     /// See [`ChartFont`] for full details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `font` - A [`ChartFont`] struct reference to represent the font
     /// properties.
@@ -9306,7 +9306,7 @@ impl ChartFormat {
     /// See the [`ChartLine`] struct for details on the line properties that can
     /// be set.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `line` - A [`ChartLine`] struct reference.
     ///
@@ -9322,7 +9322,7 @@ impl ChartFormat {
     /// [`ChartBorder`] instead
     /// of `ChartLine`.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `line` - A [`ChartLine`] struct reference.
     ///
@@ -9563,7 +9563,7 @@ impl ChartFormat {
     /// See the [`ChartSolidFill`] struct for details on the solid fill
     /// properties that can be set.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `fill` - A [`ChartSolidFill`] struct reference.
     ///
@@ -9627,7 +9627,7 @@ impl ChartFormat {
     /// See the [`ChartPatternFill`] struct for details on the pattern fill
     /// properties that can be set.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `fill` - A [`ChartPatternFill`] struct reference.
     ///
@@ -9797,7 +9797,7 @@ impl ChartLine {
 
     /// Set the color of a line/border.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -9860,7 +9860,7 @@ impl ChartLine {
 
     /// Set the width of the line or border.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `width` - The width should be specified in increments of 0.25 of a
     /// point as in Excel. The width can be an number type that convert [`Into`]
@@ -9925,7 +9925,7 @@ impl ChartLine {
 
     /// Set the dash type of the line or border.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `dash_type` - A [`ChartLineDashType`] enum value.
     ///
@@ -9987,7 +9987,7 @@ impl ChartLine {
     /// Set the transparency of a line/border for a Chart element. You must also
     /// specify a line color in order for the transparency to be applied.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `transparency` - The color transparency in the range 0 <= transparency
     ///   <= 100. The default value is 0.
@@ -10203,7 +10203,7 @@ impl ChartSolidFill {
 
     /// Set the color of a solid fill.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -10269,7 +10269,7 @@ impl ChartSolidFill {
     /// Set the transparency of a solid fill color for a Chart element. You must
     /// also specify a line color in order for the transparency to be applied.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `transparency` - The color transparency in the range 0 <= transparency
     ///   <= 100. The default value is 0.
@@ -10420,7 +10420,7 @@ impl ChartPatternFill {
     ///
     /// See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `pattern` - The pattern property defined by a [`ChartPatternFillType`] enum value.
     ///
@@ -10482,7 +10482,7 @@ impl ChartPatternFill {
     ///
     /// See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -10557,7 +10557,7 @@ impl ChartPatternFill {
     ///
     /// See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -11153,7 +11153,7 @@ impl ChartFont {
 
     /// Set the color property for the font of a chart element.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The font color property defined by a [`Color`] enum
     ///   value.
@@ -11221,7 +11221,7 @@ impl ChartFont {
     ///
     /// Set the name/type of a font for a chart element.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_name` - The font name property.
     ///
@@ -11282,7 +11282,7 @@ impl ChartFont {
 
     /// Set the size property for the font of a chart element.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_size` - The font size property.
     ///
@@ -11347,7 +11347,7 @@ impl ChartFont {
     /// angle in the range -90 to 90 degrees, or 270-271 to indicate text where
     /// the letters run from top to bottom, see below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `rotation` - The rotation angle in the range `-90 <= rotation <= 90`.
     ///   Two special case values are supported:
@@ -11443,7 +11443,7 @@ impl ChartFont {
     /// This function is implemented for completeness but is rarely used in
     /// practice.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `family` - The font family property.
     ///
@@ -11458,7 +11458,7 @@ impl ChartFont {
     /// Set the font character set. This function is implemented for
     /// completeness but is rarely used in practice.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_charset` - The font character set property.
     ///

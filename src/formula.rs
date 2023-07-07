@@ -780,7 +780,7 @@ pub struct Formula {
 impl Formula {
     /// Create a new `Formula` struct instance.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `formula` - A string like type representing an Excel formula.
     ///
@@ -799,7 +799,7 @@ impl Formula {
     /// Results](#formula-results) it is occasionally necessary to specify the
     /// result of a formula. This can be done using the `set_result()` method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `result` - The formula result, as a string or string like type.
     ///

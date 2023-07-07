@@ -431,7 +431,7 @@ impl FilterCondition {
     /// expression for the filter condition would be: `value == "East" || value
     /// == "West" || value == "South"`.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `value` - The value can be a `&str`,`f64` or `i32` type for which the
     ///   [`IntoFilterData`] trait is implemented.
@@ -637,7 +637,7 @@ impl FilterCondition {
     /// [`add_custom_boolean_or`](FilterCondition::add_custom_boolean_or) method
     /// below to get an "or" logical condition.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `value` - The value can be a `&str`,`f64` or `i32` type for which the
     ///   [`IntoFilterData`] trait is implemented.

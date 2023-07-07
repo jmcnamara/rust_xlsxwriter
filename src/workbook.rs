@@ -273,7 +273,7 @@ impl Workbook {
     ///
     /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `index` - The index of the worksheet to get a reference to.
     ///
@@ -357,7 +357,7 @@ impl Workbook {
     /// the `rust_xlsxwriter` documentation on [Creating worksheets] and working
     /// with the borrow checker.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `name` - The name of the worksheet to get a reference to.
     ///
@@ -539,7 +539,7 @@ impl Workbook {
     ///
     /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `worksheet` - The worksheet to add to the workbook.
     ///
@@ -596,7 +596,7 @@ impl Workbook {
     /// container so for performance reasons you shouldn't call it
     /// unnecessarily.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `path` - The path of the new Excel file to create as a `&str` or as a
     ///   [`std::path`] `Path` or `PathBuf` instance.
@@ -715,7 +715,7 @@ impl Workbook {
     /// Set the index for the format. This is currently only used in testing but
     /// may be used publicly at a later stage.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `format` - The [`Format`] instance to register.
     ///
@@ -781,7 +781,7 @@ impl Workbook {
     /// formulas](https://support.microsoft.com/en-us/office/define-and-use-names-in-formulas-4d0f13ac-53b7-422e-afd2-abd7ff379c64)
     /// and subsections.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `name` - The variable name to define.
     /// * `formula` - The formula, value or range that the name defines..
@@ -908,7 +908,7 @@ impl Workbook {
     /// Set various Excel document metadata properties such as Author or
     /// Creation Date. It is used in conjunction with the [`DocProperties`] struct.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `properties` - A reference to a [`DocProperties`] object.
     ///

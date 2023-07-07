@@ -609,7 +609,7 @@ impl Format {
     /// [Number Formats in different locales]:
     ///     struct.Format.html#number-formats-in-different-locales
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `num_format` - The number format property.
     ///
@@ -728,7 +728,7 @@ impl Format {
     ///  - These formats can also be set via
     ///    [`set_num_format()`](Format::set_num_format).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `num_format_index` - The index to one of the inbuilt formats shown in
     ///   the table above.
@@ -844,7 +844,7 @@ impl Format {
     /// To set the color of a cell background use the `set_bg_color()` and
     /// `set_pattern()` methods.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The font color property defined by a [`Color`] enum
     ///   value.
@@ -897,7 +897,7 @@ impl Format {
     /// installed on the system that it is running on. Therefore it is generally
     /// best to use standard Excel fonts.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_name` - The font name property.
     ///
@@ -948,7 +948,7 @@ impl Format {
     /// Excel adjusts the height of a row to accommodate the largest font size
     /// in the row.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_size` - The font size property.
     ///
@@ -992,7 +992,7 @@ impl Format {
     /// This function is implemented for completeness but is rarely used in
     /// practice.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_scheme` - The font scheme property.
     ///
@@ -1006,7 +1006,7 @@ impl Format {
     /// Set the font family. This is usually an integer in the range 1-4. This
     /// function is implemented for completeness but is rarely used in practice.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_family` - The font family property.
     ///
@@ -1020,7 +1020,7 @@ impl Format {
     /// Set the font character. This function is implemented for completeness
     /// but is rarely used in practice.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_charset` - The font character set property.
     ///
@@ -1035,7 +1035,7 @@ impl Format {
     /// is that a normal underline only underlines the text/number in a cell
     /// whereas an accounting underline underlines the entire cell width.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `underline` - The underline type defined by a [`FormatUnderline`] enum
     ///   value.
@@ -1124,7 +1124,7 @@ impl Format {
     /// string. See
     /// [`write_rich_string()`](crate::Worksheet::write_rich_string).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `font_script` - The font superscript or subscript property via a
     ///   [`FormatScript`] enum.
@@ -1140,7 +1140,7 @@ impl Format {
     /// This method is used to set the horizontal and vertical data alignment
     /// within a cell.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `align` - The vertical and or horizontal alignment direction as
     ///   defined by the [`FormatAlign`] enum.
@@ -1279,7 +1279,7 @@ impl Format {
     /// alignments. It will override any other horizontal properties that don't
     /// support indentation.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `indent` - The indentation level for the cell.
     ///
@@ -1326,7 +1326,7 @@ impl Format {
     /// angle in the range -90 to 90 degrees, or 270 to indicate text where the
     /// letters run from top to bottom.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `rotation` - The rotation angle.
     ///
@@ -1387,7 +1387,7 @@ impl Format {
     /// [`set_right_to_left`](crate::Worksheet::set_right_to_left()) method
     /// which changes the cell display direction of the worksheet.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `reading_direction` - The reading order property, should be 0, 1, or
     ///   2, where these values refer to:
@@ -1488,7 +1488,7 @@ impl Format {
     /// [`set_background_color()`](Format::set_background_color()) and
     /// [`set_foreground_color()`](Format::set_foreground_color()).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `pattern` - The pattern property defined by a [`FormatPattern`] enum
     ///   value.
@@ -1544,7 +1544,7 @@ impl Format {
     /// [`set_pattern`](Format::set_pattern()) method. If a pattern hasn't been
     /// defined then a solid fill pattern is used as the default.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The background color property defined by a [`Color`]
     ///   enum value or a type that implements the [`IntoColor`] trait.
@@ -1601,7 +1601,7 @@ impl Format {
     /// foreground/pattern color of a pattern. Patterns are defined via the
     /// [`set_pattern`](Format::set_pattern()) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The foreground color property defined by a [`Color`]
     ///   enum value or a type that implements the [`IntoColor`] trait.
@@ -1664,7 +1664,7 @@ impl Format {
     /// - [`set_border_right()`](Format::set_border_right())
     /// - [`set_border_color()`](Format::set_border_color())
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
@@ -1726,7 +1726,7 @@ impl Format {
     /// required border. A later version of this library will provide helper
     /// functions to do this more easily.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -1791,7 +1791,7 @@ impl Format {
     /// Set the cell top border style. See
     /// [`set_border()`](Format::set_border()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
@@ -1804,7 +1804,7 @@ impl Format {
     /// Set the cell top border color. See
     /// [`set_border_color()`](Format::set_border_color()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -1824,7 +1824,7 @@ impl Format {
     /// Set the cell bottom border style. See
     /// [`set_border()`](Format::set_border()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
@@ -1837,7 +1837,7 @@ impl Format {
     /// Set the cell bottom border color. See
     /// [`set_border_color()`](Format::set_border_color()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -1857,7 +1857,7 @@ impl Format {
     /// Set the cell left border style. See
     /// [`set_border()`](Format::set_border()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
@@ -1870,7 +1870,7 @@ impl Format {
     /// Set the cell left border color. See
     /// [`set_border_color()`](Format::set_border_color()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -1890,7 +1890,7 @@ impl Format {
     /// Set the cell right border style. See
     /// [`set_border()`](Format::set_border()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
@@ -1903,7 +1903,7 @@ impl Format {
     /// Set the cell right border color. See
     /// [`set_border_color()`](Format::set_border_color()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -1927,7 +1927,7 @@ impl Format {
     /// [`set_border_diagonal_type()`](Format::set_border_diagonal_type())
     /// method to set the diagonal type.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `border` - The border property as defined by a [`FormatBorder`] enum
     ///   value.
@@ -1986,7 +1986,7 @@ impl Format {
     /// Set the cell diagonal border color. See
     /// [`set_border_diagonal()`](Format::set_border_diagonal()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
@@ -2006,7 +2006,7 @@ impl Format {
     /// Set the cell diagonal border direction type. See
     /// [`set_border_diagonal()`](Format::set_border_diagonal()) for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `border_type` - The diagonal border type as defined by a
     ///   [`FormatDiagonalBorder`] enum value.

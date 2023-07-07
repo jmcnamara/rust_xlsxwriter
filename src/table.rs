@@ -227,7 +227,7 @@ impl Table {
     /// [`Worksheet::write()`](crate::Worksheet::write) methods since that will
     /// cause a warning when the file is loaded in Excel.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is on by default.
     ///
@@ -412,7 +412,7 @@ impl Table {
     /// Overwriting the total row cells with `worksheet.write()` calls will
     /// cause Excel to warn that the table is corrupt when loading the file.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -553,7 +553,7 @@ impl Table {
     /// Note, you can also select a table style without banded rows using the
     /// [`table.set_style`](Table::set_style) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is on by default.
     /// # Examples
@@ -620,7 +620,7 @@ impl Table {
     /// table but alternates the color of rows. If you wish you can set "banded"
     /// columns of alternating colors in a table to distinguish each data column.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -691,7 +691,7 @@ impl Table {
     /// whereas the other columns are more commonly used for data. In these
     /// cases it is sometimes desirable to highlight the first column differently.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -760,7 +760,7 @@ impl Table {
     /// other formula operating on the  data in the other columns. In these
     /// cases it is sometimes required to highlight the last column differently.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -843,7 +843,7 @@ impl Table {
     /// By default Excel adds an autofilter to the header of a table. This
     /// method can be used to turn it off if necessary.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is on by default.
     ///
@@ -916,7 +916,7 @@ impl Table {
     /// - A formula for the column.
     ///
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `columns` - An array reference of [`TableColumn`] structs. Use
     ///   `TableColumn::default()` to get default values.
@@ -1016,7 +1016,7 @@ impl Table {
     /// workbook, otherwise you will get a warning when you load the file in
     /// Excel.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `name` - The name of the table. It must be unique across the workbook.
     ///
@@ -1088,7 +1088,7 @@ impl Table {
     /// default table style in Excel is equivalent to
     /// [`TableStyle::Medium9`](TableStyle::Medium9).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `style` - a [`TableStyle`] enum value.
     ///
@@ -1444,7 +1444,7 @@ impl TableColumn {
     /// Non-unique names will raise a validation error when using
     /// [`worksheet.add_table()`](crate::Worksheet::add_table).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `caption` - The caption/name of the column header. It must be unique
     ///   for the table.
@@ -1539,7 +1539,7 @@ impl TableColumn {
     /// will cause Excel to warn that the table is corrupt when loading the
     /// file.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `function` - A [`TableFunction`] enum value equivalent to one of the
     ///   available Excel `SUBTOTAL()` options.
@@ -1623,7 +1623,7 @@ impl TableColumn {
     /// will cause Excel to warn that the table is corrupt when loading the
     /// file.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `label` - The label/caption of the total row of the column.
     ///
@@ -1644,7 +1644,7 @@ impl TableColumn {
     /// [Structured References]:
     ///     https://support.microsoft.com/en-us/office/using-structured-references-with-excel-tables-f5ed2452-2337-4f71-bed3-c8ae6d2b276e
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `formula` - The formula to be applied to the column as a string or
     ///   [`Formula`].

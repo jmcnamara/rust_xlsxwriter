@@ -104,7 +104,7 @@ impl Image {
     /// since a conversion to the PNG format would be required and that format
     /// is already supported.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `path` - The path of the image file to read e as a `&str` or as a
     ///   [`std::path`] `Path` or `PathBuf` instance.
@@ -177,7 +177,7 @@ impl Image {
     /// This method is similar to [`new()`](Image::new), see above, except the
     /// image data can be in a buffer instead of a file path.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `buffer` - The image data as a u8 array or vector.
     ///
@@ -278,7 +278,7 @@ impl Image {
     /// different from the scale on Windows. This is an Excel issue and not a
     /// `rust_xlsxwriter` issue.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `scale` - The scale ratio.
     ///
@@ -335,7 +335,7 @@ impl Image {
     /// Set the width scale for the image relative to 1.0/100%. See the
     /// [`set_scale_height()`](Image::set_scale_height) method for details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `scale` - The scale ratio.
     ///
@@ -366,7 +366,7 @@ impl Image {
     /// [`worksheet.insert_image_fit_to_cell()`](crate::Worksheet::insert_image_fit_to_cell)
     /// method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `width` - The target width in pixels to scale the image to.
     /// * `height` - The target height in pixels to scale the image to.
@@ -476,7 +476,7 @@ impl Image {
     /// know to write effective alt
     /// text](https://support.microsoft.com/en-us/office/everything-you-need-to-know-to-write-effective-alt-text-df98f884-ca3d-456c-807b-1a1fa82f5dc2).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `alt_text` - The alt text string to add to the image.
     ///
@@ -535,7 +535,7 @@ impl Image {
     /// so that screen readers can inform the users that they don't contain
     /// important information.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -601,7 +601,7 @@ impl Image {
     /// to be hidden in rows or columns. In Excel this equates to option 1 above
     /// but the internal image position calculations are handled differently.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `option` - An image/object positioning behavior defined by the
     ///   [`ObjectMovement`] enum.
@@ -755,7 +755,7 @@ impl Image {
     /// This method sets an internal image name used by header/footer VML. It is
     /// mainly used for completeness in testing. It isn't useful to the end user.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `name` - The VML object name/description.
     ///

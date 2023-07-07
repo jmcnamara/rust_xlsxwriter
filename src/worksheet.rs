@@ -394,7 +394,7 @@ impl Worksheet {
     /// will be followed (Sheet1, Sheet2, etc.) in the order the worksheets are
     /// created.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `name` - The worksheet name. It must follow the Excel rules, shown
     ///   below.
@@ -538,7 +538,7 @@ impl Worksheet {
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -588,7 +588,7 @@ impl Worksheet {
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -627,7 +627,7 @@ impl Worksheet {
     /// See also [`worksheet.write_column()`](Worksheet::write_column) for a
     /// similar function that works in an orthogonal direction.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -771,7 +771,7 @@ impl Worksheet {
     /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -852,7 +852,7 @@ impl Worksheet {
     /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -937,7 +937,7 @@ impl Worksheet {
     /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1024,7 +1024,7 @@ impl Worksheet {
     ///  These will be stored as the strings "Nan", "INF", and "-INF" strings
     ///  instead.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1108,7 +1108,7 @@ impl Worksheet {
     ///  These will be stored as the strings "Nan", "INF", and "-INF" strings
     ///  instead.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1178,7 +1178,7 @@ impl Worksheet {
     /// encoded string can be written with this method. The maximum string size
     /// supported by Excel is 32,767 characters.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1254,7 +1254,7 @@ impl Worksheet {
     /// encoded string can be written with this method. The maximum string
     /// size supported by Excel is 32,767 characters.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1360,7 +1360,7 @@ impl Worksheet {
     /// an additional [`Format`] object and the
     /// [`write_rich_string_with_format()`](Worksheet::write_rich_string) method, see below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1463,7 +1463,7 @@ impl Worksheet {
     /// For strings with a single format you can use the more common
     /// [`write_string_with_format()`](Worksheet::write_string) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1554,7 +1554,7 @@ impl Worksheet {
     /// Write an unformatted Excel formula to a worksheet cell. See also the
     /// documentation on working with formulas at [`Formula`].
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1619,7 +1619,7 @@ impl Worksheet {
     ///
     /// See also the documentation on working with formulas at [`Formula`].
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -1698,7 +1698,7 @@ impl Worksheet {
     /// first_ and last_ parameters should be the same, as shown in the example
     /// below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -1794,7 +1794,7 @@ impl Worksheet {
     /// first_ and last_ parameters should be the same, as shown in the example
     /// below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -1895,7 +1895,7 @@ impl Worksheet {
     /// [Dynamic array formulas]:
     ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -1998,7 +1998,7 @@ impl Worksheet {
     /// [Dynamic array formulas]:
     ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -2088,7 +2088,7 @@ impl Worksheet {
     /// [Dynamic array formulas]:
     ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2126,7 +2126,7 @@ impl Worksheet {
     /// [Dynamic array formulas]:
     ///     https://rustxlsxwriter.github.io/examples/dynamic_arrays.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2162,7 +2162,7 @@ impl Worksheet {
     /// The most common case for a formatted blank cell is to write a background
     /// or a border, see the example below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2276,7 +2276,7 @@ impl Worksheet {
     /// * [`write_url_with_format()`](Worksheet::write_url_with_format()) to add
     ///   an alternative format to the link.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2394,7 +2394,7 @@ impl Worksheet {
     /// Rust](https://www.rust-lang.org) instead of the raw link
     /// <https://www.rust-lang.org>.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2487,7 +2487,7 @@ impl Worksheet {
     /// This method is similar to [`write_url()`](Worksheet::write_url())
     /// except that you can specify an alternative format for the url.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2557,7 +2557,7 @@ impl Worksheet {
     /// variant methods except that you can also add a screen tip message, if
     /// required.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2618,7 +2618,7 @@ impl Worksheet {
     /// [`Format`] struct which can also control visual formatting such as bold
     /// and italic text.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2803,7 +2803,7 @@ impl Worksheet {
     /// [`chrono::NaiveDateTime`]:
     ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2902,7 +2902,7 @@ impl Worksheet {
     /// [`Format`] struct which can also control visual formatting such as bold
     /// and italic text.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -2997,7 +2997,7 @@ impl Worksheet {
     /// [`Format`] struct which can also control visual formatting such as bold
     /// and italic text.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -3072,7 +3072,7 @@ impl Worksheet {
     ///
     /// Write an unformatted Excel boolean value to a worksheet cell.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -3128,7 +3128,7 @@ impl Worksheet {
     /// the number, for example as a currency or a percentage value, or the
     /// visual format, such as bold and italic text.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -3194,7 +3194,7 @@ impl Worksheet {
     /// `worksheet.write_*()` functions. The same [`Format`] instance should be
     /// used as was used in the merged range, see the example below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -3364,7 +3364,7 @@ impl Worksheet {
     /// is already supported.
     ///
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -3431,7 +3431,7 @@ impl Worksheet {
     /// Note, it is possible to offset the image outside the target cell if
     /// required.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -3516,7 +3516,7 @@ impl Worksheet {
     /// that the image is scaled to the lesser of the horizontal or vertical
     /// sizes. See the example below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -3615,7 +3615,7 @@ impl Worksheet {
     ///
     /// Add a [`Chart`] to a worksheet at a cell location.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -3689,7 +3689,7 @@ impl Worksheet {
     /// * [`XlsxError::ChartError`] - A general error that is raised when a
     /// chart parameter is incorrect or a chart is configured incorrectly.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -3771,7 +3771,7 @@ impl Worksheet {
     /// To specify the height in pixels use the
     /// [`set_row_height_pixels()`](Worksheet::set_row_height_pixels()) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `height` - The row height in character units.
@@ -3857,7 +3857,7 @@ impl Worksheet {
     /// To specify the height in Excel's character units use the
     /// [`set_row_height()`](Worksheet::set_row_height()) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `height` - The row height in pixels.
@@ -3917,7 +3917,7 @@ impl Worksheet {
     /// explicit cell formatting with the row formatting but that isn't
     /// currently supported.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `format` - The [`Format`] property for the cell.
@@ -4001,7 +4001,7 @@ impl Worksheet {
     /// used, for example, to hide intermediary steps in a complicated
     /// calculation.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     ///
@@ -4071,7 +4071,7 @@ impl Worksheet {
     /// row. This can occasionally be useful when used in conjunction with
     /// autofilter rules.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     ///
@@ -4115,7 +4115,7 @@ impl Worksheet {
     ///
     /// See also the [`autofit()`](Worksheet::autofit()) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `col` - The zero indexed column number.
     /// * `width` - The row width in character units.
@@ -4195,7 +4195,7 @@ impl Worksheet {
     ///
     /// See also the [`autofit()`](Worksheet::autofit()) method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `col` - The zero indexed column number.
     /// * `width` - The row width in pixels.
@@ -4271,7 +4271,7 @@ impl Worksheet {
     /// explicit cell formatting with the column formatting but that isn't
     /// currently supported.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `col` - The zero indexed column number.
     /// * `format` - The [`Format`] property for the cell.
@@ -4358,7 +4358,7 @@ impl Worksheet {
     /// used, for example, to hide intermediary steps in a complicated
     /// calculation.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `col` - The zero indexed column number.
     ///
@@ -4435,7 +4435,7 @@ impl Worksheet {
     /// Note, Excel only allows one autofilter range per worksheet so calling
     /// this method multiple times will overwrite the previous range.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -4571,7 +4571,7 @@ impl Worksheet {
     /// [Auto-hiding filtered rows]:
     ///     https://rustxlsxwriter.github.io/formulas/autofilters.html#auto-hiding-filtered-rows
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `col` - The zero indexed column number.
     /// * `filter_condition` - The column filter condition defined by the
@@ -4720,7 +4720,7 @@ impl Worksheet {
     /// [Overview of Excel tables]:
     ///     https://support.microsoft.com/en-us/office/overview-of-excel-tables-7ab0bb7d-3a9e-4b56-a3c9-6c94334e492c
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -4995,7 +4995,7 @@ impl Worksheet {
     /// msoffice-crypt.exe -e -p password clear.xlsx encrypted.xlsx
     /// ```
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `password` - The password string. Note, only ascii text passwords are
     ///   supported. Passing the empty string "" is the same as turning on
@@ -5053,7 +5053,7 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options1.png">
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `options` - Worksheet protection options as defined by a
     /// [`ProtectionOptions`] struct reference.
@@ -5115,7 +5115,7 @@ impl Worksheet {
     /// replicated in `rust_xlsxwriter` using the `unprotect_range()` method,
     /// see the example below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -5185,7 +5185,7 @@ impl Worksheet {
     /// [`protect_with_password()`](Worksheet::protect_with_password) for an
     /// explanation of what weak means here).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -5282,7 +5282,7 @@ impl Worksheet {
     /// Only one range of cells can be selected. The default cell selection is
     /// (0, 0, 0, 0), "A1".
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -5369,7 +5369,7 @@ impl Worksheet {
     /// This `set_top_left_cell()` method can be used to set the top leftmost
     /// visible cell in the worksheet.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -5448,7 +5448,7 @@ impl Worksheet {
     /// If required, it is possible to specify the calculated result of a
     /// formula using the `set_formula_result()` method.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -5537,7 +5537,7 @@ impl Worksheet {
     /// empty string literal `""`, via the `set_formula_result_default()`
     /// method, to force calculation of the result.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `result` - The default formula result to write to the cell.
     ///
@@ -5591,7 +5591,7 @@ impl Worksheet {
     /// [`Formula::use_future_functions()`](Formula::use_future_functions)
     /// method, see below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -5660,7 +5660,7 @@ impl Worksheet {
     /// [`Format::set_reading_direction()`](crate::Format::set_reading_direction)
     /// method to set the direction of the text within the cells.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -5727,7 +5727,7 @@ impl Worksheet {
     /// initially visible in a multi-sheet workbook. If no worksheet is set then
     /// the first worksheet is made the active worksheet, like in Excel.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -5787,7 +5787,7 @@ impl Worksheet {
     /// [`set_active()`](Worksheet::set_active) method will also appear as
     /// selected.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -5849,7 +5849,7 @@ impl Worksheet {
     /// the first worksheet will default to being the active worksheet, you
     /// cannot hide the first worksheet without activating another sheet.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -5908,7 +5908,7 @@ impl Worksheet {
     /// This method is not required very often. The default is the first
     /// worksheet.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -5928,7 +5928,7 @@ impl Worksheet {
     /// worksheet tab. This is useful for highlighting the important tab in a
     /// group of worksheets.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `color` - The tab color property defined by a [`Color`] enum
     ///   value.
@@ -6039,7 +6039,7 @@ impl Worksheet {
     /// If you do not specify a paper type the worksheet will print using the
     /// printer's default paper style.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `paper_size` - The paper size index from the list above .
     ///
@@ -6087,7 +6087,7 @@ impl Worksheet {
     /// However, by using `set_page_order(false)` the print order will be
     /// changed to "over then down".
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. Set `true` to get "Down, then
     ///   over" (the default) and `false` to get "Over, then down".
@@ -6210,7 +6210,7 @@ impl Worksheet {
     /// worksheet. A page break causes all the data that follows it to be
     /// printed on the next page. Horizontal page breaks act between rows.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `breaks` - A list of one or more row numbers where the page breaks
     ///   occur. To create a page break between rows 20 and 21 you must specify
@@ -6279,7 +6279,7 @@ impl Worksheet {
     /// worksheet. This is much less common than the
     /// [`set_page_breaks()`](Worksheet::set_page_breaks) method shown above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `breaks` - A list of one or more column numbers where the page breaks
     ///   occur.
@@ -6321,7 +6321,7 @@ impl Worksheet {
     /// the scale of the printed page in Excel. For that you should use
     /// [`set_print_scale()`](Worksheet::set_print_scale).
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `zoom` - The worksheet zoom level.
     ///
@@ -6378,7 +6378,7 @@ impl Worksheet {
     /// In Excel it is also possible to set "split" panes without freezing them.
     /// That feature isn't currently supported by `rust_xlsxwriter`.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -6453,7 +6453,7 @@ impl Worksheet {
     /// to freeze the top row a but have the worksheet pre-scrolled so that cell
     /// `A20` is visible in the scrolled area. See the example below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
@@ -6665,7 +6665,7 @@ impl Worksheet {
     /// characters, including the control characters. Strings longer than this
     /// will not be written, and a warning will be output.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `header` - The header string with optional control characters.
     ///
@@ -6731,7 +6731,7 @@ impl Worksheet {
     /// See the documentation for [`set_header()`](Worksheet::set_header()) for
     /// more details on the syntax of the header/footer string.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `footer` - The footer string with optional control characters.
     ///
@@ -6766,7 +6766,7 @@ impl Worksheet {
     /// `&[Picture]` element is added to the header formatting string such as
     /// `"&L&[Picture]"`.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `position` - The image position as defined by the [`HeaderImagePosition`]
     ///   enum.
@@ -6886,7 +6886,7 @@ impl Worksheet {
     /// See the documentation for
     /// [`set_header_image()`](Worksheet::set_header_image()) for more details.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `position` - The image position as defined by the [`HeaderImagePosition`]
     ///   enum.
@@ -6930,7 +6930,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is on by default.
     ///
@@ -6956,7 +6956,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is on by default.
     ///S
@@ -6977,7 +6977,7 @@ impl Worksheet {
     /// parameter will give the default Excel value. The defaults are shown
     /// below.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `left` - Left margin in inches. Excel default is 0.7.
     /// * `right` - Right margin in inches. Excel default is 0.7.
@@ -7064,7 +7064,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `page_number` - The page number of the first printed page.
     ///
@@ -7113,7 +7113,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `scale` - The print scale factor.
     ///
@@ -7193,7 +7193,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `width` - Number of pages horizontally.
     /// * `height` - Number of pages vertically.
@@ -7252,7 +7252,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -7277,7 +7277,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -7302,7 +7302,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -7327,7 +7327,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -7346,7 +7346,7 @@ impl Worksheet {
     ///
     /// [Worksheet - Page Setup]: https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -7371,7 +7371,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
@@ -7406,7 +7406,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (All zero indexed.)
     /// * `first_col` - The first row of the range.
@@ -7504,7 +7504,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_row` - The first row of the range. (Zero indexed.)
     /// * `last_row` - The last row of the range.
@@ -7584,7 +7584,7 @@ impl Worksheet {
     /// [Worksheet - Page Setup]:
     ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `first_col` - The first row of the range. (Zero indexed.)
     /// * `last_col` - The last row of the range.

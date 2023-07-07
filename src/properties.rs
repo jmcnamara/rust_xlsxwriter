@@ -243,7 +243,7 @@ impl DocProperties {
     /// Set the "Title" field of the document properties to create a title for
     /// the document such as "Sales Report". See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `title` - The title string property.
     ///
@@ -258,7 +258,7 @@ impl DocProperties {
     /// Set the "Subject" field of the document properties to indicate the
     /// subject matter. See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `subject` - The subject string property.
     ///
@@ -273,7 +273,7 @@ impl DocProperties {
     /// Set the "Manager" field of the document properties. See the example
     /// above. See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `manager` - The manager string property.
     ///
@@ -288,7 +288,7 @@ impl DocProperties {
     /// Set the "Company" field of the document properties. See the example
     /// above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `company` - The company string property.
     ///
@@ -303,7 +303,7 @@ impl DocProperties {
     /// Set the "Category" field of the document properties to indicate the
     /// category that the file belongs to. See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `category` - The category string property.
     ///
@@ -318,7 +318,7 @@ impl DocProperties {
     /// Set the "Author" field of the document properties. See the example
     /// above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `author` - The author string property.
     ///
@@ -333,7 +333,7 @@ impl DocProperties {
     /// Set the "Keywords" field of the document properties. This can be one or
     /// more keywords that can be used in searches. See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `keywords` - The keywords string property.
     ///
@@ -349,7 +349,7 @@ impl DocProperties {
     /// general comment or summary that you want to add to the properties. See
     /// the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `comment` - The comment string property.
     ///
@@ -364,7 +364,7 @@ impl DocProperties {
     /// Set the "Status" field of the document properties such as "Draft" or
     /// "Final".
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `status` - The status string property.
     ///
@@ -379,7 +379,7 @@ impl DocProperties {
     /// Set the "Hyperlink base" field of the document properties to have a
     /// default base url.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `hyperlink_base` - The hyperlink base string property.
     ///
@@ -395,7 +395,7 @@ impl DocProperties {
     /// `rust_xlsxwriter` library does the same. However there may be cases
     /// where you wish to set a different creation time.  See the example above.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `datetime` - The creation date property. A type that implements
     ///   [`IntoCustomDateTimeUtc`].
@@ -419,7 +419,7 @@ impl DocProperties {
     /// Excel support custom data types that are equivalent to the Rust types:
     /// [`&str`], [`f64`], [`i32`] [`bool`] and `&DateTime<Utc>`
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `name` - The user defined name of the custom property.
     /// * `value` - The value can be a [`&str`], [`f64`], [`i32`] [`bool`],

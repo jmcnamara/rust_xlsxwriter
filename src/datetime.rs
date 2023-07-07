@@ -159,7 +159,7 @@ impl ExcelDateTime {
     ///
     /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `datetime` - A string representing a date, time or datetime in the
     /// formats shown above.
@@ -258,7 +258,7 @@ impl ExcelDateTime {
 
     /// Create a `ExcelDateTime` instance from years, months and days.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `year` - Integer year in range 1900-9999.
     /// * `month` - Integer month in the range 1-12.
@@ -336,7 +336,7 @@ impl ExcelDateTime {
 
     /// Create a `ExcelDateTime` instance from hours, minutes and seconds.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `hour` - Integer hour. Generally in the range 0-23 but can be greater
     ///   than 24 for time durations.
@@ -405,7 +405,7 @@ impl ExcelDateTime {
     /// Create a `ExcelDateTime` instance from hours, minutes, seconds and
     /// milliseconds.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `hour` - Integer hour. Generally in the range 0-23 but can be greater
     ///   than 24 for time durations.
@@ -482,7 +482,7 @@ impl ExcelDateTime {
     /// Adds time to a existing `ExcelDateTime` date instance or creates a new
     /// one if required.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `hour` - Integer hours in the range 0-23.
     /// * `min` - Integer minutes in the range 0-59.
@@ -575,7 +575,7 @@ impl ExcelDateTime {
     /// Adds time to a existing `ExcelDateTime` date instance or creates a new
     /// one if required.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `hour` - Integer hours in the range 0-23.
     /// * `min` - Integer minutes in the range 0-59.
@@ -674,7 +674,7 @@ impl ExcelDateTime {
     /// you want to manipulate the datetime output from one of the other
     /// routines to account for some offset.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `number` - Excel serial date in the range 0.0 to 2,958,466.0 (years
     ///   1900 to 9999).
@@ -749,7 +749,7 @@ impl ExcelDateTime {
     ///
     /// [Unix Time]: https://en.wikipedia.org/wiki/Unix_time
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// * `timestamp` - Unix time in the range -2,209,075,200 to 253,402,300,800
     ///   (years 1900 to 9999).

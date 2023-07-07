@@ -146,7 +146,7 @@ pub struct Url {
 impl Url {
     /// Create a new Url struct.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `link` - A string like type representing a URL.
     ///
@@ -162,7 +162,7 @@ impl Url {
     ///
     /// Set an alternative, user friendly, text for the url.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `text` - The alternative text, as a string or string like type.
     ///
@@ -206,7 +206,7 @@ impl Url {
     ///
     /// Set a screen tip when the user does a mouseover of the url.
     ///
-    /// # Arguments
+    /// # Parameters
     ///
     /// `tip` - The url tip, as a string or string like type.
     ///
