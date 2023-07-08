@@ -3862,6 +3862,7 @@ impl DrawingObject for Chart {
 /// struct represents the Category and Value ranges, and the formatting and
 /// options for the chart series.
 ///
+/// It is used in conjunction with the [`Chart`] struct.
 ///
 /// # Examples
 ///
@@ -3926,6 +3927,8 @@ impl ChartSeries {
     /// Create a new chart series object. A chart in Excel must contain at least
     /// one data series. The `ChartSeries` struct represents the category and
     /// value ranges, and the formatting and options for the chart series.
+    ///
+    /// It is used in conjunction with the [`Chart`] struct.
     ///
     /// A chart series is usually created via the
     /// [`chart.add_series()`](Chart::add_series) method, see the first example
@@ -5215,6 +5218,9 @@ impl ChartSeries {
 /// A struct to represent a chart range like `"Sheet1!$A$1:$A$4"`. The struct is
 /// public to allow for the [`IntoChartRange`] trait but it isn't required to be
 /// manipulated by the end user.
+///
+/// It is used in conjunction with the [`Chart`] struct.
+///
 pub struct ChartRange {
     sheet_name: String,
     first_row: RowNum,
@@ -5503,6 +5509,9 @@ pub enum ChartType {
 }
 
 /// The `ChartTitle` struct represents a chart title.
+///
+/// It is used in conjunction with the [`Chart`] struct.
+///
 #[derive(Clone, PartialEq)]
 pub struct ChartTitle {
     pub(crate) range: ChartRange,
@@ -5776,6 +5785,8 @@ impl ChartTitle {
 /// The [`ChartMarker`] struct represents the properties of a marker on a Line,
 /// Scatter or Radar chart. In Excel a marker is a shape that represents a data
 /// point in a chart series.
+///
+/// It is used in conjunction with the [`Chart`] struct.
 ///
 /// # Examples
 ///
@@ -6095,6 +6106,8 @@ impl fmt::Display for ChartMarkerType {
 /// indicate the values of the plotted data points. It can also be used to
 /// indicate other properties such as the category or, for Pie charts, the
 /// percentage.
+///
+/// It is used in conjunction with the [`Chart`] struct.
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/chart_data_labels_dialog.png">
@@ -7058,6 +7071,8 @@ impl fmt::Display for ChartDataLabelPosition {
 /// individual segments of the chart. In all other chart types the formatting
 /// happens at the chart series level.
 ///
+/// It is used in conjunction with the [`Chart`] struct.
+///
 /// # Examples
 ///
 /// An example of formatting the individual segments of a Pie chart.
@@ -7170,6 +7185,8 @@ impl ChartPoint {
 ///
 /// Used in conjunction with the [`Chart::x_axis()`](Chart::x_axis) and
 /// [`Chart::y_axis()`](Chart::y_axis).
+///
+/// It is used in conjunction with the [`Chart`] struct.
 ///
 /// # Examples
 ///
@@ -8799,6 +8816,8 @@ impl fmt::Display for ChartGrouping {
 /// `ChartLegend` can be used to configure properties of the chart legend and is
 /// usually obtained via the [`chart.legend()`][Chart::legend] method.
 ///
+/// It is used in conjunction with the [`Chart`] struct.
+///
 /// # Examples
 ///
 /// An example of getting the chart legend object and setting some of its
@@ -9189,6 +9208,8 @@ impl fmt::Display for ChartLegendPosition {
 /// The [`ChartFormat`] struct represents many of these format options and just
 /// like Excel it offers a similar formatting interface for a number of the
 /// chart sub-elements supported by `rust_xlsxwriter`.
+///
+/// It is used in conjunction with the [`Chart`] struct.
 ///
 /// The [`ChartFormat`] struct is accessed by using the `set_format()` method of a
 /// chart element to obtain a reference to the formatting struct for that
@@ -9708,7 +9729,7 @@ impl ChartFormat {
 /// [`ChartFormat::set_line()`](ChartFormat::set_line) or
 /// [`ChartFormat::set_border()`](ChartFormat::set_border) methods.
 ///
-/// /// Excel uses the element names "Line" and "Border" depending on the
+/// Excel uses the element names "Line" and "Border" depending on the
 /// context. For a Line chart the line is represented by a line property but for
 /// a Column chart the line becomes the border. Both of these share the same
 /// properties and are both represented in `rust_xlsxwriter` by the [`ChartLine`]
@@ -9716,6 +9737,8 @@ impl ChartFormat {
 ///
 /// As a syntactic shortcut you can use the type alias [`ChartBorder`] instead
 /// of `ChartLine`.
+///
+/// It is used in conjunction with the [`Chart`] struct.
 ///
 /// # Examples
 ///
@@ -10134,6 +10157,8 @@ pub type ChartBorder = ChartLine;
 /// `ChartSolidFill` is a sub property of the [`ChartFormat`] struct and is used
 /// with the [`ChartFormat::set_solid_fill()`](ChartFormat::set_solid_fill) method.
 ///
+/// It is used in conjunction with the [`Chart`] struct.
+///
 /// # Examples
 ///
 /// An example of setting a solid fill for a chart element.
@@ -10343,6 +10368,7 @@ impl ChartSolidFill {
 /// used with the [`ChartFormat::set_pattern_fill()`](ChartFormat::set_pattern_fill)
 /// method.
 ///
+/// It is used in conjunction with the [`Chart`] struct.
 ///
 /// # Examples
 ///
@@ -10945,6 +10971,7 @@ impl fmt::Display for ChartPatternFillType {
 /// type, size, color and properties such as bold and italic. It is generally
 /// used in conjunction with a `set_font()` method for a chart element.
 ///
+/// It is used in conjunction with the [`Chart`] struct.
 ///
 /// # Examples
 ///
