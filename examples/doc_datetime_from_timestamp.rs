@@ -5,13 +5,16 @@
 //! The following example demonstrates writing formatted datetimes in an Excel
 //! worksheet.
 
-use rust_xlsxwriter::{ExcelDateTime, Workbook, XlsxError};
+use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
+
+    // Create a formats to use with the datetimes below.
+    let format = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
 
     // Set the column width for clarity.
     worksheet.set_column_width(0, 30)?;
@@ -21,10 +24,10 @@ fn main() -> Result<(), XlsxError> {
     let datetime2 = ExcelDateTime::from_timestamp(1000000000)?;
     let datetime3 = ExcelDateTime::from_timestamp(1687108108)?;
 
-    // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
-    worksheet.write(0, 0, &datetime1)?;
-    worksheet.write(1, 0, &datetime2)?;
-    worksheet.write(2, 0, &datetime3)?;
+    // Write the formatted datetime.
+    worksheet.write_with_format(0, 0, &datetime1, &format)?;
+    worksheet.write_with_format(1, 0, &datetime2, &format)?;
+    worksheet.write_with_format(2, 0, &datetime3, &format)?;
 
     workbook.save("datetime.xlsx")?;
 

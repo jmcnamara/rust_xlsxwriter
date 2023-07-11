@@ -26,15 +26,12 @@ fn main() -> Result<(), XlsxError> {
     // Create a datetime object.
     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 45.195)?;
 
-    // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
-    worksheet.write(0, 0, &datetime)?;
-
     // Write the datetime with different Excel formats.
-    worksheet.write_with_format(1, 0, &datetime, &format1)?;
-    worksheet.write_with_format(2, 0, &datetime, &format2)?;
-    worksheet.write_with_format(3, 0, &datetime, &format3)?;
-    worksheet.write_with_format(4, 0, &datetime, &format4)?;
-    worksheet.write_with_format(5, 0, &datetime, &format5)?;
+    worksheet.write_with_format(0, 0, &datetime, &format1)?;
+    worksheet.write_with_format(1, 0, &datetime, &format2)?;
+    worksheet.write_with_format(2, 0, &datetime, &format3)?;
+    worksheet.write_with_format(3, 0, &datetime, &format4)?;
+    worksheet.write_with_format(4, 0, &datetime, &format5)?;
 
     workbook.save("datetime.xlsx")?;
 

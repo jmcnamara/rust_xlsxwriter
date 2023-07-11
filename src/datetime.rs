@@ -179,7 +179,7 @@ impl ExcelDateTime {
     /// ```
     /// # // This code is available in examples/doc_datetime_parse_from_str.rs
     /// #
-    /// # use rust_xlsxwriter::{ExcelDateTime, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -187,10 +187,15 @@ impl ExcelDateTime {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
+    ///     // Create some formats to use with the datetimes below.
+    ///     let format1 = Format::new().set_num_format("hh::mm:ss");
+    ///     let format2 = Format::new().set_num_format("yyyy-mm-dd");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
     ///
-    ///     // Create a datetime object.
+    ///     // Create different datetime objects.
     ///     let datetime1 = ExcelDateTime::parse_from_str("12:30")?;
     ///     let datetime2 = ExcelDateTime::parse_from_str("12:30:45")?;
     ///     let datetime3 = ExcelDateTime::parse_from_str("12:30:45.5")?;
@@ -198,13 +203,13 @@ impl ExcelDateTime {
     ///     let datetime5 = ExcelDateTime::parse_from_str("2023-01-31 12:30:45")?;
     ///     let datetime6 = ExcelDateTime::parse_from_str("2023-01-31T12:30:45Z")?;
     ///
-    ///     // Write the dates and times with the default number formats.
-    ///     worksheet.write(0, 0, &datetime1)?;
-    ///     worksheet.write(1, 0, &datetime2)?;
-    ///     worksheet.write(2, 0, &datetime3)?;
-    ///     worksheet.write(3, 0, &datetime4)?;
-    ///     worksheet.write(4, 0, &datetime5)?;
-    ///     worksheet.write(5, 0, &datetime6)?;
+    ///     // Write the datetime with different Excel formats.
+    ///     worksheet.write_with_format(0, 0, &datetime1, &format1)?;
+    ///     worksheet.write_with_format(1, 0, &datetime2, &format1)?;
+    ///     worksheet.write_with_format(2, 0, &datetime3, &format1)?;
+    ///     worksheet.write_with_format(3, 0, &datetime4, &format2)?;
+    ///     worksheet.write_with_format(4, 0, &datetime5, &format3)?;
+    ///     worksheet.write_with_format(5, 0, &datetime6, &format3)?;
     /// #
     /// #     workbook.save("datetime.xlsx")?;
     /// #
@@ -276,7 +281,7 @@ impl ExcelDateTime {
     /// worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_datetime_from_ymd.rs
+    /// # // This code is available in examples/doc_datetime_and_hms.rs
     /// #
     /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
     /// #
@@ -287,25 +292,24 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Create some formats to use with the datetimes below.
-    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy");
-    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy");
-    ///     let format3 = Format::new().set_num_format("ddd dd mmm yyyy");
-    ///     let format4 = Format::new().set_num_format("dddd, mmmm dd, yyyy");
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.0");
+    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.000");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
     ///
     ///     // Create a datetime object.
-    ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?;
-    ///
-    ///     // Write the date with the default "yyyy-mm-dd;@" format.
-    ///     worksheet.write(0, 0, &datetime)?;
+    ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 45.195)?;
     ///
     ///     // Write the datetime with different Excel formats.
-    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
-    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
-    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
-    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
+    ///     worksheet.write_with_format(0, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(1, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format4)?;
+    ///     worksheet.write_with_format(4, 0, &datetime, &format5)?;
     /// #
     /// #     workbook.save("datetime.xlsx")?;
     /// #
@@ -377,14 +381,11 @@ impl ExcelDateTime {
     ///     // Create a datetime object.
     ///     let datetime = ExcelDateTime::from_hms(12, 30, 45.5)?;
     ///
-    ///     // Write the time with the default "hh:mm:ss;@" format.
-    ///     worksheet.write(0, 0, &datetime)?;
-    ///
     ///     // Write the datetime with different Excel formats.
-    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
-    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
-    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
-    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
+    ///     worksheet.write_with_format(0, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(1, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format4)?;
     /// #
     /// #     workbook.save("datetime.xlsx")?;
     /// #
@@ -448,14 +449,11 @@ impl ExcelDateTime {
     ///     // Create a datetime object.
     ///     let datetime = ExcelDateTime::from_hms_milli(12, 30, 45, 123)?;
     ///
-    ///     // Write the time with the default "hh:mm:ss;@" format.
-    ///     worksheet.write(0, 0, &datetime)?;
-    ///
     ///     // Write the datetime with different Excel formats.
-    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
-    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
-    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
-    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
+    ///     worksheet.write_with_format(0, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(1, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format4)?;
     /// #
     /// #     workbook.save("datetime.xlsx")?;
     /// #
@@ -523,15 +521,12 @@ impl ExcelDateTime {
     ///     // Create a datetime object.
     ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms(12, 30, 45.195)?;
     ///
-    ///     // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
-    ///     worksheet.write(0, 0, &datetime)?;
-    ///
     ///     // Write the datetime with different Excel formats.
-    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
-    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
-    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
-    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
-    ///     worksheet.write_with_format(5, 0, &datetime, &format5)?;
+    ///     worksheet.write_with_format(0, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(1, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format4)?;
+    ///     worksheet.write_with_format(4, 0, &datetime, &format5)?;
     /// #
     /// #     workbook.save("datetime.xlsx")?;
     /// #
@@ -617,15 +612,12 @@ impl ExcelDateTime {
     ///     // Create a datetime object.
     ///     let datetime = ExcelDateTime::from_ymd(2023, 1, 25)?.and_hms_milli(12, 30, 45, 195)?;
     ///
-    ///     // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
-    ///     worksheet.write(0, 0, &datetime)?;
-    ///
     ///     // Write the datetime with different Excel formats.
-    ///     worksheet.write_with_format(1, 0, &datetime, &format1)?;
-    ///     worksheet.write_with_format(2, 0, &datetime, &format2)?;
-    ///     worksheet.write_with_format(3, 0, &datetime, &format3)?;
-    ///     worksheet.write_with_format(4, 0, &datetime, &format4)?;
-    ///     worksheet.write_with_format(5, 0, &datetime, &format5)?;
+    ///     worksheet.write_with_format(0, 0, &datetime, &format1)?;
+    ///     worksheet.write_with_format(1, 0, &datetime, &format2)?;
+    ///     worksheet.write_with_format(2, 0, &datetime, &format3)?;
+    ///     worksheet.write_with_format(3, 0, &datetime, &format4)?;
+    ///     worksheet.write_with_format(4, 0, &datetime, &format5)?;
     /// #
     /// #     workbook.save("datetime.xlsx")?;
     /// #
@@ -692,7 +684,7 @@ impl ExcelDateTime {
     /// ```
     /// # // This code is available in examples/doc_datetime_from_serial_datetime.rs
     /// #
-    /// # use rust_xlsxwriter::{ExcelDateTime, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -700,18 +692,21 @@ impl ExcelDateTime {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Set the column width for clarity.
-    /// #     worksheet.set_column_width(0, 30)?;
-    /// #
+    ///     // Create a formats to use with the datetimes below.
+    ///     let format = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
     ///     // Create a datetime object.
     ///     let datetime1 = ExcelDateTime::from_serial_datetime(1.5)?;
     ///     let datetime2 = ExcelDateTime::from_serial_datetime(36526.61)?;
     ///     let datetime3 = ExcelDateTime::from_serial_datetime(44951.72)?;
     ///
-    ///     // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
-    ///     worksheet.write(0, 0, &datetime1)?;
-    ///     worksheet.write(1, 0, &datetime2)?;
-    ///     worksheet.write(2, 0, &datetime3)?;
+    ///     // Write the formatted datetime.
+    ///     worksheet.write_with_format(0, 0, &datetime1, &format)?;
+    ///     worksheet.write_with_format(1, 0, &datetime2, &format)?;
+    ///     worksheet.write_with_format(2, 0, &datetime3, &format)?;
     /// #
     /// #     workbook.save("datetime.xlsx")?;
     /// #
@@ -767,27 +762,30 @@ impl ExcelDateTime {
     /// ```
     /// # // This code is available in examples/doc_datetime_from_timestamp.rs
     /// #
-    /// # use rust_xlsxwriter::{ExcelDateTime, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
     /// #
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Set the column width for clarity.
-    /// #     worksheet.set_column_width(0, 30)?;
-    /// #
+    ///
+    ///     // Create a formats to use with the datetimes below.
+    ///     let format = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///
+    ///     // Set the column width for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
     ///     // Create a datetime object.
     ///     let datetime1 = ExcelDateTime::from_timestamp(0)?;
     ///     let datetime2 = ExcelDateTime::from_timestamp(1000000000)?;
     ///     let datetime3 = ExcelDateTime::from_timestamp(1687108108)?;
     ///
-    ///     // Write the datetime with the default "yyyy\\-mm\\-dd\\ hh:mm:ss" format.
-    ///     worksheet.write(0, 0, &datetime1)?;
-    ///     worksheet.write(1, 0, &datetime2)?;
-    ///     worksheet.write(2, 0, &datetime3)?;
-    /// #
+    ///     // Write the formatted datetime.
+    ///     worksheet.write_with_format(0, 0, &datetime1, &format)?;
+    ///     worksheet.write_with_format(1, 0, &datetime2, &format)?;
+    ///     worksheet.write_with_format(2, 0, &datetime3, &format)?;
+    ///
     /// #     workbook.save("datetime.xlsx")?;
     /// #
     /// #     Ok(())
