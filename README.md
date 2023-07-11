@@ -49,7 +49,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_with_format(4, 0, 3.00, &decimal_format)?;
 
     // Write a formula.
-    worksheet.write_formula(5, 0, "=SIN(PI()/4)")?;
+    worksheet.write(5, 0, Formula::new("=SIN(PI()/4)"))?;
 
     // Write a date.
     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
@@ -99,9 +99,9 @@ frequently.
 ## Features
 
 - `default`: Includes all the standard functionality. Has dependencies on `zip`
-  and `regex`, `itertools` and `lazy_static`.
-- `chrono`: Adds supports for Chrono date/time types to the API. This is on by
-  default in this release but will be off by default in subsequent releases.
+  and `regex` and `lazy_static`.
+- `chrono`: Adds supports for Chrono date/time types to the API. This is off by
+  default.
 - `zlib`: Adds dependency on zlib and a C compiler. This includes the same
   features as `default` but is 1.5x faster for large files.
 - `test-resave`: Developer only testing feature.
@@ -112,6 +112,7 @@ Recent changes:
 
 - Added native date/time support and made `chrono` optional.
 - Added support for worksheet tables.
+- Added [Tutorial] and [Cookbook] sections to the docs.rs documentation.
 
 See the full [Release Notes and Changelog].
 
@@ -122,7 +123,7 @@ See the full [Release Notes and Changelog].
       `rust_xlsxwriter` in a project and write a Hello World example.
     - [Tutorial]: A larger example of using `rust_xlsxwriter` to write some
        expense data to a spreadsheet.
-    - [Cookbook Examples].
+    - [Cookbook].
 - [The rust_xlsxwriter crate].
 - [The rust_xlsxwriter API docs at docs.rs].
 - [The rust_xlsxwriter repository].
@@ -130,8 +131,9 @@ See the full [Release Notes and Changelog].
 
 [User Guide]: https://rustxlsxwriter.github.io/index.html
 [Getting started]: https://rustxlsxwriter.github.io/getting_started.html
-[Tutorial]: https://rustxlsxwriter.github.io/tutorial/intro.html
-[Cookbook Examples]: https://rustxlsxwriter.github.io/examples/intro.html
+[Tutorial]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/tutorial/index.html
+[Cookbook]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html
+
 [The rust_xlsxwriter crate]: https://crates.io/crates/rust_xlsxwriter
 [The rust_xlsxwriter API docs at docs.rs]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/
 [The rust_xlsxwriter repository]: https://github.com/jmcnamara/rust_xlsxwriter

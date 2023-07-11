@@ -131,6 +131,12 @@ documentation and generally show how an individual function works.
 * app_tutorial3.rs - A simple program to write some data to an Excel
   spreadsheet using rust_xlsxwriter. Part 3 of a tutorial.
 
+* app_tutorial4.rs - A simple program to write some data to an Excel
+  spreadsheet using rust_xlsxwriter. Part 4 of a tutorial.
+
+* app_tutorial5.rs - A simple program to write some data to an Excel
+  spreadsheet using rust_xlsxwriter. Part 5 of a tutorial.
+
 * app_watermark.rs - An example of adding a worksheet watermark image using
   the rust_xlsxwriter library. This is based on the method of putting an
   image in the worksheet header as suggested in the Microsoft
@@ -145,9 +151,9 @@ documentation and generally show how an individual function works.
   contain data types that implement `rust_xlsxwriter`'s `IntoExcelData`.
 
 * app_write_generic_data.rs - Example of how to extend the the
-  rust_xlsxwriter write() method using the IntoExcelData trait to handle
-  arbitrary user data that can be mapped to one of the main Excel data
-  types.
+  `rust_xlsxwriter` `write()` method using the IntoExcelData trait to
+  handle arbitrary user data that can be mapped to one of the main Excel
+  data types.
 
 * doc_chart_add_series.rs - An example of creating a chart series via
   [`chart.add_series()`](Chart::add_series).
@@ -883,11 +889,14 @@ documentation and generally show how an individual function works.
 * doc_worksheet_write_date_chrono.rs - Demonstrates writing formatted dates
   in an Excel worksheet.
 
-* doc_worksheet_write_datetime.rs - Demonstrates writing formatted
-  datetimes in an Excel worksheet.
+* doc_worksheet_write_datetime.rs - Demonstrates writing datetimes that
+  take an implicit format from the column formatting.
 
 * doc_worksheet_write_datetime_chrono.rs - Demonstrates writing formatted
   datetimes in an Excel worksheet.
+
+* doc_worksheet_write_datetime_with_format.rs - Demonstrates writing
+  formatted datetimes in an Excel worksheet.
 
 * doc_worksheet_write_dynamic_array_formula.rs - Demonstrates a static
   function which generally returns one value turned into a dynamic array
