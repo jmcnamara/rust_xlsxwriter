@@ -98,8 +98,8 @@ frequently.
 
 ## Features
 
-- `default`: Includes all the standard functionality. Has dependencies on `zip`
-  and `regex` and `lazy_static`.
+- `default`: Includes all the standard functionality. Has dependencies on `zip`,
+  `regex` and `lazy_static`.
 - `chrono`: Adds supports for Chrono date/time types to the API. This is off by
   default.
 - `zlib`: Adds dependency on zlib and a C compiler. This includes the same

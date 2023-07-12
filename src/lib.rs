@@ -106,10 +106,11 @@
 //!
 //! ## Features
 //!
-//! - `default`: Includes all the standard functionality. Has dependencies on `zip`
-//!   and `regex`, `itertools` and `lazy_static`.
-//! - `chrono`: Adds supports for Chrono date/time types to the API. This is on by
-//!   default in this release but will be off by default in subsequent releases.
+//!
+//! - `default`: Includes all the standard functionality. Has dependencies on `zip`,
+//!   `regex` and `lazy_static`.
+//! - `chrono`: Adds supports for Chrono date/time types to the API. This is off by
+//!   default.
 //! - `zlib`: Adds dependency on zlib and a C compiler. This includes the same
 //!   features as `default` but is 1.5x faster for large files.
 //! - `test-resave`: Developer only testing feature.
