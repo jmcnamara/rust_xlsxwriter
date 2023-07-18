@@ -387,6 +387,7 @@ impl<W: Write + Seek> Packager<W> {
     fn write_styles_file(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut styles = Styles::new(
             &workbook.xf_formats,
+            &workbook.dxf_formats,
             workbook.font_count,
             workbook.fill_count,
             workbook.border_count,

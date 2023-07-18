@@ -8,7 +8,9 @@
 
 use std::{collections::HashSet, fmt};
 
-use crate::{utility::ToXmlBoolean, xmlwriter::XMLWriter, CellRange, Formula, RowNum, XlsxError};
+use crate::{
+    utility::ToXmlBoolean, xmlwriter::XMLWriter, CellRange, Format, Formula, RowNum, XlsxError,
+};
 
 /// The `Table` struct represents a worksheet Table.
 ///
@@ -1288,6 +1290,10 @@ impl Table {
             attributes.push(("totalsRowFunction", column.total_function.to_string()));
         }
 
+        if let Some(format) = &column.format {
+            attributes.push(("dataDxfId", format.dxf_index.to_string()));
+        }
+
         if let Some(formula) = &column.formula {
             self.writer.xml_start_tag("tableColumn", &attributes);
 
@@ -1420,6 +1426,7 @@ pub struct TableColumn {
     pub(crate) total_function: TableFunction,
     pub(crate) total_label: String,
     pub(crate) formula: Option<Formula>,
+    pub(crate) format: Option<Format>,
 }
 
 impl TableColumn {
@@ -1431,6 +1438,7 @@ impl TableColumn {
             total_function: TableFunction::None,
             total_label: String::new(),
             formula: None,
+            format: None,
         }
     }
 
@@ -1719,6 +1727,12 @@ impl TableColumn {
         let mut formula = formula.into();
         formula = formula.clone().use_table_functions();
         self.formula = Some(formula);
+        self
+    }
+
+    /// TODO
+    pub fn set_format(mut self, format: &Format) -> TableColumn {
+        self.format = Some(format.clone());
         self
     }
 

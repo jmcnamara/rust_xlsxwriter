@@ -134,6 +134,7 @@ pub struct Worksheet {
     pub(crate) autofilter_defined_name: DefinedName,
     pub(crate) autofilter_area: String,
     pub(crate) xf_formats: Vec<Format>,
+    pub(crate) dxf_formats: Vec<Format>,
     pub(crate) has_hyperlink_style: bool,
     pub(crate) table_relationships: Vec<(String, String, String)>,
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
@@ -156,7 +157,9 @@ pub struct Worksheet {
     col_names: HashMap<ColNum, String>,
     dimensions: CellRange,
     xf_indices: HashMap<Format, u32>,
+    dxf_indices: HashMap<Format, u32>,
     global_xf_indices: Vec<u32>,
+    global_dxf_indices: Vec<u32>,
     changed_rows: HashMap<RowNum, RowOptions>,
     changed_cols: HashMap<ColNum, ColOptions>,
     page_setup_changed: bool,
@@ -289,8 +292,6 @@ impl Worksheet {
     pub fn new() -> Worksheet {
         let writer = XMLWriter::new();
 
-        let xf_indices = HashMap::from([(Format::default(), 0)]);
-
         // Initialize the min and max dimensions with their opposite value.
         let dimensions = CellRange::default();
 
@@ -321,8 +322,11 @@ impl Worksheet {
             table_ranges: vec![],
             table_cells: HashMap::new(),
             xf_formats: vec![Format::default()],
-            xf_indices,
+            dxf_formats: vec![],
+            xf_indices: HashMap::from([(Format::default(), 0)]),
+            dxf_indices: HashMap::new(),
             global_xf_indices: vec![],
+            global_dxf_indices: vec![],
             changed_rows: HashMap::new(),
             changed_cols: HashMap::new(),
             page_setup_changed: false,
@@ -3977,7 +3981,7 @@ impl Worksheet {
         }
 
         // Get the index of the format object.
-        let xf_index = self.format_index(format);
+        let xf_index = self.format_xf_index(format);
 
         // Update an existing row metadata object or create a new one.
         match self.changed_rows.get_mut(&row) {
@@ -4333,7 +4337,7 @@ impl Worksheet {
         }
 
         // Get the index of the format object.
-        let xf_index = self.format_index(format);
+        let xf_index = self.format_xf_index(format);
 
         // Update an existing col metadata object or create a new one.
         match self.changed_cols.get_mut(&col) {
@@ -4839,9 +4843,11 @@ impl Worksheet {
         let mut table = table.clone();
         table.cell_range = CellRange::new(first_row, first_col, last_row, last_col);
         table.initialize_columns()?;
+        let first_data_row = table.first_data_row();
+        let last_data_row = table.last_data_row();
 
         // Write the worksheet information required for each column.
-        for (offset, column) in table.columns.iter().enumerate() {
+        for (offset, column) in table.columns.iter_mut().enumerate() {
             let col = first_col + offset as u16;
 
             // Write the header.
@@ -4861,9 +4867,14 @@ impl Worksheet {
 
             // Write the column formula as worksheet formulas.
             if let Some(formula) = &column.formula {
-                for row in table.first_data_row()..=table.last_data_row() {
+                for row in first_data_row..=last_data_row {
                     self.write_formula(row, col, formula)?;
                 }
+            }
+
+            // Set the column format local index if required.
+            if let Some(format) = column.format.as_mut() {
+                format.dxf_index = self.format_dxf_index(format);
             }
         }
 
@@ -8169,7 +8180,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => self.format_index(format),
+            Some(format) => self.format_xf_index(format),
             None => 0,
         };
 
@@ -8214,7 +8225,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => self.format_index(format),
+            Some(format) => self.format_xf_index(format),
             None => 0,
         };
 
@@ -8260,7 +8271,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => self.format_index(format),
+            Some(format) => self.format_xf_index(format),
             None => 0,
         };
 
@@ -8297,7 +8308,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => self.format_index(format),
+            Some(format) => self.format_xf_index(format),
             None => 0,
         };
 
@@ -8346,7 +8357,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => self.format_index(format),
+            Some(format) => self.format_xf_index(format),
             None => 0,
         };
 
@@ -8409,7 +8420,7 @@ impl Worksheet {
         }
 
         // Get the index of the format object.
-        let xf_index = self.format_index(format);
+        let xf_index = self.format_xf_index(format);
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::Blank { xf_index };
@@ -8434,7 +8445,7 @@ impl Worksheet {
 
         // Get the index of the format object, if any.
         let xf_index = match format {
-            Some(format) => self.format_index(format),
+            Some(format) => self.format_xf_index(format),
             None => 0,
         };
 
@@ -8475,6 +8486,7 @@ impl Worksheet {
     // A rich string is handled in Excel like any other shared string except
     // that it has inline font markup within the string. To generate the
     // required font xml we use an instance of the Style struct.
+    #[allow(clippy::similar_names)]
     fn get_rich_string(segments: &[(&Format, &str)]) -> Result<(String, String), XlsxError> {
         // Check that there is at least one segment tuple.
         if segments.is_empty() {
@@ -8484,7 +8496,8 @@ impl Worksheet {
 
         // Create a Style struct object to generate the font xml.
         let xf_formats: Vec<Format> = vec![];
-        let mut styler = Styles::new(&xf_formats, 0, 0, 0, vec![], false, true);
+        let dxf_formats: Vec<Format> = vec![];
+        let mut styler = Styles::new(&xf_formats, &dxf_formats, 0, 0, 0, vec![], false, true);
         let mut raw_string = String::new();
 
         let mut first_segment = true;
@@ -8624,8 +8637,8 @@ impl Worksheet {
 
     // Store local copies of unique formats passed to the write methods. These
     // indexes will be replaced by global/workbook indices before the worksheet
-    // is saved.
-    fn format_index(&mut self, format: &Format) -> u32 {
+    // is saved. XF indexed are used for cell formats.
+    fn format_xf_index(&mut self, format: &Format) -> u32 {
         match self.xf_indices.get_mut(format) {
             Some(xf_index) => *xf_index,
             None => {
@@ -8640,10 +8653,46 @@ impl Worksheet {
         }
     }
 
+    /// Get the local instance DXF id for a format.
+    ///
+    /// Get the local instance DXF id for a format. These indexes will be
+    /// replaced by global/workbook indices before the worksheet is saved. DXF
+    /// indexed are used for Tables and Conditional Formats.
+    ///
+    /// This method is public but hidden to allow test cases to mirror the
+    /// creation order for DXF ids which is usually the reverse of the order of
+    /// the XF instance ids.
+    ///
+    /// # Parameters
+    ///
+    /// `format` - The [`Format`] instance to register.
+    ///
+    #[doc(hidden)]
+    pub fn format_dxf_index(&mut self, format: &Format) -> u32 {
+        match self.dxf_indices.get_mut(format) {
+            Some(dxf_index) => *dxf_index,
+            None => {
+                let dxf_index = self.dxf_formats.len() as u32;
+                self.dxf_formats.push(format.clone());
+                self.dxf_indices.insert(format.clone(), dxf_index);
+                if format.font.is_hyperlink {
+                    self.has_hyperlink_style = true;
+                }
+                dxf_index
+            }
+        }
+    }
+
     // Set the mapping between the local format indices and the global/workbook
-    // indices.
-    pub(crate) fn set_global_xf_indices(&mut self, workbook_indices: &[u32]) {
-        self.global_xf_indices = workbook_indices.to_vec();
+    // indices for cell formats.
+    pub(crate) fn set_global_xf_indices(&mut self, workbook_xf_indices: &[u32]) {
+        self.global_xf_indices = workbook_xf_indices.to_vec();
+    }
+
+    // Set the mapping between the local format indices and the global/workbook
+    // indices for cell formats.
+    pub(crate) fn set_global_dxf_indices(&mut self, workbook_dxf_indices: &[u32]) {
+        self.global_dxf_indices = workbook_dxf_indices.to_vec();
     }
 
     // Translate the cell xf_index into a global/workbook format index. We also
@@ -8857,6 +8906,13 @@ impl Worksheet {
             table.index = table_id;
             if table.name.is_empty() {
                 table.name = format!("Table{table_id}");
+            }
+
+            // Change any column format local index from local to global.
+            for column in &mut table.columns {
+                if let Some(format) = column.format.as_mut() {
+                    format.dxf_index = self.global_dxf_indices[format.dxf_index as usize];
+                }
             }
 
             self.table_relationships.push((
@@ -9098,6 +9154,7 @@ impl Worksheet {
         self.drawing.writer.reset();
 
         for chart in self.charts.values_mut() {
+            // todo
             chart.writer.reset();
         }
 

@@ -16,7 +16,7 @@ mod common;
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let mut format1 = Format::default();
+    let format1 = Format::default();
     let format2 = Format::new().set_font_name("Arial");
     let format3 = Format::new().set_font_name("Consolas").set_font_family(3);
     let format4 = Format::new().set_font_size(10);
@@ -28,10 +28,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string_with_format(2, 0, "Rust", &format3)?;
     worksheet.write_string_with_format(3, 0, "Rust", &format4)?;
     worksheet.write_string_with_format(4, 0, "Rust", &format5)?;
-
-    // Secondary test for default format.
-    workbook.register_format(&mut format1);
-    workbook.register_format(&mut format1);
 
     workbook.save(filename)?;
 

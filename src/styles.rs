@@ -14,6 +14,7 @@ use crate::{
 pub struct Styles<'a> {
     pub(crate) writer: XMLWriter,
     xf_formats: &'a Vec<Format>,
+    dxf_formats: &'a Vec<Format>,
     font_count: u16,
     fill_count: u16,
     border_count: u16,
@@ -28,20 +29,24 @@ impl<'a> Styles<'a> {
     // -----------------------------------------------------------------------
 
     // Create a new Styles struct.
+    #[allow(clippy::similar_names)]
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
-        xf_formats: &Vec<Format>,
+        xf_formats: &'a Vec<Format>,
+        dxf_formats: &'a Vec<Format>,
         font_count: u16,
         fill_count: u16,
         border_count: u16,
         num_formats: Vec<String>,
         has_hyperlink_style: bool,
         is_rich_string_style: bool,
-    ) -> Styles {
+    ) -> Styles<'a> {
         let writer = XMLWriter::new();
 
         Styles {
             writer,
             xf_formats,
+            dxf_formats,
             font_count,
             fill_count,
             border_count,
@@ -705,9 +710,29 @@ impl<'a> Styles<'a> {
 
     // Write the <dxfs> element.
     fn write_dxfs(&mut self) {
-        let attributes = [("count", "0")];
+        let attributes = [("count", self.dxf_formats.len().to_string())];
 
-        self.writer.xml_empty_tag("dxfs", &attributes);
+        if self.dxf_formats.is_empty() {
+            self.writer.xml_empty_tag("dxfs", &attributes);
+        } else {
+            self.writer.xml_start_tag("dxfs", &attributes);
+
+            for xf_format in self.dxf_formats {
+                self.writer.xml_start_tag_only("dxf");
+
+                if xf_format.has_dxf_font() {
+                    self.write_font(&xf_format.font);
+                }
+
+                if xf_format.num_format_index > 0 {
+                    self.write_num_fmt(xf_format.num_format_index, &xf_format.num_format);
+                }
+
+                self.writer.xml_end_tag("dxf");
+            }
+
+            self.writer.xml_end_tag("dxfs");
+        }
     }
 
     // Write the <tableStyles> element.
@@ -767,7 +792,8 @@ mod tests {
         xf_format.set_border_index(0, true);
 
         let xf_formats = vec![xf_format];
-        let mut styles = Styles::new(&xf_formats, 1, 2, 1, vec![], false, false);
+        let dxf_formats = vec![];
+        let mut styles = Styles::new(&xf_formats, &dxf_formats, 1, 2, 1, vec![], false, false);
 
         styles.assemble_xml_file();
 

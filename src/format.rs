@@ -411,7 +411,7 @@ use std::{fmt, hash::Hash};
 #[derive(Debug, Clone, Eq)]
 
 pub struct Format {
-    pub(crate) xf_index: u32,
+    pub(crate) dxf_index: u32,
     pub(crate) font_index: u16,
     pub(crate) fill_index: u16,
     pub(crate) border_index: u16,
@@ -504,7 +504,7 @@ impl Format {
     /// ```
     pub fn new() -> Format {
         Format {
-            xf_index: 0,
+            dxf_index: 0,
             font_index: 0,
             fill_index: 0,
             border_index: 0,
@@ -529,13 +529,18 @@ impl Format {
     // Crate private methods.
     // -----------------------------------------------------------------------
 
-    pub(crate) fn set_xf_index(&mut self, index: u32) {
-        self.xf_index = index;
-    }
-
     pub(crate) fn set_font_index(&mut self, font_index: u16, has_font: bool) {
         self.font_index = font_index;
         self.has_font = has_font;
+    }
+
+    // For DXF formats (Table and Conditional) check if the font has changed.
+    pub(crate) fn has_dxf_font(&self) -> bool {
+        self.font.bold
+            || self.font.italic
+            || self.font.underline != FormatUnderline::None
+            || self.font.strikethrough
+            || !self.font.color.is_auto_or_default()
     }
 
     pub(crate) fn set_fill_index(&mut self, fill_index: u16, has_fill: bool) {

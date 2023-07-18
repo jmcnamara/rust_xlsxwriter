@@ -97,12 +97,14 @@ pub struct Workbook {
     pub(crate) properties: DocProperties,
     pub(crate) worksheets: Vec<Worksheet>,
     pub(crate) xf_formats: Vec<Format>,
+    pub(crate) dxf_formats: Vec<Format>,
     pub(crate) font_count: u16,
     pub(crate) fill_count: u16,
     pub(crate) border_count: u16,
     pub(crate) num_formats: Vec<String>,
     pub(crate) has_hyperlink_style: bool,
     xf_indices: HashMap<Format, u32>,
+    dxf_indices: HashMap<Format, u32>,
     active_tab: u16,
     first_sheet: u16,
     defined_names: Vec<DefinedName>,
@@ -172,9 +174,11 @@ impl Workbook {
             has_hyperlink_style: false,
             worksheets: vec![],
             xf_formats: vec![],
+            dxf_formats: vec![],
             defined_names: vec![],
             user_defined_names: vec![],
             xf_indices: HashMap::new(),
+            dxf_indices: HashMap::new(),
         };
 
         // Initialize the workbook with the same function used to reset it.
@@ -712,29 +716,6 @@ impl Workbook {
         Ok(buf)
     }
 
-    /// Set the index for the format. This is currently only used in testing but
-    /// may be used publicly at a later stage.
-    ///
-    /// # Parameters
-    ///
-    /// `format` - The [`Format`] instance to register.
-    ///
-    #[doc(hidden)]
-    pub fn register_format(&mut self, format: &mut Format) {
-        match self.xf_indices.get_mut(format) {
-            Some(xf_index) => {
-                format.set_xf_index(*xf_index);
-            }
-            None => {
-                let xf_index = self.xf_formats.len() as u32;
-                self.xf_formats.push(format.clone());
-                format.set_xf_index(xf_index);
-
-                self.xf_indices.insert(format.clone(), xf_index);
-            }
-        }
-    }
-
     /// Create a defined name in the workbook to use as a variable.
     ///
     /// The `define_name()` method is used to defined a variable name that can
@@ -1043,6 +1024,8 @@ impl Workbook {
 
         self.xf_indices = HashMap::from([(Format::default(), 0)]);
         self.xf_formats = vec![Format::default()];
+        self.dxf_indices = HashMap::new();
+        self.dxf_formats = vec![];
         self.font_count = 0;
         self.fill_count = 0;
         self.border_count = 0;
@@ -1055,6 +1038,7 @@ impl Workbook {
 
     // Internal function to prepare the workbook and other component files for
     // writing to the xlsx file.
+    #[allow(clippy::similar_names)]
     fn save_internal<W: Write + Seek>(&mut self, writer: W) -> Result<(), XlsxError> {
         // Reset workbook and worksheet state data between saves.
         self.reset();
@@ -1089,26 +1073,43 @@ impl Workbook {
             unique_worksheet_names.insert(worksheet_name);
         }
 
-        // Convert any worksheet local formats to workbook/global formats.
-        let mut worksheet_formats: Vec<Vec<Format>> = vec![];
+        // Convert any worksheet local formats to workbook/global formats. At
+        // the worksheet level each unique format will have an index like 0, 1,
+        // 2, etc., starting from 0 for each worksheet. However, at a workbook
+        // level they may have an equivalent index of 1, 7, 5 or whatever
+        // workbook order they appear in.
+        let mut worksheet_xf_formats: Vec<Vec<Format>> = vec![];
+        let mut worksheet_dxf_formats: Vec<Vec<Format>> = vec![];
         for worksheet in &self.worksheets {
             let formats = worksheet.xf_formats.clone();
-            worksheet_formats.push(formats);
+            worksheet_xf_formats.push(formats);
+            let formats = worksheet.dxf_formats.clone();
+            worksheet_dxf_formats.push(formats);
         }
 
-        let mut worksheet_indices: Vec<Vec<u32>> = vec![];
-        for formats in &worksheet_formats {
+        let mut worksheet_xf_indices: Vec<Vec<u32>> = vec![];
+        for formats in &worksheet_xf_formats {
             let mut indices = vec![];
             for format in formats {
-                let index = self.format_index(format);
+                let index = self.format_xf_index(format);
                 indices.push(index);
             }
-            worksheet_indices.push(indices);
+            worksheet_xf_indices.push(indices);
+        }
+        let mut worksheet_dxf_indices: Vec<Vec<u32>> = vec![];
+        for formats in &worksheet_dxf_formats {
+            let mut indices = vec![];
+            for format in formats {
+                let index = self.format_dxf_index(format);
+                indices.push(index);
+            }
+            worksheet_dxf_indices.push(indices);
         }
 
         for (i, worksheet) in self.worksheets.iter_mut().enumerate() {
             // Map worksheet/local format indices to the workbook/global values.
-            worksheet.set_global_xf_indices(&worksheet_indices[i]);
+            worksheet.set_global_xf_indices(&worksheet_xf_indices[i]);
+            worksheet.set_global_dxf_indices(&worksheet_dxf_indices[i]);
 
             // Perform the autofilter row hiding.
             worksheet.hide_autofilter_rows();
@@ -1327,7 +1328,7 @@ impl Workbook {
     // Evaluate and clone formats from worksheets into a workbook level vector
     // of unique formats. Also return the index for use in remapping worksheet
     // format indices.
-    fn format_index(&mut self, format: &Format) -> u32 {
+    fn format_xf_index(&mut self, format: &Format) -> u32 {
         match self.xf_indices.get_mut(format) {
             Some(xf_index) => *xf_index,
             None => {
@@ -1335,6 +1336,18 @@ impl Workbook {
                 self.xf_formats.push(format.clone());
                 self.xf_indices.insert(format.clone(), xf_index);
                 xf_index
+            }
+        }
+    }
+
+    fn format_dxf_index(&mut self, format: &Format) -> u32 {
+        match self.dxf_indices.get_mut(format) {
+            Some(dxf_index) => *dxf_index,
+            None => {
+                let dxf_index = self.dxf_formats.len() as u32;
+                self.dxf_formats.push(format.clone());
+                self.dxf_indices.insert(format.clone(), dxf_index);
+                dxf_index
             }
         }
     }
@@ -1354,7 +1367,8 @@ impl Workbook {
         self.prepare_num_formats();
     }
 
-    // Set the font index for the format objects.
+    // Set the font index for the format objects. This only needs to be done for
+    // XF formats. DXF formats are handled differently.
     fn prepare_fonts(&mut self) {
         let mut font_count: u16 = 0;
         let mut font_indices: HashMap<Font, u16> = HashMap::new();
@@ -1464,8 +1478,9 @@ impl Workbook {
         // User defined number formats in Excel start from index 164.
         let mut index = 164;
         let mut num_formats = vec![];
+        let xf_formats = [&mut self.xf_formats, &mut self.dxf_formats];
 
-        for xf_format in &mut self.xf_formats {
+        for xf_format in xf_formats.into_iter().flatten() {
             if xf_format.num_format_index > 0 {
                 continue;
             }
