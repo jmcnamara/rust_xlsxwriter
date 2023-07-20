@@ -543,6 +543,13 @@ impl Format {
             || !self.font.color.is_auto_or_default()
     }
 
+    // For DXF formats (Table and Conditional) check if the fill has changed.
+    pub(crate) fn has_dxf_fill(&self) -> bool {
+        self.fill.pattern != FormatPattern::None
+            || !self.fill.background_color.is_auto_or_default()
+            || !self.fill.foreground_color.is_auto_or_default()
+    }
+
     pub(crate) fn set_fill_index(&mut self, fill_index: u16, has_fill: bool) {
         self.fill_index = fill_index;
         self.has_fill = has_fill;
@@ -2246,6 +2253,16 @@ pub(crate) struct Border {
     pub(crate) diagonal_style: FormatBorder,
     pub(crate) diagonal_color: Color,
     pub(crate) diagonal_type: FormatDiagonalBorder,
+}
+
+impl Border {
+    // Check if the border is in the default/unmodified condition.
+    pub(crate) fn is_default(&self) -> bool {
+        lazy_static! {
+            static ref DEFAULT_STATE: Border = Border::default();
+        };
+        self == &*DEFAULT_STATE
+    }
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]

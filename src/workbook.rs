@@ -1470,6 +1470,11 @@ impl Workbook {
             }
         }
         self.border_count = border_count;
+
+        // For DXF borders we only need to check if any properties have changed.
+        for dxf_format in &mut self.dxf_formats {
+            dxf_format.has_border = !dxf_format.borders.is_default();
+        }
     }
 
     // Set the number format index for the format objects.

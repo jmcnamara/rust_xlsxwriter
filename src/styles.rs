@@ -728,6 +728,14 @@ impl<'a> Styles<'a> {
                     self.write_num_fmt(xf_format.num_format_index, &xf_format.num_format);
                 }
 
+                if xf_format.has_dxf_fill() {
+                    self.write_fill(&xf_format.fill);
+                }
+
+                if xf_format.has_border {
+                    self.write_border(&xf_format.borders);
+                }
+
                 self.writer.xml_end_tag("dxf");
             }
 
