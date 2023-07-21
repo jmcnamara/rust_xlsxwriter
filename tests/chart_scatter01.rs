@@ -12,7 +12,7 @@ extern crate lazy_static;
 
 mod common;
 
-// Test to demonstrate charts.
+// Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -45,7 +45,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test to demonstrate charts.
+// Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
