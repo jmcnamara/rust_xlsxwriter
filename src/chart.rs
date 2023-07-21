@@ -3287,10 +3287,10 @@ impl Chart {
         let mut attributes = vec![];
 
         if let Some(width) = &line.width {
-            /* Round width to nearest 0.25, like Excel. */
+            // Round width to nearest 0.25, like Excel.
             let width = ((*width + 0.125) * 4.0).floor() / 4.0;
 
-            /* Convert to Excel internal units. */
+            // Convert to Excel internal units.
             let width = (12700.0 * width).ceil() as u32;
 
             attributes.push(("w", width.to_string()));
