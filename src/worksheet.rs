@@ -4852,7 +4852,14 @@ impl Worksheet {
 
             // Write the header.
             if table.show_header_row {
-                self.write_string(first_row, col, &column.name)?;
+                match &column.header_format {
+                    Some(header_format) => {
+                        self.write_string_with_format(first_row, col, &column.name, header_format)?;
+                    }
+                    None => {
+                        self.write_string(first_row, col, &column.name)?;
+                    }
+                }
             }
 
             // Write the total row strings or formulas.

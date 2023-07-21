@@ -1427,6 +1427,7 @@ pub struct TableColumn {
     pub(crate) total_label: String,
     pub(crate) formula: Option<Formula>,
     pub(crate) format: Option<Format>,
+    pub(crate) header_format: Option<Format>,
 }
 
 impl TableColumn {
@@ -1439,6 +1440,7 @@ impl TableColumn {
             total_label: String::new(),
             formula: None,
             format: None,
+            header_format: None,
         }
     }
 
@@ -1733,6 +1735,12 @@ impl TableColumn {
     /// TODO
     pub fn set_format(mut self, format: &Format) -> TableColumn {
         self.format = Some(format.clone());
+        self
+    }
+
+    /// TODO
+    pub fn set_header_format(mut self, format: &Format) -> TableColumn {
+        self.header_format = Some(format.clone());
         self
     }
 
