@@ -4840,9 +4840,13 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
+        let default_headers =
+            self.default_table_headers(first_row, first_col, last_col, table.show_header_row);
+
         let mut table = table.clone();
         table.cell_range = CellRange::new(first_row, first_col, last_row, last_col);
-        table.initialize_columns()?;
+        table.initialize_columns(&default_headers)?;
+
         let first_data_row = table.first_data_row();
         let last_data_row = table.last_data_row();
 
@@ -9274,6 +9278,35 @@ impl Worksheet {
         cache.is_numeric = is_numeric;
         cache.data = data;
         cache
+    }
+
+    // todo
+    pub(crate) fn default_table_headers(
+        &self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_col: ColNum,
+        show_header_row: bool,
+    ) -> Vec<String> {
+        let mut headers = vec![];
+
+        for col_num in first_col..=last_col {
+            headers.push(format!("Column{}", col_num - first_col + 1));
+        }
+
+        if !show_header_row {
+            return headers;
+        }
+
+        if let Some(columns) = self.data_table.get(&first_row) {
+            for col_num in first_col..=last_col {
+                if let Some(CellType::String { string, .. }) = columns.get(&col_num) {
+                    headers[(col_num - first_col) as usize] = string.to_string();
+                }
+            }
+        }
+
+        headers
     }
 
     // -----------------------------------------------------------------------

@@ -1152,16 +1152,20 @@ impl Table {
     }
 
     // Truncate or extend (with defaults) the table columns.
-    pub(crate) fn initialize_columns(&mut self) -> Result<(), XlsxError> {
+    pub(crate) fn initialize_columns(
+        &mut self,
+        default_headers: &[String],
+    ) -> Result<(), XlsxError> {
         let mut seen_column_names = HashSet::new();
         let num_columns = self.cell_range.last_col - self.cell_range.first_col + 1;
 
         self.columns
             .resize_with(num_columns as usize, TableColumn::default);
 
+        // Set the column header names,
         for (index, column) in self.columns.iter_mut().enumerate() {
             if column.name.is_empty() {
-                column.name = format!("Column{}", index + 1);
+                column.name = default_headers[index].clone();
             }
 
             if seen_column_names.contains(&column.name.to_lowercase()) {
@@ -2217,7 +2221,7 @@ mod tests {
 
     use crate::table::Table;
     use crate::test_functions::xml_to_vec;
-    use crate::{TableColumn, TableFunction, XlsxError};
+    use crate::{TableColumn, TableFunction, Worksheet, XlsxError};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -2244,6 +2248,12 @@ mod tests {
     fn test_column_validation() {
         // Test the table column validation and checks.
         let mut table = Table::new();
+        let default_headers = vec![
+            String::from("Column1"),
+            String::from("Column2"),
+            String::from("Column3"),
+            String::from("Column4"),
+        ];
 
         table.cell_range.first_row = 0;
         table.cell_range.first_col = 0;
@@ -2259,7 +2269,7 @@ mod tests {
         ];
 
         table.set_columns(&columns);
-        let result = table.initialize_columns();
+        let result = table.initialize_columns(&default_headers);
 
         assert!(matches!(result, Err(XlsxError::TableError(_))));
 
@@ -2271,7 +2281,7 @@ mod tests {
         ];
 
         table.set_columns(&columns);
-        let result = table.initialize_columns();
+        let result = table.initialize_columns(&default_headers);
 
         assert!(matches!(result, Err(XlsxError::TableError(_))));
     }
@@ -2279,6 +2289,12 @@ mod tests {
     #[test]
     fn test_assemble1() {
         let mut table = Table::new();
+        let default_headers = vec![
+            String::from("Column1"),
+            String::from("Column2"),
+            String::from("Column3"),
+            String::from("Column4"),
+        ];
 
         table.cell_range.first_row = 2;
         table.cell_range.first_col = 2;
@@ -2286,7 +2302,7 @@ mod tests {
         table.cell_range.last_col = 5;
         table.index = 1;
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2314,6 +2330,7 @@ mod tests {
     #[test]
     fn test_assemble2() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 3;
         table.cell_range.first_col = 3;
@@ -2321,9 +2338,16 @@ mod tests {
         table.cell_range.last_col = 8;
         table.index = 2;
 
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
         table.set_style(crate::TableStyle::Light17);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2353,6 +2377,7 @@ mod tests {
     #[test]
     fn test_assemble3() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 4;
         table.cell_range.first_col = 2;
@@ -2360,12 +2385,19 @@ mod tests {
         table.cell_range.last_col = 3;
         table.index = 1;
 
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
         table.set_first_column(true);
         table.set_last_column(true);
         table.set_banded_rows(false);
         table.set_banded_columns(true);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2391,6 +2423,7 @@ mod tests {
     #[test]
     fn test_assemble4() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 2;
         table.cell_range.first_col = 2;
@@ -2398,9 +2431,16 @@ mod tests {
         table.cell_range.last_col = 5;
         table.index = 1;
 
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
         table.set_autofilter(false);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2427,6 +2467,7 @@ mod tests {
     #[test]
     fn test_assemble5() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 3;
         table.cell_range.first_col = 2;
@@ -2434,9 +2475,16 @@ mod tests {
         table.cell_range.last_col = 5;
         table.index = 1;
 
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
         table.set_header_row(false);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2463,12 +2511,20 @@ mod tests {
     #[test]
     fn test_assemble6() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 2;
         table.cell_range.first_col = 2;
         table.cell_range.last_row = 12;
         table.cell_range.last_col = 5;
         table.index = 1;
+
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
 
         let columns = vec![
             TableColumn::new().set_header("Foo"),
@@ -2479,7 +2535,7 @@ mod tests {
 
         table.set_columns(&columns);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2513,6 +2569,13 @@ mod tests {
         table.cell_range.last_col = 5;
         table.index = 1;
 
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
         let columns = vec![
             TableColumn::new().set_header("Foo"),
             TableColumn::default(),
@@ -2523,7 +2586,7 @@ mod tests {
 
         table.set_columns(&columns);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2535,6 +2598,7 @@ mod tests {
     #[test]
     fn test_assemble7() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 2;
         table.cell_range.first_col = 2;
@@ -2542,9 +2606,16 @@ mod tests {
         table.cell_range.last_col = 5;
         table.index = 1;
 
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
         table.set_total_row(true);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2572,6 +2643,7 @@ mod tests {
     #[test]
     fn test_assemble8() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 2;
         table.cell_range.first_col = 2;
@@ -2586,10 +2658,17 @@ mod tests {
             TableColumn::new().set_total_function(TableFunction::Count),
         ];
 
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
         table.set_columns(&columns);
         table.set_total_row(true);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2617,12 +2696,20 @@ mod tests {
     #[test]
     fn test_assemble9() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 1;
         table.cell_range.first_col = 1;
         table.cell_range.last_row = 7;
         table.cell_range.last_col = 10;
         table.index = 1;
+
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
 
         let columns = vec![
             TableColumn::new()
@@ -2642,7 +2729,7 @@ mod tests {
         table.set_columns(&columns);
         table.set_total_row(true);
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
@@ -2676,6 +2763,7 @@ mod tests {
     #[test]
     fn test_assemble10() {
         let mut table = Table::new();
+        let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 1;
         table.cell_range.first_col = 2;
@@ -2683,9 +2771,16 @@ mod tests {
         table.cell_range.last_col = 5;
         table.index = 1;
 
+        let default_headers = worksheet.default_table_headers(
+            table.cell_range.first_row,
+            table.cell_range.first_col,
+            table.cell_range.last_col,
+            table.show_header_row,
+        );
+
         table.set_name("MyTable");
 
-        table.initialize_columns().unwrap();
+        table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
         let got = table.writer.read_to_str();
