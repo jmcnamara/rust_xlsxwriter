@@ -12,8 +12,8 @@ extern crate lazy_static;
 
 mod common;
 
-// Create rust_xlsxwriter file to compare against Excel file.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+// Write a table with a user specified header. This also tests whitespace in headers.
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -39,11 +39,46 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Write a table that takes the header name from the worksheet cell data.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    for col_num in 2..=5u16 {
+        worksheet.set_column_width(col_num, 10.288)?;
+    }
+
+    // Write the header string, the table should read this and add it.
+    worksheet.write(2, 5, " Column4 ")?;
+
+    let table = Table::new();
+
+    worksheet.add_table(2, 2, 12, 5, &table)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_table19() {
+fn test_table19_1() {
     let test_runner = common::TestRunner::new()
         .set_name("table19")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_table19_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("table19")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

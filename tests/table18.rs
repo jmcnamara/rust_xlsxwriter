@@ -12,7 +12,7 @@ extern crate lazy_static;
 
 mod common;
 
-// Create rust_xlsxwriter file to compare against Excel file.
+// Set column header text but override with cell string and format.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -45,7 +45,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Create rust_xlsxwriter file to compare against Excel file.
+// Write header text and format.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -77,7 +77,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Create rust_xlsxwriter file to compare against Excel file.
+// Write header format but take text from cell.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
