@@ -1715,7 +1715,7 @@ impl TableColumn {
     ///     table.set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 6, 6, &table)?;
+    ///     worksheet.add_table(2, 1, 6, 6, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -1736,13 +1736,174 @@ impl TableColumn {
         self
     }
 
-    /// TODO
+    /// Set the format for a table column.
+    ///
+    /// It is sometimes required to format the data in the columns of a table.
+    /// This can be done using the standard
+    /// [`worksheet.write_with_format()`](Worksheet.write_with_format)) method
+    /// but format can also be applied separately using
+    /// `TableColumn.set_format()`.
+    ///
+    /// The most common format property to set for a table column is the [number
+    /// format](Format::set_num_format), see the example below.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the data cells in the column.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a format to a column in a worksheet table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_tablecolumn_set_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the columns.
+    ///     let mut table = Table::new();
+    ///
+    ///     // Create a number format for number columns in the table.
+    ///     let format = Format::new().set_num_format("$#,##0.00");
+    ///
+    ///     // Add a format to the number/currency columns.
+    ///     let columns = vec![
+    ///         TableColumn::new().set_header("Product"),
+    ///         TableColumn::new().set_header("Q1").set_format(&format),
+    ///         TableColumn::new().set_header("Q2").set_format(&format),
+    ///         TableColumn::new().set_header("Q3").set_format(&format),
+    ///         TableColumn::new().set_header("Q4").set_format(&format),
+    ///     ];
+    ///     table.set_columns(&columns);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/tablecolumn_set_format.png">
+    ///
     pub fn set_format(mut self, format: &Format) -> TableColumn {
         self.format = Some(format.clone());
         self
     }
 
-    /// TODO
+    /// Set the format for the header of the table column.
+    ///
+    /// The `set_header_format` method can be used to set the format for the
+    /// column header in a worksheet table.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the column header.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a header format to a column in a worksheet table.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_tablecolumn_set_header_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Some sample data for the table.
+    /// #     let items = ["Apples", "Pears", "Bananas", "Oranges"];
+    /// #     let data = [
+    /// #         [10000, 5000, 8000, 6000],
+    /// #         [2000, 3000, 4000, 5000],
+    /// #         [6000, 6000, 6500, 6000],
+    /// #         [500, 300, 200, 700],
+    /// #     ];
+    /// #
+    /// #     // Write the table data.
+    /// #     worksheet.write_column(3, 1, items)?;
+    /// #     worksheet.write_row_matrix(3, 2, data)?;
+    /// #
+    /// #     // Set the columns widths for clarity.
+    /// #     for col_num in 1..=6u16 {
+    /// #         worksheet.set_column_width(col_num, 12)?;
+    /// #     }
+    /// #
+    ///     // Create a new table and configure the columns.
+    ///     let mut table = Table::new();
+    ///
+    ///     // Create formats for the columns headers.
+    ///     let format1 = Format::new().set_font_color("#FF0000");
+    ///     let format2 = Format::new().set_font_color("#00FF00");
+    ///     let format3 = Format::new().set_font_color("#0000FF");
+    ///     let format4 = Format::new().set_font_color("#FFFF00");
+    ///
+    ///     // Add a format to the columns headers.
+    ///     let columns = vec![
+    ///         TableColumn::new().set_header("Product"),
+    ///         TableColumn::new()
+    ///             .set_header("Quarter 1")
+    ///             .set_header_format(&format1),
+    ///         TableColumn::new()
+    ///             .set_header("Quarter 2")
+    ///             .set_header_format(&format2),
+    ///         TableColumn::new()
+    ///             .set_header("Quarter 3")
+    ///             .set_header_format(&format3),
+    ///         TableColumn::new()
+    ///             .set_header("Quarter 4")
+    ///             .set_header_format(&format4),
+    ///     ];
+    ///     table.set_columns(&columns);
+    ///
+    ///     // Add the table to the worksheet.
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("tables.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/tablecolumn_set_header_format.png">
+    ///
     pub fn set_header_format(mut self, format: &Format) -> TableColumn {
         self.header_format = Some(format.clone());
         self
@@ -1758,11 +1919,11 @@ impl TableColumn {
             .replace('[', "'[");
 
         match self.total_function {
+            TableFunction::None => Formula::new(""),
             TableFunction::Max => Formula::new(format!("SUBTOTAL(104,[{column_name}])")),
             TableFunction::Min => Formula::new(format!("SUBTOTAL(105,[{column_name}])")),
             TableFunction::Sum => Formula::new(format!("SUBTOTAL(109,[{column_name}])")),
             TableFunction::Var => Formula::new(format!("SUBTOTAL(110,[{column_name}])")),
-            TableFunction::None => Formula::new(""),
             TableFunction::Count => Formula::new(format!("SUBTOTAL(103,[{column_name}])")),
             TableFunction::StdDev => Formula::new(format!("SUBTOTAL(107,[{column_name}])")),
             TableFunction::Average => Formula::new(format!("SUBTOTAL(101,[{column_name}])")),

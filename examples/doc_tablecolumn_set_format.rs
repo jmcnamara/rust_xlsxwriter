@@ -2,9 +2,9 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! Example of adding a formula to a column in a worksheet table.
+//! Example of adding a format to a column in a worksheet table.
 
-use rust_xlsxwriter::{Table, TableColumn, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -34,22 +34,21 @@ fn main() -> Result<(), XlsxError> {
     // Create a new table and configure the columns.
     let mut table = Table::new();
 
-    // Add a structured reference formula to the last column and set the header
-    // caption.
+    // Create a number format for number columns in the table.
+    let format = Format::new().set_num_format("$#,##0.00");
+
+    // Add a format to the number/currency columns.
     let columns = vec![
         TableColumn::new().set_header("Product"),
-        TableColumn::new().set_header("Quarter 1"),
-        TableColumn::new().set_header("Quarter 2"),
-        TableColumn::new().set_header("Quarter 3"),
-        TableColumn::new().set_header("Quarter 4"),
-        TableColumn::new()
-            .set_header("Totals")
-            .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
+        TableColumn::new().set_header("Q1").set_format(&format),
+        TableColumn::new().set_header("Q2").set_format(&format),
+        TableColumn::new().set_header("Q3").set_format(&format),
+        TableColumn::new().set_header("Q4").set_format(&format),
     ];
     table.set_columns(&columns);
 
     // Add the table to the worksheet.
-    worksheet.add_table(2, 1, 6, 6, &table)?;
+    worksheet.add_table(2, 1, 6, 5, &table)?;
 
     // Save the file to disk.
     workbook.save("tables.xlsx")?;

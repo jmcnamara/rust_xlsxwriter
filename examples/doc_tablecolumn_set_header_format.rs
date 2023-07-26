@@ -2,9 +2,9 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! Example of adding a formula to a column in a worksheet table.
+//! Example of adding a header format to a column in a worksheet table.
 
-use rust_xlsxwriter::{Table, TableColumn, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -34,22 +34,32 @@ fn main() -> Result<(), XlsxError> {
     // Create a new table and configure the columns.
     let mut table = Table::new();
 
-    // Add a structured reference formula to the last column and set the header
-    // caption.
+    // Create formats for the columns headers.
+    let format1 = Format::new().set_font_color("#FF0000");
+    let format2 = Format::new().set_font_color("#00FF00");
+    let format3 = Format::new().set_font_color("#0000FF");
+    let format4 = Format::new().set_font_color("#FFFF00");
+
+    // Add a format to the columns headers.
     let columns = vec![
         TableColumn::new().set_header("Product"),
-        TableColumn::new().set_header("Quarter 1"),
-        TableColumn::new().set_header("Quarter 2"),
-        TableColumn::new().set_header("Quarter 3"),
-        TableColumn::new().set_header("Quarter 4"),
         TableColumn::new()
-            .set_header("Totals")
-            .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
+            .set_header("Quarter 1")
+            .set_header_format(&format1),
+        TableColumn::new()
+            .set_header("Quarter 2")
+            .set_header_format(&format2),
+        TableColumn::new()
+            .set_header("Quarter 3")
+            .set_header_format(&format3),
+        TableColumn::new()
+            .set_header("Quarter 4")
+            .set_header_format(&format4),
     ];
     table.set_columns(&columns);
 
     // Add the table to the worksheet.
-    worksheet.add_table(2, 1, 6, 6, &table)?;
+    worksheet.add_table(2, 1, 6, 5, &table)?;
 
     // Save the file to disk.
     workbook.save("tables.xlsx")?;

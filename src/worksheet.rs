@@ -9150,7 +9150,6 @@ impl Worksheet {
         self.drawing.writer.reset();
 
         for chart in self.charts.values_mut() {
-            // todo
             chart.writer.reset();
         }
 
@@ -9265,7 +9264,10 @@ impl Worksheet {
         cache
     }
 
-    // todo
+    // Get the default header names for a worksheet table. These are generally
+    // "Column1", "Column2", etc., unless the user has already specified a
+    // string in the cell that will contain the header using
+    // `worksheet.write()`.
     pub(crate) fn default_table_headers(
         &self,
         first_row: RowNum,
@@ -9294,7 +9296,7 @@ impl Worksheet {
         headers
     }
 
-    // todo
+    // Update a format index in an existing cell. Ignores non-existing cells.
     fn update_cell_format(&mut self, row: RowNum, col: ColNum, format_id: u32) -> &mut Worksheet {
         if let Some(columns) = self.data_table.get_mut(&row) {
             if let Some(cell) = columns.get_mut(&col) {
