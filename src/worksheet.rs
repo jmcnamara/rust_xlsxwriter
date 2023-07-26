@@ -4886,6 +4886,10 @@ impl Worksheet {
             // Set the column format local index if required.
             if let Some(format) = column.format.as_mut() {
                 format.dxf_index = self.format_dxf_index(format);
+                let format_index = self.format_xf_index(format);
+                for row in first_data_row..=last_data_row {
+                    self.update_cell_format(row, col, format_index);
+                }
             }
         }
 
@@ -5523,16 +5527,12 @@ impl Worksheet {
             if let Some(cell) = columns.get_mut(&col) {
                 match cell {
                     CellType::Formula {
-                        formula: _,
-                        xf_index: _,
                         result: cell_result,
+                        ..
                     }
                     | CellType::ArrayFormula {
-                        formula: _,
-                        xf_index: _,
                         result: cell_result,
-                        is_dynamic: _,
-                        range: _,
+                        ..
                     } => {
                         *cell_result = Box::from(result.into());
                     }
@@ -7772,9 +7772,7 @@ impl Worksheet {
                             // separately.
                             CellType::String { string, .. }
                             | CellType::RichString {
-                                string: _,
-                                xf_index: _,
-                                raw_string: string,
+                                raw_string: string, ..
                             } => {
                                 if string.contains('\n') {
                                     let mut max = 0;
@@ -7807,17 +7805,8 @@ impl Worksheet {
 
                             // For formulas we autofit the result of the formula
                             // if it has a non-zero/default value.
-                            CellType::Formula {
-                                formula: _,
-                                xf_index: _,
-                                result,
-                            }
-                            | CellType::ArrayFormula {
-                                formula: _,
-                                xf_index: _,
-                                result,
-                                ..
-                            } => {
+                            CellType::Formula { result, .. }
+                            | CellType::ArrayFormula { result, .. } => {
                                 if result.as_ref() == "0" || result.is_empty() {
                                     0
                                 } else {
@@ -7949,9 +7938,7 @@ impl Worksheet {
                 match cell {
                     CellType::String { string, .. }
                     | CellType::RichString {
-                        string: _,
-                        xf_index: _,
-                        raw_string: string,
+                        raw_string: string, ..
                     } => {
                         let cell_string = string.clone().to_lowercase().trim().to_string();
 
@@ -8043,9 +8030,7 @@ impl Worksheet {
                 match cell {
                     CellType::String { string, .. }
                     | CellType::RichString {
-                        string: _,
-                        xf_index: _,
-                        raw_string: string,
+                        raw_string: string, ..
                     } => {
                         let cell_string = string.clone().to_lowercase().trim().to_string();
                         let filter_string = filter.string.to_lowercase().trim().to_string();
@@ -9307,6 +9292,30 @@ impl Worksheet {
         }
 
         headers
+    }
+
+    // todo
+    fn update_cell_format(&mut self, row: RowNum, col: ColNum, format_id: u32) -> &mut Worksheet {
+        if let Some(columns) = self.data_table.get_mut(&row) {
+            if let Some(cell) = columns.get_mut(&col) {
+                match cell {
+                    CellType::Blank { xf_index, .. }
+                    | CellType::String { xf_index, .. }
+                    | CellType::Number { xf_index, .. }
+                    | CellType::Boolean { xf_index, .. }
+                    | CellType::Formula { xf_index, .. }
+                    | CellType::DateTime { xf_index, .. }
+                    | CellType::RichString { xf_index, .. }
+                    | CellType::ArrayFormula { xf_index, .. } => {
+                        if *xf_index == 0 {
+                            *xf_index = format_id;
+                        }
+                    }
+                }
+            }
+        }
+
+        self
     }
 
     // -----------------------------------------------------------------------
