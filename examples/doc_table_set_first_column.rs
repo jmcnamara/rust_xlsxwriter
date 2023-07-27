@@ -37,7 +37,7 @@ fn main() -> Result<(), XlsxError> {
     table.set_first_column(true);
 
     // Add the table to the worksheet.
-    worksheet.add_table(3, 1, 6, 5, &table)?;
+    worksheet.add_table(2, 1, 6, 5, &table)?;
 
     // Save the file to disk.
     workbook.save("tables.xlsx")?;

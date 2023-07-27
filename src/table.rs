@@ -460,7 +460,7 @@ impl Table {
     ///     table.set_total_row(true);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 7, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 7, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -522,7 +522,7 @@ impl Table {
     ///     table.set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 7, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 7, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -597,7 +597,7 @@ impl Table {
     ///     table.set_banded_rows(false);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -669,7 +669,7 @@ impl Table {
     ///     table.set_banded_rows(false);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -737,7 +737,7 @@ impl Table {
     ///     table.set_first_column(true);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -821,7 +821,7 @@ impl Table {
     ///     table.set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 6, 6, &table)?;
+    ///     worksheet.add_table(2, 1, 6, 6, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -888,7 +888,7 @@ impl Table {
     ///     table.set_autofilter(false);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -1061,7 +1061,7 @@ impl Table {
     ///     table.set_name("ProduceSales");
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -1133,7 +1133,7 @@ impl Table {
     ///     table.set_style(TableStyle::Medium10);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 6, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 6, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -1337,8 +1337,8 @@ impl Table {
 /// The `TableColumn` struct represents a table column.
 ///
 /// The `TableColumn` struct is used to set the properties for columns in a
-/// worksheet table. This can be used to set the following properties of a table
-/// column:
+/// worksheet [`Table`]. This can be used to set the following properties of a
+/// table column:
 ///
 /// - The header caption.
 /// - The total row caption.
@@ -1608,7 +1608,7 @@ impl TableColumn {
     ///     table.set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
-    ///     worksheet.add_table(3, 1, 7, 5, &table)?;
+    ///     worksheet.add_table(2, 1, 7, 5, &table)?;
     ///
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
@@ -1997,8 +1997,8 @@ impl Default for TableColumn {
 ///     table.set_columns(&columns);
 ///
 ///     // Add the table to the worksheet.
-///     worksheet.add_table(3, 1, 7, 5, &table)?;
-///
+///     worksheet.add_table(2, 1, 7, 5, &table)?;
+/// #
 /// #     // Save the file to disk.
 /// #     workbook.save("tables.xlsx")?;
 /// #
@@ -2107,7 +2107,7 @@ impl fmt::Display for TableFunction {
 ///     table.set_style(TableStyle::Medium10);
 ///
 ///     // Add the table to the worksheet.
-///     worksheet.add_table(3, 1, 6, 5, &table)?;
+///     worksheet.add_table(2, 1, 6, 5, &table)?;
 ///
 /// #     // Save the file to disk.
 /// #     workbook.save("tables.xlsx")?;
