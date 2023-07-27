@@ -566,7 +566,7 @@ See the documentation for [`Chart`](crate::Chart) for more information.
 
 ## Tutorial Part 5: Making the code more programmatic
 
-The previous example worked as expected but it contains some hard-coded cell
+The previous example worked as expected but it it contained some hard-coded cell
 ranges like `set_values("Sheet1!$B$2:$B$5")` and `Formula::new("=SUM(B2:B5)")`.
 If our example changed to have a different number of data items then we would
 have to manually change the code to adjust for the new ranges.
@@ -583,11 +583,11 @@ Let's start by looking at the chart ranges:
         .set_values("Sheet1!$B$2:$B$5");
 ```
 
-In general `rust_xlsxwriter` always numeric APIs for any ranges in Excel but
-sometimes also provides a **secondary** string based option. The previous
-example uses the secondary string based API for demonstration purposes but for
-real applications you would set the chart ranges we can using 5-tuple values
-like this:
+In general `rust_xlsxwriter` always provides numeric APIs for any ranges in
+Excel but when it makes ergonomic sense it also provides **secondary** string
+based APIs. The previous example uses one of these secondary string based APIs
+for demonstration purposes but for real applications you would set the chart
+ranges using 5-tuple values like this:
 
 ```text
     chart
@@ -596,7 +596,8 @@ like this:
         .set_values(("Sheet1", first_row, cost_col, last_row, cost_col));
 ```
 
-Where the range values are set or calculated in the code:
+Where the range values are set or calculated in the code with something like the
+following:
 
 ```text
     let first_row = 1;
@@ -606,9 +607,10 @@ Where the range values are set or calculated in the code:
 ```
 
 This allows the range to change dynamically if we add new elements to our `data`
-vector and also ensures that the worksheet name is quoted properly, if required.
+vector and also ensures that the worksheet name is quoted properly (when
+required).
 
-The other section of the code that has a hard-coded string is the formula
+The other section of the code that had a hard-coded string is the formula
 `"=SUM(B2:B5)"`. There isn't a single API change that can be applied to ranges
 in formulas but `rust_xlsxwriter` provides several utility functions that can
 convert numbers to string ranges. For example the
