@@ -627,22 +627,8 @@ numbers and converts them to a string range like `B2:B5`:
 
 > **Reading ahead**:
 >
-> The `cell_range()` function and other similar functions are detailed elsewhere
-> in the documentation:
->
-> - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
->   zero indexed column cell reference to a string like `"A"`.
-> - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
->   column string such as `"A"` to a zero indexed column reference.
-> - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
->   row and column cell numbers to a `A1` style string.
-> - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
->   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
->   range string.
-> - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
->   col cell numbers to a `A1:B1` style range string.
-> - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
->   indexed row and col cell numbers to an absolute `$A$1:$B$1`
+> The `cell_range()` function and other similar functions are detailed in the
+> [`utility`](crate::utility) documentation.
 
 Adding these improvements our application changes to the following:
 

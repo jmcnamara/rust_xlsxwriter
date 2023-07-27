@@ -151,7 +151,6 @@ mod styles;
 mod table;
 mod theme;
 mod url;
-mod utility;
 mod vml;
 mod workbook;
 mod worksheet;
@@ -159,6 +158,7 @@ mod xmlwriter;
 
 pub mod cookbook;
 pub mod tutorial;
+pub mod utility;
 
 #[cfg(test)]
 mod test_functions;

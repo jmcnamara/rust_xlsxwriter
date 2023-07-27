@@ -4,6 +4,28 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+//! Utility functions for `rust_xlsxwriter`.
+//!
+//! The `rust_xlsxwriter` library provides a number of utility functions for
+//! dealing with cell ranges. These can be used for creating formula strings.
+//!
+//! Note, in general you shouldn't use these functions to create input for APIs
+//! that accept string ranges since these is always a similar primary API that
+//! accepts numeric ranges.
+//!
+//! # Examples:
+//!
+//! ```
+//! use rust_xlsxwriter::{cell_range, column_number_to_name};
+//!
+//! assert_eq!(column_number_to_name(1), "B");
+//! assert_eq!(column_number_to_name(702), "AAA");
+//!
+//! assert_eq!(cell_range(0, 0, 9, 0), "A1:A10");
+//! assert_eq!(cell_range(1, 2, 8, 2), "C2:C9");
+//! assert_eq!(cell_range(0, 0, 3, 4), "A1:E4");
+//! ```
+
 #![warn(missing_docs)]
 use crate::worksheet::ColNum;
 use crate::worksheet::RowNum;
@@ -23,20 +45,6 @@ use crate::XlsxError;
 /// assert_eq!(column_number_to_name(1), "B");
 /// assert_eq!(column_number_to_name(702), "AAA");
 /// ```
-///
-/// # See also:
-///
-/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
-///   column string such as `"A"` to a zero indexed column reference.
-/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
-///   row and column cell numbers to a `A1` style string.
-/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
-///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
-///   range string.
-/// - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
-///   col cell numbers to a `A1:B1` style range string.
-/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
-///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn column_number_to_name(col_num: ColNum) -> String {
     let mut col_name = String::new();
@@ -79,20 +87,6 @@ pub fn column_number_to_name(col_num: ColNum) -> String {
 /// assert_eq!(column_name_to_number("AAA"), 702);
 /// ```
 ///
-/// # See also:
-///
-/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
-///   zero indexed column cell reference to a string like `"A"`.
-/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
-///   row and column cell numbers to a `A1` style string.
-/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
-///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
-///   range string.
-/// - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
-///   col cell numbers to a `A1:B1` style range string.
-/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
-///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
-///
 pub fn column_name_to_number(column: &str) -> ColNum {
     let mut col_num = 0;
 
@@ -119,20 +113,6 @@ pub fn column_name_to_number(column: &str) -> ColNum {
 /// assert_eq!(row_col_to_cell(1, 1), "B2");
 /// ```
 ///
-/// # See also:
-///
-/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
-///   zero indexed column cell reference to a string like `"A"`.
-/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
-///   column string such as `"A"` to a zero indexed column reference.
-/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
-///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
-///   range string.
-/// - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
-///   col cell numbers to a `A1:B1` style range string.
-/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
-///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
-///
 pub fn row_col_to_cell(row_num: RowNum, col_num: ColNum) -> String {
     format!("{}{}", column_number_to_name(col_num), row_num + 1)
 }
@@ -153,19 +133,6 @@ pub fn row_col_to_cell(row_num: RowNum, col_num: ColNum) -> String {
 /// assert_eq!(row_col_to_cell_absolute(0, 1), "$B$1");
 /// assert_eq!(row_col_to_cell_absolute(1, 1), "$B$2");
 /// ```
-///
-/// # See also:
-///
-/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
-///   zero indexed column cell reference to a string like `"A"`.
-/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
-///   column string such as `"A"` to a zero indexed column reference.
-/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
-///   row and column cell numbers to a `A1` style string.
-/// - [`cell_range()`](crate::utility::cell_range) - Convert zero indexed row and
-///   col cell numbers to a `A1:B1` style range string.
-/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
-///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn row_col_to_cell_absolute(row_num: RowNum, col_num: ColNum) -> String {
     format!("${}${}", column_number_to_name(col_num), row_num + 1)
@@ -197,20 +164,6 @@ pub fn row_col_to_cell_absolute(row_num: RowNum, col_num: ColNum) -> String {
 ///
 /// assert_eq!(cell_range(0, 0, 0, 0), "A1");
 /// ```
-///
-/// # See also:
-///
-/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
-///   zero indexed column cell reference to a string like `"A"`.
-/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
-///   column string such as `"A"` to a zero indexed column reference.
-/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
-///   row and column cell numbers to a `A1` style string.
-/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
-///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
-///   range string.
-/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
-///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn cell_range(
     first_row: RowNum,
@@ -254,20 +207,6 @@ pub fn cell_range(
 ///
 /// assert_eq!(cell_range_absolute(0, 0, 0, 0), "$A$1");
 /// ```
-///
-/// # See also:
-///
-/// - [`column_number_to_name()`](crate::utility::column_number_to_name) - Convert a
-///   zero indexed column cell reference to a string like `"A"`.
-/// - [`column_name_to_number()`](crate::utility::column_name_to_number) - Convert a
-///   column string such as `"A"` to a zero indexed column reference.
-/// - [`row_col_to_cell()`](crate::utility::row_col_to_cell) - Convert zero indexed
-///   row and column cell numbers to a `A1` style string.
-/// - [`row_col_to_cell_absolute()`](crate::utility::row_col_to_cell_absolute) -
-///   Convert zero indexed row and column cell numbers to an absolute `$A$1` style
-///   range string.
-/// - [`cell_range_absolute()`](crate::utility::cell_range_absolute) - Convert zero
-///   indexed row and col cell numbers to an absolute `$A$1:$B$1`
 ///
 pub fn cell_range_absolute(
     first_row: RowNum,
