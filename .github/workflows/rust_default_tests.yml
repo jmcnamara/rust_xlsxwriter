@@ -17,17 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Free some extra build space on test instance.
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf /usr/local/share/boost
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
-
     - name: Build
       run: cargo build --verbose
 
     - name: Run the tests for the default feature set
-      run: cargo test
+      run: cargo test --test '*'

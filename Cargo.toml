@@ -34,6 +34,12 @@ chrono = ["dep:chrono"]
 # `test-resave`: Developer only testing feature.
 test-resave = []
 
+# Turn off default testing of the docs beacuse it is slow. It can still be done
+# explicitly using the --doc flag and it is also tested in the CI.
+[lib]
+doctest = false
+
+# Examples to run only when `chrono` is enabled.
 [[example]]
 name = "doc_worksheet_write_datetime_chrono"
 path = "examples/doc_worksheet_write_datetime_chrono.rs"
