@@ -616,8 +616,14 @@ documentation and generally show how an individual function works.
 * doc_table_set_total_row2.rs - Example of turning on the "totals" row at
   the bottom of a worksheet table with captions and subtotal functions.
 
+* doc_tablecolumn_set_format.rs - Example of adding a format to a column in
+  a worksheet table.
+
 * doc_tablecolumn_set_formula.rs - Example of adding a formula to a column
   in a worksheet table.
+
+* doc_tablecolumn_set_header_format.rs - Example of adding a header format
+  to a column in a worksheet table.
 
 * doc_url_intro1.rs - Demonstrates writing a url to a worksheet.
 
