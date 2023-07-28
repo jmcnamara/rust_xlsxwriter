@@ -1018,9 +1018,9 @@ impl Worksheet {
     /// the equivalent of rust's [`f64`] type. This method will accept any rust
     /// type that will convert [`Into`] a f64. These include i8, u8, i16, u16,
     /// i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
-    /// around 15 digits of precision. Anything beyond that cannot be stored by
-    /// Excel as a number without loss of precision and may need to be stored as
-    /// a string instead.
+    /// around 15 digits of precision. Anything beyond that cannot be stored as
+    /// a number by Excel without a loss of precision and may need to be stored
+    /// as a string instead.
     ///
     /// [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_754
     ///
@@ -1099,12 +1099,12 @@ impl Worksheet {
     /// visual format, such as bold and italic text.
     ///
     /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
-    /// the equivalent of rust's [`f64`] type. This method will accept any
-    /// rust type that will convert [`Into`] a f64. These include i8, u8, i16,
-    /// u16, i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
-    /// around 15 digits of precision. Anything beyond that cannot be stored by
-    /// Excel as a number without loss of precision and may need to be stored as
-    /// a string instead.
+    /// the equivalent of rust's [`f64`] type. This method will accept any rust
+    /// type that will convert [`Into`] a f64. These include i8, u8, i16, u16,
+    /// i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
+    /// around 15 digits of precision. Anything beyond that cannot be stored as
+    /// a number by Excel without a loss of precision and may need to be stored
+    /// as a string instead.
     ///
     /// [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_754
     ///
