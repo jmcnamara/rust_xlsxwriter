@@ -46,6 +46,9 @@ use std::io::{Seek, Write};
 use zip::write::FileOptions;
 use zip::{DateTime, ZipWriter};
 
+use std::sync::{Arc, Mutex};
+use std::thread;
+
 use crate::app::App;
 use crate::content_types::ContentTypes;
 use crate::core::Core;
@@ -68,7 +71,7 @@ pub struct Packager<W: Write + Seek> {
     zip_options: FileOptions,
 }
 
-impl<W: Write + Seek> Packager<W> {
+impl<W: Write + Seek + std::marker::Send> Packager<W> {
     // -----------------------------------------------------------------------
     // Crate public methods.
     // -----------------------------------------------------------------------
@@ -100,14 +103,17 @@ impl<W: Write + Seek> Packager<W> {
         self.write_styles_file(workbook)?;
         self.write_workbook_file(workbook)?;
 
+        let string_table = Self::assemble_worksheets(workbook);
+
         // Write the worksheets and update the shared string table at the same time.
-        let mut string_table = SharedStringsTable::new();
         for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
-            self.write_worksheet_file(worksheet, index + 1, &mut string_table)?;
+            self.write_worksheet_file(worksheet, index + 1)?;
             if worksheet.has_relationships() {
                 self.write_worksheet_rels_file(worksheet, index + 1)?;
             }
         }
+
+        let string_table = string_table.lock().unwrap();
 
         if options.has_sst_table {
             self.write_shared_strings_file(&string_table)?;
@@ -145,6 +151,23 @@ impl<W: Write + Seek> Packager<W> {
         self.zip.finish()?;
 
         Ok(())
+    }
+
+    // TODO
+    pub(crate) fn assemble_worksheets(workbook: &mut Workbook) -> Arc<Mutex<SharedStringsTable>> {
+        let string_table = Arc::new(Mutex::new(SharedStringsTable::new()));
+
+        thread::scope(|s| {
+            for worksheet in &mut workbook.worksheets {
+                let string_table = Arc::clone(&string_table);
+
+                s.spawn(|| {
+                    worksheet.assemble_xml_file(string_table);
+                });
+            }
+        });
+
+        string_table
     }
 
     // -----------------------------------------------------------------------
@@ -270,13 +293,9 @@ impl<W: Write + Seek> Packager<W> {
         &mut self,
         worksheet: &mut Worksheet,
         index: usize,
-        string_table: &mut SharedStringsTable,
     ) -> Result<(), XlsxError> {
         let filename = format!("xl/worksheets/sheet{index}.xml");
-
         self.zip.start_file(filename, self.zip_options)?;
-
-        worksheet.assemble_xml_file(string_table);
         self.zip.write_all(worksheet.writer.xmlfile.get_ref())?;
 
         Ok(())

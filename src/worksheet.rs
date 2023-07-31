@@ -11,7 +11,7 @@ use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Write;
 use std::mem;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
@@ -9325,7 +9325,7 @@ impl Worksheet {
     // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
-    pub(crate) fn assemble_xml_file(&mut self, string_table: &mut SharedStringsTable) {
+    pub(crate) fn assemble_xml_file(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
         self.writer.xml_declaration();
 
         // Write the worksheet element.
@@ -9663,7 +9663,7 @@ impl Worksheet {
     }
 
     // Write the <sheetData> element.
-    fn write_sheet_data(&mut self, string_table: &mut SharedStringsTable) {
+    fn write_sheet_data(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
         if self.data_table.is_empty() && self.changed_rows.is_empty() {
             self.writer.xml_empty_tag_only("sheetData");
         } else {
@@ -9933,7 +9933,7 @@ impl Worksheet {
     }
 
     // Write out all the row and cell data in the worksheet data table.
-    fn write_data_table(&mut self, string_table: &mut SharedStringsTable) {
+    fn write_data_table(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
         let spans = self.calculate_spans();
 
         // Swap out the worksheet data structures so we can iterate over it and
@@ -9969,7 +9969,8 @@ impl Worksheet {
                         string, xf_index, ..
                     } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        let string_index = string_table.shared_string_index(Arc::clone(string));
+                        let mut sst = string_table.lock().unwrap();
+                        let string_index = sst.shared_string_index(Arc::clone(string));
                         self.write_string_cell(row_num, col_num, string_index, xf_index);
                     }
                     CellType::Formula {
