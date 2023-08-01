@@ -42,6 +42,7 @@
 
 use std::collections::HashSet;
 use std::io::{Seek, Write};
+use std::thread;
 
 use zip::write::FileOptions;
 use zip::{DateTime, ZipWriter};
@@ -68,7 +69,7 @@ pub struct Packager<W: Write + Seek> {
     zip_options: FileOptions,
 }
 
-impl<W: Write + Seek> Packager<W> {
+impl<W: Write + Seek + Send> Packager<W> {
     // -----------------------------------------------------------------------
     // Crate public methods.
     // -----------------------------------------------------------------------
@@ -106,7 +107,18 @@ impl<W: Write + Seek> Packager<W> {
             worksheet.update_string_table_ids(&mut string_table);
         }
 
-        // Write the worksheets.
+        // Assemble, but don't write, the worksheet files in parallel. These are
+        // generally the largest files and the threading can help performance if
+        // there are multiple large worksheets.
+        thread::scope(|scope| {
+            for worksheet in &mut workbook.worksheets {
+                scope.spawn(|| {
+                    worksheet.assemble_xml_file();
+                });
+            }
+        });
+
+        // Write the worksheet file and and associated rel files.
         for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
             self.write_worksheet_file(worksheet, index + 1)?;
             if worksheet.has_relationships() {
@@ -277,10 +289,7 @@ impl<W: Write + Seek> Packager<W> {
         index: usize,
     ) -> Result<(), XlsxError> {
         let filename = format!("xl/worksheets/sheet{index}.xml");
-
         self.zip.start_file(filename, self.zip_options)?;
-
-        worksheet.assemble_xml_file();
         self.zip.write_all(worksheet.writer.xmlfile.get_ref())?;
 
         Ok(())

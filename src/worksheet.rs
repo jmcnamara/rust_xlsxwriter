@@ -9934,8 +9934,13 @@ impl Worksheet {
         self.writer.xml_empty_tag("customFilter", &attributes);
     }
 
-    // TODO
+    // Store unique strings in the SST table and convert them to a string id
+    // which is used when writing out the string cells.
     pub(crate) fn update_string_table_ids(&mut self, string_table: &mut SharedStringsTable) {
+        if !self.uses_string_table {
+            return;
+        }
+
         for columns in self.data_table.values_mut() {
             for cell in columns.values_mut() {
                 match cell {
@@ -9998,7 +10003,6 @@ impl Worksheet {
                     } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                         self.write_string_cell(row_num, col_num, *string_id, xf_index);
-                        // todo
                     }
                     CellType::Formula {
                         formula,

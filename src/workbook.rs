@@ -1039,7 +1039,7 @@ impl Workbook {
     // Internal function to prepare the workbook and other component files for
     // writing to the xlsx file.
     #[allow(clippy::similar_names)]
-    fn save_internal<W: Write + Seek>(&mut self, writer: W) -> Result<(), XlsxError> {
+    fn save_internal<W: Write + Seek + Send>(&mut self, writer: W) -> Result<(), XlsxError> {
         // Reset workbook and worksheet state data between saves.
         self.reset();
 
