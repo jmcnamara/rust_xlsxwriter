@@ -8,7 +8,6 @@
 mod worksheet_tests {
 
     use crate::test_functions::xml_to_vec;
-    use crate::worksheet::SharedStringsTable;
     use crate::worksheet::*;
     use crate::XlsxError;
     use pretty_assertions::assert_eq;
@@ -17,11 +16,8 @@ mod worksheet_tests {
     #[test]
     fn test_assemble() {
         let mut worksheet = Worksheet::default();
-        let mut string_table = SharedStringsTable::new();
-
         worksheet.selected = true;
-
-        worksheet.assemble_xml_file(&mut string_table);
+        worksheet.assemble_xml_file();
 
         let got = worksheet.writer.read_to_str();
         let got = xml_to_vec(got);

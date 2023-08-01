@@ -8229,6 +8229,7 @@ impl Worksheet {
         let cell = CellType::String {
             string: Arc::from(string),
             xf_index,
+            string_id: 0,
         };
 
         self.insert_cell(row, col, cell);
@@ -8276,6 +8277,7 @@ impl Worksheet {
             string: Arc::from(string),
             xf_index,
             raw_string: Arc::from(raw_string),
+            string_id: 0,
         };
 
         self.insert_cell(row, col, cell);
@@ -9325,7 +9327,7 @@ impl Worksheet {
     // -----------------------------------------------------------------------
 
     //  Assemble and write the XML file.
-    pub(crate) fn assemble_xml_file(&mut self, string_table: &mut SharedStringsTable) {
+    pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
         // Write the worksheet element.
@@ -9347,7 +9349,7 @@ impl Worksheet {
         self.write_cols();
 
         // Write the sheetData element.
-        self.write_sheet_data(string_table);
+        self.write_sheet_data();
 
         // Write the sheetProtection element.
         if self.protection_on {
@@ -9663,12 +9665,12 @@ impl Worksheet {
     }
 
     // Write the <sheetData> element.
-    fn write_sheet_data(&mut self, string_table: &mut SharedStringsTable) {
+    fn write_sheet_data(&mut self) {
         if self.data_table.is_empty() && self.changed_rows.is_empty() {
             self.writer.xml_empty_tag_only("sheetData");
         } else {
             self.writer.xml_start_tag_only("sheetData");
-            self.write_data_table(string_table);
+            self.write_data_table();
             self.writer.xml_end_tag("sheetData");
         }
     }
@@ -9932,8 +9934,28 @@ impl Worksheet {
         self.writer.xml_empty_tag("customFilter", &attributes);
     }
 
+    // TODO
+    pub(crate) fn update_string_table_ids(&mut self, string_table: &mut SharedStringsTable) {
+        for columns in self.data_table.values_mut() {
+            for cell in columns.values_mut() {
+                match cell {
+                    CellType::String {
+                        string, string_id, ..
+                    }
+                    | CellType::RichString {
+                        string, string_id, ..
+                    } => {
+                        let string_index = string_table.shared_string_index(Arc::clone(string));
+                        *string_id = string_index;
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+
     // Write out all the row and cell data in the worksheet data table.
-    fn write_data_table(&mut self, string_table: &mut SharedStringsTable) {
+    fn write_data_table(&mut self) {
         let spans = self.calculate_spans();
 
         // Swap out the worksheet data structures so we can iterate over it and
@@ -9964,13 +9986,19 @@ impl Worksheet {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                         self.write_number_cell(row_num, col_num, *number, xf_index);
                     }
-                    CellType::String { string, xf_index }
+                    CellType::String {
+                        string_id,
+                        xf_index,
+                        ..
+                    }
                     | CellType::RichString {
-                        string, xf_index, ..
+                        string_id,
+                        xf_index,
+                        ..
                     } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        let string_index = string_table.shared_string_index(Arc::clone(string));
-                        self.write_string_cell(row_num, col_num, string_index, xf_index);
+                        self.write_string_cell(row_num, col_num, *string_id, xf_index);
+                        // todo
                     }
                     CellType::Formula {
                         formula,
@@ -11114,11 +11142,13 @@ enum CellType {
     String {
         string: Arc<str>,
         xf_index: u32,
+        string_id: u32,
     },
     RichString {
         string: Arc<str>,
         xf_index: u32,
         raw_string: Arc<str>,
+        string_id: u32,
     },
 }
 

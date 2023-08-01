@@ -100,10 +100,15 @@ impl<W: Write + Seek> Packager<W> {
         self.write_styles_file(workbook)?;
         self.write_workbook_file(workbook)?;
 
-        // Write the worksheets and update the shared string table at the same time.
+        // Update the shared string table in each worksheet.
         let mut string_table = SharedStringsTable::new();
+        for worksheet in &mut workbook.worksheets {
+            worksheet.update_string_table_ids(&mut string_table);
+        }
+
+        // Write the worksheets.
         for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
-            self.write_worksheet_file(worksheet, index + 1, &mut string_table)?;
+            self.write_worksheet_file(worksheet, index + 1)?;
             if worksheet.has_relationships() {
                 self.write_worksheet_rels_file(worksheet, index + 1)?;
             }
@@ -270,13 +275,12 @@ impl<W: Write + Seek> Packager<W> {
         &mut self,
         worksheet: &mut Worksheet,
         index: usize,
-        string_table: &mut SharedStringsTable,
     ) -> Result<(), XlsxError> {
         let filename = format!("xl/worksheets/sheet{index}.xml");
 
         self.zip.start_file(filename, self.zip_options)?;
 
-        worksheet.assemble_xml_file(string_table);
+        worksheet.assemble_xml_file();
         self.zip.write_all(worksheet.writer.xmlfile.get_ref())?;
 
         Ok(())
