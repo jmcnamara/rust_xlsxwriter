@@ -110,8 +110,8 @@ frequently.
 
 Recent changes:
 
+- Performance increases.
 - Added formatting support for worksheet tables.
-- Added native date/time support and made `chrono` optional.
 - Added [Tutorial] and [Cookbook] sections to the docs.rs documentation.
 
 See the full [Release Notes and Changelog].

@@ -109,6 +109,10 @@ documentation and generally show how an individual function works.
 
 * app_perf_test.rs - Simple performance test for rust_xlsxwriter.
 
+* app_perf_test2.rs - Simple performance test for rust_xlsxwriter.
+
+* app_perf_test3.rs - Simple performance test for rust_xlsxwriter.
+
 * app_rich_strings.rs - An example of using the rust_xlsxwriter library to
   write "rich" multi-format strings in worksheet cells.
 
