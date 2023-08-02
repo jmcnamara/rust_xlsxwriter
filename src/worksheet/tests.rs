@@ -15,8 +15,11 @@ mod worksheet_tests {
 
     #[test]
     fn test_assemble() {
-        let mut worksheet = Worksheet::default();
-        worksheet.selected = true;
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
         worksheet.assemble_xml_file();
 
         let got = worksheet.writer.read_to_str();
