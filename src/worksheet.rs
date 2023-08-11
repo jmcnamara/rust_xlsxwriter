@@ -9089,8 +9089,8 @@ impl Worksheet {
         DrawingInfo {
             from,
             to,
-            col_absolute: x_abs,
-            row_absolute: y_abs,
+            col_absolute: u64::from(x_abs),
+            row_absolute: u64::from(y_abs),
             width,
             height,
             description: object.alt_text(),

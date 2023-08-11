@@ -411,8 +411,8 @@ pub(crate) struct DrawingCoordinates {
 pub(crate) struct DrawingInfo {
     pub(crate) from: DrawingCoordinates,
     pub(crate) to: DrawingCoordinates,
-    pub(crate) col_absolute: u32,
-    pub(crate) row_absolute: u32,
+    pub(crate) col_absolute: u64,
+    pub(crate) row_absolute: u64,
     pub(crate) width: f64,
     pub(crate) height: f64,
     pub(crate) description: String,

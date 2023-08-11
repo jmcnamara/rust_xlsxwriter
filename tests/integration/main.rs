@@ -430,6 +430,7 @@ mod image53;
 mod image54;
 mod image56;
 mod image57;
+mod image58;
 mod image_scale01;
 mod landscape01;
 mod merge_cells01;
