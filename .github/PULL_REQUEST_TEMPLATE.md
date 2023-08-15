@@ -1,5 +1,5 @@
 
-## Pull Requests and Contributing to rust_rust_xlsxwriter
+## Pull Requests and Contributing to rust_xlsxwriter
 
 All patches and pull requests are welcome but must start with an issue tracker.
 
