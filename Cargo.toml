@@ -15,6 +15,7 @@ chrono = {version = "0.4.24", default-features = false, features = ["clock"], op
 zip = {version = "0.6.4 ", default-features = false, features = ["deflate"]}
 regex = "1.7.3"
 lazy_static = "1.4.0"
+polars-error= {version = "0.32.1", default-features = false, features = [], optional = true }
 
 [dev-dependencies]
 pretty_assertions = "1.3.0"
@@ -30,6 +31,11 @@ zlib = ["zip/deflate-zlib"]
 # `chrono`: Add support for Chrono dates/times in addition to the native
 # ExcelDateTime types.
 chrono = ["dep:chrono"]
+
+# `polars`: Add support for mapping between `PolarsError` and
+# `rust_xlsxwriter::XlsxErrors` to make code that handles both types of error
+# easier to write.
+polars = ["dep:polars-error"]
 
 # `test-resave`: Developer only testing feature.
 test-resave = []

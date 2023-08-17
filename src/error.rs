@@ -8,6 +8,11 @@
 use std::error::Error;
 use std::fmt;
 
+#[cfg(feature = "polars")]
+use polars_error::polars_err;
+#[cfg(feature = "polars")]
+use polars_error::PolarsError;
+
 #[derive(Debug)]
 /// The `XlsxError` enum defines the error values for the `rust_xlsxwriter`
 /// library.
@@ -127,6 +132,13 @@ pub enum XlsxError {
     /// [zip::ZipWriter]. These relate to errors arising from creating
     /// the xlsx file zip container.
     ZipError(zip::result::ZipError),
+
+    /// Wrapper for a variety of [polars_error::PolarsError] errors. This is
+    /// mainly used by the `polars_excel_writer` crate but it can also be useful
+    /// for code that uses `polars` functions in an `XlsxError` error scope.
+    /// This requires the `polars` feature to be enabled.
+    #[cfg(feature = "polars")]
+    PolarsError(PolarsError),
 }
 
 impl Error for XlsxError {}
@@ -248,6 +260,11 @@ impl fmt::Display for XlsxError {
             XlsxError::ZipError(error) => {
                 write!(f, "{error}")
             }
+
+            #[cfg(feature = "polars")]
+            XlsxError::PolarsError(error) => {
+                write!(f, "{error}")
+            }
         }
     }
 }
@@ -263,6 +280,22 @@ impl From<zip::result::ZipError> for XlsxError {
 impl From<std::io::Error> for XlsxError {
     fn from(e: std::io::Error) -> XlsxError {
         XlsxError::IoError(e)
+    }
+}
+
+#[cfg(feature = "polars")]
+// Convert from Polars to Polars errors to allow easier interoperability.
+impl From<PolarsError> for XlsxError {
+    fn from(e: PolarsError) -> XlsxError {
+        XlsxError::PolarsError(e)
+    }
+}
+
+#[cfg(feature = "polars")]
+// Convert from XlsxError to Polars errors to allow easier interoperability.
+impl From<XlsxError> for PolarsError {
+    fn from(e: XlsxError) -> PolarsError {
+        polars_err!(ComputeError: "rust_xlsxwriter error: '{}'", e)
     }
 }
 
