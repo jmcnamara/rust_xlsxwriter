@@ -401,6 +401,13 @@ impl Table {
     ///
     pub fn set_header_row(&mut self, enable: bool) -> &mut Table {
         self.show_header_row = enable;
+
+        // The table autofilter should be off if the header is off so that it
+        // isn't included in the autofit() calculation.
+        if !self.show_header_row {
+            self.show_autofilter = false;
+        }
+
         self
     }
 
