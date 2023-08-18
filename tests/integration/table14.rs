@@ -8,7 +8,7 @@
 use crate::common;
 use rust_xlsxwriter::{Format, Table, TableColumn, Workbook, XlsxError};
 
-// Create rust_xlsxwriter file to compare against Excel file.
+// Test with write_with_format().
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -64,7 +64,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test add_table() setting formats for table data.
+// Test using add_table() to set formats for table data.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -120,6 +120,62 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test using IntoFormat trait.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let format1 = "0.00;[Red]0.00".into();
+    let format2 = "0.00_ ;\\-0.00\\ ".into();
+    let format3 = "0.00_ ;[Red]\\-0.00\\ ".into();
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write(2, 2, "Foo")?;
+    worksheet.write(3, 2, "Bar")?;
+    worksheet.write(4, 2, "Baz")?;
+    worksheet.write(5, 2, "Bop")?;
+
+    worksheet.write(2, 3, 1234)?;
+    worksheet.write(3, 3, 1256)?;
+    worksheet.write(4, 3, 2234)?;
+    worksheet.write(5, 3, 1324)?;
+
+    worksheet.write(2, 4, 2000)?;
+    worksheet.write(3, 4, 4000)?;
+    worksheet.write(4, 4, 3000)?;
+    worksheet.write(5, 4, 1000)?;
+
+    worksheet.write(2, 5, 4321)?;
+    worksheet.write(3, 5, 4320)?;
+    worksheet.write(4, 5, 4332)?;
+    worksheet.write(5, 5, 4333)?;
+
+    // Manually set the indices to get the same order as the target file.
+    worksheet.format_dxf_index(&format3);
+    worksheet.format_dxf_index(&format2);
+    worksheet.format_dxf_index(&format1);
+
+    for col_num in 2..=5u16 {
+        worksheet.set_column_width(col_num, 10.288)?;
+    }
+
+    let columns = vec![
+        TableColumn::default(),
+        TableColumn::new().set_format("0.00;[Red]0.00"),
+        TableColumn::new().set_format("0.00_ ;\\-0.00\\ "),
+        TableColumn::new().set_format("0.00_ ;[Red]\\-0.00\\ "),
+    ];
+
+    let mut table = Table::new();
+    table.set_columns(&columns);
+
+    worksheet.add_table(1, 2, 5, 5, &table)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_table14_1() {
     let test_runner = common::TestRunner::new()
@@ -138,6 +194,18 @@ fn test_table14_2() {
         .set_name("table14")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_table14_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("table14")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

@@ -95,7 +95,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let columns = vec![
         TableColumn::default(),
-        TableColumn::new().set_format(&format1),
+        TableColumn::new().set_format(format1),
     ];
 
     let mut table = Table::new();

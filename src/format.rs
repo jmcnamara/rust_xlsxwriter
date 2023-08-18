@@ -2312,8 +2312,44 @@ pub(crate) struct Fill {
 }
 
 // -----------------------------------------------------------------------
-// Helper enums/structs
+// Helper enums/structs/traits
 // -----------------------------------------------------------------------
+
+/// Convert a number format string to a [`Format`] object.
+///
+/// This From/Into trait provides a simple way to convert an Excel number format
+/// string into a [`Format`] object. It is the equivalent of
+/// `Format::new().set_num_format("string")`.
+///
+/// This is used as a syntactic shortcut for APIs that generally only require a
+/// number format, like [`TableColumn`](crate::TableColumn).
+///
+impl From<&Format> for Format {
+    fn from(value: &Format) -> Format {
+        (*value).clone()
+    }
+}
+
+/// Convert a number format string to a [`Format`] object.
+impl From<&str> for Format {
+    fn from(value: &str) -> Format {
+        Format::new().set_num_format(value)
+    }
+}
+
+/// Convert a number format string to a [`Format`] object.
+impl From<&String> for Format {
+    fn from(value: &String) -> Format {
+        Format::new().set_num_format(value)
+    }
+}
+
+/// Convert a number format string to a [`Format`] object.
+impl From<String> for Format {
+    fn from(value: String) -> Format {
+        Format::new().set_num_format(value)
+    }
+}
 
 /// The `Color` enum defines Excel colors the can be used throughout the
 /// `rust_xlsxwriter`.
