@@ -1158,6 +1158,26 @@ impl Table {
         self
     }
 
+    /// Check if the table has a header row.
+    ///
+    /// This method is mainly used by polars_excel_writer and hidden from the
+    /// general documentation.
+    ///
+    #[doc(hidden)]
+    pub fn has_header_row(&self) -> bool {
+        self.show_header_row
+    }
+
+    /// Check if the table has a totals row.
+    ///
+    /// This method is mainly used by polars_excel_writer and hidden from the
+    /// general documentation.
+    ///
+    #[doc(hidden)]
+    pub fn has_total_row(&self) -> bool {
+        self.show_total_row
+    }
+
     // Truncate or extend (with defaults) the table columns.
     pub(crate) fn initialize_columns(
         &mut self,
