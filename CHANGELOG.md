@@ -5,6 +5,17 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.46.0] - 2023-08-20
+
+### Added
+
+- Added `polars` crate feature to help interoperability with Polars. Currently
+  it only implements `PolarsError` and `XlsxError` mapping but other
+  functionality may be added in the future. These changes are added to support
+  the [`polars_excel_writer`] crate.
+
+  [`polars_excel_writer`]: https://crates.io/crates/polars_excel_writer
+
 
 ## [0.45.0] - 2023-08-12
 

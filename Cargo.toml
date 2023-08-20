@@ -7,7 +7,7 @@ repository = "https://github.com/jmcnamara/rust_xlsxwriter"
 keywords = ["excel", "xlsx"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.45.0"
+version = "0.46.0"
 edition = "2021"
 
 [dependencies]
@@ -33,7 +33,7 @@ zlib = ["zip/deflate-zlib"]
 chrono = ["dep:chrono"]
 
 # `polars`: Add support for mapping between `PolarsError` and
-# `rust_xlsxwriter::XlsxErrors` to make code that handles both types of error
+# `rust_xlsxwriter::XlsxError` to make code that handles both types of error
 # easier to write.
 polars = ["dep:polars-error"]
 
