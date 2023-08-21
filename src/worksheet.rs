@@ -535,10 +535,6 @@ impl Worksheet {
     /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
     /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
-    /// - Dates: `"yyyy\\-mm\\-dd;@"`
-    /// - Times: `"hh:mm:ss;@"`
-    /// - Date and times: `"yyyy\\-mm\\-dd\\ hh:mm:ss"`
-    ///
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///
