@@ -716,6 +716,63 @@ impl Workbook {
         Ok(buf)
     }
 
+    /// Save the Workbook as an xlsx file to a user supplied file/buffer.
+    ///
+    /// The workbook `save_to_writer()` method is similar to the
+    /// [`save()`](Workbook::save) method except that it writes the xlsx file to
+    /// types that implement the [`Write`] trait such as the [`std::fs::File`]
+    /// type or buffers.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
+    ///   the workbook.
+    /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    ///   the xlsx file, or its sub-files.
+    /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
+    ///   creating the xlsx file, or its sub-files.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a simple workbook to some
+    /// types that implement the `Write` trait like a file and a buffer.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_save_to_writer.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     let worksheet = workbook.add_worksheet();
+    ///     worksheet.write_string(0, 0, "Hello")?;
+    ///
+    ///     // Save the file to a File object.
+    ///     let file = File::create("workbook1.xlsx")?;
+    ///     workbook.save_to_writer(file)?;
+    ///
+    ///     // Save the file to a buffer. It is wrapped in a Cursor because it need to
+    ///     // implement the `Seek` trait.
+    ///     let mut cursor = Cursor::new(Vec::new());
+    ///     workbook.save_to_writer(&mut cursor)?;
+    ///
+    ///     // Write the buffer to a file for the sake of the example.
+    ///     let buf = cursor.into_inner();
+    ///     let mut file = File::create("workbook2.xlsx")?;
+    ///     Write::write_all(&mut file, &buf)?;
+    ///
+    ///     Ok(())
+    /// }
+    ///
+    pub fn save_to_writer<W>(&mut self, writer: W) -> Result<(), XlsxError>
+    where
+        W: Write + Seek + Send,
+    {
+        self.save_internal(writer)?;
+        Ok(())
+    }
+
     /// Create a defined name in the workbook to use as a variable.
     ///
     /// The `define_name()` method is used to defined a variable name that can

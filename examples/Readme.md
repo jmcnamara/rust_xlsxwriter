@@ -662,6 +662,10 @@ documentation and generally show how an individual function works.
 * `doc_workbook_save_to_path.rs` - Demonstrates creating a simple workbook
   using a Rust Path reference.
 
+* `doc_workbook_save_to_writer.rs` - Demonstrates creating a simple
+  workbook to some types that implement the `Write` trait like a file and a
+  buffer.
+
 * `doc_workbook_worksheet_from_index.rs` - Demonstrates getting worksheet
   reference by index.
 

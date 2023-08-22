@@ -21,7 +21,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Test case to demonstrate creating a basic file with 1 worksheet and no data.
-// Has an implicit add_worksheet.
+// The workbook will perform an implicit add_worksheet().
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -80,6 +80,35 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case to demonstrate creating a basic file from a std::fs::File.
+fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
+    let file = std::fs::File::create(filename).unwrap();
+
+    let mut workbook = Workbook::new();
+    let _worksheet = workbook.add_worksheet();
+
+    workbook.save_to_writer(file)?;
+
+    Ok(())
+}
+
+// Test case to demonstrate creating a basic file from a buffer<W>.
+fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
+    let mut cursor = std::io::Cursor::new(Vec::new());
+
+    let mut workbook = Workbook::new();
+    let _worksheet = workbook.add_worksheet();
+
+    workbook.save_to_writer(&mut cursor)?;
+
+    // Write the buffer out to a file.
+    let buf = cursor.into_inner();
+    let mut file = std::fs::File::create(filename)?;
+    std::io::Write::write_all(&mut file, &buf)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap01_single_worksheet() {
     let test_runner = common::TestRunner::new()
@@ -105,7 +134,7 @@ fn bootstrap01_add_default_worksheet() {
 }
 
 #[test]
-fn bootstrap01_new_from_path() {
+fn bootstrap01_save_to_path() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap01")
         .set_function(create_new_xlsx_file_3)
@@ -117,7 +146,7 @@ fn bootstrap01_new_from_path() {
 }
 
 #[test]
-fn bootstrap01_new_from_pathbuf() {
+fn bootstrap01_save_to_pathbuf() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap01")
         .set_function(create_new_xlsx_file_4)
@@ -129,7 +158,7 @@ fn bootstrap01_new_from_pathbuf() {
 }
 
 #[test]
-fn bootstrap01_new_from_buffer() {
+fn bootstrap01_save_to_buffer() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap01")
         .set_function(create_new_xlsx_file_5)
@@ -141,11 +170,35 @@ fn bootstrap01_new_from_buffer() {
 }
 
 #[test]
-fn bootstrap01_multi_save1() {
+fn bootstrap01_multi_save() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap01")
         .set_function(create_new_xlsx_file_6)
         .unique("6")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap01_save_to_writer_file() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap01")
+        .set_function(create_new_xlsx_file_7)
+        .unique("7")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap01_save_to_writer_buffer() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap01")
+        .set_function(create_new_xlsx_file_8)
+        .unique("8")
         .initialize();
 
     test_runner.assert_eq();
