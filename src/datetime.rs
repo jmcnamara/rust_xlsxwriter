@@ -6,6 +6,12 @@
 
 #![warn(missing_docs)]
 use regex::Regex;
+
+#[cfg(not(all(
+    feature = "wasm",
+    target_arch = "wasm32",
+    not(any(target_os = "emscripten", target_os = "wasi"))
+)))]
 use std::time::SystemTime;
 
 #[cfg(feature = "chrono")]
@@ -1175,11 +1181,32 @@ impl ExcelDateTime {
     // Get the current UTC time. This is used to set some Excel metadata
     // timestamps.
     pub(crate) fn utc_now() -> String {
+        let timestamp = Self::system_now();
+        Self::unix_time_to_rfc3339(timestamp)
+    }
+
+    // Get the current time from the system time.
+    #[cfg(not(all(
+        feature = "wasm",
+        target_arch = "wasm32",
+        not(any(target_os = "emscripten", target_os = "wasi"))
+    )))]
+    fn system_now() -> u64 {
         let timestamp = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .expect("SystemTime::now() is before Unix epoch");
+        timestamp.as_secs()
+    }
 
-        Self::unix_time_to_rfc3339(timestamp.as_secs())
+    // Get the current time on Wasm/JS systems.
+    #[cfg(all(
+        feature = "wasm",
+        target_arch = "wasm32",
+        not(any(target_os = "emscripten", target_os = "wasi"))
+    ))]
+    fn system_now() -> u64 {
+        let timestamp = js_sys::Date::now();
+        (timestamp / 1000.0) as u64
     }
 
     // Convert to UTC date in RFC 3339 format. This is used in custom
