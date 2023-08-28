@@ -10,6 +10,7 @@ use std::fmt;
 
 #[cfg(feature = "polars")]
 use polars_error::polars_err;
+
 #[cfg(feature = "polars")]
 use polars_error::PolarsError;
 
@@ -296,6 +297,18 @@ impl From<PolarsError> for XlsxError {
 impl From<XlsxError> for PolarsError {
     fn from(e: XlsxError) -> PolarsError {
         polars_err!(ComputeError: "rust_xlsxwriter error: '{}'", e)
+    }
+}
+
+#[cfg(all(
+    feature = "wasm",
+    //target_arch = "wasm32",
+    //not(any(target_os = "emscripten", target_os = "wasi"))
+))]
+impl From<XlsxError> for wasm_bindgen::JsValue {
+    fn from(e: XlsxError) -> wasm_bindgen::JsValue {
+        let error = e.to_string();
+        wasm_bindgen::JsValue::from_str(&error)
     }
 }
 
