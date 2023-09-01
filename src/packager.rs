@@ -43,7 +43,7 @@
 use std::collections::HashSet;
 use std::io::{Seek, Write};
 
-#[cfg(not(feature = "wasm"))]
+#[cfg(not(target_arch = "wasm32"))]
 use std::thread;
 
 use zip::write::FileOptions;
@@ -112,7 +112,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         // Assemble, but don't write, the worksheet files in parallel. These are
         // generally the largest files and the threading can help performance if
         // there are multiple large worksheets.
-        #[cfg(not(feature = "wasm"))]
+        #[cfg(not(target_arch = "wasm32"))]
         thread::scope(|scope| {
             for worksheet in &mut workbook.worksheets {
                 scope.spawn(|| {
@@ -121,8 +121,8 @@ impl<W: Write + Seek + Send> Packager<W> {
             }
         });
 
-        #[cfg(feature = "wasm")]
         // For wasm targets don't use threading.
+        #[cfg(target_arch = "wasm32")]
         for worksheet in &mut workbook.worksheets {
             worksheet.assemble_xml_file();
         }
