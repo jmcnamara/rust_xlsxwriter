@@ -302,8 +302,8 @@ impl From<XlsxError> for PolarsError {
 
 #[cfg(all(
     feature = "wasm",
-    //target_arch = "wasm32",
-    //not(any(target_os = "emscripten", target_os = "wasi"))
+    target_arch = "wasm32",
+    not(any(target_os = "emscripten", target_os = "wasi"))
 ))]
 impl From<XlsxError> for wasm_bindgen::JsValue {
     fn from(e: XlsxError) -> wasm_bindgen::JsValue {
