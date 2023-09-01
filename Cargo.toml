@@ -11,7 +11,7 @@ version = "0.46.0"
 edition = "2021"
 
 [dependencies]
-chrono = {version = "0.4.24", default-features = false, features = ["clock"], optional = true }
+chrono = {version = "0.4.24", default-features = false, features = ["clock", "wasmbind"], optional = true }
 zip = {version = "0.6.4 ", default-features = false, features = ["deflate"]}
 regex = "1.7.3"
 lazy_static = "1.4.0"
@@ -39,7 +39,7 @@ chrono = ["dep:chrono"]
 # easier to write.
 polars = ["dep:polars-error"]
 
-# `wasm`: todo.
+# `wasm`: Enable wasm/Javascript compilation.
 wasm = ["js-sys", "wasm-bindgen"]
 
 # `test-resave`: Developer only testing feature.
