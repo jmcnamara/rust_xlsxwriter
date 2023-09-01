@@ -117,7 +117,7 @@
 //!   `rust_xlsxwriter::XlsxError` to make code that handles both types of error
 //!   easier to write.
 //! - `wasm`: Adds dependency on `js-sys` and `wasm-bindgen` to allow
-//!   compilation for wasm/Javascript targets.
+//!   compilation for wasm/JavaScript targets.
 //! - `test-resave`: Developer only testing feature.
 //!
 //! # See also

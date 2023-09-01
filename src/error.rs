@@ -284,22 +284,23 @@ impl From<std::io::Error> for XlsxError {
     }
 }
 
-#[cfg(feature = "polars")]
 // Convert from Polars to Polars errors to allow easier interoperability.
+#[cfg(feature = "polars")]
 impl From<PolarsError> for XlsxError {
     fn from(e: PolarsError) -> XlsxError {
         XlsxError::PolarsError(e)
     }
 }
 
-#[cfg(feature = "polars")]
 // Convert from XlsxError to Polars errors to allow easier interoperability.
+#[cfg(feature = "polars")]
 impl From<XlsxError> for PolarsError {
     fn from(e: XlsxError) -> PolarsError {
         polars_err!(ComputeError: "rust_xlsxwriter error: '{}'", e)
     }
 }
 
+// Convert from XlsxError to JsValue errors to allow easier interoperability.
 #[cfg(all(
     feature = "wasm",
     target_arch = "wasm32",

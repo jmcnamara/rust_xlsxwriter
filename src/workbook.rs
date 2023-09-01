@@ -740,6 +740,9 @@ impl Workbook {
     /// ```
     /// # // This code is available in examples/doc_workbook_save_to_writer.rs
     /// #
+    /// # use std::fs::File;
+    /// # use std::io::{Cursor, Write};
+    /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {

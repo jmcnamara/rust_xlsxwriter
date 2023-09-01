@@ -362,7 +362,7 @@ which writes data and formatting together, like these examples from the code:
 Let's extend the application a little bit more to add some dates to the data:
 
 ```rust
-    let expenses = vec![
+    let expenses = [
         ("Rent", 2000, "2022-09-01"),
         ("Gas", 200, "2022-09-05"),
         ("Food", 500, "2022-09-21"),

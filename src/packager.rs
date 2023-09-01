@@ -342,7 +342,7 @@ impl<W: Write + Seek + Send> Packager<W> {
     ) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
-        for relationship in relationships.iter() {
+        for relationship in relationships {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
@@ -364,7 +364,7 @@ impl<W: Write + Seek + Send> Packager<W> {
     ) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
-        for relationship in relationships.iter() {
+        for relationship in relationships {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 

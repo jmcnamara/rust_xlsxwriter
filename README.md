@@ -112,7 +112,7 @@ frequently.
   easier to write.
 
 - `wasm`: Adds dependency on `js-sys` and `wasm-bindgen` to allow compilation
-  for wasm/Javascript targets.
+  for wasm/JavaScript targets.
 
 - `test-resave`: Developer only testing feature.
 
@@ -120,8 +120,8 @@ frequently.
 
 Recent changes:
 
+- Added Wasm and Polars feature flags for compatibility.
 - Performance increases.
-- Added formatting support for worksheet tables.
 - Added [Tutorial] and [Cookbook] sections to the docs.rs documentation.
 
 See the full [Release Notes and Changelog].
