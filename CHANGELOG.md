@@ -15,7 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   See the [rust_xlsx_wasm_example] sample application that demonstrates
   accessing `rust_xlsxwriter` code from JavaScript, Node.js, Deno and Wasmtime.
 
+- Added [`workbook.save_to_writer()`] method to make it easier to interact with
+  interfaces that implement the `<W: Write>` trait.
+
 [rust_xlsx_wasm_example]: https://github.com/Clipi-12/rust_xlsx_wasm_example
+[`workbook.save_to_writer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Workbook.html#method.save_to_writer
 
 
 ## [0.46.0] - 2023-08-20
