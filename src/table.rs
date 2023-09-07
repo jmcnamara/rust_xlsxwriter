@@ -1325,11 +1325,18 @@ impl Table {
             attributes.push(("dataDxfId", format.dxf_index.to_string()));
         }
 
-        if let Some(formula) = &column.formula {
+        if column.formula.is_some() || matches!(&column.total_function, TableFunction::Custom(_)) {
             self.writer.xml_start_tag("tableColumn", &attributes);
 
-            // Write the calculatedColumnFormula element.
-            self.write_calculated_column_formula(&formula.expand_formula(true));
+            if let Some(formula) = &column.formula {
+                // Write the calculatedColumnFormula element.
+                self.write_calculated_column_formula(&formula.expand_formula(true));
+            }
+
+            if let TableFunction::Custom(formula) = &column.total_function {
+                // Write the totalsRowFormula element.
+                self.write_totals_row_formula(&formula.expand_formula(true));
+            }
 
             self.writer.xml_end_tag("tableColumn");
         } else {
@@ -1341,6 +1348,12 @@ impl Table {
     fn write_calculated_column_formula(&mut self, formula: &str) {
         self.writer
             .xml_data_element_only("calculatedColumnFormula", formula);
+    }
+
+    // Write the <totalsRowFormula> element.
+    fn write_totals_row_formula(&mut self, formula: &str) {
+        self.writer
+            .xml_data_element_only("totalsRowFormula", formula);
     }
 
     // Write the <tableStyleInfo> element.
@@ -1945,7 +1958,7 @@ impl TableColumn {
             .replace(']', "']")
             .replace('[', "'[");
 
-        match self.total_function {
+        match &self.total_function {
             TableFunction::None => Formula::new(""),
             TableFunction::Max => Formula::new(format!("SUBTOTAL(104,[{column_name}])")),
             TableFunction::Min => Formula::new(format!("SUBTOTAL(105,[{column_name}])")),
@@ -1955,6 +1968,7 @@ impl TableColumn {
             TableFunction::StdDev => Formula::new(format!("SUBTOTAL(107,[{column_name}])")),
             TableFunction::Average => Formula::new(format!("SUBTOTAL(101,[{column_name}])")),
             TableFunction::CountNumbers => Formula::new(format!("SUBTOTAL(102,[{column_name}])")),
+            TableFunction::Custom(formula) => formula.clone(),
         }
     }
 }
@@ -1968,11 +1982,8 @@ impl Default for TableColumn {
 /// The `TableFunction` enum defines functions for worksheet table total rows.
 ///
 /// The `TableFunction` enum contains definitions for the standard Excel
-/// functions that are available via the dropdown in the total row of an Excel
-/// table.
-///
-/// Excel also supports custom functions. These aren't currently supported by
-/// `rust_xlsxwriter` but will be added in an upcoming release.
+/// "SUBTOTAL" functions that are available via the dropdown in the total row of
+/// an Excel table. It also supports custom user defined functions or formulas.
 ///
 /// # Examples
 ///
@@ -1982,7 +1993,7 @@ impl Default for TableColumn {
 /// ```
 /// # // This code is available in examples/doc_table_set_total_row2.rs
 /// #
-/// # use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+/// # use rust_xlsxwriter::{Formula, Table, TableColumn, TableFunction, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     // Create a new Excel file object.
@@ -2019,7 +2030,9 @@ impl Default for TableColumn {
 ///         TableColumn::new().set_total_function(TableFunction::Sum),
 ///         TableColumn::new().set_total_function(TableFunction::Sum),
 ///         TableColumn::new().set_total_function(TableFunction::Sum),
-///         TableColumn::new().set_total_function(TableFunction::Sum),
+///         // Use a custom formula to to a similar summation.
+///         TableColumn::new()
+///             .set_total_function(TableFunction::Custom(Formula::new("SUM([Column5])"))),
 ///     ];
 ///     table.set_columns(&columns);
 ///
@@ -2037,7 +2050,7 @@ impl Default for TableColumn {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/table_set_total_row2.png">
 ///
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, PartialEq)]
 pub enum TableFunction {
     /// The "total row" option is enable but there is no total function.
     None,
@@ -2065,6 +2078,9 @@ pub enum TableFunction {
 
     /// Use the var function as the table total.
     Var,
+
+    /// Use a custom/user specified function or formula.
+    Custom(Formula),
 }
 
 impl fmt::Display for TableFunction {
@@ -2079,6 +2095,7 @@ impl fmt::Display for TableFunction {
             TableFunction::StdDev => write!(f, "stdDev"),
             TableFunction::Average => write!(f, "average"),
             TableFunction::CountNumbers => write!(f, "countNums"),
+            TableFunction::Custom(_) => write!(f, "custom"),
         }
     }
 }

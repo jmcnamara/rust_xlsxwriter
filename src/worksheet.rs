@@ -4886,6 +4886,10 @@ impl Worksheet {
                 for row in first_data_row..=last_data_row {
                     self.update_cell_format(row, col, format_index);
                 }
+
+                if table.show_total_row && column.total_function != TableFunction::None {
+                    self.update_cell_format(last_row, col, format_index);
+                }
             }
         }
 

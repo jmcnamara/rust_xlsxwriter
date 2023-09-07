@@ -560,6 +560,8 @@ mod table27;
 mod table28;
 mod table29;
 mod table31;
+mod table32;
+mod table33;
 mod theme_color01;
 mod theme_color02;
 mod theme_color03;

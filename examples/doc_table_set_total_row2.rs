@@ -5,7 +5,7 @@
 //! Example of turning on the "totals" row at the bottom of a worksheet table
 //! with captions and subtotal functions.
 
-use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+use rust_xlsxwriter::{Formula, Table, TableColumn, TableFunction, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -42,7 +42,9 @@ fn main() -> Result<(), XlsxError> {
         TableColumn::new().set_total_function(TableFunction::Sum),
         TableColumn::new().set_total_function(TableFunction::Sum),
         TableColumn::new().set_total_function(TableFunction::Sum),
-        TableColumn::new().set_total_function(TableFunction::Sum),
+        // Use a custom formula to to a similar summation.
+        TableColumn::new()
+            .set_total_function(TableFunction::Custom(Formula::new("SUM([Column5])"))),
     ];
     table.set_columns(&columns);
 

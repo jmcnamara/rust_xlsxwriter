@@ -769,7 +769,7 @@ use std::borrow::Cow;
 ///             <f>SUM(1, 2, 3)</f>
 /// ```
 ///
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Formula {
     formula_string: String,
     expand_future_functions: bool,
