@@ -120,8 +120,8 @@ frequently.
 
 Recent changes:
 
+- Add custom functions to table totals.
 - Added Wasm and Polars feature flags for compatibility.
-- Performance increases.
 - Added [Tutorial] and [Cookbook] sections to the docs.rs documentation.
 
 See the full [Release Notes and Changelog].

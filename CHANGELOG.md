@@ -5,6 +5,16 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.48.0] - 2023-09-08
+
+### Added
+
+- Added support for custom total formulas to [`TableFunction`].
+
+[`TableFunction`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.TableFunction.html
+
+
 ## [0.47.0] - 2023-09-02
 
 ### Added
