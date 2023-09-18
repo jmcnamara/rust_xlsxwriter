@@ -133,6 +133,9 @@ pub struct Chart {
     pub(crate) chart_area_format: ChartFormat,
     pub(crate) plot_area_format: ChartFormat,
     grouping: ChartGrouping,
+    show_empty_cells_as: ChartEmptyCells,
+    show_hidden_data: bool,
+    show_na_as_empty: bool,
     default_num_format: String,
     has_overlap: bool,
     overlap: i8,
@@ -234,6 +237,9 @@ impl Chart {
             chart_area_format: ChartFormat::new(),
             plot_area_format: ChartFormat::new(),
             grouping: ChartGrouping::Standard,
+            show_empty_cells_as: ChartEmptyCells::Gaps,
+            show_hidden_data: false,
+            show_na_as_empty: false,
             default_num_format: "General".to_string(),
             has_overlap: false,
             overlap: 0,
@@ -1281,6 +1287,35 @@ impl Chart {
         Ok(self)
     }
 
+    /// Set the option for displaying empty cells in a chart.
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// `option` - A [`ChartEmptyCells`] enum value.
+    ///
+    pub fn show_empty_cells_as(&mut self, option: ChartEmptyCells) -> &mut Chart {
+        self.show_empty_cells_as = option;
+
+        self
+    }
+
+    /// Display #N/A on charts as blank/empty cells.
+    ///
+    pub fn show_na_as_empty_cell(&mut self) -> &mut Chart {
+        self.show_na_as_empty = true;
+
+        self
+    }
+
+    /// Display data on charts from hidden rows or columns.
+    ///
+    pub fn show_hidden_data(&mut self) -> &mut Chart {
+        self.show_hidden_data = true;
+
+        self
+    }
+
     /// Set default values for the chart axis ids.
     ///
     /// This is mainly used to ensure that the axis ids used in testing match
@@ -1721,7 +1756,17 @@ impl Chart {
         self.write_legend();
 
         // Write the c:plotVisOnly element.
-        self.write_plot_vis_only();
+        if !self.show_hidden_data {
+            self.write_plot_vis_only();
+        }
+
+        // Write the c:dispBlanksAs element.
+        self.write_disp_blanks_as();
+
+        // Write the dispNaAsBlank element.
+        if self.show_na_as_empty {
+            self.write_disp_na_as_blank();
+        }
 
         self.writer.xml_end_tag("c:chart");
     }
@@ -3661,6 +3706,39 @@ impl Chart {
         self.write_a_t(&title.name);
 
         self.writer.xml_end_tag("a:r");
+    }
+
+    // Write the <c:dispBlanksAs> element.
+    fn write_disp_blanks_as(&mut self) {
+        if self.show_empty_cells_as == ChartEmptyCells::Gaps {
+            return;
+        }
+
+        let attributes = [("val", self.show_empty_cells_as.to_string())];
+
+        self.writer.xml_empty_tag("c:dispBlanksAs", &attributes);
+    }
+
+    // Write the <dispNaAsBlank> element. This is an Excel 16 extension.
+    fn write_disp_na_as_blank(&mut self) {
+        let attributes = [
+            ("uri", "{56B9EC1D-385E-4148-901F-78D8002777C0}"),
+            (
+                "xmlns:c16r3",
+                "http://schemas.microsoft.com/office/drawing/2017/03/chart",
+            ),
+        ];
+
+        self.writer.xml_start_tag_only("c:extLst");
+        self.writer.xml_start_tag("c:ext", &attributes);
+        self.writer.xml_start_tag_only("c16r3:dataDisplayOptions16");
+
+        self.writer
+            .xml_empty_tag("c16r3:dispNaAsBlank", &[("val", "1")]);
+
+        self.writer.xml_end_tag("c16r3:dataDisplayOptions16");
+        self.writer.xml_end_tag("c:ext");
+        self.writer.xml_end_tag("c:extLst");
     }
 }
 
@@ -9192,6 +9270,36 @@ impl fmt::Display for ChartLegendPosition {
             ChartLegendPosition::Right => write!(f, "r"),
             ChartLegendPosition::Bottom => write!(f, "b"),
             ChartLegendPosition::TopRight => write!(f, "tr"),
+        }
+    }
+}
+
+/// The `ChartEmptyCells` enum defines the [`Chart`] empty cell options.
+///
+/// This enum defines the Excel chart options for handling empty cell in the
+/// chart data ranges.
+///
+/// These options can be set using the
+/// [`chart.show_empty_cells_as()`](Chart::show_empty_cells_as) method.
+///
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ChartEmptyCells {
+    /// Show empty cells in the chart as gaps. The default.
+    Gaps,
+
+    /// Show empty cells in the chart as zeroes.
+    Zero,
+
+    /// Show empty cells in the chart connected by a line to the previous point.
+    Connected,
+}
+
+impl fmt::Display for ChartEmptyCells {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ChartEmptyCells::Gaps => write!(f, "gap"),
+            ChartEmptyCells::Zero => write!(f, "zero"),
+            ChartEmptyCells::Connected => write!(f, "span"),
         }
     }
 }
