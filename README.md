@@ -120,9 +120,9 @@ frequently.
 
 Recent changes:
 
-- Add custom functions to table totals.
+- Added chart options for displaying non-data cells.
+- Added custom functions to table totals.
 - Added Wasm and Polars feature flags for compatibility.
-- Added [Tutorial] and [Cookbook] sections to the docs.rs documentation.
 
 See the full [Release Notes and Changelog].
 

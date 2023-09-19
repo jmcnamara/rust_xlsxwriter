@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.49.0] - 2023-09-19
+
+### Added
+
+- Added chart options to control how non-data cells are displayed.
+
+  - [`chart.show_empty_cells_as()`]
+  - [`chart.show_na_as_empty_cell()`]
+  - [`chart.show_hidden_data()`]
+
+[`chart.show_hidden_data()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.show_hidden_data
+[`chart.show_empty_cells_as()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.show_empty_cells_as
+[`chart.show_na_as_empty_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.show_na_as_empty_cell
+
+
+- Updated Polar's dependency and `PolarError` import to reflect changes in Polars v 0.33.2.
+
 ## [0.48.0] - 2023-09-08
 
 ### Added
