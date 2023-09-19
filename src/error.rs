@@ -9,10 +9,10 @@ use std::error::Error;
 use std::fmt;
 
 #[cfg(feature = "polars")]
-use polars_error::polars_err;
+use polars::prelude::polars_err;
 
 #[cfg(feature = "polars")]
-use polars_error::PolarsError;
+use polars::prelude::PolarsError;
 
 #[derive(Debug)]
 /// The `XlsxError` enum defines the error values for the `rust_xlsxwriter`
