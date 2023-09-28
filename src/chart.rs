@@ -10186,13 +10186,14 @@ impl ChartLine {
     }
 }
 
-/// A type to represent a Chart border.
+/// A type to represent a Chart border. It can be used interchangeably with
+/// [`ChartLine`].
 ///
 /// Excel uses the chart element names "Line" and "Border" depending on the
 /// context. For a Line chart the line is represented by a line property but for
 /// a Column chart the line becomes the border. Both of these share the same
-/// properties and are both represented in `rust_xlsxwriter` by the [`ChartLine`]
-/// struct.
+/// properties and are both represented in `rust_xlsxwriter` by the
+/// [`ChartLine`] struct.
 ///
 /// The `ChartBorder` type is a type alias of [`ChartLine`] for use as a
 /// syntactic shortcut where you would expect to write `ChartBorder` instead of
@@ -10252,7 +10253,8 @@ impl ChartLine {
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png">
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png">
 ///
 pub type ChartBorder = ChartLine;
 

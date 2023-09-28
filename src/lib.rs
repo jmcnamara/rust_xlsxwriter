@@ -6,17 +6,67 @@
 
 #![doc(html_logo_url = "https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png")]
 
-//! The `rust_xlsxwriter` library is a Rust library for writing Excel files in
-//! the xlsx format.
+//! `rust_xlsxwriter` is a Rust library for writing Excel files in the xlsx
+//! format.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/demo.png">
 //!
-//! The `rust_xlsxwriter` library can be used to write text, numbers, dates and
+//! The `rust_xlsxwriter` crate can be used to write text, numbers, dates and
 //! formulas to multiple worksheets in a new Excel 2007+ xlsx file. It has a
 //! focus on performance and on fidelity with the file format created by Excel.
 //! It cannot be used to modify an existing file.
 //!
-//! # Examples
+//! `rust_xlsxwriter` is a port of the [`XlsxWriter`] Python module by the same
+//! author. Feature porting is a work in progress. The currently supported
+//! features are:
+//!
+//! - Support for writing all basic Excel data types.
+//! - Full cell formatting support.
+//! - Formula support, including new Excel 365 dynamic functions.
+//! - Charts.
+//! - Hyperlink support.
+//! - Page/Printing Setup support.
+//! - Merged ranges.
+//! - Worksheet PNG/JPEG/GIF/BMP images.
+//! - Rich multi-format strings.
+//! - Defined names.
+//! - Autofilters.
+//! - Worksheet Tables.
+//!
+//! [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
+//!
+//! # Table of contents
+//!
+//! - [Tutorial](crate::tutorial): A getting started and tutorial guide.
+//! - [Cookbook](crate::cookbook): Examples of using `rust_xlsxwriter`.
+//! - [`Workbook`]: The entry point for creating an Excel workbook of
+//!       worksheets.
+//! - [`Worksheet`]: The main spreadsheet canvas for writing data and objects to
+//!       a worksheet.
+//! - [`Format`]: The interface for adding formatting to worksheets and other
+//!       objects.
+//! - [`Chart`]: The interface for creating worksheet charts.
+//! - [`Image`]: The interface for images used in worksheets.
+//! - [`ExcelDateTime`]: A type to represent dates and times in Excel format.
+//! - [`Formula`]: A type for Excel formulas.
+//! - [`Url`]: A type for URLs/Hyperlinks used in worksheets.
+//! - [`DocProperties`]: The interface used to create an object to represent
+//!       document metadata properties.
+//!
+//! Other external documentation:
+//!
+//! - [User Guide]: Working with the `rust_xlsxwriter` library.
+//! - [Release Notes].
+//! - [Roadmap of planned features].
+//!
+//! [User Guide]: https://rustxlsxwriter.github.io/index.html
+//! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
+//! [Roadmap of planned features]:
+//!     https://github.com/jmcnamara/rust_xlsxwriter/issues/1
+//!
+//! # Example
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/demo.png">
 //!
 //! Sample code to generate the Excel file shown above.
 //!
@@ -81,31 +131,9 @@
 //! }
 //! ```
 //!
-//! `rust_xlsxwriter` is a port of the [`XlsxWriter`] Python module by the same
-//! author. Feature porting is a work in progress. The currently supported
-//! features are:
+//! ## Crate Features
 //!
-//! - Support for writing all basic Excel data types.
-//! - Full cell formatting support.
-//! - Formula support, including new Excel 365 dynamic functions.
-//! - Charts.
-//! - Hyperlink support.
-//! - Page/Printing Setup support.
-//! - Merged ranges.
-//! - Worksheet PNG/JPEG/GIF/BMP images.
-//! - Rich multi-format strings.
-//! - Defined names.
-//! - Autofilters.
-//! - Worksheet Tables.
-//!
-//! `rust_xlsxwriter` is under active development and new features will be added
-//! frequently. See the [rust_xlsxwriter GitHub] for details.
-//!
-//! [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
-//! [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
-//!
-//! ## Features
-//!
+//! The following is a list of the features supports by the `rust_xlsxwriter` crate:
 //!
 //! - `default`: Includes all the standard functionality. Has dependencies on
 //!   `zip`, `regex` and `lazy_static`.
@@ -120,18 +148,6 @@
 //!   compilation for wasm/JavaScript targets.
 //! - `test-resave`: Developer only testing feature.
 //!
-//! # See also
-//!
-//! - [Tutorial](crate::tutorial): A getting started and tutorial guide.
-//! - [Cookbook](crate::cookbook): Examples of using `rust_xlsxwriter`.
-//! - [User Guide]: Working with the `rust_xlsxwriter` library.
-//! - [Release Notes].
-//! - [Roadmap of planned features].
-//!
-//! [User Guide]: https://rustxlsxwriter.github.io/index.html
-//! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
-//! [Roadmap of planned features]:
-//!     https://github.com/jmcnamara/rust_xlsxwriter/issues/1
 //!
 mod app;
 mod chart;
@@ -180,9 +196,11 @@ pub use properties::*;
 pub use protection::*;
 pub use table::*;
 pub use url::*;
-pub use utility::*;
 pub use workbook::*;
 pub use worksheet::*;
+
+#[doc(hidden)]
+pub use utility::*;
 
 #[macro_use]
 extern crate lazy_static;

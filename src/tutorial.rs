@@ -41,7 +41,7 @@ To demonstrate the steps required we will start with a small sample application.
 
 ## Create a sample project
 
-Create a new rust command-line application as follows:
+Create a new Rust command-line application as follows:
 
 ```bash
 $ cargo new hello-xlsx

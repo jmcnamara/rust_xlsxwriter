@@ -14,7 +14,7 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Write some different rust number types to a worksheet.
+    // Write some different Rust number types to a worksheet.
     // Note, u64 isn't supported by Excel.
     worksheet.write_number(0, 0, 1_u8)?;
     worksheet.write_number(1, 0, 2_i16)?;

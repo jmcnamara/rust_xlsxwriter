@@ -433,7 +433,7 @@ use std::borrow::Cow;
 ///     =ToCelsius(212)
 /// ```
 ///
-/// A rust xlsxwriter example that replicates the described Excel functionality
+/// A `rust_xlsxwriter` example that replicates the described Excel functionality
 /// is shown below:
 ///
 ///

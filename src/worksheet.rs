@@ -1050,7 +1050,7 @@ impl Worksheet {
     ///     // Add a worksheet to the workbook.
     ///     let worksheet = workbook.add_worksheet();
     ///
-    ///     // Write some different rust number types to a worksheet.
+    ///     // Write some different Rust number types to a worksheet.
     ///     // Note, u64 isn't supported by Excel.
     ///     worksheet.write_number(0, 0, 1_u8)?;
     ///     worksheet.write_number(1, 0, 2_i16)?;
@@ -1174,7 +1174,7 @@ impl Worksheet {
     /// [`write_string_with_format()`](Worksheet::write_string_with_format())
     /// method below.
     ///
-    /// Excel only supports UTF-8 text in the xlsx file format. Any rust UTF-8
+    /// Excel only supports UTF-8 text in the xlsx file format. Any Rust UTF-8
     /// encoded string can be written with this method. The maximum string size
     /// supported by Excel is 32,767 characters.
     ///
@@ -1250,7 +1250,7 @@ impl Worksheet {
     /// via a [`Format`] struct which can control the font or color or
     /// properties such as bold and italic.
     ///
-    /// Excel only supports UTF-8 text in the xlsx file format. Any rust UTF-8
+    /// Excel only supports UTF-8 text in the xlsx file format. Any Rust UTF-8
     /// encoded string can be written with this method. The maximum string
     /// size supported by Excel is 32,767 characters.
     ///
