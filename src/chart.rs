@@ -2956,8 +2956,15 @@ impl Chart {
         }
 
         if data_label.show_leader_lines {
-            // Write the c:showLeaderLines element.
-            self.write_show_leader_lines();
+            match self.chart_group_type {
+                // Write the c:showLeaderLines element.
+                ChartType::Pie | ChartType::Doughnut => {
+                    self.write_show_leader_lines_2007();
+                }
+                _ => {
+                    self.write_show_leader_lines_2015();
+                }
+            }
         }
     }
 
@@ -2995,11 +3002,32 @@ impl Chart {
             .xml_data_element_only("c:separator", &format!("{separator} "));
     }
 
-    // Write the <c:showLeaderLines> element.
-    fn write_show_leader_lines(&mut self) {
+    // Write the <c:showLeaderLines> element for Excel 2007 (mainly only for Pie
+    // and Doughnut).
+    fn write_show_leader_lines_2007(&mut self) {
         let attributes = [("val", "1")];
 
         self.writer.xml_empty_tag("c:showLeaderLines", &attributes);
+    }
+
+    // Write the <c:showLeaderLines> element for Excel 2015+ (mainly for charts
+    // that aren't Pie or Doughnut).
+    fn write_show_leader_lines_2015(&mut self) {
+        let attributes = [
+            ("uri", "{CE6537A1-D6FC-4f65-9D91-7224C49458BB}"),
+            (
+                "xmlns:c15",
+                "http://schemas.microsoft.com/office/drawing/2012/chart",
+            ),
+        ];
+
+        self.writer.xml_start_tag_only("c:extLst");
+        self.writer.xml_start_tag("c:ext", &attributes);
+
+        self.writer
+            .xml_empty_tag("<c15:showLeaderLines", &[("val", "1")]);
+        self.writer.xml_end_tag("c:ext");
+        self.writer.xml_end_tag("c:extLst");
     }
 
     // Write the <c:showLegendKey> element.

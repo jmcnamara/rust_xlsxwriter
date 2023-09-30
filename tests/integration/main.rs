@@ -220,6 +220,7 @@ mod chart_data_labels43;
 mod chart_data_labels46;
 mod chart_data_labels47;
 mod chart_data_labels50;
+mod chart_data_labels51;
 mod chart_doughnut01;
 mod chart_doughnut02;
 mod chart_doughnut03;
