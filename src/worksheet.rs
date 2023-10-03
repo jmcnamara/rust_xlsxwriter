@@ -7774,16 +7774,12 @@ impl Worksheet {
                             | CellType::RichString {
                                 raw_string: string, ..
                             } => {
-                                if string.contains('\n') {
-                                    let mut max = 0;
-                                    for segment in string.split('\n') {
-                                        let length = utility::pixel_width(segment);
-                                        max = cmp::max(max, length);
-                                    }
-                                    max
-                                } else {
-                                    utility::pixel_width(string)
+                                let mut max = 0;
+                                for segment in string.lines() {
+                                    let length = utility::pixel_width(segment);
+                                    max = cmp::max(max, length);
                                 }
+                                max
                             }
 
                             // For numbers we use a workaround/optimization
