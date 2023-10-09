@@ -1771,7 +1771,7 @@ impl TableColumn {
     ///
     pub fn set_formula(mut self, formula: impl Into<Formula>) -> TableColumn {
         let mut formula = formula.into();
-        formula = formula.clone().use_table_functions();
+        formula = formula.clone().use_table_functions().use_future_functions();
         self.formula = Some(formula);
         self
     }
@@ -1968,7 +1968,7 @@ impl TableColumn {
             TableFunction::StdDev => Formula::new(format!("SUBTOTAL(107,[{column_name}])")),
             TableFunction::Average => Formula::new(format!("SUBTOTAL(101,[{column_name}])")),
             TableFunction::CountNumbers => Formula::new(format!("SUBTOTAL(102,[{column_name}])")),
-            TableFunction::Custom(formula) => formula.clone(),
+            TableFunction::Custom(formula) => formula.clone().use_future_functions(),
         }
     }
 }
