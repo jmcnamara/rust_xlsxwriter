@@ -19,7 +19,7 @@ use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 use crate::{
     utility, Border, ChartSeriesCacheData, ColNum, DefinedName, DefinedNameType, DocProperties,
-    Fill, Font, RowNum, NUM_IMAGE_FORMATS,
+    Fill, Font, RowNum, Visible, NUM_IMAGE_FORMATS,
 };
 use crate::{Color, FormatPattern};
 
@@ -1591,7 +1591,11 @@ impl Workbook {
             let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
             sheet_names.insert(sheet_name.clone(), sheet_index as u16);
 
-            package_options.worksheet_names.push(sheet_name.clone());
+            if worksheet.visible == Visible::VeryHidden {
+                package_options.worksheet_names.push(String::new());
+            } else {
+                package_options.worksheet_names.push(sheet_name.clone());
+            }
 
             package_options.properties = self.properties.clone();
 
@@ -1799,7 +1803,7 @@ impl Workbook {
 
         let mut worksheet_data = vec![];
         for worksheet in &self.worksheets {
-            worksheet_data.push((worksheet.name.clone(), worksheet.hidden));
+            worksheet_data.push((worksheet.name.clone(), worksheet.visible));
         }
 
         for (index, data) in worksheet_data.iter().enumerate() {
@@ -1811,14 +1815,16 @@ impl Workbook {
     }
 
     // Write the <sheet> element.
-    fn write_sheet(&mut self, name: &str, is_hidden: bool, index: u16) {
+    fn write_sheet(&mut self, name: &str, visible: Visible, index: u16) {
         let sheet_id = format!("{index}");
         let ref_id = format!("rId{index}");
 
         let mut attributes = vec![("name", name.to_string()), ("sheetId", sheet_id)];
 
-        if is_hidden {
-            attributes.push(("state", "hidden".to_string()));
+        match visible {
+            Visible::Default => {}
+            Visible::Hidden => attributes.push(("state", "hidden".to_string())),
+            Visible::VeryHidden => attributes.push(("state", "veryHidden".to_string())),
         }
 
         attributes.push(("r:id", ref_id));

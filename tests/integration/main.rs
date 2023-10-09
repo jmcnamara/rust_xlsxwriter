@@ -369,6 +369,7 @@ mod header_image19;
 mod header_image20;
 mod header_image21;
 mod hide01;
+mod hide02;
 mod hyperlink01;
 mod hyperlink02;
 mod hyperlink03;

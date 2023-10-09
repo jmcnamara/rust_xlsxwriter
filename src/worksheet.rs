@@ -125,7 +125,7 @@ pub struct Worksheet {
     pub(crate) name: String,
     pub(crate) active: bool,
     pub(crate) selected: bool,
-    pub(crate) hidden: bool,
+    pub(crate) visible: Visible,
     pub(crate) first_sheet: bool,
     pub(crate) uses_string_table: bool,
     pub(crate) has_dynamic_arrays: bool,
@@ -305,7 +305,7 @@ impl Worksheet {
             name: String::new(),
             active: false,
             selected: false,
-            hidden: false,
+            visible: Visible::Default,
             first_sheet: false,
             uses_string_table: false,
             has_dynamic_arrays: false,
@@ -5792,7 +5792,7 @@ impl Worksheet {
         // Activated worksheets must also be selected and cannot be hidden.
         if self.active {
             self.selected = true;
-            self.hidden = false;
+            self.visible = Visible::Default;
         }
 
         self
@@ -5852,7 +5852,7 @@ impl Worksheet {
 
         // Selected worksheets cannot be hidden.
         if self.selected {
-            self.hidden = false;
+            self.visible = Visible::Default;
         }
 
         self
@@ -5908,10 +5908,38 @@ impl Worksheet {
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_hidden.png">
     ///
     pub fn set_hidden(&mut self, enable: bool) -> &mut Worksheet {
-        self.hidden = enable;
+        if enable {
+            self.visible = Visible::Hidden;
+        } else {
+            self.visible = Visible::Default;
+        }
 
         // Hidden worksheets cannot be active or hidden.
-        if self.hidden {
+        if self.visible == Visible::Hidden {
+            self.selected = false;
+            self.active = false;
+        }
+
+        self
+    }
+
+    /// Hide a worksheet. Can only be unhidden in Excel by VBA.
+    ///
+    /// The `set_very_hidden()` method can be used to hide a worksheet similar
+    /// to the [`set_hidden()`](Worksheet::set_hidden) method. The difference is
+    /// that the worksheet cannot be unhidden in the the Excel user interface.
+    /// The Excel worksheet `xlSheetVeryHidden` option can only be unset
+    /// programmatically by VBA.
+    ///
+    pub fn set_very_hidden(&mut self, enable: bool) -> &mut Worksheet {
+        if enable {
+            self.visible = Visible::VeryHidden;
+        } else {
+            self.visible = Visible::Default;
+        }
+
+        // Hidden worksheets cannot be active or hidden.
+        if self.visible == Visible::VeryHidden {
             self.selected = false;
             self.active = false;
         }
@@ -5939,7 +5967,7 @@ impl Worksheet {
 
         // First visible worksheet cannot be hidden.
         if self.selected {
-            self.hidden = false;
+            self.visible = Visible::Default;
         }
         self
     }
@@ -11465,6 +11493,13 @@ pub(crate) enum DefinedNameType {
     Local,
     PrintArea,
     PrintTitles,
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub(crate) enum Visible {
+    Default,
+    Hidden,
+    VeryHidden,
 }
 
 // -----------------------------------------------------------------------

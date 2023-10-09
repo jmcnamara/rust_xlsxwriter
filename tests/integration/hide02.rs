@@ -8,7 +8,7 @@
 use crate::common;
 use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
 
-// Test to demonstrate hidden worksheets.
+// Test to demonstrate very hidden worksheets.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -17,10 +17,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet3 = Worksheet::new();
 
     // This should be ignored since there is no other active worksheet.
-    worksheet1.set_hidden(true);
+    worksheet1.set_very_hidden(true);
 
     // This should be set.
-    worksheet2.set_hidden(true);
+    worksheet2.set_very_hidden(true);
 
     workbook.push_worksheet(worksheet1);
     workbook.push_worksheet(worksheet2);
@@ -32,9 +32,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_hide01() {
+fn test_hide02() {
     let test_runner = common::TestRunner::new()
-        .set_name("hide01")
+        .set_name("hide02")
         .set_function(create_new_xlsx_file)
         .initialize();
 

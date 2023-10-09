@@ -476,11 +476,17 @@ impl<W: Write + Seek + Send> Packager<W> {
         app.properties = options.properties.clone();
         app.doc_security = options.doc_security;
 
-        app.add_heading_pair("Worksheets", options.num_worksheets);
+        let mut num_worksheets = 0;
 
         for sheet_name in &options.worksheet_names {
-            app.add_part_name(sheet_name);
+            // Ignore veryHidden worksheets
+            if !sheet_name.is_empty() {
+                app.add_part_name(sheet_name);
+                num_worksheets += 1;
+            }
         }
+
+        app.add_heading_pair("Worksheets", num_worksheets);
 
         if !options.defined_names.is_empty() {
             app.add_heading_pair("Named Ranges", options.defined_names.len() as u16);
