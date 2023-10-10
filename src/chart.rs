@@ -1285,6 +1285,26 @@ impl Chart {
             if series.category_range.has_data() {
                 series.category_range.validate()?;
             }
+
+            // Validate Polynomial trendline range.
+            if let ChartTrendlineType::Polynomial(order) = series.trendline.trend_type {
+                if !(2..6).contains(&order) {
+                    return Err(XlsxError::ChartError(
+                        "Chart series Polynomial trendline order must be in the Excel range 2-6"
+                            .to_string(),
+                    ));
+                }
+            }
+
+            // Validate Moving Average trendline range.
+            if let ChartTrendlineType::MovingAverage(period) = series.trendline.trend_type {
+                if !(2..4).contains(&period) {
+                    return Err(XlsxError::ChartError(
+                        "Chart series Moving Average trendline period must be in the Excel range 2-4"
+                            .to_string(),
+                    ));
+                }
+            }
         }
 
         Ok(self)
@@ -1950,6 +1970,11 @@ impl Chart {
             if let Some(data_label) = &series.data_label {
                 // Write the c:dLbls element.
                 self.write_data_labels(data_label, &series.custom_data_labels, max_points);
+            }
+
+            if series.trendline.trend_type != ChartTrendlineType::None {
+                // Write the c:trendline element.
+                self.write_trendline(&series.trendline);
             }
 
             // Write the c:cat element.
@@ -2969,6 +2994,127 @@ impl Chart {
                 }
             }
         }
+    }
+
+    // Write the <c:trendline> element.
+    fn write_trendline(&mut self, trendline: &ChartTrendline) {
+        self.writer.xml_start_tag_only("c:trendline");
+
+        if !trendline.name.is_empty() {
+            // Write the c:name element.
+            self.write_trendline_name(&trendline.name);
+        }
+
+        // Write the c:spPr formatting element.
+        self.write_sp_pr(&trendline.format);
+
+        // Write the c:trendlineType element.
+        self.write_trendline_type(trendline);
+
+        if let ChartTrendlineType::Polynomial(order) = trendline.trend_type {
+            self.write_order(order as usize);
+        }
+
+        if let ChartTrendlineType::MovingAverage(period) = trendline.trend_type {
+            // Write the c:period element.
+            self.write_trendline_period(period);
+        }
+
+        if trendline.forward_period > 0.0 {
+            // Write the c:forward element.
+            self.write_trendline_forward(trendline.forward_period);
+        }
+
+        if trendline.backward_period > 0.0 {
+            // Write the c:backward element.
+            self.write_trendline_backward(trendline.backward_period);
+        }
+
+        if let Some(intercept) = trendline.intercept {
+            // Write the c:intercept element.
+            self.write_trendline_intercept(intercept);
+        }
+
+        if trendline.display_r_squared {
+            // Write the c:dispRSqr element.
+            self.write_disp_rsqr();
+        }
+
+        if trendline.display_equation {
+            // Write the c:dispEq element.
+            self.write_trendline_display_equation();
+        }
+
+        self.writer.xml_end_tag("c:trendline");
+    }
+
+    // Write the <c:name> element.
+    fn write_trendline_name(&mut self, name: &str) {
+        self.writer.xml_data_element_only("c:name", name);
+    }
+
+    // Write the <c:trendlineType> element.
+    fn write_trendline_type(&mut self, trendline: &ChartTrendline) {
+        let attributes = [("val", trendline.trend_type.to_string())];
+
+        self.writer.xml_empty_tag("c:trendlineType", &attributes);
+    }
+
+    // Write the <c:forward> element.
+    fn write_trendline_forward(&mut self, value: f64) {
+        let attributes = [("val", value.to_string())];
+
+        self.writer.xml_empty_tag("c:forward", &attributes);
+    }
+
+    // Write the <c:backward> element.
+    fn write_trendline_backward(&mut self, value: f64) {
+        let attributes = [("val", value.to_string())];
+
+        self.writer.xml_empty_tag("c:backward", &attributes);
+    }
+
+    // Write the <c:dispRSqr> element.
+    fn write_disp_rsqr(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer.xml_empty_tag("c:dispRSqr", &attributes);
+    }
+
+    // Write the <c:dispEq> element.
+    fn write_trendline_display_equation(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer.xml_empty_tag("c:dispEq", &attributes);
+
+        // Write the c:trendlineLbl element.
+        self.write_trendline_label();
+    }
+
+    // Write the <c:trendlineLbl> element.
+    fn write_trendline_label(&mut self) {
+        self.writer.xml_start_tag_only("c:trendlineLbl");
+
+        // Write the c:layout element.
+        self.write_layout();
+
+        self.write_number_format("General", false);
+
+        self.writer.xml_end_tag("c:trendlineLbl");
+    }
+
+    // Write the <c:period> element.
+    fn write_trendline_period(&mut self, value: u8) {
+        let attributes = [("val", value.to_string())];
+
+        self.writer.xml_empty_tag("c:period", &attributes);
+    }
+
+    // Write the <c:intercept> element.
+    fn write_trendline_intercept(&mut self, value: f64) {
+        let attributes = [("val", value.to_string())];
+
+        self.writer.xml_empty_tag("c:intercept", &attributes);
     }
 
     // Write the <c:showVal> element.
@@ -4027,6 +4173,7 @@ pub struct ChartSeries {
     pub(crate) overlap: i8,
     pub(crate) invert_if_negative: bool,
     pub(crate) inverted_color: Color,
+    pub(crate) trendline: ChartTrendline,
 }
 
 #[allow(clippy::new_without_default)]
@@ -4139,6 +4286,7 @@ impl ChartSeries {
             overlap: 0,
             invert_if_negative: false,
             inverted_color: Color::Default,
+            trendline: ChartTrendline::new(),
         }
     }
 
@@ -5044,6 +5192,12 @@ impl ChartSeries {
             .iter()
             .map(|color| ChartPoint::new().set_format(ChartSolidFill::new().set_color(*color)))
             .collect();
+        self
+    }
+
+    /// TODO
+    pub fn set_trendline(&mut self, trendline: &ChartTrendline) -> &mut ChartSeries {
+        self.trendline = trendline.clone();
         self
     }
 
@@ -11639,5 +11793,135 @@ impl ChartFont {
     // Internal check for font properties that need a sub-element.
     pub(crate) fn is_latin(&self) -> bool {
         !self.name.is_empty() || self.pitch_family > 0 || self.charset > 0
+    }
+}
+
+/// TODO
+#[derive(Clone)]
+pub struct ChartTrendline {
+    name: String,
+    trend_type: ChartTrendlineType,
+    format: ChartFormat,
+    forward_period: f64,
+    backward_period: f64,
+    display_equation: bool,
+    display_r_squared: bool,
+    intercept: Option<f64>,
+}
+
+impl ChartTrendline {
+    /// TODO
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ChartTrendline {
+        ChartTrendline {
+            name: String::new(),
+            trend_type: ChartTrendlineType::None,
+            format: ChartFormat::new(),
+            forward_period: 0.0,
+            backward_period: 0.0,
+            display_r_squared: false,
+            display_equation: false,
+            intercept: None,
+        }
+    }
+
+    /// todo
+    pub fn set_type(&mut self, trend: ChartTrendlineType) -> &mut ChartTrendline {
+        self.trend_type = trend;
+        self
+    }
+
+    /// Set the formatting properties for a chart trendline.
+    ///
+    /// Set the formatting properties for a chart trendline via a
+    /// [`ChartFormat`] object or a sub struct that implements
+    /// [`IntoChartFormat`].
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Parameters
+    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
+    ///
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartTrendline
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
+        self
+    }
+
+    /// TODO
+    pub fn set_name(&mut self, name: impl Into<String>) -> &mut ChartTrendline {
+        self.name = name.into();
+        self
+    }
+
+    /// TODO
+    pub fn set_forward_period(&mut self, value: impl Into<f64>) -> &mut ChartTrendline {
+        self.forward_period = value.into();
+        self
+    }
+
+    /// TODO
+    pub fn set_backward_period(&mut self, value: impl Into<f64>) -> &mut ChartTrendline {
+        self.backward_period = value.into();
+        self
+    }
+
+    /// TODO
+    pub fn set_display_equation(&mut self, enable: bool) -> &mut ChartTrendline {
+        self.display_equation = enable;
+        self
+    }
+
+    /// TODO
+    pub fn set_display_r_squared(&mut self, enable: bool) -> &mut ChartTrendline {
+        self.display_r_squared = enable;
+        self
+    }
+
+    /// TODO
+    pub fn set_intercept(&mut self, value: impl Into<f64>) -> &mut ChartTrendline {
+        self.intercept = Some(value.into());
+        self
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+/// The `ChartTrendlineType` enum defines the trendline types of a [`ChartSeries`].
+///
+/// TODO
+///
+pub enum ChartTrendlineType {
+    /// TODO.
+    None,
+
+    /// TODO.
+    Linear,
+
+    /// TODO.
+    Polynomial(u8),
+
+    /// TODO.
+    MovingAverage(u8),
+}
+
+impl fmt::Display for ChartTrendlineType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ChartTrendlineType::None => write!(f, "none"),
+            ChartTrendlineType::Linear => write!(f, "linear"),
+            ChartTrendlineType::Polynomial(_) => write!(f, "poly"),
+            ChartTrendlineType::MovingAverage(_) => write!(f, "movingAvg"),
+        }
     }
 }
