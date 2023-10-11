@@ -165,7 +165,7 @@ impl Chart {
     /// [`series.set_values()`][ChartSeries::set_values]. See the example below.
     ///
     /// There are some shortcut versions of `new()` such as
-    /// [`Chart::new_pie()`](Chart::new_pie) that are more useful/succinct for
+    /// [`ChartSeries::new_pie()`](Chart::new_pie) that are more useful/succinct for
     /// charts that don't have subtypes.
     ///
     /// # Parameters
@@ -1370,7 +1370,11 @@ impl Chart {
         self.axis_ids = (axis_id_1, axis_id_2);
     }
 
-    // TODO
+    // Check for any legend entries that have been hidden/deleted via the
+    // ChartSeries::delete_from_legend() and
+    // ChartTrendline::delete_from_legend() methods. These can in turn be
+    // overridden by the `ChartLegend::delete_entries()` method, which is
+    // checked for first.
     fn deleted_legend_entries(&self) -> Vec<usize> {
         // Use the user supplied entries, if available.
         if !self.legend.deleted_entries.is_empty() {
@@ -5115,7 +5119,6 @@ impl ChartSeries {
     /// individual segments of the chart. In all other chart types the formatting
     /// happens at the chart series level.
     ///
-    ///
     /// # Parameters
     ///
     /// `points`: A slice of [`ChartPoint`] objects.
@@ -5255,7 +5258,74 @@ impl ChartSeries {
         self
     }
 
-    /// TODO
+    /// Set the trendline for a chart series.
+    ///
+    /// Excel allow you to add a trendline to a data series that represents the
+    /// trend or regression of the data using different types of fit. A
+    /// [`ChartTrendline`] struct reference is used to represents the options of
+    /// Excel trendlines and can be added to a series via the
+    /// [`ChartSeries::set_trendline()`](ChartSeries::set_trendline) method.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/trendline_options.png">
+    ///
+    /// # Parameters
+    ///
+    /// `trendline`: A [`ChartTrendline`] reference.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding a trendline to a chart data series. The options
+    /// used are shown in the image above.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_trendline_intro.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartTrendline, ChartTrendlineType, ChartType, Workbook, XlsxError};
+    /// #
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some data for the chart.
+    ///     worksheet.write(0, 0, 11.1)?;
+    ///     worksheet.write(1, 0, 18.8)?;
+    ///     worksheet.write(2, 0, 33.2)?;
+    ///     worksheet.write(3, 0, 37.5)?;
+    ///     worksheet.write(4, 0, 52.1)?;
+    ///     worksheet.write(5, 0, 58.9)?;
+    ///
+    ///     // Create a trendline.
+    ///     let mut trendline = ChartTrendline::new();
+    ///     trendline
+    ///         .set_type(ChartTrendlineType::Linear)
+    ///         .display_equation(true)
+    ///         .display_r_squared(true);
+    ///
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with  a trendline
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_trendline(&trendline);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    ///     // Save the file.
+    ///     workbook.save("chart.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_trendline_intro.png">
+    ///
     pub fn set_trendline(&mut self, trendline: &ChartTrendline) -> &mut ChartSeries {
         self.trendline = trendline.clone();
         self
@@ -5496,7 +5566,85 @@ impl ChartSeries {
         self
     }
 
-    /// TODO
+    /// Delete/hide the series name from the chart legend.
+    ///
+    /// The `delete_from_legend()` method deletes/hides the series name from the
+    /// chart legend. This is sometimes required if there are a lot of secondary
+    /// series and their names are cluttering the chart legend.
+    ///
+    /// Note, to hide all the names in the chart legend you should use the
+    /// [`ChartLegend::set_hidden`](ChartLegend::set_hidden) method instead.
+    ///
+    /// See also the
+    /// [`ChartTrendline::delete_from_legend`](ChartTrendline::delete_from_legend)
+    /// and the [`ChartLegend::delete_entries`](ChartLegend::delete_entries)
+    /// methods.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating deleting/hiding a series name from the chart
+    /// legend.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_delete_from_legend.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 30)?;
+    /// #     worksheet.write(1, 0, 20)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(0, 1, 10)?;
+    /// #     worksheet.write(1, 1, 10)?;
+    /// #     worksheet.write(2, 1, 10)?;
+    /// #     worksheet.write(0, 2, 20)?;
+    /// #     worksheet.write(1, 2, 15)?;
+    /// #     worksheet.write(2, 2, 30)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a series whose name will appear in the legend.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Add a series but delete/hide its names from the legend.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$B$1:$B$3")
+    ///         .delete_from_legend(true);
+    ///
+    ///     // Add a series whose name will appear in the legend.
+    ///     chart.add_series().set_values("Sheet1!$C$1:$C$3");
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 3, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_series_delete_from_legend.png">
+    ///
+    ///
+    /// The default display without deleting the names from the legend would
+    /// look like this:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_delete_from_legend2.png">
+    ///
     pub fn delete_from_legend(&mut self, enable: bool) -> &mut ChartSeries {
         self.delete_from_legend = enable;
         self
@@ -9486,7 +9634,86 @@ impl ChartLegend {
         self
     }
 
-    /// TODO
+    /// Delete/hide series names from the chart legend.
+    ///
+    /// The `delete_entries()` method deletes/hides one or more series names
+    /// from the chart legend. This is sometimes required if there are a lot of
+    /// secondary series and their names are cluttering the chart legend.
+    ///
+    /// The same effect can be accomplished using the
+    /// [`ChartSeries::delete_from_legend`](ChartSeries::delete_from_legend) and
+    /// [`ChartTrendline::delete_from_legend`](ChartTrendline::delete_from_legend)
+    /// methods. However, this method can be used for some edge cases such as
+    /// Pie/Doughnut charts which display legend entries for each point in the
+    /// series.
+    ///
+    /// Note, to hide all the names in the chart legend you should use the
+    /// [`ChartLegend::set_hidden`](ChartLegend::set_hidden) method instead.
+    ///
+    /// # Parameters
+    ///
+    /// * `entries` - A slice ref of [`usize`] zero-indexed indices of the
+    ///   series names to be hidden.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating deleting/hiding a series name from the chart
+    /// legend.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_legend_delete_entries.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 30)?;
+    /// #     worksheet.write(1, 0, 20)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #     worksheet.write(0, 1, 10)?;
+    /// #     worksheet.write(1, 1, 10)?;
+    /// #     worksheet.write(2, 1, 10)?;
+    /// #     worksheet.write(0, 2, 20)?;
+    /// #     worksheet.write(1, 2, 15)?;
+    /// #     worksheet.write(2, 2, 30)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add some data series.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///     chart.add_series().set_values("Sheet1!$B$1:$B$3");
+    ///     chart.add_series().set_values("Sheet1!$C$1:$C$3");
+    ///
+    ///     // Delete the name of the second series (counted from zero) from the chart
+    ///     // legend.
+    ///     chart.legend().delete_entries(&[1]);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 3, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_delete_from_legend.png">
+    ///
+    ///
+    /// The default display without deleting the names from the legend would
+    /// look like this:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_delete_from_legend2.png">
+    ///
     pub fn delete_entries(&mut self, entries: &[usize]) -> &mut ChartLegend {
         self.deleted_entries = entries.to_vec();
         self
@@ -10350,7 +10577,9 @@ impl ChartLine {
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
     ///         .set_format(
-    ///             ChartFormat::new().set_line(ChartLine::new().set_dash_type(ChartLineDashType::DashDot)),
+    ///             ChartFormat::new()
+    ///                 .set_line(ChartLine::new()
+    ///                 .set_dash_type(ChartLineDashType::DashDot)),
     ///         );
     ///
     ///     // Add the chart to the worksheet.
@@ -11870,7 +12099,69 @@ impl ChartFont {
     }
 }
 
-/// TODO
+/// The `ChartTrendline` struct represents a trendline for a chart series.
+///
+/// Excel allow you to add a trendline to a data series that represents the
+/// trend or regression of the data using different types of fit. The
+/// `ChartTrendline` struct represents the options of Excel trendlines and can
+/// be added to a series via the
+/// [`ChartSeries::set_trendline()`](ChartSeries::set_trendline) method.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/trendline_options.png">
+///
+/// # Examples
+///
+/// An example of adding a trendline to a chart data series. The options used
+/// are shown in the image above.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_trendline_intro.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartTrendline, ChartTrendlineType, ChartType, Workbook, XlsxError};
+/// #
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Add some data for the chart.
+///     worksheet.write(0, 0, 11.1)?;
+///     worksheet.write(1, 0, 18.8)?;
+///     worksheet.write(2, 0, 33.2)?;
+///     worksheet.write(3, 0, 37.5)?;
+///     worksheet.write(4, 0, 52.1)?;
+///     worksheet.write(5, 0, 58.9)?;
+///
+///     // Create a trendline.
+///     let mut trendline = ChartTrendline::new();
+///     trendline
+///         .set_type(ChartTrendlineType::Linear)
+///         .display_equation(true)
+///         .display_r_squared(true);
+///
+///     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Line);
+///
+///     // Add a data series with  a trendline
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .set_trendline(&trendline);
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+///     // Save the file.
+///     workbook.save("chart.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_trendline_intro.png">
+///
 #[derive(Clone)]
 pub struct ChartTrendline {
     name: String,
@@ -11885,7 +12176,7 @@ pub struct ChartTrendline {
 }
 
 impl ChartTrendline {
-    /// TODO
+    /// Create a new `ChartTrendline` object to represent a Chart series trendline.
     #[allow(clippy::new_without_default)]
     pub fn new() -> ChartTrendline {
         ChartTrendline {
@@ -11901,7 +12192,69 @@ impl ChartTrendline {
         }
     }
 
-    /// todo
+    /// Set the type of the Chart series trendlines.
+    ///
+    /// Set the trendline type to one of the Excel allowable types represented
+    /// by the [`ChartTrendlineType`] enum.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/trendline_types.png">
+    ///
+    /// # Parameters
+    ///
+    /// * `trend` - A [`ChartTrendlineType`] enum reference.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding a trendline to a chart data series. Demonstrates
+    /// setting the polynomial trendline type.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_trendline_set_type.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartTrendline, ChartTrendlineType, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 11.1)?;
+    /// #     worksheet.write(1, 0, 18.8)?;
+    /// #     worksheet.write(2, 0, 33.2)?;
+    /// #     worksheet.write(3, 0, 37.5)?;
+    /// #     worksheet.write(4, 0, 52.1)?;
+    /// #     worksheet.write(5, 0, 58.9)?;
+    /// #
+    ///     // Create a trendline.
+    ///     let mut trendline = ChartTrendline::new();
+    ///     trendline
+    ///         .set_type(ChartTrendlineType::Polynomial(3))
+    ///         .display_equation(true);
+    ///
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with  a trendline
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_trendline(&trendline);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_trendline_set_type.png">
+    ///
     pub fn set_type(&mut self, trend: ChartTrendlineType) -> &mut ChartTrendline {
         self.trend_type = trend;
         self
@@ -11927,6 +12280,62 @@ impl ChartTrendline {
     /// convert into a `ChartFormat` instance. See the docs for
     /// [`IntoChartFormat`] for details.
     ///
+    /// # Examples
+    ///
+    /// An example of adding a trendline to a chart data series with formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_trendline_set_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartLine, ChartLineDashType, ChartTrendline, ChartTrendlineType, ChartType, Color,
+    /// #     Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 11.1)?;
+    /// #     worksheet.write(1, 0, 18.8)?;
+    /// #     worksheet.write(2, 0, 33.2)?;
+    /// #     worksheet.write(3, 0, 37.5)?;
+    /// #     worksheet.write(4, 0, 52.1)?;
+    /// #     worksheet.write(5, 0, 58.9)?;
+    /// #
+    ///     // Create a trendline.
+    ///     let mut trendline = ChartTrendline::new();
+    ///     trendline.set_type(ChartTrendlineType::Linear).set_format(
+    ///         ChartLine::new()
+    ///             .set_color(Color::Red)
+    ///             .set_width(1)
+    ///             .set_dash_type(ChartLineDashType::LongDash),
+    ///     );
+    ///
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with  a trendline
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_trendline(&trendline);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_trendline_set_format.png">
+    ///
     pub fn set_format<T>(&mut self, format: T) -> &mut ChartTrendline
     where
         T: IntoChartFormat,
@@ -11935,43 +12344,220 @@ impl ChartTrendline {
         self
     }
 
-    /// TODO
+    /// Set the name for a chart trendline.
+    ///
+    /// Set a custom name for a the trendline when it is displayed in the chart
+    /// legend.
+    ///
+    /// # Parameters
+    ///
+    /// * `name` - The custom string to name the trendline in the chart legend.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding a trendline to a chart data series with a custom
+    /// name.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_trendline_set_name.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartTrendline, ChartTrendlineType, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 11.1)?;
+    /// #     worksheet.write(1, 0, 18.8)?;
+    /// #     worksheet.write(2, 0, 33.2)?;
+    /// #     worksheet.write(3, 0, 37.5)?;
+    /// #     worksheet.write(4, 0, 52.1)?;
+    /// #     worksheet.write(5, 0, 58.9)?;
+    /// #
+    ///     // Create a trendline.
+    ///     let mut trendline = ChartTrendline::new();
+    ///     trendline
+    ///         .set_type(ChartTrendlineType::Linear)
+    ///         .set_name("My trend name");
+    ///
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with  a trendline
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_trendline(&trendline);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_trendline_set_name.png">
+    ///
     pub fn set_name(&mut self, name: impl Into<String>) -> &mut ChartTrendline {
         self.name = name.into();
         self
     }
 
-    /// TODO
-    pub fn set_forward_period(&mut self, value: impl Into<f64>) -> &mut ChartTrendline {
-        self.forward_period = value.into();
+    /// Set the forward period for a chart trendline.
+    ///
+    /// Extend the trendline forward by a multiplier of the default length.
+    ///
+    /// # Parameters
+    ///
+    /// * `period` - The forward period value.
+    ///
+    pub fn set_forward_period(&mut self, period: impl Into<f64>) -> &mut ChartTrendline {
+        self.forward_period = period.into();
         self
     }
 
-    /// TODO
-    pub fn set_backward_period(&mut self, value: impl Into<f64>) -> &mut ChartTrendline {
-        self.backward_period = value.into();
+    /// Set the backward period for a chart trendline.
+    ///
+    /// Extend the trendline backward by a multiplier of the default length.
+    ///
+    /// # Parameters
+    ///
+    /// * `period` - The backward period value.
+    ///
+    pub fn set_backward_period(&mut self, period: impl Into<f64>) -> &mut ChartTrendline {
+        self.backward_period = period.into();
         self
     }
 
-    /// TODO
+    /// Display the trendline equation for a chart trendline.
+    ///
+    /// Note, the equation is calculated by Excel at runtime. It isn't
+    /// calculated by `rust_xlsxwriter` or stored in the Excel file format.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
     pub fn display_equation(&mut self, enable: bool) -> &mut ChartTrendline {
         self.display_equation = enable;
         self
     }
 
-    /// TODO
+    /// Display the R-squared value for a chart trendline.
+    ///
+    /// Display the R-squared [coefficient of determination] for the trendline
+    /// as an indicator of how accurate the fit is.
+    ///
+    /// Note, the R-squared value is calculated by Excel at runtime. It isn't
+    /// calculated by `rust_xlsxwriter` or stored in the Excel file format.
+    ///
+    ///
+    /// [coefficient of determination]:
+    ///     https://en.wikipedia.org/wiki/Coefficient_of_determination
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
     pub fn display_r_squared(&mut self, enable: bool) -> &mut ChartTrendline {
         self.display_r_squared = enable;
         self
     }
 
-    /// TODO
-    pub fn set_intercept(&mut self, value: impl Into<f64>) -> &mut ChartTrendline {
-        self.intercept = Some(value.into());
+    /// Set the Y-axis intercept for a chart trendline.
+    ///
+    /// Set the point where the trendline will intercept the Y-axis.
+    ///
+    /// # Parameters
+    ///
+    /// * `intercept` - The intercept with the Y-axis.
+    ///
+    pub fn set_intercept(&mut self, intercept: impl Into<f64>) -> &mut ChartTrendline {
+        self.intercept = Some(intercept.into());
         self
     }
 
-    /// TODO
+    /// Delete/hide the trendline name from the chart legend.
+    ///
+    /// The `delete_from_legend()` method deletes/hides the trendline name from
+    /// the chart legend. This is often desirable since the trendlines are
+    /// generally obvious relative to their series and their names can clutter
+    /// the chart legend.
+    ///
+    /// See also the
+    /// [`ChartSeries::delete_from_legend`](ChartSeries::delete_from_legend) and
+    /// the [`ChartLegend::delete_entries`](ChartLegend::delete_entries)
+    /// methods.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding a trendline to a chart data series. This
+    /// demonstrates deleting/hiding the trendline name from the chart legend.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_trendline_delete_from_legend.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartTrendline, ChartTrendlineType, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 11.1)?;
+    /// #     worksheet.write(1, 0, 18.8)?;
+    /// #     worksheet.write(2, 0, 33.2)?;
+    /// #     worksheet.write(3, 0, 37.5)?;
+    /// #     worksheet.write(4, 0, 52.1)?;
+    /// #     worksheet.write(5, 0, 58.9)?;
+    /// #
+    ///     // Create a trendline.
+    ///     let mut trendline = ChartTrendline::new();
+    ///     trendline
+    ///         .set_type(ChartTrendlineType::Linear)
+    ///         .delete_from_legend(true);
+    ///
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with  a trendline
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_trendline(&trendline);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_trendline_delete_from_legend.png">
+    ///
+    /// The default display without deleting the name from the legend would look
+    /// like this:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_trendline_delete_from_legend2.png">
+    ///
     pub fn delete_from_legend(&mut self, enable: bool) -> &mut ChartTrendline {
         self.delete_from_legend = enable;
         self
@@ -11979,30 +12565,39 @@ impl ChartTrendline {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-/// The `ChartTrendlineType` enum defines the trendline types of a [`ChartSeries`].
+/// The `ChartTrendlineType` enum defines the trendline types of a
+/// [`ChartSeries`].
 ///
-/// TODO
+/// The following are the trendline types supported by Excel.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/trendline_types.png">
+///
+/// The trendline type is used in conjunction with the
+/// [`ChartTrendline::set_type()`](ChartTrendline::set_type) method and a
+/// [`ChartSeries`].
 ///
 pub enum ChartTrendlineType {
-    /// TODO.
+    /// Don't show any trendline for the data series. The default.
     None,
 
-    /// TODO.
+    /// Display an exponential fit trendline.
     Exponential,
 
-    /// TODO.
+    /// Display a linear best fit trendline.
     Linear,
 
-    /// TODO.
+    /// Display a logarithmic best fit trendline.
     Logarithmic,
 
-    /// TODO.
+    /// Display a polynomial fit trendline. The order of the polynomial can be
+    /// specified in the range 2-6.
     Polynomial(u8),
 
-    /// TODO.
+    /// Display a power fit trendline.
     Power,
 
-    /// TODO.
+    /// Display a moving average trendline. The period of the moving average can
+    /// be specified in the range 2-4.
     MovingAverage(u8),
 }
 
