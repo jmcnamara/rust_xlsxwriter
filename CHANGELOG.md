@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.50.0] - 2023-10-12
+
+### Added
+
+- Added support for chart trendlines (Linear, Polynomial, Moving Average, etc.)
+  via the [`ChartTrendline`] struct and methods.
+
+- Added the [`worksheet.set_very_hidden()`] method to hide a worksheet similar
+  to the [`worksheet.set_hidden()`] method. The difference is that the worksheet
+  can only be unhidden by VBA and cannot be unhidden in the the Excel user
+  interface.
+
+- Added support for leader lines to non-Pie charts.
+
+### Fixed
+
+- Fixed handling of [future functions] in table formulas.
+
+
+[`ChartTrendline`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartTrendline.html
+[`worksheet.set_very_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_very_hidden
+[future functions]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Formula.html#formulas-added-in-excel-2010-and-later
+
+
 ## [0.49.0] - 2023-09-19
 
 ### Added

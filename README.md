@@ -120,7 +120,7 @@ frequently.
 
 Recent changes:
 
-- Added chart options for displaying non-data cells.
+- Added chart trendlines.
 - Added custom functions to table totals.
 - Added Wasm and Polars feature flags for compatibility.
 

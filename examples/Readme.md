@@ -279,6 +279,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_legend.rs` - An example of getting the chart legend object and
   setting some of its properties.
 
+* `doc_chart_legend_delete_entries.rs` - A chart example demonstrating
+  deleting/hiding a series name from the chart legend.
+
 * `doc_chart_legend_set_font.rs` - An example of setting the font for a
   chart legend.
 
@@ -324,6 +327,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_push_series.rs` - An example of creating a chart series as a
   standalone object and then adding it to a chart via the
   [`chart.push_series()`](Chart::add_series) method.
+
+* `doc_chart_series_delete_from_legend.rs` - A chart example demonstrating
+  deleting/hiding a series name from the chart legend.
 
 * `doc_chart_series_set_categories.rs` - A chart example demonstrating
   setting the chart series categories and values.
@@ -412,6 +418,22 @@ documentation and generally show how an individual function works.
 
 * `doc_chart_title_set_name.rs` - A chart example demonstrating setting the
   chart title.
+
+* `doc_chart_trendline_delete_from_legend.rs` - An example of adding a
+  trendline to a chart data series. This demonstrates deleting/hiding the
+  trendline name from the chart legend.
+
+* `doc_chart_trendline_intro.rs` - An example of adding a trendline to a
+  chart data series.
+
+* `doc_chart_trendline_set_format.rs` - An example of adding a trendline to
+  a chart data series with formatting.
+
+* `doc_chart_trendline_set_name.rs` - An example of adding a trendline to a
+  chart data series with a custom name.
+
+* `doc_chart_trendline_set_type.rs` - An example of adding a trendline to a
+  chart data series. Demonstrates setting the polynomial trendline type.
 
 * `doc_datetime_and_hms.rs` - Demonstrates writing formatted datetimes in
   an Excel worksheet.
