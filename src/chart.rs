@@ -1370,6 +1370,40 @@ impl Chart {
         self.axis_ids = (axis_id_1, axis_id_2);
     }
 
+    // TODO
+    fn deleted_legend_entries(&self) -> Vec<usize> {
+        // Use the user supplied entries, if available.
+        if !self.legend.deleted_entries.is_empty() {
+            return self.legend.deleted_entries.clone();
+        }
+
+        let mut deleted_entries = vec![];
+        let mut index = 0;
+
+        // Check for deleted series in legend.
+        for series in &self.series {
+            if series.delete_from_legend {
+                deleted_entries.push(index);
+            }
+
+            index += 1;
+        }
+
+        // Check for deleted trendlines in legend. These are indexed after the
+        // series they belong to.
+        for series in &self.series {
+            if series.trendline.trend_type != ChartTrendlineType::None {
+                if series.trendline.delete_from_legend {
+                    deleted_entries.push(index);
+                }
+
+                index += 1;
+            }
+        }
+
+        deleted_entries
+    }
+
     // -----------------------------------------------------------------------
     // Chart specific methods.
     // -----------------------------------------------------------------------
@@ -2718,6 +2752,17 @@ impl Chart {
         // Write the c:legendPos element.
         self.write_legend_pos();
 
+        // Check for series and trendlines that should be deleted/hidden from
+        // the legend.
+        let deleted_entries = self.deleted_legend_entries();
+
+        if !deleted_entries.is_empty() {
+            for index in deleted_entries {
+                // Write the c:legendEntry element.
+                self.write_legend_entry(index);
+            }
+        }
+
         // Write the c:layout element.
         self.write_layout();
 
@@ -2748,6 +2793,19 @@ impl Chart {
         let attributes = [("val", self.legend.position.to_string())];
 
         self.writer.xml_empty_tag("c:legendPos", &attributes);
+    }
+
+    // Write the <c:legendEntry> element.
+    fn write_legend_entry(&mut self, index: usize) {
+        self.writer.xml_start_tag_only("c:legendEntry");
+
+        // Write the c:idx element.
+        self.write_idx(index);
+
+        // Write the c:delete element.
+        self.write_delete();
+
+        self.writer.xml_end_tag("c:legendEntry");
     }
 
     // Write the <c:overlay> element.
@@ -4174,6 +4232,7 @@ pub struct ChartSeries {
     pub(crate) invert_if_negative: bool,
     pub(crate) inverted_color: Color,
     pub(crate) trendline: ChartTrendline,
+    pub(crate) delete_from_legend: bool,
 }
 
 #[allow(clippy::new_without_default)]
@@ -4287,6 +4346,7 @@ impl ChartSeries {
             invert_if_negative: false,
             inverted_color: Color::Default,
             trendline: ChartTrendline::new(),
+            delete_from_legend: false,
         }
     }
 
@@ -5433,6 +5493,12 @@ impl ChartSeries {
             self.invert_if_negative = true;
             self.inverted_color = color;
         }
+        self
+    }
+
+    /// TODO
+    pub fn delete_from_legend(&mut self, enable: bool) -> &mut ChartSeries {
+        self.delete_from_legend = enable;
         self
     }
 
@@ -9134,6 +9200,7 @@ pub struct ChartLegend {
     has_overlay: bool,
     pub(crate) format: ChartFormat,
     pub(crate) font: Option<ChartFont>,
+    deleted_entries: Vec<usize>,
 }
 
 impl ChartLegend {
@@ -9144,6 +9211,7 @@ impl ChartLegend {
             has_overlay: false,
             format: ChartFormat::new(),
             font: None,
+            deleted_entries: vec![],
         }
     }
 
@@ -9415,6 +9483,12 @@ impl ChartLegend {
     ///
     pub fn set_font(&mut self, font: &ChartFont) -> &mut ChartLegend {
         self.font = Some(font.clone());
+        self
+    }
+
+    /// TODO
+    pub fn delete_entries(&mut self, entries: &[usize]) -> &mut ChartLegend {
+        self.deleted_entries = entries.to_vec();
         self
     }
 }
@@ -11807,6 +11881,7 @@ pub struct ChartTrendline {
     display_equation: bool,
     display_r_squared: bool,
     intercept: Option<f64>,
+    delete_from_legend: bool,
 }
 
 impl ChartTrendline {
@@ -11822,6 +11897,7 @@ impl ChartTrendline {
             display_r_squared: false,
             display_equation: false,
             intercept: None,
+            delete_from_legend: false,
         }
     }
 
@@ -11878,13 +11954,13 @@ impl ChartTrendline {
     }
 
     /// TODO
-    pub fn set_display_equation(&mut self, enable: bool) -> &mut ChartTrendline {
+    pub fn display_equation(&mut self, enable: bool) -> &mut ChartTrendline {
         self.display_equation = enable;
         self
     }
 
     /// TODO
-    pub fn set_display_r_squared(&mut self, enable: bool) -> &mut ChartTrendline {
+    pub fn display_r_squared(&mut self, enable: bool) -> &mut ChartTrendline {
         self.display_r_squared = enable;
         self
     }
@@ -11892,6 +11968,12 @@ impl ChartTrendline {
     /// TODO
     pub fn set_intercept(&mut self, value: impl Into<f64>) -> &mut ChartTrendline {
         self.intercept = Some(value.into());
+        self
+    }
+
+    /// TODO
+    pub fn delete_from_legend(&mut self, enable: bool) -> &mut ChartTrendline {
+        self.delete_from_legend = enable;
         self
     }
 }
@@ -11906,10 +11988,19 @@ pub enum ChartTrendlineType {
     None,
 
     /// TODO.
+    Exponential,
+
+    /// TODO.
     Linear,
 
     /// TODO.
+    Logarithmic,
+
+    /// TODO.
     Polynomial(u8),
+
+    /// TODO.
+    Power,
 
     /// TODO.
     MovingAverage(u8),
@@ -11919,7 +12010,10 @@ impl fmt::Display for ChartTrendlineType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ChartTrendlineType::None => write!(f, "none"),
+            ChartTrendlineType::Power => write!(f, "power"),
             ChartTrendlineType::Linear => write!(f, "linear"),
+            ChartTrendlineType::Exponential => write!(f, "exp"),
+            ChartTrendlineType::Logarithmic => write!(f, "log"),
             ChartTrendlineType::Polynomial(_) => write!(f, "poly"),
             ChartTrendlineType::MovingAverage(_) => write!(f, "movingAvg"),
         }

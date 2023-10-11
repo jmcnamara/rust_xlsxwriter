@@ -31,8 +31,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_type(ChartTrendlineType::Polynomial(2))
         .set_forward_period(0.5)
         .set_backward_period(0.5)
-        .set_display_equation(true)
-        .set_display_r_squared(true)
+        .display_equation(true)
+        .display_r_squared(true)
         .set_intercept(1.5)
         .set_format(
             ChartLine::new()
