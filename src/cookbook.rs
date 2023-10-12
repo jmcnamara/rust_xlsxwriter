@@ -45,7 +45,7 @@ cargo run --example app_demo
 30. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
 31. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
 32. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
-33. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+33. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
 
 
 # Hello World: Simple getting started example
@@ -4071,7 +4071,7 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
-# Setting document properties Set the metadata properties for a workbook
+# Setting cell protection in a worksheet
 
 Example of cell locking and formula hiding in an Excel worksheet using worksheet
 protection.
