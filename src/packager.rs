@@ -69,6 +69,7 @@ use crate::{DocProperties, NUM_IMAGE_FORMATS};
 pub struct Packager<W: Write + Seek> {
     zip: ZipWriter<W>,
     zip_options: FileOptions,
+    zip_options_for_binary_files: FileOptions,
 }
 
 impl<W: Write + Seek + Send> Packager<W> {
@@ -86,7 +87,15 @@ impl<W: Write + Seek + Send> Packager<W> {
             .last_modified_time(DateTime::default())
             .large_file(false);
 
-        Packager { zip, zip_options }
+        let zip_options_for_binary_files = zip_options
+            .clone()
+            .compression_method(zip::CompressionMethod::Stored);
+
+        Packager {
+            zip,
+            zip_options,
+            zip_options_for_binary_files,
+        }
     }
 
     // Write the xml files that make up the xlsx OPC package.
@@ -568,7 +577,8 @@ impl<W: Write + Seek + Send> Packager<W> {
                 if !unique_worksheet_images.contains(&image.hash) {
                     let filename =
                         format!("xl/media/image{index}.{}", image.image_type.extension());
-                    self.zip.start_file(filename, self.zip_options)?;
+                    self.zip
+                        .start_file(filename, self.zip_options_for_binary_files)?;
 
                     self.zip.write_all(&image.data)?;
                     unique_worksheet_images.insert(image.hash);
