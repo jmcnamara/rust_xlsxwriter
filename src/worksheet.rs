@@ -10697,7 +10697,7 @@ impl Worksheet {
 
 /// Trait to map user defined types to one of the supported Excel native types.
 ///
-/// This trait allow you to map user defined types into a type that Excel
+/// This trait allows you to map user defined types into a type that Excel
 /// supports and to write it via [`worksheet.write()`](Worksheet::write) and
 /// [`worksheet.write_with_format()`](Worksheet::write_with_format). Both of
 /// these methods need to be implemented for the trait. See the example below.

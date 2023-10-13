@@ -6,7 +6,10 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Chart, ChartTrendline, ChartTrendlineType, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    Chart, ChartFont, ChartFormat, ChartLine, ChartSolidFill, ChartTrendline, ChartTrendlineType,
+    ChartType, Color, Workbook, XlsxError,
+};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -26,18 +29,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     trendline
         .set_type(ChartTrendlineType::Linear)
         .display_equation(true)
-        .display_r_squared(true)
-        .delete_from_legend(true)
-        .set_intercept(0.8);
+        .set_label_format(
+            ChartFormat::new()
+                .set_solid_fill(ChartSolidFill::new().set_color(Color::Red))
+                .set_border(ChartLine::new().set_color(Color::Yellow)),
+        )
+        .set_label_font(ChartFont::new().set_bold().set_color("#0070C0"));
 
     let mut chart = Chart::new(ChartType::Line);
-    chart.set_axis_ids(108652416, 108655744);
+    chart.set_axis_ids(52978048, 52980352);
     chart
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 1, 4, 1))
-        .set_trendline(&trendline)
-        .delete_from_legend(true);
+        .set_trendline(&trendline);
 
     chart
         .add_series()
@@ -52,9 +57,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_format30() {
+fn test_chart_format35() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_format30")
+        .set_name("chart_format35")
         .set_function(create_new_xlsx_file)
         .initialize();
 

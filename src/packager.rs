@@ -87,9 +87,8 @@ impl<W: Write + Seek + Send> Packager<W> {
             .last_modified_time(DateTime::default())
             .large_file(false);
 
-        let zip_options_for_binary_files = zip_options
-            .clone()
-            .compression_method(zip::CompressionMethod::Stored);
+        let zip_options_for_binary_files =
+            zip_options.compression_method(zip::CompressionMethod::Stored);
 
         Packager {
             zip,

@@ -666,7 +666,7 @@ impl ExcelDateTime {
     /// Create a `ExcelDateTime` instance from an Excel serial date.
     ///
     /// An Excel serial date is a f64 number that represents the time since the
-    /// Excel epoch. The `from_serial_datetime()` method allow you to create a
+    /// Excel epoch. The `from_serial_datetime()` method allows you to create a
     /// `ExcelDateTime` instance from one of these numbers. This is generally
     /// only required if you are creating your own date handling routines or if
     /// you want to manipulate the datetime output from one of the other

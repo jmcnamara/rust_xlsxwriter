@@ -3104,7 +3104,7 @@ impl Chart {
 
         if trendline.display_equation {
             // Write the c:dispEq element.
-            self.write_trendline_display_equation();
+            self.write_trendline_display_equation(trendline);
         }
 
         self.writer.xml_end_tag("c:trendline");
@@ -3144,23 +3144,31 @@ impl Chart {
     }
 
     // Write the <c:dispEq> element.
-    fn write_trendline_display_equation(&mut self) {
+    fn write_trendline_display_equation(&mut self, trendline: &ChartTrendline) {
         let attributes = [("val", "1")];
 
         self.writer.xml_empty_tag("c:dispEq", &attributes);
 
         // Write the c:trendlineLbl element.
-        self.write_trendline_label();
+        self.write_trendline_label(trendline);
     }
 
     // Write the <c:trendlineLbl> element.
-    fn write_trendline_label(&mut self) {
+    fn write_trendline_label(&mut self, trendline: &ChartTrendline) {
         self.writer.xml_start_tag_only("c:trendlineLbl");
 
         // Write the c:layout element.
         self.write_layout();
 
         self.write_number_format("General", false);
+
+        // Write the c:spPr formatting element.
+        self.write_sp_pr(&trendline.label_format);
+
+        // Write the trendline label font elements.
+        if let Some(font) = &trendline.label_font {
+            self.write_axis_font(font);
+        }
 
         self.writer.xml_end_tag("c:trendlineLbl");
     }
@@ -5193,7 +5201,7 @@ impl ChartSeries {
     /// simple use case the [`set_points`](ChartSeries::set_points) method can be
     /// overly verbose.
     ///
-    /// As a syntactic shortcut the `set_point_colors()` method allow you to set
+    /// As a syntactic shortcut the `set_point_colors()` method allows you to set
     /// the colors of chart points with a simpler interface.
     ///
     /// Compare the example below with the previous more general example which
@@ -5260,7 +5268,7 @@ impl ChartSeries {
 
     /// Set the trendline for a chart series.
     ///
-    /// Excel allow you to add a trendline to a data series that represents the
+    /// Excel allows you to add a trendline to a data series that represents the
     /// trend or regression of the data using different types of fit. A
     /// [`ChartTrendline`] struct reference is used to represents the options of
     /// Excel trendlines and can be added to a series via the
@@ -12101,7 +12109,7 @@ impl ChartFont {
 
 /// The `ChartTrendline` struct represents a trendline for a chart series.
 ///
-/// Excel allow you to add a trendline to a data series that represents the
+/// Excel allows you to add a trendline to a data series that represents the
 /// trend or regression of the data using different types of fit. The
 /// `ChartTrendline` struct represents the options of Excel trendlines and can
 /// be added to a series via the
@@ -12167,6 +12175,8 @@ pub struct ChartTrendline {
     name: String,
     trend_type: ChartTrendlineType,
     format: ChartFormat,
+    label_format: ChartFormat,
+    label_font: Option<ChartFont>,
     forward_period: f64,
     backward_period: f64,
     display_equation: bool,
@@ -12183,6 +12193,8 @@ impl ChartTrendline {
             name: String::new(),
             trend_type: ChartTrendlineType::None,
             format: ChartFormat::new(),
+            label_format: ChartFormat::new(),
+            label_font: None,
             forward_period: 0.0,
             backward_period: 0.0,
             display_r_squared: false,
@@ -12341,6 +12353,125 @@ impl ChartTrendline {
         T: IntoChartFormat,
     {
         self.format = format.new_chart_format();
+        self
+    }
+
+    /// Set the formatting properties for a chart trendline label.
+    ///
+    /// Set the formatting properties for a chart trendline label via a
+    /// [`ChartFormat`] object or a sub struct that implements
+    /// [`IntoChartFormat`]. The label is displayed when you use the
+    /// [`display_equation()`](ChartTrendline::display_equation) or
+    /// [`display_r_squared()`](ChartTrendline::display_equation) methods.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - `no_fill`: Turn of the fill for the chart object.
+    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
+    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
+    /// - `no_line`: Turn off the line/border for the chart object.
+    /// - `line`: Set the [`ChartLine`] properties.
+    ///
+    /// # Parameters
+    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of adding a trendline to a chart data series and adding
+    /// formatting to the trendline data label.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_trendline_set_label_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartFormat, ChartLine, ChartSolidFill, ChartTrendline, ChartTrendlineType, ChartType,
+    /// #     Color, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 11.1)?;
+    /// #     worksheet.write(1, 0, 18.8)?;
+    /// #     worksheet.write(2, 0, 33.2)?;
+    /// #     worksheet.write(3, 0, 37.5)?;
+    /// #     worksheet.write(4, 0, 52.1)?;
+    /// #     worksheet.write(5, 0, 58.9)?;
+    /// #
+    ///     // Create a trendline.
+    ///     let mut trendline = ChartTrendline::new();
+    ///     trendline
+    ///         .set_type(ChartTrendlineType::Linear)
+    ///         .display_equation(true)
+    ///         .set_label_format(
+    ///             ChartFormat::new()
+    ///                 .set_solid_fill(ChartSolidFill::new().set_color(Color::Yellow))
+    ///                 .set_border(ChartLine::new().set_color(Color::Red)),
+    ///         );
+    ///
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with  a trendline
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_trendline(&trendline);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_trendline_set_label_format.png">
+    ///
+    pub fn set_label_format<T>(&mut self, format: T) -> &mut ChartTrendline
+    where
+        T: IntoChartFormat,
+    {
+        self.label_format = format.new_chart_format();
+        self
+    }
+
+    /// Set the font properties of a chart trendline label.
+    ///
+    /// Set the font properties of a chart trendline label using a [`ChartFont`]
+    /// reference. The label is displayed when you use the
+    /// [`display_equation()`](ChartTrendline::display_equation) or
+    /// [`display_r_squared()`](ChartTrendline::display_equation) methods.
+    ///
+    /// Example font properties that can be set are:
+    ///
+    /// - [`ChartFont::set_bold()`]
+    /// - [`ChartFont::set_italic()`]
+    /// - [`ChartFont::set_name()`]
+    /// - [`ChartFont::set_size()`]
+    /// - [`ChartFont::set_rotation()`]
+    ///
+    /// See [`ChartFont`] for full details.
+    ///
+    /// # Parameters
+    ///
+    /// `font`: A [`ChartFont`] struct reference to represent the font
+    /// properties.
+    ///
+    pub fn set_label_font(&mut self, font: &ChartFont) -> &mut ChartTrendline {
+        let mut font = font.clone();
+        font.has_baseline = true;
+        self.label_font = Some(font);
         self
     }
 
