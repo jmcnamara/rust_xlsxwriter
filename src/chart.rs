@@ -3561,8 +3561,10 @@ impl Chart {
         } else if let Some(pattern_fill) = &format.pattern_fill {
             // Write the a:pattFill element.
             self.write_a_patt_fill(pattern_fill);
+        } else if let Some(gradient_fill) = &format.gradient_fill {
+            // Write the a:gradFill element.
+            self.write_gradient_fill(gradient_fill);
         }
-
         if format.no_line {
             // Write a default line with no fill.
             self.write_a_ln_none();
@@ -3661,6 +3663,112 @@ impl Chart {
         }
 
         self.writer.xml_end_tag("a:pattFill");
+    }
+
+    // Write the <a:gradFill> element.
+    fn write_gradient_fill(&mut self, fill: &ChartGradientFill) {
+        let mut attributes = vec![];
+
+        if fill.gradient_type != ChartGradientFillType::Linear {
+            attributes.push(("flip", "none"));
+            attributes.push(("rotWithShape", "1"));
+        }
+
+        self.writer.xml_start_tag("a:gradFill", &attributes);
+        self.writer.xml_start_tag_only("a:gsLst");
+
+        for gradient_stop in &fill.gradient_stops {
+            // Write the a:gs element.
+            self.write_gradient_stop(gradient_stop);
+        }
+
+        self.writer.xml_end_tag("a:gsLst");
+
+        if fill.gradient_type == ChartGradientFillType::Linear {
+            // Write the a:lin element.
+            self.write_gradient_fill_angle(fill.angle);
+        } else {
+            // Write the a:path element.
+            self.write_gradient_path(fill.gradient_type);
+        }
+
+        self.writer.xml_end_tag("a:gradFill");
+    }
+
+    // Write the <a:gs> element.
+    fn write_gradient_stop(&mut self, gradient_stop: &ChartGradientStop) {
+        let position = 1000 * u32::from(gradient_stop.position.unwrap());
+        let attributes = [("pos", position.to_string())];
+
+        self.writer.xml_start_tag("a:gs", &attributes);
+        self.write_color(gradient_stop.color.unwrap(), 0);
+
+        self.writer.xml_end_tag("a:gs");
+    }
+
+    // Write the <a:lin> element.
+    fn write_gradient_fill_angle(&mut self, angle: u16) {
+        let angle = 60_000 * u32::from(angle);
+        let attributes = [("ang", angle.to_string()), ("scaled", "0".to_string())];
+
+        self.writer.xml_empty_tag("a:lin", &attributes);
+    }
+
+    // Write the <a:path> element.
+    fn write_gradient_path(&mut self, gradient_type: ChartGradientFillType) {
+        let mut attributes = vec![];
+
+        match gradient_type {
+            ChartGradientFillType::Radial => attributes.push(("path", "circle")),
+            ChartGradientFillType::Rectangular => attributes.push(("path", "rect")),
+            ChartGradientFillType::Path => attributes.push(("path", "shape")),
+            ChartGradientFillType::Linear => {}
+        }
+
+        self.writer.xml_start_tag("a:path", &attributes);
+
+        // Write the a:fillToRect element.
+        self.write_a_fill_to_rect(gradient_type);
+
+        self.writer.xml_end_tag("a:path");
+
+        // Write the a:tileRect element.
+        self.write_a_tile_rect(gradient_type);
+    }
+
+    // Write the <a:fillToRect> element.
+    fn write_a_fill_to_rect(&mut self, gradient_type: ChartGradientFillType) {
+        let mut attributes = vec![];
+
+        match gradient_type {
+            ChartGradientFillType::Path => {
+                attributes.push(("l", "50000"));
+                attributes.push(("t", "50000"));
+                attributes.push(("r", "50000"));
+                attributes.push(("b", "50000"));
+            }
+            _ => {
+                attributes.push(("l", "100000"));
+                attributes.push(("t", "100000"));
+            }
+        }
+
+        self.writer.xml_empty_tag("a:fillToRect", &attributes);
+    }
+
+    // Write the <a:tileRect> element.
+    fn write_a_tile_rect(&mut self, gradient_type: ChartGradientFillType) {
+        let mut attributes = vec![];
+
+        match gradient_type {
+            ChartGradientFillType::Rectangular | ChartGradientFillType::Radial => {
+                attributes.push(("r", "-100000"));
+                attributes.push(("b", "-100000"));
+            }
+            _ => {}
+        }
+
+        self.writer.xml_empty_tag("a:tileRect", &attributes);
     }
 
     // Write the <a:srgbClr> element.
@@ -4139,6 +4247,12 @@ impl IntoChartFormat for &mut ChartSolidFill {
 impl IntoChartFormat for &mut ChartPatternFill {
     fn new_chart_format(&self) -> ChartFormat {
         ChartFormat::new().set_pattern_fill(self).clone()
+    }
+}
+
+impl IntoChartFormat for &mut ChartGradientFill {
+    fn new_chart_format(&self) -> ChartFormat {
+        ChartFormat::new().set_gradient_fill(self).clone()
     }
 }
 
@@ -9908,6 +10022,7 @@ pub struct ChartFormat {
     line: Option<ChartLine>,
     solid_fill: Option<ChartSolidFill>,
     pattern_fill: Option<ChartPatternFill>,
+    gradient_fill: Option<ChartGradientFill>,
 }
 
 impl ChartFormat {
@@ -9921,6 +10036,7 @@ impl ChartFormat {
             line: None,
             solid_fill: None,
             pattern_fill: None,
+            gradient_fill: None,
         }
     }
 
@@ -10313,11 +10429,18 @@ impl ChartFormat {
         self
     }
 
+    /// TODO
+    pub fn set_gradient_fill(&mut self, fill: &ChartGradientFill) -> &mut ChartFormat {
+        self.gradient_fill = Some(fill.clone());
+        self
+    }
+
     // Check if formatting has been set for the struct.
     fn has_formatting(&self) -> bool {
         self.line.is_some()
             || self.solid_fill.is_some()
             || self.pattern_fill.is_some()
+            || self.gradient_fill.is_some()
             || self.no_fill
             || self.no_line
     }
@@ -12744,4 +12867,149 @@ impl fmt::Display for ChartTrendlineType {
             ChartTrendlineType::MovingAverage(_) => write!(f, "movingAvg"),
         }
     }
+}
+
+/// TODO
+#[derive(Clone, PartialEq)]
+pub struct ChartGradientFill {
+    gradient_type: ChartGradientFillType,
+    gradient_stops: Vec<ChartGradientStop>,
+    angle: u16,
+}
+
+impl Default for ChartGradientFill {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartGradientFill {
+    /// TODO
+    pub fn new() -> ChartGradientFill {
+        ChartGradientFill {
+            gradient_type: ChartGradientFillType::Linear,
+            gradient_stops: vec![],
+            angle: 90,
+        }
+    }
+
+    /// todo
+    pub fn set_type(&mut self, gradient_type: ChartGradientFillType) -> &mut ChartGradientFill {
+        self.gradient_type = gradient_type;
+        self
+    }
+
+    /// todo
+    pub fn set_gradient_stops(
+        &mut self,
+        gradient_stops: &[ChartGradientStop],
+    ) -> &mut ChartGradientFill {
+        let mut valid_gradient_stops = vec![];
+
+        for gradient_stop in gradient_stops {
+            if gradient_stop.is_valid() {
+                valid_gradient_stops.push(gradient_stop.clone());
+            }
+        }
+
+        if (2..=10).contains(&valid_gradient_stops.len()) {
+            self.gradient_stops = valid_gradient_stops;
+        } else {
+            eprintln!("Gradient stops must contain between 2 and 10 valid entries.");
+        }
+
+        self
+    }
+
+    /// todo
+    pub fn set_angle(&mut self, angle: u16) -> &mut ChartGradientFill {
+        if (0..360).contains(&angle) {
+            self.angle = angle;
+        } else {
+            eprintln!("Gradient angle '{angle}' must be in the Excel range 0 <= angle < 360");
+        }
+        self
+    }
+}
+
+/// TODO
+#[derive(Clone, PartialEq)]
+pub struct ChartGradientStop {
+    color: Option<Color>,
+    position: Option<u8>,
+}
+
+impl Default for ChartGradientStop {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartGradientStop {
+    /// TODO
+    pub fn new() -> ChartGradientStop {
+        ChartGradientStop {
+            color: None,
+            position: None,
+        }
+    }
+
+    /// TODO
+    pub fn set_color<T>(mut self, color: T) -> ChartGradientStop
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.color = Some(color);
+        }
+
+        self
+    }
+
+    /// todo
+    pub fn set_position(mut self, position: u8) -> ChartGradientStop {
+        if !(0..=100).contains(&position) {
+            eprintln!("Gradient stop {position} outside Excel range: 0 <= position <= 100.");
+            return self;
+        }
+
+        self.position = Some(position);
+        self
+    }
+
+    /// todo
+    pub(crate) fn is_valid(&self) -> bool {
+        if self.color.is_none() {
+            eprintln!("Gradient stop must contain a color.");
+            return false;
+        }
+
+        if self.position.is_none() {
+            eprintln!("Gradient stop must contain a position.");
+            return false;
+        }
+
+        true
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+/// The `ChartGradientFillType` enum defines the trendline types of a
+/// [`ChartGradientFill`]
+///
+/// TODO
+///
+pub enum ChartGradientFillType {
+    /// Todo
+    Linear,
+
+    /// Todo
+    Radial,
+
+    /// Todo
+    Rectangular,
+
+    /// Todo
+    Path,
 }
