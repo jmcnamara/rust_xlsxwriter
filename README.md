@@ -120,7 +120,7 @@ frequently.
 
 Recent changes:
 
-- Added chart trendlines.
+- Added chart trendlines and gradient fills.
 - Added custom functions to table totals.
 - Added Wasm and Polars feature flags for compatibility.
 

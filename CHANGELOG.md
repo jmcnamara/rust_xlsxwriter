@@ -6,14 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.51.0] - 2023-10-XX
+## [0.51.0] - 2023-10-15
 
 ### Added
+
+- Added support for chart gradient fill formatting via the [`ChartGradientFill`] struct and methods.
 
 - Added support for formatting the chart trendlines data labels via the
   [`ChartTrendline::set_label_font`] and [`ChartTrendline::set_label_format`].
 
 
+[`ChartGradientFill`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartGradientFill.html
 [`ChartTrendline::set_label_font`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartTrendline.html#method.set_label_font
 [`ChartTrendline::set_label_format`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartTrendline.html#method.set_label_format
 
