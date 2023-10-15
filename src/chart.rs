@@ -164,9 +164,8 @@ impl Chart {
     /// range for that series using
     /// [`series.set_values()`][ChartSeries::set_values]. See the example below.
     ///
-    /// There are some shortcut versions of `new()` such as
-    /// [`ChartSeries::new_pie()`](Chart::new_pie) that are more useful/succinct for
-    /// charts that don't have subtypes.
+    /// There are some shortcut versions of `new()` such as [`Chart::new_pie()`]
+    /// that are more useful/succinct for charts that don't have subtypes.
     ///
     /// # Parameters
     ///
@@ -198,7 +197,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -291,7 +290,7 @@ impl Chart {
     /// This is a syntactic shortcut for `Chart::new(ChartType::Area)` to
     /// create a default Area chart.
     ///
-    /// See [`Chart::new()`](Chart::new) for further details.
+    /// See [`Chart::new()`] for further details.
     ///
     pub fn new_area() -> Chart {
         Self::new(ChartType::Area)
@@ -302,7 +301,7 @@ impl Chart {
     /// This is a syntactic shortcut for `Chart::new(ChartType::Bar)` to
     /// create a default Bar chart.
     ///
-    /// See [`Chart::new()`](Chart::new) for further details.
+    /// See [`Chart::new()`] for further details.
     ///
     pub fn new_bar() -> Chart {
         Self::new(ChartType::Bar)
@@ -313,7 +312,7 @@ impl Chart {
     /// This is a syntactic shortcut for `Chart::new(ChartType::Column)` to
     /// create a default Column chart.
     ///
-    /// See [`Chart::new()`](Chart::new) for further details.
+    /// See [`Chart::new()`] for further details.
     ///
     pub fn new_column() -> Chart {
         Self::new(ChartType::Column)
@@ -324,7 +323,7 @@ impl Chart {
     /// This is a syntactic shortcut for `Chart::new_doughnut()` to
     /// create a default Doughnut chart.
     ///
-    /// See [`Chart::new()`](Chart::new) for further details.
+    /// See [`Chart::new()`] for further details.
     ///
     pub fn new_doughnut() -> Chart {
         Self::new(ChartType::Doughnut)
@@ -335,7 +334,7 @@ impl Chart {
     /// This is a syntactic shortcut for `Chart::new(ChartType::Line)` to
     /// create a default Line chart.
     ///
-    /// See [`Chart::new()`](Chart::new) for further details.
+    /// See [`Chart::new()`] for further details.
     ///
     pub fn new_line() -> Chart {
         Self::new(ChartType::Line)
@@ -346,7 +345,7 @@ impl Chart {
     /// This is a syntactic shortcut for `Chart::new(ChartType::Pie)` to
     /// create a default Pie chart.
     ///
-    /// See [`Chart::new()`](Chart::new) for further details.
+    /// See [`Chart::new()`] for further details.
     ///
     pub fn new_pie() -> Chart {
         Self::new(ChartType::Pie)
@@ -357,7 +356,7 @@ impl Chart {
     /// This is a syntactic shortcut for `Chart::new(ChartType::Radar)` to
     /// create a default Radar chart.
     ///
-    /// See [`Chart::new()`](Chart::new) for further details.
+    /// See [`Chart::new()`] for further details.
     ///
     pub fn new_radar() -> Chart {
         Self::new(ChartType::Radar)
@@ -368,7 +367,7 @@ impl Chart {
     /// This is a syntactic shortcut for `Chart::new(ChartType::Scatter)` to
     /// create a default Scatter chart.
     ///
-    /// See [`Chart::new()`](Chart::new) for further details.
+    /// See [`Chart::new()`] for further details.
     ///
     pub fn new_scatter() -> Chart {
         Self::new(ChartType::Scatter)
@@ -412,7 +411,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -496,7 +495,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -567,7 +566,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -619,7 +618,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -685,7 +684,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 3, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -846,7 +845,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -928,7 +927,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -990,7 +989,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -1048,7 +1047,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -1108,7 +1107,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -4413,7 +4412,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -4451,7 +4450,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -4540,7 +4539,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 3, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -4626,7 +4625,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 4, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -4726,7 +4725,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 5, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -4831,7 +4830,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -4889,7 +4888,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -4966,7 +4965,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5030,7 +5029,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5088,7 +5087,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5145,7 +5144,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5218,7 +5217,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5301,7 +5300,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5369,7 +5368,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5398,7 +5397,7 @@ impl ChartSeries {
     /// trend or regression of the data using different types of fit. A
     /// [`ChartTrendline`] struct reference is used to represents the options of
     /// Excel trendlines and can be added to a series via the
-    /// [`ChartSeries::set_trendline()`](ChartSeries::set_trendline) method.
+    /// [`ChartSeries::set_trendline()`] method.
     ///
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/trendline_options.png">
@@ -5481,7 +5480,7 @@ impl ChartSeries {
     ///
     /// # Examples
     ///
-    /// A example of setting the chart series gap and overlap. Note that it only
+    /// an example of setting the chart series gap and overlap. Note that it only
     /// needs to be applied to one of the series in the chart.
     ///
     /// ```
@@ -5604,7 +5603,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5676,7 +5675,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5707,12 +5706,10 @@ impl ChartSeries {
     /// series and their names are cluttering the chart legend.
     ///
     /// Note, to hide all the names in the chart legend you should use the
-    /// [`ChartLegend::set_hidden`](ChartLegend::set_hidden) method instead.
+    /// [`ChartLegend::set_hidden()`] method instead.
     ///
-    /// See also the
-    /// [`ChartTrendline::delete_from_legend`](ChartTrendline::delete_from_legend)
-    /// and the [`ChartLegend::delete_entries`](ChartLegend::delete_entries)
-    /// methods.
+    /// See also the [`ChartTrendline::delete_from_legend()`] and the
+    /// [`ChartLegend::delete_entries()`] methods.
     ///
     /// # Parameters
     ///
@@ -5720,8 +5717,8 @@ impl ChartSeries {
     ///
     /// # Examples
     ///
-    /// A chart example demonstrating deleting/hiding a series name from the chart
-    /// legend.
+    /// A chart example demonstrating deleting/hiding a series name from the
+    /// chart legend.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_series_delete_from_legend.rs
@@ -5770,7 +5767,8 @@ impl ChartSeries {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_series_delete_from_legend.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_delete_from_legend.png">
     ///
     ///
     /// The default display without deleting the names from the legend would
@@ -6197,7 +6195,7 @@ impl ChartTitle {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -6262,7 +6260,7 @@ impl ChartTitle {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -6369,7 +6367,7 @@ impl ChartTitle {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -6517,7 +6515,7 @@ impl ChartMarker {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -6586,7 +6584,7 @@ impl ChartMarker {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -6862,7 +6860,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -6917,7 +6915,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -6995,7 +6993,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7075,7 +7073,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7155,7 +7153,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7231,7 +7229,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7307,7 +7305,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7428,7 +7426,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7493,7 +7491,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7572,7 +7570,7 @@ impl ChartDataLabel {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7811,8 +7809,7 @@ impl ChartPoint {
 
 /// The `ChartAxis` struct represents a chart axis.
 ///
-/// Used in conjunction with the [`Chart::x_axis()`](Chart::x_axis) and
-/// [`Chart::y_axis()`](Chart::y_axis).
+/// Used in conjunction with the [`Chart::x_axis()`] and [`Chart::y_axis()`].
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
@@ -7962,7 +7959,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8044,7 +8041,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8155,7 +8152,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8233,7 +8230,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8288,7 +8285,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8358,7 +8355,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8382,8 +8379,7 @@ impl ChartAxis {
     ///
     /// Set the minimum bound to be displayed for an axis.
     ///
-    /// See [`ChartAxis::set_min()`](ChartAxis::set_min) above for a full
-    /// explanation and example.
+    /// See [`ChartAxis::set_min()`] above for a full explanation and example.
     ///
     /// # Parameters
     ///
@@ -8451,7 +8447,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8473,8 +8469,8 @@ impl ChartAxis {
 
     /// Set the increment of the minor units in the axis range.
     ///
-    /// See [`ChartAxis::set_major_unit()`](ChartAxis::set_major_unit) above for
-    /// a full explanation and example.
+    /// See [`ChartAxis::set_major_unit()`] above for a full explanation and
+    /// example.
     ///
     /// # Parameters
     ///
@@ -8532,7 +8528,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8593,7 +8589,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8655,7 +8651,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8718,7 +8714,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8781,7 +8777,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8854,7 +8850,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8920,7 +8916,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -8985,7 +8981,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -9055,7 +9051,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -9133,7 +9129,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -9192,7 +9188,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -9246,10 +9242,11 @@ impl fmt::Display for ChartAxisPosition {
     }
 }
 
-/// The `ChartAxisLabelPosition` enum defines the [`Chart`] axis label positions.
+/// The `ChartAxisLabelPosition` enum defines the [`Chart`] axis label
+/// positions.
 ///
 /// This property is used in conjunction with
-/// [`ChartAxis::set_label_position()`](ChartAxis::set_label_position).
+/// [`ChartAxis::set_label_position()`].
 ///
 /// # Examples
 ///
@@ -9617,7 +9614,7 @@ impl ChartLegend {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 3, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -9776,7 +9773,7 @@ impl ChartLegend {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -9801,14 +9798,13 @@ impl ChartLegend {
     /// secondary series and their names are cluttering the chart legend.
     ///
     /// The same effect can be accomplished using the
-    /// [`ChartSeries::delete_from_legend`](ChartSeries::delete_from_legend) and
-    /// [`ChartTrendline::delete_from_legend`](ChartTrendline::delete_from_legend)
-    /// methods. However, this method can be used for some edge cases such as
-    /// Pie/Doughnut charts which display legend entries for each point in the
-    /// series.
+    /// [`ChartSeries::delete_from_legend()`] and
+    /// [`ChartTrendline::delete_from_legend()`] methods. However, this method
+    /// can be used for some edge cases such as Pie/Doughnut charts which
+    /// display legend entries for each point in the series.
     ///
     /// Note, to hide all the names in the chart legend you should use the
-    /// [`ChartLegend::set_hidden`](ChartLegend::set_hidden) method instead.
+    /// [`ChartLegend::set_hidden()`] method instead.
     ///
     /// # Parameters
     ///
@@ -9817,8 +9813,8 @@ impl ChartLegend {
     ///
     /// # Examples
     ///
-    /// A chart example demonstrating deleting/hiding a series name from the chart
-    /// legend.
+    /// A chart example demonstrating deleting/hiding a series name from the
+    /// chart legend.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_legend_delete_entries.rs
@@ -9854,7 +9850,7 @@ impl ChartLegend {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 3, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -9984,7 +9980,7 @@ impl fmt::Display for ChartEmptyCells {
 ///
 /// # Examples
 ///
-/// A example of accessing the [`ChartFormat`] for data series in a chart and
+/// an example of accessing the [`ChartFormat`] for data series in a chart and
 /// using them to apply formatting.
 ///
 /// ```
@@ -10154,7 +10150,7 @@ impl ChartFormat {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10214,7 +10210,7 @@ impl ChartFormat {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10268,7 +10264,7 @@ impl ChartFormat {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10325,7 +10321,7 @@ impl ChartFormat {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10389,7 +10385,7 @@ impl ChartFormat {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10457,7 +10453,7 @@ impl ChartFormat {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10522,7 +10518,7 @@ impl ChartFormat {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10554,15 +10550,13 @@ impl ChartFormat {
 ///
 /// The [`ChartLine`] struct represents the formatting properties for a line or
 /// border for a Chart element. It is a sub property of the [`ChartFormat`]
-/// struct and is used with the
-/// [`ChartFormat::set_line()`](ChartFormat::set_line) or
-/// [`ChartFormat::set_border()`](ChartFormat::set_border) methods.
+/// struct and is used with the [`ChartFormat::set_line()`] or
+/// [`ChartFormat::set_border()`] methods.
 ///
-/// Excel uses the element names "Line" and "Border" depending on the
-/// context. For a Line chart the line is represented by a line property but for
-/// a Column chart the line becomes the border. Both of these share the same
-/// properties and are both represented in `rust_xlsxwriter` by the [`ChartLine`]
-/// struct.
+/// Excel uses the element names "Line" and "Border" depending on the context.
+/// For a Line chart the line is represented by a line property but for a Column
+/// chart the line becomes the border. Both of these share the same properties
+/// and are both represented in `rust_xlsxwriter` by the [`ChartLine`] struct.
 ///
 /// As a syntactic shortcut you can use the type alias [`ChartBorder`] instead
 /// of `ChartLine`.
@@ -10686,7 +10680,7 @@ impl ChartLine {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10750,7 +10744,7 @@ impl ChartLine {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10819,7 +10813,7 @@ impl ChartLine {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10881,7 +10875,7 @@ impl ChartLine {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10988,7 +10982,7 @@ pub type ChartBorder = ChartLine;
 /// without a pattern or gradient.
 ///
 /// `ChartSolidFill` is a sub property of the [`ChartFormat`] struct and is used
-/// with the [`ChartFormat::set_solid_fill()`](ChartFormat::set_solid_fill) method.
+/// with the [`ChartFormat::set_solid_fill()`] method.
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
@@ -11098,7 +11092,7 @@ impl ChartSolidFill {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -11170,7 +11164,7 @@ impl ChartSolidFill {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -11191,15 +11185,15 @@ impl ChartSolidFill {
     }
 }
 
-/// The `ChartPatternFill` struct represents a the pattern fill for a chart element.
+/// The `ChartPatternFill` struct represents a the pattern fill for a chart
+/// element.
 ///
 /// The [`ChartPatternFill`] struct represents the formatting properties for the
 /// pattern fill of a Chart element. In Excel a pattern fill is comprised of a
 /// simple pixelated pattern and background and foreground colors
 ///
 /// `ChartPatternFill` is a sub property of the [`ChartFormat`] struct and is
-/// used with the [`ChartFormat::set_pattern_fill()`](ChartFormat::set_pattern_fill)
-/// method.
+/// used with the [`ChartFormat::set_pattern_fill()`] method.
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
@@ -11320,7 +11314,7 @@ impl ChartPatternFill {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -11388,7 +11382,7 @@ impl ChartPatternFill {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -11940,7 +11934,7 @@ impl ChartFont {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -11994,7 +11988,7 @@ impl ChartFont {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -12053,7 +12047,7 @@ impl ChartFont {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -12123,7 +12117,7 @@ impl ChartFont {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -12181,7 +12175,7 @@ impl ChartFont {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -12250,7 +12244,7 @@ impl ChartFont {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -12339,8 +12333,7 @@ impl ChartFont {
 /// Excel allows you to add a trendline to a data series that represents the
 /// trend or regression of the data using different types of fit. The
 /// `ChartTrendline` struct represents the options of Excel trendlines and can
-/// be added to a series via the
-/// [`ChartSeries::set_trendline()`](ChartSeries::set_trendline) method.
+/// be added to a series via the [`ChartSeries::set_trendline()`] method.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/trendline_options.png">
 ///
@@ -12758,7 +12751,7 @@ impl ChartTrendline {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -12857,10 +12850,8 @@ impl ChartTrendline {
     /// generally obvious relative to their series and their names can clutter
     /// the chart legend.
     ///
-    /// See also the
-    /// [`ChartSeries::delete_from_legend`](ChartSeries::delete_from_legend) and
-    /// the [`ChartLegend::delete_entries`](ChartLegend::delete_entries)
-    /// methods.
+    /// See also the [`ChartSeries::delete_from_legend()`] and the
+    /// [`ChartLegend::delete_entries()`] methods.
     ///
     /// # Parameters
     ///
@@ -12905,7 +12896,7 @@ impl ChartTrendline {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -12939,8 +12930,7 @@ impl ChartTrendline {
 /// <img src="https://rustxlsxwriter.github.io/images/trendline_types.png">
 ///
 /// The trendline type is used in conjunction with the
-/// [`ChartTrendline::set_type()`](ChartTrendline::set_type) method and a
-/// [`ChartSeries`].
+/// [`ChartTrendline::set_type()`] method and a [`ChartSeries`].
 ///
 pub enum ChartTrendlineType {
     /// Don't show any trendline for the data series. The default.
@@ -12992,8 +12982,7 @@ impl fmt::Display for ChartTrendlineType {
 /// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
 ///
 /// `ChartGradientFill` is a sub property of the [`ChartFormat`] struct and is
-/// used with the
-/// [`ChartFormat::set_gradient_fill()`](ChartFormat::set_gradient_fill) method.
+/// used with the [`ChartFormat::set_gradient_fill()`] method.
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
@@ -13128,7 +13117,7 @@ impl ChartGradientFill {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -13204,7 +13193,7 @@ impl ChartGradientFill {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -13254,7 +13243,7 @@ impl ChartGradientFill {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #

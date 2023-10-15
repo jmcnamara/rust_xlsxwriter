@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! A example of creating column charts with fill patterns using the
+//! an example of creating column charts with fill patterns using the
 //! rust_xlsxwriter library.
 
 use rust_xlsxwriter::*;

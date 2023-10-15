@@ -24,31 +24,34 @@ documentation and generally show how an individual function works.
 * `app_chart.rs` - A simple chart example using the rust_xlsxwriter
   library.
 
-* `app_chart_area.rs` - A example of creating area charts using the
+* `app_chart_area.rs` - an example of creating area charts using the
   rust_xlsxwriter library.
 
-* `app_chart_bar.rs` - A example of creating bar charts using the
+* `app_chart_bar.rs` - an example of creating bar charts using the
   rust_xlsxwriter library.
 
-* `app_chart_column.rs` - A example of creating column charts using the
+* `app_chart_column.rs` - an example of creating column charts using the
   rust_xlsxwriter library.
 
-* `app_chart_doughnut.rs` - A example of creating doughnut charts using the
+* `app_chart_doughnut.rs` - an example of creating doughnut charts using
+  the rust_xlsxwriter library.
+
+* `app_chart_gradient.rs` - An example of creating a chart with gradient
+  fills using the rust_xlsxwriter library.
+
+* `app_chart_line.rs` - an example of creating line charts using the
   rust_xlsxwriter library.
 
-* `app_chart_line.rs` - A example of creating line charts using the
-  rust_xlsxwriter library.
-
-* `app_chart_pattern.rs` - A example of creating column charts with fill
+* `app_chart_pattern.rs` - an example of creating column charts with fill
   patterns using the rust_xlsxwriter library.
 
-* `app_chart_pie.rs` - A example of creating pie charts using the
+* `app_chart_pie.rs` - an example of creating pie charts using the
   rust_xlsxwriter library.
 
-* `app_chart_radar.rs` - A example of creating radar charts using the
+* `app_chart_radar.rs` - an example of creating radar charts using the
   rust_xlsxwriter library.
 
-* `app_chart_scatter.rs` - A example of creating scatter charts using the
+* `app_chart_scatter.rs` - an example of creating scatter charts using the
   rust_xlsxwriter library.
 
 * `app_chart_styles.rs` - # An example showing all 48 default chart styles
@@ -261,6 +264,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_font_set_size.rs` - An example of setting the font size
   property for the font in a chart element.
 
+* `doc_chart_format_set_gradient_fill.rs` - An example of setting a
+  gradient fill for a chart element.
+
 * `doc_chart_format_set_no_border.rs` - An example of turning off the
   border of a chart element.
 
@@ -272,6 +278,21 @@ documentation and generally show how an individual function works.
 
 * `doc_chart_formatting.rs` - An example of formatting the chart border
   element.
+
+* `doc_chart_gradient_fill.rs` - An example of setting a gradient fill for
+  a chart element.
+
+* `doc_chart_gradient_fill_set_type.rs` - An example of setting a gradient
+  fill for a chart element with a non-default gradient type.
+
+* `doc_chart_gradient_stops.rs` - An example of setting a gradient fill for
+  a chart element.
+
+* `doc_chart_gradient_stops2.rs` - An example of setting a gradient fill
+  for a chart element.
+
+* `doc_chart_gradient_stops_new.rs` - An example of creating gradient stops
+  for a gradient fill for a chart element.
 
 * `doc_chart_intro.rs` - A simple chart example using the rust_xlsxwriter
   library.
@@ -346,9 +367,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_series_set_name.rs` - A chart example demonstrating setting
   the chart series name.
 
-* `doc_chart_series_set_overlap.rs` - A example of setting the chart series
-  gap and overlap. Note that it only needs to be applied to one of the
-  series in the chart.
+* `doc_chart_series_set_overlap.rs` - an example of setting the chart
+  series gap and overlap. Note that it only needs to be applied to one of
+  the series in the chart.
 
 * `doc_chart_series_set_values.rs` - A chart example demonstrating setting
   the chart series values.
@@ -428,6 +449,10 @@ documentation and generally show how an individual function works.
 
 * `doc_chart_trendline_set_format.rs` - An example of adding a trendline to
   a chart data series with formatting.
+
+* `doc_chart_trendline_set_label_format.rs` - An example of adding a
+  trendline to a chart data series and adding formatting to the trendline
+  data label.
 
 * `doc_chart_trendline_set_name.rs` - An example of adding a trendline to a
   chart data series with a custom name.

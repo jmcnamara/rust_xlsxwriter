@@ -3034,7 +3034,7 @@ fn main() -> Result<(), XlsxError> {
 
 # Chart: Pattern Fill: Example of a chart with Pattern Fill
 
-A example of creating column charts with fill patterns using the [`ChartFormat`]
+an example of creating column charts with fill patterns using the [`ChartFormat`]
 and [`ChartPatternFill`] structs.
 
 

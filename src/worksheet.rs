@@ -1316,11 +1316,11 @@ impl Worksheet {
 
     /// Write a "rich" string with multiple formats to a worksheet cell.
     ///
-    /// The `write_rich_string()` method is used to write strings with
-    /// multiple font formats within the string. For example strings like "This
-    /// is **bold** and this is *italic*". For strings with a single format you
-    /// can use the more common [`write_string_with_format()`](Worksheet::write_string)
-    /// method.
+    /// The `write_rich_string()` method is used to write strings with multiple
+    /// font formats within the string. For example strings like "This is
+    /// **bold** and this is *italic*". For strings with a single format you can
+    /// use the more common
+    /// [`write_string_with_format()`](Worksheet::write_string) method.
     ///
     /// The basic rule is to break the string into pairs of [`Format`] and
     /// [`str`] fragments. So if we look at the above string again:
@@ -1350,15 +1350,15 @@ impl Worksheet {
     ///
     /// See the full example below.
     ///
-    /// For the default format segments you can use
-    /// [`Format::default()`](Format::default).
+    /// For the default format segments you can use [`Format::default()`].
     ///
     /// Note, only the Font elements of the [`Format`] are used by Excel in rich
     /// strings. For example it isn't possible in Excel to highlight part of the
     /// string with a yellow background. It is possible to have a yellow
     /// background for the entire cell or to format other cell properties using
     /// an additional [`Format`] object and the
-    /// [`write_rich_string_with_format()`](Worksheet::write_rich_string) method, see below.
+    /// [`write_rich_string_with_format()`](Worksheet::write_rich_string)
+    /// method, see below.
     ///
     /// # Parameters
     ///
@@ -3654,7 +3654,7 @@ impl Worksheet {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -3724,7 +3724,7 @@ impl Worksheet {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart_with_offset(0, 2, &chart, 10, 5)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -5610,8 +5610,7 @@ impl Worksheet {
     /// Alternatively you can use the `worksheet.use_future_functions()`
     /// function to have `rust_xlsxwriter` automatically handle future functions
     /// for you, or use a [`Formula`] struct and the
-    /// [`Formula::use_future_functions()`](Formula::use_future_functions)
-    /// method, see below.
+    /// [`Formula::use_future_functions()`] method, see below.
     ///
     /// # Parameters
     ///

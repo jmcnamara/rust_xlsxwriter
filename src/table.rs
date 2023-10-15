@@ -1094,8 +1094,7 @@ impl Table {
     /// <img src="https://rustxlsxwriter.github.io/images/table_styles.png">
     ///
     /// You can set one of these styles using a [`TableStyle`] enum value. The
-    /// default table style in Excel is equivalent to
-    /// [`TableStyle::Medium9`](TableStyle::Medium9).
+    /// default table style in Excel is equivalent to [`TableStyle::Medium9`].
     ///
     /// # Parameters
     ///
@@ -2109,8 +2108,7 @@ impl fmt::Display for TableFunction {
 /// <img src="https://rustxlsxwriter.github.io/images/table_styles.png">
 ///
 /// The style is set via the [`table.set_style`](Table::set_style) method. The
-/// default table style in Excel is equivalent to
-/// [`TableStyle::Medium9`](TableStyle::Medium9).
+/// default table style in Excel is equivalent to [`TableStyle::Medium9`].
 ///
 /// # Examples
 ///

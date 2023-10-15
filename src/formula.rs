@@ -104,8 +104,8 @@ use std::borrow::Cow;
 ///
 /// This works fine with Excel and the majority of spreadsheet applications.
 /// However, applications that don't have a facility to calculate formulas will
-/// only display the "0" result. Examples of such applications are Excel viewers,
-/// PDF converters, and some mobile device applications.
+/// only display the "0" result. Examples of such applications are Excel
+/// viewers, PDF converters, and some mobile device applications.
 ///
 /// If required, it is also possible to specify the calculated result of the
 /// formula using the [`worksheet.set_formula_result()`] method or the
@@ -137,7 +137,8 @@ use std::borrow::Cow;
 /// # }
 /// ```
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_formula_result.png">
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_set_formula_result.png">
 ///
 /// One common spreadsheet application where the formula recalculation doesn't
 /// work is `LibreOffice` (see the following [issue report]). If you wish to
@@ -433,8 +434,8 @@ use std::borrow::Cow;
 ///     =ToCelsius(212)
 /// ```
 ///
-/// A `rust_xlsxwriter` example that replicates the described Excel functionality
-/// is shown below:
+/// A `rust_xlsxwriter` example that replicates the described Excel
+/// functionality is shown below:
 ///
 ///
 /// ```
@@ -534,7 +535,7 @@ use std::borrow::Cow;
 /// ```
 ///
 /// Or if you are using a [`Formula`] struct you can use the
-/// [`Formula::use_future_functions()`](Formula::use_future_functions) method:
+/// [`Formula::use_future_functions()`] method:
 ///
 /// ```text
 ///     worksheet.write_formula(0, 0, Formula::new("=STDEV.S(B1:B5)").use_future_functions())?;
@@ -860,8 +861,7 @@ impl Formula {
     /// [`worksheet.use_future_functions()`](crate::Worksheet::use_future_functions)
     /// function to have `rust_xlsxwriter` automatically handle future functions
     /// for you, or use a [`Formula`] struct and the
-    /// [`Formula::use_future_functions()`](Formula::use_future_functions)
-    /// method, see below.
+    /// [`Formula::use_future_functions()`] method, see below.
     ///
     /// # Examples
     ///
