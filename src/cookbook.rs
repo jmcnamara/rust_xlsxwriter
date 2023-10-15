@@ -38,15 +38,16 @@ cargo run --example app_demo
 23. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
 24. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
 25. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-26. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
-27. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-28. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-29. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-30. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-31. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-32. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-33. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-34. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+26. [Chart: Chart data tools](#chart-chart-data-tools)
+27. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
+28. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+29. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+30. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+31. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+32. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+33. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+34. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+35. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -3276,6 +3277,112 @@ fn main() -> Result<(), XlsxError> {
     data_worksheet.set_hidden(true);
 
     workbook.save("chart_styles.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Chart: Chart data tools
+
+A demo of the various Excel chart data tools that are available via the
+`rust_xlsxwriter` library.
+
+
+**Image of the output file:**
+
+Chart 1 in the following example is a trendline chart:
+<img src="https://rustxlsxwriter.github.io/images/chart_data_tools1.png">
+
+Chart 2 in the following example is an example of a chart with data labels and markers:
+<img src="https://rustxlsxwriter.github.io/images/chart_data_tools2.png">
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_chart_data_tools.rs
+
+use rust_xlsxwriter::{
+    Chart, ChartDataLabel, ChartMarker, ChartTrendline, ChartTrendlineType, ChartType, Format,
+    Workbook, XlsxError,
+};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    // Add the worksheet data that the charts will refer to.
+    worksheet.write_with_format(0, 0, "Number", &bold)?;
+    worksheet.write_with_format(0, 1, "Data 1", &bold)?;
+    worksheet.write_with_format(0, 2, "Data 2", &bold)?;
+
+    let data = [
+        [2, 3, 4, 5, 6, 7],
+        [10, 40, 50, 20, 10, 50],
+        [30, 60, 70, 50, 40, 30],
+    ];
+    for (col_num, col_data) in data.iter().enumerate() {
+        for (row_num, row_data) in col_data.iter().enumerate() {
+            worksheet.write(row_num as u32 + 1, col_num as u16, *row_data)?;
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Trendline example
+    // -----------------------------------------------------------------------
+
+    // Create a new Line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure the first series with a polynomial trendline.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7")
+        .set_trendline(ChartTrendline::new().set_type(ChartTrendlineType::Polynomial(3)));
+
+    // Configure the second series with a linear trendline.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7")
+        .set_trendline(ChartTrendline::new().set_type(ChartTrendlineType::Linear));
+
+    // Add a chart title.
+    chart.title().set_name("Chart with Trendlines");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(1, 3, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
+    // Data Labels and Markers example.
+    // -----------------------------------------------------------------------
+
+    // Create a new Line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure the first series with data labels and markers.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7")
+        .set_data_label(ChartDataLabel::new().show_value())
+        .set_marker(ChartMarker::new().set_automatic());
+
+    // Configure the second series as default.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Add a chart title.
+    chart.title().set_name("Chart with Data Labels and Markers");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(17, 3, &chart, 25, 10)?;
+
+    workbook.save("chart_data_tools.xlsx")?;
 
     Ok(())
 }
