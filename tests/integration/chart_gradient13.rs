@@ -25,15 +25,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let gradient_stops = [
-        ChartGradientStop::new()
-            .set_color("#DDEBCF")
-            .set_position(0),
-        ChartGradientStop::new()
-            .set_color("#9CB86E")
-            .set_position(50),
-        ChartGradientStop::new()
-            .set_color("#156B13")
-            .set_position(100),
+        ChartGradientStop::new("#DDEBCF", 0),
+        ChartGradientStop::new("#9CB86E", 50),
+        ChartGradientStop::new("#156B13", 100),
     ];
 
     let mut chart = Chart::new(ChartType::Column);

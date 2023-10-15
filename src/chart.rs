@@ -3697,11 +3697,11 @@ impl Chart {
 
     // Write the <a:gs> element.
     fn write_gradient_stop(&mut self, gradient_stop: &ChartGradientStop) {
-        let position = 1000 * u32::from(gradient_stop.position.unwrap());
+        let position = 1000 * u32::from(gradient_stop.position);
         let attributes = [("pos", position.to_string())];
 
         self.writer.xml_start_tag("a:gs", &attributes);
-        self.write_color(gradient_stop.color.unwrap(), 0);
+        self.write_color(gradient_stop.color, 0);
 
         self.writer.xml_end_tag("a:gs");
     }
@@ -10429,7 +10429,66 @@ impl ChartFormat {
         self
     }
 
-    /// TODO
+    /// Set the gradient fill formatting for a chart element.
+    ///
+    /// See the [`ChartGradientFill`] struct for details on the gradient fill
+    /// properties that can be set.
+    ///
+    /// # Parameters
+    ///
+    /// * `fill` - A [`ChartGradientFill`] struct reference.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a gradient fill for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_format_set_gradient_fill.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartFormat, ChartGradientFill, ChartGradientStop, ChartType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(ChartFormat::new().set_gradient_fill(
+    ///             ChartGradientFill::new().set_gradient_stops(&[
+    ///                 ChartGradientStop::new("#963735", 0),
+    ///                 ChartGradientStop::new("#F1DCDB", 100),
+    ///             ]),
+    ///         ));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill.png">
+    ///
     pub fn set_gradient_fill(&mut self, fill: &ChartGradientFill) -> &mut ChartFormat {
         self.gradient_fill = Some(fill.clone());
         self
@@ -12869,7 +12928,72 @@ impl fmt::Display for ChartTrendlineType {
     }
 }
 
-/// TODO
+/// The `ChartGradientFill` struct represents a gradient fill for a chart
+/// element.
+///
+/// The [`ChartGradientFill`] struct represents the formatting properties for
+/// the gradient fill of a Chart element. In Excel a gradient fill is comprised
+/// of two or more colors that are blended gradually along a gradient.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
+///
+/// `ChartGradientFill` is a sub property of the [`ChartFormat`] struct and is
+/// used with the
+/// [`ChartFormat::set_gradient_fill()`](ChartFormat::set_gradient_fill) method.
+///
+/// It is used in conjunction with the [`Chart`] struct.
+///
+///
+/// # Examples
+///
+/// An example of setting a gradient fill for a chart element.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_gradient_fill.rs
+/// #
+/// use rust_xlsxwriter::{
+///     Chart, ChartGradientFill, ChartGradientStop, ChartType, Workbook, XlsxError,
+/// };
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Add some data for the chart.
+///     worksheet.write(0, 0, 10)?;
+///     worksheet.write(1, 0, 40)?;
+///     worksheet.write(2, 0, 50)?;
+///     worksheet.write(3, 0, 20)?;
+///     worksheet.write(4, 0, 10)?;
+///     worksheet.write(5, 0, 50)?;
+///
+///     // Create a new chart.
+///   let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series with formatting.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .set_format(ChartGradientFill::new().set_gradient_stops(&[
+///             ChartGradientStop::new("#963735", 0),
+///             ChartGradientStop::new("#F1DCDB", 100),
+///         ]));
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+///     // Save the file.
+///     workbook.save("chart.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill.png">
+///
 #[derive(Clone, PartialEq)]
 pub struct ChartGradientFill {
     gradient_type: ChartGradientFillType,
@@ -12884,7 +13008,8 @@ impl Default for ChartGradientFill {
 }
 
 impl ChartGradientFill {
-    /// TODO
+    /// Create a new `ChartGradientFill` object to represent a Chart gradient fill.
+    ///
     pub fn new() -> ChartGradientFill {
         ChartGradientFill {
             gradient_type: ChartGradientFillType::Linear,
@@ -12893,13 +13018,195 @@ impl ChartGradientFill {
         }
     }
 
-    /// todo
+    /// Set the type of the gradient fill.
+    ///
+    /// Change the default type of the gradient fill to one of the styles
+    /// supported by Excel.
+    ///
+    /// The four gradient types supported by Excel are:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill_types.png">
+    ///
+    /// # Parameters
+    ///
+    /// `gradient_type`: a [`ChartGradientFillType`] enum value.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a gradient fill for a chart element with a non-default
+    /// gradient type.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_gradient_fill_set_type.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartGradientFill, ChartGradientFillType, ChartGradientStop, ChartType, Workbook,
+    /// #     XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(
+    ///             ChartGradientFill::new()
+    ///                 .set_type(ChartGradientFillType::Rectangular)
+    ///                 .set_gradient_stops(&[
+    ///                     ChartGradientStop::new("#963735", 0),
+    ///                     ChartGradientStop::new("#F1DCDB", 100),
+    ///                 ]),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill_set_type.png">
+    ///
     pub fn set_type(&mut self, gradient_type: ChartGradientFillType) -> &mut ChartGradientFill {
         self.gradient_type = gradient_type;
         self
     }
 
-    /// todo
+    /// Set the gradient stops (data points) for a chart gradient fill.
+    ///
+    /// A gradient stop, encapsulated by the [`ChartGradientStop`] struct,
+    /// represents the properties of a data point that is used to generate a
+    /// gradient fill.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
+    ///
+    /// Excel supports between 2 and 10 gradient stops which define the a color
+    /// and it's position in the gradient as a percentage. These colors and
+    /// positions are used to interpolate a gradient fill.
+    ///
+    /// # Parameters
+    ///
+    /// `gradient_stops`: A slice ref of [`ChartGradientStop`] values. As in
+    /// Excel there must be between 2 and 10 valid gradient stops.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a gradient fill for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_gradient_stops.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartGradientFill, ChartGradientStop, ChartType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Set the properties of the gradient stops.
+    ///     let gradient_stops = [
+    ///         ChartGradientStop::new("#156B13", 0),
+    ///         ChartGradientStop::new("#9CB86E", 50),
+    ///         ChartGradientStop::new("#DDEBCF", 100),
+    ///     ];
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(ChartGradientFill::new().set_gradient_stops(&gradient_stops));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_gradient_stops.png">
+    ///
+    /// Note, it can be clearer to add the gradient stops directly to the format
+    /// as follows. This gives the same output as above.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_gradient_stops2.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartGradientFill, ChartGradientStop, ChartType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(ChartGradientFill::new().set_gradient_stops(&[
+    ///             ChartGradientStop::new("#156B13", 0),
+    ///             ChartGradientStop::new("#9CB86E", 50),
+    ///             ChartGradientStop::new("#DDEBCF", 100),
+    ///         ]));
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
     pub fn set_gradient_stops(
         &mut self,
         gradient_stops: &[ChartGradientStop],
@@ -12921,7 +13228,13 @@ impl ChartGradientFill {
         self
     }
 
-    /// todo
+    /// Set the angle of the linear gradient fill type.
+    ///
+    /// # Parameters
+    ///
+    /// * `angle` - The angle of the linear gradient fill in the range `0 <=
+    ///   angle < 360`. The default angle is 90 degrees.
+    ///
     pub fn set_angle(&mut self, angle: u16) -> &mut ChartGradientFill {
         if (0..360).contains(&angle) {
             self.angle = angle;
@@ -12932,84 +13245,155 @@ impl ChartGradientFill {
     }
 }
 
-/// TODO
+/// The `ChartGradientStop` struct represents a gradient fill data point.
+///
+/// The [`ChartGradientStop`] struct represents the properties of a data point
+/// (a stop) that is used to generate a gradient fill.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
+///
+/// Excel supports between 2 and 10 gradient stops which define the a color and
+/// it's position in the gradient as a percentage. These colors and positions
+/// are used to interpolate a gradient fill.
+///
+/// Gradient formats are generally used with the
+/// [`ChartGradientFill::set_gradient_stops()`] method and
+/// [`ChartGradientFill`].
+///
+/// # Examples
+///
+/// An example of setting a gradient fill for a chart element.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_gradient_stops.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     Chart, ChartGradientFill, ChartGradientStop, ChartType, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Set the properties of the gradient stops.
+///     let gradient_stops = [
+///         ChartGradientStop::new("#156B13", 0),
+///         ChartGradientStop::new("#9CB86E", 50),
+///         ChartGradientStop::new("#DDEBCF", 100),
+///     ];
+///
+///     // Add a data series with formatting.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .set_format(ChartGradientFill::new().set_gradient_stops(&gradient_stops));
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_stops.png">
+///
+///
 #[derive(Clone, PartialEq)]
 pub struct ChartGradientStop {
-    color: Option<Color>,
-    position: Option<u8>,
-}
-
-impl Default for ChartGradientStop {
-    fn default() -> Self {
-        Self::new()
-    }
+    color: Color,
+    position: u8,
 }
 
 impl ChartGradientStop {
-    /// TODO
-    pub fn new() -> ChartGradientStop {
-        ChartGradientStop {
-            color: None,
-            position: None,
-        }
-    }
-
-    /// TODO
-    pub fn set_color<T>(mut self, color: T) -> ChartGradientStop
+    /// Create a new `ChartGradientStop` object to represent a Chart gradient fill stop.
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The gradient stop color property defined by a [`Color`] enum
+    ///   value.
+    /// * `position` - The gradient stop position in the range 0-100.
+    ///
+    /// # Examples
+    ///
+    /// An example of creating gradient stops for a gradient fill for a chart element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_gradient_stops_new.rs
+    /// #
+    /// # use rust_xlsxwriter::ChartGradientStop;
+    /// #
+    /// # #[allow(unused_variables)]
+    /// # fn main() {
+    ///     let gradient_stops = [
+    ///         ChartGradientStop::new("#156B13", 0),
+    ///         ChartGradientStop::new("#9CB86E", 50),
+    ///         ChartGradientStop::new("#DDEBCF", 100),
+    ///     ];
+    /// # }
+    /// ```
+    pub fn new<T>(color: T, position: u8) -> ChartGradientStop
     where
         T: IntoColor,
     {
         let color = color.new_color();
-        if color.is_valid() {
-            self.color = Some(color);
+
+        // Check and warn but don't raise error since this is too deeply nested.
+        // It will be rechecked and rejected at use.
+        if !color.is_valid() {
+            eprintln!("Gradient stop color isn't valid.");
         }
-
-        self
-    }
-
-    /// todo
-    pub fn set_position(mut self, position: u8) -> ChartGradientStop {
         if !(0..=100).contains(&position) {
             eprintln!("Gradient stop {position} outside Excel range: 0 <= position <= 100.");
-            return self;
         }
 
-        self.position = Some(position);
-        self
+        ChartGradientStop { color, position }
     }
 
-    /// todo
+    // Check for valid gradient stop properties.
     pub(crate) fn is_valid(&self) -> bool {
-        if self.color.is_none() {
-            eprintln!("Gradient stop must contain a color.");
-            return false;
-        }
-
-        if self.position.is_none() {
-            eprintln!("Gradient stop must contain a position.");
-            return false;
-        }
-
-        true
+        self.color.is_valid() && (0..=100).contains(&self.position)
     }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-/// The `ChartGradientFillType` enum defines the trendline types of a
-/// [`ChartGradientFill`]
+/// The `ChartGradientFillType` enum defines the gradient types of a
+/// [`ChartGradientFill`].
 ///
-/// TODO
+/// The four gradient types supported by Excel are:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill_types.png">
 ///
 pub enum ChartGradientFillType {
-    /// Todo
+    /// The gradient runs linearly from the top of the area vertically to the
+    /// bottom. This is the default.
     Linear,
 
-    /// Todo
+    /// The gradient runs radially from the bottom right of the area vertically
+    /// to the top left.
     Radial,
 
-    /// Todo
+    /// The gradient runs in a rectangular pattern from the bottom right of the
+    /// area vertically to the top left.
     Rectangular,
 
-    /// Todo
+    /// The gradient runs in a rectangular pattern from the center of the area
+    /// to the outer vertices.
     Path,
 }
