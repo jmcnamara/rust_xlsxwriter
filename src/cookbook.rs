@@ -36,16 +36,17 @@ cargo run --example app_demo
 21. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
 22. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
 23. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
-24. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-25. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
-26. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-27. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-28. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-29. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-30. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-31. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-32. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
-33. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+24. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
+25. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
+26. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
+27. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+28. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+29. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+30. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+31. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+32. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+33. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+34. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -3034,7 +3035,7 @@ fn main() -> Result<(), XlsxError> {
 
 # Chart: Pattern Fill: Example of a chart with Pattern Fill
 
-an example of creating column charts with fill patterns using the [`ChartFormat`]
+A example of creating column charts with fill patterns using the [`ChartFormat`]
 and [`ChartPatternFill`] structs.
 
 
@@ -3117,6 +3118,105 @@ fn main() -> Result<(), XlsxError> {
 
 [`ChartFormat`]: crate::ChartFormat
 [`ChartPatternFill`]: crate::ChartPatternFill
+
+
+# Chart: Gradient Fill: Example of a chart with Gradient Fill
+
+A example of creating column charts with fill gradients using the
+[`ChartFormat`] and [`ChartGradientFill`] structs.
+
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_chart_gradient.rs
+
+use rust_xlsxwriter::{
+    Chart, ChartGradientFill, ChartGradientStop, ChartType, Format, Workbook, XlsxError,
+};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    // Add the worksheet data that the charts will refer to.
+    worksheet.write_with_format(0, 0, "Number", &bold)?;
+    worksheet.write_with_format(0, 1, "Batch 1", &bold)?;
+    worksheet.write_with_format(0, 2, "Batch 2", &bold)?;
+
+    let data = [
+        [2, 3, 4, 5, 6, 7],
+        [10, 40, 50, 20, 10, 50],
+        [30, 60, 70, 50, 40, 30],
+    ];
+    for (col_num, col_data) in data.iter().enumerate() {
+        for (row_num, row_data) in col_data.iter().enumerate() {
+            worksheet.write(row_num as u32 + 1, col_num as u16, *row_data)?;
+        }
+    }
+
+    // Create a new column chart.
+    let mut chart = Chart::new(ChartType::Column);
+
+    //
+    // Create a gradient profile to the first series.
+    //
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7")
+        .set_name("Sheet1!$B$1")
+        .set_format(ChartGradientFill::new().set_gradient_stops(&[
+            ChartGradientStop::new("#963735", 0),
+            ChartGradientStop::new("#F1DCDB", 100),
+        ]));
+
+    //
+    // Create a gradient profile to the second series.
+    //
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7")
+        .set_name("Sheet1!$C$1")
+        .set_format(ChartGradientFill::new().set_gradient_stops(&[
+            ChartGradientStop::new("#E36C0A", 0),
+            ChartGradientStop::new("#FCEADA", 100),
+        ]));
+
+    //
+    // Create a gradient profile and add it to chart plot area.
+    //
+    chart.set_plot_area_format(ChartGradientFill::new().set_gradient_stops(&[
+        ChartGradientStop::new("#FFEFD1", 0),
+        ChartGradientStop::new("#F0EBD5", 50),
+        ChartGradientStop::new("#B69F66", 100),
+    ]));
+
+    // Add some axis labels.
+    chart.x_axis().set_name("Test number");
+    chart.y_axis().set_name("Sample length (mm)");
+
+    // Turn off the chart legend.
+    chart.legend().set_hidden();
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(0, 3, &chart, 25, 10)?;
+
+    workbook.save("chart_gradient.xlsx")?;
+
+    Ok(())
+}
+```
+
+[`ChartFormat`]: crate::ChartFormat
+[`ChartGradientFill`]: crate::ChartGradientFill
 
 
 # Chart: Styles: Example of setting default chart styles
@@ -3342,6 +3442,60 @@ fn main() -> Result<(), XlsxError> {
 
     // Save the file to disk.
     workbook.save("defined_name.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Setting cell protection in a worksheet
+
+Example of cell locking and formula hiding in an Excel worksheet using worksheet
+protection.
+
+**Image of the output file:**
+
+
+<img src="https://rustxlsxwriter.github.io/images/app_worksheet_protection.png">
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_worksheet_protection.rs
+
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Create some format objects.
+    let unlocked = Format::new().set_unlocked();
+    let hidden = Format::new().set_hidden();
+
+    // Protect the worksheet to turn on cell locking.
+    worksheet.protect();
+
+    // Examples of cell locking and hiding.
+    worksheet.write_string(0, 0, "Cell B1 is locked. It cannot be edited.")?;
+    worksheet.write_formula(0, 1, "=1+2")?; // Locked by default.
+
+    worksheet.write_string(1, 0, "Cell B2 is unlocked. It can be edited.")?;
+    worksheet.write_formula_with_format(1, 1, "=1+2", &unlocked)?;
+
+    worksheet.write_string(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
+    worksheet.write_formula_with_format(2, 1, "=1+2", &hidden)?;
+
+    worksheet.write_string(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
+    worksheet.write_string(5, 0, "to remove the worksheet protection.")?;
+
+    worksheet.autofit();
+
+    // Save the file to disk.
+    workbook.save("worksheet_protection.xlsx")?;
 
     Ok(())
 }
@@ -4065,60 +4219,6 @@ fn main() -> Result<(), XlsxError> {
 
     // Save the file to disk.
     workbook.save("lambda.xlsx")?;
-
-    Ok(())
-}
-```
-
-
-# Setting cell protection in a worksheet
-
-Example of cell locking and formula hiding in an Excel worksheet using worksheet
-protection.
-
-**Image of the output file:**
-
-
-<img src="https://rustxlsxwriter.github.io/images/app_worksheet_protection.png">
-
-**Code to generate the output file:**
-
-```rust
-// Sample code from examples/app_worksheet_protection.rs
-
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
-
-fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file object.
-    let mut workbook = Workbook::new();
-
-    // Add a worksheet to the workbook.
-    let worksheet = workbook.add_worksheet();
-
-    // Create some format objects.
-    let unlocked = Format::new().set_unlocked();
-    let hidden = Format::new().set_hidden();
-
-    // Protect the worksheet to turn on cell locking.
-    worksheet.protect();
-
-    // Examples of cell locking and hiding.
-    worksheet.write_string(0, 0, "Cell B1 is locked. It cannot be edited.")?;
-    worksheet.write_formula(0, 1, "=1+2")?; // Locked by default.
-
-    worksheet.write_string(1, 0, "Cell B2 is unlocked. It can be edited.")?;
-    worksheet.write_formula_with_format(1, 1, "=1+2", &unlocked)?;
-
-    worksheet.write_string(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
-    worksheet.write_formula_with_format(2, 1, "=1+2", &hidden)?;
-
-    worksheet.write_string(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
-    worksheet.write_string(5, 0, "to remove the worksheet protection.")?;
-
-    worksheet.autofit();
-
-    // Save the file to disk.
-    workbook.save("worksheet_protection.xlsx")?;
 
     Ok(())
 }

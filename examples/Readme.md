@@ -54,7 +54,7 @@ documentation and generally show how an individual function works.
 * `app_chart_scatter.rs` - an example of creating scatter charts using the
   rust_xlsxwriter library.
 
-* `app_chart_styles.rs` - # An example showing all 48 default chart styles
+* `app_chart_styles.rs` - An example showing all 48 default chart styles
   available in Excel 2007 using rust_xlsxwriter. Note, these styles are not
   the same as the styles available in Excel 2013 and later.
 
