@@ -793,11 +793,15 @@ impl Chart {
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -871,11 +875,15 @@ impl Chart {
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -4746,11 +4754,15 @@ impl ChartSeries {
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -6277,11 +6289,15 @@ impl ChartTitle {
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -6612,11 +6628,16 @@ impl ChartMarker {
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    /// - `set_no_border`: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -7077,12 +7098,16 @@ impl ChartDataLabel {
     /// object or a sub struct that implements [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
-    ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    /// - `set_no_border`: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -7755,11 +7780,15 @@ impl ChartPoint {
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -8039,11 +8068,15 @@ impl ChartAxis {
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -9665,12 +9698,17 @@ impl ChartLegend {
     /// object or a sub struct that implements [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
-    ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    /// - `set_no_border`: Turn off the border for the chart object.
+    /// - `set_no_border`: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -9931,11 +9969,18 @@ impl fmt::Display for ChartEmptyCells {
 /// chart element to obtain a reference to the formatting struct for that
 /// element. After that it can be used to apply formatting such as:
 ///
-/// - `no_fill`: Turn of the fill for the chart object.
-/// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-/// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-/// - `no_line`: Turn off the line/border for the chart object.
-/// - `line`: Set the [`ChartLine`] properties for lines or borders.
+/// - `set_solid_fill`: Set the [`ChartSolidFill`] properties.
+/// - `set_pattern_fill`: Set the [`ChartPatternFill`] properties.
+/// - `set_pattern_gradient_fill`: Set the [`ChartGradientFill`] properties.
+/// - `set_no_fill`: Turn off the fill for the chart object.
+/// - `set_line`: Set the [`ChartLine`] properties.
+/// - `set_border`: Set the [`ChartBorder`] properties. A synonym for
+///   [`ChartLine`] depending on context.
+/// - `set_no_line`: Turn off the line for the chart object.
+/// - `set_no_border`: Turn off the border for the chart object.
+/// - `set_no_border`: Turn off the border for the chart object.
+/// - `set_no_border`: Turn off the border for the chart object.
+///
 ///
 /// # Examples
 ///
@@ -12461,12 +12506,16 @@ impl ChartTrendline {
     /// [`IntoChartFormat`].
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
-    ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    /// - `set_no_border`: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
@@ -12548,11 +12597,15 @@ impl ChartTrendline {
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
-    /// - `no_fill`: Turn of the fill for the chart object.
-    /// - `solid_fill`: Set the [`ChartSolidFill`] properties.
-    /// - `pattern_fill`: Set the [`ChartPatternFill`] properties.
-    /// - `no_line`: Turn off the line/border for the chart object.
-    /// - `line`: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
     ///
     /// # Parameters
     ///
