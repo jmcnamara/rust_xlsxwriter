@@ -2098,6 +2098,11 @@ impl Chart {
                 self.write_data_labels(data_label, &series.custom_data_labels, max_points);
             }
 
+            if series.trendline.trend_type != ChartTrendlineType::None {
+                // Write the c:trendline element.
+                self.write_trendline(&series.trendline);
+            }
+
             if let Some(error_bars) = &series.x_error_bars {
                 // Write the c:errBars element.
                 self.write_error_bar("x", error_bars);
