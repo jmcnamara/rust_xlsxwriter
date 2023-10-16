@@ -2022,6 +2022,21 @@ impl Chart {
                 self.write_trendline(&series.trendline);
             }
 
+            if self.chart_group_type == ChartType::Bar {
+                if let Some(error_bars) = &series.x_error_bars {
+                    // Write the c:errBars element.
+                    self.write_error_bar("", error_bars);
+                }
+            } else if self.chart_group_type == ChartType::Column {
+                if let Some(error_bars) = &series.y_error_bars {
+                    // Write the c:errBars element.
+                    self.write_error_bar("", error_bars);
+                }
+            } else if let Some(error_bars) = &series.y_error_bars {
+                // Write the c:errBars element.
+                self.write_error_bar("y", error_bars);
+            }
+
             // Write the c:cat element.
             if series.category_range.has_data() {
                 self.category_has_num_format = true;
@@ -2081,6 +2096,16 @@ impl Chart {
             if let Some(data_label) = &series.data_label {
                 // Write the c:dLbls element.
                 self.write_data_labels(data_label, &series.custom_data_labels, max_points);
+            }
+
+            if let Some(error_bars) = &series.x_error_bars {
+                // Write the c:errBars element.
+                self.write_error_bar("x", error_bars);
+            }
+
+            if let Some(error_bars) = &series.y_error_bars {
+                // Write the c:errBars element.
+                self.write_error_bar("y", error_bars);
             }
 
             self.write_x_val(&series.category_range, &series.category_cache_data);
@@ -3194,6 +3219,76 @@ impl Chart {
         self.writer.xml_empty_tag("c:intercept", &attributes);
     }
 
+    // Write the <c:errBars> element.
+    fn write_error_bar(&mut self, axis: &str, error_bars: &ChartErrorBars) {
+        self.writer.xml_start_tag_only("c:errBars");
+
+        // Write the c:errDir element.
+        self.write_error_bar_direction(axis);
+
+        // Write the c:errBarType element.
+        self.write_error_bar_type(error_bars.direction);
+
+        // Write the c:errValType element.
+        self.write_err_direction_type(error_bars.error_type);
+
+        if !error_bars.has_end_cap {
+            // Write the c:noEndCap element.
+            self.write_error_bar_no_end_cap();
+        }
+
+        match error_bars.error_type {
+            ChartErrorBarsType::FixedValue(value)
+            | ChartErrorBarsType::Percentage(value)
+            | ChartErrorBarsType::StandardDeviation(value) => {
+                // Write the c:val element.
+                self.write_error_value(value);
+            }
+            ChartErrorBarsType::StandardError => {}
+        }
+
+        // Write the c:spPr formatting element.
+        self.write_sp_pr(&error_bars.format);
+
+        self.writer.xml_end_tag("c:errBars");
+    }
+
+    // Write the <c:errDir> element.
+    fn write_error_bar_direction(&mut self, axis: &str) {
+        if !axis.is_empty() {
+            let attributes = vec![("val", axis.to_string())];
+            self.writer.xml_empty_tag("c:errDir", &attributes);
+        }
+    }
+
+    // Write the <c:errBarType> element.
+    fn write_error_bar_type(&mut self, direction: ChartErrorBarsDirection) {
+        let attributes = vec![("val", direction.to_string())];
+
+        self.writer.xml_empty_tag("c:errBarType", &attributes);
+    }
+
+    // Write the <c:errValType> element.
+    fn write_err_direction_type(&mut self, bar_type: ChartErrorBarsType) {
+        let attributes = vec![("val", bar_type.to_string())];
+
+        self.writer.xml_empty_tag("c:errValType", &attributes);
+    }
+
+    // Write the <c:noEndCap> element.
+    fn write_error_bar_no_end_cap(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer.xml_empty_tag("c:noEndCap", &attributes);
+    }
+
+    // Write the <c:val> element.
+    fn write_error_value(&mut self, value: f64) {
+        let attributes = [("val", value.to_string())];
+
+        self.writer.xml_empty_tag("c:val", &attributes);
+    }
+
     // Write the <c:showVal> element.
     fn write_show_val(&mut self) {
         let attributes = [("val", "1")];
@@ -4299,7 +4394,11 @@ impl DrawingObject for Chart {
 }
 
 // -----------------------------------------------------------------------
-// Secondary structs.
+// Secondary structs and enums
+// -----------------------------------------------------------------------
+
+// -----------------------------------------------------------------------
+// ChartSeries
 // -----------------------------------------------------------------------
 
 /// The `ChartSeries` struct represents a chart series.
@@ -4365,6 +4464,8 @@ pub struct ChartSeries {
     pub(crate) invert_if_negative: bool,
     pub(crate) inverted_color: Color,
     pub(crate) trendline: ChartTrendline,
+    pub(crate) x_error_bars: Option<ChartErrorBars>,
+    pub(crate) y_error_bars: Option<ChartErrorBars>,
     pub(crate) delete_from_legend: bool,
 }
 
@@ -4479,6 +4580,8 @@ impl ChartSeries {
             invert_if_negative: false,
             inverted_color: Color::Default,
             trendline: ChartTrendline::new(),
+            x_error_bars: None,
+            y_error_bars: None,
             delete_from_legend: false,
         }
     }
@@ -5464,6 +5567,18 @@ impl ChartSeries {
         self
     }
 
+    ///
+    pub fn set_y_error_bars(&mut self, error_bars: &ChartErrorBars) -> &mut ChartSeries {
+        self.y_error_bars = Some(error_bars.clone());
+        self
+    }
+
+    ///
+    pub fn set_x_error_bars(&mut self, error_bars: &ChartErrorBars) -> &mut ChartSeries {
+        self.x_error_bars = Some(error_bars.clone());
+        self
+    }
+
     /// Set the series overlap for a chart/bar chart.
     ///
     /// Set the overlap between series in a Bar/Column chart. The range is -100
@@ -5821,6 +5936,10 @@ impl ChartSeries {
     }
 }
 
+// -----------------------------------------------------------------------
+// ChartRange
+// -----------------------------------------------------------------------
+
 #[derive(Clone, PartialEq)]
 /// The `ChartRange` struct represents a chart range.
 ///
@@ -5991,6 +6110,10 @@ impl ChartSeriesCacheData {
     }
 }
 
+// -----------------------------------------------------------------------
+// ChartType
+// -----------------------------------------------------------------------
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 /// The `ChartType` enum define the type of a [`Chart`] object.
 ///
@@ -6116,6 +6239,10 @@ pub enum ChartType {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_scatter_smooth_with_markers.png">
     ScatterSmoothWithMarkers,
 }
+
+// -----------------------------------------------------------------------
+// ChartTitle
+// -----------------------------------------------------------------------
 
 /// The `ChartTitle` struct represents a chart title.
 ///
@@ -6392,6 +6519,10 @@ impl ChartTitle {
         self
     }
 }
+
+// -----------------------------------------------------------------------
+// ChartMarker
+// -----------------------------------------------------------------------
 
 /// The `ChartMarker` struct represents a chart marker.
 ///
@@ -6716,6 +6847,10 @@ impl fmt::Display for ChartMarkerType {
         }
     }
 }
+
+// -----------------------------------------------------------------------
+// ChartDataLabel
+// -----------------------------------------------------------------------
 
 /// The `ChartDataLabel` struct represents a chart data label.
 ///
@@ -7677,6 +7812,10 @@ impl fmt::Display for ChartDataLabelPosition {
     }
 }
 
+// -----------------------------------------------------------------------
+// ChartPoint
+// -----------------------------------------------------------------------
+
 /// The `ChartPoint` struct represents a chart point.
 ///
 /// The [`ChartPoint`] struct represents a "point" in a data series which is the
@@ -7806,6 +7945,10 @@ impl ChartPoint {
         self.format.has_formatting()
     }
 }
+
+// -----------------------------------------------------------------------
+// ChartAxis
+// -----------------------------------------------------------------------
 
 /// The `ChartAxis` struct represents a chart axis.
 ///
@@ -9436,6 +9579,10 @@ impl fmt::Display for ChartGrouping {
     }
 }
 
+// -----------------------------------------------------------------------
+// ChartLegend
+// -----------------------------------------------------------------------
+
 /// The `ChartLegend` struct represents a chart legend.
 ///
 /// The `ChartLegend` struct is a representation of a legend on an Excel chart.
@@ -9945,6 +10092,10 @@ impl fmt::Display for ChartEmptyCells {
         }
     }
 }
+
+// -----------------------------------------------------------------------
+// ChartFormat
+// -----------------------------------------------------------------------
 
 #[derive(Clone, PartialEq)]
 /// The `ChartFormat` struct represents formatting for various chart objects.
@@ -11786,6 +11937,10 @@ impl fmt::Display for ChartPatternFillType {
     }
 }
 
+// -----------------------------------------------------------------------
+// ChartFont
+// -----------------------------------------------------------------------
+
 #[derive(Clone, PartialEq)]
 /// The `ChartFont` struct represents the font format for various chart objects.
 ///
@@ -12327,6 +12482,10 @@ impl ChartFont {
         !self.name.is_empty() || self.pitch_family > 0 || self.charset > 0
     }
 }
+
+// -----------------------------------------------------------------------
+// ChartTrendline
+// -----------------------------------------------------------------------
 
 /// The `ChartTrendline` struct represents a trendline for a chart series.
 ///
@@ -13049,6 +13208,10 @@ impl Default for ChartGradientFill {
     }
 }
 
+// -----------------------------------------------------------------------
+// ChartGradientFill
+// -----------------------------------------------------------------------
+
 impl ChartGradientFill {
     /// Create a new `ChartGradientFill` object to represent a Chart gradient fill.
     ///
@@ -13438,4 +13601,134 @@ pub enum ChartGradientFillType {
     /// The gradient runs in a rectangular pattern from the center of the area
     /// to the outer vertices.
     Path,
+}
+
+// -----------------------------------------------------------------------
+// ChartGradientFill
+// -----------------------------------------------------------------------
+
+/// Todo start `error_bars`
+#[derive(Clone, PartialEq)]
+pub struct ChartErrorBars {
+    has_end_cap: bool,
+    error_type: ChartErrorBarsType,
+    direction: ChartErrorBarsDirection,
+    format: ChartFormat,
+}
+
+impl Default for ChartErrorBars {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartErrorBars {
+    /// Create a new `ChartErrorBars` object to represent Chart series error bars.
+    ///
+    pub fn new() -> ChartErrorBars {
+        ChartErrorBars {
+            has_end_cap: true,
+            error_type: ChartErrorBarsType::StandardError,
+            direction: ChartErrorBarsDirection::Both,
+            format: ChartFormat::new(),
+        }
+    }
+
+    /// Todo
+    pub fn set_direction(&mut self, direction: ChartErrorBarsDirection) -> &mut ChartErrorBars {
+        self.direction = direction;
+        self
+    }
+
+    /// Todo
+    pub fn set_type(&mut self, error_type: ChartErrorBarsType) -> &mut ChartErrorBars {
+        self.error_type = error_type;
+        self
+    }
+
+    /// Todo
+    pub fn set_end_cap(&mut self, enable: bool) -> &mut ChartErrorBars {
+        self.has_end_cap = enable;
+        self
+    }
+
+    /// Set the formatting properties for a chart series error bars.
+    ///
+    /// Set the formatting properties for a chart series via a [`ChartFormat`]
+    /// object or a sub struct that implements [`IntoChartFormat`].
+    ///
+    /// For error bars the only formatting supported by Excel is
+    /// [`ChartFormat::set_line()`].
+    ///
+    /// # Parameters
+    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
+    ///
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartErrorBars
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
+        self
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+/// The `ChartErrorBarsType` enum defines the type of a chart series
+/// [`ChartErrorBars`].
+///
+/// todo `ChartErrorBarsType`
+///
+pub enum ChartErrorBarsType {
+    /// TODO
+    FixedValue(f64),
+
+    /// TODO
+    Percentage(f64),
+
+    /// TODO
+    StandardDeviation(f64),
+
+    /// TODO
+    StandardError,
+}
+
+impl fmt::Display for ChartErrorBarsType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ChartErrorBarsType::StandardError => write!(f, "stdErr"),
+            ChartErrorBarsType::FixedValue(_) => write!(f, "fixedVal"),
+            ChartErrorBarsType::Percentage(_) => write!(f, "percentage"),
+            ChartErrorBarsType::StandardDeviation(_) => write!(f, "stdDev"),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+/// The `ChartErrorBarsDirection` enum defines the error bar direction for a
+/// chart series [`ChartErrorBars`].
+///
+/// todo `ChartErrorBarsDirection`
+///
+pub enum ChartErrorBarsDirection {
+    /// TODO
+    Both,
+
+    /// TODO
+    Minus,
+
+    /// TODO
+    Plus,
+}
+
+impl fmt::Display for ChartErrorBarsDirection {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ChartErrorBarsDirection::Both => write!(f, "both"),
+            ChartErrorBarsDirection::Minus => write!(f, "minus"),
+            ChartErrorBarsDirection::Plus => write!(f, "plus"),
+        }
+    }
 }
