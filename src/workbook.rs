@@ -1283,6 +1283,7 @@ impl Workbook {
     // Add worksheet number/string cache data to chart series. This isn't
     // strictly necessary but it helps non-Excel apps to render charts
     // correctly.
+    #[allow(clippy::too_many_lines)] // TODO refactor to joint range/cache.
     fn prepare_chart_cache_data(&mut self) -> Result<(), XlsxError> {
         // First build up a hash of the chart data ranges. The data may not be
         // in the same worksheet as the chart so we need to do the lookup at the
@@ -1324,6 +1325,21 @@ impl Workbook {
                             if data_label.title.range.has_data() {
                                 chart_caches.insert(
                                     data_label.title.range.key(),
+                                    ChartSeriesCacheData::new(),
+                                );
+                            }
+                        }
+
+                        if let Some(error_bars) = &series.y_error_bars {
+                            if error_bars.plus_range.has_data() {
+                                chart_caches.insert(
+                                    error_bars.plus_range.key(),
+                                    ChartSeriesCacheData::new(),
+                                );
+                            }
+                            if error_bars.minus_range.has_data() {
+                                chart_caches.insert(
+                                    error_bars.minus_range.key(),
                                     ChartSeriesCacheData::new(),
                                 );
                             }
@@ -1375,6 +1391,24 @@ impl Workbook {
                         for data_label in &mut series.custom_data_labels {
                             if let Some(cache) = chart_caches.get(&data_label.title.range.key()) {
                                 data_label.title.cache_data = cache.clone();
+                            }
+                        }
+
+                        if let Some(error_bars) = &mut series.y_error_bars {
+                            if let Some(cache) = chart_caches.get(&error_bars.plus_range.key()) {
+                                error_bars.plus_cache = cache.clone();
+                            }
+                            if let Some(cache) = chart_caches.get(&error_bars.minus_range.key()) {
+                                error_bars.minus_cache = cache.clone();
+                            }
+                        }
+
+                        if let Some(error_bars) = &mut series.x_error_bars {
+                            if let Some(cache) = chart_caches.get(&error_bars.plus_range.key()) {
+                                error_bars.plus_cache = cache.clone();
+                            }
+                            if let Some(cache) = chart_caches.get(&error_bars.minus_range.key()) {
+                                error_bars.minus_cache = cache.clone();
                             }
                         }
                     }

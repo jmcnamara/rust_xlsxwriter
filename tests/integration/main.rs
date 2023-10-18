@@ -234,6 +234,8 @@ mod chart_errorbars02;
 mod chart_errorbars03;
 mod chart_errorbars04;
 mod chart_errorbars05;
+mod chart_errorbars06;
+mod chart_errorbars10;
 mod chart_font01;
 mod chart_font02;
 mod chart_font03;

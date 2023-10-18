@@ -36,7 +36,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a new chart.
     let mut chart = Chart::new(ChartType::Line);
 
-    // Add a data series with  a trendline
+    // Add a data series with a trendline.
     chart
         .add_series()
         .set_values("Sheet1!$A$1:$A$6")

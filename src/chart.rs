@@ -3235,20 +3235,21 @@ impl Chart {
         self.write_error_bar_type(error_bars.direction);
 
         // Write the c:errValType element.
-        self.write_err_direction_type(error_bars.error_type);
+        self.write_err_direction_type(&error_bars.error_type);
 
         if !error_bars.has_end_cap {
             // Write the c:noEndCap element.
             self.write_error_bar_no_end_cap();
         }
 
-        match error_bars.error_type {
+        match &error_bars.error_type {
             ChartErrorBarsType::FixedValue(value)
             | ChartErrorBarsType::Percentage(value)
             | ChartErrorBarsType::StandardDeviation(value) => {
                 // Write the c:val element.
-                self.write_error_value(value);
+                self.write_error_value(*value);
             }
+            ChartErrorBarsType::Custom(_, _) => self.write_custom_error_bar_values(error_bars),
             ChartErrorBarsType::StandardError => {}
         }
 
@@ -3274,7 +3275,7 @@ impl Chart {
     }
 
     // Write the <c:errValType> element.
-    fn write_err_direction_type(&mut self, bar_type: ChartErrorBarsType) {
+    fn write_err_direction_type(&mut self, bar_type: &ChartErrorBarsType) {
         let attributes = vec![("val", bar_type.to_string())];
 
         self.writer.xml_empty_tag("c:errValType", &attributes);
@@ -3292,6 +3293,17 @@ impl Chart {
         let attributes = [("val", value.to_string())];
 
         self.writer.xml_empty_tag("c:val", &attributes);
+    }
+
+    // Write the custom error sub-elements
+    fn write_custom_error_bar_values(&mut self, error_bars: &ChartErrorBars) {
+        self.writer.xml_start_tag_only("c:plus");
+        self.write_cache_ref(&error_bars.plus_range, &error_bars.plus_cache);
+        self.writer.xml_end_tag("c:plus");
+
+        self.writer.xml_start_tag_only("c:minus");
+        self.write_cache_ref(&error_bars.minus_range, &error_bars.minus_cache);
+        self.writer.xml_end_tag("c:minus");
     }
 
     // Write the <c:showVal> element.
@@ -5546,7 +5558,7 @@ impl ChartSeries {
     ///     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
-    ///     // Add a data series with  a trendline
+    ///     // Add a data series with a trendline.
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
@@ -5949,8 +5961,8 @@ impl ChartSeries {
 /// The `ChartRange` struct represents a chart range.
 ///
 /// A struct to represent a chart range like `"Sheet1!$A$1:$A$4"`. The struct is
-/// public to allow for the [`IntoChartRange`] trait but it isn't required to be
-/// manipulated by the end user.
+/// public to allow for the [`IntoChartRange`] trait and a limited set of edge
+/// cases but it isn't generally required to be manipulated by the end user.
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
@@ -5964,8 +5976,8 @@ pub struct ChartRange {
 }
 
 impl ChartRange {
-    // Create a new range from a sheet 5 tuple.
-    pub(crate) fn new_from_range(
+    /// Create a new `ChartRange` from a worksheet 5 tuple.
+    pub fn new_from_range(
         sheet_name: &str,
         first_row: RowNum,
         first_col: ColNum,
@@ -5982,8 +5994,8 @@ impl ChartRange {
         }
     }
 
-    // Create a new range from an Excel range formula.
-    pub(crate) fn new_from_string(range_string: &str) -> ChartRange {
+    /// Create a new `ChartRange` from an Excel range formula.
+    pub fn new_from_string(range_string: &str) -> ChartRange {
         lazy_static! {
             static ref CHART_CELL: Regex = Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+)").unwrap();
             static ref CHART_RANGE: Regex =
@@ -12533,7 +12545,7 @@ impl ChartFont {
 ///     // Create a new chart.
 ///     let mut chart = Chart::new(ChartType::Line);
 ///
-///     // Add a data series with  a trendline
+///     // Add a data series with a trendline.
 ///     chart
 ///         .add_series()
 ///         .set_values("Sheet1!$A$1:$A$6")
@@ -12630,7 +12642,7 @@ impl ChartTrendline {
     ///     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
-    ///     // Add a data series with  a trendline
+    ///     // Add a data series with a trendline.
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
@@ -12716,7 +12728,7 @@ impl ChartTrendline {
     ///     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
-    ///     // Add a data series with  a trendline
+    ///     // Add a data series with a trendline.
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
@@ -12810,7 +12822,7 @@ impl ChartTrendline {
     ///     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
-    ///     // Add a data series with  a trendline
+    ///     // Add a data series with a trendline.
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
@@ -12907,7 +12919,7 @@ impl ChartTrendline {
     ///     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
-    ///     // Add a data series with  a trendline
+    ///     // Add a data series with a trendline.
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
@@ -13052,7 +13064,7 @@ impl ChartTrendline {
     ///     // Create a new chart.
     ///     let mut chart = Chart::new(ChartType::Line);
     ///
-    ///     // Add a data series with  a trendline
+    ///     // Add a data series with a trendline.
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$A$1:$A$6")
@@ -13240,7 +13252,6 @@ impl ChartGradientFill {
     /// # Parameters
     ///
     /// `gradient_type`: a [`ChartGradientFillType`] enum value.
-    ///
     ///
     /// # Examples
     ///
@@ -13612,13 +13623,80 @@ pub enum ChartGradientFillType {
 // ChartGradientFill
 // -----------------------------------------------------------------------
 
-/// Todo start `error_bars`
+/// The `ChartErrorBars` struct represents the error bars for a chart series.
+///
+/// Error bars on Excel charts allow you to show margins of error for a series
+/// based on measures such as Standard Deviation, Standard Error, Fixed values,
+/// Percentages or even custom defined ranges.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_error_bars_options.png">
+///
+///  The `ChartErrorBars` struct can be added to a series via the
+/// [`ChartSeries::set_y_error_bars()`] and [`ChartSeries::set_x_error_bars()`]
+/// methods.
+///
+/// # Examples
+///
+/// An example of adding error bars to a chart data series.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_error_bars_intro.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     Chart, ChartErrorBars, ChartErrorBarsType, ChartLine, ChartType, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 11.1)?;
+/// #     worksheet.write(1, 0, 18.8)?;
+/// #     worksheet.write(2, 0, 33.2)?;
+/// #     worksheet.write(3, 0, 37.5)?;
+/// #     worksheet.write(4, 0, 52.1)?;
+/// #     worksheet.write(5, 0, 58.9)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Line);
+///
+///     // Add a data series with error bars.
+///     chart
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .set_y_error_bars(
+///             ChartErrorBars::new()
+///                 .set_type(ChartErrorBarsType::StandardError)
+///                 .set_format(ChartLine::new().set_color("#FF0000")),
+///         );
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_error_bars_intro.png">
+///
 #[derive(Clone, PartialEq)]
 pub struct ChartErrorBars {
     has_end_cap: bool,
     error_type: ChartErrorBarsType,
     direction: ChartErrorBarsDirection,
     format: ChartFormat,
+    pub(crate) plus_range: ChartRange,
+    pub(crate) plus_cache: ChartSeriesCacheData,
+    pub(crate) minus_range: ChartRange,
+    pub(crate) minus_cache: ChartSeriesCacheData,
 }
 
 impl Default for ChartErrorBars {
@@ -13636,22 +13714,79 @@ impl ChartErrorBars {
             error_type: ChartErrorBarsType::StandardError,
             direction: ChartErrorBarsDirection::Both,
             format: ChartFormat::new(),
+            plus_range: ChartRange::new_from_range("", 0, 0, 0, 0),
+            plus_cache: ChartSeriesCacheData::new(),
+            minus_range: ChartRange::new_from_range("", 0, 0, 0, 0),
+            minus_cache: ChartSeriesCacheData::new(),
         }
     }
 
-    /// Todo
+    /// Set the type of the Chart series error bars.
+    ///
+    /// Set the error bar type to one of the Excel allowable amounts represented
+    /// by the [`ChartErrorBarsType`] enum.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_error_bars_types.png">
+    ///
+    /// # Parameters
+    ///
+    /// * `error_type` - A [`ChartErrorBarsType`] enum reference.
+    ///
+    pub fn set_type(&mut self, error_type: ChartErrorBarsType) -> &mut ChartErrorBars {
+        match &error_type {
+            ChartErrorBarsType::FixedValue(value) => {
+                if *value <= 0.0 {
+                    eprintln!("Error bar Fixed Value {value} must be > 0.0 in Excel");
+                    return self;
+                }
+            }
+            ChartErrorBarsType::Percentage(value) => {
+                if *value < 0.0 {
+                    eprintln!("Error bar Percentage {value} must be >= 0.0 in Excel");
+                    return self;
+                }
+            }
+            ChartErrorBarsType::StandardDeviation(value) => {
+                if *value < 0.0 {
+                    eprintln!("Error bar Standard Deviation {value} must be >= 0.0 in Excel");
+                    return self;
+                }
+            }
+            ChartErrorBarsType::Custom(plus, minus) => {
+                self.plus_range = (*plus).clone();
+                self.minus_range = (*minus).clone();
+            }
+            ChartErrorBarsType::StandardError => {}
+        }
+
+        self.error_type = error_type;
+
+        self
+    }
+
+    /// Set the direction of a Chart series error bars.
+    ///
+    /// The [`ChartErrorBarsDirection`] enum defines the error bar direction for a
+    /// chart series.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_error_bars_directions.png">
+    ///
+    /// # Parameters
+    ///
+    /// * `direction` - A [`ChartErrorBarsDirection`] enum reference.
+    ///
     pub fn set_direction(&mut self, direction: ChartErrorBarsDirection) -> &mut ChartErrorBars {
         self.direction = direction;
         self
     }
 
-    /// Todo
-    pub fn set_type(&mut self, error_type: ChartErrorBarsType) -> &mut ChartErrorBars {
-        self.error_type = error_type;
-        self
-    }
-
-    /// Todo
+    /// Set the end cap on/off for a Chart series error bars.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
     pub fn set_end_cap(&mut self, enable: bool) -> &mut ChartErrorBars {
         self.has_end_cap = enable;
         self
@@ -13680,29 +13815,45 @@ impl ChartErrorBars {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, PartialEq)]
 /// The `ChartErrorBarsType` enum defines the type of a chart series
 /// [`ChartErrorBars`].
 ///
-/// todo `ChartErrorBarsType`
+/// The following enum values represent the error bar types that are available
+/// in Excel.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_error_bars_types.png">
 ///
 pub enum ChartErrorBarsType {
-    /// TODO
+    /// Set a fixed value for the positive and negative error bars. In Excel
+    /// this must be > 0.0.
     FixedValue(f64),
 
-    /// TODO
+    /// Set a percentage for the positive and negative error bars. In Excel this
+    /// must be >= 0.0.
     Percentage(f64),
 
-    /// TODO
+    /// Set a multiple of the standard deviation for the positive and negative
+    /// error bars. In Excel this must be >= 0.0.
     StandardDeviation(f64),
 
-    /// TODO
+    /// Set a the standard error value for the positive and negative error bars.
+    /// This is the default.
     StandardError,
+
+    /// Set custom values for the error bars based on a range of worksheet
+    /// values like `Sheet1!$B$1:$B$3` (single value) or `Sheet1!$B$1:$B$5` (a
+    /// range to match the number of point in the series). Single values are
+    /// repeated for each point in the chart, like `FixedValue`. The `plus` and
+    /// `minus` values must be set separately using [`ChartRange`] instances.
+    Custom(ChartRange, ChartRange),
 }
 
 impl fmt::Display for ChartErrorBarsType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            ChartErrorBarsType::Custom(_, _) => write!(f, "cust"),
             ChartErrorBarsType::StandardError => write!(f, "stdErr"),
             ChartErrorBarsType::FixedValue(_) => write!(f, "fixedVal"),
             ChartErrorBarsType::Percentage(_) => write!(f, "percentage"),
@@ -13715,16 +13866,16 @@ impl fmt::Display for ChartErrorBarsType {
 /// The `ChartErrorBarsDirection` enum defines the error bar direction for a
 /// chart series [`ChartErrorBars`].
 ///
-/// todo `ChartErrorBarsDirection`
+/// <img src="https://rustxlsxwriter.github.io/images/chart_error_bars_directions.png">
 ///
 pub enum ChartErrorBarsDirection {
-    /// TODO
+    /// The error bars extend in both directions. This is the default.
     Both,
 
-    /// TODO
+    /// The error bars extend in the negative direction only.
     Minus,
 
-    /// TODO
+    /// The error bars extend in the positive direction only.
     Plus,
 }
 

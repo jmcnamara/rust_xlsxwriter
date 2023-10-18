@@ -247,6 +247,9 @@ documentation and generally show how an individual function works.
   percentage for the data labels of a chart series. Usually this only
   applies to a Pie or Doughnut chart.
 
+* `doc_chart_error_bars_intro.rs` - An example of adding error bars to a
+  chart data series.
+
 * `doc_chart_font.rs` - An example of setting the font for a chart element.
 
 * `doc_chart_font_set_bold.rs` - An example of setting the bold property
