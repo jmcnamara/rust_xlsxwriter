@@ -3363,7 +3363,7 @@ impl Chart {
         self.writer.xml_start_tag("c:ext", &attributes);
 
         self.writer
-            .xml_empty_tag("<c15:showLeaderLines", &[("val", "1")]);
+            .xml_empty_tag("c15:showLeaderLines", &[("val", "1")]);
         self.writer.xml_end_tag("c:ext");
         self.writer.xml_end_tag("c:extLst");
     }
