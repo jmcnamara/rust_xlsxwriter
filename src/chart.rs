@@ -6002,8 +6002,9 @@ impl ChartSeries {
 /// The `ChartRange` struct represents a chart range.
 ///
 /// A struct to represent a chart range like `"Sheet1!$A$1:$A$4"`. The struct is
-/// public to allow for the [`IntoChartRange`] trait and a limited set of edge
-/// cases but it isn't generally required to be manipulated by the end user.
+/// public to allow for the [`IntoChartRange`] trait and for a limited set of
+/// edge cases, but it isn't generally required to be manipulated by the end
+/// user.
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
@@ -6025,6 +6026,23 @@ impl Default for ChartRange {
 
 impl ChartRange {
     /// Create a new `ChartRange` from a worksheet 5 tuple.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a new chart range.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chartrange_new_from_range.rs
+    /// #
+    /// # use rust_xlsxwriter::ChartRange;
+    /// #
+    /// # #[allow(unused_variables)]
+    /// # fn main() {
+    ///     // Same as "Sheet1!$A$1:$A$5".
+    ///     let range = ChartRange::new_from_range("Sheet1", 0, 0, 4, 0);
+    /// # }
+    /// ```
+    ///
     pub fn new_from_range(
         sheet_name: &str,
         first_row: RowNum,
@@ -6044,6 +6062,24 @@ impl ChartRange {
     }
 
     /// Create a new `ChartRange` from an Excel range formula.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a new chart range.
+    ///
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chartrange_new_from_string.rs
+    /// #
+    /// # use rust_xlsxwriter::ChartRange;
+    /// #
+    /// # #[allow(unused_variables)]
+    /// # fn main() {
+    ///     let range = ChartRange::new_from_string("Sheet1!$A$1:$A$5");
+    /// # }
+    /// ```
+    ///
     pub fn new_from_string(range_string: &str) -> ChartRange {
         lazy_static! {
             static ref CHART_CELL: Regex = Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+)").unwrap();
