@@ -146,6 +146,9 @@ pub struct Chart {
     style: u8,
     hole_size: u8,
     rotation: u16,
+    has_up_down_bars: bool,
+    up_bar_format: ChartFormat,
+    down_bar_format: ChartFormat,
 }
 
 impl Chart {
@@ -250,6 +253,9 @@ impl Chart {
             hole_size: 50,
             rotation: 0,
             default_label_position: ChartDataLabelPosition::Default,
+            has_up_down_bars: false,
+            up_bar_format: ChartFormat::new(),
+            down_bar_format: ChartFormat::new(),
         };
 
         match chart_type {
@@ -1066,6 +1072,58 @@ impl Chart {
         self
     }
 
+    /// TODO
+    ///
+    /// Line chart only
+    ///
+    pub fn set_up_down_bars(&mut self, enable: bool) -> &mut Chart {
+        self.has_up_down_bars = enable;
+        self
+    }
+
+    /// Set the formatting properties for line chart up bars.
+    ///
+    /// Set the formatting properties for line chart up bars via a [`ChartFormat`]
+    /// object or a sub struct that implements [`IntoChartFormat`].
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    ///
+    /// # Parameters
+    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
+    ///
+    pub fn set_up_bar_format<T>(&mut self, format: T) -> &mut Chart
+    where
+        T: IntoChartFormat,
+    {
+        self.has_up_down_bars = true;
+        self.up_bar_format = format.new_chart_format();
+        self
+    }
+
+    /// Set the formatting properties for line chart down bars.
+    ///
+    pub fn set_down_bar_format<T>(&mut self, format: T) -> &mut Chart
+    where
+        T: IntoChartFormat,
+    {
+        self.has_up_down_bars = true;
+        self.down_bar_format = format.new_chart_format();
+        self
+    }
+
     /// Set the width of the chart.
     ///
     /// The default width of an Excel chart is 480 pixels. The `set_width()`
@@ -1689,6 +1747,11 @@ impl Chart {
 
         // Write the c:ser elements.
         self.write_series();
+
+        // Write the c:upDownBars element.
+        if self.has_up_down_bars {
+            self.write_up_down_bars();
+        }
 
         // Write the c:marker element.
         self.write_marker_value();
@@ -3304,6 +3367,50 @@ impl Chart {
         self.writer.xml_start_tag_only("c:minus");
         self.write_cache_ref(&error_bars.minus_range);
         self.writer.xml_end_tag("c:minus");
+    }
+
+    // Write the <c:upDownBars> element.
+    fn write_up_down_bars(&mut self) {
+        self.writer.xml_start_tag_only("c:upDownBars");
+
+        // Write the c:gapWidth element.
+        self.write_gap_width(150);
+
+        // Write the c:upBars element.
+        self.write_up_bars();
+
+        // Write the c:downBars element.
+        self.write_down_bars();
+
+        self.writer.xml_end_tag("c:upDownBars");
+    }
+
+    // Write the <c:upBars> element.
+    fn write_up_bars(&mut self) {
+        if self.up_bar_format.has_formatting() {
+            self.writer.xml_start_tag_only("c:upBars");
+
+            // Write the c:spPr element.
+            self.write_sp_pr(&self.up_bar_format.clone());
+
+            self.writer.xml_end_tag("c:upBars");
+        } else {
+            self.writer.xml_empty_tag_only("c:upBars");
+        }
+    }
+
+    // Write the <c:downBars> element.
+    fn write_down_bars(&mut self) {
+        if self.down_bar_format.has_formatting() {
+            self.writer.xml_start_tag_only("c:downBars");
+
+            // Write the c:spPr element.
+            self.write_sp_pr(&self.down_bar_format.clone());
+
+            self.writer.xml_end_tag("c:downBars");
+        } else {
+            self.writer.xml_empty_tag_only("c:downBars");
+        }
     }
 
     // Write the <c:showVal> element.
