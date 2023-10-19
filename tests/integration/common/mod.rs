@@ -268,6 +268,18 @@ fn compare_xlsx_files(
             // Read XML data from non-binary files.
             let mut xml_data = String::new();
             file.read_to_string(&mut xml_data).unwrap();
+
+            // Check for test generator XML error.
+            if xml_data.contains("<<") {
+                return (
+                    vec![file.name().to_string()],
+                    vec![
+                        "Generated XML contains double start tag".to_string(),
+                        String::new(),
+                    ],
+                );
+            }
+
             got_xml.insert(file.name().to_string(), xml_data);
         }
     }
