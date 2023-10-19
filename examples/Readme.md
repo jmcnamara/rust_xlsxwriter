@@ -466,6 +466,12 @@ documentation and generally show how an individual function works.
 * `doc_chart_trendline_set_type.rs` - An example of adding a trendline to a
   chart data series. Demonstrates setting the polynomial trendline type.
 
+* `doc_chartrange_new_from_range.rs` - Demonstrates creating a new chart
+  range.
+
+* `doc_chartrange_new_from_string.rs` - Demonstrates creating a new chart
+  range.
+
 * `doc_datetime_and_hms.rs` - Demonstrates writing formatted datetimes in
   an Excel worksheet.
 

@@ -5,7 +5,7 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.52.0] - 2023-10-XX
+## [0.52.0] - 2023-10-20
 
 ### Added
 
@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and methods.
 
 [`ChartErrorBars`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartErrorBars.html
+
+### Fixed
+
+- Fixed XML error in non-Pie charts.
+
+  [GitHub Issue #55].
+
+[GitHub Issue #55]: https://github.com/jmcnamara/rust_xlsxwriter/issues/55
+
 
 
 ## [0.51.0] - 2023-10-15
@@ -118,7 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   Related to [GitHub Issue #51].
 
-[GitHub Issue #51]: https://github.com/jmcnamara/rust_xlsxwriter/issues/45
+[GitHub Issue #51]: https://github.com/jmcnamara/rust_xlsxwriter/issues/51
 
 
 ## [0.44.0] - 2023-08-02
