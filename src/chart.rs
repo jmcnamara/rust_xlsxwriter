@@ -5586,13 +5586,90 @@ impl ChartSeries {
         self
     }
 
-    /// todo
+    /// Set the vertical error bars for a chart series.
+    ///
+    /// Error bars on Excel charts allow you to show margins of error for a series
+    /// based on measures such as Standard Deviation, Standard Error, Fixed values,
+    /// Percentages or even custom defined ranges.
+    ///
+    /// The `ChartErrorBars` struct represents the error bars for a chart series.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_error_bars_options.png">
+    ///
+    /// # Parameters
+    ///
+    /// `error_bars`: A [`ChartErrorBars`] reference.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding error bars to a chart data series.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_error_bars_intro.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartErrorBars, ChartErrorBarsType, ChartLine, ChartType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 11.1)?;
+    /// #     worksheet.write(1, 0, 18.8)?;
+    /// #     worksheet.write(2, 0, 33.2)?;
+    /// #     worksheet.write(3, 0, 37.5)?;
+    /// #     worksheet.write(4, 0, 52.1)?;
+    /// #     worksheet.write(5, 0, 58.9)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Add a data series with error bars.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_y_error_bars(
+    ///             ChartErrorBars::new()
+    ///                 .set_type(ChartErrorBarsType::StandardError)
+    ///                 .set_format(ChartLine::new().set_color("#FF0000")),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_error_bars_intro.png">
+    ///
+    ///
+    ///
     pub fn set_y_error_bars(&mut self, error_bars: &ChartErrorBars) -> &mut ChartSeries {
         self.y_error_bars = Some(error_bars.clone());
         self
     }
 
-    /// todo
+    /// Set the horizontal error bars for a chart series.
+    ///
+    /// See [`ChartSeries::set_y_error_bars()`] above for a description of error
+    /// bars and their properties.
+    ///
+    /// Horizontal error bars can only be set in Excel for Scatter and Bar charts.
+    ///
+    /// # Parameters
+    ///
+    /// `error_bars`: A [`ChartErrorBars`] reference.
+    ///
     pub fn set_x_error_bars(&mut self, error_bars: &ChartErrorBars) -> &mut ChartSeries {
         self.x_error_bars = Some(error_bars.clone());
         self

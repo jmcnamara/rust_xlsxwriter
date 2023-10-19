@@ -3297,14 +3297,17 @@ Chart 1 in the following example is a trendline chart:
 Chart 2 in the following example is an example of a chart with data labels and markers:
 <img src="https://rustxlsxwriter.github.io/images/chart_data_tools2.png">
 
+Chart 3 in the following example is an example of a chart with error bars:
+<img src="https://rustxlsxwriter.github.io/images/chart_data_tools3.png">
+
 **Code to generate the output file:**
 
 ```rust
 // Sample code from examples/app_chart_data_tools.rs
 
 use rust_xlsxwriter::{
-    Chart, ChartDataLabel, ChartMarker, ChartTrendline, ChartTrendlineType, ChartType, Format,
-    Workbook, XlsxError,
+    Chart, ChartDataLabel, ChartErrorBars, ChartErrorBarsType, ChartMarker, ChartTrendline,
+    ChartTrendlineType, ChartType, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -3381,6 +3384,32 @@ fn main() -> Result<(), XlsxError> {
 
     // Add the chart to the worksheet.
     worksheet.insert_chart_with_offset(17, 3, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
+    // Error Bar example.
+    // -----------------------------------------------------------------------
+
+    // Create a new Line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure the first series with data labels and markers.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7")
+        .set_y_error_bars(ChartErrorBars::new().set_type(ChartErrorBarsType::StandardError));
+
+    // Configure the second series as default.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Add a chart title.
+    chart.title().set_name("Chart with Error Bars");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(33, 3, &chart, 25, 10)?;
 
     workbook.save("chart_data_tools.xlsx")?;
 
