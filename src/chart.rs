@@ -2040,11 +2040,11 @@ impl Chart {
             // Write the c:cat element.
             if series.category_range.has_data() {
                 self.category_has_num_format = true;
-                self.write_cat(&series.category_range, &series.category_cache_data);
+                self.write_cat(&series.category_range);
             }
 
             // Write the c:val element.
-            self.write_val(&series.value_range, &series.value_cache_data);
+            self.write_val(&series.value_range);
 
             if !series.inverted_color.is_auto_or_default() {
                 // Write the c:extLst element for the inverted fill color.
@@ -2113,9 +2113,9 @@ impl Chart {
                 self.write_error_bar("y", error_bars);
             }
 
-            self.write_x_val(&series.category_range, &series.category_cache_data);
+            self.write_x_val(&series.category_range);
 
-            self.write_y_val(&series.value_range, &series.value_cache_data);
+            self.write_y_val(&series.value_range);
 
             if self.chart_type == ChartType::ScatterSmooth
                 || self.chart_type == ChartType::ScatterSmoothWithMarkers
@@ -2208,82 +2208,82 @@ impl Chart {
     }
 
     // Write the <c:cat> element.
-    fn write_cat(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+    fn write_cat(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:cat");
 
-        self.write_cache_ref(range, cache);
+        self.write_cache_ref(range);
 
         self.writer.xml_end_tag("c:cat");
     }
 
     // Write the <c:val> element.
-    fn write_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+    fn write_val(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:val");
 
-        self.write_cache_ref(range, cache);
+        self.write_cache_ref(range);
 
         self.writer.xml_end_tag("c:val");
     }
 
     // Write the <c:xVal> element for scatter charts.
-    fn write_x_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+    fn write_x_val(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:xVal");
 
-        self.write_cache_ref(range, cache);
+        self.write_cache_ref(range);
 
         self.writer.xml_end_tag("c:xVal");
     }
 
     // Write the <c:yVal> element for scatter charts.
-    fn write_y_val(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+    fn write_y_val(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:yVal");
 
-        self.write_cache_ref(range, cache);
+        self.write_cache_ref(range);
 
         self.writer.xml_end_tag("c:yVal");
     }
 
     // Write the <c:numRef> or <c:strRef> elements.
-    fn write_cache_ref(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
-        if cache.is_numeric {
-            self.write_num_ref(range, cache);
+    fn write_cache_ref(&mut self, range: &ChartRange) {
+        if range.cache.is_numeric {
+            self.write_num_ref(range);
         } else {
-            self.write_str_ref(range, cache);
+            self.write_str_ref(range);
         }
     }
 
     // Write the <c:numRef> element.
-    fn write_num_ref(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+    fn write_num_ref(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:numRef");
 
         // Write the c:f element.
         self.write_range_formula(&range.formula());
 
         // Write the c:numCache element.
-        if cache.has_data() {
-            self.write_num_cache(cache);
+        if range.cache.has_data() {
+            self.write_num_cache(&range.cache);
         }
 
         self.writer.xml_end_tag("c:numRef");
     }
 
     // Write the <c:strRef> element.
-    fn write_str_ref(&mut self, range: &ChartRange, cache: &ChartSeriesCacheData) {
+    fn write_str_ref(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:strRef");
 
         // Write the c:f element.
         self.write_range_formula(&range.formula());
 
         // Write the c:strCache element.
-        if cache.has_data() {
-            self.write_str_cache(cache);
+        if range.cache.has_data() {
+            self.write_str_cache(&range.cache);
         }
 
         self.writer.xml_end_tag("c:strRef");
     }
 
     // Write the <c:numCache> element.
-    fn write_num_cache(&mut self, cache: &ChartSeriesCacheData) {
+    fn write_num_cache(&mut self, cache: &ChartRangeCacheData) {
         self.writer.xml_start_tag_only("c:numCache");
 
         // Write the c:formatCode element.
@@ -2303,7 +2303,7 @@ impl Chart {
     }
 
     // Write the <c:strCache> element.
-    fn write_str_cache(&mut self, cache: &ChartSeriesCacheData) {
+    fn write_str_cache(&mut self, cache: &ChartRangeCacheData) {
         self.writer.xml_start_tag_only("c:strCache");
 
         // Write the c:ptCount element.
@@ -3298,11 +3298,11 @@ impl Chart {
     // Write the custom error sub-elements
     fn write_custom_error_bar_values(&mut self, error_bars: &ChartErrorBars) {
         self.writer.xml_start_tag_only("c:plus");
-        self.write_cache_ref(&error_bars.plus_range, &error_bars.plus_cache);
+        self.write_cache_ref(&error_bars.plus_range);
         self.writer.xml_end_tag("c:plus");
 
         self.writer.xml_start_tag_only("c:minus");
-        self.write_cache_ref(&error_bars.minus_range, &error_bars.minus_cache);
+        self.write_cache_ref(&error_bars.minus_range);
         self.writer.xml_end_tag("c:minus");
     }
 
@@ -4073,7 +4073,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:tx");
 
         // Title is always a string type.
-        self.write_str_ref(&title.range, &title.cache_data);
+        self.write_str_ref(&title.range);
 
         self.writer.xml_end_tag("c:tx");
     }
@@ -4243,6 +4243,12 @@ impl Chart {
 pub trait IntoChartRange {
     /// Trait function to turn a type into [`ChartRange`].
     fn new_chart_range(&self) -> ChartRange;
+}
+
+impl IntoChartRange for &ChartRange {
+    fn new_chart_range(&self) -> ChartRange {
+        (*self).clone()
+    }
 }
 
 impl IntoChartRange for (&str, RowNum, ColNum, RowNum, ColNum) {
@@ -4468,8 +4474,6 @@ impl DrawingObject for Chart {
 pub struct ChartSeries {
     pub(crate) value_range: ChartRange,
     pub(crate) category_range: ChartRange,
-    pub(crate) value_cache_data: ChartSeriesCacheData,
-    pub(crate) category_cache_data: ChartSeriesCacheData,
     pub(crate) title: ChartTitle,
     pub(crate) format: ChartFormat,
     pub(crate) marker: Option<ChartMarker>,
@@ -4582,10 +4586,8 @@ impl ChartSeries {
     ///
     pub fn new() -> ChartSeries {
         ChartSeries {
-            value_range: ChartRange::new_from_range("", 0, 0, 0, 0),
-            category_range: ChartRange::new_from_range("", 0, 0, 0, 0),
-            value_cache_data: ChartSeriesCacheData::new(),
-            category_cache_data: ChartSeriesCacheData::new(),
+            value_range: ChartRange::default(),
+            category_range: ChartRange::default(),
             title: ChartTitle::new(),
             format: ChartFormat::new(),
             marker: None,
@@ -5584,13 +5586,13 @@ impl ChartSeries {
         self
     }
 
-    ///
+    /// todo
     pub fn set_y_error_bars(&mut self, error_bars: &ChartErrorBars) -> &mut ChartSeries {
         self.y_error_bars = Some(error_bars.clone());
         self
     }
 
-    ///
+    /// todo
     pub fn set_x_error_bars(&mut self, error_bars: &ChartErrorBars) -> &mut ChartSeries {
         self.x_error_bars = Some(error_bars.clone());
         self
@@ -5913,44 +5915,6 @@ impl ChartSeries {
         self.delete_from_legend = enable;
         self
     }
-
-    /// Add data to the chart values cache.
-    ///
-    /// This method is only used to populate the chart data caches in test code.
-    /// The library reads and populates the cache automatically in most cases.
-    ///
-    /// # Parameters
-    ///
-    /// `data` - Array of string data to populate the chart cache.
-    /// `is_numeric` - The chart cache date is numeric.
-    ///
-    #[doc(hidden)]
-    pub fn set_value_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
-        self.value_cache_data = ChartSeriesCacheData {
-            is_numeric,
-            data: data.iter().map(std::string::ToString::to_string).collect(),
-        };
-        self
-    }
-
-    /// Add data to the chart categories cache.
-    ///
-    /// This method is only used to populate the chart data caches in test code.
-    /// The library reads and populates the cache automatically in most cases.
-    ///
-    /// # Parameters
-    ///
-    /// `data` - Array of string data to populate the chart cache.
-    /// `is_numeric` - The chart cache date is numeric.
-    ///
-    #[doc(hidden)]
-    pub fn set_category_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartSeries {
-        self.category_cache_data = ChartSeriesCacheData {
-            is_numeric,
-            data: data.iter().map(|s| (*s).to_string()).collect(),
-        };
-        self
-    }
 }
 
 // -----------------------------------------------------------------------
@@ -5973,6 +5937,13 @@ pub struct ChartRange {
     last_row: RowNum,
     last_col: ColNum,
     range_string: String,
+    pub(crate) cache: ChartRangeCacheData,
+}
+
+impl Default for ChartRange {
+    fn default() -> Self {
+        Self::new_from_range("", 0, 0, 0, 0)
+    }
 }
 
 impl ChartRange {
@@ -5991,6 +5962,7 @@ impl ChartRange {
             last_row,
             last_col,
             range_string: String::new(),
+            cache: ChartRangeCacheData::new(),
         }
     }
 
@@ -6035,6 +6007,7 @@ impl ChartRange {
             last_row,
             last_col,
             range_string: range_string.to_string(),
+            cache: ChartRangeCacheData::new(),
         }
     }
 
@@ -6106,17 +6079,36 @@ impl ChartRange {
 
         Ok(())
     }
+
+    /// Add data to the `ChartRange` cache.
+    ///
+    /// This method is only used to populate the chart data caches in test code.
+    /// The library reads and populates the cache automatically.
+    ///
+    /// # Parameters
+    ///
+    /// * `data` - Array of string data to populate the chart cache.
+    /// * `is_numeric` - The chart cache date is numeric.
+    ///
+    #[doc(hidden)]
+    pub fn set_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartRange {
+        self.cache = ChartRangeCacheData {
+            is_numeric,
+            data: data.iter().map(std::string::ToString::to_string).collect(),
+        };
+        self
+    }
 }
 
 #[derive(Clone, PartialEq)]
-pub(crate) struct ChartSeriesCacheData {
+pub(crate) struct ChartRangeCacheData {
     pub(crate) is_numeric: bool,
     pub(crate) data: Vec<String>,
 }
 
-impl ChartSeriesCacheData {
-    pub(crate) fn new() -> ChartSeriesCacheData {
-        ChartSeriesCacheData {
+impl ChartRangeCacheData {
+    pub(crate) fn new() -> ChartRangeCacheData {
+        ChartRangeCacheData {
             is_numeric: true,
             data: vec![],
         }
@@ -6268,7 +6260,6 @@ pub enum ChartType {
 #[derive(Clone, PartialEq)]
 pub struct ChartTitle {
     pub(crate) range: ChartRange,
-    pub(crate) cache_data: ChartSeriesCacheData,
     pub(crate) format: ChartFormat,
     pub(crate) font: ChartFont,
     name: String,
@@ -6280,8 +6271,7 @@ pub struct ChartTitle {
 impl ChartTitle {
     pub(crate) fn new() -> ChartTitle {
         ChartTitle {
-            range: ChartRange::new_from_range("", 0, 0, 0, 0),
-            cache_data: ChartSeriesCacheData::new(),
+            range: ChartRange::default(),
             format: ChartFormat::new(),
             font: ChartFont::new(),
             name: String::new(),
@@ -13694,9 +13684,7 @@ pub struct ChartErrorBars {
     direction: ChartErrorBarsDirection,
     format: ChartFormat,
     pub(crate) plus_range: ChartRange,
-    pub(crate) plus_cache: ChartSeriesCacheData,
     pub(crate) minus_range: ChartRange,
-    pub(crate) minus_cache: ChartSeriesCacheData,
 }
 
 impl Default for ChartErrorBars {
@@ -13714,10 +13702,8 @@ impl ChartErrorBars {
             error_type: ChartErrorBarsType::StandardError,
             direction: ChartErrorBarsDirection::Both,
             format: ChartFormat::new(),
-            plus_range: ChartRange::new_from_range("", 0, 0, 0, 0),
-            plus_cache: ChartSeriesCacheData::new(),
-            minus_range: ChartRange::new_from_range("", 0, 0, 0, 0),
-            minus_cache: ChartSeriesCacheData::new(),
+            plus_range: ChartRange::default(),
+            minus_range: ChartRange::default(),
         }
     }
 

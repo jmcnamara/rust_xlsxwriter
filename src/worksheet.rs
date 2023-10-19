@@ -30,7 +30,7 @@ use crate::{
     utility, Color, ExcelDateTime, HeaderImagePosition, Image, IntoColor, IntoExcelDateTime,
     ObjectMovement, ProtectionOptions, Table, TableFunction, Url,
 };
-use crate::{Chart, ChartSeriesCacheData};
+use crate::{Chart, ChartRangeCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -9258,8 +9258,8 @@ impl Worksheet {
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-    ) -> ChartSeriesCacheData {
-        let mut cache = ChartSeriesCacheData::new();
+    ) -> ChartRangeCacheData {
+        let mut cache = ChartRangeCacheData::new();
         let mut data = vec![];
         let mut is_numeric = true;
 

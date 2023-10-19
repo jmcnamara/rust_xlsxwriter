@@ -80,18 +80,23 @@ mod chart_tests {
     #[test]
     fn test_assemble() {
         let mut series1 = ChartSeries::new();
-        series1
-            .set_categories(("Sheet1", 0, 0, 4, 0))
-            .set_values(("Sheet1", 0, 1, 4, 1))
-            .set_category_cache(&["1", "2", "3", "4", "5"], true)
-            .set_value_cache(&["2", "4", "6", "8", "10"], true);
+
+        let mut range1 = ChartRange::new_from_range("Sheet1", 0, 0, 4, 0);
+        range1.set_cache(&["1", "2", "3", "4", "5"], true);
+
+        let mut range2 = ChartRange::new_from_range("Sheet1", 0, 1, 4, 1);
+        range2.set_cache(&["2", "4", "6", "8", "10"], true);
+
+        let mut range3 = ChartRange::new_from_string("Sheet1!$A$1:$A$5");
+        range3.set_cache(&["1", "2", "3", "4", "5"], true);
+
+        let mut range4 = ChartRange::new_from_string("Sheet1!$C$1:$C$5");
+        range4.set_cache(&["3", "6", "9", "12", "15"], true);
+
+        series1.set_categories(&range1).set_values(&range2);
 
         let mut series2 = ChartSeries::new();
-        series2
-            .set_categories("Sheet1!$A$1:$A$5")
-            .set_values("Sheet1!$C$1:$C$5")
-            .set_category_cache(&["1", "2", "3", "4", "5"], true)
-            .set_value_cache(&["3", "6", "9", "12", "15"], true);
+        series2.set_categories(&range3).set_values(&range4);
 
         let mut chart = Chart::new(ChartType::Bar);
         chart.push_series(&series1).push_series(&series2);
