@@ -425,6 +425,12 @@ documentation and generally show how an individual function works.
 * `doc_chart_set_rotation.rs` - An example of formatting the chart rotation
   for pie and doughnut charts.
 
+* `doc_chart_set_up_down_bars.rs` - An example of setting up-down bars for
+  a chart.
+
+* `doc_chart_set_up_down_bars_format.rs` - An example of setting up-down
+  bars for a chart, with formatting.
+
 * `doc_chart_set_width.rs` - A simple chart example using the
   rust_xlsxwriter library.
 

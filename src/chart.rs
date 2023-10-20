@@ -1072,9 +1072,63 @@ impl Chart {
         self
     }
 
-    /// TODO
+    /// Set Up-Down bar indicators for a line chart.
     ///
-    /// Line chart only
+    /// Set Up-Down bar indicator to indicate change between two or more series.
+    /// In Excel these can only be added to Line charts (and Stock charts which
+    /// aren't currently supported in `rust_xlsxwriter`).
+    ///
+    /// # Examples
+    ///
+    /// An example of setting up-down bars for a chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_up_down_bars.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let data = [[5, 10, 15], [4, 9, 13], [3, 8, 10], [2, 7, 6], [1, 6, 4]];
+    /// #
+    /// #     for (row_num, row_data) in data.iter().enumerate() {
+    /// #         for (col_num, col_data) in row_data.iter().enumerate() {
+    /// #             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+    /// #         }
+    /// #     }
+    /// #
+    /// #     // Create the chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 1, 4, 1));
+    ///
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 2, 4, 2));
+    ///
+    ///     // Set the up-down bars.
+    ///     chart.set_up_down_bars(true);
+    ///
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_up_down_bars.png">
     ///
     pub fn set_up_down_bars(&mut self, enable: bool) -> &mut Chart {
         self.has_up_down_bars = enable;
@@ -1083,26 +1137,77 @@ impl Chart {
 
     /// Set the formatting properties for line chart up bars.
     ///
-    /// Set the formatting properties for line chart up bars via a [`ChartFormat`]
-    /// object or a sub struct that implements [`IntoChartFormat`].
+    /// Set the formatting properties for line chart positive "Up" bars via a
+    /// [`ChartFormat`] object or a sub struct that implements
+    /// [`IntoChartFormat`].
     ///
-    /// The formatting that can be applied via a [`ChartFormat`] object are:
-    ///
-    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
-    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
-    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
-    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
-    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
-    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
-    ///   A synonym for [`ChartLine`] depending on context.
-    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
-    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    /// See [`ChartFormat`] for the format properties that can be set.
     ///
     /// # Parameters
     ///
     /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
     /// convert into a `ChartFormat` instance. See the docs for
     /// [`IntoChartFormat`] for details.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of setting up-down bars for a chart, with formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_up_down_bars_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let data = [[5, 10, 15], [4, 9, 13], [3, 8, 10], [2, 7, 6], [1, 6, 4]];
+    /// #
+    /// #     for (row_num, row_data) in data.iter().enumerate() {
+    /// #         for (col_num, col_data) in row_data.iter().enumerate() {
+    /// #             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+    /// #         }
+    /// #     }
+    /// #
+    /// #     // Create the chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 1, 4, 1));
+    ///
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 2, 4, 2));
+    ///
+    ///     // Set the up-down bars.
+    ///     chart
+    ///         .set_up_down_bars(true)
+    ///         .set_up_bar_format(
+    ///             ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#00B050")),
+    ///         )
+    ///         .set_down_bar_format(
+    ///             ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
+    ///         );
+    ///
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_up_down_bars_format.png">
     ///
     pub fn set_up_bar_format<T>(&mut self, format: T) -> &mut Chart
     where
@@ -1114,6 +1219,9 @@ impl Chart {
     }
 
     /// Set the formatting properties for line chart down bars.
+    ///
+    /// Set the formatting for negative "Down" bars on an "Up-Down" chart
+    /// element. See the documentation for [`Chart::set_up_bar_format()`].
     ///
     pub fn set_down_bar_format<T>(&mut self, format: T) -> &mut Chart
     where
@@ -10343,17 +10451,15 @@ impl fmt::Display for ChartEmptyCells {
 /// chart element to obtain a reference to the formatting struct for that
 /// element. After that it can be used to apply formatting such as:
 ///
-/// - `set_solid_fill`: Set the [`ChartSolidFill`] properties.
-/// - `set_pattern_fill`: Set the [`ChartPatternFill`] properties.
-/// - `set_pattern_gradient_fill`: Set the [`ChartGradientFill`] properties.
-/// - `set_no_fill`: Turn off the fill for the chart object.
-/// - `set_line`: Set the [`ChartLine`] properties.
-/// - `set_border`: Set the [`ChartBorder`] properties. A synonym for
-///   [`ChartLine`] depending on context.
-/// - `set_no_line`: Turn off the line for the chart object.
-/// - `set_no_border`: Turn off the border for the chart object.
-/// - `set_no_border`: Turn off the border for the chart object.
-/// - `set_no_border`: Turn off the border for the chart object.
+/// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+/// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+/// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+/// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+/// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+/// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+///   A synonym for [`ChartLine`] depending on context.
+/// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+/// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
 ///
 ///
 /// # Examples

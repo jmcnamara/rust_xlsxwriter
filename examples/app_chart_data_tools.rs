@@ -6,8 +6,8 @@
 //! rust_xlsxwriter library.
 
 use rust_xlsxwriter::{
-    Chart, ChartDataLabel, ChartErrorBars, ChartErrorBarsType, ChartMarker, ChartTrendline,
-    ChartTrendlineType, ChartType, Format, Workbook, XlsxError,
+    Chart, ChartDataLabel, ChartErrorBars, ChartErrorBarsType, ChartMarker, ChartSolidFill,
+    ChartTrendline, ChartTrendlineType, ChartType, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -92,7 +92,7 @@ fn main() -> Result<(), XlsxError> {
     // Create a new Line chart.
     let mut chart = Chart::new(ChartType::Line);
 
-    // Configure the first series with data labels and markers.
+    // Configure the first series with error bars.
     chart
         .add_series()
         .set_categories("Sheet1!$A$2:$A$7")
@@ -111,6 +111,40 @@ fn main() -> Result<(), XlsxError> {
     // Add the chart to the worksheet.
     worksheet.insert_chart_with_offset(33, 3, &chart, 25, 10)?;
 
+    // -----------------------------------------------------------------------
+    // Up-Down Bar example.
+    // -----------------------------------------------------------------------
+
+    // Create a new Line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure the first series.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    // Configure the second series.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Add the chart up-down bars.
+    chart
+        .set_up_down_bars(true)
+        .set_up_bar_format(ChartSolidFill::new().set_color("#00B050"))
+        .set_down_bar_format(ChartSolidFill::new().set_color("#FF0000"));
+
+    // Add a chart title.
+    chart.title().set_name("Chart with Up-Down Bars");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(49, 3, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
+    // Save and close the file.
+    // -----------------------------------------------------------------------
     workbook.save("chart_data_tools.xlsx")?;
 
     Ok(())
