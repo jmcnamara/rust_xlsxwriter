@@ -143,6 +143,34 @@ fn main() -> Result<(), XlsxError> {
     worksheet.insert_chart_with_offset(49, 3, &chart, 25, 10)?;
 
     // -----------------------------------------------------------------------
+    // High-Low Lines example.
+    // -----------------------------------------------------------------------
+
+    // Create a new Line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure the first series.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    // Configure the second series.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Add the chart High-Low lines.
+    chart.set_high_low_lines(true);
+
+    // Add a chart title.
+    chart.title().set_name("Chart with High-Low Lines");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(65, 3, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
     // Save and close the file.
     // -----------------------------------------------------------------------
     workbook.save("chart_data_tools.xlsx")?;

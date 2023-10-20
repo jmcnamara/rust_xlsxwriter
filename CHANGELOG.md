@@ -10,10 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added support for chart up down bars via the  [`chart.set_up_down_bars()`]
+- Added support for chart up-down bars via the  [`Chart::set_up_down_bars()`]
   method.
 
-[`chart.set_up_down_bars()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_up_down_bars
+- Added support for chart high-low lines via the  [`Chart::set_high_low_lines()`]
+  method.
+
+[`Chart::set_up_down_bars()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_up_down_bars
+[`Chart::set_high_low_lines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_high_low_lines
 
 
 ## [0.52.0] - 2023-10-20

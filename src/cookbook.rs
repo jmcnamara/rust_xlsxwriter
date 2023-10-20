@@ -3291,18 +3291,20 @@ A demo of the various Excel chart data tools that are available via the
 
 **Image of the output file:**
 
-Chart 1 in the following example is a trendline chart:
+Chart 1 in the following code is a trendline chart:
 <img src="https://rustxlsxwriter.github.io/images/chart_data_tools1.png">
 
-Chart 2 in the following example is an example of a chart with data labels and markers:
+Chart 2 in the following code is an example of a chart with data labels and markers:
 <img src="https://rustxlsxwriter.github.io/images/chart_data_tools2.png">
 
-Chart 3 in the following example is an example of a chart with error bars:
+Chart 3 in the following code is an example of a chart with error bars:
 <img src="https://rustxlsxwriter.github.io/images/chart_data_tools3.png">
 
-Chart 4 in the following example is an example of a chart with up-down bars:
+Chart 4 in the following code is an example of a chart with up-down bars:
 <img src="https://rustxlsxwriter.github.io/images/chart_data_tools4.png">
 
+Chart 5 in the following code is an example of a chart with high-low lines:
+<img src="https://rustxlsxwriter.github.io/images/chart_data_tools5.png">
 
 **Code to generate the output file:**
 
@@ -3445,6 +3447,34 @@ fn main() -> Result<(), XlsxError> {
 
     // Add the chart to the worksheet.
     worksheet.insert_chart_with_offset(49, 3, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
+    // High-Low Lines example.
+    // -----------------------------------------------------------------------
+
+    // Create a new Line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure the first series.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    // Configure the second series.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Add the chart High-Low lines.
+    chart.set_high_low_lines(true);
+
+    // Add a chart title.
+    chart.title().set_name("Chart with High-Low Lines");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(65, 3, &chart, 25, 10)?;
 
     // -----------------------------------------------------------------------
     // Save and close the file.

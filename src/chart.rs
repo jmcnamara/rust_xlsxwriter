@@ -149,6 +149,8 @@ pub struct Chart {
     has_up_down_bars: bool,
     up_bar_format: ChartFormat,
     down_bar_format: ChartFormat,
+    has_high_low_lines: bool,
+    high_low_lines_format: ChartFormat,
 }
 
 impl Chart {
@@ -256,6 +258,8 @@ impl Chart {
             has_up_down_bars: false,
             up_bar_format: ChartFormat::new(),
             down_bar_format: ChartFormat::new(),
+            has_high_low_lines: false,
+            high_low_lines_format: ChartFormat::new(),
         };
 
         match chart_type {
@@ -1072,11 +1076,15 @@ impl Chart {
         self
     }
 
-    /// Set Up-Down bar indicators for a line chart.
+    /// Set Up-Down bar indicators for a Line chart.
     ///
     /// Set Up-Down bar indicator to indicate change between two or more series.
     /// In Excel these can only be added to Line charts (and Stock charts which
     /// aren't currently supported in `rust_xlsxwriter`).
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -1135,9 +1143,9 @@ impl Chart {
         self
     }
 
-    /// Set the formatting properties for line chart up bars.
+    /// Set the formatting properties for Line chart up bars.
     ///
-    /// Set the formatting properties for line chart positive "Up" bars via a
+    /// Set the formatting properties for Line chart positive "Up" bars via a
     /// [`ChartFormat`] object or a sub struct that implements
     /// [`IntoChartFormat`].
     ///
@@ -1218,7 +1226,7 @@ impl Chart {
         self
     }
 
-    /// Set the formatting properties for line chart down bars.
+    /// Set the formatting properties for Line chart down bars.
     ///
     /// Set the formatting for negative "Down" bars on an "Up-Down" chart
     /// element. See the documentation for [`Chart::set_up_bar_format()`].
@@ -1229,6 +1237,150 @@ impl Chart {
     {
         self.has_up_down_bars = true;
         self.down_bar_format = format.new_chart_format();
+        self
+    }
+
+    /// Set High-Low lines for a Line chart.
+    ///
+    /// Set High-Low line for a Line chart to indicate the high and low values
+    /// between two or more series. In Excel these can only be added to Line
+    /// charts (and Stock charts which aren't currently supported in
+    /// `rust_xlsxwriter`).
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting high-low lines for a chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_high_low_lines.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let data = [[5, 10, 15], [4, 9, 13], [3, 8, 10], [2, 7, 6], [1, 6, 4]];
+    /// #
+    /// #     for (row_num, row_data) in data.iter().enumerate() {
+    /// #         for (col_num, col_data) in row_data.iter().enumerate() {
+    /// #             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+    /// #         }
+    /// #     }
+    /// #
+    /// #     // Create the chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 1, 4, 1));
+    ///
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 2, 4, 2));
+    ///
+    ///     // Set the high_low lines.
+    ///     chart.set_high_low_lines(true);
+    ///
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_high_low_lines.png">
+    ///
+    pub fn set_high_low_lines(&mut self, enable: bool) -> &mut Chart {
+        self.has_high_low_lines = enable;
+        self
+    }
+
+    /// Set the formatting properties for Line chart High-Low lines.
+    ///
+    /// Set the formatting properties for line chart high-low lines via a
+    /// [`ChartFormat`] object or a sub struct that implements
+    /// [`IntoChartFormat`]. In general you will only need to use a
+    /// [`ChartLine`] to define the line format properties.
+    ///
+    /// # Parameters
+    ///
+    /// * `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    ///   convert into a `ChartFormat` instance. See the docs for
+    ///   [`IntoChartFormat`] for details.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting high-low lines for a chart, with formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_high_low_lines_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let data = [[5, 10, 15], [4, 9, 13], [3, 8, 10], [2, 7, 6], [1, 6, 4]];
+    /// #
+    /// #     for (row_num, row_data) in data.iter().enumerate() {
+    /// #         for (col_num, col_data) in row_data.iter().enumerate() {
+    /// #             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+    /// #         }
+    /// #     }
+    /// #
+    /// #     // Create the chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 1, 4, 1));
+    ///
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 2, 4, 2));
+    ///
+    ///     // Set the high_low lines.
+    ///     chart
+    ///         .set_high_low_lines(true)
+    ///         .set_high_low_lines_format(ChartLine::new().set_color("#FF0000"));
+    ///
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_high_low_lines_format.png">
+    ///
+    pub fn set_high_low_lines_format<T>(&mut self, format: T) -> &mut Chart
+    where
+        T: IntoChartFormat,
+    {
+        self.has_high_low_lines = true;
+        self.high_low_lines_format = format.new_chart_format();
         self
     }
 
@@ -1855,6 +2007,11 @@ impl Chart {
 
         // Write the c:ser elements.
         self.write_series();
+
+        if self.has_high_low_lines {
+            // Write the c:hiLowLines element.
+            self.write_hi_low_lines();
+        }
 
         // Write the c:upDownBars element.
         if self.has_up_down_bars {
@@ -3521,6 +3678,20 @@ impl Chart {
         }
     }
 
+    // Write the <c:hiLowLines> element.
+    fn write_hi_low_lines(&mut self) {
+        if self.high_low_lines_format.has_formatting() {
+            self.writer.xml_start_tag_only("c:hiLowLines");
+
+            // Write the c:spPr element.
+            self.write_sp_pr(&self.high_low_lines_format.clone());
+
+            self.writer.xml_end_tag("c:hiLowLines");
+        } else {
+            self.writer.xml_empty_tag_only("c:hiLowLines");
+        }
+    }
+
     // Write the <c:showVal> element.
     fn write_show_val(&mut self) {
         let attributes = [("val", "1")];
@@ -5126,7 +5297,7 @@ impl ChartSeries {
     ///
     /// # Examples
     ///
-    /// An example of adding markers to a line chart.
+    /// An example of adding markers to a Line chart.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_marker.rs
@@ -6869,7 +7040,7 @@ impl ChartTitle {
 ///
 /// # Examples
 ///
-/// An example of adding markers to a line chart.
+/// An example of adding markers to a Line chart.
 ///
 /// ```
 /// # // This code is available in examples/doc_chart_marker.rs
@@ -6951,7 +7122,7 @@ impl ChartMarker {
     ///
     /// # Examples
     ///
-    /// An example of adding automatic markers to a line chart.
+    /// An example of adding automatic markers to a Line chart.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_marker_set_automatic.rs
@@ -7019,7 +7190,7 @@ impl ChartMarker {
     ///
     /// # Examples
     ///
-    /// An example of adding markers to a line chart with user defined marker
+    /// An example of adding markers to a Line chart with user defined marker
     /// types.
     ///
     /// ```

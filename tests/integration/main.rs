@@ -299,6 +299,8 @@ mod chart_gridlines05;
 mod chart_gridlines06;
 mod chart_gridlines08;
 mod chart_gridlines09;
+mod chart_high_low_lines01;
+mod chart_high_low_lines02;
 mod chart_legend01;
 mod chart_legend03;
 mod chart_legend04;
