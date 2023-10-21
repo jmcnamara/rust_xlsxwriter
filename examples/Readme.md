@@ -409,6 +409,12 @@ documentation and generally show how an individual function works.
   labels to a chart series. This example shows how to format some of the
   data labels and leave the rest with the default formatting.
 
+* `doc_chart_set_drop_lines.rs` - An example of setting drop lines for a
+  chart.
+
+* `doc_chart_set_drop_lines_format.rs` - An example of setting drop lines
+  for a chart, with formatting.
+
 * `doc_chart_set_high_low_lines.rs` - An example of setting high-low lines
   for a chart.
 

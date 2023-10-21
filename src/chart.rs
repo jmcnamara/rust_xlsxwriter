@@ -151,6 +151,8 @@ pub struct Chart {
     down_bar_format: ChartFormat,
     has_high_low_lines: bool,
     high_low_lines_format: ChartFormat,
+    has_drop_lines: bool,
+    drop_lines_format: ChartFormat,
 }
 
 impl Chart {
@@ -260,6 +262,8 @@ impl Chart {
             down_bar_format: ChartFormat::new(),
             has_high_low_lines: false,
             high_low_lines_format: ChartFormat::new(),
+            has_drop_lines: false,
+            drop_lines_format: ChartFormat::new(),
         };
 
         match chart_type {
@@ -1242,7 +1246,7 @@ impl Chart {
 
     /// Set High-Low lines for a Line chart.
     ///
-    /// Set High-Low line for a Line chart to indicate the high and low values
+    /// Set High-Low lines for a Line chart to indicate the high and low values
     /// between two or more series. In Excel these can only be added to Line
     /// charts (and Stock charts which aren't currently supported in
     /// `rust_xlsxwriter`).
@@ -1381,6 +1385,149 @@ impl Chart {
     {
         self.has_high_low_lines = true;
         self.high_low_lines_format = format.new_chart_format();
+        self
+    }
+
+    /// Set drop lines for a chart.
+    ///
+    /// Set drop lines for a chart between the maximum value and the associated
+    /// category value. In Excel these can only be added to Line and Area charts
+    /// (and Stock charts which aren't currently supported in
+    /// `rust_xlsxwriter`).
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    /// # Examples
+    ///
+    /// An example of setting drop lines for a chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_drop_lines.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let data = [[5, 10, 15], [4, 9, 13], [3, 8, 10], [2, 7, 6], [1, 6, 4]];
+    /// #
+    /// #     for (row_num, row_data) in data.iter().enumerate() {
+    /// #         for (col_num, col_data) in row_data.iter().enumerate() {
+    /// #             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+    /// #         }
+    /// #     }
+    /// #
+    /// #     // Create the chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 1, 4, 1));
+    ///
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 2, 4, 2));
+    ///
+    ///     // Set the drop lines.
+    ///     chart.set_drop_lines(true);
+    ///
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_drop_lines.png">
+    ///
+    pub fn set_drop_lines(&mut self, enable: bool) -> &mut Chart {
+        self.has_drop_lines = enable;
+        self
+    }
+
+    /// Set the formatting properties for a chart drop lines.
+    ///
+    /// Set the formatting properties for a chart drop lines via a
+    /// [`ChartFormat`] object or a sub struct that implements
+    /// [`IntoChartFormat`]. In general you will only need to use a
+    /// [`ChartLine`] to define the line format properties.
+    ///
+    /// # Parameters
+    ///
+    /// * `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    ///   convert into a `ChartFormat` instance. See the docs for
+    ///   [`IntoChartFormat`] for details.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting drop lines for a chart, with formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_drop_lines_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLine, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let data = [[5, 10, 15], [4, 9, 13], [3, 8, 10], [2, 7, 6], [1, 6, 4]];
+    /// #
+    /// #     for (row_num, row_data) in data.iter().enumerate() {
+    /// #         for (col_num, col_data) in row_data.iter().enumerate() {
+    /// #             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+    /// #         }
+    /// #     }
+    /// #
+    /// #     // Create the chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 1, 4, 1));
+    ///
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 2, 4, 2));
+    ///
+    ///     // Set the drop lines.
+    ///     chart
+    ///         .set_drop_lines(true)
+    ///         .set_drop_lines_format(ChartLine::new().set_color("#FF0000"));
+    ///
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_drop_lines_format.png">
+    ///
+    pub fn set_drop_lines_format<T>(&mut self, format: T) -> &mut Chart
+    where
+        T: IntoChartFormat,
+    {
+        self.has_drop_lines = true;
+        self.drop_lines_format = format.new_chart_format();
         self
     }
 
@@ -1915,6 +2062,11 @@ impl Chart {
         // Write the c:ser elements.
         self.write_series();
 
+        if self.has_drop_lines {
+            // Write the c:dropLines element.
+            self.write_drop_lines();
+        }
+
         // Write the c:axId elements.
         self.write_ax_ids();
 
@@ -2007,6 +2159,11 @@ impl Chart {
 
         // Write the c:ser elements.
         self.write_series();
+
+        if self.has_drop_lines {
+            // Write the c:dropLines element.
+            self.write_drop_lines();
+        }
 
         if self.has_high_low_lines {
             // Write the c:hiLowLines element.
@@ -3689,6 +3846,20 @@ impl Chart {
             self.writer.xml_end_tag("c:hiLowLines");
         } else {
             self.writer.xml_empty_tag_only("c:hiLowLines");
+        }
+    }
+
+    // Write the <c:dropLines> element.
+    fn write_drop_lines(&mut self) {
+        if self.drop_lines_format.has_formatting() {
+            self.writer.xml_start_tag_only("c:dropLines");
+
+            // Write the c:spPr element.
+            self.write_sp_pr(&self.drop_lines_format.clone());
+
+            self.writer.xml_end_tag("c:dropLines");
+        } else {
+            self.writer.xml_empty_tag_only("c:dropLines");
         }
     }
 

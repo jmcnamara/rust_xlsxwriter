@@ -3306,6 +3306,9 @@ Chart 4 in the following code is an example of a chart with up-down bars:
 Chart 5 in the following code is an example of a chart with high-low lines:
 <img src="https://rustxlsxwriter.github.io/images/chart_data_tools5.png">
 
+Chart 6 in the following code is an example of a chart with drop lines:
+<img src="https://rustxlsxwriter.github.io/images/chart_data_tools6.png">
+
 **Code to generate the output file:**
 
 ```rust
@@ -3475,6 +3478,36 @@ fn main() -> Result<(), XlsxError> {
 
     // Add the chart to the worksheet.
     worksheet.insert_chart_with_offset(65, 3, &chart, 25, 10)?;
+
+
+    // -----------------------------------------------------------------------
+    // Drop Lines example.
+    // -----------------------------------------------------------------------
+
+    // Create a new Line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure the first series.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    // Configure the second series.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Add the chart Drop lines.
+    chart.set_drop_lines(true);
+
+    // Add a chart title.
+    chart.title().set_name("Chart with Drop Lines");
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(81, 3, &chart, 25, 10)?;
+
 
     // -----------------------------------------------------------------------
     // Save and close the file.
