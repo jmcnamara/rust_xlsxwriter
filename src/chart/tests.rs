@@ -9,6 +9,7 @@ mod chart_tests {
 
     use crate::chart::{Chart, ChartRange, ChartSeries, ChartType, XlsxError};
     use crate::test_functions::xml_to_vec;
+    use crate::ChartRangeCacheDataType;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -82,16 +83,19 @@ mod chart_tests {
         let mut series1 = ChartSeries::new();
 
         let mut range1 = ChartRange::new_from_range("Sheet1", 0, 0, 4, 0);
-        range1.set_cache(&["1", "2", "3", "4", "5"], true);
+        range1.set_cache(&["1", "2", "3", "4", "5"], ChartRangeCacheDataType::Number);
 
         let mut range2 = ChartRange::new_from_range("Sheet1", 0, 1, 4, 1);
-        range2.set_cache(&["2", "4", "6", "8", "10"], true);
+        range2.set_cache(&["2", "4", "6", "8", "10"], ChartRangeCacheDataType::Number);
 
         let mut range3 = ChartRange::new_from_string("Sheet1!$A$1:$A$5");
-        range3.set_cache(&["1", "2", "3", "4", "5"], true);
+        range3.set_cache(&["1", "2", "3", "4", "5"], ChartRangeCacheDataType::Number);
 
         let mut range4 = ChartRange::new_from_string("Sheet1!$C$1:$C$5");
-        range4.set_cache(&["3", "6", "9", "12", "15"], true);
+        range4.set_cache(
+            &["3", "6", "9", "12", "15"],
+            ChartRangeCacheDataType::Number,
+        );
 
         series1.set_categories(&range1).set_values(&range2);
 

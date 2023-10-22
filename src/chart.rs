@@ -296,6 +296,8 @@ impl Chart {
             | ChartType::ScatterStraightWithMarkers
             | ChartType::ScatterSmooth
             | ChartType::ScatterSmoothWithMarkers => Self::initialize_scatter_chart(chart),
+
+            ChartType::Stock => Self::initialize_stock_chart(chart),
         }
     }
 
@@ -443,7 +445,7 @@ impl Chart {
         // The default Scatter chart has a hidden line with a standard width.
         if self.chart_type == ChartType::Scatter {
             series.set_format(
-                ChartFormat::new().set_line(ChartLine::new().set_width(2.25).set_hidden()),
+                ChartFormat::new().set_line(ChartLine::new().set_width(2.25).set_hidden(true)),
             );
         }
 
@@ -527,7 +529,7 @@ impl Chart {
         // The default Scatter chart has a hidden line with a standard width.
         if self.chart_type == ChartType::Scatter {
             series.set_format(
-                ChartFormat::new().set_line(ChartLine::new().set_width(2.25).set_hidden()),
+                ChartFormat::new().set_line(ChartLine::new().set_width(2.25).set_hidden(true)),
             );
         }
 
@@ -2052,6 +2054,22 @@ impl Chart {
         self
     }
 
+    // Initialize stock charts.
+    fn initialize_stock_chart(mut self) -> Chart {
+        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_position = ChartAxisPosition::Bottom;
+
+        self.y_axis.axis_type = ChartAxisType::Value;
+        self.y_axis.axis_position = ChartAxisPosition::Left;
+        self.y_axis.title.is_horizontal = true;
+        self.y_axis.major_gridlines = true;
+
+        self.chart_group_type = ChartType::Stock;
+        self.default_label_position = ChartDataLabelPosition::Right;
+
+        self
+    }
+
     // Write the <c:areaChart> element for Column charts.
     fn write_area_chart(&mut self) {
         self.writer.xml_start_tag_only("c:areaChart");
@@ -2232,6 +2250,34 @@ impl Chart {
         self.writer.xml_end_tag("c:scatterChart");
     }
 
+    // Write the <c:stockChart>element.
+    fn write_stock_chart(&mut self) {
+        self.writer.xml_start_tag_only("c:stockChart");
+
+        // Write the c:ser elements.
+        self.write_series();
+
+        if self.has_drop_lines {
+            // Write the c:dropLines element.
+            self.write_drop_lines();
+        }
+
+        if self.has_high_low_lines {
+            // Write the c:hiLowLines element.
+            self.write_hi_low_lines();
+        }
+
+        // Write the c:upDownBars element.
+        if self.has_up_down_bars {
+            self.write_up_down_bars();
+        }
+
+        // Write the c:axId elements.
+        self.write_ax_ids();
+
+        self.writer.xml_end_tag("c:stockChart");
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -2381,6 +2427,10 @@ impl Chart {
             | ChartType::ScatterStraightWithMarkers
             | ChartType::ScatterSmooth
             | ChartType::ScatterSmoothWithMarkers => self.write_scatter_chart(),
+
+            ChartType::Stock => {
+                self.write_stock_chart();
+            }
         }
 
         // Reverse the X and Y axes for Bar charts.
@@ -2399,8 +2449,13 @@ impl Chart {
                 self.write_val_ax();
             }
             _ => {
-                // Write the c:catAx element.
-                self.write_cat_ax();
+                if self.x_axis.is_date_axis {
+                    // Write the c:dateAx element.
+                    self.write_date_ax();
+                } else {
+                    // Write the c:catAx element.
+                    self.write_cat_ax();
+                }
 
                 // Write the c:valAx element.
                 self.write_val_ax();
@@ -2730,10 +2785,10 @@ impl Chart {
 
     // Write the <c:numRef> or <c:strRef> elements.
     fn write_cache_ref(&mut self, range: &ChartRange) {
-        if range.cache.is_numeric {
-            self.write_num_ref(range);
-        } else {
+        if range.cache.cache_type == ChartRangeCacheDataType::String {
             self.write_str_ref(range);
+        } else {
+            self.write_num_ref(range);
         }
     }
 
@@ -2772,7 +2827,11 @@ impl Chart {
         self.writer.xml_start_tag_only("c:numCache");
 
         // Write the c:formatCode element.
-        self.write_format_code();
+        if cache.cache_type == ChartRangeCacheDataType::Date {
+            self.write_format_code("dd/mm/yyyy");
+        } else {
+            self.write_format_code("General");
+        }
 
         // Write the c:ptCount element.
         self.write_pt_count(cache.data.len());
@@ -2808,8 +2867,9 @@ impl Chart {
     }
 
     // Write the <c:formatCode> element.
-    fn write_format_code(&mut self) {
-        self.writer.xml_data_element_only("c:formatCode", "General");
+    fn write_format_code(&mut self, format_code: &str) {
+        self.writer
+            .xml_data_element_only("c:formatCode", format_code);
     }
 
     // Write the <c:ptCount> element.
@@ -2919,6 +2979,83 @@ impl Chart {
         }
 
         self.writer.xml_end_tag("c:catAx");
+    }
+
+    // Write the <c:dateAx> element.
+    fn write_date_ax(&mut self) {
+        self.writer.xml_start_tag_only("c:dateAx");
+
+        self.write_ax_id(self.axis_ids.0);
+
+        // Write the c:scaling element.
+        self.write_scaling(&self.x_axis.clone());
+
+        if self.x_axis.is_hidden {
+            self.write_delete();
+        }
+
+        // Write the c:axPos element.
+        self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
+
+        self.write_major_gridlines(self.x_axis.clone());
+        self.write_minor_gridlines(self.x_axis.clone());
+
+        // Write the c:title element.
+        self.write_chart_title(&self.x_axis.title.clone());
+
+        // Write the c:numFmt element.
+        if !self.x_axis.num_format.is_empty() {
+            self.write_number_format(&self.x_axis.num_format.clone(), false);
+        } else if self.category_has_num_format {
+            self.write_number_format("dd/mm/yyyy", true);
+        }
+
+        // Write the c:majorTickMark element.
+        if let Some(tick_type) = self.x_axis.major_tick_type {
+            self.write_major_tick_mark(tick_type);
+        }
+
+        // Write the c:minorTickMark element.
+        if let Some(tick_type) = self.x_axis.minor_tick_type {
+            self.write_minor_tick_mark(tick_type);
+        }
+
+        // Write the c:tickLblPos element.
+        self.write_tick_label_position(self.x_axis.label_position);
+
+        if self.x_axis.format.has_formatting() {
+            // Write the c:spPr formatting element.
+            self.write_sp_pr(&self.x_axis.format.clone());
+        }
+
+        // Write the axis font elements.
+        if let Some(font) = &self.x_axis.font {
+            self.write_axis_font(&font.clone());
+        }
+
+        // Write the c:crossAx element.
+        self.write_cross_ax(self.axis_ids.1);
+
+        // Write the c:crosses element.
+        self.write_crosses();
+
+        // Write the c:auto element.
+        self.write_auto();
+
+        // Write the c:lblOffset element.
+        self.write_lbl_offset();
+
+        // Write the c:tickLblSkip element.
+        if self.x_axis.label_interval > 1 {
+            self.write_tick_lbl_skip(self.x_axis.label_interval);
+        }
+
+        // Write the c:tickMarkSkip element.
+        if self.x_axis.tick_interval > 1 {
+            self.write_tick_mark_skip(self.x_axis.tick_interval);
+        }
+
+        self.writer.xml_end_tag("c:dateAx");
     }
 
     // Write the <c:valAx> element.
@@ -6760,10 +6897,14 @@ impl ChartRange {
     /// * `data` - Array of string data to populate the chart cache.
     /// * `is_numeric` - The chart cache date is numeric.
     ///
-    #[doc(hidden)]
-    pub fn set_cache(&mut self, data: &[&str], is_numeric: bool) -> &mut ChartRange {
+    #[allow(dead_code)] // This is only used for internal testing.
+    pub(crate) fn set_cache(
+        &mut self,
+        data: &[&str],
+        cache_type: ChartRangeCacheDataType,
+    ) -> &mut ChartRange {
         self.cache = ChartRangeCacheData {
-            is_numeric,
+            cache_type,
             data: data.iter().map(std::string::ToString::to_string).collect(),
         };
         self
@@ -6772,14 +6913,14 @@ impl ChartRange {
 
 #[derive(Clone, PartialEq)]
 pub(crate) struct ChartRangeCacheData {
-    pub(crate) is_numeric: bool,
+    pub(crate) cache_type: ChartRangeCacheDataType,
     pub(crate) data: Vec<String>,
 }
 
 impl ChartRangeCacheData {
     pub(crate) fn new() -> ChartRangeCacheData {
         ChartRangeCacheData {
-            is_numeric: true,
+            cache_type: ChartRangeCacheDataType::None,
             data: vec![],
         }
     }
@@ -6787,6 +6928,16 @@ impl ChartRangeCacheData {
     pub(crate) fn has_data(&self) -> bool {
         !self.data.is_empty()
     }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+
+/// Todo
+pub(crate) enum ChartRangeCacheDataType {
+    None,
+    String,
+    Number,
+    Date,
 }
 
 // -----------------------------------------------------------------------
@@ -6917,6 +7068,9 @@ pub enum ChartType {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_scatter_smooth_with_markers.png">
     ScatterSmoothWithMarkers,
+
+    /// TODO
+    Stock,
 }
 
 // -----------------------------------------------------------------------
@@ -7507,12 +7661,20 @@ pub enum ChartMarkerType {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_plus_sign.png">
     PlusSign,
+
+    /// Todo
+    Dot,
+
+    /// Todo
+    None,
 }
 
 impl fmt::Display for ChartMarkerType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ChartMarkerType::X => write!(f, "x"),
+            ChartMarkerType::Dot => write!(f, "dot"),
+            ChartMarkerType::None => write!(f, "none"),
             ChartMarkerType::Star => write!(f, "star"),
             ChartMarkerType::Circle => write!(f, "circle"),
             ChartMarkerType::Square => write!(f, "square"),
@@ -8686,6 +8848,7 @@ pub struct ChartAxis {
     pub(crate) num_format: String,
     pub(crate) reverse: bool,
     pub(crate) is_hidden: bool,
+    pub(crate) is_date_axis: bool,
     pub(crate) position_between_ticks: bool,
     pub(crate) max: String,
     pub(crate) min: String,
@@ -8714,6 +8877,7 @@ impl ChartAxis {
             num_format: String::new(),
             reverse: false,
             is_hidden: false,
+            is_date_axis: false,
             position_between_ticks: true,
             max: String::new(),
             min: String::new(),
@@ -9065,6 +9229,12 @@ impl ChartAxis {
     ///
     pub fn set_num_format(&mut self, num_format: impl Into<String>) -> &mut ChartAxis {
         self.num_format = num_format.into();
+        self
+    }
+
+    /// TODO
+    pub fn set_date_axis(&mut self, enable: bool) -> &mut ChartAxis {
+        self.is_date_axis = enable;
         self
     }
 
@@ -11721,10 +11891,11 @@ impl ChartLine {
         self
     }
 
-    // Internal method for some chart types such as Scatter that set a line
-    // width but also set the line hidden.
-    pub(crate) fn set_hidden(&mut self) -> &mut ChartLine {
-        self.hidden = true;
+    /// Internal method for some chart types such as Scatter that set a line
+    /// width but also set the line hidden.
+    /// TODO
+    pub fn set_hidden(&mut self, enable: bool) -> &mut ChartLine {
+        self.hidden = enable;
         self
     }
 }

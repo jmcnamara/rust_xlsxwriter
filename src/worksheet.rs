@@ -27,8 +27,8 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, Color, ExcelDateTime, HeaderImagePosition, Image, IntoColor, IntoExcelDateTime,
-    ObjectMovement, ProtectionOptions, Table, TableFunction, Url,
+    utility, ChartRangeCacheDataType, Color, ExcelDateTime, HeaderImagePosition, Image, IntoColor,
+    IntoExcelDateTime, ObjectMovement, ProtectionOptions, Table, TableFunction, Url,
 };
 use crate::{Chart, ChartRangeCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
@@ -752,6 +752,32 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// Todo
+    ///
+    /// # Errors
+    ///
+    /// Todo
+    ///
+    pub fn write_row_with_format<I>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        data: I,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        I: IntoIterator,
+        I::Item: IntoExcelData,
+    {
+        let mut col = col;
+        for item in data {
+            self.write_with_format(row, col, item, format)?;
+            col += 1;
+        }
+
+        Ok(self)
+    }
+
     /// Write an array like data structure as a column of data to a worksheet.
     ///
     /// Write an array of data vertically downwards starting from the initial
@@ -826,6 +852,32 @@ impl Worksheet {
         let mut row = row;
         for item in data {
             self.write(row, col, item)?;
+            row += 1;
+        }
+
+        Ok(self)
+    }
+
+    /// Todo
+    ///
+    /// # Errors
+    ///
+    /// Todo
+    ///
+    pub fn write_column_with_format<I>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        data: I,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        I: IntoIterator,
+        I::Item: IntoExcelData,
+    {
+        let mut row = row;
+        for item in data {
+            self.write_with_format(row, col, item, format)?;
             row += 1;
         }
 
@@ -9261,7 +9313,6 @@ impl Worksheet {
     ) -> ChartRangeCacheData {
         let mut cache = ChartRangeCacheData::new();
         let mut data = vec![];
-        let mut is_numeric = true;
 
         for row_num in first_row..=last_row {
             match self.data_table.get(&row_num) {
@@ -9271,9 +9322,21 @@ impl Worksheet {
                             Some(cell) => match cell {
                                 CellType::String { string, .. } => {
                                     data.push(string.to_string());
-                                    is_numeric = false;
+                                    cache.cache_type = ChartRangeCacheDataType::String;
                                 }
-                                CellType::Number { number, .. } => data.push(number.to_string()),
+                                CellType::Number { number, .. } => {
+                                    if cache.cache_type != ChartRangeCacheDataType::String {
+                                        cache.cache_type = ChartRangeCacheDataType::Number;
+                                    }
+                                    data.push(number.to_string());
+                                }
+                                CellType::DateTime { number, .. } => {
+                                    if cache.cache_type != ChartRangeCacheDataType::String {
+                                        cache.cache_type = ChartRangeCacheDataType::Date;
+                                    }
+                                    data.push(number.to_string());
+                                }
+
                                 _ => data.push(String::new()),
                             },
                             None => data.push(String::new()),
@@ -9284,7 +9347,6 @@ impl Worksheet {
             }
         }
 
-        cache.is_numeric = is_numeric;
         cache.data = data;
         cache
     }
@@ -10905,6 +10967,29 @@ impl IntoExcelData for bool {
 }
 
 impl IntoExcelData for &ExcelDateTime {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = self.to_excel();
+        worksheet.store_datetime(row, col, number, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let number = self.to_excel();
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
+impl IntoExcelData for ExcelDateTime {
     fn write(
         self,
         worksheet: &mut Worksheet,

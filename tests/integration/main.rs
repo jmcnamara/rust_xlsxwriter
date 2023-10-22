@@ -346,6 +346,7 @@ mod chart_scatter14;
 mod chart_scatter15;
 mod chart_size01;
 mod chart_size02;
+mod chart_stock01;
 mod chart_theme01;
 mod chart_theme02;
 mod chart_theme03;
