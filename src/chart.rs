@@ -2056,7 +2056,8 @@ impl Chart {
 
     // Initialize stock charts.
     fn initialize_stock_chart(mut self) -> Chart {
-        self.x_axis.axis_type = ChartAxisType::Category;
+        self.x_axis.axis_type = ChartAxisType::Date;
+        self.x_axis.is_date_axis = true;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
 
         self.y_axis.axis_type = ChartAxisType::Value;
@@ -2282,7 +2283,7 @@ impl Chart {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    //  Assemble and write the XML file.
+    // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
@@ -2633,23 +2634,23 @@ impl Chart {
                 self.write_d_pt(&series.points, max_points);
             }
 
+            // Write the c:dLbls element.
             if let Some(data_label) = &series.data_label {
-                // Write the c:dLbls element.
                 self.write_data_labels(data_label, &series.custom_data_labels, max_points);
             }
 
+            // Write the c:trendline element.
             if series.trendline.trend_type != ChartTrendlineType::None {
-                // Write the c:trendline element.
                 self.write_trendline(&series.trendline);
             }
 
+            // Write the X-Axis c:errBars element.
             if let Some(error_bars) = &series.x_error_bars {
-                // Write the c:errBars element.
                 self.write_error_bar("x", error_bars);
             }
 
+            // Write the Y-Axis the c:errBars element.
             if let Some(error_bars) = &series.y_error_bars {
-                // Write the c:errBars element.
                 self.write_error_bar("y", error_bars);
             }
 
@@ -2901,6 +2902,10 @@ impl Chart {
         self.writer.xml_empty_tag("c:axId", &attributes);
     }
 
+    // -----------------------------------------------------------------------
+    // Category Axis.
+    // -----------------------------------------------------------------------
+
     // Write the <c:catAx> element.
     fn write_cat_ax(&mut self) {
         self.writer.xml_start_tag_only("c:catAx");
@@ -2981,6 +2986,10 @@ impl Chart {
         self.writer.xml_end_tag("c:catAx");
     }
 
+    // -----------------------------------------------------------------------
+    // Date Axis.
+    // -----------------------------------------------------------------------
+
     // Write the <c:dateAx> element.
     fn write_date_ax(&mut self) {
         self.writer.xml_start_tag_only("c:dateAx");
@@ -3055,8 +3064,32 @@ impl Chart {
             self.write_tick_mark_skip(self.x_axis.tick_interval);
         }
 
+        // Write the c:majorUnit element.
+        if !self.x_axis.major_unit.is_empty() {
+            self.write_major_unit(self.x_axis.major_unit.clone());
+        }
+
+        // Write the c:majorTimeUnit element.
+        if let Some(unit) = self.x_axis.major_unit_date_type {
+            self.write_major_time_unit(unit);
+        }
+
+        // Write the c:minorUnit element.
+        if !self.x_axis.minor_unit.is_empty() {
+            self.write_minor_unit(self.x_axis.minor_unit.clone());
+        }
+
+        // Write the c:minorTimeUnit element.
+        if let Some(unit) = self.x_axis.minor_unit_date_type {
+            self.write_minor_time_unit(unit);
+        }
+
         self.writer.xml_end_tag("c:dateAx");
     }
+
+    // -----------------------------------------------------------------------
+    // Value Axis.
+    // -----------------------------------------------------------------------
 
     // Write the <c:valAx> element.
     fn write_val_ax(&mut self) {
@@ -3120,17 +3153,21 @@ impl Chart {
         self.write_cross_between(self.x_axis.position_between_ticks);
 
         // Write the c:majorUnit element.
-        if self.y_axis.axis_type == ChartAxisType::Value && !self.y_axis.major_unit.is_empty() {
+        if self.y_axis.axis_type != ChartAxisType::Category && !self.y_axis.major_unit.is_empty() {
             self.write_major_unit(self.y_axis.major_unit.clone());
         }
 
         // Write the c:minorUnit element.
-        if self.y_axis.axis_type == ChartAxisType::Value && !self.y_axis.minor_unit.is_empty() {
+        if self.y_axis.axis_type != ChartAxisType::Category && !self.y_axis.minor_unit.is_empty() {
             self.write_minor_unit(self.y_axis.minor_unit.clone());
         }
 
         self.writer.xml_end_tag("c:valAx");
     }
+
+    // -----------------------------------------------------------------------
+    // Category Value Axis. Only for Scatter charts.
+    // -----------------------------------------------------------------------
 
     // Write the category <c:valAx> element for scatter charts.
     fn write_cat_val_ax(&mut self) {
@@ -3195,12 +3232,12 @@ impl Chart {
         self.write_cross_between(self.y_axis.position_between_ticks);
 
         // Write the c:majorUnit element.
-        if self.x_axis.axis_type == ChartAxisType::Value && !self.x_axis.major_unit.is_empty() {
+        if self.x_axis.axis_type != ChartAxisType::Category && !self.x_axis.major_unit.is_empty() {
             self.write_major_unit(self.x_axis.major_unit.clone());
         }
 
         // Write the c:minorUnit element.
-        if self.x_axis.axis_type == ChartAxisType::Value && !self.x_axis.minor_unit.is_empty() {
+        if self.x_axis.axis_type != ChartAxisType::Category && !self.x_axis.minor_unit.is_empty() {
             self.write_minor_unit(self.x_axis.minor_unit.clone());
         }
 
@@ -3212,7 +3249,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:scaling");
 
         // Write the c:logBase element.
-        if axis.axis_type == ChartAxisType::Value && axis.log_base >= 2 {
+        if axis.axis_type != ChartAxisType::Category && axis.log_base >= 2 {
             self.write_log_base(axis.log_base);
         }
 
@@ -3220,12 +3257,12 @@ impl Chart {
         self.write_orientation(axis.reverse);
 
         // Write the c:max element.
-        if axis.axis_type == ChartAxisType::Value && !axis.max.is_empty() {
+        if axis.axis_type != ChartAxisType::Category && !axis.max.is_empty() {
             self.write_max(&axis.max);
         }
 
         // Write the c:min element.
-        if axis.axis_type == ChartAxisType::Value && !axis.min.is_empty() {
+        if axis.axis_type != ChartAxisType::Category && !axis.min.is_empty() {
             self.write_min(&axis.min);
         }
 
@@ -3402,6 +3439,20 @@ impl Chart {
         let attributes = [("val", value)];
 
         self.writer.xml_empty_tag("c:minorUnit", &attributes);
+    }
+
+    // Write the <c:majorTimeUnit> element.
+    fn write_major_time_unit(&mut self, unit: ChartAxisDateUnitType) {
+        let attributes = [("val", unit.to_string())];
+
+        self.writer.xml_empty_tag("c:majorTimeUnit", &attributes);
+    }
+
+    // Write the <c:minorTimeUnit> element.
+    fn write_minor_time_unit(&mut self, unit: ChartAxisDateUnitType) {
+        let attributes = [("val", unit.to_string())];
+
+        self.writer.xml_empty_tag("c:minorTimeUnit", &attributes);
     }
 
     // Write the <c:legend> element.
@@ -8863,6 +8914,8 @@ pub struct ChartAxis {
     pub(crate) tick_interval: u16,
     pub(crate) major_tick_type: Option<ChartAxisTickType>,
     pub(crate) minor_tick_type: Option<ChartAxisTickType>,
+    pub(crate) major_unit_date_type: Option<ChartAxisDateUnitType>,
+    pub(crate) minor_unit_date_type: Option<ChartAxisDateUnitType>,
 }
 
 impl ChartAxis {
@@ -8892,6 +8945,8 @@ impl ChartAxis {
             tick_interval: 0,
             major_tick_type: None,
             minor_tick_type: None,
+            major_unit_date_type: None,
+            minor_unit_date_type: None,
         }
     }
 
@@ -9471,6 +9526,18 @@ impl ChartAxis {
         T: Into<f64>,
     {
         self.minor_unit = value.into().to_string();
+        self
+    }
+
+    /// todo
+    pub fn set_major_unit_date_type(&mut self, unit: ChartAxisDateUnitType) -> &mut ChartAxis {
+        self.major_unit_date_type = Some(unit);
+        self
+    }
+
+    /// todo
+    pub fn set_minor_unit_date_type(&mut self, unit: ChartAxisDateUnitType) -> &mut ChartAxis {
+        self.minor_unit_date_type = Some(unit);
         self
     }
 
@@ -10200,6 +10267,7 @@ impl ChartAxis {
 pub(crate) enum ChartAxisType {
     Category,
     Value,
+    Date,
 }
 
 #[derive(Clone, Copy)]
@@ -10289,11 +10357,11 @@ impl fmt::Display for ChartAxisPosition {
 ///
 #[derive(Clone, Copy)]
 pub enum ChartAxisLabelPosition {
-    ///  Position the axis labels next to the axis. The default.
+    /// Position the axis labels next to the axis. The default.
     NextTo,
 
-    ///  Position the axis labels at the top of the chart, for horizontal axes,
-    ///  or to the right for vertical axes.
+    /// Position the axis labels at the top of the chart, for horizontal axes,
+    /// or to the right for vertical axes.
     High,
 
     /// Position the axis labels at the bottom of the chart, for horizontal
@@ -10383,10 +10451,10 @@ impl fmt::Display for ChartAxisLabelPosition {
 ///
 #[derive(Clone, Copy)]
 pub enum ChartAxisTickType {
-    ///  No tick mark for the axis.
+    /// No tick mark for the axis.
     None,
 
-    ///  The tick mark is inside the axis only.
+    /// The tick mark is inside the axis only.
     Inside,
 
     /// The tick mark is outside the axis only.
@@ -10403,6 +10471,29 @@ impl fmt::Display for ChartAxisTickType {
             ChartAxisTickType::Cross => write!(f, "cross"),
             ChartAxisTickType::Inside => write!(f, "in"),
             ChartAxisTickType::Outside => write!(f, "out"),
+        }
+    }
+}
+
+/// TODO
+#[derive(Clone, Copy)]
+pub enum ChartAxisDateUnitType {
+    /// TODO
+    Days,
+
+    /// TODO
+    Months,
+
+    /// TODO
+    Years,
+}
+
+impl fmt::Display for ChartAxisDateUnitType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ChartAxisDateUnitType::Days => write!(f, "days"),
+            ChartAxisDateUnitType::Years => write!(f, "years"),
+            ChartAxisDateUnitType::Months => write!(f, "months"),
         }
     }
 }
@@ -14461,7 +14552,7 @@ pub enum ChartGradientFillType {
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/chart_error_bars_options.png">
 ///
-///  The `ChartErrorBars` struct can be added to a series via the
+/// The `ChartErrorBars` struct can be added to a series via the
 /// [`ChartSeries::set_y_error_bars()`] and [`ChartSeries::set_x_error_bars()`]
 /// methods.
 ///

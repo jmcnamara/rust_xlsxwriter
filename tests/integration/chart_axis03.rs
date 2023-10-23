@@ -41,7 +41,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_column(0, 3, close)?;
 
     let mut chart = Chart::new(ChartType::Stock);
-    chart.set_axis_ids(40522880, 40524416);
+    chart.set_axis_ids(65514112, 65556864);
 
     chart
         .add_series()
@@ -68,8 +68,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_size(3),
         );
 
-    // The following is implicit. Adding for additional testing.
-    chart.x_axis().set_date_axis(true);
+    chart.title().set_name("Title");
+    chart.x_axis().set_name("XXX");
+    chart.y_axis().set_name("YYY");
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -79,9 +80,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_stock01() {
+fn test_chart_axis03() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_stock01")
+        .set_name("chart_axis03")
         .set_function(create_new_xlsx_file)
         .initialize();
 

@@ -66,7 +66,7 @@ use std::{collections::HashMap, fmt, hash::Hash};
 ///      workbook.save("formats.xlsx")?;
 ///
 ///      Ok(())
-///  }
+/// }
 /// ```
 ///
 ///

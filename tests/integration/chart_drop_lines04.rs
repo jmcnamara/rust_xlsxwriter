@@ -41,7 +41,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_column(0, 3, close)?;
 
     let mut chart = Chart::new(ChartType::Stock);
-    chart.set_axis_ids(40522880, 40524416);
+    chart.set_axis_ids(49019520, 49222016);
 
     chart
         .add_series()
@@ -58,6 +58,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_marker(ChartMarker::new().set_none());
     chart
         .set_high_low_lines(true)
+        .set_drop_lines(true)
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 3, 4, 3))
@@ -68,9 +69,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_size(3),
         );
 
-    // The following is implicit. Adding for additional testing.
-    chart.x_axis().set_date_axis(true);
-
     worksheet.insert_chart(8, 4, &chart)?;
 
     workbook.save(filename)?;
@@ -79,9 +77,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_stock01() {
+fn test_chart_drop_lines04() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_stock01")
+        .set_name("chart_drop_lines04")
         .set_function(create_new_xlsx_file)
         .initialize();
 

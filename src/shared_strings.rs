@@ -27,7 +27,7 @@ impl SharedStrings {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    //  Assemble and write the XML file.
+    // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self, string_table: &SharedStringsTable) {
         self.writer.xml_declaration();
 

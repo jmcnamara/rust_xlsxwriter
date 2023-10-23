@@ -9411,7 +9411,7 @@ impl Worksheet {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    //  Assemble and write the XML file.
+    // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 

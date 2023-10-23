@@ -284,7 +284,7 @@ use std::borrow::Cow;
 /// Microsoft documentation on [Dynamic array formulas vs. legacy CSE array
 /// formulas].
 ///
-///  In `rust_xlsxwriter` you can use the [`worksheet.write_array_formula()`]
+/// In `rust_xlsxwriter` you can use the [`worksheet.write_array_formula()`]
 /// function to get a static/CSE range and
 /// [`worksheet.write_dynamic_array_formula()`] or
 /// [`worksheet.write_dynamic_formula()`] to get a dynamic range.

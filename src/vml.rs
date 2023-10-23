@@ -34,7 +34,7 @@ impl Vml {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    //  Assemble and write the XML file.
+    // Assemble and write the XML file.
     pub fn assemble_xml_file(&mut self) {
         // Write the xml element.
         self.write_xml_namespace();

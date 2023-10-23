@@ -47,7 +47,7 @@
 ///     workbook.save("worksheet.xlsx")?;
 ///
 ///     Ok(())
-///  }
+/// }
 /// ```
 ///
 /// Excel dialog for the output file, compare this with the default image above:

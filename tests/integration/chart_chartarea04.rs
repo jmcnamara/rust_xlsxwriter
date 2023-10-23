@@ -7,8 +7,8 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    Chart, ChartLine, ChartMarker, ChartMarkerType, ChartType, ExcelDateTime, Format, Workbook,
-    XlsxError,
+    Chart, ChartFormat, ChartLine, ChartLineDashType, ChartMarker, ChartMarkerType, ChartSolidFill,
+    ChartType, ExcelDateTime, Format, Workbook, XlsxError,
 };
 
 // Create rust_xlsxwriter file to compare against Excel file.
@@ -41,7 +41,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_column(0, 3, close)?;
 
     let mut chart = Chart::new(ChartType::Stock);
-    chart.set_axis_ids(40522880, 40524416);
+    chart.set_axis_ids(82954112, 82956288);
 
     chart
         .add_series()
@@ -68,8 +68,17 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_size(3),
         );
 
-    // The following is implicit. Adding for additional testing.
-    chart.x_axis().set_date_axis(true);
+    chart.set_chart_area_format(
+        ChartFormat::new()
+            .set_border(ChartLine::new().set_color("#FF0000"))
+            .set_solid_fill(ChartSolidFill::new().set_color("#00B050")),
+    );
+
+    chart.set_plot_area_format(
+        ChartFormat::new()
+            .set_border(ChartLine::new().set_dash_type(ChartLineDashType::DashDot))
+            .set_solid_fill(ChartSolidFill::new().set_color("#FFC000")),
+    );
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -79,9 +88,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_stock01() {
+fn test_chart_chartarea04() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_stock01")
+        .set_name("chart_chartarea04")
         .set_function(create_new_xlsx_file)
         .initialize();
 
