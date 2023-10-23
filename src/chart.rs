@@ -16,7 +16,8 @@ use crate::{
     drawing::{DrawingObject, DrawingType},
     utility::{self, ToXmlBoolean},
     xmlwriter::XMLWriter,
-    ColNum, Color, IntoColor, ObjectMovement, RowNum, XlsxError, COL_MAX, ROW_MAX,
+    ColNum, Color, IntoColor, IntoExcelDateTime, ObjectMovement, RowNum, XlsxError, COL_MAX,
+    ROW_MAX,
 };
 
 #[derive(Clone)]
@@ -794,7 +795,7 @@ impl Chart {
         if (1..=48).contains(&style) {
             self.style = style;
         } else {
-            eprintln!("Style id {style} outside Excel range: 1 <= style <= 48.");
+            eprintln!("Style id '{style}' outside Excel range: 1 <= style <= 48.");
         }
 
         self
@@ -2057,7 +2058,6 @@ impl Chart {
     // Initialize stock charts.
     fn initialize_stock_chart(mut self) -> Chart {
         self.x_axis.axis_type = ChartAxisType::Date;
-        self.x_axis.is_date_axis = true;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
 
         self.y_axis.axis_type = ChartAxisType::Value;
@@ -2450,7 +2450,7 @@ impl Chart {
                 self.write_val_ax();
             }
             _ => {
-                if self.x_axis.is_date_axis {
+                if self.x_axis.axis_type == ChartAxisType::Date {
                     // Write the c:dateAx element.
                     self.write_date_ax();
                 } else {
@@ -2930,7 +2930,10 @@ impl Chart {
 
         // Write the c:numFmt element.
         if !self.x_axis.num_format.is_empty() {
-            self.write_number_format(&self.x_axis.num_format.clone(), false);
+            self.write_number_format(
+                &self.x_axis.num_format.clone(),
+                self.x_axis.num_format_source_linked,
+            );
         } else if self.category_has_num_format {
             self.write_number_format("General", true);
         }
@@ -2964,8 +2967,10 @@ impl Chart {
         // Write the c:crosses element.
         self.write_crosses();
 
-        // Write the c:auto element.
-        self.write_auto();
+        if !self.x_axis.is_text_axis {
+            // Write the c:auto element.
+            self.write_auto();
+        }
 
         // Write the c:lblAlgn element.
         self.write_lbl_algn();
@@ -3014,7 +3019,10 @@ impl Chart {
 
         // Write the c:numFmt element.
         if !self.x_axis.num_format.is_empty() {
-            self.write_number_format(&self.x_axis.num_format.clone(), false);
+            self.write_number_format(
+                &self.x_axis.num_format.clone(),
+                self.x_axis.num_format_source_linked,
+            );
         } else if self.category_has_num_format {
             self.write_number_format("dd/mm/yyyy", true);
         }
@@ -3117,7 +3125,10 @@ impl Chart {
         if self.y_axis.num_format.is_empty() {
             self.write_number_format(&self.default_num_format.clone(), true);
         } else {
-            self.write_number_format(&self.y_axis.num_format.clone(), false);
+            self.write_number_format(
+                &self.y_axis.num_format.clone(),
+                self.y_axis.num_format_source_linked,
+            );
         }
 
         // Write the c:majorTickMark element.
@@ -3196,7 +3207,10 @@ impl Chart {
         if self.x_axis.num_format.is_empty() {
             self.write_number_format(&self.default_num_format.clone(), true);
         } else {
-            self.write_number_format(&self.x_axis.num_format.clone(), false);
+            self.write_number_format(
+                &self.x_axis.num_format.clone(),
+                self.x_axis.num_format_source_linked,
+            );
         }
 
         // Write the c:majorTickMark element.
@@ -8897,9 +8911,10 @@ pub struct ChartAxis {
     pub(crate) format: ChartFormat,
     pub(crate) font: Option<ChartFont>,
     pub(crate) num_format: String,
+    pub(crate) num_format_source_linked: bool,
     pub(crate) reverse: bool,
     pub(crate) is_hidden: bool,
-    pub(crate) is_date_axis: bool,
+    pub(crate) is_text_axis: bool,
     pub(crate) position_between_ticks: bool,
     pub(crate) max: String,
     pub(crate) min: String,
@@ -8928,9 +8943,10 @@ impl ChartAxis {
             format: ChartFormat::new(),
             font: None,
             num_format: String::new(),
+            num_format_source_linked: false,
             reverse: false,
             is_hidden: false,
-            is_date_axis: false,
+            is_text_axis: false,
             position_between_ticks: true,
             max: String::new(),
             min: String::new(),
@@ -9288,8 +9304,31 @@ impl ChartAxis {
     }
 
     /// TODO
+    pub fn set_num_format_linked(
+        &mut self,
+        num_format: impl Into<String>,
+        source_linked: bool,
+    ) -> &mut ChartAxis {
+        self.num_format = num_format.into();
+        self.num_format_source_linked = source_linked;
+        self
+    }
+
+    /// TODO
     pub fn set_date_axis(&mut self, enable: bool) -> &mut ChartAxis {
-        self.is_date_axis = enable;
+        if enable {
+            self.axis_type = ChartAxisType::Date;
+        } else {
+            self.axis_type = ChartAxisType::Category;
+        }
+
+        self
+    }
+
+    /// TODO
+    pub fn set_text_axis(&mut self, enable: bool) -> &mut ChartAxis {
+        self.is_text_axis = enable;
+
         self
     }
 
@@ -9438,6 +9477,18 @@ impl ChartAxis {
         self
     }
 
+    /// TODO
+    pub fn set_max_date(&mut self, datetime: impl IntoExcelDateTime) -> &mut ChartAxis {
+        self.max = datetime.to_excel_serial_date().to_string();
+        self
+    }
+
+    /// TODO
+    pub fn set_min_date(&mut self, datetime: impl IntoExcelDateTime) -> &mut ChartAxis {
+        self.min = datetime.to_excel_serial_date().to_string();
+        self
+    }
+
     /// Set the increment of the major units in the axis range.
     ///
     /// Note, Excel only supports major/minor units for "Value" axes. In general
@@ -9508,7 +9559,13 @@ impl ChartAxis {
     where
         T: Into<f64>,
     {
-        self.major_unit = value.into().to_string();
+        let value = value.into();
+        if value < 0.0 {
+            eprintln!("Chart axis major unit '{value}' must be >= 0.0 in Excel");
+            return self;
+        }
+
+        self.major_unit = value.to_string();
         self
     }
 
@@ -9525,7 +9582,13 @@ impl ChartAxis {
     where
         T: Into<f64>,
     {
-        self.minor_unit = value.into().to_string();
+        let value = value.into();
+        if value < 0.0 {
+            eprintln!("Chart axis minor unit '{value}' must be >= 0.0 in Excel");
+            return self;
+        }
+
+        self.minor_unit = value.to_string();
         self
     }
 
@@ -13352,7 +13415,7 @@ impl ChartFont {
     pub fn set_rotation(&mut self, rotation: i16) -> &mut ChartFont {
         match rotation {
             270..=271 | -90..=90 => self.rotation = Some(rotation),
-            _ => eprintln!("Rotation outside range: -90 <= angle <= 90."),
+            _ => eprintln!("Rotation '{rotation}' outside range: -90 <= angle <= 90."),
         }
 
         self
@@ -14501,7 +14564,7 @@ impl ChartGradientStop {
             eprintln!("Gradient stop color isn't valid.");
         }
         if !(0..=100).contains(&position) {
-            eprintln!("Gradient stop {position} outside Excel range: 0 <= position <= 100.");
+            eprintln!("Gradient stop '{position}' outside Excel range: 0 <= position <= 100.");
         }
 
         ChartGradientStop { color, position }
@@ -14653,19 +14716,19 @@ impl ChartErrorBars {
         match &error_type {
             ChartErrorBarsType::FixedValue(value) => {
                 if *value <= 0.0 {
-                    eprintln!("Error bar Fixed Value {value} must be > 0.0 in Excel");
+                    eprintln!("Error bar Fixed Value '{value}' must be > 0.0 in Excel");
                     return self;
                 }
             }
             ChartErrorBarsType::Percentage(value) => {
                 if *value < 0.0 {
-                    eprintln!("Error bar Percentage {value} must be >= 0.0 in Excel");
+                    eprintln!("Error bar Percentage '{value}' must be >= 0.0 in Excel");
                     return self;
                 }
             }
             ChartErrorBarsType::StandardDeviation(value) => {
                 if *value < 0.0 {
-                    eprintln!("Error bar Standard Deviation {value} must be >= 0.0 in Excel");
+                    eprintln!("Error bar Standard Deviation '{value}' must be >= 0.0 in Excel");
                     return self;
                 }
             }

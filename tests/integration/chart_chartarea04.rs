@@ -25,11 +25,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     // Add some test data for the chart(s).
     let dates = [
-        ExcelDateTime::parse_from_str("2007-01-01").unwrap(),
-        ExcelDateTime::parse_from_str("2007-01-02").unwrap(),
-        ExcelDateTime::parse_from_str("2007-01-03").unwrap(),
-        ExcelDateTime::parse_from_str("2007-01-04").unwrap(),
-        ExcelDateTime::parse_from_str("2007-01-05").unwrap(),
+        ExcelDateTime::parse_from_str("2007-01-01")?,
+        ExcelDateTime::parse_from_str("2007-01-02")?,
+        ExcelDateTime::parse_from_str("2007-01-03")?,
+        ExcelDateTime::parse_from_str("2007-01-04")?,
+        ExcelDateTime::parse_from_str("2007-01-05")?,
     ];
     let high = [27.2, 25.03, 19.05, 20.34, 18.5];
     let low = [23.49, 19.55, 15.12, 17.84, 16.34];

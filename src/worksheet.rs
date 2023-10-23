@@ -2822,7 +2822,7 @@ impl Worksheet {
         datetime: impl IntoExcelDateTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let datetime = datetime.to_excel();
+        let datetime = datetime.to_excel_serial_date();
 
         // Store the cell data.
         self.store_datetime(row, col, datetime, Some(format))
@@ -2924,7 +2924,7 @@ impl Worksheet {
         col: ColNum,
         datetime: impl IntoExcelDateTime,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let datetime = datetime.to_excel();
+        let datetime = datetime.to_excel_serial_date();
 
         // Store the cell data.
         self.store_datetime(row, col, datetime, None)
@@ -3019,7 +3019,7 @@ impl Worksheet {
         date: impl IntoExcelDateTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let datetime = date.to_excel();
+        let datetime = date.to_excel_serial_date();
 
         // Store the cell data.
         self.store_datetime(row, col, datetime, Some(format))
@@ -3114,7 +3114,7 @@ impl Worksheet {
         time: impl IntoExcelDateTime,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let datetime = time.to_excel();
+        let datetime = time.to_excel_serial_date();
 
         // Store the cell data.
         self.store_datetime(row, col, datetime, Some(format))
@@ -10996,7 +10996,7 @@ impl IntoExcelData for ExcelDateTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = self.to_excel();
+        let number = self.to_excel_serial_date();
         worksheet.store_datetime(row, col, number, None)
     }
 
@@ -11007,7 +11007,7 @@ impl IntoExcelData for ExcelDateTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = self.to_excel();
+        let number = self.to_excel_serial_date();
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }

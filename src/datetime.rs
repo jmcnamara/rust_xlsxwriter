@@ -114,6 +114,7 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 ///
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
 ///
+#[derive(Clone)]
 pub struct ExcelDateTime {
     year: u16,
     month: u8,
@@ -1304,32 +1305,38 @@ enum ExcelDateTimeType {
 pub trait IntoExcelDateTime {
     /// Trait method to convert a date or time into an Excel serial datetime.
     ///
-    fn to_excel(self) -> f64;
+    fn to_excel_serial_date(self) -> f64;
 }
 
 impl IntoExcelDateTime for &ExcelDateTime {
-    fn to_excel(self) -> f64 {
+    fn to_excel_serial_date(self) -> f64 {
+        self.to_excel()
+    }
+}
+
+impl IntoExcelDateTime for ExcelDateTime {
+    fn to_excel_serial_date(self) -> f64 {
         self.to_excel()
     }
 }
 
 #[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveDateTime {
-    fn to_excel(self) -> f64 {
+    fn to_excel_serial_date(self) -> f64 {
         ExcelDateTime::chrono_datetime_to_excel(self)
     }
 }
 
 #[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveDate {
-    fn to_excel(self) -> f64 {
+    fn to_excel_serial_date(self) -> f64 {
         ExcelDateTime::chrono_date_to_excel(*self)
     }
 }
 
 #[cfg(feature = "chrono")]
 impl IntoExcelDateTime for &NaiveTime {
-    fn to_excel(self) -> f64 {
+    fn to_excel_serial_date(self) -> f64 {
         ExcelDateTime::chrono_time_to_excel(*self)
     }
 }
