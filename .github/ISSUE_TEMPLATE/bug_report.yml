@@ -54,10 +54,12 @@ body:
     description: |
       Any relevant version or system information:
     value: |
-        - rust_xlsxwriter version:
+        - `rust_xlsxwriter` version:
+        - Cargo.toml dependency line for `rust_xlsxwriter`:
         - rustc version:
         - Excel version:
         - OS:
+        - If using wasm, which method/tool:
     render: markdown
   validations:
     required: false
