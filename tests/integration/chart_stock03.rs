@@ -7,8 +7,7 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    Chart, ChartLine, ChartMarker, ChartMarkerType, ChartType, ExcelDateTime, Format, Workbook,
-    XlsxError,
+    Chart, ChartLine, ChartMarker, ChartType, ExcelDateTime, Format, Workbook, XlsxError,
 };
 
 // Create rust_xlsxwriter file to compare against Excel file.
@@ -20,6 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_width(1, 11)?;
     worksheet.set_column_width(2, 11)?;
     worksheet.set_column_width(3, 11)?;
+    worksheet.set_column_width(4, 11)?;
 
     let date_format = Format::new().set_num_format_index(14);
 
@@ -31,17 +31,19 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         ExcelDateTime::parse_from_str("2007-01-04")?,
         ExcelDateTime::parse_from_str("2007-01-05")?,
     ];
+    let open = [23.49, 19.55, 15.12, 17.84, 16.34];
     let high = [27.2, 25.03, 19.05, 20.34, 18.5];
     let low = [23.49, 19.55, 15.12, 17.84, 16.34];
     let close = [25.45, 23.05, 17.32, 20.45, 17.34];
 
     worksheet.write_column_with_format(0, 0, dates, &date_format)?;
-    worksheet.write_column(0, 1, high)?;
-    worksheet.write_column(0, 2, low)?;
-    worksheet.write_column(0, 3, close)?;
+    worksheet.write_column(0, 1, open)?;
+    worksheet.write_column(0, 2, high)?;
+    worksheet.write_column(0, 3, low)?;
+    worksheet.write_column(0, 4, close)?;
 
     let mut chart = Chart::new(ChartType::Stock);
-    chart.set_axis_ids(40522880, 40524416);
+    chart.set_axis_ids(53202304, 66693376);
 
     chart
         .add_series()
@@ -62,16 +64,17 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 3, 4, 3))
         .set_format(ChartLine::new().set_width(2.25).set_hidden(true))
-        .set_marker(
-            ChartMarker::new()
-                .set_type(ChartMarkerType::ShortDash)
-                .set_size(3),
-        );
+        .set_marker(ChartMarker::new().set_none());
+
+    chart
+        .add_series()
+        .set_categories(("Sheet1", 0, 0, 4, 0))
+        .set_values(("Sheet1", 0, 4, 4, 4))
+        .set_format(ChartLine::new().set_width(2.25).set_hidden(true))
+        .set_marker(ChartMarker::new().set_none());
 
     chart.set_high_low_lines(true);
-
-    // The following is implicit. Adding for additional testing.
-    chart.x_axis().set_date_axis(true);
+    chart.set_up_down_bars(true);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -81,9 +84,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_stock01() {
+fn test_chart_stock03() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_stock01")
+        .set_name("chart_stock03")
         .set_function(create_new_xlsx_file)
         .initialize();
 
