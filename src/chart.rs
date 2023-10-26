@@ -7707,12 +7707,12 @@ pub enum ChartMarkerType {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_star.png">
     Star,
 
-    /// Short dash marker type.
+    /// Short dash marker type. This is also called `dot` in some Excel versions.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_short_dash.png">
     ShortDash,
 
-    /// Long dash marker type.
+    /// Long dash marker type. This is also called `dash` in some Excel versions.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_long_dash.png">
     LongDash,
@@ -7726,30 +7726,21 @@ pub enum ChartMarkerType {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_marker_type_plus_sign.png">
     PlusSign,
-
-    /// Todo
-    Dot,
-
-    /// Todo
-    Dash,
-
-    /// Todo
-    None,
 }
 
 impl fmt::Display for ChartMarkerType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ChartMarkerType::X => write!(f, "x"),
-            ChartMarkerType::None => write!(f, "none"),
+            //ChartMarkerType::None => write!(f, "none"),
             ChartMarkerType::Star => write!(f, "star"),
             ChartMarkerType::Circle => write!(f, "circle"),
             ChartMarkerType::Square => write!(f, "square"),
             ChartMarkerType::Diamond => write!(f, "diamond"),
+            ChartMarkerType::LongDash => write!(f, "dash"),
             ChartMarkerType::PlusSign => write!(f, "plus"),
             ChartMarkerType::Triangle => write!(f, "triangle"),
-            ChartMarkerType::Dot | ChartMarkerType::ShortDash => write!(f, "dot"),
-            ChartMarkerType::Dash | ChartMarkerType::LongDash => write!(f, "dash"),
+            ChartMarkerType::ShortDash => write!(f, "dot"),
         }
     }
 }

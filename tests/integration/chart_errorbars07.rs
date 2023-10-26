@@ -66,7 +66,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_format(ChartLine::new().set_width(2.25).set_hidden(true))
         .set_marker(
             ChartMarker::new()
-                .set_type(ChartMarkerType::Dot)
+                .set_type(ChartMarkerType::ShortDash)
                 .set_size(3),
         )
         .set_y_error_bars(ChartErrorBars::new().set_type(ChartErrorBarsType::StandardError));
