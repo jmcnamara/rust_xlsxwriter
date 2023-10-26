@@ -7731,6 +7731,9 @@ pub enum ChartMarkerType {
     Dot,
 
     /// Todo
+    Dash,
+
+    /// Todo
     None,
 }
 
@@ -7738,7 +7741,6 @@ impl fmt::Display for ChartMarkerType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ChartMarkerType::X => write!(f, "x"),
-            ChartMarkerType::Dot => write!(f, "dot"),
             ChartMarkerType::None => write!(f, "none"),
             ChartMarkerType::Star => write!(f, "star"),
             ChartMarkerType::Circle => write!(f, "circle"),
@@ -7746,8 +7748,8 @@ impl fmt::Display for ChartMarkerType {
             ChartMarkerType::Diamond => write!(f, "diamond"),
             ChartMarkerType::PlusSign => write!(f, "plus"),
             ChartMarkerType::Triangle => write!(f, "triangle"),
-            ChartMarkerType::LongDash => write!(f, "long_dash"),
-            ChartMarkerType::ShortDash => write!(f, "short_dash"),
+            ChartMarkerType::Dot | ChartMarkerType::ShortDash => write!(f, "dot"),
+            ChartMarkerType::Dash | ChartMarkerType::LongDash => write!(f, "dash"),
         }
     }
 }
