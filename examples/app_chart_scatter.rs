@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! an example of creating scatter charts using the rust_xlsxwriter library.
+//! An example of creating scatter charts using the rust_xlsxwriter library.
 
 use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
 

@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! an example of setting the chart series gap and overlap. Note that it only
+//! An example of setting the chart series gap and overlap. Note that it only
 //! needs to be applied to one of the series in the chart.
 
 use rust_xlsxwriter::*;
