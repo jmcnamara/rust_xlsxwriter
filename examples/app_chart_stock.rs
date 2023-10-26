@@ -142,7 +142,7 @@ fn main() -> Result<(), XlsxError> {
     chart.set_high_low_lines(true);
 
     // Add a chart title and some axis labels.
-    chart.title().set_name("Stock Chart: High - Low - Close");
+    chart.title().set_name("Stock: High - Low - Close");
     chart.x_axis().set_name("Date");
     chart.y_axis().set_name("Stock Price");
 
@@ -153,7 +153,76 @@ fn main() -> Result<(), XlsxError> {
     chart.legend().set_hidden();
 
     // Insert the chart into the worksheet.
-    worksheet.insert_chart_with_offset(header_row, close_col + 1, &chart, 25, 10)?;
+    worksheet.insert_chart_with_offset(start_row, close_col + 1, &chart, 20, 10)?;
+
+    // -----------------------------------------------------------------------
+    // Create a new Open-High-Low-Close Stock chart.
+    //
+    // To create a chart similar to a default Excel Open-High-Low-Close Stock
+    // chart you need to do the following steps:
+    //
+    // 1. Create a `Stock` type chart.
+    // 2. Add 4 series for Open, High, Low and Close, in that order.
+    // 3. Hide the default lines in all 4 series.
+    // 4. Turn on the chart High-Low bars.
+    // 5. Turn on the chart Up-Down bars.
+    // 6. Format any other chart or axis property you need.
+    //
+    let mut chart = Chart::new(ChartType::Stock);
+
+    // Add the Open series.
+    chart
+        .add_series()
+        .set_categories(("Sheet1", start_row, date_col, end_row, date_col))
+        .set_values(("Sheet1", start_row, open_col, end_row, open_col))
+        .set_format(ChartLine::new().set_hidden(true))
+        .set_marker(ChartMarker::new().set_none());
+
+    // Add the High series.
+    chart
+        .add_series()
+        .set_categories(("Sheet1", start_row, date_col, end_row, date_col))
+        .set_values(("Sheet1", start_row, high_col, end_row, high_col))
+        .set_format(ChartLine::new().set_hidden(true))
+        .set_marker(ChartMarker::new().set_none());
+
+    // Add the Low series.
+    chart
+        .add_series()
+        .set_categories(("Sheet1", start_row, date_col, end_row, date_col))
+        .set_values(("Sheet1", start_row, low_col, end_row, low_col))
+        .set_format(ChartLine::new().set_hidden(true))
+        .set_marker(ChartMarker::new().set_none());
+
+    // Add the Close series.
+    chart
+        .add_series()
+        .set_categories(("Sheet1", start_row, date_col, end_row, date_col))
+        .set_values(("Sheet1", start_row, close_col, end_row, close_col))
+        .set_format(ChartLine::new().set_hidden(true))
+        .set_marker(ChartMarker::new().set_none());
+
+    // Set the High-Low lines.
+    chart.set_high_low_lines(true);
+
+    // Turn on and format the Up-Down bars.
+    chart.set_up_down_bars(true);
+    chart.set_up_bar_format(ChartSolidFill::new().set_color("#C6EFCE"));
+    chart.set_down_bar_format(ChartSolidFill::new().set_color("#FFC7CE"));
+
+    // Add a chart title and some axis labels.
+    chart.title().set_name("Stock: Open - High - Low - Close");
+    chart.x_axis().set_name("Date");
+    chart.y_axis().set_name("Stock Price");
+
+    // Format the price axis number format.
+    chart.y_axis().set_num_format("[$$-en-US]#,##0");
+
+    // Turn off the chart legend.
+    chart.legend().set_hidden();
+
+    // Insert the chart into the worksheet.
+    worksheet.insert_chart_with_offset(start_row + 16, close_col + 1, &chart, 20, 10)?;
 
     // -----------------------------------------------------------------------
     // Save and close the file.
