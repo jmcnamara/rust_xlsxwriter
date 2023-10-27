@@ -1584,9 +1584,7 @@ impl TableColumn {
     /// - Sum
     /// - Standard Deviation
     /// - Variance
-    ///
-    /// Excel also supports custom functions. These aren't currently supported
-    /// by `rust_xlsxwriter` but will be added in an upcoming release.
+    /// - Custom - User defined function or formula
     ///
     /// Note, overwriting the total row cells with `worksheet.write()` calls
     /// will cause Excel to warn that the table is corrupt when loading the

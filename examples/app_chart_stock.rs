@@ -207,8 +207,8 @@ fn main() -> Result<(), XlsxError> {
 
     // Turn on and format the Up-Down bars.
     chart.set_up_down_bars(true);
-    chart.set_up_bar_format(ChartSolidFill::new().set_color("#C6EFCE"));
-    chart.set_down_bar_format(ChartSolidFill::new().set_color("#FFC7CE"));
+    chart.set_up_bar_format(ChartSolidFill::new().set_color("#009933"));
+    chart.set_down_bar_format(ChartSolidFill::new().set_color("#FF5050"));
 
     // Add a chart title and some axis labels.
     chart.title().set_name("Stock: Open - High - Low - Close");

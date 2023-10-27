@@ -43,7 +43,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 9, 0))
         .set_values(("Sheet1", 0, 1, 9, 1));
 
-    chart.x_axis().set_num_format_linked("dd/mm/yyyy", true);
+    chart.x_axis().set_num_format("dd/mm/yyyy");
+    chart.x_axis().set_num_format_linked_to_source(true);
     chart.x_axis().set_text_axis(true);
 
     worksheet.insert_chart(8, 4, &chart)?;

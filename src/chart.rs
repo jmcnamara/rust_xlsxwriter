@@ -108,8 +108,8 @@ use crate::{
 ///
 /// Date category axes are a special type of category axis that give them some
 /// of the properties of values axes such as `min` and `max` when used with date
-/// or time values. These aren't currently supported but will be in a future
-/// release.
+/// or time values. Date axes are used in Stock charts or if you use the
+/// [`ChartAxis::set_date_axis()`] method.
 ///
 pub struct Chart {
     pub(crate) id: u32,
@@ -1086,8 +1086,7 @@ impl Chart {
     /// Set Up-Down bar indicators for a Line chart.
     ///
     /// Set Up-Down bar indicator to indicate change between two or more series.
-    /// In Excel these can only be added to Line charts (and Stock charts which
-    /// aren't currently supported in `rust_xlsxwriter`).
+    /// In Excel these can only be added to Line and Stock charts.
     ///
     /// # Parameters
     ///
@@ -1250,9 +1249,8 @@ impl Chart {
     /// Set High-Low lines for a Line chart.
     ///
     /// Set High-Low lines for a Line chart to indicate the high and low values
-    /// between two or more series. In Excel these can only be added to Line
-    /// charts (and Stock charts which aren't currently supported in
-    /// `rust_xlsxwriter`).
+    /// between two or more series. In Excel these can only be added to Line and
+    /// Stock charts.
     ///
     /// # Parameters
     ///
@@ -1394,9 +1392,8 @@ impl Chart {
     /// Set drop lines for a chart.
     ///
     /// Set drop lines for a chart between the maximum value and the associated
-    /// category value. In Excel these can only be added to Line and Area charts
-    /// (and Stock charts which aren't currently supported in
-    /// `rust_xlsxwriter`).
+    /// category value. In Excel these can only be added to Line, Area and Stock
+    /// charts.
     ///
     /// # Parameters
     ///
@@ -2932,7 +2929,7 @@ impl Chart {
         if !self.x_axis.num_format.is_empty() {
             self.write_number_format(
                 &self.x_axis.num_format.clone(),
-                self.x_axis.num_format_source_linked,
+                self.x_axis.num_format_linked_to_source,
             );
         } else if self.category_has_num_format {
             self.write_number_format("General", true);
@@ -3021,7 +3018,7 @@ impl Chart {
         if !self.x_axis.num_format.is_empty() {
             self.write_number_format(
                 &self.x_axis.num_format.clone(),
-                self.x_axis.num_format_source_linked,
+                self.x_axis.num_format_linked_to_source,
             );
         } else if self.category_has_num_format {
             self.write_number_format("dd/mm/yyyy", true);
@@ -3127,7 +3124,7 @@ impl Chart {
         } else {
             self.write_number_format(
                 &self.y_axis.num_format.clone(),
-                self.y_axis.num_format_source_linked,
+                self.y_axis.num_format_linked_to_source,
             );
         }
 
@@ -3209,7 +3206,7 @@ impl Chart {
         } else {
             self.write_number_format(
                 &self.x_axis.num_format.clone(),
-                self.x_axis.num_format_source_linked,
+                self.x_axis.num_format_linked_to_source,
             );
         }
 
@@ -6996,8 +6993,6 @@ impl ChartRangeCacheData {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-
-/// Todo
 pub(crate) enum ChartRangeCacheDataType {
     None,
     String,
@@ -7134,7 +7129,10 @@ pub enum ChartType {
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_scatter_smooth_with_markers.png">
     ScatterSmoothWithMarkers,
 
-    /// TODO
+    /// A Stock chart showing Open-High-Low-Close data. It is also possible to
+    /// show High-Low-Close data.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_type_stock.png">
     Stock,
 }
 
@@ -8904,7 +8902,7 @@ pub struct ChartAxis {
     pub(crate) format: ChartFormat,
     pub(crate) font: Option<ChartFont>,
     pub(crate) num_format: String,
-    pub(crate) num_format_source_linked: bool,
+    pub(crate) num_format_linked_to_source: bool,
     pub(crate) reverse: bool,
     pub(crate) is_hidden: bool,
     pub(crate) is_text_axis: bool,
@@ -8936,7 +8934,7 @@ impl ChartAxis {
             format: ChartFormat::new(),
             font: None,
             num_format: String::new(),
-            num_format_source_linked: false,
+            num_format_linked_to_source: false,
             reverse: false,
             is_hidden: false,
             is_text_axis: false,
@@ -9296,14 +9294,20 @@ impl ChartAxis {
         self
     }
 
-    /// TODO
-    pub fn set_num_format_linked(
+    /// Link the number format to worksheet cell changes.
+    ///
+    /// Link the number format to format changes in the worksheet cells that the
+    /// chart axis refers to.
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default for X axes.
+    ///
+    #[doc(hidden)] // Currently only required for testing.
+    pub fn set_num_format_linked_to_source(
         &mut self,
-        num_format: impl Into<String>,
         source_linked: bool,
     ) -> &mut ChartAxis {
-        self.num_format = num_format.into();
-        self.num_format_source_linked = source_linked;
+        self.num_format_linked_to_source = source_linked;
         self
     }
 
@@ -9384,11 +9388,13 @@ impl ChartAxis {
     ///
     /// Set the maximum bound to be displayed for an axis.
     ///
-    /// Note, Excel only supports maximum/minimum values for "Value" axes. In
-    /// general you cannot set a maximum or minimum value for a X/Category axis
-    /// even if the category values are numbers. See [Chart Value and Category
-    /// Axes] for an explanation of the difference between Value and Category
-    /// axes in Excel.
+    /// Maximum and minimum chart axis values can only be set for chart "Value"
+    /// axes and "Category Date" axes in Excel. You cannot set a maximum or
+    /// minimum value for "Category" axes even if the category values are
+    /// numbers. See [Chart Value and Category Axes] for an explanation of the
+    /// difference between Value and Category axes in Excel.
+    ///
+    /// See also [`ChartAxis::set_max_date()`] below.
     ///
     /// [Chart Value and Category Axes]:
     ///     struct.Chart.html#chart-value-and-category-axes
@@ -9442,7 +9448,8 @@ impl ChartAxis {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_max.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_max.png">
     ///
     pub fn set_max<T>(&mut self, max: T) -> &mut ChartAxis
     where
@@ -9456,7 +9463,7 @@ impl ChartAxis {
     ///
     /// Set the minimum bound to be displayed for an axis.
     ///
-    /// See [`ChartAxis::set_min()`] above for a full explanation and example.
+    /// See [`ChartAxis::set_max()`] above for a full explanation and example.
     ///
     /// # Parameters
     ///
@@ -9470,13 +9477,31 @@ impl ChartAxis {
         self
     }
 
-    /// TODO
+    /// Set the maximum date value for an axis.
+    ///
+    /// Set the maximum date/time bound to be displayed for an axis. This is
+    /// just a syntactic helper around [`ChartAxis::set_max()`] to allow dates
+    /// that support the [`IntoExcelDateTime`] trait to be passed to the API.
+    ///
+    /// # Parameters
+    ///
+    /// `datetime` - A date/time instance that implements [`IntoExcelDateTime`].
+    ///
     pub fn set_max_date(&mut self, datetime: impl IntoExcelDateTime) -> &mut ChartAxis {
         self.max = datetime.to_excel_serial_date().to_string();
         self
     }
 
-    /// TODO
+    /// Set the minimum date value for an axis.
+    ///
+    /// Set the minimum date/time bound to be displayed for an axis. This is
+    /// just a syntactic helper around [`ChartAxis::set_min()`] to allow dates
+    /// that support the [`IntoExcelDateTime`] trait to be passed to the API.
+    ///
+    /// # Parameters
+    ///
+    /// `datetime` - A date/time instance that implements [`IntoExcelDateTime`].
+    ///
     pub fn set_min_date(&mut self, datetime: impl IntoExcelDateTime) -> &mut ChartAxis {
         self.min = datetime.to_excel_serial_date().to_string();
         self
@@ -9495,8 +9520,6 @@ impl ChartAxis {
     /// # Parameters
     ///
     /// `value` - The major unit for the axes.
-    ///
-    ///
     ///
     /// # Examples
     ///
