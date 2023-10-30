@@ -120,8 +120,9 @@ frequently.
 
 Recent changes:
 
-- Added chart trendlines, error bars and gradient fills.
-- Added custom functions to table totals.
+- Added stock chart support.
+- Added chart date axes, trendlines, error bars, up-down bars, high-low bars,
+  drop-lines and gradient fills.
 - Added Wasm and Polars feature flags for compatibility.
 
 See the full [Release Notes and Changelog].

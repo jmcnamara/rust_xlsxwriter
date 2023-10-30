@@ -58,7 +58,8 @@ documentation and generally show how an individual function works.
   rust_xlsxwriter library.
 
 * `app_chart_stock.rs` - An example of creating Stock charts using the
-  rust_xlsxwriter library.
+  rust_xlsxwriter library. Note, Volume variants of the Excel stock charts
+  aren't currently supported but will be in a future release.
 
 * `app_chart_styles.rs` - An example showing all 48 default chart styles
   available in Excel 2007 using rust_xlsxwriter. Note, these styles are not

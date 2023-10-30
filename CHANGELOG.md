@@ -6,19 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [0.53.0] - 2023-10-XX
+## [0.53.0] - 2023-10-30
 
 ### Added
 
-- Added support for to charts for:
+- Added support for Excel Stock charts. See the [Stock Chart] cookbook example.
+
+- Added support to charts for:
   - Up-Down bars via the [`Chart::set_up_down_bars()`] struct and methods.
   - High-Low lines via the [`Chart::set_high_low_lines()`] struct and methods.
   - Drop lines via the [`Chart::set_high_low_lines()`] struct and methods.
+  - Chart axis support for Date, Text and Automatic axes via the
+    [`ChartAxis::set_date_axis()`], [`ChartAxis::set_text_axis()`]
+    and[`ChartAxis::set_automatic_axis()`] methods.
+  - Chart axis support for minimum and maximum date values via the
+    [`ChartAxis::set_min_date()`] and [`ChartAxis::set_max_date()`] methods.
+
+- Add worksheet syntactic helper methods
+  [`Worksheet::write_row_with_formatting()`] and
+  [`Worksheet::write_column_with_formatting()`].
 
 [`Chart::set_drop_lines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_drop_lines
 [`Chart::set_up_down_bars()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_up_down_bars
 [`Chart::set_high_low_lines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_high_low_lines
 
+[`ChartAxis::set_date_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_date_axis
+[`ChartAxis::set_text_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_text_axis
+[`ChartAxis::set_automatic_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_automatic_axis
+
+[`ChartAxis::set_min_date()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_min_date
+[`ChartAxis::set_max_date()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_max_date
+
+[`Worksheet::write_row_with_formatting()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_row_with_formatting
+[`Worksheet::write_column_with_formatting()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_column_with_formatting
+
+
+[Stock Chart]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#chart-pie-excel-stock-chart-example
 
 ## [0.52.0] - 2023-10-20
 
