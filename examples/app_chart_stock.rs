@@ -3,6 +3,9 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! An example of creating Stock charts using the rust_xlsxwriter library.
+//!
+//! Note, Volume variants of the Excel stock charts aren't currently supported
+//! but will be in a future release.
 
 use rust_xlsxwriter::{
     Chart, ChartFormat, ChartLine, ChartMarker, ChartMarkerType, ChartSolidFill, ChartType,
@@ -59,9 +62,8 @@ fn main() -> Result<(), XlsxError> {
     ];
 
     // -----------------------------------------------------------------------
-    // Define variables so that chart can change dynamically with the data.
+    // Define variables so that the chart can change dynamically with the data.
     //
-
     let header_row = 0;
     let start_row = header_row + 1;
     let end_row = start_row + (dates.len() as u32) - 1;

@@ -7146,6 +7146,9 @@ pub enum ChartType {
     /// A Stock chart showing Open-High-Low-Close data. It is also possible to
     /// show High-Low-Close data.
     ///
+    /// Note, Volume variants of the Excel stock charts aren't currently
+    /// supported but will be in a future release.
+    ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_type_stock.png">
     Stock,
 }
