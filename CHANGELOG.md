@@ -23,8 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [`ChartAxis::set_min_date()`] and [`ChartAxis::set_max_date()`] methods.
 
 - Add worksheet syntactic helper methods
-  [`Worksheet::write_row_with_formatting()`] and
-  [`Worksheet::write_column_with_formatting()`].
+  [`Worksheet::write_row_with_format()`] and
+  [`Worksheet::write_column_with_format()`].
 
 [`Chart::set_drop_lines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_drop_lines
 [`Chart::set_up_down_bars()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_up_down_bars
@@ -37,11 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`ChartAxis::set_min_date()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_min_date
 [`ChartAxis::set_max_date()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_max_date
 
-[`Worksheet::write_row_with_formatting()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_row_with_formatting
-[`Worksheet::write_column_with_formatting()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_column_with_formatting
+[`Worksheet::write_row_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_row_with_format
+[`Worksheet::write_column_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_column_with_format
 
 
-[Stock Chart]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#chart-pie-excel-stock-chart-example
+[Stock Chart]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#chart-stock-excel-stock-chart-example
 
 ## [0.52.0] - 2023-10-20
 
