@@ -45,6 +45,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     chart.x_axis().set_date_axis(true);
 
+    // Turn automatic axis on to match test case.
+    chart.x_axis().set_automatic_axis(true);
+
     worksheet.insert_chart(8, 4, &chart)?;
 
     workbook.save(filename)?;

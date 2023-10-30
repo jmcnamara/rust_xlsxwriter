@@ -43,13 +43,17 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 9, 0))
         .set_values(("Sheet1", 0, 1, 9, 1));
 
-    chart.x_axis().set_date_axis(true);
     chart
         .x_axis()
         .set_min_date(ExcelDateTime::parse_from_str("2013-01-02")?);
     chart
         .x_axis()
         .set_max_date(ExcelDateTime::parse_from_str("2013-01-09")?);
+
+    chart.x_axis().set_date_axis(true);
+
+    // Turn automatic axis on to match test case.
+    chart.x_axis().set_automatic_axis(true);
 
     worksheet.insert_chart(8, 4, &chart)?;
 

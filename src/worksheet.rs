@@ -752,11 +752,29 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// Todo
+    /// Write an array like data structure as a row of data to a worksheet, with
+    /// formatting.
+    ///
+    /// This method is similar to [`Worksheet::write_row()`] except you can also
+    /// specify a format for the data.
+    ///
+    /// See [`Worksheet::write_row()`] above for details.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data` - Arrays or array-like data structures that implement
+    ///   [`IntoIterator`] and that contain a data type that implements
+    ///   [`IntoExcelData`].
+    /// * `format` - The [`Format`] property for the data.
     ///
     /// # Errors
     ///
-    /// Todo
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
     ///
     pub fn write_row_with_format<I>(
         &mut self,
@@ -858,11 +876,29 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// Todo
+    /// Write an array like data structure as a column of data to a worksheet, with
+    /// formatting.
+    ///
+    /// This method is similar to [`Worksheet::write_column()`] except you can also
+    /// specify a format for the data.
+    ///
+    /// See [`Worksheet::write_column()`] above for details.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data` - Arrays or array-like data structures that implement
+    ///   [`IntoIterator`] and that contain a data type that implements
+    ///   [`IntoExcelData`].
+    /// * `format` - The [`Format`] property for the data.
     ///
     /// # Errors
     ///
-    /// Todo
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
     ///
     pub fn write_column_with_format<I>(
         &mut self,

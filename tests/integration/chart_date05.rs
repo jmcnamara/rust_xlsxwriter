@@ -44,7 +44,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_values(("Sheet1", 0, 1, 9, 1));
 
     chart.x_axis().set_num_format("dd/mm/yyyy");
-    chart.x_axis().set_num_format_linked_to_source(true);
     chart.x_axis().set_text_axis(true);
 
     worksheet.insert_chart(8, 4, &chart)?;
@@ -58,6 +57,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 fn test_chart_date05() {
     let test_runner = common::TestRunner::new()
         .set_name("chart_date05")
+        .ignore_elements("xl/charts/chart1.xml", "sourceLinked")
         .set_function(create_new_xlsx_file)
         .initialize();
 

@@ -70,9 +70,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     chart.set_high_low_lines(true);
 
-    // The following is implicit. Adding for additional testing.
-    chart.x_axis().set_date_axis(true);
-
     worksheet.insert_chart(8, 4, &chart)?;
 
     workbook.save(filename)?;

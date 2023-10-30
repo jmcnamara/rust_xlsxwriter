@@ -24,37 +24,40 @@ documentation and generally show how an individual function works.
 * `app_chart.rs` - A simple chart example using the rust_xlsxwriter
   library.
 
-* `app_chart_area.rs` - an example of creating area charts using the
+* `app_chart_area.rs` - An example of creating area charts using the
   rust_xlsxwriter library.
 
-* `app_chart_bar.rs` - an example of creating bar charts using the
+* `app_chart_bar.rs` - An example of creating bar charts using the
   rust_xlsxwriter library.
 
-* `app_chart_column.rs` - an example of creating column charts using the
+* `app_chart_column.rs` - An example of creating column charts using the
   rust_xlsxwriter library.
 
 * `app_chart_data_tools.rs` - A demo of the various Excel chart data tools
   that are available via the rust_xlsxwriter library.
 
-* `app_chart_doughnut.rs` - an example of creating doughnut charts using
+* `app_chart_doughnut.rs` - An example of creating doughnut charts using
   the rust_xlsxwriter library.
 
 * `app_chart_gradient.rs` - An example of creating a chart with gradient
   fills using the rust_xlsxwriter library.
 
-* `app_chart_line.rs` - an example of creating line charts using the
+* `app_chart_line.rs` - An example of creating line charts using the
   rust_xlsxwriter library.
 
-* `app_chart_pattern.rs` - an example of creating column charts with fill
+* `app_chart_pattern.rs` - An example of creating column charts with fill
   patterns using the rust_xlsxwriter library.
 
-* `app_chart_pie.rs` - an example of creating pie charts using the
+* `app_chart_pie.rs` - An example of creating pie charts using the
   rust_xlsxwriter library.
 
-* `app_chart_radar.rs` - an example of creating radar charts using the
+* `app_chart_radar.rs` - An example of creating radar charts using the
   rust_xlsxwriter library.
 
-* `app_chart_scatter.rs` - an example of creating scatter charts using the
+* `app_chart_scatter.rs` - An example of creating scatter charts using the
+  rust_xlsxwriter library.
+
+* `app_chart_stock.rs` - An example of creating Stock charts using the
   rust_xlsxwriter library.
 
 * `app_chart_styles.rs` - An example showing all 48 default chart styles
@@ -169,6 +172,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_add_series.rs` - An example of creating a chart series via
   [`chart.add_series()`](Chart::add_series).
 
+* `doc_chart_axis_set_date_axis.rs` - A chart example demonstrating setting
+  a date axis for a chart.
+
 * `doc_chart_axis_set_hidden.rs` - A chart example demonstrating hiding the
   chart axes.
 
@@ -195,6 +201,9 @@ documentation and generally show how an individual function works.
 
 * `doc_chart_axis_set_max.rs` - A chart example demonstrating setting the
   axes bounds for chart axes.
+
+* `doc_chart_axis_set_max_date.rs` - A chart example demonstrating setting
+  a date axis for a chart.
 
 * `doc_chart_axis_set_minor_gridlines.rs` - A chart example demonstrating
   turning on the minor gridlines for chart axes.
@@ -373,7 +382,7 @@ documentation and generally show how an individual function works.
 * `doc_chart_series_set_name.rs` - A chart example demonstrating setting
   the chart series name.
 
-* `doc_chart_series_set_overlap.rs` - an example of setting the chart
+* `doc_chart_series_set_overlap.rs` - An example of setting the chart
   series gap and overlap. Note that it only needs to be applied to one of
   the series in the chart.
 

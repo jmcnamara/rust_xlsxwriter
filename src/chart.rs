@@ -390,6 +390,17 @@ impl Chart {
         Self::new(ChartType::Scatter)
     }
 
+    /// Create a new Stock `Chart`.
+    ///
+    /// This is a syntactic shortcut for `Chart::new(ChartType::Stock)` to
+    /// create a default Stock chart.
+    ///
+    /// See [`Chart::new()`] for further details.
+    ///
+    pub fn new_stock() -> Chart {
+        Self::new(ChartType::Stock)
+    }
+
     /// Create and add a new chart series to a chart.
     ///
     /// Create and add a new chart series to a chart. The chart series
@@ -2056,6 +2067,7 @@ impl Chart {
     fn initialize_stock_chart(mut self) -> Chart {
         self.x_axis.axis_type = ChartAxisType::Date;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
+        self.x_axis.automatic = true;
 
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
@@ -2964,8 +2976,8 @@ impl Chart {
         // Write the c:crosses element.
         self.write_crosses();
 
-        if !self.x_axis.is_text_axis {
-            // Write the c:auto element.
+        // Write the c:auto element.
+        if !self.x_axis.automatic {
             self.write_auto();
         }
 
@@ -3054,7 +3066,9 @@ impl Chart {
         self.write_crosses();
 
         // Write the c:auto element.
-        self.write_auto();
+        if self.x_axis.automatic {
+            self.write_auto();
+        }
 
         // Write the c:lblOffset element.
         self.write_lbl_offset();
@@ -8905,7 +8919,7 @@ pub struct ChartAxis {
     pub(crate) num_format_linked_to_source: bool,
     pub(crate) reverse: bool,
     pub(crate) is_hidden: bool,
-    pub(crate) is_text_axis: bool,
+    pub(crate) automatic: bool,
     pub(crate) position_between_ticks: bool,
     pub(crate) max: String,
     pub(crate) min: String,
@@ -8937,7 +8951,7 @@ impl ChartAxis {
             num_format_linked_to_source: false,
             reverse: false,
             is_hidden: false,
-            is_text_axis: false,
+            automatic: false,
             position_between_ticks: true,
             max: String::new(),
             min: String::new(),
@@ -9294,24 +9308,88 @@ impl ChartAxis {
         self
     }
 
-    /// Link the number format to worksheet cell changes.
+    /// Set the category axis as a date axis.
     ///
-    /// Link the number format to format changes in the worksheet cells that the
-    /// chart axis refers to.
+    /// In general the "Category" axis (usually the X-axis) in Excel charts is
+    /// made up of evenly spaced categories. This type of axis doesn't support
+    /// features such as maximum and minimum even if the categories are numbers.
+    /// The two exceptions to this are the "Value" axes used in Scatter charts
+    /// and "Date" axes. Date axes are a combination of "Category" and "Value"
+    /// axes and they support features of both types of axes.
+    ///
+    /// In order to have a date axes in your chart you need to have a range of
+    /// Date/Time values in a worksheet that the
+    /// [`ChartSeries::set_categories()`] refer to. You can then use the
+    /// `set_date_axis()` method turns on the "date axis" property for a chart
+    /// axis.
+    ///
+    /// See [Chart Value and Category Axes] for an explanation of the
+    /// difference between Value and Category axes in Excel.
+    ///
+    /// [Chart Value and Category Axes]:
+    ///     struct.Chart.html#chart-value-and-category-axes
+    ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default for X axes.
+    /// * `enable` - Turn the property on/off. It is off by default.
     ///
-    #[doc(hidden)] // Currently only required for testing.
-    pub fn set_num_format_linked_to_source(
-        &mut self,
-        source_linked: bool,
-    ) -> &mut ChartAxis {
-        self.num_format_linked_to_source = source_linked;
-        self
-    }
-
-    /// TODO
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting a date axis for a chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_date_axis.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     let date_format = Format::new().set_num_format("yyyy-mm-dd");
+    /// #
+    /// #     // Adjust the date column width for clarity.
+    /// #     worksheet.set_column_width(0, 11)?;
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let dates = [
+    /// #         ExcelDateTime::parse_from_str("2024-01-01")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-02")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-03")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-04")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-05")?,
+    /// #     ];
+    /// #     let values = [27.2, 25.03, 19.05, 20.34, 18.5];
+    /// #
+    /// #     worksheet.write_column_with_format(0, 0, dates, &date_format)?;
+    /// #     worksheet.write_column(0, 1, values)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 4, 0))
+    ///         .set_values(("Sheet1", 0, 1, 4, 1));
+    ///
+    ///     // Set the axis as a date axis.
+    ///     chart.x_axis().set_date_axis(true);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 3, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_date_axis.png">
+    ///
+    ///
     pub fn set_date_axis(&mut self, enable: bool) -> &mut ChartAxis {
         if enable {
             self.axis_type = ChartAxisType::Date;
@@ -9319,13 +9397,30 @@ impl ChartAxis {
             self.axis_type = ChartAxisType::Category;
         }
 
+        self.automatic = !enable;
+
         self
     }
 
-    /// TODO
+    /// Set the category axis as a text axis.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
     pub fn set_text_axis(&mut self, enable: bool) -> &mut ChartAxis {
-        self.is_text_axis = enable;
+        self.set_automatic_axis(enable);
+        self
+    }
 
+    /// Set the category axis as an automatic axis - generally the default.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_automatic_axis(&mut self, enable: bool) -> &mut ChartAxis {
+        self.automatic = enable;
         self
     }
 
@@ -9477,9 +9572,9 @@ impl ChartAxis {
         self
     }
 
-    /// Set the maximum date value for an axis.
+    /// Set the maximum date value for a date axis.
     ///
-    /// Set the maximum date/time bound to be displayed for an axis. This is
+    /// Set the maximum date/time bound to be displayed for a date axis. This is
     /// just a syntactic helper around [`ChartAxis::set_max()`] to allow dates
     /// that support the [`IntoExcelDateTime`] trait to be passed to the API.
     ///
@@ -9487,14 +9582,79 @@ impl ChartAxis {
     ///
     /// `datetime` - A date/time instance that implements [`IntoExcelDateTime`].
     ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting a date axis for a chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_max_date.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, ExcelDateTime, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #     let date_format = Format::new().set_num_format("yyyy-mm-dd");
+    /// #
+    /// #     // Adjust the date column width for clarity.
+    /// #     worksheet.set_column_width(0, 11)?;
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let dates = [
+    /// #         ExcelDateTime::parse_from_str("2024-01-01")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-02")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-03")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-04")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-05")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-06")?,
+    /// #         ExcelDateTime::parse_from_str("2024-01-07")?,
+    /// #     ];
+    /// #     let values = [27, 25, 19, 20, 18, 15, 19];
+    /// #
+    /// #     worksheet.write_column_with_format(0, 0, dates, &date_format)?;
+    /// #     worksheet.write_column(0, 1, values)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories(("Sheet1", 0, 0, 6, 0))
+    ///         .set_values(("Sheet1", 0, 1, 6, 1));
+    ///
+    ///     // Set the axis as a date axis.
+    ///     chart.x_axis().set_date_axis(true);
+    ///
+    ///     // Set the min and max date values for the chart.
+    ///     let min_date = ExcelDateTime::parse_from_str("2024-01-02")?;
+    ///     let max_date = ExcelDateTime::parse_from_str("2024-01-06")?;
+    ///
+    ///     chart.x_axis().set_min_date(min_date);
+    ///     chart.x_axis().set_max_date(max_date);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 3, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_max_date.png">
+    ///
     pub fn set_max_date(&mut self, datetime: impl IntoExcelDateTime) -> &mut ChartAxis {
         self.max = datetime.to_excel_serial_date().to_string();
         self
     }
 
-    /// Set the minimum date value for an axis.
+    /// Set the minimum date value for a date axis.
     ///
-    /// Set the minimum date/time bound to be displayed for an axis. This is
+    /// Set the minimum date/time bound to be displayed for a date axis. This is
     /// just a syntactic helper around [`ChartAxis::set_min()`] to allow dates
     /// that support the [`IntoExcelDateTime`] trait to be passed to the API.
     ///
@@ -9608,13 +9768,23 @@ impl ChartAxis {
         self
     }
 
-    /// todo
+    /// Set the major unit type as days, months or years.
+    ///
+    /// # Parameters
+    ///
+    /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
+    ///
     pub fn set_major_unit_date_type(&mut self, unit: ChartAxisDateUnitType) -> &mut ChartAxis {
         self.major_unit_date_type = Some(unit);
         self
     }
 
-    /// todo
+    /// Set the minor unit type as days, months or years.
+    ///
+    /// # Parameters
+    ///
+    /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
+    ///
     pub fn set_minor_unit_date_type(&mut self, unit: ChartAxisDateUnitType) -> &mut ChartAxis {
         self.minor_unit_date_type = Some(unit);
         self
@@ -10554,16 +10724,19 @@ impl fmt::Display for ChartAxisTickType {
     }
 }
 
-/// TODO
+/// The `ChartAxisDateUnitType` enum defines the [`Chart`] axis date unit types.
+///
+/// Define the unit type for the major or minor unit in a Chart Date axis.
+///
 #[derive(Clone, Copy)]
 pub enum ChartAxisDateUnitType {
-    /// TODO
+    /// The major or minor unit is expressed in days.
     Days,
 
-    /// TODO
+    /// The major or minor unit is expressed in months.
     Months,
 
-    /// TODO
+    /// The major or minor unit is expressed in years.
     Years,
 }
 
@@ -12061,9 +12234,16 @@ impl ChartLine {
         self
     }
 
-    /// Internal method for some chart types such as Scatter that set a line
-    /// width but also set the line hidden.
-    /// TODO
+    /// Set the chart line as hidden.
+    ///
+    /// The method is sometimes required to turn off a default line type in
+    /// order to highlight some other element such as the line markers.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off (not hidden) by
+    ///   default.
+    ///
     pub fn set_hidden(&mut self, enable: bool) -> &mut ChartLine {
         self.hidden = enable;
         self
