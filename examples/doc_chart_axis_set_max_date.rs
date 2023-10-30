@@ -2,7 +2,8 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! A chart example demonstrating setting a date axis for a chart.
+//! A chart example demonstrating setting the maximum and minimum values for a
+//! date axis.
 
 use rust_xlsxwriter::{Chart, ChartType, ExcelDateTime, Format, Workbook, XlsxError};
 

@@ -3184,6 +3184,14 @@ impl Chart {
             self.write_minor_unit(self.y_axis.minor_unit.clone());
         }
 
+        // Write the c:dispUnits element.
+        if self.y_axis.display_units_type != ChartAxisDisplayUnitType::None {
+            self.write_disp_units(
+                self.y_axis.display_units_type,
+                self.y_axis.display_units_visible,
+            );
+        }
+
         self.writer.xml_end_tag("c:valAx");
     }
 
@@ -3264,6 +3272,14 @@ impl Chart {
         // Write the c:minorUnit element.
         if self.x_axis.axis_type != ChartAxisType::Category && !self.x_axis.minor_unit.is_empty() {
             self.write_minor_unit(self.x_axis.minor_unit.clone());
+        }
+
+        // Write the c:dispUnits element.
+        if self.x_axis.display_units_type != ChartAxisDisplayUnitType::None {
+            self.write_disp_units(
+                self.x_axis.display_units_type,
+                self.x_axis.display_units_visible,
+            );
         }
 
         self.writer.xml_end_tag("c:valAx");
@@ -3439,15 +3455,15 @@ impl Chart {
     }
 
     // Write the <c:tickLblSkip> element.
-    fn write_tick_lbl_skip(&mut self, unit: u16) {
-        let attributes = [("val", unit.to_string())];
+    fn write_tick_lbl_skip(&mut self, units: u16) {
+        let attributes = [("val", units.to_string())];
 
         self.writer.xml_empty_tag("c:tickLblSkip", &attributes);
     }
 
     // Write the <c:tickMarkSkip> element.
-    fn write_tick_mark_skip(&mut self, unit: u16) {
-        let attributes = [("val", unit.to_string())];
+    fn write_tick_mark_skip(&mut self, units: u16) {
+        let attributes = [("val", units.to_string())];
 
         self.writer.xml_empty_tag("c:tickMarkSkip", &attributes);
     }
@@ -3467,17 +3483,49 @@ impl Chart {
     }
 
     // Write the <c:majorTimeUnit> element.
-    fn write_major_time_unit(&mut self, unit: ChartAxisDateUnitType) {
-        let attributes = [("val", unit.to_string())];
+    fn write_major_time_unit(&mut self, units: ChartAxisDateUnitType) {
+        let attributes = [("val", units.to_string())];
 
         self.writer.xml_empty_tag("c:majorTimeUnit", &attributes);
     }
 
     // Write the <c:minorTimeUnit> element.
-    fn write_minor_time_unit(&mut self, unit: ChartAxisDateUnitType) {
-        let attributes = [("val", unit.to_string())];
+    fn write_minor_time_unit(&mut self, units: ChartAxisDateUnitType) {
+        let attributes = [("val", units.to_string())];
 
         self.writer.xml_empty_tag("c:minorTimeUnit", &attributes);
+    }
+
+    // Write the <c:dispUnits> element.
+    fn write_disp_units(&mut self, units: ChartAxisDisplayUnitType, visible: bool) {
+        self.writer.xml_start_tag_only("c:dispUnits");
+
+        // Write the c:builtInUnit element.
+        self.write_built_in_unit(units);
+
+        // Write the c:dispUnitsLbl element.
+        if visible {
+            self.write_disp_units_lbl();
+        }
+
+        self.writer.xml_end_tag("c:dispUnits");
+    }
+
+    // Write the <c:builtInUnit> element.
+    fn write_built_in_unit(&mut self, units: ChartAxisDisplayUnitType) {
+        let attributes = [("val", units.to_string())];
+
+        self.writer.xml_empty_tag("c:builtInUnit", &attributes);
+    }
+
+    // Write the <c:dispUnitsLbl> element.
+    fn write_disp_units_lbl(&mut self) {
+        self.writer.xml_start_tag_only("c:dispUnitsLbl");
+
+        // Write the c:layout element.
+        self.write_layout();
+
+        self.writer.xml_end_tag("c:dispUnitsLbl");
     }
 
     // Write the <c:legend> element.
@@ -8939,6 +8987,8 @@ pub struct ChartAxis {
     pub(crate) minor_tick_type: Option<ChartAxisTickType>,
     pub(crate) major_unit_date_type: Option<ChartAxisDateUnitType>,
     pub(crate) minor_unit_date_type: Option<ChartAxisDateUnitType>,
+    pub(crate) display_units_type: ChartAxisDisplayUnitType,
+    pub(crate) display_units_visible: bool,
 }
 
 impl ChartAxis {
@@ -8971,6 +9021,8 @@ impl ChartAxis {
             minor_tick_type: None,
             major_unit_date_type: None,
             minor_unit_date_type: None,
+            display_units_type: ChartAxisDisplayUnitType::None,
+            display_units_visible: false,
         }
     }
 
@@ -9587,7 +9639,8 @@ impl ChartAxis {
     ///
     /// # Examples
     ///
-    /// A chart example demonstrating setting a date axis for a chart.
+    /// A chart example demonstrating setting the maximum and minimum values for a
+    /// date axis.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_axis_set_max_date.rs
@@ -9771,14 +9824,98 @@ impl ChartAxis {
         self
     }
 
+    /// Set the display unit type such as Thousands, Millions, or other units.
+    ///
+    /// If the Value axis in your chart has very large numbers you can set the
+    /// unit type to one of the following Excel values:
+    ///
+    /// - Hundreds
+    /// - Thousands
+    /// - Ten Thousands
+    /// - Hundred Thousands
+    /// - Millions
+    /// - Ten Millions
+    /// - Hundred Millions
+    /// - Billions
+    /// - Trillions
+    ///
+    /// # Parameters
+    ///
+    /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the units of the Value/Y-axis.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_display_unit_type.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartAxisDisplayUnitType, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 6_000_000)?;
+    /// #     worksheet.write(1, 0, 17_000_000)?;
+    /// #     worksheet.write(2, 0, 23_000_000)?;
+    /// #     worksheet.write(3, 0, 4_000_000)?;
+    /// #     worksheet.write(4, 0, 12_000_000)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Set the units for the axis.
+    ///     chart
+    ///         .y_axis()
+    ///         .set_display_unit_type(ChartAxisDisplayUnitType::Millions);
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_display_unit_type.png">
+    ///
+    pub fn set_display_unit_type(&mut self, unit_type: ChartAxisDisplayUnitType) -> &mut ChartAxis {
+        self.display_units_type = unit_type;
+        self.display_units_visible = true;
+        self
+    }
+
+    /// Make the display units visible (if they have been set).
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off.
+    ///
+    pub fn set_display_units_visible(&mut self, enable: bool) -> &mut ChartAxis {
+        self.display_units_visible = enable;
+        self
+    }
+
     /// Set the major unit type as days, months or years.
     ///
     /// # Parameters
     ///
     /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
     ///
-    pub fn set_major_unit_date_type(&mut self, unit: ChartAxisDateUnitType) -> &mut ChartAxis {
-        self.major_unit_date_type = Some(unit);
+    pub fn set_major_unit_date_type(&mut self, unit_type: ChartAxisDateUnitType) -> &mut ChartAxis {
+        self.major_unit_date_type = Some(unit_type);
         self
     }
 
@@ -9788,8 +9925,8 @@ impl ChartAxis {
     ///
     /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
     ///
-    pub fn set_minor_unit_date_type(&mut self, unit: ChartAxisDateUnitType) -> &mut ChartAxis {
-        self.minor_unit_date_type = Some(unit);
+    pub fn set_minor_unit_date_type(&mut self, unit_type: ChartAxisDateUnitType) -> &mut ChartAxis {
+        self.minor_unit_date_type = Some(unit_type);
         self
     }
 
@@ -10771,6 +10908,79 @@ impl fmt::Display for ChartGrouping {
         }
     }
 }
+
+/// The `ChartAxisDisplayUnitType` enum defines the [`Chart`] axis date display
+/// unit types.
+///
+/// Define the display unit type for chart axes such as "Thousands" or
+/// "Millions".
+///
+#[derive(Clone, Copy, PartialEq)]
+pub enum ChartAxisDisplayUnitType {
+    /// Don't display any units for the axis values, the default.
+    None,
+
+    /// Display the axis values in units of Hundreds.
+    Hundreds,
+
+    /// Display the axis values in units of Thousands.
+    Thousands,
+
+    /// Display the axis values in units of Ten Thousands.
+    TenThousands,
+
+    /// Display the axis values in units of Hundred Thousands.
+    HundredThousands,
+
+    /// Display the axis values in units of Millions.
+    Millions,
+
+    /// Display the axis values in units of Ten Millions.
+    TenMillions,
+
+    /// Display the axis values in units of Hundred Millions.
+    HundredMillions,
+
+    /// Display the axis values in units of Billions.
+    Billions,
+
+    /// Display the axis values in units of Trillions.
+    Trillions,
+}
+
+impl fmt::Display for ChartAxisDisplayUnitType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ChartAxisDisplayUnitType::None => write!(f, "non"),
+            ChartAxisDisplayUnitType::Hundreds => write!(f, "hundreds"),
+            ChartAxisDisplayUnitType::Thousands => write!(f, "thousands"),
+            ChartAxisDisplayUnitType::TenThousands => write!(f, "tenThousands"),
+            ChartAxisDisplayUnitType::HundredThousands => write!(f, "hundredThousands"),
+            ChartAxisDisplayUnitType::Millions => write!(f, "millions"),
+            ChartAxisDisplayUnitType::TenMillions => write!(f, "tenMillions"),
+            ChartAxisDisplayUnitType::HundredMillions => write!(f, "hundredMillions"),
+            ChartAxisDisplayUnitType::Billions => write!(f, "billions"),
+            ChartAxisDisplayUnitType::Trillions => write!(f, "trillions"),
+        }
+    }
+}
+
+/*
+
+
+types = {
+    "hundreds": "hundreds",
+    "thousands": "thousands",
+    "ten_thousands": "tenThousands",
+    "hundred_thousands": "hundredThousands",
+    "millions": "millions",
+    "ten_millions": "tenMillions",
+    "hundred_millions": "hundredMillions",
+    "billions": "billions",
+    "trillions": "trillions",
+}
+
+ */
 
 // -----------------------------------------------------------------------
 // ChartLegend

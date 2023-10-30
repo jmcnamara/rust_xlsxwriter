@@ -176,6 +176,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_axis_set_date_axis.rs` - A chart example demonstrating setting
   a date axis for a chart.
 
+* `doc_chart_axis_set_display_unit_type.rs` - A chart example demonstrating
+  setting the units of the Value/Y-axis.
+
 * `doc_chart_axis_set_hidden.rs` - A chart example demonstrating hiding the
   chart axes.
 
@@ -204,7 +207,7 @@ documentation and generally show how an individual function works.
   axes bounds for chart axes.
 
 * `doc_chart_axis_set_max_date.rs` - A chart example demonstrating setting
-  a date axis for a chart.
+  the maximum and minimum values for a date axis.
 
 * `doc_chart_axis_set_minor_gridlines.rs` - A chart example demonstrating
   turning on the minor gridlines for chart axes.
