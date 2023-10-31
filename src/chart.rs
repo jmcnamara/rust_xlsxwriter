@@ -154,7 +154,7 @@ pub struct Chart {
     high_low_lines_format: ChartFormat,
     has_drop_lines: bool,
     drop_lines_format: ChartFormat,
-    table: Option<ChartTable>,
+    table: Option<ChartDataTable>,
 }
 
 impl Chart {
@@ -245,8 +245,8 @@ impl Chart {
             x_axis: ChartAxis::new(),
             y_axis: ChartAxis::new(),
             legend: ChartLegend::new(),
-            chart_area_format: ChartFormat::new(),
-            plot_area_format: ChartFormat::new(),
+            chart_area_format: ChartFormat::default(),
+            plot_area_format: ChartFormat::default(),
             grouping: ChartGrouping::Standard,
             show_empty_cells_as: ChartEmptyCells::Gaps,
             show_hidden_data: false,
@@ -260,12 +260,12 @@ impl Chart {
             rotation: 0,
             default_label_position: ChartDataLabelPosition::Default,
             has_up_down_bars: false,
-            up_bar_format: ChartFormat::new(),
-            down_bar_format: ChartFormat::new(),
+            up_bar_format: ChartFormat::default(),
+            down_bar_format: ChartFormat::default(),
             has_high_low_lines: false,
-            high_low_lines_format: ChartFormat::new(),
+            high_low_lines_format: ChartFormat::default(),
             has_drop_lines: false,
-            drop_lines_format: ChartFormat::new(),
+            drop_lines_format: ChartFormat::default(),
             table: None,
         };
 
@@ -1544,8 +1544,70 @@ impl Chart {
         self
     }
 
-    /// TODO `set_table`
-    pub fn set_table(&mut self, table: &ChartTable) -> &mut Chart {
+    /// Set a data table for a chart.
+    ///
+    /// A chart data table in Excel is an additional table below a chart that
+    /// shows the plotted data in tabular form.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_data_table.png">
+    ///
+    /// The chart data table has the following default properties which can be
+    /// set via the [`ChartDataTable`] struct.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_data_table_options.png">
+    ///
+    /// # Parameters
+    ///
+    /// * `table`: A [`ChartDataTable`] reference.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding a data table to a chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_data_table.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartDataTable, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
+    /// #     for (row_num, row_data) in data.iter().enumerate() {
+    /// #         for (col_num, col_data) in row_data.iter().enumerate() {
+    /// #             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+    /// #         }
+    /// #     }
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new_column();
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///     chart.add_series().set_values("Sheet1!$B$1:$B$5");
+    ///     chart.add_series().set_values("Sheet1!$C$1:$C$5");
+    ///
+    ///     // Add a default data table to the chart.
+    ///     let table = ChartDataTable::default();
+    ///     chart.set_data_table(&table);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 4, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_data_table.png">
+    ///
+    pub fn set_data_table(&mut self, table: &ChartDataTable) -> &mut Chart {
         self.table = Some(table.clone());
         self
     }
@@ -2486,9 +2548,8 @@ impl Chart {
         }
 
         // Write the c:dTable element.
-        if self.table.is_some() {
-            let table = self.table.clone().unwrap();
-            self.write_chart_table(&table);
+        if let Some(table) = &self.table {
+            self.write_data_table(&table.clone());
         }
 
         // Write the c:spPr element.
@@ -3573,15 +3634,25 @@ impl Chart {
         // Write the c:overlay element.
         self.write_overlay();
 
+        // Pie/Doughnut charts set the "rtl" flag to "0" in the legend font even
+        // though "0" is implied. To match Excel output we set it if it hasn't
+        // been set by the user.
         if self.chart_type == ChartType::Pie || self.chart_type == ChartType::Doughnut {
-            let font = match &self.legend.font {
-                Some(font) => font.clone(),
-                None => ChartFont::default(),
+            match &mut self.legend.font {
+                Some(font) => {
+                    if font.right_to_left.is_none() {
+                        font.set_right_to_left(false);
+                    }
+                }
+                None => {
+                    let mut font = ChartFont::new();
+                    font.set_right_to_left(false);
+                    self.legend.font = Some(font);
+                }
             };
+        }
 
-            // Write the c:txPr element.
-            self.write_tx_pr_pie(&font);
-        } else if let Some(font) = &self.legend.font {
+        if let Some(font) = &self.legend.font {
             // Write the c:txPr element.
             self.write_tx_pr(&font.clone(), false);
         }
@@ -4139,25 +4210,45 @@ impl Chart {
     }
 
     // Write the <c:dTable> element.
-    fn write_chart_table(&mut self, table: &ChartTable) {
+    fn write_data_table(&mut self, table: &ChartDataTable) {
         self.writer.xml_start_tag_only("c:dTable");
 
         // Write the c:showHorzBorder element.
-        if table.horizontal {
+        if table.show_horizontal_borders {
             self.write_show_horz_border();
         }
 
         // Write the c:showVertBorder element.
-        if table.vertical {
+        if table.show_vertical_borders {
             self.write_show_vert_border();
         }
 
         // Write the c:showOutline element.
-        if table.outline {
+        if table.show_outline_borders {
             self.write_show_outline();
         }
 
+        // Write the c:showKeys element.
+        if table.show_legend_keys {
+            self.write_show_keys();
+        }
+
+        // Write the c:spPr element.
+        self.write_sp_pr(&table.format);
+
+        // Write the trendline label font elements.
+        if let Some(font) = &table.font {
+            self.write_axis_font(font);
+        }
+
         self.writer.xml_end_tag("c:dTable");
+    }
+
+    // Write the <c:showKeys> element.
+    fn write_show_keys(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer.xml_empty_tag("c:showKeys", &attributes);
     }
 
     // Write the <c:showHorzBorder> element.
@@ -4329,22 +4420,6 @@ impl Chart {
     }
 
     // Write the <c:txPr> element.
-    fn write_tx_pr_pie(&mut self, font: &ChartFont) {
-        self.writer.xml_start_tag_only("c:txPr");
-
-        // Write the a:bodyPr element.
-        self.write_a_body_pr(font, false);
-
-        // Write the a:lstStyle element.
-        self.write_a_lst_style();
-
-        // Write the a:p element.
-        self.write_a_p_pie(font);
-
-        self.writer.xml_end_tag("c:txPr");
-    }
-
-    // Write the <c:txPr> element.
     fn write_tx_pr(&mut self, font: &ChartFont, is_horizontal: bool) {
         self.writer.xml_start_tag_only("c:txPr");
 
@@ -4375,7 +4450,13 @@ impl Chart {
 
     // Write the <a:pPr> element.
     fn write_a_p_pr(&mut self, font: &ChartFont) {
-        self.writer.xml_start_tag_only("a:pPr");
+        let mut attributes = vec![];
+
+        if let Some(right_to_left) = font.right_to_left {
+            attributes.push(("rtl", right_to_left.to_xml_bool()));
+        }
+
+        self.writer.xml_start_tag("a:pPr", &attributes);
 
         // Write the a:defRPr element.
         self.write_a_def_rpr(font);
@@ -4425,31 +4506,6 @@ impl Chart {
     // Write the <a:lstStyle> element.
     fn write_a_lst_style(&mut self) {
         self.writer.xml_empty_tag_only("a:lstStyle");
-    }
-
-    // Write the <a:p> element.
-    fn write_a_p_pie(&mut self, font: &ChartFont) {
-        self.writer.xml_start_tag_only("a:p");
-
-        // Write the a:pPr element.
-        self.write_pie_a_p_pr(font);
-
-        // Write the a:endParaRPr element.
-        self.write_a_end_para_rpr();
-
-        self.writer.xml_end_tag("a:p");
-    }
-
-    // Write the <a:pPr> element.
-    fn write_pie_a_p_pr(&mut self, font: &ChartFont) {
-        let attributes = [("rtl", "0")];
-
-        self.writer.xml_start_tag("a:pPr", &attributes);
-
-        // Write the a:defRPr element.
-        self.write_a_def_rpr(font);
-
-        self.writer.xml_end_tag("a:pPr");
     }
 
     // Write the <a:defRPr> element.
@@ -4520,8 +4576,8 @@ impl Chart {
             attributes.push(("pitchFamily", font.pitch_family.to_string()));
         }
 
-        if font.charset > 0 || font.pitch_family > 0 {
-            attributes.push(("charset", font.charset.to_string()));
+        if font.character_set > 0 || font.pitch_family > 0 {
+            attributes.push(("charset", font.character_set.to_string()));
         }
 
         self.writer.xml_empty_tag("a:latin", &attributes);
@@ -5036,7 +5092,13 @@ impl Chart {
 
     // Write the <a:pPr> element.
     fn write_a_p_pr_rich(&mut self, font: &ChartFont) {
-        self.writer.xml_start_tag_only("a:pPr");
+        let mut attributes = vec![];
+
+        if let Some(right_to_left) = font.right_to_left {
+            attributes.push(("rtl", right_to_left.to_xml_bool()));
+        }
+
+        self.writer.xml_start_tag("a:pPr", &attributes);
 
         // Write the a:defRPr element.
         self.write_a_def_rpr(font);
@@ -5464,7 +5526,7 @@ impl ChartSeries {
             value_range: ChartRange::default(),
             category_range: ChartRange::default(),
             title: ChartTitle::new(),
-            format: ChartFormat::new(),
+            format: ChartFormat::default(),
             marker: None,
             data_label: None,
             points: vec![],
@@ -7281,8 +7343,8 @@ impl ChartTitle {
     pub(crate) fn new() -> ChartTitle {
         ChartTitle {
             range: ChartRange::default(),
-            format: ChartFormat::new(),
-            font: ChartFont::new(),
+            format: ChartFormat::default(),
+            font: ChartFont::default(),
             name: String::new(),
             hidden: false,
             is_horizontal: false,
@@ -7622,7 +7684,7 @@ impl ChartMarker {
             none: false,
             marker_type: None,
             size: 0,
-            format: ChartFormat::new(),
+            format: ChartFormat::default(),
         }
     }
 
@@ -7956,7 +8018,7 @@ impl ChartDataLabel {
     ///
     pub fn new() -> ChartDataLabel {
         ChartDataLabel {
-            format: ChartFormat::new(),
+            format: ChartFormat::default(),
             show_value: false,
             show_category_name: false,
             show_series_name: false,
@@ -8923,7 +8985,7 @@ impl ChartPoint {
     ///
     pub fn new() -> ChartPoint {
         ChartPoint {
-            format: ChartFormat::new(),
+            format: ChartFormat::default(),
         }
     }
 
@@ -9055,7 +9117,7 @@ impl ChartAxis {
             axis_position: ChartAxisPosition::Bottom,
             label_position: ChartAxisLabelPosition::NextTo,
             title: ChartTitle::new(),
-            format: ChartFormat::new(),
+            format: ChartFormat::default(),
             font: None,
             num_format: String::new(),
             num_format_linked_to_source: false,
@@ -11116,7 +11178,7 @@ impl ChartLegend {
             position: ChartLegendPosition::Right,
             hidden: false,
             has_overlay: false,
-            format: ChartFormat::new(),
+            format: ChartFormat::default(),
             font: None,
             deleted_entries: vec![],
         }
@@ -11675,10 +11737,15 @@ pub struct ChartFormat {
     gradient_fill: Option<ChartGradientFill>,
 }
 
+impl Default for ChartFormat {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ChartFormat {
     /// Create a new `ChartFormat` instance to set formatting for a chart element.
     ///
-    #[allow(clippy::new_without_default)]
     pub fn new() -> ChartFormat {
         ChartFormat {
             no_fill: false,
@@ -13487,9 +13554,10 @@ pub struct ChartFont {
     pub(crate) color: Color,
     pub(crate) strikethrough: bool,
     pub(crate) pitch_family: u8,
-    pub(crate) charset: u8,
+    pub(crate) character_set: u8,
     pub(crate) rotation: Option<i16>,
     pub(crate) has_baseline: bool,
+    pub(crate) right_to_left: Option<bool>,
 }
 
 impl Default for ChartFont {
@@ -13511,10 +13579,11 @@ impl ChartFont {
             color: Color::Default,
             strikethrough: false,
             pitch_family: 0,
-            charset: 0,
+            character_set: 0,
             rotation: None,
             has_baseline: false,
             has_default_bold: false,
+            right_to_left: None,
         }
     }
 
@@ -13913,6 +13982,21 @@ impl ChartFont {
         self
     }
 
+    /// Display the chart font from right to left for some language support.
+    ///
+    /// See
+    /// [`Worksheet::set_right_to_left()`](crate::Worksheet::set_right_to_left)
+    /// for details.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_right_to_left(&mut self, enable: bool) -> &mut ChartFont {
+        self.right_to_left = Some(enable);
+        self
+    }
+
     /// Set the pitch family property for the font of a chart element.
     ///
     /// This function is implemented for completeness but is rarely used in
@@ -13922,7 +14006,6 @@ impl ChartFont {
     ///
     /// * `family` - The font family property.
     ///
-    #[doc(hidden)]
     pub fn set_pitch_family(&mut self, family: u8) -> &mut ChartFont {
         self.pitch_family = family;
         self
@@ -13931,21 +14014,20 @@ impl ChartFont {
     /// Set the character set property for the font of a chart element.
     ///
     /// Set the font character set. This function is implemented for
-    /// completeness but is rarely used in practice.
+    /// completeness but is rarely required in practice.
     ///
     /// # Parameters
     ///
-    /// * `font_charset` - The font character set property.
+    /// * `character_set` - The font character set property.
     ///
-    #[doc(hidden)]
-    pub fn set_charset(&mut self, font_charset: u8) -> &mut ChartFont {
-        self.charset = font_charset;
+    pub fn set_character_set(&mut self, character_set: u8) -> &mut ChartFont {
+        self.character_set = character_set;
         self
     }
 
     // Internal check for font properties that need a sub-element.
     pub(crate) fn is_latin(&self) -> bool {
-        !self.name.is_empty() || self.pitch_family > 0 || self.charset > 0
+        !self.name.is_empty() || self.pitch_family > 0 || self.character_set > 0
     }
 }
 
@@ -14037,8 +14119,8 @@ impl ChartTrendline {
         ChartTrendline {
             name: String::new(),
             trend_type: ChartTrendlineType::None,
-            format: ChartFormat::new(),
-            label_format: ChartFormat::new(),
+            format: ChartFormat::default(),
+            label_format: ChartFormat::default(),
             label_font: None,
             forward_period: 0.0,
             backward_period: 0.0,
@@ -15160,7 +15242,7 @@ impl ChartErrorBars {
             has_end_cap: true,
             error_type: ChartErrorBarsType::StandardError,
             direction: ChartErrorBarsDirection::Both,
-            format: ChartFormat::new(),
+            format: ChartFormat::default(),
             plus_range: ChartRange::default(),
             minus_range: ChartRange::default(),
         }
@@ -15335,35 +15417,197 @@ impl fmt::Display for ChartErrorBarsDirection {
 }
 
 // -----------------------------------------------------------------------
-// ChartTable
+// ChartDataTable
 // -----------------------------------------------------------------------
 
-/// The `ChartTable` struct represents a data table displayed below the chart.
+/// The `ChartDataTable` struct represents an optional data table displayed
+/// below the chart.
 ///
-
+/// A chart data table in Excel is an additional table below a chart that shows
+/// the plotted data in tabular form.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_data_table.png">
+///
+/// The chart data table has the following default properties which can be set
+/// with the methods outlined below.
+///
+/// The `ChartDataTable` struct is used in conjunction with the
+/// [`Chart::set_data_table()`] method.
+///
+///  <img src="https://rustxlsxwriter.github.io/images/chart_data_table_options.png">
+///
+/// # Examples
+///
+/// An example of adding a data table to a chart.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_set_data_table.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartDataTable, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
+/// #     for (row_num, row_data) in data.iter().enumerate() {
+/// #         for (col_num, col_data) in row_data.iter().enumerate() {
+/// #             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
+/// #         }
+/// #     }
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new_column();
+///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+///     chart.add_series().set_values("Sheet1!$B$1:$B$5");
+///     chart.add_series().set_values("Sheet1!$C$1:$C$5");
+///
+///     // Add a default data table to the chart.
+///     let table = ChartDataTable::default();
+///     chart.set_data_table(&table);
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 4, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_set_data_table.png">
+///
 #[derive(Clone, PartialEq)]
-pub struct ChartTable {
-    horizontal: bool,
-    vertical: bool,
-    outline: bool,
-    show_keys: bool,
+pub struct ChartDataTable {
+    show_horizontal_borders: bool,
+    show_vertical_borders: bool,
+    show_outline_borders: bool,
+    show_legend_keys: bool,
+    font: Option<ChartFont>,
+    format: ChartFormat,
 }
 
-impl Default for ChartTable {
+impl Default for ChartDataTable {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl ChartTable {
-    /// Create a new `ChartTable` object to represent Chart Table.
+impl ChartDataTable {
+    /// Create a new `ChartDataTable` object to represent a Chart Data Table.
     ///
-    pub fn new() -> ChartTable {
-        ChartTable {
-            horizontal: true,
-            vertical: true,
-            outline: true,
-            show_keys: false,
+    pub fn new() -> ChartDataTable {
+        ChartDataTable {
+            show_horizontal_borders: true,
+            show_vertical_borders: true,
+            show_outline_borders: true,
+            show_legend_keys: false,
+            font: None,
+            format: ChartFormat::default(),
         }
+    }
+
+    /// Turn on/off the horizontal border lines for a chart data table.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    pub fn show_horizontal_borders(mut self, enable: bool) -> ChartDataTable {
+        self.show_horizontal_borders = enable;
+        self
+    }
+
+    /// Turn on/off the vertical border lines for a chart data table.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    pub fn show_vertical_borders(mut self, enable: bool) -> ChartDataTable {
+        self.show_vertical_borders = enable;
+        self
+    }
+
+    /// Turn on/off the outline border lines for a chart data table.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    pub fn show_outline_borders(mut self, enable: bool) -> ChartDataTable {
+        self.show_outline_borders = enable;
+        self
+    }
+
+    /// Turn on/off the legend keys for a chart data table.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn show_legend_keys(mut self, enable: bool) -> ChartDataTable {
+        self.show_legend_keys = enable;
+        self
+    }
+
+    /// Set the formatting properties for a chart data table.
+    ///
+    /// Set the formatting properties for a chart data table via a [`ChartFormat`]
+    /// object or a sub struct that implements [`IntoChartFormat`].
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    ///
+    /// # Parameters
+    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
+    ///
+    pub fn set_format<T>(mut self, format: T) -> ChartDataTable
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
+        self
+    }
+
+    /// Set the font properties of a chart data table.
+    ///
+    /// Set the font properties of a chart data table using a [`ChartFont`]
+    /// reference. Example font properties that can be set are:
+    ///
+    /// - [`ChartFont::set_bold()`]
+    /// - [`ChartFont::set_italic()`]
+    /// - [`ChartFont::set_name()`]
+    /// - [`ChartFont::set_size()`]
+    /// - [`ChartFont::set_rotation()`]
+    ///
+    /// See [`ChartFont`] for full details.
+    ///
+    /// # Parameters
+    ///
+    /// `font`: A [`ChartFont`] struct reference to represent the font
+    /// properties.
+    ///
+
+    ///
+    pub fn set_font(mut self, font: &ChartFont) -> ChartDataTable {
+        self.font = Some(font.clone());
+        self
     }
 }

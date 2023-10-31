@@ -422,6 +422,9 @@ documentation and generally show how an individual function works.
   labels to a chart series. This example shows how to format some of the
   data labels and leave the rest with the default formatting.
 
+* `doc_chart_set_data_table.rs` - An example of adding a data table to a
+  chart.
+
 * `doc_chart_set_drop_lines.rs` - An example of setting drop lines for a
   chart.
 

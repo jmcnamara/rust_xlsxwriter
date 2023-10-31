@@ -10,9 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add option to set the display units on a Y-axis to units such as Thousands or
+- Added option to add a chart data table to charts via the
+  [`Chart::set_data_table()`] and [`ChartDataTable`].
+
+- Added option to set the display units on a Y-axis to units such as Thousands or
   Millions via the [`ChartAxis::set_display_unit_type()`] method.
 
+[`ChartDataTable`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartDataTable.html
+[`Chart::set_data_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_data_table
 [`ChartAxis::set_display_unit_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_display_unit_type
 
 

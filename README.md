@@ -121,8 +121,8 @@ frequently.
 Recent changes:
 
 - Added stock chart support.
-- Added chart date axes, trendlines, error bars, up-down bars, high-low bars,
-  drop-lines and gradient fills.
+- Added chart date axes, data tables, trendlines, error bars, up-down bars,
+  high-low bars, drop-lines and gradient fills.
 - Added Wasm and Polars feature flags for compatibility.
 
 See the full [Release Notes and Changelog].
