@@ -154,6 +154,7 @@ pub struct Chart {
     high_low_lines_format: ChartFormat,
     has_drop_lines: bool,
     drop_lines_format: ChartFormat,
+    table: Option<ChartTable>,
 }
 
 impl Chart {
@@ -265,6 +266,7 @@ impl Chart {
             high_low_lines_format: ChartFormat::new(),
             has_drop_lines: false,
             drop_lines_format: ChartFormat::new(),
+            table: None,
         };
 
         match chart_type {
@@ -1542,6 +1544,12 @@ impl Chart {
         self
     }
 
+    /// TODO `set_table`
+    pub fn set_table(&mut self, table: &ChartTable) -> &mut Chart {
+        self.table = Some(table.clone());
+        self
+    }
+
     /// Set the width of the chart.
     ///
     /// The default width of an Excel chart is 480 pixels. The `set_width()`
@@ -2475,6 +2483,12 @@ impl Chart {
         // Reset the X and Y axes for Bar charts.
         if self.chart_group_type == ChartType::Bar {
             std::mem::swap(&mut self.x_axis, &mut self.y_axis);
+        }
+
+        // Write the c:dTable element.
+        if self.table.is_some() {
+            let table = self.table.clone().unwrap();
+            self.write_chart_table(&table);
         }
 
         // Write the c:spPr element.
@@ -4122,6 +4136,49 @@ impl Chart {
         } else {
             self.writer.xml_empty_tag_only("c:dropLines");
         }
+    }
+
+    // Write the <c:dTable> element.
+    fn write_chart_table(&mut self, table: &ChartTable) {
+        self.writer.xml_start_tag_only("c:dTable");
+
+        // Write the c:showHorzBorder element.
+        if table.horizontal {
+            self.write_show_horz_border();
+        }
+
+        // Write the c:showVertBorder element.
+        if table.vertical {
+            self.write_show_vert_border();
+        }
+
+        // Write the c:showOutline element.
+        if table.outline {
+            self.write_show_outline();
+        }
+
+        self.writer.xml_end_tag("c:dTable");
+    }
+
+    // Write the <c:showHorzBorder> element.
+    fn write_show_horz_border(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer.xml_empty_tag("c:showHorzBorder", &attributes);
+    }
+
+    // Write the <c:showVertBorder> element.
+    fn write_show_vert_border(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer.xml_empty_tag("c:showVertBorder", &attributes);
+    }
+
+    // Write the <c:showOutline> element.
+    fn write_show_outline(&mut self) {
+        let attributes = [("val", "1")];
+
+        self.writer.xml_empty_tag("c:showOutline", &attributes);
     }
 
     // Write the <c:showVal> element.
@@ -15012,7 +15069,7 @@ pub enum ChartGradientFillType {
 }
 
 // -----------------------------------------------------------------------
-// ChartGradientFill
+// ChartErrorBars
 // -----------------------------------------------------------------------
 
 /// The `ChartErrorBars` struct represents the error bars for a chart series.
@@ -15273,6 +15330,40 @@ impl fmt::Display for ChartErrorBarsDirection {
             ChartErrorBarsDirection::Both => write!(f, "both"),
             ChartErrorBarsDirection::Minus => write!(f, "minus"),
             ChartErrorBarsDirection::Plus => write!(f, "plus"),
+        }
+    }
+}
+
+// -----------------------------------------------------------------------
+// ChartTable
+// -----------------------------------------------------------------------
+
+/// The `ChartTable` struct represents a data table displayed below the chart.
+///
+
+#[derive(Clone, PartialEq)]
+pub struct ChartTable {
+    horizontal: bool,
+    vertical: bool,
+    outline: bool,
+    show_keys: bool,
+}
+
+impl Default for ChartTable {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartTable {
+    /// Create a new `ChartTable` object to represent Chart Table.
+    ///
+    pub fn new() -> ChartTable {
+        ChartTable {
+            horizontal: true,
+            vertical: true,
+            outline: true,
+            show_keys: false,
         }
     }
 }
