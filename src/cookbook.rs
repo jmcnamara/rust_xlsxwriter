@@ -39,16 +39,17 @@ cargo run --example app_demo
 24. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
 25. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
 26. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-27. [Chart: Chart data tools](#chart-chart-data-tools)
-28. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
-29. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-30. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-31. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-32. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-33. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-34. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-35. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-36. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+27. [Chart: Chart data table](#chart-chart-data-table)
+28. [Chart: Chart data tools](#chart-chart-data-tools)
+29. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
+30. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+31. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+32. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+33. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+34. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+35. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+36. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+37. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -3553,6 +3554,125 @@ fn main() -> Result<(), XlsxError> {
     data_worksheet.set_hidden(true);
 
     workbook.save("chart_styles.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Chart: Chart data table
+
+An example of creating Excel Column charts with data tables using the
+`rust_xlsxwriter` library.
+
+
+**Image of the output file:**
+
+Chart 1 in the following code is a Column chart with a default chart data table.
+<img src="https://rustxlsxwriter.github.io/images/chart_data_table1.png">
+
+Chart 2 in the following code is a Column chart with a chart data table with legend keys.
+<img src="https://rustxlsxwriter.github.io/images/chart_data_table2.png">
+
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_chart_data_table.rs
+
+
+use rust_xlsxwriter::{Chart, ChartDataTable, ChartType, Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    // Add the worksheet data that the charts will refer to.
+    worksheet.write_with_format(0, 0, "Number", &bold)?;
+    worksheet.write_with_format(0, 1, "Batch 1", &bold)?;
+    worksheet.write_with_format(0, 2, "Batch 2", &bold)?;
+
+    let data = [
+        [2, 3, 4, 5, 6, 7],
+        [10, 40, 50, 20, 10, 50],
+        [30, 60, 70, 50, 40, 30],
+    ];
+    for (col_num, col_data) in data.iter().enumerate() {
+        for (row_num, row_data) in col_data.iter().enumerate() {
+            worksheet.write(row_num as u32 + 1, col_num as u16, *row_data)?;
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Create a column chart with a data table.
+    // -----------------------------------------------------------------------
+
+    // Create a new Column chart.
+    let mut chart = Chart::new(ChartType::Column);
+
+    // Configure some data series.
+    chart
+        .add_series()
+        .set_name("Sheet1!$B$1")
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    chart
+        .add_series()
+        .set_name("Sheet1!$C$1")
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Add a chart title and some axis labels.
+    chart.title().set_name("Chart with Data Table");
+    chart.x_axis().set_name("Test number");
+    chart.y_axis().set_name("Sample length (mm)");
+
+    // Set a default data table on the X-Axis.
+    let table = ChartDataTable::default();
+    chart.set_data_table(&table);
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(1, 3, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
+    // Create a column chart with a data table and legend keys.
+    // -----------------------------------------------------------------------
+
+    // Create a new Column chart.
+    let mut chart = Chart::new(ChartType::Column);
+
+    // Configure some data series.
+    chart
+        .add_series()
+        .set_name("Sheet1!$B$1")
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    chart
+        .add_series()
+        .set_name("Sheet1!$C$1")
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Add a chart title and some axis labels.
+    chart.title().set_name("Data Table with legend keys");
+    chart.x_axis().set_name("Test number");
+    chart.y_axis().set_name("Sample length (mm)");
+
+    // Set a data table on the X-Axis with the legend keys shown.
+    let table = ChartDataTable::new().show_legend_keys(true);
+    chart.set_data_table(&table);
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(17, 3, &chart, 25, 10)?;
+
+    // -----------------------------------------------------------------------
+    // Save and close the file.
+    // -----------------------------------------------------------------------
+    workbook.save("chart_data_table.xlsx")?;
 
     Ok(())
 }

@@ -33,6 +33,9 @@ documentation and generally show how an individual function works.
 * `app_chart_column.rs` - An example of creating column charts using the
   rust_xlsxwriter library.
 
+* `app_chart_data_table.rs` - An example of creating Excel Column charts
+  with data tables using the rust_xlsxwriter library.
+
 * `app_chart_data_tools.rs` - A demo of the various Excel chart data tools
   that are available via the rust_xlsxwriter library.
 
