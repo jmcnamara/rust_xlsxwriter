@@ -2836,7 +2836,7 @@ impl Chart {
     fn write_cat(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:cat");
 
-        self.write_cache_ref(range);
+        self.write_cache_ref(range, false);
 
         self.writer.xml_end_tag("c:cat");
     }
@@ -2845,7 +2845,7 @@ impl Chart {
     fn write_val(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:val");
 
-        self.write_cache_ref(range);
+        self.write_cache_ref(range, true);
 
         self.writer.xml_end_tag("c:val");
     }
@@ -2854,7 +2854,7 @@ impl Chart {
     fn write_x_val(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:xVal");
 
-        self.write_cache_ref(range);
+        self.write_cache_ref(range, false);
 
         self.writer.xml_end_tag("c:xVal");
     }
@@ -2863,14 +2863,15 @@ impl Chart {
     fn write_y_val(&mut self, range: &ChartRange) {
         self.writer.xml_start_tag_only("c:yVal");
 
-        self.write_cache_ref(range);
+        self.write_cache_ref(range, true);
 
         self.writer.xml_end_tag("c:yVal");
     }
 
-    // Write the <c:numRef> or <c:strRef> elements.
-    fn write_cache_ref(&mut self, range: &ChartRange) {
-        if range.cache.cache_type == ChartRangeCacheDataType::String {
+    // Write the <c:numRef> or <c:strRef> elements. Value range must be written
+    // as a numRef where strings are treated as zero.
+    fn write_cache_ref(&mut self, range: &ChartRange, is_num_only: bool) {
+        if range.cache.cache_type == ChartRangeCacheDataType::String && !is_num_only {
             self.write_str_ref(range);
         } else {
             self.write_num_ref(range);
@@ -2924,7 +2925,13 @@ impl Chart {
         // Write the c:pt elements.
         for (index, value) in cache.data.iter().enumerate() {
             if !value.is_empty() {
-                self.write_pt(index, value);
+                // Non numeric values in value/number caches are treated as zero
+                // by Excel.
+                if value.parse::<f64>().is_err() {
+                    self.write_pt(index, "0");
+                } else {
+                    self.write_pt(index, value);
+                }
             }
         }
 
@@ -4129,11 +4136,11 @@ impl Chart {
     // Write the custom error sub-elements
     fn write_custom_error_bar_values(&mut self, error_bars: &ChartErrorBars) {
         self.writer.xml_start_tag_only("c:plus");
-        self.write_cache_ref(&error_bars.plus_range);
+        self.write_cache_ref(&error_bars.plus_range, true);
         self.writer.xml_end_tag("c:plus");
 
         self.writer.xml_start_tag_only("c:minus");
-        self.write_cache_ref(&error_bars.minus_range);
+        self.write_cache_ref(&error_bars.minus_range, true);
         self.writer.xml_end_tag("c:minus");
     }
 
