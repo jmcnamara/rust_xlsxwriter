@@ -2676,6 +2676,15 @@ impl Chart {
                 self.write_extension_list(series.inverted_color);
             }
 
+            // Write the c:smooth element.
+            if self.chart_group_type == ChartType::Line {
+                if let Some(smooth) = series.smooth {
+                    if smooth {
+                        self.write_smooth();
+                    }
+                }
+            }
+
             self.writer.xml_end_tag("c:ser");
         }
     }
@@ -2742,11 +2751,19 @@ impl Chart {
 
             self.write_y_val(&series.value_range);
 
-            if self.chart_type == ChartType::ScatterSmooth
-                || self.chart_type == ChartType::ScatterSmoothWithMarkers
-            {
-                // Write the c:smooth element.
-                self.write_smooth();
+            // Write the c:smooth element.
+            if self.chart_group_type == ChartType::Scatter {
+                if let Some(smooth) = series.smooth {
+                    if smooth {
+                        self.write_smooth();
+                    }
+                } else if self.chart_type == ChartType::ScatterSmooth
+                    || self.chart_type == ChartType::ScatterSmoothWithMarkers
+                {
+                    // The ScatterSmooth charts have a default smooth element if
+                    // one hasn't been set/unset by the user.
+                    self.write_smooth();
+                }
             }
 
             self.writer.xml_end_tag("c:ser");
@@ -5432,6 +5449,7 @@ pub struct ChartSeries {
     pub(crate) x_error_bars: Option<ChartErrorBars>,
     pub(crate) y_error_bars: Option<ChartErrorBars>,
     pub(crate) delete_from_legend: bool,
+    pub(crate) smooth: Option<bool>,
 }
 
 #[allow(clippy::new_without_default)]
@@ -5546,6 +5564,7 @@ impl ChartSeries {
             x_error_bars: None,
             y_error_bars: None,
             delete_from_legend: false,
+            smooth: None,
         }
     }
 
@@ -6710,6 +6729,26 @@ impl ChartSeries {
         if gap <= 500 {
             self.gap = gap;
         }
+        self
+    }
+
+    /// Set line type charts to smooth for a series.
+    ///
+    /// Line and Scatter charts can have a linear or smoothed line connecting
+    /// their data points. Some chart types such as [`ChartType::ScatterSmooth`] have
+    /// smoothed series by default and some such as
+    /// [`ChartType::ScatterStraight`] don't.
+    ///
+    /// The `ChartSeries::set_smooth()` method can be used to turn on/off the
+    /// smooth property for a series.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. The default depends on the chart
+    ///   type.
+    ///
+    pub fn set_smooth(&mut self, enable: bool) -> &mut ChartSeries {
+        self.smooth = Some(enable);
         self
     }
 
