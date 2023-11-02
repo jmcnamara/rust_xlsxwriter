@@ -2664,7 +2664,9 @@ impl Chart {
 
             // Write the c:cat element.
             if series.category_range.has_data() {
-                self.category_has_num_format = true;
+                // We only set a default num format for non-string categories.
+                self.category_has_num_format =
+                    series.category_range.cache.cache_type != ChartRangeCacheDataType::String;
                 self.write_cat(&series.category_range);
             }
 

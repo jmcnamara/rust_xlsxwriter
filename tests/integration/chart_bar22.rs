@@ -61,7 +61,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 fn test_chart_bar22() {
     let test_runner = common::TestRunner::new()
         .set_name("chart_bar22")
-        .ignore_elements("xl/charts/chart1.xml", "sourceLinked")
         .set_function(create_new_xlsx_file)
         .initialize();
 
