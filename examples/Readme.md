@@ -176,6 +176,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_add_series.rs` - An example of creating a chart series via
   [`chart.add_series()`](Chart::add_series).
 
+* `doc_chart_axis_set_crossing.rs` - A chart example demonstrating setting
+  the point where the axes will cross.
+
 * `doc_chart_axis_set_date_axis.rs` - A chart example demonstrating setting
   a date axis for a chart.
 

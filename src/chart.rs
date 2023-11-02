@@ -3028,7 +3028,11 @@ impl Chart {
         }
 
         // Write the c:axPos element.
-        self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
+        self.write_ax_pos(
+            self.x_axis.axis_position,
+            self.y_axis.reverse,
+            self.y_axis.crossing,
+        );
 
         self.write_major_gridlines(self.x_axis.clone());
         self.write_minor_gridlines(self.x_axis.clone());
@@ -3072,8 +3076,20 @@ impl Chart {
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.1);
 
-        // Write the c:crosses element.
-        self.write_crosses();
+        // Write the c:crosses element. Note, the X crossing comes from the Y
+        // axis.
+        match self.y_axis.crossing {
+            ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
+                self.write_crosses(&self.y_axis.crossing.to_string());
+            }
+            ChartAxisCrossing::AxisValue(_) => {
+                self.write_crosses_at(&self.y_axis.crossing.to_string());
+            }
+            ChartAxisCrossing::CategoryNumber(_) => {
+                // Ignore Category crossing on a Value axis.
+                self.write_crosses(&ChartAxisCrossing::Automatic.to_string());
+            }
+        }
 
         // Write the c:auto element.
         if !self.x_axis.automatic {
@@ -3117,7 +3133,11 @@ impl Chart {
         }
 
         // Write the c:axPos element.
-        self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
+        self.write_ax_pos(
+            self.x_axis.axis_position,
+            self.y_axis.reverse,
+            self.y_axis.crossing,
+        );
 
         self.write_major_gridlines(self.x_axis.clone());
         self.write_minor_gridlines(self.x_axis.clone());
@@ -3161,8 +3181,20 @@ impl Chart {
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.1);
 
-        // Write the c:crosses element.
-        self.write_crosses();
+        // Write the c:crosses element. Note, the X crossing comes from the Y
+        // axis.
+        match self.y_axis.crossing {
+            ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
+                self.write_crosses(&self.y_axis.crossing.to_string());
+            }
+            ChartAxisCrossing::AxisValue(_) => {
+                self.write_crosses_at(&self.y_axis.crossing.to_string());
+            }
+            ChartAxisCrossing::CategoryNumber(_) => {
+                // Ignore Category crossing on a Value axis.
+                self.write_crosses(&ChartAxisCrossing::Automatic.to_string());
+            }
+        }
 
         // Write the c:auto element.
         if self.x_axis.automatic {
@@ -3222,7 +3254,11 @@ impl Chart {
             self.write_delete();
         }
         // Write the c:axPos element.
-        self.write_ax_pos(self.y_axis.axis_position, self.x_axis.reverse);
+        self.write_ax_pos(
+            self.y_axis.axis_position,
+            self.x_axis.reverse,
+            self.x_axis.crossing,
+        );
 
         // Write the Gridlines elements.
         self.write_major_gridlines(self.y_axis.clone());
@@ -3267,8 +3303,16 @@ impl Chart {
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.0);
 
-        // Write the c:crosses element.
-        self.write_crosses();
+        // Write the c:crosses element. Note, the Y crossing comes from the X
+        // axis.
+        match self.x_axis.crossing {
+            ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
+                self.write_crosses(&self.x_axis.crossing.to_string());
+            }
+            ChartAxisCrossing::CategoryNumber(_) | ChartAxisCrossing::AxisValue(_) => {
+                self.write_crosses_at(&self.x_axis.crossing.to_string());
+            }
+        }
 
         // Write the c:crossBetween element.
         self.write_cross_between(self.x_axis.position_between_ticks);
@@ -3312,7 +3356,11 @@ impl Chart {
         }
 
         // Write the c:axPos element.
-        self.write_ax_pos(self.x_axis.axis_position, self.y_axis.reverse);
+        self.write_ax_pos(
+            self.x_axis.axis_position,
+            self.y_axis.reverse,
+            self.y_axis.crossing,
+        );
 
         // Write the Gridlines elements.
         self.write_major_gridlines(self.x_axis.clone());
@@ -3357,8 +3405,16 @@ impl Chart {
         // Write the c:crossAx element.
         self.write_cross_ax(self.axis_ids.1);
 
-        // Write the c:crosses element.
-        self.write_crosses();
+        // Write the c:crosses element. Note, the X crossing comes from the Y
+        // axis.
+        match self.y_axis.crossing {
+            ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
+                self.write_crosses(&self.y_axis.crossing.to_string());
+            }
+            ChartAxisCrossing::CategoryNumber(_) | ChartAxisCrossing::AxisValue(_) => {
+                self.write_crosses_at(&self.y_axis.crossing.to_string());
+            }
+        }
 
         // Write the c:crossBetween element.
         self.write_cross_between(self.y_axis.position_between_ticks);
@@ -3442,10 +3498,15 @@ impl Chart {
     }
 
     // Write the <c:axPos> element.
-    fn write_ax_pos(&mut self, position: ChartAxisPosition, reverse: bool) {
+    fn write_ax_pos(
+        &mut self,
+        position: ChartAxisPosition,
+        reverse: bool,
+        crossing: ChartAxisCrossing,
+    ) {
         let mut position = position;
 
-        if reverse {
+        if reverse || crossing == ChartAxisCrossing::Max {
             position = position.reverse();
         }
 
@@ -3515,10 +3576,17 @@ impl Chart {
     }
 
     // Write the <c:crosses> element.
-    fn write_crosses(&mut self) {
-        let attributes = [("val", "autoZero")];
+    fn write_crosses(&mut self, crossing: &str) {
+        let attributes = [("val", crossing)];
 
         self.writer.xml_empty_tag("c:crosses", &attributes);
+    }
+
+    // Write the <c:crossesAt> element.
+    fn write_crosses_at(&mut self, crossing: &str) {
+        let attributes = [("val", crossing)];
+
+        self.writer.xml_empty_tag("c:crossesAt", &attributes);
     }
 
     // Write the <c:auto> element.
@@ -9154,6 +9222,7 @@ pub struct ChartAxis {
     pub(crate) minor_unit_date_type: Option<ChartAxisDateUnitType>,
     pub(crate) display_units_type: ChartAxisDisplayUnitType,
     pub(crate) display_units_visible: bool,
+    pub(crate) crossing: ChartAxisCrossing,
 }
 
 impl ChartAxis {
@@ -9188,6 +9257,7 @@ impl ChartAxis {
             minor_unit_date_type: None,
             display_units_type: ChartAxisDisplayUnitType::None,
             display_units_visible: false,
+            crossing: ChartAxisCrossing::Automatic,
         }
     }
 
@@ -9641,6 +9711,93 @@ impl ChartAxis {
     ///
     pub fn set_automatic_axis(&mut self, enable: bool) -> &mut ChartAxis {
         self.automatic = enable;
+        self
+    }
+
+    /// Set the crossing point for the opposite axis.
+    ///
+    /// By default Excel sets chart axes to cross at 0. If required you can use
+    /// [`ChartAxis::set_crossing()`] and [`ChartAxisCrossing`] to define
+    /// another point where the opposite axis will cross the current axis.
+    ///
+    /// The [`ChartAxisCrossing`] enum defines values like `max` and `min` but
+    /// also allows you to define a category value for X-axes (except for
+    /// Scatter and Date axes) and an actual value for Y-axes and Scatter and
+    /// Date axes.
+    ///
+    /// # Parameters
+    ///
+    /// * `crossing` - A [`ChartAxisCrossing`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the point where the axes will
+    /// cross.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_crossing.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartAxisCrossing, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, "North")?;
+    /// #     worksheet.write(1, 0, "South")?;
+    /// #     worksheet.write(2, 0, "East")?;
+    /// #     worksheet.write(3, 0, "West")?;
+    /// #     worksheet.write(0, 1, 10)?;
+    /// #     worksheet.write(1, 1, 35)?;
+    /// #     worksheet.write(2, 1, 40)?;
+    /// #     worksheet.write(3, 1, 25)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart
+    ///         .add_series()
+    ///         .set_categories("Sheet1!$A$1:$A$5")
+    ///         .set_values("Sheet1!$B$1:$B$5");
+    ///
+    ///     // Set the X-axis crossing at a category index.
+    ///     chart
+    ///         .x_axis()
+    ///         .set_crossing(ChartAxisCrossing::CategoryNumber(3));
+    ///
+    ///     // Set the Y-axis crossing at a value.
+    ///     chart
+    ///         .y_axis()
+    ///         .set_crossing(ChartAxisCrossing::AxisValue(20.0));
+    ///
+    ///     // Hide legend for clarity.
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_crossing1.png">
+    ///
+    /// For reference here is the default chart without default crossings:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_crossing2.png">
+    ///
+    pub fn set_crossing(&mut self, crossing: ChartAxisCrossing) -> &mut ChartAxis {
+        self.crossing = crossing;
+
         self
     }
 
@@ -15655,5 +15812,128 @@ impl ChartDataTable {
     pub fn set_font(mut self, font: &ChartFont) -> ChartDataTable {
         self.font = Some(font.clone());
         self
+    }
+}
+
+// -----------------------------------------------------------------------
+// ChartAxisCrossing
+// -----------------------------------------------------------------------
+
+/// The `ChartAxisCrossing` enum defines the [`ChartAxis`] crossing point for
+/// the opposite axis.
+///
+/// By default Excel sets chart axes to cross at 0. If required you can use
+/// [`ChartAxis::set_crossing()`] and [`ChartAxisCrossing`] to define another
+/// point where the opposite axis will cross the current axis.
+///
+/// # Examples
+///
+/// A chart example demonstrating setting the point where the axes will cross.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_axis_set_crossing.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartAxisCrossing, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, "North")?;
+/// #     worksheet.write(1, 0, "South")?;
+/// #     worksheet.write(2, 0, "East")?;
+/// #     worksheet.write(3, 0, "West")?;
+/// #     worksheet.write(0, 1, 10)?;
+/// #     worksheet.write(1, 1, 35)?;
+/// #     worksheet.write(2, 1, 40)?;
+/// #     worksheet.write(3, 1, 25)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///
+///     // Add a data series using Excel formula syntax to describe the range.
+///     chart
+///         .add_series()
+///         .set_categories("Sheet1!$A$1:$A$5")
+///         .set_values("Sheet1!$B$1:$B$5");
+///
+///     // Set the X-axis crossing at a category index.
+///     chart
+///         .x_axis()
+///         .set_crossing(ChartAxisCrossing::CategoryNumber(3));
+///
+///     // Set the Y-axis crossing at a value.
+///     chart
+///         .y_axis()
+///         .set_crossing(ChartAxisCrossing::AxisValue(20.0));
+///
+///     // Hide legend for clarity.
+///     chart.legend().set_hidden();
+///
+///     // Add the chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_crossing1.png">
+///
+/// For reference here is the default chart without default crossings:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_crossing2.png">
+///
+///
+#[derive(Clone, Copy, PartialEq)]
+pub enum ChartAxisCrossing {
+    /// The axis crossing is at the default value which is generally zero. This
+    /// is the default.
+    Automatic,
+
+    /// The axis crossing is at the minimum value for the axis.
+    Min,
+
+    /// The axis crossing is at the maximum value for the axis.
+    Max,
+
+    /// The axis crossing is at a category index number.
+    ///
+    /// This is for Category style axes only. For example say you are plotting 4
+    /// categories on the X-axis ("North", "South", "East", "West"). By setting
+    /// the category number as `CategoryNumber(3)` the Y-axis will cross at
+    /// "East".
+    ///
+    /// See [Chart Value and Category
+    /// Axes](struct.Chart.html#chart-value-and-category-axes) for an
+    /// explanation of the difference between Value and Category axes in Excel.
+    ///
+    CategoryNumber(u32),
+
+    /// The axis crossing is at a value.
+    ///
+    /// This is for Value and Date style axes only.
+    ///
+    /// See [Chart Value and Category
+    /// Axes](struct.Chart.html#chart-value-and-category-axes) for an
+    /// explanation of the difference between Value and Category axes in Excel.
+    ///
+    AxisValue(f64),
+}
+
+impl fmt::Display for ChartAxisCrossing {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ChartAxisCrossing::Min => write!(f, "min"),
+            ChartAxisCrossing::Max => write!(f, "max"),
+            ChartAxisCrossing::Automatic => write!(f, "autoZero"),
+            ChartAxisCrossing::AxisValue(value) => write!(f, "{value}"),
+            ChartAxisCrossing::CategoryNumber(index) => write!(f, "{index}"),
+        }
     }
 }

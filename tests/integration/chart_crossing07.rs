@@ -41,7 +41,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_column(0, 3, close)?;
 
     let mut chart = Chart::new(ChartType::Stock);
-    chart.set_axis_ids(40522880, 40524416);
+    chart.set_axis_ids(87397120, 87399424);
 
     chart
         .add_series()
@@ -70,10 +70,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     chart.set_high_low_lines(true);
 
-    // These crossing types are on the wrong axes and should be ignored.
     chart
         .y_axis()
-        .set_crossing(ChartAxisCrossing::CategoryNumber(8));
+        .set_crossing(ChartAxisCrossing::AxisValue(15.0));
+
+    chart.x_axis().set_crossing(ChartAxisCrossing::AxisValue(
+        ExcelDateTime::parse_from_str("2007-01-03")?.to_excel(),
+    ));
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -83,9 +86,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_stock01() {
+fn test_chart_crossing07() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_stock01")
+        .set_name("chart_crossing07")
         .set_function(create_new_xlsx_file)
         .initialize();
 

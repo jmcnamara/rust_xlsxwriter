@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Chart, ChartSeries, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartAxisCrossing, ChartSeries, ChartType, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -59,6 +59,11 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     // Set the chart axis ids to match the random values in the Excel file.
     chart.set_axis_ids(43424000, 43434368);
+
+    // These crossing types are on the wrong axes and should be ignored.
+    chart
+        .y_axis()
+        .set_crossing(ChartAxisCrossing::CategoryNumber(8));
 
     worksheet.insert_chart(8, 4, &chart)?;
 

@@ -16,10 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added option to set the display units on a Y-axis to units such as Thousands or
   Millions via the [`ChartAxis::set_display_unit_type()`] method.
 
-- Added option to turn on/off line smoothing for Line and Scatter charts via the [`ChartSeries::set_smooth()`] method.
+- Added option to set the crossing position of axes via the [`ChartAxis::set_crossing()`] method.
+
+- Added option to turn on/off line smoothing for Line and Scatter charts via the
+  [`ChartSeries::set_smooth()`] method.
+
 
 [`ChartDataTable`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartDataTable.html
 [`Chart::set_data_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Chart.html#method.set_data_table
+[`ChartAxis::set_display_unit_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_crossing
 [`ChartAxis::set_display_unit_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartAxis.html#method.set_display_unit_type
 [`ChartSeries::set_smooth()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartSeries.html#method.set_smooth
 
