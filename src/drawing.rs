@@ -157,7 +157,11 @@ impl Drawing {
     // Write the <xdr:cNvPr> element.
     fn write_c_nv_pr(&mut self, index: u32, drawing_info: &DrawingInfo, name: &str) {
         let id = index + 1;
-        let name = format!("{name} {index}");
+        let mut name = format!("{name} {index}");
+
+        if !drawing_info.name.is_empty() {
+            name = drawing_info.name.clone();
+        }
 
         let mut attributes = vec![("id", id.to_string()), ("name", name)];
 
@@ -415,6 +419,7 @@ pub(crate) struct DrawingInfo {
     pub(crate) row_absolute: u64,
     pub(crate) width: f64,
     pub(crate) height: f64,
+    pub(crate) name: String,
     pub(crate) description: String,
     pub(crate) decorative: bool,
     pub(crate) object_movement: ObjectMovement,
@@ -435,6 +440,7 @@ pub(crate) trait DrawingObject {
     fn width_scaled(&self) -> f64;
     fn height_scaled(&self) -> f64;
     fn object_movement(&self) -> ObjectMovement;
+    fn name(&self) -> String;
     fn alt_text(&self) -> String;
     fn decorative(&self) -> bool;
     fn drawing_type(&self) -> DrawingType;
@@ -475,6 +481,7 @@ mod tests {
             row_absolute: 190500,
             width: 1142857.0,
             height: 1142857.0,
+            name: "Picture 1".to_string(),
             description: "rust.png".to_string(),
             decorative: false,
             rel_id: 1,

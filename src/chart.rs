@@ -116,6 +116,7 @@ pub struct Chart {
     pub(crate) writer: XMLWriter,
     pub(crate) x_offset: u32,
     pub(crate) y_offset: u32,
+    pub(crate) name: String,
     pub(crate) alt_text: String,
     pub(crate) object_movement: ObjectMovement,
     pub(crate) decorative: bool,
@@ -231,6 +232,7 @@ impl Chart {
             scale_height: 1.0,
             x_offset: 0,
             y_offset: 0,
+            name: String::new(),
             alt_text: String::new(),
             object_movement: ObjectMovement::MoveAndSizeWithCells,
             decorative: false,
@@ -1726,6 +1728,24 @@ impl Chart {
         }
 
         self.scale_width = scale;
+        self
+    }
+
+    /// Set a user defined name for a chart.
+    ///
+    /// By default Excel names charts as "Chart 1", "Chart 2", etc. This name
+    /// shows up in the formula bar and can be used to find or reference a
+    /// chart.
+    ///
+    /// The [`Chart::set_name()`] method allows you to give the chart a user
+    /// defined name.
+    ///
+    /// # Parameters
+    ///
+    /// * `name` - A user defined name for the chart.
+    ///
+    pub fn set_name(&mut self, name: impl Into<String>) -> &mut Chart {
+        self.name = name.into();
         self
     }
 
@@ -5432,6 +5452,10 @@ impl DrawingObject for Chart {
 
     fn object_movement(&self) -> ObjectMovement {
         self.object_movement
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
     }
 
     fn alt_text(&self) -> String {

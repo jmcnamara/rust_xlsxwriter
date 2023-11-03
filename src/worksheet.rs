@@ -9204,6 +9204,7 @@ impl Worksheet {
             row_absolute: u64::from(y_abs),
             width,
             height,
+            name: object.name(),
             description: object.alt_text(),
             decorative: object.decorative(),
             object_movement: object.object_movement(),

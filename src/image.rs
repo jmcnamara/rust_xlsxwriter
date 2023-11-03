@@ -61,6 +61,7 @@ pub struct Image {
     pub(crate) x_offset: u32,
     pub(crate) y_offset: u32,
     pub(crate) image_type: XlsxImageType,
+    pub(crate) name: String,
     pub(crate) alt_text: String,
     pub(crate) vml_name: String,
     pub(crate) header_position: HeaderImagePosition,
@@ -252,6 +253,7 @@ impl Image {
             y_offset: 0,
             has_default_dpi: true,
             image_type: XlsxImageType::Unknown,
+            name: String::new(),
             alt_text: String::new(),
             vml_name: "image".to_string(),
             header_position: HeaderImagePosition::Center,
@@ -968,6 +970,10 @@ impl DrawingObject for Image {
 
     fn object_movement(&self) -> ObjectMovement {
         self.object_movement
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
     }
 
     fn alt_text(&self) -> String {
