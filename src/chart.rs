@@ -3119,7 +3119,7 @@ impl Chart {
         }
 
         // Write the c:lblAlgn element.
-        self.write_lbl_algn();
+        self.write_lbl_algn(&self.x_axis.label_alignment.to_string());
 
         // Write the c:lblOffset element.
         self.write_lbl_offset();
@@ -3619,8 +3619,8 @@ impl Chart {
     }
 
     // Write the <c:lblAlgn> element.
-    fn write_lbl_algn(&mut self) {
-        let attributes = [("val", "ctr")];
+    fn write_lbl_algn(&mut self, position: &str) {
+        let attributes = [("val", position)];
 
         self.writer.xml_empty_tag("c:lblAlgn", &attributes);
     }
@@ -9249,6 +9249,7 @@ pub struct ChartAxis {
     pub(crate) display_units_type: ChartAxisDisplayUnitType,
     pub(crate) display_units_visible: bool,
     pub(crate) crossing: ChartAxisCrossing,
+    pub(crate) label_alignment: ChartAxisLabelAlignment,
 }
 
 impl ChartAxis {
@@ -9284,6 +9285,7 @@ impl ChartAxis {
             display_units_type: ChartAxisDisplayUnitType::None,
             display_units_visible: false,
             crossing: ChartAxisCrossing::Automatic,
+            label_alignment: ChartAxisLabelAlignment::Center,
         }
     }
 
@@ -10275,6 +10277,17 @@ impl ChartAxis {
     ///
     pub fn set_minor_unit_date_type(&mut self, unit_type: ChartAxisDateUnitType) -> &mut ChartAxis {
         self.minor_unit_date_type = Some(unit_type);
+        self
+    }
+
+    /// Set the alignment of the axis labels relative to the tick mark.
+    ///
+    /// # Parameters
+    ///
+    /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
+    ///
+    pub fn set_label_alignment(&mut self, alignment: ChartAxisLabelAlignment) -> &mut ChartAxis {
+        self.label_alignment = alignment;
         self
     }
 
@@ -15960,6 +15973,39 @@ impl fmt::Display for ChartAxisCrossing {
             ChartAxisCrossing::Automatic => write!(f, "autoZero"),
             ChartAxisCrossing::AxisValue(value) => write!(f, "{value}"),
             ChartAxisCrossing::CategoryNumber(index) => write!(f, "{index}"),
+        }
+    }
+}
+
+// -----------------------------------------------------------------------
+// ChartAxisLabelAlignment
+// -----------------------------------------------------------------------
+
+/// The `ChartAxisLabelAlignment` enum defines the [`ChartAxis`] crossing point for
+/// the opposite axis.
+///
+///
+/// TODO
+///
+#[derive(Clone, Copy, PartialEq)]
+pub enum ChartAxisLabelAlignment {
+    /// TODO. This
+    /// is the default.
+    Center,
+
+    /// TODO
+    Left,
+
+    /// TODO
+    Right,
+}
+
+impl fmt::Display for ChartAxisLabelAlignment {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ChartAxisLabelAlignment::Left => write!(f, "l"),
+            ChartAxisLabelAlignment::Right => write!(f, "r"),
+            ChartAxisLabelAlignment::Center => write!(f, "ctr"),
         }
     }
 }

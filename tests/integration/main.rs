@@ -148,6 +148,8 @@ mod chart_axis38;
 mod chart_axis39;
 mod chart_axis40;
 mod chart_axis41;
+mod chart_axis42;
+mod chart_axis43;
 mod chart_axis44;
 mod chart_axis45;
 mod chart_axis46;
