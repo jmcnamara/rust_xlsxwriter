@@ -106,7 +106,7 @@ impl XMLWriter {
             &mut self.xmlfile,
             "<{}>{}</{}>",
             tag,
-            escape_data(data),
+            escape_xml_data(data),
             tag
         )
         .expect(XML_WRITE_ERROR);
@@ -122,7 +122,7 @@ impl XMLWriter {
             attribute.write_to(&mut self.xmlfile);
         }
 
-        write!(&mut self.xmlfile, ">{}</{}>", escape_data(data), tag).expect(XML_WRITE_ERROR);
+        write!(&mut self.xmlfile, ">{}</{}>", escape_xml_data(data), tag).expect(XML_WRITE_ERROR);
     }
 
     // Optimized tag writer for shared strings <si> elements.
@@ -131,14 +131,14 @@ impl XMLWriter {
             write!(
                 &mut self.xmlfile,
                 r#"<si><t xml:space="preserve">{}</t></si>"#,
-                escape_si_data(&escape_xml_escapes(string))
+                escape_xml_data(&escape_xml_escapes(string))
             )
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
                 &mut self.xmlfile,
                 "<si><t>{}</t></si>",
-                escape_si_data(&escape_xml_escapes(string))
+                escape_xml_data(&escape_xml_escapes(string))
             )
             .expect(XML_WRITE_ERROR);
         }
@@ -160,17 +160,9 @@ pub(crate) fn escape_attributes(attribute: &str) -> Cow<str> {
     escape_string(attribute, match_attribute_html_char)
 }
 
-// Escape XML characters in data sections of tags.  Note, this
-// is different from escape_attributes() because double quotes
-// and newline are not escaped by Excel.
-pub(crate) fn escape_data(data: &str) -> Cow<str> {
-    escape_string(data, match_data_html_char)
-}
-
-// Escape XML characters in shared strings. In particular we need to escape
-// control and non-printing characters in the range '\x00' - '\x1F'.
-pub(crate) fn escape_si_data(data: &str) -> Cow<str> {
-    escape_string(data, match_shared_string_char)
+// Escape XML characters in data sections of tags.
+pub(crate) fn escape_xml_data(data: &str) -> Cow<str> {
+    escape_string(data, match_xml_char)
 }
 
 // Escape non-url characters in a hyperlink/url.
@@ -194,20 +186,17 @@ fn match_attribute_html_char(ch: char) -> Option<&'static str> {
     }
 }
 
-// Match function for escape_data().
-fn match_data_html_char(ch: char) -> Option<&'static str> {
+// Match function for escape_xml_data().
+//
+// Note, this is different from match_attribute_html_char() because double
+// quotes and newline are not escaped by Excel.
+//
+// We need to mimic Excel by escaping control and non-printing characters in the
+// range '\x00' - '\x1F'.
+fn match_xml_char(ch: char) -> Option<&'static str> {
     match ch {
-        '&' => Some("&amp;"),
-        '<' => Some("&lt;"),
-        '>' => Some("&gt;"),
-        _ => None,
-    }
-}
-
-// Match function for escape_si_data(). Excel escapes control characters and
-// other non-printing characters in the range '\x00' - '\x1F' with _xHHHH_.
-fn match_shared_string_char(ch: char) -> Option<&'static str> {
-    match ch {
+        // Excel escapes control characters and other non-printing characters in
+        // the range '\x00' - '\x1F' with _xHHHH_.
         '\x00' => Some("_x0000_"),
         '\x01' => Some("_x0001_"),
         '\x02' => Some("_x0002_"),
@@ -240,6 +229,8 @@ fn match_shared_string_char(ch: char) -> Option<&'static str> {
         '\x1D' => Some("_x001D_"),
         '\x1E' => Some("_x001E_"),
         '\x1F' => Some("_x001F_"),
+
+        // Standard XML escapes.
         '&' => Some("&amp;"),
         '<' => Some("&lt;"),
         '>' => Some("&gt;"),

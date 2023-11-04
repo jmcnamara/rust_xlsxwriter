@@ -10333,8 +10333,8 @@ impl Worksheet {
             row + 1,
             style,
             result_type,
-            crate::xmlwriter::escape_data(formula),
-            crate::xmlwriter::escape_data(result),
+            crate::xmlwriter::escape_xml_data(formula),
+            crate::xmlwriter::escape_xml_data(result),
         )
         .expect(XML_WRITE_ERROR);
     }
@@ -10376,8 +10376,8 @@ impl Worksheet {
             cm,
             result_type,
             range,
-            crate::xmlwriter::escape_data(formula),
-            crate::xmlwriter::escape_data(result),
+            crate::xmlwriter::escape_xml_data(formula),
+            crate::xmlwriter::escape_xml_data(result),
         )
         .expect(XML_WRITE_ERROR);
     }
