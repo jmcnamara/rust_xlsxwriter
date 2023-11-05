@@ -15984,19 +15984,15 @@ impl fmt::Display for ChartAxisCrossing {
 /// The `ChartAxisLabelAlignment` enum defines the [`ChartAxis`] crossing point for
 /// the opposite axis.
 ///
-///
-/// TODO
-///
 #[derive(Clone, Copy, PartialEq)]
 pub enum ChartAxisLabelAlignment {
-    /// TODO. This
-    /// is the default.
+    /// Center the axis label with the tick mark. This is the default.
     Center,
 
-    /// TODO
+    /// Set the axis label to the left of the tick mark.
     Left,
 
-    /// TODO
+    /// Set the axis label to the right of the tick mark.
     Right,
 }
 
