@@ -1574,7 +1574,11 @@ impl Workbook {
                     unique_num_formats.insert(num_format_string.clone(), index);
                     xf_format.set_num_format_index_u16(index);
                     index += 1;
-                    num_formats.push(num_format_string);
+
+                    // Only store XF formats (not DXF formats).
+                    if !xf_format.is_dxf_format {
+                        num_formats.push(num_format_string);
+                    }
                 }
             }
         }

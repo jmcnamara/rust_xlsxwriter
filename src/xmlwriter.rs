@@ -111,6 +111,7 @@ impl XMLWriter {
         )
         .expect(XML_WRITE_ERROR);
     }
+
     // Write an XML element containing data with attributes.
     pub(crate) fn xml_data_element<T>(&mut self, tag: &str, data: &str, attributes: &[T])
     where
@@ -152,6 +153,13 @@ impl XMLWriter {
     // Write the theme string to the theme file.
     pub(crate) fn write_theme(&mut self, theme: &str) {
         writeln!(&mut self.xmlfile, "{theme}").expect(XML_WRITE_ERROR);
+    }
+
+    // Write a string with escaped XML data.
+    pub(crate) fn xml_raw_string(&mut self, data: &str) {
+        self.xmlfile
+            .write_all(data.as_bytes())
+            .expect(XML_WRITE_ERROR);
     }
 }
 

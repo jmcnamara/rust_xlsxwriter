@@ -5,6 +5,12 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.55.0] - 2023-11-XX WIP
+
+### Added
+
+- Added support for conditional formatting.
+
 
 ## [0.54.0] - 2023-11-04
 

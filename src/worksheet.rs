@@ -27,8 +27,9 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, ChartRangeCacheDataType, Color, ExcelDateTime, HeaderImagePosition, Image, IntoColor,
-    IntoExcelDateTime, ObjectMovement, ProtectionOptions, Table, TableFunction, Url,
+    utility, ChartRangeCacheDataType, Color, ConditionalFormatCell, ExcelDateTime,
+    HeaderImagePosition, Image, IntoColor, IntoExcelDateTime, ObjectMovement, ProtectionOptions,
+    Table, TableFunction, Url,
 };
 use crate::{Chart, ChartRangeCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
@@ -210,6 +211,7 @@ pub struct Worksheet {
     filter_automatic_off: bool,
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashSet<(RowNum, ColNum)>,
+    conditional_formats: BTreeMap<(RowNum, ColNum, RowNum, ColNum), Vec<ConditionalFormatCell>>,
 }
 
 impl Default for Worksheet {
@@ -389,6 +391,7 @@ impl Worksheet {
             charts: BTreeMap::new(),
             has_drawing_object_linkage: false,
             cells_with_autofilter: HashSet::new(),
+            conditional_formats: BTreeMap::new(),
         }
     }
 
@@ -5017,6 +5020,67 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
+    ///   when a conditional formatting parameter is incorrect or missing.
+    ///
+    pub fn add_conditional_format(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        conditional_format: &ConditionalFormatCell,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        let mut conditional_format = conditional_format.clone();
+
+        // Validate the conditional format.
+        conditional_format.validate()?;
+
+        // Set the dxf format local index if required.
+        if let Some(format) = conditional_format.format.as_mut() {
+            format.dxf_index = self.format_dxf_index(format);
+        }
+
+        match self
+            .conditional_formats
+            .entry((first_row, first_col, last_row, last_col))
+        {
+            Entry::Occupied(mut entry) => {
+                // The conditional format range already exists. Append the rule.
+                let rules = entry.get_mut();
+                rules.push(conditional_format);
+            }
+            Entry::Vacant(entry) => {
+                // The row doesn't exist, create a new row with columns and insert
+                // the cell value.
+                let rules = vec![conditional_format];
+                entry.insert(rules);
+            }
+        }
+
+        Ok(self)
+    }
+
     /// Protect a worksheet from modification.
     ///
     /// The `protect()` method protects a worksheet from modification. It works
@@ -8634,7 +8698,7 @@ impl Worksheet {
                 styler.writer.xml_end_tag("r");
             } else {
                 styler.writer.xml_start_tag_only("r");
-                styler.write_font(&format.font);
+                styler.write_font(&format.font, false);
                 styler.writer.xml_data_element("t", string, &attributes);
                 styler.writer.xml_end_tag("r");
             }
@@ -8776,14 +8840,16 @@ impl Worksheet {
     ///
     /// `format` - The [`Format`] instance to register.
     ///
-    #[doc(hidden)]
+    #[doc(hidden)] // Set dxf_index (public for testing).
     pub fn format_dxf_index(&mut self, format: &Format) -> u32 {
         match self.dxf_indices.get_mut(format) {
             Some(dxf_index) => *dxf_index,
             None => {
                 let dxf_index = self.dxf_formats.len() as u32;
-                self.dxf_formats.push(format.clone());
-                self.dxf_indices.insert(format.clone(), dxf_index);
+                let mut dxf_format = format.clone();
+                dxf_format.is_dxf_format = true;
+                self.dxf_formats.push(dxf_format.clone());
+                self.dxf_indices.insert(dxf_format, dxf_index);
                 if format.font.is_hyperlink {
                     self.has_hyperlink_style = true;
                 }
@@ -9493,6 +9559,11 @@ impl Worksheet {
             self.write_merge_cells();
         }
 
+        // Write the conditionalFormatting element.
+        if !self.conditional_formats.is_empty() {
+            self.write_conditional_formats();
+        }
+
         // Write the hyperlinks elements.
         if !self.hyperlinks.is_empty() {
             self.write_hyperlinks();
@@ -9831,6 +9902,33 @@ impl Worksheet {
         self.rel_count = ref_id - 1;
 
         self.writer.xml_end_tag("hyperlinks");
+    }
+
+    // Write the <conditionalFormatting> element. TODO
+    fn write_conditional_formats(&mut self) {
+        let mut priority = 1;
+        for (range, conditional_formats) in &self.conditional_formats {
+            let cell_range = utility::cell_range(range.0, range.1, range.2, range.3);
+
+            let attributes = [("sqref", cell_range)];
+
+            self.writer
+                .xml_start_tag("conditionalFormatting", &attributes);
+
+            for conditional_format in conditional_formats {
+                // Get the format dxf_index as a global value.
+                let mut dxf_index: Option<u32> = None;
+                if let Some(format) = conditional_format.format.as_ref() {
+                    dxf_index = Some(self.global_dxf_indices[format.dxf_index as usize]);
+                }
+
+                let rule = conditional_format.get_rule_string(dxf_index, priority);
+                self.writer.xml_raw_string(&rule);
+                priority += 1;
+            }
+
+            self.writer.xml_end_tag("conditionalFormatting");
+        }
     }
 
     // Write the <hyperlink> element.
@@ -11081,7 +11179,7 @@ impl IntoExcelData for &NaiveDate {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_date_to_excel(*self);
+        let number = ExcelDateTime::chrono_date_to_excel(self);
         worksheet.store_datetime(row, col, number, None)
     }
 
@@ -11092,7 +11190,7 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_date_to_excel(*self);
+        let number = ExcelDateTime::chrono_date_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -11105,7 +11203,7 @@ impl IntoExcelData for &NaiveTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_time_to_excel(*self);
+        let number = ExcelDateTime::chrono_time_to_excel(self);
         worksheet.store_datetime(row, col, number, None)
     }
 
@@ -11116,7 +11214,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_time_to_excel(*self);
+        let number = ExcelDateTime::chrono_time_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }

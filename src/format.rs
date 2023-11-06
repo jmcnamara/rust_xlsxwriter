@@ -443,6 +443,7 @@ pub struct Format {
 
     // Non-UI properties.
     pub(crate) quote_prefix: bool,
+    pub(crate) is_dxf_format: bool,
 }
 
 impl Hash for Format {
@@ -522,6 +523,7 @@ impl Format {
             num_format: String::new(),
             num_format_index: 0,
             quote_prefix: false,
+            is_dxf_format: false,
         }
     }
 

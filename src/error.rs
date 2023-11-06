@@ -123,6 +123,10 @@ pub enum XlsxError {
     /// Table name is already in use in the workbook.
     TableNameReused(String),
 
+    /// A general error that is raised when a conditional format parameter is
+    /// incorrect or missing.
+    ConditionalFormatError(String),
+
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -252,6 +256,10 @@ impl fmt::Display for XlsxError {
                     f,
                     "Table name '{name}' has already been used in this workbook.",
                 )
+            }
+
+            XlsxError::ConditionalFormatError(error) => {
+                write!(f, "Conditional format error: '{error}'.")
             }
 
             XlsxError::IoError(error) => {

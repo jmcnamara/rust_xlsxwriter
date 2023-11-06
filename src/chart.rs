@@ -11326,23 +11326,6 @@ impl fmt::Display for ChartAxisDisplayUnitType {
     }
 }
 
-/*
-
-
-types = {
-    "hundreds": "hundreds",
-    "thousands": "thousands",
-    "ten_thousands": "tenThousands",
-    "hundred_thousands": "hundredThousands",
-    "millions": "millions",
-    "ten_millions": "tenMillions",
-    "hundred_millions": "hundredMillions",
-    "billions": "billions",
-    "trillions": "trillions",
-}
-
- */
-
 // -----------------------------------------------------------------------
 // ChartLegend
 // -----------------------------------------------------------------------

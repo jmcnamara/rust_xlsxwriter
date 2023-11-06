@@ -151,6 +151,7 @@
 //!
 mod app;
 mod chart;
+mod conditional_format;
 mod content_types;
 mod core;
 mod custom;
@@ -186,6 +187,7 @@ mod test_functions;
 
 // Re-export the public APIs.
 pub use chart::*;
+pub use conditional_format::*;
 pub use datetime::*;
 pub use error::*;
 pub use filter::*;

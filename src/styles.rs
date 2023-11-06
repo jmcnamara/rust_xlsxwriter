@@ -118,7 +118,7 @@ impl<'a> Styles<'a> {
         for xf_format in self.xf_formats {
             // Write the font element.
             if xf_format.has_font {
-                self.write_font(&xf_format.font);
+                self.write_font(&xf_format.font, false);
             }
         }
 
@@ -126,7 +126,7 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <font> element.
-    pub(crate) fn write_font(&mut self, font: &Font) {
+    pub(crate) fn write_font(&mut self, font: &Font, dxf_format: bool) {
         if self.is_rich_string_style {
             self.writer.xml_start_tag_only("rPr");
         } else {
@@ -153,26 +153,30 @@ impl<'a> Styles<'a> {
             self.write_vert_align(font);
         }
         // Write the sz element.
-        self.write_font_size(font);
+        if !dxf_format {
+            self.write_font_size(font);
+        }
 
         // Write the color element.
-        self.write_font_color(font);
+        self.write_font_color(font, dxf_format);
 
-        // Write the name element.
-        self.write_font_name(font);
+        if !dxf_format {
+            // Write the name element.
+            self.write_font_name(font);
 
-        // Write the family element.
-        if font.family > 0 {
-            self.write_font_family(font);
+            // Write the family element.
+            if font.family > 0 {
+                self.write_font_family(font);
+            }
+
+            // Write the charset element.
+            if font.charset > 0 {
+                self.write_font_charset(font);
+            }
+
+            // Write the scheme element.
+            self.write_font_scheme(font);
         }
-
-        // Write the charset element.
-        if font.charset > 0 {
-            self.write_font_charset(font);
-        }
-
-        // Write the scheme element.
-        self.write_font_scheme(font);
 
         if self.is_rich_string_style {
             self.writer.xml_end_tag("rPr");
@@ -189,7 +193,7 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <color> element.
-    fn write_font_color(&mut self, font: &Font) {
+    fn write_font_color(&mut self, font: &Font, dxf_format: bool) {
         let mut attributes = vec![];
 
         match font.color {
@@ -197,8 +201,10 @@ impl<'a> Styles<'a> {
                 // The color element is omitted for an Automatic color.
             }
             Color::Default => {
-                attributes.push(("theme", "1".to_string()));
-                self.writer.xml_empty_tag("color", &attributes);
+                if !dxf_format {
+                    attributes.push(("theme", "1".to_string()));
+                    self.writer.xml_empty_tag("color", &attributes);
+                }
             }
             _ => {
                 attributes.append(&mut font.color.attributes());
@@ -293,7 +299,7 @@ impl<'a> Styles<'a> {
         for xf_format in self.xf_formats {
             // Write the fill element.
             if xf_format.has_fill {
-                self.write_fill(&xf_format.fill);
+                self.write_fill(&xf_format.fill, false);
             }
         }
 
@@ -310,7 +316,7 @@ impl<'a> Styles<'a> {
     }
 
     // Write the user defined <fill> element.
-    fn write_fill(&mut self, fill: &Fill) {
+    fn write_fill(&mut self, fill: &Fill, dxf_format: bool) {
         // Special handling for pattern only case.
         if fill.pattern != FormatPattern::None
             && (fill.background_color == Color::Default
@@ -326,7 +332,14 @@ impl<'a> Styles<'a> {
         self.writer.xml_start_tag_only("fill");
 
         // Write the fill pattern.
-        let attributes = [("patternType", fill.pattern.to_string())];
+        let mut attributes = vec![("patternType", fill.pattern.to_string())];
+
+        if dxf_format
+            && (fill.pattern == FormatPattern::None || fill.pattern == FormatPattern::Solid)
+        {
+            attributes = vec![];
+        }
+
         self.writer.xml_start_tag("patternFill", &attributes);
 
         // Write the foreground color.
@@ -358,7 +371,7 @@ impl<'a> Styles<'a> {
         for xf_format in self.xf_formats {
             // Write the border element.
             if xf_format.has_border {
-                self.write_border(&xf_format.borders);
+                self.write_border(&xf_format.borders, false);
             }
         }
 
@@ -366,7 +379,7 @@ impl<'a> Styles<'a> {
     }
 
     // Write the <border> element.
-    fn write_border(&mut self, borders: &Border) {
+    fn write_border(&mut self, borders: &Border, dxf_format: bool) {
         match borders.diagonal_type {
             FormatDiagonalBorder::None => {
                 self.writer.xml_start_tag_only("border");
@@ -390,7 +403,15 @@ impl<'a> Styles<'a> {
         self.write_sub_border("right", borders.right_style, borders.right_color);
         self.write_sub_border("top", borders.top_style, borders.top_color);
         self.write_sub_border("bottom", borders.bottom_style, borders.bottom_color);
-        self.write_sub_border("diagonal", borders.diagonal_style, borders.diagonal_color);
+
+        if !dxf_format {
+            self.write_sub_border("diagonal", borders.diagonal_style, borders.diagonal_color);
+        }
+
+        if dxf_format {
+            self.writer.xml_empty_tag_only("vertical");
+            self.writer.xml_empty_tag_only("horizontal");
+        }
 
         self.writer.xml_end_tag("border");
     }
@@ -721,7 +742,7 @@ impl<'a> Styles<'a> {
                 self.writer.xml_start_tag_only("dxf");
 
                 if xf_format.has_dxf_font() {
-                    self.write_font(&xf_format.font);
+                    self.write_font(&xf_format.font, true);
                 }
 
                 if xf_format.num_format_index > 0 {
@@ -729,11 +750,11 @@ impl<'a> Styles<'a> {
                 }
 
                 if xf_format.has_dxf_fill() {
-                    self.write_fill(&xf_format.fill);
+                    self.write_fill(&xf_format.fill, true);
                 }
 
                 if xf_format.has_border {
-                    self.write_border(&xf_format.borders);
+                    self.write_border(&xf_format.borders, true);
                 }
 
                 self.writer.xml_end_tag("dxf");

@@ -71,6 +71,11 @@ documentation and generally show how an individual function works.
 * `app_colors.rs` - A demonstration of the RGB and Theme colors palettes
   available in the rust_xlsxwriter library.
 
+* `app_conditional_formatting.rs` - Example of how to add conditional
+  formatting to a worksheet using the rust_xlsxwriter library. Conditional
+  formatting allows you to apply a format to a cell or a range of cells
+  based on certain criteria.
+
 * `app_defined_name.rs` - Example of how to create defined names using the
   rust_xlsxwriter library. This functionality is used to define user
   friendly variable names to represent a value, a single cell,	or a range
@@ -511,6 +516,14 @@ documentation and generally show how an individual function works.
 
 * `doc_chartrange_new_from_string.rs` - Demonstrates creating a new chart
   range.
+
+* `doc_conditional_format_cell1.rs` - Example of adding a cell type
+  conditional formatting to a worksheet. Cells with values >= 50 are in
+  light red. Values < 50 are in light green.
+
+* `doc_conditional_format_cell2.rs` - Example of adding a cell type
+  conditional formatting to a worksheet. Values between 30 and 70 are
+  highlighted in light red. Values outside that range are in light green.
 
 * `doc_datetime_and_hms.rs` - Demonstrates writing formatted datetimes in
   an Excel worksheet.
