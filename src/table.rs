@@ -55,7 +55,7 @@ use crate::{
 ///     worksheet.write_column(3, 1, items)?;
 ///     worksheet.write_row_matrix(3, 2, data)?;
 ///
-///     // Set the columns widths for clarity.
+///     // Set the column widths for clarity.
 ///     for col_num in 1..=6u16 {
 ///         worksheet.set_column_width(col_num, 12)?;
 ///     }
@@ -171,7 +171,7 @@ impl Table {
     ///     worksheet.write_column(3, 1, items)?;
     ///     worksheet.write_row_matrix(3, 2, data)?;
     ///
-    ///     // Set the columns widths for clarity.
+    ///     // Set the column widths for clarity.
     ///     for col_num in 1..=6u16 {
     ///         worksheet.set_column_width(col_num, 12)?;
     ///     }
@@ -262,7 +262,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -315,7 +315,7 @@ impl Table {
     /// #     worksheet.write_column(2, 1, items)?;
     /// #     worksheet.write_row_matrix(2, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -366,7 +366,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -457,7 +457,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -509,7 +509,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -594,7 +594,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -663,7 +663,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -734,7 +734,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -803,7 +803,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -885,7 +885,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -960,7 +960,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -1058,7 +1058,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -1129,7 +1129,7 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -1416,7 +1416,7 @@ impl Table {
 ///     worksheet.write_column(3, 1, items)?;
 ///     worksheet.write_row_matrix(3, 2, data)?;
 ///
-///     // Set the columns widths for clarity.
+///     // Set the column widths for clarity.
 ///     for col_num in 1..=6u16 {
 ///         worksheet.set_column_width(col_num, 12)?;
 ///     }
@@ -1531,7 +1531,7 @@ impl TableColumn {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -1625,7 +1625,7 @@ impl TableColumn {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -1729,7 +1729,7 @@ impl TableColumn {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -1817,7 +1817,7 @@ impl TableColumn {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -1895,7 +1895,7 @@ impl TableColumn {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the columns widths for clarity.
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
@@ -2012,7 +2012,7 @@ impl Default for TableColumn {
 /// #     worksheet.write_column(3, 1, items)?;
 /// #     worksheet.write_row_matrix(3, 2, data)?;
 /// #
-/// #     // Set the columns widths for clarity.
+/// #     // Set the column widths for clarity.
 /// #     for col_num in 1..=6u16 {
 /// #         worksheet.set_column_width(col_num, 12)?;
 /// #     }
@@ -2137,7 +2137,7 @@ impl fmt::Display for TableFunction {
 /// #     worksheet.write_column(3, 1, items)?;
 /// #     worksheet.write_row_matrix(3, 2, data)?;
 /// #
-/// #     // Set the columns widths for clarity.
+/// #     // Set the column widths for clarity.
 /// #     for col_num in 1..=6u16 {
 /// #         worksheet.set_column_width(col_num, 12)?;
 /// #     }

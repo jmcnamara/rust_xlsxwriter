@@ -27,7 +27,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(3, 1, items)?;
     worksheet.write_row_matrix(3, 2, data)?;
 
-    // Set the columns widths for clarity.
+    // Set the column widths for clarity.
     for col_num in 1..=6u16 {
         worksheet.set_column_width(col_num, 12)?;
     }
