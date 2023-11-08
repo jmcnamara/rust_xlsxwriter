@@ -27,9 +27,9 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, ChartRangeCacheDataType, Color, ConditionalFormatCell, ExcelDateTime,
-    HeaderImagePosition, Image, IntoColor, IntoExcelDateTime, ObjectMovement, ProtectionOptions,
-    Table, TableFunction, Url,
+    utility, ChartRangeCacheDataType, Color, ConditionalFormat, ExcelDateTime, HeaderImagePosition,
+    Image, IntoColor, IntoExcelDateTime, ObjectMovement, ProtectionOptions, Table, TableFunction,
+    Url,
 };
 use crate::{Chart, ChartRangeCacheData};
 use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
@@ -211,7 +211,9 @@ pub struct Worksheet {
     filter_automatic_off: bool,
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashSet<(RowNum, ColNum)>,
-    conditional_formats: BTreeMap<(RowNum, ColNum, RowNum, ColNum), Vec<ConditionalFormatCell>>,
+    #[allow(clippy::type_complexity)] // todo
+    conditional_formats:
+        BTreeMap<(RowNum, ColNum, RowNum, ColNum), Vec<Box<dyn ConditionalFormat + Send>>>,
 }
 
 impl Default for Worksheet {
@@ -5031,14 +5033,17 @@ impl Worksheet {
     /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
     ///   when a conditional formatting parameter is incorrect or missing.
     ///
-    pub fn add_conditional_format(
+    pub fn add_conditional_format<T>(
         &mut self,
         first_row: RowNum,
         first_col: ColNum,
         last_row: RowNum,
         last_col: ColNum,
-        conditional_format: &ConditionalFormatCell,
-    ) -> Result<&mut Worksheet, XlsxError> {
+        conditional_format: &T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: ConditionalFormat + Send,
+    {
         // Check rows and cols are in the allowed range.
         if !self.check_dimensions_only(first_row, first_col)
             || !self.check_dimensions_only(last_row, last_col)
@@ -5051,13 +5056,13 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-        let mut conditional_format = conditional_format.clone();
+        let mut conditional_format = conditional_format.box_clone();
 
         // Validate the conditional format.
         conditional_format.validate()?;
 
         // Set the dxf format local index if required.
-        if let Some(format) = conditional_format.format.as_mut() {
+        if let Some(format) = conditional_format.format_as_mut() {
             format.dxf_index = self.format_dxf_index(format);
         }
 
@@ -9904,7 +9909,7 @@ impl Worksheet {
         self.writer.xml_end_tag("hyperlinks");
     }
 
-    // Write the <conditionalFormatting> element. TODO
+    // Write the <conditionalFormatting> element.
     fn write_conditional_formats(&mut self) {
         let mut priority = 1;
         for (range, conditional_formats) in &self.conditional_formats {
@@ -9918,8 +9923,8 @@ impl Worksheet {
             for conditional_format in conditional_formats {
                 // Get the format dxf_index as a global value.
                 let mut dxf_index: Option<u32> = None;
-                if let Some(format) = conditional_format.format.as_ref() {
-                    dxf_index = Some(self.global_dxf_indices[format.dxf_index as usize]);
+                if let Some(local_index) = conditional_format.format_index() {
+                    dxf_index = Some(self.global_dxf_indices[local_index as usize]);
                 }
 
                 let rule = conditional_format.get_rule_string(dxf_index, priority);

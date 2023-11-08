@@ -15,6 +15,57 @@ use crate::{xmlwriter::XMLWriter, ExcelDateTime, Format, Formula, XlsxError};
 use std::{borrow::Cow, fmt};
 
 // -----------------------------------------------------------------------
+// ConditionalFormat trait
+// -----------------------------------------------------------------------
+
+/// Trait for generic conditional format types.
+///
+pub trait ConditionalFormat {
+    /// Validate the conditional format.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
+    ///   when a conditional formatting parameter is incorrect or missing.
+    ///
+    fn validate(&self) -> Result<(), XlsxError>;
+
+    /// Return the conditional format rule as an XML string.
+    fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String;
+
+    /// Get a mutable reference to the format object in the conditional format.
+    fn format_as_mut(&mut self) -> Option<&mut Format>;
+
+    /// Get the index of the format object in the conditional format.
+    fn format_index(&self) -> Option<u32>;
+
+    /// Clone a reference into a concrete Box type.
+    fn box_clone(&self) -> Box<dyn ConditionalFormat + Send>;
+}
+
+impl ConditionalFormat for ConditionalFormatCell {
+    fn validate(&self) -> Result<(), XlsxError> {
+        self.validate()
+    }
+
+    fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
+        self.get_rule_string(dxf_index, priority)
+    }
+
+    fn format_as_mut(&mut self) -> Option<&mut Format> {
+        self.format_as_mut()
+    }
+
+    fn format_index(&self) -> Option<u32> {
+        self.format_index()
+    }
+
+    fn box_clone(&self) -> Box<dyn ConditionalFormat + Send> {
+        Box::new(self.clone())
+    }
+}
+
+// -----------------------------------------------------------------------
 // ConditionalFormatCell
 // -----------------------------------------------------------------------
 
@@ -306,6 +357,16 @@ impl ConditionalFormatCell {
         writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
+    }
+
+    /// Get the index of the format object in the conditional format.
+    pub(crate) fn format_index(&self) -> Option<u32> {
+        self.format.as_ref().map(|format| format.dxf_index)
+    }
+
+    /// Get a reference to the format object in the conditional format.
+    pub(crate) fn format_as_mut(&mut self) -> Option<&mut Format> {
+        self.format.as_mut()
     }
 }
 
