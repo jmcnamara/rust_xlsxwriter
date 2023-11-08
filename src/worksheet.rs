@@ -211,9 +211,7 @@ pub struct Worksheet {
     filter_automatic_off: bool,
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashSet<(RowNum, ColNum)>,
-    #[allow(clippy::type_complexity)] // todo
-    conditional_formats:
-        BTreeMap<(RowNum, ColNum, RowNum, ColNum), Vec<Box<dyn ConditionalFormat + Send>>>,
+    conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Send>>>,
 }
 
 impl Default for Worksheet {
@@ -5022,7 +5020,17 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
+    /// Add a conditional format to highlight cells based on rules.
+    ///
+    /// Conditional formatting is a feature of Excel which allows you to apply a
+    /// format to a cell or a range of cells based on certain criteria. This is
+    /// generally used to highlight particular values in a range of data.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell_intro.png">
+    ///
+    /// The [`ConditionalFormat`](crate::conditional_format) variants are used to represent the types of
+    /// conditional format that can be applied in Excel.
     ///
     /// # Errors
     ///
@@ -5033,6 +5041,92 @@ impl Worksheet {
     /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
     ///   when a conditional formatting parameter is incorrect or missing.
     ///
+    /// # Parameters
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `conditional_format` - A conditional format instance that implements
+    ///   the [`ConditionalFormat`] trait.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a cell type conditional formatting to a worksheet.
+    /// Cells with values >= 50 are in light red. Values < 50 are in light
+    /// green.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_cell1.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some sample data.
+    /// #     let data = [
+    /// #         [90, 80, 50, 10, 20, 90, 40, 90, 30, 40],
+    /// #         [20, 10, 90, 100, 30, 60, 70, 60, 50, 90],
+    /// #         [10, 50, 60, 50, 20, 50, 80, 30, 40, 60],
+    /// #         [10, 90, 20, 40, 10, 40, 50, 70, 90, 50],
+    /// #         [70, 100, 10, 90, 10, 10, 20, 100, 100, 40],
+    /// #         [20, 60, 10, 100, 30, 10, 20, 60, 100, 10],
+    /// #         [10, 60, 10, 80, 100, 80, 30, 30, 70, 40],
+    /// #         [30, 90, 60, 10, 10, 100, 40, 40, 30, 40],
+    /// #         [80, 90, 10, 20, 20, 50, 80, 20, 60, 90],
+    /// #         [60, 80, 30, 30, 10, 50, 80, 60, 50, 30],
+    /// #     ];
+    /// #     worksheet.write_row_matrix(2, 1, data)?;
+    /// #
+    /// #     // Set the column widths for clarity.
+    /// #     for col_num in 1..=10u16 {
+    /// #         worksheet.set_column_width(col_num, 6)?;
+    /// #     }
+    /// #
+    /// #     // Add a format. Light red fill with dark red text.
+    /// #     let format1 = Format::new()
+    /// #         .set_font_color("9C0006")
+    /// #         .set_background_color("FFC7CE");
+    /// #
+    /// #     // Add a format. Green fill with dark green text.
+    /// #     let format2 = Format::new()
+    /// #         .set_font_color("006100")
+    /// #         .set_background_color("C6EFCE");
+    /// #
+    ///     // Write a conditional format over a range.
+    ///     let conditional_format = ConditionalFormatCell::new()
+    ///         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+    ///         .set_value(50)
+    ///         .set_format(format1);
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+    ///
+    ///     // Write another conditional format over the same range.
+    ///     let conditional_format = ConditionalFormatCell::new()
+    ///         .set_criteria(ConditionalFormatCellCriteria::LessThan)
+    ///         .set_value(50)
+    ///         .set_format(format2);
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell1.png">
+    ///
+
     pub fn add_conditional_format<T>(
         &mut self,
         first_row: RowNum,
@@ -5058,6 +5152,13 @@ impl Worksheet {
 
         let mut conditional_format = conditional_format.box_clone();
 
+        // Store the conditional formats based on their range.
+        let mut cell_range = utility::cell_range(first_row, first_col, last_row, last_col);
+        let multi_range = conditional_format.multi_range();
+        if !multi_range.is_empty() {
+            cell_range = multi_range;
+        }
+
         // Validate the conditional format.
         conditional_format.validate()?;
 
@@ -5066,10 +5167,7 @@ impl Worksheet {
             format.dxf_index = self.format_dxf_index(format);
         }
 
-        match self
-            .conditional_formats
-            .entry((first_row, first_col, last_row, last_col))
-        {
+        match self.conditional_formats.entry(cell_range) {
             Entry::Occupied(mut entry) => {
                 // The conditional format range already exists. Append the rule.
                 let rules = entry.get_mut();
@@ -9912,10 +10010,8 @@ impl Worksheet {
     // Write the <conditionalFormatting> element.
     fn write_conditional_formats(&mut self) {
         let mut priority = 1;
-        for (range, conditional_formats) in &self.conditional_formats {
-            let cell_range = utility::cell_range(range.0, range.1, range.2, range.3);
-
-            let attributes = [("sqref", cell_range)];
+        for (cell_range, conditional_formats) in &self.conditional_formats {
+            let attributes = [("sqref", cell_range.as_str())];
 
             self.writer
                 .xml_start_tag("conditionalFormatting", &attributes);

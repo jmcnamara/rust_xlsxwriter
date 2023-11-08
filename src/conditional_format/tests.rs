@@ -224,7 +224,8 @@ mod conditional_format_tests {
         let conditional_format = ConditionalFormatCell::new()
             .set_criteria(ConditionalFormatCellCriteria::NotBetween)
             .set_minimum(20)
-            .set_maximum(30);
+            .set_maximum(30)
+            .set_multi_range("A1:A4"); // Additional test for multi_range.
 
         worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
 

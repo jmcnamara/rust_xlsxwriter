@@ -151,7 +151,6 @@
 //!
 mod app;
 mod chart;
-mod conditional_format;
 mod content_types;
 mod core;
 mod custom;
@@ -178,6 +177,7 @@ mod workbook;
 mod worksheet;
 mod xmlwriter;
 
+pub mod conditional_format;
 pub mod cookbook;
 pub mod tutorial;
 pub mod utility;

@@ -4,6 +4,19 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+//! TODO some general docs for Conditional Formats.
+//!
+//!
+//!
+//! # Excel's limitations on conditional format properties
+//!
+//! Not all of Excel's cell format properties can be modified with a conditional
+//! format. Properties that **cannot** be modified in a conditional format are
+//! font name, font size, superscript and subscript, diagonal borders, all
+//! alignment properties and all protection properties.
+//!
+//!
+
 #![warn(missing_docs)]
 
 mod tests;
@@ -39,31 +52,43 @@ pub trait ConditionalFormat {
     /// Get the index of the format object in the conditional format.
     fn format_index(&self) -> Option<u32>;
 
+    /// Get the multi-cell range for the conditional format, if present.
+    fn multi_range(&self) -> String;
+
     /// Clone a reference into a concrete Box type.
     fn box_clone(&self) -> Box<dyn ConditionalFormat + Send>;
 }
 
-impl ConditionalFormat for ConditionalFormatCell {
-    fn validate(&self) -> Result<(), XlsxError> {
-        self.validate()
-    }
+macro_rules! generate_conditional_format_impls {
+    ($($t:ty)*) => ($(
+        impl ConditionalFormat for $t {
+            fn validate(&self) -> Result<(), XlsxError> {
+                self.validate()
+            }
 
-    fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
-        self.get_rule_string(dxf_index, priority)
-    }
+            fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
+                self.get_rule_string(dxf_index, priority)
+            }
 
-    fn format_as_mut(&mut self) -> Option<&mut Format> {
-        self.format_as_mut()
-    }
+            fn format_as_mut(&mut self) -> Option<&mut Format> {
+                self.format_as_mut()
+            }
 
-    fn format_index(&self) -> Option<u32> {
-        self.format_index()
-    }
+            fn format_index(&self) -> Option<u32> {
+                self.format_index()
+            }
 
-    fn box_clone(&self) -> Box<dyn ConditionalFormat + Send> {
-        Box::new(self.clone())
-    }
+            fn multi_range(&self) -> String {
+                self.multi_range()
+            }
+
+            fn box_clone(&self) -> Box<dyn ConditionalFormat + Send> {
+                Box::new(self.clone())
+            }
+        }
+    )*)
 }
+generate_conditional_format_impls!(ConditionalFormatCell);
 
 // -----------------------------------------------------------------------
 // ConditionalFormatCell
@@ -235,10 +260,12 @@ pub struct ConditionalFormatCell {
     minimum: ConditionalFormatValue,
     maximum: ConditionalFormatValue,
     criteria: ConditionalFormatCellCriteria,
+    multi_range: String,
     stop_if_true: bool,
     pub(crate) format: Option<Format>,
 }
 
+/// The following methods are specific to `ConditionalFormatCell`.
 impl ConditionalFormatCell {
     /// Create a new Cell conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -247,17 +274,125 @@ impl ConditionalFormatCell {
             minimum: ConditionalFormatValue::new_from_string(""),
             maximum: ConditionalFormatValue::new_from_string(""),
             criteria: ConditionalFormatCellCriteria::None,
+            multi_range: String::new(),
             stop_if_true: false,
             format: None,
         }
     }
 
     /// Set the value of the Cell conditional format rule.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    ///   which is effectively all types supported by Excel.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a cell type conditional formatting to a worksheet. Cells
+    /// with values >= 50 are in light green.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_cell_set_value.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some sample data.
+    /// #     let data = [10, 80, 50, 10, 20, 60, 40, 70, 30, 40];
+    /// #
+    /// #     worksheet.write_column(0, 0, data)?;
+    /// #
+    /// #     // Add a format. Green fill with dark green text.
+    /// #     let format = Format::new()
+    /// #         .set_font_color("006100")
+    /// #         .set_background_color("C6EFCE");
+    /// #
+    ///     // Write a conditional format over a range.
+    ///     let conditional_format = ConditionalFormatCell::new()
+    ///         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+    ///         .set_value(50)
+    ///         .set_format(format);
+    ///
+    ///     worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_cell_set_value.png">
+    ///
     pub fn set_value(self, value: impl Into<ConditionalFormatValue>) -> ConditionalFormatCell {
         self.set_minimum(value)
     }
 
-    /// Set the minimum value of the Cell conditional format rule.
+    /// Set the minimum value of the Cell "between" and "not between"
+    /// conditional format rules.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    ///   which is effectively all types supported by Excel.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a cell type conditional formatting to a worksheet.
+    /// Values between 40 and 60 are highlighted in light green.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_cell_set_minimum.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some sample data.
+    /// #     let data = [10, 80, 50, 10, 20, 60, 40, 70, 30, 40];
+    /// #
+    /// #     worksheet.write_column(0, 0, data)?;
+    /// #
+    /// #     // Add a format. Green fill with dark green text.
+    /// #     let format = Format::new()
+    /// #         .set_font_color("006100")
+    /// #         .set_background_color("C6EFCE");
+    /// #
+    ///     // Write a conditional format over a range.
+    ///     let conditional_format = ConditionalFormatCell::new()
+    ///         .set_criteria(ConditionalFormatCellCriteria::Between)
+    ///         .set_minimum(40)
+    ///         .set_maximum(60)
+    ///         .set_format(format);
+    ///
+    ///     worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell_set_minimum.png">
+    ///
     pub fn set_minimum(
         mut self,
         value: impl Into<ConditionalFormatValue>,
@@ -267,7 +402,16 @@ impl ConditionalFormatCell {
         self
     }
 
-    /// Set the maximum value of the Cell conditional format rule.
+    /// Set the maximum value of the Cell "between" and "not between"
+    /// conditional format rules.
+    ///
+    /// Set the example above.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    ///   which is effectively all types supported by Excel.
+    ///
     pub fn set_maximum(
         mut self,
         value: impl Into<ConditionalFormatValue>,
@@ -277,24 +421,18 @@ impl ConditionalFormatCell {
         self
     }
 
-    /// Set the criteria of the Cell conditional format rule.
+    /// Set the criteria for the conditional format rule such as `=`, `!=`, `>`,
+    /// `<`, `>=`, `<=`, `between` or `not between`.
+    ///
+    /// # Parameters
+    ///
+    /// * `criteria` - A [`ConditionalFormatCellCriteria`] enum value.
+    ///
     pub fn set_criteria(
         mut self,
         criteria: ConditionalFormatCellCriteria,
     ) -> ConditionalFormatCell {
         self.criteria = criteria;
-        self
-    }
-
-    /// Set the format of the Cell conditional format rule.
-    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatCell {
-        self.format = Some(format.into());
-        self
-    }
-
-    /// Set the "Stop if True" option for the Cell conditional format rule.
-    pub fn set_stop_if_true(mut self, enable: bool) -> ConditionalFormatCell {
-        self.stop_if_true = enable;
         self
     }
 
@@ -357,16 +495,6 @@ impl ConditionalFormatCell {
         writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
-    }
-
-    /// Get the index of the format object in the conditional format.
-    pub(crate) fn format_index(&self) -> Option<u32> {
-        self.format.as_ref().map(|format| format.dxf_index)
-    }
-
-    /// Get a reference to the format object in the conditional format.
-    pub(crate) fn format_as_mut(&mut self) -> Option<&mut Format> {
-        self.format.as_mut()
     }
 }
 
@@ -532,3 +660,90 @@ impl fmt::Display for ConditionalFormatCellCriteria {
         }
     }
 }
+
+// -----------------------------------------------------------------------
+// Generate common methods.
+// -----------------------------------------------------------------------
+macro_rules! generate_conditional_common_methods {
+    ($($t:ty)*) => ($(
+
+    /// The following methods are common to all conditional formatting variants.
+    impl $t {
+        /// Set the [`Format`] of the conditional format rule.
+        ///
+        /// Set the [`Format`] that will be applied to the cell range if the conditional
+        /// format rule applies. Not all cell format properties can be set in a
+        /// conditional format. See [Excel's limitations on conditional format
+        /// properties](#excels-limitations-on-conditional-format-properties) for
+        /// more information.
+        ///
+        /// See the examples above.
+        ///
+        /// # Parameters
+        ///
+        /// * `format` - The [`Format`] property for the conditional format.
+        ///
+        pub fn set_format(mut self, format: impl Into<Format>) -> $t {
+            self.format = Some(format.into());
+            self
+        }
+
+        /// Set an additional multi-cell range for the conditional format.
+        ///
+        /// The `set_multi_range()` method is used to extend a conditional format
+        /// over non-contiguous ranges.
+        ///
+        /// It is possible to apply a conditional format to different cell ranges in
+        /// a worksheet using multiple calls to
+        /// [`Worksheet::add_conditional_format()`](crate::Worksheet::add_conditional_format).
+        /// However, as a minor optimization it is also possible in Excel to apply
+        /// the same conditional format to different non-contiguous cell ranges.
+        ///
+        /// This is replicated in the `rust_xlsxwriter` conditional formats using
+        /// the `set_multi_range()` method. The range must contain the primary range
+        /// for the conditional format and any others separated by spaces. For
+        /// example a range like `"A1:A3 A5 B3:K6 B9:K12"`.
+        ///
+        /// # Parameters
+        ///
+        /// * `range` - A string like type representing an Excel range.
+        ///
+        pub fn set_multi_range(mut self, range: impl Into<String>) -> $t {
+            self.multi_range = range.into();
+            self
+        }
+
+        /// Set the "Stop if True" option for the conditional format rule.
+        ///
+        /// The `set_stop_if_true()` method can be used to set the “Stop if true”
+        /// feature of a conditional formatting rule when more than one rule is
+        /// applied to a cell or a range of cells. When this parameter is set then
+        /// subsequent rules are not evaluated if the current rule is true.
+        ///
+        /// # Parameters
+        ///
+        /// * `enable` - Turn the property on/off. It is off by default.
+        ///
+        pub fn set_stop_if_true(mut self, enable: bool) -> $t {
+            self.stop_if_true = enable;
+            self
+        }
+
+        // Get the index of the format object in the conditional format.
+        pub(crate) fn format_index(&self) -> Option<u32> {
+            self.format.as_ref().map(|format| format.dxf_index)
+        }
+
+        // Get a reference to the format object in the conditional format.
+        pub(crate) fn format_as_mut(&mut self) -> Option<&mut Format> {
+            self.format.as_mut()
+        }
+
+        // Get the multi-cell range for the conditional format, if present.
+        pub(crate) fn multi_range(&self) -> String {
+            self.multi_range.clone()
+        }
+    }
+    )*)
+}
+generate_conditional_common_methods!(ConditionalFormatCell);
