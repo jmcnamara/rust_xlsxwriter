@@ -88,7 +88,7 @@ macro_rules! generate_conditional_format_impls {
         }
     )*)
 }
-generate_conditional_format_impls!(ConditionalFormatCell);
+generate_conditional_format_impls!(ConditionalFormatCell ConditionalFormatDuplicate);
 
 // -----------------------------------------------------------------------
 // ConditionalFormatCell
@@ -499,6 +499,156 @@ impl ConditionalFormatCell {
 }
 
 // -----------------------------------------------------------------------
+// ConditionalFormatDuplicate
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatDuplicate` struct represents a Duplicate/Unique
+/// conditional format.
+///
+/// `ConditionalFormatDuplicate` is used to represent a Duplicate or Unique
+/// style conditional format in Excel. Duplicate conditional formats show
+/// duplicated values in a range while Unique conditional formats show unique
+/// values.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_duplicate_intro.png">
+///
+///
+/// # Examples
+///
+/// Example of how to add a duplicate/unique conditional formatting to a
+/// worksheet. Duplicate values are in light red. Unique values are in light
+/// green. Note, that we invert the Duplicate rule to get Unique values.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_duplicate.rs
+/// #
+/// # use rust_xlsxwriter::{ConditionalFormatDuplicate, Format, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some sample data.
+/// #     let data = [
+/// #         [34, 72, 38, 30, 75, 48, 75, 66, 84, 86],
+/// #         [6, 24, 1, 84, 54, 62, 60, 3, 26, 59],
+/// #         [28, 79, 97, 13, 85, 93, 93, 22, 5, 14],
+/// #         [27, 71, 40, 17, 18, 79, 90, 93, 29, 47],
+/// #         [88, 25, 33, 23, 67, 1, 59, 79, 47, 36],
+/// #         [24, 100, 20, 88, 29, 33, 38, 54, 54, 88],
+/// #         [6, 57, 88, 28, 10, 26, 37, 7, 41, 48],
+/// #         [52, 78, 1, 96, 26, 45, 47, 33, 96, 36],
+/// #         [60, 54, 81, 66, 81, 90, 80, 93, 12, 55],
+/// #         [70, 5, 46, 14, 71, 19, 66, 36, 41, 21],
+/// #     ];
+/// #     worksheet.write_row_matrix(2, 1, data)?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     for col_num in 1..=10u16 {
+/// #         worksheet.set_column_width(col_num, 6)?;
+/// #     }
+/// #
+/// #     // Add a format. Light red fill with dark red text.
+/// #     let format1 = Format::new()
+/// #         .set_font_color("9C0006")
+/// #         .set_background_color("FFC7CE");
+/// #
+/// #     // Add a format. Green fill with dark green text.
+/// #     let format2 = Format::new()
+/// #         .set_font_color("006100")
+/// #         .set_background_color("C6EFCE");
+/// #
+///     // Write a conditional format over a range.
+///     let conditional_format = ConditionalFormatDuplicate::new().set_format(format1);
+///
+///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+///
+///     // Invert the duplicate conditional format to show uniques values.
+///     let conditional_format = ConditionalFormatDuplicate::new()
+///         .invert()
+///         .set_format(format2);
+///
+///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_duplicate.png">
+///
+#[derive(Clone)]
+pub struct ConditionalFormatDuplicate {
+    is_unique: bool,
+    multi_range: String,
+    stop_if_true: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// The following methods are specific to `ConditionalFormatDuplicate`.
+impl ConditionalFormatDuplicate {
+    /// Create a new Duplicate conditional format struct.
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ConditionalFormatDuplicate {
+        ConditionalFormatDuplicate {
+            is_unique: false,
+            multi_range: String::new(),
+            stop_if_true: false,
+            format: None,
+        }
+    }
+
+    /// Invert the functionality of the conditional format to get unique values
+    /// instead of duplicate values.
+    ///
+    /// See the example above.
+    ///
+    pub fn invert(mut self) -> ConditionalFormatDuplicate {
+        self.is_unique = true;
+        self
+    }
+
+    // Validate the conditional format.
+    #[allow(clippy::unnecessary_wraps)]
+    #[allow(clippy::unused_self)]
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![];
+
+        if self.is_unique {
+            attributes.push(("type", "uniqueValues".to_string()));
+        } else {
+            attributes.push(("type", "duplicateValues".to_string()));
+        }
+
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        attributes.push(("priority", priority.to_string()));
+
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        writer.xml_empty_tag("cfRule", &attributes);
+
+        writer.read_to_string()
+    }
+}
+
+// -----------------------------------------------------------------------
 // ConditionalFormatValue
 // -----------------------------------------------------------------------
 
@@ -746,4 +896,4 @@ macro_rules! generate_conditional_common_methods {
     }
     )*)
 }
-generate_conditional_common_methods!(ConditionalFormatCell);
+generate_conditional_common_methods!(ConditionalFormatCell ConditionalFormatDuplicate);

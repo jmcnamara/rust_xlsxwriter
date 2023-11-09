@@ -187,7 +187,6 @@ mod test_functions;
 
 // Re-export the public APIs.
 pub use chart::*;
-pub use conditional_format::*;
 pub use datetime::*;
 pub use error::*;
 pub use filter::*;
@@ -201,6 +200,8 @@ pub use url::*;
 pub use workbook::*;
 pub use worksheet::*;
 
+#[doc(hidden)]
+pub use conditional_format::*;
 #[doc(hidden)]
 pub use utility::*;
 
