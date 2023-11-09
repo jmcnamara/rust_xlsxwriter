@@ -10,7 +10,8 @@
 
 use rust_xlsxwriter::{
     ConditionalFormatAverage, ConditionalFormatAverageCriteria, ConditionalFormatCell,
-    ConditionalFormatCellCriteria, ConditionalFormatDuplicate, Format, Workbook, XlsxError,
+    ConditionalFormatCellCriteria, ConditionalFormatDuplicate, ConditionalFormatTop, Format,
+    Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -173,6 +174,41 @@ fn main() -> Result<(), XlsxError> {
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatAverage::new()
         .set_criteria(ConditionalFormatAverageCriteria::BelowAverage)
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // -----------------------------------------------------------------------
+    // Example 5. Top and Bottom range conditional formats.
+    // -----------------------------------------------------------------------
+    let caption = "Top 10 values are in light red. Bottom 10 values are in light green.";
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write the caption.
+    worksheet.write(0, 1, caption)?;
+
+    // Write the worksheet data.
+    worksheet.write_row_matrix(2, 1, data)?;
+
+    // Set the column widths for clarity.
+    for col_num in 1..=10u16 {
+        worksheet.set_column_width(col_num, 6)?;
+    }
+
+    // Write a conditional format over a range.
+    let conditional_format = ConditionalFormatTop::new()
+        .set_value(10)
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Invert the Top conditional format to show Bottom values in the same
+    // range.
+    let conditional_format = ConditionalFormatTop::new()
+        .invert()
+        .set_value(10)
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
