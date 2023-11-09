@@ -9,8 +9,8 @@
 //! cells based on certain criteria.
 
 use rust_xlsxwriter::{
-    ConditionalFormatCell, ConditionalFormatCellCriteria, ConditionalFormatDuplicate, Format,
-    Workbook, XlsxError,
+    ConditionalFormatAverage, ConditionalFormatAverageCriteria, ConditionalFormatCell,
+    ConditionalFormatCellCriteria, ConditionalFormatDuplicate, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -142,6 +142,37 @@ fn main() -> Result<(), XlsxError> {
     // same range.
     let conditional_format = ConditionalFormatDuplicate::new()
         .invert()
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // -----------------------------------------------------------------------
+    // Example 4. Above and Below Average conditional formats.
+    // -----------------------------------------------------------------------
+    let caption = "Above average values are in light red. Below average values are in light green.";
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write the caption.
+    worksheet.write(0, 1, caption)?;
+
+    // Write the worksheet data.
+    worksheet.write_row_matrix(2, 1, data)?;
+
+    // Set the column widths for clarity.
+    for col_num in 1..=10u16 {
+        worksheet.set_column_width(col_num, 6)?;
+    }
+
+    // Write a conditional format over a range. The default criteria is Above Average.
+    let conditional_format = ConditionalFormatAverage::new().set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Write another conditional format over the same range.
+    let conditional_format = ConditionalFormatAverage::new()
+        .set_criteria(ConditionalFormatAverageCriteria::BelowAverage)
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;

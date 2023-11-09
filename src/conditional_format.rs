@@ -4,7 +4,9 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! TODO some general docs for Conditional Formats.
+//! Working with Conditional Formats
+//!
+//! TODO
 //!
 //!
 //!
@@ -88,7 +90,7 @@ macro_rules! generate_conditional_format_impls {
         }
     )*)
 }
-generate_conditional_format_impls!(ConditionalFormatCell ConditionalFormatDuplicate);
+generate_conditional_format_impls!(ConditionalFormatCell ConditionalFormatDuplicate ConditionalFormatAverage);
 
 // -----------------------------------------------------------------------
 // ConditionalFormatCell
@@ -102,6 +104,8 @@ generate_conditional_format_impls!(ConditionalFormatCell ConditionalFormatDuplic
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell_intro.png">
+///
+/// For more information see [Working with Conditional Formats](crate::conditional_format).
 ///
 /// # Examples
 ///
@@ -265,7 +269,7 @@ pub struct ConditionalFormatCell {
     pub(crate) format: Option<Format>,
 }
 
-/// The following methods are specific to `ConditionalFormatCell`.
+/// **Section 1**: The following methods are specific to `ConditionalFormatCell`.
 impl ConditionalFormatCell {
     /// Create a new Cell conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -513,6 +517,7 @@ impl ConditionalFormatCell {
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_duplicate_intro.png">
 ///
+/// For more information see [Working with Conditional Formats](crate::conditional_format).
 ///
 /// # Examples
 ///
@@ -591,7 +596,7 @@ pub struct ConditionalFormatDuplicate {
     pub(crate) format: Option<Format>,
 }
 
-/// The following methods are specific to `ConditionalFormatDuplicate`.
+/// **Section 1**: The following methods are specific to `ConditionalFormatDuplicate`.
 impl ConditionalFormatDuplicate {
     /// Create a new Duplicate conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -640,6 +645,206 @@ impl ConditionalFormatDuplicate {
 
         if self.stop_if_true {
             attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        writer.xml_empty_tag("cfRule", &attributes);
+
+        writer.read_to_string()
+    }
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatAverage
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatAverage` struct represents an Average/Standard
+/// Deviation style conditional format.
+///
+/// `ConditionalFormatAverage` is used to represent a Average or Standard Deviation style
+/// conditional format in Excel.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_average_intro.png">
+///
+/// For more information see [Working with Conditional
+/// Formats](crate::conditional_format).
+///
+/// # Examples
+///
+/// Example of how to add Average conditional formatting to a worksheet. Above
+/// average values are in light red. Below average values are in light green.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_average.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     ConditionalFormatAverage, ConditionalFormatAverageCriteria, Format, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some sample data.
+/// #     let data = [
+/// #         [34, 72, 38, 30, 75, 48, 75, 66, 84, 86],
+/// #         [6, 24, 1, 84, 54, 62, 60, 3, 26, 59],
+/// #         [28, 79, 97, 13, 85, 93, 93, 22, 5, 14],
+/// #         [27, 71, 40, 17, 18, 79, 90, 93, 29, 47],
+/// #         [88, 25, 33, 23, 67, 1, 59, 79, 47, 36],
+/// #         [24, 100, 20, 88, 29, 33, 38, 54, 54, 88],
+/// #         [6, 57, 88, 28, 10, 26, 37, 7, 41, 48],
+/// #         [52, 78, 1, 96, 26, 45, 47, 33, 96, 36],
+/// #         [60, 54, 81, 66, 81, 90, 80, 93, 12, 55],
+/// #         [70, 5, 46, 14, 71, 19, 66, 36, 41, 21],
+/// #     ];
+/// #     worksheet.write_row_matrix(2, 1, data)?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     for col_num in 1..=10u16 {
+/// #         worksheet.set_column_width(col_num, 6)?;
+/// #     }
+/// #
+/// #     // Add a format. Light red fill with dark red text.
+/// #     let format1 = Format::new()
+/// #         .set_font_color("9C0006")
+/// #         .set_background_color("FFC7CE");
+/// #
+/// #     // Add a format. Green fill with dark green text.
+/// #     let format2 = Format::new()
+/// #         .set_font_color("006100")
+/// #         .set_background_color("C6EFCE");
+/// #
+///     // Write a conditional format. The default criteria is Above Average.
+///     let conditional_format = ConditionalFormatAverage::new().set_format(format1);
+///
+///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+///
+///     // Write another conditional format over the same range.
+///     let conditional_format = ConditionalFormatAverage::new()
+///         .set_criteria(ConditionalFormatAverageCriteria::BelowAverage)
+///         .set_format(format2);
+///
+///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_average.png">
+///
+#[derive(Clone)]
+pub struct ConditionalFormatAverage {
+    criteria: ConditionalFormatAverageCriteria,
+    multi_range: String,
+    stop_if_true: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// **Section 1**: The following methods are specific to `ConditionalFormatAverage`.
+impl ConditionalFormatAverage {
+    /// Create a new Average conditional format struct.
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ConditionalFormatAverage {
+        ConditionalFormatAverage {
+            criteria: ConditionalFormatAverageCriteria::AboveAverage,
+            multi_range: String::new(),
+            stop_if_true: false,
+            format: None,
+        }
+    }
+
+    /// Set the criteria for the Average conditional format rule such as above
+    /// or below average or standard deviation ranges.
+    ///
+    /// # Parameters
+    ///
+    /// * `criteria` - A [`ConditionalFormatAverageCriteria`] enum value.
+    ///
+    pub fn set_criteria(
+        mut self,
+        criteria: ConditionalFormatAverageCriteria,
+    ) -> ConditionalFormatAverage {
+        self.criteria = criteria;
+        self
+    }
+
+    // Validate the conditional format.
+    #[allow(clippy::unnecessary_wraps)]
+    #[allow(clippy::unused_self)]
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![("type", "aboveAverage".to_string())];
+
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        attributes.push(("priority", priority.to_string()));
+
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        // Set the Average specific attributes.
+        match self.criteria {
+            ConditionalFormatAverageCriteria::AboveAverage => {
+                // There are no additional attributes for above average.
+            }
+
+            ConditionalFormatAverageCriteria::BelowAverage => {
+                attributes.push(("aboveAverage", "0".to_string()));
+            }
+
+            ConditionalFormatAverageCriteria::EqualOrAboveAverage => {
+                attributes.push(("equalAverage", "1".to_string()));
+            }
+
+            ConditionalFormatAverageCriteria::EqualOrBelowAverage => {
+                attributes.push(("aboveAverage", "0".to_string()));
+                attributes.push(("equalAverage", "1".to_string()));
+            }
+
+            ConditionalFormatAverageCriteria::OneStandardDeviationAbove => {
+                attributes.push(("stdDev", "1".to_string()));
+            }
+
+            ConditionalFormatAverageCriteria::OneStandardDeviationBelow => {
+                attributes.push(("aboveAverage", "0".to_string()));
+                attributes.push(("stdDev", "1".to_string()));
+            }
+
+            ConditionalFormatAverageCriteria::TwoStandardDeviationsAbove => {
+                attributes.push(("stdDev", "2".to_string()));
+            }
+
+            ConditionalFormatAverageCriteria::TwoStandardDeviationsBelow => {
+                attributes.push(("aboveAverage", "0".to_string()));
+
+                attributes.push(("stdDev", "2".to_string()));
+            }
+
+            ConditionalFormatAverageCriteria::ThreeStandardDeviationsAbove => {
+                attributes.push(("stdDev", "3".to_string()));
+            }
+
+            ConditionalFormatAverageCriteria::ThreeStandardDeviationsBelow => {
+                attributes.push(("aboveAverage", "0".to_string()));
+
+                attributes.push(("stdDev", "3".to_string()));
+            }
         }
 
         writer.xml_empty_tag("cfRule", &attributes);
@@ -812,12 +1017,62 @@ impl fmt::Display for ConditionalFormatCellCriteria {
 }
 
 // -----------------------------------------------------------------------
+// ConditionalFormatAverageCriteria
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatAverageCriteria` enum defines the conditional format
+/// criteria for [`ConditionalFormatCell`] .
+///
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ConditionalFormatAverageCriteria {
+    /// Show the conditional format for cells above the average for the range.
+    /// This is the default.
+    AboveAverage,
+
+    /// Show the conditional format for cells below the average for the range.
+    BelowAverage,
+
+    /// Show the conditional format for cells above or equal to the average for
+    /// the range.
+    EqualOrAboveAverage,
+
+    /// Show the conditional format for cells below or equal to the average for
+    /// the range.
+    EqualOrBelowAverage,
+
+    /// Show the conditional format for cells 1 standard deviation above the
+    /// average for the range.
+    OneStandardDeviationAbove,
+
+    /// Show the conditional format for cells 1 standard deviation below the
+    /// average for the range.
+    OneStandardDeviationBelow,
+
+    /// Show the conditional format for cells 2 standard deviation above the
+    /// average for the range.
+    TwoStandardDeviationsAbove,
+
+    /// Show the conditional format for cells 2 standard deviation below the
+    /// average for the range.
+    TwoStandardDeviationsBelow,
+
+    /// Show the conditional format for cells 3 standard deviation above the
+    /// average for the range.
+    ThreeStandardDeviationsAbove,
+
+    /// Show the conditional format for cells 3 standard deviation below the
+    /// average for the range.
+    ThreeStandardDeviationsBelow,
+}
+
+// -----------------------------------------------------------------------
 // Generate common methods.
 // -----------------------------------------------------------------------
 macro_rules! generate_conditional_common_methods {
     ($($t:ty)*) => ($(
 
-    /// The following methods are common to all conditional formatting variants.
+    /// **Section 2**: The following methods are common to all conditional
+    /// formatting variants.
     impl $t {
         /// Set the [`Format`] of the conditional format rule.
         ///
@@ -896,4 +1151,4 @@ macro_rules! generate_conditional_common_methods {
     }
     )*)
 }
-generate_conditional_common_methods!(ConditionalFormatCell ConditionalFormatDuplicate);
+generate_conditional_common_methods!(ConditionalFormatCell ConditionalFormatDuplicate ConditionalFormatAverage);

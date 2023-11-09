@@ -9,6 +9,8 @@ mod conditional_format_tests {
 
     use crate::test_functions::xml_to_vec;
     use crate::worksheet::*;
+    use crate::ConditionalFormatAverage;
+    use crate::ConditionalFormatAverageCriteria;
     use crate::ConditionalFormatCell;
     use crate::ConditionalFormatCellCriteria;
     use crate::ConditionalFormatDuplicate;
@@ -341,6 +343,123 @@ mod conditional_format_tests {
               <conditionalFormatting sqref="A1:A4">
                 <cfRule type="duplicateValues" priority="1"/>
                 <cfRule type="uniqueValues" priority="2"/>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_05() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 10)?;
+        worksheet.write(1, 0, 20)?;
+        worksheet.write(2, 0, 30)?;
+        worksheet.write(3, 0, 40)?;
+
+        let conditional_format = ConditionalFormatAverage::new();
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::BelowAverage);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::EqualOrAboveAverage);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::EqualOrBelowAverage);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::OneStandardDeviationAbove);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::OneStandardDeviationBelow);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::TwoStandardDeviationsAbove);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::TwoStandardDeviationsBelow);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::ThreeStandardDeviationsAbove);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatAverage::new()
+            .set_criteria(ConditionalFormatAverageCriteria::ThreeStandardDeviationsBelow);
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A4"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>20</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>30</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>40</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1:A4">
+                <cfRule type="aboveAverage" priority="1"/>
+                <cfRule type="aboveAverage" priority="2" aboveAverage="0"/>
+                <cfRule type="aboveAverage" priority="3" equalAverage="1"/>
+                <cfRule type="aboveAverage" priority="4" aboveAverage="0" equalAverage="1"/>
+                <cfRule type="aboveAverage" priority="5" stdDev="1"/>
+                <cfRule type="aboveAverage" priority="6" aboveAverage="0" stdDev="1"/>
+                <cfRule type="aboveAverage" priority="7" stdDev="2"/>
+                <cfRule type="aboveAverage" priority="8" aboveAverage="0" stdDev="2"/>
+                <cfRule type="aboveAverage" priority="9" stdDev="3"/>
+                <cfRule type="aboveAverage" priority="10" aboveAverage="0" stdDev="3"/>
               </conditionalFormatting>
               <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
             </worksheet>
