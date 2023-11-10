@@ -48,7 +48,7 @@ fn main() -> Result<(), XlsxError> {
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
-    // Invert the duplicate conditional format to show uniques values.
+    // Invert the duplicate conditional format to show unique values.
     let conditional_format = ConditionalFormatDuplicate::new()
         .invert()
         .set_format(format2);

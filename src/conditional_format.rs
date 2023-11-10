@@ -4,21 +4,195 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! Working with Conditional Formats
+//! # Working with Conditional Formats
 //!
-//! TODO Add intro to conditional formats
+//! Conditional formatting is a feature of Excel which allows you to apply a
+//! format to a cell or a range of cells based on certain criteria. For example
+//! you might apply rules like the following to highlight cells in different
+//! ranges.
 //!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_dialog.png">
 //!
+//! With `rust_xlsxwriter` we could emulate this by creating [`Format`]
+//! instances and applying them to conditional format rules, like this:
+//!
+//! ```
+//! # // This code is available in examples/doc_conditional_format_cell1.rs
+//! #
+//! # use rust_xlsxwriter::{
+//! #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+//! # };
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     // Create a new Excel file object.
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//! #     // Add some sample data.
+//! #     let data = [
+//! #         [90, 80, 50, 10, 20, 90, 40, 90, 30, 40],
+//! #         [20, 10, 90, 100, 30, 60, 70, 60, 50, 90],
+//! #         [10, 50, 60, 50, 20, 50, 80, 30, 40, 60],
+//! #         [10, 90, 20, 40, 10, 40, 50, 70, 90, 50],
+//! #         [70, 100, 10, 90, 10, 10, 20, 100, 100, 40],
+//! #         [20, 60, 10, 100, 30, 10, 20, 60, 100, 10],
+//! #         [10, 60, 10, 80, 100, 80, 30, 30, 70, 40],
+//! #         [30, 90, 60, 10, 10, 100, 40, 40, 30, 40],
+//! #         [80, 90, 10, 20, 20, 50, 80, 20, 60, 90],
+//! #         [60, 80, 30, 30, 10, 50, 80, 60, 50, 30],
+//! #     ];
+//! #     worksheet.write_row_matrix(2, 1, data)?;
+//! #
+//! #     // Set the column widths for clarity.
+//! #     for col_num in 1..=10u16 {
+//! #         worksheet.set_column_width(col_num, 6)?;
+//! #     }
+//! #
+//!     // Add a format. Light red fill with dark red text.
+//!     let format1 = Format::new()
+//!         .set_font_color("9C0006")
+//!         .set_background_color("FFC7CE");
+//!
+//!     // Add a format. Green fill with dark green text.
+//!     let format2 = Format::new()
+//!         .set_font_color("006100")
+//!         .set_background_color("C6EFCE");
+//!
+//!     // Write a conditional format over a range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+//!         .set_value(50)
+//!         .set_format(format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Write another conditional format over the same range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::LessThan)
+//!         .set_value(50)
+//!         .set_format(format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//! #     // Save the file.
+//! #     workbook.save("conditional_format.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Which would produce an output like the following. Cells with values >= 50
+//! are in light red. Values < 50 are in light green.
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_cell1.png">
 //!
 //! # Excel's limitations on conditional format properties
 //!
 //! Not all of Excel's cell format properties can be modified with a conditional
-//! format. Properties that **cannot** be modified in a conditional format are
-//! font name, font size, superscript and subscript, diagonal borders, all
-//! alignment properties and all protection properties.
+//! format.
 //!
+//! For example see the limited number of font properties that can be set in the
+//! Excel conditional format dialog. The available properties are highlighted
+//! with green.
 //!
-
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_limitations.png">
+//!
+//! Properties that **cannot** be modified in a conditional format are font
+//! name, font size, superscript and subscript, diagonal borders, all alignment
+//! properties and all protection properties.
+//!
+//! # Selecting a non-contiguous range
+//!
+//! In Excel it is possible to select several non-contiguous cells or ranges
+//! like `"A1:A3 A5 B3:K6 B9:K12"` and apply a conditional format to them.
+//!
+//! It is possible to achieve a similar effect with `rust_xlsxwriter` by using
+//! repeated calls to
+//! [`Worksheet::add_conditional_format()`](crate::Worksheet::add_conditional_format).
+//! However this approach results in multiple identical conditional formats
+//! applied to different cell ranges rather than one conditional format applied
+//! to a multiple range selection.
+//!
+//! If this distinction is important to you then you can get the Excel multiple
+//! selection effect using the `set_multi_range()` which is provided for all the
+//! `ConditionalFormat` types. See the example below and note that the cells
+//! outside the selected ranges do not have any conditional formatting.
+//!
+//! ```
+//! # // This code is available in examples/doc_conditional_format_multi_range.rs
+//! #
+//! # use rust_xlsxwriter::{
+//! #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+//! # };
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     // Create a new Excel file object.
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//! #     // Add some sample data.
+//! #     let data = [
+//! #         [90, 80, 50, 10, 20, 90, 40, 90, 30, 40],
+//! #         [20, 10, 90, 100, 30, 60, 70, 60, 50, 90],
+//! #         [10, 50, 60, 50, 20, 50, 80, 30, 40, 60],
+//! #         [10, 90, 20, 40, 10, 40, 50, 70, 90, 50],
+//! #         [70, 100, 10, 90, 10, 10, 20, 100, 100, 40],
+//! #         [20, 60, 10, 100, 30, 10, 20, 60, 100, 10],
+//! #         [10, 60, 10, 80, 100, 80, 30, 30, 70, 40],
+//! #         [30, 90, 60, 10, 10, 100, 40, 40, 30, 40],
+//! #         [80, 90, 10, 20, 20, 50, 80, 20, 60, 90],
+//! #         [60, 80, 30, 30, 10, 50, 80, 60, 50, 30],
+//! #     ];
+//! #     worksheet.write_row_matrix(2, 1, data)?;
+//! #
+//! #     // Set the column widths for clarity.
+//! #     for col_num in 1..=10u16 {
+//! #         worksheet.set_column_width(col_num, 6)?;
+//! #     }
+//! #
+//! #     // Add a format. Light red fill with dark red text.
+//! #     let format1 = Format::new()
+//! #         .set_font_color("9C0006")
+//! #         .set_background_color("FFC7CE");
+//! #
+//! #     // Add a format. Green fill with dark green text.
+//! #     let format2 = Format::new()
+//! #         .set_font_color("006100")
+//! #         .set_background_color("C6EFCE");
+//! #
+//!     // Write a conditional format over a non-contiguous range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+//!         .set_value(50)
+//!         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
+//!         .set_format(format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Write another conditional format over the same range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::LessThan)
+//!         .set_value(50)
+//!         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
+//!         .set_format(format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//! #     // Save the file.
+//! #     workbook.save("conditional_format.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Output file:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_multi_range.png">
+//!
 #![warn(missing_docs)]
 
 mod tests;
@@ -575,7 +749,7 @@ impl ConditionalFormatCell {
 ///
 ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 ///
-///     // Invert the duplicate conditional format to show uniques values.
+///     // Invert the duplicate conditional format to show unique values.
 ///     let conditional_format = ConditionalFormatDuplicate::new()
 ///         .invert()
 ///         .set_format(format2);

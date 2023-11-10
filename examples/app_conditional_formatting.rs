@@ -139,7 +139,7 @@ fn main() -> Result<(), XlsxError> {
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
-    // Invert the duplicate conditional format to show uniques values in the
+    // Invert the duplicate conditional format to show unique values in the
     // same range.
     let conditional_format = ConditionalFormatDuplicate::new()
         .invert()
@@ -209,6 +209,43 @@ fn main() -> Result<(), XlsxError> {
     let conditional_format = ConditionalFormatTop::new()
         .invert()
         .set_value(10)
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // -----------------------------------------------------------------------
+    // Example 6. Cell conditional formatting in non-contiguous range.
+    // -----------------------------------------------------------------------
+    let caption = "Cells with values >= 50 are in light red. Values < 50 are in light green. Non-contiguous ranges.";
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write the caption.
+    worksheet.write(0, 1, caption)?;
+
+    // Write the worksheet data.
+    worksheet.write_row_matrix(2, 1, data)?;
+
+    // Set the column widths for clarity.
+    for col_num in 1..=10u16 {
+        worksheet.set_column_width(col_num, 6)?;
+    }
+
+    // Write a conditional format over a non-contiguous range.
+    let conditional_format = ConditionalFormatCell::new()
+        .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+        .set_value(50)
+        .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Write another conditional format over the same range.
+    let conditional_format = ConditionalFormatCell::new()
+        .set_criteria(ConditionalFormatCellCriteria::LessThan)
+        .set_value(50)
+        .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
