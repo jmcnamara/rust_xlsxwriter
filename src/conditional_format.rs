@@ -88,14 +88,49 @@
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_cell1.png">
 //!
+//! # Replicating an Excel conditional format with `rust_xlsxwriter`
+//!
+//! It is important not to try to reverse engineer Excel's conditional
+//! formatting rules from `rust_xlsxwriter`. If you aren't familiar with the
+//! syntax and functionality of conditional formats then a better place to start
+//! is in Excel. Create a conditional format in Excel to meet your needs and
+//! then port it over to `rust_xlsxwriter`.
+//!
+//! There are several common features of all conditional formats:
+//!
+//! - A range: The range that the conditional format applies to. This is usually
+//!   set via the
+//!   [`Worksheet::add_conditional_format()`](crate::Worksheet::add_conditional_format)
+//!   method.
+//! - A rule: This can be an equality like `>=` or a rule like "Top 10".
+//! - A target: This is usually a cell or range that the rule applies to. This
+//!   mainly applies to Cell style conditional formats. For other types of
+//!   conditional format the "range" is the target.
+//! - A format: The cell format with properties such as text or background color
+//!   to high the cell if the rule matches.
+//!
+//! The following are the structs that represent the main conditional format
+//! variants in Excel. See each of these sections for more information:
+//!
+//! - [`ConditionalFormatCell`]: The Cell style conditional format. This is the
+//!   most common style of conditional formats which uses simple equalities such
+//!   as "equal to" or "greater than" or "between". See the example above.
+//! - [`ConditionalFormatAverage`]: The Average/Standard Deviation style
+//!   conditional format.
+//! - [`ConditionalFormatDuplicate`]: The Duplicate/Unique style conditional
+//!   format.
+//! - [`ConditionalFormatText`]: The Text conditional format for rules like
+//!   "contains" or "begins with".
+//! - [`ConditionalFormatTop`]: The Top/Bottom style conditional format.
+//!
 //! # Excel's limitations on conditional format properties
 //!
-//! Not all of Excel's cell format properties can be modified with a conditional
-//! format.
+//! It is important to note that not all of Excel's cell format properties can
+//! be modified with a conditional format.
 //!
-//! For example see the limited number of font properties that can be set in the
-//! Excel conditional format dialog. The available properties are highlighted
-//! with green.
+//! For example the view below of the Excel conditional format dialog shows the
+//! limited number of font properties that can be set. The available properties
+//! are highlighted with green.
 //!
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_limitations.png">
@@ -107,7 +142,7 @@
 //! # Selecting a non-contiguous range
 //!
 //! In Excel it is possible to select several non-contiguous cells or ranges
-//! like `"A1:A3 A5 B3:K6 B9:K12"` and apply a conditional format to them.
+//! like `"B3:D6 I3:K6 B9:D12 I9:K12"` and apply a conditional format to them.
 //!
 //! It is possible to achieve a similar effect with `rust_xlsxwriter` by using
 //! repeated calls to
@@ -120,6 +155,14 @@
 //! selection effect using the `set_multi_range()` which is provided for all the
 //! `ConditionalFormat` types. See the example below and note that the cells
 //! outside the selected ranges do not have any conditional formatting.
+//!
+//!
+//! Note, you can use an Excel range like
+//! `"$B$3:$D$6,$I$3:$K$6,$B$9:$D$12,$I$9:$K$12"` or omit the `$` anchors and
+//! replace the commas with spaces to have a clearer range like `"B3:D6 I3:K6
+//! B9:D12 I9:K12"`. The documentation and examples use the latter format for
+//! clarity but it you are copying and pasting from Excel you can use the first
+//! format.
 //!
 //! ```
 //! # // This code is available in examples/doc_conditional_format_multi_range.rs
@@ -220,7 +263,7 @@ pub trait ConditionalFormat {
     fn validate(&self) -> Result<(), XlsxError>;
 
     /// Return the conditional format rule as an XML string.
-    fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String;
+    fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32, anchor: &str) -> String;
 
     /// Get a mutable reference to the format object in the conditional format.
     fn format_as_mut(&mut self) -> Option<&mut Format>;
@@ -242,8 +285,8 @@ macro_rules! generate_conditional_format_impls {
                 self.validate()
             }
 
-            fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
-                self.get_rule_string(dxf_index, priority)
+            fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32, anchor: &str) -> String {
+                self.get_rule_string(dxf_index, priority, anchor)
             }
 
             fn format_as_mut(&mut self) -> Option<&mut Format> {
@@ -268,6 +311,7 @@ generate_conditional_format_impls!(
     ConditionalFormatAverage
     ConditionalFormatCell
     ConditionalFormatDuplicate
+    ConditionalFormatText
     ConditionalFormatTop
 );
 
@@ -649,24 +693,32 @@ impl ConditionalFormatCell {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        _anchor: &str,
+    ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "cellIs".to_string())];
 
+        // Set the format index if present.
         if let Some(dxf_index) = dxf_index {
             attributes.push(("dxfId", dxf_index.to_string()));
         }
 
+        // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
 
+        // Set the "Stop if True" property.
         if self.stop_if_true {
             attributes.push(("stopIfTrue", "1".to_string()));
         }
 
         attributes.push(("operator", self.criteria.to_string()));
 
+        // Write the rule.
         writer.xml_start_tag("cfRule", &attributes);
-
         writer.xml_data_element_only("formula", &self.minimum.value);
 
         if self.criteria == ConditionalFormatCellCriteria::Between
@@ -806,7 +858,12 @@ impl ConditionalFormatDuplicate {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        _anchor: &str,
+    ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![];
 
@@ -816,16 +873,20 @@ impl ConditionalFormatDuplicate {
             attributes.push(("type", "duplicateValues".to_string()));
         }
 
+        // Set the format index if present.
         if let Some(dxf_index) = dxf_index {
             attributes.push(("dxfId", dxf_index.to_string()));
         }
 
+        // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
 
+        // Set the "Stop if True" property.
         if self.stop_if_true {
             attributes.push(("stopIfTrue", "1".to_string()));
         }
 
+        // Write the rule.
         writer.xml_empty_tag("cfRule", &attributes);
 
         writer.read_to_string()
@@ -963,16 +1024,24 @@ impl ConditionalFormatAverage {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        _anchor: &str,
+    ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "aboveAverage".to_string())];
 
+        // Set the format index if present.
         if let Some(dxf_index) = dxf_index {
             attributes.push(("dxfId", dxf_index.to_string()));
         }
 
+        // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
 
+        // Set the "Stop if True" property.
         if self.stop_if_true {
             attributes.push(("stopIfTrue", "1".to_string()));
         }
@@ -1026,6 +1095,7 @@ impl ConditionalFormatAverage {
             }
         }
 
+        // Write the rule.
         writer.xml_empty_tag("cfRule", &attributes);
 
         writer.read_to_string()
@@ -1186,16 +1256,24 @@ impl ConditionalFormatTop {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32) -> String {
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        _anchor: &str,
+    ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "top10".to_string())];
 
+        // Set the format index if present.
         if let Some(dxf_index) = dxf_index {
             attributes.push(("dxfId", dxf_index.to_string()));
         }
 
+        // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
 
+        // Set the "Stop if True" property.
         if self.stop_if_true {
             attributes.push(("stopIfTrue", "1".to_string()));
         }
@@ -1210,7 +1288,244 @@ impl ConditionalFormatTop {
 
         attributes.push(("rank", self.value.to_string()));
 
+        // Write the rule.
         writer.xml_empty_tag("cfRule", &attributes);
+
+        writer.read_to_string()
+    }
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatText
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatText` struct represents a Text conditional format.
+///
+/// `ConditionalFormatText` is used to represent a Text style conditional format
+/// in Excel. Text conditional formats use simple equalities such as "equal to"
+/// or "greater than" or "between".
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_text_intro.png">
+///
+/// For more information see [Working with Conditional Formats](crate::conditional_format).
+///
+/// # Examples
+///
+/// Example of adding a text type conditional formatting to a worksheet.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_text.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     ConditionalFormatText, ConditionalFormatTextCriteria, Format, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some sample data.
+/// #     let data = [
+/// #         "apocrustic",
+/// #         "burstwort",
+/// #         "cloudburst",
+/// #         "crustification",
+/// #         "distrustfulness",
+/// #         "laurustine",
+/// #         "outburst",
+/// #         "rusticism",
+/// #         "thunderburst",
+/// #         "trustee",
+/// #         "trustworthiness",
+/// #         "unburstableness",
+/// #         "unfrustratable",
+/// #     ];
+/// #     worksheet.write_column(0, 0, data)?;
+/// #     worksheet.write_column(0, 2, data)?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     worksheet.set_column_width(0, 20)?;
+/// #     worksheet.set_column_width(2, 20)?;
+/// #
+/// #     // Add a format. Green fill with dark green text.
+/// #     let format1 = Format::new()
+/// #         .set_font_color("006100")
+/// #         .set_background_color("C6EFCE");
+/// #
+/// #     // Add a format. Light red fill with dark red text.
+/// #     let format2 = Format::new()
+/// #         .set_font_color("9C0006")
+/// #         .set_background_color("FFC7CE");
+/// #
+///     // Write a text "containing" conditional format over a range.
+///     let conditional_format = ConditionalFormatText::new()
+///         .set_criteria(ConditionalFormatTextCriteria::Contains)
+///         .set_value("rust")
+///         .set_format(&format1);
+///
+///     worksheet.add_conditional_format(0, 0, 12, 0, &conditional_format)?;
+///
+///     // Write a text "not containing" conditional format over the same range.
+///     let conditional_format = ConditionalFormatText::new()
+///         .set_criteria(ConditionalFormatTextCriteria::DoesNotContain)
+///         .set_value("rust")
+///         .set_format(&format2);
+///
+///     worksheet.add_conditional_format(0, 0, 12, 0, &conditional_format)?;
+///
+///     // Write a text "begins with" conditional format over a range.
+///     let conditional_format = ConditionalFormatText::new()
+///         .set_criteria(ConditionalFormatTextCriteria::BeginsWith)
+///         .set_value("t")
+///         .set_format(&format1);
+///
+///     worksheet.add_conditional_format(0, 2, 12, 2, &conditional_format)?;
+///
+///     // Write a text "ends with" conditional format over the same range.
+///     let conditional_format = ConditionalFormatText::new()
+///         .set_criteria(ConditionalFormatTextCriteria::EndsWith)
+///         .set_value("t")
+///         .set_format(&format2);
+///
+///     worksheet.add_conditional_format(0, 2, 12, 2, &conditional_format)?;
+/// #
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// This creates conditional format rules like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_text_rules.png">
+///
+/// And the following output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_text.png">
+///
+#[derive(Clone)]
+pub struct ConditionalFormatText {
+    value: String,
+    criteria: ConditionalFormatTextCriteria,
+    multi_range: String,
+    stop_if_true: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// **Section 1**: The following methods are specific to `ConditionalFormatText`.
+impl ConditionalFormatText {
+    /// Create a new Text conditional format struct.
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ConditionalFormatText {
+        ConditionalFormatText {
+            value: String::new(),
+            criteria: ConditionalFormatTextCriteria::Contains,
+            multi_range: String::new(),
+            stop_if_true: false,
+            format: None,
+        }
+    }
+
+    /// Set the value of the Text conditional format rule.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - A string like value.
+    ///
+    ///   Newer versions of Excel support support using a cell reference for the
+    ///   value but that isn't currently supported by `rust_xlsxwriter`.
+    ///
+    pub fn set_value(mut self, value: impl Into<String>) -> ConditionalFormatText {
+        self.value = value.into();
+        self
+    }
+
+    /// Set the criteria for the Text conditional format rule such "contains" or
+    /// "starts with".
+    ///
+    /// # Parameters
+    ///
+    /// * `criteria` - A [`ConditionalFormatTextCriteria`] enum value.
+    ///
+    pub fn set_criteria(
+        mut self,
+        criteria: ConditionalFormatTextCriteria,
+    ) -> ConditionalFormatText {
+        self.criteria = criteria;
+        self
+    }
+
+    // Validate the conditional format.
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        if self.value.is_empty() {
+            return Err(XlsxError::ConditionalFormatError(
+                "Text conditional format string cannot be empty".to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        anchor: &str,
+    ) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![];
+        let text = self.value.clone();
+        let operator;
+        let formula;
+
+        // Set the rule attributes based on the criteria.
+        match self.criteria {
+            ConditionalFormatTextCriteria::Contains => {
+                attributes.push(("type", "containsText".to_string()));
+                operator = "containsText".to_string();
+                formula = format!(r#"NOT(ISERROR(SEARCH("{text}",{anchor})))"#);
+            }
+            ConditionalFormatTextCriteria::DoesNotContain => {
+                attributes.push(("type", "notContainsText".to_string()));
+                operator = "notContains".to_string();
+                formula = format!(r#"ISERROR(SEARCH("{text}",{anchor}))"#);
+            }
+            ConditionalFormatTextCriteria::BeginsWith => {
+                attributes.push(("type", "beginsWith".to_string()));
+                operator = "beginsWith".to_string();
+                formula = format!(r#"LEFT({anchor},1)="{text}""#);
+            }
+            ConditionalFormatTextCriteria::EndsWith => {
+                attributes.push(("type", "endsWith".to_string()));
+                operator = "endsWith".to_string();
+                formula = format!(r#"RIGHT({anchor},1)="{text}""#);
+            }
+        }
+
+        // Set the format index if present.
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        // Set the rule priority order.
+        attributes.push(("priority", priority.to_string()));
+
+        // Set the "Stop if True" property.
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        // Add the attributes.
+        attributes.push(("operator", operator));
+        attributes.push(("text", text));
+
+        writer.xml_start_tag("cfRule", &attributes);
+        writer.xml_data_element_only("formula", &formula);
+        writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
     }
@@ -1433,6 +1748,29 @@ pub enum ConditionalFormatAverageCriteria {
 }
 
 // -----------------------------------------------------------------------
+// ConditionalFormatTextCriteria
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatTextCriteria` enum defines the conditional format
+/// criteria for [`ConditionalFormatText`] .
+///
+///
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ConditionalFormatTextCriteria {
+    /// Show the conditional format for text that contains to the target string.
+    Contains,
+
+    /// Show the conditional format for text that do not contain to the target string.
+    DoesNotContain,
+
+    /// Show the conditional format for text that begins with the target string.
+    BeginsWith,
+
+    /// Show the conditional format for text that ends with the target string.
+    EndsWith,
+}
+
+// -----------------------------------------------------------------------
 // Generate common methods.
 // -----------------------------------------------------------------------
 macro_rules! generate_conditional_common_methods {
@@ -1446,7 +1784,7 @@ macro_rules! generate_conditional_common_methods {
         /// Set the [`Format`] that will be applied to the cell range if the conditional
         /// format rule applies. Not all cell format properties can be set in a
         /// conditional format. See [Excel's limitations on conditional format
-        /// properties](#excels-limitations-on-conditional-format-properties) for
+        /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
         /// more information.
         ///
         /// See the examples above.
@@ -1462,26 +1800,26 @@ macro_rules! generate_conditional_common_methods {
 
         /// Set an additional multi-cell range for the conditional format.
         ///
-        /// The `set_multi_range()` method is used to extend a conditional format
-        /// over non-contiguous ranges.
+        /// The `set_multi_range()` method is used to extend a conditional
+        /// format over non-contiguous ranges like `"B3:D6 I3:K6 B9:D12
+        /// I9:K12"`.
         ///
-        /// It is possible to apply a conditional format to different cell ranges in
-        /// a worksheet using multiple calls to
-        /// [`Worksheet::add_conditional_format()`](crate::Worksheet::add_conditional_format).
-        /// However, as a minor optimization it is also possible in Excel to apply
-        /// the same conditional format to different non-contiguous cell ranges.
-        ///
-        /// This is replicated in the `rust_xlsxwriter` conditional formats using
-        /// the `set_multi_range()` method. The range must contain the primary range
-        /// for the conditional format and any others separated by spaces. For
-        /// example a range like `"A1:A3 A5 B3:K6 B9:K12"`.
+        /// See [Selecting a non-contiguous
+        /// range](crate::conditional_format#selecting-a-non-contiguous-range)
+        /// for more information.
         ///
         /// # Parameters
         ///
         /// * `range` - A string like type representing an Excel range.
         ///
+        ///   Note, you can use an Excel range like `"$B$3:$D$6,$I$3:$K$6"` or
+        ///   omit the `$` anchors and replace the commas with spaces to have a
+        ///   clearer range like `"B3:D6 I3:K6"`. The documentation and examples
+        ///   use the latter format for clarity but it you are copying and
+        ///   pasting from Excel you can use the first format.
+        ///
         pub fn set_multi_range(mut self, range: impl Into<String>) -> $t {
-            self.multi_range = range.into();
+            self.multi_range = range.into().replace('$', "").replace(',', " ");
             self
         }
 
@@ -1522,5 +1860,6 @@ generate_conditional_common_methods!(
     ConditionalFormatAverage
     ConditionalFormatCell
     ConditionalFormatDuplicate
+    ConditionalFormatText
     ConditionalFormatTop
 );

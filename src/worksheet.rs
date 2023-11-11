@@ -10012,6 +10012,17 @@ impl Worksheet {
         let mut priority = 1;
         for (cell_range, conditional_formats) in &self.conditional_formats {
             let attributes = [("sqref", cell_range.as_str())];
+            let mut anchor = cell_range.as_str();
+
+            // Extract cell/range from optional space separated list.
+            if let Some(position) = anchor.find(' ') {
+                anchor = &anchor[0..position];
+            }
+
+            // Extract cell from optional : separated range.
+            if let Some(position) = anchor.find(':') {
+                anchor = &anchor[0..position];
+            }
 
             self.writer
                 .xml_start_tag("conditionalFormatting", &attributes);
@@ -10023,7 +10034,7 @@ impl Worksheet {
                     dxf_index = Some(self.global_dxf_indices[local_index as usize]);
                 }
 
-                let rule = conditional_format.get_rule_string(dxf_index, priority);
+                let rule = conditional_format.get_rule_string(dxf_index, priority, anchor);
                 self.writer.xml_raw_string(&rule);
                 priority += 1;
             }

@@ -10,8 +10,8 @@
 
 use rust_xlsxwriter::{
     ConditionalFormatAverage, ConditionalFormatAverageCriteria, ConditionalFormatCell,
-    ConditionalFormatCellCriteria, ConditionalFormatDuplicate, ConditionalFormatTop, Format,
-    Workbook, XlsxError,
+    ConditionalFormatCellCriteria, ConditionalFormatDuplicate, ConditionalFormatText,
+    ConditionalFormatTextCriteria, ConditionalFormatTop, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -249,6 +249,73 @@ fn main() -> Result<(), XlsxError> {
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // -----------------------------------------------------------------------
+    // Example 7. Text style conditional formats.
+    // -----------------------------------------------------------------------
+    let caption =
+        "Column A shows words that contain the sub-word 'rust'. Column C shows words that start/end with 't'";
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write the caption.
+    worksheet.write(0, 0, caption)?;
+
+    // Add some sample data.
+    let word_list = [
+        "apocrustic",
+        "burstwort",
+        "cloudburst",
+        "crustification",
+        "distrustfulness",
+        "laurustine",
+        "outburst",
+        "rusticism",
+        "thunderburst",
+        "trustee",
+        "trustworthiness",
+        "unburstableness",
+        "unfrustratable",
+    ];
+    worksheet.write_column(1, 0, word_list)?;
+    worksheet.write_column(1, 2, word_list)?;
+
+    // Set the column widths for clarity.
+    worksheet.set_column_width(0, 20)?;
+    worksheet.set_column_width(2, 20)?;
+
+    // Write a text "containing" conditional format over a range.
+    let conditional_format = ConditionalFormatText::new()
+        .set_criteria(ConditionalFormatTextCriteria::Contains)
+        .set_value("rust")
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(1, 0, 13, 0, &conditional_format)?;
+
+    // Write a text "not containing" conditional format over the same range.
+    let conditional_format = ConditionalFormatText::new()
+        .set_criteria(ConditionalFormatTextCriteria::DoesNotContain)
+        .set_value("rust")
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(1, 0, 13, 0, &conditional_format)?;
+
+    // Write a text "begins with" conditional format over a range.
+    let conditional_format = ConditionalFormatText::new()
+        .set_criteria(ConditionalFormatTextCriteria::BeginsWith)
+        .set_value("t")
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;
+
+    // Write a text "ends with" conditional format over the same range.
+    let conditional_format = ConditionalFormatText::new()
+        .set_criteria(ConditionalFormatTextCriteria::EndsWith)
+        .set_value("t")
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;
 
     // -----------------------------------------------------------------------
     // Save and close the file.
