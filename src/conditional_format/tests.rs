@@ -13,6 +13,8 @@ mod conditional_format_tests {
     use crate::ConditionalFormatAverageCriteria;
     use crate::ConditionalFormatCell;
     use crate::ConditionalFormatCellCriteria;
+    use crate::ConditionalFormatDate;
+    use crate::ConditionalFormatDateCriteria;
     use crate::ConditionalFormatDuplicate;
     use crate::ConditionalFormatText;
     use crate::ConditionalFormatTextCriteria;
@@ -741,6 +743,134 @@ mod conditional_format_tests {
                 </cfRule>
                 </conditionalFormatting>
                 <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_08() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 10)?;
+        worksheet.write(1, 0, 20)?;
+        worksheet.write(2, 0, 30)?;
+        worksheet.write(3, 0, 40)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::Yesterday);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::Today);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::Tomorrow);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::Last7Days);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::LastWeek);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::ThisWeek);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::NextWeek);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::LastMonth);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::ThisMonth);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatDate::new().set_criteria(ConditionalFormatDateCriteria::NextMonth);
+        worksheet.add_conditional_format(1, 2, 4, 2, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A4"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>20</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>30</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>40</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="C2:C5">
+                <cfRule type="timePeriod" priority="1" timePeriod="yesterday">
+                  <formula>FLOOR(C2,1)=TODAY()-1</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="2" timePeriod="today">
+                  <formula>FLOOR(C2,1)=TODAY()</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="3" timePeriod="tomorrow">
+                  <formula>FLOOR(C2,1)=TODAY()+1</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="4" timePeriod="last7Days">
+                  <formula>AND(TODAY()-FLOOR(C2,1)&lt;=6,FLOOR(C2,1)&lt;=TODAY())</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="5" timePeriod="lastWeek">
+                  <formula>AND(TODAY()-ROUNDDOWN(C2,0)&gt;=(WEEKDAY(TODAY())),TODAY()-ROUNDDOWN(C2,0)&lt;(WEEKDAY(TODAY())+7))</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="6" timePeriod="thisWeek">
+                  <formula>AND(TODAY()-ROUNDDOWN(C2,0)&lt;=WEEKDAY(TODAY())-1,ROUNDDOWN(C2,0)-TODAY()&lt;=7-WEEKDAY(TODAY()))</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="7" timePeriod="nextWeek">
+                  <formula>AND(ROUNDDOWN(C2,0)-TODAY()&gt;(7-WEEKDAY(TODAY())),ROUNDDOWN(C2,0)-TODAY()&lt;(15-WEEKDAY(TODAY())))</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="8" timePeriod="lastMonth">
+                  <formula>AND(MONTH(C2)=MONTH(TODAY())-1,OR(YEAR(C2)=YEAR(TODAY()),AND(MONTH(C2)=1,YEAR(C2)=YEAR(TODAY())-1)))</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="9" timePeriod="thisMonth">
+                  <formula>AND(MONTH(C2)=MONTH(TODAY()),YEAR(C2)=YEAR(TODAY()))</formula>
+                </cfRule>
+                <cfRule type="timePeriod" priority="10" timePeriod="nextMonth">
+                  <formula>AND(MONTH(C2)=MONTH(TODAY())+1,OR(YEAR(C2)=YEAR(TODAY()),AND(MONTH(C2)=12,YEAR(C2)=YEAR(TODAY())+1)))</formula>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
             </worksheet>
             "#,
         );

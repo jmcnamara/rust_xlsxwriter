@@ -119,6 +119,8 @@
 //!   conditional format.
 //! - [`ConditionalFormatDuplicate`]: The Duplicate/Unique style conditional
 //!   format.
+//! - [`ConditionalFormatDate`]: The Dates Occurring style conditional
+//!   format.
 //! - [`ConditionalFormatText`]: The Text conditional format for rules like
 //!   "contains" or "begins with".
 //! - [`ConditionalFormatTop`]: The Top/Bottom style conditional format.
@@ -315,6 +317,7 @@ macro_rules! generate_conditional_format_impls {
 generate_conditional_format_impls!(
     ConditionalFormatAverage
     ConditionalFormatCell
+    ConditionalFormatDate
     ConditionalFormatDuplicate
     ConditionalFormatText
     ConditionalFormatTop
@@ -1504,32 +1507,26 @@ impl ConditionalFormatText {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![];
         let text = self.value.clone();
-        let operator;
-        let formula;
 
         // Set the rule attributes based on the criteria.
-        match self.criteria {
+        let formula = match self.criteria {
             ConditionalFormatTextCriteria::Contains => {
                 attributes.push(("type", "containsText".to_string()));
-                operator = "containsText".to_string();
-                formula = format!(r#"NOT(ISERROR(SEARCH("{text}",{anchor})))"#);
+                format!(r#"NOT(ISERROR(SEARCH("{text}",{anchor})))"#)
             }
             ConditionalFormatTextCriteria::DoesNotContain => {
                 attributes.push(("type", "notContainsText".to_string()));
-                operator = "notContains".to_string();
-                formula = format!(r#"ISERROR(SEARCH("{text}",{anchor}))"#);
+                format!(r#"ISERROR(SEARCH("{text}",{anchor}))"#)
             }
             ConditionalFormatTextCriteria::BeginsWith => {
                 attributes.push(("type", "beginsWith".to_string()));
-                operator = "beginsWith".to_string();
-                formula = format!(r#"LEFT({anchor},1)="{text}""#);
+                format!(r#"LEFT({anchor},1)="{text}""#)
             }
             ConditionalFormatTextCriteria::EndsWith => {
                 attributes.push(("type", "endsWith".to_string()));
-                operator = "endsWith".to_string();
-                formula = format!(r#"RIGHT({anchor},1)="{text}""#);
+                format!(r#"RIGHT({anchor},1)="{text}""#)
             }
-        }
+        };
 
         // Set the format index if present.
         if let Some(dxf_index) = dxf_index {
@@ -1545,8 +1542,245 @@ impl ConditionalFormatText {
         }
 
         // Add the attributes.
-        attributes.push(("operator", operator));
+        attributes.push(("operator", self.criteria.to_string()));
         attributes.push(("text", text));
+
+        writer.xml_start_tag("cfRule", &attributes);
+        writer.xml_data_element_only("formula", &formula);
+        writer.xml_end_tag("cfRule");
+
+        writer.read_to_string()
+    }
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatDate
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatDate` struct represents a Dates Occurring style
+/// conditional format.
+///
+/// `ConditionalFormatDate` is used to represent a Dates Occurring style
+/// conditional format in Excel. This is used to identify dates in ranges like
+/// "Last Week" or "Last Month".
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_date_intro.png">
+///
+/// For more information see [Working with Conditional
+/// Formats](crate::conditional_format).
+///
+/// # Examples
+///
+/// Example of adding a Dates Occurring type conditional formatting to a
+/// worksheet. Note, the rules in this example such as "Last month", "This
+/// month" and "Next month" are applied to the sample dates which by default are
+/// for November 2023. Changes the dates to some range closer to the time you
+/// run the example.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_date.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     ConditionalFormatDate, ConditionalFormatDateCriteria, ExcelDateTime, Format, Workbook,
+/// #     XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Create a date format.
+/// #     let date_format = Format::new().set_num_format("yyyy-mm-dd");
+/// #
+/// #     // Add some sample data.
+/// #     let dates = [
+/// #         "2023-10-01",
+/// #         "2023-11-05",
+/// #         "2023-11-06",
+/// #         "2023-10-04",
+/// #         "2023-11-11",
+/// #         "2023-11-02",
+/// #         "2023-11-04",
+/// #         "2023-11-12",
+/// #         "2023-12-01",
+/// #         "2023-12-13",
+/// #         "2023-11-13",
+/// #     ];
+/// #
+/// #     // Map the string dates to ExcelDateTime objects, while capturing any
+/// #     // potential conversion errors.
+/// #     let dates: Result<Vec<ExcelDateTime>, XlsxError> = dates
+/// #         .into_iter()
+/// #         .map(ExcelDateTime::parse_from_str)
+/// #         .collect();
+/// #     let dates = dates?;
+/// #
+/// #     worksheet.write_column_with_format(0, 0, dates, &date_format)?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     worksheet.set_column_width(0, 20)?;
+/// #
+/// #     // Add a format. Light red fill with dark red text.
+/// #     let format1 = Format::new()
+/// #         .set_font_color("9C0006")
+/// #         .set_background_color("FFC7CE");
+/// #
+/// #     // Add a format. Green fill with dark green text.
+/// #     let format2 = Format::new()
+/// #         .set_font_color("006100")
+/// #         .set_background_color("C6EFCE");
+/// #
+/// #     // Add a format. Light yellow fill with dark yellow text.
+/// #     let format3 = Format::new()
+/// #         .set_font_color("9C6500")
+/// #         .set_background_color("FFEB9C");
+/// #
+///     // Write conditional format over the same range.
+///     let conditional_format = ConditionalFormatDate::new()
+///         .set_criteria(ConditionalFormatDateCriteria::LastMonth)
+///         .set_format(format1);
+///
+///     worksheet.add_conditional_format(0, 0, 10, 0, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormatDate::new()
+///         .set_criteria(ConditionalFormatDateCriteria::ThisMonth)
+///         .set_format(format2);
+///
+///     worksheet.add_conditional_format(0, 0, 10, 0, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormatDate::new()
+///         .set_criteria(ConditionalFormatDateCriteria::NextMonth)
+///         .set_format(format3);
+///
+///     worksheet.add_conditional_format(0, 0, 10, 0, &conditional_format)?;
+/// #
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// This creates conditional format rules like this:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_date_rules.png">
+///
+/// And the following output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_date.png">
+///
+#[derive(Clone)]
+pub struct ConditionalFormatDate {
+    criteria: ConditionalFormatDateCriteria,
+    multi_range: String,
+    stop_if_true: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// **Section 1**: The following methods are specific to `ConditionalFormatDate`.
+impl ConditionalFormatDate {
+    /// Create a new Date conditional format struct.
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ConditionalFormatDate {
+        ConditionalFormatDate {
+            criteria: ConditionalFormatDateCriteria::Yesterday,
+            multi_range: String::new(),
+            stop_if_true: false,
+            format: None,
+        }
+    }
+
+    /// Set the criteria for the Dates Occurring  conditional format rule such
+    /// "Today" or "Last Week".
+    ///
+    /// # Parameters
+    ///
+    /// * `criteria` - A [`ConditionalFormatDateCriteria`] enum value.
+    ///
+    pub fn set_criteria(
+        mut self,
+        criteria: ConditionalFormatDateCriteria,
+    ) -> ConditionalFormatDate {
+        self.criteria = criteria;
+        self
+    }
+
+    // Validate the conditional format.
+    #[allow(clippy::unnecessary_wraps)]
+    #[allow(clippy::unused_self)]
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        anchor: &str,
+    ) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![("type", "timePeriod".to_string())];
+
+        // Set the rule attributes based on the criteria.
+        let formula = match self.criteria {
+            ConditionalFormatDateCriteria::Yesterday => {
+                format!("FLOOR({anchor},1)=TODAY()-1")
+            }
+            ConditionalFormatDateCriteria::Today => {
+                format!("FLOOR({anchor},1)=TODAY()")
+            }
+            ConditionalFormatDateCriteria::Tomorrow => {
+                format!("FLOOR({anchor},1)=TODAY()+1")
+            }
+            ConditionalFormatDateCriteria::Last7Days => {
+                format!("AND(TODAY()-FLOOR({anchor},1)<=6,FLOOR({anchor},1)<=TODAY())")
+            }
+
+            ConditionalFormatDateCriteria::LastWeek => {
+                format!("AND(TODAY()-ROUNDDOWN({anchor},0)>=(WEEKDAY(TODAY())),TODAY()-ROUNDDOWN({anchor},0)<(WEEKDAY(TODAY())+7))")
+            }
+
+            ConditionalFormatDateCriteria::ThisWeek => {
+                format!("AND(TODAY()-ROUNDDOWN({anchor},0)<=WEEKDAY(TODAY())-1,ROUNDDOWN({anchor},0)-TODAY()<=7-WEEKDAY(TODAY()))")
+            }
+
+            ConditionalFormatDateCriteria::NextWeek => {
+                format!("AND(ROUNDDOWN({anchor},0)-TODAY()>(7-WEEKDAY(TODAY())),ROUNDDOWN({anchor},0)-TODAY()<(15-WEEKDAY(TODAY())))")
+            }
+
+            ConditionalFormatDateCriteria::LastMonth => {
+                format!("AND(MONTH({anchor})=MONTH(TODAY())-1,OR(YEAR({anchor})=YEAR(TODAY()),AND(MONTH({anchor})=1,YEAR({anchor})=YEAR(TODAY())-1)))")
+            }
+
+            ConditionalFormatDateCriteria::ThisMonth => {
+                format!("AND(MONTH({anchor})=MONTH(TODAY()),YEAR({anchor})=YEAR(TODAY()))")
+            }
+
+            ConditionalFormatDateCriteria::NextMonth => {
+                format!("AND(MONTH({anchor})=MONTH(TODAY())+1,OR(YEAR({anchor})=YEAR(TODAY()),AND(MONTH({anchor})=12,YEAR({anchor})=YEAR(TODAY())+1)))")
+            }
+        };
+
+        // Set the format index if present.
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        // Set the rule priority order.
+        attributes.push(("priority", priority.to_string()));
+
+        // Set the "Stop if True" property.
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        // Add the attributes.
+        attributes.push(("timePeriod", self.criteria.to_string()));
 
         writer.xml_start_tag("cfRule", &attributes);
         writer.xml_data_element_only("formula", &formula);
@@ -1795,6 +2029,84 @@ pub enum ConditionalFormatTextCriteria {
     EndsWith,
 }
 
+impl fmt::Display for ConditionalFormatTextCriteria {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ConditionalFormatTextCriteria::Contains => write!(f, "containsText"),
+            ConditionalFormatTextCriteria::DoesNotContain => write!(f, "notContains"),
+            ConditionalFormatTextCriteria::BeginsWith => write!(f, "beginsWith"),
+            ConditionalFormatTextCriteria::EndsWith => write!(f, "endsWith"),
+        }
+    }
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatDateCriteria
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatDateCriteria` enum defines the conditional format
+/// criteria for [`ConditionalFormatDate`] .
+///
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ConditionalFormatDateCriteria {
+    /// Show the conditional format for dates occurring yesterday. This is the
+    /// default.
+    Yesterday,
+
+    /// Show the conditional format for dates occurring today, relative to when
+    /// the file is opened.
+    Today,
+
+    /// Show the conditional format for dates occurring tomorrow, relative to
+    /// when the file is opened.
+    Tomorrow,
+
+    /// Show the conditional format for dates occurring in the last 7 days,
+    /// relative to when the file is opened.
+    Last7Days,
+
+    /// Show the conditional format for dates occurring in the last week,
+    /// relative to when the file is opened.
+    LastWeek,
+
+    /// Show the conditional format for dates occurring this week, relative to
+    /// when the file is opened.
+    ThisWeek,
+
+    /// Show the conditional format for dates occurring in the next week,
+    /// relative to when the file is opened.
+    NextWeek,
+
+    /// Show the conditional format for dates occurring in the last month,
+    /// relative to when the file is opened.
+    LastMonth,
+
+    /// Show the conditional format for dates occurring this month, relative to
+    /// when the file is opened.
+    ThisMonth,
+
+    /// Show the conditional format for dates occurring in the next month,
+    /// relative to when the file is opened.
+    NextMonth,
+}
+
+impl fmt::Display for ConditionalFormatDateCriteria {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ConditionalFormatDateCriteria::Today => write!(f, "today"),
+            ConditionalFormatDateCriteria::Tomorrow => write!(f, "tomorrow"),
+            ConditionalFormatDateCriteria::LastWeek => write!(f, "lastWeek"),
+            ConditionalFormatDateCriteria::NextWeek => write!(f, "nextWeek"),
+            ConditionalFormatDateCriteria::ThisWeek => write!(f, "thisWeek"),
+            ConditionalFormatDateCriteria::Last7Days => write!(f, "last7Days"),
+            ConditionalFormatDateCriteria::LastMonth => write!(f, "lastMonth"),
+            ConditionalFormatDateCriteria::NextMonth => write!(f, "nextMonth"),
+            ConditionalFormatDateCriteria::ThisMonth => write!(f, "thisMonth"),
+            ConditionalFormatDateCriteria::Yesterday => write!(f, "yesterday"),
+        }
+    }
+}
+
 // -----------------------------------------------------------------------
 // Generate common methods.
 // -----------------------------------------------------------------------
@@ -1884,6 +2196,7 @@ macro_rules! generate_conditional_common_methods {
 generate_conditional_common_methods!(
     ConditionalFormatAverage
     ConditionalFormatCell
+    ConditionalFormatDate
     ConditionalFormatDuplicate
     ConditionalFormatText
     ConditionalFormatTop
