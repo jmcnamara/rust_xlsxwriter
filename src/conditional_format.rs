@@ -117,10 +117,11 @@
 //!   as "equal to" or "greater than" or "between". See the example above.
 //! - [`ConditionalFormatAverage`]: The Average/Standard Deviation style
 //!   conditional format.
+//! - [`ConditionalFormatBlank`]: The Blank/Non-blank style conditional format.
+//! - [`ConditionalFormatError`]: The Error/Non-error style conditional format.
 //! - [`ConditionalFormatDuplicate`]: The Duplicate/Unique style conditional
 //!   format.
-//! - [`ConditionalFormatDate`]: The Dates Occurring style conditional
-//!   format.
+//! - [`ConditionalFormatDate`]: The Dates Occurring style conditional format.
 //! - [`ConditionalFormatText`]: The Text conditional format for rules like
 //!   "contains" or "begins with".
 //! - [`ConditionalFormatTop`]: The Top/Bottom style conditional format.
@@ -316,9 +317,11 @@ macro_rules! generate_conditional_format_impls {
 }
 generate_conditional_format_impls!(
     ConditionalFormatAverage
+    ConditionalFormatBlank
     ConditionalFormatCell
     ConditionalFormatDate
     ConditionalFormatDuplicate
+    ConditionalFormatError
     ConditionalFormatText
     ConditionalFormatTop
 );
@@ -750,6 +753,344 @@ impl ConditionalFormatCell {
 }
 
 // -----------------------------------------------------------------------
+// ConditionalFormatBlank
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatBlank` struct represents a Blank/Non-blank conditional
+/// format.
+///
+/// `ConditionalFormatBlank` is used to represent a Blank or Non-blank style
+/// conditional format in Excel. A Blank conditional format highlights blank
+/// values in a range while the inverted version highlights non-blanks values.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_blank_intro.png">
+///
+/// For more information see [Working with Conditional
+/// Formats](crate::conditional_format).
+///
+/// # Examples
+///
+/// Example of how to add a blank/non-blank conditional formatting to a
+/// worksheet. Blank values are in light red. Non-blank values are in light
+/// green. Note, that we invert the Blank rule to get Non-blank values.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_blank.rs
+/// #
+/// # use rust_xlsxwriter::{ConditionalFormatBlank, Format, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some sample data.
+/// #     let data = [
+/// #         "Not blank", "", "", "Not blank", "Not blank", "", "Not blank", "Not blank", "", "Not blank", "", "Not blank",
+/// #     ];
+/// #     worksheet.write_column(0, 0, data)?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     for col_num in 1..=10u16 {
+/// #         worksheet.set_column_width(col_num, 6)?;
+/// #     }
+/// #
+/// #     // Add a format. Light red fill with dark red text.
+/// #     let format1 = Format::new()
+/// #         .set_font_color("9C0006")
+/// #         .set_background_color("FFC7CE");
+/// #
+/// #     // Add a format. Green fill with dark green text.
+/// #     let format2 = Format::new()
+/// #         .set_font_color("006100")
+/// #         .set_background_color("C6EFCE");
+/// #
+///     // Write a conditional format over a range.
+///     let conditional_format = ConditionalFormatBlank::new().set_format(format1);
+///
+///     worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
+///
+///     // Invert the blank conditional format to show non-blank values.
+///     let conditional_format = ConditionalFormatBlank::new().invert().set_format(format2);
+///
+///     worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// This creates conditional format rules like this:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_blank_rules.png">
+///
+/// And the following output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_blank.png">
+///
+#[derive(Clone)]
+pub struct ConditionalFormatBlank {
+    is_inverted: bool,
+    multi_range: String,
+    stop_if_true: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// **Section 1**: The following methods are specific to `ConditionalFormatBlank`.
+impl ConditionalFormatBlank {
+    /// Create a new Blank conditional format struct.
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ConditionalFormatBlank {
+        ConditionalFormatBlank {
+            is_inverted: false,
+            multi_range: String::new(),
+            stop_if_true: false,
+            format: None,
+        }
+    }
+
+    /// Invert the functionality of the conditional format to get Non-blank
+    /// values instead of Blank values.
+    ///
+    /// See the example above.
+    ///
+    pub fn invert(mut self) -> ConditionalFormatBlank {
+        self.is_inverted = true;
+        self
+    }
+
+    // Validate the conditional format.
+    #[allow(clippy::unnecessary_wraps)]
+    #[allow(clippy::unused_self)]
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        anchor: &str,
+    ) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![];
+
+        // Write the type.
+        if self.is_inverted {
+            attributes.push(("type", "notContainsBlanks".to_string()));
+        } else {
+            attributes.push(("type", "containsBlanks".to_string()));
+        }
+
+        // Set the format index if present.
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        // Set the rule priority order.
+        attributes.push(("priority", priority.to_string()));
+
+        // Set the "Stop if True" property.
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        // Create the formula for the rule.
+        let formula = if self.is_inverted {
+            format!("LEN(TRIM({anchor}))>0")
+        } else {
+            format!("LEN(TRIM({anchor}))=0")
+        };
+
+        // Write the rule.
+        writer.xml_start_tag("cfRule", &attributes);
+        writer.xml_data_element_only("formula", &formula);
+        writer.xml_end_tag("cfRule");
+
+        writer.read_to_string()
+    }
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatError
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatError` struct represents an Error/Non-error conditional
+/// format.
+///
+/// `ConditionalFormatError` is used to represent an Error or Non-error style
+/// conditional format in Excel. An error conditional format highlights error
+/// values in a range while the inverted version highlights non-errors values.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_error_intro.png">
+///
+/// For more information see [Working with Conditional
+/// Formats](crate::conditional_format).
+///
+/// # Examples
+///
+/// Example of how to add an error/non-error conditional formatting to a
+/// worksheet. Error values are in light red. Non-error values are in light
+/// green. Note, that we invert the Error rule to get Non-error values.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_error.rs
+/// #
+/// # use rust_xlsxwriter::{ConditionalFormatError, Format, Formula, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some sample data.
+/// #     worksheet.write(0, 0, Formula::new("=1/1"))?;
+/// #     worksheet.write(1, 0, Formula::new("=1/0"))?;
+/// #     worksheet.write(2, 0, Formula::new("=1/0"))?;
+/// #     worksheet.write(3, 0, Formula::new("=1/1"))?;
+/// #     worksheet.write(4, 0, Formula::new("=1/1"))?;
+/// #     worksheet.write(5, 0, Formula::new("=1/0"))?;
+/// #     worksheet.write(6, 0, Formula::new("=1/1"))?;
+/// #     worksheet.write(7, 0, Formula::new("=1/1"))?;
+/// #     worksheet.write(8, 0, Formula::new("=1/0"))?;
+/// #     worksheet.write(9, 0, Formula::new("=1/1"))?;
+/// #     worksheet.write(10, 0, Formula::new("=1/0"))?;
+/// #     worksheet.write(11, 0, Formula::new("=1/1"))?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     for col_num in 1..=10u16 {
+/// #         worksheet.set_column_width(col_num, 6)?;
+/// #     }
+/// #
+/// #     // Add a format. Light red fill with dark red text.
+/// #     let format1 = Format::new()
+/// #         .set_font_color("9C0006")
+/// #         .set_background_color("FFC7CE");
+/// #
+/// #     // Add a format. Green fill with dark green text.
+/// #     let format2 = Format::new()
+/// #         .set_font_color("006100")
+/// #         .set_background_color("C6EFCE");
+/// #
+///     // Write a conditional format over a range.
+///     let conditional_format = ConditionalFormatError::new().set_format(format1);
+///
+///     worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
+///
+///     // Invert the error conditional format to show non-error values.
+///     let conditional_format = ConditionalFormatError::new().invert().set_format(format2);
+///
+///     worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// This creates conditional format rules like this:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_error_rules.png">
+///
+/// And the following output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_error.png">
+///
+#[derive(Clone)]
+pub struct ConditionalFormatError {
+    is_inverted: bool,
+    multi_range: String,
+    stop_if_true: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// **Section 1**: The following methods are specific to `ConditionalFormatError`.
+impl ConditionalFormatError {
+    /// Create a new Error conditional format struct.
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ConditionalFormatError {
+        ConditionalFormatError {
+            is_inverted: false,
+            multi_range: String::new(),
+            stop_if_true: false,
+            format: None,
+        }
+    }
+
+    /// Invert the functionality of the conditional format to get Non-error
+    /// values instead of Error values.
+    ///
+    /// See the example above.
+    ///
+    pub fn invert(mut self) -> ConditionalFormatError {
+        self.is_inverted = true;
+        self
+    }
+
+    // Validate the conditional format.
+    #[allow(clippy::unnecessary_wraps)]
+    #[allow(clippy::unused_self)]
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        anchor: &str,
+    ) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![];
+
+        // Write the type.
+        if self.is_inverted {
+            attributes.push(("type", "notContainsErrors".to_string()));
+        } else {
+            attributes.push(("type", "containsErrors".to_string()));
+        }
+
+        // Set the format index if present.
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        // Set the rule priority order.
+        attributes.push(("priority", priority.to_string()));
+
+        // Set the "Stop if True" property.
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        // Create the formula for the rule.
+        let formula = if self.is_inverted {
+            format!("NOT(ISERROR({anchor}))")
+        } else {
+            format!("ISERROR({anchor})")
+        };
+
+        // Write the rule.
+        writer.xml_start_tag("cfRule", &attributes);
+        writer.xml_data_element_only("formula", &formula);
+        writer.xml_end_tag("cfRule");
+
+        writer.read_to_string()
+    }
+}
+
+// -----------------------------------------------------------------------
 // ConditionalFormatDuplicate
 // -----------------------------------------------------------------------
 
@@ -841,7 +1182,7 @@ impl ConditionalFormatCell {
 ///
 #[derive(Clone)]
 pub struct ConditionalFormatDuplicate {
-    is_unique: bool,
+    is_inverted: bool,
     multi_range: String,
     stop_if_true: bool,
     pub(crate) format: Option<Format>,
@@ -853,20 +1194,20 @@ impl ConditionalFormatDuplicate {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ConditionalFormatDuplicate {
         ConditionalFormatDuplicate {
-            is_unique: false,
+            is_inverted: false,
             multi_range: String::new(),
             stop_if_true: false,
             format: None,
         }
     }
 
-    /// Invert the functionality of the conditional format to get unique values
-    /// instead of duplicate values.
+    /// Invert the functionality of the conditional format to get Unique values
+    /// instead of Duplicate values.
     ///
     /// See the example above.
     ///
     pub fn invert(mut self) -> ConditionalFormatDuplicate {
-        self.is_unique = true;
+        self.is_inverted = true;
         self
     }
 
@@ -887,7 +1228,7 @@ impl ConditionalFormatDuplicate {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![];
 
-        if self.is_unique {
+        if self.is_inverted {
             attributes.push(("type", "uniqueValues".to_string()));
         } else {
             attributes.push(("type", "duplicateValues".to_string()));
@@ -1222,7 +1563,7 @@ impl ConditionalFormatAverage {
 #[derive(Clone)]
 pub struct ConditionalFormatTop {
     value: u16,
-    is_bottom: bool,
+    is_inverted: bool,
     is_percent: bool,
     multi_range: String,
     stop_if_true: bool,
@@ -1236,7 +1577,7 @@ impl ConditionalFormatTop {
     pub fn new() -> ConditionalFormatTop {
         ConditionalFormatTop {
             value: 10,
-            is_bottom: false,
+            is_inverted: false,
             is_percent: false,
             multi_range: String::new(),
             stop_if_true: false,
@@ -1259,7 +1600,7 @@ impl ConditionalFormatTop {
     /// See the example above.
     ///
     pub fn invert(mut self) -> ConditionalFormatTop {
-        self.is_bottom = true;
+        self.is_inverted = true;
         self
     }
 
@@ -1310,7 +1651,7 @@ impl ConditionalFormatTop {
             attributes.push(("percent", "1".to_string()));
         }
 
-        if self.is_bottom {
+        if self.is_inverted {
             attributes.push(("bottom", "1".to_string()));
         }
 
@@ -2195,9 +2536,11 @@ macro_rules! generate_conditional_common_methods {
 }
 generate_conditional_common_methods!(
     ConditionalFormatAverage
+    ConditionalFormatBlank
     ConditionalFormatCell
     ConditionalFormatDate
     ConditionalFormatDuplicate
+    ConditionalFormatError
     ConditionalFormatText
     ConditionalFormatTop
 );
