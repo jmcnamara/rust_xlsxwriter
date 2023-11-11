@@ -231,7 +231,12 @@
 //! # }
 //! ```
 //!
-//! Output file:
+//! This creates conditional format rules like this:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_multi_range_rules.png">
+//!
+//! And the following output file:
 //!
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_multi_range.png">
@@ -400,7 +405,11 @@ generate_conditional_format_impls!(
 /// # }
 /// ```
 ///
-/// Output file:
+/// This creates conditional format rules like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_cell1_rules.png">
+///
+/// And the following output file:
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell1.png">
@@ -477,7 +486,11 @@ generate_conditional_format_impls!(
 /// # }
 /// ```
 ///
-/// Output file:
+/// This creates conditional format rules like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_cell2_rules.png">
+///
+/// And the following output file:
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell2.png">
@@ -815,7 +828,11 @@ impl ConditionalFormatCell {
 /// # }
 /// ```
 ///
-/// Output file:
+/// This creates conditional format rules like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_duplicate_rules.png">
+///
+/// And the following output file:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_duplicate.png">
 ///
@@ -975,7 +992,11 @@ impl ConditionalFormatDuplicate {
 /// # }
 /// ```
 ///
-/// Output file:
+/// This creates conditional format rules like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_average_rules.png">
+///
+/// And the following output file:
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_average.png">
@@ -1186,7 +1207,11 @@ impl ConditionalFormatAverage {
 /// # }
 /// ```
 ///
-/// Output file:
+/// This creates conditional format rules like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_top_rules.png">
+///
+/// And the following output file:
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_top.png">
