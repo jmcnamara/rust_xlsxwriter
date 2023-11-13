@@ -9,6 +9,7 @@ mod conditional_format_tests {
 
     use crate::test_functions::xml_to_vec;
     use crate::worksheet::*;
+    use crate::ConditionalFormat2ColorScale;
     use crate::ConditionalFormatAverage;
     use crate::ConditionalFormatAverageCriteria;
     use crate::ConditionalFormatBlank;
@@ -18,6 +19,7 @@ mod conditional_format_tests {
     use crate::ConditionalFormatDateCriteria;
     use crate::ConditionalFormatDuplicate;
     use crate::ConditionalFormatError;
+    use crate::ConditionalFormatScaleType;
     use crate::ConditionalFormatText;
     use crate::ConditionalFormatTextCriteria;
     use crate::ConditionalFormatTop;
@@ -73,6 +75,63 @@ mod conditional_format_tests {
         let expected = r#"<cfRule type="cellIs" priority="1" operator="equal"><formula>"Foo "" Bar"</formula></cfRule>"#;
 
         assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn validation_checks() {
+        // Check validations for various conditional formats.
+
+        // Cell format must have a non-None type.
+        let conditional_format = ConditionalFormatCell::new();
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+
+        // Cell format must have a value.
+        let conditional_format =
+            ConditionalFormatCell::new().set_criteria(ConditionalFormatCellCriteria::EqualTo);
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+
+        // Cell between format must have a min value.
+        let conditional_format =
+            ConditionalFormatCell::new().set_criteria(ConditionalFormatCellCriteria::Between);
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+
+        // Cell between format must have a max value.
+        let conditional_format = ConditionalFormatCell::new()
+            .set_criteria(ConditionalFormatCellCriteria::Between)
+            .set_minimum(1);
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+
+        // Top value must be in the Excel range 1..1000.
+        let conditional_format = ConditionalFormatTop::new().set_value(0);
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+
+        // Top value must be in the Excel range 1..1000.
+        let conditional_format = ConditionalFormatTop::new().set_value(1001);
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+    }
+
+    #[test]
+    fn multi_range_replacing() {
+        // Check escaping of the multi-range string.
+
+        let conditional_format = ConditionalFormatCell::new().set_multi_range("A1");
+        let multi_range = conditional_format.multi_range();
+        assert_eq!("A1", multi_range);
+
+        let conditional_format = ConditionalFormatCell::new().set_multi_range("$A$1");
+        let multi_range = conditional_format.multi_range();
+        assert_eq!("A1", multi_range);
+
+        let conditional_format = ConditionalFormatCell::new()
+            .set_multi_range("$B$3:$D$6,$I$3:$K$6,$B$9:$D$12,$I$9:$K$12");
+        let multi_range = conditional_format.multi_range();
+        assert_eq!("B3:D6 I3:K6 B9:D12 I9:K12", multi_range);
     }
 
     #[test]
@@ -892,7 +951,6 @@ mod conditional_format_tests {
         worksheet.write(2, 0, 30)?;
         worksheet.write(3, 0, 40)?;
 
-
         let conditional_format = ConditionalFormatBlank::new();
         worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
 
@@ -1102,59 +1160,207 @@ mod conditional_format_tests {
     }
 
     #[test]
-    fn validation_checks() {
-        // Check validations for various conditional formats.
+    fn conditional_format_12() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
 
-        // Cell format must have a non-None type.
-        let conditional_format = ConditionalFormatCell::new();
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+        worksheet.write(8, 0, 9)?;
+        worksheet.write(9, 0, 10)?;
+        worksheet.write(10, 0, 11)?;
+        worksheet.write(11, 0, 12)?;
 
-        // Cell format must have a value.
-        let conditional_format =
-            ConditionalFormatCell::new().set_criteria(ConditionalFormatCellCriteria::EqualTo);
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+        let conditional_format = ConditionalFormat2ColorScale::new();
 
-        // Cell between format must have a min value.
-        let conditional_format =
-            ConditionalFormatCell::new().set_criteria(ConditionalFormatCellCriteria::Between);
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+        worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
 
-        // Cell between format must have a max value.
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::Between)
-            .set_minimum(1);
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+        worksheet.assemble_xml_file();
 
-        // Top value must be in the Excel range 1..1000.
-        let conditional_format = ConditionalFormatTop::new().set_value(0);
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
 
-        // Top value must be in the Excel range 1..1000.
-        let conditional_format = ConditionalFormatTop::new().set_value(1001);
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A12"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+                <row r="9" spans="1:1">
+                  <c r="A9">
+                    <v>9</v>
+                  </c>
+                </row>
+                <row r="10" spans="1:1">
+                  <c r="A10">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="11" spans="1:1">
+                  <c r="A11">
+                    <v>11</v>
+                  </c>
+                </row>
+                <row r="12" spans="1:1">
+                  <c r="A12">
+                    <v>12</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1:A12">
+                <cfRule type="colorScale" priority="1">
+                  <colorScale>
+                    <cfvo type="min" val="0"/>
+                    <cfvo type="max" val="0"/>
+                    <color rgb="FFFCFCFF"/>
+                    <color rgb="FF63BE7B"/>
+                  </colorScale>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
     }
 
     #[test]
-    fn multi_range_replacing() {
-        // Check escaping of the multi-range string.
+    fn conditional_format_12b() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
 
-        let conditional_format = ConditionalFormatCell::new().set_multi_range("A1");
-        let multi_range = conditional_format.multi_range();
-        assert_eq!("A1", multi_range);
+        let conditional_format = ConditionalFormat2ColorScale::new()
+            // String should be ignored.
+            .set_minimum(ConditionalFormatScaleType::Number, "Foo")
+            .set_maximum(ConditionalFormatScaleType::Number, "Foo")
+            // High/low should be ignored.
+            .set_minimum(ConditionalFormatScaleType::Highest, 0)
+            .set_maximum(ConditionalFormatScaleType::Lowest, 0)
+            // > 100 should be ignored.
+            .set_minimum(ConditionalFormatScaleType::Percent, 101)
+            .set_maximum(ConditionalFormatScaleType::Percent, 101)
+            // < 0 should be ignored.
+            .set_minimum(ConditionalFormatScaleType::Percentile, -1)
+            .set_maximum(ConditionalFormatScaleType::Percentile, -1)
+            .set_minimum_color("FF0000")
+            .set_maximum_color("FFFF00");
+        worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
 
-        let conditional_format = ConditionalFormatCell::new().set_multi_range("$A$1");
-        let multi_range = conditional_format.multi_range();
-        assert_eq!("A1", multi_range);
+        let conditional_format = ConditionalFormat2ColorScale::new()
+            .set_minimum(ConditionalFormatScaleType::Number, 2.5)
+            .set_maximum(ConditionalFormatScaleType::Percent, 90);
+        worksheet.add_conditional_format(0, 2, 9, 2, &conditional_format)?;
 
-        let conditional_format = ConditionalFormatCell::new()
-            .set_multi_range("$B$3:$D$6,$I$3:$K$6,$B$9:$D$12,$I$9:$K$12");
-        let multi_range = conditional_format.multi_range();
-        assert_eq!("B3:D6 I3:K6 B9:D12 I9:K12", multi_range);
+        let conditional_format = ConditionalFormat2ColorScale::new()
+            .set_minimum(ConditionalFormatScaleType::Formula, Formula::new("=$M$20"))
+            .set_maximum(ConditionalFormatScaleType::Percentile, 90);
+        worksheet.add_conditional_format(0, 4, 9, 4, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <conditionalFormatting sqref="A1:A10">
+                <cfRule type="colorScale" priority="1">
+                  <colorScale>
+                    <cfvo type="min" val="0"/>
+                    <cfvo type="max" val="0"/>
+                    <color rgb="FFFF0000"/>
+                    <color rgb="FFFFFF00"/>
+                  </colorScale>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="C1:C10">
+                <cfRule type="colorScale" priority="2">
+                  <colorScale>
+                    <cfvo type="num" val="2.5"/>
+                    <cfvo type="percent" val="90"/>
+                    <color rgb="FFFCFCFF"/>
+                    <color rgb="FF63BE7B"/>
+                  </colorScale>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="E1:E10">
+                <cfRule type="colorScale" priority="3">
+                  <colorScale>
+                    <cfvo type="formula" val="$M$20"/>
+                    <cfvo type="percentile" val="90"/>
+                    <color rgb="FFFCFCFF"/>
+                    <color rgb="FF63BE7B"/>
+                  </colorScale>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
     }
 }

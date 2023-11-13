@@ -2559,7 +2559,7 @@ impl Color {
     }
 
     // Get the ARGB hex value for a color. The alpha channel is always FF.
-    fn argb_hex_value(self) -> String {
+    pub(crate) fn argb_hex_value(self) -> String {
         format!("FF{}", self.rgb_hex_value())
     }
 
