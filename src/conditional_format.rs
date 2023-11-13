@@ -127,6 +127,8 @@
 //! - [`ConditionalFormatTop`]: The Top/Bottom style conditional format.
 //! - [`ConditionalFormat2ColorScale`]: The 2 color scale style conditional
 //!   format.
+//! - [`ConditionalFormat3ColorScale`]: The 3 color scale style conditional
+//!   format.
 //!
 //! # Excel's limitations on conditional format properties
 //!
@@ -327,6 +329,7 @@ generate_conditional_format_impls!(
     ConditionalFormatText
     ConditionalFormatTop
     ConditionalFormat2ColorScale
+    ConditionalFormat3ColorScale
 );
 
 // -----------------------------------------------------------------------
@@ -2154,8 +2157,8 @@ impl ConditionalFormatDate {
 /// # Examples
 ///
 /// Example of adding 2 color scale type conditional formatting to a worksheet.
-/// Note, the colors in the first example could be omitted since they are the
-/// default colors.
+/// Note, the colors in the fifth example (yellow to green) are the default
+/// colors and could be omitted.
 ///
 /// ```
 /// # // This code is available in examples/doc_conditional_format_2color.rs
@@ -2173,31 +2176,50 @@ impl ConditionalFormatDate {
 /// #     worksheet.write_column(2, 3, scale_data)?;
 /// #     worksheet.write_column(2, 5, scale_data)?;
 /// #     worksheet.write_column(2, 7, scale_data)?;
+/// #     worksheet.write_column(2, 9, scale_data)?;
+/// #     worksheet.write_column(2, 11, scale_data)?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     for col_num in 0..=12u16 {
+/// #         worksheet.set_column_width(col_num, 6)?;
+/// #     }
 /// #
 ///     // Write 2 color scale formats with standard Excel colors.
 ///     let conditional_format = ConditionalFormat2ColorScale::new()
-///         .set_minimum_color("FCFCFF")
-///         .set_maximum_color("63BE7B");
+///         .set_minimum_color("F8696B")
+///         .set_maximum_color("FCFCFF");
 ///
 ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
 ///
 ///     let conditional_format = ConditionalFormat2ColorScale::new()
-///         .set_minimum_color("63BE7B")
-///         .set_maximum_color("FCFCFF");
+///         .set_minimum_color("FCFCFF")
+///         .set_maximum_color("F8696B");
 ///
 ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
 ///
 ///     let conditional_format = ConditionalFormat2ColorScale::new()
-///         .set_minimum_color("FFEF9C")
+///         .set_minimum_color("FCFCFF")
 ///         .set_maximum_color("63BE7B");
 ///
 ///     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
 ///
 ///     let conditional_format = ConditionalFormat2ColorScale::new()
 ///         .set_minimum_color("63BE7B")
-///         .set_maximum_color("FFEF9C");
+///         .set_maximum_color("FCFCFF");
 ///
 ///     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormat2ColorScale::new()
+///         .set_minimum_color("FFEF9C")
+///         .set_maximum_color("63BE7B");
+///
+///     worksheet.add_conditional_format(2, 9, 11, 9, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormat2ColorScale::new()
+///         .set_minimum_color("63BE7B")
+///         .set_maximum_color("FFEF9C");
+///
+///     worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
 /// #
 /// #     // Save the file.
 /// #     workbook.save("conditional_format.xlsx")?;
@@ -2242,7 +2264,7 @@ impl ConditionalFormat2ColorScale {
             max_type: ConditionalFormatScaleType::Highest,
             min_value: 0.into(),
             max_value: 0.into(),
-            min_color: Color::RGB(0xFCFCFF),
+            min_color: Color::RGB(0xFFEF9C),
             max_color: Color::RGB(0x63BE7B),
             multi_range: String::new(),
             stop_if_true: false,
@@ -2292,7 +2314,7 @@ impl ConditionalFormat2ColorScale {
     ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
     ///
     ///     // Write a 2 color scale formats with standard Excel colors but a user
-    ///     // defined range. Values <=3 will be shown with the minimum color while
+    ///     // defined range. Values <= 3 will be shown with the minimum color while
     ///     // values >= 7 will be shown with the maximum color.
     ///     let conditional_format = ConditionalFormat2ColorScale::new()
     ///         .set_minimum(ConditionalFormatScaleType::Number, 3)
@@ -2397,7 +2419,7 @@ impl ConditionalFormat2ColorScale {
     /// Set the color of the minimum in the 2 color scale.
     ///
     /// Set the minimum color value for a 2 color scale type of conditional
-    /// format. By default the minimum color is `#FCFCFF` (white).
+    /// format. By default the minimum color is `#FFEF9C` (yellow).
     ///
     /// # Parameters
     ///
@@ -2421,6 +2443,8 @@ impl ConditionalFormat2ColorScale {
     /// #
     /// #     // Write the worksheet data.
     /// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write(1, 1, "Default colors")?;
+    /// #     worksheet.write(1, 3, "User colors")?;
     /// #     worksheet.write_column(2, 1, scale_data)?;
     /// #     worksheet.write_column(2, 3, scale_data)?;
     /// #
@@ -2429,10 +2453,11 @@ impl ConditionalFormat2ColorScale {
     ///
     ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
     ///
-    ///     // Write a 2 color scale formats with user defined colors.
+    ///     // Write a 2 color scale formats with user defined colors. This reverses the
+    ///     // default colors.
     ///     let conditional_format = ConditionalFormat2ColorScale::new()
-    ///         .set_minimum_color("FFEB84")
-    ///         .set_maximum_color("F8696B");
+    ///         .set_minimum_color("63BE7B")
+    ///         .set_maximum_color("FFEF9C");
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
     /// #
@@ -2519,6 +2544,545 @@ impl ConditionalFormat2ColorScale {
         Self::write_type(&mut writer, self.max_type, &self.max_value.value);
 
         Self::write_color(&mut writer, self.min_color);
+        Self::write_color(&mut writer, self.max_color);
+
+        writer.xml_end_tag("colorScale");
+
+        writer.xml_end_tag("cfRule");
+
+        writer.read_to_string()
+    }
+
+    // Write the <cfvo> element.
+    fn write_type(writer: &mut XMLWriter, rule_type: ConditionalFormatScaleType, value: &str) {
+        let mut attributes = vec![];
+
+        match rule_type {
+            ConditionalFormatScaleType::Lowest => {
+                attributes.push(("type", "min".to_string()));
+            }
+            ConditionalFormatScaleType::Number => {
+                attributes.push(("type", "num".to_string()));
+            }
+            ConditionalFormatScaleType::Percent => {
+                attributes.push(("type", "percent".to_string()));
+            }
+            ConditionalFormatScaleType::Formula => {
+                attributes.push(("type", "formula".to_string()));
+            }
+            ConditionalFormatScaleType::Percentile => {
+                attributes.push(("type", "percentile".to_string()));
+            }
+            ConditionalFormatScaleType::Highest => {
+                attributes.push(("type", "max".to_string()));
+            }
+        }
+
+        attributes.push(("val", value.to_string()));
+
+        writer.xml_empty_tag("cfvo", &attributes);
+    }
+
+    // Write the <color> element.
+    fn write_color(writer: &mut XMLWriter, color: Color) {
+        let attributes = [("rgb", color.argb_hex_value())];
+
+        writer.xml_empty_tag("color", &attributes);
+    }
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormat3ColorScale
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormat3ColorScale` struct represents a 3 Color Scale
+/// conditional format.
+///
+/// `ConditionalFormat3ColorScale` is used to represent a Cell style conditional
+/// format in Excel. A 3 Color Scale Cell conditional format shows a per cell
+/// color gradient from the minimum value to the maximum value.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_3color_intro.png">
+///
+/// For more information see [Working with Conditional
+/// Formats](crate::conditional_format).
+///
+/// # Examples
+///
+/// Example of adding 3 color scale type conditional formatting to a worksheet.
+/// Note, the colors in the first example (red to yellow to green) are the
+/// default colors and could be omitted.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_3color.rs
+/// #
+/// # use rust_xlsxwriter::{ConditionalFormat3ColorScale, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Write the worksheet data.
+/// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/// #     worksheet.write_column(2, 1, scale_data)?;
+/// #     worksheet.write_column(2, 3, scale_data)?;
+/// #     worksheet.write_column(2, 5, scale_data)?;
+/// #     worksheet.write_column(2, 7, scale_data)?;
+/// #     worksheet.write_column(2, 9, scale_data)?;
+/// #     worksheet.write_column(2, 11, scale_data)?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     for col_num in 0..=12u16 {
+/// #         worksheet.set_column_width(col_num, 6)?;
+/// #     }
+/// #
+///     // Write 3 color scale formats with standard Excel colors.
+///     let conditional_format = ConditionalFormat3ColorScale::new()
+///         .set_minimum_color("F8696B")
+///         .set_midpoint_color("FFEB84")
+///         .set_maximum_color("63BE7B");
+///
+///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormat3ColorScale::new()
+///         .set_minimum_color("63BE7B")
+///         .set_midpoint_color("FFEB84")
+///         .set_maximum_color("F8696B");
+///
+///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormat3ColorScale::new()
+///         .set_minimum_color("F8696B")
+///         .set_midpoint_color("FCFCFF")
+///         .set_maximum_color("63BE7B");
+///
+///     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormat3ColorScale::new()
+///         .set_minimum_color("63BE7B")
+///         .set_midpoint_color("FCFCFF")
+///         .set_maximum_color("F8696B");
+///
+///     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormat3ColorScale::new()
+///         .set_minimum_color("F8696B")
+///         .set_midpoint_color("FCFCFF")
+///         .set_maximum_color("5A8AC6");
+///
+///     worksheet.add_conditional_format(2, 9, 11, 9, &conditional_format)?;
+///
+///     let conditional_format = ConditionalFormat3ColorScale::new()
+///         .set_minimum_color("5A8AC6")
+///         .set_midpoint_color("FCFCFF")
+///         .set_maximum_color("F8696B");
+///
+///     worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
+/// #
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// This creates conditional format rules like this:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_3color_rules.png">
+///
+/// And the following output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_3color.png">
+///
+///
+#[derive(Clone)]
+pub struct ConditionalFormat3ColorScale {
+    min_type: ConditionalFormatScaleType,
+    mid_type: ConditionalFormatScaleType,
+    max_type: ConditionalFormatScaleType,
+    min_value: ConditionalFormatValue,
+    mid_value: ConditionalFormatValue,
+    max_value: ConditionalFormatValue,
+    min_color: Color,
+    mid_color: Color,
+    max_color: Color,
+
+    multi_range: String,
+    stop_if_true: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// **Section 1**: The following methods are specific to `ConditionalFormat3ColorScale`.
+impl ConditionalFormat3ColorScale {
+    /// Create a new Cell conditional format struct.
+    #[allow(clippy::new_without_default)]
+    #[allow(clippy::unreadable_literal)] // For RGB colors.
+    pub fn new() -> ConditionalFormat3ColorScale {
+        ConditionalFormat3ColorScale {
+            min_type: ConditionalFormatScaleType::Lowest,
+            mid_type: ConditionalFormatScaleType::Percentile,
+            max_type: ConditionalFormatScaleType::Highest,
+            min_value: 0.into(),
+            mid_value: 50.into(),
+            max_value: 0.into(),
+            min_color: Color::RGB(0xF8696B),
+            mid_color: Color::RGB(0xFFEB84),
+            max_color: Color::RGB(0x63BE7B),
+            multi_range: String::new(),
+            stop_if_true: false,
+            format: None,
+        }
+    }
+
+    /// Set the type and value of the minimum in the 3 color scale.
+    ///
+    /// Set the minimum type (number, percent, formula or percentile) and value
+    /// for a 3 color scale type of conditional format. By default the minimum
+    /// is the lowest value in the conditional formatting range.
+    ///
+    /// # Parameters
+    ///
+    /// * `rule_type`: a [`ConditionalFormatScaleType`] enum value.
+    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    ///   such as numbers, dates, times and formula ranges. String values are
+    ///   ignored in this type of conditional format.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding 3 color scale type conditional formatting to a worksheet
+    /// with user defined minimum and maximum values.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_3color_set_minimum.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     ConditionalFormat3ColorScale, ConditionalFormatScaleType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, scale_data)?;
+    /// #     worksheet.write_column(2, 3, scale_data)?;
+    /// #
+    ///     // Write a 3 color scale formats with standard Excel colors. The conditional
+    ///     // format is applied from the lowest to the highest value.
+    ///     let conditional_format = ConditionalFormat3ColorScale::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a 3 color scale formats with standard Excel colors but a user
+    ///     // defined range. Values <= 3 will be shown with the minimum color while
+    ///     // values >= 7 will be shown with the maximum color.
+    ///     let conditional_format = ConditionalFormat3ColorScale::new()
+    ///         .set_minimum(ConditionalFormatScaleType::Number, 3)
+    ///         .set_maximum(ConditionalFormatScaleType::Number, 7);
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_3color_set_minimum.png">
+    ///
+    pub fn set_minimum(
+        mut self,
+        rule_type: ConditionalFormatScaleType,
+        value: impl Into<ConditionalFormatValue>,
+    ) -> ConditionalFormat3ColorScale {
+        let value = value.into();
+
+        // This type of rule doesn't support strings.
+        if value.is_string {
+            return self;
+        }
+
+        // Check that percent and percentile are in range 0..100.
+        if rule_type == ConditionalFormatScaleType::Percent
+            || rule_type == ConditionalFormatScaleType::Percentile
+        {
+            if let Ok(num) = value.value.parse::<f64>() {
+                if !(0.0..=100.0).contains(&num) {
+                    eprintln!("Percent/percentile '{num}' must be in Excel range: 0..100.");
+                    return self;
+                }
+            }
+        }
+
+        // The highest and lowest options cannot be set by the user.
+        if rule_type != ConditionalFormatScaleType::Lowest
+            && rule_type != ConditionalFormatScaleType::Highest
+        {
+            self.min_type = rule_type;
+            self.min_value = value;
+        }
+
+        self
+    }
+
+    /// Set the type and value of the midpoint in the 3 color scale.
+    ///
+    /// Set the midpoint type (number, percent, formula or percentile) and value
+    /// for a 3 color scale type of conditional format. By default the midpoint
+    /// is set as 50 percentile.
+    ///
+    /// # Parameters
+    ///
+    /// * `rule_type`: a [`ConditionalFormatScaleType`] enum value.
+    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    ///   such as numbers, dates, times and formula ranges. String values are
+    ///   ignored in this type of conditional format.
+    ///
+    pub fn set_midpoint(
+        mut self,
+        rule_type: ConditionalFormatScaleType,
+        value: impl Into<ConditionalFormatValue>,
+    ) -> ConditionalFormat3ColorScale {
+        let value = value.into();
+
+        // This type of rule doesn't support strings.
+        if value.is_string {
+            return self;
+        }
+
+        // Check that percent and percentile are in range 0..100.
+        if rule_type == ConditionalFormatScaleType::Percent
+            || rule_type == ConditionalFormatScaleType::Percentile
+        {
+            if let Ok(num) = value.value.parse::<f64>() {
+                if !(0.0..=100.0).contains(&num) {
+                    eprintln!("Percent/percentile '{num}' must be in Excel range: 0..100.");
+                    return self;
+                }
+            }
+        }
+
+        // The highest and lowest options cannot be set by the user.
+        if rule_type != ConditionalFormatScaleType::Lowest
+            && rule_type != ConditionalFormatScaleType::Highest
+        {
+            self.mid_type = rule_type;
+            self.mid_value = value;
+        }
+
+        self
+    }
+
+    /// Set the type and value of the maximum in the 3 color scale.
+    ///
+    /// Set the maximum type (number, percent, formula or percentile) and value
+    /// for a 3 color scale type of conditional format. By default the maximum
+    /// is the highest value in the conditional formatting range.
+    ///
+    /// # Parameters
+    ///
+    /// * `rule_type`: a [`ConditionalFormatScaleType`] enum value.
+    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    ///   such as numbers, dates, times and formula ranges. String values are
+    ///   ignored in this type of conditional format.
+    ///
+    pub fn set_maximum(
+        mut self,
+        rule_type: ConditionalFormatScaleType,
+        value: impl Into<ConditionalFormatValue>,
+    ) -> ConditionalFormat3ColorScale {
+        let value = value.into();
+
+        // This type of rule doesn't support strings.
+        if value.is_string {
+            return self;
+        }
+
+        // Check that percent and percentile are in range 0..100.
+        if rule_type == ConditionalFormatScaleType::Percent
+            || rule_type == ConditionalFormatScaleType::Percentile
+        {
+            if let Ok(num) = value.value.parse::<f64>() {
+                if !(0.0..=100.0).contains(&num) {
+                    eprintln!("Percent/percentile '{num}' must be in Excel range: 0..100.");
+                    return self;
+                }
+            }
+        }
+
+        // The highest and lowest options cannot be set by the user.
+        if rule_type != ConditionalFormatScaleType::Lowest
+            && rule_type != ConditionalFormatScaleType::Highest
+        {
+            self.max_type = rule_type;
+            self.max_value = value;
+        }
+
+        self
+    }
+
+    /// Set the color of the minimum in the 3 color scale.
+    ///
+    /// Set the minimum color value for a 3 color scale type of conditional
+    /// format. By default the minimum color is `#FCFCFF` (white).
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The color property defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding 3 color scale type conditional formatting to a worksheet
+    /// with user defined minimum, midpoint and maximum colors.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_3color_set_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormat3ColorScale, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write(1, 1, "Default colors")?;
+    /// #     worksheet.write(1, 3, "User colors")?;
+    /// #     worksheet.write_column(2, 1, scale_data)?;
+    /// #     worksheet.write_column(2, 3, scale_data)?;
+    /// #
+    ///     // Write a 3 color scale formats with standard Excel colors.
+    ///     let conditional_format = ConditionalFormat3ColorScale::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a 3 color scale formats with user defined colors. This reverses the
+    ///     // default colors.
+    ///     let conditional_format = ConditionalFormat3ColorScale::new()
+    ///         .set_minimum_color("63BE7B")
+    ///         .set_midpoint_color("FFEB84")
+    ///         .set_maximum_color("F8696B");
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_3color_set_color.png">
+    ///
+    pub fn set_minimum_color<T>(mut self, color: T) -> ConditionalFormat3ColorScale
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.min_color = color;
+        }
+
+        self
+    }
+
+    /// Set the color of the midpoint in the 3 color scale.
+    ///
+    /// Set the midpoint color value for a 3 color scale type of conditional
+    /// format. By default the midpoint color is `#TODO` (todo).
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The color property defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
+    ///
+    pub fn set_midpoint_color<T>(mut self, color: T) -> ConditionalFormat3ColorScale
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.mid_color = color;
+        }
+
+        self
+    }
+
+    /// Set the color of the maximum in the 3 color scale.
+    ///
+    /// Set the maximum color value for a 3 color scale type of conditional
+    /// format. By default the maximum color is `#63BE7B` (green).
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The color property defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
+    ///
+    pub fn set_maximum_color<T>(mut self, color: T) -> ConditionalFormat3ColorScale
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.max_color = color;
+        }
+
+        self
+    }
+
+    // Validate the conditional format.
+    #[allow(clippy::unnecessary_wraps)]
+    #[allow(clippy::unused_self)]
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn get_rule_string(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        _anchor: &str,
+    ) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![("type", "colorScale".to_string())];
+
+        // Set the format index if present.
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        // Set the rule priority order.
+        attributes.push(("priority", priority.to_string()));
+
+        // Set the "Stop if True" property.
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        // Write the rule.
+        writer.xml_start_tag("cfRule", &attributes);
+        writer.xml_start_tag_only("colorScale");
+
+        Self::write_type(&mut writer, self.min_type, &self.min_value.value);
+        Self::write_type(&mut writer, self.mid_type, &self.mid_value.value);
+        Self::write_type(&mut writer, self.max_type, &self.max_value.value);
+
+        Self::write_color(&mut writer, self.min_color);
+        Self::write_color(&mut writer, self.mid_color);
         Self::write_color(&mut writer, self.max_color);
 
         writer.xml_end_tag("colorScale");
@@ -2887,8 +3451,8 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 // ConditionalFormatScaleType
 // -----------------------------------------------------------------------
 
-/// The `ConditionalFormatScaleType` enum defines the conditional format
-/// type for [`ConditionalFormat2ColorScale`].
+/// The `ConditionalFormatScaleType` enum defines the conditional format type
+/// for [`ConditionalFormat2ColorScale`] and [`ConditionalFormat3ColorScale`].
 ///
 /// # Examples
 ///
@@ -2919,7 +3483,7 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
 ///
 ///     // Write a 2 color scale formats with standard Excel colors but a user
-///     // defined range. Values <=3 will be shown with the minimum color while
+///     // defined range. Values <= 3 will be shown with the minimum color while
 ///     // values >= 7 will be shown with the maximum color.
 ///     let conditional_format = ConditionalFormat2ColorScale::new()
 ///         .set_minimum(ConditionalFormatScaleType::Number, 3)
@@ -2936,7 +3500,8 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_2color_set_minimum.png">
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_2color_set_minimum.png">
 ///
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -3061,4 +3626,5 @@ generate_conditional_common_methods!(
     ConditionalFormatText
     ConditionalFormatTop
     ConditionalFormat2ColorScale
+    ConditionalFormat3ColorScale
 );

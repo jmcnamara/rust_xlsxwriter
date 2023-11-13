@@ -9,10 +9,10 @@
 //! cells based on certain criteria.
 
 use rust_xlsxwriter::{
-    ConditionalFormat2ColorScale, ConditionalFormatAverage, ConditionalFormatAverageCriteria,
-    ConditionalFormatCell, ConditionalFormatCellCriteria, ConditionalFormatDuplicate,
-    ConditionalFormatText, ConditionalFormatTextCriteria, ConditionalFormatTop, Format, Workbook,
-    XlsxError,
+    ConditionalFormat2ColorScale, ConditionalFormat3ColorScale, ConditionalFormatAverage,
+    ConditionalFormatAverageCriteria, ConditionalFormatCell, ConditionalFormatCellCriteria,
+    ConditionalFormatDuplicate, ConditionalFormatText, ConditionalFormatTextCriteria,
+    ConditionalFormatTop, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -321,7 +321,7 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Example 8. Examples of 2 color scale conditional formats.
     // -----------------------------------------------------------------------
-    let caption = "Examples of 2 scale conditional formats";
+    let caption = "Examples of 2 color scale conditional formats";
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
@@ -335,31 +335,118 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(2, 3, scale_data)?;
     worksheet.write_column(2, 5, scale_data)?;
     worksheet.write_column(2, 7, scale_data)?;
+    worksheet.write_column(2, 9, scale_data)?;
+    worksheet.write_column(2, 11, scale_data)?;
+
+    // Set the column widths for clarity.
+    for col_num in 0..=12u16 {
+        worksheet.set_column_width(col_num, 6)?;
+    }
 
     // Write 2 color scale formats with standard Excel colors.
     let conditional_format = ConditionalFormat2ColorScale::new()
-        .set_minimum_color("FCFCFF")
-        .set_maximum_color("63BE7B");
+        .set_minimum_color("F8696B")
+        .set_maximum_color("FCFCFF");
 
     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
 
     let conditional_format = ConditionalFormat2ColorScale::new()
-        .set_minimum_color("63BE7B")
-        .set_maximum_color("FCFCFF");
+        .set_minimum_color("FCFCFF")
+        .set_maximum_color("F8696B");
 
     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
 
     let conditional_format = ConditionalFormat2ColorScale::new()
-        .set_minimum_color("FFEF9C")
+        .set_minimum_color("FCFCFF")
         .set_maximum_color("63BE7B");
 
     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
 
     let conditional_format = ConditionalFormat2ColorScale::new()
         .set_minimum_color("63BE7B")
-        .set_maximum_color("FFEF9C");
+        .set_maximum_color("FCFCFF");
 
     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color("FFEF9C")
+        .set_maximum_color("63BE7B");
+
+    worksheet.add_conditional_format(2, 9, 11, 9, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color("63BE7B")
+        .set_maximum_color("FFEF9C");
+
+    worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
+
+    // -----------------------------------------------------------------------
+    // Example 9. Examples of 3 color scale conditional formats.
+    // -----------------------------------------------------------------------
+    let caption = "Examples of 3 color scale conditional formats";
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write the caption.
+    worksheet.write(0, 1, caption)?;
+
+    // Write the worksheet data.
+    let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    worksheet.write_column(2, 1, scale_data)?;
+    worksheet.write_column(2, 3, scale_data)?;
+    worksheet.write_column(2, 5, scale_data)?;
+    worksheet.write_column(2, 7, scale_data)?;
+    worksheet.write_column(2, 9, scale_data)?;
+    worksheet.write_column(2, 11, scale_data)?;
+
+    // Set the column widths for clarity.
+    for col_num in 0..=12u16 {
+        worksheet.set_column_width(col_num, 6)?;
+    }
+
+    // Write 3 color scale formats with standard Excel colors.
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("F8696B")
+        .set_midpoint_color("FFEB84")
+        .set_maximum_color("63BE7B");
+
+    worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("63BE7B")
+        .set_midpoint_color("FFEB84")
+        .set_maximum_color("F8696B");
+
+    worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("F8696B")
+        .set_midpoint_color("FCFCFF")
+        .set_maximum_color("63BE7B");
+
+    worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("63BE7B")
+        .set_midpoint_color("FCFCFF")
+        .set_maximum_color("F8696B");
+
+    worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("F8696B")
+        .set_midpoint_color("FCFCFF")
+        .set_maximum_color("5A8AC6");
+
+    worksheet.add_conditional_format(2, 9, 11, 9, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("5A8AC6")
+        .set_midpoint_color("FCFCFF")
+        .set_maximum_color("F8696B");
+
+    worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
 
     // -----------------------------------------------------------------------
     // Save and close the file.

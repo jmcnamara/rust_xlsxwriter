@@ -2,10 +2,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! Example of adding 2 color scale type conditional formatting to a worksheet
-//! with user defined minimum and maximum colors.
+//! Example of adding 3 color scale type conditional formatting to a worksheet
+//! with user defined minimum, midpoint and maximum colors.
 
-use rust_xlsxwriter::{ConditionalFormat2ColorScale, Workbook, XlsxError};
+use rust_xlsxwriter::{ConditionalFormat3ColorScale, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -19,16 +19,17 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(2, 1, scale_data)?;
     worksheet.write_column(2, 3, scale_data)?;
 
-    // Write a 2 color scale formats with standard Excel colors.
-    let conditional_format = ConditionalFormat2ColorScale::new();
+    // Write a 3 color scale formats with standard Excel colors.
+    let conditional_format = ConditionalFormat3ColorScale::new();
 
     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
 
-    // Write a 2 color scale formats with user defined colors. This reverses the
+    // Write a 3 color scale formats with user defined colors. This reverses the
     // default colors.
-    let conditional_format = ConditionalFormat2ColorScale::new()
+    let conditional_format = ConditionalFormat3ColorScale::new()
         .set_minimum_color("63BE7B")
-        .set_maximum_color("FFEF9C");
+        .set_midpoint_color("FFEB84")
+        .set_maximum_color("F8696B");
 
     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
 
