@@ -129,6 +129,8 @@
 //!   format.
 //! - [`ConditionalFormat3ColorScale`]: The 3 color scale style conditional
 //!   format.
+//! - [`ConditionalFormatDataBar`]: The Data Bar scale style conditional
+//!   format.
 //!
 //! # Excel's limitations on conditional format properties
 //!
@@ -275,7 +277,10 @@ pub trait ConditionalFormat {
     fn validate(&self) -> Result<(), XlsxError>;
 
     /// Return the conditional format rule as an XML string.
-    fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32, anchor: &str) -> String;
+    fn rule(&self, dxf_index: Option<u32>, priority: u32, range: &str, guid: &str) -> String;
+
+    /// Return the extended x14 conditional format rule as an XML string.
+    fn x14_rule(&self, guid: &str) -> String;
 
     /// Get a mutable reference to the format object in the conditional format.
     fn format_as_mut(&mut self) -> Option<&mut Format>;
@@ -285,6 +290,9 @@ pub trait ConditionalFormat {
 
     /// Get the multi-cell range for the conditional format, if present.
     fn multi_range(&self) -> String;
+
+    /// Check if the conditional format uses Excel 2010+ extensions.
+    fn has_extensions(&self) -> bool;
 
     /// Clone a reference into a concrete Box type.
     fn box_clone(&self) -> Box<dyn ConditionalFormat + Send>;
@@ -297,9 +305,14 @@ macro_rules! generate_conditional_format_impls {
                 self.validate()
             }
 
-            fn get_rule_string(&self, dxf_index: Option<u32>, priority: u32, anchor: &str) -> String {
-                self.get_rule_string(dxf_index, priority, anchor)
+            fn rule(&self, dxf_index: Option<u32>, priority: u32, range: &str, guid: &str) -> String {
+                self.rule(dxf_index, priority, range, guid)
             }
+
+            fn x14_rule(&self, guid: &str) -> String {
+                self.x14_rule(guid)
+            }
+
 
             fn format_as_mut(&mut self) -> Option<&mut Format> {
                 self.format_as_mut()
@@ -311,6 +324,10 @@ macro_rules! generate_conditional_format_impls {
 
             fn multi_range(&self) -> String {
                 self.multi_range()
+            }
+
+            fn has_extensions(&self) -> bool {
+                self.has_extensions()
             }
 
             fn box_clone(&self) -> Box<dyn ConditionalFormat + Send> {
@@ -330,6 +347,7 @@ generate_conditional_format_impls!(
     ConditionalFormatTop
     ConditionalFormat2ColorScale
     ConditionalFormat3ColorScale
+    ConditionalFormatDataBar
 );
 
 // -----------------------------------------------------------------------
@@ -514,6 +532,7 @@ pub struct ConditionalFormatCell {
     criteria: ConditionalFormatCellCriteria,
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -528,6 +547,7 @@ impl ConditionalFormatCell {
             criteria: ConditionalFormatCellCriteria::None,
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -718,11 +738,12 @@ impl ConditionalFormatCell {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        _anchor: &str,
+        _range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "cellIs".to_string())];
@@ -755,6 +776,12 @@ impl ConditionalFormatCell {
         writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -844,6 +871,7 @@ pub struct ConditionalFormatBlank {
     is_inverted: bool,
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -856,6 +884,7 @@ impl ConditionalFormatBlank {
             is_inverted: false,
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -878,14 +907,16 @@ impl ConditionalFormatBlank {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        anchor: &str,
+        range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![];
+        let anchor = &range_to_anchor(range);
 
         // Write the type.
         if self.is_inverted {
@@ -920,6 +951,12 @@ impl ConditionalFormatBlank {
         writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -1017,6 +1054,7 @@ pub struct ConditionalFormatError {
     is_inverted: bool,
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1029,6 +1067,7 @@ impl ConditionalFormatError {
             is_inverted: false,
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -1051,14 +1090,16 @@ impl ConditionalFormatError {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        anchor: &str,
+        range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![];
+        let anchor = &range_to_anchor(range);
 
         // Write the type.
         if self.is_inverted {
@@ -1093,6 +1134,12 @@ impl ConditionalFormatError {
         writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -1191,6 +1238,7 @@ pub struct ConditionalFormatDuplicate {
     is_inverted: bool,
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1203,6 +1251,7 @@ impl ConditionalFormatDuplicate {
             is_inverted: false,
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -1225,11 +1274,12 @@ impl ConditionalFormatDuplicate {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        _anchor: &str,
+        _range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![];
@@ -1257,6 +1307,12 @@ impl ConditionalFormatDuplicate {
         writer.xml_empty_tag("cfRule", &attributes);
 
         writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -1356,6 +1412,7 @@ pub struct ConditionalFormatAverage {
     criteria: ConditionalFormatAverageCriteria,
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1368,6 +1425,7 @@ impl ConditionalFormatAverage {
             criteria: ConditionalFormatAverageCriteria::AboveAverage,
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -1395,11 +1453,12 @@ impl ConditionalFormatAverage {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        _anchor: &str,
+        _range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "aboveAverage".to_string())];
@@ -1470,6 +1529,12 @@ impl ConditionalFormatAverage {
         writer.xml_empty_tag("cfRule", &attributes);
 
         writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -1573,6 +1638,7 @@ pub struct ConditionalFormatTop {
     is_percent: bool,
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1587,6 +1653,7 @@ impl ConditionalFormatTop {
             is_percent: false,
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -1631,11 +1698,12 @@ impl ConditionalFormatTop {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        _anchor: &str,
+        _range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "top10".to_string())];
@@ -1667,6 +1735,12 @@ impl ConditionalFormatTop {
         writer.xml_empty_tag("cfRule", &attributes);
 
         writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -1787,6 +1861,7 @@ pub struct ConditionalFormatText {
     criteria: ConditionalFormatTextCriteria,
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1800,6 +1875,7 @@ impl ConditionalFormatText {
             criteria: ConditionalFormatTextCriteria::Contains,
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -1845,15 +1921,17 @@ impl ConditionalFormatText {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        anchor: &str,
+        range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![];
         let text = self.value.clone();
+        let anchor = &range_to_anchor(range);
 
         // Set the rule attributes based on the criteria.
         let formula = match self.criteria {
@@ -1897,6 +1975,12 @@ impl ConditionalFormatText {
         writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -2025,6 +2109,7 @@ pub struct ConditionalFormatDate {
     criteria: ConditionalFormatDateCriteria,
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2037,6 +2122,7 @@ impl ConditionalFormatDate {
             criteria: ConditionalFormatDateCriteria::Yesterday,
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -2064,14 +2150,16 @@ impl ConditionalFormatDate {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        anchor: &str,
+        range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "timePeriod".to_string())];
+        let anchor = &range_to_anchor(range);
 
         // Set the rule attributes based on the criteria.
         let formula = match self.criteria {
@@ -2134,6 +2222,12 @@ impl ConditionalFormatDate {
         writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -2241,8 +2335,8 @@ impl ConditionalFormatDate {
 ///
 #[derive(Clone)]
 pub struct ConditionalFormat2ColorScale {
-    min_type: ConditionalFormatScaleType,
-    max_type: ConditionalFormatScaleType,
+    min_type: ConditionalFormatType,
+    max_type: ConditionalFormatType,
     min_value: ConditionalFormatValue,
     max_value: ConditionalFormatValue,
     min_color: Color,
@@ -2250,6 +2344,7 @@ pub struct ConditionalFormat2ColorScale {
 
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2260,14 +2355,15 @@ impl ConditionalFormat2ColorScale {
     #[allow(clippy::unreadable_literal)] // For RGB colors.
     pub fn new() -> ConditionalFormat2ColorScale {
         ConditionalFormat2ColorScale {
-            min_type: ConditionalFormatScaleType::Lowest,
-            max_type: ConditionalFormatScaleType::Highest,
+            min_type: ConditionalFormatType::Lowest,
+            max_type: ConditionalFormatType::Highest,
             min_value: 0.into(),
             max_value: 0.into(),
             min_color: Color::RGB(0xFFEF9C),
             max_color: Color::RGB(0x63BE7B),
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -2280,7 +2376,7 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatScaleType`] enum value.
+    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
@@ -2294,7 +2390,7 @@ impl ConditionalFormat2ColorScale {
     /// # // This code is available in examples/doc_conditional_format_2color_set_minimum.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     ConditionalFormat2ColorScale, ConditionalFormatScaleType, Workbook, XlsxError,
+    /// #     ConditionalFormat2ColorScale, ConditionalFormatType, Workbook, XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -2317,8 +2413,8 @@ impl ConditionalFormat2ColorScale {
     ///     // defined range. Values <= 3 will be shown with the minimum color while
     ///     // values >= 7 will be shown with the maximum color.
     ///     let conditional_format = ConditionalFormat2ColorScale::new()
-    ///         .set_minimum(ConditionalFormatScaleType::Number, 3)
-    ///         .set_maximum(ConditionalFormatScaleType::Number, 7);
+    ///         .set_minimum(ConditionalFormatType::Number, 3)
+    ///         .set_maximum(ConditionalFormatType::Number, 7);
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
     /// #
@@ -2335,7 +2431,7 @@ impl ConditionalFormat2ColorScale {
     ///
     pub fn set_minimum(
         mut self,
-        rule_type: ConditionalFormatScaleType,
+        rule_type: ConditionalFormatType,
         value: impl Into<ConditionalFormatValue>,
     ) -> ConditionalFormat2ColorScale {
         let value = value.into();
@@ -2346,8 +2442,8 @@ impl ConditionalFormat2ColorScale {
         }
 
         // Check that percent and percentile are in range 0..100.
-        if rule_type == ConditionalFormatScaleType::Percent
-            || rule_type == ConditionalFormatScaleType::Percentile
+        if rule_type == ConditionalFormatType::Percent
+            || rule_type == ConditionalFormatType::Percentile
         {
             if let Ok(num) = value.value.parse::<f64>() {
                 if !(0.0..=100.0).contains(&num) {
@@ -2358,8 +2454,9 @@ impl ConditionalFormat2ColorScale {
         }
 
         // The highest and lowest options cannot be set by the user.
-        if rule_type != ConditionalFormatScaleType::Lowest
-            && rule_type != ConditionalFormatScaleType::Highest
+        if rule_type != ConditionalFormatType::Lowest
+            && rule_type != ConditionalFormatType::Highest
+            && rule_type != ConditionalFormatType::Automatic
         {
             self.min_type = rule_type;
             self.min_value = value;
@@ -2376,14 +2473,14 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatScaleType`] enum value.
+    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
     pub fn set_maximum(
         mut self,
-        rule_type: ConditionalFormatScaleType,
+        rule_type: ConditionalFormatType,
         value: impl Into<ConditionalFormatValue>,
     ) -> ConditionalFormat2ColorScale {
         let value = value.into();
@@ -2394,8 +2491,8 @@ impl ConditionalFormat2ColorScale {
         }
 
         // Check that percent and percentile are in range 0..100.
-        if rule_type == ConditionalFormatScaleType::Percent
-            || rule_type == ConditionalFormatScaleType::Percentile
+        if rule_type == ConditionalFormatType::Percent
+            || rule_type == ConditionalFormatType::Percentile
         {
             if let Ok(num) = value.value.parse::<f64>() {
                 if !(0.0..=100.0).contains(&num) {
@@ -2406,8 +2503,9 @@ impl ConditionalFormat2ColorScale {
         }
 
         // The highest and lowest options cannot be set by the user.
-        if rule_type != ConditionalFormatScaleType::Lowest
-            && rule_type != ConditionalFormatScaleType::Highest
+        if rule_type != ConditionalFormatType::Lowest
+            && rule_type != ConditionalFormatType::Highest
+            && rule_type != ConditionalFormatType::Automatic
         {
             self.max_type = rule_type;
             self.max_value = value;
@@ -2514,11 +2612,12 @@ impl ConditionalFormat2ColorScale {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        _anchor: &str,
+        _range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "colorScale".to_string())];
@@ -2554,28 +2653,29 @@ impl ConditionalFormat2ColorScale {
     }
 
     // Write the <cfvo> element.
-    fn write_type(writer: &mut XMLWriter, rule_type: ConditionalFormatScaleType, value: &str) {
+    fn write_type(writer: &mut XMLWriter, rule_type: ConditionalFormatType, value: &str) {
         let mut attributes = vec![];
 
         match rule_type {
-            ConditionalFormatScaleType::Lowest => {
+            ConditionalFormatType::Lowest => {
                 attributes.push(("type", "min".to_string()));
             }
-            ConditionalFormatScaleType::Number => {
+            ConditionalFormatType::Number => {
                 attributes.push(("type", "num".to_string()));
             }
-            ConditionalFormatScaleType::Percent => {
+            ConditionalFormatType::Percent => {
                 attributes.push(("type", "percent".to_string()));
             }
-            ConditionalFormatScaleType::Formula => {
+            ConditionalFormatType::Formula => {
                 attributes.push(("type", "formula".to_string()));
             }
-            ConditionalFormatScaleType::Percentile => {
+            ConditionalFormatType::Percentile => {
                 attributes.push(("type", "percentile".to_string()));
             }
-            ConditionalFormatScaleType::Highest => {
+            ConditionalFormatType::Highest => {
                 attributes.push(("type", "max".to_string()));
             }
+            ConditionalFormatType::Automatic => {}
         }
 
         attributes.push(("val", value.to_string()));
@@ -2588,6 +2688,12 @@ impl ConditionalFormat2ColorScale {
         let attributes = [("rgb", color.argb_hex_value())];
 
         writer.xml_empty_tag("color", &attributes);
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
     }
 }
 
@@ -2701,9 +2807,9 @@ impl ConditionalFormat2ColorScale {
 ///
 #[derive(Clone)]
 pub struct ConditionalFormat3ColorScale {
-    min_type: ConditionalFormatScaleType,
-    mid_type: ConditionalFormatScaleType,
-    max_type: ConditionalFormatScaleType,
+    min_type: ConditionalFormatType,
+    mid_type: ConditionalFormatType,
+    max_type: ConditionalFormatType,
     min_value: ConditionalFormatValue,
     mid_value: ConditionalFormatValue,
     max_value: ConditionalFormatValue,
@@ -2713,6 +2819,7 @@ pub struct ConditionalFormat3ColorScale {
 
     multi_range: String,
     stop_if_true: bool,
+    has_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2723,9 +2830,9 @@ impl ConditionalFormat3ColorScale {
     #[allow(clippy::unreadable_literal)] // For RGB colors.
     pub fn new() -> ConditionalFormat3ColorScale {
         ConditionalFormat3ColorScale {
-            min_type: ConditionalFormatScaleType::Lowest,
-            mid_type: ConditionalFormatScaleType::Percentile,
-            max_type: ConditionalFormatScaleType::Highest,
+            min_type: ConditionalFormatType::Lowest,
+            mid_type: ConditionalFormatType::Percentile,
+            max_type: ConditionalFormatType::Highest,
             min_value: 0.into(),
             mid_value: 50.into(),
             max_value: 0.into(),
@@ -2734,6 +2841,7 @@ impl ConditionalFormat3ColorScale {
             max_color: Color::RGB(0x63BE7B),
             multi_range: String::new(),
             stop_if_true: false,
+            has_extensions: false,
             format: None,
         }
     }
@@ -2746,7 +2854,7 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatScaleType`] enum value.
+    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
@@ -2760,7 +2868,7 @@ impl ConditionalFormat3ColorScale {
     /// # // This code is available in examples/doc_conditional_format_3color_set_minimum.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     ConditionalFormat3ColorScale, ConditionalFormatScaleType, Workbook, XlsxError,
+    /// #     ConditionalFormat3ColorScale, ConditionalFormatType, Workbook, XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -2783,8 +2891,8 @@ impl ConditionalFormat3ColorScale {
     ///     // defined range. Values <= 3 will be shown with the minimum color while
     ///     // values >= 7 will be shown with the maximum color.
     ///     let conditional_format = ConditionalFormat3ColorScale::new()
-    ///         .set_minimum(ConditionalFormatScaleType::Number, 3)
-    ///         .set_maximum(ConditionalFormatScaleType::Number, 7);
+    ///         .set_minimum(ConditionalFormatType::Number, 3)
+    ///         .set_maximum(ConditionalFormatType::Number, 7);
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
     /// #
@@ -2801,7 +2909,7 @@ impl ConditionalFormat3ColorScale {
     ///
     pub fn set_minimum(
         mut self,
-        rule_type: ConditionalFormatScaleType,
+        rule_type: ConditionalFormatType,
         value: impl Into<ConditionalFormatValue>,
     ) -> ConditionalFormat3ColorScale {
         let value = value.into();
@@ -2812,8 +2920,8 @@ impl ConditionalFormat3ColorScale {
         }
 
         // Check that percent and percentile are in range 0..100.
-        if rule_type == ConditionalFormatScaleType::Percent
-            || rule_type == ConditionalFormatScaleType::Percentile
+        if rule_type == ConditionalFormatType::Percent
+            || rule_type == ConditionalFormatType::Percentile
         {
             if let Ok(num) = value.value.parse::<f64>() {
                 if !(0.0..=100.0).contains(&num) {
@@ -2824,8 +2932,9 @@ impl ConditionalFormat3ColorScale {
         }
 
         // The highest and lowest options cannot be set by the user.
-        if rule_type != ConditionalFormatScaleType::Lowest
-            && rule_type != ConditionalFormatScaleType::Highest
+        if rule_type != ConditionalFormatType::Lowest
+            && rule_type != ConditionalFormatType::Highest
+            && rule_type != ConditionalFormatType::Automatic
         {
             self.min_type = rule_type;
             self.min_value = value;
@@ -2842,14 +2951,14 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatScaleType`] enum value.
+    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
     pub fn set_midpoint(
         mut self,
-        rule_type: ConditionalFormatScaleType,
+        rule_type: ConditionalFormatType,
         value: impl Into<ConditionalFormatValue>,
     ) -> ConditionalFormat3ColorScale {
         let value = value.into();
@@ -2860,8 +2969,8 @@ impl ConditionalFormat3ColorScale {
         }
 
         // Check that percent and percentile are in range 0..100.
-        if rule_type == ConditionalFormatScaleType::Percent
-            || rule_type == ConditionalFormatScaleType::Percentile
+        if rule_type == ConditionalFormatType::Percent
+            || rule_type == ConditionalFormatType::Percentile
         {
             if let Ok(num) = value.value.parse::<f64>() {
                 if !(0.0..=100.0).contains(&num) {
@@ -2872,8 +2981,9 @@ impl ConditionalFormat3ColorScale {
         }
 
         // The highest and lowest options cannot be set by the user.
-        if rule_type != ConditionalFormatScaleType::Lowest
-            && rule_type != ConditionalFormatScaleType::Highest
+        if rule_type != ConditionalFormatType::Lowest
+            && rule_type != ConditionalFormatType::Highest
+            && rule_type != ConditionalFormatType::Automatic
         {
             self.mid_type = rule_type;
             self.mid_value = value;
@@ -2890,14 +3000,14 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatScaleType`] enum value.
+    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
     pub fn set_maximum(
         mut self,
-        rule_type: ConditionalFormatScaleType,
+        rule_type: ConditionalFormatType,
         value: impl Into<ConditionalFormatValue>,
     ) -> ConditionalFormat3ColorScale {
         let value = value.into();
@@ -2908,8 +3018,8 @@ impl ConditionalFormat3ColorScale {
         }
 
         // Check that percent and percentile are in range 0..100.
-        if rule_type == ConditionalFormatScaleType::Percent
-            || rule_type == ConditionalFormatScaleType::Percentile
+        if rule_type == ConditionalFormatType::Percent
+            || rule_type == ConditionalFormatType::Percentile
         {
             if let Ok(num) = value.value.parse::<f64>() {
                 if !(0.0..=100.0).contains(&num) {
@@ -2920,8 +3030,9 @@ impl ConditionalFormat3ColorScale {
         }
 
         // The highest and lowest options cannot be set by the user.
-        if rule_type != ConditionalFormatScaleType::Lowest
-            && rule_type != ConditionalFormatScaleType::Highest
+        if rule_type != ConditionalFormatType::Lowest
+            && rule_type != ConditionalFormatType::Highest
+            && rule_type != ConditionalFormatType::Automatic
         {
             self.max_type = rule_type;
             self.max_value = value;
@@ -3002,7 +3113,7 @@ impl ConditionalFormat3ColorScale {
     /// Set the color of the midpoint in the 3 color scale.
     ///
     /// Set the midpoint color value for a 3 color scale type of conditional
-    /// format. By default the midpoint color is `#TODO` (todo).
+    /// format. By default the midpoint color is `#FFEB84` (Yellow).
     ///
     /// # Parameters
     ///
@@ -3051,11 +3162,12 @@ impl ConditionalFormat3ColorScale {
     }
 
     //  Return the conditional format rule as an XML string.
-    pub(crate) fn get_rule_string(
+    pub(crate) fn rule(
         &self,
         dxf_index: Option<u32>,
         priority: u32,
-        _anchor: &str,
+        _range: &str,
+        _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "colorScale".to_string())];
@@ -3093,28 +3205,29 @@ impl ConditionalFormat3ColorScale {
     }
 
     // Write the <cfvo> element.
-    fn write_type(writer: &mut XMLWriter, rule_type: ConditionalFormatScaleType, value: &str) {
+    fn write_type(writer: &mut XMLWriter, rule_type: ConditionalFormatType, value: &str) {
         let mut attributes = vec![];
 
         match rule_type {
-            ConditionalFormatScaleType::Lowest => {
+            ConditionalFormatType::Lowest => {
                 attributes.push(("type", "min".to_string()));
             }
-            ConditionalFormatScaleType::Number => {
+            ConditionalFormatType::Number => {
                 attributes.push(("type", "num".to_string()));
             }
-            ConditionalFormatScaleType::Percent => {
+            ConditionalFormatType::Percent => {
                 attributes.push(("type", "percent".to_string()));
             }
-            ConditionalFormatScaleType::Formula => {
+            ConditionalFormatType::Formula => {
                 attributes.push(("type", "formula".to_string()));
             }
-            ConditionalFormatScaleType::Percentile => {
+            ConditionalFormatType::Percentile => {
                 attributes.push(("type", "percentile".to_string()));
             }
-            ConditionalFormatScaleType::Highest => {
+            ConditionalFormatType::Highest => {
                 attributes.push(("type", "max".to_string()));
             }
+            ConditionalFormatType::Automatic => {}
         }
 
         attributes.push(("val", value.to_string()));
@@ -3127,6 +3240,546 @@ impl ConditionalFormat3ColorScale {
         let attributes = [("rgb", color.argb_hex_value())];
 
         writer.xml_empty_tag("color", &attributes);
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
+    }
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatDataBar
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatDataBar` struct represents a Data Bar
+/// conditional format.
+///
+/// `ConditionalFormatDataBar` is used to represent a Cell style conditional
+/// format in Excel. A Data Bar Cell conditional format shows a per cell
+/// color gradient from the minimum value to the maximum value.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_intro.png">
+///
+/// For more information see [Working with Conditional
+/// Formats](crate::conditional_format).
+///
+/// # Examples
+///
+///
+/// This creates conditional format rules like this:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_rules.png">
+///
+/// And the following output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_databar.png">
+///
+///
+#[derive(Clone)]
+pub struct ConditionalFormatDataBar {
+    min_type: ConditionalFormatType,
+    max_type: ConditionalFormatType,
+    min_value: ConditionalFormatValue,
+    max_value: ConditionalFormatValue,
+    bar_color: Color,
+    border_color: Color,
+    negative_fill_color: Color,
+    negative_border_color: Color,
+    axis_color: Color,
+    no_border: bool,
+    solid_bar: bool,
+    direction: ConditionalFormatDataBarDirection,
+
+    multi_range: String,
+    stop_if_true: bool,
+    has_extensions: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// **Section 1**: The following methods are specific to `ConditionalFormatDataBar`.
+impl ConditionalFormatDataBar {
+    /// Create a new Cell conditional format struct.
+    #[allow(clippy::new_without_default)]
+    #[allow(clippy::unreadable_literal)] // For RGB colors.
+    pub fn new() -> ConditionalFormatDataBar {
+        ConditionalFormatDataBar {
+            min_type: ConditionalFormatType::Automatic,
+            max_type: ConditionalFormatType::Automatic,
+            min_value: 0.into(),
+            max_value: 0.into(),
+            bar_color: Color::RGB(0x638EC6),
+            border_color: Color::RGB(0x638EC6),
+            negative_fill_color: Color::RGB(0xFF0000),
+            negative_border_color: Color::RGB(0xFF0000),
+            axis_color: Color::RGB(0x000000),
+            no_border: false,
+            solid_bar: false,
+            direction: ConditionalFormatDataBarDirection::Context,
+
+            multi_range: String::new(),
+            stop_if_true: false,
+            has_extensions: true,
+            format: None,
+        }
+    }
+
+    /// Set the type and value of the minimum in the data bar.
+    ///
+    /// Set the minimum type (number, percent, formula or percentile) and value
+    /// for a data bar type of conditional format. By default the minimum
+    /// is the lowest value in the conditional formatting range.
+    ///
+    /// # Parameters
+    ///
+    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    ///   such as numbers, dates, times and formula ranges. String values are
+    ///   ignored in this type of conditional format.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_minimum.png">
+    ///
+    pub fn set_minimum(
+        mut self,
+        rule_type: ConditionalFormatType,
+        value: impl Into<ConditionalFormatValue>,
+    ) -> ConditionalFormatDataBar {
+        let value = value.into();
+
+        // This type of rule doesn't support strings.
+        if value.is_string {
+            return self;
+        }
+
+        // Check that percent and percentile are in range 0..100.
+        if rule_type == ConditionalFormatType::Percent
+            || rule_type == ConditionalFormatType::Percentile
+        {
+            if let Ok(num) = value.value.parse::<f64>() {
+                if !(0.0..=100.0).contains(&num) {
+                    eprintln!("Percent/percentile '{num}' must be in Excel range: 0..100.");
+                    return self;
+                }
+            }
+        }
+        // The highest and lowest options cannot be set by the user. TODO
+        if rule_type != ConditionalFormatType::Lowest && rule_type != ConditionalFormatType::Highest
+        {
+            self.min_type = rule_type;
+            self.min_value = value;
+        }
+
+        self
+    }
+
+    /// Set the type and value of the maximum in the data bar.
+    ///
+    /// Set the maximum type (number, percent, formula or percentile) and value
+    /// for a data bar type of conditional format. By default the maximum
+    /// is the highest value in the conditional formatting range.
+    ///
+    /// # Parameters
+    ///
+    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    ///   such as numbers, dates, times and formula ranges. String values are
+    ///   ignored in this type of conditional format.
+    ///
+    pub fn set_maximum(
+        mut self,
+        rule_type: ConditionalFormatType,
+        value: impl Into<ConditionalFormatValue>,
+    ) -> ConditionalFormatDataBar {
+        let value = value.into();
+
+        // This type of rule doesn't support strings.
+        if value.is_string {
+            return self;
+        }
+
+        // Check that percent and percentile are in range 0..100.
+        if rule_type == ConditionalFormatType::Percent
+            || rule_type == ConditionalFormatType::Percentile
+        {
+            if let Ok(num) = value.value.parse::<f64>() {
+                if !(0.0..=100.0).contains(&num) {
+                    eprintln!("Percent/percentile '{num}' must be in Excel range: 0..100.");
+                    return self;
+                }
+            }
+        }
+
+        // The highest and lowest options cannot be set by the user.
+        if rule_type != ConditionalFormatType::Lowest && rule_type != ConditionalFormatType::Highest
+        {
+            self.max_type = rule_type;
+            self.max_value = value;
+        }
+
+        self
+    }
+
+    /// Set the color of the Todo in the data bar.
+    ///
+    /// Set the minimum color value for a data bar type of conditional
+    /// format. By default the minimum color is `#FFEF9C` (yellow).
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The color property defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_bar_color.png">
+    ///
+    pub fn set_bar_color<T>(mut self, color: T) -> ConditionalFormatDataBar
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.bar_color = color;
+            self.border_color = color;
+        }
+
+        self
+    }
+
+    ///
+    pub fn set_bar_negative_color<T>(mut self, color: T) -> ConditionalFormatDataBar
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.negative_fill_color = color;
+        }
+
+        self
+    }
+
+    /// todo
+    pub fn set_border_color<T>(mut self, color: T) -> ConditionalFormatDataBar
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.border_color = color;
+        }
+
+        self
+    }
+
+    /// todo
+    pub fn set_no_border(mut self, enable: bool) -> ConditionalFormatDataBar {
+        self.no_border = enable;
+
+        self
+    }
+
+    /// todo
+    pub fn set_solid_bar(mut self, enable: bool) -> ConditionalFormatDataBar {
+        self.solid_bar = enable;
+
+        self
+    }
+
+    /// todo
+    pub fn set_direction(
+        mut self,
+        direction: ConditionalFormatDataBarDirection,
+    ) -> ConditionalFormatDataBar {
+        self.direction = direction;
+
+        self
+    }
+
+    /// todo - set hidden
+    pub fn set_classic_style(mut self) -> ConditionalFormatDataBar {
+        self.has_extensions = false;
+
+        if self.min_type == ConditionalFormatType::Automatic {
+            self.min_type = ConditionalFormatType::Lowest;
+        }
+        if self.max_type == ConditionalFormatType::Automatic {
+            self.max_type = ConditionalFormatType::Highest;
+        }
+
+        self
+    }
+
+    // Validate the conditional format.
+    #[allow(clippy::unnecessary_wraps)]
+    #[allow(clippy::unused_self)]
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn rule(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        _range: &str,
+        guid: &str,
+    ) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![("type", "dataBar".to_string())];
+
+        // Set the format index if present.
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        // Set the rule priority order.
+        attributes.push(("priority", priority.to_string()));
+
+        // Set the "Stop if True" property.
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        // Write the rule.
+        writer.xml_start_tag("cfRule", &attributes);
+        writer.xml_start_tag_only("dataBar");
+
+        Self::write_type(
+            &mut writer,
+            self.min_type,
+            &self.min_value.value,
+            self.has_extensions,
+            false,
+        );
+
+        Self::write_type(
+            &mut writer,
+            self.max_type,
+            &self.max_value.value,
+            self.has_extensions,
+            true,
+        );
+
+        Self::write_color(&mut writer, "color", self.bar_color);
+
+        writer.xml_end_tag("dataBar");
+
+        if self.has_extensions {
+            // Write the extLst element.
+            Self::write_extension_list(&mut writer, guid);
+        }
+
+        writer.xml_end_tag("cfRule");
+
+        writer.read_to_string()
+    }
+
+    // Write the <cfvo> element.
+    fn write_type(
+        writer: &mut XMLWriter,
+        rule_type: ConditionalFormatType,
+        value: &str,
+        has_extensions: bool,
+        is_max: bool,
+    ) {
+        let mut attributes = vec![];
+
+        match rule_type {
+            ConditionalFormatType::Automatic => {
+                if is_max {
+                    attributes.push(("type", "max".to_string()));
+                } else {
+                    attributes.push(("type", "min".to_string()));
+                }
+            }
+            ConditionalFormatType::Lowest => {
+                attributes.push(("type", "min".to_string()));
+                if !has_extensions {
+                    attributes.push(("val", value.to_string()));
+                }
+            }
+            ConditionalFormatType::Number => {
+                attributes.push(("type", "num".to_string()));
+                attributes.push(("val", value.to_string()));
+            }
+            ConditionalFormatType::Percent => {
+                attributes.push(("type", "percent".to_string()));
+                attributes.push(("val", value.to_string()));
+            }
+            ConditionalFormatType::Formula => {
+                attributes.push(("type", "formula".to_string()));
+                attributes.push(("val", value.to_string()));
+            }
+            ConditionalFormatType::Percentile => {
+                attributes.push(("type", "percentile".to_string()));
+                attributes.push(("val", value.to_string()));
+            }
+            ConditionalFormatType::Highest => {
+                attributes.push(("type", "max".to_string()));
+                if !has_extensions {
+                    attributes.push(("val", value.to_string()));
+                }
+            }
+        }
+
+        writer.xml_empty_tag("cfvo", &attributes);
+    }
+
+    // Write the <color> element.
+    fn write_color(writer: &mut XMLWriter, color_tag: &str, color: Color) {
+        let attributes = [("rgb", color.argb_hex_value())];
+
+        writer.xml_empty_tag(color_tag, &attributes);
+    }
+
+    // Write the <extLst> element.
+    fn write_extension_list(writer: &mut XMLWriter, guid: &str) {
+        writer.xml_start_tag_only("extLst");
+
+        let attributes = [
+            (
+                "xmlns:x14",
+                "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main",
+            ),
+            ("uri", "{B025F937-C7B1-47D3-B67F-A62EFF666E3E}"),
+        ];
+
+        writer.xml_start_tag("ext", &attributes);
+        writer.xml_data_element_only("x14:id", guid);
+        writer.xml_end_tag("ext");
+        writer.xml_end_tag("extLst");
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    pub(crate) fn x14_rule(&self, guid: &str) -> String {
+        let mut writer = XMLWriter::new();
+        let attributes = [("type", "dataBar".to_string()), ("id", guid.to_string())];
+
+        // Write the rule.
+        writer.xml_start_tag("x14:cfRule", &attributes);
+        Self::write_data_bar(&mut writer, self.solid_bar, self.no_border, self.direction);
+
+        Self::write_x14_type(&mut writer, self.min_type, &self.min_value.value, false);
+        Self::write_x14_type(&mut writer, self.max_type, &self.max_value.value, true);
+
+        // Write the color elements.
+        if !self.no_border {
+            Self::write_color(&mut writer, "x14:borderColor", self.border_color);
+        }
+
+        Self::write_color(
+            &mut writer,
+            "x14:negativeFillColor",
+            self.negative_fill_color,
+        );
+
+        if !self.no_border {
+            Self::write_color(
+                &mut writer,
+                "x14:negativeBorderColor",
+                self.negative_border_color,
+            );
+        }
+        Self::write_color(&mut writer, "x14:axisColor", self.axis_color);
+
+        writer.xml_end_tag("x14:dataBar");
+        writer.xml_end_tag("x14:cfRule");
+
+        writer.read_to_string()
+    }
+
+    // Write the <x14:dataBar> element.
+    fn write_data_bar(
+        writer: &mut XMLWriter,
+        solid_bar: bool,
+        no_border: bool,
+        direction: ConditionalFormatDataBarDirection,
+    ) {
+        let mut attributes = vec![
+            ("minLength", "0".to_string()),
+            ("maxLength", "100".to_string()),
+        ];
+
+        if !no_border {
+            attributes.push(("border", "1".to_string()));
+        }
+
+        if solid_bar {
+            attributes.push(("gradient", "0".to_string()));
+        }
+
+        match direction {
+            ConditionalFormatDataBarDirection::LeftToRight => {
+                attributes.push(("direction", "leftToRight".to_string()));
+            }
+            ConditionalFormatDataBarDirection::RightToLeft => {
+                attributes.push(("direction", "rightToLeft".to_string()));
+            }
+            ConditionalFormatDataBarDirection::Context => {}
+        }
+
+        if !no_border {
+            attributes.push(("negativeBarBorderColorSameAsPositive", "0".to_string()));
+        }
+
+        writer.xml_start_tag("x14:dataBar", &attributes);
+    }
+
+    // Write the <x14:cfvo> element.
+    fn write_x14_type(
+        writer: &mut XMLWriter,
+        rule_type: ConditionalFormatType,
+        value: &str,
+        is_max: bool,
+    ) {
+        let mut attributes = vec![];
+
+        match rule_type {
+            ConditionalFormatType::Automatic => {
+                if is_max {
+                    attributes.push(("type", "autoMax".to_string()));
+                } else {
+                    attributes.push(("type", "autoMin".to_string()));
+                }
+            }
+            ConditionalFormatType::Lowest => {
+                attributes.push(("type", "min".to_string()));
+            }
+            ConditionalFormatType::Number => {
+                attributes.push(("type", "num".to_string()));
+                attributes.push(("val", value.to_string()));
+            }
+            ConditionalFormatType::Percent => {
+                attributes.push(("type", "percent".to_string()));
+                attributes.push(("val", value.to_string()));
+            }
+            ConditionalFormatType::Formula => {
+                attributes.push(("type", "formula".to_string()));
+                attributes.push(("val", value.to_string()));
+            }
+            ConditionalFormatType::Percentile => {
+                attributes.push(("type", "percentile".to_string()));
+                attributes.push(("val", value.to_string()));
+            }
+            ConditionalFormatType::Highest => {
+                attributes.push(("type", "max".to_string()));
+            }
+        }
+
+        writer.xml_empty_tag("x14:cfvo", &attributes);
     }
 }
 
@@ -3448,11 +4101,12 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 }
 
 // -----------------------------------------------------------------------
-// ConditionalFormatScaleType
+// ConditionalFormatType
 // -----------------------------------------------------------------------
 
-/// The `ConditionalFormatScaleType` enum defines the conditional format type
-/// for [`ConditionalFormat2ColorScale`] and [`ConditionalFormat3ColorScale`].
+/// The `ConditionalFormatType` enum defines the conditional format type
+/// for [`ConditionalFormat2ColorScale`], [`ConditionalFormat3ColorScale`] and
+/// [`ConditionalFormatDataBar`].
 ///
 /// # Examples
 ///
@@ -3463,7 +4117,7 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 /// # // This code is available in examples/doc_conditional_format_2color_set_minimum.rs
 /// #
 /// # use rust_xlsxwriter::{
-/// #     ConditionalFormat2ColorScale, ConditionalFormatScaleType, Workbook, XlsxError,
+/// #     ConditionalFormat2ColorScale, ConditionalFormatType, Workbook, XlsxError,
 /// # };
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -3486,8 +4140,8 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 ///     // defined range. Values <= 3 will be shown with the minimum color while
 ///     // values >= 7 will be shown with the maximum color.
 ///     let conditional_format = ConditionalFormat2ColorScale::new()
-///         .set_minimum(ConditionalFormatScaleType::Number, 3)
-///         .set_maximum(ConditionalFormatScaleType::Number, 7);
+///         .set_minimum(ConditionalFormatType::Number, 3)
+///         .set_maximum(ConditionalFormatType::Number, 7);
 ///
 ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
 /// #
@@ -3505,29 +4159,53 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 ///
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum ConditionalFormatScaleType {
-    /// Set the color scale to use the minimum value in the range. This is the
-    /// default for the minimum value in the scale.
+pub enum ConditionalFormatType {
+    /// Set the color scale/data bar to use the minimum or maximum value in the range. This is the
+    /// default for data bars.
+    Automatic,
+
+    /// Set the color scale/data bar to use the minimum value in the range. This is the
+    /// default for the minimum value in color scales.
     Lowest,
 
-    /// Set the color scale to use a number value other than the
+    /// Set the color scale/data bar to use a number value other than the
     /// maximum/minimum.
     Number,
 
-    /// Set the color scale to use a percentage. This must be in the range
+    /// Set the color scale/data bar to use a percentage. This must be in the range
     /// 0-100.
     Percent,
 
-    /// Set the color scale to use a formula value.
+    /// Set the color scale/data bar to use a formula value.
     Formula,
 
-    /// Set the color scale to use a percentile. This must be in the range
+    /// Set the color scale/data bar to use a percentile. This must be in the range
     /// 0-100.
     Percentile,
 
-    /// Set the color scale to use the maximum value in the range. This is the
-    /// default for the maximum value in the scale.
+    /// Set the color scale/data bar to use the maximum value in the range. This is the
+    /// default for the maximum value in value in color scales.
     Highest,
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatDataBarDirection
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatDataBarDirection` enum defines the conditional format
+/// directions for [`ConditionalFormatDataBar`] .
+///
+///
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ConditionalFormatDataBarDirection {
+    /// TODO
+    Context,
+
+    /// TODO
+    LeftToRight,
+
+    /// TODO
+    RightToLeft,
 }
 
 // -----------------------------------------------------------------------
@@ -3613,6 +4291,11 @@ macro_rules! generate_conditional_common_methods {
         pub(crate) fn multi_range(&self) -> String {
             self.multi_range.clone()
         }
+
+        /// Check if the conditional format uses Excel 2010+ extensions.
+        pub(crate) fn has_extensions(&self) -> bool {
+            self.has_extensions
+        }
     }
     )*)
 }
@@ -3627,4 +4310,26 @@ generate_conditional_common_methods!(
     ConditionalFormatTop
     ConditionalFormat2ColorScale
     ConditionalFormat3ColorScale
+    ConditionalFormatDataBar
 );
+
+// -----------------------------------------------------------------------
+// Common methods.
+// -----------------------------------------------------------------------
+
+// TODO COW
+fn range_to_anchor(range: &str) -> String {
+    let mut anchor = range;
+
+    // Extract cell/range from optional space separated list.
+    if let Some(position) = anchor.find(' ') {
+        anchor = &anchor[0..position];
+    }
+
+    // Extract cell from optional : separated range.
+    if let Some(position) = anchor.find(':') {
+        anchor = &anchor[0..position];
+    }
+
+    anchor.to_string()
+}

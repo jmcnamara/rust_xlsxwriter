@@ -5,9 +5,7 @@
 //! Example of adding 3 color scale type conditional formatting to a worksheet
 //! with user defined minimum and maximum values.
 
-use rust_xlsxwriter::{
-    ConditionalFormat3ColorScale, ConditionalFormatScaleType, Workbook, XlsxError,
-};
+use rust_xlsxwriter::{ConditionalFormat3ColorScale, ConditionalFormatType, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -29,8 +27,8 @@ fn main() -> Result<(), XlsxError> {
     // defined range. Values <= 3 will be shown with the minimum color while
     // values >= 7 will be shown with the maximum color.
     let conditional_format = ConditionalFormat3ColorScale::new()
-        .set_minimum(ConditionalFormatScaleType::Number, 3)
-        .set_maximum(ConditionalFormatScaleType::Number, 7);
+        .set_minimum(ConditionalFormatType::Number, 3)
+        .set_maximum(ConditionalFormatType::Number, 7);
 
     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
 

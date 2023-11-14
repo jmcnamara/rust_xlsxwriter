@@ -1173,6 +1173,9 @@ impl Workbook {
 
             // Perform the autofilter row hiding.
             worksheet.hide_autofilter_rows();
+
+            // Set the index of the worksheets.
+            worksheet.sheet_index = i;
         }
 
         // Convert the images in the workbooks into drawing files and rel links.

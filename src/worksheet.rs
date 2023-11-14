@@ -124,6 +124,7 @@ const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 pub struct Worksheet {
     pub(crate) writer: XMLWriter,
     pub(crate) name: String,
+    pub(crate) sheet_index: usize,
     pub(crate) active: bool,
     pub(crate) selected: bool,
     pub(crate) visible: Visible,
@@ -212,6 +213,8 @@ pub struct Worksheet {
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashSet<(RowNum, ColNum)>,
     conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Send>>>,
+    use_x14_extensions: bool,
+    has_2010_data_bars: bool,
 }
 
 impl Default for Worksheet {
@@ -305,6 +308,7 @@ impl Worksheet {
         Worksheet {
             writer,
             name: String::new(),
+            sheet_index: 0,
             active: false,
             selected: false,
             visible: Visible::Default,
@@ -392,6 +396,8 @@ impl Worksheet {
             has_drawing_object_linkage: false,
             cells_with_autofilter: HashSet::new(),
             conditional_formats: BTreeMap::new(),
+            use_x14_extensions: false,
+            has_2010_data_bars: false,
         }
     }
 
@@ -5162,6 +5168,12 @@ impl Worksheet {
         // Validate the conditional format.
         conditional_format.validate()?;
 
+        // Check for extended Excel 2010 data bars.
+        if conditional_format.has_extensions() {
+            self.use_x14_extensions = true;
+            self.has_2010_data_bars = true;
+        }
+
         // Set the dxf format local index if required.
         if let Some(format) = conditional_format.format_as_mut() {
             format.dxf_index = self.format_dxf_index(format);
@@ -9715,16 +9727,39 @@ impl Worksheet {
             self.write_table_parts();
         }
 
+        // Write the extLst element.
+        if self.use_x14_extensions {
+            self.write_extensions();
+        }
+
         // Close the worksheet tag.
         self.writer.xml_end_tag("worksheet");
     }
 
     // Write the <worksheet> element.
     fn write_worksheet(&mut self) {
-        let xmlns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
-        let xmlns_r = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+        let mut attributes = vec![
+            (
+                "xmlns",
+                "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+            ),
+            (
+                "xmlns:r",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+            ),
+        ];
 
-        let attributes = [("xmlns", xmlns), ("xmlns:r", xmlns_r)];
+        if self.use_x14_extensions {
+            attributes.push((
+                "xmlns:mc",
+                "http://schemas.openxmlformats.org/markup-compatibility/2006",
+            ));
+            attributes.push((
+                "xmlns:x14ac",
+                "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac",
+            ));
+            attributes.push(("mc:Ignorable", "x14ac"));
+        }
 
         self.writer.xml_start_tag("worksheet", &attributes);
     }
@@ -9955,7 +9990,11 @@ impl Worksheet {
 
     // Write the <sheetFormatPr> element.
     fn write_sheet_format_pr(&mut self) {
-        let attributes = [("defaultRowHeight", "15")];
+        let mut attributes = vec![("defaultRowHeight", "15")];
+
+        if self.use_x14_extensions {
+            attributes.push(("x14ac:dyDescent", "0.25"));
+        }
 
         self.writer.xml_empty_tag("sheetFormatPr", &attributes);
     }
@@ -10010,19 +10049,18 @@ impl Worksheet {
     // Write the <conditionalFormatting> element.
     fn write_conditional_formats(&mut self) {
         let mut priority = 1;
+        let mut data_bar_count = 1;
+
         for (cell_range, conditional_formats) in &self.conditional_formats {
             let attributes = [("sqref", cell_range.as_str())];
-            let mut anchor = cell_range.as_str();
 
-            // Extract cell/range from optional space separated list.
-            if let Some(position) = anchor.find(' ') {
-                anchor = &anchor[0..position];
-            }
-
-            // Extract cell from optional : separated range.
-            if let Some(position) = anchor.find(':') {
-                anchor = &anchor[0..position];
-            }
+            // Create a pseudo GUID for each unique Excel 2010 data bar.
+            let guid = format!(
+                "{{DA7ABA51-AAAA-BBBB-{:04X}-{:012X}}}",
+                self.sheet_index + 1,
+                data_bar_count
+            );
+            data_bar_count += 1;
 
             self.writer
                 .xml_start_tag("conditionalFormatting", &attributes);
@@ -10034,7 +10072,7 @@ impl Worksheet {
                     dxf_index = Some(self.global_dxf_indices[local_index as usize]);
                 }
 
-                let rule = conditional_format.get_rule_string(dxf_index, priority, anchor);
+                let rule = conditional_format.rule(dxf_index, priority, cell_range, &guid);
                 self.writer.xml_raw_string(&rule);
                 priority += 1;
             }
@@ -10996,6 +11034,65 @@ impl Worksheet {
         ];
 
         self.writer.xml_empty_tag("brk", &attributes);
+    }
+
+    // Write the <extLst> element.
+    fn write_extensions(&mut self) {
+        let attributes = [
+            (
+                "xmlns:x14",
+                "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main",
+            ),
+            ("uri", "{78C0D931-6437-407d-A8EE-F0AAD7539E65}"),
+        ];
+
+        self.writer.xml_start_tag_only("extLst");
+        self.writer.xml_start_tag("ext", &attributes);
+
+        if self.has_2010_data_bars {
+            // Write the x14:conditionalFormattings element.
+            self.write_conditional_formattings();
+        }
+
+        self.writer.xml_end_tag("ext");
+
+        self.writer.xml_end_tag("extLst");
+    }
+
+    // Write the <x14:conditionalFormattings> element.
+    fn write_conditional_formattings(&mut self) {
+        self.writer.xml_start_tag_only("x14:conditionalFormattings");
+
+        let mut data_bar_count = 1;
+        for (cell_range, conditional_formats) in &self.conditional_formats {
+            for conditional_format in conditional_formats {
+                if conditional_format.has_extensions() {
+                    let attributes = [(
+                        "xmlns:xm",
+                        "http://schemas.microsoft.com/office/excel/2006/main",
+                    )];
+
+                    self.writer
+                        .xml_start_tag("x14:conditionalFormatting", &attributes);
+
+                    // Create a pseudo GUID for each unique Excel 2010 data bar.
+                    let guid = format!(
+                        "{{DA7ABA51-AAAA-BBBB-{:04X}-{:012X}}}",
+                        self.sheet_index + 1,
+                        data_bar_count
+                    );
+                    data_bar_count += 1;
+
+                    let rule = conditional_format.x14_rule(&guid);
+                    self.writer.xml_raw_string(&rule);
+
+                    self.writer.xml_data_element_only("xm:sqref", cell_range);
+                    self.writer.xml_end_tag("x14:conditionalFormatting");
+                }
+            }
+        }
+
+        self.writer.xml_end_tag("x14:conditionalFormattings");
     }
 }
 

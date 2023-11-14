@@ -16,14 +16,16 @@ mod conditional_format_tests {
     use crate::ConditionalFormatBlank;
     use crate::ConditionalFormatCell;
     use crate::ConditionalFormatCellCriteria;
+    use crate::ConditionalFormatDataBar;
+    use crate::ConditionalFormatDataBarDirection;
     use crate::ConditionalFormatDate;
     use crate::ConditionalFormatDateCriteria;
     use crate::ConditionalFormatDuplicate;
     use crate::ConditionalFormatError;
-    use crate::ConditionalFormatScaleType;
     use crate::ConditionalFormatText;
     use crate::ConditionalFormatTextCriteria;
     use crate::ConditionalFormatTop;
+    use crate::ConditionalFormatType;
     use crate::ExcelDateTime;
     use crate::Formula;
     use crate::XlsxError;
@@ -35,7 +37,7 @@ mod conditional_format_tests {
             .set_criteria(ConditionalFormatCellCriteria::EqualTo)
             .set_value(5);
 
-        let got = conditional_format.get_rule_string(None, 1, "");
+        let got = conditional_format.rule(None, 1, "", "");
         let expected =
             r#"<cfRule type="cellIs" priority="1" operator="equal"><formula>5</formula></cfRule>"#;
 
@@ -48,7 +50,7 @@ mod conditional_format_tests {
             .set_criteria(ConditionalFormatCellCriteria::EqualTo)
             .set_value("Foo");
 
-        let got = conditional_format.get_rule_string(None, 1, "");
+        let got = conditional_format.rule(None, 1, "", "");
         let expected = r#"<cfRule type="cellIs" priority="1" operator="equal"><formula>"Foo"</formula></cfRule>"#;
 
         assert_eq!(expected, got);
@@ -60,7 +62,7 @@ mod conditional_format_tests {
             .set_criteria(ConditionalFormatCellCriteria::EqualTo)
             .set_value("\"Foo\"");
 
-        let got = conditional_format.get_rule_string(None, 1, "");
+        let got = conditional_format.rule(None, 1, "", "");
         let expected = r#"<cfRule type="cellIs" priority="1" operator="equal"><formula>"Foo"</formula></cfRule>"#;
 
         assert_eq!(expected, got);
@@ -72,7 +74,7 @@ mod conditional_format_tests {
             .set_criteria(ConditionalFormatCellCriteria::EqualTo)
             .set_value("Foo \" Bar");
 
-        let got = conditional_format.get_rule_string(None, 1, "");
+        let got = conditional_format.rule(None, 1, "", "");
         let expected = r#"<cfRule type="cellIs" priority="1" operator="equal"><formula>"Foo "" Bar"</formula></cfRule>"#;
 
         assert_eq!(expected, got);
@@ -1285,29 +1287,29 @@ mod conditional_format_tests {
 
         let conditional_format = ConditionalFormat2ColorScale::new()
             // String should be ignored.
-            .set_minimum(ConditionalFormatScaleType::Number, "Foo")
-            .set_maximum(ConditionalFormatScaleType::Number, "Foo")
+            .set_minimum(ConditionalFormatType::Number, "Foo")
+            .set_maximum(ConditionalFormatType::Number, "Foo")
             // High/low should be ignored.
-            .set_minimum(ConditionalFormatScaleType::Highest, 0)
-            .set_maximum(ConditionalFormatScaleType::Lowest, 0)
+            .set_minimum(ConditionalFormatType::Highest, 0)
+            .set_maximum(ConditionalFormatType::Lowest, 0)
             // > 100 should be ignored.
-            .set_minimum(ConditionalFormatScaleType::Percent, 101)
-            .set_maximum(ConditionalFormatScaleType::Percent, 101)
+            .set_minimum(ConditionalFormatType::Percent, 101)
+            .set_maximum(ConditionalFormatType::Percent, 101)
             // < 0 should be ignored.
-            .set_minimum(ConditionalFormatScaleType::Percentile, -1)
-            .set_maximum(ConditionalFormatScaleType::Percentile, -1)
+            .set_minimum(ConditionalFormatType::Percentile, -1)
+            .set_maximum(ConditionalFormatType::Percentile, -1)
             .set_minimum_color("FF0000")
             .set_maximum_color("FFFF00");
         worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
 
         let conditional_format = ConditionalFormat2ColorScale::new()
-            .set_minimum(ConditionalFormatScaleType::Number, 2.5)
-            .set_maximum(ConditionalFormatScaleType::Percent, 90);
+            .set_minimum(ConditionalFormatType::Number, 2.5)
+            .set_maximum(ConditionalFormatType::Percent, 90);
         worksheet.add_conditional_format(0, 2, 9, 2, &conditional_format)?;
 
         let conditional_format = ConditionalFormat2ColorScale::new()
-            .set_minimum(ConditionalFormatScaleType::Formula, Formula::new("=$M$20"))
-            .set_maximum(ConditionalFormatScaleType::Percentile, 90);
+            .set_minimum(ConditionalFormatType::Formula, Formula::new("=$M$20"))
+            .set_maximum(ConditionalFormatType::Percentile, 90);
         worksheet.add_conditional_format(0, 4, 9, 4, &conditional_format)?;
 
         worksheet.assemble_xml_file();
@@ -1479,6 +1481,739 @@ mod conditional_format_tests {
                 </cfRule>
               </conditionalFormatting>
               <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_14() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+        worksheet.write(8, 0, 9)?;
+        worksheet.write(9, 0, 10)?;
+        worksheet.write(10, 0, 11)?;
+        worksheet.write(11, 0, 12)?;
+
+        let conditional_format = ConditionalFormatDataBar::new().set_classic_style();
+
+        worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A12"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+                <row r="9" spans="1:1">
+                  <c r="A9">
+                    <v>9</v>
+                  </c>
+                </row>
+                <row r="10" spans="1:1">
+                  <c r="A10">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="11" spans="1:1">
+                  <c r="A11">
+                    <v>11</v>
+                  </c>
+                </row>
+                <row r="12" spans="1:1">
+                  <c r="A12">
+                    <v>12</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1:A12">
+                <cfRule type="dataBar" priority="1">
+                  <dataBar>
+                    <cfvo type="min" val="0"/>
+                    <cfvo type="max" val="0"/>
+                    <color rgb="FF638EC6"/>
+                  </dataBar>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_19() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+        worksheet.write(8, 0, 9)?;
+        worksheet.write(9, 0, 10)?;
+        worksheet.write(10, 0, 11)?;
+        worksheet.write(11, 0, 12)?;
+
+        let conditional_format = ConditionalFormatDataBar::new()
+            .set_minimum(ConditionalFormatType::Number, 5)
+            .set_maximum(ConditionalFormatType::Percent, 90)
+            .set_bar_color("8DB4E3")
+            .set_classic_style();
+
+        worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A12"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+                <row r="9" spans="1:1">
+                  <c r="A9">
+                    <v>9</v>
+                  </c>
+                </row>
+                <row r="10" spans="1:1">
+                  <c r="A10">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="11" spans="1:1">
+                  <c r="A11">
+                    <v>11</v>
+                  </c>
+                </row>
+                <row r="12" spans="1:1">
+                  <c r="A12">
+                    <v>12</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1:A12">
+                <cfRule type="dataBar" priority="1">
+                  <dataBar>
+                    <cfvo type="num" val="5"/>
+                    <cfvo type="percent" val="90"/>
+                    <color rgb="FF8DB4E3"/>
+                  </dataBar>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_bar_01() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let conditional_format = ConditionalFormatDataBar::new().set_classic_style();
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="dataBar" priority="1">
+                  <dataBar>
+                    <cfvo type="min" val="0"/>
+                    <cfvo type="max" val="0"/>
+                    <color rgb="FF638EC6"/>
+                  </dataBar>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_bar_02() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let conditional_format = ConditionalFormatDataBar::new();
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="dataBar" priority="1">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FF638EC6"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000001}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FF638EC6"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_bar_03() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let conditional_format = ConditionalFormatDataBar::new();
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatDataBar::new().set_bar_color("63C384");
+        worksheet.add_conditional_format(1, 0, 1, 1, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatDataBar::new().set_bar_color("FF555A");
+        worksheet.add_conditional_format(2, 0, 2, 2, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="dataBar" priority="1">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FF638EC6"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000001}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A2:B2">
+                <cfRule type="dataBar" priority="2">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FF63C384"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000002}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A3:C3">
+                <cfRule type="dataBar" priority="3">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FFFF555A"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000003}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FF638EC6"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000002}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FF63C384"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A2:B2</xm:sqref>
+                    </x14:conditionalFormatting>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000003}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FFFF555A"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A3:C3</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_bar_04() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let conditional_format = ConditionalFormatDataBar::new().set_solid_bar(true);
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatDataBar::new()
+            .set_bar_color("63C384")
+            .set_no_border(true);
+        worksheet.add_conditional_format(1, 0, 1, 1, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatDataBar::new()
+            .set_bar_color("FF555A")
+            .set_border_color("FF0000");
+        worksheet.add_conditional_format(2, 0, 2, 2, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="dataBar" priority="1">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FF638EC6"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000001}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A2:B2">
+                <cfRule type="dataBar" priority="2">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FF63C384"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000002}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A3:C3">
+                <cfRule type="dataBar" priority="3">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FFFF555A"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000003}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" gradient="0" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FF638EC6"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000002}">
+                        <x14:dataBar minLength="0" maxLength="100">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A2:B2</xm:sqref>
+                    </x14:conditionalFormatting>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000003}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FFFF0000"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A3:C3</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_bar_05() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let conditional_format = ConditionalFormatDataBar::new()
+            .set_direction(ConditionalFormatDataBarDirection::LeftToRight);
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatDataBar::new()
+            .set_bar_color("63C384")
+            .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
+        worksheet.add_conditional_format(1, 0, 1, 1, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatDataBar::new()
+            .set_bar_color("FF555A")
+            .set_bar_negative_color("FFFF00");
+        worksheet.add_conditional_format(2, 0, 2, 2, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="dataBar" priority="1">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FF638EC6"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000001}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A2:B2">
+                <cfRule type="dataBar" priority="2">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FF63C384"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000002}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A3:C3">
+                <cfRule type="dataBar" priority="3">
+                  <dataBar>
+                    <cfvo type="min"/>
+                    <cfvo type="max"/>
+                    <color rgb="FFFF555A"/>
+                  </dataBar>
+                  <extLst>
+                    <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{B025F937-C7B1-47D3-B67F-A62EFF666E3E}">
+                      <x14:id>{DA7ABA51-AAAA-BBBB-0001-000000000003}</x14:id>
+                    </ext>
+                  </extLst>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" direction="leftToRight" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FF638EC6"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000002}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" direction="rightToLeft" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FF63C384"/>
+                          <x14:negativeFillColor rgb="FFFF0000"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A2:B2</xm:sqref>
+                    </x14:conditionalFormatting>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="dataBar" id="{DA7ABA51-AAAA-BBBB-0001-000000000003}">
+                        <x14:dataBar minLength="0" maxLength="100" border="1" negativeBarBorderColorSameAsPositive="0">
+                          <x14:cfvo type="autoMin"/>
+                          <x14:cfvo type="autoMax"/>
+                          <x14:borderColor rgb="FFFF555A"/>
+                          <x14:negativeFillColor rgb="FFFFFF00"/>
+                          <x14:negativeBorderColor rgb="FFFF0000"/>
+                          <x14:axisColor rgb="FF000000"/>
+                        </x14:dataBar>
+                      </x14:cfRule>
+                      <xm:sqref>A3:C3</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
             </worksheet>
             "#,
         );
