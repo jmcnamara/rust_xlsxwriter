@@ -292,7 +292,7 @@ pub trait ConditionalFormat {
     fn multi_range(&self) -> String;
 
     /// Check if the conditional format uses Excel 2010+ extensions.
-    fn has_extensions(&self) -> bool;
+    fn has_x14_extensions(&self) -> bool;
 
     /// Clone a reference into a concrete Box type.
     fn box_clone(&self) -> Box<dyn ConditionalFormat + Send>;
@@ -326,8 +326,8 @@ macro_rules! generate_conditional_format_impls {
                 self.multi_range()
             }
 
-            fn has_extensions(&self) -> bool {
-                self.has_extensions()
+            fn has_x14_extensions(&self) -> bool {
+                self.has_x14_extensions()
             }
 
             fn box_clone(&self) -> Box<dyn ConditionalFormat + Send> {
@@ -532,7 +532,7 @@ pub struct ConditionalFormatCell {
     criteria: ConditionalFormatCellCriteria,
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -547,7 +547,7 @@ impl ConditionalFormatCell {
             criteria: ConditionalFormatCellCriteria::None,
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -871,7 +871,7 @@ pub struct ConditionalFormatBlank {
     is_inverted: bool,
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -884,7 +884,7 @@ impl ConditionalFormatBlank {
             is_inverted: false,
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -1054,7 +1054,7 @@ pub struct ConditionalFormatError {
     is_inverted: bool,
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1067,7 +1067,7 @@ impl ConditionalFormatError {
             is_inverted: false,
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -1238,7 +1238,7 @@ pub struct ConditionalFormatDuplicate {
     is_inverted: bool,
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1251,7 +1251,7 @@ impl ConditionalFormatDuplicate {
             is_inverted: false,
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -1412,7 +1412,7 @@ pub struct ConditionalFormatAverage {
     criteria: ConditionalFormatAverageCriteria,
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1425,7 +1425,7 @@ impl ConditionalFormatAverage {
             criteria: ConditionalFormatAverageCriteria::AboveAverage,
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -1638,7 +1638,7 @@ pub struct ConditionalFormatTop {
     is_percent: bool,
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1653,7 +1653,7 @@ impl ConditionalFormatTop {
             is_percent: false,
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -1861,7 +1861,7 @@ pub struct ConditionalFormatText {
     criteria: ConditionalFormatTextCriteria,
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1875,7 +1875,7 @@ impl ConditionalFormatText {
             criteria: ConditionalFormatTextCriteria::Contains,
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -2109,7 +2109,7 @@ pub struct ConditionalFormatDate {
     criteria: ConditionalFormatDateCriteria,
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2122,7 +2122,7 @@ impl ConditionalFormatDate {
             criteria: ConditionalFormatDateCriteria::Yesterday,
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -2250,7 +2250,7 @@ impl ConditionalFormatDate {
 ///
 /// # Examples
 ///
-/// Example of adding 2 color scale type conditional formatting to a worksheet.
+/// Example of adding a 2 color scale type conditional formatting to a worksheet.
 /// Note, the colors in the fifth example (yellow to green) are the default
 /// colors and could be omitted.
 ///
@@ -2265,13 +2265,13 @@ impl ConditionalFormatDate {
 /// #     let worksheet = workbook.add_worksheet();
 /// #
 /// #     // Write the worksheet data.
-/// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-/// #     worksheet.write_column(2, 1, scale_data)?;
-/// #     worksheet.write_column(2, 3, scale_data)?;
-/// #     worksheet.write_column(2, 5, scale_data)?;
-/// #     worksheet.write_column(2, 7, scale_data)?;
-/// #     worksheet.write_column(2, 9, scale_data)?;
-/// #     worksheet.write_column(2, 11, scale_data)?;
+/// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/// #     worksheet.write_column(2, 1, data)?;
+/// #     worksheet.write_column(2, 3, data)?;
+/// #     worksheet.write_column(2, 5, data)?;
+/// #     worksheet.write_column(2, 7, data)?;
+/// #     worksheet.write_column(2, 9, data)?;
+/// #     worksheet.write_column(2, 11, data)?;
 /// #
 /// #     // Set the column widths for clarity.
 /// #     for col_num in 0..=12u16 {
@@ -2344,7 +2344,7 @@ pub struct ConditionalFormat2ColorScale {
 
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2363,7 +2363,7 @@ impl ConditionalFormat2ColorScale {
             max_color: Color::RGB(0x63BE7B),
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -2376,14 +2376,14 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
     /// # Examples
     ///
-    /// Example of adding 2 color scale type conditional formatting to a worksheet
+    /// Example of adding a 2 color scale type conditional formatting to a worksheet
     /// with user defined minimum and maximum values.
     ///
     /// ```
@@ -2399,9 +2399,9 @@ impl ConditionalFormat2ColorScale {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Write the worksheet data.
-    /// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    /// #     worksheet.write_column(2, 1, scale_data)?;
-    /// #     worksheet.write_column(2, 3, scale_data)?;
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
     /// #
     ///     // Write a 2 color scale formats with standard Excel colors. The conditional
     ///     // format is applied from the lowest to the highest value.
@@ -2473,7 +2473,7 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
@@ -2526,7 +2526,7 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Examples
     ///
-    /// Example of adding 2 color scale type conditional formatting to a worksheet
+    /// Example of adding a 2 color scale type conditional formatting to a worksheet
     /// with user defined minimum and maximum colors.
     ///
     /// ```
@@ -2540,11 +2540,11 @@ impl ConditionalFormat2ColorScale {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Write the worksheet data.
-    /// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     /// #     worksheet.write(1, 1, "Default colors")?;
     /// #     worksheet.write(1, 3, "User colors")?;
-    /// #     worksheet.write_column(2, 1, scale_data)?;
-    /// #     worksheet.write_column(2, 3, scale_data)?;
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
     /// #
     ///     // Write a 2 color scale formats with standard Excel colors.
     ///     let conditional_format = ConditionalFormat2ColorScale::new();
@@ -2731,13 +2731,13 @@ impl ConditionalFormat2ColorScale {
 /// #     let worksheet = workbook.add_worksheet();
 /// #
 /// #     // Write the worksheet data.
-/// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-/// #     worksheet.write_column(2, 1, scale_data)?;
-/// #     worksheet.write_column(2, 3, scale_data)?;
-/// #     worksheet.write_column(2, 5, scale_data)?;
-/// #     worksheet.write_column(2, 7, scale_data)?;
-/// #     worksheet.write_column(2, 9, scale_data)?;
-/// #     worksheet.write_column(2, 11, scale_data)?;
+/// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/// #     worksheet.write_column(2, 1, data)?;
+/// #     worksheet.write_column(2, 3, data)?;
+/// #     worksheet.write_column(2, 5, data)?;
+/// #     worksheet.write_column(2, 7, data)?;
+/// #     worksheet.write_column(2, 9, data)?;
+/// #     worksheet.write_column(2, 11, data)?;
 /// #
 /// #     // Set the column widths for clarity.
 /// #     for col_num in 0..=12u16 {
@@ -2819,7 +2819,7 @@ pub struct ConditionalFormat3ColorScale {
 
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2841,7 +2841,7 @@ impl ConditionalFormat3ColorScale {
             max_color: Color::RGB(0x63BE7B),
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: false,
+            has_x14_extensions: false,
             format: None,
         }
     }
@@ -2854,7 +2854,7 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
@@ -2877,9 +2877,9 @@ impl ConditionalFormat3ColorScale {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Write the worksheet data.
-    /// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    /// #     worksheet.write_column(2, 1, scale_data)?;
-    /// #     worksheet.write_column(2, 3, scale_data)?;
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
     /// #
     ///     // Write a 3 color scale formats with standard Excel colors. The conditional
     ///     // format is applied from the lowest to the highest value.
@@ -2951,7 +2951,7 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
@@ -3000,7 +3000,7 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
@@ -3067,11 +3067,11 @@ impl ConditionalFormat3ColorScale {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Write the worksheet data.
-    /// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     /// #     worksheet.write(1, 1, "Default colors")?;
     /// #     worksheet.write(1, 3, "User colors")?;
-    /// #     worksheet.write_column(2, 1, scale_data)?;
-    /// #     worksheet.write_column(2, 3, scale_data)?;
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
     /// #
     ///     // Write a 3 color scale formats with standard Excel colors.
     ///     let conditional_format = ConditionalFormat3ColorScale::new();
@@ -3253,20 +3253,85 @@ impl ConditionalFormat3ColorScale {
 // ConditionalFormatDataBar
 // -----------------------------------------------------------------------
 
-/// The `ConditionalFormatDataBar` struct represents a Data Bar
-/// conditional format.
+/// The `ConditionalFormatDataBar` struct represents a Data Bar conditional
+/// format.
 ///
 /// `ConditionalFormatDataBar` is used to represent a Cell style conditional
-/// format in Excel. A Data Bar Cell conditional format shows a per cell
-/// color gradient from the minimum value to the maximum value.
+/// format in Excel. A Data Bar Cell conditional format shows a per cell color
+/// gradient from the minimum value to the maximum value.
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_intro.png">
+///
+/// The options that can be applied to a data bar conditional format in Excel
+/// are shown in the image below.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_intro2.png">
+///
+/// The methods to replicate these options are explained in the following
+/// documentation.
 ///
 /// For more information see [Working with Conditional
 /// Formats](crate::conditional_format).
 ///
 /// # Examples
+///
+/// Example of adding data bar type conditional formatting to a worksheet.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_databar.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     ConditionalFormatDataBar, ConditionalFormatDataBarDirection, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Write some captions.
+/// #     worksheet.write(1, 1, "Default")?;
+/// #     worksheet.write(1, 3, "Default negative")?;
+/// #     worksheet.write(1, 5, "User color")?;
+/// #     worksheet.write(1, 7, "Changed direction")?;
+/// #
+/// #     // Write the worksheet data.
+/// #     let data1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/// #     let data2 = [6, 4, 2, -2, -4, -6, -4, -2, 2, 4];
+/// #     worksheet.write_column(2, 1, data1)?;
+/// #     worksheet.write_column(2, 3, data2)?;
+/// #     worksheet.write_column(2, 5, data1)?;
+/// #     worksheet.write_column(2, 7, data1)?;
+/// #
+///     // Write a standard Excel data bar.
+///     let conditional_format = ConditionalFormatDataBar::new();
+///
+///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+///
+///     // Write a standard Excel data bar with negative data
+///     let conditional_format = ConditionalFormatDataBar::new();
+///
+///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+///
+///     // Write a data bar with a user defined fill color.
+///     let conditional_format = ConditionalFormatDataBar::new().set_fill_color("009933");
+///
+///     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+///
+///     // Write a data bar with the direction changed.
+///     let conditional_format = ConditionalFormatDataBar::new()
+///         .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
+///
+///     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
 ///
 ///
 /// This creates conditional format rules like this:
@@ -3286,18 +3351,20 @@ pub struct ConditionalFormatDataBar {
     max_type: ConditionalFormatType,
     min_value: ConditionalFormatValue,
     max_value: ConditionalFormatValue,
-    bar_color: Color,
+    fill_color: Color,
     border_color: Color,
     negative_fill_color: Color,
     negative_border_color: Color,
     axis_color: Color,
-    no_border: bool,
+    border_off: bool,
     solid_bar: bool,
+    bar_only: bool,
     direction: ConditionalFormatDataBarDirection,
+    axis_position: ConditionalFormatDataBarAxisPosition,
 
     multi_range: String,
     stop_if_true: bool,
-    has_extensions: bool,
+    has_x14_extensions: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -3312,18 +3379,20 @@ impl ConditionalFormatDataBar {
             max_type: ConditionalFormatType::Automatic,
             min_value: 0.into(),
             max_value: 0.into(),
-            bar_color: Color::RGB(0x638EC6),
+            fill_color: Color::RGB(0x638EC6),
             border_color: Color::RGB(0x638EC6),
             negative_fill_color: Color::RGB(0xFF0000),
             negative_border_color: Color::RGB(0xFF0000),
             axis_color: Color::RGB(0x000000),
-            no_border: false,
+            border_off: false,
             solid_bar: false,
+            bar_only: false,
             direction: ConditionalFormatDataBarDirection::Context,
+            axis_position: ConditionalFormatDataBarAxisPosition::Automatic,
 
             multi_range: String::new(),
             stop_if_true: false,
-            has_extensions: true,
+            has_x14_extensions: true,
             format: None,
         }
     }
@@ -3331,22 +3400,62 @@ impl ConditionalFormatDataBar {
     /// Set the type and value of the minimum in the data bar.
     ///
     /// Set the minimum type (number, percent, formula or percentile) and value
-    /// for a data bar type of conditional format. By default the minimum
-    /// is the lowest value in the conditional formatting range.
+    /// for a data bar conditional format. By default the minimum is set
+    /// automatically.
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
+    ///
     /// # Examples
     ///
+    /// Example of adding a data bar type conditional formatting to a worksheet
+    /// with user defined minimum and maximum values.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_minimum.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, ConditionalFormatType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar. The conditional format is applied over
+    ///     // the full range of values from minimum to maximum.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar a user defined range. Values <= 3 are shown with zero
+    ///     // bar width while values >= 7 are shown with the maximum bar width.
+    ///     let conditional_format = ConditionalFormatDataBar::new()
+    ///         .set_minimum(ConditionalFormatType::Number, 3)
+    ///         .set_maximum(ConditionalFormatType::Number, 7);
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_minimum.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_minimum.png">
     ///
     pub fn set_minimum(
         mut self,
@@ -3371,9 +3480,8 @@ impl ConditionalFormatDataBar {
                 }
             }
         }
-        // The highest and lowest options cannot be set by the user. TODO
-        if rule_type != ConditionalFormatType::Lowest && rule_type != ConditionalFormatType::Highest
-        {
+        // The highest option cannot be set for the minimum.
+        if rule_type != ConditionalFormatType::Highest {
             self.min_type = rule_type;
             self.min_value = value;
         }
@@ -3384,12 +3492,14 @@ impl ConditionalFormatDataBar {
     /// Set the type and value of the maximum in the data bar.
     ///
     /// Set the maximum type (number, percent, formula or percentile) and value
-    /// for a data bar type of conditional format. By default the maximum
-    /// is the highest value in the conditional formatting range.
+    /// for a data bar conditional format. By default the maximum is set
+    /// automatically.
+    ///
+    /// See the example above.
     ///
     /// # Parameters
     ///
-    /// * `rule_type`: a [`ConditionalFormatType`] enum value.
+    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
@@ -3418,9 +3528,8 @@ impl ConditionalFormatDataBar {
             }
         }
 
-        // The highest and lowest options cannot be set by the user.
-        if rule_type != ConditionalFormatType::Lowest && rule_type != ConditionalFormatType::Highest
-        {
+        // The lowest option cannot be set for the maximum.
+        if rule_type != ConditionalFormatType::Lowest {
             self.max_type = rule_type;
             self.max_value = value;
         }
@@ -3428,10 +3537,10 @@ impl ConditionalFormatDataBar {
         self
     }
 
-    /// Set the color of the Todo in the data bar.
+    /// Set the color of the fill in the data bar.
     ///
-    /// Set the minimum color value for a data bar type of conditional
-    /// format. By default the minimum color is `#FFEF9C` (yellow).
+    /// Set the fill color for a data bar conditional format. By default the
+    /// data bar color is `#638EC6` (blue).
     ///
     /// # Parameters
     ///
@@ -3440,38 +3549,111 @@ impl ConditionalFormatDataBar {
     ///
     /// # Examples
     ///
+    /// Example of adding a data bar type conditional formatting to a worksheet
+    /// with user defined fill color.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_fill_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with a user defined fill color.
+    ///     let conditional_format = ConditionalFormatDataBar::new().set_fill_color("009933");
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_bar_color.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_fill_color.png">
     ///
-    pub fn set_bar_color<T>(mut self, color: T) -> ConditionalFormatDataBar
+    pub fn set_fill_color<T>(mut self, color: T) -> ConditionalFormatDataBar
     where
         T: IntoColor,
     {
         let color = color.new_color();
         if color.is_valid() {
-            self.bar_color = color;
+            self.fill_color = color;
             self.border_color = color;
         }
 
         self
     }
 
+    /// Set the color of the border in the data bar.
     ///
-    pub fn set_bar_negative_color<T>(mut self, color: T) -> ConditionalFormatDataBar
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
-        if color.is_valid() {
-            self.negative_fill_color = color;
-        }
-
-        self
-    }
-
-    /// todo
+    /// Set the border color for a data bar conditional format. By default the
+    /// border is the same color as the data bar: `#638EC6` (blue).
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The color property defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet
+    /// with user defined border color.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_border_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with a user defined border color.
+    ///     let conditional_format = ConditionalFormatDataBar::new().set_border_color("FF0000");
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_border_color.png">
+    ///
     pub fn set_border_color<T>(mut self, color: T) -> ConditionalFormatDataBar
     where
         T: IntoColor,
@@ -3484,21 +3666,297 @@ impl ConditionalFormatDataBar {
         self
     }
 
-    /// todo
-    pub fn set_no_border(mut self, enable: bool) -> ConditionalFormatDataBar {
-        self.no_border = enable;
+    /// Set the color of the fill for negative values in the data bar.
+    ///
+    /// Set the fill color for negative values in a data bar conditional format.
+    /// By default the negative data bar color is `#FF0000` (red).
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The color property defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet
+    /// with user defined negative fill color.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_negative_fill_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [6, 4, 2, -2, -4, -6, -4, -2, 2, 4];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with a user defined negative fill color.
+    ///     let conditional_format = ConditionalFormatDataBar::new().set_negative_fill_color("009933");
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_negative_fill_color.png">
+    ///
+    pub fn set_negative_fill_color<T>(mut self, color: T) -> ConditionalFormatDataBar
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.negative_fill_color = color;
+            self.negative_border_color = color;
+        }
 
         self
     }
 
-    /// todo
-    pub fn set_solid_bar(mut self, enable: bool) -> ConditionalFormatDataBar {
+    /// Set the color of the border for negative values in the data bar.
+    ///
+    /// Set the border color for negative values in a data bar conditional
+    /// format. By default the border is the same color as the data bar:
+    /// is `#FF0000` (red).
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The color property defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet with
+    /// user defined negative border color.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_negative_border_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [6, 4, 2, -2, -4, -6, -4, -2, 2, 4];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with a user defined negative border color.
+    ///     let conditional_format = ConditionalFormatDataBar::new()
+    ///         .set_negative_border_color("000000");
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_negative_border_color.png">
+    ///
+    pub fn set_negative_border_color<T>(mut self, color: T) -> ConditionalFormatDataBar
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.negative_border_color = color;
+        }
+
+        self
+    }
+
+    /// Set the data bar fill to solid.
+    ///
+    /// By default Excel uses a gradient fill for data bar conditional formats.
+    /// This option can be used to turn on a solid fill.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet
+    /// with a solid (non-gradient) style bar.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_solid_fill.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with a solid fill.
+    ///     let conditional_format = ConditionalFormatDataBar::new().set_solid_fill(true);
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_solid_fill.png">
+    ///
+    pub fn set_solid_fill(mut self, enable: bool) -> ConditionalFormatDataBar {
         self.solid_bar = enable;
-
         self
     }
 
-    /// todo
+    /// Turn off the border for a data bar conditional format.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet
+    /// without a border.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_border_off.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar without a border.
+    ///     let conditional_format = ConditionalFormatDataBar::new().set_border_off(true);
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_border_off.png">
+    ///
+    pub fn set_border_off(mut self, enable: bool) -> ConditionalFormatDataBar {
+        self.border_off = enable;
+        self
+    }
+
+    /// Set the direction of the data bar conditional format.
+    ///
+    /// Set the data bar conditional format direction to "Right to left", "Left
+    /// to right" or "Context" (the default).
+    ///
+    /// # Parameters
+    ///
+    /// * `direction`- A [`ConditionalFormatDataBarDirection`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet
+    /// without a border
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_direction.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     ConditionalFormatDataBar, ConditionalFormatDataBarDirection, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with the direction changed.
+    ///     let conditional_format = ConditionalFormatDataBar::new()
+    ///         .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_direction.png">
+    ///
     pub fn set_direction(
         mut self,
         direction: ConditionalFormatDataBarDirection,
@@ -3508,9 +3966,210 @@ impl ConditionalFormatDataBar {
         self
     }
 
-    /// todo - set hidden
-    pub fn set_classic_style(mut self) -> ConditionalFormatDataBar {
-        self.has_extensions = false;
+    /// Hide the values and only show the data bars.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet with
+    /// the bar only and with the data hidden.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_bar_only.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with the data hidden and bars shown only.
+    ///     let conditional_format = ConditionalFormatDataBar::new().set_bar_only(true);
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_bar_only.png">
+    ///
+    ///
+    pub fn set_bar_only(mut self, enable: bool) -> ConditionalFormatDataBar {
+        self.bar_only = enable;
+
+        self
+    }
+
+    /// Set the position of the axis in a data bar.
+    ///
+    /// The position can be set to midpoint or turned off.
+    ///
+    /// # Parameters
+    ///
+    /// * `position`- A [`ConditionalFormatDataBarAxisPosition`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet
+    /// with different axis positions.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_axis_position.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     ConditionalFormatDataBar, ConditionalFormatDataBarAxisPosition, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// #     let data2 = [6, 4, 2, -2, -4, -6, -4, -2, 2, 4];
+    /// #     worksheet.write_column(2, 1, data1)?;
+    /// #     worksheet.write_column(2, 3, data1)?;
+    /// #     worksheet.write_column(2, 5, data2)?;
+    /// #     worksheet.write_column(2, 7, data2)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with a midpoint axis.
+    ///     let conditional_format = ConditionalFormatDataBar::new()
+    ///         .set_axis_position(ConditionalFormatDataBarAxisPosition::Midpoint);
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    ///     // Write a standard Excel data bar with negative data
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+    ///
+    ///     // Write a data bar without an axis.
+    ///     let conditional_format = ConditionalFormatDataBar::new()
+    ///         .set_axis_position(ConditionalFormatDataBarAxisPosition::None);
+    ///
+    ///     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_axis_position.png">
+    ///
+    pub fn set_axis_position(
+        mut self,
+        position: ConditionalFormatDataBarAxisPosition,
+    ) -> ConditionalFormatDataBar {
+        self.axis_position = position;
+
+        self
+    }
+
+    /// Set the color of the axis in the data bar.
+    ///
+    /// Set the axis color for a data bar conditional format. By default the
+    /// axis color is `#000000` (black).
+    ///
+    /// # Parameters
+    ///
+    /// * `color` - The color property defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data bar type conditional formatting to a worksheet with
+    /// a user defined axis color.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_databar_set_axis_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatDataBar, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     let data = [6, 4, 2, -2, -4, -6, -4, -2, 2, 4];
+    /// #     worksheet.write_column(2, 1, data)?;
+    /// #     worksheet.write_column(2, 3, data)?;
+    /// #
+    ///     // Write a standard Excel data bar.
+    ///     let conditional_format = ConditionalFormatDataBar::new();
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+    ///
+    ///     // Write a data bar with a user defined axis color.
+    ///     let conditional_format = ConditionalFormatDataBar::new().set_axis_color("FF0000");
+    ///
+    ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_axis_color.png">
+    ///
+    pub fn set_axis_color<T>(mut self, color: T) -> ConditionalFormatDataBar
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.axis_color = color;
+        }
+
+        self
+    }
+
+    /// Set the data bar format to the original Excel 2007 style.
+    ///
+    /// The original Excel 2007 style was simpler than the post Excel 2010 style
+    /// and had very limited configuration options.
+    ///
+    /// This is implemented for backward compatibility and for testing but is
+    /// unlikely be be required by the end user.
+    ///
+    #[doc(hidden)]
+    pub fn use_classic_style(mut self) -> ConditionalFormatDataBar {
+        self.has_x14_extensions = false;
 
         if self.min_type == ConditionalFormatType::Automatic {
             self.min_type = ConditionalFormatType::Lowest;
@@ -3555,13 +4214,20 @@ impl ConditionalFormatDataBar {
 
         // Write the rule.
         writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_start_tag_only("dataBar");
+
+        let mut attributes = vec![];
+
+        if self.bar_only {
+            attributes.push(("showValue", "0".to_string()));
+        }
+
+        writer.xml_start_tag("dataBar", &attributes);
 
         Self::write_type(
             &mut writer,
             self.min_type,
             &self.min_value.value,
-            self.has_extensions,
+            self.has_x14_extensions,
             false,
         );
 
@@ -3569,15 +4235,15 @@ impl ConditionalFormatDataBar {
             &mut writer,
             self.max_type,
             &self.max_value.value,
-            self.has_extensions,
+            self.has_x14_extensions,
             true,
         );
 
-        Self::write_color(&mut writer, "color", self.bar_color);
+        Self::write_color(&mut writer, "color", self.fill_color);
 
         writer.xml_end_tag("dataBar");
 
-        if self.has_extensions {
+        if self.has_x14_extensions {
             // Write the extLst element.
             Self::write_extension_list(&mut writer, guid);
         }
@@ -3592,7 +4258,7 @@ impl ConditionalFormatDataBar {
         writer: &mut XMLWriter,
         rule_type: ConditionalFormatType,
         value: &str,
-        has_extensions: bool,
+        has_x14_extensions: bool,
         is_max: bool,
     ) {
         let mut attributes = vec![];
@@ -3607,7 +4273,7 @@ impl ConditionalFormatDataBar {
             }
             ConditionalFormatType::Lowest => {
                 attributes.push(("type", "min".to_string()));
-                if !has_extensions {
+                if !has_x14_extensions {
                     attributes.push(("val", value.to_string()));
                 }
             }
@@ -3629,7 +4295,7 @@ impl ConditionalFormatDataBar {
             }
             ConditionalFormatType::Highest => {
                 attributes.push(("type", "max".to_string()));
-                if !has_extensions {
+                if !has_x14_extensions {
                     attributes.push(("val", value.to_string()));
                 }
             }
@@ -3670,30 +4336,35 @@ impl ConditionalFormatDataBar {
 
         // Write the rule.
         writer.xml_start_tag("x14:cfRule", &attributes);
-        Self::write_data_bar(&mut writer, self.solid_bar, self.no_border, self.direction);
+        Self::write_data_bar(&mut writer, self.clone());
 
         Self::write_x14_type(&mut writer, self.min_type, &self.min_value.value, false);
         Self::write_x14_type(&mut writer, self.max_type, &self.max_value.value, true);
 
         // Write the color elements.
-        if !self.no_border {
+        if !self.border_off {
             Self::write_color(&mut writer, "x14:borderColor", self.border_color);
         }
 
-        Self::write_color(
-            &mut writer,
-            "x14:negativeFillColor",
-            self.negative_fill_color,
-        );
+        if self.fill_color != self.negative_fill_color {
+            Self::write_color(
+                &mut writer,
+                "x14:negativeFillColor",
+                self.negative_fill_color,
+            );
+        }
 
-        if !self.no_border {
+        if !self.border_off && self.fill_color != self.negative_border_color {
             Self::write_color(
                 &mut writer,
                 "x14:negativeBorderColor",
                 self.negative_border_color,
             );
         }
-        Self::write_color(&mut writer, "x14:axisColor", self.axis_color);
+
+        if self.axis_position != ConditionalFormatDataBarAxisPosition::None {
+            Self::write_color(&mut writer, "x14:axisColor", self.axis_color);
+        }
 
         writer.xml_end_tag("x14:dataBar");
         writer.xml_end_tag("x14:cfRule");
@@ -3702,26 +4373,21 @@ impl ConditionalFormatDataBar {
     }
 
     // Write the <x14:dataBar> element.
-    fn write_data_bar(
-        writer: &mut XMLWriter,
-        solid_bar: bool,
-        no_border: bool,
-        direction: ConditionalFormatDataBarDirection,
-    ) {
+    fn write_data_bar(writer: &mut XMLWriter, data_bar: ConditionalFormatDataBar) {
         let mut attributes = vec![
             ("minLength", "0".to_string()),
             ("maxLength", "100".to_string()),
         ];
 
-        if !no_border {
+        if !data_bar.border_off {
             attributes.push(("border", "1".to_string()));
         }
 
-        if solid_bar {
+        if data_bar.solid_bar {
             attributes.push(("gradient", "0".to_string()));
         }
 
-        match direction {
+        match data_bar.direction {
             ConditionalFormatDataBarDirection::LeftToRight => {
                 attributes.push(("direction", "leftToRight".to_string()));
             }
@@ -3731,8 +4397,22 @@ impl ConditionalFormatDataBar {
             ConditionalFormatDataBarDirection::Context => {}
         }
 
-        if !no_border {
+        if data_bar.fill_color == data_bar.negative_fill_color {
+            attributes.push(("negativeBarColorSameAsPositive", "1".to_string()));
+        }
+
+        if !data_bar.border_off && data_bar.fill_color != data_bar.negative_border_color {
             attributes.push(("negativeBarBorderColorSameAsPositive", "0".to_string()));
+        }
+
+        match data_bar.axis_position {
+            ConditionalFormatDataBarAxisPosition::Midpoint => {
+                attributes.push(("axisPosition", "middle".to_string()));
+            }
+            ConditionalFormatDataBarAxisPosition::None => {
+                attributes.push(("axisPosition", "none".to_string()));
+            }
+            ConditionalFormatDataBarAxisPosition::Automatic => {}
         }
 
         writer.xml_start_tag("x14:dataBar", &attributes);
@@ -3754,32 +4434,41 @@ impl ConditionalFormatDataBar {
                 } else {
                     attributes.push(("type", "autoMin".to_string()));
                 }
+                writer.xml_empty_tag("x14:cfvo", &attributes);
             }
             ConditionalFormatType::Lowest => {
                 attributes.push(("type", "min".to_string()));
-            }
-            ConditionalFormatType::Number => {
-                attributes.push(("type", "num".to_string()));
-                attributes.push(("val", value.to_string()));
-            }
-            ConditionalFormatType::Percent => {
-                attributes.push(("type", "percent".to_string()));
-                attributes.push(("val", value.to_string()));
-            }
-            ConditionalFormatType::Formula => {
-                attributes.push(("type", "formula".to_string()));
-                attributes.push(("val", value.to_string()));
-            }
-            ConditionalFormatType::Percentile => {
-                attributes.push(("type", "percentile".to_string()));
-                attributes.push(("val", value.to_string()));
+                writer.xml_empty_tag("x14:cfvo", &attributes);
             }
             ConditionalFormatType::Highest => {
                 attributes.push(("type", "max".to_string()));
+                writer.xml_empty_tag("x14:cfvo", &attributes);
+            }
+            ConditionalFormatType::Number => {
+                attributes.push(("type", "num".to_string()));
+                writer.xml_start_tag("x14:cfvo", &attributes);
+                writer.xml_data_element_only("xm:f", value);
+                writer.xml_end_tag("x14:cfvo");
+            }
+            ConditionalFormatType::Percent => {
+                attributes.push(("type", "percent".to_string()));
+                writer.xml_start_tag("x14:cfvo", &attributes);
+                writer.xml_data_element_only("xm:f", value);
+                writer.xml_end_tag("x14:cfvo");
+            }
+            ConditionalFormatType::Formula => {
+                attributes.push(("type", "formula".to_string()));
+                writer.xml_start_tag("x14:cfvo", &attributes);
+                writer.xml_data_element_only("xm:f", value);
+                writer.xml_end_tag("x14:cfvo");
+            }
+            ConditionalFormatType::Percentile => {
+                attributes.push(("type", "percentile".to_string()));
+                writer.xml_start_tag("x14:cfvo", &attributes);
+                writer.xml_data_element_only("xm:f", value);
+                writer.xml_end_tag("x14:cfvo");
             }
         }
-
-        writer.xml_empty_tag("x14:cfvo", &attributes);
     }
 }
 
@@ -3900,7 +4589,7 @@ impl From<&NaiveTime> for ConditionalFormatValue {
 // -----------------------------------------------------------------------
 
 /// The `ConditionalFormatCellCriteria` enum defines the conditional format
-/// criteria for [`ConditionalFormatCell`] .
+/// criteria for [`ConditionalFormatCell`].
 ///
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -3955,7 +4644,7 @@ impl fmt::Display for ConditionalFormatCellCriteria {
 // -----------------------------------------------------------------------
 
 /// The `ConditionalFormatAverageCriteria` enum defines the conditional format
-/// criteria for [`ConditionalFormatCell`] .
+/// criteria for [`ConditionalFormatCell`].
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ConditionalFormatAverageCriteria {
@@ -4004,7 +4693,7 @@ pub enum ConditionalFormatAverageCriteria {
 // -----------------------------------------------------------------------
 
 /// The `ConditionalFormatTextCriteria` enum defines the conditional format
-/// criteria for [`ConditionalFormatText`] .
+/// criteria for [`ConditionalFormatText`].
 ///
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -4038,7 +4727,7 @@ impl fmt::Display for ConditionalFormatTextCriteria {
 // -----------------------------------------------------------------------
 
 /// The `ConditionalFormatDateCriteria` enum defines the conditional format
-/// criteria for [`ConditionalFormatDate`] .
+/// criteria for [`ConditionalFormatDate`].
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ConditionalFormatDateCriteria {
@@ -4110,7 +4799,7 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 ///
 /// # Examples
 ///
-/// Example of adding 2 color scale type conditional formatting to a worksheet
+/// Example of adding a 2 color scale type conditional formatting to a worksheet
 /// with user defined minimum and maximum values.
 ///
 /// ```
@@ -4126,9 +4815,9 @@ impl fmt::Display for ConditionalFormatDateCriteria {
 /// #     let worksheet = workbook.add_worksheet();
 /// #
 /// #     // Write the worksheet data.
-/// #     let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-/// #     worksheet.write_column(2, 1, scale_data)?;
-/// #     worksheet.write_column(2, 3, scale_data)?;
+/// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/// #     worksheet.write_column(2, 1, data)?;
+/// #     worksheet.write_column(2, 3, data)?;
 /// #
 ///     // Write a 2 color scale formats with standard Excel colors. The conditional
 ///     // format is applied from the lowest to the highest value.
@@ -4193,19 +4882,151 @@ pub enum ConditionalFormatType {
 // -----------------------------------------------------------------------
 
 /// The `ConditionalFormatDataBarDirection` enum defines the conditional format
-/// directions for [`ConditionalFormatDataBar`] .
+/// directions for [`ConditionalFormatDataBar`]. This is used to set the data
+/// bar conditional format direction to "Right to left", "Left to right" or
+/// "Context" (the default) in conjunction with
+/// [`ConditionalFormatDataBar::set_direction()`].
 ///
+/// # Parameters
+///
+/// * `direction`- A [`ConditionalFormatDataBarDirection`] enum value.
+///
+/// # Examples
+///
+/// Example of adding a data bar type conditional formatting to a worksheet
+/// without a border
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_databar_set_direction.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     ConditionalFormatDataBar, ConditionalFormatDataBarDirection, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Write the worksheet data.
+/// #     let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/// #     worksheet.write_column(2, 1, data)?;
+/// #     worksheet.write_column(2, 3, data)?;
+/// #
+///     // Write a standard Excel data bar.
+///     let conditional_format = ConditionalFormatDataBar::new();
+///
+///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+///
+///     // Write a data bar without a border.
+///     let conditional_format = ConditionalFormatDataBar::new()
+///         .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
+///
+///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_direction.png">
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ConditionalFormatDataBarDirection {
-    /// TODO
+    /// The bars go "Right to left" or "Left to right" depending on the context.
+    /// This is the default.
     Context,
 
-    /// TODO
+    /// The bars go "Left to right".
     LeftToRight,
 
-    /// TODO
+    /// The bars go "Right to left".
     RightToLeft,
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatDataBarAxisPosition
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatDataBarAxisPosition` enum defines the conditional
+/// format axis positions for [`ConditionalFormatDataBar`].
+///
+///
+/// # Examples
+///
+/// Example of adding a data bar type conditional formatting to a worksheet
+/// with different axis positions.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_databar_set_axis_position.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     ConditionalFormatDataBar, ConditionalFormatDataBarAxisPosition, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Write the worksheet data.
+/// #     let data1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/// #     let data2 = [6, 4, 2, -2, -4, -6, -4, -2, 2, 4];
+/// #     worksheet.write_column(2, 1, data1)?;
+/// #     worksheet.write_column(2, 3, data1)?;
+/// #     worksheet.write_column(2, 5, data2)?;
+/// #     worksheet.write_column(2, 7, data2)?;
+/// #
+///     // Write a standard Excel data bar.
+///     let conditional_format = ConditionalFormatDataBar::new();
+///
+///     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+///
+///     // Write a data bar with a midpoint axis.
+///     let conditional_format = ConditionalFormatDataBar::new()
+///         .set_axis_position(ConditionalFormatDataBarAxisPosition::Midpoint);
+///
+///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+///
+///     // Write a standard Excel data bar with negative data
+///     let conditional_format = ConditionalFormatDataBar::new();
+///
+///     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+///
+///     // Write a data bar without an axis.
+///     let conditional_format = ConditionalFormatDataBar::new()
+///         .set_axis_position(ConditionalFormatDataBarAxisPosition::None);
+///
+///     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_axis_position.png">
+///
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ConditionalFormatDataBarAxisPosition {
+    /// The axis is set automatically depending on whether the data contains
+    /// negative values. This is the default.
+    Automatic,
+
+    /// The axis is set at the midpoint. This is the automatic option for ranges
+    /// with negative values.
+    Midpoint,
+
+    /// Turn the axis off.
+    None,
 }
 
 // -----------------------------------------------------------------------
@@ -4293,8 +5114,8 @@ macro_rules! generate_conditional_common_methods {
         }
 
         /// Check if the conditional format uses Excel 2010+ extensions.
-        pub(crate) fn has_extensions(&self) -> bool {
-            self.has_extensions
+        pub(crate) fn has_x14_extensions(&self) -> bool {
+            self.has_x14_extensions
         }
     }
     )*)

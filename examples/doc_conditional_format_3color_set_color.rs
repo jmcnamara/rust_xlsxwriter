@@ -13,11 +13,11 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the worksheet data.
-    let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     worksheet.write(1, 1, "Default colors")?;
     worksheet.write(1, 3, "User colors")?;
-    worksheet.write_column(2, 1, scale_data)?;
-    worksheet.write_column(2, 3, scale_data)?;
+    worksheet.write_column(2, 1, data)?;
+    worksheet.write_column(2, 3, data)?;
 
     // Write a 3 color scale formats with standard Excel colors.
     let conditional_format = ConditionalFormat3ColorScale::new();

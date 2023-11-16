@@ -11,8 +11,9 @@
 use rust_xlsxwriter::{
     ConditionalFormat2ColorScale, ConditionalFormat3ColorScale, ConditionalFormatAverage,
     ConditionalFormatAverageCriteria, ConditionalFormatCell, ConditionalFormatCellCriteria,
-    ConditionalFormatDuplicate, ConditionalFormatText, ConditionalFormatTextCriteria,
-    ConditionalFormatTop, Format, Workbook, XlsxError,
+    ConditionalFormatDataBar, ConditionalFormatDataBarDirection, ConditionalFormatDuplicate,
+    ConditionalFormatText, ConditionalFormatTextCriteria, ConditionalFormatTop, Format, Workbook,
+    XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -330,13 +331,13 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(0, 1, caption)?;
 
     // Write the worksheet data.
-    let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    worksheet.write_column(2, 1, scale_data)?;
-    worksheet.write_column(2, 3, scale_data)?;
-    worksheet.write_column(2, 5, scale_data)?;
-    worksheet.write_column(2, 7, scale_data)?;
-    worksheet.write_column(2, 9, scale_data)?;
-    worksheet.write_column(2, 11, scale_data)?;
+    let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    worksheet.write_column(2, 1, data)?;
+    worksheet.write_column(2, 3, data)?;
+    worksheet.write_column(2, 5, data)?;
+    worksheet.write_column(2, 7, data)?;
+    worksheet.write_column(2, 9, data)?;
+    worksheet.write_column(2, 11, data)?;
 
     // Set the column widths for clarity.
     for col_num in 0..=12u16 {
@@ -392,13 +393,13 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write(0, 1, caption)?;
 
     // Write the worksheet data.
-    let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    worksheet.write_column(2, 1, scale_data)?;
-    worksheet.write_column(2, 3, scale_data)?;
-    worksheet.write_column(2, 5, scale_data)?;
-    worksheet.write_column(2, 7, scale_data)?;
-    worksheet.write_column(2, 9, scale_data)?;
-    worksheet.write_column(2, 11, scale_data)?;
+    let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    worksheet.write_column(2, 1, data)?;
+    worksheet.write_column(2, 3, data)?;
+    worksheet.write_column(2, 5, data)?;
+    worksheet.write_column(2, 7, data)?;
+    worksheet.write_column(2, 9, data)?;
+    worksheet.write_column(2, 11, data)?;
 
     // Set the column widths for clarity.
     for col_num in 0..=12u16 {
@@ -447,6 +448,50 @@ fn main() -> Result<(), XlsxError> {
         .set_maximum_color("F8696B");
 
     worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
+
+    // -----------------------------------------------------------------------
+    // Example 9. Examples of data bars.
+    // -----------------------------------------------------------------------
+    let caption = "Examples of data bars";
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write the caption.
+    worksheet.write(0, 1, caption)?;
+    worksheet.write(1, 1, "Default")?;
+    worksheet.write(1, 3, "Default negative")?;
+    worksheet.write(1, 5, "User color")?;
+    worksheet.write(1, 7, "Changed direction")?;
+
+    // Write the worksheet data.
+    let data1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let data2 = [6, 4, 2, -2, -4, -6, -4, -2, 2, 4];
+    worksheet.write_column(2, 1, data1)?;
+    worksheet.write_column(2, 3, data2)?;
+    worksheet.write_column(2, 5, data1)?;
+    worksheet.write_column(2, 7, data1)?;
+
+    // Write a standard Excel data bar.
+    let conditional_format = ConditionalFormatDataBar::new();
+
+    worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+
+    // Write a standard Excel data bar with negative data
+    let conditional_format = ConditionalFormatDataBar::new();
+
+    worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+
+    // Write a data bar with a user defined fill color.
+    let conditional_format = ConditionalFormatDataBar::new().set_fill_color("009933");
+
+    worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+
+    // Write a data bar with the direction changed.
+    let conditional_format = ConditionalFormatDataBar::new()
+        .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
+
+    worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
 
     // -----------------------------------------------------------------------
     // Save and close the file.

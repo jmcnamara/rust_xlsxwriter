@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! Example of adding 2 color scale type conditional formatting to a worksheet.
+//! Example of adding a 2 color scale type conditional formatting to a worksheet.
 //! Note, the colors in the fifth example (yellow to green) are the default
 //! colors and could be omitted.
 
@@ -14,13 +14,13 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Write the worksheet data.
-    let scale_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    worksheet.write_column(2, 1, scale_data)?;
-    worksheet.write_column(2, 3, scale_data)?;
-    worksheet.write_column(2, 5, scale_data)?;
-    worksheet.write_column(2, 7, scale_data)?;
-    worksheet.write_column(2, 9, scale_data)?;
-    worksheet.write_column(2, 11, scale_data)?;
+    let data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    worksheet.write_column(2, 1, data)?;
+    worksheet.write_column(2, 3, data)?;
+    worksheet.write_column(2, 5, data)?;
+    worksheet.write_column(2, 7, data)?;
+    worksheet.write_column(2, 9, data)?;
+    worksheet.write_column(2, 11, data)?;
 
     // Set the column widths for clarity.
     for col_num in 0..=12u16 {

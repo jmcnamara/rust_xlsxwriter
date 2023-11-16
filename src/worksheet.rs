@@ -5169,7 +5169,7 @@ impl Worksheet {
         conditional_format.validate()?;
 
         // Check for extended Excel 2010 data bars.
-        if conditional_format.has_extensions() {
+        if conditional_format.has_x14_extensions() {
             self.use_x14_extensions = true;
             self.has_2010_data_bars = true;
         }
@@ -11066,7 +11066,7 @@ impl Worksheet {
         let mut data_bar_count = 1;
         for (cell_range, conditional_formats) in &self.conditional_formats {
             for conditional_format in conditional_formats {
-                if conditional_format.has_extensions() {
+                if conditional_format.has_x14_extensions() {
                     let attributes = [(
                         "xmlns:xm",
                         "http://schemas.microsoft.com/office/excel/2006/main",
