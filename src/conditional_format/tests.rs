@@ -1696,6 +1696,373 @@ mod conditional_format_tests {
     }
 
     #[test]
+    fn conditional_format_16() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+        worksheet.write(8, 0, 9)?;
+        worksheet.write(9, 0, 10)?;
+        worksheet.write(10, 0, 11)?;
+        worksheet.write(11, 0, 12)?;
+
+        let conditional_format = ConditionalFormat3ColorScale::new()
+            .set_minimum_color("C5D9F1")
+            .set_midpoint_color("8DB4E3")
+            .set_maximum_color("538ED5");
+
+        worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A12"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+                <row r="9" spans="1:1">
+                  <c r="A9">
+                    <v>9</v>
+                  </c>
+                </row>
+                <row r="10" spans="1:1">
+                  <c r="A10">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="11" spans="1:1">
+                  <c r="A11">
+                    <v>11</v>
+                  </c>
+                </row>
+                <row r="12" spans="1:1">
+                  <c r="A12">
+                    <v>12</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1:A12">
+                <cfRule type="colorScale" priority="1">
+                  <colorScale>
+                    <cfvo type="min" val="0"/>
+                    <cfvo type="percentile" val="50"/>
+                    <cfvo type="max" val="0"/>
+                    <color rgb="FFC5D9F1"/>
+                    <color rgb="FF8DB4E3"/>
+                    <color rgb="FF538ED5"/>
+                  </colorScale>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_17() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+        worksheet.write(8, 0, 9)?;
+        worksheet.write(9, 0, 10)?;
+        worksheet.write(10, 0, 11)?;
+        worksheet.write(11, 0, 12)?;
+
+        let conditional_format = ConditionalFormat3ColorScale::new()
+            .set_minimum(ConditionalFormatType::Number, Formula::new("$A$10"))
+            .set_midpoint(ConditionalFormatType::Percent, 52)
+            .set_maximum(ConditionalFormatType::Percentile, 99);
+
+        worksheet.add_conditional_format(0, 0, 11, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A12"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+                <row r="9" spans="1:1">
+                  <c r="A9">
+                    <v>9</v>
+                  </c>
+                </row>
+                <row r="10" spans="1:1">
+                  <c r="A10">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="11" spans="1:1">
+                  <c r="A11">
+                    <v>11</v>
+                  </c>
+                </row>
+                <row r="12" spans="1:1">
+                  <c r="A12">
+                    <v>12</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1:A12">
+                <cfRule type="colorScale" priority="1">
+                  <colorScale>
+                    <cfvo type="num" val="$A$10"/>
+                    <cfvo type="percent" val="52"/>
+                    <cfvo type="percentile" val="99"/>
+                    <color rgb="FFF8696B"/>
+                    <color rgb="FFFFEB84"/>
+                    <color rgb="FF63BE7B"/>
+                  </colorScale>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_18() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+        worksheet.write(8, 0, 9)?;
+        worksheet.write(9, 0, 10)?;
+        worksheet.write(10, 0, 11)?;
+        worksheet.write(11, 0, 12)?;
+
+        let conditional_format =
+            ConditionalFormat3ColorScale::new().set_multi_range("$A$3:$A$4,A1,A6:$A$8,$A10,A$12");
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A12"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+                <row r="9" spans="1:1">
+                  <c r="A9">
+                    <v>9</v>
+                  </c>
+                </row>
+                <row r="10" spans="1:1">
+                  <c r="A10">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="11" spans="1:1">
+                  <c r="A11">
+                    <v>11</v>
+                  </c>
+                </row>
+                <row r="12" spans="1:1">
+                  <c r="A12">
+                    <v>12</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A3:A4 A1 A6:A8 A10 A12">
+                <cfRule type="colorScale" priority="1">
+                  <colorScale>
+                    <cfvo type="min" val="0"/>
+                    <cfvo type="percentile" val="50"/>
+                    <cfvo type="max" val="0"/>
+                    <color rgb="FFF8696B"/>
+                    <color rgb="FFFFEB84"/>
+                    <color rgb="FF63BE7B"/>
+                  </colorScale>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
     fn conditional_format_19() -> Result<(), XlsxError> {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
@@ -1804,6 +2171,168 @@ mod conditional_format_tests {
                     <cfvo type="percent" val="90"/>
                     <color rgb="FF8DB4E3"/>
                   </dataBar>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_20() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 10)?;
+        worksheet.write(1, 0, 20)?;
+        worksheet.write(2, 0, 30)?;
+        worksheet.write(3, 0, 40)?;
+
+        let conditional_format = ConditionalFormatText::new()
+            .set_criteria(ConditionalFormatTextCriteria::BeginsWith)
+            .set_value("b");
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatText::new()
+            .set_criteria(ConditionalFormatTextCriteria::BeginsWith)
+            .set_value("bc");
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatText::new()
+            .set_criteria(ConditionalFormatTextCriteria::EndsWith)
+            .set_value("z");
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatText::new()
+            .set_criteria(ConditionalFormatTextCriteria::EndsWith)
+            .set_value("yz");
+
+        worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A4"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>20</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>30</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>40</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1:A4">
+                <cfRule type="beginsWith" priority="1" operator="beginsWith" text="b">
+                  <formula>LEFT(A1,1)="b"</formula>
+                </cfRule>
+                <cfRule type="beginsWith" priority="2" operator="beginsWith" text="bc">
+                  <formula>LEFT(A1,2)="bc"</formula>
+                </cfRule>
+                <cfRule type="endsWith" priority="3" operator="endsWith" text="z">
+                  <formula>RIGHT(A1,1)="z"</formula>
+                </cfRule>
+                <cfRule type="endsWith" priority="4" operator="endsWith" text="yz">
+                  <formula>RIGHT(A1,2)="yz"</formula>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_21() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 10)?;
+        worksheet.write(1, 0, 20)?;
+        worksheet.write(2, 0, 30)?;
+        worksheet.write(3, 0, 40)?;
+
+        let conditional_format = ConditionalFormatCell::new()
+            .set_criteria(ConditionalFormatCellCriteria::GreaterThan)
+            .set_value(5)
+            .set_stop_if_true(true);
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A4"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>10</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>20</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>30</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>40</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="cellIs" priority="1" stopIfTrue="1" operator="greaterThan">
+                  <formula>5</formula>
                 </cfRule>
               </conditionalFormatting>
               <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>

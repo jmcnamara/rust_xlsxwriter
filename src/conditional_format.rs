@@ -2340,6 +2340,7 @@ impl ConditionalFormatText {
         let mut attributes = vec![];
         let text = self.value.clone();
         let anchor = &range_to_anchor(range);
+        let length = text.len();
 
         // Set the rule attributes based on the criteria.
         let formula = match self.criteria {
@@ -2353,11 +2354,11 @@ impl ConditionalFormatText {
             }
             ConditionalFormatTextCriteria::BeginsWith => {
                 attributes.push(("type", "beginsWith".to_string()));
-                format!(r#"LEFT({anchor},1)="{text}""#)
+                format!(r#"LEFT({anchor},{length})="{text}""#)
             }
             ConditionalFormatTextCriteria::EndsWith => {
                 attributes.push(("type", "endsWith".to_string()));
-                format!(r#"RIGHT({anchor},1)="{text}""#)
+                format!(r#"RIGHT({anchor},{length})="{text}""#)
             }
         };
 
