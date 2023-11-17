@@ -117,6 +117,7 @@
 //!   as "equal to" or "greater than" or "between". See the example above.
 //! - [`ConditionalFormatAverage`]: The Average/Standard Deviation style
 //!   conditional format.
+//! - [`ConditionalFormatFormula`]: The Formula style conditional format.
 //! - [`ConditionalFormatBlank`]: The Blank/Non-blank style conditional format.
 //! - [`ConditionalFormatError`]: The Error/Non-error style conditional format.
 //! - [`ConditionalFormatDuplicate`]: The Duplicate/Unique style conditional
@@ -343,6 +344,7 @@ generate_conditional_format_impls!(
     ConditionalFormatDate
     ConditionalFormatDuplicate
     ConditionalFormatError
+    ConditionalFormatFormula
     ConditionalFormatText
     ConditionalFormatTop
     ConditionalFormat2ColorScale
@@ -1305,6 +1307,272 @@ impl ConditionalFormatDuplicate {
 
         // Write the rule.
         writer.xml_empty_tag("cfRule", &attributes);
+
+        writer.read_to_string()
+    }
+
+    // Return an extended x14 rule for conditional formats that support it.
+    #[allow(clippy::unused_self)]
+    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+        String::new()
+    }
+}
+
+// -----------------------------------------------------------------------
+// ConditionalFormatFormula
+// -----------------------------------------------------------------------
+
+/// The `ConditionalFormatFormula` struct represents a Formula style conditional
+/// format.
+///
+/// `ConditionalFormatFormula` is used to represent a Formula style conditional
+/// format in Excel. A Formula conditional format highlights formula values in a
+/// range based on a user supplied formula.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_formula_intro.png">
+///
+/// For more information see [Working with Conditional
+/// Formats](crate::conditional_format).
+///
+/// # Examples
+///
+/// Example of adding a Formula type conditional formatting to a worksheet.
+/// Cells with odd numbered values are in light red while even numbered values
+/// are in light green.
+///
+/// ```
+/// # // This code is available in examples/doc_conditional_format_formula.rs
+/// #
+/// # use rust_xlsxwriter::{ConditionalFormatFormula, Format, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some sample data.
+/// #     let data = [
+/// #         [34, 72, 38, 30, 75, 48, 75, 66, 84, 86],
+/// #         [6, 24, 1, 84, 54, 62, 60, 3, 26, 59],
+/// #         [28, 79, 97, 13, 85, 93, 93, 22, 5, 14],
+/// #         [27, 71, 40, 17, 18, 79, 90, 93, 29, 47],
+/// #         [88, 25, 33, 23, 67, 1, 59, 79, 47, 36],
+/// #         [24, 100, 20, 88, 29, 33, 38, 54, 54, 88],
+/// #         [6, 57, 88, 28, 10, 26, 37, 7, 41, 48],
+/// #         [52, 78, 1, 96, 26, 45, 47, 33, 96, 36],
+/// #         [60, 54, 81, 66, 81, 90, 80, 93, 12, 55],
+/// #         [70, 5, 46, 14, 71, 19, 66, 36, 41, 21],
+/// #     ];
+/// #     worksheet.write_row_matrix(2, 1, data)?;
+/// #
+/// #     // Set the column widths for clarity.
+/// #     for col_num in 1..=10u16 {
+/// #         worksheet.set_column_width(col_num, 6)?;
+/// #     }
+/// #
+/// #     // Add a format. Light red fill with dark red text.
+/// #     let format1 = Format::new()
+/// #         .set_font_color("9C0006")
+/// #         .set_background_color("FFC7CE");
+/// #
+/// #     // Add a format. Green fill with dark green text.
+/// #     let format2 = Format::new()
+/// #         .set_font_color("006100")
+/// #         .set_background_color("C6EFCE");
+/// #
+///     // Write a conditional format over a range.
+///     let conditional_format = ConditionalFormatFormula::new()
+///         .set_value("=ISODD(B3)")
+///         .set_format(format1);
+///
+///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+///
+///     // Write another conditional format over the same range.
+///     let conditional_format = ConditionalFormatFormula::new()
+///         .set_value("=ISEVEN(B3)")
+///         .set_format(format2);
+///
+///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("conditional_format.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// This creates conditional format rules like this:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_formula_rules.png">
+///
+/// And the following output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/conditional_format_formula.png">
+///
+#[derive(Clone)]
+pub struct ConditionalFormatFormula {
+    formula: Formula,
+    multi_range: String,
+    stop_if_true: bool,
+    has_x14_extensions: bool,
+    pub(crate) format: Option<Format>,
+}
+
+/// **Section 1**: The following methods are specific to `ConditionalFormatFormula`.
+impl ConditionalFormatFormula {
+    /// Create a new Formula conditional format struct.
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> ConditionalFormatFormula {
+        ConditionalFormatFormula {
+            formula: Formula::new(""),
+            multi_range: String::new(),
+            stop_if_true: false,
+            has_x14_extensions: false,
+            format: None,
+        }
+    }
+
+    /// Set the value of a Formula conditional format rule.
+    ///
+    /// Set the formula in a Formula style conditional format.
+    ///
+    /// There are some caveats to be aware of when creating the formula:
+    ///
+    /// - The formula must evaluate to a boolean, number, date, time or string.
+    /// - Some newer "dynamic range" style functions aren't supported by Excel
+    ///   in Formula conditional formats.
+    /// - The formula should be in English with US style punctuation. See
+    ///   [`Formula`] for details.
+    ///
+    /// If you encounter any issues you should verify that the formula works in
+    /// Excel before transferring it to `rust_xlsxwriter`.
+    ///
+    /// # Parameters
+    ///
+    /// * `value` - A [`Formula`] value or type that converts "into" a `Formula`
+    ///   such as a `&str` or `&Formula`.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a Formula type conditional formatting to a worksheet.
+    /// Cells with odd numbered values are in light red while even numbered
+    /// values are in light green.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_formula.rs
+    /// #
+    /// # use rust_xlsxwriter::{ConditionalFormatFormula, Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some sample data.
+    /// #     let data = [
+    /// #         [34, 72, 38, 30, 75, 48, 75, 66, 84, 86],
+    /// #         [6, 24, 1, 84, 54, 62, 60, 3, 26, 59],
+    /// #         [28, 79, 97, 13, 85, 93, 93, 22, 5, 14],
+    /// #         [27, 71, 40, 17, 18, 79, 90, 93, 29, 47],
+    /// #         [88, 25, 33, 23, 67, 1, 59, 79, 47, 36],
+    /// #         [24, 100, 20, 88, 29, 33, 38, 54, 54, 88],
+    /// #         [6, 57, 88, 28, 10, 26, 37, 7, 41, 48],
+    /// #         [52, 78, 1, 96, 26, 45, 47, 33, 96, 36],
+    /// #         [60, 54, 81, 66, 81, 90, 80, 93, 12, 55],
+    /// #         [70, 5, 46, 14, 71, 19, 66, 36, 41, 21],
+    /// #     ];
+    /// #     worksheet.write_row_matrix(2, 1, data)?;
+    /// #
+    /// #     // Set the column widths for clarity.
+    /// #     for col_num in 1..=10u16 {
+    /// #         worksheet.set_column_width(col_num, 6)?;
+    /// #     }
+    /// #
+    /// #     // Add a format. Light red fill with dark red text.
+    /// #     let format1 = Format::new()
+    /// #         .set_font_color("9C0006")
+    /// #         .set_background_color("FFC7CE");
+    /// #
+    /// #     // Add a format. Green fill with dark green text.
+    /// #     let format2 = Format::new()
+    /// #         .set_font_color("006100")
+    /// #         .set_background_color("C6EFCE");
+    /// #
+    ///     // Write a conditional format over a range.
+    ///     let conditional_format = ConditionalFormatFormula::new()
+    ///         .set_value("=ISODD(B3)")
+    ///         .set_format(format1);
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+    ///
+    ///     // Write another conditional format over the same range.
+    ///     let conditional_format = ConditionalFormatFormula::new()
+    ///         .set_value("=ISEVEN(B3)")
+    ///         .set_format(format2);
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_formula.png">
+    ///
+    pub fn set_value(mut self, value: impl Into<Formula>) -> ConditionalFormatFormula {
+        self.formula = value.into();
+        self
+    }
+
+    // Validate the conditional format.
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        if self.formula.expand_formula(true).is_empty() {
+            return Err(XlsxError::ConditionalFormatError(
+                "Formula value must be set".to_string(),
+            ));
+        }
+        Ok(())
+    }
+
+    //  Return the conditional format rule as an XML string.
+    pub(crate) fn rule(
+        &self,
+        dxf_index: Option<u32>,
+        priority: u32,
+        _range: &str,
+        _guid: &str,
+    ) -> String {
+        let mut writer = XMLWriter::new();
+        let mut attributes = vec![];
+
+        // Write the type.
+        attributes.push(("type", "expression".to_string()));
+
+        // Set the format index if present.
+        if let Some(dxf_index) = dxf_index {
+            attributes.push(("dxfId", dxf_index.to_string()));
+        }
+
+        // Set the rule priority order.
+        attributes.push(("priority", priority.to_string()));
+
+        // Set the "Stop if True" property.
+        if self.stop_if_true {
+            attributes.push(("stopIfTrue", "1".to_string()));
+        }
+
+        // Write the rule.
+        writer.xml_start_tag("cfRule", &attributes);
+        writer.xml_data_element_only("formula", &self.formula.expand_formula(true));
+        writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
     }
@@ -5127,6 +5395,7 @@ generate_conditional_common_methods!(
     ConditionalFormatDate
     ConditionalFormatDuplicate
     ConditionalFormatError
+    ConditionalFormatFormula
     ConditionalFormatText
     ConditionalFormatTop
     ConditionalFormat2ColorScale
