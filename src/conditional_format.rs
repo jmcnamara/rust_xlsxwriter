@@ -88,6 +88,9 @@
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_cell1.png">
 //!
+//!
+//!
+//!
 //! # Replicating an Excel conditional format with `rust_xlsxwriter`
 //!
 //! It is important not to try to reverse engineer Excel's conditional
@@ -130,8 +133,10 @@
 //!   format.
 //! - [`ConditionalFormat3ColorScale`]: The 3 color scale style conditional
 //!   format.
-//! - [`ConditionalFormatDataBar`]: The Data Bar scale style conditional
-//!   format.
+//! - [`ConditionalFormatDataBar`]: The Data Bar scale style conditional format.
+//!
+//!
+//!
 //!
 //! # Excel's limitations on conditional format properties
 //!
@@ -148,6 +153,9 @@
 //! Properties that **cannot** be modified in a conditional format are font
 //! name, font size, superscript and subscript, diagonal borders, all alignment
 //! properties and all protection properties.
+//!
+//!
+//!
 //!
 //! # Selecting a non-contiguous range
 //!
@@ -250,6 +258,138 @@
 //!
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_multi_range.png">
+//!
+//!
+//!
+//!
+//! # Relative and absolute references in conditional formats
+//!
+//! When dealing with Excel conditional formats it is important to distinguish
+//! between relative and absolute cell references in Excel.
+//!
+//! Relative cell references change when they are copied while absolute
+//! references maintain fixed row and column references. In Excel absolute
+//! references are prefixed by the dollar symbol like `$A$1`. See the Microsoft
+//! Office documentation for more information on [relative and absolute
+//! references].
+//!
+//! [relative and absolute references]:
+//!     https://support.microsoft.com/en-us/office/switch-between-relative-absolute-and-mixed-references-dfec08cd-ae65-4f56-839e-5f0d8d0baca9
+//!
+//! In conditional formats each of these four variants has a different effect on
+//! how the conditional format is applied:
+//!
+//! - `A1`: Column and row are relative. The conditional format rule is applied
+//!   to each cell in the conditional format range.
+//! - `$A1`: Column is absolute and row is relative. The conditional format rule
+//!   is applied to each row based on the first cell in the row.
+//! - `A$1`: Column is relative and row is absolute. The conditional format rule
+//!   is applied to each column based on the first cell in the column.
+//! - `$A$1`: Column and row are absolute. The conditional format rule is
+//!   applied to the entire range based on the first cell in the range.
+//!
+//! The effect is shown in the following example that highlights cells with even
+//! numbered values:
+//!
+//!
+//! ```
+//! # // This code is available in examples/doc_conditional_format_anchor.rs
+//! #
+//! # use rust_xlsxwriter::{ConditionalFormatFormula, Format, Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     // Create a new Excel file object.
+//! #     let mut workbook = Workbook::new();
+//! #
+//! #     // Add a format. Green fill with dark green text.
+//! #     let format = Format::new()
+//! #         .set_font_color("006100")
+//! #         .set_background_color("C6EFCE");
+//! #
+//! #     // Add some sample data.
+//! #     let data = [
+//! #         [34, 73, 39, 32, 75, 48, 75, 66],
+//! #         [5, 24, 1, 84, 54, 62, 60, 3],
+//! #         [28, 79, 97, 13, 85, 93, 93, 22],
+//! #         [27, 71, 40, 17, 18, 79, 90, 93],
+//! #         [88, 25, 33, 23, 67, 1, 59, 79],
+//! #         [23, 100, 20, 88, 29, 33, 38, 54],
+//! #         [7, 57, 88, 28, 10, 26, 37, 7],
+//! #         [53, 78, 1, 96, 26, 45, 47, 33],
+//! #         [60, 54, 81, 66, 81, 90, 80, 93],
+//! #         [70, 5, 46, 14, 71, 19, 66, 36],
+//! #     ];
+//! #
+//! #     // Add a new worksheet and write the sample data.
+//! #     let worksheet = workbook.add_worksheet();
+//! #     worksheet.write_row_matrix(2, 1, data)?;
+//! #
+//!     // The rule is applied to each cell in the range.
+//!     let conditional_format = ConditionalFormatFormula::new()
+//!         .set_value("=ISEVEN(B3)")
+//!         .set_format(&format);
+//!
+//! #     worksheet.add_conditional_format(2, 1, 11, 8, &conditional_format)?;
+//! #
+//! #     // Add a new worksheet and write the sample data.
+//! #     let worksheet = workbook.add_worksheet();
+//! #     worksheet.write_row_matrix(2, 1, data)?;
+//! #
+//!     // The rule is applied to each row based on the first row in the column.
+//!     let conditional_format = ConditionalFormatFormula::new()
+//!         .set_value("=ISEVEN($B3)")
+//!         .set_format(&format);
+//!
+//! #     worksheet.add_conditional_format(2, 1, 11, 8, &conditional_format)?;
+//! #
+//! #     // Add a new worksheet and write the sample data.
+//! #     let worksheet = workbook.add_worksheet();
+//! #     worksheet.write_row_matrix(2, 1, data)?;
+//! #
+//!     // The rule is applied to each column based on the first cell in the column.
+//!     let conditional_format = ConditionalFormatFormula::new()
+//!         .set_value("=ISEVEN(B$3)")
+//!         .set_format(&format);
+//!
+//! #     worksheet.add_conditional_format(2, 1, 11, 8, &conditional_format)?;
+//! #
+//! #     // Add a new worksheet and write the sample data.
+//! #     let worksheet = workbook.add_worksheet();
+//! #     worksheet.write_row_matrix(2, 1, data)?;
+//! #
+//!     // The rule is applied to the entire range based on the first cell in the range.
+//!     let conditional_format = ConditionalFormatFormula::new()
+//!         .set_value("=ISEVEN($B$3)")
+//!         .set_format(format);
+//!
+//! #     worksheet.add_conditional_format(2, 1, 11, 8, &conditional_format)?;
+//! #
+//! #     // Save the file.
+//! #     workbook.save("conditional_format.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Output for the formula `=ISEVEN(B3)`:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor1.png">
+//!
+//! Output for the formula `=ISEVEN($B3)`:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor2.png">
+//!
+//! Output for the formula `=ISEVEN(B$3)`:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor3.png">
+//!
+//! Output for the formula `=ISEVEN($B$3)`:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor4.png">
 //!
 #![warn(missing_docs)]
 
