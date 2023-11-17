@@ -12,8 +12,8 @@ use rust_xlsxwriter::{
     ConditionalFormat2ColorScale, ConditionalFormat3ColorScale, ConditionalFormatAverage,
     ConditionalFormatAverageCriteria, ConditionalFormatCell, ConditionalFormatCellCriteria,
     ConditionalFormatDataBar, ConditionalFormatDataBarDirection, ConditionalFormatDuplicate,
-    ConditionalFormatText, ConditionalFormatTextCriteria, ConditionalFormatTop, Format, Workbook,
-    XlsxError,
+    ConditionalFormatFormula, ConditionalFormatText, ConditionalFormatTextCriteria,
+    ConditionalFormatTop, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -45,7 +45,7 @@ fn main() -> Result<(), XlsxError> {
     ];
 
     // -----------------------------------------------------------------------
-    // Example 1. Cell conditional formatting.
+    // Worksheet 1. Cell conditional formatting.
     // -----------------------------------------------------------------------
     let caption = "Cells with values >= 50 are in light red. Values < 50 are in light green.";
 
@@ -80,7 +80,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 2. Cell conditional formatting with between ranges.
+    // Worksheet 2. Cell conditional formatting with between ranges.
     // -----------------------------------------------------------------------
     let caption =
         "Values between 30 and 70 are in light red. Values outside that range are in light green.";
@@ -118,7 +118,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 3. Duplicate and Unique conditional formats.
+    // Worksheet 3. Duplicate and Unique conditional formats.
     // -----------------------------------------------------------------------
     let caption = "Duplicate values are in light red. Unique values are in light green.";
 
@@ -150,7 +150,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 4. Above and Below Average conditional formats.
+    // Worksheet 4. Above and Below Average conditional formats.
     // -----------------------------------------------------------------------
     let caption = "Above average values are in light red. Below average values are in light green.";
 
@@ -181,7 +181,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 5. Top and Bottom range conditional formats.
+    // Worksheet 5. Top and Bottom range conditional formats.
     // -----------------------------------------------------------------------
     let caption = "Top 10 values are in light red. Bottom 10 values are in light green.";
 
@@ -216,7 +216,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 6. Cell conditional formatting in non-contiguous range.
+    // Worksheet 6. Cell conditional formatting in non-contiguous range.
     // -----------------------------------------------------------------------
     let caption = "Cells with values >= 50 are in light red. Values < 50 are in light green. Non-contiguous ranges.";
 
@@ -253,7 +253,40 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 7. Text style conditional formats.
+    // Worksheet 7. Formula conditional formatting.
+    // -----------------------------------------------------------------------
+    let caption = "Even numbered cells are in light green. Odd numbered cells are in light red.";
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Write the caption.
+    worksheet.write(0, 1, caption)?;
+
+    // Write the worksheet data.
+    worksheet.write_row_matrix(2, 1, data)?;
+
+    // Set the column widths for clarity.
+    for col_num in 1..=10u16 {
+        worksheet.set_column_width(col_num, 6)?;
+    }
+
+    // Write a conditional format over a range.
+    let conditional_format = ConditionalFormatFormula::new()
+        .set_value("=ISODD(B3)")
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Write another conditional format over the same range.
+    let conditional_format = ConditionalFormatFormula::new()
+        .set_value("=ISEVEN(B3)")
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // -----------------------------------------------------------------------
+    // Worksheet 8. Text style conditional formats.
     // -----------------------------------------------------------------------
     let caption =
         "Column A shows words that contain the sub-word 'rust'. Column C shows words that start/end with 't'";
@@ -320,7 +353,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 8. Examples of 2 color scale conditional formats.
+    // Worksheet 9. Examples of 2 color scale conditional formats.
     // -----------------------------------------------------------------------
     let caption = "Examples of 2 color scale conditional formats";
 
@@ -382,7 +415,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 9. Examples of 3 color scale conditional formats.
+    // Worksheet 10. Examples of 3 color scale conditional formats.
     // -----------------------------------------------------------------------
     let caption = "Examples of 3 color scale conditional formats";
 
@@ -450,7 +483,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
 
     // -----------------------------------------------------------------------
-    // Example 9. Examples of data bars.
+    // Worksheet 11. Examples of data bars.
     // -----------------------------------------------------------------------
     let caption = "Examples of data bars";
 
