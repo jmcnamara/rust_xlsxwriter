@@ -1619,37 +1619,6 @@ mod conditional_format_tests {
         worksheet.write(2, 0, 30)?;
         worksheet.write(3, 0, 40)?;
 
-        /* todo
-        worksheet.conditional_formatting("A1:A4",
-          :
-                'type': "formula",
-                'criteria': "=$A$1>5",
-                'format': format,
-        );
-
-        worksheet.conditional_formatting("A1:A4",
-          :
-                'type': "formula",
-                'criteria': "=$A$2<80",
-                'format': format,
-        );
-
-        worksheet.conditional_formatting("A1:A4",
-          :
-                'type': "formula",
-                'criteria': ""1+2"",
-                'format': format,
-        );
-
-        worksheet.conditional_formatting("A1:A4",
-          :
-                'type': "formula",
-                'criteria': "=$A$3>$A$4",
-                'format': format,
-        );
-
-        */
-
         let conditional_format = ConditionalFormatFormula::new().set_value("=$A$1>5");
 
         worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;

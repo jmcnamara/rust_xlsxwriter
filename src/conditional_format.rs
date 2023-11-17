@@ -4623,14 +4623,14 @@ impl ConditionalFormatDataBar {
         // Write the rule.
         writer.xml_start_tag("cfRule", &attributes);
 
+        // Set the bar attributes, if any.
         let mut attributes = vec![];
-
         if self.bar_only {
             attributes.push(("showValue", "0".to_string()));
         }
-
         writer.xml_start_tag("dataBar", &attributes);
 
+        // Write the min type/value.
         Self::write_type(
             &mut writer,
             self.min_type,
@@ -4639,6 +4639,7 @@ impl ConditionalFormatDataBar {
             false,
         );
 
+        // Write the max type/value.
         Self::write_type(
             &mut writer,
             self.max_type,
@@ -4647,17 +4648,18 @@ impl ConditionalFormatDataBar {
             true,
         );
 
+        // Write the bar/fill color.
         Self::write_color(&mut writer, "color", self.fill_color);
 
         writer.xml_end_tag("dataBar");
 
+        // Write the extLst element to indicate x14 extensions for Excel 2010+
+        // data bars.
         if self.has_x14_extensions {
-            // Write the extLst element.
             Self::write_extension_list(&mut writer, guid);
         }
 
         writer.xml_end_tag("cfRule");
-
         writer.read_to_string()
     }
 
@@ -4754,6 +4756,7 @@ impl ConditionalFormatDataBar {
             Self::write_color(&mut writer, "x14:borderColor", self.border_color);
         }
 
+        // Excel doesn't write some color tags if they match the fill color.
         if self.fill_color != self.negative_fill_color {
             Self::write_color(
                 &mut writer,
@@ -4884,10 +4887,26 @@ impl ConditionalFormatDataBar {
 // ConditionalFormatValue
 // -----------------------------------------------------------------------
 
-/// The `ConditionalFormatValue` struct represents conditional format
-/// value types.
+/// The `ConditionalFormatValue` struct represents conditional format value
+/// types.
 ///
-/// TODO - Explain `ConditionalFormatValue`
+/// Excel supports various types when specifying values in a conditional format
+/// such as numbers, strings, dates, times and cell references.
+/// `ConditionalFormatValue` is used to support a similar generic interface to
+/// conditional format values. It supports:
+///
+/// - Numbers: Any Rust number that can convert [`Into`] [`f64`].
+/// - Strings: Any Rust string type that can convert into String such as
+///   [`&str`], [`String`], `&String` and `Cow<'_, str>`.
+/// - Dates/times: [`ExcelDateTime`] values and if the `chrono` feature is
+///   enabled [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] and
+///   [`chrono::NaiveTime`].
+/// - Cell ranges: Use [`Formula`] in order to distinguish from strings. For
+///   example `Formula::new(=A1)`.
+///
+/// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+/// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+/// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
 ///
 #[derive(Clone)]
 pub struct ConditionalFormatValue {
@@ -5547,8 +5566,8 @@ generate_conditional_common_methods!(
 // Common methods.
 // -----------------------------------------------------------------------
 
-// TODO COW
-fn range_to_anchor(range: &str) -> String {
+// Extract the first cell from a range (potentially a multi range).
+fn range_to_anchor(range: &str) -> &str {
     let mut anchor = range;
 
     // Extract cell/range from optional space separated list.
@@ -5561,5 +5580,5 @@ fn range_to_anchor(range: &str) -> String {
         anchor = &anchor[0..position];
     }
 
-    anchor.to_string()
+    anchor
 }
