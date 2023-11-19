@@ -16,6 +16,7 @@ mod conditional_format_tests {
     use crate::ConditionalFormatBlank;
     use crate::ConditionalFormatCell;
     use crate::ConditionalFormatCellCriteria;
+    use crate::ConditionalFormatCustomIcon;
     use crate::ConditionalFormatDataBar;
     use crate::ConditionalFormatDataBarAxisPosition;
     use crate::ConditionalFormatDataBarDirection;
@@ -24,6 +25,8 @@ mod conditional_format_tests {
     use crate::ConditionalFormatDuplicate;
     use crate::ConditionalFormatError;
     use crate::ConditionalFormatFormula;
+    use crate::ConditionalFormatIconSet;
+    use crate::ConditionalFormatIconType;
     use crate::ConditionalFormatText;
     use crate::ConditionalFormatTextCriteria;
     use crate::ConditionalFormatTop;
@@ -117,6 +120,42 @@ mod conditional_format_tests {
 
         // Top value must be in the Excel range 1..1000.
         let conditional_format = ConditionalFormatTop::new().set_value(1001);
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+
+        // Check validation of the number of user supplied rules. 3 icon style.
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 1),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 20),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeArrows)
+            .set_icons(&icons);
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+
+        // Check validation of the number of user supplied rules. 4 icon style.
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 1),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 2),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 3),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FourArrows)
+            .set_icons(&icons);
+        let result = conditional_format.validate();
+        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
+
+        // Check validation of the number of user supplied rules. 5 icon style.
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 1),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 2),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 3),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 4),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FiveArrows)
+            .set_icons(&icons);
         let result = conditional_format.validate();
         assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
     }
@@ -2333,6 +2372,681 @@ mod conditional_format_tests {
               <conditionalFormatting sqref="A1">
                 <cfRule type="cellIs" priority="1" stopIfTrue="1" operator="greaterThan">
                   <formula>5</formula>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_22() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+        worksheet.write(8, 0, 9)?;
+
+        let conditional_format =
+            ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeArrows);
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeFlags);
+        worksheet.add_conditional_format(1, 0, 1, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeTrafficLightsWithRim);
+        worksheet.add_conditional_format(2, 0, 2, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeSymbolsCircled);
+        worksheet.add_conditional_format(3, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourArrows);
+        worksheet.add_conditional_format(4, 0, 4, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FourRedToBlack);
+        worksheet.add_conditional_format(5, 0, 5, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FourTrafficLights);
+        worksheet.add_conditional_format(6, 0, 6, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FiveArrowsGray);
+        worksheet.add_conditional_format(7, 0, 7, 0, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveQuadrants);
+        worksheet.add_conditional_format(8, 0, 8, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A9"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+                <row r="9" spans="1:1">
+                  <c r="A9">
+                    <v>9</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="iconSet" priority="1">
+                  <iconSet iconSet="3Arrows">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A2">
+                <cfRule type="iconSet" priority="2">
+                  <iconSet iconSet="3Flags">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A3">
+                <cfRule type="iconSet" priority="3">
+                  <iconSet iconSet="3TrafficLights2">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A4">
+                <cfRule type="iconSet" priority="4">
+                  <iconSet iconSet="3Symbols">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A5">
+                <cfRule type="iconSet" priority="5">
+                  <iconSet iconSet="4Arrows">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="25"/>
+                    <cfvo type="percent" val="50"/>
+                    <cfvo type="percent" val="75"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A6">
+                <cfRule type="iconSet" priority="6">
+                  <iconSet iconSet="4RedToBlack">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="25"/>
+                    <cfvo type="percent" val="50"/>
+                    <cfvo type="percent" val="75"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A7">
+                <cfRule type="iconSet" priority="7">
+                  <iconSet iconSet="4TrafficLights">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="25"/>
+                    <cfvo type="percent" val="50"/>
+                    <cfvo type="percent" val="75"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A8">
+                <cfRule type="iconSet" priority="8">
+                  <iconSet iconSet="5ArrowsGray">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="20"/>
+                    <cfvo type="percent" val="40"/>
+                    <cfvo type="percent" val="60"/>
+                    <cfvo type="percent" val="80"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A9">
+                <cfRule type="iconSet" priority="9">
+                  <iconSet iconSet="5Quarters">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="20"/>
+                    <cfvo type="percent" val="40"/>
+                    <cfvo type="percent" val="60"/>
+                    <cfvo type="percent" val="80"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_23() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeArrowsGray);
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights);
+        worksheet.add_conditional_format(1, 0, 1, 0, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeSigns);
+        worksheet.add_conditional_format(2, 0, 2, 0, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeSymbols);
+        worksheet.add_conditional_format(3, 0, 3, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FourArrowsGray);
+        worksheet.add_conditional_format(4, 0, 4, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FourHistograms);
+        worksheet.add_conditional_format(5, 0, 5, 0, &conditional_format)?;
+
+        let conditional_format =
+            ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveArrows);
+        worksheet.add_conditional_format(6, 0, 6, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FiveHistograms);
+        worksheet.add_conditional_format(7, 0, 7, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A8"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="iconSet" priority="1">
+                  <iconSet iconSet="3ArrowsGray">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A2">
+                <cfRule type="iconSet" priority="2">
+                  <iconSet>
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A3">
+                <cfRule type="iconSet" priority="3">
+                  <iconSet iconSet="3Signs">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A4">
+                <cfRule type="iconSet" priority="4">
+                  <iconSet iconSet="3Symbols2">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A5">
+                <cfRule type="iconSet" priority="5">
+                  <iconSet iconSet="4ArrowsGray">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="25"/>
+                    <cfvo type="percent" val="50"/>
+                    <cfvo type="percent" val="75"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A6">
+                <cfRule type="iconSet" priority="6">
+                  <iconSet iconSet="4Rating">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="25"/>
+                    <cfvo type="percent" val="50"/>
+                    <cfvo type="percent" val="75"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A7">
+                <cfRule type="iconSet" priority="7">
+                  <iconSet iconSet="5Arrows">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="20"/>
+                    <cfvo type="percent" val="40"/>
+                    <cfvo type="percent" val="60"/>
+                    <cfvo type="percent" val="80"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A8">
+                <cfRule type="iconSet" priority="8">
+                  <iconSet iconSet="5Rating">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="20"/>
+                    <cfvo type="percent" val="40"/>
+                    <cfvo type="percent" val="60"/>
+                    <cfvo type="percent" val="80"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn conditional_format_24() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        worksheet.write(0, 0, 1)?;
+        worksheet.write(1, 0, 2)?;
+        worksheet.write(2, 0, 3)?;
+        worksheet.write(3, 0, 4)?;
+        worksheet.write(4, 0, 5)?;
+        worksheet.write(5, 0, 6)?;
+        worksheet.write(6, 0, 7)?;
+        worksheet.write(7, 0, 8)?;
+        worksheet.write(8, 0, 9)?;
+
+        worksheet.write(11, 0, 75)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeArrows)
+            .reverse_icons(true);
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeFlags)
+            .show_icons_only(true);
+        worksheet.add_conditional_format(1, 0, 1, 0, &conditional_format)?;
+
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeTrafficLightsWithRim)
+            .reverse_icons(true)
+            .show_icons_only(true);
+        worksheet.add_conditional_format(2, 0, 2, 0, &conditional_format)?;
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 20),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 80),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeSymbolsCircled)
+            .set_icons(&icons);
+        worksheet.add_conditional_format(3, 0, 3, 0, &conditional_format)?;
+
+        let icons = [
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percentile, 99)
+                .set_greater_than(true), // Should be overridden by default.
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, 25)
+                .set_greater_than(true),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, 50)
+                .set_greater_than(true),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, 75)
+                .set_greater_than(true),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FourArrows)
+            .set_icons(&icons);
+        worksheet.add_conditional_format(4, 0, 4, 0, &conditional_format)?;
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 25),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percentile, 50),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Number, 90),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FourRedToBlack)
+            .set_icons(&icons);
+        worksheet.add_conditional_format(5, 0, 5, 0, &conditional_format)?;
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 25),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 50),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, Formula::new("$A$12")),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FourTrafficLights)
+            .set_icons(&icons);
+        worksheet.add_conditional_format(6, 0, 6, 0, &conditional_format)?;
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 20),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 40),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 60),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Formula, Formula::new("$A$12")),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FiveArrowsGray)
+            .set_icons(&icons);
+        worksheet.add_conditional_format(7, 0, 7, 0, &conditional_format)?;
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percentile, 10),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percentile, 30),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percentile, 50),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percentile, 70),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::FiveQuadrants)
+            .reverse_icons(true)
+            .set_icons(&icons);
+        worksheet.add_conditional_format(8, 0, 8, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1:A12"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData>
+                <row r="1" spans="1:1">
+                  <c r="A1">
+                    <v>1</v>
+                  </c>
+                </row>
+                <row r="2" spans="1:1">
+                  <c r="A2">
+                    <v>2</v>
+                  </c>
+                </row>
+                <row r="3" spans="1:1">
+                  <c r="A3">
+                    <v>3</v>
+                  </c>
+                </row>
+                <row r="4" spans="1:1">
+                  <c r="A4">
+                    <v>4</v>
+                  </c>
+                </row>
+                <row r="5" spans="1:1">
+                  <c r="A5">
+                    <v>5</v>
+                  </c>
+                </row>
+                <row r="6" spans="1:1">
+                  <c r="A6">
+                    <v>6</v>
+                  </c>
+                </row>
+                <row r="7" spans="1:1">
+                  <c r="A7">
+                    <v>7</v>
+                  </c>
+                </row>
+                <row r="8" spans="1:1">
+                  <c r="A8">
+                    <v>8</v>
+                  </c>
+                </row>
+                <row r="9" spans="1:1">
+                  <c r="A9">
+                    <v>9</v>
+                  </c>
+                </row>
+                <row r="12" spans="1:1">
+                  <c r="A12">
+                    <v>75</v>
+                  </c>
+                </row>
+              </sheetData>
+              <conditionalFormatting sqref="A1">
+                <cfRule type="iconSet" priority="1">
+                  <iconSet iconSet="3Arrows" reverse="1">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A2">
+                <cfRule type="iconSet" priority="2">
+                  <iconSet iconSet="3Flags" showValue="0">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A3">
+                <cfRule type="iconSet" priority="3">
+                  <iconSet iconSet="3TrafficLights2" showValue="0" reverse="1">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="33"/>
+                    <cfvo type="percent" val="67"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A4">
+                <cfRule type="iconSet" priority="4">
+                  <iconSet iconSet="3Symbols">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="20"/>
+                    <cfvo type="percent" val="80"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A5">
+                <cfRule type="iconSet" priority="5">
+                  <iconSet iconSet="4Arrows">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="25" gte="0"/>
+                    <cfvo type="percent" val="50" gte="0"/>
+                    <cfvo type="percent" val="75" gte="0"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A6">
+                <cfRule type="iconSet" priority="6">
+                  <iconSet iconSet="4RedToBlack">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="25"/>
+                    <cfvo type="percentile" val="50"/>
+                    <cfvo type="num" val="90"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A7">
+                <cfRule type="iconSet" priority="7">
+                  <iconSet iconSet="4TrafficLights">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="25"/>
+                    <cfvo type="percent" val="50"/>
+                    <cfvo type="percent" val="$A$12"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A8">
+                <cfRule type="iconSet" priority="8">
+                  <iconSet iconSet="5ArrowsGray">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percent" val="20"/>
+                    <cfvo type="percent" val="40"/>
+                    <cfvo type="percent" val="60"/>
+                    <cfvo type="formula" val="$A$12"/>
+                  </iconSet>
+                </cfRule>
+              </conditionalFormatting>
+              <conditionalFormatting sqref="A9">
+                <cfRule type="iconSet" priority="9">
+                  <iconSet iconSet="5Quarters" reverse="1">
+                    <cfvo type="percent" val="0"/>
+                    <cfvo type="percentile" val="10"/>
+                    <cfvo type="percentile" val="30"/>
+                    <cfvo type="percentile" val="50"/>
+                    <cfvo type="percentile" val="70"/>
+                  </iconSet>
                 </cfRule>
               </conditionalFormatting>
               <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
