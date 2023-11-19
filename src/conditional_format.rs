@@ -99,7 +99,8 @@
 //! is in Excel. Create a conditional format in Excel to meet your needs and
 //! then port it over to `rust_xlsxwriter`.
 //!
-//! There are several common features of all conditional formats:
+//! There are several common features of conditional formats (although some
+//! variants do not have all of these):
 //!
 //! - A range: The range that the conditional format applies to. This is usually
 //!   set via the
@@ -110,39 +111,53 @@
 //!   mainly applies to Cell style conditional formats. For other types of
 //!   conditional format the "range" is the target.
 //! - A format: The cell format with properties such as text or background color
-//!   to high the cell if the rule matches.
+//!   to high the cell if the rule matches. This only applies to "Classic"
+//!   conditional formats, see below.
+//!
+//! Excel has four main categories of conditional format: Classic, Color Scale,
+//! Data Bar and Icon Sets. The Classic variants apply a format based on a rule.
+//! The newer versions apply a visualization such as a color scale, data bar or
+//! icons based on a rule.
 //!
 //! The following are the structs that represent the main conditional format
 //! variants in Excel. See each of these sections for more information:
 //!
-//! - [`ConditionalFormatCell`]: The Cell style conditional format. This is the
-//!   most common style of conditional formats which uses simple equalities such
-//!   as "equal to" or "greater than" or "between". See the example above.
-//! - [`ConditionalFormatAverage`]: The Average/Standard Deviation style
-//!   conditional format.
-//! - [`ConditionalFormatFormula`]: The Formula style conditional format.
-//! - [`ConditionalFormatBlank`]: The Blank/Non-blank style conditional format.
-//! - [`ConditionalFormatError`]: The Error/Non-error style conditional format.
-//! - [`ConditionalFormatDuplicate`]: The Duplicate/Unique style conditional
-//!   format.
-//! - [`ConditionalFormatDate`]: The Dates Occurring style conditional format.
-//! - [`ConditionalFormatText`]: The Text conditional format for rules like
-//!   "contains" or "begins with".
-//! - [`ConditionalFormatTop`]: The Top/Bottom style conditional format.
-//! - [`ConditionalFormat2ColorScale`]: The 2 color scale style conditional
-//!   format.
-//! - [`ConditionalFormat3ColorScale`]: The 3 color scale style conditional
-//!   format.
-//! - [`ConditionalFormatDataBar`]: The Data Bar style conditional format.
-//! - [`ConditionalFormatIconSet`]: The Icon style conditional format.
+//! - Classic:
+//!   - [`ConditionalFormatCell`]: The Cell style conditional format. This is
+//!     the most common style of conditional formats which uses simple
+//!     equalities such as "equal to" or "greater than" or "between". See the
+//!     example above.
+//!   - [`ConditionalFormatAverage`]: The Average/Standard Deviation style
+//!     conditional format.
+//!   - [`ConditionalFormatBlank`]: The Blank/Non-blank style conditional
+//!     format.
+//!   - [`ConditionalFormatDate`]: The Dates Occurring style conditional format.
+//!   - [`ConditionalFormatDuplicate`]: The Duplicate/Unique style conditional
+//!     format.
+//!   - [`ConditionalFormatError`]: The Error/Non-error style conditional
+//!     format.
+//!   - [`ConditionalFormatFormula`]: The Formula style conditional format.
+//!   - [`ConditionalFormatText`]: The Text conditional format for rules like
+//!     "contains" or "begins with".
+//!   - [`ConditionalFormatTop`]: The Top/Bottom style conditional format.
+//! - Color Scale:
+//!   - [`ConditionalFormat2ColorScale`]: The 2 color scale style conditional
+//!     format.
+//!   - [`ConditionalFormat3ColorScale`]: The 3 color scale style conditional
+//!     format.
+//! - Data Bar:
+//!   - [`ConditionalFormatDataBar`]: The Data Bar style conditional format.
+//! - Icon Set:
+//!   - [`ConditionalFormatIconSet`]: The Icon style conditional format.
 //!
 //!
 //!
 //!
 //! # Excel's limitations on conditional format properties
 //!
-//! It is important to note that not all of Excel's cell format properties can
-//! be modified with a conditional format.
+//! When using the "Classic" style of conditional format, see above, it is
+//! important to note that not all of Excel's cell format properties can be
+//! modified or set.
 //!
 //! For example the view below of the Excel conditional format dialog shows the
 //! limited number of font properties that can be set. The available properties
@@ -6541,6 +6556,8 @@ macro_rules! generate_conditional_common_methods {
         ///   clearer range like `"B3:D6 I3:K6"`. The documentation and examples
         ///   use the latter format for clarity but it you are copying and
         ///   pasting from Excel you can use the first format.
+        ///
+        ///   Note, if the range is invalid then Excel will omit it silently.
         ///
         pub fn set_multi_range(mut self, range: impl Into<String>) -> $t {
             self.multi_range = range.into().replace('$', "").replace(',', " ");
