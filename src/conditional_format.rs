@@ -680,7 +680,6 @@ pub struct ConditionalFormatCell {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatCell`.
 impl ConditionalFormatCell {
     /// Create a new Cell conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -852,6 +851,25 @@ impl ConditionalFormatCell {
         self
     }
 
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatCell {
+        self.format = Some(format.into());
+        self
+    }
+
     // Validate the conditional format.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
         let error_message = match self.criteria {
@@ -1019,7 +1037,6 @@ pub struct ConditionalFormatBlank {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatBlank`.
 impl ConditionalFormatBlank {
     /// Create a new Blank conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -1040,6 +1057,25 @@ impl ConditionalFormatBlank {
     ///
     pub fn invert(mut self) -> ConditionalFormatBlank {
         self.is_inverted = true;
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatBlank {
+        self.format = Some(format.into());
         self
     }
 
@@ -1202,7 +1238,6 @@ pub struct ConditionalFormatError {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatError`.
 impl ConditionalFormatError {
     /// Create a new Error conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -1223,6 +1258,25 @@ impl ConditionalFormatError {
     ///
     pub fn invert(mut self) -> ConditionalFormatError {
         self.is_inverted = true;
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatError {
+        self.format = Some(format.into());
         self
     }
 
@@ -1386,7 +1440,6 @@ pub struct ConditionalFormatDuplicate {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatDuplicate`.
 impl ConditionalFormatDuplicate {
     /// Create a new Duplicate conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -1407,6 +1460,25 @@ impl ConditionalFormatDuplicate {
     ///
     pub fn invert(mut self) -> ConditionalFormatDuplicate {
         self.is_inverted = true;
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatDuplicate {
+        self.format = Some(format.into());
         self
     }
 
@@ -1563,7 +1635,6 @@ pub struct ConditionalFormatFormula {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatFormula`.
 impl ConditionalFormatFormula {
     /// Create a new Formula conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -1671,6 +1742,25 @@ impl ConditionalFormatFormula {
     ///
     pub fn set_value(mut self, value: impl Into<Formula>) -> ConditionalFormatFormula {
         self.formula = value.into();
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatFormula {
+        self.format = Some(format.into());
         self
     }
 
@@ -1826,7 +1916,6 @@ pub struct ConditionalFormatAverage {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatAverage`.
 impl ConditionalFormatAverage {
     /// Create a new Average conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -1852,6 +1941,25 @@ impl ConditionalFormatAverage {
         criteria: ConditionalFormatAverageCriteria,
     ) -> ConditionalFormatAverage {
         self.criteria = criteria;
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatAverage {
+        self.format = Some(format.into());
         self
     }
 
@@ -2052,7 +2160,6 @@ pub struct ConditionalFormatTop {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatTop`.
 impl ConditionalFormatTop {
     /// Create a new Top conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -2093,6 +2200,25 @@ impl ConditionalFormatTop {
     ///
     pub fn set_percent(mut self) -> ConditionalFormatTop {
         self.is_percent = true;
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatTop {
+        self.format = Some(format.into());
         self
     }
 
@@ -2275,7 +2401,6 @@ pub struct ConditionalFormatText {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatText`.
 impl ConditionalFormatText {
     /// Create a new Text conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -2316,6 +2441,25 @@ impl ConditionalFormatText {
         criteria: ConditionalFormatTextCriteria,
     ) -> ConditionalFormatText {
         self.criteria = criteria;
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatText {
+        self.format = Some(format.into());
         self
     }
 
@@ -2524,7 +2668,6 @@ pub struct ConditionalFormatDate {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatDate`.
 impl ConditionalFormatDate {
     /// Create a new Date conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -2550,6 +2693,25 @@ impl ConditionalFormatDate {
         criteria: ConditionalFormatDateCriteria,
     ) -> ConditionalFormatDate {
         self.criteria = criteria;
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] that will be applied to the cell range if the conditional
+    /// format rule applies. Not all cell format properties can be set in a
+    /// conditional format. See [Excel's limitations on conditional format
+    /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
+    /// more information.
+    ///
+    /// See the examples above.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatDate {
+        self.format = Some(format.into());
         self
     }
 
@@ -2759,7 +2921,6 @@ pub struct ConditionalFormat2ColorScale {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormat2ColorScale`.
 impl ConditionalFormat2ColorScale {
     /// Create a new Cell conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -3025,18 +3186,13 @@ impl ConditionalFormat2ColorScale {
     //  Return the conditional format rule as an XML string.
     pub(crate) fn rule(
         &self,
-        dxf_index: Option<u32>,
+        _dxf_index: Option<u32>,
         priority: u32,
         _range: &str,
         _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "colorScale".to_string())];
-
-        // Set the format index if present.
-        if let Some(dxf_index) = dxf_index {
-            attributes.push(("dxfId", dxf_index.to_string()));
-        }
 
         // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
@@ -3234,7 +3390,6 @@ pub struct ConditionalFormat3ColorScale {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormat3ColorScale`.
 impl ConditionalFormat3ColorScale {
     /// Create a new Cell conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -3575,18 +3730,13 @@ impl ConditionalFormat3ColorScale {
     //  Return the conditional format rule as an XML string.
     pub(crate) fn rule(
         &self,
-        dxf_index: Option<u32>,
+        _dxf_index: Option<u32>,
         priority: u32,
         _range: &str,
         _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "colorScale".to_string())];
-
-        // Set the format index if present.
-        if let Some(dxf_index) = dxf_index {
-            attributes.push(("dxfId", dxf_index.to_string()));
-        }
 
         // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
@@ -3779,7 +3929,6 @@ pub struct ConditionalFormatDataBar {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatDataBar`.
 impl ConditionalFormatDataBar {
     /// Create a new Cell conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -4602,18 +4751,13 @@ impl ConditionalFormatDataBar {
     //  Return the conditional format rule as an XML string.
     pub(crate) fn rule(
         &self,
-        dxf_index: Option<u32>,
+        _dxf_index: Option<u32>,
         priority: u32,
         _range: &str,
         guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "dataBar".to_string())];
-
-        // Set the format index if present.
-        if let Some(dxf_index) = dxf_index {
-            attributes.push(("dxfId", dxf_index.to_string()));
-        }
 
         // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
@@ -5070,7 +5214,6 @@ pub struct ConditionalFormatIconSet {
     pub(crate) format: Option<Format>,
 }
 
-/// **Section 1**: The following methods are specific to `ConditionalFormatIconSet`.
 impl ConditionalFormatIconSet {
     /// Create a new Icon Set conditional format struct.
     #[allow(clippy::new_without_default)]
@@ -5431,18 +5574,13 @@ impl ConditionalFormatIconSet {
     //  Return the conditional format rule as an XML string.
     pub(crate) fn rule(
         &self,
-        dxf_index: Option<u32>,
+        _dxf_index: Option<u32>,
         priority: u32,
         _range: &str,
         _guid: &str,
     ) -> String {
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "iconSet".to_string())];
-
-        // Set the format index if present.
-        if let Some(dxf_index) = dxf_index {
-            attributes.push(("dxfId", dxf_index.to_string()));
-        }
 
         // Set the rule priority order.
         attributes.push(("priority", priority.to_string()));
@@ -6382,27 +6520,7 @@ impl fmt::Display for ConditionalFormatIconType {
 macro_rules! generate_conditional_common_methods {
     ($($t:ty)*) => ($(
 
-    /// **Section 2**: The following methods are common to all conditional
-    /// formatting variants.
     impl $t {
-        /// Set the [`Format`] of the conditional format rule.
-        ///
-        /// Set the [`Format`] that will be applied to the cell range if the conditional
-        /// format rule applies. Not all cell format properties can be set in a
-        /// conditional format. See [Excel's limitations on conditional format
-        /// properties](crate::conditional_format#excels-limitations-on-conditional-format-properties) for
-        /// more information.
-        ///
-        /// See the examples above.
-        ///
-        /// # Parameters
-        ///
-        /// * `format` - The [`Format`] property for the conditional format.
-        ///
-        pub fn set_format(mut self, format: impl Into<Format>) -> $t {
-            self.format = Some(format.into());
-            self
-        }
 
         /// Set an additional multi-cell range for the conditional format.
         ///
