@@ -437,7 +437,7 @@ pub trait ConditionalFormat {
     fn rule(&self, dxf_index: Option<u32>, priority: u32, range: &str, guid: &str) -> String;
 
     /// Return the extended x14 conditional format rule as an XML string.
-    fn x14_rule(&self, guid: &str) -> String;
+    fn x14_rule(&self, priority: u32, guid: &str) -> String;
 
     /// Get a mutable reference to the format object in the conditional format.
     fn format_as_mut(&mut self) -> Option<&mut Format>;
@@ -450,6 +450,9 @@ pub trait ConditionalFormat {
 
     /// Check if the conditional format uses Excel 2010+ extensions.
     fn has_x14_extensions(&self) -> bool;
+
+    /// Check if the conditional format uses Excel 2010+ extensions only.
+    fn has_x14_only(&self) -> bool;
 
     /// Clone a reference into a concrete Box type.
     fn box_clone(&self) -> Box<dyn ConditionalFormat + Send>;
@@ -466,8 +469,8 @@ macro_rules! generate_conditional_format_impls {
                 self.rule(dxf_index, priority, range, guid)
             }
 
-            fn x14_rule(&self, guid: &str) -> String {
-                self.x14_rule(guid)
+            fn x14_rule(&self, priority: u32, guid: &str) -> String {
+                self.x14_rule(priority, guid)
             }
 
 
@@ -486,6 +489,12 @@ macro_rules! generate_conditional_format_impls {
             fn has_x14_extensions(&self) -> bool {
                 self.has_x14_extensions()
             }
+
+
+            fn has_x14_only(&self) -> bool {
+                self.has_x14_only()
+            }
+
 
             fn box_clone(&self) -> Box<dyn ConditionalFormat + Send> {
                 Box::new(self.clone())
@@ -692,6 +701,7 @@ pub struct ConditionalFormatCell {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -706,6 +716,7 @@ impl ConditionalFormatCell {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -957,7 +968,7 @@ impl ConditionalFormatCell {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -1049,6 +1060,7 @@ pub struct ConditionalFormatBlank {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1061,6 +1073,7 @@ impl ConditionalFormatBlank {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -1150,7 +1163,7 @@ impl ConditionalFormatBlank {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -1250,6 +1263,7 @@ pub struct ConditionalFormatError {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1262,6 +1276,7 @@ impl ConditionalFormatError {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -1351,7 +1366,7 @@ impl ConditionalFormatError {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -1452,6 +1467,7 @@ pub struct ConditionalFormatDuplicate {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1464,6 +1480,7 @@ impl ConditionalFormatDuplicate {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -1542,7 +1559,7 @@ impl ConditionalFormatDuplicate {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -1647,6 +1664,7 @@ pub struct ConditionalFormatFormula {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1659,6 +1677,7 @@ impl ConditionalFormatFormula {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -1826,7 +1845,7 @@ impl ConditionalFormatFormula {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -1928,6 +1947,7 @@ pub struct ConditionalFormatAverage {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -1940,6 +1960,7 @@ impl ConditionalFormatAverage {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -2066,7 +2087,7 @@ impl ConditionalFormatAverage {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -2172,6 +2193,7 @@ pub struct ConditionalFormatTop {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2186,6 +2208,7 @@ impl ConditionalFormatTop {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -2290,7 +2313,7 @@ impl ConditionalFormatTop {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -2413,6 +2436,7 @@ pub struct ConditionalFormatText {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2426,6 +2450,7 @@ impl ConditionalFormatText {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -2549,7 +2574,7 @@ impl ConditionalFormatText {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -2680,6 +2705,7 @@ pub struct ConditionalFormatDate {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2692,6 +2718,7 @@ impl ConditionalFormatDate {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -2814,7 +2841,7 @@ impl ConditionalFormatDate {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -2933,6 +2960,7 @@ pub struct ConditionalFormat2ColorScale {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -2951,6 +2979,7 @@ impl ConditionalFormat2ColorScale {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -3274,7 +3303,7 @@ impl ConditionalFormat2ColorScale {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -3402,6 +3431,7 @@ pub struct ConditionalFormat3ColorScale {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -3423,6 +3453,7 @@ impl ConditionalFormat3ColorScale {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -3820,7 +3851,7 @@ impl ConditionalFormat3ColorScale {
 
     // Return an extended x14 rule for conditional formats that support it.
     #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, _guid: &str) -> String {
         String::new()
     }
 }
@@ -3941,6 +3972,7 @@ pub struct ConditionalFormatDataBar {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -3968,6 +4000,7 @@ impl ConditionalFormatDataBar {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: true,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -4902,7 +4935,7 @@ impl ConditionalFormatDataBar {
     }
 
     // Return an extended x14 rule for conditional formats that support it.
-    pub(crate) fn x14_rule(&self, guid: &str) -> String {
+    pub(crate) fn x14_rule(&self, _priority: u32, guid: &str) -> String {
         let mut writer = XMLWriter::new();
         let attributes = [("type", "dataBar".to_string()), ("id", guid.to_string())];
 
@@ -5226,6 +5259,7 @@ pub struct ConditionalFormatIconSet {
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
+    has_x14_only: bool,
     pub(crate) format: Option<Format>,
 }
 
@@ -5242,6 +5276,7 @@ impl ConditionalFormatIconSet {
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
+            has_x14_only: false,
             format: None,
         }
     }
@@ -5263,6 +5298,8 @@ impl ConditionalFormatIconSet {
             | ConditionalFormatIconType::ThreeTrafficLights
             | ConditionalFormatIconType::ThreeTrafficLightsWithRim
             | ConditionalFormatIconType::ThreeSigns
+            | ConditionalFormatIconType::ThreeStars
+            | ConditionalFormatIconType::ThreeTriangles
             | ConditionalFormatIconType::ThreeSymbolsCircled
             | ConditionalFormatIconType::ThreeSymbols => {
                 self.icons = vec![
@@ -5284,6 +5321,7 @@ impl ConditionalFormatIconSet {
                 ];
             }
             ConditionalFormatIconType::FiveArrows
+            | ConditionalFormatIconType::FiveBoxes
             | ConditionalFormatIconType::FiveArrowsGray
             | ConditionalFormatIconType::FiveHistograms
             | ConditionalFormatIconType::FiveQuadrants => {
@@ -5295,6 +5333,16 @@ impl ConditionalFormatIconSet {
                     ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 80),
                 ];
             }
+        }
+
+        match icon_type {
+            ConditionalFormatIconType::ThreeStars
+            | ConditionalFormatIconType::ThreeTriangles
+            | ConditionalFormatIconType::FiveBoxes => {
+                self.has_x14_extensions = true;
+                self.has_x14_only = true;
+            }
+            _ => {}
         }
 
         self.icon_type = icon_type;
@@ -5555,6 +5603,8 @@ impl ConditionalFormatIconSet {
             | ConditionalFormatIconType::ThreeTrafficLights
             | ConditionalFormatIconType::ThreeTrafficLightsWithRim
             | ConditionalFormatIconType::ThreeSigns
+            | ConditionalFormatIconType::ThreeStars
+            | ConditionalFormatIconType::ThreeTriangles
             | ConditionalFormatIconType::ThreeSymbolsCircled
             | ConditionalFormatIconType::ThreeSymbols => {
                 if num_rules != 3 {
@@ -5573,6 +5623,7 @@ impl ConditionalFormatIconSet {
                 }
             }
             ConditionalFormatIconType::FiveArrows
+            | ConditionalFormatIconType::FiveBoxes
             | ConditionalFormatIconType::FiveArrowsGray
             | ConditionalFormatIconType::FiveHistograms
             | ConditionalFormatIconType::FiveQuadrants => {
@@ -5634,6 +5685,36 @@ impl ConditionalFormatIconSet {
         writer.read_to_string()
     }
 
+    // Return an extended x14 rule for conditional formats that support it.
+    pub(crate) fn x14_rule(&self, priority: u32, guid: &str) -> String {
+        let mut writer = XMLWriter::new();
+        let attributes = [
+            ("type", "iconSet".to_string()),
+            ("priority", priority.to_string()),
+            ("id", guid.to_string()),
+        ];
+
+        // Write the rule.
+        writer.xml_start_tag("x14:cfRule", &attributes);
+
+        // Write the <x14:iconSet> element.
+        let mut attributes = vec![];
+        if self.icon_type != ConditionalFormatIconType::ThreeTrafficLights {
+            attributes.push(("iconSet", self.icon_type.to_string()));
+        }
+
+        writer.xml_start_tag("x14:iconSet", &attributes);
+
+        for icon in &self.icons {
+            Self::write_x14_type(&mut writer, icon);
+        }
+
+        writer.xml_end_tag("x14:iconSet");
+        writer.xml_end_tag("x14:cfRule");
+
+        writer.read_to_string()
+    }
+
     // Write the <cfvo> element.
     fn write_type(writer: &mut XMLWriter, icon: &ConditionalFormatCustomIcon) {
         let mut attributes = vec![];
@@ -5664,10 +5745,40 @@ impl ConditionalFormatIconSet {
         writer.xml_empty_tag("cfvo", &attributes);
     }
 
-    // Return an extended x14 rule for conditional formats that support it.
-    #[allow(clippy::unused_self)]
-    pub(crate) fn x14_rule(&self, _guid: &str) -> String {
-        String::new()
+    // Write the <x14:cfvo> element.
+    fn write_x14_type(writer: &mut XMLWriter, icon: &ConditionalFormatCustomIcon) {
+        let mut attributes = vec![];
+        let value = icon.value.value.as_ref();
+
+        match icon.rule_type {
+            ConditionalFormatType::Automatic
+            | ConditionalFormatType::Lowest
+            | ConditionalFormatType::Highest => {}
+            ConditionalFormatType::Number => {
+                attributes.push(("type", "num".to_string()));
+                writer.xml_start_tag("x14:cfvo", &attributes);
+                writer.xml_data_element_only("xm:f", value);
+                writer.xml_end_tag("x14:cfvo");
+            }
+            ConditionalFormatType::Percent => {
+                attributes.push(("type", "percent".to_string()));
+                writer.xml_start_tag("x14:cfvo", &attributes);
+                writer.xml_data_element_only("xm:f", value);
+                writer.xml_end_tag("x14:cfvo");
+            }
+            ConditionalFormatType::Formula => {
+                attributes.push(("type", "formula".to_string()));
+                writer.xml_start_tag("x14:cfvo", &attributes);
+                writer.xml_data_element_only("xm:f", value);
+                writer.xml_end_tag("x14:cfvo");
+            }
+            ConditionalFormatType::Percentile => {
+                attributes.push(("type", "percentile".to_string()));
+                writer.xml_start_tag("x14:cfvo", &attributes);
+                writer.xml_data_element_only("xm:f", value);
+                writer.xml_end_tag("x14:cfvo");
+            }
+        }
     }
 }
 
@@ -6440,6 +6551,18 @@ pub enum ConditionalFormatIconType {
     ///
     ThreeSymbols,
 
+    /// Three stars showing different levels of rating.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/icons_three_stars.png">
+    ///
+    ThreeStars,
+
+    /// Three triangles.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/icons_three_triangles.png">
+    ///
+    ThreeTriangles,
+
     /// Four arrows showing up, diagonal up, diagonal down and down.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/icons_four_arrows.png">
@@ -6493,28 +6616,27 @@ pub enum ConditionalFormatIconType {
     /// <img src="https://rustxlsxwriter.github.io/images/icons_five_quadrants.png">
     ///
     FiveQuadrants,
-    /*
-    /// TODO - placeholder images for extended icon sets.
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/icons_three_triangles.png">
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/icons_three_stars.png">
+
+    /// Five boxes rating
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/icons_five_boxes.png">
     ///
-     */
+    FiveBoxes,
 }
 
 impl fmt::Display for ConditionalFormatIconType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            ConditionalFormatIconType::FiveBoxes => write!(f, "5Boxes"),
             ConditionalFormatIconType::ThreeFlags => write!(f, "3Flags"),
             ConditionalFormatIconType::ThreeSigns => write!(f, "3Signs"),
+            ConditionalFormatIconType::ThreeStars => write!(f, "3Stars"),
             ConditionalFormatIconType::FourArrows => write!(f, "4Arrows"),
             ConditionalFormatIconType::FiveArrows => write!(f, "5Arrows"),
             ConditionalFormatIconType::ThreeArrows => write!(f, "3Arrows"),
             ConditionalFormatIconType::ThreeSymbols => write!(f, "3Symbols2"),
             ConditionalFormatIconType::FiveQuadrants => write!(f, "5Quarters"),
+            ConditionalFormatIconType::ThreeTriangles => write!(f, "3Triangles"),
             ConditionalFormatIconType::FourArrowsGray => write!(f, "4ArrowsGray"),
             ConditionalFormatIconType::FourRedToBlack => write!(f, "4RedToBlack"),
             ConditionalFormatIconType::FourHistograms => write!(f, "4Rating"),
@@ -6522,7 +6644,7 @@ impl fmt::Display for ConditionalFormatIconType {
             ConditionalFormatIconType::FiveHistograms => write!(f, "5Rating"),
             ConditionalFormatIconType::ThreeArrowsGray => write!(f, "3ArrowsGray"),
             ConditionalFormatIconType::FourTrafficLights => write!(f, "4TrafficLights"),
-            ConditionalFormatIconType::ThreeTrafficLights => write!(f, "3TrafficLights"),
+            ConditionalFormatIconType::ThreeTrafficLights => write!(f, "3TrafficLights1"),
             ConditionalFormatIconType::ThreeSymbolsCircled => write!(f, "3Symbols"),
             ConditionalFormatIconType::ThreeTrafficLightsWithRim => write!(f, "3TrafficLights2"),
         }
@@ -6599,6 +6721,12 @@ macro_rules! generate_conditional_common_methods {
         pub(crate) fn has_x14_extensions(&self) -> bool {
             self.has_x14_extensions
         }
+
+        /// Check if the conditional format uses Excel 2010+ extensions only.
+        pub(crate) fn has_x14_only(&self) -> bool {
+            self.has_x14_only
+        }
+
     }
     )*)
 }

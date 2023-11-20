@@ -213,8 +213,9 @@ pub struct Worksheet {
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashSet<(RowNum, ColNum)>,
     conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Send>>>,
+    has_conditional_formats: bool,
     use_x14_extensions: bool,
-    has_2010_data_bars: bool,
+    has_x14_conditional_formats: bool,
 }
 
 impl Default for Worksheet {
@@ -294,6 +295,7 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_new.png">
     ///
+    #[allow(clippy::too_many_lines)]
     pub fn new() -> Worksheet {
         let writer = XMLWriter::new();
 
@@ -396,8 +398,9 @@ impl Worksheet {
             has_drawing_object_linkage: false,
             cells_with_autofilter: HashSet::new(),
             conditional_formats: BTreeMap::new(),
+            has_conditional_formats: false,
             use_x14_extensions: false,
-            has_2010_data_bars: false,
+            has_x14_conditional_formats: false,
         }
     }
 
@@ -5168,10 +5171,15 @@ impl Worksheet {
         // Validate the conditional format.
         conditional_format.validate()?;
 
-        // Check for extended Excel 2010 data bars.
+        // Check for extended Excel 2010 data bars/icons.
         if conditional_format.has_x14_extensions() {
             self.use_x14_extensions = true;
-            self.has_2010_data_bars = true;
+            self.has_x14_conditional_formats = true;
+        }
+
+        // Only write standard cond formats for non-x14 icons.
+        if !conditional_format.has_x14_only() {
+            self.has_conditional_formats = true;
         }
 
         // Set the dxf format local index if required.
@@ -9675,7 +9683,7 @@ impl Worksheet {
         }
 
         // Write the conditionalFormatting element.
-        if !self.conditional_formats.is_empty() {
+        if self.has_conditional_formats {
             self.write_conditional_formats();
         }
 
@@ -11049,7 +11057,7 @@ impl Worksheet {
         self.writer.xml_start_tag_only("extLst");
         self.writer.xml_start_tag("ext", &attributes);
 
-        if self.has_2010_data_bars {
+        if self.has_x14_conditional_formats {
             // Write the x14:conditionalFormattings element.
             self.write_conditional_formattings();
         }
@@ -11064,6 +11072,8 @@ impl Worksheet {
         self.writer.xml_start_tag_only("x14:conditionalFormattings");
 
         let mut data_bar_count = 1;
+        let mut priority = 1;
+
         for (cell_range, conditional_formats) in &self.conditional_formats {
             for conditional_format in conditional_formats {
                 if conditional_format.has_x14_extensions() {
@@ -11083,11 +11093,12 @@ impl Worksheet {
                     );
                     data_bar_count += 1;
 
-                    let rule = conditional_format.x14_rule(&guid);
+                    let rule = conditional_format.x14_rule(priority, &guid);
                     self.writer.xml_raw_string(&rule);
 
                     self.writer.xml_data_element_only("xm:sqref", cell_range);
                     self.writer.xml_end_tag("x14:conditionalFormatting");
+                    priority += 1;
                 }
             }
         }
