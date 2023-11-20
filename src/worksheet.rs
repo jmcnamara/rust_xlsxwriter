@@ -10056,37 +10056,99 @@ impl Worksheet {
 
     // Write the <conditionalFormatting> element.
     fn write_conditional_formats(&mut self) {
+        let mut guid_index = 1;
         let mut priority = 1;
-        let mut data_bar_count = 1;
 
-        for (cell_range, conditional_formats) in &self.conditional_formats {
-            let attributes = [("sqref", cell_range.as_str())];
+        for (cell_range, conditionals_for_range) in &self.conditional_formats {
+            let has_x14_only = conditionals_for_range
+                .iter()
+                .all(|rule| rule.has_x14_only());
 
-            // Create a pseudo GUID for each unique Excel 2010 data bar.
-            let guid = format!(
-                "{{DA7ABA51-AAAA-BBBB-{:04X}-{:012X}}}",
-                self.sheet_index + 1,
-                data_bar_count
-            );
-            data_bar_count += 1;
+            // Don't write classic CFs if range only contains new style x14 CFs.
+            if !has_x14_only {
+                let attributes = [("sqref", cell_range.as_str())];
+                self.writer
+                    .xml_start_tag("conditionalFormatting", &attributes);
+            }
 
-            self.writer
-                .xml_start_tag("conditionalFormatting", &attributes);
+            for conditional_format in conditionals_for_range {
+                // Create a pseudo GUID for each unique Excel 2010 data bar.
+                let mut guid = String::new();
+                if conditional_format.has_x14_extensions() {
+                    guid = format!(
+                        "{{DA7ABA51-AAAA-BBBB-{:04X}-{:012X}}}",
+                        self.sheet_index + 1,
+                        guid_index
+                    );
+                    guid_index += 1;
+                }
 
-            for conditional_format in conditional_formats {
                 // Get the format dxf_index as a global value.
                 let mut dxf_index: Option<u32> = None;
                 if let Some(local_index) = conditional_format.format_index() {
                     dxf_index = Some(self.global_dxf_indices[local_index as usize]);
                 }
 
-                let rule = conditional_format.rule(dxf_index, priority, cell_range, &guid);
-                self.writer.xml_raw_string(&rule);
+                if !conditional_format.has_x14_only() {
+                    let rule = conditional_format.rule(dxf_index, priority, cell_range, &guid);
+                    self.writer.xml_raw_string(&rule);
+                }
+
                 priority += 1;
             }
 
-            self.writer.xml_end_tag("conditionalFormatting");
+            if !has_x14_only {
+                self.writer.xml_end_tag("conditionalFormatting");
+            }
         }
+    }
+
+    // Write the <x14:conditionalFormattings> element. This is used for new
+    // style conditional formats added after the original spec.
+    fn write_conditional_formattings(&mut self) {
+        self.writer.xml_start_tag_only("x14:conditionalFormattings");
+
+        let mut guid_index = 1;
+        let mut priority = 1;
+
+        for (cell_range, conditionals_for_range) in &self.conditional_formats {
+            // Only create an entry if range contains a x14 style conditional.
+            if !conditionals_for_range
+                .iter()
+                .any(|rule| rule.has_x14_extensions())
+            {
+                continue;
+            }
+
+            let attributes = [(
+                "xmlns:xm",
+                "http://schemas.microsoft.com/office/excel/2006/main",
+            )];
+
+            self.writer
+                .xml_start_tag("x14:conditionalFormatting", &attributes);
+
+            for conditional_format in conditionals_for_range {
+                if conditional_format.has_x14_extensions() {
+                    // Create a pseudo GUID for each unique Excel 2010 data bar.
+                    let guid = format!(
+                        "{{DA7ABA51-AAAA-BBBB-{:04X}-{:012X}}}",
+                        self.sheet_index + 1,
+                        guid_index
+                    );
+                    guid_index += 1;
+
+                    let rule = conditional_format.x14_rule(priority, &guid);
+                    self.writer.xml_raw_string(&rule);
+                }
+                priority += 1;
+            }
+
+            self.writer.xml_data_element_only("xm:sqref", cell_range);
+            self.writer.xml_end_tag("x14:conditionalFormatting");
+        }
+
+        self.writer.xml_end_tag("x14:conditionalFormattings");
     }
 
     // Write the <hyperlink> element.
@@ -11065,45 +11127,6 @@ impl Worksheet {
         self.writer.xml_end_tag("ext");
 
         self.writer.xml_end_tag("extLst");
-    }
-
-    // Write the <x14:conditionalFormattings> element.
-    fn write_conditional_formattings(&mut self) {
-        self.writer.xml_start_tag_only("x14:conditionalFormattings");
-
-        let mut data_bar_count = 1;
-        let mut priority = 1;
-
-        for (cell_range, conditional_formats) in &self.conditional_formats {
-            for conditional_format in conditional_formats {
-                if conditional_format.has_x14_extensions() {
-                    let attributes = [(
-                        "xmlns:xm",
-                        "http://schemas.microsoft.com/office/excel/2006/main",
-                    )];
-
-                    self.writer
-                        .xml_start_tag("x14:conditionalFormatting", &attributes);
-
-                    // Create a pseudo GUID for each unique Excel 2010 data bar.
-                    let guid = format!(
-                        "{{DA7ABA51-AAAA-BBBB-{:04X}-{:012X}}}",
-                        self.sheet_index + 1,
-                        data_bar_count
-                    );
-                    data_bar_count += 1;
-
-                    let rule = conditional_format.x14_rule(priority, &guid);
-                    self.writer.xml_raw_string(&rule);
-
-                    self.writer.xml_data_element_only("xm:sqref", cell_range);
-                    self.writer.xml_end_tag("x14:conditionalFormatting");
-                    priority += 1;
-                }
-            }
-        }
-
-        self.writer.xml_end_tag("x14:conditionalFormattings");
     }
 }
 
