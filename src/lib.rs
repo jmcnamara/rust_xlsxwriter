@@ -37,21 +37,23 @@
 //!
 //! # Table of contents
 //!
-//! - [Tutorial](crate::tutorial): A getting started and tutorial guide.
-//! - [Cookbook](crate::cookbook): Examples of using `rust_xlsxwriter`.
+//! - [`Tutorial`](crate::tutorial): A getting started and tutorial guide.
+//! - [`Cookbook`](crate::cookbook): Examples of using `rust_xlsxwriter`.
 //! - [`Workbook`]: The entry point for creating an Excel workbook of
-//!       worksheets.
+//!   worksheets.
 //! - [`Worksheet`]: The main spreadsheet canvas for writing data and objects to
-//!       a worksheet.
+//!   a worksheet.
 //! - [`Format`]: The interface for adding formatting to worksheets and other
-//!       objects.
+//!   objects.
 //! - [`Chart`]: The interface for creating worksheet charts.
 //! - [`Image`]: The interface for images used in worksheets.
+//! - [`Conditional Formats`](crate::conditional_format): Working with
+//!   conditional formatting in worksheets.
 //! - [`ExcelDateTime`]: A type to represent dates and times in Excel format.
 //! - [`Formula`]: A type for Excel formulas.
 //! - [`Url`]: A type for URLs/Hyperlinks used in worksheets.
 //! - [`DocProperties`]: The interface used to create an object to represent
-//!       document metadata properties.
+//!   document metadata properties.
 //!
 //! Other external documentation:
 //!
@@ -133,7 +135,8 @@
 //!
 //! ## Crate Features
 //!
-//! The following is a list of the features supports by the `rust_xlsxwriter` crate:
+//! The following is a list of the features supports by the `rust_xlsxwriter`
+//! crate:
 //!
 //! - `default`: Includes all the standard functionality. Has dependencies on
 //!   `zip`, `regex` and `lazy_static`.
