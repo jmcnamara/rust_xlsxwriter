@@ -712,7 +712,7 @@ impl ConditionalFormatCell {
         ConditionalFormatCell {
             minimum: ConditionalFormatValue::new_from_string(""),
             maximum: ConditionalFormatValue::new_from_string(""),
-            criteria: ConditionalFormatCellCriteria::None,
+            criteria: ConditionalFormatCellCriteria::EqualTo,
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
@@ -899,7 +899,6 @@ impl ConditionalFormatCell {
     // Validate the conditional format.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
         let error_message = match self.criteria {
-            ConditionalFormatCellCriteria::None => "'criteria' must be set".to_string(),
             ConditionalFormatCellCriteria::Between | ConditionalFormatCellCriteria::NotBetween => {
                 if self.minimum.value.is_empty() {
                     "'minimum' value must be set".to_string()
@@ -6256,10 +6255,6 @@ impl From<&NaiveTime> for ConditionalFormatValue {
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ConditionalFormatCellCriteria {
-    /// The cell conditional format criteria isn't set.
-    #[doc(hidden)]
-    None,
-
     /// Show the conditional format for cells that are equal to the target value.
     EqualTo,
 
@@ -6288,7 +6283,6 @@ pub enum ConditionalFormatCellCriteria {
 impl fmt::Display for ConditionalFormatCellCriteria {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ConditionalFormatCellCriteria::None => write!(f, ""),
             ConditionalFormatCellCriteria::EqualTo => write!(f, "equal"),
             ConditionalFormatCellCriteria::Between => write!(f, "between"),
             ConditionalFormatCellCriteria::LessThan => write!(f, "lessThan"),
