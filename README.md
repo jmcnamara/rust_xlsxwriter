@@ -120,7 +120,7 @@ frequently.
 
 Recent changes:
 
-- Added stock chart support.
+- Added support for Conditional Formatting.
 - Added chart date axes, data tables, axes crossing, trendlines, error bars,
   up-down bars, high-low bars, drop-lines and gradient fills.
 - Added Wasm and Polars feature flags for compatibility.

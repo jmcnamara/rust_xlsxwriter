@@ -5,11 +5,14 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.55.0] - 2023-11-XX WIP
+## [0.55.0] - 2023-11-21
 
 ### Added
 
-- Added support for conditional formatting.
+- Added support for conditional formatting. See [Working with Conditional Formats].
+
+
+[Working with Conditional Formats]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/conditional_format/index.html
 
 
 ## [0.54.0] - 2023-11-04
@@ -612,20 +615,20 @@ Performance improvement release.
 
 - The following enums and structs have changed to a more logical naming:
 
-  | Previous name              | New name                |
-  | :------------------------- | :---------------------- |
-  | `XlsxAlign`                | `FormatAlign`           |
-  | `XlsxBorder`               | `FormatBorder`          |
-  | `XlsxDiagonalBorder`       | `FormatDiagonalBorder`  |
-  | `XlsxPattern`              | `FormatPattern`         |
-  | `XlsxScript`               | `FormatScript`          |
-  | `XlsxUnderline`            | `FormatUnderline`       |
-  |                            |                         |
-  | `XlsxObjectMovement`       | `ObjectMovement`        |
-  | `XlsxImagePosition`        | `HeaderImagePosition`   |
-  |                            |                         |
-  | `ProtectWorksheetOptions`  | `ProtectionOptions`     |
-  | `Properties`               | `DocProperties`         |
+  | Previous name             | New name               |
+  | :------------------------ | :--------------------- |
+  | `XlsxAlign`               | `FormatAlign`          |
+  | `XlsxBorder`              | `FormatBorder`         |
+  | `XlsxDiagonalBorder`      | `FormatDiagonalBorder` |
+  | `XlsxPattern`             | `FormatPattern`        |
+  | `XlsxScript`              | `FormatScript`         |
+  | `XlsxUnderline`           | `FormatUnderline`      |
+  |                           |                        |
+  | `XlsxObjectMovement`      | `ObjectMovement`       |
+  | `XlsxImagePosition`       | `HeaderImagePosition`  |
+  |                           |                        |
+  | `ProtectWorksheetOptions` | `ProtectionOptions`    |
+  | `Properties`              | `DocProperties`        |
 
 
 - The `DocProperties::set_custom_property()` method replaces several type

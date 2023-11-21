@@ -407,6 +407,520 @@
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor4.png">
 //!
+//!
+//!
+//! # Examples
+//!
+//! Conditional formatting is a feature of Excel which allows you to apply a
+//! format to a cell or a range of cells based on certain criteria. For example
+//! you might apply rules like the following to highlight cells in different
+//! ranges.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_format_dialog.png">
+//!
+//! The examples below show how to use the various types of conditional formatting
+//! with `rust_xlsxwriter`.
+//!
+//! ## Some examples:
+//!
+//! **Example 1.** Cell conditional formatting. Cells with values >= 50 are in
+//! light red. Values < 50 are in light green.
+//!
+//! See [`ConditionalFormatCell`] for more details.
+//!
+//! [`ConditionalFormatCell`]: crate::ConditionalFormatCell
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats1.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a conditional format over a range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+//!         .set_value(50)
+//!         .set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Write another conditional format over the same range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::LessThan)
+//!         .set_value(50)
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 2.** Cell conditional formatting with between ranges. Values between
+//! 30 and 70 are in light red. Values outside that range are in light green.
+//!
+//! See [`ConditionalFormatCell`] for more details.
+//!
+//! [`ConditionalFormatCell`]: crate::ConditionalFormatCell
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats2.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a conditional format over a range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::Between)
+//!         .set_minimum(30)
+//!         .set_maximum(70)
+//!         .set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Write another conditional format over the same range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::NotBetween)
+//!         .set_minimum(30)
+//!         .set_maximum(70)
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 3.** Duplicate and Unique conditional formats. Duplicate values are
+//! in light red. Unique values are in light green.
+//!
+//! See [`ConditionalFormatDuplicate`] for more details.
+//!
+//! [`ConditionalFormatDuplicate`]: crate::ConditionalFormatDuplicate
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats3.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a conditional format over a range.
+//!     let conditional_format = ConditionalFormatDuplicate::new().set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Invert the duplicate conditional format to show unique values in the
+//!     // same range.
+//!     let conditional_format = ConditionalFormatDuplicate::new()
+//!         .invert()
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 4.** Above and Below Average conditional formats. Above average
+//! values are in light red. Below average values are in light green.
+//!
+//! See [`ConditionalFormatAverage`] for more details.
+//!
+//! [`ConditionalFormatAverage`]: crate::ConditionalFormatAverage
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats4.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a conditional format over a range. The default criteria is Above Average.
+//!     let conditional_format = ConditionalFormatAverage::new().set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Write another conditional format over the same range.
+//!     let conditional_format = ConditionalFormatAverage::new()
+//!         .set_criteria(ConditionalFormatAverageCriteria::BelowAverage)
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 5.** Top and Bottom range conditional formats. Top 10 values are in
+//! light red. Bottom 10 values are in light green.
+//!
+//! See [`ConditionalFormatTop`] for more details.
+//!
+//! [`ConditionalFormatTop`]: crate::ConditionalFormatTop
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats5.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a conditional format over a range.
+//!     let conditional_format = ConditionalFormatTop::new()
+//!         .set_value(10)
+//!         .set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Invert the Top conditional format to show Bottom values in the same
+//!     // range.
+//!     let conditional_format = ConditionalFormatTop::new()
+//!         .invert()
+//!         .set_value(10)
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 6.** Cell conditional formatting in non-contiguous range. Cells with
+//! values >= 50 are in light red. Values < 50 are in light green. Non-contiguous
+//! ranges.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats6.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a conditional format over a non-contiguous range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+//!         .set_value(50)
+//!         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
+//!         .set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Write another conditional format over the same range.
+//!     let conditional_format = ConditionalFormatCell::new()
+//!         .set_criteria(ConditionalFormatCellCriteria::LessThan)
+//!         .set_value(50)
+//!         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 7.** Formula conditional formatting. Even numbered cells are in
+//! light green. Odd numbered cells are in light red.
+//!
+//! See [`ConditionalFormatFormula`] for more details.
+//!
+//! [`ConditionalFormatFormula`]: crate::ConditionalFormatFormula
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats7.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a conditional format over a range.
+//!     let conditional_format = ConditionalFormatFormula::new()
+//!         .set_value("=ISODD(B3)")
+//!         .set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//!
+//!     // Write another conditional format over the same range.
+//!     let conditional_format = ConditionalFormatFormula::new()
+//!         .set_value("=ISEVEN(B3)")
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 8.** Text style conditional formats. Column A shows words that
+//! contain the sub-word 'rust'. Column C shows words that start/end with 't'
+//!
+//! See [`ConditionalFormatText`] for more details.
+//!
+//! [`ConditionalFormatText`]: crate::ConditionalFormatText
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats8.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a text "containing" conditional format over a range.
+//!     let conditional_format = ConditionalFormatText::new()
+//!         .set_criteria(ConditionalFormatTextCriteria::Contains)
+//!         .set_value("rust")
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(1, 0, 13, 0, &conditional_format)?;
+//!
+//!     // Write a text "not containing" conditional format over the same range.
+//!     let conditional_format = ConditionalFormatText::new()
+//!         .set_criteria(ConditionalFormatTextCriteria::DoesNotContain)
+//!         .set_value("rust")
+//!         .set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(1, 0, 13, 0, &conditional_format)?;
+//!
+//!     // Write a text "begins with" conditional format over a range.
+//!     let conditional_format = ConditionalFormatText::new()
+//!         .set_criteria(ConditionalFormatTextCriteria::BeginsWith)
+//!         .set_value("t")
+//!         .set_format(&format2);
+//!
+//!     worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;
+//!
+//!     // Write a text "ends with" conditional format over the same range.
+//!     let conditional_format = ConditionalFormatText::new()
+//!         .set_criteria(ConditionalFormatTextCriteria::EndsWith)
+//!         .set_value("t")
+//!         .set_format(&format1);
+//!
+//!     worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 9.** Examples of 2 color scale conditional formats.
+//!
+//! See [`ConditionalFormat2ColorScale`] for more details.
+//!
+//! [`ConditionalFormat2ColorScale`]: crate::ConditionalFormat2ColorScale
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats9.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write 2 color scale formats with standard Excel colors.
+//!     let conditional_format = ConditionalFormat2ColorScale::new()
+//!         .set_minimum_color("F8696B")
+//!         .set_maximum_color("FCFCFF");
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat2ColorScale::new()
+//!         .set_minimum_color("FCFCFF")
+//!         .set_maximum_color("F8696B");
+//!
+//!     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat2ColorScale::new()
+//!         .set_minimum_color("FCFCFF")
+//!         .set_maximum_color("63BE7B");
+//!
+//!     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat2ColorScale::new()
+//!         .set_minimum_color("63BE7B")
+//!         .set_maximum_color("FCFCFF");
+//!
+//!     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat2ColorScale::new()
+//!         .set_minimum_color("FFEF9C")
+//!         .set_maximum_color("63BE7B");
+//!
+//!     worksheet.add_conditional_format(2, 9, 11, 9, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat2ColorScale::new()
+//!         .set_minimum_color("63BE7B")
+//!         .set_maximum_color("FFEF9C");
+//!
+//!     worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 10.** Examples of 3 color scale conditional formats.
+//!
+//! See [`ConditionalFormat3ColorScale`] for more details.
+//!
+//! [`ConditionalFormat3ColorScale`]: crate::ConditionalFormat3ColorScale
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats10.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write 3 color scale formats with standard Excel colors.
+//!     let conditional_format = ConditionalFormat3ColorScale::new()
+//!         .set_minimum_color("F8696B")
+//!         .set_midpoint_color("FFEB84")
+//!         .set_maximum_color("63BE7B");
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat3ColorScale::new()
+//!         .set_minimum_color("63BE7B")
+//!         .set_midpoint_color("FFEB84")
+//!         .set_maximum_color("F8696B");
+//!
+//!     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat3ColorScale::new()
+//!         .set_minimum_color("F8696B")
+//!         .set_midpoint_color("FCFCFF")
+//!         .set_maximum_color("63BE7B");
+//!
+//!     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat3ColorScale::new()
+//!         .set_minimum_color("63BE7B")
+//!         .set_midpoint_color("FCFCFF")
+//!         .set_maximum_color("F8696B");
+//!
+//!     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat3ColorScale::new()
+//!         .set_minimum_color("F8696B")
+//!         .set_midpoint_color("FCFCFF")
+//!         .set_maximum_color("5A8AC6");
+//!
+//!     worksheet.add_conditional_format(2, 9, 11, 9, &conditional_format)?;
+//!
+//!     let conditional_format = ConditionalFormat3ColorScale::new()
+//!         .set_minimum_color("5A8AC6")
+//!         .set_midpoint_color("FCFCFF")
+//!         .set_maximum_color("F8696B");
+//!
+//!     worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 11.** Examples of data bars.
+//!
+//! See [`ConditionalFormatDataBar`] for more details.
+//!
+//! [`ConditionalFormatDataBar`]: crate::ConditionalFormatDataBar
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats11.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Write a standard Excel data bar.
+//!     let conditional_format = ConditionalFormatDataBar::new();
+//!
+//!     worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+//!
+//!     // Write a standard Excel data bar with negative data
+//!     let conditional_format = ConditionalFormatDataBar::new();
+//!
+//!     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+//!
+//!     // Write a data bar with a user defined fill color.
+//!     let conditional_format = ConditionalFormatDataBar::new().set_fill_color("009933");
+//!
+//!     worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+//!
+//!     // Write a data bar with the direction changed.
+//!     let conditional_format = ConditionalFormatDataBar::new()
+//!         .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
+//!
+//!     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+//! ```
+//!
+//!
+//! **Example 12.** Examples of icon style conditional formats.
+//!
+//!
+//! See [`ConditionalFormatIconSet`] for more details.
+//!
+//! [`ConditionalFormatIconSet`]: crate::ConditionalFormatIconSet
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats12.png">
+//!
+//! Code to generate the above example:
+//!
+//! ```ignore
+//!     // Code snippet from examples/app_conditional_formatting.rs
+//!
+//!     // Three Traffic lights - Green is highest.
+//!     let conditional_format = ConditionalFormatIconSet::new()
+//!         .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights);
+//!
+//!     worksheet.add_conditional_format(1, 1, 1, 3, &conditional_format)?;
+//!
+//!     // Reversed - Red is highest.
+//!     let conditional_format = ConditionalFormatIconSet::new()
+//!         .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+//!         .reverse_icons(true);
+//!
+//!     worksheet.add_conditional_format(2, 1, 2, 3, &conditional_format)?;
+//!
+//!     // Icons only - The number data is hidden.
+//!     let conditional_format = ConditionalFormatIconSet::new()
+//!         .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+//!         .show_icons_only(true);
+//!
+//!     worksheet.add_conditional_format(3, 1, 3, 3, &conditional_format)?;
+//!
+//!     // Three arrows.
+//!     let conditional_format =
+//!         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeArrows);
+//!
+//!     worksheet.add_conditional_format(5, 1, 5, 3, &conditional_format)?;
+//!
+//!     // Three symbols.
+//!     let conditional_format = ConditionalFormatIconSet::new()
+//!         .set_icon_type(ConditionalFormatIconType::ThreeSymbolsCircled);
+//!
+//!     worksheet.add_conditional_format(6, 1, 6, 3, &conditional_format)?;
+//!
+//!     // Three stars.
+//!     let conditional_format =
+//!         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeStars);
+//!
+//!     worksheet.add_conditional_format(7, 1, 7, 3, &conditional_format)?;
+//!
+//!     // Four Arrows.
+//!     let conditional_format =
+//!         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourArrows);
+//!
+//!     worksheet.add_conditional_format(8, 1, 8, 4, &conditional_format)?;
+//!
+//!     // Four circles - Red (highest) to Black (lowest).
+//!     let conditional_format =
+//!         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourRedToBlack);
+//!
+//!     worksheet.add_conditional_format(9, 1, 9, 4, &conditional_format)?;
+//!
+//!     // Four rating histograms.
+//!     let conditional_format =
+//!         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourHistograms);
+//!
+//!     worksheet.add_conditional_format(10, 1, 10, 4, &conditional_format)?;
+//!
+//!     // Four Arrows.
+//!     let conditional_format =
+//!         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveArrows);
+//!
+//!     worksheet.add_conditional_format(11, 1, 11, 5, &conditional_format)?;
+//!
+//!     // Four rating histograms.
+//!     let conditional_format =
+//!         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveHistograms);
+//!
+//!     worksheet.add_conditional_format(12, 1, 12, 5, &conditional_format)?;
+//!
+//!     // Four rating quadrants.
+//!     let conditional_format =
+//!         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveQuadrants);
+//!
+//!     worksheet.add_conditional_format(13, 1, 13, 5, &conditional_format)?;
+//! ```
 #![warn(missing_docs)]
 
 mod tests;

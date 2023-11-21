@@ -517,6 +517,44 @@ documentation and generally show how an individual function works.
 * `doc_chartrange_new_from_string.rs` - Demonstrates creating a new chart
   range.
 
+* `doc_conditional_format_2color.rs` - Example of adding a 2 color scale
+  type conditional formatting to a worksheet. Note, the colors in the fifth
+  example (yellow to green) are the default colors and could be omitted.
+
+* `doc_conditional_format_2color_set_color.rs` - Example of adding a 2
+  color scale type conditional formatting to a worksheet with user defined
+  minimum and maximum colors.
+
+* `doc_conditional_format_2color_set_minimum.rs` - Example of adding a 2
+  color scale type conditional formatting to a worksheet with user defined
+  minimum and maximum values.
+
+* `doc_conditional_format_3color.rs` - Example of adding 3 color scale type
+  conditional formatting to a worksheet. Note, the colors in the first
+  example (red to yellow to green) are the default colors and could be
+  omitted.
+
+* `doc_conditional_format_3color_set_color.rs` - Example of adding 3 color
+  scale type conditional formatting to a worksheet with user defined
+  minimum, midpoint and maximum colors.
+
+* `doc_conditional_format_3color_set_minimum.rs` - Example of adding 3
+  color scale type conditional formatting to a worksheet with user defined
+  minimum and maximum values.
+
+* `doc_conditional_format_anchor.rs` - Example of adding a Formula type
+  conditional formatting to a worksheet. This example demonstrate the
+  effect of changing the absolute/relative anchor in the target cell.
+
+* `doc_conditional_format_average.rs` - Example of how to add Average
+  conditional formatting to a worksheet. Above average values are in light
+  red. Below average values are in light green.
+
+* `doc_conditional_format_blank.rs` - Example of how to add a
+  blank/non-blank conditional formatting to a worksheet. Blank values are
+  in light red. Non-blank values are in light green. Note, that we invert
+  the Blank rule to get Non-blank values.
+
 * `doc_conditional_format_cell1.rs` - Example of adding a cell type
   conditional formatting to a worksheet. Cells with values >= 50 are in
   light red. Values < 50 are in light green.
@@ -524,6 +562,114 @@ documentation and generally show how an individual function works.
 * `doc_conditional_format_cell2.rs` - Example of adding a cell type
   conditional formatting to a worksheet. Values between 30 and 70 are
   highlighted in light red. Values outside that range are in light green.
+
+* `doc_conditional_format_cell_set_minimum.rs` - Example of adding a cell
+  type conditional formatting to a worksheet. Values between 40 and 60 are
+  highlighted in light green.
+
+* `doc_conditional_format_cell_set_value.rs` - Example of adding a cell
+  type conditional formatting to a worksheet. Cells with values >= 50 are
+  in light green.
+
+* `doc_conditional_format_databar.rs` - Example of adding data bar type
+  conditional formatting to a worksheet.
+
+* `doc_conditional_format_databar_set_axis_color.rs` - Example of adding a
+  data bar type conditional formatting to a worksheet with a user defined
+  axis color.
+
+* `doc_conditional_format_databar_set_axis_position.rs` - Example of adding
+  a data bar type conditional formatting to a worksheet with different axis
+  positions.
+
+* `doc_conditional_format_databar_set_bar_only.rs` - Example of adding a
+  data bar type conditional formatting to a worksheet with the bar only and
+  with the data hidden.
+
+* `doc_conditional_format_databar_set_border_color.rs` - Example of adding
+  a data bar type conditional formatting to a worksheet with user defined
+  border color.
+
+* `doc_conditional_format_databar_set_border_off.rs` - Example of adding a
+  data bar type conditional formatting to a worksheet without a border.
+
+* `doc_conditional_format_databar_set_direction.rs` - Example of adding a
+  data bar type conditional formatting to a worksheet without a border
+
+* `doc_conditional_format_databar_set_fill_color.rs` - Example of adding a
+  data bar type conditional formatting to a worksheet with user defined
+  fill color.
+
+* `doc_conditional_format_databar_set_minimum.rs` - Example of adding a
+  data bar type conditional formatting to a worksheet with user defined
+  minimum and maximum values.
+
+* `doc_conditional_format_databar_set_negative_border_color.rs` - Example
+  of adding a data bar type conditional formatting to a worksheet with user
+  defined negative border color.
+
+* `doc_conditional_format_databar_set_negative_fill_color.rs` - Example of
+  adding a data bar type conditional formatting to a worksheet with user
+  defined negative fill color.
+
+* `doc_conditional_format_databar_set_solid_fill.rs` - Example of adding a
+  data bar type conditional formatting to a worksheet with a solid
+  (non-gradient) style bar.
+
+* `doc_conditional_format_date.rs` - Example of adding a Dates Occurring
+  type conditional formatting to a worksheet. Note, the rules in this
+  example such as "Last month", "This month" and "Next month" are applied
+  to the sample dates which by default are for November 2023. Changes the
+  dates to some range closer to the time you run the example.
+
+* `doc_conditional_format_duplicate.rs` - Example of how to add a
+  duplicate/unique conditional formatting to a worksheet. Duplicate values
+  are in light red. Unique values are in light green. Note, that we invert
+  the Duplicate rule to get Unique values.
+
+* `doc_conditional_format_error.rs` - Example of how to add a
+  error/non-error conditional formatting to a worksheet. Error values are
+  in light red. Non-error values are in light green. Note, that we invert
+  the Error rule to get Non-error values.
+
+* `doc_conditional_format_formula.rs` - Example of adding a Formula type
+  conditional formatting to a worksheet. Cells with odd numbered values are
+  in light red while even numbered values are in light green.
+
+* `doc_conditional_format_icon.rs` - Example of adding icon style
+  conditional formatting to a worksheet.
+
+* `doc_conditional_format_icon_default_icons.rs` - The following example
+  shows Excels default icon settings expressed as `rust_xlsxwriter` rules.
+
+* `doc_conditional_format_icon_reverse_icons.rs` - Example of adding icon
+  style conditional formatting to a worksheet. In the second example the
+  order of the icons is reversed.
+
+* `doc_conditional_format_icon_set_custom.rs` - Example of adding icon
+  style conditional formatting to a worksheet. In the second example the
+  default icons are changed.
+
+* `doc_conditional_format_icon_set_icons.rs` - Example of adding icon style
+  conditional formatting to a worksheet. In the second example the default
+  rules are changed.
+
+* `doc_conditional_format_icon_show_icons_only.rs` - Example of adding icon
+  style conditional formatting to a worksheet. In the second example the
+  icons are shown without the cell data.
+
+* `doc_conditional_format_multi_range.rs` - Example of adding a cell type
+  conditional formatting to a worksheet over a non-contiguous range. Cells
+  with values >= 50 are in light red. Values < 50 are in light green. Note
+  that the cells outside the selected ranges do not have any conditional
+  formatting.
+
+* `doc_conditional_format_text.rs` - Example of adding a text type
+  conditional formatting to a worksheet.
+
+* `doc_conditional_format_top.rs` - Example of how to add Top and Bottom
+  conditional formatting to a worksheet. Top 10 values are in light red.
+  Bottom 10 values are in light green.
 
 * `doc_datetime_and_hms.rs` - Demonstrates writing formatted datetimes in
   an Excel worksheet.

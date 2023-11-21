@@ -8,7 +8,7 @@ The examples below can be run as follows:
 ```bash
 git clone git@github.com:jmcnamara/rust_xlsxwriter.git
 cd rust_xlsxwriter/
-cargo run --example app_demo
+cargo run --example app_demo  # or any other example
 ```
 
 # Contents
@@ -20,36 +20,37 @@ cargo run --example app_demo
 5. [Merging cells: An example of merging cell ranges](#merging-cells-an-example-of-merging-cell-ranges)
 6. [Autofilters: Add an autofilter to a worksheet](#autofilters-add-an-autofilter-to-a-worksheet)
 7. [Adding worksheet tables](#adding-worksheet-tables)
-8. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
-9. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
-10. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
-11. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
-12. [Insert images: Inserting images to fit cell](#insert-images-inserting-images-to-fit-cell)
-13. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
-14. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
-15. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
-16. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
-17. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
-18. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
-19. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
-20. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
-21. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
-22. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
-23. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
-24. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
-25. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
-26. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-27. [Chart: Chart data table](#chart-chart-data-table)
-28. [Chart: Chart data tools](#chart-chart-data-tools)
-29. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
-30. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-31. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-32. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-33. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-34. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-35. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-36. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-37. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+8. [Adding Conditional Formatting](#adding-conditional-formatting)
+9. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
+10. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
+11. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
+12. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
+13. [Insert images: Inserting images to fit cell](#insert-images-inserting-images-to-fit-cell)
+14. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
+15. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
+16. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
+17. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
+18. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
+19. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
+20. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
+21. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
+22. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
+23. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
+24. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
+25. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
+26. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
+27. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
+28. [Chart: Chart data table](#chart-chart-data-table)
+29. [Chart: Chart data tools](#chart-chart-data-tools)
+30. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
+31. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+32. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+33. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+34. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+35. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+36. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+37. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+38. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -915,7 +916,7 @@ the table data can be added via standard [`worksheet.write()`]methods.
 
 ## Some examples:
 
-Example 1. Default table with no data.
+**Example 1.** Default table with no data.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables1.png">
 
@@ -945,7 +946,7 @@ Code to generate the above example:
 ```
 
 
-Example 2. Default table with data.
+**Example 2.** Default table with data.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables2.png">
 
@@ -979,7 +980,7 @@ Code to generate the above example:
 ```
 
 
-Example 3. Table without default autofilter.
+**Example 3.** Table without default autofilter.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables3.png">
 
@@ -1014,7 +1015,7 @@ Code to generate the above example:
 ```
 
 
-Example 4. Table without default header row.
+**Example 4.** Table without default header row.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables4.png">
 
@@ -1049,7 +1050,7 @@ Code to generate the above example:
 ```
 
 
-Example 5. Default table with "First Column" and "Last Column" options.
+**Example 5.** Default table with "First Column" and "Last Column" options.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables5.png">
 
@@ -1085,7 +1086,7 @@ Code to generate the above example:
 ```
 
 
-Example 6. Table with banded columns but without default banded rows.
+**Example 6.** Table with banded columns but without default banded rows.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables6.png">
 
@@ -1121,7 +1122,7 @@ Code to generate the above example:
 ```
 
 
-Example 7. Table with user defined column headers.
+**Example 7.** Table with user defined column headers.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables7.png">
 
@@ -1163,7 +1164,7 @@ Code to generate the above example:
 ```
 
 
-Example 8. Table with user defined column headers, and formulas.
+**Example 8.** Table with user defined column headers, and formulas.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables8.png">
 
@@ -1208,7 +1209,7 @@ Code to generate the above example:
 ```
 
 
-Example 9. Table with totals row (but no caption or totals).
+**Example 9.** Table with totals row (but no caption or totals).
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables9.png">
 
@@ -1254,7 +1255,7 @@ Code to generate the above example:
 ```
 
 
-Example 10. Table with totals row with user captions and functions.
+**Example 10.** Table with totals row with user captions and functions.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables10.png">
 
@@ -1311,7 +1312,7 @@ Code to generate the above example:
 ```
 
 
-Example 11. Table with alternative Excel style.
+**Example 11.** Table with alternative Excel style.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables11.png">
 
@@ -1324,7 +1325,7 @@ Code to generate the above example:
 
     let caption = "Table with alternative Excel style.";
 
-    // Set the column widths for clarity
+    // Set the column widths for clarity.
     for col_num in 1..=6u16 {
         worksheet.set_column_width(col_num, 12)?;
     }
@@ -1369,7 +1370,7 @@ Code to generate the above example:
 ```
 
 
-Example 12. Table with Excel style removed.
+**Example 12.** Table with Excel style removed.
 
 <img src="https://rustxlsxwriter.github.io/images/app_tables12.png">
 
@@ -1424,6 +1425,520 @@ Code to generate the above example:
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 6, &table)?;
 
+```
+
+
+# Adding Conditional Formatting
+
+Conditional formatting is a feature of Excel which allows you to apply a
+format to a cell or a range of cells based on certain criteria. For example
+you might apply rules like the following to highlight cells in different
+ranges.
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_format_dialog.png">
+
+The examples below show how to use the various types of conditional formatting
+with `rust_xlsxwriter`.
+
+## Some examples:
+
+**Example 1.** Cell conditional formatting. Cells with values >= 50 are in
+light red. Values < 50 are in light green.
+
+See [`ConditionalFormatCell`] for more details.
+
+[`ConditionalFormatCell`]: crate::ConditionalFormatCell
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats1.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    let conditional_format = ConditionalFormatCell::new()
+        .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+        .set_value(50)
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Write another conditional format over the same range.
+    let conditional_format = ConditionalFormatCell::new()
+        .set_criteria(ConditionalFormatCellCriteria::LessThan)
+        .set_value(50)
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+```
+
+
+**Example 2.** Cell conditional formatting with between ranges. Values between
+30 and 70 are in light red. Values outside that range are in light green.
+
+See [`ConditionalFormatCell`] for more details.
+
+[`ConditionalFormatCell`]: crate::ConditionalFormatCell
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats2.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    let conditional_format = ConditionalFormatCell::new()
+        .set_criteria(ConditionalFormatCellCriteria::Between)
+        .set_minimum(30)
+        .set_maximum(70)
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Write another conditional format over the same range.
+    let conditional_format = ConditionalFormatCell::new()
+        .set_criteria(ConditionalFormatCellCriteria::NotBetween)
+        .set_minimum(30)
+        .set_maximum(70)
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+```
+
+
+**Example 3.** Duplicate and Unique conditional formats. Duplicate values are
+in light red. Unique values are in light green.
+
+See [`ConditionalFormatDuplicate`] for more details.
+
+[`ConditionalFormatDuplicate`]: crate::ConditionalFormatDuplicate
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats3.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    let conditional_format = ConditionalFormatDuplicate::new().set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Invert the duplicate conditional format to show unique values in the
+    // same range.
+    let conditional_format = ConditionalFormatDuplicate::new()
+        .invert()
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+```
+
+
+**Example 4.** Above and Below Average conditional formats. Above average
+values are in light red. Below average values are in light green.
+
+See [`ConditionalFormatAverage`] for more details.
+
+[`ConditionalFormatAverage`]: crate::ConditionalFormatAverage
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats4.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range. The default criteria is Above Average.
+    let conditional_format = ConditionalFormatAverage::new().set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Write another conditional format over the same range.
+    let conditional_format = ConditionalFormatAverage::new()
+        .set_criteria(ConditionalFormatAverageCriteria::BelowAverage)
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+```
+
+
+**Example 5.** Top and Bottom range conditional formats. Top 10 values are in
+light red. Bottom 10 values are in light green.
+
+See [`ConditionalFormatTop`] for more details.
+
+[`ConditionalFormatTop`]: crate::ConditionalFormatTop
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats5.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    let conditional_format = ConditionalFormatTop::new()
+        .set_value(10)
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Invert the Top conditional format to show Bottom values in the same
+    // range.
+    let conditional_format = ConditionalFormatTop::new()
+        .invert()
+        .set_value(10)
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+```
+
+
+**Example 6.** Cell conditional formatting in non-contiguous range. Cells with
+values >= 50 are in light red. Values < 50 are in light green. Non-contiguous
+ranges.
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats6.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a non-contiguous range.
+    let conditional_format = ConditionalFormatCell::new()
+        .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
+        .set_value(50)
+        .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Write another conditional format over the same range.
+    let conditional_format = ConditionalFormatCell::new()
+        .set_criteria(ConditionalFormatCellCriteria::LessThan)
+        .set_value(50)
+        .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+```
+
+
+**Example 7.** Formula conditional formatting. Even numbered cells are in
+light green. Odd numbered cells are in light red.
+
+See [`ConditionalFormatFormula`] for more details.
+
+[`ConditionalFormatFormula`]: crate::ConditionalFormatFormula
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats7.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a conditional format over a range.
+    let conditional_format = ConditionalFormatFormula::new()
+        .set_value("=ISODD(B3)")
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+
+    // Write another conditional format over the same range.
+    let conditional_format = ConditionalFormatFormula::new()
+        .set_value("=ISEVEN(B3)")
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
+```
+
+
+**Example 8.** Text style conditional formats. Column A shows words that
+contain the sub-word 'rust'. Column C shows words that start/end with 't'
+
+See [`ConditionalFormatText`] for more details.
+
+[`ConditionalFormatText`]: crate::ConditionalFormatText
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats8.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a text "containing" conditional format over a range.
+    let conditional_format = ConditionalFormatText::new()
+        .set_criteria(ConditionalFormatTextCriteria::Contains)
+        .set_value("rust")
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(1, 0, 13, 0, &conditional_format)?;
+
+    // Write a text "not containing" conditional format over the same range.
+    let conditional_format = ConditionalFormatText::new()
+        .set_criteria(ConditionalFormatTextCriteria::DoesNotContain)
+        .set_value("rust")
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(1, 0, 13, 0, &conditional_format)?;
+
+    // Write a text "begins with" conditional format over a range.
+    let conditional_format = ConditionalFormatText::new()
+        .set_criteria(ConditionalFormatTextCriteria::BeginsWith)
+        .set_value("t")
+        .set_format(&format2);
+
+    worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;
+
+    // Write a text "ends with" conditional format over the same range.
+    let conditional_format = ConditionalFormatText::new()
+        .set_criteria(ConditionalFormatTextCriteria::EndsWith)
+        .set_value("t")
+        .set_format(&format1);
+
+    worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;
+```
+
+
+**Example 9.** Examples of 2 color scale conditional formats.
+
+See [`ConditionalFormat2ColorScale`] for more details.
+
+[`ConditionalFormat2ColorScale`]: crate::ConditionalFormat2ColorScale
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats9.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write 2 color scale formats with standard Excel colors.
+    let conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color("F8696B")
+        .set_maximum_color("FCFCFF");
+
+    worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color("FCFCFF")
+        .set_maximum_color("F8696B");
+
+    worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color("FCFCFF")
+        .set_maximum_color("63BE7B");
+
+    worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color("63BE7B")
+        .set_maximum_color("FCFCFF");
+
+    worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color("FFEF9C")
+        .set_maximum_color("63BE7B");
+
+    worksheet.add_conditional_format(2, 9, 11, 9, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat2ColorScale::new()
+        .set_minimum_color("63BE7B")
+        .set_maximum_color("FFEF9C");
+
+    worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
+```
+
+
+**Example 10.** Examples of 3 color scale conditional formats.
+
+See [`ConditionalFormat3ColorScale`] for more details.
+
+[`ConditionalFormat3ColorScale`]: crate::ConditionalFormat3ColorScale
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats10.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write 3 color scale formats with standard Excel colors.
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("F8696B")
+        .set_midpoint_color("FFEB84")
+        .set_maximum_color("63BE7B");
+
+    worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("63BE7B")
+        .set_midpoint_color("FFEB84")
+        .set_maximum_color("F8696B");
+
+    worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("F8696B")
+        .set_midpoint_color("FCFCFF")
+        .set_maximum_color("63BE7B");
+
+    worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("63BE7B")
+        .set_midpoint_color("FCFCFF")
+        .set_maximum_color("F8696B");
+
+    worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("F8696B")
+        .set_midpoint_color("FCFCFF")
+        .set_maximum_color("5A8AC6");
+
+    worksheet.add_conditional_format(2, 9, 11, 9, &conditional_format)?;
+
+    let conditional_format = ConditionalFormat3ColorScale::new()
+        .set_minimum_color("5A8AC6")
+        .set_midpoint_color("FCFCFF")
+        .set_maximum_color("F8696B");
+
+    worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
+```
+
+
+**Example 11.** Examples of data bars.
+
+See [`ConditionalFormatDataBar`] for more details.
+
+[`ConditionalFormatDataBar`]: crate::ConditionalFormatDataBar
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats11.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Write a standard Excel data bar.
+    let conditional_format = ConditionalFormatDataBar::new();
+
+    worksheet.add_conditional_format(2, 1, 11, 1, &conditional_format)?;
+
+    // Write a standard Excel data bar with negative data
+    let conditional_format = ConditionalFormatDataBar::new();
+
+    worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
+
+    // Write a data bar with a user defined fill color.
+    let conditional_format = ConditionalFormatDataBar::new().set_fill_color("009933");
+
+    worksheet.add_conditional_format(2, 5, 11, 5, &conditional_format)?;
+
+    // Write a data bar with the direction changed.
+    let conditional_format = ConditionalFormatDataBar::new()
+        .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
+
+    worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
+```
+
+
+**Example 12.** Examples of icon style conditional formats.
+
+
+See [`ConditionalFormatIconSet`] for more details.
+
+[`ConditionalFormatIconSet`]: crate::ConditionalFormatIconSet
+
+<img src="https://rustxlsxwriter.github.io/images/conditional_formats12.png">
+
+Code to generate the above example:
+
+```ignore
+    // Code snippet from examples/app_conditional_formatting.rs
+
+    // Three Traffic lights - Green is highest.
+    let conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights);
+
+    worksheet.add_conditional_format(1, 1, 1, 3, &conditional_format)?;
+
+    // Reversed - Red is highest.
+    let conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+        .reverse_icons(true);
+
+    worksheet.add_conditional_format(2, 1, 2, 3, &conditional_format)?;
+
+    // Icons only - The number data is hidden.
+    let conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+        .show_icons_only(true);
+
+    worksheet.add_conditional_format(3, 1, 3, 3, &conditional_format)?;
+
+    // Three arrows.
+    let conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeArrows);
+
+    worksheet.add_conditional_format(5, 1, 5, 3, &conditional_format)?;
+
+    // Three symbols.
+    let conditional_format = ConditionalFormatIconSet::new()
+        .set_icon_type(ConditionalFormatIconType::ThreeSymbolsCircled);
+
+    worksheet.add_conditional_format(6, 1, 6, 3, &conditional_format)?;
+
+    // Three stars.
+    let conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeStars);
+
+    worksheet.add_conditional_format(7, 1, 7, 3, &conditional_format)?;
+
+    // Four Arrows.
+    let conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourArrows);
+
+    worksheet.add_conditional_format(8, 1, 8, 4, &conditional_format)?;
+
+    // Four circles - Red (highest) to Black (lowest).
+    let conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourRedToBlack);
+
+    worksheet.add_conditional_format(9, 1, 9, 4, &conditional_format)?;
+
+    // Four rating histograms.
+    let conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FourHistograms);
+
+    worksheet.add_conditional_format(10, 1, 10, 4, &conditional_format)?;
+
+    // Four Arrows.
+    let conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveArrows);
+
+    worksheet.add_conditional_format(11, 1, 11, 5, &conditional_format)?;
+
+    // Four rating histograms.
+    let conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveHistograms);
+
+    worksheet.add_conditional_format(12, 1, 12, 5, &conditional_format)?;
+
+    // Four rating quadrants.
+    let conditional_format =
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveQuadrants);
+
+    worksheet.add_conditional_format(13, 1, 13, 5, &conditional_format)?;
 ```
 
 
