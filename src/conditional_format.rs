@@ -5124,7 +5124,7 @@ impl ConditionalFormatDataBar {
 /// #     worksheet.write_with_format(4, 0, "Other three-five icon examples", &bold)?;
 /// #     worksheet.write_with_format(5, 0, "Three arrows", &indent)?;
 /// #     worksheet.write_with_format(6, 0, "Three symbols", &indent)?;
-/// #     worksheet.write_with_format(7, 0, "Three flags", &indent)?;
+/// #     worksheet.write_with_format(7, 0, "Three stars", &indent)?;
 /// #
 /// #     worksheet.write_with_format(8, 0, "Four arrows", &indent)?;
 /// #     worksheet.write_with_format(9, 0, "Four circles - Red (highest) to Black", &indent)?;
@@ -5189,9 +5189,9 @@ impl ConditionalFormatDataBar {
 ///
 ///     worksheet.add_conditional_format(6, 1, 6, 3, &conditional_format)?;
 ///
-///     // Three flags.
+///     // Three stars.
 ///     let conditional_format = ConditionalFormatIconSet::new()
-///         .set_icon_type(ConditionalFormatIconType::ThreeFlags);
+///         .set_icon_type(ConditionalFormatIconType::ThreeStars);
 ///
 ///     worksheet.add_conditional_format(7, 1, 7, 3, &conditional_format)?;
 ///
@@ -5254,6 +5254,7 @@ pub struct ConditionalFormatIconSet {
     icon_type: ConditionalFormatIconType,
     is_reversed: bool,
     icon_only: bool,
+    has_custom_icons: bool,
     icons: Vec<ConditionalFormatCustomIcon>,
 
     multi_range: String,
@@ -5271,6 +5272,7 @@ impl ConditionalFormatIconSet {
             icon_type: ConditionalFormatIconType::ThreeTrafficLights,
             is_reversed: false,
             icon_only: false,
+            has_custom_icons: false,
             icons: vec![],
 
             multi_range: String::new(),
@@ -5585,6 +5587,13 @@ impl ConditionalFormatIconSet {
             icon.greater_than = false;
         }
 
+        // Check for custom icons types.
+        if icons.iter().any(|icon| icon.is_custom) {
+            self.has_custom_icons = true;
+            self.has_x14_extensions = true;
+            self.has_x14_only = true;
+        }
+
         self.icons = icons;
 
         self
@@ -5703,10 +5712,34 @@ impl ConditionalFormatIconSet {
             attributes.push(("iconSet", self.icon_type.to_string()));
         }
 
+        if self.has_custom_icons {
+            attributes.push(("custom", "1".to_string()));
+        }
+
         writer.xml_start_tag("x14:iconSet", &attributes);
 
         for icon in &self.icons {
             Self::write_x14_type(&mut writer, icon);
+        }
+
+        // Write custom icons, if any.
+        if self.has_custom_icons {
+            for (index, icon) in self.icons.iter().enumerate() {
+                // Write the <x14:cfIcon> element.
+                let mut attributes = vec![];
+                if icon.no_icon {
+                    attributes.push(("iconSet", "NoIcons".to_string()));
+                    attributes.push(("iconId", "0".to_string()));
+                } else if let Some(icon_type) = icon.icon_type {
+                    attributes.push(("iconSet", icon_type.to_string()));
+                    attributes.push(("iconId", icon.icon_index.to_string()));
+                } else {
+                    attributes.push(("iconSet", self.icon_type.to_string()));
+                    attributes.push(("iconId", index.to_string()));
+                }
+
+                writer.xml_empty_tag("x14:cfIcon", &attributes);
+            }
         }
 
         writer.xml_end_tag("x14:iconSet");
@@ -5843,16 +5876,24 @@ impl ConditionalFormatIconSet {
 /// # }
 /// ```
 ///
-/// Output file:
 ///
-/// <img
-/// src="https://rustxlsxwriter.github.io/images/conditional_format_icon_set_icons.png">
+/// The default rules in the output file look like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_icon_set_icons1.png">
+///
+/// The user defined rules in the output file look like this:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/conditional_format_icon_set_icons2.png">
 ///
 #[derive(Clone)]
 pub struct ConditionalFormatCustomIcon {
+    icon_type: Option<ConditionalFormatIconType>,
+    icon_index: u8,
+    no_icon: bool,
+    is_custom: bool,
+    greater_than: bool,
     rule_type: ConditionalFormatType,
     value: ConditionalFormatValue,
-    greater_than: bool,
 }
 
 impl ConditionalFormatCustomIcon {
@@ -5861,9 +5902,13 @@ impl ConditionalFormatCustomIcon {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ConditionalFormatCustomIcon {
         ConditionalFormatCustomIcon {
+            icon_type: None,
+            icon_index: 0,
+            no_icon: false,
+            is_custom: false,
+            greater_than: false,
             rule_type: ConditionalFormatType::Percent,
             value: ConditionalFormatValue::new_from_string("0"),
-            greater_than: false,
         }
     }
 
@@ -5904,6 +5949,158 @@ impl ConditionalFormatCustomIcon {
             self.rule_type = rule_type;
             self.value = value;
         }
+
+        self
+    }
+
+    /// Set a custom icon type.
+    ///
+    /// In Excel you can specify a custom icon for one of more icons in the
+    /// default set using the following dialog:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_icon_custom_dialog.png">
+    ///
+    /// In `rust_xlsxwriter` you can emulate this by using the `set_icon_type()`
+    /// API to specify the [`ConditionalFormatIconType`] and index to the icon
+    /// within the icon type. For example the following are the
+    /// [`ConditionalFormatIconType::FiveBoxes`] icons:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/icons_five_boxes.png">
+    ///
+    /// So to use the fully filled box icon we would use index 4, see the
+    /// example below.
+    ///
+    /// # Parameters
+    ///
+    /// * `icon_type`- A [`ConditionalFormatIconType`] enum value.
+    /// * `index` - Index to the icon within the type. See the indexes shown in
+    ///   the images for [`ConditionalFormatIconType`].
+    ///
+    ///
+    /// # Examples
+    ///
+    /// Example of adding icon style conditional formatting to a worksheet. In the
+    /// second example the default icons are changed.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_conditional_format_icon_set_custom.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     ConditionalFormatCustomIcon, ConditionalFormatIconSet, ConditionalFormatIconType,
+    /// #     ConditionalFormatType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Write the worksheet data.
+    /// #     worksheet.write_row(1, 1, [1, 2, 3])?;
+    /// #     worksheet.write_row(2, 1, [1, 2, 3])?;
+    /// #
+    ///     // Three Traffic lights with default icons.
+    ///     let conditional_format = ConditionalFormatIconSet::new()
+    ///         .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights);
+    ///
+    ///     worksheet.add_conditional_format(1, 1, 1, 3, &conditional_format)?;
+    ///
+    ///     // Create some custom icons. Note, it is also required to set the default rules.
+    ///     let icons = [
+    ///         // We leave the default icon in the first/lowest position.
+    ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+    ///         ConditionalFormatCustomIcon::new()
+    ///             .set_rule(ConditionalFormatType::Percent, 33)
+    ///             .set_icon_type(ConditionalFormatIconType::FourHistograms, 0),
+    ///         ConditionalFormatCustomIcon::new()
+    ///             .set_rule(ConditionalFormatType::Percent, 67)
+    ///             .set_icon_type(ConditionalFormatIconType::FiveBoxes, 4),
+    ///     ];
+    ///
+    ///     // Three Traffic lights with user defined icons.
+    ///     let conditional_format = ConditionalFormatIconSet::new()
+    ///         .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+    ///         .set_icons(&icons);
+    ///
+    ///     worksheet.add_conditional_format(2, 1, 2, 3, &conditional_format)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("conditional_format.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_icon_set_custom.png">
+    ///
+    pub fn set_icon_type(
+        mut self,
+        icon_type: ConditionalFormatIconType,
+        index: u8,
+    ) -> ConditionalFormatCustomIcon {
+        // Check the index matches the icon type range.
+        match icon_type {
+            ConditionalFormatIconType::ThreeArrows
+            | ConditionalFormatIconType::ThreeArrowsGray
+            | ConditionalFormatIconType::ThreeFlags
+            | ConditionalFormatIconType::ThreeTrafficLights
+            | ConditionalFormatIconType::ThreeTrafficLightsWithRim
+            | ConditionalFormatIconType::ThreeSigns
+            | ConditionalFormatIconType::ThreeStars
+            | ConditionalFormatIconType::ThreeTriangles
+            | ConditionalFormatIconType::ThreeSymbolsCircled
+            | ConditionalFormatIconType::ThreeSymbols => {
+                if index >= 3 {
+                    eprintln!("Found '{index}' index. Three symbol Icon Sets have indexes of 0-2.");
+                    return self;
+                }
+            }
+            ConditionalFormatIconType::FourArrows
+            | ConditionalFormatIconType::FourArrowsGray
+            | ConditionalFormatIconType::FourRedToBlack
+            | ConditionalFormatIconType::FourHistograms
+            | ConditionalFormatIconType::FourTrafficLights => {
+                if index >= 4 {
+                    eprintln!("Found '{index}' index. Four symbol Icon Sets have indexes of 0-3.");
+                    return self;
+                }
+            }
+            ConditionalFormatIconType::FiveArrows
+            | ConditionalFormatIconType::FiveBoxes
+            | ConditionalFormatIconType::FiveArrowsGray
+            | ConditionalFormatIconType::FiveHistograms
+            | ConditionalFormatIconType::FiveQuadrants => {
+                if index >= 5 {
+                    eprintln!("Found '{index}' index. Five symbol Icon Sets have indexes of 0-4.");
+                    return self;
+                }
+            }
+        }
+
+        self.icon_type = Some(icon_type);
+        self.icon_index = index;
+        self.is_custom = true;
+
+        self
+    }
+
+    /// Turn off the icon in the cell.
+    ///
+    /// This is a variant of a custom icon setting:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/conditional_format_icon_custom_dialog.png">
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_no_icon(mut self, enable: bool) -> ConditionalFormatCustomIcon {
+        self.no_icon = enable;
+        self.is_custom = true;
 
         self
     }

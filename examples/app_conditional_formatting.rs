@@ -550,7 +550,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_with_format(4, 0, "Other three-five icon examples", &bold)?;
     worksheet.write_with_format(5, 0, "Three arrows", &indent)?;
     worksheet.write_with_format(6, 0, "Three symbols", &indent)?;
-    worksheet.write_with_format(7, 0, "Three flags", &indent)?;
+    worksheet.write_with_format(7, 0, "Three stars", &indent)?;
 
     worksheet.write_with_format(8, 0, "Four arrows", &indent)?;
     worksheet.write_with_format(9, 0, "Four circles - Red (highest) to Black", &indent)?;
@@ -612,9 +612,9 @@ fn main() -> Result<(), XlsxError> {
 
     worksheet.add_conditional_format(6, 1, 6, 3, &conditional_format)?;
 
-    // Three flags.
+    // Three stars.
     let conditional_format =
-        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeFlags);
+        ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::ThreeStars);
 
     worksheet.add_conditional_format(7, 1, 7, 3, &conditional_format)?;
 

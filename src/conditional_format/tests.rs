@@ -4921,4 +4921,344 @@ mod conditional_format_tests {
 
         Ok(())
     }
+
+    #[test]
+    fn icon_10() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 33),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, 67)
+                .set_icon_type(ConditionalFormatIconType::ThreeArrows, 2),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeStars)
+            .set_icons(&icons);
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+              <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+              <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+                <dimension ref="A1"/>
+                <sheetViews>
+                  <sheetView tabSelected="1" workbookViewId="0"/>
+                </sheetViews>
+                <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="iconSet" priority="1" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:iconSet iconSet="3Stars" custom="1">
+                          <x14:cfvo type="percent">
+                            <xm:f>0</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>33</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>67</xm:f>
+                          </x14:cfvo>
+                          <x14:cfIcon iconSet="3Stars" iconId="0"/>
+                          <x14:cfIcon iconSet="3Stars" iconId="1"/>
+                          <x14:cfIcon iconSet="3Arrows" iconId="2"/>
+                        </x14:iconSet>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn icon_11() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 33),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, 67)
+                .set_icon_type(ConditionalFormatIconType::FiveBoxes, 0),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeStars)
+            .set_icons(&icons);
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+              <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+              <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+                <dimension ref="A1"/>
+                <sheetViews>
+                  <sheetView tabSelected="1" workbookViewId="0"/>
+                </sheetViews>
+                <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="iconSet" priority="1" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:iconSet iconSet="3Stars" custom="1">
+                          <x14:cfvo type="percent">
+                            <xm:f>0</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>33</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>67</xm:f>
+                          </x14:cfvo>
+                          <x14:cfIcon iconSet="3Stars" iconId="0"/>
+                          <x14:cfIcon iconSet="3Stars" iconId="1"/>
+                          <x14:cfIcon iconSet="5Boxes" iconId="0"/>
+                        </x14:iconSet>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn icon_12() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 33),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, 67)
+                .set_icon_type(ConditionalFormatIconType::FiveBoxes, 4),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeStars)
+            .set_icons(&icons);
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+              <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+              <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+                <dimension ref="A1"/>
+                <sheetViews>
+                  <sheetView tabSelected="1" workbookViewId="0"/>
+                </sheetViews>
+                <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="iconSet" priority="1" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:iconSet iconSet="3Stars" custom="1">
+                          <x14:cfvo type="percent">
+                            <xm:f>0</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>33</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>67</xm:f>
+                          </x14:cfvo>
+                          <x14:cfIcon iconSet="3Stars" iconId="0"/>
+                          <x14:cfIcon iconSet="3Stars" iconId="1"/>
+                          <x14:cfIcon iconSet="5Boxes" iconId="4"/>
+                        </x14:iconSet>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn icon_13() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 33),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, 67)
+                .set_icon_type(ConditionalFormatIconType::FiveHistograms, 0),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+            .set_icons(&icons);
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+              <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+              <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+                <dimension ref="A1"/>
+                <sheetViews>
+                  <sheetView tabSelected="1" workbookViewId="0"/>
+                </sheetViews>
+                <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="iconSet" priority="1" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:iconSet custom="1">
+                          <x14:cfvo type="percent">
+                            <xm:f>0</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>33</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>67</xm:f>
+                          </x14:cfvo>
+                          <x14:cfIcon iconSet="3TrafficLights1" iconId="0"/>
+                          <x14:cfIcon iconSet="3TrafficLights1" iconId="1"/>
+                          <x14:cfIcon iconSet="5Rating" iconId="0"/>
+                        </x14:iconSet>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn icon_14() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let icons = [
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
+            ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 33),
+            ConditionalFormatCustomIcon::new()
+                .set_rule(ConditionalFormatType::Percent, 67)
+                .set_no_icon(true),
+        ];
+        let conditional_format = ConditionalFormatIconSet::new()
+            .set_icon_type(ConditionalFormatIconType::ThreeTrafficLights)
+            .set_icons(&icons);
+
+        worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+              <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+              <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">
+                <dimension ref="A1"/>
+                <sheetViews>
+                  <sheetView tabSelected="1" workbookViewId="0"/>
+                </sheetViews>
+                <sheetFormatPr defaultRowHeight="15" x14ac:dyDescent="0.25"/>
+              <sheetData/>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+              <extLst>
+                <ext xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" uri="{78C0D931-6437-407d-A8EE-F0AAD7539E65}">
+                  <x14:conditionalFormattings>
+                    <x14:conditionalFormatting xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">
+                      <x14:cfRule type="iconSet" priority="1" id="{DA7ABA51-AAAA-BBBB-0001-000000000001}">
+                        <x14:iconSet custom="1">
+                          <x14:cfvo type="percent">
+                            <xm:f>0</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>33</xm:f>
+                          </x14:cfvo>
+                          <x14:cfvo type="percent">
+                            <xm:f>67</xm:f>
+                          </x14:cfvo>
+                          <x14:cfIcon iconSet="3TrafficLights1" iconId="0"/>
+                          <x14:cfIcon iconSet="3TrafficLights1" iconId="1"/>
+                          <x14:cfIcon iconSet="NoIcons" iconId="0"/>
+                        </x14:iconSet>
+                      </x14:cfRule>
+                      <xm:sqref>A1</xm:sqref>
+                    </x14:conditionalFormatting>
+                  </x14:conditionalFormattings>
+                </ext>
+              </extLst>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
 }
