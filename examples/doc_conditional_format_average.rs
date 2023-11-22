@@ -6,7 +6,7 @@
 //! average values are in light red. Below average values are in light green.
 
 use rust_xlsxwriter::{
-    ConditionalFormatAverage, ConditionalFormatAverageCriteria, Format, Workbook, XlsxError,
+    ConditionalFormatAverage, ConditionalFormatAverageRule, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -51,7 +51,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatAverage::new()
-        .set_criteria(ConditionalFormatAverageCriteria::BelowAverage)
+        .set_rule(ConditionalFormatAverageRule::BelowAverage)
         .set_format(format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;

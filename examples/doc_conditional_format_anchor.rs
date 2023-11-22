@@ -37,7 +37,7 @@ fn main() -> Result<(), XlsxError> {
 
     // The rule is applied to each cell in the range.
     let conditional_format = ConditionalFormatFormula::new()
-        .set_value("=ISEVEN(B3)")
+        .set_rule("=ISEVEN(B3)")
         .set_format(&format);
 
     worksheet.add_conditional_format(2, 1, 11, 8, &conditional_format)?;
@@ -48,7 +48,7 @@ fn main() -> Result<(), XlsxError> {
 
     // The rule is applied to each row based on the first row in the column.
     let conditional_format = ConditionalFormatFormula::new()
-        .set_value("=ISEVEN($B3)")
+        .set_rule("=ISEVEN($B3)")
         .set_format(&format);
 
     worksheet.add_conditional_format(2, 1, 11, 8, &conditional_format)?;
@@ -59,7 +59,7 @@ fn main() -> Result<(), XlsxError> {
 
     // The rule is applied to each column based on the first cell in the column.
     let conditional_format = ConditionalFormatFormula::new()
-        .set_value("=ISEVEN(B$3)")
+        .set_rule("=ISEVEN(B$3)")
         .set_format(&format);
 
     worksheet.add_conditional_format(2, 1, 11, 8, &conditional_format)?;
@@ -70,7 +70,7 @@ fn main() -> Result<(), XlsxError> {
 
     // The rule is applied to the entire range based on the first cell in the range.
     let conditional_format = ConditionalFormatFormula::new()
-        .set_value("=ISEVEN($B$3)")
+        .set_rule("=ISEVEN($B$3)")
         .set_format(format);
 
     worksheet.add_conditional_format(2, 1, 11, 8, &conditional_format)?;

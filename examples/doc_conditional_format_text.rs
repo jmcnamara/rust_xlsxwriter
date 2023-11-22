@@ -5,7 +5,7 @@
 //! Example of adding a text type conditional formatting to a worksheet.
 
 use rust_xlsxwriter::{
-    ConditionalFormatText, ConditionalFormatTextCriteria, Format, Workbook, XlsxError,
+    ConditionalFormatText, ConditionalFormatTextRule, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -48,32 +48,30 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a text "containing" conditional format over a range.
     let conditional_format = ConditionalFormatText::new()
-        .set_criteria(ConditionalFormatTextCriteria::Contains)
-        .set_value("rust")
+        .set_rule(ConditionalFormatTextRule::Contains("rust".to_string()))
         .set_format(&format1);
 
     worksheet.add_conditional_format(0, 0, 12, 0, &conditional_format)?;
 
     // Write a text "not containing" conditional format over the same range.
     let conditional_format = ConditionalFormatText::new()
-        .set_criteria(ConditionalFormatTextCriteria::DoesNotContain)
-        .set_value("rust")
+        .set_rule(ConditionalFormatTextRule::DoesNotContain(
+            "rust".to_string(),
+        ))
         .set_format(&format2);
 
     worksheet.add_conditional_format(0, 0, 12, 0, &conditional_format)?;
 
     // Write a text "begins with" conditional format over a range.
     let conditional_format = ConditionalFormatText::new()
-        .set_criteria(ConditionalFormatTextCriteria::BeginsWith)
-        .set_value("t")
+        .set_rule(ConditionalFormatTextRule::BeginsWith("t".to_string()))
         .set_format(&format1);
 
     worksheet.add_conditional_format(0, 2, 12, 2, &conditional_format)?;
 
     // Write a text "ends with" conditional format over the same range.
     let conditional_format = ConditionalFormatText::new()
-        .set_criteria(ConditionalFormatTextCriteria::EndsWith)
-        .set_value("t")
+        .set_rule(ConditionalFormatTextRule::EndsWith("t".to_string()))
         .set_format(&format2);
 
     worksheet.add_conditional_format(0, 2, 12, 2, &conditional_format)?;

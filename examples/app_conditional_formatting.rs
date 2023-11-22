@@ -6,14 +6,14 @@
 //! rust_xlsxwriter library.
 //!
 //! Conditional formatting allows you to apply a format to a cell or a range of
-//! cells based on certain criteria.
+//! cells based on user defined rule.
 
 use rust_xlsxwriter::{
     ConditionalFormat2ColorScale, ConditionalFormat3ColorScale, ConditionalFormatAverage,
-    ConditionalFormatAverageCriteria, ConditionalFormatCell, ConditionalFormatCellCriteria,
+    ConditionalFormatAverageRule, ConditionalFormatCell, ConditionalFormatCellRule,
     ConditionalFormatDataBar, ConditionalFormatDataBarDirection, ConditionalFormatDuplicate,
     ConditionalFormatFormula, ConditionalFormatIconSet, ConditionalFormatIconType,
-    ConditionalFormatText, ConditionalFormatTextCriteria, ConditionalFormatTop, Format, Workbook,
+    ConditionalFormatText, ConditionalFormatTextRule, ConditionalFormatTop, Format, Workbook,
     XlsxError,
 };
 
@@ -72,16 +72,14 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-        .set_value(50)
+        .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(50))
         .set_format(&format1);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::LessThan)
-        .set_value(50)
+        .set_rule(ConditionalFormatCellRule::LessThan(50))
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -108,18 +106,14 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::Between)
-        .set_minimum(30)
-        .set_maximum(70)
+        .set_rule(ConditionalFormatCellRule::Between(30, 70))
         .set_format(&format1);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::NotBetween)
-        .set_minimum(30)
-        .set_maximum(70)
+        .set_rule(ConditionalFormatCellRule::NotBetween(30, 70))
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -182,7 +176,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatAverage::new()
-        .set_criteria(ConditionalFormatAverageCriteria::BelowAverage)
+        .set_rule(ConditionalFormatAverageRule::BelowAverage)
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -208,16 +202,14 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatTop::new()
-        .set_value(10)
+        .set_rule(rust_xlsxwriter::ConditionalFormatTopRule::Top(10))
         .set_format(&format1);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
-    // Invert the Top conditional format to show Bottom values in the same
-    // range.
+    // Also show the bottom values in the same range.
     let conditional_format = ConditionalFormatTop::new()
-        .invert()
-        .set_value(10)
+        .set_rule(rust_xlsxwriter::ConditionalFormatTopRule::Bottom(10))
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -243,8 +235,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a non-contiguous range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-        .set_value(50)
+        .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(50))
         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
         .set_format(&format1);
 
@@ -252,8 +243,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::LessThan)
-        .set_value(50)
+        .set_rule(ConditionalFormatCellRule::LessThan(50))
         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
         .set_format(&format2);
 
@@ -280,14 +270,14 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatFormula::new()
-        .set_value("=ISODD(B3)")
+        .set_rule("=ISODD(B3)")
         .set_format(&format1);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatFormula::new()
-        .set_value("=ISEVEN(B3)")
+        .set_rule("=ISEVEN(B3)")
         .set_format(&format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -329,32 +319,30 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a text "containing" conditional format over a range.
     let conditional_format = ConditionalFormatText::new()
-        .set_criteria(ConditionalFormatTextCriteria::Contains)
-        .set_value("rust")
+        .set_rule(ConditionalFormatTextRule::Contains("rust".to_string()))
         .set_format(&format2);
 
     worksheet.add_conditional_format(1, 0, 13, 0, &conditional_format)?;
 
     // Write a text "not containing" conditional format over the same range.
     let conditional_format = ConditionalFormatText::new()
-        .set_criteria(ConditionalFormatTextCriteria::DoesNotContain)
-        .set_value("rust")
+        .set_rule(ConditionalFormatTextRule::DoesNotContain(
+            "rust".to_string(),
+        ))
         .set_format(&format1);
 
     worksheet.add_conditional_format(1, 0, 13, 0, &conditional_format)?;
 
     // Write a text "begins with" conditional format over a range.
     let conditional_format = ConditionalFormatText::new()
-        .set_criteria(ConditionalFormatTextCriteria::BeginsWith)
-        .set_value("t")
+        .set_rule(ConditionalFormatTextRule::BeginsWith("t".to_string()))
         .set_format(&format2);
 
     worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;
 
     // Write a text "ends with" conditional format over the same range.
     let conditional_format = ConditionalFormatText::new()
-        .set_criteria(ConditionalFormatTextCriteria::EndsWith)
-        .set_value("t")
+        .set_rule(ConditionalFormatTextRule::EndsWith("t".to_string()))
         .set_format(&format1);
 
     worksheet.add_conditional_format(1, 2, 13, 2, &conditional_format)?;

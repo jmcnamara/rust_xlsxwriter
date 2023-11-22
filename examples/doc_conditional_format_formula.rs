@@ -45,14 +45,14 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatFormula::new()
-        .set_value("=ISODD(B3)")
+        .set_rule("=ISODD(B3)")
         .set_format(format1);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatFormula::new()
-        .set_value("=ISEVEN(B3)")
+        .set_rule("=ISEVEN(B3)")
         .set_format(format2);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;

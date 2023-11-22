@@ -7,7 +7,7 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+    ConditionalFormatCell, ConditionalFormatCellRule, Format, Workbook, XlsxError,
 };
 
 // Create rust_xlsxwriter file to compare against Excel file.
@@ -26,8 +26,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(5, 1, 40)?;
 
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::GreaterThan)
-        .set_value(20)
+        .set_rule(ConditionalFormatCellRule::GreaterThan(20))
         .set_format(format);
 
     worksheet.add_conditional_format(2, 1, 5, 1, &conditional_format)?;

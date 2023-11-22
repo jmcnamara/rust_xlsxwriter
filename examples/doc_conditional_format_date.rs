@@ -9,8 +9,7 @@
 //! run the example.
 
 use rust_xlsxwriter::{
-    ConditionalFormatDate, ConditionalFormatDateCriteria, ExcelDateTime, Format, Workbook,
-    XlsxError,
+    ConditionalFormatDate, ConditionalFormatDateRule, ExcelDateTime, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -66,19 +65,19 @@ fn main() -> Result<(), XlsxError> {
 
     // Write conditional format over the same range.
     let conditional_format = ConditionalFormatDate::new()
-        .set_criteria(ConditionalFormatDateCriteria::LastMonth)
+        .set_rule(ConditionalFormatDateRule::LastMonth)
         .set_format(format1);
 
     worksheet.add_conditional_format(0, 0, 10, 0, &conditional_format)?;
 
     let conditional_format = ConditionalFormatDate::new()
-        .set_criteria(ConditionalFormatDateCriteria::ThisMonth)
+        .set_rule(ConditionalFormatDateRule::ThisMonth)
         .set_format(format2);
 
     worksheet.add_conditional_format(0, 0, 10, 0, &conditional_format)?;
 
     let conditional_format = ConditionalFormatDate::new()
-        .set_criteria(ConditionalFormatDateCriteria::NextMonth)
+        .set_rule(ConditionalFormatDateRule::NextMonth)
         .set_format(format3);
 
     worksheet.add_conditional_format(0, 0, 10, 0, &conditional_format)?;

@@ -5,7 +5,9 @@
 //! Example of how to add Top and Bottom conditional formatting to a worksheet.
 //! Top 10 values are in light red. Bottom 10 values are in light green.
 
-use rust_xlsxwriter::{ConditionalFormatTop, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    ConditionalFormatTop, ConditionalFormatTopRule, Format, Workbook, XlsxError,
+};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -44,16 +46,16 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatTop::new()
-        .set_value(10)
+        .set_rule(ConditionalFormatTopRule::Top(10))
         .set_format(format1);
 
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // Invert the Top conditional format to show Bottom values.
     let conditional_format = ConditionalFormatTop::new()
-        .invert()
-        .set_value(10)
+        .set_rule(ConditionalFormatTopRule::Bottom(10))
         .set_format(format2);
+
     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 
     // Save the file.

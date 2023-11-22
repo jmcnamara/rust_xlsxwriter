@@ -8,7 +8,7 @@
 //! have any conditional formatting.
 
 use rust_xlsxwriter::{
-    ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+    ConditionalFormatCell, ConditionalFormatCellRule, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -48,8 +48,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a non-contiguous range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-        .set_value(50)
+        .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(50))
         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
         .set_format(format1);
 
@@ -57,8 +56,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Write another conditional format over the same range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::LessThan)
-        .set_value(50)
+        .set_rule(ConditionalFormatCellRule::LessThan(50))
         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
         .set_format(format2);
 

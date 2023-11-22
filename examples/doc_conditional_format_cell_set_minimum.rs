@@ -6,7 +6,7 @@
 //! between 40 and 60 are highlighted in light green.
 
 use rust_xlsxwriter::{
-    ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+    ConditionalFormatCell, ConditionalFormatCellRule, Format, Workbook, XlsxError,
 };
 
 fn main() -> Result<(), XlsxError> {
@@ -26,9 +26,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::Between)
-        .set_minimum(40)
-        .set_maximum(60)
+        .set_rule(ConditionalFormatCellRule::Between(40, 60))
         .set_format(format);
 
     worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
