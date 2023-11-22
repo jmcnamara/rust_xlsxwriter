@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 // Test case to demonstrate creating a basic file with some string cell data.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
@@ -20,11 +20,36 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test with Option<T>.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write(0, 0, Some("Hello"))?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn bootstrap06_write_string_with_format() {
+fn bootstrap06_write_string_with_format_1() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap06")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap06_write_string_with_format_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap06")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

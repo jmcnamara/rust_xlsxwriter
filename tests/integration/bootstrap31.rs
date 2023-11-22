@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Color, Format, FormatPattern, Workbook, XlsxError};
 
 // Test case to demonstrate creating a basic file with cell patterns and color.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
@@ -36,11 +36,56 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test with Option<T>.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Test paper size as well.
+    worksheet.set_paper_size(11);
+
+    let format1 = Format::new().set_bold();
+    let format2 = Format::new().set_foreground_color(Color::Red);
+    let format3 = Format::new().set_pattern(FormatPattern::MediumGray);
+    let format4 = Format::new()
+        .set_background_color(Color::Yellow)
+        .set_foreground_color(Color::Red)
+        .set_pattern(FormatPattern::DarkVertical);
+    let format5 = Format::new().set_background_color(Color::RGB(0x00B050));
+
+    worksheet.write_with_format(0, 0, None::<&str>, &format1)?;
+    worksheet.write_with_format(1, 0, Some(""), &format2)?;
+
+    // Should be ignored.
+    worksheet.write(0, 0, None::<&str>)?;
+
+    worksheet.write_blank(2, 0, &format3)?;
+    worksheet.write_blank(3, 0, &format4)?;
+    worksheet.write_blank(4, 0, &format5)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn bootstrap31_format_patterns() {
+fn bootstrap31_format_patterns_1() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap31")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap31_format_patterns_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap31")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

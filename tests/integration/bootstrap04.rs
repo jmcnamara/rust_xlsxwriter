@@ -36,6 +36,23 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Write Option<T> with generic write().
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write(0, 0, Some(1))?;
+    worksheet.write(1, 1, 2)?;
+    worksheet.write(2, 2, 3)?;
+
+    // This should be ignored.
+    worksheet.write(0, 0, None::<u8>)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap04_write_numbers_1() {
     let test_runner = common::TestRunner::new()
@@ -54,6 +71,18 @@ fn bootstrap04_write_numbers_2() {
         .set_name("bootstrap04")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap04_write_numbers_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap04")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

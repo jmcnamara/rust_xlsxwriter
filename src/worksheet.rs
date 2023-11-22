@@ -535,6 +535,8 @@ impl Worksheet {
     /// - [`ExcelDateTime`].
     /// - [`Formula`].
     /// - [`Url`].
+    /// - [`Option<T>`]: If [`Some`] and `T` is a supported type then the `data`
+    ///   is written. If [`None`] then nothing is written.
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
@@ -585,6 +587,9 @@ impl Worksheet {
     /// - [`ExcelDateTime`].
     /// - [`Formula`].
     /// - [`Url`].
+    /// - [`Option<T>`]: If [`Some`] and `T` is a supported type then the `data`
+    ///   is written. If [`None`] then a formatted blank cell is written using
+    ///   [`Worksheet::write_blank()`].
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
@@ -11522,6 +11527,33 @@ impl IntoExcelData for Url {
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         worksheet.store_url(row, col, self, Some(format))
+    }
+}
+
+impl<T: IntoExcelData> IntoExcelData for Option<T> {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        match self {
+            Some(data) => worksheet.write(row, col, data),
+            None => Ok(worksheet),
+        }
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        match self {
+            Some(data) => worksheet.write_with_format(row, col, data, format),
+            None => worksheet.write_blank(row, col, format),
+        }
     }
 }
 
