@@ -11525,6 +11525,33 @@ impl IntoExcelData for Url {
     }
 }
 
+impl<T: IntoExcelData> IntoExcelData for Option<T> {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        match self {
+            Some(data) => worksheet.write(row, col, data),
+            None => Ok(worksheet),
+        }
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        match self {
+            Some(data) => worksheet.write_with_format(row, col, data, format),
+            None => worksheet.write_blank(row, col, format),
+        }
+    }
+}
+
 // -----------------------------------------------------------------------
 // Helper enums/structs/functions.
 // -----------------------------------------------------------------------
