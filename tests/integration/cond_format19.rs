@@ -34,6 +34,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let _z = ConditionalFormatCellRule::EqualTo(5);
 
+    let conditional_format = ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::EqualTo(5));
+
     workbook.save(filename)?;
 
     Ok(())

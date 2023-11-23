@@ -1032,8 +1032,7 @@ generate_conditional_format_impls!(
     ConditionalFormatIconSet
 );
 
-
-impl<T: IntoConditionalFormatValue + Sync> ConditionalFormat for ConditionalFormatCell<T> {
+impl ConditionalFormat for ConditionalFormatCell {
     fn validate(&self) -> Result<(), XlsxError> {
         self.validate()
     }
@@ -1045,7 +1044,6 @@ impl<T: IntoConditionalFormatValue + Sync> ConditionalFormat for ConditionalForm
     fn x14_rule(&self, priority: u32, guid: &str) -> String {
         self.x14_rule(priority, guid)
     }
-
 
     fn format_as_mut(&mut self) -> Option<&mut Format> {
         self.format_as_mut()
@@ -1063,18 +1061,14 @@ impl<T: IntoConditionalFormatValue + Sync> ConditionalFormat for ConditionalForm
         self.has_x14_extensions()
     }
 
-
     fn has_x14_only(&self) -> bool {
         self.has_x14_only()
     }
-
 
     fn box_clone(&self) -> Box<dyn ConditionalFormat + Send> {
         Box::new(self.clone())
     }
 }
-
-
 
 // -----------------------------------------------------------------------
 // ConditionalFormatCell
@@ -1252,11 +1246,11 @@ impl<T: IntoConditionalFormatValue + Sync> ConditionalFormat for ConditionalForm
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell2.png">
 ///
 #[derive(Clone)]
-pub struct ConditionalFormatCell<T: IntoConditionalFormatValue + Sync> {
+pub struct ConditionalFormatCell {
     minimum: ConditionalFormatValue,
     maximum: ConditionalFormatValue,
     criteria: ConditionalFormatCellCriteria,
-    rule: Option<ConditionalFormatCellRule<T>>,
+    rule: ConditionalFormatCellRule<ConditionalFormatValue>,
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
@@ -1264,15 +1258,15 @@ pub struct ConditionalFormatCell<T: IntoConditionalFormatValue + Sync> {
     pub(crate) format: Option<Format>,
 }
 
-impl<T: IntoConditionalFormatValue + Sync> ConditionalFormatCell<T> {
+impl ConditionalFormatCell {
     /// Create a new Cell conditional format struct.
     #[allow(clippy::new_without_default)]
-    pub fn new() -> ConditionalFormatCell<T> {
+    pub fn new() -> ConditionalFormatCell {
         ConditionalFormatCell {
             minimum: ConditionalFormatValue::new_from_string(""),
             maximum: ConditionalFormatValue::new_from_string(""),
             criteria: ConditionalFormatCellCriteria::EqualTo,
-            rule: None,
+            rule: ConditionalFormatCellRule::EqualTo(ConditionalFormatValue::new_from_string("0")),
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
@@ -1334,7 +1328,7 @@ impl<T: IntoConditionalFormatValue + Sync> ConditionalFormatCell<T> {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_cell_set_value.png">
     ///
-    pub fn set_value(self, value: impl Into<ConditionalFormatValue>) -> ConditionalFormatCell<T> {
+    pub fn set_value(self, value: impl Into<ConditionalFormatValue>) -> ConditionalFormatCell {
         self.set_minimum(value)
     }
 
@@ -1397,7 +1391,7 @@ impl<T: IntoConditionalFormatValue + Sync> ConditionalFormatCell<T> {
     pub fn set_minimum(
         mut self,
         value: impl Into<ConditionalFormatValue>,
-    ) -> ConditionalFormatCell<T> {
+    ) -> ConditionalFormatCell {
         self.minimum = value.into();
         self.minimum.quote_string();
         self
@@ -1416,7 +1410,7 @@ impl<T: IntoConditionalFormatValue + Sync> ConditionalFormatCell<T> {
     pub fn set_maximum(
         mut self,
         value: impl Into<ConditionalFormatValue>,
-    ) -> ConditionalFormatCell<T> {
+    ) -> ConditionalFormatCell {
         self.maximum = value.into();
         self.maximum.quote_string();
         self
@@ -1432,8 +1426,49 @@ impl<T: IntoConditionalFormatValue + Sync> ConditionalFormatCell<T> {
     pub fn set_criteria(
         mut self,
         criteria: ConditionalFormatCellCriteria,
-    ) -> ConditionalFormatCell<T> {
+    ) -> ConditionalFormatCell {
         self.criteria = criteria;
+        self
+    }
+
+    /*     EqualTo(T),
+
+       /// Show the conditional format for cells that are not equal to the target value.
+       NotEqualTo(T),
+
+       /// Show the conditional format for cells that are greater than the target value.
+       GreaterThan(T),
+
+       /// Show the conditional format for cells that are greater than or equal to the target value.
+       GreaterThanOrEqualTo(T),
+
+       /// Show the conditional format for cells that are less than the target value.
+       LessThan(T),
+
+       /// Show the conditional format for cells that are less than or equal to the target value.
+       LessThanOrEqualTo(T),
+
+       /// Show the conditional format for cells that are between the target values.
+       Between(T, T),
+
+       /// Show the conditional format for cells that are not between the target values.
+       NotBetween(T, T),
+    */
+
+    ///
+    pub fn set_rule<T>(mut self, rule: ConditionalFormatCellRule<T>) -> ConditionalFormatCell
+    where
+        T: IntoConditionalFormatValue,
+    {
+        self.rule = match rule {
+            ConditionalFormatCellRule::EqualTo(value) => {
+                ConditionalFormatCellRule::EqualTo(value.new_value())
+
+            }
+            _ => ConditionalFormatCellRule::EqualTo(ConditionalFormatValue::new_from_string("0")),
+        };
+
+
         self
     }
 
@@ -1451,7 +1486,7 @@ impl<T: IntoConditionalFormatValue + Sync> ConditionalFormatCell<T> {
     ///
     /// * `format` - The [`Format`] property for the conditional format.
     ///
-    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatCell<T> {
+    pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatCell {
         self.format = Some(format.into());
         self
     }
@@ -6805,7 +6840,6 @@ impl From<&NaiveTime> for ConditionalFormatValue {
     }
 }
 
-
 /// TODO
 pub trait IntoConditionalFormatValue {
     /// TODO
@@ -6825,8 +6859,6 @@ macro_rules! conditional_format_value_from_string {
 }
 conditional_format_value_from_string!(&str &String String Cow<'_, str>);
 
-
-
 macro_rules! conditional_format_value_from_number {
     ($($t:ty)*) => ($(
         impl IntoConditionalFormatValue for $t {
@@ -6838,7 +6870,6 @@ macro_rules! conditional_format_value_from_number {
     )*)
 }
 conditional_format_value_from_number!(u8 i8 u16 i16 u32 i32 f32 f64);
-
 
 impl IntoConditionalFormatValue for ExcelDateTime {
     fn new_value(self) -> ConditionalFormatValue {
@@ -6854,11 +6885,11 @@ impl IntoConditionalFormatValue for &ExcelDateTime {
     }
 }
 
-
-
-
-
-
+impl IntoConditionalFormatValue for ConditionalFormatValue {
+    fn new_value(self) -> ConditionalFormatValue {
+        self.clone()
+    }
+}
 
 // -----------------------------------------------------------------------
 // ConditionalFormatCellCriteria
@@ -6910,38 +6941,6 @@ impl fmt::Display for ConditionalFormatCellCriteria {
     }
 }
 
-
-///
-pub enum ConditionalFormatCellRule2<T: IntoConditionalFormatValue + Sync> {
-    /// The cell conditional format criteria isn't set.
-    #[doc(hidden)]
-    None,
-
-    /// Show the conditional format for cells that are equal to the target value.
-    EqualTo(T),
-
-    /// Show the conditional format for cells that are not equal to the target value.
-    NotEqualTo,
-
-    /// Show the conditional format for cells that are greater than the target value.
-    GreaterThan,
-
-    /// Show the conditional format for cells that are greater than or equal to the target value.
-    GreaterThanOrEqualTo,
-
-    /// Show the conditional format for cells that are less than the target value.
-    LessThan,
-
-    /// Show the conditional format for cells that are less than or equal to the target value.
-    LessThanOrEqualTo,
-
-    /// Show the conditional format for cells that are between the target values.
-    Between,
-
-    /// Show the conditional format for cells that are not between the target values.
-    NotBetween,
-}
-
 // -----------------------------------------------------------------------
 // ConditionalFormatCellRule
 // -----------------------------------------------------------------------
@@ -6951,7 +6950,7 @@ pub enum ConditionalFormatCellRule2<T: IntoConditionalFormatValue + Sync> {
 ///
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub enum ConditionalFormatCellRule<T: IntoConditionalFormatValue + Sync> {
+pub enum ConditionalFormatCellRule<T: IntoConditionalFormatValue> {
     /// Show the conditional format for cells that are equal to the target value.
     EqualTo(T),
 
@@ -6976,7 +6975,6 @@ pub enum ConditionalFormatCellRule<T: IntoConditionalFormatValue + Sync> {
     /// Show the conditional format for cells that are not between the target values.
     NotBetween(T, T),
 }
-
 
 // -----------------------------------------------------------------------
 // ConditionalFormatAverageCriteria
@@ -7619,8 +7617,7 @@ generate_conditional_common_methods!(
     ConditionalFormatIconSet
 );
 
-impl<T: IntoConditionalFormatValue + Sync + Sync>  ConditionalFormatCell<T> {
-
+impl ConditionalFormatCell {
     /// Set an additional multi-cell range for the conditional format.
     ///
     /// The `set_multi_range()` method is used to extend a conditional
@@ -7643,7 +7640,7 @@ impl<T: IntoConditionalFormatValue + Sync + Sync>  ConditionalFormatCell<T> {
     ///
     ///   Note, if the range is invalid then Excel will omit it silently.
     ///
-    pub fn set_multi_range(mut self, range: impl Into<String>) -> ConditionalFormatCell<T> {
+    pub fn set_multi_range(mut self, range: impl Into<String>) -> ConditionalFormatCell {
         self.multi_range = range.into().replace('$', "").replace(',', " ");
         self
     }
@@ -7659,7 +7656,7 @@ impl<T: IntoConditionalFormatValue + Sync + Sync>  ConditionalFormatCell<T> {
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
-    pub fn set_stop_if_true(mut self, enable: bool) -> ConditionalFormatCell<T> {
+    pub fn set_stop_if_true(mut self, enable: bool) -> ConditionalFormatCell {
         self.stop_if_true = enable;
         self
     }
@@ -7689,7 +7686,6 @@ impl<T: IntoConditionalFormatValue + Sync + Sync>  ConditionalFormatCell<T> {
         self.has_x14_only
     }
 }
-
 
 // -----------------------------------------------------------------------
 // Common methods.
