@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{ConditionalFormatCell, ConditionalFormatCellCriteria, Workbook, XlsxError};
+use rust_xlsxwriter::{ConditionalFormatCell, ConditionalFormatCellRule, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -19,9 +19,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(2, 0, 30)?;
     worksheet.write(3, 0, 40)?;
 
-    let conditional_format = ConditionalFormatCell::new()
-        .set_criteria(ConditionalFormatCellCriteria::LessThan)
-        .set_value(5);
+    let conditional_format =
+        ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::LessThan(5));
 
     worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
 

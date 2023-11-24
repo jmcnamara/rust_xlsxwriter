@@ -21,7 +21,7 @@
 //! # // This code is available in examples/doc_conditional_format_cell1.rs
 //! #
 //! # use rust_xlsxwriter::{
-//! #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+//! #     ConditionalFormatCell, ConditionalFormatCellRule, Format, Workbook, XlsxError,
 //! # };
 //! #
 //! # fn main() -> Result<(), XlsxError> {
@@ -49,28 +49,26 @@
 //! #         worksheet.set_column_width(col_num, 6)?;
 //! #     }
 //! #
-//!     // Add a format. Light red fill with dark red text.
-//!     let format1 = Format::new()
-//!         .set_font_color("9C0006")
-//!         .set_background_color("FFC7CE");
-//!
-//!     // Add a format. Green fill with dark green text.
-//!     let format2 = Format::new()
-//!         .set_font_color("006100")
-//!         .set_background_color("C6EFCE");
-//!
+//! #     // Add a format. Light red fill with dark red text.
+//! #     let format1 = Format::new()
+//! #         .set_font_color("9C0006")
+//! #         .set_background_color("FFC7CE");
+//! #
+//! #     // Add a format. Green fill with dark green text.
+//! #     let format2 = Format::new()
+//! #         .set_font_color("006100")
+//! #         .set_background_color("C6EFCE");
+//! #
 //!     // Write a conditional format over a range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-//!         .set_value(50)
+//!         .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(50))
 //!         .set_format(format1);
 //!
 //!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 //!
 //!     // Write another conditional format over the same range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::LessThan)
-//!         .set_value(50)
+//!         .set_rule(ConditionalFormatCellRule::LessThan(50))
 //!         .set_format(format2);
 //!
 //!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -202,7 +200,7 @@
 //! # // This code is available in examples/doc_conditional_format_multi_range.rs
 //! #
 //! # use rust_xlsxwriter::{
-//! #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+//! #     ConditionalFormatCell, ConditionalFormatCellRule, Format, Workbook, XlsxError,
 //! # };
 //! #
 //! # fn main() -> Result<(), XlsxError> {
@@ -242,8 +240,7 @@
 //! #
 //!     // Write a conditional format over a non-contiguous range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-//!         .set_value(50)
+//!         .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(50))
 //!         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
 //!         .set_format(format1);
 //!
@@ -251,8 +248,7 @@
 //!
 //!     // Write another conditional format over the same range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::LessThan)
-//!         .set_value(50)
+//!         .set_rule(ConditionalFormatCellRule::LessThan(50))
 //!         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
 //!         .set_format(format2);
 //!
@@ -439,16 +435,14 @@
 //!
 //!     // Write a conditional format over a range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-//!         .set_value(50)
+//!         .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(50))
 //!         .set_format(&format1);
 //!
 //!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 //!
 //!     // Write another conditional format over the same range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::LessThan)
-//!         .set_value(50)
+//!         .set_rule(ConditionalFormatCellRule::LessThan(50))
 //!         .set_format(&format2);
 //!
 //!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -471,18 +465,14 @@
 //!
 //!     // Write a conditional format over a range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::Between)
-//!         .set_minimum(30)
-//!         .set_maximum(70)
+//!         .set_rule(ConditionalFormatCellRule::Between(30, 70))
 //!         .set_format(&format1);
 //!
 //!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 //!
 //!     // Write another conditional format over the same range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::NotBetween)
-//!         .set_minimum(30)
-//!         .set_maximum(70)
+//!         .set_rule(ConditionalFormatCellRule::NotBetween(30, 70))
 //!         .set_format(&format2);
 //!
 //!     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -591,8 +581,7 @@
 //!
 //!     // Write a conditional format over a non-contiguous range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-//!         .set_value(50)
+//!         .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(50))
 //!         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
 //!         .set_format(&format1);
 //!
@@ -600,8 +589,7 @@
 //!
 //!     // Write another conditional format over the same range.
 //!     let conditional_format = ConditionalFormatCell::new()
-//!         .set_criteria(ConditionalFormatCellCriteria::LessThan)
-//!         .set_value(50)
+//!         .set_rule(ConditionalFormatCellRule::LessThan(50))
 //!         .set_multi_range("B3:D6 I3:K6 B9:D12 I9:K12")
 //!         .set_format(&format2);
 //!
@@ -792,8 +780,6 @@
 //!         .set_minimum_color("5A8AC6")
 //!         .set_midpoint_color("FCFCFF")
 //!         .set_maximum_color("F8696B");
-//!
-//!     worksheet.add_conditional_format(2, 11, 11, 11, &conditional_format)?;
 //! ```
 //!
 //!
@@ -921,6 +907,7 @@
 //!
 //!     worksheet.add_conditional_format(13, 1, 13, 5, &conditional_format)?;
 //! ```
+
 #![warn(missing_docs)]
 
 mod tests;
@@ -1094,7 +1081,7 @@ impl ConditionalFormat for ConditionalFormatCell {
 /// # // This code is available in examples/doc_conditional_format_cell1.rs
 /// #
 /// # use rust_xlsxwriter::{
-/// #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+/// #     ConditionalFormatCell, ConditionalFormatCellRule, Format, Workbook, XlsxError,
 /// # };
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -1134,16 +1121,14 @@ impl ConditionalFormat for ConditionalFormatCell {
 /// #
 ///     // Write a conditional format over a range.
 ///     let conditional_format = ConditionalFormatCell::new()
-///         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-///         .set_value(50)
+///         .set_rule(ConditionalFormatCellRule::GreaterThanOrEqualTo(50))
 ///         .set_format(format1);
 ///
 ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 ///
 ///     // Write another conditional format over the same range.
 ///     let conditional_format = ConditionalFormatCell::new()
-///         .set_criteria(ConditionalFormatCellCriteria::LessThan)
-///         .set_value(50)
+///         .set_rule(ConditionalFormatCellRule::LessThan(50))
 ///         .set_format(format2);
 ///
 ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -1173,7 +1158,7 @@ impl ConditionalFormat for ConditionalFormatCell {
 /// # // This code is available in examples/doc_conditional_format_cell2.rs
 /// #
 /// # use rust_xlsxwriter::{
-/// #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
+/// #     ConditionalFormatCell, ConditionalFormatCellRule, Format, Workbook, XlsxError,
 /// # };
 /// #
 /// # fn main() -> Result<(), XlsxError> {
@@ -1213,18 +1198,14 @@ impl ConditionalFormat for ConditionalFormatCell {
 /// #
 ///     // Write a conditional format over a range.
 ///     let conditional_format = ConditionalFormatCell::new()
-///         .set_criteria(ConditionalFormatCellCriteria::Between)
-///         .set_minimum(30)
-///         .set_maximum(70)
+///         .set_rule(ConditionalFormatCellRule::Between(30, 70))
 ///         .set_format(format1);
 ///
 ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
 ///
 ///     // Write another conditional format over the same range.
 ///     let conditional_format = ConditionalFormatCell::new()
-///         .set_criteria(ConditionalFormatCellCriteria::NotBetween)
-///         .set_minimum(30)
-///         .set_maximum(70)
+///         .set_rule(ConditionalFormatCellRule::NotBetween(30, 70))
 ///         .set_format(format2);
 ///
 ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
@@ -1235,6 +1216,7 @@ impl ConditionalFormat for ConditionalFormatCell {
 /// #     Ok(())
 /// # }
 /// ```
+///
 ///
 /// This creates conditional format rules like this:
 ///
@@ -1247,10 +1229,7 @@ impl ConditionalFormat for ConditionalFormatCell {
 ///
 #[derive(Clone)]
 pub struct ConditionalFormatCell {
-    minimum: ConditionalFormatValue,
-    maximum: ConditionalFormatValue,
-    criteria: ConditionalFormatCellCriteria,
-    rule: ConditionalFormatCellRule<ConditionalFormatValue>,
+    rule: Option<ConditionalFormatCellRule<ConditionalFormatValue>>,
     multi_range: String,
     stop_if_true: bool,
     has_x14_extensions: bool,
@@ -1263,10 +1242,7 @@ impl ConditionalFormatCell {
     #[allow(clippy::new_without_default)]
     pub fn new() -> ConditionalFormatCell {
         ConditionalFormatCell {
-            minimum: ConditionalFormatValue::new_from_string(""),
-            maximum: ConditionalFormatValue::new_from_string(""),
-            criteria: ConditionalFormatCellCriteria::EqualTo,
-            rule: ConditionalFormatCellRule::EqualTo(ConditionalFormatValue::new_from_string("0")),
+            rule: None,
             multi_range: String::new(),
             stop_if_true: false,
             has_x14_extensions: false,
@@ -1284,119 +1260,18 @@ impl ConditionalFormatCell {
     ///
     /// # Examples
     ///
-    /// Example of adding a cell type conditional formatting to a worksheet. Cells
-    /// with values >= 50 are in light green.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_conditional_format_cell_set_value.rs
-    /// #
-    /// # use rust_xlsxwriter::{
-    /// #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
-    /// # };
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file object.
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some sample data.
-    /// #     let data = [10, 80, 50, 10, 20, 60, 40, 70, 30, 40];
-    /// #
-    /// #     worksheet.write_column(0, 0, data)?;
-    /// #
-    /// #     // Add a format. Green fill with dark green text.
-    /// #     let format = Format::new()
-    /// #         .set_font_color("006100")
-    /// #         .set_background_color("C6EFCE");
-    /// #
-    ///     // Write a conditional format over a range.
-    ///     let conditional_format = ConditionalFormatCell::new()
-    ///         .set_criteria(ConditionalFormatCellCriteria::GreaterThanOrEqualTo)
-    ///         .set_value(50)
-    ///         .set_format(format);
-    ///
-    ///     worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
-    ///
-    /// #     // Save the file.
-    /// #     workbook.save("conditional_format.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
+    /// TODO
     ///
     /// Output file:
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_cell_set_value.png">
     ///
-    pub fn set_value(self, value: impl Into<ConditionalFormatValue>) -> ConditionalFormatCell {
-        self.set_minimum(value)
-    }
-
-    /// Set the minimum value of the Cell "between" and "not between"
-    /// conditional format rules.
-    ///
-    /// # Parameters
-    ///
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
-    ///   which is effectively all types supported by Excel.
-    ///
-    /// # Examples
-    ///
-    /// Example of adding a cell type conditional formatting to a worksheet.
-    /// Values between 40 and 60 are highlighted in light green.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_conditional_format_cell_set_minimum.rs
-    /// #
-    /// # use rust_xlsxwriter::{
-    /// #     ConditionalFormatCell, ConditionalFormatCellCriteria, Format, Workbook, XlsxError,
-    /// # };
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file object.
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some sample data.
-    /// #     let data = [10, 80, 50, 10, 20, 60, 40, 70, 30, 40];
-    /// #
-    /// #     worksheet.write_column(0, 0, data)?;
-    /// #
-    /// #     // Add a format. Green fill with dark green text.
-    /// #     let format = Format::new()
-    /// #         .set_font_color("006100")
-    /// #         .set_background_color("C6EFCE");
-    /// #
-    ///     // Write a conditional format over a range.
-    ///     let conditional_format = ConditionalFormatCell::new()
-    ///         .set_criteria(ConditionalFormatCellCriteria::Between)
-    ///         .set_minimum(40)
-    ///         .set_maximum(60)
-    ///         .set_format(format);
-    ///
-    ///     worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
-    ///
-    /// #     // Save the file.
-    /// #     workbook.save("conditional_format.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
     ///
     /// Output file:
     ///
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell_set_minimum.png">
     ///
-    pub fn set_minimum(
-        mut self,
-        value: impl Into<ConditionalFormatValue>,
-    ) -> ConditionalFormatCell {
-        self.minimum = value.into();
-        self.minimum.quote_string();
-        self
-    }
-
     /// Set the maximum value of the Cell "between" and "not between"
     /// conditional format rules.
     ///
@@ -1407,68 +1282,65 @@ impl ConditionalFormatCell {
     /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
     ///   which is effectively all types supported by Excel.
     ///
-    pub fn set_maximum(
-        mut self,
-        value: impl Into<ConditionalFormatValue>,
-    ) -> ConditionalFormatCell {
-        self.maximum = value.into();
-        self.maximum.quote_string();
-        self
-    }
-
     /// Set the criteria for the conditional format rule such as `=`, `!=`, `>`,
     /// `<`, `>=`, `<=`, `between` or `not between`.
     ///
     /// # Parameters
     ///
-    /// * `criteria` - A [`ConditionalFormatCellCriteria`] enum value.
+    /// * `rule` - A [`ConditionalFormatCellRule`] enum value.
     ///
-    pub fn set_criteria(
-        mut self,
-        criteria: ConditionalFormatCellCriteria,
-    ) -> ConditionalFormatCell {
-        self.criteria = criteria;
-        self
-    }
-
-    /*     EqualTo(T),
-
-       /// Show the conditional format for cells that are not equal to the target value.
-       NotEqualTo(T),
-
-       /// Show the conditional format for cells that are greater than the target value.
-       GreaterThan(T),
-
-       /// Show the conditional format for cells that are greater than or equal to the target value.
-       GreaterThanOrEqualTo(T),
-
-       /// Show the conditional format for cells that are less than the target value.
-       LessThan(T),
-
-       /// Show the conditional format for cells that are less than or equal to the target value.
-       LessThanOrEqualTo(T),
-
-       /// Show the conditional format for cells that are between the target values.
-       Between(T, T),
-
-       /// Show the conditional format for cells that are not between the target values.
-       NotBetween(T, T),
-    */
-
-    ///
+    /// todo
     pub fn set_rule<T>(mut self, rule: ConditionalFormatCellRule<T>) -> ConditionalFormatCell
     where
         T: IntoConditionalFormatValue,
     {
-        self.rule = match rule {
+        // Change from a generic type to a concrete ConditionalFormatValue type.
+        let mut rule = match rule {
             ConditionalFormatCellRule::EqualTo(value) => {
                 ConditionalFormatCellRule::EqualTo(value.new_value())
-
             }
-            _ => ConditionalFormatCellRule::EqualTo(ConditionalFormatValue::new_from_string("0")),
+            ConditionalFormatCellRule::NotEqualTo(value) => {
+                ConditionalFormatCellRule::NotEqualTo(value.new_value())
+            }
+            ConditionalFormatCellRule::GreaterThan(value) => {
+                ConditionalFormatCellRule::GreaterThan(value.new_value())
+            }
+            ConditionalFormatCellRule::GreaterThanOrEqualTo(value) => {
+                ConditionalFormatCellRule::GreaterThanOrEqualTo(value.new_value())
+            }
+            ConditionalFormatCellRule::LessThan(value) => {
+                ConditionalFormatCellRule::LessThan(value.new_value())
+            }
+            ConditionalFormatCellRule::LessThanOrEqualTo(value) => {
+                ConditionalFormatCellRule::LessThanOrEqualTo(value.new_value())
+            }
+            ConditionalFormatCellRule::Between(min, max) => {
+                ConditionalFormatCellRule::Between(min.new_value(), max.new_value())
+            }
+            ConditionalFormatCellRule::NotBetween(min, max) => {
+                ConditionalFormatCellRule::NotBetween(min.new_value(), max.new_value())
+            }
         };
 
+        // Excel requires that strings in Cell style conditional formats are
+        // quoted.
+        match &mut rule {
+            ConditionalFormatCellRule::EqualTo(value)
+            | ConditionalFormatCellRule::NotEqualTo(value)
+            | ConditionalFormatCellRule::LessThan(value)
+            | ConditionalFormatCellRule::LessThanOrEqualTo(value)
+            | ConditionalFormatCellRule::GreaterThan(value)
+            | ConditionalFormatCellRule::GreaterThanOrEqualTo(value) => {
+                value.quote_string();
+            }
+            ConditionalFormatCellRule::Between(min, max)
+            | ConditionalFormatCellRule::NotBetween(min, max) => {
+                min.quote_string();
+                max.quote_string();
+            }
+        }
 
+        self.rule = Some(rule);
         self
     }
 
@@ -1493,27 +1365,10 @@ impl ConditionalFormatCell {
 
     // Validate the conditional format.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
-        let error_message = match self.criteria {
-            ConditionalFormatCellCriteria::Between | ConditionalFormatCellCriteria::NotBetween => {
-                if self.minimum.value.is_empty() {
-                    "'minimum' value must be set".to_string()
-                } else if self.maximum.value.is_empty() {
-                    "'maximum' value must be set".to_string()
-                } else {
-                    String::new()
-                }
-            }
-            _ => {
-                if self.minimum.value.is_empty() {
-                    "'value' must be set".to_string()
-                } else {
-                    String::new()
-                }
-            }
-        };
-
-        if !error_message.is_empty() {
-            return Err(XlsxError::ConditionalFormatError(error_message));
+        if self.rule.is_none() {
+            return Err(XlsxError::ConditionalFormatError(
+                "ConditionalFormatCell rule must be set".to_string(),
+            ));
         }
 
         Ok(())
@@ -1527,6 +1382,10 @@ impl ConditionalFormatCell {
         _range: &str,
         _guid: &str,
     ) -> String {
+        let Some(rule) = &self.rule else {
+            return String::new();
+        };
+
         let mut writer = XMLWriter::new();
         let mut attributes = vec![("type", "cellIs".to_string())];
 
@@ -1543,16 +1402,25 @@ impl ConditionalFormatCell {
             attributes.push(("stopIfTrue", "1".to_string()));
         }
 
-        attributes.push(("operator", self.criteria.to_string()));
+        attributes.push(("operator", rule.to_string()));
 
         // Write the rule.
         writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_data_element_only("formula", &self.minimum.value);
 
-        if self.criteria == ConditionalFormatCellCriteria::Between
-            || self.criteria == ConditionalFormatCellCriteria::NotBetween
-        {
-            writer.xml_data_element_only("formula", &self.maximum.value);
+        match rule {
+            ConditionalFormatCellRule::EqualTo(value)
+            | ConditionalFormatCellRule::NotEqualTo(value)
+            | ConditionalFormatCellRule::LessThan(value)
+            | ConditionalFormatCellRule::LessThanOrEqualTo(value)
+            | ConditionalFormatCellRule::GreaterThan(value)
+            | ConditionalFormatCellRule::GreaterThanOrEqualTo(value) => {
+                writer.xml_data_element_only("formula", &value.value);
+            }
+            ConditionalFormatCellRule::Between(min, max)
+            | ConditionalFormatCellRule::NotBetween(min, max) => {
+                writer.xml_data_element_only("formula", &min.value);
+                writer.xml_data_element_only("formula", &max.value);
+            }
         }
 
         writer.xml_end_tag("cfRule");
@@ -6772,6 +6640,8 @@ impl ConditionalFormatValue {
     }
 }
 
+// todo remove these
+
 macro_rules! conditional_format_value_from_string {
     ($($t:ty)*) => ($(
         impl From<$t> for ConditionalFormatValue {
@@ -6885,6 +6755,13 @@ impl IntoConditionalFormatValue for &ExcelDateTime {
     }
 }
 
+impl IntoConditionalFormatValue for Formula {
+    fn new_value(self) -> ConditionalFormatValue {
+        let value = self.expand_formula(true);
+        ConditionalFormatValue::new_from_string(value)
+    }
+}
+
 impl IntoConditionalFormatValue for ConditionalFormatValue {
     fn new_value(self) -> ConditionalFormatValue {
         self.clone()
@@ -6892,61 +6769,11 @@ impl IntoConditionalFormatValue for ConditionalFormatValue {
 }
 
 // -----------------------------------------------------------------------
-// ConditionalFormatCellCriteria
-// -----------------------------------------------------------------------
-
-/// The `ConditionalFormatCellCriteria` enum defines the conditional format
-/// criteria for [`ConditionalFormatCell`].
-///
-///
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub enum ConditionalFormatCellCriteria {
-    /// Show the conditional format for cells that are equal to the target value.
-    EqualTo,
-
-    /// Show the conditional format for cells that are not equal to the target value.
-    NotEqualTo,
-
-    /// Show the conditional format for cells that are greater than the target value.
-    GreaterThan,
-
-    /// Show the conditional format for cells that are greater than or equal to the target value.
-    GreaterThanOrEqualTo,
-
-    /// Show the conditional format for cells that are less than the target value.
-    LessThan,
-
-    /// Show the conditional format for cells that are less than or equal to the target value.
-    LessThanOrEqualTo,
-
-    /// Show the conditional format for cells that are between the target values.
-    Between,
-
-    /// Show the conditional format for cells that are not between the target values.
-    NotBetween,
-}
-
-impl fmt::Display for ConditionalFormatCellCriteria {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ConditionalFormatCellCriteria::EqualTo => write!(f, "equal"),
-            ConditionalFormatCellCriteria::Between => write!(f, "between"),
-            ConditionalFormatCellCriteria::LessThan => write!(f, "lessThan"),
-            ConditionalFormatCellCriteria::NotEqualTo => write!(f, "notEqual"),
-            ConditionalFormatCellCriteria::NotBetween => write!(f, "notBetween"),
-            ConditionalFormatCellCriteria::GreaterThan => write!(f, "greaterThan"),
-            ConditionalFormatCellCriteria::LessThanOrEqualTo => write!(f, "lessThanOrEqual"),
-            ConditionalFormatCellCriteria::GreaterThanOrEqualTo => write!(f, "greaterThanOrEqual"),
-        }
-    }
-}
-
-// -----------------------------------------------------------------------
 // ConditionalFormatCellRule
 // -----------------------------------------------------------------------
 
-/// The `ConditionalFormatCellRule` enum defines the conditional format
-/// criteria for [`ConditionalFormatCell`].
+/// The `ConditionalFormatCellRule` enum defines the conditional format rule for
+/// [`ConditionalFormatCell`].
 ///
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -6974,6 +6801,21 @@ pub enum ConditionalFormatCellRule<T: IntoConditionalFormatValue> {
 
     /// Show the conditional format for cells that are not between the target values.
     NotBetween(T, T),
+}
+
+impl<T: IntoConditionalFormatValue> fmt::Display for ConditionalFormatCellRule<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ConditionalFormatCellRule::EqualTo(_) => write!(f, "equal"),
+            ConditionalFormatCellRule::Between(_, _) => write!(f, "between"),
+            ConditionalFormatCellRule::LessThan(_) => write!(f, "lessThan"),
+            ConditionalFormatCellRule::NotEqualTo(_) => write!(f, "notEqual"),
+            ConditionalFormatCellRule::NotBetween(_, _) => write!(f, "notBetween"),
+            ConditionalFormatCellRule::GreaterThan(_) => write!(f, "greaterThan"),
+            ConditionalFormatCellRule::LessThanOrEqualTo(_) => write!(f, "lessThanOrEqual"),
+            ConditionalFormatCellRule::GreaterThanOrEqualTo(_) => write!(f, "greaterThanOrEqual"),
+        }
+    }
 }
 
 // -----------------------------------------------------------------------

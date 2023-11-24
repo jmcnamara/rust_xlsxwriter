@@ -15,7 +15,7 @@ mod conditional_format_tests {
     use crate::ConditionalFormatAverageCriteria;
     use crate::ConditionalFormatBlank;
     use crate::ConditionalFormatCell;
-    use crate::ConditionalFormatCellCriteria;
+    use crate::ConditionalFormatCellRule;
     use crate::ConditionalFormatCustomIcon;
     use crate::ConditionalFormatDataBar;
     use crate::ConditionalFormatDataBarAxisPosition;
@@ -38,9 +38,8 @@ mod conditional_format_tests {
 
     #[test]
     fn quoted_string_01() {
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::EqualTo)
-            .set_value(5);
+        let conditional_format =
+            ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::EqualTo(5));
 
         let got = conditional_format.rule(None, 1, "", "");
         let expected =
@@ -51,9 +50,8 @@ mod conditional_format_tests {
 
     #[test]
     fn quoted_string_02() {
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::EqualTo)
-            .set_value("Foo");
+        let conditional_format =
+            ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::EqualTo("Foo"));
 
         let got = conditional_format.rule(None, 1, "", "");
         let expected = r#"<cfRule type="cellIs" priority="1" operator="equal"><formula>"Foo"</formula></cfRule>"#;
@@ -63,9 +61,8 @@ mod conditional_format_tests {
 
     #[test]
     fn quoted_string_03() {
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::EqualTo)
-            .set_value("\"Foo\"");
+        let conditional_format =
+            ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::EqualTo("\"Foo\""));
 
         let got = conditional_format.rule(None, 1, "", "");
         let expected = r#"<cfRule type="cellIs" priority="1" operator="equal"><formula>"Foo"</formula></cfRule>"#;
@@ -75,9 +72,8 @@ mod conditional_format_tests {
 
     #[test]
     fn quoted_string_04() {
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::EqualTo)
-            .set_value("Foo \" Bar");
+        let conditional_format =
+            ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::EqualTo("Foo \" Bar"));
 
         let got = conditional_format.rule(None, 1, "", "");
         let expected = r#"<cfRule type="cellIs" priority="1" operator="equal"><formula>"Foo "" Bar"</formula></cfRule>"#;
@@ -89,27 +85,8 @@ mod conditional_format_tests {
     fn validation_checks() {
         // Check validations for various conditional formats.
 
-        // Cell format must have a non-None type.
+        // Cell format must have a rule.
         let conditional_format = ConditionalFormatCell::new();
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
-
-        // Cell format must have a value.
-        let conditional_format =
-            ConditionalFormatCell::new().set_criteria(ConditionalFormatCellCriteria::EqualTo);
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
-
-        // Cell between format must have a min value.
-        let conditional_format =
-            ConditionalFormatCell::new().set_criteria(ConditionalFormatCellCriteria::Between);
-        let result = conditional_format.validate();
-        assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
-
-        // Cell between format must have a max value.
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::Between)
-            .set_minimum(1);
         let result = conditional_format.validate();
         assert!(matches!(result, Err(XlsxError::ConditionalFormatError(_))));
 
@@ -188,9 +165,8 @@ mod conditional_format_tests {
         worksheet.write(2, 0, 30)?;
         worksheet.write(3, 0, 40)?;
 
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::GreaterThan)
-            .set_value(5);
+        let conditional_format =
+            ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::GreaterThan(5));
 
         worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
 
@@ -258,8 +234,7 @@ mod conditional_format_tests {
         worksheet.write(0, 1, 5)?;
 
         let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::GreaterThan)
-            .set_value(Formula::new("$B$1"));
+            .set_rule(ConditionalFormatCellRule::GreaterThan(Formula::new("$B$1")));
 
         worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
 
@@ -327,17 +302,13 @@ mod conditional_format_tests {
         worksheet.write(2, 0, 30)?;
         worksheet.write(3, 0, 40)?;
 
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::Between)
-            .set_minimum(20)
-            .set_maximum(30);
+        let conditional_format =
+            ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::Between(20, 30));
 
         worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
 
         let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::NotBetween)
-            .set_minimum(20)
-            .set_maximum(30)
+            .set_rule(ConditionalFormatCellRule::NotBetween(20, 30))
             .set_multi_range("A1:A4"); // Additional test for multi_range.
 
         worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
@@ -1077,9 +1048,9 @@ mod conditional_format_tests {
         worksheet.write(2, 0, 30)?;
         worksheet.write(3, 0, 40)?;
 
-        let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::GreaterThan)
-            .set_value(ExcelDateTime::parse_from_str("2024-01-01")?);
+        let conditional_format = ConditionalFormatCell::new().set_rule(
+            ConditionalFormatCellRule::GreaterThan(ExcelDateTime::parse_from_str("2024-01-01")?),
+        );
 
         worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
 
@@ -1144,10 +1115,11 @@ mod conditional_format_tests {
         worksheet.write(2, 0, 30)?;
         worksheet.write(3, 0, 40)?;
 
-        let conditional_format = ConditionalFormatCell::new()
-            .set_minimum(ExcelDateTime::parse_from_str("2024-01-01")?)
-            .set_maximum(ExcelDateTime::parse_from_str("2024-01-10")?)
-            .set_criteria(ConditionalFormatCellCriteria::Between);
+        let conditional_format =
+            ConditionalFormatCell::new().set_rule(ConditionalFormatCellRule::Between(
+                ExcelDateTime::parse_from_str("2024-01-01")?,
+                ExcelDateTime::parse_from_str("2024-01-10")?,
+            ));
 
         worksheet.add_conditional_format(0, 0, 3, 0, &conditional_format)?;
 
@@ -2327,8 +2299,7 @@ mod conditional_format_tests {
         worksheet.write(3, 0, 40)?;
 
         let conditional_format = ConditionalFormatCell::new()
-            .set_criteria(ConditionalFormatCellCriteria::GreaterThan)
-            .set_value(5)
+            .set_rule(ConditionalFormatCellRule::GreaterThan(5))
             .set_stop_if_true(true);
 
         worksheet.add_conditional_format(0, 0, 0, 0, &conditional_format)?;
