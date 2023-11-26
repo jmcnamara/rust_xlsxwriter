@@ -45,7 +45,8 @@
 //!   a worksheet.
 //! - [`Format`]: The interface for adding formatting to worksheets and other
 //!   objects.
-//! - [`Chart`]: The interface for creating worksheet charts.
+//! - [`Chart`] struct: The interface for creating worksheet charts.
+//!   - [`Working with charts`](crate::chart).
 //! - [`Image`]: The interface for images used in worksheets.
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.
@@ -153,7 +154,6 @@
 //!
 //!
 mod app;
-mod chart;
 mod content_types;
 mod core;
 mod custom;
@@ -180,6 +180,7 @@ mod workbook;
 mod worksheet;
 mod xmlwriter;
 
+pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
 pub mod tutorial;
@@ -203,6 +204,8 @@ pub use url::*;
 pub use workbook::*;
 pub use worksheet::*;
 
+#[doc(hidden)]
+pub use chart::*;
 #[doc(hidden)]
 pub use conditional_format::*;
 #[doc(hidden)]

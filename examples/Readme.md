@@ -68,13 +68,25 @@ documentation and generally show how an individual function works.
   available in Excel 2007 using rust_xlsxwriter. Note, these styles are not
   the same as the styles available in Excel 2013 and later.
 
+* `app_chart_tutorial1.rs` - An example of creating a simple chart using
+  the rust_xlsxwriter library.
+
+* `app_chart_tutorial2.rs` - An example of creating a simple chart using
+  the rust_xlsxwriter library.
+
+* `app_chart_tutorial3.rs` - An example of creating a simple chart using
+  the rust_xlsxwriter library.
+
+* `app_chart_tutorial4.rs` - An example of creating a simple chart using
+  the rust_xlsxwriter library.
+
 * `app_colors.rs` - A demonstration of the RGB and Theme colors palettes
   available in the rust_xlsxwriter library.
 
 * `app_conditional_formatting.rs` - Example of how to add conditional
   formatting to a worksheet using the rust_xlsxwriter library. Conditional
   formatting allows you to apply a format to a cell or a range of cells
-  based on certain criteria.
+  based on user defined rule.
 
 * `app_defined_name.rs` - Example of how to create defined names using the
   rust_xlsxwriter library. This functionality is used to define user

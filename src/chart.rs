@@ -4,6 +4,379 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
+//! # Working with Charts
+//!
+//! The sections below explain some of the options and features when working
+//! with the [`Chart`] struct.
+//!
+//!
+//!
+//!
+//! ## Creating a chart with `rust_xlsxwriter`
+//!
+//! The basis steps for creating a chart in `rust_xlsxwriter` are:
+//!
+//! - Create a new [`Chart`] object of the chart type you want.
+//! - Add one or more series to the chart via [`Chart::add_series()`] to define
+//!   the data you wish to plot.
+//! - Add any formatting or additional feature you need.
+//! - Add the chart to the worksheet via
+//!   [`Worksheet::insert_chart()`](crate::Worksheet::insert_chart).
+//!
+//! These steps are shown in the example below which creates a minimal chart
+//! that plots data in a worksheet. The program creates a new column [`Chart`],
+//! adds a series via [`Chart::add_series()`] and add the value range the series
+//! refers to via [`ChartSeries::set_values()`]:
+//!
+//! ```rust
+//! # // This code is available in examples/app_chart_tutorial1.rs
+//! #
+//! use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!     let worksheet = workbook.add_worksheet();
+//!     let bold = Format::new().set_bold();
+//!
+//!     // Add the worksheet data that the charts will refer to.
+//!     let categories = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+//!     let values = [20, 40, 50, 30, 20];
+//!
+//!     worksheet.write_with_format(0, 0, "Day", &bold)?;
+//!     worksheet.write_column(1, 0, categories)?;
+//!
+//!     worksheet.write_with_format(0, 1, "Sample", &bold)?;
+//!     worksheet.write_column(1, 1, values)?;
+//!
+//!     // Create a new column chart.
+//!     let mut chart = Chart::new(ChartType::Column);
+//!
+//!     // Configure the data series for the chart.
+//!     chart.add_series().set_values("Sheet1!$B$2:$B$6");
+//!
+//!     // Add the chart to the worksheet.
+//!     worksheet.insert_chart(0, 2, &chart)?;
+//!
+//!     workbook.save("chart_tutorial1.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! This produces a file like this:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_tutorial1.png">
+//!
+//! To improve this a little we will add the category data that the value data
+//! refers to. In this case it is the "Day" data in Column A. We extend the
+//! program by adding the category values via [`ChartSeries::set_categories()`]:
+//!
+//! ```rust
+//! # // This code is available in examples/app_chart_tutorial2.rs
+//! #
+//! # use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #     let bold = Format::new().set_bold();
+//! #
+//! #     // Add the worksheet data that the charts will refer to.
+//! #     let categories = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+//! #     let values = [20, 40, 50, 30, 20];
+//! #
+//! #     worksheet.write_with_format(0, 0, "Day", &bold)?;
+//! #     worksheet.write_column(1, 0, categories)?;
+//! #
+//! #     worksheet.write_with_format(0, 1, "Sample", &bold)?;
+//! #     worksheet.write_column(1, 1, values)?;
+//! #
+//! #     // Create a new column chart.
+//!     let mut chart = Chart::new(ChartType::Column);
+//!
+//!     // Configure the data series for the chart.
+//!     chart
+//!         .add_series()
+//!         .set_categories("Sheet1!$A$2:$A$6")
+//!         .set_values("Sheet1!$B$2:$B$6");
+//!
+//!     // Add the chart to the worksheet.
+//!     worksheet.insert_chart(0, 2, &chart)?;
+//! #
+//! #     workbook.save("chart_tutorial2.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//! (Note, the section of the program where we write the worksheet data is the
+//! same as the previous example and is omitted in this example. You can view it
+//! in the source or the examples folder.)
+//!
+//! The updated file like this (the chart data range is highlighted):
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_tutorial2.png">
+//!
+//! The previous example works fine but it it contained some hard-coded cell
+//! ranges like  `set_values("Sheet1!$B$2:$B$6")`. This is okay for simple
+//! programs but if our example changed to have a different number of data items
+//! then we would have to manually change the code to adjust for the new ranges.
+//!
+//! Fortunately, these hard-coded values are only used for the sake of the
+//! example and `rust_xlsxwriter` provides APIs to handle these more
+//! programmatically.
+//!
+//! In general `rust_xlsxwriter` always provides numeric APIs for any ranges in
+//! Excel but when it makes ergonomic sense it also provides **secondary**
+//! string based APIs. The previous example uses one of these secondary string
+//! based APIs for demonstration purposes but for real applications you would
+//! set the chart ranges using 5-tuple values like this:
+//!
+//! ```rust
+//! # // This code is available in examples/app_chart_tutorial3.rs
+//! #
+//! # use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #     let bold = Format::new().set_bold();
+//! #
+//! #     // Add the worksheet data that the charts will refer to.
+//! #     let categories = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+//! #     let values = [20, 40, 50, 30, 20];
+//! #
+//! #     worksheet.write_with_format(0, 0, "Day", &bold)?;
+//! #     worksheet.write_column(1, 0, categories)?;
+//! #
+//! #     worksheet.write_with_format(0, 1, "Sample", &bold)?;
+//! #     worksheet.write_column(1, 1, values)?;
+//! #
+//!     // Set some variables to define the chart range.
+//!     let row_min = 1;
+//!     let row_max = values.len() as u32;
+//!     let col_cat = 0;
+//!     let col_val = 1;
+//!
+//!     // Create a new column chart.
+//!     let mut chart = Chart::new(ChartType::Column);
+//!
+//!     // Configure the data series for the chart.
+//!     chart
+//!         .add_series()
+//!         .set_categories(("Sheet1", row_min, col_cat, row_max, col_cat))
+//!         .set_values(("Sheet1", row_min, col_val, row_max, col_val));
+//!
+//!     // Add the chart to the worksheet.
+//!     worksheet.insert_chart(0, 2, &chart)?;
+//! #
+//! #     workbook.save("chart_tutorial3.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! We could use hard coded row and column indexes for the chart ranges but the
+//! variables make it more flexible and future proof. The output from this
+//! example is exactly the same as the previous image above.
+//!
+//! Finally we can improve the output a bit more by inserting chart and axes
+//! titles, by hiding the legend since it doesn't provide much information in
+//! this case, and by shifting the chart a few pixels away from the data for
+//! clarity via
+//! [`Worksheet::insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset).
+//!
+//! Here is the chart section with these changes:
+//!
+//!
+//! ```rust
+//! # // This code is available in examples/app_chart_tutorial4.rs
+//! #
+//! # use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #     let bold = Format::new().set_bold();
+//! #
+//! #     // Add the worksheet data that the charts will refer to.
+//! #     let categories = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+//! #     let values = [20, 40, 50, 30, 20];
+//! #
+//! #     worksheet.write_with_format(0, 0, "Day", &bold)?;
+//! #     worksheet.write_column(1, 0, categories)?;
+//! #
+//! #     worksheet.write_with_format(0, 1, "Sample", &bold)?;
+//! #     worksheet.write_column(1, 1, values)?;
+//! #
+//! #     // Set some variables to define the chart range.
+//! #     let row_min = 1;
+//! #     let row_max = values.len() as u32;
+//! #     let col_cat = 0;
+//! #     let col_val = 1;
+//! #
+//!     // Create a new column chart.
+//!     let mut chart = Chart::new(ChartType::Column);
+//!
+//!     // Configure the data series for the chart.
+//!     chart
+//!         .add_series()
+//!         .set_categories(("Sheet1", row_min, col_cat, row_max, col_cat))
+//!         .set_values(("Sheet1", row_min, col_val, row_max, col_val));
+//!
+//!     // Add a chart title and some axis labels.
+//!     chart.title().set_name("Results of sample tests");
+//!     chart.x_axis().set_name("Test day");
+//!     chart.y_axis().set_name("Sample length (mm)");
+//!
+//!     // Turn off the chart legend.
+//!     chart.legend().set_hidden();
+//!
+//!     // Add the chart to the worksheet.
+//!     worksheet.insert_chart_with_offset(0, 2, &chart, 5, 5)?;
+//! #
+//! #     workbook.save("chart_tutorial4.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! This produces a file like this:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_tutorial4.png">
+//!
+//! For more examples see chart examples in the[`Cookbook`](crate::cookbook).
+//!
+//!
+//!
+//!
+//! ## Supported chart types
+//!
+//! The `rust_xlsxwriter` library supports the main original Excel chart types
+//! such as:
+//!
+//! - Area
+//! - Bar
+//! - Column
+//! - Doughnut
+//! - Line
+//! - Pie
+//! - Radar
+//! - Stock
+//! - Scatter
+//!
+//! See [`ChartType`] for the full list and examples.
+//!
+//! Support for newer Excel chart types such as Treemap, Sunburst, Box and
+//! Whisker, Statistical Histogram, Waterfall, Funnel, and Maps is not currently
+//! planned since the underlying structure is substantially different from the
+//! original chart types above.
+//!
+//!
+//!
+//! ## Chart formatting
+//!
+//! Excel uses a standard dialog for any chart elements that support formatting
+//! such as data series, the plot area, the chart area, the legend or individual
+//! points. It looks like this:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_format_dialog.png">
+//!
+//! In `rust_xlsxwriter` the [`ChartFormat`] struct represents many of these
+//! format options and just like Excel it offers a standard formatting interface
+//! for a number of the chart elements.
+//!
+//! The [`ChartFormat`] struct is generally passed to the `set_format()` method
+//! of a chart element. `ChartFormat` supports several child formatting structs
+//! such as:
+//!
+//! - [`ChartSolidFill`] properties for solid fills.
+//! - [`ChartPatternFill`] for pattern fills.
+//! - [`ChartGradientFill`] for gradient fills.
+//! - [`ChartLine`] for line/border properties.
+//!
+//! As a syntactic shortcut you can pass any of the child format structs to
+//! `set_format()`. This allows you to create and use a [`ChartLine`] struct,
+//! for example, without having to construct a parent [`ChartFormat`]. However,
+//! if you mix more than one type of format you will need a parent
+//! [`ChartFormat`] struct to group them.
+//!
+//!
+//!
+//!
+//! ## Chart Value and Category Axes
+//!
+//! When working with charts it is important to understand how Excel
+//! differentiates between a chart axis that is used for data series
+//! "Categories" and a chart axis that is used for data series "Values".
+//!
+//! The majority of Excel charts types have a "Category" X-axis axis where each
+//! of the values is evenly spaced and sequential. The category values can be
+//! strings, like in the example below, or they can be numbers. When the
+//! categories are numbers Excel treats them as if they were strings which is
+//! why you can't set a minimum or maximum limit in Category axes.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_axes01.png">
+//!
+//! <p style="text-align: center;"><b>Column chart with Category X-axis and Value Y-axis</b></p>
+//!
+//! The Y axis of Excel charts are generally a "Value" axis where points are
+//! displayed according to their value. This type of axis does support minimum
+//! and maximum limits.
+//!
+//! Scatter charts are an exception to the general rule since they have two
+//! value axes in order to plot `(x, y)` data that doesn't necessarily lie on
+//! fixed X-axis divisions, as shown in the chart below:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_axes02.png">
+//!
+//! <p style="text-align: center;"><b>Scatter chart with Value X-axis and Value Y-axis</b></p>
+//!
+//! One other variation is a category style chart with date or time values for
+//! the X-axis. This type of "Date" axis shares properties of Category and Value
+//! axes. Date axes are used in Stock charts, or if you provide date/time data
+//! and use the [`ChartAxis::set_date_axis()`] method.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_axes03.png">
+//!
+//! <p style="text-align: center;"><b>Column chart with Date X-axis and Value Y-axis</b></p>
+//!
+//! Finally, one other variant is a Bar chart where the Category and Value axes
+//! positions are reversed:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_axes04.png">
+//!
+//! <p style="text-align: center;"><b>Bar chart with Category Y-axis and Value X-axis</b></p>
+//!
+//! In Excel category and values axes expose different properties as can be seen
+//! in the dialogs for a each type of axis, shown below. Note that for Category
+//! axes there is no minimum and maximum "Bounds" option:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_axes05.png">
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_axes06.png">
+//!
+//! Due to Excel's distinction between axes type some `rust_xlsxwriter`
+//! [`ChartAxis`] properties can be set for a value axis, some can be set for a
+//! category axis and some properties can be set for both. For example `reverse`
+//! can be set for either category or value axes while the `min` and `max`
+//! properties can only be set for value axes (and date axes). The documentation
+//! calls out the type of axis to which properties apply.
+//!
+//!
+//!
+//!
+//! ## Future work
+//!
+//! Future additions to chart support in `rust_xlsxwriter` include:
+//!
+//! - Combined charts to allow x2/y2 axes.
+//! - Chartsheets - Worksheets that only display a chart.
+//! - Some chart element layout options.
+//!
+//! See the [Chart Roadmap] on the `rust_xlsxwriter` GitHub for more information.
+//!
+//! [Chart Roadmap]: https://github.com/jmcnamara/rust_xlsxwriter/issues/19
+//!
 #![warn(missing_docs)]
 
 // Unit tests are in the sub-directory.
@@ -34,6 +407,9 @@ use crate::{
 /// [`worksheet.insert_chart()`](crate::Worksheet::insert_chart) or
 /// [`worksheet.insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
 /// methods.
+///
+/// See also [Working with Charts](crate::chart) for a general introduction to
+/// working with charts in `rust_xlsxwriter`.
 ///
 /// Code the generate the above file:
 ///
@@ -68,49 +444,6 @@ use crate::{
 ///     Ok(())
 /// }
 /// ```
-///
-/// # Chart Value and Category Axes
-///
-/// When working with charts it is important to understand how Excel
-/// differentiates between a chart axis that is used for series categories and a
-/// chart axis that is used for series values.
-///
-/// In the majority of Excel charts the X axis is the **category** axis and each
-/// of the values is evenly spaced and sequential. The Y axis is the **value**
-/// axis and points are displayed according to their value:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_axes01.png">
-///
-/// Excel treats these two types of axis differently and exposes different
-/// properties for each. For example, here are the properties for a category
-/// axis:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_axes02.png">
-///
-/// Here are properties for a value axis:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_axes03.png">
-///
-/// As such, some of the `rust_xlsxwriter` axis properties can be set for a
-/// value axis, some can be set for a category axis and some properties can be
-/// set for both. For example `reverse` can be set for either category or value
-/// axes while the `min` and `max` properties can only be set for value axes
-/// (and date axes). The documentation calls out the type of axis to which
-/// properties apply.
-///
-/// For a Bar chart the Category and Value axes are reversed:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_axes04.png">
-///
-/// A Scatter chart (but not a Line chart) has 2 value axes:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_axes05.png">
-///
-/// Date category axes are a special type of category axis that give them some
-/// of the properties of values axes such as `min` and `max` when used with date
-/// or time values. Date axes are used in Stock charts or if you use the
-/// [`ChartAxis::set_date_axis()`] method.
-///
 pub struct Chart {
     pub(crate) id: u32,
     pub(crate) writer: XMLWriter,
@@ -7330,9 +7663,10 @@ pub(crate) enum ChartRangeCacheDataType {
 ///
 /// The main original chart types are supported, see below.
 ///
-/// Stock chart variants will be supported at a later date. Support for newer
-/// Excel chart types such as Treemap, Sunburst, Box and Whisker, Statistical
-/// Histogram, Waterfall, Funnel and Maps is not currently planned.
+/// Support for newer Excel chart types such as Treemap, Sunburst, Box and
+/// Whisker, Statistical Histogram, Waterfall, Funnel and Maps is not currently
+/// planned since the underlying structure is substantially different from the
+/// implemented chart types.
 ///
 pub enum ChartType {
     /// An Area chart type.
@@ -11859,24 +12193,25 @@ impl fmt::Display for ChartEmptyCells {
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
-/// The [`ChartFormat`] struct is accessed by using the `set_format()` method of a
-/// chart element to obtain a reference to the formatting struct for that
-/// element. After that it can be used to apply formatting such as:
+/// The [`ChartFormat`] struct is generally passed to the `set_format()` method
+/// of a chart element. It supports several chart formatting elements such as:
 ///
 /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
-/// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
-/// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+/// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`]
+///   properties.
+/// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`]
+///   properties.
 /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
 /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
-/// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
-///   A synonym for [`ChartLine`] depending on context.
+/// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties. A
+///   synonym for [`ChartLine`] depending on context.
 /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
-/// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
-///
+/// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart
+///   object.
 ///
 /// # Examples
 ///
-/// an example of accessing the [`ChartFormat`] for data series in a chart and
+/// An example of accessing the [`ChartFormat`] for data series in a chart and
 /// using them to apply formatting.
 ///
 /// ```
