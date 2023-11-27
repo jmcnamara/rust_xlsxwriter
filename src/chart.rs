@@ -9979,7 +9979,7 @@ impl ChartAxis {
     /// difference between Value and Category axes in Excel.
     ///
     /// [Chart Value and Category Axes]:
-    ///     struct.Chart.html#chart-value-and-category-axes
+    ///     crate::chart#chart-value-and-category-axes
     ///
     /// # Parameters
     ///
@@ -10231,7 +10231,7 @@ impl ChartAxis {
     /// See also [`ChartAxis::set_max_date()`] below.
     ///
     /// [Chart Value and Category Axes]:
-    ///     struct.Chart.html#chart-value-and-category-axes
+    ///     crate::chart#chart-value-and-category-axes
     ///
     /// # Parameters
     ///
@@ -10415,7 +10415,7 @@ impl ChartAxis {
     /// explanation of the difference between Value and Category axes in Excel.
     ///
     /// [Chart Value and Category Axes]:
-    ///     struct.Chart.html#chart-value-and-category-axes
+    ///     crate::chart#chart-value-and-category-axes
     ///
     /// # Parameters
     ///
@@ -10948,7 +10948,7 @@ impl ChartAxis {
     /// Value and Category axes in Excel.
     ///
     /// [Chart Value and Category Axes]:
-    ///     struct.Chart.html#chart-value-and-category-axes
+    ///     crate::chart#chart-value-and-category-axes
     ///
     /// # Parameters
     ///
@@ -11230,7 +11230,7 @@ impl ChartAxis {
     /// Category axes in Excel.
     ///
     /// [Chart Value and Category Axes]:
-    ///     struct.Chart.html#chart-value-and-category-axes
+    ///     crate::chart#chart-value-and-category-axes
     ///
     /// # Parameters
     ///
@@ -16267,7 +16267,7 @@ pub enum ChartAxisCrossing {
     /// "East".
     ///
     /// See [Chart Value and Category
-    /// Axes](struct.Chart.html#chart-value-and-category-axes) for an
+    /// Axes](crate::chart#chart-value-and-category-axes) for an
     /// explanation of the difference between Value and Category axes in Excel.
     ///
     CategoryNumber(u32),
@@ -16277,7 +16277,7 @@ pub enum ChartAxisCrossing {
     /// This is for Value and Date style axes only.
     ///
     /// See [Chart Value and Category
-    /// Axes](struct.Chart.html#chart-value-and-category-axes) for an
+    /// Axes](crate::chart#chart-value-and-category-axes) for an
     /// explanation of the difference between Value and Category axes in Excel.
     ///
     AxisValue(f64),
