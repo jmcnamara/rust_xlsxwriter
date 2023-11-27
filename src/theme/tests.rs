@@ -1,29 +1,26 @@
-// theme - A module for creating the Excel Theme.xml file.
+// Theme unit tests.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-mod tests;
+#[cfg(test)]
+mod theme_tests {
 
-use crate::xmlwriter::XMLWriter;
+    use crate::test_functions::xml_to_vec;
+    use crate::theme::Theme;
+    use pretty_assertions::assert_eq;
 
-pub struct Theme {
-    pub(crate) writer: XMLWriter,
-}
+    #[test]
+    fn test_assemble() {
+        let mut theme = Theme::new();
 
-impl Theme {
-    // Create a new Theme struct.
-    pub(crate) fn new() -> Theme {
-        let writer = XMLWriter::new();
+        theme.assemble_xml_file();
 
-        Theme { writer }
-    }
+        let got = theme.writer.read_to_str();
+        let got = xml_to_vec(got);
 
-    // Assemble and write the XML file.
-    #[allow(clippy::too_many_lines)]
-    pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.write_theme(
+        let expected = xml_to_vec(
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n\
              <a:theme xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" name=\"Office Theme\">\
              <a:themeElements>\
@@ -282,5 +279,7 @@ impl Theme {
              <a:extraClrSchemeLst/>\
              </a:theme>"
         );
+
+        assert_eq!(expected, got);
     }
 }

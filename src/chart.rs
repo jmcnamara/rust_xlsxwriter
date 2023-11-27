@@ -379,7 +379,6 @@
 //!
 #![warn(missing_docs)]
 
-// Unit tests are in the sub-directory.
 mod tests;
 
 use regex::Regex;
