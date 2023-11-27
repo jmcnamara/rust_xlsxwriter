@@ -26,7 +26,7 @@ pretty_assertions = "1.3.0"
 # `default`: Includes all the standard functionality.
 default = []
 
-# `zlib`: Adds dependency on zlib and a C compiler. This includes the same
+# `zlib`: Adds a dependency on zlib and a C compiler. This includes the same
 #  features as `default` but is 1.5x faster for large files.
 zlib = ["zip/deflate-zlib"]
 

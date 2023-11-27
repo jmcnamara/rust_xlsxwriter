@@ -105,17 +105,15 @@ frequently.
 - `chrono`: Adds supports for Chrono date/time types to the API. This is off by
   default.
 
-- `zlib`: Adds dependency on `zlib` and a C compiler. This includes the same
+- `zlib`: Adds a dependency on `zlib` and a C compiler. This includes the same
   features as `default` but is 1.5x faster for large files.
 
 - `polars`: Add support for mapping between `PolarsError` and
   `rust_xlsxwriter::XlsxError` to make code that handles both types of error
   easier to write.
 
-- `wasm`: Adds dependency on `js-sys` and `wasm-bindgen` to allow compilation
+- `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow compilation
   for wasm/JavaScript targets.
-
-- `test-resave`: Developer only testing feature.
 
 ## Release notes
 
