@@ -5,12 +5,26 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.56.0] - 2023-11-27
+
+### Added
+
+- Changed some of the Conditional Format interfaces introduced in the previous
+  release to use extended enums. This is an API change with the version released
+  earlier this week but it provides a cleaner interface.
+
+- Added support for `Option<T>` wrapped types to [`worksheet.write()`].
+
+  [Feature Request #59].
+
+[Feature Request #59]: https://github.com/jmcnamara/rust_xlsxwriter/pull/59
+
+
 ## [0.55.0] - 2023-11-21
 
 ### Added
 
 - Added support for conditional formatting. See [Working with Conditional Formats].
-
 
 [Working with Conditional Formats]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/conditional_format/index.html
 

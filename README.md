@@ -84,6 +84,7 @@ features are:
 - Hyperlink support.
 - Page/Printing Setup support.
 - Merged ranges.
+- Conditional formatting.
 - Worksheet PNG/JPEG/GIF/BMP images.
 - Rich multi-format strings.
 - Defined names.
