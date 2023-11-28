@@ -427,7 +427,7 @@ impl DocProperties {
     ///   `IntoCustomProperty` trait is implemented.
     ///
     /// [`chrono::DateTime<Utc>`]:
-    /// https://docs.rs/chrono/latest/chrono/naive/struct.DateTime.html
+    /// https://docs.rs/chrono/latest/chrono/struct.DateTime.html
     ///
     ///
     /// # Examples
@@ -628,7 +628,7 @@ impl IntoCustomProperty for &ExcelDateTime {
 /// feature is enabled, a [`chrono::DateTime<Utc>`] instance.
 ///
 /// [`chrono::DateTime<Utc>`]:
-/// https://docs.rs/chrono/latest/chrono/naive/struct.DateTime.html
+/// https://docs.rs/chrono/latest/chrono/struct.DateTime.html
 ///
 ///
 pub trait IntoCustomDateTimeUtc {

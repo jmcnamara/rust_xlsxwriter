@@ -1779,7 +1779,7 @@ impl TableColumn {
     ///
     /// It is sometimes required to format the data in the columns of a table.
     /// This can be done using the standard
-    /// [`worksheet.write_with_format()`](Worksheet.write_with_format)) method
+    /// [`worksheet.write_with_format()`](crate::Worksheet::write_with_format)) method
     /// but format can also be applied separately using
     /// `TableColumn.set_format()`.
     ///

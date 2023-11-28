@@ -690,7 +690,7 @@ use std::borrow::Cow;
 ///
 
 /// The dynamic array functions shown in the [Dynamic Array
-/// support](dynamic_arrays.md) section are also future functions, however the
+/// support](#dynamic-array-support) section are also future functions, however the
 /// `rust_xlsxwriter` library automatically adds the required prefixes on the
 /// fly so you don't have to add them explicitly.
 
@@ -755,7 +755,7 @@ use std::borrow::Cow;
 ///    added then it is probably an array function and should be written using
 ///    [`worksheet.write_array_formula()`] or
 ///    [`worksheet.write_dynamic_array_formula()`] (see also [Dynamic Array
-///    support](dynamic_arrays.md)).
+///    support](#dynamic-array-support)).
 ///
 /// Finally if you have completed all the previous steps and still get a
 /// `#NAME?` error you can examine a valid Excel file to see what the correct

@@ -8950,9 +8950,9 @@ impl ChartDataLabel {
     /// See also [Number Format Categories] and [Number Formats in different
     /// locales] in the documentation for [`Format`](crate::Format).
     ///
-    /// [Number Format Categories]: struct.Format.html#number-format-categories
+    /// [Number Format Categories]: crate::Format#number-format-categories
     /// [Number Formats in different locales]:
-    ///     struct.Format.html#number-formats-in-different-locales
+    ///     crate::Format#number-formats-in-different-locales
     ///
     /// # Parameters
     ///
@@ -9900,9 +9900,9 @@ impl ChartAxis {
     /// See also [Number Format Categories] and [Number Formats in different
     /// locales] in the documentation for [`Format`](crate::Format).
     ///
-    /// [Number Format Categories]: struct.Format.html#number-format-categories
+    /// [Number Format Categories]: crate::Format#number-format-categories
     /// [Number Formats in different locales]:
-    ///     struct.Format.html#number-formats-in-different-locales
+    ///     crate::Format#number-formats-in-different-locales
     ///
     /// # Parameters
     ///
