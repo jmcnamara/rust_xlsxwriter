@@ -8386,16 +8386,15 @@ pub enum ChartMarkerType {
 impl fmt::Display for ChartMarkerType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartMarkerType::X => write!(f, "x"),
-            //ChartMarkerType::None => write!(f, "none"),
-            ChartMarkerType::Star => write!(f, "star"),
-            ChartMarkerType::Circle => write!(f, "circle"),
-            ChartMarkerType::Square => write!(f, "square"),
-            ChartMarkerType::Diamond => write!(f, "diamond"),
-            ChartMarkerType::LongDash => write!(f, "dash"),
-            ChartMarkerType::PlusSign => write!(f, "plus"),
-            ChartMarkerType::Triangle => write!(f, "triangle"),
-            ChartMarkerType::ShortDash => write!(f, "dot"),
+            Self::X => write!(f, "x"),
+            Self::Star => write!(f, "star"),
+            Self::Circle => write!(f, "circle"),
+            Self::Square => write!(f, "square"),
+            Self::Diamond => write!(f, "diamond"),
+            Self::LongDash => write!(f, "dash"),
+            Self::PlusSign => write!(f, "plus"),
+            Self::Triangle => write!(f, "triangle"),
+            Self::ShortDash => write!(f, "dot"),
         }
     }
 }
@@ -9350,16 +9349,16 @@ pub enum ChartDataLabelPosition {
 impl fmt::Display for ChartDataLabelPosition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartDataLabelPosition::Left => write!(f, "l"),
-            ChartDataLabelPosition::Right => write!(f, "r"),
-            ChartDataLabelPosition::Above => write!(f, "t"),
-            ChartDataLabelPosition::Below => write!(f, "b"),
-            ChartDataLabelPosition::Center => write!(f, "ctr"),
-            ChartDataLabelPosition::Default => write!(f, ""),
-            ChartDataLabelPosition::BestFit => write!(f, "bestFit"),
-            ChartDataLabelPosition::InsideEnd => write!(f, "inEnd"),
-            ChartDataLabelPosition::InsideBase => write!(f, "inBase"),
-            ChartDataLabelPosition::OutsideEnd => write!(f, "outEnd"),
+            Self::Left => write!(f, "l"),
+            Self::Right => write!(f, "r"),
+            Self::Above => write!(f, "t"),
+            Self::Below => write!(f, "b"),
+            Self::Center => write!(f, "ctr"),
+            Self::Default => write!(f, ""),
+            Self::BestFit => write!(f, "bestFit"),
+            Self::InsideEnd => write!(f, "inEnd"),
+            Self::InsideBase => write!(f, "inBase"),
+            Self::OutsideEnd => write!(f, "outEnd"),
         }
     }
 }
@@ -11364,10 +11363,10 @@ pub(crate) enum ChartAxisPosition {
 impl ChartAxisPosition {
     pub(crate) fn reverse(self) -> ChartAxisPosition {
         match self {
-            ChartAxisPosition::Top => ChartAxisPosition::Bottom,
-            ChartAxisPosition::Left => ChartAxisPosition::Right,
-            ChartAxisPosition::Right => ChartAxisPosition::Left,
-            ChartAxisPosition::Bottom => ChartAxisPosition::Top,
+            Self::Top => Self::Bottom,
+            Self::Left => Self::Right,
+            Self::Right => Self::Left,
+            Self::Bottom => Self::Top,
         }
     }
 }
@@ -11375,10 +11374,10 @@ impl ChartAxisPosition {
 impl fmt::Display for ChartAxisPosition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisPosition::Top => write!(f, "t"),
-            ChartAxisPosition::Left => write!(f, "l"),
-            ChartAxisPosition::Right => write!(f, "r"),
-            ChartAxisPosition::Bottom => write!(f, "b"),
+            Self::Top => write!(f, "t"),
+            Self::Left => write!(f, "l"),
+            Self::Right => write!(f, "r"),
+            Self::Bottom => write!(f, "b"),
         }
     }
 }
@@ -11458,10 +11457,10 @@ pub enum ChartAxisLabelPosition {
 impl fmt::Display for ChartAxisLabelPosition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisLabelPosition::Low => write!(f, "low"),
-            ChartAxisLabelPosition::High => write!(f, "high"),
-            ChartAxisLabelPosition::None => write!(f, "none"),
-            ChartAxisLabelPosition::NextTo => write!(f, "nextTo"),
+            Self::Low => write!(f, "low"),
+            Self::High => write!(f, "high"),
+            Self::None => write!(f, "none"),
+            Self::NextTo => write!(f, "nextTo"),
         }
     }
 }
@@ -11550,10 +11549,10 @@ pub enum ChartAxisTickType {
 impl fmt::Display for ChartAxisTickType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisTickType::None => write!(f, "none"),
-            ChartAxisTickType::Cross => write!(f, "cross"),
-            ChartAxisTickType::Inside => write!(f, "in"),
-            ChartAxisTickType::Outside => write!(f, "out"),
+            Self::None => write!(f, "none"),
+            Self::Cross => write!(f, "cross"),
+            Self::Inside => write!(f, "in"),
+            Self::Outside => write!(f, "out"),
         }
     }
 }
@@ -11577,9 +11576,9 @@ pub enum ChartAxisDateUnitType {
 impl fmt::Display for ChartAxisDateUnitType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisDateUnitType::Days => write!(f, "days"),
-            ChartAxisDateUnitType::Years => write!(f, "years"),
-            ChartAxisDateUnitType::Months => write!(f, "months"),
+            Self::Days => write!(f, "days"),
+            Self::Years => write!(f, "years"),
+            Self::Months => write!(f, "months"),
         }
     }
 }
@@ -11595,10 +11594,10 @@ pub(crate) enum ChartGrouping {
 impl fmt::Display for ChartGrouping {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartGrouping::Stacked => write!(f, "stacked"),
-            ChartGrouping::Standard => write!(f, "standard"),
-            ChartGrouping::Clustered => write!(f, "clustered"),
-            ChartGrouping::PercentStacked => write!(f, "percentStacked"),
+            Self::Stacked => write!(f, "stacked"),
+            Self::Standard => write!(f, "standard"),
+            Self::Clustered => write!(f, "clustered"),
+            Self::PercentStacked => write!(f, "percentStacked"),
         }
     }
 }
@@ -11645,16 +11644,16 @@ pub enum ChartAxisDisplayUnitType {
 impl fmt::Display for ChartAxisDisplayUnitType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisDisplayUnitType::None => write!(f, "non"),
-            ChartAxisDisplayUnitType::Hundreds => write!(f, "hundreds"),
-            ChartAxisDisplayUnitType::Thousands => write!(f, "thousands"),
-            ChartAxisDisplayUnitType::TenThousands => write!(f, "tenThousands"),
-            ChartAxisDisplayUnitType::HundredThousands => write!(f, "hundredThousands"),
-            ChartAxisDisplayUnitType::Millions => write!(f, "millions"),
-            ChartAxisDisplayUnitType::TenMillions => write!(f, "tenMillions"),
-            ChartAxisDisplayUnitType::HundredMillions => write!(f, "hundredMillions"),
-            ChartAxisDisplayUnitType::Billions => write!(f, "billions"),
-            ChartAxisDisplayUnitType::Trillions => write!(f, "trillions"),
+            Self::None => write!(f, "none"),
+            Self::Hundreds => write!(f, "hundreds"),
+            Self::Thousands => write!(f, "thousands"),
+            Self::TenThousands => write!(f, "tenThousands"),
+            Self::HundredThousands => write!(f, "hundredThousands"),
+            Self::Millions => write!(f, "millions"),
+            Self::TenMillions => write!(f, "tenMillions"),
+            Self::HundredMillions => write!(f, "hundredMillions"),
+            Self::Billions => write!(f, "billions"),
+            Self::Trillions => write!(f, "trillions"),
         }
     }
 }
@@ -12134,11 +12133,11 @@ pub enum ChartLegendPosition {
 impl fmt::Display for ChartLegendPosition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartLegendPosition::Top => write!(f, "t"),
-            ChartLegendPosition::Left => write!(f, "l"),
-            ChartLegendPosition::Right => write!(f, "r"),
-            ChartLegendPosition::Bottom => write!(f, "b"),
-            ChartLegendPosition::TopRight => write!(f, "tr"),
+            Self::Top => write!(f, "t"),
+            Self::Left => write!(f, "l"),
+            Self::Right => write!(f, "r"),
+            Self::Bottom => write!(f, "b"),
+            Self::TopRight => write!(f, "tr"),
         }
     }
 }
@@ -12166,9 +12165,9 @@ pub enum ChartEmptyCells {
 impl fmt::Display for ChartEmptyCells {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartEmptyCells::Gaps => write!(f, "gap"),
-            ChartEmptyCells::Zero => write!(f, "zero"),
-            ChartEmptyCells::Connected => write!(f, "span"),
+            Self::Gaps => write!(f, "gap"),
+            Self::Zero => write!(f, "zero"),
+            Self::Connected => write!(f, "span"),
         }
     }
 }
@@ -13718,14 +13717,14 @@ pub enum ChartLineDashType {
 impl fmt::Display for ChartLineDashType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartLineDashType::Dash => write!(f, "dash"),
-            ChartLineDashType::Solid => write!(f, "solid"),
-            ChartLineDashType::DashDot => write!(f, "dashDot"),
-            ChartLineDashType::LongDash => write!(f, "lgDash"),
-            ChartLineDashType::RoundDot => write!(f, "sysDot"),
-            ChartLineDashType::SquareDot => write!(f, "sysDash"),
-            ChartLineDashType::LongDashDot => write!(f, "lgDashDot"),
-            ChartLineDashType::LongDashDotDot => write!(f, "lgDashDotDot"),
+            Self::Dash => write!(f, "dash"),
+            Self::Solid => write!(f, "solid"),
+            Self::DashDot => write!(f, "dashDot"),
+            Self::LongDash => write!(f, "lgDash"),
+            Self::RoundDot => write!(f, "sysDot"),
+            Self::SquareDot => write!(f, "sysDash"),
+            Self::LongDashDot => write!(f, "lgDashDot"),
+            Self::LongDashDotDot => write!(f, "lgDashDotDot"),
         }
     }
 }
@@ -13977,54 +13976,54 @@ pub enum ChartPatternFillType {
 impl fmt::Display for ChartPatternFillType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartPatternFillType::Wave => write!(f, "wave"),
-            ChartPatternFillType::Weave => write!(f, "weave"),
-            ChartPatternFillType::Plaid => write!(f, "plaid"),
-            ChartPatternFillType::Divot => write!(f, "divot"),
-            ChartPatternFillType::Zigzag => write!(f, "zigZag"),
-            ChartPatternFillType::Sphere => write!(f, "sphere"),
-            ChartPatternFillType::Shingle => write!(f, "shingle"),
-            ChartPatternFillType::Trellis => write!(f, "trellis"),
-            ChartPatternFillType::SmallGrid => write!(f, "smGrid"),
-            ChartPatternFillType::LargeGrid => write!(f, "lgGrid"),
-            ChartPatternFillType::DottedGrid => write!(f, "dotGrid"),
-            ChartPatternFillType::DottedDiamond => write!(f, "dotDmnd"),
-            ChartPatternFillType::DiagonalBrick => write!(f, "diagBrick"),
-            ChartPatternFillType::LargeConfetti => write!(f, "lgConfetti"),
-            ChartPatternFillType::SmallConfetti => write!(f, "smConfetti"),
-            ChartPatternFillType::Dotted5Percent => write!(f, "pct5"),
-            ChartPatternFillType::Dotted10Percent => write!(f, "pct10"),
-            ChartPatternFillType::Dotted20Percent => write!(f, "pct20"),
-            ChartPatternFillType::Dotted25Percent => write!(f, "pct25"),
-            ChartPatternFillType::Dotted30Percent => write!(f, "pct30"),
-            ChartPatternFillType::Dotted40Percent => write!(f, "pct40"),
-            ChartPatternFillType::Dotted50Percent => write!(f, "pct50"),
-            ChartPatternFillType::Dotted60Percent => write!(f, "pct60"),
-            ChartPatternFillType::Dotted70Percent => write!(f, "pct70"),
-            ChartPatternFillType::Dotted75Percent => write!(f, "pct75"),
-            ChartPatternFillType::Dotted80Percent => write!(f, "pct80"),
-            ChartPatternFillType::Dotted90Percent => write!(f, "pct90"),
-            ChartPatternFillType::HorizontalBrick => write!(f, "horzBrick"),
-            ChartPatternFillType::SolidDiamondGrid => write!(f, "solidDmnd"),
-            ChartPatternFillType::SmallCheckerboard => write!(f, "smCheck"),
-            ChartPatternFillType::LargeCheckerboard => write!(f, "lgCheck"),
-            ChartPatternFillType::StripesBackslashes => write!(f, "dashDnDiag"),
-            ChartPatternFillType::VerticalStripesDark => write!(f, "dkVert"),
-            ChartPatternFillType::OutlinedDiamondGrid => write!(f, "openDmnd"),
-            ChartPatternFillType::VerticalStripesLight => write!(f, "ltVert"),
-            ChartPatternFillType::HorizontalStripesDark => write!(f, "dkHorz"),
-            ChartPatternFillType::StripesForwardSlashes => write!(f, "dashUpDiag"),
-            ChartPatternFillType::VerticalStripesNarrow => write!(f, "narVert"),
-            ChartPatternFillType::HorizontalStripesLight => write!(f, "ltHorz"),
-            ChartPatternFillType::HorizontalStripesNarrow => write!(f, "narHorz"),
-            ChartPatternFillType::DiagonalStripesDarkUpwards => write!(f, "dkUpDiag"),
-            ChartPatternFillType::DiagonalStripesWideUpwards => write!(f, "wdUpDiag"),
-            ChartPatternFillType::VerticalStripesAlternating => write!(f, "dashVert"),
-            ChartPatternFillType::DiagonalStripesLightUpwards => write!(f, "ltUpDiag"),
-            ChartPatternFillType::DiagonalStripesDarkDownwards => write!(f, "dkDnDiag"),
-            ChartPatternFillType::DiagonalStripesWideDownwards => write!(f, "wdDnDiag"),
-            ChartPatternFillType::HorizontalStripesAlternating => write!(f, "dashHorz"),
-            ChartPatternFillType::DiagonalStripesLightDownwards => write!(f, "ltDnDiag"),
+            Self::Wave => write!(f, "wave"),
+            Self::Weave => write!(f, "weave"),
+            Self::Plaid => write!(f, "plaid"),
+            Self::Divot => write!(f, "divot"),
+            Self::Zigzag => write!(f, "zigZag"),
+            Self::Sphere => write!(f, "sphere"),
+            Self::Shingle => write!(f, "shingle"),
+            Self::Trellis => write!(f, "trellis"),
+            Self::SmallGrid => write!(f, "smGrid"),
+            Self::LargeGrid => write!(f, "lgGrid"),
+            Self::DottedGrid => write!(f, "dotGrid"),
+            Self::DottedDiamond => write!(f, "dotDmnd"),
+            Self::DiagonalBrick => write!(f, "diagBrick"),
+            Self::LargeConfetti => write!(f, "lgConfetti"),
+            Self::SmallConfetti => write!(f, "smConfetti"),
+            Self::Dotted5Percent => write!(f, "pct5"),
+            Self::Dotted10Percent => write!(f, "pct10"),
+            Self::Dotted20Percent => write!(f, "pct20"),
+            Self::Dotted25Percent => write!(f, "pct25"),
+            Self::Dotted30Percent => write!(f, "pct30"),
+            Self::Dotted40Percent => write!(f, "pct40"),
+            Self::Dotted50Percent => write!(f, "pct50"),
+            Self::Dotted60Percent => write!(f, "pct60"),
+            Self::Dotted70Percent => write!(f, "pct70"),
+            Self::Dotted75Percent => write!(f, "pct75"),
+            Self::Dotted80Percent => write!(f, "pct80"),
+            Self::Dotted90Percent => write!(f, "pct90"),
+            Self::HorizontalBrick => write!(f, "horzBrick"),
+            Self::SolidDiamondGrid => write!(f, "solidDmnd"),
+            Self::SmallCheckerboard => write!(f, "smCheck"),
+            Self::LargeCheckerboard => write!(f, "lgCheck"),
+            Self::StripesBackslashes => write!(f, "dashDnDiag"),
+            Self::VerticalStripesDark => write!(f, "dkVert"),
+            Self::OutlinedDiamondGrid => write!(f, "openDmnd"),
+            Self::VerticalStripesLight => write!(f, "ltVert"),
+            Self::HorizontalStripesDark => write!(f, "dkHorz"),
+            Self::StripesForwardSlashes => write!(f, "dashUpDiag"),
+            Self::VerticalStripesNarrow => write!(f, "narVert"),
+            Self::HorizontalStripesLight => write!(f, "ltHorz"),
+            Self::HorizontalStripesNarrow => write!(f, "narHorz"),
+            Self::DiagonalStripesDarkUpwards => write!(f, "dkUpDiag"),
+            Self::DiagonalStripesWideUpwards => write!(f, "wdUpDiag"),
+            Self::VerticalStripesAlternating => write!(f, "dashVert"),
+            Self::DiagonalStripesLightUpwards => write!(f, "ltUpDiag"),
+            Self::DiagonalStripesDarkDownwards => write!(f, "dkDnDiag"),
+            Self::DiagonalStripesWideDownwards => write!(f, "wdDnDiag"),
+            Self::HorizontalStripesAlternating => write!(f, "dashHorz"),
+            Self::DiagonalStripesLightDownwards => write!(f, "ltDnDiag"),
         }
     }
 }
@@ -15226,13 +15225,13 @@ pub enum ChartTrendlineType {
 impl fmt::Display for ChartTrendlineType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartTrendlineType::None => write!(f, "none"),
-            ChartTrendlineType::Power => write!(f, "power"),
-            ChartTrendlineType::Linear => write!(f, "linear"),
-            ChartTrendlineType::Exponential => write!(f, "exp"),
-            ChartTrendlineType::Logarithmic => write!(f, "log"),
-            ChartTrendlineType::Polynomial(_) => write!(f, "poly"),
-            ChartTrendlineType::MovingAverage(_) => write!(f, "movingAvg"),
+            Self::None => write!(f, "none"),
+            Self::Power => write!(f, "power"),
+            Self::Linear => write!(f, "linear"),
+            Self::Exponential => write!(f, "exp"),
+            Self::Logarithmic => write!(f, "log"),
+            Self::Polynomial(_) => write!(f, "poly"),
+            Self::MovingAverage(_) => write!(f, "movingAvg"),
         }
     }
 }
@@ -15939,11 +15938,11 @@ pub enum ChartErrorBarsType {
 impl fmt::Display for ChartErrorBarsType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartErrorBarsType::Custom(_, _) => write!(f, "cust"),
-            ChartErrorBarsType::StandardError => write!(f, "stdErr"),
-            ChartErrorBarsType::FixedValue(_) => write!(f, "fixedVal"),
-            ChartErrorBarsType::Percentage(_) => write!(f, "percentage"),
-            ChartErrorBarsType::StandardDeviation(_) => write!(f, "stdDev"),
+            Self::Custom(_, _) => write!(f, "cust"),
+            Self::StandardError => write!(f, "stdErr"),
+            Self::FixedValue(_) => write!(f, "fixedVal"),
+            Self::Percentage(_) => write!(f, "percentage"),
+            Self::StandardDeviation(_) => write!(f, "stdDev"),
         }
     }
 }
@@ -15968,9 +15967,9 @@ pub enum ChartErrorBarsDirection {
 impl fmt::Display for ChartErrorBarsDirection {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartErrorBarsDirection::Both => write!(f, "both"),
-            ChartErrorBarsDirection::Minus => write!(f, "minus"),
-            ChartErrorBarsDirection::Plus => write!(f, "plus"),
+            Self::Both => write!(f, "both"),
+            Self::Minus => write!(f, "minus"),
+            Self::Plus => write!(f, "plus"),
         }
     }
 }
@@ -16285,11 +16284,11 @@ pub enum ChartAxisCrossing {
 impl fmt::Display for ChartAxisCrossing {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisCrossing::Min => write!(f, "min"),
-            ChartAxisCrossing::Max => write!(f, "max"),
-            ChartAxisCrossing::Automatic => write!(f, "autoZero"),
-            ChartAxisCrossing::AxisValue(value) => write!(f, "{value}"),
-            ChartAxisCrossing::CategoryNumber(index) => write!(f, "{index}"),
+            Self::Min => write!(f, "min"),
+            Self::Max => write!(f, "max"),
+            Self::Automatic => write!(f, "autoZero"),
+            Self::AxisValue(value) => write!(f, "{value}"),
+            Self::CategoryNumber(index) => write!(f, "{index}"),
         }
     }
 }
@@ -16316,9 +16315,9 @@ pub enum ChartAxisLabelAlignment {
 impl fmt::Display for ChartAxisLabelAlignment {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ChartAxisLabelAlignment::Left => write!(f, "l"),
-            ChartAxisLabelAlignment::Right => write!(f, "r"),
-            ChartAxisLabelAlignment::Center => write!(f, "ctr"),
+            Self::Left => write!(f, "l"),
+            Self::Right => write!(f, "r"),
+            Self::Center => write!(f, "ctr"),
         }
     }
 }
