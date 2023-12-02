@@ -5,6 +5,8 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 #![warn(missing_docs)]
+mod tests;
+
 use std::borrow::Cow;
 use std::cmp;
 use std::collections::btree_map::Entry;
@@ -17,11 +19,13 @@ use std::sync::Arc;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 use regex::Regex;
+use serde::Serialize;
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::formula::Formula;
+use crate::serializer::{to_worksheet_cells, SerState};
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
@@ -216,6 +220,9 @@ pub struct Worksheet {
     has_conditional_formats: bool,
     use_x14_extensions: bool,
     has_x14_conditional_formats: bool,
+
+    // TODO
+    pub(crate) serializer_state: SerState,
 }
 
 impl Default for Worksheet {
@@ -401,6 +408,8 @@ impl Worksheet {
             has_conditional_formats: false,
             use_x14_extensions: false,
             has_x14_conditional_formats: false,
+
+            serializer_state: SerState::new(),
         }
     }
 
@@ -630,6 +639,21 @@ impl Worksheet {
         T: IntoExcelData,
     {
         data.write_with_format(self, row, col, format)
+    }
+
+    //pub fn to_worksheet<T>(value: &T, serializer: &mut Worksheet) -> Result<()>
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    pub fn serialize<T>(&mut self, data: &T) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Serialize,
+    {
+        to_worksheet_cells(data, self).unwrap();
+
+        Ok(self)
     }
 
     /// Write an array like data structure as a row of data to a worksheet.
@@ -8911,7 +8935,7 @@ impl Worksheet {
     // Check that row and col are within the allowed Excel range but don't
     // modify the worksheet cell range.
     #[allow(clippy::unused_self)]
-    fn check_dimensions_only(&mut self, row: RowNum, col: ColNum) -> bool {
+    pub(crate) fn check_dimensions_only(&mut self, row: RowNum, col: ColNum) -> bool {
         // Check that the row an column number are within Excel's ranges.
         if row >= ROW_MAX {
             return false;
@@ -11993,8 +12017,3 @@ pub(crate) enum Visible {
     Hidden,
     VeryHidden,
 }
-
-// -----------------------------------------------------------------------
-// Tests are in the worksheet sub-directory.
-// -----------------------------------------------------------------------
-mod tests;

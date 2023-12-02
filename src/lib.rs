@@ -169,6 +169,7 @@ mod packager;
 mod properties;
 mod protection;
 mod relationship;
+mod serializer;
 mod shared_strings;
 mod shared_strings_table;
 mod styles;

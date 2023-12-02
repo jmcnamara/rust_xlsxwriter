@@ -5,6 +5,8 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 #![warn(missing_docs)]
+mod tests;
+
 use regex::Regex;
 
 #[cfg(not(all(
@@ -1340,8 +1342,3 @@ impl IntoExcelDateTime for &NaiveTime {
         ExcelDateTime::chrono_time_to_excel(self)
     }
 }
-
-// -----------------------------------------------------------------------
-// Tests are in the datetime sub-directory.
-// -----------------------------------------------------------------------
-mod tests;
