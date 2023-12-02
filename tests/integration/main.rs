@@ -3,6 +3,12 @@ extern crate lazy_static;
 
 mod common;
 
+mod serde01;
+mod serde02;
+mod serde03;
+mod serde04;
+
+
 mod array_formula01;
 mod array_formula02;
 mod array_formula03;

@@ -6,7 +6,6 @@
 
 mod error {
     pub use serde::de::value::Error;
-    //pub type Result<T> = ::std::result::Result<T, Error>;
 }
 
 use std::collections::HashMap;
@@ -15,27 +14,31 @@ use crate::{ColNum, IntoExcelData, RowNum, Worksheet, XlsxError};
 use error::Error;
 use serde::{ser, Serialize};
 
+const MAX_LOSSLESS_U64_TO_F64: u64 = 2 << 52;
+const MAX_LOSSLESS_I64_TO_F64: i64 = 2 << 52;
+const MIN_LOSSLESS_I64_TO_F64: i64 = -MAX_LOSSLESS_I64_TO_F64;
+
 // -----------------------------------------------------------------------
 
-pub(crate) struct SerState {
-    headers: HashMap<String, SerHeader>,
-    //current_field: String,
+pub(crate) struct SerializerState {
+    headers: HashMap<String, SerializerHeader>,
+    current_field: String,
     current_col: ColNum,
     current_row: RowNum,
 }
 
-impl SerState {
+impl SerializerState {
     // TODO
-    pub(crate) fn new() -> SerState {
-        SerState {
+    pub(crate) fn new() -> SerializerState {
+        SerializerState {
             headers: HashMap::new(),
-            //current_field: String::new(),
+            current_field: String::new(),
             current_col: 0,
             current_row: 0,
         }
     }
 
-    // serialize_field
+    // TODO
     pub(crate) fn set_row_col_for_field(&mut self, key: &'static str) -> Result<(), Error> {
         let Some(header) = self.headers.get_mut(key) else {
             return Err(serde::de::Error::custom(format!(
@@ -47,20 +50,40 @@ impl SerState {
 
         self.current_col = header.col;
         self.current_row = header.row;
+        self.current_field = key.to_string();
+
+        Ok(())
+    }
+
+    // TODO
+    pub(crate) fn set_row_col_after_sequence(&mut self) -> Result<(), Error> {
+        let Some(header) = self.headers.get_mut(&self.current_field) else {
+            return Err(serde::de::Error::custom(format!(
+                "unknown field '{}', add it via Worksheet::add_serialize_headers()",
+                self.current_field
+            )));
+        };
+
+        header.row = self.current_row - 1;
 
         Ok(())
     }
 }
 
-pub(crate) struct SerHeader {
-    col: ColNum,
+pub(crate) struct SerializerHeader {
     row: RowNum,
+    col: ColNum,
 }
 
 // -----------------------------------------------------------------------
 
 impl Worksheet {
-    // TODO
+    /// TODO
+    ///
+    ///
+    /// # Errors
+    ///
+    ///
     pub fn add_serialize_headers(
         &mut self,
         row: RowNum,
@@ -77,11 +100,11 @@ impl Worksheet {
         for (col_offset, header) in headers.iter().enumerate() {
             let col = col_initial + col_offset as u16;
 
-            let serializer_header = SerHeader { row, col };
+            let serializer_header = SerializerHeader { row, col };
 
             self.serializer_state
                 .headers
-                .insert(header.to_string(), serializer_header);
+                .insert((*header).to_string(), serializer_header);
 
             self.write(row, col, *header)?;
         }
@@ -89,7 +112,7 @@ impl Worksheet {
         Ok(self)
     }
 
-    pub(crate) fn serialize_data(
+    pub(crate) fn serialize_to_worksheet_cell(
         &mut self,
         data: impl IntoExcelData,
     ) -> Result<&mut Worksheet, XlsxError> {
@@ -124,21 +147,8 @@ where
 
 #[allow(unused_variables)]
 impl<'a> ser::Serializer for &'a mut Worksheet {
-    // The output type produced by this `Serializer` during successful
-    // serialization. Most serializers that produce text or binary output should
-    // set `Ok = ()` and serialize into an `io::Write` or buffer contained
-    // within the `Serializer` instance, as happens here. Serializers that build
-    // in-memory data structures may be simplified by using `Ok` to propagate
-    // the data structure around.
     type Ok = ();
-
-    // The error type when some error occurs during serialization.
     type Error = Error;
-
-    // Associated types for keeping track of additional state while serializing
-    // compound data structures like sequences and maps. In this case no
-    // additional state is required beyond what is already stored in the
-    // Serializer struct.
     type SerializeSeq = Self;
     type SerializeTuple = Self;
     type SerializeTupleStruct = Self;
@@ -147,112 +157,127 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
     type SerializeStruct = Self;
     type SerializeStructVariant = Self;
 
-    // Here we go with the simple methods. The following 12 methods receive one
-    // of the primitive types of the data model and map it to JSON by appending
-    // into the output string.
-    fn serialize_bool(self, v: bool) -> Result<(), Error> {
-        println!("    serialize_bool\t= {v}");
-        self.serialize_data(v)?;
+    //
+    // Serialize all the default number types that fit into Excel's f64 type.
+    //
+    fn serialize_bool(self, data: bool) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_i8(self, v: i8) -> Result<(), Error> {
-        println!("    serialize_i8\t= {v}");
-        self.serialize_data(v)?;
+    fn serialize_i8(self, data: i8) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_i16(self, v: i16) -> Result<(), Error> {
+    fn serialize_u8(self, data: u8) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_i32(self, v: i32) -> Result<(), Error> {
+    fn serialize_i16(self, data: i16) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_i64(self, v: i64) -> Result<(), Error> {
+    fn serialize_u16(self, data: u16) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_u8(self, v: u8) -> Result<(), Error> {
+    fn serialize_i32(self, data: i32) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_u16(self, v: u16) -> Result<(), Error> {
+    fn serialize_u32(self, data: u32) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_u32(self, v: u32) -> Result<(), Error> {
+    fn serialize_f32(self, data: f32) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_u64(self, v: u64) -> Result<(), Error> {
+    fn serialize_f64(self, data: f64) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
         Ok(())
     }
 
-    fn serialize_f32(self, v: f32) -> Result<(), Error> {
-        Ok(())
-    }
-
-    fn serialize_f64(self, v: f64) -> Result<(), Error> {
-        Ok(())
-    }
-
-    // Serialize a char as a single-character string. Other formats may
-    // represent this differently.
-    fn serialize_char(self, v: char) -> Result<(), Error> {
-        Ok(())
-    }
-
-    // This only works for strings that don't require escape sequences but you
-    // get the idea. For example it would emit invalid JSON if the input string
-    // contains a '"' character.
-    fn serialize_str(self, v: &str) -> Result<(), Error> {
-        println!("    serialize_str\t= {v}");
-        self.serialize_data(v)?;
-        Ok(())
-    }
-
-    // Serialize a byte array as an array of bytes. Could also use a base64
-    // string here. Binary formats will typically represent byte arrays more
-    // compactly.
-    fn serialize_bytes(self, v: &[u8]) -> Result<(), Error> {
-        use serde::ser::SerializeSeq;
-        let mut seq = self.serialize_seq(Some(v.len()))?;
-        for byte in v {
-            seq.serialize_element(byte)?;
+    //
+    // Serialize i64/u64.
+    //
+    // Excel uses a f64 data type for all numbers. i64/u64 won't fit losslessly
+    // into f64 but a large part of its range does (+/- 2^52). As such, we
+    // convert the integers that will convert losslessly and raise an error for
+    // anything outside that range.
+    //
+    #[allow(clippy::cast_precision_loss)]
+    fn serialize_i64(self, data: i64) -> Result<(), Error> {
+        if (MIN_LOSSLESS_I64_TO_F64..=MAX_LOSSLESS_I64_TO_F64).contains(&data) {
+            self.serialize_f64(data as f64)
+        } else {
+            Err(serde::de::Error::custom(format!(
+                "i64 value '{data}' does not fit into to Excel's f64 range"
+            )))
         }
-        seq.end()
     }
 
-    // An absent optional is represented as the JSON `null`.
-    fn serialize_none(self) -> Result<(), Error> {
-        self.serialize_unit()
+    #[allow(clippy::cast_precision_loss)]
+    fn serialize_u64(self, data: u64) -> Result<(), Error> {
+        if (0..=MAX_LOSSLESS_U64_TO_F64).contains(&data) {
+            self.serialize_f64(data as f64)
+        } else {
+            Err(serde::de::Error::custom(format!(
+                "u64 value '{data}' does not fit into to Excel's f64 range"
+            )))
+        }
     }
 
-    // A present optional is represented as just the contained value. Note that
-    // this is a lossy representation. For example the values `Some(())` and
-    // `None` both serialize as just `null`. Unfortunately this is typically
-    // what people expect when working with JSON. Other formats are encouraged
-    // to behave more intelligently if possible.
-    fn serialize_some<T>(self, value: &T) -> Result<(), Error>
+    //
+    // Serialize strings types.
+    //
+    fn serialize_str(self, data: &str) -> Result<(), Error> {
+        self.serialize_to_worksheet_cell(data)?;
+        Ok(())
+    }
+
+    // Serialize a char as a single-character string.
+    fn serialize_char(self, data: char) -> Result<(), Error> {
+        self.serialize_str(&data.to_string())
+    }
+
+    // Excel has no type equivalent to a byte array.
+    fn serialize_bytes(self, data: &[u8]) -> Result<(), Error> {
+        Err(serde::de::Error::custom(
+            "byte array is not support by Excel. See the `rust_xlsxwriter` serialization docs for supported data types".to_string()
+        ))
+    }
+
+    // Serialize Some(T).
+    fn serialize_some<T>(self, data: &T) -> Result<(), Error>
     where
         T: ?Sized + Serialize,
     {
-        value.serialize(self)
+        data.serialize(self)
     }
 
-    // In Serde, unit means an anonymous value containing no data. Map this to
-    // JSON as `null`.
+    // Empty/None/Null values in Excel are ignored unless the cell has
+    // formatting in which case they are handled as a "blank" cell. For all of
+    // these cases we write an empty string and `rust_xlsxwriter` will handle it
+    // correctly based on context.
+
+    fn serialize_none(self) -> Result<(), Error> {
+        self.serialize_str("")
+    }
+
     fn serialize_unit(self) -> Result<(), Error> {
-        Ok(())
+        self.serialize_none()
     }
 
-    // Unit struct means a named value containing no data. Again, since there is
-    // no data, map this to JSON as `null`. There is no need to serialize the
-    // name in most formats.
     fn serialize_unit_struct(self, _name: &'static str) -> Result<(), Error> {
-        self.serialize_unit()
+        self.serialize_none()
     }
 
     // When serializing a unit variant (or any other kind of variant), formats
@@ -269,7 +294,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
     }
 
     // As is done here, serializers are encouraged to treat newtype structs as
-    // insignificant wrappers around the data they contain.
+    // insignificant wrappers around the data they contain. TODO
     fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> Result<(), Error>
     where
         T: ?Sized + Serialize,
@@ -279,7 +304,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
 
     // Note that newtype variant (and all of the other variant serialization
     // methods) refer exclusively to the "externally tagged" enum
-    // representation.
+    // representation. TODO
     //
     // Serialize this to JSON in externally tagged form as `{ NAME: VALUE }`.
     fn serialize_newtype_variant<T>(
@@ -295,29 +320,21 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
         Ok(())
     }
 
-    // Now we get to the serialization of compound types.
+    // Compound types.
     //
-    // The start of the sequence, each value, and the end are three separate
-    // method calls. This one is responsible only for serializing the start,
-    // which in JSON is `[`.
-    //
-    // The length of the sequence may or may not be known ahead of time. This
-    // doesn't make a difference in JSON because the length is not represented
-    // explicitly in the serialized form. Some serializers may only be able to
-    // support sequences for which the length is known up front.
+    // The only compound types that map into the Excel data model are
+    // structs and array/vector types as fields in a struct.
+
     fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq, Error> {
         Ok(self)
     }
 
-    // Tuples look just like sequences in JSON. Some formats may be able to
-    // represent tuples more efficiently by omitting the length, since tuple
-    // means that the corresponding `Deserialize implementation will know the
-    // length without needing to look at the serialized data.
+    // TODO - not used.
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Error> {
         self.serialize_seq(Some(len))
     }
 
-    // Tuple structs look just like sequences in JSON.
+    // TODO - not used.
     fn serialize_tuple_struct(
         self,
         _name: &'static str,
@@ -326,8 +343,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
         self.serialize_seq(Some(len))
     }
 
-    // Tuple variants are represented in JSON as `{ NAME: [DATA...] }`. Again
-    // this method is only responsible for the externally tagged representation.
+    // TODO - not used?
     fn serialize_tuple_variant(
         self,
         _name: &'static str,
@@ -339,28 +355,22 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
         Ok(self)
     }
 
-    // Maps are represented in JSON as `{ K: V, K: V, ... }`.
+    // The field/values of structs are treated as a map.
     fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap, Error> {
-        println!("serialize_map\t\t= {}", _len.unwrap());
         Ok(self)
     }
 
-    // Structs look just like maps in JSON. In particular, JSON requires that we
-    // serialize the field names of the struct. Other formats may be able to
-    // omit the field names when serializing structs because the corresponding
-    // Deserialize implementation is required to know what the keys are without
-    // looking at the serialized data.
+    // Structs are the main primary data type used to map data structures into
+    // Excel.
     fn serialize_struct(
         self,
         _name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, Error> {
-        println!("serialize_struct\t= {_name}");
         self.serialize_map(Some(len))
     }
 
-    // Struct variants are represented in JSON as `{ NAME: { K: V, ... } }`.
-    // This is the externally tagged representation.
+    // TODO - not used.
     fn serialize_struct_variant(
         self,
         _name: &'static str,
@@ -373,17 +383,11 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
     }
 }
 
-// The following 7 impls deal with the serialization of compound types like
-// sequences and maps. Serialization of such types is begun by a Serializer
-// method and followed by zero or more calls to serialize individual elements of
-// the compound type and one call to end the compound type.
-//
-// This impl is SerializeSeq so these methods are called after `serialize_seq`
-// is called on the Serializer.
+// The following 7 impls deal with the serialization of compound types.
+// Currently we only support/use SerializeStruct and SerializeSeq.
+
 impl<'a> ser::SerializeSeq for &'a mut Worksheet {
-    // Must match the `Ok` type of the serializer.
     type Ok = ();
-    // Must match the `Error` type of the serializer.
     type Error = Error;
 
     // Serialize a single element of the sequence.
@@ -391,16 +395,23 @@ impl<'a> ser::SerializeSeq for &'a mut Worksheet {
     where
         T: ?Sized + Serialize,
     {
-        value.serialize(&mut **self)
+        let ret = value.serialize(&mut **self);
+
+        // Increment the row number for each element of the sequence.
+        self.serializer_state.current_row += 1;
+
+        ret
     }
 
     // Close the sequence.
     fn end(self) -> Result<(), Error> {
+        self.serializer_state.set_row_col_after_sequence()?;
+
         Ok(())
     }
 }
 
-// Same thing but for tuples.
+// Serialize tuple sequences.
 impl<'a> ser::SerializeTuple for &'a mut Worksheet {
     type Ok = ();
     type Error = Error;
@@ -417,7 +428,7 @@ impl<'a> ser::SerializeTuple for &'a mut Worksheet {
     }
 }
 
-// Same thing but for tuple structs.
+// Serialize tuple struct sequences.
 impl<'a> ser::SerializeTupleStruct for &'a mut Worksheet {
     type Ok = ();
     type Error = Error;
@@ -434,15 +445,7 @@ impl<'a> ser::SerializeTupleStruct for &'a mut Worksheet {
     }
 }
 
-// Tuple variants are a little different. Refer back to the
-// `serialize_tuple_variant` method above:
-//
-//    self.output += "{";
-//    variant.serialize(&mut *self)?;
-//    self.output += ":[";
-//
-// So the `end` method in this impl is responsible for closing both the `]` and
-// the `}`.
+// Serialize tuple variant sequences.
 impl<'a> ser::SerializeTupleVariant for &'a mut Worksheet {
     type Ok = ();
     type Error = Error;
@@ -459,26 +462,11 @@ impl<'a> ser::SerializeTupleVariant for &'a mut Worksheet {
     }
 }
 
-// Some `Serialize` types are not able to hold a key and value in memory at the
-// same time so `SerializeMap` implementations are required to support
-// `serialize_key` and `serialize_value` individually.
-//
-// There is a third optional method on the `SerializeMap` trait. The
-// `serialize_entry` method allows serializers to optimize for the case where
-// key and value are both available simultaneously. In JSON it doesn't make a
-// difference so the default behavior for `serialize_entry` is fine.
+// Serialize tuple map sequences.
 impl<'a> ser::SerializeMap for &'a mut Worksheet {
     type Ok = ();
     type Error = Error;
 
-    // The Serde data model allows map keys to be any serializable type. JSON
-    // only allows string keys so the implementation below will produce invalid
-    // JSON if the key serializes as something other than a string.
-    //
-    // A real JSON serializer would need to validate that map keys are strings.
-    // This can be done by using a different Serializer to serialize the key
-    // (instead of `&mut **self`) and having that other serializer only
-    // implement `serialize_str` and return an error on any other data type.
     fn serialize_key<T>(&mut self, key: &T) -> Result<(), Error>
     where
         T: ?Sized + Serialize,
@@ -486,9 +474,6 @@ impl<'a> ser::SerializeMap for &'a mut Worksheet {
         key.serialize(&mut **self)
     }
 
-    // It doesn't make a difference whether the colon is printed at the end of
-    // `serialize_key` or at the beginning of `serialize_value`. In this case
-    // the code is a bit simpler having it here.
     fn serialize_value<T>(&mut self, value: &T) -> Result<(), Error>
     where
         T: ?Sized + Serialize,
@@ -501,8 +486,7 @@ impl<'a> ser::SerializeMap for &'a mut Worksheet {
     }
 }
 
-// Structs are like maps in which the keys are constrained to be compile-time
-// constant strings.
+// Structs are are the main sequence type used by `rust_xlsxwriter`.
 impl<'a> ser::SerializeStruct for &'a mut Worksheet {
     type Ok = ();
     type Error = Error;
@@ -511,11 +495,10 @@ impl<'a> ser::SerializeStruct for &'a mut Worksheet {
     where
         T: ?Sized + Serialize,
     {
-        println!("    serialize_field\t= {key}");
-
+        // Set the serializer (row, col) starting point for data serialization
+        // by mapping the field name to a header name.
         self.serializer_state.set_row_col_for_field(key)?;
 
-        //key.serialize(&mut **self)?;
         value.serialize(&mut **self)
     }
 

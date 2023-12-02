@@ -25,7 +25,7 @@ use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::formula::Formula;
-use crate::serializer::{to_worksheet_cells, SerState};
+use crate::serializer::{to_worksheet_cells, SerializerState};
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
@@ -222,7 +222,7 @@ pub struct Worksheet {
     has_x14_conditional_formats: bool,
 
     // TODO
-    pub(crate) serializer_state: SerState,
+    pub(crate) serializer_state: SerializerState,
 }
 
 impl Default for Worksheet {
@@ -409,7 +409,7 @@ impl Worksheet {
             use_x14_extensions: false,
             has_x14_conditional_formats: false,
 
-            serializer_state: SerState::new(),
+            serializer_state: SerializerState::new(),
         }
     }
 
