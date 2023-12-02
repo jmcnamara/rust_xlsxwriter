@@ -669,6 +669,14 @@ mod row_col_format11;
 mod row_col_format12;
 mod row_col_format13;
 mod row_col_format14;
+#[cfg(feature = "serde")]
+mod serde01;
+#[cfg(feature = "serde")]
+mod serde02;
+#[cfg(feature = "serde")]
+mod serde03;
+#[cfg(feature = "serde")]
+mod serde04;
 mod set_row01;
 mod set_row02;
 mod set_row03;

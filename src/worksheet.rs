@@ -5,6 +5,8 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 #![warn(missing_docs)]
+mod tests;
+
 use std::borrow::Cow;
 use std::cmp;
 use std::collections::btree_map::Entry;
@@ -17,6 +19,9 @@ use std::sync::Arc;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 use regex::Regex;
+
+#[cfg(feature = "serde")]
+use crate::serializer::SerializerState;
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
@@ -216,6 +221,9 @@ pub struct Worksheet {
     has_conditional_formats: bool,
     use_x14_extensions: bool,
     has_x14_conditional_formats: bool,
+
+    #[cfg(feature = "serde")]
+    pub(crate) serializer_state: SerializerState,
 }
 
 impl Default for Worksheet {
@@ -401,6 +409,9 @@ impl Worksheet {
             has_conditional_formats: false,
             use_x14_extensions: false,
             has_x14_conditional_formats: false,
+
+            #[cfg(feature = "serde")]
+            serializer_state: SerializerState::new(),
         }
     }
 
@@ -8911,7 +8922,7 @@ impl Worksheet {
     // Check that row and col are within the allowed Excel range but don't
     // modify the worksheet cell range.
     #[allow(clippy::unused_self)]
-    fn check_dimensions_only(&mut self, row: RowNum, col: ColNum) -> bool {
+    pub(crate) fn check_dimensions_only(&mut self, row: RowNum, col: ColNum) -> bool {
         // Check that the row an column number are within Excel's ranges.
         if row >= ROW_MAX {
             return false;
@@ -11993,8 +12004,3 @@ pub(crate) enum Visible {
     Hidden,
     VeryHidden,
 }
-
-// -----------------------------------------------------------------------
-// Tests are in the worksheet sub-directory.
-// -----------------------------------------------------------------------
-mod tests;

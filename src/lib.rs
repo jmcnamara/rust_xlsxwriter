@@ -180,6 +180,9 @@ mod workbook;
 mod worksheet;
 mod xmlwriter;
 
+#[cfg(feature = "serde")]
+mod serializer;
+
 pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
