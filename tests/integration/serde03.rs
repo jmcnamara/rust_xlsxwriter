@@ -41,7 +41,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         col2: None,
     };
 
-    worksheet.write_serialize_headers(0, 0, &data)?;
+    worksheet.serialize_headers(0, 0, &data)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;

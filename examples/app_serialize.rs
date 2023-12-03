@@ -26,7 +26,7 @@ fn main() -> Result<(), XlsxError> {
         number: 123,
     };
 
-    worksheet.write_serialize_headers(1, 5, &struct1)?;
+    worksheet.serialize_headers(1, 5, &struct1)?;
     worksheet.serialize(&struct1)?;
     worksheet.serialize(&struct1)?;
 
@@ -42,7 +42,7 @@ fn main() -> Result<(), XlsxError> {
         col2: vec![true, false, true],
     };
 
-    worksheet.write_serialize_headers(0, 0, &data)?;
+    worksheet.serialize_headers(0, 0, &data)?;
     worksheet.serialize(&data)?;
 
     // Save the file to disk.

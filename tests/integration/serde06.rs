@@ -6,19 +6,26 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    worksheet.set_paper_size(9);
 
     // Not serialized.
-    worksheet.write(0, 0, "col1")?;
-    worksheet.write(1, 0, "aaa")?;
-    worksheet.write(0, 1, "col2")?;
-    worksheet.write(1, 1, "a")?;
+    worksheet.write_with_format(0, 0, "col1", &bold)?;
+    worksheet.write(1, 0, 123)?;
+    worksheet.write(2, 0, 456)?;
+    worksheet.write(3, 0, 789)?;
+    worksheet.write_with_format(0, 1, "col2", &bold)?;
+    worksheet.write(1, 1, true)?;
+    worksheet.write(2, 1, false)?;
+    worksheet.write(3, 1, true)?;
 
     workbook.save(filename)?;
 
@@ -29,20 +36,23 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    worksheet.set_paper_size(9);
 
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct {
-        col1: &'static str,
-        col2: char,
+        col1: Vec<u16>,
+        col2: Vec<bool>,
     }
 
     let data = MyStruct {
-        col1: "aaa",
-        col2: 'a',
+        col1: vec![123, 456, 789],
+        col2: vec![true, false, true],
     };
 
-    worksheet.serialize_headers(0, 0, &data)?;
+    worksheet.serialize_headers_with_format(0, 0, &data, &bold)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -51,9 +61,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_serde02_1() {
+fn test_serde06_1() {
     let test_runner = common::TestRunner::new()
-        .set_name("serde02")
+        .set_name("serde06")
         .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
@@ -63,9 +73,9 @@ fn test_serde02_1() {
 }
 
 #[test]
-fn test_serde02_2() {
+fn test_serde06_2() {
     let test_runner = common::TestRunner::new()
-        .set_name("serde02")
+        .set_name("serde06")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();

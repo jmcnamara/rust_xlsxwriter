@@ -7,7 +7,7 @@
 use std::collections::HashMap;
 use std::fmt::Display;
 
-use crate::{ColNum, IntoExcelData, RowNum, Worksheet, XlsxError};
+use crate::{ColNum, Format, IntoExcelData, RowNum, Worksheet, XlsxError};
 use serde::{ser, Serialize};
 
 const MAX_LOSSLESS_U64_TO_F64: u64 = 2 << 52;
@@ -40,7 +40,7 @@ impl Worksheet {
     /// # Errors
     ///
     ///
-    pub fn write_serialize_headers<T>(
+    pub fn serialize_headers<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -74,6 +74,52 @@ impl Worksheet {
             );
 
             self.write(row, col, header_name)?;
+        }
+
+        Ok(self)
+    }
+
+    /// TODO - Document
+    ///
+    ///
+    /// # Errors
+    ///
+    ///
+    pub fn serialize_headers_with_format<T>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        data_structure: &T,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Serialize,
+    {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let mut headers = SerializerHeader {
+            struct_name: String::new(),
+            field_names: vec![],
+        };
+
+        data_structure.serialize(&mut headers)?;
+
+        let col_initial = col;
+
+        for (col_offset, header_name) in headers.field_names.iter().enumerate() {
+            let col = col_initial + col_offset as u16;
+
+            let serializer_header = FieldMetadata { row, col };
+
+            self.serializer_state.headers.insert(
+                (headers.struct_name.clone(), (*header_name).to_string()),
+                serializer_header,
+            );
+
+            self.write_with_format(row, col, header_name, format)?;
         }
 
         Ok(self)

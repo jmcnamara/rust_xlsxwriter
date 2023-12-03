@@ -54,7 +54,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         col2: vec![true, false, true],
     };
 
-    worksheet.write_serialize_headers(0, 0, &data1)?;
+    worksheet.serialize_headers(0, 0, &data1)?;
     worksheet.serialize(&data1)?;
 
     #[derive(Serialize)]
@@ -68,7 +68,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         col2: vec![6, 7],
     };
 
-    worksheet.write_serialize_headers(0, 3, &data2)?;
+    worksheet.serialize_headers(0, 3, &data2)?;
     worksheet.serialize(&data2)?;
 
     workbook.save(filename)?;
@@ -105,8 +105,8 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
         col2: vec![6, 7],
     };
 
-    worksheet.write_serialize_headers(0, 0, &data1)?;
-    worksheet.write_serialize_headers(0, 3, &data2)?;
+    worksheet.serialize_headers(0, 0, &data1)?;
+    worksheet.serialize_headers(0, 3, &data2)?;
 
     worksheet.serialize(&data1)?;
     worksheet.serialize(&data2)?;
