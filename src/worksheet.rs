@@ -21,10 +21,7 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use regex::Regex;
 
 #[cfg(feature = "serde")]
-use serde::Serialize;
-
-#[cfg(feature = "serde")]
-use crate::serializer::{to_worksheet_cells, SerializerState};
+use crate::serializer::SerializerState;
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
@@ -644,20 +641,6 @@ impl Worksheet {
         T: IntoExcelData,
     {
         data.write_with_format(self, row, col, format)
-    }
-
-    /// TODO
-    ///
-    /// # Errors
-    ///
-    #[cfg(feature = "serde")]
-    pub fn serialize<T>(&mut self, data: &T) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Serialize,
-    {
-        to_worksheet_cells(data, self).unwrap(); // TODO
-
-        Ok(self)
     }
 
     /// Write an array like data structure as a row of data to a worksheet.

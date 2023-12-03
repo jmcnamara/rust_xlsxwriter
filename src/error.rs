@@ -141,6 +141,10 @@ pub enum XlsxError {
     /// the xlsx file zip container.
     ZipError(zip::result::ZipError),
 
+    /// A general error that is raised when serializing data via the Serde
+    /// serializer.
+    SerdeError(String),
+
     /// Wrapper for a variety of [polars_error::PolarsError] errors. This is
     /// mainly used by the `polars_excel_writer` crate but it can also be useful
     /// for code that uses `polars` functions in an `XlsxError` error scope.
@@ -152,6 +156,7 @@ pub enum XlsxError {
 impl Error for XlsxError {}
 
 impl fmt::Display for XlsxError {
+    #[allow(clippy::too_many_lines)]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             XlsxError::ParameterError(error) => {
@@ -271,6 +276,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::ZipError(error) => {
                 write!(f, "{error}")
+            }
+
+            XlsxError::SerdeError(error) => {
+                write!(f, "Serialization error: '{error}'.")
             }
 
             #[cfg(feature = "polars")]

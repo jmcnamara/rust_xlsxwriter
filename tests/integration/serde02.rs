@@ -42,7 +42,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         col2: 'a',
     };
 
-    worksheet.add_serialize_headers(0, 0, &["col1", "col2"])?;
+    worksheet.write_serialize_headers(0, 0, &["col1", "col2"])?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;

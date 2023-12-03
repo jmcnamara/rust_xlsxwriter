@@ -2,7 +2,8 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! TODO.
+//! Example of serializing Serde derived structs to an Excel worksheet using
+//! `rust_xlsxwriter`.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 use serde::Serialize;
@@ -25,7 +26,7 @@ fn main() -> Result<(), XlsxError> {
         number: 123,
     };
 
-    worksheet.add_serialize_headers(1, 5, &["logical", "number"])?;
+    worksheet.write_serialize_headers(1, 5, &["logical", "number"])?;
 
     worksheet.serialize(&struct1)?;
     worksheet.serialize(&struct1)?;
@@ -42,7 +43,7 @@ fn main() -> Result<(), XlsxError> {
         col2: vec![true, false, true],
     };
 
-    worksheet.add_serialize_headers(0, 0, &["col1", "col2"])?;
+    worksheet.write_serialize_headers(0, 0, &["col1", "col2"])?;
     worksheet.serialize(&data)?;
 
     // Save the file to disk.
