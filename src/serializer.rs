@@ -54,20 +54,24 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        let mut headers = SerializerHeader { names: vec![] };
+        let mut headers = SerializerHeader {
+            struct_name: String::new(),
+            field_names: vec![],
+        };
 
         data_structure.serialize(&mut headers)?;
 
         let col_initial = col;
 
-        for (col_offset, header_name) in headers.names.iter().enumerate() {
+        for (col_offset, header_name) in headers.field_names.iter().enumerate() {
             let col = col_initial + col_offset as u16;
 
             let serializer_header = FieldMetadata { row, col };
 
-            self.serializer_state
-                .headers
-                .insert((*header_name).to_string(), serializer_header);
+            self.serializer_state.headers.insert(
+                (headers.struct_name.clone(), (*header_name).to_string()),
+                serializer_header,
+            );
 
             self.write(row, col, header_name)?;
         }
@@ -102,12 +106,13 @@ impl Worksheet {
 }
 
 // -----------------------------------------------------------------------
-// SerializerState, a struct to maintain row/colum state and other metadata
+// SerializerState, a struct to maintain row/column state and other metadata
 // between serialized writes. This avoids passing around cell location
 // information in the serializer.
 // -----------------------------------------------------------------------
 pub(crate) struct SerializerState {
-    headers: HashMap<String, FieldMetadata>,
+    headers: HashMap<(String, String), FieldMetadata>,
+    current_struct: String,
     current_field: String,
     current_col: ColNum,
     current_row: RowNum,
@@ -118,6 +123,7 @@ impl SerializerState {
     pub(crate) fn new() -> SerializerState {
         SerializerState {
             headers: HashMap::new(),
+            current_struct: String::new(),
             current_field: String::new(),
             current_col: 0,
             current_row: 0,
@@ -128,9 +134,13 @@ impl SerializerState {
     // number comes from the initial serialization of the headers and the row is
     // incremented with each access to a field.
     pub(crate) fn set_row_col_for_field(&mut self, key: &'static str) -> Result<(), XlsxError> {
-        let Some(header) = self.headers.get_mut(key) else {
+        let Some(header) = self
+            .headers
+            .get_mut(&(self.current_struct.clone(), key.to_string()))
+        else {
+            let structure = &self.current_struct;
             return Err(XlsxError::ParameterError(format!(
-                "unknown field '{key}', add it via Worksheet::add_serialize_headers()"
+                "unknown struct/field '{structure}.{key}', add it via Worksheet::write_serialize_headers()"
             )));
         };
 
@@ -147,10 +157,14 @@ impl SerializerState {
 
     // Store the last row position after writing a vec/array sequence.
     pub(crate) fn set_row_col_after_sequence(&mut self) -> Result<(), XlsxError> {
-        let Some(header) = self.headers.get_mut(&self.current_field) else {
+        let Some(header) = self
+            .headers
+            .get_mut(&(self.current_struct.clone(), self.current_field.clone()))
+        else {
+            let structure = &self.current_struct;
+            let field = &self.current_field;
             return Err(XlsxError::ParameterError(format!(
-                "unknown field '{}', add it via Worksheet::add_serialize_headers()",
-                self.current_field
+                "unknown struct/field '{structure}.{field}', add it via Worksheet::write_serialize_headers()"
             )));
         };
 
@@ -175,7 +189,8 @@ pub(crate) struct FieldMetadata {
 // serialization of the headers.
 // -----------------------------------------------------------------------
 pub(crate) struct SerializerHeader {
-    names: Vec<String>,
+    struct_name: String,
+    field_names: Vec<String>,
 }
 
 // -----------------------------------------------------------------------
@@ -353,9 +368,12 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
     // Excel.
     fn serialize_struct(
         self,
-        _name: &'static str,
+        name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, XlsxError> {
+        // Store the struct type/name to allow us to disambiguate structs.
+        self.serializer_state.current_struct = name.to_string();
+
         self.serialize_map(Some(len))
     }
 
@@ -567,8 +585,18 @@ impl<'a> ser::Serializer for &'a mut SerializerHeader {
     // Serialize strings types to capture the field names but ignore all other
     // types.
     fn serialize_str(self, data: &str) -> Result<(), XlsxError> {
-        self.names.push(data.to_string());
+        self.field_names.push(data.to_string());
         Ok(())
+    }
+
+    // Store the struct type/name to allow us to disambiguate structs.
+    fn serialize_struct(
+        self,
+        name: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeStruct, XlsxError> {
+        self.struct_name = name.to_string();
+        self.serialize_map(Some(len))
     }
 
     // Ignore all other primitive types.
@@ -670,14 +698,6 @@ impl<'a> ser::Serializer for &'a mut SerializerHeader {
         T: ?Sized + Serialize,
     {
         Ok(())
-    }
-
-    fn serialize_struct(
-        self,
-        _name: &'static str,
-        len: usize,
-    ) -> Result<Self::SerializeStruct, XlsxError> {
-        self.serialize_map(Some(len))
     }
 
     fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq, XlsxError> {
