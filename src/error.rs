@@ -145,11 +145,12 @@ pub enum XlsxError {
     /// serializer.
     SerdeError(String),
 
-    /// Wrapper for a variety of [polars_error::PolarsError] errors. This is
+    /// Wrapper for a variety of [polars::prelude::PolarsError] errors. This is
     /// mainly used by the `polars_excel_writer` crate but it can also be useful
     /// for code that uses `polars` functions in an `XlsxError` error scope.
     /// This requires the `polars` feature to be enabled.
     #[cfg(feature = "polars")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "polars")))]
     PolarsError(PolarsError),
 }
 

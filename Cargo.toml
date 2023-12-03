@@ -81,6 +81,31 @@ name = "app_serialize"
 path = "examples/app_serialize.rs"
 required-features = ["serde"]
 
+[[example]]
+name = "doc_worksheet_serialize"
+path = "examples/doc_worksheet_serialize.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers1"
+path = "examples/doc_worksheet_serialize_headers1.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers2"
+path = "examples/doc_worksheet_serialize_headers2.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_vectors"
+path = "examples/doc_worksheet_serialize_vectors.rs"
+required-features = ["serde"]
+
+
+# Workaround to display feature specific docs.
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.commands]
 # Some local package management and release check commands.

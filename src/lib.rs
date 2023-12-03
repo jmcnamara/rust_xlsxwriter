@@ -5,6 +5,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 #![doc(html_logo_url = "https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! `rust_xlsxwriter` is a Rust library for writing Excel files in the xlsx
 //! format.
@@ -181,7 +182,8 @@ mod worksheet;
 mod xmlwriter;
 
 #[cfg(feature = "serde")]
-mod serializer;
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+pub mod serializer;
 
 pub mod chart;
 pub mod conditional_format;
