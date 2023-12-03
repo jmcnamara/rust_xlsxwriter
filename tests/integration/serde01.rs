@@ -39,7 +39,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let data = MyStruct { col1: 1, col2: -1 };
 
-    worksheet.write_serialize_headers(0, 0, &["col1", "col2"])?;
+    worksheet.write_serialize_headers(0, 0, &data)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -61,7 +61,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 
     let data = MyStruct { col1: 1, col2: -1 };
 
-    worksheet.write_serialize_headers(0, 0, &["col1", "col2"])?;
+    worksheet.write_serialize_headers(0, 0, &data)?;
 
     worksheet.serialize(&data)?;
     workbook.save(filename)?;
@@ -83,7 +83,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 
     let data = MyStruct { col1: 1, col2: -1 };
 
-    worksheet.write_serialize_headers(0, 0, &["col1", "col2"])?;
+    worksheet.write_serialize_headers(0, 0, &data)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -108,7 +108,7 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
         col2: -1.0,
     };
 
-    worksheet.write_serialize_headers(0, 0, &["col1", "col2"])?;
+    worksheet.write_serialize_headers(0, 0, &data)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -133,7 +133,7 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
         col2: -1.0,
     };
 
-    worksheet.write_serialize_headers(0, 0, &["col1", "col2"])?;
+    worksheet.write_serialize_headers(0, 0, &data)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -155,7 +155,7 @@ fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
 
     let data = MyStruct { col1: 1, col2: -1 };
 
-    worksheet.write_serialize_headers(0, 0, &["col1", "col2"])?;
+    worksheet.write_serialize_headers(0, 0, &data)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;

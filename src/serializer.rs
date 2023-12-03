@@ -25,44 +25,51 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    pub fn serialize<T>(&mut self, data: &T) -> Result<&mut Worksheet, XlsxError>
+    pub fn serialize<T>(&mut self, data_structure: &T) -> Result<&mut Worksheet, XlsxError>
     where
         T: Serialize,
     {
-        self.serialize_data_structure(data)?;
+        self.serialize_data_structure(data_structure)?;
 
         Ok(self)
     }
 
-    /// TODO - This will be replaced with a serialized version.
+    /// TODO - Document
     ///
     ///
     /// # Errors
     ///
     ///
-    pub fn write_serialize_headers(
+    pub fn write_serialize_headers<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        headers: &[&str],
-    ) -> Result<&mut Worksheet, XlsxError> {
+        data_structure: &T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Serialize,
+    {
         // Check row and columns are in the allowed range.
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
         }
 
+        let mut headers = SerializerHeader { names: vec![] };
+
+        data_structure.serialize(&mut headers)?;
+
         let col_initial = col;
 
-        for (col_offset, header) in headers.iter().enumerate() {
+        for (col_offset, header_name) in headers.names.iter().enumerate() {
             let col = col_initial + col_offset as u16;
 
-            let serializer_header = SerializerHeader { row, col };
+            let serializer_header = FieldMetadata { row, col };
 
             self.serializer_state
                 .headers
-                .insert((*header).to_string(), serializer_header);
+                .insert((*header_name).to_string(), serializer_header);
 
-            self.write(row, col, *header)?;
+            self.write(row, col, header_name)?;
         }
 
         Ok(self)
@@ -100,7 +107,7 @@ impl Worksheet {
 // information in the serializer.
 // -----------------------------------------------------------------------
 pub(crate) struct SerializerState {
-    headers: HashMap<String, SerializerHeader>,
+    headers: HashMap<String, FieldMetadata>,
     current_field: String,
     current_col: ColNum,
     current_row: RowNum,
@@ -158,9 +165,17 @@ impl SerializerState {
 // SerializerHeader. A struct used to store header/field position and metadata
 // for individual fields.
 // -----------------------------------------------------------------------
-pub(crate) struct SerializerHeader {
+pub(crate) struct FieldMetadata {
     row: RowNum,
     col: ColNum,
+}
+
+// -----------------------------------------------------------------------
+// SerializerHeader. A struct used to store header/field name during
+// serialization of the headers.
+// -----------------------------------------------------------------------
+pub(crate) struct SerializerHeader {
+    names: Vec<String>,
 }
 
 // -----------------------------------------------------------------------
@@ -174,8 +189,8 @@ impl serde::ser::Error for XlsxError {
 }
 
 // -----------------------------------------------------------------------
-// Serializer. This is the implementation of the Serializer trait to serialized
-// a serde derived struct to an Excel worksheet.
+// Worksheet Serializer. This is the implementation of the Serializer trait to
+// serialized a serde derived struct to an Excel worksheet.
 // -----------------------------------------------------------------------
 #[allow(unused_variables)]
 impl<'a> ser::Serializer for &'a mut Worksheet {
@@ -526,6 +541,302 @@ impl<'a> ser::SerializeStructVariant for &'a mut Worksheet {
     {
         key.serialize(&mut **self)?;
         value.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+}
+
+// -----------------------------------------------------------------------
+// Header Serializer. This is the a simplified implementation of the Serializer
+// trait to capture the headers/field names only.
+// -----------------------------------------------------------------------
+#[allow(unused_variables)]
+impl<'a> ser::Serializer for &'a mut SerializerHeader {
+    type Ok = ();
+    type Error = XlsxError;
+    type SerializeSeq = Self;
+    type SerializeTuple = Self;
+    type SerializeTupleStruct = Self;
+    type SerializeTupleVariant = Self;
+    type SerializeMap = Self;
+    type SerializeStruct = Self;
+    type SerializeStructVariant = Self;
+
+    // Serialize strings types to capture the field names but ignore all other
+    // types.
+    fn serialize_str(self, data: &str) -> Result<(), XlsxError> {
+        self.names.push(data.to_string());
+        Ok(())
+    }
+
+    // Ignore all other primitive types.
+    fn serialize_bool(self, data: bool) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_i8(self, data: i8) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_u8(self, data: u8) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_i16(self, data: i16) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_u16(self, data: u16) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_i32(self, data: i32) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_u32(self, data: u32) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_i64(self, data: i64) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_u64(self, data: u64) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_f32(self, data: f32) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_f64(self, data: f64) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_char(self, data: char) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_bytes(self, data: &[u8]) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_some<T>(self, data: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
+    }
+
+    fn serialize_none(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_unit(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_unit_struct(self, _name: &'static str) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_unit_variant(
+        self,
+        _name: &'static str,
+        _variant_index: u32,
+        variant: &'static str,
+    ) -> Result<(), XlsxError> {
+        Ok(())
+    }
+
+    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
+    }
+
+    fn serialize_newtype_variant<T>(
+        self,
+        _name: &'static str,
+        _variant_index: u32,
+        variant: &'static str,
+        value: &T,
+    ) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
+    }
+
+    fn serialize_struct(
+        self,
+        _name: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeStruct, XlsxError> {
+        self.serialize_map(Some(len))
+    }
+
+    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq, XlsxError> {
+        Ok(self)
+    }
+
+    fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, XlsxError> {
+        self.serialize_seq(Some(len))
+    }
+
+    fn serialize_tuple_struct(
+        self,
+        _name: &'static str,
+        len: usize,
+    ) -> Result<Self::SerializeTupleStruct, XlsxError> {
+        self.serialize_seq(Some(len))
+    }
+
+    fn serialize_tuple_variant(
+        self,
+        _name: &'static str,
+        _variant_index: u32,
+        variant: &'static str,
+        _len: usize,
+    ) -> Result<Self::SerializeTupleVariant, XlsxError> {
+        variant.serialize(&mut *self)?;
+        Ok(self)
+    }
+
+    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap, XlsxError> {
+        Ok(self)
+    }
+
+    fn serialize_struct_variant(
+        self,
+        _name: &'static str,
+        _variant_index: u32,
+        variant: &'static str,
+        _len: usize,
+    ) -> Result<Self::SerializeStructVariant, XlsxError> {
+        variant.serialize(&mut *self)?;
+        Ok(self)
+    }
+}
+
+// We are only interested in Struct fields. Other compound types are ignored.
+impl<'a> ser::SerializeStruct for &'a mut SerializerHeader {
+    type Ok = ();
+    type Error = XlsxError;
+
+    fn serialize_field<T>(&mut self, key: &'static str, _value: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        // Serialize the key/field name but ignore the values.
+        key.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+}
+
+impl<'a> ser::SerializeSeq for &'a mut SerializerHeader {
+    type Ok = ();
+    type Error = XlsxError;
+
+    fn serialize_element<T>(&mut self, _value: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
+    }
+
+    fn end(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+}
+
+impl<'a> ser::SerializeTuple for &'a mut SerializerHeader {
+    type Ok = ();
+    type Error = XlsxError;
+
+    fn serialize_element<T>(&mut self, value: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        value.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+}
+
+impl<'a> ser::SerializeTupleStruct for &'a mut SerializerHeader {
+    type Ok = ();
+    type Error = XlsxError;
+
+    fn serialize_field<T>(&mut self, _value: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
+    }
+
+    fn end(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+}
+
+impl<'a> ser::SerializeTupleVariant for &'a mut SerializerHeader {
+    type Ok = ();
+    type Error = XlsxError;
+
+    fn serialize_field<T>(&mut self, _value: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
+    }
+
+    fn end(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+}
+
+impl<'a> ser::SerializeMap for &'a mut SerializerHeader {
+    type Ok = ();
+    type Error = XlsxError;
+
+    fn serialize_key<T>(&mut self, _key: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
+    }
+
+    fn serialize_value<T>(&mut self, _value: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
+    }
+
+    fn end(self) -> Result<(), XlsxError> {
+        Ok(())
+    }
+}
+
+impl<'a> ser::SerializeStructVariant for &'a mut SerializerHeader {
+    type Ok = ();
+    type Error = XlsxError;
+
+    fn serialize_field<T>(&mut self, _key: &'static str, _value: &T) -> Result<(), XlsxError>
+    where
+        T: ?Sized + Serialize,
+    {
+        Ok(())
     }
 
     fn end(self) -> Result<(), XlsxError> {
