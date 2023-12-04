@@ -53,6 +53,22 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Write i64/u64 numbers.
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    let num = 3_u64;
+
+    worksheet.write(0, 0, 1_i64)?;
+    worksheet.write(1, 1, 2_u64)?;
+    worksheet.write_number(2, 2, num as f64)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn bootstrap04_write_numbers_1() {
     let test_runner = common::TestRunner::new()
@@ -83,6 +99,18 @@ fn bootstrap04_write_numbers_3() {
         .set_name("bootstrap04")
         .set_function(create_new_xlsx_file_3)
         .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap04_write_numbers_4() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap04")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();

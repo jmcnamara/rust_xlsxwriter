@@ -17,10 +17,6 @@ use std::fmt::Display;
 use crate::{ColNum, Format, IntoExcelData, RowNum, Worksheet, XlsxError};
 use serde::{ser, Serialize};
 
-const MAX_LOSSLESS_U64_TO_F64: u64 = 2 << 52;
-const MAX_LOSSLESS_I64_TO_F64: i64 = 2 << 52;
-const MIN_LOSSLESS_I64_TO_F64: i64 = -MAX_LOSSLESS_I64_TO_F64;
-
 // -----------------------------------------------------------------------
 // Worksheet extensions to handle serialization.
 // -----------------------------------------------------------------------
@@ -35,7 +31,7 @@ impl Worksheet {
     /// [Serde](https://serde.rs) into cells on a worksheet.
     ///
     /// The limitations are that the primary data type to be serialized must be
-    /// a struct and it's fields must be either primitive types (strings, chars,
+    /// a struct and its fields must be either primitive types (strings, chars,
     /// numbers, booleans) or vector/array types. Compound types such as enums,
     /// tuples or maps aren't supported. The reason for this is that the output
     /// data must fit in the 2D cell format of an Excel worksheet.
@@ -614,40 +610,20 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
         self.serialize_to_worksheet_cell(data)
     }
 
+    fn serialize_i64(self, data: i64) -> Result<(), XlsxError> {
+        self.serialize_to_worksheet_cell(data)
+    }
+
+    fn serialize_u64(self, data: u64) -> Result<(), XlsxError> {
+        self.serialize_to_worksheet_cell(data)
+    }
+
     fn serialize_f32(self, data: f32) -> Result<(), XlsxError> {
         self.serialize_to_worksheet_cell(data)
     }
 
     fn serialize_f64(self, data: f64) -> Result<(), XlsxError> {
         self.serialize_to_worksheet_cell(data)
-    }
-
-    // Serialize i64/u64.
-    //
-    // Excel uses a f64 data type for all numbers. i64/u64 won't fit losslessly
-    // into f64 but a large part of its range does (+/- 2^52). As a compromise,
-    // we convert the integers that will convert losslessly and raise an error
-    // for anything outside that range.
-    #[allow(clippy::cast_precision_loss)]
-    fn serialize_i64(self, data: i64) -> Result<(), XlsxError> {
-        if (MIN_LOSSLESS_I64_TO_F64..=MAX_LOSSLESS_I64_TO_F64).contains(&data) {
-            self.serialize_f64(data as f64)
-        } else {
-            Err(XlsxError::SerdeError(format!(
-                "The i64 value '{data}' does not fit into to Excel's f64 range."
-            )))
-        }
-    }
-
-    #[allow(clippy::cast_precision_loss)]
-    fn serialize_u64(self, data: u64) -> Result<(), XlsxError> {
-        if (0..=MAX_LOSSLESS_U64_TO_F64).contains(&data) {
-            self.serialize_f64(data as f64)
-        } else {
-            Err(XlsxError::SerdeError(format!(
-                "The u64 value '{data}' does not fit into to Excel's f64 range."
-            )))
-        }
     }
 
     // Serialize strings types.

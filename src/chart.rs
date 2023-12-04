@@ -15412,7 +15412,7 @@ impl ChartGradientFill {
     /// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
     ///
     /// Excel supports between 2 and 10 gradient stops which define the a color
-    /// and it's position in the gradient as a percentage. These colors and
+    /// and its position in the gradient as a percentage. These colors and
     /// positions are used to interpolate a gradient fill.
     ///
     /// # Parameters
@@ -15564,7 +15564,7 @@ impl ChartGradientFill {
 /// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
 ///
 /// Excel supports between 2 and 10 gradient stops which define the a color and
-/// it's position in the gradient as a percentage. These colors and positions
+/// its position in the gradient as a percentage. These colors and positions
 /// are used to interpolate a gradient fill.
 ///
 /// Gradient formats are generally used with the

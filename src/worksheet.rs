@@ -541,7 +541,9 @@ impl Worksheet {
     ///
     /// The types currently supported are:
     /// - String types: [`&str`], [`String`], `&String` and `Cow<'_, str>`.
-    /// - Numbers that convert [`Into`] [`f64`].
+    /// - Numbers that convert [`Into`] [`f64`]. Also, u64 and i64 are supported
+    ///   with loss of precision outside Excel's integer range of +/-
+    ///   999,999,999,999,999 (15 digits).
     /// - [`bool`]
     /// - [`ExcelDateTime`].
     /// - [`Formula`].
@@ -556,9 +558,12 @@ impl Worksheet {
     /// - [`chrono::NaiveTime`].
     ///
     /// [`Chrono`]: https://docs.rs/chrono/latest/chrono/index.html
-    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    /// [`chrono::NaiveDate`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]:
+    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
@@ -593,7 +598,9 @@ impl Worksheet {
     ///
     /// The types currently supported are:
     /// - String types: [`&str`], [`String`], `&String` and `Cow<'_, str>`.
-    /// - Numbers that convert [`Into`] [`f64`].
+    /// - Numbers that convert [`Into`] [`f64`]. Also, u64 and i64 are supported
+    ///   with loss of precision outside Excel's integer range of +/-
+    ///   999,999,999,999,999 (15 digits).
     /// - [`bool`]
     /// - [`ExcelDateTime`].
     /// - [`Formula`].
@@ -1129,16 +1136,21 @@ impl Worksheet {
     /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
     /// the equivalent of rust's [`f64`] type. This method will accept any rust
     /// type that will convert [`Into`] a f64. These include i8, u8, i16, u16,
-    /// i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
-    /// around 15 digits of precision. Anything beyond that cannot be stored as
-    /// a number by Excel without a loss of precision and may need to be stored
-    /// as a string instead.
+    /// i32, u32 and f32 but not i64 or u64, see below.
+    ///
+    /// IEEE 754 Doubles and f64 have around 15 digits of precision. Anything
+    /// beyond that cannot be stored as a number by Excel without a loss of
+    /// precision and may need to be stored as a string instead.
     ///
     /// [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_754
     ///
-    ///  Excel doesn't have handling for NaN or INF floating point numbers.
-    ///  These will be stored as the strings "Nan", "INF", and "-INF" strings
-    ///  instead.
+    /// For i64/u64 you can cast the numbers `as f64` which will allow you to
+    /// store the number with a loss of precision outside Excel's integer range
+    /// of +/- 999,999,999,999,999 (15 digits).
+    ///
+    /// Excel doesn't have handling for NaN or INF floating point numbers.
+    /// These will be stored as the strings "Nan", "INF", and "-INF" strings
+    /// instead.
     ///
     /// # Parameters
     ///
@@ -1213,16 +1225,21 @@ impl Worksheet {
     /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
     /// the equivalent of rust's [`f64`] type. This method will accept any rust
     /// type that will convert [`Into`] a f64. These include i8, u8, i16, u16,
-    /// i32, u32 and f32 but not i64 or u64. IEEE 754 Doubles and f64 have
-    /// around 15 digits of precision. Anything beyond that cannot be stored as
-    /// a number by Excel without a loss of precision and may need to be stored
-    /// as a string instead.
+    /// i32, u32 and f32 but not i64 or u64, see below.
+    ///
+    /// IEEE 754 Doubles and f64 have around 15 digits of precision. Anything
+    /// beyond that cannot be stored as a number by Excel without a loss of
+    /// precision and may need to be stored as a string instead.
     ///
     /// [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_754
     ///
-    ///  Excel doesn't have handling for NaN or INF floating point numbers.
-    ///  These will be stored as the strings "Nan", "INF", and "-INF" strings
-    ///  instead.
+    /// For i64/u64 you can cast the numbers `as f64` which will allow you to
+    /// store the number with a loss of precision outside Excel's integer range
+    /// of +/- 999,999,999,999,999 (15 digits).
+    ///
+    /// Excel doesn't have handling for NaN or INF floating point numbers.
+    /// These will be stored as the strings "Nan", "INF", and "-INF" strings
+    /// instead.
     ///
     /// # Parameters
     ///
@@ -11336,6 +11353,33 @@ macro_rules! write_number_trait_impl {
     )*)
 }
 write_number_trait_impl!(u8 i8 u16 i16 u32 i32 f32 f64);
+
+// Note: Excel doesn't support saving the full range of i64/u64 in f64.
+macro_rules! write_number_trait_impl {
+    ($($t:ty)*) => ($(
+        impl IntoExcelData for $t {
+            fn write(
+                self,
+                worksheet: &mut Worksheet,
+                row: RowNum,
+                col: ColNum,
+            ) -> Result<&mut Worksheet, XlsxError> {
+                worksheet.store_number(row, col, self as f64, None)
+            }
+
+            fn write_with_format<'a>(
+                self,
+                worksheet: &'a mut Worksheet,
+                row: RowNum,
+                col: ColNum,
+                format: &'a Format,
+            ) -> Result<&'a mut Worksheet, XlsxError> {
+                worksheet.store_number(row, col, self as f64, Some(format))
+            }
+        }
+    )*)
+}
+write_number_trait_impl!(u64 i64);
 
 impl IntoExcelData for bool {
     fn write(
