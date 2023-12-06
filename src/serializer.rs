@@ -299,7 +299,9 @@ impl Worksheet {
         for (col_offset, header_name) in headers.field_names.iter().enumerate() {
             let col = col_initial + col_offset as u16;
 
-            let serializer_header = FieldMetadata { row, col };
+            let mut serializer_header = CustomSerializeHeader::new(header_name);
+            serializer_header.row = row;
+            serializer_header.col = col;
 
             self.serializer_state.headers.insert(
                 (headers.struct_name.clone(), (*header_name).to_string()),
@@ -428,7 +430,9 @@ impl Worksheet {
         for (col_offset, header_name) in headers.field_names.iter().enumerate() {
             let col = col_initial + col_offset as u16;
 
-            let serializer_header = FieldMetadata { row, col };
+            let mut serializer_header = CustomSerializeHeader::new(header_name);
+            serializer_header.row = row;
+            serializer_header.col = col;
 
             self.serializer_state.headers.insert(
                 (headers.struct_name.clone(), (*header_name).to_string()),
@@ -436,6 +440,49 @@ impl Worksheet {
             );
 
             self.write_with_format(row, col, header_name, format)?;
+        }
+
+        Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn serialize_headers_with_options(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        struct_name: impl Into<String>,
+        custom_headers: &[CustomSerializeHeader],
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let col_initial = col;
+        let struct_name = struct_name.into();
+
+        for (col_offset, custom_header) in custom_headers.iter().enumerate() {
+            let col = col_initial + col_offset as u16;
+
+            let mut serializer_header = custom_header.clone();
+            serializer_header.row = row;
+            serializer_header.col = col;
+
+            match &serializer_header.header_format {
+                Some(format) => {
+                    self.write_with_format(row, col, &serializer_header.header_name, format)?
+                }
+                None => self.write(row, col, &serializer_header.header_name)?,
+            };
+
+            self.serializer_state.headers.insert(
+                (struct_name.clone(), (custom_header.field_name.clone())),
+                serializer_header,
+            );
         }
 
         Ok(self)
@@ -461,7 +508,10 @@ impl Worksheet {
         let row = self.serializer_state.current_row;
         let col = self.serializer_state.current_col;
 
-        self.write(row, col, data)?;
+        match &self.serializer_state.cell_format.clone() {
+            Some(format) => self.write_with_format(row, col, data, format)?,
+            None => self.write(row, col, data)?,
+        };
 
         Ok(())
     }
@@ -473,11 +523,12 @@ impl Worksheet {
 // information in the serializer.
 // -----------------------------------------------------------------------
 pub(crate) struct SerializerState {
-    headers: HashMap<(String, String), FieldMetadata>,
+    headers: HashMap<(String, String), CustomSerializeHeader>,
     current_struct: String,
     current_field: String,
     current_col: ColNum,
     current_row: RowNum,
+    cell_format: Option<Format>,
 }
 
 impl SerializerState {
@@ -489,6 +540,7 @@ impl SerializerState {
             current_field: String::new(),
             current_col: 0,
             current_row: 0,
+            cell_format: None,
         }
     }
 
@@ -513,6 +565,7 @@ impl SerializerState {
         self.current_col = header.col;
         self.current_row = header.row;
         self.current_field = key.to_string();
+        self.cell_format = header.cell_format.clone();
 
         Ok(())
     }
@@ -538,12 +591,43 @@ impl SerializerState {
 }
 
 // -----------------------------------------------------------------------
-// SerializerHeader. A struct used to store header/field position and metadata
-// for individual fields.
+// CustomSerializeHeader. A struct used to store header/field position and
+// metadata for individual fields. TODO
 // -----------------------------------------------------------------------
-pub(crate) struct FieldMetadata {
+
+/// TODO
+#[derive(Clone)]
+pub struct CustomSerializeHeader {
+    field_name: String,
+    header_name: String,
+    header_format: Option<Format>,
+    cell_format: Option<Format>,
     row: RowNum,
     col: ColNum,
+}
+
+impl CustomSerializeHeader {
+    /// Todo
+    pub fn new(field_name: impl Into<String>) -> CustomSerializeHeader {
+        let field_name = field_name.into();
+        let header_name = field_name.clone();
+
+        CustomSerializeHeader {
+            field_name,
+            header_name,
+            header_format: None,
+            cell_format: None,
+            row: 0,
+            col: 0,
+        }
+    }
+
+    /// TODO
+    pub fn set_header_format(mut self, format: &Format) -> CustomSerializeHeader {
+        self.header_format = Some(format.clone());
+
+        self
+    }
 }
 
 // -----------------------------------------------------------------------

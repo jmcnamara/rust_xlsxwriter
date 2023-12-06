@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{serializer::CustomSerializeHeader, Format, Workbook, XlsxError};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -60,6 +60,39 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for serialize_headers_with_options().
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    worksheet.set_paper_size(9);
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: Vec<u16>,
+        col2: Vec<bool>,
+    }
+
+    let data = MyStruct {
+        col1: vec![123, 456, 789],
+        col2: vec![true, false, true],
+    };
+
+    let custom_headers = [
+        CustomSerializeHeader::new("col1").set_header_format(&bold),
+        CustomSerializeHeader::new("col2").set_header_format(&bold),
+    ];
+
+    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde06_1() {
     let test_runner = common::TestRunner::new()
@@ -78,6 +111,18 @@ fn test_serde06_2() {
         .set_name("serde06")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde06_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde06")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

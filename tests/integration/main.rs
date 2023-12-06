@@ -681,6 +681,8 @@ mod serde04;
 mod serde05;
 #[cfg(feature = "serde")]
 mod serde06;
+#[cfg(feature = "serde")]
+mod serde07;
 mod set_row01;
 mod set_row02;
 mod set_row03;
