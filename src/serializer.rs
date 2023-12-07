@@ -17,6 +17,15 @@ use std::fmt::Display;
 use crate::{ColNum, Format, IntoExcelData, RowNum, Worksheet, XlsxError};
 use serde::{ser, Serialize};
 
+/// Implementation of the `serde::ser::Error` Trait to allow the use of a single
+/// error type for serialization and `rust_xlsxwriter` errors.
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+impl serde::ser::Error for XlsxError {
+    fn custom<T: Display>(msg: T) -> Self {
+        XlsxError::SerdeError(msg.to_string())
+    }
+}
+
 // -----------------------------------------------------------------------
 // Worksheet extensions to handle serialization.
 // -----------------------------------------------------------------------
@@ -282,36 +291,7 @@ impl Worksheet {
     where
         T: Serialize,
     {
-        // Check row and columns are in the allowed range.
-        if !self.check_dimensions_only(row, col) {
-            return Err(XlsxError::RowColumnLimitError);
-        }
-
-        let mut headers = SerializerHeader {
-            struct_name: String::new(),
-            field_names: vec![],
-        };
-
-        data_structure.serialize(&mut headers)?;
-
-        let col_initial = col;
-
-        for (col_offset, header_name) in headers.field_names.iter().enumerate() {
-            let col = col_initial + col_offset as u16;
-
-            let mut serializer_header = CustomSerializeHeader::new(header_name);
-            serializer_header.row = row;
-            serializer_header.col = col;
-
-            self.serializer_state.headers.insert(
-                (headers.struct_name.clone(), (*header_name).to_string()),
-                serializer_header,
-            );
-
-            self.write(row, col, header_name)?;
-        }
-
-        Ok(self)
+        self.serialize_headers_with_format(row, col, data_structure, &Format::default())
     }
 
     /// Write the location and headers for data serialization, with formatting.
@@ -413,41 +393,129 @@ impl Worksheet {
     where
         T: Serialize,
     {
-        // Check row and columns are in the allowed range.
-        if !self.check_dimensions_only(row, col) {
-            return Err(XlsxError::RowColumnLimitError);
-        }
-
+        // Serialize the struct to determine the type name and the fields.
         let mut headers = SerializerHeader {
             struct_name: String::new(),
             field_names: vec![],
         };
-
         data_structure.serialize(&mut headers)?;
 
-        let col_initial = col;
+        // Convert the field names to custom header structs.
+        let custom_headers: Vec<CustomSerializeHeader> = headers
+            .field_names
+            .iter()
+            .map(|name| CustomSerializeHeader::new_with_format(name, format))
+            .collect();
 
-        for (col_offset, header_name) in headers.field_names.iter().enumerate() {
-            let col = col_initial + col_offset as u16;
-
-            let mut serializer_header = CustomSerializeHeader::new(header_name);
-            serializer_header.row = row;
-            serializer_header.col = col;
-
-            self.serializer_state.headers.insert(
-                (headers.struct_name.clone(), (*header_name).to_string()),
-                serializer_header,
-            );
-
-            self.write_with_format(row, col, header_name, format)?;
-        }
-
-        Ok(self)
+        self.serialize_headers_with_options(row, col, headers.struct_name, &custom_headers)
     }
 
-    /// TODO
+    /// Write the location and headers for data serialization, with additional
+    /// options.
+    ///
+    /// The [`Worksheet::serialize()`] and
+    /// [`Worksheet::serialize_headers_with_format()`] methods, above, set the
+    /// serialization headers and location via an instance of the structure to
+    /// be serialized. This will work for the majority of use cases, and for
+    /// other cases you can adjust the output by using Serde Container or Field
+    /// [Attributes].
+    ///
+    /// [Attributes]: https://serde.rs/attributes.html
+    ///
+    /// If these methods don't give you the output or flexibility you require
+    /// you can use the `serialize_headers_with_options()` method with
+    /// [`CustomSerializeHeader`] options. This allows you to reorder, rename,
+    /// format or skip headers and also define formatting for field values.
+    ///
+    /// See [`CustomSerializeHeader`] for additional information and examples.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `struct_name` - The type name for the target struct, as a string.
+    /// * `custom_headers` - An array of [`CustomSerializeHeader`] values.
     ///
     /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    ///   serialization.
+    /// # Examples
+    ///
+    /// The following example demonstrates serializing instances of a Serde
+    /// derived data structure to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize_headers_with_options.rs
+    /// #
+    /// # use rust_xlsxwriter::{CustomSerializeHeader, Format, Workbook, XlsxError};
+    /// # use serde::Serialize;
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add some formats to use with the serialization data.
+    ///     let bold = Format::new().set_bold();
+    ///     let currency = Format::new().set_num_format("$0.00");
+    ///
+    ///     // Create a serializable test struct.
+    ///     #[derive(Serialize)]
+    ///     struct Produce {
+    ///         fruit: &'static str,
+    ///         cost: f64,
+    ///     }
+    ///
+    ///     // Create some data instances.
+    ///     let items = [
+    ///         Produce {
+    ///             fruit: "Peach",
+    ///             cost: 1.05,
+    ///         },
+    ///         Produce {
+    ///             fruit: "Plum",
+    ///             cost: 0.15,
+    ///         },
+    ///         Produce {
+    ///             fruit: "Pear",
+    ///             cost: 0.75,
+    ///         },
+    ///     ];
+    ///
+    ///     // Set up the start location and headers of the data to be serialized using
+    ///     // custom headers.
+    ///     let custom_headers = [
+    ///         CustomSerializeHeader::new("fruit")
+    ///             .rename("Fruit")
+    ///             .set_header_format(&bold),
+    ///         CustomSerializeHeader::new("cost")
+    ///             .rename("Price")
+    ///             .set_header_format(&bold)
+    ///             .set_cell_format(&currency),
+    ///     ];
+    ///
+    ///     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
+    ///
+    ///     // Serialize the data.
+    ///     worksheet.serialize(&items)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("serialize.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_with_options.png">
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn serialize_headers_with_options(
@@ -462,10 +530,20 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        let col_initial = col;
+        // Check for empty struct name.
         let struct_name = struct_name.into();
+        if struct_name.is_empty() {
+            return Err(XlsxError::ParameterError(
+                "struct_name parameter cannot be blank".to_string(),
+            ));
+        }
 
+        let col_initial = col;
         for (col_offset, custom_header) in custom_headers.iter().enumerate() {
+            if custom_header.skip {
+                continue;
+            }
+
             let col = col_initial + col_offset as u16;
 
             let mut serializer_header = custom_header.clone();
@@ -489,10 +567,7 @@ impl Worksheet {
     }
 
     // Serialize the parent data structure to the worksheet.
-    pub(crate) fn serialize_data_structure<T>(
-        &mut self,
-        data_structure: &T,
-    ) -> Result<(), XlsxError>
+    fn serialize_data_structure<T>(&mut self, data_structure: &T) -> Result<(), XlsxError>
     where
         T: Serialize,
     {
@@ -501,10 +576,11 @@ impl Worksheet {
     }
 
     // Serialize individual data items to a worksheet cell.
-    pub(crate) fn serialize_to_worksheet_cell(
-        &mut self,
-        data: impl IntoExcelData,
-    ) -> Result<(), XlsxError> {
+    fn serialize_to_worksheet_cell(&mut self, data: impl IntoExcelData) -> Result<(), XlsxError> {
+        if !self.serializer_state.is_known_field() {
+            return Ok(());
+        }
+
         let row = self.serializer_state.current_row;
         let col = self.serializer_state.current_col;
 
@@ -544,70 +620,49 @@ impl SerializerState {
         }
     }
 
-    // Set the row/col data to use when writing a serialized value. The column
-    // number comes from the initial serialization of the headers and the row is
-    // incremented with each access to a field.
-    pub(crate) fn set_row_col_for_field(&mut self, key: &'static str) -> Result<(), XlsxError> {
-        let Some(header) = self
-            .headers
-            .get_mut(&(self.current_struct.clone(), key.to_string()))
-        else {
-            let structure = &self.current_struct;
-            return Err(XlsxError::SerdeError(format!(
-                "Unknown struct/field '{structure}.{key}'. Add it via Worksheet::serialize_headers()."
-            )));
-        };
-
-        // Increment the row number for the next worksheet.write().
-        header.row += 1;
-
-        // Set the "current" cell values used to write the serialized data.
-        self.current_col = header.col;
-        self.current_row = header.row;
-        self.current_field = key.to_string();
-        self.cell_format = header.cell_format.clone();
-
-        Ok(())
-    }
-
-    // Store the last row position after writing a vec/array sequence.
-    pub(crate) fn set_row_col_after_sequence(&mut self) -> Result<(), XlsxError> {
-        let Some(header) = self
+    // Check if the current struct/field have been selected to be serialized by
+    // the user. If it has then set the row/col values for the next write() call.
+    fn is_known_field(&mut self) -> bool {
+        let Some(field) = self
             .headers
             .get_mut(&(self.current_struct.clone(), self.current_field.clone()))
         else {
-            let structure = &self.current_struct;
-            let field = &self.current_field;
-            return Err(XlsxError::SerdeError(format!(
-                "Unknown struct/field '{structure}.{field}'. Add it via Worksheet::serialize_headers()."
-            )));
+            return false;
         };
 
-        // Store the row position for the field.
-        header.row = self.current_row - 1;
+        // Increment the row number for the next worksheet.write().
+        field.row += 1;
 
-        Ok(())
+        // Set the "current" cell values used to write the serialized data.
+        self.current_col = field.col;
+        self.current_row = field.row;
+        self.cell_format = field.cell_format.clone();
+
+        true
     }
 }
 
 // -----------------------------------------------------------------------
-// CustomSerializeHeader. A struct used to store header/field position and
-// metadata for individual fields. TODO
+// CustomSerializeHeader. A struct used represent a serializer field/header and
+// the metadata required to write associated data to cells.
 // -----------------------------------------------------------------------
 
 /// TODO
 #[derive(Clone)]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub struct CustomSerializeHeader {
     field_name: String,
     header_name: String,
     header_format: Option<Format>,
     cell_format: Option<Format>,
+    skip: bool,
     row: RowNum,
     col: ColNum,
 }
 
 impl CustomSerializeHeader {
     /// Todo
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn new(field_name: impl Into<String>) -> CustomSerializeHeader {
         let field_name = field_name.into();
         let header_name = field_name.clone();
@@ -617,35 +672,43 @@ impl CustomSerializeHeader {
             header_name,
             header_format: None,
             cell_format: None,
+            skip: false,
             row: 0,
             col: 0,
         }
     }
 
     /// TODO
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn set_header_format(mut self, format: &Format) -> CustomSerializeHeader {
         self.header_format = Some(format.clone());
-
         self
     }
-}
 
-// -----------------------------------------------------------------------
-// SerializerHeader. A struct used to store header/field name during
-// serialization of the headers.
-// -----------------------------------------------------------------------
-pub(crate) struct SerializerHeader {
-    struct_name: String,
-    field_names: Vec<String>,
-}
+    /// TODO
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_cell_format(mut self, format: &Format) -> CustomSerializeHeader {
+        self.cell_format = Some(format.clone());
+        self
+    }
 
-// -----------------------------------------------------------------------
-// Implementation of the serde::ser::Error Trait for XlsxWriter to allow us to
-// use a single error type for both serialization and writing errors.
-// -----------------------------------------------------------------------
-impl serde::ser::Error for XlsxError {
-    fn custom<T: Display>(msg: T) -> Self {
-        XlsxError::SerdeError(msg.to_string())
+    /// TODO
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_skip(mut self, enable: bool) -> CustomSerializeHeader {
+        self.skip = enable;
+        self
+    }
+
+    /// TODO
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn rename(mut self, name: impl Into<String>) -> CustomSerializeHeader {
+        self.header_name = name.into();
+        self
+    }
+
+    // Internal constructor.
+    fn new_with_format(field_name: impl Into<String>, format: &Format) -> CustomSerializeHeader {
+        CustomSerializeHeader::new(field_name).set_header_format(format)
     }
 }
 
@@ -795,7 +858,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, XlsxError> {
-        // Store the struct type/name to allow us to disambiguate structs.
+        // Store the struct type name to check against user defined structs.
         self.serializer_state.current_struct = name.to_string();
 
         self.serialize_map(Some(len))
@@ -853,6 +916,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
 // Currently we only support/use SerializeStruct and SerializeSeq.
 
 // Structs are the main sequence type used by `rust_xlsxwriter`.
+#[doc(hidden)]
 impl<'a> ser::SerializeStruct for &'a mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
@@ -861,9 +925,9 @@ impl<'a> ser::SerializeStruct for &'a mut Worksheet {
     where
         T: ?Sized + Serialize,
     {
-        // Set the serializer (row, col) starting point for data serialization
-        // by mapping the field name to a header name.
-        self.serializer_state.set_row_col_for_field(key)?;
+        // Store the struct field name to allow us to map to the correct
+        // header/column.
+        self.serializer_state.current_field = key.to_string();
 
         value.serialize(&mut **self)
     }
@@ -874,6 +938,7 @@ impl<'a> ser::SerializeStruct for &'a mut Worksheet {
 }
 
 // We also serialize sequences to map vectors/arrays to Excel.
+#[doc(hidden)]
 impl<'a> ser::SerializeSeq for &'a mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
@@ -891,13 +956,13 @@ impl<'a> ser::SerializeSeq for &'a mut Worksheet {
         ret
     }
 
-    // Close the sequence.
     fn end(self) -> Result<(), XlsxError> {
-        self.serializer_state.set_row_col_after_sequence()
+        Ok(())
     }
 }
 
 // Serialize tuple sequences.
+#[doc(hidden)]
 impl<'a> ser::SerializeTuple for &'a mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
@@ -915,6 +980,7 @@ impl<'a> ser::SerializeTuple for &'a mut Worksheet {
 }
 
 // Serialize tuple struct sequences.
+#[doc(hidden)]
 impl<'a> ser::SerializeTupleStruct for &'a mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
@@ -932,6 +998,7 @@ impl<'a> ser::SerializeTupleStruct for &'a mut Worksheet {
 }
 
 // Serialize tuple variant sequences.
+#[doc(hidden)]
 impl<'a> ser::SerializeTupleVariant for &'a mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
@@ -949,6 +1016,7 @@ impl<'a> ser::SerializeTupleVariant for &'a mut Worksheet {
 }
 
 // Serialize tuple map sequences.
+#[doc(hidden)]
 impl<'a> ser::SerializeMap for &'a mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
@@ -973,6 +1041,7 @@ impl<'a> ser::SerializeMap for &'a mut Worksheet {
 }
 
 // Serialize struct variant sequences.
+#[doc(hidden)]
 impl<'a> ser::SerializeStructVariant for &'a mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
@@ -988,6 +1057,15 @@ impl<'a> ser::SerializeStructVariant for &'a mut Worksheet {
     fn end(self) -> Result<(), XlsxError> {
         Ok(())
     }
+}
+
+// -----------------------------------------------------------------------
+// SerializerHeader. A struct used to store header/field name during
+// serialization of the headers.
+// -----------------------------------------------------------------------
+struct SerializerHeader {
+    struct_name: String,
+    field_names: Vec<String>,
 }
 
 // -----------------------------------------------------------------------

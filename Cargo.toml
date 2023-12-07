@@ -92,9 +92,15 @@ path = "examples/doc_worksheet_serialize_headers1.rs"
 required-features = ["serde"]
 
 [[example]]
+name = "doc_worksheet_serialize_headers_with_options"
+path = "examples/doc_worksheet_serialize_headers_with_options.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "doc_worksheet_serialize_headers2"
 path = "examples/doc_worksheet_serialize_headers2.rs"
 required-features = ["serde"]
+
 
 [[example]]
 name = "doc_worksheet_serialize_vectors"

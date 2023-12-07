@@ -143,6 +143,8 @@ pub enum XlsxError {
 
     /// A general error that is raised when serializing data via the Serde
     /// serializer.
+    #[cfg(feature = "serde")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     SerdeError(String),
 
     /// Wrapper for a variety of [polars::prelude::PolarsError] errors. This is
@@ -279,6 +281,7 @@ impl fmt::Display for XlsxError {
                 write!(f, "{error}")
             }
 
+            #[cfg(feature = "serde")]
             XlsxError::SerdeError(error) => {
                 write!(f, "Serialization error: '{error}'.")
             }

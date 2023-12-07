@@ -208,6 +208,10 @@ pub use url::*;
 pub use workbook::*;
 pub use worksheet::*;
 
+#[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+pub use serializer::*;
+
 #[doc(hidden)]
 pub use chart::*;
 #[doc(hidden)]

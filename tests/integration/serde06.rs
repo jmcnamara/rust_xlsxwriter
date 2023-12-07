@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{serializer::CustomSerializeHeader, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeHeader, Format, Workbook, XlsxError};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
