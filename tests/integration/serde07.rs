@@ -189,7 +189,7 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case for skipping fields via set_skip().
+// Test case for skipping fields via skip().
 fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
@@ -223,7 +223,7 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
     let custom_headers = [
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2"),
-        CustomSerializeHeader::new("col3").set_skip(true),
+        CustomSerializeHeader::new("col3").skip(true),
     ];
 
     worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;

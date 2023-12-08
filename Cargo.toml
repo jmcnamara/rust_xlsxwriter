@@ -76,6 +76,7 @@ name = "doc_properties_checksum2_chrono"
 path = "examples/doc_properties_checksum2_chrono.rs"
 required-features = ["chrono"]
 
+# Examples to run only when `serde` is enabled.
 [[example]]
 name = "app_serialize"
 path = "examples/app_serialize.rs"
@@ -92,15 +93,64 @@ path = "examples/doc_worksheet_serialize_headers1.rs"
 required-features = ["serde"]
 
 [[example]]
-name = "doc_worksheet_serialize_headers_with_options"
-path = "examples/doc_worksheet_serialize_headers_with_options.rs"
-required-features = ["serde"]
-
-[[example]]
 name = "doc_worksheet_serialize_headers2"
 path = "examples/doc_worksheet_serialize_headers2.rs"
 required-features = ["serde"]
 
+[[example]]
+name = "doc_worksheet_serialize_headers_custom"
+path = "examples/doc_worksheet_serialize_headers_custom.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_format1"
+path = "examples/doc_worksheet_serialize_headers_format1.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_format2"
+path = "examples/doc_worksheet_serialize_headers_format2.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_format3"
+path = "examples/doc_worksheet_serialize_headers_format3.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_format4"
+path = "examples/doc_worksheet_serialize_headers_format4.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_rename1"
+path = "examples/doc_worksheet_serialize_headers_rename1.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_rename2"
+path = "examples/doc_worksheet_serialize_headers_rename2.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_skip1"
+path = "examples/doc_worksheet_serialize_headers_skip1.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_skip2"
+path = "examples/doc_worksheet_serialize_headers_skip2.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_skip3"
+path = "examples/doc_worksheet_serialize_headers_skip3.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_with_options"
+path = "examples/doc_worksheet_serialize_headers_with_options.rs"
+required-features = ["serde"]
 
 [[example]]
 name = "doc_worksheet_serialize_vectors"
@@ -138,7 +188,3 @@ release_check = {cmd = ["../release/release_check.sh"]}
 
 # Profile
 # cargo instruments -t time --example app_perf_test
-
-# Clippy commands
-# cargo clippy --all-targets -- -Dwarnings
-# cargo +nightly rustdoc-clippy
