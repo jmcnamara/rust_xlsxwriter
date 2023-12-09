@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added support for Serde serialization. This requires the `serde` feature flag
-  to be enabled.
+  to be enabled. See [Working with Serde].
+
 
 - Added support for writing `u64` and `i64` number within Excel's limitations.
   This implies a loss of precision outside Excel's integer range of +/-
   999,999,999,999,999 (15 digits).
 
+  [Working with Serde]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#working-with-serde
 
 ## [0.56.0] - 2023-11-27
 
