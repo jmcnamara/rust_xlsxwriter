@@ -2,10 +2,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates serializing instances of a Serde derived
-//! data structure to a worksheet with custom headers and cell formatting.
-
-use rust_xlsxwriter::{CustomSerializeHeader, Format, FormatBorder, Workbook, XlsxError};
+//! The following example demonstrates serializing data without outputting the
+//! headers above the data.
+//!
+use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -13,14 +13,6 @@ fn main() -> Result<(), XlsxError> {
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
-
-    // Add some formats to use with the serialization data.
-    let header_format = Format::new()
-        .set_bold()
-        .set_border(FormatBorder::Thin)
-        .set_background_color("C6EFCE");
-
-    let currency_format = Format::new().set_num_format("$0.00");
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -47,17 +39,12 @@ fn main() -> Result<(), XlsxError> {
 
     // Set up the custom headers.
     let custom_headers = [
-        CustomSerializeHeader::new("fruit")
-            .rename("Item")
-            .set_header_format(&header_format),
-        CustomSerializeHeader::new("cost")
-            .rename("Price")
-            .set_header_format(&header_format)
-            .set_cell_format(&currency_format),
+        CustomSerializeHeader::new("fruit").hide_headers(true),
+        CustomSerializeHeader::new("cost"),
     ];
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(1, 1, "Produce", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

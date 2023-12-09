@@ -5,7 +5,7 @@
 //! The following example demonstrates serializing instances of a Serde derived
 //! data structure to a worksheet.
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -13,6 +13,12 @@ fn main() -> Result<(), XlsxError> {
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
+
+    // Add some formats to use with the serialization data.
+    let header_format = Format::new()
+        .set_bold()
+        .set_border(FormatBorder::Thin)
+        .set_background_color("C6E0B4");
 
     // Create a serializable test struct.
     #[derive(Serialize)]
@@ -23,18 +29,24 @@ fn main() -> Result<(), XlsxError> {
         id: u32,
     }
 
-    let student = Student {
-        name: "Aoife",
-        age: 25,
-        id: 564351,
-    };
+    let students = [
+        Student {
+            name: "Aoife",
+            age: 25,
+            id: 564351,
+        },
+        Student {
+            name: "Caoimhe",
+            age: 21,
+            id: 443287,
+        },
+    ];
 
-    // Set up the start location and headers of the data to be serialized using
-    // any temporary or valid instance.
-    worksheet.serialize_headers(2, 4, &student)?;
+    // Set up the start location and headers of the data to be serialized.
+    worksheet.serialize_headers_with_format(1, 3, &students.get(0).unwrap(), &header_format)?;
 
     // Serialize the data.
-    worksheet.serialize(&student)?;
+    worksheet.serialize(&students)?;
 
     // Save the file.
     workbook.save("serialize.xlsx")?;

@@ -41,13 +41,14 @@ fn main() -> Result<(), XlsxError> {
         in_stock: false,
     };
 
-    // Set the serialization location and custom headers.
+    // Set up the custom headers.
     let custom_headers = [
         CustomSerializeHeader::new("fruit"),
         CustomSerializeHeader::new("cost"),
         CustomSerializeHeader::new("in_stock").skip(true),
     ];
 
+    // Set the serialization location and custom headers.
     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
 
     // Serialize the data.

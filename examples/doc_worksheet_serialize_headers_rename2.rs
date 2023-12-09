@@ -38,12 +38,13 @@ fn main() -> Result<(), XlsxError> {
         cost: 0.75,
     };
 
-    // Set the serialization location and custom headers.
+    // Set up the custom headers.
     let custom_headers = [
         CustomSerializeHeader::new("fruit").rename("Item"),
         CustomSerializeHeader::new("cost").rename("Price"),
     ];
 
+    // Set the serialization location and custom headers.
     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
 
     // Serialize the data.

@@ -209,7 +209,7 @@ pub use workbook::*;
 pub use worksheet::*;
 
 #[cfg(feature = "serde")]
-#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+#[doc(hidden)]
 pub use serializer::*;
 
 #[doc(hidden)]

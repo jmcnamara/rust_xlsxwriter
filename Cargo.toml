@@ -98,6 +98,11 @@ path = "examples/doc_worksheet_serialize_headers2.rs"
 required-features = ["serde"]
 
 [[example]]
+name = "doc_worksheet_serialize_headers3"
+path = "examples/doc_worksheet_serialize_headers3.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "doc_worksheet_serialize_headers_custom"
 path = "examples/doc_worksheet_serialize_headers_custom.rs"
 required-features = ["serde"]
@@ -120,6 +125,11 @@ required-features = ["serde"]
 [[example]]
 name = "doc_worksheet_serialize_headers_format4"
 path = "examples/doc_worksheet_serialize_headers_format4.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_hide"
+path = "examples/doc_worksheet_serialize_headers_hide.rs"
 required-features = ["serde"]
 
 [[example]]
@@ -150,6 +160,11 @@ required-features = ["serde"]
 [[example]]
 name = "doc_worksheet_serialize_headers_with_options"
 path = "examples/doc_worksheet_serialize_headers_with_options.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_intro"
+path = "examples/doc_worksheet_serialize_intro.rs"
 required-features = ["serde"]
 
 [[example]]

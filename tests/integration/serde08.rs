@@ -81,6 +81,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     ];
 
     worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+
     worksheet.serialize(&data1)?;
     worksheet.serialize(&data2)?;
     worksheet.serialize(&data3)?;
