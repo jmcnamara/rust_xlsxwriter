@@ -143,6 +143,7 @@
 //!
 //! - `default`: Includes all the standard functionality. Has dependencies on
 //!   `zip`, `regex` and `lazy_static`.
+//! - `serde`: Adds supports for Serde serialization. This is off by default.
 //! - `chrono`: Adds supports for Chrono date/time types to the API. This is off
 //!   by default.
 //! - `zlib`: Adds a dependency on zlib and a C compiler. This includes the same

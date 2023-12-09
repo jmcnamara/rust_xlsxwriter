@@ -90,6 +90,7 @@ features are:
 - Defined names.
 - Autofilters.
 - Worksheet Tables.
+- Serde serialization support.
 
 `rust_xlsxwriter` is under active development and new features will be added
 frequently.
@@ -101,6 +102,9 @@ frequently.
 
 - `default`: Includes all the standard functionality. Has dependencies on `zip`,
   `regex` and `lazy_static`.
+
+
+- `serde`: Adds supports for Serde serialization. This is off by default.
 
 - `chrono`: Adds supports for Chrono date/time types to the API. This is off by
   default.
@@ -119,10 +123,8 @@ frequently.
 
 Recent changes:
 
+- Added support for Serde serialization.
 - Added support for Conditional Formatting.
-- Added chart date axes, data tables, axes crossing, trendlines, error bars,
-  up-down bars, high-low bars, drop-lines and gradient fills.
-- Added Wasm and Polars feature flags for compatibility.
 
 See the full [Release Notes and Changelog].
 

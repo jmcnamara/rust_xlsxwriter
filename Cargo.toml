@@ -7,7 +7,7 @@ repository = "https://github.com/jmcnamara/rust_xlsxwriter"
 keywords = ["excel", "xlsx"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.56.0"
+version = "0.57.0"
 edition = "2021"
 
 [dependencies]
@@ -40,8 +40,7 @@ chrono = ["dep:chrono"]
 # easier to write.
 polars = ["dep:polars"]
 
-# `serde`: Add support for serializing serde enabled structs and fields
-# into a worksheet.
+# `serde`: Adds supports for Serde serialization.
 serde = ["dep:serde"]
 
 # `wasm`: Enable wasm/Javascript compilation.

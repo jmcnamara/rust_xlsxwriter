@@ -152,6 +152,9 @@ documentation and generally show how an individual function works.
   left-to-right to right-to-left, as required by some middle eastern
   versions of Excel.
 
+* `app_serialize.rs` - Example of serializing Serde derived structs to an
+  Excel worksheet using `rust_xlsxwriter`.
+
 * `app_tables.rs` - Example of how to add tables to a worksheet using the
   rust_xlsxwriter library. Tables in Excel are used to group rows and
   columns of data into a single structure that can be referenced in a
@@ -1029,6 +1032,68 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_protect_with_password.rs` - Demonstrates protecting a
   worksheet from editing with a password.
+
+* `doc_worksheet_serialize.rs` - Demonstrates serializing instances of a
+  Serde derived data structure to a worksheet.
+
+* `doc_worksheet_serialize_headers1.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet.
+
+* `doc_worksheet_serialize_headers2.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet. This
+  demonstrates starting the serialization in a different position
+
+* `doc_worksheet_serialize_headers3.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet using
+  different methods.
+
+* `doc_worksheet_serialize_headers_custom.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet with custom
+  headers and cell formatting.
+
+* `doc_worksheet_serialize_headers_format1.rs` - Demonstrates formatting
+  headers during serialization.
+
+* `doc_worksheet_serialize_headers_format2.rs` - Demonstrates formatting
+  headers during serialization.
+
+* `doc_worksheet_serialize_headers_format3.rs` - Demonstrates formatting
+  cells during serialization.
+
+* `doc_worksheet_serialize_headers_format4.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet with header
+  and cell formatting.
+
+* `doc_worksheet_serialize_headers_hide.rs` - Demonstrates serializing data
+  without outputting the headers above the data.
+
+* `doc_worksheet_serialize_headers_rename1.rs` - Demonstrates renaming
+  fields during serialization by using Serde field attributes.
+
+* `doc_worksheet_serialize_headers_rename2.rs` - Demonstrates renaming
+  fields during serialization by specifying custom headers and renaming
+  them there. You must still specify the actual field name to serialize in
+  the `new()` constructor.
+
+* `doc_worksheet_serialize_headers_skip1.rs` - Demonstrates skipping fields
+  during serialization by using Serde field attributes. Since the field is
+  no longer used we also need to tell rustc not emit a `dead_code` warning.
+
+* `doc_worksheet_serialize_headers_skip2.rs` - Demonstrates skipping fields
+  during serialization by omitting them from the serialization headers. To
+  do this we need to specify custom headers.
+
+* `doc_worksheet_serialize_headers_skip3.rs` - Demonstrates skipping fields
+  during serialization by explicitly skipping them via custom headers.
+
+* `doc_worksheet_serialize_headers_with_options.rs` - Demonstrates
+  serializing instances of a Serde derived data structure to a worksheet.
+
+* `doc_worksheet_serialize_intro.rs` - Demonstrates serializing instances
+  of a Serde derived data structure to a worksheet.
+
+* `doc_worksheet_serialize_vectors.rs` - Demonstrates serializing instances
+  of a Serde derived data structure with vectors to a worksheet.
 
 * `doc_worksheet_set_active.rs` - Demonstrates setting a worksheet as the
   visible worksheet when a file is opened.
