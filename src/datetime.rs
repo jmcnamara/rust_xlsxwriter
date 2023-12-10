@@ -9,15 +9,18 @@ mod tests;
 
 use regex::Regex;
 
+#[cfg(feature = "serde")]
+use serde::ser;
+
+#[cfg(feature = "chrono")]
+use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
+
 #[cfg(not(all(
     feature = "wasm",
     target_arch = "wasm32",
     not(any(target_os = "emscripten", target_os = "wasi"))
 )))]
 use std::time::SystemTime;
-
-#[cfg(feature = "chrono")]
-use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 
 use crate::XlsxError;
 
@@ -874,9 +877,9 @@ impl ExcelDateTime {
     ///
     /// There is some internal support for the 1904 epoch in `ExcelDateTime`
     /// since it was implemented for the Python version of the library. However,
-    /// it was almost never used/needed by user so I am omitting it from the
+    /// it was almost never used/needed by users so I am omitting it from the
     /// Rust version for now. I won't accept pull requests to implement/unhide
-    /// it but I may consider feature requests with a good use
+    /// it but I will consider feature requests with a good use
     /// case/justification.
     #[allow(dead_code)]
     pub(crate) fn set_1904_date(mut self) -> ExcelDateTime {
@@ -1340,5 +1343,21 @@ impl IntoExcelDateTime for &NaiveDate {
 impl IntoExcelDateTime for &NaiveTime {
     fn to_excel_serial_date(self) -> f64 {
         ExcelDateTime::chrono_time_to_excel(self)
+    }
+}
+
+/// Implementation of the `ser::Serialize` trait for `ExcelDateTime`.
+///
+/// An Excel datetime is a number (see the [`ExcelDateTime`] docs) so it will
+/// also need to have an Excel cell format applied to it to display as a date.
+///
+#[cfg(feature = "serde")]
+impl ser::Serialize for ExcelDateTime {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: ser::Serializer,
+    {
+        let serial_datetime = self.to_excel();
+        serializer.serialize_f64(serial_datetime)
     }
 }

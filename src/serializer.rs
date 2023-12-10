@@ -859,7 +859,7 @@ use serde::{ser, Serialize};
 /// Implementation of the `serde::ser::Error` Trait to allow the use of a single
 /// error type for serialization and `rust_xlsxwriter` errors.
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-impl serde::ser::Error for XlsxError {
+impl ser::Error for XlsxError {
     fn custom<T: Display>(msg: T) -> Self {
         XlsxError::SerdeError(msg.to_string())
     }
