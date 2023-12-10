@@ -851,19 +851,9 @@
 #![warn(missing_docs)]
 
 use std::collections::HashMap;
-use std::fmt::Display;
 
 use crate::{ColNum, Format, IntoExcelData, RowNum, Worksheet, XlsxError};
 use serde::{ser, Serialize};
-
-/// Implementation of the `serde::ser::Error` Trait to allow the use of a single
-/// error type for serialization and `rust_xlsxwriter` errors.
-#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-impl ser::Error for XlsxError {
-    fn custom<T: Display>(msg: T) -> Self {
-        XlsxError::SerdeError(msg.to_string())
-    }
-}
 
 // -----------------------------------------------------------------------
 // Worksheet extensions to handle serialization.
