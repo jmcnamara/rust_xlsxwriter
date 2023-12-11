@@ -26,6 +26,7 @@
 //! - [Renaming fields when serializing](#renaming-fields-when-serializing)
 //! - [Skipping fields when serializing](#skipping-fields-when-serializing)
 //! - [Setting serialization formatting](#setting-serialization-formatting)
+//! - [Serializing dates and times](#serializing-dates-and-times)
 //! - [Limitations of serializing to
 //!   Excel](#limitations-of-serializing-to-excel)
 //!
@@ -263,9 +264,9 @@
 //!
 //! As explained above serialization converts the field names of structs to
 //! column headers at the top of serialized data. The default field names are
-//! generally lowercase and snake case and may not be the way you want the header
-//! names displayed in Excel. In which case you can use one of the two main
-//! methods to rename the fields/headers:
+//! generally lowercase and snake case and may not be the way you want the
+//! header names displayed in Excel. In which case you can use one of the two
+//! main methods to rename the fields/headers:
 //!
 //! 1. Rename the field during serialization using the Serde [field attribute]
 //!    `#[serde(rename = "name")` or the [container attribute]
@@ -813,6 +814,210 @@
 //!
 //!
 //!
+//! ## Serializing dates and times
+//!
+//! Dates and times can be serialized to Excel from one of the following types:
+//!
+//! - [`ExcelDateTime`]: The inbuilt `rust_xlsxwriter` datetime type.
+//! - [`Chrono`] naive (i.e., timezone unaware) types:
+//!   - [`NaiveDateTime`]
+//!   - [`NaiveDate`]
+//!   - [`NaiveTime`]
+//! - [`f64`]: Excel datetimes are actually `f64` values, see below. You can use
+//!   `f64` if you do you own conversion into this type.
+//!
+//! [`ExcelDateTime`]: crate::ExcelDateTime
+//! [`Chrono`]: https://docs.rs/chrono/latest/chrono
+//! [`NaiveDate`]:
+//!     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+//! [`NaiveTime`]:
+//!     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+//! [`NaiveDateTime`]:
+//!     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+//!
+//! Datetimes in Excel are serial dates with days counted from an epoch (usually
+//! 1900-01-01) and where the time is a percentage/decimal of the milliseconds
+//! in the day. Both the date and time are stored in the same f64 value. For
+//! example, "2023/01/01 12:00:00" is stored as 44927.5.
+//!
+//! The [`ExcelDateTime`]type is serialized automatically since it implements
+//! the [`Serialize`] trait. The [`Chrono`] types also implements [`Serialize`]
+//! but they will serialize to an Excel string in RFC3339 format. To serialize
+//! them to an Excel number/datetime format requires a serializing function like
+//! [`Utility::serialize_chrono_naive_to_excel()`](crate::utility::serialize_chrono_naive_to_excel())
+//! as shown in the example below.
+//!
+//! With either data type you will also need to specify a
+//! [`Format::set_num_format()`] cell formatting, see the previous section.
+//! Datetimes in Excel must also be formatted with a number format like
+//! `"yyyy/mm/dd hh:mm"` or otherwise they will appear as a number (which
+//! technically they are).
+//!
+//! Excel doesn't use timezones or try to convert or encode timezone information
+//! in any way so they aren't supported by `rust_xlsxwriter`.
+//!
+//! ### Examples of serializing dates
+//!
+//! The following example demonstrates serializing instances of a Serde derived
+//! data structure with [`ExcelDateTime`] fields.
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_serialize_datetime1.rs
+//! #
+//! use rust_xlsxwriter::{
+//!     CustomSerializeHeader, ExcelDateTime, Format, FormatBorder, Workbook, XlsxError,
+//! };
+//! use serde::Serialize;
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Widen the date column for clarity.
+//!     worksheet.set_column_width(1, 12)?;
+//!
+//!     // Add some formats to use with the serialization data.
+//!     let header_format = Format::new()
+//!         .set_bold()
+//!         .set_border(FormatBorder::Thin)
+//!         .set_background_color("C6E0B4");
+//!
+//!     let date_format = Format::new().set_num_format("yyyy/mm/dd");
+//!
+//!     // Create a serializable test struct.
+//!     #[derive(Serialize)]
+//!     struct Student<'a> {
+//!         name: &'a str,
+//!         dob: ExcelDateTime,
+//!         id: u32,
+//!     }
+//!
+//!     let students = [
+//!         Student {
+//!             name: "Aoife",
+//!             dob: ExcelDateTime::from_ymd(1998, 1, 12)?,
+//!             id: 564351,
+//!         },
+//!         Student {
+//!             name: "Caoimhe",
+//!             dob: ExcelDateTime::from_ymd(2000, 5, 1)?,
+//!             id: 443287,
+//!         },
+//!     ];
+//!
+//!     // Set up the start location and headers of the data to be serialized. Note,
+//!     // we need to add a cell format for the datetime data.
+//!     let custom_headers = [
+//!         CustomSerializeHeader::new("name")
+//!             .rename("Student")
+//!             .set_header_format(&header_format),
+//!         CustomSerializeHeader::new("dob")
+//!             .rename("Birthday")
+//!             .set_cell_format(&date_format)
+//!             .set_header_format(&header_format),
+//!         CustomSerializeHeader::new("id")
+//!             .rename("ID")
+//!             .set_header_format(&header_format),
+//!     ];
+//!
+//!     worksheet.serialize_headers_with_options(0, 0, "Student", &custom_headers)?;
+//!
+//!     // Serialize the data.
+//!     worksheet.serialize(&students)?;
+//!
+//!     // Save the file.
+//!     workbook.save("serialize.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Output file:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_serialize_datetime1.png">
+//!
+//! Here is an example which serializes a struct with a [`NaiveDate`] field. The
+//! output is the same as the previous example.
+//!
+//! ```ignore
+//! # // This code is available in examples/doc_worksheet_serialize_datetime2.rs
+//! #
+//! use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+//!
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//! #     // Add a worksheet to the workbook.
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//! #     // Widen the date column for clarity.
+//! #     worksheet.set_column_width(1, 12)?;
+//! #
+//! #     // Add some formats to use with the serialization data.
+//! #     let header_format = Format::new()
+//! #         .set_bold()
+//! #         .set_border(FormatBorder::Thin)
+//! #         .set_background_color("C6E0B4");
+//! #
+//! #     let date_format = Format::new().set_num_format("yyyy/mm/dd");
+//! #
+//!     // Create a serializable test struct.
+//!     #[derive(Serialize)]
+//!     struct Student<'a> {
+//!         name: &'a str,
+//!
+//!         // Note, we add a `rust_xlsxwriter` function to serialize the date.
+//!         #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+//!         dob: NaiveDate,
+//!
+//!         id: u32,
+//!     }
+//! #
+//! #     let students = [
+//! #         Student {
+//! #             name: "Aoife",
+//! #             dob: NaiveDate::from_ymd_opt(1998, 1, 12).unwrap(),
+//! #             id: 564351,
+//! #         },
+//! #         Student {
+//! #             name: "Caoimhe",
+//! #             dob: NaiveDate::from_ymd_opt(2000, 5, 1).unwrap(),
+//! #             id: 443287,
+//! #         },
+//! #     ];
+//! #
+//! #     // Set up the start location and headers of the data to be serialized. Note,
+//! #     // we need to add a cell format for the datetime data.
+//! #     let custom_headers = [
+//! #         CustomSerializeHeader::new("name")
+//! #             .rename("Student")
+//! #             .set_header_format(&header_format),
+//! #         CustomSerializeHeader::new("dob")
+//! #             .rename("Birthday")
+//! #             .set_cell_format(&date_format)
+//! #             .set_header_format(&header_format),
+//! #         CustomSerializeHeader::new("id")
+//! #             .rename("ID")
+//! #             .set_header_format(&header_format),
+//! #     ];
+//! #
+//! #     worksheet.serialize_headers_with_options(0, 0, "Student", &custom_headers)?;
+//! #
+//! #     // Serialize the data.
+//! #     worksheet.serialize(&students)?;
+//! #
+//! #     // Save the file.
+//! #     workbook.save("serialize.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//!
+//!
 //! ## Limitations of serializing to Excel
 //!
 //! The cell/grid format of Excel sets a physical limitation on what can be
@@ -830,9 +1035,6 @@
 //! issue to discuss it with an example data structure.
 //!
 //! [Serde data model]: https://serde.rs/data-model.html
-//!
-//! Currently [`ExcelDateTime`](crate::ExcelDateTime) and Chrono date/times
-//! aren't supported but they will be in the next release(s).
 //!
 //! Finally if you hit some serialization limitation using `rust_xlsxwriter`
 //! remember that there are other non-serialization options available to use in

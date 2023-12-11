@@ -6710,14 +6710,16 @@ impl From<&ExcelDateTime> for ConditionalFormatValue {
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl From<&NaiveDate> for ConditionalFormatValue {
     fn from(value: &NaiveDate) -> ConditionalFormatValue {
-        let value = ExcelDateTime::chrono_date_to_excel(value).to_string();
+        let value = ExcelDateTime::chrono_date_to_excel(*value).to_string();
         ConditionalFormatValue::new_from_string(value)
     }
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl From<&NaiveDateTime> for ConditionalFormatValue {
     fn from(value: &NaiveDateTime) -> ConditionalFormatValue {
         let value = ExcelDateTime::chrono_datetime_to_excel(value).to_string();
@@ -6726,9 +6728,10 @@ impl From<&NaiveDateTime> for ConditionalFormatValue {
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl From<&NaiveTime> for ConditionalFormatValue {
     fn from(value: &NaiveTime) -> ConditionalFormatValue {
-        let value = ExcelDateTime::chrono_time_to_excel(value).to_string();
+        let value = ExcelDateTime::chrono_time_to_excel(*value).to_string();
         ConditionalFormatValue::new_from_string(value)
     }
 }
@@ -6770,6 +6773,7 @@ conditional_format_value_from_type!(
 );
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 conditional_format_value_from_type!(&NaiveDate & NaiveDateTime & NaiveTime);
 
 // -----------------------------------------------------------------------

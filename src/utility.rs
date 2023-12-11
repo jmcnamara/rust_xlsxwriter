@@ -29,6 +29,11 @@
 #![warn(missing_docs)]
 mod tests;
 
+#[cfg(feature = "serde")]
+use crate::IntoExcelDateTime;
+#[cfg(feature = "serde")]
+use serde::Serializer;
+
 use crate::worksheet::ColNum;
 use crate::worksheet::RowNum;
 use crate::XlsxError;
@@ -224,6 +229,40 @@ pub fn cell_range_absolute(
     } else {
         format!("{range1}:{range2}")
     }
+}
+
+/// Serialize a `Chrono` naive date/time to and Excel value.
+///
+/// This is a helper function for serializing [`Chrono`] naive (i.e., timezone
+/// unaware) date/time fields using [Serde](https://serde.rs). See [Working with
+/// Serde](crate::serializer#working-with-serde) for more information.
+///
+/// The function works for the following types:
+///   - [`NaiveDateTime`]
+///   - [`NaiveDate`]
+///   - [`NaiveTime`]
+///
+/// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+/// [`NaiveDate`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+/// [`NaiveTime`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+/// [`NaiveDateTime`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+///
+/// # Errors
+///
+/// * [`XlsxError::SerdeError`] - A wrapped serialization error.
+///
+#[cfg(feature = "serde")]
+pub fn serialize_chrono_naive_to_excel<S>(
+    datetime: impl IntoExcelDateTime,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_f64(datetime.to_excel_serial_date())
 }
 
 // Convert zero indexed row and col cell references to a chart absolute

@@ -9,6 +9,11 @@ use crate::common;
 use rust_xlsxwriter::{CustomSerializeHeader, ExcelDateTime, Format, Workbook, XlsxError};
 use serde::Serialize;
 
+#[cfg(feature = "chrono")]
+use chrono::{NaiveDate, NaiveDateTime};
+
+use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -79,6 +84,111 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization with chrono.
+#[cfg(feature = "chrono")]
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_column_width(1, 11)?;
+
+    let format = Format::new().set_num_format_index(14);
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: &'static str,
+        #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+        col2: NaiveDate,
+    }
+
+    let data1 = MyStruct {
+        col1: "aaa",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
+    };
+
+    let data2 = MyStruct {
+        col1: "bbb",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 2).unwrap(),
+    };
+
+    let data3 = MyStruct {
+        col1: "ccc",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 3).unwrap(),
+    };
+
+    let custom_headers = [
+        CustomSerializeHeader::new("col1"),
+        CustomSerializeHeader::new("col2").set_cell_format(&format),
+    ];
+
+    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+
+    worksheet.serialize(&data1)?;
+    worksheet.serialize(&data2)?;
+    worksheet.serialize(&data3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde serialization with chrono.
+#[cfg(feature = "chrono")]
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_column_width(1, 11)?;
+
+    let format = Format::new().set_num_format_index(14);
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: &'static str,
+        #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+        col2: NaiveDateTime,
+    }
+
+    let data1 = MyStruct {
+        col1: "aaa",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap(),
+    };
+
+    let data2 = MyStruct {
+        col1: "bbb",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 2)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap(),
+    };
+
+    let data3 = MyStruct {
+        col1: "ccc",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 3)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap(),
+    };
+
+    let custom_headers = [
+        CustomSerializeHeader::new("col1"),
+        CustomSerializeHeader::new("col2").set_cell_format(&format),
+    ];
+
+    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+
+    worksheet.serialize(&data1)?;
+    worksheet.serialize(&data2)?;
+    worksheet.serialize(&data3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde10_1() {
     let test_runner = common::TestRunner::new()
@@ -97,6 +207,32 @@ fn test_serde10_2() {
         .set_name("serde10")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+#[cfg(feature = "chrono")]
+fn test_serde10_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde10")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+#[cfg(feature = "chrono")]
+fn test_serde10_4() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde10")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();

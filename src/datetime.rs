@@ -35,11 +35,11 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 /// The `ExcelDateTime` struct is used to represent an Excel date and/or time.
 ///
 /// The `rust_xlsxwriter` library supports two ways of converting dates and
-/// times to Excel dates and times. The first is  via the external [`Chrono`]
-/// library which has a comprehensive sets of types and functions for dealing
-/// with dates and times. The second is the inbuilt [`ExcelDateTime`] struct
-/// which provides a more limited set of methods and which only targets Excel
-/// specific dates and times.
+/// times to Excel dates and times. The first is the inbuilt [`ExcelDateTime`]
+/// which has a limited but workable set of conversion methods and which only
+/// targets Excel specific dates and times. The second is via the external
+/// [`Chrono`] library which has a comprehensive sets of types and functions for
+/// dealing with dates and times.
 ///
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
 ///
@@ -88,10 +88,10 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 ///
 /// ## Datetimes in Excel
 ///
-/// Datetimes in Excel are a serial date with days counted from an epoch
-/// (usually 1900-01-01) and the time as a percentage/decimal of the
-/// milliseconds in the day. Both the date and time are stored in the same f64
-/// value. For example, 2023/01/01 12:00:00 is stored as 44927.5.
+/// Datetimes in Excel are serial dates with days counted from an epoch (usually
+/// 1900-01-01) and where the time is a percentage/decimal of the milliseconds
+/// in the day. Both the date and time are stored in the same f64 value. For
+/// example, 2023/01/01 12:00:00 is stored as 44927.5.
 ///
 /// Datetimes in Excel must also be formatted with a number format like
 /// `"yyyy/mm/dd hh:mm"` or otherwise they will appear as a number (which
@@ -106,16 +106,24 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 ///
 /// ## Chrono vs. native `ExcelDateTime`
 ///
-/// The `rust_xlsxwriter` native `ExcelDateTime` struct is mainly provided to
-/// avoid a hard dependency on [`Chrono`] for limited use cases. If you need
-/// anything beyond the limited functionality of `ExcelDateTime` you should use
-/// `Chrono`. All date/time APIs in `rust_xlsxwriter` support both and the
+/// The `rust_xlsxwriter` native `ExcelDateTime` provided most of the
+/// functionality that you will need to work with Excel dates and times.
+///
+/// For anything more advanced you can use the Naive Date/Time variants of
+/// [`Chrono`], particularly if you are interacting with code that already uses
+/// `Chrono`.
+///
+/// All date/time APIs in `rust_xlsxwriter` support both options and the
 /// `ExcelDateTime` method names are similar to `Chrono` method names to allow
-/// easier portability between the two structs.
+/// easier portability between the two.
 ///
 /// In order to use [`Chrono`] with `rust_xlsxwriter` APIs you must enable the
 /// optional `chrono` feature when adding `rust_xlsxwriter` to your
 /// `Cargo.toml`.
+///
+/// ```bash
+/// cargo add rust_xlsxwriter -F chrono
+/// ```
 ///
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
 ///
@@ -1229,8 +1237,8 @@ impl ExcelDateTime {
     // Convert a chrono::NaiveTime to an Excel serial datetime.
     #[cfg(feature = "chrono")]
     pub(crate) fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
-        let excel_date = Self::chrono_date_to_excel(&datetime.date());
-        let excel_time = Self::chrono_time_to_excel(&datetime.time());
+        let excel_date = Self::chrono_date_to_excel(datetime.date());
+        let excel_time = Self::chrono_time_to_excel(datetime.time());
 
         excel_date + excel_time
     }
@@ -1240,10 +1248,10 @@ impl ExcelDateTime {
     // 1904-01-01.
     #[cfg(feature = "chrono")]
     #[allow(clippy::cast_precision_loss)]
-    pub(crate) fn chrono_date_to_excel(date: &NaiveDate) -> f64 {
+    pub(crate) fn chrono_date_to_excel(date: NaiveDate) -> f64 {
         let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
-        let duration = *date - epoch;
+        let duration = date - epoch;
         let mut excel_date = duration.num_days() as f64;
 
         // For legacy reasons Excel treats 1900 as a leap year. We add an additional
@@ -1260,9 +1268,9 @@ impl ExcelDateTime {
     // milliseconds in the day.
     #[cfg(feature = "chrono")]
     #[allow(clippy::cast_precision_loss)]
-    pub(crate) fn chrono_time_to_excel(time: &NaiveTime) -> f64 {
+    pub(crate) fn chrono_time_to_excel(time: NaiveTime) -> f64 {
         let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
-        let duration = *time - midnight;
+        let duration = time - midnight;
 
         duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
     }
@@ -1326,6 +1334,7 @@ impl IntoExcelDateTime for ExcelDateTime {
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelDateTime for &NaiveDateTime {
     fn to_excel_serial_date(self) -> f64 {
         ExcelDateTime::chrono_datetime_to_excel(self)
@@ -1333,16 +1342,18 @@ impl IntoExcelDateTime for &NaiveDateTime {
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelDateTime for &NaiveDate {
     fn to_excel_serial_date(self) -> f64 {
-        ExcelDateTime::chrono_date_to_excel(self)
+        ExcelDateTime::chrono_date_to_excel(*self)
     }
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelDateTime for &NaiveTime {
     fn to_excel_serial_date(self) -> f64 {
-        ExcelDateTime::chrono_time_to_excel(self)
+        ExcelDateTime::chrono_time_to_excel(*self)
     }
 }
 

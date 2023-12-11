@@ -12048,6 +12048,7 @@ impl IntoExcelData for ExcelDateTime {
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelData for &NaiveDateTime {
     fn write(
         self,
@@ -12072,6 +12073,7 @@ impl IntoExcelData for &NaiveDateTime {
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelData for &NaiveDate {
     fn write(
         self,
@@ -12079,7 +12081,7 @@ impl IntoExcelData for &NaiveDate {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_date_to_excel(self);
+        let number = ExcelDateTime::chrono_date_to_excel(*self);
         worksheet.store_datetime(row, col, number, None)
     }
 
@@ -12090,12 +12092,13 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_date_to_excel(self);
+        let number = ExcelDateTime::chrono_date_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelData for &NaiveTime {
     fn write(
         self,
@@ -12103,7 +12106,7 @@ impl IntoExcelData for &NaiveTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_time_to_excel(self);
+        let number = ExcelDateTime::chrono_time_to_excel(*self);
         worksheet.store_datetime(row, col, number, None)
     }
 
@@ -12114,7 +12117,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_time_to_excel(self);
+        let number = ExcelDateTime::chrono_time_to_excel(*self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }

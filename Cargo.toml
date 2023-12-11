@@ -11,7 +11,7 @@ version = "0.57.0"
 edition = "2021"
 
 [dependencies]
-chrono = {version = "0.4.31", default-features = false, features = ["clock", "wasmbind"], optional = true}
+chrono = {version = "0.4.31", default-features = false, features = ["clock", "wasmbind", "serde"], optional = true}
 zip = {version = "0.6.4 ", default-features = false, features = ["deflate"]}
 regex = "1.7.3"
 lazy_static = "1.4.0"
@@ -54,7 +54,9 @@ test-resave = []
 [lib]
 doctest = false
 
+#
 # Examples to run only when `chrono` is enabled.
+#
 [[example]]
 name = "doc_worksheet_write_datetime_chrono"
 path = "examples/doc_worksheet_write_datetime_chrono.rs"
@@ -75,7 +77,9 @@ name = "doc_properties_checksum2_chrono"
 path = "examples/doc_properties_checksum2_chrono.rs"
 required-features = ["chrono"]
 
+#
 # Examples to run only when `serde` is enabled.
+#
 [[example]]
 name = "app_serialize"
 path = "examples/app_serialize.rs"
@@ -170,6 +174,20 @@ required-features = ["serde"]
 name = "doc_worksheet_serialize_vectors"
 path = "examples/doc_worksheet_serialize_vectors.rs"
 required-features = ["serde"]
+
+#
+# Examples to run only when `serde` and `chrono` is enabled.
+#
+[[example]]
+name = "doc_worksheet_serialize_datetime1"
+path = "examples/doc_worksheet_serialize_datetime1.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_datetime2"
+path = "examples/doc_worksheet_serialize_datetime2.rs"
+required-features = ["serde", "chrono"]
+
 
 
 # Workaround to display feature specific docs.

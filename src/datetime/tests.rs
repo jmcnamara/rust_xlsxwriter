@@ -1832,7 +1832,7 @@ mod datetime_tests {
         for test_data in dates {
             let (year, month, day, expected) = test_data;
             let datetime = NaiveDate::from_ymd_opt(year, month, day).unwrap();
-            assert_eq!(expected, ExcelDateTime::chrono_date_to_excel(&datetime));
+            assert_eq!(expected, ExcelDateTime::chrono_date_to_excel(datetime));
         }
     }
 
@@ -1945,7 +1945,7 @@ mod datetime_tests {
         for test_data in times {
             let (hour, min, seconds, millis, expected) = test_data;
             let datetime = NaiveTime::from_hms_milli_opt(hour, min, seconds, millis).unwrap();
-            let mut diff = ExcelDateTime::chrono_time_to_excel(&datetime) - expected;
+            let mut diff = ExcelDateTime::chrono_time_to_excel(datetime) - expected;
             diff = diff.abs();
             assert!(diff < 0.00000000001);
         }

@@ -608,6 +608,7 @@ impl IntoCustomProperty for bool {
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoCustomProperty for &DateTime<Utc> {
     fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
         CustomProperty::new_property_datetime(name.into(), self)
@@ -638,6 +639,7 @@ pub trait IntoCustomDateTimeUtc {
 }
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoCustomDateTimeUtc for &DateTime<Utc> {
     fn utc_datetime(self) -> String {
         self.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
