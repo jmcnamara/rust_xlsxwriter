@@ -5,6 +5,14 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.58.0] - 2023-12-11
+
+- Added serialization support for [`ExcelDateTime`] and [`Chrono`] date/time
+  types. See [Working with Serde - Serializing dates and times].
+
+  [Working with Serde - Serializing dates and times]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#serializing-dates-and-times
+
+
 ## [0.57.0] - 2023-12-09
 
 ### Added

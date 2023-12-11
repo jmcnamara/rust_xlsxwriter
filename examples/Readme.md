@@ -1036,6 +1036,14 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_serialize.rs` - Demonstrates serializing instances of a
   Serde derived data structure to a worksheet.
 
+* `doc_worksheet_serialize_datetime1.rs` - Demonstrates serializing
+  instances of a Serde derived data structure, including datetimes, to a
+  worksheet.
+
+* `doc_worksheet_serialize_datetime2.rs` - Demonstrates serializing
+  instances of a Serde derived data structure, including chrono datetimes,
+  to a worksheet.
+
 * `doc_worksheet_serialize_headers1.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet.
 
