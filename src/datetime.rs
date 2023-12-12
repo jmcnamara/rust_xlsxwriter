@@ -1237,8 +1237,8 @@ impl ExcelDateTime {
     // Convert a chrono::NaiveTime to an Excel serial datetime.
     #[cfg(feature = "chrono")]
     pub(crate) fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
-        let excel_date = Self::chrono_date_to_excel(datetime.date());
-        let excel_time = Self::chrono_time_to_excel(datetime.time());
+        let excel_date = Self::chrono_date_to_excel(&datetime.date());
+        let excel_time = Self::chrono_time_to_excel(&datetime.time());
 
         excel_date + excel_time
     }
@@ -1248,10 +1248,11 @@ impl ExcelDateTime {
     // 1904-01-01.
     #[cfg(feature = "chrono")]
     #[allow(clippy::cast_precision_loss)]
-    pub(crate) fn chrono_date_to_excel(date: NaiveDate) -> f64 {
+    #[allow(clippy::trivially_copy_pass_by_ref)]
+    pub(crate) fn chrono_date_to_excel(date: &NaiveDate) -> f64 {
         let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
-        let duration = date - epoch;
+        let duration = *date - epoch;
         let mut excel_date = duration.num_days() as f64;
 
         // For legacy reasons Excel treats 1900 as a leap year. We add an additional
@@ -1268,9 +1269,10 @@ impl ExcelDateTime {
     // milliseconds in the day.
     #[cfg(feature = "chrono")]
     #[allow(clippy::cast_precision_loss)]
-    pub(crate) fn chrono_time_to_excel(time: NaiveTime) -> f64 {
+    #[allow(clippy::trivially_copy_pass_by_ref)]
+    pub(crate) fn chrono_time_to_excel(time: &NaiveTime) -> f64 {
         let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
-        let duration = time - midnight;
+        let duration = *time - midnight;
 
         duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
     }
@@ -1318,17 +1320,17 @@ enum ExcelDateTimeType {
 pub trait IntoExcelDateTime {
     /// Trait method to convert a date or time into an Excel serial datetime.
     ///
-    fn to_excel_serial_date(self) -> f64;
+    fn to_excel_serial_date(&self) -> f64;
 }
 
 impl IntoExcelDateTime for &ExcelDateTime {
-    fn to_excel_serial_date(self) -> f64 {
+    fn to_excel_serial_date(&self) -> f64 {
         self.to_excel()
     }
 }
 
 impl IntoExcelDateTime for ExcelDateTime {
-    fn to_excel_serial_date(self) -> f64 {
+    fn to_excel_serial_date(&self) -> f64 {
         self.to_excel()
     }
 }
@@ -1336,7 +1338,7 @@ impl IntoExcelDateTime for ExcelDateTime {
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelDateTime for &NaiveDateTime {
-    fn to_excel_serial_date(self) -> f64 {
+    fn to_excel_serial_date(&self) -> f64 {
         ExcelDateTime::chrono_datetime_to_excel(self)
     }
 }
@@ -1344,16 +1346,40 @@ impl IntoExcelDateTime for &NaiveDateTime {
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelDateTime for &NaiveDate {
-    fn to_excel_serial_date(self) -> f64 {
-        ExcelDateTime::chrono_date_to_excel(*self)
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::chrono_date_to_excel(self)
     }
 }
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl IntoExcelDateTime for &NaiveTime {
-    fn to_excel_serial_date(self) -> f64 {
-        ExcelDateTime::chrono_time_to_excel(*self)
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::chrono_time_to_excel(self)
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl IntoExcelDateTime for NaiveDateTime {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::chrono_datetime_to_excel(self)
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl IntoExcelDateTime for NaiveDate {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::chrono_date_to_excel(self)
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl IntoExcelDateTime for NaiveTime {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::chrono_time_to_excel(self)
     }
 }
 

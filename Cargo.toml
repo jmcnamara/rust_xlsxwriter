@@ -188,6 +188,21 @@ name = "doc_worksheet_serialize_datetime2"
 path = "examples/doc_worksheet_serialize_datetime2.rs"
 required-features = ["serde", "chrono"]
 
+[[example]]
+name = "doc_worksheet_serialize_datetime3"
+path = "examples/doc_worksheet_serialize_datetime3.rs"
+required-features = ["serde", "chrono"]
+
+[[example]]
+name = "doc_worksheet_serialize_datetime4"
+path = "examples/doc_worksheet_serialize_datetime4.rs"
+required-features = ["serde", "chrono"]
+
+
+[[example]]
+name = "doc_worksheet_serialize_datetime5"
+path = "examples/doc_worksheet_serialize_datetime5.rs"
+required-features = ["serde", "chrono"]
 
 
 # Workaround to display feature specific docs.

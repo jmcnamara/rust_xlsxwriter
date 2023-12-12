@@ -845,7 +845,8 @@
 //! but they will serialize to an Excel string in RFC3339 format. To serialize
 //! them to an Excel number/datetime format requires a serializing function like
 //! [`Utility::serialize_chrono_naive_to_excel()`](crate::utility::serialize_chrono_naive_to_excel())
-//! as shown in the example below.
+//! (as shown in the example below) or
+//! [`Utility::serialize_chrono_option_naive_to_excel()`](crate::utility::serialize_chrono_option_naive_to_excel()).
 //!
 //! With either data type you will also need to specify a
 //! [`Format::set_num_format()`] cell formatting, see the previous section.

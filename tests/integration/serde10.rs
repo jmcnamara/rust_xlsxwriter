@@ -13,6 +13,7 @@ use serde::Serialize;
 use chrono::{NaiveDate, NaiveDateTime};
 
 use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+use rust_xlsxwriter::utility::serialize_chrono_option_naive_to_excel;
 
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -189,6 +190,54 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization with chrono Option<>.
+#[cfg(feature = "chrono")]
+fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_column_width(1, 11)?;
+
+    let format = Format::new().set_num_format_index(14);
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: &'static str,
+        #[serde(serialize_with = "serialize_chrono_option_naive_to_excel")]
+        col2: Option<NaiveDate>,
+    }
+
+    let data1 = MyStruct {
+        col1: "aaa",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 1),
+    };
+
+    let data2 = MyStruct {
+        col1: "bbb",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 2),
+    };
+
+    let data3 = MyStruct {
+        col1: "ccc",
+        col2: NaiveDate::from_ymd_opt(2024, 1, 3),
+    };
+
+    let custom_headers = [
+        CustomSerializeHeader::new("col1"),
+        CustomSerializeHeader::new("col2").set_cell_format(&format),
+    ];
+
+    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+
+    worksheet.serialize(&data1)?;
+    worksheet.serialize(&data2)?;
+    worksheet.serialize(&data3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde10_1() {
     let test_runner = common::TestRunner::new()
@@ -233,6 +282,19 @@ fn test_serde10_4() {
         .set_name("serde10")
         .set_function(create_new_xlsx_file_4)
         .unique("4")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+#[cfg(feature = "chrono")]
+fn test_serde10_5() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde10")
+        .set_function(create_new_xlsx_file_5)
+        .unique("5")
         .initialize();
 
     test_runner.assert_eq();

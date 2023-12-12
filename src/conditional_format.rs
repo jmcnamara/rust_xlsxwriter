@@ -6713,7 +6713,7 @@ impl From<&ExcelDateTime> for ConditionalFormatValue {
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl From<&NaiveDate> for ConditionalFormatValue {
     fn from(value: &NaiveDate) -> ConditionalFormatValue {
-        let value = ExcelDateTime::chrono_date_to_excel(*value).to_string();
+        let value = ExcelDateTime::chrono_date_to_excel(value).to_string();
         ConditionalFormatValue::new_from_string(value)
     }
 }
@@ -6731,7 +6731,7 @@ impl From<&NaiveDateTime> for ConditionalFormatValue {
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl From<&NaiveTime> for ConditionalFormatValue {
     fn from(value: &NaiveTime) -> ConditionalFormatValue {
-        let value = ExcelDateTime::chrono_time_to_excel(*value).to_string();
+        let value = ExcelDateTime::chrono_time_to_excel(value).to_string();
         ConditionalFormatValue::new_from_string(value)
     }
 }

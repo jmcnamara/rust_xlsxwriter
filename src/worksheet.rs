@@ -12081,7 +12081,7 @@ impl IntoExcelData for &NaiveDate {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_date_to_excel(*self);
+        let number = ExcelDateTime::chrono_date_to_excel(self);
         worksheet.store_datetime(row, col, number, None)
     }
 
@@ -12092,7 +12092,7 @@ impl IntoExcelData for &NaiveDate {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_date_to_excel(*self);
+        let number = ExcelDateTime::chrono_date_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
@@ -12106,7 +12106,7 @@ impl IntoExcelData for &NaiveTime {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_time_to_excel(*self);
+        let number = ExcelDateTime::chrono_time_to_excel(self);
         worksheet.store_datetime(row, col, number, None)
     }
 
@@ -12117,7 +12117,7 @@ impl IntoExcelData for &NaiveTime {
         col: ColNum,
         format: &'a Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let number = ExcelDateTime::chrono_time_to_excel(*self);
+        let number = ExcelDateTime::chrono_time_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }

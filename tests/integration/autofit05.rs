@@ -44,8 +44,8 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let date1 = NaiveDate::from_ymd_opt(2023, 1, 1).unwrap();
     let date2 = NaiveDate::from_ymd_opt(2023, 12, 12).unwrap();
 
-    worksheet.write_date_with_format(0, 0, &date1, &date_format)?;
-    worksheet.write_date_with_format(0, 1, &date2, &date_format)?;
+    worksheet.write_date_with_format(0, 0, date1, &date_format)?;
+    worksheet.write_date_with_format(0, 1, date2, &date_format)?;
 
     worksheet.autofit();
 

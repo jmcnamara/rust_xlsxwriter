@@ -102,12 +102,12 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
         .unwrap();
     let time = datetime2.time();
 
-    worksheet.write_datetime_with_format(0, 0, &datetime, &format1)?;
-    worksheet.write_datetime_with_format(1, 0, &datetime, &format2)?;
-    worksheet.write_date_with_format(2, 0, &date, &format3)?;
-    worksheet.write_date_with_format(3, 0, &date, &format4)?;
-    worksheet.write_datetime_with_format(4, 0, &datetime2, &format5)?;
-    worksheet.write_time_with_format(5, 0, &time, &format6)?;
+    worksheet.write_datetime_with_format(0, 0, datetime, &format1)?;
+    worksheet.write_datetime_with_format(1, 0, datetime, &format2)?;
+    worksheet.write_date_with_format(2, 0, date, &format3)?;
+    worksheet.write_date_with_format(3, 0, date, &format4)?;
+    worksheet.write_datetime_with_format(4, 0, datetime2, &format5)?;
+    worksheet.write_time_with_format(5, 0, time, &format6)?;
 
     workbook.save(filename)?;
 
