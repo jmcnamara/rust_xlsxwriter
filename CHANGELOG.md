@@ -5,7 +5,22 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.59.0] - 2023-12-15
+
+### Added
+
+- Added [`serialize_chrono_option_naive_to_excel()`] to help serialization of
+  `Option` Chrono types. [Feature Request #62].
+
+[Feature Request #62]: https://github.com/jmcnamara/rust_xlsxwriter/pull/62
+
+[`serialize_chrono_option_naive_to_excel()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.serialize_chrono_option_naive_to_excel.html
+
+
 ## [0.58.0] - 2023-12-11
+
+### Added
 
 - Added serialization support for [`ExcelDateTime`] and [`Chrono`] date/time
   types. See [Working with Serde - Serializing dates and times].

@@ -1044,6 +1044,16 @@ documentation and generally show how an individual function works.
   instances of a Serde derived data structure, including chrono datetimes,
   to a worksheet.
 
+* `doc_worksheet_serialize_datetime3.rs` - Example of a serializable struct
+  with a Chrono Naive value with a helper function.
+
+* `doc_worksheet_serialize_datetime4.rs` - Demonstrates serializing
+  instances of a Serde derived data structure, including `Option` chrono
+  datetimes, to a worksheet.
+
+* `doc_worksheet_serialize_datetime5.rs` - Example of a serializable struct
+  with an Option Chrono Naive value with a helper function.
+
 * `doc_worksheet_serialize_headers1.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet.
 
