@@ -1056,7 +1056,10 @@
 use std::collections::HashMap;
 
 use crate::{ColNum, Format, RowNum, Worksheet, XlsxError};
-use serde::{ser, Serialize};
+use serde::{
+    de::{self, Visitor},
+    ser, Deserialize, Deserializer, Serialize,
+};
 
 // -----------------------------------------------------------------------
 // SerializerState, a struct to maintain row/column state and other metadata
@@ -2398,5 +2401,66 @@ impl<'a> ser::SerializeStructVariant for &'a mut SerializerHeader {
 
     fn end(self) -> Result<(), XlsxError> {
         Ok(())
+    }
+}
+
+// -----------------------------------------------------------------------
+// Header DeSerializer. This is the a simplified implementation of the
+// Deserializer trait to capture the headers/field names only.
+// -----------------------------------------------------------------------
+pub(crate) struct DeSerializerHeader<'a> {
+    pub(crate) struct_name: &'a mut &'static str,
+    pub(crate) field_names: &'a mut &'static [&'static str],
+}
+
+impl<'de, 'a> Deserializer<'de> for DeSerializerHeader<'a> {
+    type Error = serde::de::value::Error;
+
+    fn deserialize_struct<V>(
+        self,
+        name: &'static str,
+        fields: &'static [&'static str],
+        _visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        *self.struct_name = name;
+        *self.field_names = fields;
+        Err(de::Error::custom("Deserialization error"))
+    }
+
+    fn deserialize_any<V>(self, _visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        Err(de::Error::custom("Deserialization error"))
+    }
+
+    serde::forward_to_deserialize_any! {
+        bool i8 i16 i32 i64 u8 u16 u32 u64 f32 f64 char str string bytes
+        byte_buf option unit unit_struct newtype_struct seq tuple
+        tuple_struct map enum identifier ignored_any
+    }
+}
+
+pub(crate) fn deserialize_headers<'de, T>() -> SerializerHeader
+where
+    T: Deserialize<'de>,
+{
+    let mut struct_name = "";
+    let mut field_names: &[&str] = &[""];
+
+    let _ = T::deserialize(DeSerializerHeader {
+        struct_name: &mut struct_name,
+        field_names: &mut field_names,
+    });
+
+    let struct_name = struct_name.to_string();
+    let field_names = field_names.iter().map(|&s| s.to_string()).collect();
+
+    SerializerHeader {
+        struct_name,
+        field_names,
     }
 }

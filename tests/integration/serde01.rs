@@ -7,7 +7,7 @@
 
 use crate::common;
 use rust_xlsxwriter::{Workbook, XlsxError};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -163,6 +163,28 @@ fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization. Header deserialization.
+fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Create a serializable test struct.
+    #[derive(Deserialize, Serialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: i8,
+    }
+
+    let data = MyStruct { col1: 1, col2: -1 };
+
+    worksheet.serialize_headers_from_type::<MyStruct>(0, 0)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde01_1() {
     let test_runner = common::TestRunner::new()
@@ -241,6 +263,18 @@ fn test_serde01_7() {
         .set_name("serde01")
         .set_function(create_new_xlsx_file_7)
         .unique("7")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde01_8() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde01")
+        .set_function(create_new_xlsx_file_8)
+        .unique("8")
         .initialize();
 
     test_runner.assert_eq();

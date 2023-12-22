@@ -32,6 +32,12 @@ use crate::SerializerHeader;
 #[cfg(feature = "serde")]
 use crate::CustomSerializeHeader;
 
+#[cfg(feature = "serde")]
+use serde::Deserialize;
+
+#[cfg(feature = "serde")]
+use crate::deserialize_headers;
+
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -6535,6 +6541,51 @@ impl Worksheet {
         }
 
         Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    #[cfg(feature = "serde")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn serialize_headers_from_type<'de, T>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Deserialize<'de>,
+    {
+        self.serialize_headers_with_format_from_type::<T>(row, col, &Format::default())
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    #[cfg(feature = "serde")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn serialize_headers_with_format_from_type<'de, T>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Deserialize<'de>,
+    {
+        // Deserialize the struct to determine the type name and the fields.
+        let headers = deserialize_headers::<T>();
+
+        // Convert the field names to custom header structs.
+        let custom_headers: Vec<CustomSerializeHeader> = headers
+            .field_names
+            .iter()
+            .map(|name| CustomSerializeHeader::new_with_format(name, format))
+            .collect();
+
+        self.serialize_headers_with_options(row, col, headers.struct_name, &custom_headers)
     }
 
     // Serialize the parent data structure to the worksheet.
