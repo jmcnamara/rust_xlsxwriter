@@ -12,7 +12,10 @@ use serde::Serialize;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime};
 
+#[cfg(feature = "chrono")]
 use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+
+#[cfg(feature = "chrono")]
 use rust_xlsxwriter::utility::serialize_chrono_option_naive_to_excel;
 
 // Test case for Serde serialization. First test isn't serialized.
