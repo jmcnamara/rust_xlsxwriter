@@ -18,6 +18,9 @@ use polars::prelude::polars_err;
 use polars::prelude::PolarsError;
 
 #[cfg(feature = "serde")]
+use serde::de;
+
+#[cfg(feature = "serde")]
 use serde::ser;
 
 #[derive(Debug)]
@@ -340,10 +343,18 @@ impl From<XlsxError> for wasm_bindgen::JsValue {
     }
 }
 
-/// Implementation of the `serde::ser::Error` Trait to allow the use of a single
-/// error type for serialization and `rust_xlsxwriter` errors.
+/// Implementation of the `serde::de::Error` and `serde::ser::Error` Traits to
+/// allow the use of a single error type for deserialization/serialization and
+/// `rust_xlsxwriter` errors.
 #[cfg(feature = "serde")]
 impl ser::Error for XlsxError {
+    fn custom<T: fmt::Display>(msg: T) -> Self {
+        XlsxError::SerdeError(msg.to_string())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl de::Error for XlsxError {
     fn custom<T: fmt::Display>(msg: T) -> Self {
         XlsxError::SerdeError(msg.to_string())
     }

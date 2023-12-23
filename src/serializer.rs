@@ -1056,10 +1056,8 @@
 use std::collections::HashMap;
 
 use crate::{ColNum, Format, RowNum, Worksheet, XlsxError};
-use serde::{
-    de::{self, Visitor},
-    ser, Deserialize, Deserializer, Serialize,
-};
+use serde::de::Visitor;
+use serde::{ser, Deserialize, Deserializer, Serialize};
 
 // -----------------------------------------------------------------------
 // SerializerState, a struct to maintain row/column state and other metadata
@@ -2414,7 +2412,7 @@ pub(crate) struct DeSerializerHeader<'a> {
 }
 
 impl<'de, 'a> Deserializer<'de> for DeSerializerHeader<'a> {
-    type Error = serde::de::value::Error;
+    type Error = XlsxError;
 
     fn deserialize_struct<V>(
         self,
@@ -2427,14 +2425,14 @@ impl<'de, 'a> Deserializer<'de> for DeSerializerHeader<'a> {
     {
         *self.struct_name = name;
         *self.field_names = fields;
-        Err(de::Error::custom("Deserialization error"))
+        Err(XlsxError::SerdeError("Deserialization error".to_string()))
     }
 
     fn deserialize_any<V>(self, _visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        Err(de::Error::custom("Deserialization error"))
+        Err(XlsxError::SerdeError("Deserialization error".to_string()))
     }
 
     serde::forward_to_deserialize_any! {
@@ -2451,6 +2449,8 @@ where
     let mut struct_name = "";
     let mut field_names: &[&str] = &[""];
 
+    // Ignore the deserialization return since we have set up all the
+    // Deserializer methods (above) to return quickly/with an error.
     let _ = T::deserialize(DeSerializerHeader {
         struct_name: &mut struct_name,
         field_names: &mut field_names,
