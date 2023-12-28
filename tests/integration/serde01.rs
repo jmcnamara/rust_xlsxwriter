@@ -177,7 +177,7 @@ fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
 
     let data = MyStruct { col1: 1, col2: -1 };
 
-    worksheet.serialize_headers_from_type::<MyStruct>(0, 0)?;
+    worksheet.deserialize_headers::<MyStruct>(0, 0)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;

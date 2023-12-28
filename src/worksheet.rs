@@ -38,6 +38,9 @@ use serde::Deserialize;
 #[cfg(feature = "serde")]
 use crate::deserialize_headers;
 
+#[cfg(feature = "serde")]
+use crate::SerializeHeadersOptions;
+
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -6367,16 +6370,10 @@ impl Worksheet {
             struct_name: String::new(),
             field_names: vec![],
         };
+
         data_structure.serialize(&mut headers)?;
 
-        // Convert the field names to custom header structs.
-        let custom_headers: Vec<CustomSerializeHeader> = headers
-            .field_names
-            .iter()
-            .map(|name| CustomSerializeHeader::new_with_format(name, format))
-            .collect();
-
-        self.serialize_headers_with_options(row, col, headers.struct_name, &custom_headers)
+        self.store_serialization_headers(row, col, &headers, format)
     }
 
     /// Write the location and headers for data serialization, with additional
@@ -6413,6 +6410,7 @@ impl Worksheet {
     ///   of 32,767 characters.
     /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
+    ///
     /// # Examples
     ///
     /// The following example demonstrates serializing instances of a Serde
@@ -6488,59 +6486,25 @@ impl Worksheet {
     ///
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn serialize_headers_with_options(
+    pub fn serialize_headers_with_options<T>(
         &mut self,
         row: RowNum,
         col: ColNum,
-        struct_name: impl Into<String>,
-        custom_headers: &[CustomSerializeHeader],
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Check row and columns are in the allowed range.
-        if !self.check_dimensions_only(row, col) {
-            return Err(XlsxError::RowColumnLimitError);
-        }
+        data_structure: &T,
+        header_options: &SerializeHeadersOptions,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Serialize,
+    {
+        // Serialize the struct to determine the type name and the fields.
+        let mut headers = SerializerHeader {
+            struct_name: String::new(),
+            field_names: vec![],
+        };
 
-        // Check for empty struct name.
-        let struct_name = struct_name.into();
-        if struct_name.is_empty() {
-            return Err(XlsxError::ParameterError(
-                "struct_name parameter cannot be blank".to_string(),
-            ));
-        }
+        data_structure.serialize(&mut headers)?;
 
-        // Check if the headers should be hidden.
-        let hidden_headers = custom_headers.iter().any(|h| h.hide_headers);
-
-        let col_initial = col;
-        for (col_offset, custom_header) in custom_headers.iter().enumerate() {
-            if custom_header.skip {
-                continue;
-            }
-
-            let col = col_initial + col_offset as u16;
-
-            let mut serializer_header = custom_header.clone();
-            serializer_header.row = row;
-            serializer_header.col = col;
-
-            if !hidden_headers {
-                match &serializer_header.header_format {
-                    Some(format) => {
-                        self.write_with_format(row, col, &serializer_header.header_name, format)?
-                    }
-                    None => self.write(row, col, &serializer_header.header_name)?,
-                };
-
-                serializer_header.row += 1;
-            }
-
-            self.serializer_state.headers.insert(
-                (struct_name.clone(), (custom_header.field_name.clone())),
-                serializer_header,
-            );
-        }
-
-        Ok(self)
+        self.store_serialization_headers_with_options(row, col, &headers, header_options)
     }
 
     /// TODO
@@ -6549,7 +6513,7 @@ impl Worksheet {
     ///
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn serialize_headers_from_type<'de, T>(
+    pub fn deserialize_headers<'de, T>(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -6557,7 +6521,7 @@ impl Worksheet {
     where
         T: Deserialize<'de>,
     {
-        self.serialize_headers_with_format_from_type::<T>(row, col, &Format::default())
+        self.deserialize_headers_with_format::<T>(row, col, &Format::default())
     }
 
     /// TODO
@@ -6566,7 +6530,7 @@ impl Worksheet {
     ///
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn serialize_headers_with_format_from_type<'de, T>(
+    pub fn deserialize_headers_with_format<'de, T>(
         &mut self,
         row: RowNum,
         col: ColNum,
@@ -6578,14 +6542,172 @@ impl Worksheet {
         // Deserialize the struct to determine the type name and the fields.
         let headers = deserialize_headers::<T>();
 
+        self.store_serialization_headers(row, col, &headers, format)
+    }
+
+    /// TODO
+    #[cfg(feature = "serde")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn deserialize_headers_with_options<'de, T>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        header_options: &SerializeHeadersOptions,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Deserialize<'de>,
+    {
+        // Deserialize the struct to determine the type name and the fields.
+        let headers = deserialize_headers::<T>();
+
+        self.store_serialization_headers_with_options(row, col, &headers, header_options)
+    }
+
+    // TODO
+    #[cfg(feature = "serde")]
+    fn store_serialization_headers_with_options(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        headers: &SerializerHeader,
+        header_options: &SerializeHeadersOptions,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check that any custom field names match the actual field names.
+        let field_names: HashSet<String> = HashSet::from_iter(headers.field_names.clone());
+        for custom_header in &header_options.custom_headers {
+            if !field_names.contains(&custom_header.field_name) {
+                return Err(XlsxError::ParameterError(format!(
+                    "No custom field name '{}' found for struct '{}.'",
+                    custom_header.field_name, header_options.struct_name
+                )));
+            }
+        }
+
+        // Create a map of the user defined custom field settings to overwrite
+        // the default field settings.
+        let mut custom_fields: HashMap<&String, &CustomSerializeHeader> = HashMap::new();
+        for custom_header in &header_options.custom_headers {
+            custom_fields.insert(&custom_header.field_name, custom_header);
+        }
+
+        // Clone the header options to modify it and store it internally.
+        let mut header_options = header_options.clone();
+        header_options.struct_name = headers.struct_name.clone();
+
+        // Create a "custom" header for default fields or replace them with user
+        // specified custom fields. The "use_custom_headers_only" overrides the
+        // default headers to allow users to skip fields.
+        if !header_options.use_custom_headers_only {
+            let mut custom_headers: Vec<CustomSerializeHeader> = vec![];
+
+            for field_name in &headers.field_names {
+                match custom_fields.get(field_name) {
+                    Some(custom_field) => {
+                        if !custom_field.skip {
+                            custom_headers.push((*custom_field).clone());
+                        }
+                    }
+                    None => custom_headers.push(CustomSerializeHeader::new(field_name)),
+                }
+            }
+
+            header_options.custom_headers = custom_headers;
+        }
+
+        self.store_custom_serialization_headers(row, col, &header_options)
+    }
+
+    // TODO
+    #[cfg(feature = "serde")]
+    fn store_serialization_headers(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        headers: &SerializerHeader,
+        header_format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
         // Convert the field names to custom header structs.
         let custom_headers: Vec<CustomSerializeHeader> = headers
             .field_names
             .iter()
-            .map(|name| CustomSerializeHeader::new_with_format(name, format))
+            .map(CustomSerializeHeader::new)
             .collect();
 
-        self.serialize_headers_with_options(row, col, headers.struct_name, &custom_headers)
+        // Transfer the options to a default option struct.
+        let header_options = SerializeHeadersOptions {
+            struct_name: headers.struct_name.clone(),
+            header_format: Some(header_format.clone()),
+            custom_headers,
+            ..Default::default()
+        };
+
+        self.store_custom_serialization_headers(row, col, &header_options)
+    }
+
+    // TODO
+    #[cfg(feature = "serde")]
+    fn store_custom_serialization_headers(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        header_options: &SerializeHeadersOptions,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check for empty struct name.
+        if header_options.struct_name.is_empty() {
+            return Err(XlsxError::ParameterError(
+                "Struct not found or serialized/deserialized.".to_string(),
+            ));
+        }
+
+        // Check for empty struct members.
+        if header_options.custom_headers.is_empty() {
+            return Err(XlsxError::ParameterError(format!(
+                "No members found/specified for struct '{}.'",
+                header_options.struct_name
+            )));
+        }
+
+        let col_initial = col;
+        for (col_offset, custom_header) in header_options.custom_headers.iter().enumerate() {
+            if custom_header.skip {
+                continue;
+            }
+
+            let col = col_initial + col_offset as u16;
+            let mut custom_header = custom_header.clone();
+            custom_header.row = row;
+            custom_header.col = col;
+
+            if !header_options.hide_headers {
+                // Use the column specific header format or else the header row
+                // format, and if neither of those have been specified then
+                // write without a format.
+                if let Some(format) = &custom_header.header_format {
+                    self.write_with_format(row, col, &custom_header.header_name, format)?;
+                } else if let Some(format) = &header_options.header_format {
+                    self.write_with_format(row, col, &custom_header.header_name, format)?;
+                } else {
+                    self.write(row, col, &custom_header.header_name)?;
+                };
+
+                custom_header.row += 1;
+            }
+
+            self.serializer_state.headers.insert(
+                (
+                    header_options.struct_name.clone(),
+                    (custom_header.field_name.clone()),
+                ),
+                custom_header,
+            );
+        }
+
+        Ok(self)
     }
 
     // Serialize the parent data structure to the worksheet.

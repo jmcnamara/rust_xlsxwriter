@@ -6,7 +6,9 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{CustomSerializeHeader, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    CustomSerializeHeader, Format, SerializeHeadersOptions, Workbook, XlsxError,
+};
 use serde::{Deserialize, Serialize};
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -84,8 +86,46 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1").set_header_format(&bold),
         CustomSerializeHeader::new("col2").set_header_format(&bold),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data, &header_options)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for serialize_headers_with_options().
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    worksheet.set_paper_size(9);
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: Vec<u16>,
+        col2: Vec<bool>,
+    }
+
+    let data = MyStruct {
+        col1: vec![123, 456, 789],
+        col2: vec![true, false, true],
+    };
+
+    let custom_headers = [
+        CustomSerializeHeader::new("col1"),
+        CustomSerializeHeader::new("col2"),
+    ];
+
+    let header_options = SerializeHeadersOptions::new()
+        .set_custom_headers(&custom_headers)
+        .set_header_format(&bold);
+
+    worksheet.serialize_headers_with_options(0, 0, &data, &header_options)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -94,7 +134,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Test case for Serde serialization. Header deserialization.
-fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     let bold = Format::new().set_bold();
@@ -113,7 +153,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
         col2: vec![true, false, true],
     };
 
-    worksheet.serialize_headers_with_format_from_type::<MyStruct>(0, 0, &bold)?;
+    worksheet.deserialize_headers_with_format::<MyStruct>(0, 0, &bold)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -163,6 +203,18 @@ fn test_serde06_4() {
         .set_name("serde06")
         .set_function(create_new_xlsx_file_4)
         .unique("4")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde06_5() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde06")
+        .set_function(create_new_xlsx_file_5)
+        .unique("5")
         .initialize();
 
     test_runner.assert_eq();

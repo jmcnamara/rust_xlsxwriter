@@ -1109,6 +1109,129 @@ impl SerializerState {
 }
 
 // -----------------------------------------------------------------------
+// SerializeHeadersOptions.
+// -----------------------------------------------------------------------
+
+/// The `SerializeHeadersOptions` struct represents a custom serializer
+/// field/header.
+///
+/// `SerializeHeadersOptions` can be used to set column headers to map serialized
+/// data to. It allows you to reorder, rename, format or skip headers and also
+/// define formatting for field values.
+///
+/// It is used in conjunction with the
+/// [`Worksheet::serialize_headers_with_options()`] method.
+///
+/// # Examples
+///
+///
+#[derive(Clone)]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+pub struct SerializeHeadersOptions {
+    pub(crate) struct_name: String,
+    pub(crate) header_format: Option<Format>,
+    pub(crate) hide_headers: bool,
+    pub(crate) custom_headers: Vec<CustomSerializeHeader>,
+    pub(crate) use_custom_headers_only: bool,
+}
+
+impl Default for SerializeHeadersOptions {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl SerializeHeadersOptions {
+    /// Create serialization header options.
+    ///
+    /// Create a `CustomSerializeHeader` struct to be used with
+    /// [`Worksheet::serialize_headers_with_options()`]. TODO
+    ///
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn new() -> SerializeHeadersOptions {
+        SerializeHeadersOptions {
+            struct_name: String::new(),
+            header_format: None,
+            hide_headers: false,
+            custom_headers: vec![],
+            use_custom_headers_only: false,
+        }
+    }
+
+    /// Set the header format for a serialization headers.
+    ///
+    /// See [`Format`] for more information on formatting.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the header.
+    ///
+    /// # Examples
+    ///
+    /// TODO
+    ///
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_header_format(mut self, format: &Format) -> SerializeHeadersOptions {
+        self.header_format = Some(format.clone());
+        self
+    }
+
+    /// Hide all the headers.
+    ///
+    /// If you want to serialize data without outputting the headers above the
+    /// data you can set the `hide_headers` parameters to any of the custom
+    /// headers.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// TODO
+    ///
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn hide_headers(mut self, enable: bool) -> SerializeHeadersOptions {
+        self.hide_headers = enable;
+        self
+    }
+
+    /// Write the location and headers for data serialization, with additional
+    /// options.
+    ///
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// * `custom_headers` - An array of [`CustomSerializeHeader`] values.
+    ///
+    ///
+    ///
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_custom_headers(
+        mut self,
+        custom_headers: &[CustomSerializeHeader],
+    ) -> SerializeHeadersOptions {
+        self.custom_headers = custom_headers.to_vec();
+        self
+    }
+
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    ///
+    ///
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn use_custom_headers_only(mut self, enable: bool) -> SerializeHeadersOptions {
+        self.use_custom_headers_only = enable;
+        self
+    }
+}
+
+// -----------------------------------------------------------------------
 // CustomSerializeHeader.
 // -----------------------------------------------------------------------
 
@@ -1208,7 +1331,6 @@ pub struct CustomSerializeHeader {
     pub(crate) header_format: Option<Format>,
     pub(crate) cell_format: Option<Format>,
     pub(crate) skip: bool,
-    pub(crate) hide_headers: bool,
     pub(crate) row: RowNum,
     pub(crate) col: ColNum,
 }
@@ -1235,7 +1357,6 @@ impl CustomSerializeHeader {
             header_format: None,
             cell_format: None,
             skip: false,
-            hide_headers: false,
             row: 0,
             col: 0,
         }
@@ -1619,96 +1740,6 @@ impl CustomSerializeHeader {
     pub fn skip(mut self, enable: bool) -> CustomSerializeHeader {
         self.skip = enable;
         self
-    }
-
-    /// Hide all the headers.
-    ///
-    /// If you want to serialize data without outputting the headers above the
-    /// data you can set the `hide_headers` parameters to any of the custom
-    /// headers.
-    ///
-    /// # Parameters
-    ///
-    /// * `enable` - Turn the property on/off. It is off by default.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates serializing data without outputting the
-    /// headers above the data.
-    ///
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_worksheet_serialize_headers_hide.rs
-    /// #
-    /// # use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
-    /// # use serde::Serialize;
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    ///     // Create a serializable test struct.
-    ///     #[derive(Serialize)]
-    ///     struct Produce {
-    ///         fruit: &'static str,
-    ///         cost: f64,
-    ///     }
-    ///
-    ///     // Create some data instances.
-    ///     let item1 = Produce {
-    ///         fruit: "Peach",
-    ///         cost: 1.05,
-    ///     };
-    ///
-    ///     let item2 = Produce {
-    ///         fruit: "Plum",
-    ///         cost: 0.15,
-    ///     };
-    ///
-    ///     let item3 = Produce {
-    ///         fruit: "Pear",
-    ///         cost: 0.75,
-    ///     };
-    ///
-    ///     // Set up the custom headers.
-    ///     let custom_headers = [
-    ///         CustomSerializeHeader::new("fruit").hide_headers(true),
-    ///         CustomSerializeHeader::new("cost"),
-    ///     ];
-    ///
-    ///     // Set the serialization location and custom headers.
-    ///     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
-    ///
-    ///     // Serialize the data.
-    ///     worksheet.serialize(&item1)?;
-    ///     worksheet.serialize(&item2)?;
-    ///     worksheet.serialize(&item3)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("serialize.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_hide.png">
-    ///
-    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn hide_headers(mut self, enable: bool) -> CustomSerializeHeader {
-        self.hide_headers = enable;
-        self
-    }
-
-    // Internal constructor.
-    pub(crate) fn new_with_format(
-        field_name: impl Into<String>,
-        format: &Format,
-    ) -> CustomSerializeHeader {
-        CustomSerializeHeader::new(field_name).set_header_format(format)
     }
 }
 

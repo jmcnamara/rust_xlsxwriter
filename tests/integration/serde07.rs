@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -136,8 +136,10 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2"),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
+
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -180,8 +182,11 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2"),
     ];
+    let header_options = SerializeHeadersOptions::new()
+        .set_custom_headers(&custom_headers)
+        .use_custom_headers_only(true);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -225,8 +230,9 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col2"),
         CustomSerializeHeader::new("col3").skip(true),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -265,8 +271,11 @@ fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2"),
     ];
+    let header_options = SerializeHeadersOptions::new()
+        .set_custom_headers(&custom_headers)
+        .use_custom_headers_only(true);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -308,8 +317,9 @@ fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2"),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -348,8 +358,99 @@ fn create_new_xlsx_file_9(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("field1").rename("col1"),
         CustomSerializeHeader::new("field2").rename("col2"),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for skipping fields via skip() for single field only.
+fn create_new_xlsx_file_10(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: &'static str,
+        col3: bool,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: "aaa",
+            col3: true,
+        },
+        MyStruct {
+            col1: 2,
+            col2: "bbb",
+            col3: true,
+        },
+        MyStruct {
+            col1: 3,
+            col2: "ccc",
+            col3: true,
+        },
+    ];
+
+    let custom_headers = [CustomSerializeHeader::new("col3").skip(true)];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for skipping fields via skip() (custom headers only)
+fn create_new_xlsx_file_11(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: &'static str,
+        col3: bool,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: "aaa",
+            col3: true,
+        },
+        MyStruct {
+            col1: 2,
+            col2: "bbb",
+            col3: true,
+        },
+        MyStruct {
+            col1: 3,
+            col2: "ccc",
+            col3: true,
+        },
+    ];
+
+    let custom_headers = [
+        CustomSerializeHeader::new("col1"),
+        CustomSerializeHeader::new("col2"),
+        CustomSerializeHeader::new("col3").skip(true),
+    ];
+    let header_options = SerializeHeadersOptions::new()
+        .set_custom_headers(&custom_headers)
+        .use_custom_headers_only(true);
+
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -458,6 +559,30 @@ fn test_serde07_9() {
         .set_name("serde07")
         .set_function(create_new_xlsx_file_9)
         .unique("9")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde07_10() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_10)
+        .unique("10")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde07_11() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_11)
+        .unique("11")
         .initialize();
 
     test_runner.assert_eq();

@@ -6,7 +6,9 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{CustomSerializeHeader, ExcelDateTime, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    CustomSerializeHeader, ExcelDateTime, Format, SerializeHeadersOptions, Workbook, XlsxError,
+};
 use serde::Serialize;
 
 #[cfg(feature = "chrono")]
@@ -76,8 +78,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2").set_cell_format(&format),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
     worksheet.serialize(&data1)?;
     worksheet.serialize(&data2)?;
@@ -124,8 +127,9 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2").set_cell_format(&format),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
     worksheet.serialize(&data1)?;
     worksheet.serialize(&data2)?;
@@ -181,8 +185,9 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2").set_cell_format(&format),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
     worksheet.serialize(&data1)?;
     worksheet.serialize(&data2)?;
@@ -229,8 +234,9 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
         CustomSerializeHeader::new("col1"),
         CustomSerializeHeader::new("col2").set_cell_format(&format),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "MyStruct", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
     worksheet.serialize(&data1)?;
     worksheet.serialize(&data2)?;
