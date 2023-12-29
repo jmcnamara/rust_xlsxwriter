@@ -6546,6 +6546,9 @@ impl Worksheet {
     }
 
     /// TODO
+    ///
+    /// # Errors
+    ///
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn deserialize_headers_with_options<'de, T>(

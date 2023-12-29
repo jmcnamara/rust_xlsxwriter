@@ -6,7 +6,7 @@
 //! omitting them from the serialization headers. To do this we need to specify
 //! custom headers.
 
-use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -47,9 +47,12 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeHeader::new("fruit"),
         CustomSerializeHeader::new("cost"),
     ];
+    let header_options = SerializeHeadersOptions::new()
+        .use_custom_headers_only(true)
+        .set_custom_headers(&custom_headers);
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &item1, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

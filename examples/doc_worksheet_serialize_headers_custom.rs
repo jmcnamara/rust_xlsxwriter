@@ -5,7 +5,9 @@
 //! The following example demonstrates serializing instances of a Serde derived
 //! data structure to a worksheet with custom headers and cell formatting.
 
-use rust_xlsxwriter::{CustomSerializeHeader, Format, FormatBorder, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -47,17 +49,19 @@ fn main() -> Result<(), XlsxError> {
 
     // Set up the custom headers.
     let custom_headers = [
-        CustomSerializeHeader::new("fruit")
-            .rename("Item")
-            .set_header_format(&header_format),
+        CustomSerializeHeader::new("fruit").rename("Item"),
         CustomSerializeHeader::new("cost")
             .rename("Price")
-            .set_header_format(&header_format)
             .set_cell_format(&currency_format),
     ];
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(1, 1, "Produce", &custom_headers)?;
+    let header_options = SerializeHeadersOptions::new()
+        .set_header_format(&header_format)
+        .set_custom_headers(&custom_headers);
+
+    // Set the serialization location and custom headers.
+    worksheet.serialize_headers_with_options(1, 1, &item1, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

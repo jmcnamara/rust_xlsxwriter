@@ -5,7 +5,7 @@
 //! The following example demonstrates skipping fields during serialization by
 //! explicitly skipping them via custom headers.
 
-use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -47,10 +47,10 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeHeader::new("cost"),
         CustomSerializeHeader::new("in_stock").skip(true),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
-
+    worksheet.serialize_headers_with_options(0, 0, &item1, &header_options)?;
     // Serialize the data.
     worksheet.serialize(&item1)?;
     worksheet.serialize(&item2)?;

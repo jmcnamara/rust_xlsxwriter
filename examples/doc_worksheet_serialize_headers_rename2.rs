@@ -6,7 +6,7 @@
 //! specifying custom headers and renaming them there. You must still specify
 //! the actual field name to serialize in the `new()` constructor.
 //!
-use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -43,9 +43,10 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeHeader::new("fruit").rename("Item"),
         CustomSerializeHeader::new("cost").rename("Price"),
     ];
+    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &item1, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

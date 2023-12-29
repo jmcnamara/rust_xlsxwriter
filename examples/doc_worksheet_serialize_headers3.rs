@@ -5,7 +5,9 @@
 //! The following example demonstrates serializing instances of a Serde derived
 //! data structure to a worksheet using different methods.
 
-use rust_xlsxwriter::{CustomSerializeHeader, Format, FormatBorder, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -53,6 +55,7 @@ fn main() -> Result<(), XlsxError> {
     // 1. Set the serialization location and headers with `serialize_headers()`
     //    and serialize some data.
     worksheet.serialize_headers(0, 0, &item1)?;
+
     worksheet.serialize(&item1)?;
     worksheet.serialize(&item2)?;
     worksheet.serialize(&item3)?;
@@ -60,6 +63,7 @@ fn main() -> Result<(), XlsxError> {
     // 2. Set the serialization location and formatted headers with
     //    `serialize_headers_with_format()` and serialize some data.
     worksheet.serialize_headers_with_format(0, 3, &item1, &header_format)?;
+
     worksheet.serialize(&item1)?;
     worksheet.serialize(&item2)?;
     worksheet.serialize(&item3)?;
@@ -68,28 +72,31 @@ fn main() -> Result<(), XlsxError> {
     //    the customization to set the header format and also the cell format
     //    for the number values.
     let custom_headers = [
-        CustomSerializeHeader::new("fruit")
-            .rename("Item")
-            .set_header_format(&header_format),
+        CustomSerializeHeader::new("fruit").rename("Item"),
         CustomSerializeHeader::new("cost")
             .rename("Price")
-            .set_header_format(&header_format)
             .set_cell_format(&currency_format),
     ];
+    let header_options = SerializeHeadersOptions::new()
+        .set_header_format(&header_format)
+        .set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 6, "Produce", &custom_headers)?;
+    // Set the serialization location and custom headers.
+    worksheet.serialize_headers_with_options(0, 6, &item1, &header_options)?;
+
     worksheet.serialize(&item1)?;
     worksheet.serialize(&item2)?;
     worksheet.serialize(&item3)?;
 
     // 4. Set the serialization location and headers with custom headers. We use
     //    the customization to turn off the headers.
-    let custom_headers = [
-        CustomSerializeHeader::new("fruit").hide_headers(true),
-        CustomSerializeHeader::new("cost"),
-    ];
+    let header_options = SerializeHeadersOptions::new()
+        .hide_headers(true)
+        .set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 9, "Produce", &custom_headers)?;
+    // Set the serialization location and custom headers.
+    worksheet.serialize_headers_with_options(0, 9, &item1, &header_options)?;
+
     worksheet.serialize(&item1)?;
     worksheet.serialize(&item2)?;
     worksheet.serialize(&item3)?;

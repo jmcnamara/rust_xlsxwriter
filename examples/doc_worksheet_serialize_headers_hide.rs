@@ -5,7 +5,7 @@
 //! The following example demonstrates serializing data without outputting the
 //! headers above the data.
 //!
-use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
+use rust_xlsxwriter::{SerializeHeadersOptions, Workbook, XlsxError};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -37,14 +37,11 @@ fn main() -> Result<(), XlsxError> {
         cost: 0.75,
     };
 
-    // Set up the custom headers.
-    let custom_headers = [
-        CustomSerializeHeader::new("fruit").hide_headers(true),
-        CustomSerializeHeader::new("cost"),
-    ];
+    // Set up the headers options.
+    let header_options = SerializeHeadersOptions::new().hide_headers(true);
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &item1, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

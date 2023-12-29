@@ -6,7 +6,9 @@
 //! data structure, including `Option` chrono datetimes, to a worksheet.
 
 use chrono::NaiveDate;
-use rust_xlsxwriter::{CustomSerializeHeader, Format, FormatBorder, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+};
 use serde::Serialize;
 
 use rust_xlsxwriter::utility::serialize_chrono_option_naive_to_excel;
@@ -56,19 +58,17 @@ fn main() -> Result<(), XlsxError> {
     // Set up the start location and headers of the data to be serialized. Note,
     // we need to add a cell format for the datetime data.
     let custom_headers = [
-        CustomSerializeHeader::new("name")
-            .rename("Student")
-            .set_header_format(&header_format),
+        CustomSerializeHeader::new("name").rename("Student"),
         CustomSerializeHeader::new("dob")
             .rename("Birthday")
-            .set_cell_format(&date_format)
-            .set_header_format(&header_format),
-        CustomSerializeHeader::new("id")
-            .rename("ID")
-            .set_header_format(&header_format),
+            .set_cell_format(&date_format),
+        CustomSerializeHeader::new("id").rename("ID"),
     ];
+    let header_options = SerializeHeadersOptions::new()
+        .set_header_format(&header_format)
+        .set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "Student", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &students[0], &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&students)?;

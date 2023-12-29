@@ -6,7 +6,8 @@
 //! data structure, including datetimes, to a worksheet.
 
 use rust_xlsxwriter::{
-    CustomSerializeHeader, ExcelDateTime, Format, FormatBorder, Workbook, XlsxError,
+    CustomSerializeHeader, ExcelDateTime, Format, FormatBorder, SerializeHeadersOptions, Workbook,
+    XlsxError,
 };
 use serde::Serialize;
 
@@ -51,19 +52,17 @@ fn main() -> Result<(), XlsxError> {
     // Set up the start location and headers of the data to be serialized. Note,
     // we need to add a cell format for the datetime data.
     let custom_headers = [
-        CustomSerializeHeader::new("name")
-            .rename("Student")
-            .set_header_format(&header_format),
+        CustomSerializeHeader::new("name").rename("Student"),
         CustomSerializeHeader::new("dob")
             .rename("Birthday")
-            .set_cell_format(&date_format)
-            .set_header_format(&header_format),
-        CustomSerializeHeader::new("id")
-            .rename("ID")
-            .set_header_format(&header_format),
+            .set_cell_format(&date_format),
+        CustomSerializeHeader::new("id").rename("ID"),
     ];
+    let header_options = SerializeHeadersOptions::new()
+        .set_header_format(&header_format)
+        .set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, "Student", &custom_headers)?;
+    worksheet.serialize_headers_with_options(0, 0, &students[0], &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&students)?;

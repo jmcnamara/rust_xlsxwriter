@@ -18,4 +18,4 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Run the tests for the wasm feature set
-      run: cargo test --features wasm --test '*'
+      run: cargo test --features wasm
