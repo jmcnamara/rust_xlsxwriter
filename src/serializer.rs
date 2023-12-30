@@ -1333,6 +1333,8 @@ pub struct CustomSerializeHeader {
     pub(crate) skip: bool,
     pub(crate) row: RowNum,
     pub(crate) col: ColNum,
+    pub(crate) width: Option<f64>,
+    pub(crate) pixel_width: Option<u16>,
 }
 
 impl CustomSerializeHeader {
@@ -1359,6 +1361,8 @@ impl CustomSerializeHeader {
             skip: false,
             row: 0,
             col: 0,
+            width: None,
+            pixel_width: None,
         }
     }
 
@@ -1739,6 +1743,18 @@ impl CustomSerializeHeader {
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn skip(mut self, enable: bool) -> CustomSerializeHeader {
         self.skip = enable;
+        self
+    }
+
+    /// TODO
+    pub fn set_column_width(mut self, width: impl Into<f64>) -> CustomSerializeHeader {
+        self.width = Some(width.into());
+        self
+    }
+
+    /// TODO
+    pub fn set_column_width_pixels(mut self, width: u16) -> CustomSerializeHeader {
+        self.pixel_width = Some(width);
         self
     }
 }

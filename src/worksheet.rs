@@ -6686,6 +6686,13 @@ impl Worksheet {
             custom_header.row = row;
             custom_header.col = col;
 
+            // Set the column width if specified by user.
+            if let Some(width) = custom_header.width {
+                self.set_column_width(col, width)?;
+            } else if let Some(pixel_width) = custom_header.pixel_width {
+                self.set_column_width_pixels(col, pixel_width)?;
+            }
+
             if !header_options.hide_headers {
                 // Use the column specific header format or else the header row
                 // format, and if neither of those have been specified then
