@@ -6,7 +6,7 @@
 //! explicitly skipping them via custom headers.
 
 use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -15,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize)]
+    #[derive(Deserialize, Serialize)]
     struct Produce {
         fruit: &'static str,
         cost: f64,
@@ -41,16 +41,13 @@ fn main() -> Result<(), XlsxError> {
         in_stock: false,
     };
 
-    // Set up the custom headers.
-    let custom_headers = [
-        CustomSerializeHeader::new("fruit"),
-        CustomSerializeHeader::new("cost"),
-        CustomSerializeHeader::new("in_stock").skip(true),
-    ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    // We only need to set a custom header for the field we want to skip.
+    let header_options = SerializeHeadersOptions::new()
+        .set_custom_headers(&[CustomSerializeHeader::new("in_stock").skip(true)]);
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(0, 0, &item1, &header_options)?;
+    worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
+
     // Serialize the data.
     worksheet.serialize(&item1)?;
     worksheet.serialize(&item2)?;

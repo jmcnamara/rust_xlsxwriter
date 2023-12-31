@@ -7,7 +7,7 @@
 //! to tell rustc not emit a `dead_code` warning.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -16,12 +16,12 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct. Note the serde attribute.
-    #[derive(Serialize)]
+    #[derive(Deserialize, Serialize)]
     struct Produce {
         fruit: &'static str,
         cost: f64,
 
-        #[serde(skip_serializing)]
+        #[serde(skip)]
         #[allow(dead_code)]
         in_stock: bool,
     }
@@ -46,7 +46,7 @@ fn main() -> Result<(), XlsxError> {
     };
 
     // Set the serialization location and headers.
-    worksheet.serialize_headers(0, 0, &item1)?;
+    worksheet.deserialize_headers::<Produce>(0, 0)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

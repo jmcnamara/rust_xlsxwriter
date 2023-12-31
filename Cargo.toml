@@ -171,6 +171,11 @@ path = "examples/doc_worksheet_serialize_intro.rs"
 required-features = ["serde"]
 
 [[example]]
+name = "doc_worksheet_serialize_intro2"
+path = "examples/doc_worksheet_serialize_intro2.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "doc_worksheet_serialize_vectors"
 path = "examples/doc_worksheet_serialize_vectors.rs"
 required-features = ["serde"]

@@ -3,11 +3,10 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates renaming fields during serialization by
-//! specifying custom headers and renaming them there. You must still specify
-//! the actual field name to serialize in the `new()` constructor.
+//! specifying custom headers and renaming them there.
 //!
 use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -16,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize)]
+    #[derive(Deserialize, Serialize)]
     struct Produce {
         fruit: &'static str,
         cost: f64,
@@ -46,7 +45,7 @@ fn main() -> Result<(), XlsxError> {
     let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(0, 0, &item1, &header_options)?;
+    worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

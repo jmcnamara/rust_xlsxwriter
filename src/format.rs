@@ -2399,8 +2399,8 @@ impl From<String> for Format {
     }
 }
 
-/// The `Color` enum defines Excel colors the can be used throughout the
-/// `rust_xlsxwriter`.
+/// The `Color` enum defines Excel colors that can be used throughout the
+/// `rust_xlsxwriter` APIs.
 ///
 /// There are 3 types of colors within the enum:
 ///

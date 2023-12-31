@@ -4,10 +4,10 @@
 
 //! The following example demonstrates skipping fields during serialization by
 //! omitting them from the serialization headers. To do this we need to specify
-//! custom headers.
+//! custom headers and set `use_custom_headers_only()`.
 
 use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize)]
+    #[derive(Deserialize, Serialize)]
     struct Produce {
         fruit: &'static str,
         cost: f64,
@@ -42,17 +42,20 @@ fn main() -> Result<(), XlsxError> {
         in_stock: false,
     };
 
-    // Set up the custom headers.
+    // Only set up the custom headers we want and omit "in_stock".
     let custom_headers = [
         CustomSerializeHeader::new("fruit"),
         CustomSerializeHeader::new("cost"),
     ];
+
+    // Note the use of "use_custom_headers_only" to only serialize the named
+    // custom headers.
     let header_options = SerializeHeadersOptions::new()
         .use_custom_headers_only(true)
         .set_custom_headers(&custom_headers);
 
     // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(0, 0, &item1, &header_options)?;
+    worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;
