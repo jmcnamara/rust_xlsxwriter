@@ -14,7 +14,7 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Create a serializable test struct.
+    // Create a serializable struct.
     #[derive(Serialize)]
     struct Produce {
         fruit: &'static str,

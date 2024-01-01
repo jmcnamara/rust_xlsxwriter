@@ -3,10 +3,10 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates serializing instances of a Serde derived
-//! data structure to a worksheet with header and cell formatting.
+//! data structure to a worksheet with header and value formatting.
 
 use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -22,8 +22,8 @@ fn main() -> Result<(), XlsxError> {
 
     let currency_format = Format::new().set_num_format("$0.00");
 
-    // Create a serializable test struct.
-    #[derive(Serialize)]
+    // Create a serializable struct.
+    #[derive(Deserialize, Serialize)]
     struct Produce {
         #[serde(rename = "Item")]
         fruit: &'static str,
@@ -53,7 +53,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.set_column_format(2, &currency_format)?;
 
     // Set the serialization location and headers.
-    worksheet.serialize_headers_with_format(1, 1, &item1, &header_format)?;
+    worksheet.deserialize_headers_with_format::<Produce>(1, 1, &header_format)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

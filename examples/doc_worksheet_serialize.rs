@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     // Add a simple format for the headers.
     let format = Format::new().set_bold();
 
-    // Create a serializable test struct.
+    // Create a serializable struct.
     #[derive(Serialize)]
     #[serde(rename_all = "PascalCase")]
     struct Produce {

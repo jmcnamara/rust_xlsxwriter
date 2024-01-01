@@ -30,7 +30,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.serialize(&struct1)?;
     worksheet.serialize(&struct1)?;
 
-    // Create a serializable test struct.
+    // Create a serializable struct.
     #[derive(Serialize)]
     struct MyStruct {
         col1: Vec<u16>,

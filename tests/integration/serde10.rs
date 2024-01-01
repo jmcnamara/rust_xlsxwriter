@@ -76,7 +76,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let custom_headers = [
         CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2").set_cell_format(&format),
+        CustomSerializeHeader::new("col2").set_value_format(&format),
     ];
     let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
@@ -125,7 +125,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
 
     let custom_headers = [
         CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2").set_cell_format(&format),
+        CustomSerializeHeader::new("col2").set_value_format(&format),
     ];
     let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
@@ -183,7 +183,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 
     let custom_headers = [
         CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2").set_cell_format(&format),
+        CustomSerializeHeader::new("col2").set_value_format(&format),
     ];
     let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
@@ -232,7 +232,7 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
 
     let custom_headers = [
         CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2").set_cell_format(&format),
+        CustomSerializeHeader::new("col2").set_value_format(&format),
     ];
     let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 

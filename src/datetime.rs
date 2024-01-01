@@ -12,6 +12,12 @@ use regex::Regex;
 #[cfg(feature = "serde")]
 use serde::ser;
 
+#[cfg(feature = "serde")]
+use serde::Deserialize;
+
+#[cfg(feature = "serde")]
+use serde::Deserializer;
+
 #[cfg(feature = "chrono")]
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 
@@ -1396,5 +1402,19 @@ impl ser::Serialize for ExcelDateTime {
     {
         let serial_datetime = self.to_excel();
         serializer.serialize_f64(serial_datetime)
+    }
+}
+
+/// Implementation of the `ser::Deserialize` trait for `ExcelDateTime`.
+///
+/// TODO
+///
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ExcelDateTime {
+    fn deserialize<D>(_deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        unimplemented!()
     }
 }

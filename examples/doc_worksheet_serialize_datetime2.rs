@@ -9,7 +9,7 @@ use chrono::NaiveDate;
 use rust_xlsxwriter::{
     CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
 
@@ -30,8 +30,8 @@ fn main() -> Result<(), XlsxError> {
 
     let date_format = Format::new().set_num_format("yyyy/mm/dd");
 
-    // Create a serializable test struct.
-    #[derive(Serialize)]
+    // Create a serializable struct.
+    #[derive(Deserialize, Serialize)]
     struct Student<'a> {
         name: &'a str,
 
@@ -61,15 +61,14 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeHeader::new("name").rename("Student"),
         CustomSerializeHeader::new("dob")
             .rename("Birthday")
-            .set_cell_format(&date_format),
+            .set_value_format(&date_format),
         CustomSerializeHeader::new("id").rename("ID"),
     ];
     let header_options = SerializeHeadersOptions::new()
         .set_header_format(&header_format)
         .set_custom_headers(&custom_headers);
 
-    // Set the serialization location and custom headers.
-    worksheet.serialize_headers_with_options(0, 0, &students[0], &header_options)?;
+    worksheet.deserialize_headers_with_options::<Student>(0, 0, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&students)?;

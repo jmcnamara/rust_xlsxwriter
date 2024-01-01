@@ -15,10 +15,10 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Set a header format.
-    let cell_format = Format::new().set_num_format("$0.00");
+    // Set a cell value format.
+    let value_format = Format::new().set_num_format("$0.00");
 
-    // Create a serializable test struct.
+    // Create a serializable struct.
     #[derive(Serialize)]
     struct Produce {
         fruit: &'static str,
@@ -42,7 +42,7 @@ fn main() -> Result<(), XlsxError> {
     };
 
     // Set the serialization location and headers.
-    let custom_headers = [CustomSerializeHeader::new("cost").set_cell_format(&cell_format)];
+    let custom_headers = [CustomSerializeHeader::new("cost").set_value_format(&value_format)];
     let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
 
     // Set the serialization location and custom headers.

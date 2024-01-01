@@ -20,7 +20,7 @@ fn main() -> Result<(), XlsxError> {
     let bold = Format::new().set_bold();
     let currency = Format::new().set_num_format("$0.00");
 
-    // Create a serializable test struct.
+    // Create a serializable struct.
     #[derive(Serialize)]
     struct Produce {
         fruit: &'static str,
@@ -49,7 +49,7 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeHeader::new("fruit").rename("Fruit"),
         CustomSerializeHeader::new("cost")
             .rename("Price")
-            .set_cell_format(&currency),
+            .set_value_format(&currency),
     ];
     let header_options = SerializeHeadersOptions::new()
         .set_header_format(&bold)

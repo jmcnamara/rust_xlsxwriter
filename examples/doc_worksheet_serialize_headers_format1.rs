@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
         .set_border(FormatBorder::Thin)
         .set_background_color("C6EFCE");
 
-    // Create a serializable test struct.
+    // Create a serializable struct.
     #[derive(Serialize)]
     struct Produce {
         fruit: &'static str,

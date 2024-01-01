@@ -30,7 +30,7 @@ fn main() -> Result<(), XlsxError> {
 
     let date_format = Format::new().set_num_format("yyyy/mm/dd");
 
-    // Create a serializable test struct.
+    // Create a serializable struct.
     #[derive(Serialize)]
     struct Student<'a> {
         name: &'a str,
@@ -61,7 +61,7 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeHeader::new("name").rename("Student"),
         CustomSerializeHeader::new("dob")
             .rename("Birthday")
-            .set_cell_format(&date_format),
+            .set_value_format(&date_format),
         CustomSerializeHeader::new("id").rename("ID"),
     ];
     let header_options = SerializeHeadersOptions::new()

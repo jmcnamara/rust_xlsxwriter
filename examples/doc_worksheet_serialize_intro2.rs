@@ -20,7 +20,7 @@ fn main() -> Result<(), XlsxError> {
         .set_border(FormatBorder::Thin)
         .set_background_color("C6E0B4");
 
-    // Create a serializable test struct.
+    // Create a serializable struct.
     #[derive(Deserialize, Serialize)]
     #[serde(rename_all = "PascalCase")]
     struct Student<'a> {

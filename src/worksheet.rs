@@ -6048,7 +6048,7 @@ impl Worksheet {
     ///     // Add a simple format for the headers.
     ///     let format = Format::new().set_bold();
     ///
-    ///     // Create a serializable test struct.
+    ///     // Create a serializable struct.
     ///     #[derive(Serialize)]
     ///     #[serde(rename_all = "PascalCase")]
     ///     struct Produce {
@@ -6146,7 +6146,7 @@ impl Worksheet {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     // Create a serializable test struct.
+    ///     // Create a serializable struct.
     ///     #[derive(Serialize)]
     ///     #[serde(rename_all = "PascalCase")]
     ///     struct Produce {
@@ -6204,7 +6204,7 @@ impl Worksheet {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Create a serializable test struct.
+    /// #     // Create a serializable struct.
     /// #     #[derive(Serialize)]
     /// #     #[serde(rename_all = "PascalCase")]
     /// #     struct Produce {
@@ -6310,7 +6310,7 @@ impl Worksheet {
     ///     // Add a simple format for the headers.
     ///     let format = Format::new().set_bold();
     ///
-    ///     // Create a serializable test struct.
+    ///     // Create a serializable struct.
     ///     #[derive(Serialize)]
     ///     #[serde(rename_all = "PascalCase")]
     ///     struct Produce {
@@ -6432,7 +6432,7 @@ impl Worksheet {
     ///     let bold = Format::new().set_bold();
     ///     let currency = Format::new().set_num_format("$0.00");
     ///
-    ///     // Create a serializable test struct.
+    ///     // Create a serializable struct.
     ///     #[derive(Serialize)]
     ///     struct Produce {
     ///         fruit: &'static str,
@@ -6464,7 +6464,7 @@ impl Worksheet {
     ///         CustomSerializeHeader::new("cost")
     ///             .rename("Price")
     ///             .set_header_format(&bold)
-    ///             .set_cell_format(&currency),
+    ///             .set_value_format(&currency),
     ///     ];
     ///
     ///     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
@@ -6691,6 +6691,11 @@ impl Worksheet {
                 self.set_column_width(col, width)?;
             } else if let Some(pixel_width) = custom_header.pixel_width {
                 self.set_column_width_pixels(col, pixel_width)?;
+            }
+
+            // Set the column format if specified by user.
+            if let Some(format) = &custom_header.column_format {
+                self.set_column_format(col, format)?;
             }
 
             if !header_options.hide_headers {

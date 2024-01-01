@@ -15,73 +15,68 @@ use serde::Serialize;
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
-
     let bold = Format::new().set_bold();
-    let italic = Format::new().set_italic();
-    let bold_italic = Format::new().set_bold().set_italic();
+
+    worksheet.set_paper_size(9);
+    worksheet.set_column_format(1, &bold)?;
 
     // Not serialized.
     worksheet.write(0, 0, "col1")?;
-    worksheet.write_with_format(1, 0, 1, &bold)?;
-    worksheet.write_with_format(2, 0, 2, &bold)?;
-    worksheet.write_with_format(3, 0, 3, &bold)?;
+    worksheet.write(1, 0, 1)?;
+    worksheet.write(2, 0, 2)?;
+    worksheet.write(3, 0, 3)?;
 
     worksheet.write(0, 1, "col2")?;
-    worksheet.write_with_format(1, 1, 4, &italic)?;
-    worksheet.write_with_format(2, 1, 5, &italic)?;
-    worksheet.write_with_format(3, 1, 6, &italic)?;
+    worksheet.write(1, 1, 4)?;
+    worksheet.write(2, 1, 5)?;
+    worksheet.write(3, 1, 6)?;
 
     worksheet.write(0, 2, "col3")?;
-    worksheet.write_with_format(1, 2, 7, &bold_italic)?;
-    worksheet.write_with_format(2, 2, "", &bold_italic)?;
-    worksheet.write_with_format(3, 2, 9, &bold_italic)?;
+    worksheet.write(1, 2, 7)?;
+    worksheet.write(2, 2, 8)?;
+    worksheet.write(3, 2, 9)?;
 
     workbook.save(filename)?;
 
     Ok(())
 }
 
-// Test case for Serde serialization.
+// Test case for Serde serialization. Set the column format.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
-
     let bold = Format::new().set_bold();
-    let italic = Format::new().set_italic();
-    let bold_italic = Format::new().set_bold().set_italic();
+
+    worksheet.set_paper_size(9);
 
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct {
         col1: u8,
         col2: u8,
-        col3: Option<u8>,
+        col3: u8,
     }
 
     let data1 = MyStruct {
         col1: 1,
         col2: 4,
-        col3: Some(7),
+        col3: 7,
     };
 
     let data2 = MyStruct {
         col1: 2,
         col2: 5,
-        col3: None,
+        col3: 8,
     };
 
     let data3 = MyStruct {
         col1: 3,
         col2: 6,
-        col3: Some(9),
+        col3: 9,
     };
 
-    let custom_headers = [
-        CustomSerializeHeader::new("col1").set_value_format(&bold),
-        CustomSerializeHeader::new("col2").set_value_format(&italic),
-        CustomSerializeHeader::new("col3").set_value_format(&bold_italic),
-    ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeHeadersOptions::new()
+        .set_custom_headers(&[CustomSerializeHeader::new("col2").set_column_format(&bold)]);
 
     worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
@@ -89,25 +84,15 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.serialize(&data2)?;
     worksheet.serialize(&data3)?;
 
-    // Secondary test. This should be ignored since one of the field names is wrong.
-    let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
-        CustomSerializeHeader::new("col99"),
-    ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
-
-    let _ = worksheet.serialize_headers_with_options(6, 0, &data1, &header_options);
-
     workbook.save(filename)?;
 
     Ok(())
 }
 
 #[test]
-fn test_serde08_1() {
+fn test_serde13_1() {
     let test_runner = common::TestRunner::new()
-        .set_name("serde08")
+        .set_name("serde13")
         .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
@@ -117,9 +102,9 @@ fn test_serde08_1() {
 }
 
 #[test]
-fn test_serde08_2() {
+fn test_serde13_2() {
     let test_runner = common::TestRunner::new()
-        .set_name("serde08")
+        .set_name("serde13")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();

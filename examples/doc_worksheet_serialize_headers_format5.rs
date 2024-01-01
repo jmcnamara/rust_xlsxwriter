@@ -2,10 +2,13 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates formatting headers during serialization.
-//!
-use rust_xlsxwriter::{Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError};
-use serde::Serialize;
+//! The following example demonstrates serializing instances of a Serde derived
+//! data structure to a worksheet with header and value formatting.
+
+use rust_xlsxwriter::{
+    CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+};
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -13,16 +16,21 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Set a header format.
+    // Add some formats to use with the serialization data.
     let header_format = Format::new()
         .set_bold()
         .set_border(FormatBorder::Thin)
         .set_background_color("C6EFCE");
 
+    let currency_format = Format::new().set_num_format("$0.00");
+
     // Create a serializable struct.
-    #[derive(Serialize)]
+    #[derive(Deserialize, Serialize)]
     struct Produce {
+        #[serde(rename = "Item")]
         fruit: &'static str,
+
+        #[serde(rename = "Price")]
         cost: f64,
     }
 
@@ -42,10 +50,15 @@ fn main() -> Result<(), XlsxError> {
         cost: 0.75,
     };
 
-    // Set the serialization location and headers.
-    let header_options = SerializeHeadersOptions::new().set_header_format(&header_format);
+    // Set up the custom headers.
+    let custom_headers = [CustomSerializeHeader::new("Price").set_column_format(&currency_format)];
 
-    worksheet.serialize_headers_with_options(1, 1, &item1, &header_options)?;
+    let header_options = SerializeHeadersOptions::new()
+        .set_header_format(&header_format)
+        .set_custom_headers(&custom_headers);
+
+    // Set the serialization location and headers.
+    worksheet.deserialize_headers_with_options::<Produce>(1, 1, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;
