@@ -6716,7 +6716,7 @@ impl Worksheet {
             self.serializer_state.headers.insert(
                 (
                     header_options.struct_name.clone(),
-                    (custom_header.field_name.clone()),
+                    custom_header.field_name.clone(),
                 ),
                 custom_header,
             );

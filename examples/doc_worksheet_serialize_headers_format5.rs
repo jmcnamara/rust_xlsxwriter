@@ -3,7 +3,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates serializing instances of a Serde derived
-//! data structure to a worksheet with header and value formatting.
+//! data structure to a worksheet with header and column formatting.
 
 use rust_xlsxwriter::{
     CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,

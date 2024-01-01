@@ -141,6 +141,16 @@ path = "examples/doc_worksheet_serialize_headers_format6.rs"
 required-features = ["serde"]
 
 [[example]]
+name = "doc_worksheet_serialize_headers_format7"
+path = "examples/doc_worksheet_serialize_headers_format7.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers_format8"
+path = "examples/doc_worksheet_serialize_headers_format8.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "doc_worksheet_serialize_headers_hide"
 path = "examples/doc_worksheet_serialize_headers_hide.rs"
 required-features = ["serde"]

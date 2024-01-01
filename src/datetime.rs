@@ -10,13 +10,7 @@ mod tests;
 use regex::Regex;
 
 #[cfg(feature = "serde")]
-use serde::ser;
-
-#[cfg(feature = "serde")]
-use serde::Deserialize;
-
-#[cfg(feature = "serde")]
-use serde::Deserializer;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg(feature = "chrono")]
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
@@ -1389,25 +1383,26 @@ impl IntoExcelDateTime for NaiveTime {
     }
 }
 
-/// Implementation of the `ser::Serialize` trait for `ExcelDateTime`.
+/// Implementation of the `serde::Serialize` trait for `ExcelDateTime`.
 ///
 /// An Excel datetime is a number (see the [`ExcelDateTime`] docs) so it will
 /// also need to have an Excel cell format applied to it to display as a date.
 ///
 #[cfg(feature = "serde")]
-impl ser::Serialize for ExcelDateTime {
+impl Serialize for ExcelDateTime {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: ser::Serializer,
+        S: Serializer,
     {
         let serial_datetime = self.to_excel();
         serializer.serialize_f64(serial_datetime)
     }
 }
 
-/// Implementation of the `ser::Deserialize` trait for `ExcelDateTime`.
+/// Implementation of the `serde::Deserialize` trait for `ExcelDateTime`.
 ///
-/// TODO
+/// This is a non-functional implementation o allow `ExcelDateTime` types to be
+/// included in a struct that derives `Deserialize`.
 ///
 #[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for ExcelDateTime {

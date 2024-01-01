@@ -291,7 +291,7 @@
 //! header names displayed in Excel. In which case you can use one of the two
 //! main methods to rename the fields/headers:
 //!
-//! 1. Rename the field during serialization using the Serde
+//! 1. Rename the field during serialization using the Serde:
 //!    - [field attribute]: `#[serde(rename = "name")` or
 //!    - [container attribute]: `#[serde(rename_all = "...")]`.
 //! 2. Rename the header (not field) when setting up custom serialization
@@ -1211,18 +1211,100 @@ impl SerializerState {
 // SerializeHeadersOptions.
 // -----------------------------------------------------------------------
 
-/// The `SerializeHeadersOptions` struct represents a custom serializer
-/// field/header.
+/// The `SerializeHeadersOptions` struct represents custom field/header options.
 ///
 /// `SerializeHeadersOptions` can be used to set column headers to map serialized
 /// data to. It allows you to reorder, rename, format or skip headers and also
 /// define formatting for field values.
 ///
-/// It is used in conjunction with the
-/// [`Worksheet::serialize_headers_with_options()`] method.
+/// It is used in conjunction with the [`CustomSerializeHeader`] struct and
+/// [`Worksheet::deserialize_headers_with_options()`] and
+/// [`Worksheet::serialize_headers_with_options()`] methods.
+///
+/// See [Working with Serde](crate::serializer) for an introduction to
+/// serialization with `rust_xlsxwriter`.
 ///
 /// # Examples
 ///
+/// The following example demonstrates serializing instances of a Serde derived
+/// data structure to a worksheet with custom headers and cell formatting.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_serialize_headers_custom.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+/// # };
+/// # use serde::{Deserialize, Serialize};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some formats to use with the serialization data.
+/// #     let header_format = Format::new()
+/// #         .set_bold()
+/// #         .set_border(FormatBorder::Thin)
+/// #         .set_background_color("C6EFCE");
+/// #
+/// #     let currency_format = Format::new().set_num_format("$0.00");
+/// #
+/// #     // Create a serializable struct.
+///     #[derive(Deserialize, Serialize)]
+///     struct Produce {
+///         fruit: &'static str,
+///         cost: f64,
+///     }
+///
+///     // Create some data instances.
+///     let item1 = Produce {
+///         fruit: "Peach",
+///         cost: 1.05,
+///     };
+///
+///     let item2 = Produce {
+///         fruit: "Plum",
+///         cost: 0.15,
+///     };
+///
+///     let item3 = Produce {
+///         fruit: "Pear",
+///         cost: 0.75,
+///     };
+///
+///     // Set up the custom headers.
+///     let custom_headers = [
+///         CustomSerializeHeader::new("fruit")
+///             .rename("Item"),
+///         CustomSerializeHeader::new("cost")
+///             .rename("Price")
+///             .set_value_format(&currency_format),
+///     ];
+///
+///     let header_options = SerializeHeadersOptions::new()
+///         .set_header_format(&header_format)
+///         .set_custom_headers(&custom_headers);
+///
+///     // Set the serialization location and custom headers.
+///     worksheet.deserialize_headers_with_options::<Produce>(1, 1, &header_options)?;
+///
+///     // Serialize the data.
+///     worksheet.serialize(&item1)?;
+///     worksheet.serialize(&item2)?;
+///     worksheet.serialize(&item3)?;
+/// #
+/// #     // Save the file.
+/// #     workbook.save("serialize.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_custom.png">
 ///
 #[derive(Clone)]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
@@ -1243,8 +1325,12 @@ impl Default for SerializeHeadersOptions {
 impl SerializeHeadersOptions {
     /// Create serialization header options.
     ///
-    /// Create a `CustomSerializeHeader` struct to be used with
-    /// [`Worksheet::serialize_headers_with_options()`]. TODO
+    /// Create a `SerializeHeadersOptions` struct to be used with the
+    /// [`Worksheet::deserialize_headers_with_options()`] or
+    /// [`Worksheet::serialize_headers_with_options()`] methods.
+    ///
+    /// This can be used to set or skip column headers as well as specifying
+    /// column and field specific formatting.
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn new() -> SerializeHeadersOptions {
@@ -1265,13 +1351,78 @@ impl SerializeHeadersOptions {
     ///
     /// * `format` - The [`Format`] property for the header.
     ///
+    ///
     /// # Examples
     ///
-    /// TODO
+    /// The following example demonstrates formatting headers during serialization.
+    ///
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize_headers_format2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError};
+    /// # use serde::Serialize;
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Set a header format.
+    ///     let header_format = Format::new()
+    ///         .set_bold()
+    ///         .set_border(FormatBorder::Thin)
+    ///         .set_background_color("C6EFCE");
+    ///
+    ///     // Create a serializable struct.
+    ///     #[derive(Serialize)]
+    ///     struct Produce {
+    ///         fruit: &'static str,
+    ///         cost: f64,
+    ///     }
+    ///
+    ///     // Create some data instances.
+    ///     let item1 = Produce {
+    ///         fruit: "Peach",
+    ///         cost: 1.05,
+    ///     };
+    ///
+    ///     let item2 = Produce {
+    ///         fruit: "Plum",
+    ///         cost: 0.15,
+    ///     };
+    ///
+    ///     let item3 = Produce {
+    ///         fruit: "Pear",
+    ///         cost: 0.75,
+    ///     };
+    ///
+    ///     // Set the serialization location and headers.
+    ///     let header_options = SerializeHeadersOptions::new().set_header_format(&header_format);
+    ///
+    ///     worksheet.serialize_headers_with_options(1, 1, &item1, &header_options)?;
+    ///
+    ///     // Serialize the data.
+    ///     worksheet.serialize(&item1)?;
+    ///     worksheet.serialize(&item2)?;
+    ///     worksheet.serialize(&item3)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("serialize.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_format1.png">
+    ///
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn set_header_format(mut self, format: &Format) -> SerializeHeadersOptions {
-        self.header_format = Some(format.clone());
+    pub fn set_header_format(mut self, format: impl Into<Format>) -> SerializeHeadersOptions {
+        self.header_format = Some(format.into());
         self
     }
 
@@ -1287,7 +1438,66 @@ impl SerializeHeadersOptions {
     ///
     /// # Examples
     ///
-    /// TODO
+    /// The following example demonstrates turning off headers during serialization.
+    /// The example in columns "D:E" have the headers turned off.
+    ///
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize_headers_format7.rs
+    /// #
+    /// # use rust_xlsxwriter::{SerializeHeadersOptions, Workbook, XlsxError};
+    /// # use serde::{Deserialize, Serialize};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Create a serializable struct.
+    /// #     #[derive(Deserialize, Serialize)]
+    /// #     struct Produce {
+    /// #         fruit: &'static str,
+    /// #         cost: f64,
+    /// #     }
+    /// #
+    /// #     // Create some data instances.
+    /// #     let items = [
+    /// #         Produce {
+    /// #             fruit: "Peach",
+    /// #             cost: 1.05,
+    /// #         },
+    /// #         Produce {
+    /// #             fruit: "Plum",
+    /// #             cost: 0.15,
+    /// #         },
+    /// #         Produce {
+    /// #             fruit: "Pear",
+    /// #             cost: 0.75,
+    /// #         },
+    /// #     ];
+    /// #
+    ///     // Default serialization with headers (fruit and cost).
+    ///     worksheet.deserialize_headers::<Produce>(0, 0)?;
+    ///     worksheet.serialize(&items)?;
+    ///
+    ///     // Serialize the data but hide headers.
+    ///     let header_options = SerializeHeadersOptions::new().hide_headers(true);
+    ///
+    ///     worksheet.deserialize_headers_with_options::<Produce>(0, 3, &header_options)?;
+    ///     worksheet.serialize(&items)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("serialize.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_format7.png">
+    ///
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn hide_headers(mut self, enable: bool) -> SerializeHeadersOptions {
@@ -1295,16 +1505,101 @@ impl SerializeHeadersOptions {
         self
     }
 
-    /// Write the location and headers for data serialization, with additional
-    /// options.
+    /// Set custom properties for serialized fields.
     ///
-    /// TODO
+    /// This method allows customization of of the serialization output of
+    /// individual fields. It allows you to rename field headers, set
+    /// formatting for serialized values, set the column width and other properties.
+    ///
+    /// See [`CustomSerializeHeader`] for more details.
     ///
     /// # Parameters
     ///
     /// * `custom_headers` - An array of [`CustomSerializeHeader`] values.
     ///
+    /// # Examples
     ///
+    /// The following example demonstrates serializing instances of a Serde
+    /// derived data structure to a worksheet with custom headers and cell
+    /// formatting.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize_headers_custom.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+    /// # };
+    /// # use serde::{Deserialize, Serialize};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some formats to use with the serialization data.
+    /// #     let header_format = Format::new()
+    /// #         .set_bold()
+    /// #         .set_border(FormatBorder::Thin)
+    /// #         .set_background_color("C6EFCE");
+    /// #
+    /// #     let currency_format = Format::new().set_num_format("$0.00");
+    /// #
+    /// #     // Create a serializable struct.
+    ///     #[derive(Deserialize, Serialize)]
+    ///     struct Produce {
+    ///         fruit: &'static str,
+    ///         cost: f64,
+    ///     }
+    ///
+    ///     // Create some data instances.
+    ///     let item1 = Produce {
+    ///         fruit: "Peach",
+    ///         cost: 1.05,
+    ///     };
+    ///
+    ///     let item2 = Produce {
+    ///         fruit: "Plum",
+    ///         cost: 0.15,
+    ///     };
+    ///
+    ///     let item3 = Produce {
+    ///         fruit: "Pear",
+    ///         cost: 0.75,
+    ///     };
+    ///
+    ///     // Set up the custom headers.
+    ///     let custom_headers = [
+    ///         CustomSerializeHeader::new("fruit")
+    ///             .rename("Item"),
+    ///         CustomSerializeHeader::new("cost")
+    ///             .rename("Price")
+    ///             .set_value_format(&currency_format),
+    ///     ];
+    ///
+    ///     let header_options = SerializeHeadersOptions::new()
+    ///         .set_header_format(&header_format)
+    ///         .set_custom_headers(&custom_headers);
+    ///
+    ///     // Set the serialization location and custom headers.
+    ///     worksheet.deserialize_headers_with_options::<Produce>(1, 1, &header_options)?;
+    ///
+    ///     // Serialize the data.
+    ///     worksheet.serialize(&item1)?;
+    ///     worksheet.serialize(&item2)?;
+    ///     worksheet.serialize(&item3)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("serialize.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_custom.png">
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn set_custom_headers(
@@ -1338,11 +1633,15 @@ impl SerializeHeadersOptions {
 /// field/header.
 ///
 /// `CustomSerializeHeader` can be used to set column headers to map serialized
-/// data to. It allows you to reorder, rename, format or skip headers and also
-/// define formatting for field values.
+/// data to. It allows you to rename, format or skip headers and also to define
+/// formatting for field values.
 ///
-/// It is used in conjunction with the
-/// [`Worksheet::serialize_headers_with_options()`] method.
+/// It is used in conjunction with the [`SerializeHeadersOptions`] struct and
+/// [`Worksheet::deserialize_headers_with_options()`] and
+/// [`Worksheet::serialize_headers_with_options()`] methods.
+///
+/// See [Working with Serde](crate::serializer) for an introduction to
+/// serialization with `rust_xlsxwriter`.
 ///
 /// # Examples
 ///
@@ -1352,15 +1651,17 @@ impl SerializeHeadersOptions {
 /// ```
 /// # // This code is available in examples/doc_worksheet_serialize_headers_custom.rs
 /// #
-/// # use rust_xlsxwriter::{CustomSerializeHeader, Format, FormatBorder, Workbook, XlsxError};
-/// # use serde::Serialize;
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     let mut workbook = Workbook::new();
-/// #
-/// #     // Add a worksheet to the workbook.
-/// #     let worksheet = workbook.add_worksheet();
-/// #
+/// use rust_xlsxwriter::{
+///     CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+/// };
+/// use serde::{Deserialize, Serialize};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
 ///     // Add some formats to use with the serialization data.
 ///     let header_format = Format::new()
 ///         .set_bold()
@@ -1370,7 +1671,7 @@ impl SerializeHeadersOptions {
 ///     let currency_format = Format::new().set_num_format("$0.00");
 ///
 ///     // Create a serializable struct.
-///     #[derive(Serialize)]
+///     #[derive(Deserialize, Serialize)]
 ///     struct Produce {
 ///         fruit: &'static str,
 ///         cost: f64,
@@ -1392,35 +1693,39 @@ impl SerializeHeadersOptions {
 ///         cost: 0.75,
 ///     };
 ///
-///     // Set up the start location and headers of the data to be serialized.
+///     // Set up the custom headers.
 ///     let custom_headers = [
 ///         CustomSerializeHeader::new("fruit")
-///             .rename("Item")
-///             .set_header_format(&header_format),
+///             .rename("Item"),
 ///         CustomSerializeHeader::new("cost")
 ///             .rename("Price")
-///             .set_header_format(&header_format)
 ///             .set_value_format(&currency_format),
 ///     ];
 ///
-///     worksheet.serialize_headers_with_options(1, 1, "Produce", &custom_headers)?;
+///     let header_options = SerializeHeadersOptions::new()
+///         .set_header_format(&header_format)
+///         .set_custom_headers(&custom_headers);
+///
+///     // Set the serialization location and custom headers.
+///     worksheet.deserialize_headers_with_options::<Produce>(1, 1, &header_options)?;
 ///
 ///     // Serialize the data.
 ///     worksheet.serialize(&item1)?;
 ///     worksheet.serialize(&item2)?;
 ///     worksheet.serialize(&item3)?;
-/// #
-/// #     // Save the file.
-/// #     workbook.save("serialize.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
+///
+///     // Save the file.
+///     workbook.save("serialize.xlsx")?;
+///
+///     Ok(())
+/// }
 /// ```
 ///
 /// Output file:
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_custom.png">
+///
 ///
 #[derive(Clone)]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
@@ -1438,15 +1743,17 @@ pub struct CustomSerializeHeader {
 }
 
 impl CustomSerializeHeader {
-    /// Create a custom serialize header.
+    /// Create custom serialize header options.
     ///
     /// Create a `CustomSerializeHeader` to be used with
-    /// [`Worksheet::serialize_headers_with_options()`]. The name should
-    /// correspond to a struct field being serialized.
+    /// [`SerializeHeadersOptions::set_custom_headers()`].
+    ///
+    /// The `field_name` argument must correspond to a struct field being
+    /// serialized.
     ///
     /// # Parameters
     ///
-    /// * `name` - The name of the serialized field to map to the header.
+    /// * `field_name` - The name of the serialized field to map to the header.
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn new(field_name: impl Into<String>) -> CustomSerializeHeader {
@@ -1474,11 +1781,12 @@ impl CustomSerializeHeader {
     /// that you want displayed in Excel in which case you can use one of the
     /// two main methods to rename the fields/headers:
     ///
-    /// 1. Rename the field during serialization using the Serde [field
-    ///    attribute] `#[serde(rename = "name")` or the [container attribute]
-    ///    `#[serde(rename_all = "...")]`.
+    /// 1. Rename the field during serialization using the Serde:
+    ///    - [field attribute]: `#[serde(rename = "name")` or
+    ///    - [container attribute]: `#[serde(rename_all = "...")]`.
     /// 2. Rename the header (not field) when setting up custom serialization
-    ///    headers via [`Worksheet::serialize_headers_with_options()`] and
+    ///    headers via [`Worksheet::deserialize_headers_with_options()`] or
+    ///    [`Worksheet::serialize_headers_with_options()`] and
     ///    [`CustomSerializeHeader::rename()`].
     ///
     /// [field attribute]: https://serde.rs/field-attrs.html
@@ -1498,12 +1806,11 @@ impl CustomSerializeHeader {
     /// by specifying custom headers and renaming them there. You must still
     /// specify the actual field name to serialize in the `new()` constructor.
     ///
-    ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_serialize_headers_rename2.rs
     /// #
-    /// # use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
-    /// # use serde::Serialize;
+    /// # use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
+    /// # use serde::{Deserialize, Serialize};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -1511,8 +1818,8 @@ impl CustomSerializeHeader {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     // Create a serializable struct.
-    ///     #[derive(Serialize)]
+    /// #     // Create a serializable struct.
+    ///     #[derive(Deserialize, Serialize)]
     ///     struct Produce {
     ///         fruit: &'static str,
     ///         cost: f64,
@@ -1539,9 +1846,10 @@ impl CustomSerializeHeader {
     ///         CustomSerializeHeader::new("fruit").rename("Item"),
     ///         CustomSerializeHeader::new("cost").rename("Price"),
     ///     ];
+    ///     let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
     ///
     ///     // Set the serialization location and custom headers.
-    ///     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
+    ///     worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
     ///
     ///     // Serialize the data.
     ///     worksheet.serialize(&item1)?;
@@ -1568,22 +1876,54 @@ impl CustomSerializeHeader {
 
     /// Set the header format for a custom serialize header.
     ///
+    /// In general the [`SerializeHeadersOptions::set_header_format()`] method
+    /// should be used to set the header format for all custom headers but if
+    /// you require individual headers to have different header formats you can
+    /// use this method.
+    ///
     /// See [`Format`] for more information on formatting.
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the header.
+    /// * `format` - The [`Format`] property for the custom header.
+    ///
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_header_format(mut self, format: impl Into<Format>) -> CustomSerializeHeader {
+        self.header_format = Some(format.into());
+        self
+    }
+
+    /// Set the format for the column corresponding to a serialize header/field.
+    ///
+    /// This method can be used to set a number format, or other properties, for
+    /// data that is serialized below the header. This method sets the format
+    /// for the entire column whereas the
+    /// [`CustomSerializeHeader::set_value_format()`] method below only sets it
+    /// for serialized data within the column.
+    ///
+    /// This a a wrapper around the [`Worksheet::set_column_format()`] method
+    /// with the advantage that it doesn't require you to keep track of the
+    /// actual column number to use it.
+    ///
+    /// See [`Format`] and [`Format::set_num_format()`] for more information on
+    /// formatting.
+    ///
+    /// # Parameters
+    ///
+    /// * `format` - The [`Format`] property for the conditional format.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates formatting headers during
-    /// serialization.
+    /// The following example demonstrates serializing instances of a Serde
+    /// derived data structure to a worksheet with header and column formatting.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_serialize_headers_format2.rs
+    /// # // This code is available in examples/doc_worksheet_serialize_headers_format5.rs
     /// #
-    /// # use rust_xlsxwriter::{CustomSerializeHeader, Format, FormatBorder, Workbook, XlsxError};
-    /// # use serde::Serialize;
+    /// # use rust_xlsxwriter::{
+    /// #     CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+    /// # };
+    /// # use serde::{Deserialize, Serialize};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -1591,16 +1931,21 @@ impl CustomSerializeHeader {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     // Set a header format.
+    ///     // Add some formats to use with the serialization data.
     ///     let header_format = Format::new()
     ///         .set_bold()
     ///         .set_border(FormatBorder::Thin)
     ///         .set_background_color("C6EFCE");
     ///
+    ///     let currency_format = Format::new().set_num_format("$0.00");
+    ///
     /// #     // Create a serializable struct.
-    /// #     #[derive(Serialize)]
+    /// #     #[derive(Deserialize, Serialize)]
     /// #     struct Produce {
+    /// #         #[serde(rename = "Item")]
     /// #         fruit: &'static str,
+    /// #
+    /// #         #[serde(rename = "Price")]
     /// #         cost: f64,
     /// #     }
     /// #
@@ -1620,13 +1965,16 @@ impl CustomSerializeHeader {
     /// #         cost: 0.75,
     /// #     };
     /// #
-    ///     // Set the serialization location and headers.
-    ///     let custom_headers = [
-    ///         CustomSerializeHeader::new("fruit").set_header_format(&header_format),
-    ///         CustomSerializeHeader::new("cost").set_header_format(&header_format),
-    ///     ];
+    ///     // Set up the custom headers.
+    ///     let custom_headers =
+    ///         [CustomSerializeHeader::new("Price").set_column_format(&currency_format)];
     ///
-    ///     worksheet.serialize_headers_with_options(1, 1, "Produce", &custom_headers)?;
+    ///     let header_options = SerializeHeadersOptions::new()
+    ///         .set_header_format(&header_format)
+    ///         .set_custom_headers(&custom_headers);
+    ///
+    ///     // Set the serialization location and headers.
+    ///     worksheet.deserialize_headers_with_options::<Produce>(1, 1, &header_options)?;
     /// #
     /// #     // Serialize the data.
     /// #     worksheet.serialize(&item1)?;
@@ -1643,20 +1991,21 @@ impl CustomSerializeHeader {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_format1.png">
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_custom.png">
     ///
-    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn set_header_format(mut self, format: impl Into<Format>) -> CustomSerializeHeader {
-        self.header_format = Some(format.into());
+    pub fn set_column_format(mut self, format: impl Into<Format>) -> CustomSerializeHeader {
+        self.column_format = Some(format.into());
         self
     }
 
     /// Set the cell format for values corresponding to a serialize
     /// header/field.
     ///
-    /// It is sometimes necessary to set the cell format for the values of
-    /// fields being serialized. The most common use case is to set the Excel
-    /// number format for number fields.
+    /// This method can be used to set a number format, or other properties, for
+    /// data that is serialized below the header. This method sets the format
+    /// for the serialized data within the column whereas the
+    /// [`CustomSerializeHeader::set_column_format()`] method above sets it for
+    /// the the entire column.
     ///
     /// See [`Format`] and [`Format::set_num_format()`] for more information on
     /// formatting.
@@ -1671,12 +2020,13 @@ impl CustomSerializeHeader {
     /// The following example demonstrates formatting cells during
     /// serialization. Note the currency format for the `cost` cells.
     ///
-    ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_serialize_headers_format3.rs
     /// #
-    /// # use rust_xlsxwriter::{CustomSerializeHeader, Format, Workbook, XlsxError};
-    /// # use serde::Serialize;
+    /// # use rust_xlsxwriter::{
+    /// #     CustomSerializeHeader, Format, SerializeHeadersOptions, Workbook, XlsxError,
+    /// # };
+    /// # use serde::{Deserialize, Serialize};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -1684,11 +2034,11 @@ impl CustomSerializeHeader {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     // Set a header format.
-    ///     let cell_format = Format::new().set_num_format("$0.00");
+    ///     // Set a cell value format.
+    ///     let value_format = Format::new().set_num_format("$0.00");
     ///
     /// #     // Create a serializable struct.
-    /// #     #[derive(Serialize)]
+    /// #     #[derive(Deserialize, Serialize)]
     /// #     struct Produce {
     /// #         fruit: &'static str,
     /// #         cost: f64,
@@ -1710,13 +2060,14 @@ impl CustomSerializeHeader {
     /// #         cost: 0.75,
     /// #     };
     /// #
-    ///     // Set the serialization location and headers.
-    ///     let custom_headers = [
-    ///         CustomSerializeHeader::new("fruit"),
-    ///         CustomSerializeHeader::new("cost").set_value_format(&cell_format),
-    ///     ];
+    ///     // Set the custom headers.
+    ///     let header_options = SerializeHeadersOptions::new()
+    ///         .set_custom_headers(
+    ///             &[CustomSerializeHeader::new("cost").set_value_format(&value_format)]
+    ///         );
     ///
-    ///     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
+    ///     // Set the serialization location and headers.
+    ///     worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
     /// #
     /// #     // Serialize the data.
     /// #     worksheet.serialize(&item1)?;
@@ -1742,17 +2093,6 @@ impl CustomSerializeHeader {
         self
     }
 
-    /// TODO
-    ///
-    /// # Parameters
-    ///
-    /// * `format` - The [`Format`] property for the conditional format.
-    ///
-    pub fn set_column_format(mut self, format: impl Into<Format>) -> CustomSerializeHeader {
-        self.column_format = Some(format.into());
-        self
-    }
-
     /// Skip a field when serializing.
     ///
     /// When serializing a struct you may not want all of the fields to be
@@ -1760,18 +2100,16 @@ impl CustomSerializeHeader {
     /// aren't of interest to the end user. There are several ways to skip
     /// fields:
     ///
-    /// 1. Using the Serde [field attributes] `#[serde(skip)]` or
-    ///    `#[serde(skip_serializing)]`.
-    /// 2. Explicitly omitted the field when setting up custom serialization
-    ///    headers via [`Worksheet::serialize_headers_with_options()`].
-    /// 3. Marking the field as skippable via custom headers and the `skip()`
-    ///    method.
+    /// 1. Using the Serde [field attributes] `#[serde(skip)]`. This is the
+    ///    simplest and best method.
+    /// 2. Explicitly omitting the field when setting up custom serialization
+    ///    headers This method is useful when you can't add any additional
+    ///    attributes on the struct.
+    /// 3. Marking the field as skippable via custom headers and this `skip()`
+    ///    method. This is only required in a few edge cases where the previous
+    ///    methods won't work.
     ///
     /// [field attributes]: https://serde.rs/field-attrs.html
-    ///
-    /// This method is only required in a few edge cases where you want to
-    /// reserialize a struct to different parts of the worksheet with different
-    /// combinations of fields displayed. Otherwise option 2 above is better.
     ///
     /// See [Skipping fields when
     /// serializing](crate::serializer#skipping-fields-when-serializing) for
@@ -1789,8 +2127,8 @@ impl CustomSerializeHeader {
     /// ```
     /// # // This code is available in examples/doc_worksheet_serialize_headers_skip3.rs
     /// #
-    /// # use rust_xlsxwriter::{CustomSerializeHeader, Workbook, XlsxError};
-    /// # use serde::Serialize;
+    /// # use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
+    /// # use serde::{Deserialize, Serialize};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
@@ -1798,8 +2136,8 @@ impl CustomSerializeHeader {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     // Create a serializable struct.
-    ///     #[derive(Serialize)]
+    /// #     // Create a serializable struct.
+    ///     #[derive(Deserialize, Serialize)]
     ///     struct Produce {
     ///         fruit: &'static str,
     ///         cost: f64,
@@ -1825,15 +2163,12 @@ impl CustomSerializeHeader {
     ///         in_stock: false,
     ///     };
     ///
-    ///     // Set up the custom headers.
-    ///     let custom_headers = [
-    ///         CustomSerializeHeader::new("fruit"),
-    ///         CustomSerializeHeader::new("cost"),
-    ///         CustomSerializeHeader::new("in_stock").skip(true),
-    ///     ];
+    ///     // We only need to set a custom header for the field we want to skip.
+    ///     let header_options = SerializeHeadersOptions::new()
+    ///         .set_custom_headers(&[CustomSerializeHeader::new("in_stock").skip(true)]);
     ///
     ///     // Set the serialization location and custom headers.
-    ///     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
+    ///     worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
     ///
     ///     // Serialize the data.
     ///     worksheet.serialize(&item1)?;
@@ -1858,13 +2193,37 @@ impl CustomSerializeHeader {
         self
     }
 
-    /// TODO
+    /// Set the width for the column corresponding to a serialize header/field.
+    ///
+    /// The `set_column_width()` method is used to change the default width of a
+    /// worksheet column in character units.
+    ///
+    /// This a a wrapper around the [`Worksheet::set_column_width()`] method
+    /// with the advantage that it doesn't require you to keep track of the
+    /// actual column number to use it.
+    ///
+    /// # Parameters
+    ///
+    /// * `width` - The row width in character units.
+    ///
     pub fn set_column_width(mut self, width: impl Into<f64>) -> CustomSerializeHeader {
         self.width = Some(width.into());
         self
     }
 
-    /// TODO
+    /// Set the width for the column corresponding to a serialize header/field.
+    ///
+    /// The `set_column_width_pixels()` method is used to change the default
+    /// width of a worksheet column in pixel units.
+    ///
+    /// This a a wrapper around the [`Worksheet::set_column_width_pixels()`]
+    /// method with the advantage that it doesn't require you to keep track of
+    /// the actual column number to use it.
+    ///
+    /// # Parameters
+    ///
+    /// * `width` - The row width in character units.
+    ///
     pub fn set_column_width_pixels(mut self, width: u16) -> CustomSerializeHeader {
         self.pixel_width = Some(width);
         self

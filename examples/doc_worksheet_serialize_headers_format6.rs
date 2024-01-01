@@ -50,14 +50,14 @@ fn main() -> Result<(), XlsxError> {
         cost: 0.75,
     };
 
-    // Set up the custom headers.
+    // Set the custom headers.
     let custom_headers = [CustomSerializeHeader::new("Price").set_value_format(&currency_format)];
 
-    // Set the serialization location and custom headers.
     let header_options = SerializeHeadersOptions::new()
         .set_header_format(&header_format)
         .set_custom_headers(&custom_headers);
 
+    // Set the serialization location and custom headers.
     worksheet.deserialize_headers_with_options::<Produce>(1, 1, &header_options)?;
 
     // Serialize the data.
