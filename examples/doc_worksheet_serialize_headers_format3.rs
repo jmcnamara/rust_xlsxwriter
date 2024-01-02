@@ -4,9 +4,7 @@
 
 //! The following example demonstrates formatting cells during serialization.
 //!
-use rust_xlsxwriter::{
-    CustomSerializeHeader, Format, SerializeHeadersOptions, Workbook, XlsxError,
-};
+use rust_xlsxwriter::{CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError};
 use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
@@ -42,8 +40,8 @@ fn main() -> Result<(), XlsxError> {
     };
 
     // Set the custom headers.
-    let header_options = SerializeHeadersOptions::new()
-        .set_custom_headers(&[CustomSerializeHeader::new("cost").set_value_format(&value_format)]);
+    let header_options = SerializeFieldOptions::new()
+        .set_custom_headers(&[CustomSerializeField::new("cost").set_value_format(&value_format)]);
 
     // Set the serialization location and headers.
     worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;

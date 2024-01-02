@@ -6,7 +6,7 @@
 //! data structure to a worksheet.
 
 use rust_xlsxwriter::{CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
     let currency = Format::new().set_num_format("$0.00");
 
     // Create a serializable struct.
-    #[derive(Serialize)]
+    #[derive(Deserialize, Serialize)]
     struct Produce {
         fruit: &'static str,
         cost: f64,
@@ -53,7 +53,7 @@ fn main() -> Result<(), XlsxError> {
         .set_header_format(&bold)
         .set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, &items[0], &header_options)?;
+    worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&items)?;

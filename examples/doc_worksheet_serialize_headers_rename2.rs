@@ -5,7 +5,7 @@
 //! The following example demonstrates renaming fields during serialization by
 //! specifying custom headers and renaming them there.
 //!
-use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeField, SerializeFieldOptions, Workbook, XlsxError};
 use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
@@ -39,10 +39,10 @@ fn main() -> Result<(), XlsxError> {
 
     // Set up the custom headers.
     let custom_headers = [
-        CustomSerializeHeader::new("fruit").rename("Item"),
-        CustomSerializeHeader::new("cost").rename("Price"),
+        CustomSerializeField::new("fruit").rename("Item"),
+        CustomSerializeField::new("cost").rename("Price"),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     // Set the serialization location and custom headers.
     worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;

@@ -6,7 +6,7 @@
 //! data structure to a worksheet with header and value formatting.
 
 use rust_xlsxwriter::{
-    CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+    CustomSerializeField, Format, FormatBorder, SerializeFieldOptions, Workbook, XlsxError,
 };
 use serde::{Deserialize, Serialize};
 
@@ -51,9 +51,9 @@ fn main() -> Result<(), XlsxError> {
     };
 
     // Set the custom headers.
-    let custom_headers = [CustomSerializeHeader::new("Price").set_value_format(&currency_format)];
+    let custom_headers = [CustomSerializeField::new("Price").set_value_format(&currency_format)];
 
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_header_format(&header_format)
         .set_custom_headers(&custom_headers);
 

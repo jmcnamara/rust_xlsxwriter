@@ -6,7 +6,7 @@
 //! properties. The user can either merge them with the default properties or
 //! use the custom properties exclusively.
 //!
-use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeField, SerializeFieldOptions, Workbook, XlsxError};
 use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
@@ -45,11 +45,11 @@ fn main() -> Result<(), XlsxError> {
     // Default handling of customized headers: the formatting is merged with the
     // default values so "in_stock" is still shown.
     let custom_headers = [
-        CustomSerializeHeader::new("fruit").rename("Item"),
-        CustomSerializeHeader::new("cost").rename("Price"),
-        CustomSerializeHeader::new("in_stock").rename("Foo"),
+        CustomSerializeField::new("fruit").rename("Item"),
+        CustomSerializeField::new("cost").rename("Price"),
+        CustomSerializeField::new("in_stock").rename("Foo"),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
     worksheet.serialize(&items)?;
@@ -57,10 +57,10 @@ fn main() -> Result<(), XlsxError> {
     // Set the "use_custom_headers_only" option to shown only the specified
     // custom headers.
     let custom_headers = [
-        CustomSerializeHeader::new("fruit").rename("Item"),
-        CustomSerializeHeader::new("cost").rename("Price"),
+        CustomSerializeField::new("fruit").rename("Item"),
+        CustomSerializeField::new("cost").rename("Price"),
     ];
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_custom_headers(&custom_headers)
         .use_custom_headers_only(true);
 
@@ -69,10 +69,10 @@ fn main() -> Result<(), XlsxError> {
 
     // This can also be used to set the order of the output.
     let custom_headers = [
-        CustomSerializeHeader::new("cost").rename("Price"),
-        CustomSerializeHeader::new("fruit").rename("Item"),
+        CustomSerializeField::new("cost").rename("Price"),
+        CustomSerializeField::new("fruit").rename("Item"),
     ];
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_custom_headers(&custom_headers)
         .use_custom_headers_only(true);
 

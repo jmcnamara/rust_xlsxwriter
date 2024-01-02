@@ -6,9 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{
-    CustomSerializeHeader, Format, SerializeHeadersOptions, Workbook, XlsxError,
-};
+use rust_xlsxwriter::{CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError};
 use serde::{Deserialize, Serialize};
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -83,10 +81,10 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1").set_header_format(&bold),
-        CustomSerializeHeader::new("col2").set_header_format(&bold),
+        CustomSerializeField::new("col1").set_header_format(&bold),
+        CustomSerializeField::new("col2").set_header_format(&bold),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data, &header_options)?;
     worksheet.serialize(&data)?;
@@ -117,11 +115,11 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
     ];
 
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_custom_headers(&custom_headers)
         .set_header_format(&bold);
 

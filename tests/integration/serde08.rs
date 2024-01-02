@@ -6,9 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{
-    CustomSerializeHeader, Format, SerializeHeadersOptions, Workbook, XlsxError,
-};
+use rust_xlsxwriter::{CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -77,11 +75,11 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1").set_value_format(&bold),
-        CustomSerializeHeader::new("col2").set_value_format(&italic),
-        CustomSerializeHeader::new("col3").set_value_format(&bold_italic),
+        CustomSerializeField::new("col1").set_value_format(&bold),
+        CustomSerializeField::new("col2").set_value_format(&italic),
+        CustomSerializeField::new("col3").set_value_format(&bold_italic),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
@@ -91,11 +89,11 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     // Secondary test. This should be ignored since one of the field names is wrong.
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
-        CustomSerializeHeader::new("col99"),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
+        CustomSerializeField::new("col99"),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     let _ = worksheet.serialize_headers_with_options(6, 0, &data1, &header_options);
 

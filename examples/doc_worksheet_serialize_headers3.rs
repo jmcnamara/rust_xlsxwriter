@@ -7,7 +7,7 @@
 //! and deserialization).
 
 use rust_xlsxwriter::{
-    CustomSerializeHeader, Format, FormatBorder, SerializeHeadersOptions, Workbook, XlsxError,
+    CustomSerializeField, Format, FormatBorder, SerializeFieldOptions, Workbook, XlsxError,
 };
 use serde::{Deserialize, Serialize};
 
@@ -73,12 +73,12 @@ fn main() -> Result<(), XlsxError> {
     //    the customization to set the header format and also the cell format
     //    for the number values.
     let custom_headers = [
-        CustomSerializeHeader::new("fruit").rename("Item"),
-        CustomSerializeHeader::new("cost")
+        CustomSerializeField::new("fruit").rename("Item"),
+        CustomSerializeField::new("cost")
             .rename("Price")
             .set_value_format(&currency_format),
     ];
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_header_format(&header_format)
         .set_custom_headers(&custom_headers);
 
@@ -91,7 +91,7 @@ fn main() -> Result<(), XlsxError> {
 
     // 4. Set the serialization location and headers with custom options. We use
     //    the customization to turn off the headers.
-    let header_options = SerializeHeadersOptions::new().hide_headers(true);
+    let header_options = SerializeFieldOptions::new().hide_headers(true);
 
     // Set the serialization location and custom headers.
     worksheet.serialize_headers_with_options(0, 9, &item1, &header_options)?;

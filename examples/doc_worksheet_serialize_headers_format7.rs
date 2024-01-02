@@ -5,7 +5,7 @@
 //! The following example demonstrates turning off headers during serialization.
 //! The example in columns "D:E" have the headers turned off.
 //!
-use rust_xlsxwriter::{SerializeHeadersOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{SerializeFieldOptions, Workbook, XlsxError};
 use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
@@ -42,7 +42,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.serialize(&items)?;
 
     // Serialize the data but hide headers.
-    let header_options = SerializeHeadersOptions::new().hide_headers(true);
+    let header_options = SerializeFieldOptions::new().hide_headers(true);
 
     worksheet.deserialize_headers_with_options::<Produce>(0, 3, &header_options)?;
     worksheet.serialize(&items)?;

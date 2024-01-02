@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeField, SerializeFieldOptions, Workbook, XlsxError};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -45,10 +45,10 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
     ];
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_custom_headers(&custom_headers)
         .hide_headers(true);
 

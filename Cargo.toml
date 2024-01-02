@@ -86,6 +86,11 @@ path = "examples/app_serialize.rs"
 required-features = ["serde"]
 
 [[example]]
+name = "doc_worksheet_deserialize_headers1"
+path = "examples/doc_worksheet_deserialize_headers1.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "doc_worksheet_serialize"
 path = "examples/doc_worksheet_serialize.rs"
 required-features = ["serde"]
@@ -103,6 +108,11 @@ required-features = ["serde"]
 [[example]]
 name = "doc_worksheet_serialize_headers3"
 path = "examples/doc_worksheet_serialize_headers3.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_headers4"
+path = "examples/doc_worksheet_serialize_headers4.rs"
 required-features = ["serde"]
 
 [[example]]
@@ -186,6 +196,11 @@ path = "examples/doc_worksheet_serialize_headers_with_options.rs"
 required-features = ["serde"]
 
 [[example]]
+name = "doc_worksheet_serialize_headers_with_options2"
+path = "examples/doc_worksheet_serialize_headers_with_options2.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "doc_worksheet_serialize_intro"
 path = "examples/doc_worksheet_serialize_intro.rs"
 required-features = ["serde"]
@@ -222,7 +237,6 @@ required-features = ["serde", "chrono"]
 name = "doc_worksheet_serialize_datetime4"
 path = "examples/doc_worksheet_serialize_datetime4.rs"
 required-features = ["serde", "chrono"]
-
 
 [[example]]
 name = "doc_worksheet_serialize_datetime5"

@@ -7,7 +7,7 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    CustomSerializeHeader, ExcelDateTime, Format, SerializeHeadersOptions, Workbook, XlsxError,
+    CustomSerializeField, ExcelDateTime, Format, SerializeFieldOptions, Workbook, XlsxError,
 };
 use serde::Serialize;
 
@@ -75,10 +75,10 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2").set_value_format(&format),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2").set_value_format(&format),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
@@ -124,10 +124,10 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2").set_value_format(&format),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2").set_value_format(&format),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
@@ -182,10 +182,10 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2").set_value_format(&format),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2").set_value_format(&format),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 
@@ -231,10 +231,10 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2").set_value_format(&format),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2").set_value_format(&format),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
 

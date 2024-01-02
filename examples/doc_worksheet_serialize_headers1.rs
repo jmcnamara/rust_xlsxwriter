@@ -17,24 +17,33 @@ fn main() -> Result<(), XlsxError> {
     // Create a serializable struct.
     #[derive(Serialize)]
     #[serde(rename_all = "PascalCase")]
-    struct Student<'a> {
-        name: &'a str,
-        age: u8,
-        id: u32,
+    struct Produce {
+        fruit: &'static str,
+        cost: f64,
     }
 
-    let student = Student {
-        name: "Aoife",
-        age: 25,
-        id: 564351,
+    // Create some data instances.
+    let item1 = Produce {
+        fruit: "Peach",
+        cost: 1.05,
+    };
+    let item2 = Produce {
+        fruit: "Plum",
+        cost: 0.15,
+    };
+    let item3 = Produce {
+        fruit: "Pear",
+        cost: 0.75,
     };
 
     // Set up the start location and headers of the data to be serialized using
     // any temporary or valid instance.
-    worksheet.serialize_headers(2, 4, &student)?;
+    worksheet.serialize_headers(0, 0, &item1)?;
 
     // Serialize the data.
-    worksheet.serialize(&student)?;
+    worksheet.serialize(&item1)?;
+    worksheet.serialize(&item2)?;
+    worksheet.serialize(&item3)?;
 
     // Save the file.
     workbook.save("serialize.xlsx")?;

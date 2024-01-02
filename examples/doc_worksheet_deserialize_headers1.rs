@@ -3,11 +3,9 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates serializing instances of a Serde derived
-//! data structure to a worksheet with header and column formatting.
+//! data structure to a worksheet.
 
-use rust_xlsxwriter::{
-    CustomSerializeField, Format, FormatBorder, SerializeFieldOptions, Workbook, XlsxError,
-};
+use rust_xlsxwriter::{Workbook, XlsxError};
 use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
@@ -16,21 +14,11 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Add some formats to use with the serialization data.
-    let header_format = Format::new()
-        .set_bold()
-        .set_border(FormatBorder::Thin)
-        .set_background_color("C6EFCE");
-
-    let currency_format = Format::new().set_num_format("$0.00");
-
     // Create a serializable struct.
     #[derive(Deserialize, Serialize)]
+    #[serde(rename_all = "PascalCase")]
     struct Produce {
-        #[serde(rename = "Item")]
         fruit: &'static str,
-
-        #[serde(rename = "Price")]
         cost: f64,
     }
 
@@ -39,26 +27,17 @@ fn main() -> Result<(), XlsxError> {
         fruit: "Peach",
         cost: 1.05,
     };
-
     let item2 = Produce {
         fruit: "Plum",
         cost: 0.15,
     };
-
     let item3 = Produce {
         fruit: "Pear",
         cost: 0.75,
     };
 
-    // Set up the custom headers.
-    let custom_headers = [CustomSerializeField::new("Price").set_column_format(&currency_format)];
-
-    let header_options = SerializeFieldOptions::new()
-        .set_header_format(&header_format)
-        .set_custom_headers(&custom_headers);
-
-    // Set the serialization location and headers.
-    worksheet.deserialize_headers_with_options::<Produce>(1, 1, &header_options)?;
+    // Set up the start location and headers of the data to be serialized.
+    worksheet.deserialize_headers::<Produce>(0, 0)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

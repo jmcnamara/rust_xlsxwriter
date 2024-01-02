@@ -30,7 +30,7 @@ use serde::Serialize;
 use crate::SerializerHeader;
 
 #[cfg(feature = "serde")]
-use crate::CustomSerializeHeader;
+use crate::CustomSerializeField;
 
 #[cfg(feature = "serde")]
 use serde::Deserialize;
@@ -39,7 +39,7 @@ use serde::Deserialize;
 use crate::deserialize_headers;
 
 #[cfg(feature = "serde")]
-use crate::SerializeHeadersOptions;
+use crate::SerializeFieldOptions;
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
@@ -5994,28 +5994,158 @@ impl Worksheet {
     /// Write a Serde serializable struct to a worksheet.
     ///
     /// This method can be used to serialize [Serde](https://serde.rs) enabled
-    /// data structure into cells in a worksheet.
+    /// data structures into cells in a worksheet.
     ///
     /// See [Working with Serde](crate::serializer#working-with-serde) for
     /// background details on how serialization works with `rust_xlsxwriter`.
     ///
-    /// In order to serialize an instance of a data structure you must first
-    /// define the fields/headers and worksheet location that the serialization
-    /// will refer to. You can do this using one of the following methods:
+    /// When serializing structs `rust_xlsxwriter` needs to know location where
+    /// the serialization starts and also the type and field names of the struct
+    /// being serialized. The field names are used as headers and the type name
+    /// allows for several distinct structs to be serialized to the same
+    /// worksheet.
     ///
-    /// - [`Worksheet::serialize_headers()`]: The simplest most direct method. It
-    ///   requires a argument of the type of struct that you wish to serialize. The
-    ///   library uses this to infer the struct name and fields (via serialization).
-    /// - [`Worksheet::serialize_headers_with_format()`]: This is similar to the
-    ///   previous method but it allows you to add a cell format for the headers.
-    /// - [`Worksheet::serialize_headers_with_options()`]: This requires the struct
-    ///   type to be passed as a string and an array of [`CustomSerializeHeader`]
-    ///   objects. However it gives the highest degree of control over the output.
-    ///   This method also allows you to turn off the headers above the serialized
-    ///   data.
+    /// <img src="https://rustxlsxwriter.github.io/images/serialize_intro1.png">
+    ///
+    /// The worksheet methods that perform this function fall into two types:
+    /// methods which use deserialization to find the fields from the *type* and
+    /// methods that use serialization to find the fields from an *instance of
+    /// the type*. The deserialization methods are easier to use but require
+    /// that the struct derives the Serde [`Deserialize`] trait as well as the
+    /// [`Serialize`] trait. The serialization methods work for anything else.
+    ///
+    /// There available methods are.
+    ///
+    /// - [`Worksheet::deserialize_headers()`]: The simplest most direct method.
+    ///   It only requires the type of struct that you wish to serialize and
+    ///   that it derives the [`Deserialize`] and [`Serialize`] traits. The
+    ///   library uses this to infer the struct name and fields (via
+    ///   deserialization).
+    ///
+    /// - [`Worksheet::deserialize_headers_with_format()`]: This is similar to
+    ///   the previous method but it allows you to add a cell format for the
+    ///   headers.
+    ///
+    /// - [`Worksheet::deserialize_headers_with_options()`]: Similar to the
+    ///   previous methods but also allows configuration of the headers and
+    ///   fields via [`SerializeFieldOptions`].
+    ///
+    /// - [`Worksheet::serialize_headers()`]: Similar to the
+    ///   `deserialize_headers()` method but it requires a concrete instance of
+    ///   the type of struct that you wish to serialize. The library uses this
+    ///   to infer the struct name and fields (via serialization). This method
+    ///   only requires that the struct derives [`Serialize`].
+    ///
+    /// Once the headers are set up an subsequent calls to `serialize()` will
+    /// write the struct data in rows beneath the header.
+    ///
     ///
     /// # Parameters
     ///
+    /// * `data_structure` - A reference to a struct that implements the
+    ///   [`serde::Serializer`] trait.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    ///   serialization.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates serializing instances of a Serde derived
+    /// data structure to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize.rs
+    /// #
+    /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// use serde::{Deserialize, Serialize};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add a simple format for the headers.
+    ///     let format = Format::new().set_bold();
+    ///
+    ///     // Create a serializable struct.
+    ///     #[derive(Deserialize, Serialize)]
+    ///     #[serde(rename_all = "PascalCase")]
+    ///     struct Produce {
+    ///         fruit: &'static str,
+    ///         cost: f64,
+    ///     }
+    ///
+    ///     // Create some data instances.
+    ///     let item1 = Produce {
+    ///         fruit: "Peach",
+    ///         cost: 1.05,
+    ///     };
+    ///     let item2 = Produce {
+    ///         fruit: "Plum",
+    ///         cost: 0.15,
+    ///     };
+    ///     let item3 = Produce {
+    ///         fruit: "Pear",
+    ///         cost: 0.75,
+    ///     };
+    ///
+    ///     // Set up the start location and headers of the data to be serialized.
+    ///     worksheet.deserialize_headers_with_format::<Produce>(0, 0, &format)?;
+    ///
+    ///     // Serialize the data.
+    ///     worksheet.serialize(&item1)?;
+    ///     worksheet.serialize(&item2)?;
+    ///     worksheet.serialize(&item3)?;
+    ///
+    ///     // Save the file.
+    ///     workbook.save("serialize.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize.png">
+    ///
+    #[cfg(feature = "serde")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn serialize<T>(&mut self, data_structure: &T) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Serialize,
+    {
+        self.serialize_data_structure(data_structure)?;
+
+        Ok(self)
+    }
+
+    /// Write the location and headers for data serialization.
+    ///
+    /// The [`Worksheet::serialize()`] method, above, serializes Serde derived
+    /// structs to worksheet cells. However, before you serialize the data you
+    /// need to set the position in the worksheet where the headers will be
+    /// written and where serialized data will be written.
+    ///
+    /// See [Setting serialization
+    /// headers](crate::serializer#setting-serialization-headers) for more
+    /// information.
+    ///
+    /// See also [`Worksheet::deserialize_headers()`] which only requires the
+    /// serializable type and not an actual instance. That method requires that
+    /// your struct also derives "Deserialize".
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
     /// * `data_structure` - A reference to a struct that implements the
     ///   [`serde::Serializer`] trait.
     ///
@@ -6034,9 +6164,173 @@ impl Worksheet {
     /// derived data structure to a worksheet.
     ///
     /// ```
-    /// # // This code is available in examples/doc_worksheet_serialize.rs
+    /// # // This code is available in examples/doc_worksheet_serialize_headers1.rs
     /// #
-    /// use rust_xlsxwriter::{Workbook, XlsxError, Format};
+    /// use rust_xlsxwriter::{Workbook, XlsxError};
+    /// use serde::Serialize;
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create a serializable struct.
+    ///     #[derive(Serialize)]
+    ///     #[serde(rename_all = "PascalCase")]
+    ///     struct Produce {
+    ///         fruit: &'static str,
+    ///         cost: f64,
+    ///     }
+    ///
+    ///     // Create some data instances.
+    ///     let item1 = Produce {
+    ///         fruit: "Peach",
+    ///         cost: 1.05,
+    ///     };
+    ///     let item2 = Produce {
+    ///         fruit: "Plum",
+    ///         cost: 0.15,
+    ///     };
+    ///     let item3 = Produce {
+    ///         fruit: "Pear",
+    ///         cost: 0.75,
+    ///     };
+    ///
+    ///     // Set up the start location and headers of the data to be serialized using
+    ///     // any temporary or valid instance.
+    ///     worksheet.serialize_headers(0, 0, &item1)?;
+    ///
+    ///     // Serialize the data.
+    ///     worksheet.serialize(&item1)?;
+    ///     worksheet.serialize(&item2)?;
+    ///     worksheet.serialize(&item3)?;
+    ///
+    ///     // Save the file.
+    ///     workbook.save("serialize.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers1.png">
+    ///
+    /// You can serialize the data to any valid region of the worksheet:
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize_headers2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// # use serde::Serialize;
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Create a serializable struct.
+    /// #     #[derive(Serialize)]
+    /// #     #[serde(rename_all = "PascalCase")]
+    /// #     struct Produce {
+    /// #         fruit: &'static str,
+    /// #         cost: f64,
+    /// #     }
+    /// #
+    /// #     // Create some data instances.
+    /// #     let item1 = Produce {
+    /// #         fruit: "Peach",
+    /// #         cost: 1.05,
+    /// #     };
+    /// #     let item2 = Produce {
+    /// #         fruit: "Plum",
+    /// #         cost: 0.15,
+    /// #     };
+    /// #     let item3 = Produce {
+    /// #         fruit: "Pear",
+    /// #         cost: 0.75,
+    /// #     };
+    /// #
+    /// #     // Set up the start location and headers of the data to be serialized using
+    /// #     // any temporary or valid instance.
+    ///     worksheet.serialize_headers(1, 2, &item1)?;
+    /// #
+    /// #   // Serialize the data.
+    /// #   worksheet.serialize(&item1)?;
+    /// #   worksheet.serialize(&item2)?;
+    /// #   worksheet.serialize(&item3)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("serialize.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers2.png">
+    ///
+    #[cfg(feature = "serde")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn serialize_headers<T>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        data_structure: &T,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: Serialize,
+    {
+        self.serialize_headers_with_format(row, col, data_structure, &Format::default())
+    }
+
+    /// Write the location and headers for data serialization, with formatting.
+    ///
+    /// The [`Worksheet::serialize()`] method, above, serializes Serde derived
+    /// structs to worksheet cells. However, before you serialize the data you
+    /// need to set the position in the worksheet where the headers will be
+    /// written and where serialized data will be written. This method also
+    /// allows you to set the format for the headers.
+    ///
+    /// See [Setting serialization
+    /// headers](crate::serializer#setting-serialization-headers) for more
+    /// information.
+    ///
+    /// See also [`Worksheet::deserialize_headers_with_format()`] which only
+    /// requires the serializable type and not an actual instance. That method
+    /// requires that your struct also derives "Deserialize".
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `data_structure` - A reference to a struct that implements the
+    ///   [`serde::Serializer`] trait.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    ///   serialization.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates serializing instances of a Serde derived
+    /// data structure to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize_headers4.rs
+    /// #
+    /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// use serde::Serialize;
     ///
     /// fn main() -> Result<(), XlsxError> {
@@ -6085,269 +6379,6 @@ impl Worksheet {
     ///     Ok(())
     /// }
     /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize.png">
-    ///
-    #[cfg(feature = "serde")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn serialize<T>(&mut self, data_structure: &T) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Serialize,
-    {
-        self.serialize_data_structure(data_structure)?;
-
-        Ok(self)
-    }
-
-    /// Write the location and headers for data serialization.
-    ///
-    /// The [`Worksheet::serialize()`] method, above, serializes Serde derived
-    /// structs to worksheet cells. However, before you serialize the data you
-    /// need to set the position in the worksheet where the headers will be
-    /// written and where serialized data will be written.
-    ///
-    /// See [Setting serialization
-    /// headers](crate::serializer#setting-serialization-headers) for
-    /// more information.
-    ///
-    /// # Parameters
-    ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data_structure` - A reference to a struct that implements the
-    ///   [`serde::Serializer`] trait.
-    ///
-    /// # Errors
-    ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
-    ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
-    ///   serialization.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates serializing instances of a Serde
-    /// derived data structure to a worksheet.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_worksheet_serialize_headers1.rs
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    /// # use serde::Serialize;
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    ///     // Create a serializable struct.
-    ///     #[derive(Serialize)]
-    ///     #[serde(rename_all = "PascalCase")]
-    ///     struct Produce {
-    ///         fruit: &'static str,
-    ///         cost: f64,
-    ///     }
-    ///
-    ///     // Create some data instances.
-    ///     let item1 = Produce {
-    ///         fruit: "Peach",
-    ///         cost: 1.05,
-    ///     };
-    ///     let item2 = Produce {
-    ///         fruit: "Plum",
-    ///         cost: 0.15,
-    ///     };
-    ///     let item3 = Produce {
-    ///         fruit: "Pear",
-    ///         cost: 0.75,
-    ///     };
-    ///
-    ///     // Set up the start location and headers of the data to be serialized using
-    ///     // any temporary or valid instance.
-    ///     worksheet.serialize_headers(0, 0, &item1)?;
-    ///
-    ///     // Serialize the data.
-    ///     worksheet.serialize(&item1)?;
-    ///     worksheet.serialize(&item2)?;
-    ///     worksheet.serialize(&item3)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("serialize.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers1.png">
-    ///
-    /// This example demonstrates starting the serialization in a different
-    /// position.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_worksheet_serialize_headers2.rs
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError};
-    /// # use serde::Serialize;
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Create a serializable struct.
-    /// #     #[derive(Serialize)]
-    /// #     #[serde(rename_all = "PascalCase")]
-    /// #     struct Produce {
-    /// #         fruit: &'static str,
-    /// #         cost: f64,
-    /// #     }
-    /// #
-    /// #     // Create some data instances.
-    /// #     let item1 = Produce {
-    /// #         fruit: "Peach",
-    /// #         cost: 1.05,
-    /// #     };
-    /// #     let item2 = Produce {
-    /// #         fruit: "Plum",
-    /// #         cost: 0.15,
-    /// #     };
-    /// #     let item3 = Produce {
-    /// #         fruit: "Pear",
-    /// #         cost: 0.75,
-    /// #     };
-    /// #
-    ///     // Set up the start location and headers of the data to be serialized using
-    ///     // any temporary or valid instance.
-    ///     worksheet.serialize_headers(1, 2, &item1)?;
-    ///
-    ///     // Serialize the data.
-    ///     worksheet.serialize(&item1)?;
-    ///     worksheet.serialize(&item2)?;
-    ///     worksheet.serialize(&item3)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("serialize.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers2.png">
-    ///
-    #[cfg(feature = "serde")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn serialize_headers<T>(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        data_structure: &T,
-    ) -> Result<&mut Worksheet, XlsxError>
-    where
-        T: Serialize,
-    {
-        self.serialize_headers_with_format(row, col, data_structure, &Format::default())
-    }
-
-    /// Write the location and headers for data serialization, with formatting.
-    ///
-    /// The [`Worksheet::serialize()`] method, above, serializes Serde derived
-    /// structs to worksheet cells. However, before you serialize the data you
-    /// need to set the position in the worksheet where the headers will be
-    /// written and where serialized data will be written. This method also
-    /// allows you to set the format for the headers.
-    ///
-    /// See [Setting serialization
-    /// headers](crate::serializer#setting-serialization-headers) for more
-    /// information.
-    ///
-    /// # Parameters
-    ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data_structure` - A reference to a struct that implements the
-    ///   [`serde::Serializer`] trait.
-    /// * `format` - The [`Format`] property for the cell.
-    ///
-    /// # Errors
-    ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
-    ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
-    ///   serialization.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates serializing instances of a Serde
-    /// derived data structure to a worksheet.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_worksheet_serialize.rs
-    /// #
-    /// # use rust_xlsxwriter::{Workbook, XlsxError, Format};
-    /// # use serde::Serialize;
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    ///     // Add a simple format for the headers.
-    ///     let format = Format::new().set_bold();
-    ///
-    ///     // Create a serializable struct.
-    ///     #[derive(Serialize)]
-    ///     #[serde(rename_all = "PascalCase")]
-    ///     struct Produce {
-    ///         fruit: &'static str,
-    ///         cost: f64,
-    ///     }
-    ///
-    ///     // Create some data instances.
-    ///     let item1 = Produce {
-    ///         fruit: "Peach",
-    ///         cost: 1.05,
-    ///     };
-    ///     let item2 = Produce {
-    ///         fruit: "Plum",
-    ///         cost: 0.15,
-    ///     };
-    ///     let item3 = Produce {
-    ///         fruit: "Pear",
-    ///         cost: 0.75,
-    ///     };
-    ///
-    ///     // Set up the start location and headers of the data to be serialized using
-    ///     // any temporary or valid instance.
-    ///     worksheet.serialize_headers_with_format(0, 0, &item1, &format)?;
-    ///
-    ///     // Serialize the data.
-    ///     worksheet.serialize(&item1)?;
-    ///     worksheet.serialize(&item2)?;
-    ///     worksheet.serialize(&item3)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("serialize.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
     /// Output file:
     ///
     /// <img
@@ -6390,17 +6421,24 @@ impl Worksheet {
     ///
     /// If these methods don't give you the output or flexibility you require
     /// you can use the `serialize_headers_with_options()` method with
-    /// [`CustomSerializeHeader`] options. This allows you to reorder, rename,
-    /// format or skip headers and also define formatting for field values.
+    /// [`SerializeFieldOptions`] and [`CustomSerializeField`] options. This
+    /// allows you to reorder, rename, format or skip headers and also define
+    /// formatting for field values.
     ///
-    /// See [`CustomSerializeHeader`] for additional information and examples.
+    /// See [`SerializeFieldOptions`] and [`CustomSerializeField`] for
+    /// additional information and examples.
+    ///
+    /// See also [`Worksheet::deserialize_headers_with_options()`] which only
+    /// requires the serializable type and not an actual instance. That method
+    /// requires that your struct also derives "Deserialize".
     ///
     /// # Parameters
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `struct_name` - The type name for the target struct, as a string.
-    /// * `custom_headers` - An array of [`CustomSerializeHeader`] values.
+    /// * `data_structure` - A reference to a struct that implements the
+    ///   [`serde::Serializer`] trait.
+    /// * `header_options` - A [`SerializeFieldOptions`] instance.
     ///
     /// # Errors
     ///
@@ -6419,15 +6457,17 @@ impl Worksheet {
     /// ```
     /// # // This code is available in examples/doc_worksheet_serialize_headers_with_options.rs
     /// #
-    /// # use rust_xlsxwriter::{CustomSerializeHeader, Format, Workbook, XlsxError};
-    /// # use serde::Serialize;
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
+    /// use rust_xlsxwriter::{
+    ///     CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError
+    /// };
+    /// use serde::Serialize;
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
     ///     // Add some formats to use with the serialization data.
     ///     let bold = Format::new().set_bold();
     ///     let currency = Format::new().set_num_format("$0.00");
@@ -6458,25 +6498,26 @@ impl Worksheet {
     ///     // Set up the start location and headers of the data to be serialized using
     ///     // custom headers.
     ///     let custom_headers = [
-    ///         CustomSerializeHeader::new("fruit")
-    ///             .rename("Fruit")
-    ///             .set_header_format(&bold),
-    ///         CustomSerializeHeader::new("cost")
+    ///         CustomSerializeField::new("fruit")
+    ///             .rename("Fruit"),
+    ///         CustomSerializeField::new("cost")
     ///             .rename("Price")
-    ///             .set_header_format(&bold)
     ///             .set_value_format(&currency),
     ///     ];
+    ///     let header_options = SerializeFieldOptions::new()
+    ///         .set_header_format(&bold)
+    ///         .set_custom_headers(&custom_headers);
     ///
-    ///     worksheet.serialize_headers_with_options(0, 0, "Produce", &custom_headers)?;
+    ///     worksheet.serialize_headers_with_options(0, 0, &items[0], &header_options)?;
     ///
     ///     // Serialize the data.
     ///     worksheet.serialize(&items)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("serialize.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
+    ///
+    ///     // Save the file.
+    ///     workbook.save("serialize.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
     /// ```
     ///
     /// Output file:
@@ -6491,7 +6532,7 @@ impl Worksheet {
         row: RowNum,
         col: ColNum,
         data_structure: &T,
-        header_options: &SerializeHeadersOptions,
+        header_options: &SerializeFieldOptions,
     ) -> Result<&mut Worksheet, XlsxError>
     where
         T: Serialize,
@@ -6507,9 +6548,93 @@ impl Worksheet {
         self.store_serialization_headers_with_options(row, col, &headers, header_options)
     }
 
-    /// TODO
+    /// Write the location and headers for data serialization.
+    ///
+    /// The [`Worksheet::serialize()`] method, above, serializes Serde derived
+    /// structs to worksheet cells. However, before you serialize the data you
+    /// need to set the position in the worksheet where the headers will be
+    /// written and where serialized data will be written.
+    ///
+    /// See [Setting serialization
+    /// headers](crate::serializer#setting-serialization-headers) for more
+    /// information.
+    ///
+    /// See also [`Worksheet::serialize_headers()`] which requires an instance
+    /// of the serializable type but doesn't require that your struct also
+    /// derives "Deserialize".
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
     ///
     /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    ///   serialization.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates serializing instances of a Serde
+    /// derived data structure to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_deserialize_headers1.rs
+    /// #
+    /// use rust_xlsxwriter::{Workbook, XlsxError};
+    /// use serde::{Deserialize, Serialize};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create a serializable struct.
+    ///     #[derive(Deserialize, Serialize)]
+    ///     #[serde(rename_all = "PascalCase")]
+    ///     struct Produce {
+    ///         fruit: &'static str,
+    ///         cost: f64,
+    ///     }
+    ///
+    ///     // Create some data instances.
+    ///     let item1 = Produce {
+    ///         fruit: "Peach",
+    ///         cost: 1.05,
+    ///     };
+    ///     let item2 = Produce {
+    ///         fruit: "Plum",
+    ///         cost: 0.15,
+    ///     };
+    ///     let item3 = Produce {
+    ///         fruit: "Pear",
+    ///         cost: 0.75,
+    ///     };
+    ///
+    ///     // Set up the start location and headers of the data to be serialized.
+    ///     worksheet.deserialize_headers::<Produce>(0, 0)?;
+    ///
+    ///     // Serialize the data.
+    ///     worksheet.serialize(&item1)?;
+    ///     worksheet.serialize(&item2)?;
+    ///     worksheet.serialize(&item3)?;
+    ///
+    ///     // Save the file.
+    ///     workbook.save("serialize.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers1.png">
     ///
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
@@ -6524,9 +6649,99 @@ impl Worksheet {
         self.deserialize_headers_with_format::<T>(row, col, &Format::default())
     }
 
-    /// TODO
+    /// Write the location and headers for data serialization, with formatting.
+    ///
+    /// The [`Worksheet::serialize()`] method, above, serializes Serde derived
+    /// structs to worksheet cells. However, before you serialize the data you
+    /// need to set the position in the worksheet where the headers will be
+    /// written and where serialized data will be written. This method also
+    /// allows you to set the format for the headers.
+    ///
+    /// See [Setting serialization
+    /// headers](crate::serializer#setting-serialization-headers) for more
+    /// information.
+    ///
+    /// See also [`Worksheet::serialize_headers_with_format()`] which requires
+    /// an instance of the serializable type but doesn't require that your
+    /// struct also derives "Deserialize".
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `format` - The [`Format`] property for the cell.
     ///
     /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    ///   serialization.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates serializing instances of a Serde
+    /// derived data structure to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// # use serde::{Deserialize, Serialize};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add a simple format for the headers.
+    /// #     let format = Format::new().set_bold();
+    /// #
+    /// #     // Create a serializable struct.
+    /// #     #[derive(Deserialize, Serialize)]
+    /// #     #[serde(rename_all = "PascalCase")]
+    /// #     struct Produce {
+    /// #         fruit: &'static str,
+    /// #         cost: f64,
+    /// #     }
+    /// #
+    /// #     // Create some data instances.
+    /// #     let item1 = Produce {
+    /// #         fruit: "Peach",
+    /// #         cost: 1.05,
+    /// #     };
+    /// #     let item2 = Produce {
+    /// #         fruit: "Plum",
+    /// #         cost: 0.15,
+    /// #     };
+    /// #     let item3 = Produce {
+    /// #         fruit: "Pear",
+    /// #         cost: 0.75,
+    /// #     };
+    /// #
+    /// #     // Set up the start location and headers of the data to be serialized.
+    /// #     worksheet.deserialize_headers_with_format::<Produce>(0, 0, &format)?;
+    /// #
+    /// #     // Serialize the data.
+    /// #     worksheet.serialize(&item1)?;
+    /// #     worksheet.serialize(&item2)?;
+    /// #     worksheet.serialize(&item3)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("serialize.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_serialize.png">
+    ///
     ///
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
@@ -6545,9 +6760,121 @@ impl Worksheet {
         self.store_serialization_headers(row, col, &headers, format)
     }
 
-    /// TODO
+    /// Write the location and headers for data serialization, with additional
+    /// options.
+    ///
+    /// The [`Worksheet::serialize()`] and
+    /// [`Worksheet::deserialize_headers_with_format()`] methods, above, set the
+    /// serialization headers and location via an instance of the structure to
+    /// be serialized. This will work for the majority of use cases, and for
+    /// other cases you can adjust the output by using Serde Container or Field
+    /// [Attributes]. See [Working with Serde](#working-with-serde).
+    ///
+    /// [Attributes]: https://serde.rs/attributes.html
+    ///
+    /// If these methods don't give you the output or flexibility you require
+    /// you can use the `deserialize_headers_with_options()` method with
+    /// [`SerializeFieldOptions`] and [`CustomSerializeField`] options. This
+    /// allows you to reorder, rename, format or skip headers and also define
+    /// formatting for field values.
+    ///
+    /// See [`SerializeFieldOptions`] and [`CustomSerializeField`] for
+    /// additional information and examples.
+    ///
+    /// See also [`Worksheet::serialize_headers_with_options()`] which requires
+    /// an instance of the serializable type but doesn't require that your
+    /// struct also derives "Deserialize".
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `header_options` - A [`SerializeFieldOptions`] instance.
     ///
     /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
+    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    ///   serialization.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates serializing instances of a Serde derived
+    /// data structure to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_serialize_headers_with_options2.rs
+    /// #
+    /// use rust_xlsxwriter::{
+    ///     CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError
+    /// };
+    /// use serde::{Deserialize, Serialize};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some formats to use with the serialization data.
+    ///     let bold = Format::new().set_bold();
+    ///     let currency = Format::new().set_num_format("$0.00");
+    ///
+    ///     // Create a serializable struct.
+    ///     #[derive(Deserialize, Serialize)]
+    ///     struct Produce {
+    ///         fruit: &'static str,
+    ///         cost: f64,
+    ///     }
+    ///
+    ///     // Create some data instances.
+    ///     let items = [
+    ///         Produce {
+    ///             fruit: "Peach",
+    ///             cost: 1.05,
+    ///         },
+    ///         Produce {
+    ///             fruit: "Plum",
+    ///             cost: 0.15,
+    ///         },
+    ///         Produce {
+    ///             fruit: "Pear",
+    ///             cost: 0.75,
+    ///         },
+    ///     ];
+    ///
+    ///     // Set up the start location and headers of the data to be serialized using
+    ///     // custom headers.
+    ///     let custom_headers = [
+    ///         CustomSerializeField::new("fruit")
+    ///             .rename("Fruit"),
+    ///         CustomSerializeField::new("cost")
+    ///             .rename("Price")
+    ///             .set_value_format(&currency),
+    ///     ];
+    ///     let header_options = SerializeFieldOptions::new()
+    ///         .set_header_format(&bold)
+    ///         .set_custom_headers(&custom_headers);
+    ///
+    ///     worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
+    ///
+    ///     // Serialize the data.
+    ///     worksheet.serialize(&items)?;
+    ///
+    ///     // Save the file.
+    ///     workbook.save("serialize.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_serialize_headers_with_options.png">
     ///
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
@@ -6555,7 +6882,7 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        header_options: &SerializeHeadersOptions,
+        header_options: &SerializeFieldOptions,
     ) -> Result<&mut Worksheet, XlsxError>
     where
         T: Deserialize<'de>,
@@ -6573,7 +6900,7 @@ impl Worksheet {
         row: RowNum,
         col: ColNum,
         headers: &SerializerHeader,
-        header_options: &SerializeHeadersOptions,
+        header_options: &SerializeFieldOptions,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check that any custom field names match the actual field names.
         let field_names: HashSet<String> = HashSet::from_iter(headers.field_names.clone());
@@ -6588,7 +6915,7 @@ impl Worksheet {
 
         // Create a map of the user defined custom field settings to overwrite
         // the default field settings.
-        let mut custom_fields: HashMap<&String, &CustomSerializeHeader> = HashMap::new();
+        let mut custom_fields: HashMap<&String, &CustomSerializeField> = HashMap::new();
         for custom_header in &header_options.custom_headers {
             custom_fields.insert(&custom_header.field_name, custom_header);
         }
@@ -6601,7 +6928,7 @@ impl Worksheet {
         // specified custom fields. The "use_custom_headers_only" overrides the
         // default headers to allow users to skip fields.
         if !header_options.use_custom_headers_only {
-            let mut custom_headers: Vec<CustomSerializeHeader> = vec![];
+            let mut custom_headers: Vec<CustomSerializeField> = vec![];
 
             for field_name in &headers.field_names {
                 match custom_fields.get(field_name) {
@@ -6610,7 +6937,7 @@ impl Worksheet {
                             custom_headers.push((*custom_field).clone());
                         }
                     }
-                    None => custom_headers.push(CustomSerializeHeader::new(field_name)),
+                    None => custom_headers.push(CustomSerializeField::new(field_name)),
                 }
             }
 
@@ -6630,14 +6957,14 @@ impl Worksheet {
         header_format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Convert the field names to custom header structs.
-        let custom_headers: Vec<CustomSerializeHeader> = headers
+        let custom_headers: Vec<CustomSerializeField> = headers
             .field_names
             .iter()
-            .map(CustomSerializeHeader::new)
+            .map(CustomSerializeField::new)
             .collect();
 
         // Transfer the options to a default option struct.
-        let header_options = SerializeHeadersOptions {
+        let header_options = SerializeFieldOptions {
             struct_name: headers.struct_name.clone(),
             header_format: Some(header_format.clone()),
             custom_headers,
@@ -6653,7 +6980,7 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        header_options: &SerializeHeadersOptions,
+        header_options: &SerializeFieldOptions,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and columns are in the allowed range.
         if !self.check_dimensions_only(row, col) {
@@ -6675,7 +7002,7 @@ impl Worksheet {
             )));
         }
 
-        // HashMap<String, CustomSerializeHeader>
+        // HashMap<String, CustomSerializeField>
         let mut field_map = HashMap::new();
 
         let col_initial = col;

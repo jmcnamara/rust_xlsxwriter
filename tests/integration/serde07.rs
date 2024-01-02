@@ -6,7 +6,7 @@
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeField, SerializeFieldOptions, Workbook, XlsxError};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -133,10 +133,10 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     ];
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
 
@@ -179,10 +179,10 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     ];
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
     ];
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_custom_headers(&custom_headers)
         .use_custom_headers_only(true);
 
@@ -226,11 +226,11 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
     ];
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
-        CustomSerializeHeader::new("col3").skip(true),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
+        CustomSerializeField::new("col3").skip(true),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
@@ -268,10 +268,10 @@ fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
     ];
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
     ];
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_custom_headers(&custom_headers)
         .use_custom_headers_only(true);
 
@@ -314,10 +314,10 @@ fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
     ];
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
@@ -355,10 +355,10 @@ fn create_new_xlsx_file_9(filename: &str) -> Result<(), XlsxError> {
     ];
 
     let custom_headers = [
-        CustomSerializeHeader::new("field1").rename("col1"),
-        CustomSerializeHeader::new("field2").rename("col2"),
+        CustomSerializeField::new("field1").rename("col1"),
+        CustomSerializeField::new("field2").rename("col2"),
     ];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
@@ -399,8 +399,8 @@ fn create_new_xlsx_file_10(filename: &str) -> Result<(), XlsxError> {
         },
     ];
 
-    let custom_headers = [CustomSerializeHeader::new("col3").skip(true)];
-    let header_options = SerializeHeadersOptions::new().set_custom_headers(&custom_headers);
+    let custom_headers = [CustomSerializeField::new("col3").skip(true)];
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
     worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
@@ -442,11 +442,11 @@ fn create_new_xlsx_file_11(filename: &str) -> Result<(), XlsxError> {
     ];
 
     let custom_headers = [
-        CustomSerializeHeader::new("col1"),
-        CustomSerializeHeader::new("col2"),
-        CustomSerializeHeader::new("col3").skip(true),
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2"),
+        CustomSerializeField::new("col3").skip(true),
     ];
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .set_custom_headers(&custom_headers)
         .use_custom_headers_only(true);
 

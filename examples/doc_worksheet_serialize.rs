@@ -6,7 +6,7 @@
 //! data structure to a worksheet.
 
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
     let format = Format::new().set_bold();
 
     // Create a serializable struct.
-    #[derive(Serialize)]
+    #[derive(Deserialize, Serialize)]
     #[serde(rename_all = "PascalCase")]
     struct Produce {
         fruit: &'static str,
@@ -39,9 +39,8 @@ fn main() -> Result<(), XlsxError> {
         cost: 0.75,
     };
 
-    // Set up the start location and headers of the data to be serialized using
-    // any temporary or valid instance.
-    worksheet.serialize_headers_with_format(0, 0, &item1, &format)?;
+    // Set up the start location and headers of the data to be serialized.
+    worksheet.deserialize_headers_with_format::<Produce>(0, 0, &format)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

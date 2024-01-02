@@ -6,7 +6,7 @@
 //! omitting them from the serialization headers. To do this we need to specify
 //! custom headers and set `use_custom_headers_only()`.
 
-use rust_xlsxwriter::{CustomSerializeHeader, SerializeHeadersOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{CustomSerializeField, SerializeFieldOptions, Workbook, XlsxError};
 use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
@@ -44,13 +44,13 @@ fn main() -> Result<(), XlsxError> {
 
     // Only set up the custom headers we want and omit "in_stock".
     let custom_headers = [
-        CustomSerializeHeader::new("fruit"),
-        CustomSerializeHeader::new("cost"),
+        CustomSerializeField::new("fruit"),
+        CustomSerializeField::new("cost"),
     ];
 
     // Note the use of "use_custom_headers_only" to only serialize the named
     // custom headers.
-    let header_options = SerializeHeadersOptions::new()
+    let header_options = SerializeFieldOptions::new()
         .use_custom_headers_only(true)
         .set_custom_headers(&custom_headers);
 

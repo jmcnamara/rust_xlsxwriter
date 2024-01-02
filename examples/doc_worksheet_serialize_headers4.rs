@@ -2,9 +2,10 @@
 //
 // Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates formatting headers during serialization.
-//!
-use rust_xlsxwriter::{Format, FormatBorder, SerializeFieldOptions, Workbook, XlsxError};
+//! The following example demonstrates serializing instances of a Serde derived
+//! data structure to a worksheet.
+
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -13,14 +14,12 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Set a header format.
-    let header_format = Format::new()
-        .set_bold()
-        .set_border(FormatBorder::Thin)
-        .set_background_color("C6EFCE");
+    // Add a simple format for the headers.
+    let format = Format::new().set_bold();
 
     // Create a serializable struct.
     #[derive(Serialize)]
+    #[serde(rename_all = "PascalCase")]
     struct Produce {
         fruit: &'static str,
         cost: f64,
@@ -31,21 +30,18 @@ fn main() -> Result<(), XlsxError> {
         fruit: "Peach",
         cost: 1.05,
     };
-
     let item2 = Produce {
         fruit: "Plum",
         cost: 0.15,
     };
-
     let item3 = Produce {
         fruit: "Pear",
         cost: 0.75,
     };
 
-    // Set the serialization location and headers.
-    let header_options = SerializeFieldOptions::new().set_header_format(&header_format);
-
-    worksheet.serialize_headers_with_options(1, 1, &item1, &header_options)?;
+    // Set up the start location and headers of the data to be serialized using
+    // any temporary or valid instance.
+    worksheet.serialize_headers_with_format(0, 0, &item1, &format)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;
