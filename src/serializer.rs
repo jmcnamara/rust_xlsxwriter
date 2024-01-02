@@ -1164,41 +1164,42 @@ use serde::{ser, Deserialize, Deserializer, Serialize};
 // information in the serializer.
 // -----------------------------------------------------------------------
 pub(crate) struct SerializerState {
-    pub(crate) headers: HashMap<(String, String), CustomSerializeHeader>,
+    pub(crate) structs: HashMap<String, HashMap<String, CustomSerializeHeader>>,
     pub(crate) current_struct: String,
     pub(crate) current_field: String,
     pub(crate) current_col: ColNum,
     pub(crate) current_row: RowNum,
-    pub(crate) cell_format: Option<Format>,
+    pub(crate) value_format: Option<Format>,
 }
 
 impl SerializerState {
     // Create a new SerializerState struct.
     pub(crate) fn new() -> SerializerState {
         SerializerState {
-            headers: HashMap::new(),
+            structs: HashMap::new(),
             current_struct: String::new(),
             current_field: String::new(),
             current_col: 0,
             current_row: 0,
-            cell_format: None,
+            value_format: None,
         }
     }
 
     // Check if the current struct/field have been selected to be serialized by
     // the user. If it has then set the row/col values for the next write() call.
     pub(crate) fn is_known_field(&mut self) -> bool {
-        let Some(field) = self
-            .headers
-            .get_mut(&(self.current_struct.clone(), self.current_field.clone()))
-        else {
+        let Some(fields) = self.structs.get_mut(&self.current_struct) else {
+            return false;
+        };
+
+        let Some(field) = fields.get_mut(&self.current_field) else {
             return false;
         };
 
         // Set the "current" cell values used to write the serialized data.
         self.current_col = field.col;
         self.current_row = field.row;
-        self.cell_format = field.value_format.clone();
+        self.value_format = field.value_format.clone();
 
         // Increment the row number for the next worksheet.write().
         field.row += 1;

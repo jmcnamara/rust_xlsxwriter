@@ -6675,6 +6675,9 @@ impl Worksheet {
             )));
         }
 
+        // HashMap<String, CustomSerializeHeader>
+        let mut field_map = HashMap::new();
+
         let col_initial = col;
         for (col_offset, custom_header) in header_options.custom_headers.iter().enumerate() {
             if custom_header.skip {
@@ -6713,14 +6716,12 @@ impl Worksheet {
                 custom_header.row += 1;
             }
 
-            self.serializer_state.headers.insert(
-                (
-                    header_options.struct_name.clone(),
-                    custom_header.field_name.clone(),
-                ),
-                custom_header,
-            );
+            field_map.insert(custom_header.field_name.clone(), custom_header);
         }
+
+        self.serializer_state
+            .structs
+            .insert(header_options.struct_name.clone(), field_map);
 
         Ok(self)
     }
@@ -6748,7 +6749,7 @@ impl Worksheet {
         let row = self.serializer_state.current_row;
         let col = self.serializer_state.current_col;
 
-        match &self.serializer_state.cell_format.clone() {
+        match &self.serializer_state.value_format.clone() {
             Some(format) => self.write_with_format(row, col, data, format)?,
             None => self.write(row, col, data)?,
         };
