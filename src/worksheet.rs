@@ -6893,7 +6893,7 @@ impl Worksheet {
         self.store_serialization_headers_with_options(row, col, &headers, header_options)
     }
 
-    // TODO
+    // Store serialization headers and options.
     #[cfg(feature = "serde")]
     fn store_serialization_headers_with_options(
         &mut self,
@@ -6947,7 +6947,7 @@ impl Worksheet {
         self.store_custom_serialization_headers(row, col, &header_options)
     }
 
-    // TODO
+    // Store serialization headers with default options.
     #[cfg(feature = "serde")]
     fn store_serialization_headers(
         &mut self,
@@ -6974,7 +6974,7 @@ impl Worksheet {
         self.store_custom_serialization_headers(row, col, &header_options)
     }
 
-    // TODO
+    // Write serialization headers to the worksheet.
     #[cfg(feature = "serde")]
     fn store_custom_serialization_headers(
         &mut self,

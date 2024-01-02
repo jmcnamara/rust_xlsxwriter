@@ -5,6 +5,28 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.60.0] - 2023-01-02
+
+### Added
+
+- Added support for setting Serde headers using deserialization of a target
+  struct type as well as the previous method of using serialization and an
+  instance of the struct type. See [Setting serialization headers].
+
+  [Feature Request #64].
+
+- Added additional support for serialization header and field options via
+  [`CustomSerializeField`].
+
+- Added support for writing `Result<T, E>` with [`worksheet.write()`] when `T`
+  and `E` are supported types.
+
+  [Feature Request #64].
+
+[Feature Request #63]: https://github.com/jmcnamara/rust_xlsxwriter/pull/63
+[Feature Request #64]: https://github.com/jmcnamara/rust_xlsxwriter/pull/64
+[Setting serialization headers]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#setting-serialization-headers
+[`CustomSerializeField`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/struct.CustomSerializeField.html
 
 ## [0.59.0] - 2023-12-15
 

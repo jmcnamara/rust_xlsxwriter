@@ -989,6 +989,9 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_autofit.rs` - Demonstrates auto-fitting the worksheet
   column widths based on the data in the columns.
 
+* `doc_worksheet_deserialize_headers1.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet.
+
 * `doc_worksheet_filter_column1.rs` - Demonstrates setting an autofilter
   with a list filter condition.
 
@@ -1063,7 +1066,10 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_serialize_headers3.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet using
-  different methods.
+  different methods (both serialization and deserialization).
+
+* `doc_worksheet_serialize_headers4.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet.
 
 * `doc_worksheet_serialize_headers_custom.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet with custom
@@ -1080,7 +1086,23 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_serialize_headers_format4.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet with header
-  and cell formatting.
+  and value formatting.
+
+* `doc_worksheet_serialize_headers_format5.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet with header
+  and column formatting.
+
+* `doc_worksheet_serialize_headers_format6.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet with header
+  and value formatting.
+
+* `doc_worksheet_serialize_headers_format7.rs` - Demonstrates turning off
+  headers during serialization. The example in columns "D:E" have the
+  headers turned off.
+
+* `doc_worksheet_serialize_headers_format8.rs` - Demonstrates different
+  methods of handling custom properties. The user can either merge them
+  with the default properties or use the custom properties exclusively.
 
 * `doc_worksheet_serialize_headers_hide.rs` - Demonstrates serializing data
   without outputting the headers above the data.
@@ -1090,8 +1112,7 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_serialize_headers_rename2.rs` - Demonstrates renaming
   fields during serialization by specifying custom headers and renaming
-  them there. You must still specify the actual field name to serialize in
-  the `new()` constructor.
+  them there.
 
 * `doc_worksheet_serialize_headers_skip1.rs` - Demonstrates skipping fields
   during serialization by using Serde field attributes. Since the field is
@@ -1099,7 +1120,8 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_serialize_headers_skip2.rs` - Demonstrates skipping fields
   during serialization by omitting them from the serialization headers. To
-  do this we need to specify custom headers.
+  do this we need to specify custom headers and set
+  `use_custom_headers_only()`.
 
 * `doc_worksheet_serialize_headers_skip3.rs` - Demonstrates skipping fields
   during serialization by explicitly skipping them via custom headers.
@@ -1107,8 +1129,15 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_serialize_headers_with_options.rs` - Demonstrates
   serializing instances of a Serde derived data structure to a worksheet.
 
+* `doc_worksheet_serialize_headers_with_options2.rs` - Demonstrates
+  serializing instances of a Serde derived data structure to a worksheet.
+
 * `doc_worksheet_serialize_intro.rs` - Demonstrates serializing instances
   of a Serde derived data structure to a worksheet.
+
+* `doc_worksheet_serialize_intro2.rs` - Demonstrates serializing instances
+  of a Serde derived data structure to a worksheet. This version uses
+  header deserialization.
 
 * `doc_worksheet_serialize_vectors.rs` - Demonstrates serializing instances
   of a Serde derived data structure with vectors to a worksheet.
