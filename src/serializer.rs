@@ -1167,9 +1167,7 @@ pub(crate) struct SerializerState {
     pub(crate) structs: HashMap<String, HashMap<String, CustomSerializeHeader>>,
     pub(crate) current_struct: String,
     pub(crate) current_field: String,
-    pub(crate) current_col: ColNum,
     pub(crate) current_row: RowNum,
-    pub(crate) value_format: Option<Format>,
 }
 
 impl SerializerState {
@@ -1179,32 +1177,30 @@ impl SerializerState {
             structs: HashMap::new(),
             current_struct: String::new(),
             current_field: String::new(),
-            current_col: 0,
             current_row: 0,
-            value_format: None,
         }
     }
 
     // Check if the current struct/field have been selected to be serialized by
-    // the user. If it has then set the row/col values for the next write() call.
-    pub(crate) fn is_known_field(&mut self) -> bool {
+    // the user. If it has then set the row value for the next write() call.
+    pub(crate) fn current_state(&mut self) -> Result<(RowNum, ColNum, Option<Format>), ()> {
         let Some(fields) = self.structs.get_mut(&self.current_struct) else {
-            return false;
+            return Err(());
         };
 
         let Some(field) = fields.get_mut(&self.current_field) else {
-            return false;
+            return Err(());
         };
 
         // Set the "current" cell values used to write the serialized data.
-        self.current_col = field.col;
-        self.current_row = field.row;
-        self.value_format = field.value_format.clone();
+        let row = field.row;
+        let col = field.col;
+        let value_format = field.value_format.clone();
 
         // Increment the row number for the next worksheet.write().
         field.row += 1;
 
-        true
+        Ok((row, col, value_format))
     }
 }
 

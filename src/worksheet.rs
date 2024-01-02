@@ -6742,19 +6742,18 @@ impl Worksheet {
         &mut self,
         data: impl IntoExcelData,
     ) -> Result<(), XlsxError> {
-        if !self.serializer_state.is_known_field() {
-            return Ok(());
+        let result = self.serializer_state.current_state();
+
+        match result {
+            Ok(result) => {
+                let (row, col, value_format) = result;
+                match &value_format {
+                    Some(format) => self.write_with_format(row, col, data, format).map(|_| ()),
+                    None => self.write(row, col, data).map(|_| ()),
+                }
+            }
+            Err(()) => Ok(()),
         }
-
-        let row = self.serializer_state.current_row;
-        let col = self.serializer_state.current_col;
-
-        match &self.serializer_state.value_format.clone() {
-            Some(format) => self.write_with_format(row, col, data, format)?,
-            None => self.write(row, col, data)?,
-        };
-
-        Ok(())
     }
 
     // -----------------------------------------------------------------------
