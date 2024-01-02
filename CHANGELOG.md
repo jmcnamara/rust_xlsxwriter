@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   struct type as well as the previous method of using serialization and an
   instance of the struct type. See [Setting serialization headers].
 
-  [Feature Request #64].
+  [Feature Request #63].
 
 - Added additional support for serialization header and field options via
   [`CustomSerializeField`].
