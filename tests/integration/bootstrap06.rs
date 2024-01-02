@@ -32,8 +32,36 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test with Result<T, E>.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    let result: Result<&str, &str> = Ok("Hello");
+
+    worksheet.write(0, 0, result)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test with Result<T, E>.
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    let result: Result<&str, &str> = Err("Hello");
+
+    worksheet.write(0, 0, result)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn bootstrap06_write_string_with_format_1() {
+fn bootstrap06_write_string_1() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap06")
         .set_function(create_new_xlsx_file_1)
@@ -45,11 +73,35 @@ fn bootstrap06_write_string_with_format_1() {
 }
 
 #[test]
-fn bootstrap06_write_string_with_format_2() {
+fn bootstrap06_write_string_2() {
     let test_runner = common::TestRunner::new()
         .set_name("bootstrap06")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap06_write_string_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap06")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn bootstrap06_write_string_4() {
+    let test_runner = common::TestRunner::new()
+        .set_name("bootstrap06")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();

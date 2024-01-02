@@ -566,8 +566,10 @@ impl Worksheet {
     /// - [`ExcelDateTime`].
     /// - [`Formula`].
     /// - [`Url`].
-    /// - [`Option<T>`]: If [`Some`] and `T` is a supported type then the `data`
-    ///   is written. If [`None`] then nothing is written.
+    /// - [`Option<T>`]: If `T` is a supported type then write the [`Some`]
+    ///   value but ignore the [`None`].
+    /// - [`Result<T, E>`]: If `T` and `E` are supported types then write `T`
+    ///   or `E` depending on the result.
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
@@ -576,12 +578,9 @@ impl Worksheet {
     /// - [`chrono::NaiveTime`].
     ///
     /// [`Chrono`]: https://docs.rs/chrono/latest/chrono/index.html
-    /// [`chrono::NaiveDate`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
@@ -623,9 +622,10 @@ impl Worksheet {
     /// - [`ExcelDateTime`].
     /// - [`Formula`].
     /// - [`Url`].
-    /// - [`Option<T>`]: If [`Some`] and `T` is a supported type then the `data`
-    ///   is written. If [`None`] then a formatted blank cell is written using
-    ///   [`Worksheet::write_blank()`].
+    /// - [`Option<T>`]: If `T` is a supported type then write the [`Some`]
+    ///   value or [`None`] as a formatted blank cell.
+    /// - [`Result<T, E>`]: If `T` and `E` are supported types then write `T`
+    ///   or `E` depending on the result.
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
@@ -12397,6 +12397,33 @@ impl<T: IntoExcelData> IntoExcelData for Option<T> {
         match self {
             Some(data) => worksheet.write_with_format(row, col, data, format),
             None => worksheet.write_blank(row, col, format),
+        }
+    }
+}
+
+impl<T: IntoExcelData, E: IntoExcelData> IntoExcelData for Result<T, E> {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        match self {
+            Ok(data) => worksheet.write(row, col, data),
+            Err(data) => worksheet.write(row, col, data),
+        }
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &'a Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        match self {
+            Ok(data) => worksheet.write_with_format(row, col, data, format),
+            Err(data) => worksheet.write_with_format(row, col, data, format),
         }
     }
 }
