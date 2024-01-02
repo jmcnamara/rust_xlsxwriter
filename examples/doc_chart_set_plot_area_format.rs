@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! An example of formatting the chart "area" of a chart. In Excel the plot area
 //! is the area between the axes on which the chart series are plotted.

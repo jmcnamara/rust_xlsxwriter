@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! An example of setting a gradient fill for a chart element with a non-default
 //! gradient type.

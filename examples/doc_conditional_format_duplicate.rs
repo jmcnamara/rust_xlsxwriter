@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! Example of how to add a duplicate/unique conditional formatting to a
 //! worksheet. Duplicate values are in light red. Unique values are in light

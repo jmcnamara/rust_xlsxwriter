@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! An example of setting the percentage for the data labels of a chart series.
 //! Usually this only applies to a Pie or Doughnut chart.

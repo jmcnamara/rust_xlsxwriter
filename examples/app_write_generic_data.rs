@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! Example of how to extend the the `rust_xlsxwriter` `write()` method using
 //! the IntoExcelData trait to handle arbitrary user data that can be mapped to

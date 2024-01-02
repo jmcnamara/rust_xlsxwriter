@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! An example showing all 48 default chart styles available in Excel 2007
 //! using rust_xlsxwriter. Note, these styles are not the same as the styles

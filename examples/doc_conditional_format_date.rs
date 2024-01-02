@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! Example of adding a Dates Occurring type conditional formatting to a
 //! worksheet. Note, the rules in this example such as "Last month", "This
