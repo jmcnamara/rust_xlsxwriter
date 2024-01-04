@@ -5,45 +5,61 @@
 //! Example of serializing Serde derived structs to an Excel worksheet using
 //! `rust_xlsxwriter`.
 
-use rust_xlsxwriter::{Workbook, XlsxError};
-use serde::Serialize;
+use rust_xlsxwriter::{
+    CustomSerializeField, Format, FormatBorder, SerializeFieldOptions, Workbook, XlsxError,
+};
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
-    // Create a new Excel file object.
     let mut workbook = Workbook::new();
 
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    #[derive(Serialize)]
-    struct MyStruct1 {
-        logical: bool,
-        number: i8,
-    }
+    // Set some formats.
+    let header_format = Format::new()
+        .set_bold()
+        .set_border(FormatBorder::Thin)
+        .set_background_color("C6EFCE");
 
-    let struct1 = MyStruct1 {
-        logical: true,
-        number: 123,
-    };
-
-    worksheet.serialize_headers(1, 5, &struct1)?;
-    worksheet.serialize(&struct1)?;
-    worksheet.serialize(&struct1)?;
+    let value_format = Format::new().set_num_format("$0.00");
 
     // Create a serializable struct.
-    #[derive(Serialize)]
-    struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+    #[derive(Deserialize, Serialize)]
+    #[serde(rename_all = "PascalCase")]
+    struct Produce {
+        fruit: &'static str,
+        cost: f64,
     }
 
-    let data = MyStruct {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
+    // Create some data instances.
+    let item1 = Produce {
+        fruit: "Peach",
+        cost: 1.05,
     };
 
-    worksheet.serialize_headers(0, 0, &data)?;
-    worksheet.serialize(&data)?;
+    let item2 = Produce {
+        fruit: "Plum",
+        cost: 0.15,
+    };
+
+    let item3 = Produce {
+        fruit: "Pear",
+        cost: 0.75,
+    };
+
+    // Set the custom headers.
+    let header_options = SerializeFieldOptions::new()
+        .set_header_format(&header_format)
+        .set_custom_headers(&[CustomSerializeField::new("Cost").set_value_format(&value_format)]);
+
+    // Set the serialization location and headers.
+    worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
+
+    // Serialize the data.
+    worksheet.serialize(&item1)?;
+    worksheet.serialize(&item2)?;
+    worksheet.serialize(&item3)?;
 
     // Save the file to disk.
     workbook.save("serialize.xlsx")?;
