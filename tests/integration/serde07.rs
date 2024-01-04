@@ -6,7 +6,9 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{CustomSerializeField, SerializeFieldOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    CustomSerializeField, ExcelSerialize, SerializeFieldOptions, Workbook, XlsxError,
+};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -458,6 +460,166 @@ fn create_new_xlsx_file_11(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for skipping fields via proc macro.
+fn create_new_xlsx_file_12(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Create a serializable test struct.
+    #[derive(Serialize, ExcelSerialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: &'static str,
+        #[rust_xlsxwriter(skip)]
+        col3: bool,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: "aaa",
+            col3: true,
+        },
+        MyStruct {
+            col1: 2,
+            col2: "bbb",
+            col3: true,
+        },
+        MyStruct {
+            col1: 3,
+            col2: "ccc",
+            col3: true,
+        },
+    ];
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde skipping fields via proc macro.
+fn create_new_xlsx_file_13(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Create a serializable test struct.
+    #[derive(Serialize, ExcelSerialize)]
+    #[allow(dead_code)]
+    struct MyStruct {
+        col1: u8,
+        col2: &'static str,
+        #[serde(skip_serializing)]
+        col3: bool,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: "aaa",
+            col3: true,
+        },
+        MyStruct {
+            col1: 2,
+            col2: "bbb",
+            col3: true,
+        },
+        MyStruct {
+            col1: 3,
+            col2: "ccc",
+            col3: true,
+        },
+    ];
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde skipping fields via proc macro.
+fn create_new_xlsx_file_14(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Create a serializable test struct.
+    #[derive(Serialize, ExcelSerialize)]
+    #[allow(dead_code)]
+    struct MyStruct {
+        col1: u8,
+        col2: &'static str,
+        #[serde(skip)]
+        col3: bool,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: "aaa",
+            col3: true,
+        },
+        MyStruct {
+            col1: 2,
+            col2: "bbb",
+            col3: true,
+        },
+        MyStruct {
+            col1: 3,
+            col2: "ccc",
+            col3: true,
+        },
+    ];
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for field rename via Serde and proc macro.
+fn create_new_xlsx_file_15(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Create a serializable test struct.
+    #[derive(Serialize, ExcelSerialize)]
+    struct MyStruct {
+        #[serde(rename = "col1")]
+        field1: u8,
+
+        #[serde(rename = "col2")]
+        field2: &'static str,
+    }
+
+    let data = [
+        MyStruct {
+            field1: 1,
+            field2: "aaa",
+        },
+        MyStruct {
+            field1: 2,
+            field2: "bbb",
+        },
+        MyStruct {
+            field1: 3,
+            field2: "ccc",
+        },
+    ];
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde07_1() {
     let test_runner = common::TestRunner::new()
@@ -583,6 +745,54 @@ fn test_serde07_11() {
         .set_name("serde07")
         .set_function(create_new_xlsx_file_11)
         .unique("11")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde07_12() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_12)
+        .unique("12")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde07_13() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_13)
+        .unique("13")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde07_14() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_14)
+        .unique("14")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde07_15() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_15)
+        .unique("15")
         .initialize();
 
     test_runner.assert_eq();

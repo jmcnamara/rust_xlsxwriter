@@ -72,7 +72,8 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeField::new("cost").rename("Price"),
         CustomSerializeField::new("fruit").rename("Item"),
     ];
-    let header_options = SerializeFieldOptions::new()
+    let header_options = SerializeFieldOptions::new();
+    let header_options = header_options
         .set_custom_headers(&custom_headers)
         .use_custom_headers_only(true);
 

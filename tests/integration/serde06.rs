@@ -6,7 +6,9 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    CustomSerializeField, ExcelSerialize, Format, SerializeFieldOptions, Workbook, XlsxError,
+};
 use serde::{Deserialize, Serialize};
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -159,6 +161,62 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization. With ExcelSerialize.
+fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_paper_size(9);
+
+    // Create a serializable test struct.
+    #[derive(ExcelSerialize, Serialize)]
+    #[rust_xlsxwriter(header_format = Format::new().set_bold())]
+    struct MyStruct {
+        col1: Vec<u16>,
+        col2: Vec<bool>,
+    }
+
+    let data = MyStruct {
+        col1: vec![123, 456, 789],
+        col2: vec![true, false, true],
+    };
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde serialization. With ExcelSerialize.
+fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_paper_size(9);
+
+    // Create a serializable test struct.
+    #[derive(ExcelSerialize, Serialize)]
+    struct MyStruct {
+        #[rust_xlsxwriter(header_format = Format::new().set_bold())]
+        col1: Vec<u16>,
+
+        #[rust_xlsxwriter(header_format = Format::new().set_bold())]
+        col2: Vec<bool>,
+    }
+
+    let data = MyStruct {
+        col1: vec![123, 456, 789],
+        col2: vec![true, false, true],
+    };
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde06_1() {
     let test_runner = common::TestRunner::new()
@@ -213,6 +271,30 @@ fn test_serde06_5() {
         .set_name("serde06")
         .set_function(create_new_xlsx_file_5)
         .unique("5")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde06_6() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde06")
+        .set_function(create_new_xlsx_file_6)
+        .unique("6")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde06_7() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde06")
+        .set_function(create_new_xlsx_file_7)
+        .unique("7")
         .initialize();
 
     test_runner.assert_eq();

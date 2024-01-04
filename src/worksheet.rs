@@ -41,6 +41,9 @@ use crate::deserialize_headers;
 #[cfg(feature = "serde")]
 use crate::SerializeFieldOptions;
 
+#[cfg(feature = "serde")] // TODO add derive feature
+use crate::ExcelSerialize;
+
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -6891,6 +6894,24 @@ impl Worksheet {
         let headers = deserialize_headers::<T>();
 
         self.store_serialization_headers_with_options(row, col, &headers, header_options)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    #[cfg(feature = "serde")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_serialize_headers<T>(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError>
+    where
+        T: ExcelSerialize,
+    {
+        let header_options = T::to_serialize_field_options();
+        self.store_custom_serialization_headers(row, col, &header_options)
     }
 
     // Store serialization headers and options.

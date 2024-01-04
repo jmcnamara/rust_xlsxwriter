@@ -6,7 +6,9 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError};
+use rust_xlsxwriter::{
+    CustomSerializeField, ExcelSerialize, Format, SerializeFieldOptions, Workbook, XlsxError,
+};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -87,6 +89,52 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization. With ExcelSerialize.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_paper_size(9);
+
+    // Create a serializable test struct.
+    #[derive(ExcelSerialize, Serialize)]
+    struct MyStruct {
+        col1: u8,
+
+        #[rust_xlsxwriter(column_format = Format::new().set_bold())]
+        col2: u8,
+
+        col3: u8,
+    }
+
+    let data1 = MyStruct {
+        col1: 1,
+        col2: 4,
+        col3: 7,
+    };
+
+    let data2 = MyStruct {
+        col1: 2,
+        col2: 5,
+        col3: 8,
+    };
+
+    let data3 = MyStruct {
+        col1: 3,
+        col2: 6,
+        col3: 9,
+    };
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+
+    worksheet.serialize(&data1)?;
+    worksheet.serialize(&data2)?;
+    worksheet.serialize(&data3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde13_1() {
     let test_runner = common::TestRunner::new()
@@ -105,6 +153,18 @@ fn test_serde13_2() {
         .set_name("serde13")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde13_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde13")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

@@ -222,3 +222,10 @@ pub use utility::*;
 
 #[macro_use]
 extern crate lazy_static;
+
+#[cfg(feature = "serde")]
+extern crate rust_xlsxwriter_derive;
+
+#[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+pub use rust_xlsxwriter_derive::ExcelSerialize;

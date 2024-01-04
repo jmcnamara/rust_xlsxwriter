@@ -5,10 +5,8 @@
 //! Example of serializing Serde derived structs to an Excel worksheet using
 //! `rust_xlsxwriter`.
 
-use rust_xlsxwriter::{
-    CustomSerializeField, Format, FormatBorder, SerializeFieldOptions, Workbook, XlsxError,
-};
-use serde::{Deserialize, Serialize};
+use rust_xlsxwriter::{ExcelSerialize, Workbook, XlsxError};
+use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -16,19 +14,17 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Set some formats.
-    let header_format = Format::new()
+    // Create a serializable struct.
+    #[derive(ExcelSerialize, Serialize)]
+    #[rust_xlsxwriter(header_format = Format::new()
         .set_bold()
         .set_border(FormatBorder::Thin)
-        .set_background_color("C6EFCE");
-
-    let value_format = Format::new().set_num_format("$0.00");
-
-    // Create a serializable struct.
-    #[derive(Deserialize, Serialize)]
+        .set_background_color("C6EFCE"))]
     #[serde(rename_all = "PascalCase")]
     struct Produce {
         fruit: &'static str,
+
+        #[rust_xlsxwriter(value_format = Format::new().set_num_format("$0.00"))]
         cost: f64,
     }
 
@@ -48,13 +44,8 @@ fn main() -> Result<(), XlsxError> {
         cost: 0.75,
     };
 
-    // Set the custom headers.
-    let header_options = SerializeFieldOptions::new()
-        .set_header_format(&header_format)
-        .set_custom_headers(&[CustomSerializeField::new("Cost").set_value_format(&value_format)]);
-
     // Set the serialization location and headers.
-    worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
+    worksheet.set_serialize_headers::<Produce>(0, 0)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;

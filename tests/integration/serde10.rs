@@ -7,7 +7,8 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    CustomSerializeField, ExcelDateTime, Format, SerializeFieldOptions, Workbook, XlsxError,
+    CustomSerializeField, ExcelDateTime, ExcelSerialize, Format, SerializeFieldOptions, Workbook,
+    XlsxError,
 };
 use serde::Serialize;
 
@@ -247,6 +248,47 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization. With ExcelSerialize.
+fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_column_width(1, 11)?;
+
+    // Create a serializable test struct.
+    #[derive(Serialize, ExcelSerialize)]
+    struct MyStruct {
+        col1: &'static str,
+
+        #[rust_xlsxwriter(value_format = Format::new().set_num_format_index(14))]
+        col2: ExcelDateTime,
+    }
+
+    let data1 = MyStruct {
+        col1: "aaa",
+        col2: ExcelDateTime::parse_from_str("2024-01-01")?,
+    };
+
+    let data2 = MyStruct {
+        col1: "bbb",
+        col2: ExcelDateTime::parse_from_str("2024-01-02")?,
+    };
+
+    let data3 = MyStruct {
+        col1: "ccc",
+        col2: ExcelDateTime::parse_from_str("2024-01-03")?,
+    };
+
+    worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
+
+    worksheet.serialize(&data1)?;
+    worksheet.serialize(&data2)?;
+    worksheet.serialize(&data3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde10_1() {
     let test_runner = common::TestRunner::new()
@@ -304,6 +346,18 @@ fn test_serde10_5() {
         .set_name("serde10")
         .set_function(create_new_xlsx_file_5)
         .unique("5")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde10_6() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde10")
+        .set_function(create_new_xlsx_file_6)
+        .unique("6")
         .initialize();
 
     test_runner.assert_eq();

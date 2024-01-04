@@ -1725,6 +1725,13 @@ impl SerializeFieldOptions {
         self.use_custom_headers_only = enable;
         self
     }
+
+    /// TODO
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_struct_name(mut self, name: impl Into<String>) -> SerializeFieldOptions {
+        self.struct_name = name.into();
+        self
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -3083,4 +3090,14 @@ where
         struct_name,
         field_names,
     }
+}
+
+// -----------------------------------------------------------------------
+// ExcelSerializer trait. Todo
+// -----------------------------------------------------------------------
+
+/// TODO
+pub trait ExcelSerialize {
+    /// todo
+    fn to_serialize_field_options() -> SerializeFieldOptions;
 }
