@@ -4,6 +4,9 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
+//! TODO
+//!
+
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{
@@ -12,15 +15,21 @@ use syn::{
 
 #[proc_macro_derive(ExcelSerialize, attributes(rust_xlsxwriter, serde))]
 #[allow(clippy::too_many_lines)]
+/// TODO
+///
+/// Add docs on attributes.
+///
+///
 pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
     let mut struct_name = ast.ident.to_string();
     let struct_type = ast.ident;
+
+    let mut field_case = "original".to_string();
     let mut custom_fields = Vec::new();
     let mut field_options = quote!();
     let mut has_format_object = false;
     let mut format_use_statements = quote!();
-    let mut field_case = "original".to_string();
 
     // Parse and handle container attributes.
     for attribute in &ast.attrs {

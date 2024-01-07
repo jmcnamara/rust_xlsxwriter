@@ -19,14 +19,14 @@ polars= {version = "0.35.4", default-features = false, features = [], optional =
 js-sys = {version = "0.3.64", optional = true}
 wasm-bindgen = {version = "0.2.87", optional = true}
 serde = { version = "1.0.193", features = ["derive"], optional = true }
-rust_xlsxwriter_derive = { path = "rust_xlsxwriter_derive" }
+rust_xlsxwriter_derive = { path = "rust_xlsxwriter_derive", optional = true }
 
 [dev-dependencies]
 pretty_assertions = "1.3.0"
 
 [features]
 # `default`: Includes all the standard functionality.
-default = ["serde"]
+default = []
 
 # `zlib`: Adds a dependency on zlib and a C compiler. This includes the same
 #  features as `default` but is 1.5x faster for large files.
@@ -42,7 +42,7 @@ chrono = ["dep:chrono"]
 polars = ["dep:polars"]
 
 # `serde`: Adds supports for Serde serialization.
-serde = ["dep:serde"]
+serde = ["dep:serde", "dep:rust_xlsxwriter_derive"]
 
 # `wasm`: Enable wasm/Javascript compilation.
 wasm = ["js-sys", "wasm-bindgen"]
