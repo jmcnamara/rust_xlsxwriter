@@ -1943,8 +1943,8 @@ impl TableColumn {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/tablecolumn_set_header_format.png">
     ///
-    pub fn set_header_format(mut self, format: &Format) -> TableColumn {
-        self.header_format = Some(format.clone());
+    pub fn set_header_format(mut self, format: impl Into<Format>) -> TableColumn {
+        self.header_format = Some(format.into());
         self
     }
 

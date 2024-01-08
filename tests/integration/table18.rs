@@ -61,7 +61,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         TableColumn::default(),
         TableColumn::new()
             .set_header("Column\n4")
-            .set_header_format(&text_wrap),
+            .set_header_format(text_wrap),
     ];
 
     table.set_columns(&columns);
@@ -94,7 +94,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
         TableColumn::default(),
         TableColumn::default(),
         TableColumn::default(),
-        TableColumn::new().set_header_format(&text_wrap),
+        TableColumn::new().set_header_format(text_wrap),
     ];
 
     table.set_columns(&columns);
