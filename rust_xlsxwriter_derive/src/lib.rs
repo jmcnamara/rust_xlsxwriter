@@ -22,6 +22,7 @@ use syn::{
 ///
 pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
+    let (impl_generics, type_generics, where_clause) = ast.generics.split_for_impl();
     let mut struct_name = ast.ident.to_string();
     let struct_type = ast.ident;
 
@@ -207,7 +208,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
         #[doc(hidden)]
         const _: () = {
             #format_use_statements
-            impl ::rust_xlsxwriter::ExcelSerialize for #struct_type {
+            impl #impl_generics ::rust_xlsxwriter::ExcelSerialize for #struct_type #type_generics #where_clause {
                 fn to_serialize_field_options() -> ::rust_xlsxwriter::SerializeFieldOptions {
                     let custom_headers = [
                         #( #custom_fields ),*
