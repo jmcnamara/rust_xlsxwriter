@@ -81,7 +81,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
                     }
 
                     let mut custom_field_constructor = quote! {
-                        rust_xlsxwriter::CustomSerializeField::new(#field_name)
+                        ::rust_xlsxwriter::CustomSerializeField::new(#field_name)
                     };
 
                     let mut custom_field_methods = quote! {};
@@ -101,7 +101,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
                             // Handle serde field "rename" attribute.
                             FieldAttributeTypes::SerdeRename(field_name) => {
                                 custom_field_constructor = quote! {
-                                    rust_xlsxwriter::CustomSerializeField::new(#field_name)
+                                    ::rust_xlsxwriter::CustomSerializeField::new(#field_name)
                                 };
                             }
 
@@ -194,7 +194,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
     if has_format_object {
         format_use_statements = quote!(
             #[allow(unused_imports)]
-            use rust_xlsxwriter::{
+            use ::rust_xlsxwriter::{
                 Color, Format, FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern,
                 FormatScript, FormatUnderline,
             };
@@ -207,13 +207,13 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
         #[doc(hidden)]
         const _: () = {
             #format_use_statements
-            impl ExcelSerialize for #struct_type {
-                fn to_serialize_field_options() -> rust_xlsxwriter::SerializeFieldOptions {
+            impl ::rust_xlsxwriter::ExcelSerialize for #struct_type {
+                fn to_serialize_field_options() -> ::rust_xlsxwriter::SerializeFieldOptions {
                     let custom_headers = [
                         #( #custom_fields ),*
                     ];
 
-                    rust_xlsxwriter::SerializeFieldOptions::new()
+                    ::rust_xlsxwriter::SerializeFieldOptions::new()
                         #field_options
                         .set_struct_name(#struct_name)
                         .set_custom_headers(&custom_headers)
