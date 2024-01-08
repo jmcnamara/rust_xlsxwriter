@@ -31,7 +31,7 @@ body:
     label: Sample code to reproduce
     description: Please add a small, complete, sample program that demonstrates your issue.
     value: |
-        ```rust
+        ```
         use rust_xlsxwriter::{Workbook, XlsxError};
 
         fn main() -> Result<(), XlsxError> {
@@ -44,7 +44,7 @@ body:
             Ok(())
         }
         ```
-    render: markdown
+    render: rust
   validations:
     required: true
 
@@ -60,7 +60,7 @@ body:
         - Excel version:
         - OS:
         - If using wasm, which method/tool:
-    render: markdown
+    render: text
   validations:
     required: false
 
