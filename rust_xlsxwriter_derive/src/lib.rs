@@ -209,10 +209,9 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
             #format_use_statements
             impl ExcelSerialize for #struct_type {
                 fn to_serialize_field_options() -> rust_xlsxwriter::SerializeFieldOptions {
-                    let mut custom_headers: Vec<rust_xlsxwriter::CustomSerializeField> = vec![];
-                    #(
-                        custom_headers.push(#custom_fields);
-                    )*
+                    let custom_headers = [
+                        #( #custom_fields ),*
+                    ];
 
                     rust_xlsxwriter::SerializeFieldOptions::new()
                         #field_options
