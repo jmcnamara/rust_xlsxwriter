@@ -33,39 +33,38 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
     let mut format_use_statements = quote!();
 
     // Parse and handle container attributes.
-    for attribute in &ast.attrs {
-        match parse_header_attribute(attribute) {
-            // Handle rust_xlsxwriter container "field_options" attribute.
-            HeaderAttributeTypes::HideHeaders => {
-                field_options = quote! {
-                    .hide_headers(true)
+    for attribute_tokens in &ast.attrs {
+        for attribute in parse_header_attribute(attribute_tokens) {
+            match attribute {
+                // Handle rust_xlsxwriter container "field_options" attribute.
+                HeaderAttributeTypes::HideHeaders => {
+                    field_options = quote! {
+                        .hide_headers(true)
+                    }
+                }
+
+                // Handle rust_xlsxwriter container "header_format" attribute.
+                HeaderAttributeTypes::HeaderFormat(format) => {
+                    field_options = quote! {
+                        #field_options
+                        .set_header_format(#format)
+                    };
+                    has_format_object = true;
+                }
+
+                // Handle serde container "rename" attribute.
+                HeaderAttributeTypes::SerdeRename(name) => {
+                    struct_name = name.value();
+                }
+
+                // Handle serde container "rename_all" attribute.
+                HeaderAttributeTypes::SerdeRenameAll(name) => field_case = name.value(),
+
+                // Raise any errors from parsing the attributes.
+                HeaderAttributeTypes::Error(error_code) => {
+                    return error_code;
                 }
             }
-
-            // Handle rust_xlsxwriter container "header_format" attribute.
-            HeaderAttributeTypes::HeaderFormat(format) => {
-                field_options = quote! {
-                    #field_options
-                    .set_header_format(#format)
-                };
-                has_format_object = true;
-            }
-
-            // Handle serde container "rename" attribute.
-            HeaderAttributeTypes::SerdeRename(name) => {
-                struct_name = name.value();
-            }
-
-            // Handle serde container "rename_all" attribute.
-            HeaderAttributeTypes::SerdeRenameAll(name) => field_case = name.value(),
-
-            // Raise any errors from parsing the attributes.
-            HeaderAttributeTypes::Error(error_code) => {
-                return error_code;
-            }
-
-            // Ignore any attributes we aren't specifically interested in.
-            HeaderAttributeTypes::Unknown => {}
         }
     }
 
@@ -87,96 +86,95 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
 
                     let mut custom_field_methods = quote! {};
 
-                    for attribute in &field.attrs {
-                        match parse_field_attribute(attribute) {
-                            // Handle rust_xlsxwriter field "rename" attribute. This is different
-                            // from serde "rename" since it doesn't rename the struct field just
-                            // the string in Excel.
-                            FieldAttributeTypes::Rename(name) => {
-                                custom_field_methods = quote! {
-                                    #custom_field_methods
-                                    .rename(#name)
-                                };
-                            }
+                    for attribute_tokens in &field.attrs {
+                        for attribute in parse_field_attribute(attribute_tokens) {
+                            match attribute {
+                                // Handle rust_xlsxwriter field "rename" attribute. This is different
+                                // from serde "rename" since it doesn't rename the struct field just
+                                // the string in Excel.
+                                FieldAttributeTypes::Rename(name) => {
+                                    custom_field_methods = quote! {
+                                        #custom_field_methods
+                                        .rename(#name)
+                                    };
+                                }
 
-                            // Handle serde field "rename" attribute.
-                            FieldAttributeTypes::SerdeRename(field_name) => {
-                                custom_field_constructor = quote! {
-                                    ::rust_xlsxwriter::CustomSerializeField::new(#field_name)
-                                };
-                            }
+                                // Handle serde field "rename" attribute.
+                                FieldAttributeTypes::SerdeRename(field_name) => {
+                                    custom_field_constructor = quote! {
+                                        ::rust_xlsxwriter::CustomSerializeField::new(#field_name)
+                                    };
+                                }
 
-                            // Handle rust_xlsxwriter field "header_format" attribute.
-                            FieldAttributeTypes::HeaderFormat(format) => {
-                                custom_field_methods = quote! {
-                                    #custom_field_methods
-                                    .set_header_format(#format)
-                                };
-                                has_format_object = true;
-                            }
+                                // Handle rust_xlsxwriter field "header_format" attribute.
+                                FieldAttributeTypes::HeaderFormat(format) => {
+                                    custom_field_methods = quote! {
+                                        #custom_field_methods
+                                        .set_header_format(#format)
+                                    };
+                                    has_format_object = true;
+                                }
 
-                            // Handle rust_xlsxwriter field "value_format" attribute.
-                            FieldAttributeTypes::ValueFormat(format) => {
-                                custom_field_methods = quote! {
-                                    #custom_field_methods
-                                    .set_value_format(#format)
-                                };
-                                has_format_object = true;
-                            }
+                                // Handle rust_xlsxwriter field "value_format" attribute.
+                                FieldAttributeTypes::ValueFormat(format) => {
+                                    custom_field_methods = quote! {
+                                        #custom_field_methods
+                                        .set_value_format(#format)
+                                    };
+                                    has_format_object = true;
+                                }
 
-                            // Handle rust_xlsxwriter field "column_format" attribute.
-                            FieldAttributeTypes::ColumnFormat(format) => {
-                                custom_field_methods = quote! {
-                                    #custom_field_methods
-                                    .set_column_format(#format)
-                                };
-                                has_format_object = true;
-                            }
+                                // Handle rust_xlsxwriter field "column_format" attribute.
+                                FieldAttributeTypes::ColumnFormat(format) => {
+                                    custom_field_methods = quote! {
+                                        #custom_field_methods
+                                        .set_column_format(#format)
+                                    };
+                                    has_format_object = true;
+                                }
 
-                            // Handle rust_xlsxwriter field "num_format" attribute.
-                            FieldAttributeTypes::NumFormat(num_format) => {
-                                custom_field_methods = quote! {
-                                    #custom_field_methods
-                                    .set_value_format(#num_format)
-                                };
-                            }
+                                // Handle rust_xlsxwriter field "num_format" attribute.
+                                FieldAttributeTypes::NumFormat(num_format) => {
+                                    custom_field_methods = quote! {
+                                        #custom_field_methods
+                                        .set_value_format(#num_format)
+                                    };
+                                }
 
-                            // Handle rust_xlsxwriter field "column_width" attribute.
-                            FieldAttributeTypes::ColumnWidth(width) => {
-                                custom_field_methods = quote! {
-                                    #custom_field_methods
-                                    .set_column_width(#width)
-                                };
-                            }
+                                // Handle rust_xlsxwriter field "column_width" attribute.
+                                FieldAttributeTypes::ColumnWidth(width) => {
+                                    custom_field_methods = quote! {
+                                        #custom_field_methods
+                                        .set_column_width(#width)
+                                    };
+                                }
 
-                            // Handle rust_xlsxwriter field "column_width_pixels" attribute.
-                            FieldAttributeTypes::ColumnWidthPixels(width) => {
-                                custom_field_methods = quote! {
-                                    #custom_field_methods
-                                    .set_column_width_pixels(#width)
-                                };
-                            }
+                                // Handle rust_xlsxwriter field "column_width_pixels" attribute.
+                                FieldAttributeTypes::ColumnWidthPixels(width) => {
+                                    custom_field_methods = quote! {
+                                        #custom_field_methods
+                                        .set_column_width_pixels(#width)
+                                    };
+                                }
 
-                            // Handle rust_xlsxwriter field "skip" attribute by setting the
-                            // .skip() property of the custom header.
-                            FieldAttributeTypes::Skip => {
-                                custom_field_methods = quote! {
-                                    #custom_field_methods
-                                    .skip(true)
-                                };
-                            }
-                            // Handle serde field "skip" attribute by ignoring the field.
-                            FieldAttributeTypes::SerdeSkip => {
-                                continue 'field;
-                            }
+                                // Handle rust_xlsxwriter field "skip" attribute by setting the
+                                // .skip() property of the custom header.
+                                FieldAttributeTypes::Skip => {
+                                    custom_field_methods = quote! {
+                                        #custom_field_methods
+                                        .skip(true)
+                                    };
+                                }
+                                // Handle serde field "skip" attribute by ignoring the field.
+                                FieldAttributeTypes::SerdeSkip => {
+                                    continue 'field;
+                                }
 
-                            // Raise any errors from parsing the attributes.
-                            FieldAttributeTypes::Error(error_code) => {
-                                return error_code;
+                                // Raise any errors from parsing the attributes.
+                                FieldAttributeTypes::Error(error_code) => {
+                                    return error_code;
+                                }
                             }
-
-                            // Ignore any attributes we aren't specifically interested in.
-                            FieldAttributeTypes::Unknown => {}
                         }
                     }
 
@@ -243,8 +241,8 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
 // ```
 //
 //
-fn parse_header_attribute(attribute: &Attribute) -> HeaderAttributeTypes {
-    let mut attribute_type = HeaderAttributeTypes::Unknown;
+fn parse_header_attribute(attribute: &Attribute) -> Vec<HeaderAttributeTypes> {
+    let mut attributes = vec![];
 
     if attribute.path().is_ident("rust_xlsxwriter") {
         let parse_result = attribute.parse_nested_meta(|meta| {
@@ -253,7 +251,7 @@ fn parse_header_attribute(attribute: &Attribute) -> HeaderAttributeTypes {
             // #[rust_xlsxwriter(hide_headers)]
             //
             if meta.path.is_ident("hide_headers") {
-                attribute_type = HeaderAttributeTypes::HideHeaders;
+                attributes.push(HeaderAttributeTypes::HideHeaders);
                 Ok(())
             }
             // Handle rust_xlsxwriter `header_format` attribute:
@@ -263,7 +261,7 @@ fn parse_header_attribute(attribute: &Attribute) -> HeaderAttributeTypes {
             else if meta.path.is_ident("header_format") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = HeaderAttributeTypes::HeaderFormat(token);
+                attributes.push(HeaderAttributeTypes::HeaderFormat(token));
                 Ok(())
             }
             // Handle any unrecognized attributes as an error.
@@ -276,7 +274,7 @@ fn parse_header_attribute(attribute: &Attribute) -> HeaderAttributeTypes {
 
         if let Err(err) = parse_result {
             let error = err.into_compile_error();
-            attribute_type = HeaderAttributeTypes::Error(error.into());
+            attributes.push(HeaderAttributeTypes::Error(error.into()));
         }
     }
 
@@ -295,13 +293,13 @@ fn parse_header_attribute(attribute: &Attribute) -> HeaderAttributeTypes {
                 if not_nested {
                     let value = meta.value()?;
                     let token = value.parse()?;
-                    attribute_type = HeaderAttributeTypes::SerdeRenameAll(token);
+                    attributes.push(HeaderAttributeTypes::SerdeRenameAll(token));
                 } else {
                     let _ = meta.parse_nested_meta(|meta| {
                         if meta.path.is_ident("serialize") {
                             let value = meta.value()?;
                             let token = value.parse()?;
-                            attribute_type = HeaderAttributeTypes::SerdeRenameAll(token);
+                            attributes.push(HeaderAttributeTypes::SerdeRenameAll(token));
                         }
                         Ok(())
                     });
@@ -316,7 +314,7 @@ fn parse_header_attribute(attribute: &Attribute) -> HeaderAttributeTypes {
             else if meta.path.is_ident("rename") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = HeaderAttributeTypes::SerdeRename(token);
+                attributes.push(HeaderAttributeTypes::SerdeRename(token));
                 Ok(())
             }
             // Ignore everything else.
@@ -326,12 +324,11 @@ fn parse_header_attribute(attribute: &Attribute) -> HeaderAttributeTypes {
         });
     }
 
-    attribute_type
+    attributes
 }
 
 // Header attribute return values.
 enum HeaderAttributeTypes {
-    Unknown,
     Error(TokenStream),
     HideHeaders,
     HeaderFormat(Expr),
@@ -359,8 +356,8 @@ enum HeaderAttributeTypes {
 // }
 // ```
 //
-fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
-    let mut attribute_type = FieldAttributeTypes::Unknown;
+fn parse_field_attribute(attribute: &Attribute) -> Vec<FieldAttributeTypes> {
+    let mut attributes = vec![];
 
     if attribute.path().is_ident("rust_xlsxwriter") {
         let parse_result = attribute.parse_nested_meta(|meta| {
@@ -371,7 +368,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             if meta.path.is_ident("rename") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = FieldAttributeTypes::Rename(token);
+                attributes.push(FieldAttributeTypes::Rename(token));
                 Ok(())
             }
             // Handle rust_xlsxwriter `num_format` attribute:
@@ -381,7 +378,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             else if meta.path.is_ident("num_format") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = FieldAttributeTypes::NumFormat(token);
+                attributes.push(FieldAttributeTypes::NumFormat(token));
                 Ok(())
             }
             // Handle rust_xlsxwriter `header_format` attribute:
@@ -391,7 +388,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             else if meta.path.is_ident("header_format") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = FieldAttributeTypes::HeaderFormat(token);
+                attributes.push(FieldAttributeTypes::HeaderFormat(token));
                 Ok(())
             }
             // Handle rust_xlsxwriter `value_format` attribute:
@@ -401,7 +398,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             else if meta.path.is_ident("value_format") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = FieldAttributeTypes::ValueFormat(token);
+                attributes.push(FieldAttributeTypes::ValueFormat(token));
                 Ok(())
             }
             // Handle rust_xlsxwriter `column_format` attribute:
@@ -411,7 +408,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             else if meta.path.is_ident("column_format") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = FieldAttributeTypes::ColumnFormat(token);
+                attributes.push(FieldAttributeTypes::ColumnFormat(token));
                 Ok(())
             }
             // Handle rust_xlsxwriter `column_width` attribute:
@@ -421,7 +418,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             else if meta.path.is_ident("column_width") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = FieldAttributeTypes::ColumnWidth(token);
+                attributes.push(FieldAttributeTypes::ColumnWidth(token));
                 Ok(())
             }
             // Handle rust_xlsxwriter `column_width_pixels` attribute:
@@ -431,7 +428,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             else if meta.path.is_ident("column_width_pixels") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = FieldAttributeTypes::ColumnWidthPixels(token);
+                attributes.push(FieldAttributeTypes::ColumnWidthPixels(token));
                 Ok(())
             }
             // Handle rust_xlsxwriter `skip` attribute:
@@ -439,7 +436,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             // #[rust_xlsxwriter(skip)]
             //
             else if meta.path.is_ident("skip") {
-                attribute_type = FieldAttributeTypes::Skip;
+                attributes.push(FieldAttributeTypes::Skip);
                 Ok(())
             }
             // Handle any unrecognized attributes as an error.
@@ -452,7 +449,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
 
         if let Err(err) = parse_result {
             let error = err.into_compile_error();
-            attribute_type = FieldAttributeTypes::Error(error.into());
+            attributes.push(FieldAttributeTypes::Error(error.into()));
         }
     }
 
@@ -466,7 +463,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             // #[serde(skip_serializing)]
             //
             if meta.path.is_ident("skip") || meta.path.is_ident("skip_serializing") {
-                attribute_type = FieldAttributeTypes::SerdeSkip;
+                attributes.push(FieldAttributeTypes::SerdeSkip);
                 Ok(())
             }
             // Handle serde `rename` attribute:
@@ -476,7 +473,7 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
             else if meta.path.is_ident("rename") {
                 let value = meta.value()?;
                 let token = value.parse()?;
-                attribute_type = FieldAttributeTypes::SerdeRename(token);
+                attributes.push(FieldAttributeTypes::SerdeRename(token));
                 Ok(())
             }
             // Ignore everything else.
@@ -486,12 +483,11 @@ fn parse_field_attribute(attribute: &Attribute) -> FieldAttributeTypes {
         });
     }
 
-    attribute_type
+    attributes
 }
 
 // Field attribute return values.
 enum FieldAttributeTypes {
-    Unknown,
     Skip,
     Error(TokenStream),
     Rename(LitStr),
