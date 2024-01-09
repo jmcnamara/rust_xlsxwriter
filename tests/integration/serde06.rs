@@ -45,16 +45,26 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
 
-    let data = MyStruct {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data = [
+        MyStruct {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
-    worksheet.serialize_headers_with_format(0, 0, &data, &bold)?;
+    worksheet.serialize_headers_with_format(0, 0, &data[0], &bold)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -73,14 +83,24 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
 
-    let data = MyStruct {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data = [
+        MyStruct {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
     let custom_headers = [
         CustomSerializeField::new("col1").set_header_format(&bold),
@@ -88,7 +108,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     ];
     let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 
-    worksheet.serialize_headers_with_options(0, 0, &data, &header_options)?;
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -107,14 +127,24 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
 
-    let data = MyStruct {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data = [
+        MyStruct {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
     let custom_headers = [
         CustomSerializeField::new("col1"),
@@ -125,7 +155,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
         .set_custom_headers(&custom_headers)
         .set_header_format(&bold);
 
-    worksheet.serialize_headers_with_options(0, 0, &data, &header_options)?;
+    worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -144,14 +174,24 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     // Create a serializable test struct.
     #[derive(Deserialize, Serialize)]
     struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
 
-    let data = MyStruct {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data = [
+        MyStruct {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
     worksheet.deserialize_headers_with_format::<MyStruct>(0, 0, &bold)?;
     worksheet.serialize(&data)?;
@@ -171,14 +211,24 @@ fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
     #[derive(ExcelSerialize, Serialize)]
     #[rust_xlsxwriter(header_format = Format::new().set_bold())]
     struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
 
-    let data = MyStruct {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data = [
+        MyStruct {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
     worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
     worksheet.serialize(&data)?;
@@ -198,16 +248,26 @@ fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
     #[derive(ExcelSerialize, Serialize)]
     struct MyStruct {
         #[rust_xlsxwriter(header_format = Format::new().set_bold())]
-        col1: Vec<u16>,
+        col1: u16,
 
         #[rust_xlsxwriter(header_format = Format::new().set_bold())]
-        col2: Vec<bool>,
+        col2: bool,
     }
 
-    let data = MyStruct {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data = [
+        MyStruct {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
     worksheet.set_serialize_headers::<MyStruct>(0, 0)?;
     worksheet.serialize(&data)?;

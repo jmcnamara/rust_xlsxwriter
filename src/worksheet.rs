@@ -7004,6 +7004,8 @@ impl Worksheet {
         header_options: &SerializeFieldOptions,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and columns are in the allowed range.
+
+        use crate::HeaderConfig;
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
         }
@@ -7023,10 +7025,11 @@ impl Worksheet {
             )));
         }
 
-        // HashMap<String, CustomSerializeField>
-        let mut field_map = HashMap::new();
-
+        let mut fields = HashMap::new();
+        let mut row = row;
         let col_initial = col;
+        let write_headers = header_options.has_headers;
+
         for (col_offset, custom_header) in header_options.custom_headers.iter().enumerate() {
             if custom_header.skip {
                 continue;
@@ -7034,7 +7037,6 @@ impl Worksheet {
 
             let col = col_initial + col_offset as u16;
             let mut custom_header = custom_header.clone();
-            custom_header.row = row;
             custom_header.col = col;
 
             // Set the column width if specified by user.
@@ -7049,10 +7051,10 @@ impl Worksheet {
                 self.set_column_format(col, format)?;
             }
 
-            if !header_options.hide_headers {
-                // Use the column specific header format or else the header row
-                // format, and if neither of those have been specified then
-                // write without a format.
+            // Use the column specific header format or else the header row
+            // format, and if neither of those have been specified then write
+            // without a format.
+            if write_headers {
                 if let Some(format) = &custom_header.header_format {
                     self.write_with_format(row, col, &custom_header.header_name, format)?;
                 } else if let Some(format) = &header_options.header_format {
@@ -7060,16 +7062,24 @@ impl Worksheet {
                 } else {
                     self.write(row, col, &custom_header.header_name)?;
                 };
-
-                custom_header.row += 1;
             }
 
-            field_map.insert(custom_header.field_name.clone(), custom_header);
+            fields.insert(custom_header.field_name.clone(), custom_header);
         }
 
-        self.serializer_state
-            .structs
-            .insert(header_options.struct_name.clone(), field_map);
+        // If we wrote headers then start the data serialization one row down.
+        if write_headers {
+            row += 1;
+        }
+
+        // Store meta data for the struct/headers.
+        self.serializer_state.structs.insert(
+            header_options.struct_name.clone(),
+            HeaderConfig {
+                max_row: row,
+                fields,
+            },
+        );
 
         Ok(self)
     }

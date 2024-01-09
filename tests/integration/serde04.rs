@@ -29,7 +29,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case for Serde serialization.
+// Test case for Serde serialization. Array of data.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
@@ -37,16 +37,26 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
 
-    let data = MyStruct {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data = [
+        MyStruct {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
-    worksheet.serialize_headers(0, 0, &data)?;
+    worksheet.serialize_headers(0, 0, &data[0])?;
     worksheet.serialize(&data)?;
 
     workbook.save(filename)?;
@@ -54,8 +64,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case for Serde serialization. The array data is split between
-// serialization calls.
+// Test case for Serde serialization. Individual structs.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
@@ -63,55 +72,23 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
 
     let data1 = MyStruct {
-        col1: vec![123, 456],
-        col2: vec![true, false],
+        col1: 123,
+        col2: true,
     };
 
     let data2 = MyStruct {
-        col1: vec![789],
-        col2: vec![true],
-    };
-
-    worksheet.serialize_headers(0, 0, &data1)?;
-    worksheet.serialize(&data1)?;
-    worksheet.serialize(&data2)?;
-
-    workbook.save(filename)?;
-
-    Ok(())
-}
-
-// Test case for Serde serialization. The array data is split between
-// serialization calls.
-fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet();
-
-    // Create a serializable test struct.
-    #[derive(Serialize)]
-    struct MyStruct {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
-    }
-
-    let data1 = MyStruct {
-        col1: vec![123],
-        col2: vec![true],
-    };
-
-    let data2 = MyStruct {
-        col1: vec![456],
-        col2: vec![false],
+        col1: 456,
+        col2: false,
     };
 
     let data3 = MyStruct {
-        col1: vec![789],
-        col2: vec![true],
+        col1: 789,
+        col2: true,
     };
 
     worksheet.serialize_headers(0, 0, &data1)?;
@@ -154,18 +131,6 @@ fn test_serde04_3() {
         .set_name("serde04")
         .set_function(create_new_xlsx_file_3)
         .unique("3")
-        .initialize();
-
-    test_runner.assert_eq();
-    test_runner.cleanup();
-}
-
-#[test]
-fn test_serde04_4() {
-    let test_runner = common::TestRunner::new()
-        .set_name("serde04")
-        .set_function(create_new_xlsx_file_4)
-        .unique("4")
         .initialize();
 
     test_runner.assert_eq();

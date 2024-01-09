@@ -1164,10 +1164,9 @@ use serde::{ser, Deserialize, Deserializer, Serialize};
 // information in the serializer.
 // -----------------------------------------------------------------------
 pub(crate) struct SerializerState {
-    pub(crate) structs: HashMap<String, HashMap<String, CustomSerializeField>>,
+    pub(crate) structs: HashMap<String, HeaderConfig>,
     pub(crate) current_struct: String,
     pub(crate) current_field: String,
-    pub(crate) current_row: RowNum,
 }
 
 impl SerializerState {
@@ -1177,31 +1176,47 @@ impl SerializerState {
             structs: HashMap::new(),
             current_struct: String::new(),
             current_field: String::new(),
-            current_row: 0,
         }
     }
 
     // Check if the current struct/field have been selected to be serialized by
-    // the user. If it has then set the row value for the next write() call.
+    // the user. If it has then return the row value for the next `write()` call.
     pub(crate) fn current_state(&mut self) -> Result<(RowNum, ColNum, Option<Format>), ()> {
-        let Some(fields) = self.structs.get_mut(&self.current_struct) else {
+        let Some(header_config) = self.structs.get_mut(&self.current_struct) else {
             return Err(());
         };
 
-        let Some(field) = fields.get_mut(&self.current_field) else {
+        let Some(field) = header_config.fields.get_mut(&self.current_field) else {
             return Err(());
         };
 
         // Set the "current" cell values used to write the serialized data.
-        let row = field.row;
+        let row = header_config.max_row - 1;
         let col = field.col;
         let value_format = field.value_format.clone();
 
-        // Increment the row number for the next worksheet.write().
-        field.row += 1;
-
         Ok((row, col, value_format))
     }
+
+    // Store the name and max row of the current struct being serialized.
+    pub(crate) fn set_current_struct(&mut self, struct_name: &str) {
+        self.current_struct = struct_name.to_string();
+
+        // Increment the max row every time we serialize a new struct instance.
+        let Some(header_config) = self.structs.get_mut(&self.current_struct) else {
+            return;
+        };
+        header_config.max_row += 1;
+    }
+}
+
+// -----------------------------------------------------------------------
+// HeaderConfig, a struct to capture the metadata for fields associated
+// with a struct.
+// -----------------------------------------------------------------------
+pub(crate) struct HeaderConfig {
+    pub(crate) fields: HashMap<String, CustomSerializeField>,
+    pub(crate) max_row: RowNum,
 }
 
 // -----------------------------------------------------------------------
@@ -1308,7 +1323,7 @@ impl SerializerState {
 pub struct SerializeFieldOptions {
     pub(crate) struct_name: String,
     pub(crate) header_format: Option<Format>,
-    pub(crate) hide_headers: bool,
+    pub(crate) has_headers: bool,
     pub(crate) custom_headers: Vec<CustomSerializeField>,
     pub(crate) use_custom_headers_only: bool,
 }
@@ -1334,7 +1349,7 @@ impl SerializeFieldOptions {
         SerializeFieldOptions {
             struct_name: String::new(),
             header_format: None,
-            hide_headers: false,
+            has_headers: true,
             custom_headers: vec![],
             use_custom_headers_only: false,
         }
@@ -1498,7 +1513,7 @@ impl SerializeFieldOptions {
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn hide_headers(mut self, enable: bool) -> SerializeFieldOptions {
-        self.hide_headers = enable;
+        self.has_headers = !enable;
         self
     }
 
@@ -1845,7 +1860,6 @@ pub struct CustomSerializeField {
     pub(crate) column_format: Option<Format>,
     pub(crate) value_format: Option<Format>,
     pub(crate) skip: bool,
-    pub(crate) row: RowNum,
     pub(crate) col: ColNum,
     pub(crate) width: Option<f64>,
     pub(crate) pixel_width: Option<u16>,
@@ -1876,7 +1890,6 @@ impl CustomSerializeField {
             column_format: None,
             value_format: None,
             skip: false,
-            row: 0,
             col: 0,
             width: None,
             pixel_width: None,
@@ -2505,8 +2518,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
 
     // Compound types.
     //
-    // The only compound types that map into the Excel data model are
-    // structs and array/vector types as fields in a struct.
+    // The only compound types we map into the Excel data model are structs.
 
     // Structs are the main primary data type used to map data structures into
     // Excel.
@@ -2516,7 +2528,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
         len: usize,
     ) -> Result<Self::SerializeStruct, XlsxError> {
         // Store the struct type name to check against user defined structs.
-        self.serializer_state.current_struct = name.to_string();
+        self.serializer_state.set_current_struct(name);
 
         self.serialize_map(Some(len))
     }
@@ -2588,8 +2600,7 @@ impl<'a> ser::SerializeStruct for &'a mut Worksheet {
     where
         T: ?Sized + Serialize,
     {
-        // Store the struct field name to allow us to map to the correct
-        // header/column.
+        // Store field name to allow us to map to the correct header/column.
         self.serializer_state.current_field = key.to_string();
 
         value.serialize(&mut **self)
@@ -2611,12 +2622,7 @@ impl<'a> ser::SerializeSeq for &'a mut Worksheet {
     where
         T: ?Sized + Serialize,
     {
-        let ret = value.serialize(&mut **self);
-
-        // Increment the row number for each element of the sequence.
-        self.serializer_state.current_row += 1;
-
-        ret
+        value.serialize(&mut **self)
     }
 
     fn end(self) -> Result<(), XlsxError> {

@@ -45,30 +45,40 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct1 {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
 
-    let data1 = MyStruct1 {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data1 = [
+        MyStruct1 {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct1 {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct1 {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
-    worksheet.serialize_headers(0, 0, &data1)?;
+    worksheet.serialize_headers(0, 0, &data1[0])?;
     worksheet.serialize(&data1)?;
 
     #[derive(Serialize)]
     struct MyStruct2 {
-        col1: Vec<u8>,
-        col2: Vec<u8>,
+        col1: u8,
+        col2: u8,
     }
 
-    let data2 = MyStruct2 {
-        col1: vec![1, 2],
-        col2: vec![6, 7],
-    };
+    let data2 = [
+        MyStruct2 { col1: 1, col2: 6 },
+        MyStruct2 { col1: 2, col2: 7 },
+    ];
 
-    worksheet.serialize_headers(0, 3, &data2)?;
+    worksheet.serialize_headers(0, 3, &data2[0])?;
     worksheet.serialize(&data2)?;
 
     workbook.save(filename)?;
@@ -77,7 +87,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 // Test case for Serde serialization. The test structs have similar field names
-// to test for overwriting. Additional the serialize calls are interleaved.
+// to test for overwriting. Additionally the serialize calls are interleaved.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
@@ -85,28 +95,38 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     // Create a serializable test struct.
     #[derive(Serialize)]
     struct MyStruct1 {
-        col1: Vec<u16>,
-        col2: Vec<bool>,
+        col1: u16,
+        col2: bool,
     }
+
+    let data1 = [
+        MyStruct1 {
+            col1: 123,
+            col2: true,
+        },
+        MyStruct1 {
+            col1: 456,
+            col2: false,
+        },
+        MyStruct1 {
+            col1: 789,
+            col2: true,
+        },
+    ];
 
     #[derive(Serialize)]
     struct MyStruct2 {
-        col1: Vec<u8>,
-        col2: Vec<u8>,
+        col1: u8,
+        col2: u8,
     }
 
-    let data1 = MyStruct1 {
-        col1: vec![123, 456, 789],
-        col2: vec![true, false, true],
-    };
+    let data2 = [
+        MyStruct2 { col1: 1, col2: 6 },
+        MyStruct2 { col1: 2, col2: 7 },
+    ];
 
-    let data2 = MyStruct2 {
-        col1: vec![1, 2],
-        col2: vec![6, 7],
-    };
-
-    worksheet.serialize_headers(0, 0, &data1)?;
-    worksheet.serialize_headers(0, 3, &data2)?;
+    worksheet.serialize_headers(0, 0, &data1[0])?;
+    worksheet.serialize_headers(0, 3, &data2[0])?;
 
     worksheet.serialize(&data1)?;
     worksheet.serialize(&data2)?;
