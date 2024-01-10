@@ -7105,7 +7105,7 @@ impl Worksheet {
         match result {
             Ok(result) => {
                 let (row, col, value_format) = result;
-                match &value_format {
+                match &*value_format {
                     Some(format) => self.write_with_format(row, col, data, format).map(|_| ()),
                     None => self.write(row, col, data).map(|_| ()),
                 }

@@ -1153,6 +1153,7 @@
 #![warn(missing_docs)]
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use crate::{ColNum, Format, RowNum, Worksheet, XlsxError};
 use serde::de::Visitor;
@@ -1181,7 +1182,7 @@ impl SerializerState {
 
     // Check if the current struct/field have been selected to be serialized by
     // the user. If it has then return the row value for the next `write()` call.
-    pub(crate) fn current_state(&mut self) -> Result<(RowNum, ColNum, Option<Format>), ()> {
+    pub(crate) fn current_state(&mut self) -> Result<(RowNum, ColNum, Arc<Option<Format>>), ()> {
         let Some(header_config) = self.structs.get_mut(&self.current_struct) else {
             return Err(());
         };
@@ -1193,14 +1194,16 @@ impl SerializerState {
         // Set the "current" cell values used to write the serialized data.
         let row = header_config.max_row - 1;
         let col = field.col;
-        let value_format = field.value_format.clone();
+        let value_format = Arc::clone(&field.value_format);
 
         Ok((row, col, value_format))
     }
 
     // Store the name and max row of the current struct being serialized.
     pub(crate) fn set_current_struct(&mut self, struct_name: &str) {
-        self.current_struct = struct_name.to_string();
+        if struct_name != self.current_struct {
+            self.current_struct = struct_name.to_string();
+        }
 
         // Increment the max row every time we serialize a new struct instance.
         let Some(header_config) = self.structs.get_mut(&self.current_struct) else {
@@ -1858,7 +1861,7 @@ pub struct CustomSerializeField {
     pub(crate) header_name: String,
     pub(crate) header_format: Option<Format>,
     pub(crate) column_format: Option<Format>,
-    pub(crate) value_format: Option<Format>,
+    pub(crate) value_format: Arc<Option<Format>>,
     pub(crate) skip: bool,
     pub(crate) col: ColNum,
     pub(crate) width: Option<f64>,
@@ -1888,7 +1891,7 @@ impl CustomSerializeField {
             header_name,
             header_format: None,
             column_format: None,
-            value_format: None,
+            value_format: Arc::new(None),
             skip: false,
             col: 0,
             width: None,
@@ -2211,7 +2214,7 @@ impl CustomSerializeField {
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn set_value_format(mut self, format: impl Into<Format>) -> CustomSerializeField {
-        self.value_format = Some(format.into());
+        self.value_format = Arc::new(Some(format.into()));
         self
     }
 
