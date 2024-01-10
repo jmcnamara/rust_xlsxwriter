@@ -136,6 +136,10 @@ pub enum XlsxError {
     /// incorrect or missing.
     ConditionalFormatError(String),
 
+    /// A customizable error that can be used by third parties to raise errors
+    /// or to convert other Error types to.
+    CustomError(String),
+
     /// Wrapper for a variety of [std::io::Error] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
@@ -277,6 +281,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::ConditionalFormatError(error) => {
                 write!(f, "Conditional format error: '{error}'.")
+            }
+
+            XlsxError::CustomError(error) => {
+                write!(f, "{error}")
             }
 
             XlsxError::IoError(error) => {
