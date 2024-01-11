@@ -43,7 +43,7 @@ fn main() -> Result<(), XlsxError> {
     ];
 
     // Set up the start location and headers of the data to be serialized.
-    worksheet.serialize_headers_with_format(1, 3, &students.get(0).unwrap(), &header_format)?;
+    worksheet.serialize_headers_with_format(1, 3, &students.first().unwrap(), &header_format)?;
 
     // Serialize the data.
     worksheet.serialize(&students)?;

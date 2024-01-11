@@ -52,7 +52,7 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeField::new("fruit").rename("Item"),
         CustomSerializeField::new("cost")
             .rename("Price")
-            .set_value_format(&currency_format),
+            .set_value_format(currency_format),
     ];
 
     let header_options = SerializeFieldOptions::new()

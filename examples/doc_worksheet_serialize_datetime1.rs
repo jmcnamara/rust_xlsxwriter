@@ -55,11 +55,11 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeField::new("name").rename("Student"),
         CustomSerializeField::new("dob")
             .rename("Birthday")
-            .set_value_format(&date_format),
+            .set_value_format(date_format),
         CustomSerializeField::new("id").rename("ID"),
     ];
     let header_options = SerializeFieldOptions::new()
-        .set_header_format(&header_format)
+        .set_header_format(header_format)
         .set_custom_headers(&custom_headers);
 
     worksheet.deserialize_headers_with_options::<Student>(0, 0, &header_options)?;
