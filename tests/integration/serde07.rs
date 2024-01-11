@@ -7,7 +7,7 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    CustomSerializeField, ExcelSerialize, SerializeFieldOptions, Workbook, XlsxError,
+    CustomSerializeField, SerializeFieldOptions, Workbook, XlsxError, XlsxSerialize,
 };
 use serde::Serialize;
 
@@ -466,11 +466,11 @@ fn create_new_xlsx_file_12(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize, ExcelSerialize)]
+    #[derive(Serialize, XlsxSerialize)]
     struct MyStruct {
         col1: u8,
         col2: &'static str,
-        #[rust_xlsxwriter(skip)]
+        #[xlsx(skip)]
         col3: bool,
     }
 
@@ -506,7 +506,7 @@ fn create_new_xlsx_file_13(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize, ExcelSerialize)]
+    #[derive(Serialize, XlsxSerialize)]
     #[allow(dead_code)]
     struct MyStruct {
         col1: u8,
@@ -547,7 +547,7 @@ fn create_new_xlsx_file_14(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize, ExcelSerialize)]
+    #[derive(Serialize, XlsxSerialize)]
     #[allow(dead_code)]
     struct MyStruct {
         col1: u8,
@@ -588,7 +588,7 @@ fn create_new_xlsx_file_15(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize, ExcelSerialize)]
+    #[derive(Serialize, XlsxSerialize)]
     struct MyStruct {
         #[serde(rename = "col1")]
         field1: u8,

@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{ExcelSerialize, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Workbook, XlsxError, XlsxSerialize};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -47,11 +47,11 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_paper_size(9);
 
     // Create a serializable test struct.
-    #[derive(ExcelSerialize, Serialize)]
+    #[derive(XlsxSerialize, Serialize)]
     struct MyStruct {
         col1: u8,
 
-        #[rust_xlsxwriter(
+        #[xlsx(
             column_width = 13.0,
             column_format = Format::new().set_bold(),
         )]

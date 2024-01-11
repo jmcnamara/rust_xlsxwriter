@@ -7,7 +7,7 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    CustomSerializeField, ExcelSerialize, Format, SerializeFieldOptions, Workbook, XlsxError,
+    CustomSerializeField, Format, SerializeFieldOptions, Workbook, XlsxError, XlsxSerialize,
 };
 use serde::Serialize;
 
@@ -89,18 +89,18 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case for Serde serialization. With ExcelSerialize.
+// Test case for Serde serialization. With XlsxSerialize.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
     worksheet.set_paper_size(9);
 
     // Create a serializable test struct.
-    #[derive(ExcelSerialize, Serialize)]
+    #[derive(XlsxSerialize, Serialize)]
     struct MyStruct {
         col1: u8,
 
-        #[rust_xlsxwriter(column_format = Format::new().set_bold())]
+        #[xlsx(column_format = Format::new().set_bold())]
         col2: u8,
 
         col3: u8,

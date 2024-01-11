@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{ExcelSerialize, Workbook, XlsxError};
+use rust_xlsxwriter::{Workbook, XlsxError, XlsxSerialize};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
@@ -25,13 +25,13 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case for Serde serialization. With ExcelSerialize.
+// Test case for Serde serialization. With XlsxSerialize.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize, ExcelSerialize)]
+    #[derive(Serialize, XlsxSerialize)]
     #[serde(rename_all = "PascalCase")]
     struct MyStruct {
         field_1: u8,
@@ -51,13 +51,13 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case for Serde serialization. With ExcelSerialize.
+// Test case for Serde serialization. With XlsxSerialize.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable test struct.
-    #[derive(Serialize, ExcelSerialize)]
+    #[derive(Serialize, XlsxSerialize)]
     #[serde(rename_all(serialize = "PascalCase"))]
     struct MyStruct {
         field_1: u8,

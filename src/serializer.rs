@@ -3102,11 +3102,11 @@ where
 }
 
 // -----------------------------------------------------------------------
-// ExcelSerializer trait. Todo
+// XlsxSerializer trait. Todo
 // -----------------------------------------------------------------------
 
 /// TODO
-pub trait ExcelSerialize {
+pub trait XlsxSerialize {
     /// todo
     fn to_serialize_field_options() -> SerializeFieldOptions;
 }

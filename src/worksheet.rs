@@ -42,7 +42,7 @@ use crate::deserialize_headers;
 use crate::SerializeFieldOptions;
 
 #[cfg(feature = "serde")] // TODO add derive feature
-use crate::ExcelSerialize;
+use crate::XlsxSerialize;
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
@@ -6908,7 +6908,7 @@ impl Worksheet {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError>
     where
-        T: ExcelSerialize,
+        T: XlsxSerialize,
     {
         let header_options = T::to_serialize_field_options();
         self.store_custom_serialization_headers(row, col, &header_options)

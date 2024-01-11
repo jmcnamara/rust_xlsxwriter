@@ -5,7 +5,7 @@
 //! Example of serializing Serde derived structs to an Excel worksheet using
 //! `rust_xlsxwriter`.
 
-use rust_xlsxwriter::{ExcelSerialize, Workbook, XlsxError};
+use rust_xlsxwriter::{Workbook, XlsxError, XlsxSerialize};
 use serde::Serialize;
 
 fn main() -> Result<(), XlsxError> {
@@ -15,8 +15,8 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable struct.
-    #[derive(ExcelSerialize, Serialize)]
-    #[rust_xlsxwriter(header_format = Format::new()
+    #[derive(XlsxSerialize, Serialize)]
+    #[xlsx(header_format = Format::new()
         .set_bold()
         .set_border(FormatBorder::Thin)
         .set_background_color("C6EFCE"))]
@@ -24,7 +24,7 @@ fn main() -> Result<(), XlsxError> {
     struct Produce {
         fruit: &'static str,
 
-        #[rust_xlsxwriter(value_format = Format::new().set_num_format("$0.00"))]
+        #[xlsx(value_format = Format::new().set_num_format("$0.00"))]
         cost: f64,
     }
 

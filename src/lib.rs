@@ -228,4 +228,4 @@ extern crate rust_xlsxwriter_derive;
 
 #[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-pub use rust_xlsxwriter_derive::ExcelSerialize;
+pub use rust_xlsxwriter_derive::XlsxSerialize;
