@@ -4,22 +4,593 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
-//! TODO
+//! The `rust_xlsxwriter_derive` crate provides the `XlsxSerialize` derived
+//! trait which is used in conjunction with `rust_xlsxwriter` serialization.
 //!
-
+//! # Introduction
+//!
+//! [`XlsxSerialize`] can be used to set container and field attributes for
+//! structs to define Excel formatting and other options when serializing them
+//! to Excel using `rust_xlsxwriter` and `Serde`.
+//!
+//! ```
+//! # // This code is available in examples/doc_xlsxserialize_intro.rs
+//! #
+//! use rust_xlsxwriter::{Workbook, XlsxError, XlsxSerialize};
+//! use serde::Serialize;
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Create a serializable struct.
+//!     #[derive(XlsxSerialize, Serialize)]
+//!     #[xlsx(header_format = Format::new().set_bold())]
+//!     struct Produce {
+//!         #[xlsx(rename = "Item")]
+//!         #[xlsx(column_width = 12.0)]
+//!         fruit: &'static str,
+//!
+//!         #[xlsx(rename = "Price")]
+//!         #[xlsx(value_format = Format::new().set_num_format("$0.00"))]
+//!         cost: f64,
+//!     }
+//!
+//!     // Create some data instances.
+//!     let item1 = Produce {
+//!         fruit: "Peach",
+//!         cost: 1.05,
+//!     };
+//!
+//!     let item2 = Produce {
+//!         fruit: "Plum",
+//!         cost: 0.15,
+//!     };
+//!
+//!     let item3 = Produce {
+//!         fruit: "Pear",
+//!         cost: 0.75,
+//!     };
+//!
+//!     // Set the serialization location and headers.
+//!     worksheet.set_serialize_headers::<Produce>(0, 0)?;
+//!
+//!     // Serialize the data.
+//!     worksheet.serialize(&item1)?;
+//!     worksheet.serialize(&item2)?;
+//!     worksheet.serialize(&item3)?;
+//!
+//!     // Save the file to disk.
+//!     workbook.save("serialize.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! The output file is shown below. Note the change or column width in Column A,
+//! the renamed headers and the currency format in Column B numbers.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/xlsxserialize_intro.png">
+//!
+//! For more information see the documentation for [`XlsxSerialize`] or [Working
+//! with Serde] in the `rust_xlsxwriter` docs.
+//!
+//! [Working with Serde]:
+//!     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html
+//!
 use proc_macro::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{
     parse_macro_input, Attribute, Data, DeriveInput, Expr, Fields, LitFloat, LitInt, LitStr, Token,
 };
 
+/// The `XlsxSerialize` derived trait is used in conjunction with
+/// `rust_xlsxwriter` serialization.
+///
+/// # Introduction
+///
+/// `XlsxSerialize` can be used to set container and field attributes for
+/// structs to define Excel formatting and other options when serializing them
+/// to Excel using the `rust_xlsxwriter` crate.
+///
+/// ```
+/// # // This code is available in examples/doc_xlsxserialize_intro.rs
+/// #
+/// use rust_xlsxwriter::{Workbook, XlsxError, XlsxSerialize};
+/// use serde::Serialize;
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Create a serializable struct.
+///     #[derive(XlsxSerialize, Serialize)]
+///     #[xlsx(header_format = Format::new().set_bold())]
+///     struct Produce {
+///         #[xlsx(rename = "Item")]
+///         #[xlsx(column_width = 12.0)]
+///         fruit: &'static str,
+///
+///         #[xlsx(rename = "Price", num_format = "$0.00")]
+///         cost: f64,
+///     }
+///
+///     // Create some data instances.
+///     let item1 = Produce {
+///         fruit: "Peach",
+///         cost: 1.05,
+///     };
+///
+///     let item2 = Produce {
+///         fruit: "Plum",
+///         cost: 0.15,
+///     };
+///
+///     let item3 = Produce {
+///         fruit: "Pear",
+///         cost: 0.75,
+///     };
+///
+///     // Set the serialization location and headers.
+///     worksheet.set_serialize_headers::<Produce>(0, 0)?;
+///
+///     // Serialize the data.
+///     worksheet.serialize(&item1)?;
+///     worksheet.serialize(&item2)?;
+///     worksheet.serialize(&item3)?;
+///
+///     // Save the file to disk.
+///     workbook.save("serialize.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// The output file is shown below. Note the change or column width in Column A,
+/// the renamed headers and the currency format in Column B numbers.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/xlsxserialize_intro.png">
+///
+/// For more information on serialization to Excel see [Working with Serde] in
+/// the `rust_xlsxwriter` docs.
+///
+///
+///
+///
+/// # The `xlsx` attributes
+///
+/// The `XlsxSerializer` derived trait adds a wrapper around a Serde
+/// serializable struct to add `rust_xlsxwriter` specific formatting options. It
+/// achieves this via the `rust_xlsxwriter` [`SerializeFieldOptions`] and
+/// [`CustomSerializeField`] serialization configuration structs.
+///
+/// The attributes are divided into "Container" attributes that apply to the
+/// entire struct and "Field" attributes which apply to individuals fields. In
+/// an Excel context the field attributes apply to the serialization headers and
+/// the data below them.
+///
+/// In order to demonstrate the each attribute and its effect in the next
+/// sections we will use variations of the following example with the relevant
+/// attribute applied.
+///
+/// ```
+/// # // This code is available in examples/doc_xlsxserialize_base.rs
+/// #
+/// use rust_xlsxwriter::{Workbook, XlsxError, XlsxSerialize};
+/// use serde::Serialize;
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Create a serializable struct.
+///     #[derive(XlsxSerialize, Serialize)]
+///     struct Produce {
+///         fruit: &'static str,
+///         cost: f64,
+///     }
+///
+///     // Create some data instances.
+///     let items = [
+///         Produce {
+///             fruit: "Peach",
+///             cost: 1.05,
+///         },
+///         Produce {
+///             fruit: "Plum",
+///             cost: 0.15,
+///         },
+///         Produce {
+///             fruit: "Pear",
+///             cost: 0.75,
+///         },
+///     ];
+///
+///     // Set the serialization location and headers.
+///     worksheet.set_serialize_headers::<Produce>(0, 0)?;
+///
+///     // Serialize the data.
+///     worksheet.serialize(&items)?;
+///
+///     // Save the file to disk.
+///     workbook.save("serialize.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// ## Container `xlsx` attributes
+///
+/// The following are the "Container" attributes supported by `XlsxSerializer`:
+///
+/// - `#[xlsx(header_format = Format)`
+///
+///   The `header_format` container attribute sets the [`Format`] property for
+///   headers. See the [Working with attribute
+///   Formats](#working-with-attribute-formats) section below for information on
+///   handling formats.
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         #[xlsx(header_format = Format::new()
+///                    .set_bold()
+///                    .set_border(FormatBorder::Thin)
+///                    .set_background_color("C6EFCE"))]
+///         struct Produce {
+///             fruit: &'static str,
+///             cost: f64,
+///         }
+///   # }
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_header_format.png">
+///
+///
+///
+/// - `#[xlsx(hide_headers)`
+///
+///   The `hide_headers` container attribute hides the serialization headers:
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         #[xlsx(hide_headers)]
+///         struct Produce {
+///             fruit: &'static str,
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_hide_headers.png">
+///
+///
+///
+///
+/// ## Field `xlsx` attributes
+///
+/// The following are the "Field" attributes supported by `XlsxSerializer`:
+///
+/// - `#[xlsx(rename = "")`
+///
+///   The `rename` field attribute renames the Excel header. This is similar to
+///   the `#[serde(rename = "")` field attribute except that it doesn't rename
+///   the field for other types of serialization.
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         struct Produce {
+///             #[xlsx(rename = "Item")]
+///             fruit: &'static str,
+///
+///             #[xlsx(rename = "Price")]
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_rename.png">
+///
+///
+/// - `#[xlsx(num_format = "")`
+///
+///   The `num_format` field attribute sets the property to change the number
+///   formatting of the output. It is a syntactic shortcut for
+///   [`Format::set_num_format()`], see below.
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         struct Produce {
+///             fruit: &'static str,
+///
+///             #[xlsx(num_format = "$0.00")]
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_num_format.png">
+///
+///
+/// - `#[xlsx(value_format = Format)`
+///
+///   The `value_format` field attribute sets the [`Format`] property for the
+///   fields below the header.
+///
+///   See the [Working with attribute Formats](#working-with-attribute-formats)
+///   section below for information on handling formats.
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         struct Produce {
+///             #[xlsx(value_format = Format::new().set_font_color("#FF0000"))]
+///             fruit: &'static str,
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_value_format.png">
+///
+///
+/// - `#[xlsx(column_format = Format)`
+///
+///   The `column_format` field attribute is similar to the previous
+///   `value_format` attribute except that it sets the format for the entire
+///   column, including any data added manually below the serialized data.
+///
+///   <br>
+///
+/// - `#[xlsx(header_format = Format)`
+///
+///   The `header_format` field attribute sets the [`Format`] property for the
+///   the header. It is similar to the container method of the same name except
+///   it only sets the format or one header:
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         struct Produce {
+///             fruit: &'static str,
+///
+///             #[xlsx(header_format = Format::new().set_bold().set_font_color("#FF0000"))]
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_field_header_format.png">
+///
+///
+/// - `#[xlsx(column_width = float)`
+///
+///   The `column_width` field attribute sets the column width in character
+///   units.
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         struct Produce {
+///             fruit: &'static str,
+///             #[xlsx(column_width = 20.0)]
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_column_width.png">
+///
+///
+///
+/// - `#[xlsx(column_width_pixels = int)`
+///
+///   The `column_width_pixels` field attribute field attribute is similar to
+///   the previous `column_width` attribute except that the width is specified
+///   in integer pixel units.
+///
+///   <br>
+///
+///
+///
+///
+/// - `#[xlsx(skip)`
+///
+///   The `skip` field attribute skips writing the field to the target Excel
+///   file.  This is similar to the `#[serde(skip)` field attribute except that
+///   it doesn't skip the field for other types of serialization.
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         struct Produce {
+///             fruit: &'static str,
+///
+///             #[xlsx(skip)]
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img src="https://rustxlsxwriter.github.io/images/xlsxserialize_skip.png">
+///
+///
+/// Note, if required you can group more than one attribute
+///
+/// ```
+/// #[xlsx(rename = "Item", column_width = 20.0)]
+/// ```
+///
+/// ## Working with attribute Formats
+///
+/// When working with `XlsxSerialize` attributes that deal with [`Format`]
+/// objects the definition can become quite long:
+///
+/// ```
+/// # use rust_xlsxwriter::XlsxSerialize;
+/// # use serde::Serialize;
+/// #
+/// # fn main() {
+///       #[derive(XlsxSerialize, Serialize)]
+///       #[xlsx(header_format = Format::new()
+///                  .set_bold()
+///                  .set_border(FormatBorder::Thin)
+///                  .set_background_color("C6EFCE"))]
+///       struct Produce {
+///           fruit: &'static str,
+///           cost: f64,
+///       }
+/// # }
+/// ```
+///
+/// You might in this case be tempted to define the format in another part of
+/// your code and use a variable to define the format:
+///
+/// ```compile_fail
+/// # use rust_xlsxwriter::{Format, FormatBorder, XlsxSerialize};
+/// # use serde::Serialize;
+/// #
+/// # fn main() {
+///     let my_header_format = Format::new()
+///         .set_bold()
+///         .set_border(FormatBorder::Thin)
+///         .set_background_color("C6EFCE");
+///
+///     #[derive(XlsxSerialize, Serialize)]
+///     #[xlsx(header_format = &my_header_format)] // Wont' work.
+///     struct Produce {
+///         fruit: &'static str,
+///         cost: f64,
+///     }
+/// # }
+/// ```
+///
+/// However, this worn't work because derive macros are compiled statically and
+/// `&header_format` is a dynamic variable.
+///
+/// A workaround for this it to define any formats you wish to use in functions:
+///
+/// ```
+/// # // This code is available in examples/doc_xlsxserialize_header_format_reuse.rs
+/// #
+/// # use rust_xlsxwriter::{FormatBorder, Workbook, XlsxError, XlsxSerialize, Format};
+/// # use serde::Serialize;
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+///     fn my_header_format() -> Format {
+///         Format::new()
+///             .set_bold()
+///             .set_border(FormatBorder::Thin)
+///             .set_background_color("C6EFCE")
+///     }
+///
+///     #[derive(XlsxSerialize, Serialize)]
+///     #[xlsx(header_format = my_header_format())]
+///     struct Produce {
+///         fruit: &'static str,
+///         cost: f64,
+///     }
+/// #
+/// #     // Create some data instances.
+/// #     let items = [
+/// #         Produce {
+/// #             fruit: "Peach",
+/// #             cost: 1.05,
+/// #         },
+/// #         Produce {
+/// #             fruit: "Plum",
+/// #             cost: 0.15,
+/// #         },
+/// #         Produce {
+/// #             fruit: "Pear",
+/// #             cost: 0.75,
+/// #         },
+/// #     ];
+/// #
+/// #     // Set the serialization location and headers.
+/// #     worksheet.set_serialize_headers::<Produce>(0, 0)?;
+/// #
+/// #     // Serialize the data.
+/// #     worksheet.serialize(&items)?;
+/// #
+/// #     // Save the file to disk.
+/// #     workbook.save("serialize.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/xlsxserialize_header_format_reuse.png">
+///
+///
+///
+///
+/// [Serde Attributes]: https://serde.rs/attributes.html
+///
+/// [`Format`]:
+///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
+///
+/// [`Format::set_num_format()`]:
+///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#method.set_num_format
+///
+/// [`SerializeFieldOptions`]:
+///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/struct.SerializeFieldOptions.html
+///
+/// [`CustomSerializeField`]:
+///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/struct.CustomSerializeField.html
+///
+///
+///
+///
+///
 #[proc_macro_derive(XlsxSerialize, attributes(xlsx, serde))]
 #[allow(clippy::too_many_lines)]
-/// TODO
-///
-/// Add docs on attributes.
-///
-///
 pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
     let (impl_generics, type_generics, where_clause) = ast.generics.split_for_impl();
@@ -36,7 +607,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
     for attribute_tokens in &ast.attrs {
         for attribute in parse_header_attribute(attribute_tokens) {
             match attribute {
-                // Handle container #[xlsx(field_options = "")] attribute.
+                // Handle container #[xlsx(hide_headers)] attribute.
                 HeaderAttributeTypes::HideHeaders => {
                     field_options = quote! {
                         .hide_headers(true)

@@ -1,10 +1,18 @@
 [package]
 name = "rust_xlsxwriter_derive"
+description = "Proc macros to support rust_xlsxwriter serialization"
+authors = ["John McNamara <jmcnamara@cpan.org>"]
+homepage = "https://rustxlsxwriter.github.io"
+repository = "https://github.com/jmcnamara/rust_xlsxwriter"
+keywords = ["excel", "xlsx"]
+readme = "README.md"
+license = "MIT OR Apache-2.0"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
 proc-macro = true
+doctest = false
 
 [dependencies]
 quote = "1.0"
