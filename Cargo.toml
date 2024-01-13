@@ -18,8 +18,8 @@ lazy_static = "1.4.0"
 polars= {version = "0.35.4", default-features = false, features = [], optional = true}
 js-sys = {version = "0.3.64", optional = true}
 wasm-bindgen = {version = "0.2.87", optional = true}
-serde = { version = "1.0.193", features = ["derive"], optional = true }
-rust_xlsxwriter_derive = { path = "macros", optional = true }
+serde = {version = "1.0.193", features = ["derive"], optional = true}
+rust_xlsxwriter_derive = {path = "macros", optional = true}
 
 [dev-dependencies]
 pretty_assertions = "1.3.0"
@@ -215,6 +215,57 @@ required-features = ["serde"]
 name = "doc_worksheet_serialize_vectors"
 path = "examples/doc_worksheet_serialize_vectors.rs"
 required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_column_width"
+path = "examples/doc_xlsxserialize_column_width.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_field_header_format"
+path = "examples/doc_xlsxserialize_field_header_format.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_header_format"
+path = "examples/doc_xlsxserialize_header_format.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_header_format_reuse"
+path = "examples/doc_xlsxserialize_header_format_reuse.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_hide_headers"
+path = "examples/doc_xlsxserialize_hide_headers.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_intro"
+path = "examples/doc_xlsxserialize_intro.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_num_format"
+path = "examples/doc_xlsxserialize_num_format.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_rename"
+path = "examples/doc_xlsxserialize_rename.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_skip"
+path = "examples/doc_xlsxserialize_skip.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_xlsxserialize_value_format"
+path = "examples/doc_xlsxserialize_value_format.rs"
+required-features = ["serde"]
+
 
 #
 # Examples to run only when `serde` and `chrono` is enabled.
