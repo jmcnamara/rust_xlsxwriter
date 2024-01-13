@@ -13,9 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the formatting and options of the Excel output during serialization. These are
   similar in intention to Serde container/field attributes.
 
-  See [Working with Serde] and the the discussion at [Feature Request #66].
+  See [Controlling Excel output via `XlsxSerialize` and struct attributes] and
+  [Working with Serde].
+
+  [Feature Request #66].
 
   [Feature Request #66]: https://github.com/jmcnamara/rust_xlsxwriter/pull/66
+
+  [Controlling Excel output via `XlsxSerialize` and struct attributes]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#controlling-excel-output-via-xlsxserialize-and-struct-attributes
+
 
 - Added `XlsxError::CustomError` as a target error for external crates/apps.
 
