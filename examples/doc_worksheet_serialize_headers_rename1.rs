@@ -25,28 +25,26 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Create some data instances.
-    let item1 = Produce {
-        fruit: "Peach",
-        cost: 1.05,
-    };
-
-    let item2 = Produce {
-        fruit: "Plum",
-        cost: 0.15,
-    };
-
-    let item3 = Produce {
-        fruit: "Pear",
-        cost: 0.75,
-    };
+    let items = [
+        Produce {
+            fruit: "Peach",
+            cost: 1.05,
+        },
+        Produce {
+            fruit: "Plum",
+            cost: 0.15,
+        },
+        Produce {
+            fruit: "Pear",
+            cost: 0.75,
+        },
+    ];
 
     // Set the serialization location and headers.
     worksheet.deserialize_headers::<Produce>(0, 0)?;
 
     // Serialize the data.
-    worksheet.serialize(&item1)?;
-    worksheet.serialize(&item2)?;
-    worksheet.serialize(&item3)?;
+    worksheet.serialize(&items)?;
 
     // Save the file.
     workbook.save("serialize.xlsx")?;

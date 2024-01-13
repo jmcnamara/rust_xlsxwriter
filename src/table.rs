@@ -1916,16 +1916,16 @@ impl TableColumn {
     ///         TableColumn::new().set_header("Product"),
     ///         TableColumn::new()
     ///             .set_header("Quarter 1")
-    ///             .set_header_format(&format1),
+    ///             .set_header_format(format1),
     ///         TableColumn::new()
     ///             .set_header("Quarter 2")
-    ///             .set_header_format(&format2),
+    ///             .set_header_format(format2),
     ///         TableColumn::new()
     ///             .set_header("Quarter 3")
-    ///             .set_header_format(&format3),
+    ///             .set_header_format(format3),
     ///         TableColumn::new()
     ///             .set_header("Quarter 4")
-    ///             .set_header_format(&format4),
+    ///             .set_header_format(format4),
     ///     ];
     ///     table.set_columns(&columns);
     ///

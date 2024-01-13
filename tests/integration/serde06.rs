@@ -153,7 +153,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 
     let header_options = SerializeFieldOptions::new()
         .set_custom_headers(&custom_headers)
-        .set_header_format(&bold);
+        .set_header_format(bold);
 
     worksheet.serialize_headers_with_options(0, 0, &data[0], &header_options)?;
     worksheet.serialize(&data)?;

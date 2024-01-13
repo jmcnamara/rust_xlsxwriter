@@ -77,7 +77,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let custom_headers = [
         CustomSerializeField::new("col1"),
-        CustomSerializeField::new("col2").set_value_format(&format),
+        CustomSerializeField::new("col2").set_value_format(format),
     ];
     let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 

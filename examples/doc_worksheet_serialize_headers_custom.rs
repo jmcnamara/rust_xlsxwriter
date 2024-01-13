@@ -56,7 +56,7 @@ fn main() -> Result<(), XlsxError> {
     ];
 
     let header_options = SerializeFieldOptions::new()
-        .set_header_format(&header_format)
+        .set_header_format(header_format)
         .set_custom_headers(&custom_headers);
 
     // Set the serialization location and custom headers.

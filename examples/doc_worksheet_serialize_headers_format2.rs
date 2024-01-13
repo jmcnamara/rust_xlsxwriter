@@ -43,7 +43,7 @@ fn main() -> Result<(), XlsxError> {
     };
 
     // Set the serialization location and headers.
-    let header_options = SerializeFieldOptions::new().set_header_format(&header_format);
+    let header_options = SerializeFieldOptions::new().set_header_format(header_format);
 
     worksheet.serialize_headers_with_options(1, 1, &item1, &header_options)?;
 

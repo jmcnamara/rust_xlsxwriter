@@ -51,10 +51,10 @@ fn main() -> Result<(), XlsxError> {
     };
 
     // Set up the custom headers.
-    let custom_headers = [CustomSerializeField::new("Price").set_column_format(&currency_format)];
+    let custom_headers = [CustomSerializeField::new("Price").set_column_format(currency_format)];
 
     let header_options = SerializeFieldOptions::new()
-        .set_header_format(&header_format)
+        .set_header_format(header_format)
         .set_custom_headers(&custom_headers);
 
     // Set the serialization location and headers.

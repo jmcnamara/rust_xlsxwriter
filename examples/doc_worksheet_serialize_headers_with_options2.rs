@@ -47,10 +47,10 @@ fn main() -> Result<(), XlsxError> {
         CustomSerializeField::new("fruit").rename("Fruit"),
         CustomSerializeField::new("cost")
             .rename("Price")
-            .set_value_format(&currency),
+            .set_value_format(currency),
     ];
     let header_options = SerializeFieldOptions::new()
-        .set_header_format(&bold)
+        .set_header_format(bold)
         .set_custom_headers(&custom_headers);
 
     worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;

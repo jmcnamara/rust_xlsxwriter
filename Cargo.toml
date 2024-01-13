@@ -262,10 +262,14 @@ path = "examples/doc_xlsxserialize_skip.rs"
 required-features = ["serde"]
 
 [[example]]
+name = "doc_xlsxserialize_skip2"
+path = "examples/doc_xlsxserialize_skip2.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "doc_xlsxserialize_value_format"
 path = "examples/doc_xlsxserialize_value_format.rs"
 required-features = ["serde"]
-
 
 #
 # Examples to run only when `serde` and `chrono` is enabled.

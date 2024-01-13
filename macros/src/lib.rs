@@ -243,14 +243,15 @@ use syn::{
 ///   # fn main() {
 ///         #[derive(XlsxSerialize, Serialize)]
 ///         #[xlsx(header_format = Format::new()
-///                    .set_bold()
-///                    .set_border(FormatBorder::Thin)
-///                    .set_background_color("C6EFCE"))]
+///                .set_bold()
+///                .set_border(FormatBorder::Thin)
+///                .set_background_color("C6EFCE"))]
 ///         struct Produce {
 ///             fruit: &'static str,
 ///             cost: f64,
 ///         }
 ///   # }
+///   ```
 ///
 ///   <img
 ///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_header_format.png">
@@ -472,9 +473,9 @@ use syn::{
 /// # fn main() {
 ///       #[derive(XlsxSerialize, Serialize)]
 ///       #[xlsx(header_format = Format::new()
-///                  .set_bold()
-///                  .set_border(FormatBorder::Thin)
-///                  .set_background_color("C6EFCE"))]
+///              .set_bold()
+///              .set_border(FormatBorder::Thin)
+///              .set_background_color("C6EFCE"))]
 ///       struct Produce {
 ///           fruit: &'static str,
 ///           cost: f64,
@@ -504,8 +505,10 @@ use syn::{
 /// # }
 /// ```
 ///
-/// However, this worn't work because derive macros are compiled statically and
-/// `&header_format` is a dynamic variable.
+/// <br>
+///
+/// However, this won't work because Rust derive/proc macros are compiled
+/// statically and `&header_format` is a dynamic variable.
 ///
 /// A workaround for this it to define any formats you wish to use in functions:
 ///
@@ -566,7 +569,8 @@ use syn::{
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/xlsxserialize_header_format_reuse.png">
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/xlsxserialize_header_format_reuse.png">
 ///
 ///
 ///

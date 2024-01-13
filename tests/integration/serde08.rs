@@ -77,9 +77,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     };
 
     let custom_headers = [
-        CustomSerializeField::new("col1").set_value_format(&bold),
-        CustomSerializeField::new("col2").set_value_format(&italic),
-        CustomSerializeField::new("col3").set_value_format(&bold_italic),
+        CustomSerializeField::new("col1").set_value_format(bold),
+        CustomSerializeField::new("col2").set_value_format(italic),
+        CustomSerializeField::new("col3").set_value_format(bold_italic),
     ];
     let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
 

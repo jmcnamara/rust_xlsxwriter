@@ -17,34 +17,40 @@ fn main() -> Result<(), XlsxError> {
     // Create a serializable struct.
     #[derive(XlsxSerialize, Serialize)]
     struct Produce {
-        #[xlsx(rename = "Item")]
         fruit: &'static str,
-
-        #[xlsx(rename = "Price")]
         cost: f64,
+
+        #[serde(skip)]
+        #[allow(dead_code)]
+        in_stock: bool,
     }
 
     // Create some data instances.
-    let items = [
-        Produce {
-            fruit: "Peach",
-            cost: 1.05,
-        },
-        Produce {
-            fruit: "Plum",
-            cost: 0.15,
-        },
-        Produce {
-            fruit: "Pear",
-            cost: 0.75,
-        },
-    ];
+    let item1 = Produce {
+        fruit: "Peach",
+        cost: 1.05,
+        in_stock: true,
+    };
+
+    let item2 = Produce {
+        fruit: "Plum",
+        cost: 0.15,
+        in_stock: true,
+    };
+
+    let item3 = Produce {
+        fruit: "Pear",
+        cost: 0.75,
+        in_stock: false,
+    };
 
     // Set the serialization location and headers.
     worksheet.set_serialize_headers::<Produce>(0, 0)?;
 
     // Serialize the data.
-    worksheet.serialize(&items)?;
+    worksheet.serialize(&item1)?;
+    worksheet.serialize(&item2)?;
+    worksheet.serialize(&item3)?;
 
     // Save the file to disk.
     workbook.save("serialize.xlsx")?;
