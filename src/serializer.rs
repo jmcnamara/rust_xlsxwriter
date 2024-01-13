@@ -847,7 +847,7 @@
 //!         fruit: &'static str,
 //!         cost: f64,
 //!
-//!         #[serde(skip)]
+//!         #[xlsx(skip)]
 //!         #[allow(dead_code)]
 //!         in_stock: bool,
 //!     }
@@ -1852,7 +1852,7 @@
 //!
 //! The cell/grid format of Excel sets a physical limitation on what can be
 //! serialized to a worksheet. Unlike other formats such as JSON or XML you
-//! cannot serialize arbitrary nested data to Excel without making some some
+//! cannot serialize arbitrary nested data to Excel without making some
 //! concessions to either the format or the contents of the data. When
 //! serializing data to Excel via `rust_xlsxwriter` it is best to consider what
 //! that data will look like while designing your serialization.
