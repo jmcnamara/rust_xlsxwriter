@@ -5,13 +5,23 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.60.1] - 2023-01-XX TODO
+## [0.61.0] - 2023-01-13
 
 ### Added
 
-- Added `XlsxError::CustomError` to as a target error for external crates/apps.
+- Added support for a `XlsxSerialize` derive and struct attributes to control
+  the formatting and options of the Excel output during serialization. These are
+  similar in intention to Serde container/field attributes.
 
-  [Feature Request #72](https://github.com/jmcnamara/rust_xlsxwriter/pull/72).
+  See [Working with Serde] and the the discussion at [Feature Request #66].
+
+  [Feature Request #66]: https://github.com/jmcnamara/rust_xlsxwriter/pull/66
+
+- Added `XlsxError::CustomError` as a target error for external crates/apps.
+
+  [Feature Request #72].
+
+  [Feature Request #72]: https://github.com/jmcnamara/rust_xlsxwriter/pull/72
 
 
 ## [0.60.0] - 2023-01-02

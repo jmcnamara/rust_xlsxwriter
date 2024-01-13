@@ -1349,6 +1349,50 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_write_url_with_text.rs` - Demonstrates writing a url with
   alternative text.
 
+* `doc_xlsxserialize_column_width.rs` - Example of serializing Serde
+  derived structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_field_header_format.rs` - Example of serializing Serde
+  derived structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_header_format.rs` - Example of serializing Serde
+  derived structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_header_format_reuse.rs` - Example of serializing Serde
+  derived structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_hide_headers.rs` - Example of serializing Serde
+  derived structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_intro.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_num_format.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_rename.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_skip.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_skip2.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_value_format.rs` - Example of serializing Serde
+  derived structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
 * `doc_xmlwriter_perf_test.rs` - Simple performance test to exercise
   xmlwriter without hitting the worksheet::write_data_table() fast path.
 
