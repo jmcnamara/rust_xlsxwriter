@@ -620,6 +620,41 @@ fn create_new_xlsx_file_15(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization. Test Result types.
+fn create_new_xlsx_file_16(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: Result<u8, &'static str>,
+        col2: Result<f64, &'static str>,
+    }
+
+    let data = [
+        MyStruct {
+            col1: Ok(1),
+            col2: Err("aaa"),
+        },
+        MyStruct {
+            col1: Ok(2),
+            col2: Err("bbb"),
+        },
+        MyStruct {
+            col1: Ok(3),
+            col2: Err("ccc"),
+        },
+    ];
+
+    worksheet.serialize_headers(0, 0, &data.get(0).unwrap())?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde07_1() {
     let test_runner = common::TestRunner::new()
@@ -793,6 +828,18 @@ fn test_serde07_15() {
         .set_name("serde07")
         .set_function(create_new_xlsx_file_15)
         .unique("15")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde07_16() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_16)
+        .unique("16")
         .initialize();
 
     test_runner.assert_eq();

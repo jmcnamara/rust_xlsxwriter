@@ -3259,6 +3259,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
     where
         T: ?Sized + Serialize,
     {
+        value.serialize(&mut *self)?;
         Ok(())
     }
 
