@@ -21,28 +21,13 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use regex::Regex;
 
 #[cfg(feature = "serde")]
-use crate::serializer::SerializerState;
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "serde")]
-use serde::Serialize;
-
-#[cfg(feature = "serde")]
-use crate::SerializerHeader;
-
-#[cfg(feature = "serde")]
-use crate::CustomSerializeField;
-
-#[cfg(feature = "serde")]
-use serde::Deserialize;
-
-#[cfg(feature = "serde")]
-use crate::deserialize_headers;
-
-#[cfg(feature = "serde")]
-use crate::SerializeFieldOptions;
-
-#[cfg(feature = "serde")]
-use crate::XlsxSerialize;
+use crate::{
+    deserialize_headers, serializer::SerializerState, CustomSerializeField, HeaderConfig,
+    SerializeFieldOptions, SerializerHeader, XlsxSerialize,
+};
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
@@ -53,12 +38,11 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, ChartRangeCacheDataType, Color, ConditionalFormat, ExcelDateTime, HeaderImagePosition,
-    Image, IntoColor, IntoExcelDateTime, ObjectMovement, ProtectionOptions, Table, TableFunction,
-    Url,
+    utility, Chart, ChartRangeCacheData, ChartRangeCacheDataType, Color, ConditionalFormat,
+    ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
+    HeaderImagePosition, Image, IntoColor, IntoExcelDateTime, ObjectMovement, ProtectionOptions,
+    Table, TableFunction, Url,
 };
-use crate::{Chart, ChartRangeCacheData};
-use crate::{FilterCondition, FilterCriteria, FilterData, FilterDataType};
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
 /// in a worksheet is 1,048,576.
@@ -7107,7 +7091,6 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Check row and columns are in the allowed range.
 
-        use crate::HeaderConfig;
         if !self.check_dimensions_only(row, col) {
             return Err(XlsxError::RowColumnLimitError);
         }
@@ -7136,7 +7119,8 @@ impl Worksheet {
         let col_initial = col;
         let write_headers = header_options.has_headers;
 
-        for (col_offset, custom_header) in header_options.custom_headers.iter().enumerate() {
+        let mut col_offset = 0;
+        for custom_header in &header_options.custom_headers {
             if custom_header.skip {
                 continue;
             }
@@ -7145,6 +7129,7 @@ impl Worksheet {
             let mut custom_header = custom_header.clone();
             custom_header.col = col;
             max_col = col;
+            col_offset += 1;
 
             // Set the column width if specified by user.
             if let Some(width) = custom_header.width {
