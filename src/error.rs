@@ -28,7 +28,7 @@ use serde::ser;
 /// library.
 pub enum XlsxError {
     /// A general parameter error that is raised when a parameter conflicts with
-    /// an Excel limit or syntax. The nature of the error in on the error string.
+    /// an Excel limit or syntax. The nature of the error is in the error string.
     ParameterError(String),
 
     /// Error returned when a row or column argument exceeds Excel's limits of

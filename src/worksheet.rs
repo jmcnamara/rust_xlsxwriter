@@ -6912,7 +6912,7 @@ impl Worksheet {
     ///
     /// See also [`Worksheet::serialize_headers()`] which requires an instance
     /// of the serializable type but doesn't require that your struct also
-    /// derives `Deserialize``, and [`Worksheet::deserialize_headers()`] which
+    /// derives `Deserialize`, and [`Worksheet::deserialize_headers()`] which
     /// does.
     ///
     /// # Parameters
@@ -6997,10 +6997,23 @@ impl Worksheet {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError>
     where
-        T: XlsxSerialize,
+        T: XlsxSerialize + Serialize,
     {
         let header_options = T::to_serialize_field_options();
         self.store_custom_serialization_headers(row, col, &header_options)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    #[cfg(feature = "serde")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn serialize_dimensions(
+        &mut self,
+        name: &str,
+    ) -> Result<(RowNum, ColNum, RowNum, ColNum), XlsxError> {
+        self.serializer_state.get_dimensions(name)
     }
 
     // Store serialization headers and options.
@@ -7115,7 +7128,11 @@ impl Worksheet {
         }
 
         let mut fields = HashMap::new();
-        let mut row = row;
+        let min_row = row;
+        let min_col = col;
+        let mut max_row = row;
+        let mut max_col = col;
+
         let col_initial = col;
         let write_headers = header_options.has_headers;
 
@@ -7127,6 +7144,7 @@ impl Worksheet {
             let col = col_initial + col_offset as u16;
             let mut custom_header = custom_header.clone();
             custom_header.col = col;
+            max_col = col;
 
             // Set the column width if specified by user.
             if let Some(width) = custom_header.width {
@@ -7145,11 +7163,11 @@ impl Worksheet {
             // without a format.
             if write_headers {
                 if let Some(format) = &custom_header.header_format {
-                    self.write_with_format(row, col, &custom_header.header_name, format)?;
+                    self.write_with_format(max_row, col, &custom_header.header_name, format)?;
                 } else if let Some(format) = &header_options.header_format {
-                    self.write_with_format(row, col, &custom_header.header_name, format)?;
+                    self.write_with_format(max_row, col, &custom_header.header_name, format)?;
                 } else {
-                    self.write(row, col, &custom_header.header_name)?;
+                    self.write(max_row, col, &custom_header.header_name)?;
                 };
             }
 
@@ -7158,15 +7176,18 @@ impl Worksheet {
 
         // If we wrote headers then start the data serialization one row down.
         if write_headers {
-            row += 1;
+            max_row += 1;
         }
 
         // Store meta data for the struct/headers.
         self.serializer_state.structs.insert(
             header_options.struct_name.clone(),
             HeaderConfig {
-                max_row: row,
                 fields,
+                min_row,
+                min_col,
+                max_row,
+                max_col,
             },
         );
 

@@ -1942,6 +1942,25 @@ impl SerializerState {
         };
         header_config.max_row += 1;
     }
+
+    // TODO
+    pub(crate) fn get_dimensions(
+        &mut self,
+        name: &str,
+    ) -> Result<(RowNum, ColNum, RowNum, ColNum), XlsxError> {
+        let Some(header_config) = self.structs.get_mut(name) else {
+            return Err(XlsxError::ParameterError(
+                "Unknown serialized struct: '{name}'".to_string(),
+            ));
+        };
+
+        Ok((
+            header_config.min_row,
+            header_config.min_col,
+            header_config.max_row - 1,
+            header_config.max_col,
+        ))
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1950,7 +1969,10 @@ impl SerializerState {
 // -----------------------------------------------------------------------
 pub(crate) struct HeaderConfig {
     pub(crate) fields: HashMap<String, CustomSerializeField>,
+    pub(crate) min_row: RowNum,
+    pub(crate) min_col: ColNum,
     pub(crate) max_row: RowNum,
+    pub(crate) max_col: ColNum,
 }
 
 // -----------------------------------------------------------------------
