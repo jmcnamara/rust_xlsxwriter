@@ -7,7 +7,7 @@ repository = "https://github.com/jmcnamara/rust_xlsxwriter"
 keywords = ["excel", "xlsx"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-version = "0.61.0"
+version = "0.61.1"
 edition = "2021"
 
 [dependencies]
@@ -15,7 +15,7 @@ chrono = {version = "0.4.31", default-features = false, features = ["clock", "wa
 zip = {version = "0.6.4 ", default-features = false, features = ["deflate"]}
 regex = "1.7.3"
 lazy_static = "1.4.0"
-polars= {version = "0.35.4", default-features = false, features = [], optional = true}
+polars= {version = "0.36.2", default-features = false, features = [], optional = true}
 js-sys = {version = "0.3.64", optional = true}
 wasm-bindgen = {version = "0.2.87", optional = true}
 serde = {version = "1.0.193", features = ["derive"], optional = true}
