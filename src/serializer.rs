@@ -46,7 +46,7 @@
 //!
 //! ## How serialization works in `rust_xlsxwriter`
 //!
-//! Serialization with `rust_xlsxwriter` needs to take into consideration that
+//! Serialization with `rust_xlsxwriter` needs to take into consideration
 //! that the target output is a 2D grid of cells into which the data can be
 //! serialized. As such the focus is on serializing data types that map to this
 //! 2D grid such as structs or compound collections of structs such as vectors
@@ -1886,9 +1886,18 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::{ColNum, Format, RowNum, Worksheet, XlsxError};
+use crate::{ColNum, Format, RowNum, Table, Worksheet, XlsxError};
 use serde::de::Visitor;
 use serde::{ser, Deserialize, Deserializer, Serialize};
+
+// Convenience tuple struct Table data used for serialization formatting.
+pub(crate) struct TableData(
+    pub(crate) RowNum,
+    pub(crate) ColNum,
+    pub(crate) RowNum,
+    pub(crate) ColNum,
+    pub(crate) Table,
+);
 
 // -----------------------------------------------------------------------
 // SerializerState, a struct to maintain row/column state and other metadata
@@ -1896,7 +1905,7 @@ use serde::{ser, Deserialize, Deserializer, Serialize};
 // information in the serializer.
 // -----------------------------------------------------------------------
 pub(crate) struct SerializerState {
-    pub(crate) structs: HashMap<String, HeaderConfig>,
+    pub(crate) structs: HashMap<String, SerializationHeaderConfig>,
     pub(crate) current_struct: String,
     pub(crate) current_field: String,
 }
@@ -1943,15 +1952,16 @@ impl SerializerState {
         header_config.max_row += 1;
     }
 
-    // TODO
+    // Get dimensions of a serialization area. This is the internal function for
+    // worksheet.get_serialize_dimensions().
     pub(crate) fn get_dimensions(
         &mut self,
         name: &str,
     ) -> Result<(RowNum, ColNum, RowNum, ColNum), XlsxError> {
         let Some(header_config) = self.structs.get_mut(name) else {
-            return Err(XlsxError::ParameterError(
-                "Unknown serialized struct: '{name}'".to_string(),
-            ));
+            return Err(XlsxError::ParameterError(format!(
+                "Unknown serialized struct '{name}'"
+            )));
         };
 
         Ok((
@@ -1961,18 +1971,50 @@ impl SerializerState {
             header_config.max_col,
         ))
     }
+
+    // Get all/any tables defined for serialization areas.
+    pub(crate) fn get_tables(&mut self) -> Vec<TableData> {
+        let mut tables = vec![];
+
+        for header_config in self.structs.values_mut() {
+            if let Some(table) = header_config.get_table() {
+                tables.push(table);
+            }
+        }
+
+        tables
+    }
 }
 
 // -----------------------------------------------------------------------
 // HeaderConfig, a struct to capture the metadata for fields associated
 // with a struct.
 // -----------------------------------------------------------------------
-pub(crate) struct HeaderConfig {
+pub(crate) struct SerializationHeaderConfig {
     pub(crate) fields: HashMap<String, CustomSerializeField>,
     pub(crate) min_row: RowNum,
     pub(crate) min_col: ColNum,
     pub(crate) max_row: RowNum,
     pub(crate) max_col: ColNum,
+    pub(crate) table: Option<Table>,
+}
+
+impl SerializationHeaderConfig {
+    // Get table object and dimensions for the a serialization area.
+    pub(crate) fn get_table(&mut self) -> Option<TableData> {
+        let table = self.table.take();
+
+        match table {
+            Some(table) => Some(TableData(
+                self.min_row,
+                self.min_col,
+                self.max_row - 1,
+                self.max_col,
+                table,
+            )),
+            None => None,
+        }
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -2082,6 +2124,7 @@ pub struct SerializeFieldOptions {
     pub(crate) has_headers: bool,
     pub(crate) custom_headers: Vec<CustomSerializeField>,
     pub(crate) use_custom_headers_only: bool,
+    pub(crate) table: Option<Table>,
 }
 
 impl Default for SerializeFieldOptions {
@@ -2108,6 +2151,7 @@ impl SerializeFieldOptions {
             has_headers: true,
             custom_headers: vec![],
             use_custom_headers_only: false,
+            table: None,
         }
     }
 
@@ -2375,6 +2419,20 @@ impl SerializeFieldOptions {
         custom_headers: &[CustomSerializeField],
     ) -> SerializeFieldOptions {
         self.custom_headers = custom_headers.to_vec();
+        self
+    }
+
+    /// TODO
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_default_table(mut self) -> SerializeFieldOptions {
+        self.table = Some(Table::new());
+        self
+    }
+
+    /// TODO
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_table(mut self, table: &Table) -> SerializeFieldOptions {
+        self.table = Some(table.clone());
         self
     }
 

@@ -25,8 +25,8 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "serde")]
 use crate::{
-    deserialize_headers, serializer::SerializerState, CustomSerializeField, HeaderConfig,
-    SerializeFieldOptions, SerializerHeader, XlsxSerialize,
+    deserialize_headers, serializer::SerializerState, CustomSerializeField,
+    SerializationHeaderConfig, SerializeFieldOptions, SerializerHeader, TableData, XlsxSerialize,
 };
 
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
@@ -6532,7 +6532,6 @@ impl Worksheet {
         };
 
         data_structure.serialize(&mut headers)?;
-
         self.store_serialization_headers_with_options(row, col, &headers, header_options)
     }
 
@@ -6993,7 +6992,7 @@ impl Worksheet {
     ///
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn serialize_dimensions(
+    pub fn get_serialize_dimensions(
         &mut self,
         name: &str,
     ) -> Result<(RowNum, ColNum, RowNum, ColNum), XlsxError> {
@@ -7014,8 +7013,8 @@ impl Worksheet {
         for custom_header in &header_options.custom_headers {
             if !field_names.contains(&custom_header.field_name) {
                 return Err(XlsxError::ParameterError(format!(
-                    "No custom field name '{}' found for struct '{}.'",
-                    custom_header.field_name, header_options.struct_name
+                    "No custom field name '{}' found for struct '{}'",
+                    custom_header.field_name, headers.struct_name
                 )));
             }
         }
@@ -7105,7 +7104,7 @@ impl Worksheet {
         // Check for empty struct members.
         if header_options.custom_headers.is_empty() {
             return Err(XlsxError::ParameterError(format!(
-                "No members found/specified for struct '{}.'",
+                "No members found/specified for struct '{}'",
                 header_options.struct_name
             )));
         }
@@ -7159,20 +7158,45 @@ impl Worksheet {
             fields.insert(custom_header.field_name.clone(), custom_header);
         }
 
-        // If we wrote headers then start the data serialization one row down.
+        // Start the data serialization one row down if headers were written.
         if write_headers {
             max_row += 1;
         }
 
+        // If a previous serialization was carried out with the same struct name
+        // then write the previous table formatting.
+        if let Some(header_config) = self
+            .serializer_state
+            .structs
+            .get_mut(&header_options.struct_name)
+        {
+            if let Some(table_data) = header_config.get_table() {
+                self.write_serialized_table(&table_data)?;
+            }
+        }
+
+        // Clone the new user defined table format, if present.
+        let table = match &header_options.table {
+            Some(table) => {
+                let mut table = table.clone();
+                if !header_options.has_headers {
+                    table.show_header_row = false;
+                }
+                Some(table)
+            }
+            None => None,
+        };
+
         // Store meta data for the struct/headers.
         self.serializer_state.structs.insert(
             header_options.struct_name.clone(),
-            HeaderConfig {
+            SerializationHeaderConfig {
                 fields,
                 min_row,
                 min_col,
                 max_row,
                 max_col,
+                table,
             },
         );
 
@@ -7207,6 +7231,37 @@ impl Worksheet {
             }
             Err(()) => Ok(()),
         }
+    }
+
+    // Add any tables that were added as part of serialization formatting.
+    #[cfg(feature = "serde")]
+    pub(crate) fn store_serialized_tables(&mut self) -> Result<&mut Worksheet, XlsxError> {
+        let tables = self.serializer_state.get_tables();
+
+        for table_data in tables {
+            self.write_serialized_table(&table_data)?;
+        }
+
+        Ok(self)
+    }
+
+    // Write a table that is part of serialization formatting.
+    #[cfg(feature = "serde")]
+    pub(crate) fn write_serialized_table(
+        &mut self,
+        table_data: &TableData,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let min_col = table_data.1;
+        let max_col = table_data.3;
+        let min_row = table_data.0;
+        let mut max_row = table_data.2;
+        let table = &table_data.4;
+
+        if table.show_total_row {
+            max_row += 1;
+        }
+
+        self.add_table(min_row, min_col, max_row, max_col, table)
     }
 
     // -----------------------------------------------------------------------

@@ -1135,6 +1135,12 @@ impl Workbook {
             unique_worksheet_names.insert(worksheet_name);
         }
 
+        // Write any Tables associated with serialization areas.
+        #[cfg(feature = "serde")]
+        for worksheet in &mut self.worksheets {
+            worksheet.store_serialized_tables()?;
+        }
+
         // Convert any worksheet local formats to workbook/global formats. At
         // the worksheet level each unique format will have an index like 0, 1,
         // 2, etc., starting from 0 for each worksheet. However, at a workbook

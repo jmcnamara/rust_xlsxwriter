@@ -6,22 +6,24 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{
-    CustomSerializeField, SerializeFieldOptions, Table, Workbook, XlsxError, XlsxSerialize,
-};
+use rust_xlsxwriter::{CustomSerializeField, SerializeFieldOptions, Table, Workbook, XlsxError};
 use serde::Serialize;
 
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
+
     let worksheet = workbook.add_worksheet();
+    worksheet.write_string(0, 0, "Foo")?;
 
     worksheet.set_column_width(2, 10.288)?;
     worksheet.set_column_width(3, 10.288)?;
     worksheet.set_column_width(4, 10.288)?;
     worksheet.set_column_width(5, 10.288)?;
 
-    let table = Table::new();
+    let mut table = Table::new();
+    table.set_header_row(false);
+
     worksheet.add_table(2, 2, 12, 5, &table)?;
 
     workbook.save(filename)?;
@@ -33,83 +35,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
-
-    #[derive(Serialize, XlsxSerialize)]
-    #[serde(rename_all = "PascalCase")]
-    struct MyStruct {
-        #[xlsx(column_width = 10.288)]
-        column1: Option<f64>,
-
-        #[xlsx(column_width = 10.288)]
-        column2: Option<f64>,
-
-        #[xlsx(column_width = 10.288)]
-        column3: Option<f64>,
-
-        #[xlsx(column_width = 10.288)]
-        column4: Option<f64>,
-    }
-
-    worksheet.set_serialize_headers::<MyStruct>(2, 2)?;
-
-    let table = Table::new();
-    worksheet.add_table(2, 2, 12, 5, &table)?;
-
-    workbook.save(filename)?;
-
-    Ok(())
-}
-
-// Test case for Serde serialization. Test Worksheet table.
-fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet();
-
-    #[derive(Serialize, XlsxSerialize)]
-    #[serde(rename_all = "PascalCase")]
-    struct MyStruct {
-        #[xlsx(column_width = 10.288)]
-        column1: Option<f64>,
-
-        #[xlsx(column_width = 10.288)]
-        column2: Option<f64>,
-
-        #[xlsx(column_width = 10.288)]
-        column3: Option<f64>,
-
-        #[xlsx(column_width = 10.288)]
-        column4: Option<f64>,
-    }
-
-    worksheet.set_serialize_headers::<MyStruct>(2, 2)?;
-
-    let data = MyStruct {
-        column1: None,
-        column2: None,
-        column3: None,
-        column4: None,
-    };
-
-    for _ in 1..=10 {
-        worksheet.serialize(&data)?;
-    }
-
-    let table_dimensions = worksheet.get_serialize_dimensions("MyStruct");
-
-    if let Ok((first_row, first_col, last_row, last_col)) = table_dimensions {
-        let table = Table::new();
-        worksheet.add_table(first_row, first_col, last_row, last_col, &table)?;
-    }
-
-    workbook.save(filename)?;
-
-    Ok(())
-}
-
-// Test case for Serde serialization. Test Worksheet table.
-fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet();
+    worksheet.write_string(0, 0, "Foo")?;
 
     #[derive(Serialize)]
     #[serde(rename_all = "PascalCase")]
@@ -129,6 +55,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 
     let header_options = SerializeFieldOptions::new()
         .set_default_table()
+        .hide_headers(true)
         .set_custom_headers(&[
             CustomSerializeField::new("Column1").set_column_width(10.288),
             CustomSerializeField::new("Column2").set_column_width(10.288),
@@ -138,7 +65,53 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.serialize_headers_with_options(2, 2, &data, &header_options)?;
 
-    for _ in 1..=10 {
+    for _ in 1..=11 {
+        worksheet.serialize(&data)?;
+    }
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde serialization. Test Worksheet table.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    worksheet.write_string(0, 0, "Foo")?;
+
+    #[derive(Serialize)]
+    #[serde(rename_all = "PascalCase")]
+    struct MyStruct {
+        column1: Option<f64>,
+        column2: Option<f64>,
+        column3: Option<f64>,
+        column4: Option<f64>,
+    }
+
+    let data = MyStruct {
+        column1: None,
+        column2: None,
+        column3: None,
+        column4: None,
+    };
+
+    // Create a user defined table.
+    let table = Table::new();
+
+    let header_options = SerializeFieldOptions::new()
+        .set_table(&table)
+        .hide_headers(true)
+        .set_custom_headers(&[
+            CustomSerializeField::new("Column1").set_column_width(10.288),
+            CustomSerializeField::new("Column2").set_column_width(10.288),
+            CustomSerializeField::new("Column3").set_column_width(10.288),
+            CustomSerializeField::new("Column4").set_column_width(10.288),
+        ]);
+
+    worksheet.serialize_headers_with_options(2, 2, &data, &header_options)?;
+
+    for _ in 1..=11 {
         worksheet.serialize(&data)?;
     }
 
@@ -148,11 +121,11 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_serde18_1() {
+fn test_serde20_1() {
     let test_runner = common::TestRunner::new()
-        .set_name("table01")
+        .set_name("table07")
         .set_function(create_new_xlsx_file_1)
-        .unique("serde18_1")
+        .unique("serde20_1")
         .initialize();
 
     test_runner.assert_eq();
@@ -160,11 +133,11 @@ fn test_serde18_1() {
 }
 
 #[test]
-fn test_serde18_2() {
+fn test_serde20_2() {
     let test_runner = common::TestRunner::new()
-        .set_name("table01")
+        .set_name("table07")
         .set_function(create_new_xlsx_file_2)
-        .unique("serde18_2")
+        .unique("serde20_2")
         .initialize();
 
     test_runner.assert_eq();
@@ -172,23 +145,11 @@ fn test_serde18_2() {
 }
 
 #[test]
-fn test_serde18_3() {
+fn test_serde20_3() {
     let test_runner = common::TestRunner::new()
-        .set_name("table01")
+        .set_name("table07")
         .set_function(create_new_xlsx_file_3)
-        .unique("serde18_3")
-        .initialize();
-
-    test_runner.assert_eq();
-    test_runner.cleanup();
-}
-
-#[test]
-fn test_serde18_4() {
-    let test_runner = common::TestRunner::new()
-        .set_name("table01")
-        .set_function(create_new_xlsx_file_4)
-        .unique("serde18_4")
+        .unique("serde20_3")
         .initialize();
 
     test_runner.assert_eq();

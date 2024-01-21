@@ -705,6 +705,18 @@ mod serde16;
 mod serde17;
 #[cfg(feature = "serde")]
 mod serde18;
+#[cfg(feature = "serde")]
+mod serde19;
+#[cfg(feature = "serde")]
+mod serde20;
+#[cfg(feature = "serde")]
+mod serde21;
+#[cfg(feature = "serde")]
+mod serde22;
+#[cfg(feature = "serde")]
+mod serde23;
+#[cfg(feature = "serde")]
+mod serde24;
 mod set_row01;
 mod set_row02;
 mod set_row03;
