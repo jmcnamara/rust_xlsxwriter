@@ -19,8 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let data = [["apple", "pie"], ["pine", "tree"]];
     worksheet.write_row_matrix(1, 1, data)?;
 
-    let mut table = Table::new();
-    table.set_header_row(false);
+    let table = Table::new().set_header_row(false);
 
     worksheet.add_table(1, 1, 2, 2, &table)?;
 

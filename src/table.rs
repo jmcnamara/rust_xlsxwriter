@@ -63,8 +63,6 @@ use crate::{
 ///     }
 ///
 ///     // Create a new table and configure it.
-///     let mut table = Table::new();
-///
 ///     let columns = vec![
 ///         TableColumn::new()
 ///             .set_header("Product")
@@ -87,8 +85,7 @@ use crate::{
 ///             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
 ///     ];
 ///
-///     table.set_columns(&columns);
-///     table.set_total_row(true);
+///     let table = Table::new().set_columns(&columns).set_total_row(true);
 ///
 ///     // Add the table to the worksheet.
 ///     worksheet.add_table(2, 1, 7, 6, &table)?;
@@ -323,8 +320,7 @@ impl Table {
     /// #     }
     /// #
     ///     // Create a new table and configure the header.
-    ///     let mut table = Table::new();
-    ///     table.set_header_row(false);
+    ///     let table = Table::new().set_header_row(false);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 5, 5, &table)?;
@@ -373,9 +369,6 @@ impl Table {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the column headers.
-    ///     let mut table = Table::new();
-    ///
     ///     // Set the captions for the header row.
     ///     let columns = vec![
     ///         TableColumn::new().set_header("Product"),
@@ -384,7 +377,9 @@ impl Table {
     ///         TableColumn::new().set_header("Quarter 3"),
     ///         TableColumn::new().set_header("Quarter 4"),
     ///     ];
-    ///     table.set_columns(&columns);
+    ///
+    ///     // Create a new table and configure the column headers.
+    ///     let table = Table::new().set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -401,7 +396,7 @@ impl Table {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/table_set_header_row3.png">
     ///
-    pub fn set_header_row(&mut self, enable: bool) -> &mut Table {
+    pub fn set_header_row(mut self, enable: bool) -> Table {
         self.show_header_row = enable;
 
         // The table autofilter should be off if the header is off so that it
@@ -465,8 +460,7 @@ impl Table {
     /// #     }
     /// #
     ///     // Create a new table and configure the total row.
-    ///     let mut table = Table::new();
-    ///     table.set_total_row(true);
+    ///     let table = Table::new().set_total_row(true);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 7, 5, &table)?;
@@ -489,7 +483,7 @@ impl Table {
     /// ```
     /// # // This code is available in examples/doc_table_set_total_row2.rs
     /// #
-    /// # use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Formula, Table, TableColumn, TableFunction, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -516,19 +510,19 @@ impl Table {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the total row.
-    ///     let mut table = Table::new();
-    ///     table.set_total_row(true);
-    ///
     ///     // Set the caption and subtotal in the total row.
     ///     let columns = vec![
     ///         TableColumn::new().set_total_label("Totals"),
     ///         TableColumn::new().set_total_function(TableFunction::Sum),
     ///         TableColumn::new().set_total_function(TableFunction::Sum),
     ///         TableColumn::new().set_total_function(TableFunction::Sum),
-    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///         // Use a custom formula to get a similar summation.
+    ///         TableColumn::new()
+    ///             .set_total_function(TableFunction::Custom(Formula::new("SUM([Column5])"))),
     ///     ];
-    ///     table.set_columns(&columns);
+    ///
+    ///     // Create a new table and configure the total row.
+    ///     let table = Table::new().set_total_row(true).set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 7, 5, &table)?;
@@ -545,7 +539,7 @@ impl Table {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/table_set_total_row2.png">
     ///
-    pub fn set_total_row(&mut self, enable: bool) -> &mut Table {
+    pub fn set_total_row(mut self, enable: bool) -> Table {
         self.show_total_row = enable;
         self
     }
@@ -596,14 +590,13 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the column widths for clarity
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
     ///     // Create a new table and configure the banded rows.
-    ///     let mut table = Table::new();
-    ///     table.set_banded_rows(false);
+    ///     let table = Table::new().set_banded_rows(false);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -620,7 +613,7 @@ impl Table {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/table_set_banded_rows.png">
     ///
-    pub fn set_banded_rows(&mut self, enable: bool) -> &mut Table {
+    pub fn set_banded_rows(mut self, enable: bool) -> Table {
         self.show_banded_rows = enable;
         self
     }
@@ -665,17 +658,14 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the column widths for clarity
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the banded columns.
-    ///     let mut table = Table::new();
-    ///     table.set_banded_columns(true);
-    ///
-    ///     // Turn off banded rows for clarity.
-    ///     table.set_banded_rows(false);
+    ///     // Create a new table and configure the banded columns (but turn off banded
+    ///     // rows for clarity).
+    ///     let table = Table::new().set_banded_columns(true).set_banded_rows(false);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -691,7 +681,7 @@ impl Table {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/table_set_banded_columns.png">
     ///
-    pub fn set_banded_columns(&mut self, enable: bool) -> &mut Table {
+    pub fn set_banded_columns(mut self, enable: bool) -> Table {
         self.show_banded_columns = enable;
         self
     }
@@ -742,8 +732,7 @@ impl Table {
     /// #     }
     /// #
     ///     // Create a new table and configure the first column highlighting.
-    ///     let mut table = Table::new();
-    ///     table.set_first_column(true);
+    ///     let table = Table::new().set_first_column(true);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -760,7 +749,7 @@ impl Table {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/table_set_first_column.png">
     ///
-    pub fn set_first_column(&mut self, enable: bool) -> &mut Table {
+    pub fn set_first_column(mut self, enable: bool) -> Table {
         self.show_first_column = enable;
         self
     }
@@ -805,15 +794,11 @@ impl Table {
     /// #     worksheet.write_column(3, 1, items)?;
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
-    /// #     // Set the column widths for clarity
+    /// #     // Set the column widths for clarity.
     /// #     for col_num in 1..=6u16 {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the last column highlighting.
-    ///     let mut table = Table::new();
-    ///     table.set_last_column(true);
-    ///
     ///     // Add a structured reference formula to the last column and set the header
     ///     // caption. The last column in `add_table()` should be extended to account
     ///     // for this extra column.
@@ -827,7 +812,9 @@ impl Table {
     ///             .set_header("Totals")
     ///             .set_formula("SUM(Table1[@[Column2]:[Column5]])"),
     ///     ];
-    ///     table.set_columns(&columns);
+    ///
+    ///     // Create a new table and configure the last column highlighting.
+    ///     let table = Table::new().set_last_column(true).set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 6, &table)?;
@@ -844,7 +831,7 @@ impl Table {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/table_set_last_column.png">
     ///
-    pub fn set_last_column(&mut self, enable: bool) -> &mut Table {
+    pub fn set_last_column(mut self, enable: bool) -> Table {
         self.show_last_column = enable;
         self
     }
@@ -893,8 +880,7 @@ impl Table {
     /// #     }
     /// #
     ///     // Create a new table and configure the autofilter.
-    ///     let mut table = Table::new();
-    ///     table.set_autofilter(false);
+    ///     let table = Table::new().set_autofilter(false);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -910,7 +896,7 @@ impl Table {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/table_set_autofilter.png">
     ///
-    pub fn set_autofilter(&mut self, enable: bool) -> &mut Table {
+    pub fn set_autofilter(mut self, enable: bool) -> Table {
         self.show_autofilter = enable;
         self
     }
@@ -968,8 +954,6 @@ impl Table {
     /// #     }
     /// #
     ///     // Create a new table and configure it.
-    ///     let mut table = Table::new();
-    ///
     ///     let columns = vec![
     ///         TableColumn::new()
     ///             .set_header("Product")
@@ -992,8 +976,7 @@ impl Table {
     ///             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
     ///     ];
     ///
-    ///     table.set_columns(&columns);
-    ///     table.set_total_row(true);
+    ///     let table = Table::new().set_columns(&columns).set_total_row(true);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 7, 6, &table)?;
@@ -1010,7 +993,7 @@ impl Table {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/table_set_columns.png">
     ///
-    pub fn set_columns(&mut self, columns: &[TableColumn]) -> &mut Table {
+    pub fn set_columns(mut self, columns: &[TableColumn]) -> Table {
         self.columns = columns.to_vec();
         self
     }
@@ -1066,8 +1049,7 @@ impl Table {
     /// #     }
     /// #
     ///     // Create a new table and set the name.
-    ///     let mut table = Table::new();
-    ///     table.set_name("ProduceSales");
+    ///     let table = Table::new().set_name("ProduceSales");
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -1083,7 +1065,7 @@ impl Table {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/table_set_name.png">
     ///
-    pub fn set_name(&mut self, name: impl Into<String>) -> &mut Table {
+    pub fn set_name(mut self, name: impl Into<String>) -> Table {
         self.name = name.into();
         self
     }
@@ -1137,8 +1119,7 @@ impl Table {
     /// #     }
     /// #
     ///     // Create a new table and set the style.
-    ///     let mut table = Table::new();
-    ///     table.set_style(TableStyle::Medium10);
+    ///     let table = Table::new().set_style(TableStyle::Medium10);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -1154,7 +1135,7 @@ impl Table {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/table_set_style.png">
     ///
-    pub fn set_style(&mut self, style: TableStyle) -> &mut Table {
+    pub fn set_style(mut self, style: TableStyle) -> Table {
         self.style = style;
         self
     }
@@ -1424,8 +1405,6 @@ impl Table {
 ///     }
 ///
 ///     // Create a new table and configure it.
-///     let mut table = Table::new();
-///
 ///     let columns = vec![
 ///         TableColumn::new()
 ///             .set_header("Product")
@@ -1448,8 +1427,7 @@ impl Table {
 ///             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
 ///     ];
 ///
-///     table.set_columns(&columns);
-///     table.set_total_row(true);
+///     let table = Table::new().set_columns(&columns).set_total_row(true);
 ///
 ///     // Add the table to the worksheet.
 ///     worksheet.add_table(2, 1, 7, 6, &table)?;
@@ -1538,9 +1516,6 @@ impl TableColumn {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the column headers.
-    ///     let mut table = Table::new();
-    ///
     ///     // Set the captions for the header row.
     ///     let columns = vec![
     ///         TableColumn::new().set_header("Product"),
@@ -1549,7 +1524,9 @@ impl TableColumn {
     ///         TableColumn::new().set_header("Quarter 3"),
     ///         TableColumn::new().set_header("Quarter 4"),
     ///     ];
-    ///     table.set_columns(&columns);
+    ///
+    ///     // Create a new table and configure the column headers.
+    ///     let table = Table::new().set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -1605,7 +1582,7 @@ impl TableColumn {
     /// ```
     /// # // This code is available in examples/doc_table_set_total_row2.rs
     /// #
-    /// # use rust_xlsxwriter::{Table, TableColumn, TableFunction, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Formula, Table, TableColumn, TableFunction, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     // Create a new Excel file object.
@@ -1632,19 +1609,19 @@ impl TableColumn {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the total row.
-    ///     let mut table = Table::new();
-    ///     table.set_total_row(true);
-    ///
     ///     // Set the caption and subtotal in the total row.
     ///     let columns = vec![
     ///         TableColumn::new().set_total_label("Totals"),
     ///         TableColumn::new().set_total_function(TableFunction::Sum),
     ///         TableColumn::new().set_total_function(TableFunction::Sum),
     ///         TableColumn::new().set_total_function(TableFunction::Sum),
-    ///         TableColumn::new().set_total_function(TableFunction::Sum),
+    ///         // Use a custom formula to get a similar summation.
+    ///         TableColumn::new()
+    ///             .set_total_function(TableFunction::Custom(Formula::new("SUM([Column5])"))),
     ///     ];
-    ///     table.set_columns(&columns);
+    ///
+    ///     // Create a new table and configure the total row.
+    ///     let table = Table::new().set_total_row(true).set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 7, 5, &table)?;
@@ -1736,9 +1713,6 @@ impl TableColumn {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the columns.
-    ///     let mut table = Table::new();
-    ///
     ///     // Add a structured reference formula to the last column and set the header
     ///     // caption.
     ///     let columns = vec![
@@ -1751,7 +1725,9 @@ impl TableColumn {
     ///             .set_header("Totals")
     ///             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
     ///     ];
-    ///     table.set_columns(&columns);
+    ///
+    ///     // Create a new table and configure the columns.
+    ///     let table = Table::new().set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 6, &table)?;
@@ -1824,9 +1800,6 @@ impl TableColumn {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the columns.
-    ///     let mut table = Table::new();
-    ///
     ///     // Create a number format for number columns in the table.
     ///     let format = Format::new().set_num_format("$#,##0.00");
     ///
@@ -1838,7 +1811,9 @@ impl TableColumn {
     ///         TableColumn::new().set_header("Q3").set_format(&format),
     ///         TableColumn::new().set_header("Q4").set_format(&format),
     ///     ];
-    ///     table.set_columns(&columns);
+    ///
+    ///     // Create a new table and configure the columns.
+    ///     let table = Table::new().set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -1902,10 +1877,7 @@ impl TableColumn {
     /// #         worksheet.set_column_width(col_num, 12)?;
     /// #     }
     /// #
-    ///     // Create a new table and configure the columns.
-    ///     let mut table = Table::new();
-    ///
-    ///     // Create formats for the columns headers.
+    /// #     // Create formats for the columns headers.
     ///     let format1 = Format::new().set_font_color("#FF0000");
     ///     let format2 = Format::new().set_font_color("#00FF00");
     ///     let format3 = Format::new().set_font_color("#0000FF");
@@ -1927,7 +1899,9 @@ impl TableColumn {
     ///             .set_header("Quarter 4")
     ///             .set_header_format(format4),
     ///     ];
-    ///     table.set_columns(&columns);
+    ///
+    ///     // Create a new table and configure the columns.
+    ///     let table = Table::new().set_columns(&columns);
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -2019,25 +1993,23 @@ impl Default for TableColumn {
 /// #         worksheet.set_column_width(col_num, 12)?;
 /// #     }
 /// #
-///     // Create a new table and configure the total row.
-///     let mut table = Table::new();
-///     table.set_total_row(true);
-///
 ///     // Set the caption and subtotal in the total row.
 ///     let columns = vec![
 ///         TableColumn::new().set_total_label("Totals"),
 ///         TableColumn::new().set_total_function(TableFunction::Sum),
 ///         TableColumn::new().set_total_function(TableFunction::Sum),
 ///         TableColumn::new().set_total_function(TableFunction::Sum),
-///         // Use a custom formula to to a similar summation.
+///         // Use a custom formula to get a similar summation.
 ///         TableColumn::new()
 ///             .set_total_function(TableFunction::Custom(Formula::new("SUM([Column5])"))),
 ///     ];
-///     table.set_columns(&columns);
+///
+///     // Create a new table and configure the total row.
+///     let table = Table::new().set_total_row(true).set_columns(&columns);
 ///
 ///     // Add the table to the worksheet.
 ///     worksheet.add_table(2, 1, 7, 5, &table)?;
-/// #
+///
 /// #     // Save the file to disk.
 /// #     workbook.save("tables.xlsx")?;
 /// #
@@ -2145,8 +2117,7 @@ impl fmt::Display for TableFunction {
 /// #     }
 /// #
 ///     // Create a new table and set the style.
-///     let mut table = Table::new();
-///     table.set_style(TableStyle::Medium10);
+///     let table = Table::new().set_style(TableStyle::Medium10);
 ///
 ///     // Add the table to the worksheet.
 ///     worksheet.add_table(2, 1, 6, 5, &table)?;

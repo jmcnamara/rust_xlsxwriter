@@ -31,9 +31,6 @@ fn main() -> Result<(), XlsxError> {
         worksheet.set_column_width(col_num, 12)?;
     }
 
-    // Create a new table and configure the columns.
-    let mut table = Table::new();
-
     // Add a structured reference formula to the last column and set the header
     // caption.
     let columns = vec![
@@ -46,7 +43,9 @@ fn main() -> Result<(), XlsxError> {
             .set_header("Totals")
             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
     ];
-    table.set_columns(&columns);
+
+    // Create a new table and configure the columns.
+    let table = Table::new().set_columns(&columns);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 6, &table)?;

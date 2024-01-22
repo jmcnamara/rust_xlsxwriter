@@ -49,6 +49,7 @@
 //!   objects.
 //! - [`Chart`] struct: The interface for creating worksheet charts.
 //!   - [`Working with charts`](crate::chart).
+//! - [`Table`]: The interface for worksheet tables.
 //! - [`Image`]: The interface for images used in worksheets.
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.

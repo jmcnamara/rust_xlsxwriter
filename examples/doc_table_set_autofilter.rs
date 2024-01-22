@@ -32,8 +32,7 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Create a new table and configure the autofilter.
-    let mut table = Table::new();
-    table.set_autofilter(false);
+    let table = Table::new().set_autofilter(false);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;

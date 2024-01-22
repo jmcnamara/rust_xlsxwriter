@@ -33,8 +33,7 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Create a new table and configure the first column highlighting.
-    let mut table = Table::new();
-    table.set_first_column(true);
+    let table = Table::new().set_first_column(true);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;

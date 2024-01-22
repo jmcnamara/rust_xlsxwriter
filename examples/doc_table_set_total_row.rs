@@ -34,8 +34,7 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Create a new table and configure the total row.
-    let mut table = Table::new();
-    table.set_total_row(true);
+    let table = Table::new().set_total_row(true);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 5, &table)?;

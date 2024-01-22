@@ -18,7 +18,6 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         worksheet.set_column_width(col_num, 10.288)?;
     }
 
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::default(),
         TableColumn::default(),
@@ -26,7 +25,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_header(" Column4 "),
     ];
 
-    table.set_columns(&columns);
+    let table = Table::new().set_columns(&columns);
 
     worksheet.add_table(2, 2, 12, 5, &table)?;
 

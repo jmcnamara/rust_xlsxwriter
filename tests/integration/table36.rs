@@ -25,7 +25,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(0, 3, "Column4")?;
     worksheet.write(0, 4, "Total")?;
 
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::new().set_total_label("Total"),
         TableColumn::new().set_total_function(TableFunction::Custom(Formula::new("BASE(0,2)"))),
@@ -33,8 +32,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_total_function(TableFunction::Count),
     ];
 
-    table.set_columns(&columns);
-    table.set_total_row(true);
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     worksheet.add_table(2, 2, 13, 5, &table)?;
 

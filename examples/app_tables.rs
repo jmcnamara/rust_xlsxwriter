@@ -95,8 +95,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
-    table.set_autofilter(false);
+    let table = Table::new().set_autofilter(false);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -123,8 +122,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
-    table.set_header_row(false);
+    let table = Table::new().set_header_row(false);
 
     // Add the table to the worksheet.
     worksheet.add_table(3, 1, 6, 5, &table)?;
@@ -151,9 +149,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
-    table.set_first_column(true);
-    table.set_last_column(true);
+    let table = Table::new().set_first_column(true).set_last_column(true);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -180,9 +176,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
-    table.set_banded_rows(false);
-    table.set_banded_columns(true);
+    let table = Table::new().set_banded_rows(false).set_banded_columns(true);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -209,7 +203,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::new().set_header("Product"),
         TableColumn::new().set_header("Quarter 1"),
@@ -217,7 +210,8 @@ fn main() -> Result<(), XlsxError> {
         TableColumn::new().set_header("Quarter 3"),
         TableColumn::new().set_header("Quarter 4"),
     ];
-    table.set_columns(&columns);
+
+    let table = Table::new().set_columns(&columns);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;
@@ -244,7 +238,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::new().set_header("Product"),
         TableColumn::new().set_header("Quarter 1"),
@@ -255,7 +248,8 @@ fn main() -> Result<(), XlsxError> {
             .set_header("Year")
             .set_formula("SUM(Table8[@[Quarter 1]:[Quarter 4]])"),
     ];
-    table.set_columns(&columns);
+
+    let table = Table::new().set_columns(&columns);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 6, &table)?;
@@ -282,7 +276,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::new().set_header("Product"),
         TableColumn::new().set_header("Quarter 1"),
@@ -293,8 +286,8 @@ fn main() -> Result<(), XlsxError> {
             .set_header("Year")
             .set_formula("SUM(Table9[@[Quarter 1]:[Quarter 4]])"),
     ];
-    table.set_columns(&columns);
-    table.set_total_row(true);
+
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 6, &table)?;
@@ -319,8 +312,8 @@ fn main() -> Result<(), XlsxError> {
     // Write the table data.
     worksheet.write_column(3, 1, items)?;
     worksheet.write_row_matrix(3, 2, data)?;
+
     // Create and configure a new table.
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::new()
             .set_header("Product")
@@ -342,8 +335,8 @@ fn main() -> Result<(), XlsxError> {
             .set_total_function(TableFunction::Sum)
             .set_formula("SUM(Table10[@[Quarter 1]:[Quarter 4]])"),
     ];
-    table.set_columns(&columns);
-    table.set_total_row(true);
+
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 6, &table)?;
@@ -370,7 +363,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::new()
             .set_header("Product")
@@ -392,9 +384,11 @@ fn main() -> Result<(), XlsxError> {
             .set_total_function(TableFunction::Sum)
             .set_formula("SUM(Table11[@[Quarter 1]:[Quarter 4]])"),
     ];
-    table.set_columns(&columns);
-    table.set_total_row(true);
-    table.set_style(TableStyle::Light11);
+
+    let table = Table::new()
+        .set_columns(&columns)
+        .set_total_row(true)
+        .set_style(TableStyle::Light11);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 6, &table)?;
@@ -421,7 +415,6 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Create and configure a new table.
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::new()
             .set_header("Product")
@@ -443,9 +436,11 @@ fn main() -> Result<(), XlsxError> {
             .set_total_function(TableFunction::Sum)
             .set_formula("SUM(Table12[@[Quarter 1]:[Quarter 4]])"),
     ];
-    table.set_columns(&columns);
-    table.set_total_row(true);
-    table.set_style(TableStyle::None);
+
+    let table = Table::new()
+        .set_columns(&columns)
+        .set_total_row(true)
+        .set_style(TableStyle::None);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 6, &table)?;

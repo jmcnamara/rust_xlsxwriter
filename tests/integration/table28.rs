@@ -14,8 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut table = Table::new();
-    table.set_autofilter(false);
+    let table = Table::new().set_autofilter(false);
 
     worksheet.add_table(2, 2, 12, 5, &table)?;
 

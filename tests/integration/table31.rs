@@ -48,8 +48,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_format(&format1),
     ];
 
-    let mut table = Table::new();
-    table.set_columns(&columns);
+    let table = Table::new().set_columns(&columns);
 
     worksheet.add_table(1, 2, 5, 5, &table)?;
 
@@ -98,8 +97,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_format(format1),
     ];
 
-    let mut table = Table::new();
-    table.set_columns(&columns);
+    let table = Table::new().set_columns(&columns);
 
     worksheet.add_table(1, 2, 5, 5, &table)?;
 

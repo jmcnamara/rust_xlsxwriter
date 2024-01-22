@@ -31,9 +31,6 @@ fn main() -> Result<(), XlsxError> {
         worksheet.set_column_width(col_num, 12)?;
     }
 
-    // Create a new table and configure the columns.
-    let mut table = Table::new();
-
     // Create formats for the columns headers.
     let format1 = Format::new().set_font_color("#FF0000");
     let format2 = Format::new().set_font_color("#00FF00");
@@ -56,7 +53,9 @@ fn main() -> Result<(), XlsxError> {
             .set_header("Quarter 4")
             .set_header_format(format4),
     ];
-    table.set_columns(&columns);
+
+    // Create a new table and configure the columns.
+    let table = Table::new().set_columns(&columns);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;

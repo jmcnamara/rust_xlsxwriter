@@ -5,9 +5,23 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.61.1] - 2023-01-20
+## [0.62.0] - 2023-01-XX
 
-- Migration to polars 0.36.2
+### Added
+
+- Added support for adding worksheet [`Table`] as a serialization format.
+
+- Updated polars dependency to 0.36.2 to pick up Polars `AnyData` changes for
+  [`polars_excel_writer`].
+
+
+### Changed
+
+- Changed APIs for [`Table`] to return `Table` instead of `&Table` to allow
+  methods to be chained. This makes worksheet Table usage easier during
+  serialization. Note that this is a backward incompatible change.
+
+
 
 ## [0.61.0] - 2023-01-13
 

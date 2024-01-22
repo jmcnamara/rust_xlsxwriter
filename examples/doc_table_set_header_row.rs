@@ -32,8 +32,7 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Create a new table and configure the header.
-    let mut table = Table::new();
-    table.set_header_row(false);
+    let table = Table::new().set_header_row(false);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 5, 5, &table)?;

@@ -31,9 +31,6 @@ fn main() -> Result<(), XlsxError> {
         worksheet.set_column_width(col_num, 12)?;
     }
 
-    // Create a new table and configure the column headers.
-    let mut table = Table::new();
-
     // Set the captions for the header row.
     let columns = vec![
         TableColumn::new().set_header("Product"),
@@ -42,7 +39,9 @@ fn main() -> Result<(), XlsxError> {
         TableColumn::new().set_header("Quarter 3"),
         TableColumn::new().set_header("Quarter 4"),
     ];
-    table.set_columns(&columns);
+
+    // Create a new table and configure the column headers.
+    let table = Table::new().set_columns(&columns);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;

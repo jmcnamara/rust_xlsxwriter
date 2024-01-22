@@ -32,8 +32,7 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Create a new table and set the style.
-    let mut table = Table::new();
-    table.set_style(TableStyle::Medium10);
+    let table = Table::new().set_style(TableStyle::Medium10);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;

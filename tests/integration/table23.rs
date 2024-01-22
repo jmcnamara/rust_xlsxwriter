@@ -43,9 +43,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
             .set_total_function(TableFunction::Sum),
     ];
 
-    let mut table = Table::new();
-    table.set_columns(&columns);
-    table.set_total_row(true);
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     worksheet.add_table(2, 1, 8, 5, &table)?;
 
@@ -85,9 +83,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_total_function(TableFunction::Sum),
     ];
 
-    let mut table = Table::new();
-    table.set_columns(&columns);
-    table.set_total_row(true);
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     worksheet.add_table(2, 1, 8, 5, &table)?;
 

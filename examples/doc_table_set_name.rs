@@ -32,8 +32,7 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Create a new table and set the name.
-    let mut table = Table::new();
-    table.set_name("ProduceSales");
+    let table = Table::new().set_name("ProduceSales");
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;

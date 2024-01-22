@@ -71,9 +71,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             .set_format(format),
     ];
 
-    let mut table = Table::new();
-    table.set_columns(&columns);
-    table.set_total_row(true);
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     worksheet.add_table(2, 1, 5, 10, &table)?;
 

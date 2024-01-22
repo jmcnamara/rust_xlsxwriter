@@ -32,21 +32,19 @@ fn main() -> Result<(), XlsxError> {
         worksheet.set_column_width(col_num, 12)?;
     }
 
-    // Create a new table and configure the total row.
-    let mut table = Table::new();
-    table.set_total_row(true);
-
     // Set the caption and subtotal in the total row.
     let columns = vec![
         TableColumn::new().set_total_label("Totals"),
         TableColumn::new().set_total_function(TableFunction::Sum),
         TableColumn::new().set_total_function(TableFunction::Sum),
         TableColumn::new().set_total_function(TableFunction::Sum),
-        // Use a custom formula to to a similar summation.
+        // Use a custom formula to get a similar summation.
         TableColumn::new()
             .set_total_function(TableFunction::Custom(Formula::new("SUM([Column5])"))),
     ];
-    table.set_columns(&columns);
+
+    // Create a new table and configure the total row.
+    let table = Table::new().set_total_row(true).set_columns(&columns);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 5, &table)?;

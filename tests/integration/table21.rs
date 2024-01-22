@@ -20,10 +20,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.write(0, 0, "Column")?;
 
-    let mut table = Table::new();
     let columns = vec![TableColumn::new().set_header("Column")];
 
-    table.set_columns(&columns);
+    let table = Table::new().set_columns(&columns);
 
     worksheet.add_table(2, 2, 12, 3, &table)?;
 

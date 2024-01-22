@@ -7,8 +7,8 @@
 #[cfg(test)]
 mod workbook_tests {
 
-    use crate::Workbook;
     use crate::{test_functions::xml_to_vec, XlsxError};
+    use crate::{Table, Workbook};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -86,12 +86,11 @@ mod workbook_tests {
         let mut workbook = Workbook::default();
         let worksheet = workbook.add_worksheet();
 
-        let mut table = crate::Table::new();
+        let mut table = Table::new().set_name("Foo");
 
-        table.set_name("Foo");
         worksheet.add_table(0, 0, 9, 9, &table).unwrap();
 
-        table.set_name("foo");
+        table = table.set_name("foo");
         worksheet.add_table(10, 10, 19, 19, &table).unwrap();
 
         let result = workbook.prepare_tables();

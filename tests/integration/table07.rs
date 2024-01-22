@@ -20,8 +20,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_width(4, 10.288)?;
     worksheet.set_column_width(5, 10.288)?;
 
-    let mut table = Table::new();
-    table.set_header_row(false);
+    let table = Table::new().set_header_row(false);
 
     worksheet.add_table(2, 2, 12, 5, &table)?;
 

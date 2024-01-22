@@ -32,8 +32,6 @@ fn main() -> Result<(), XlsxError> {
     }
 
     // Create a new table and configure it.
-    let mut table = Table::new();
-
     let columns = vec![
         TableColumn::new()
             .set_header("Product")
@@ -56,8 +54,7 @@ fn main() -> Result<(), XlsxError> {
             .set_formula("SUM(Table1[@[Quarter 1]:[Quarter 4]])"),
     ];
 
-    table.set_columns(&columns);
-    table.set_total_row(true);
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 7, 6, &table)?;

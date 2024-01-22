@@ -23,11 +23,11 @@ mod table_tests {
         assert_eq!(1, table.first_data_row());
         assert_eq!(9, table.last_data_row());
 
-        table.set_total_row(true);
+        table = table.set_total_row(true);
         assert_eq!(1, table.first_data_row());
         assert_eq!(8, table.last_data_row());
 
-        table.set_header_row(false);
+        table = table.set_header_row(false);
         assert_eq!(0, table.first_data_row());
         assert_eq!(8, table.last_data_row());
     }
@@ -56,7 +56,7 @@ mod table_tests {
             TableColumn::new().set_header("foo"), // Lowercase duplicate.
         ];
 
-        table.set_columns(&columns);
+        table = table.set_columns(&columns);
         let result = table.initialize_columns(&default_headers);
 
         assert!(matches!(result, Err(XlsxError::TableError(_))));
@@ -68,7 +68,7 @@ mod table_tests {
             TableColumn::new().set_header("column1"), // Lowercase duplicate.
         ];
 
-        table.set_columns(&columns);
+        table = table.set_columns(&columns);
         let result = table.initialize_columns(&default_headers);
 
         assert!(matches!(result, Err(XlsxError::TableError(_))));
@@ -117,7 +117,7 @@ mod table_tests {
 
     #[test]
     fn test_assemble2() {
-        let mut table = Table::new();
+        let mut table = Table::new().set_style(crate::TableStyle::Light17);
         let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 3;
@@ -132,8 +132,6 @@ mod table_tests {
             table.cell_range.last_col,
             table.show_header_row,
         );
-
-        table.set_style(crate::TableStyle::Light17);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -164,7 +162,12 @@ mod table_tests {
 
     #[test]
     fn test_assemble3() {
-        let mut table = Table::new();
+        let mut table = Table::new()
+            .set_first_column(true)
+            .set_last_column(true)
+            .set_banded_rows(false)
+            .set_banded_columns(true);
+
         let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 4;
@@ -179,11 +182,6 @@ mod table_tests {
             table.cell_range.last_col,
             table.show_header_row,
         );
-
-        table.set_first_column(true);
-        table.set_last_column(true);
-        table.set_banded_rows(false);
-        table.set_banded_columns(true);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -210,7 +208,7 @@ mod table_tests {
 
     #[test]
     fn test_assemble4() {
-        let mut table = Table::new();
+        let mut table = Table::new().set_autofilter(false);
         let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 2;
@@ -225,8 +223,6 @@ mod table_tests {
             table.cell_range.last_col,
             table.show_header_row,
         );
-
-        table.set_autofilter(false);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -254,7 +250,7 @@ mod table_tests {
 
     #[test]
     fn test_assemble5() {
-        let mut table = Table::new();
+        let mut table = Table::new().set_header_row(false);
         let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 3;
@@ -269,8 +265,6 @@ mod table_tests {
             table.cell_range.last_col,
             table.show_header_row,
         );
-
-        table.set_header_row(false);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -321,7 +315,7 @@ mod table_tests {
             TableColumn::new().set_header("Baz"),
         ];
 
-        table.set_columns(&columns);
+        table = table.set_columns(&columns);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -372,7 +366,7 @@ mod table_tests {
             TableColumn::new().set_header("Too many"),
         ];
 
-        table.set_columns(&columns);
+        table = table.set_columns(&columns);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -385,7 +379,7 @@ mod table_tests {
 
     #[test]
     fn test_assemble7() {
-        let mut table = Table::new();
+        let mut table = Table::new().set_total_row(true);
         let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 2;
@@ -400,8 +394,6 @@ mod table_tests {
             table.cell_range.last_col,
             table.show_header_row,
         );
-
-        table.set_total_row(true);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -453,8 +445,7 @@ mod table_tests {
             table.show_header_row,
         );
 
-        table.set_columns(&columns);
-        table.set_total_row(true);
+        table = table.set_columns(&columns).set_total_row(true);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -514,8 +505,7 @@ mod table_tests {
             TableColumn::new().set_total_function(TableFunction::Var),
         ];
 
-        table.set_columns(&columns);
-        table.set_total_row(true);
+        table = table.set_columns(&columns).set_total_row(true);
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
@@ -550,7 +540,7 @@ mod table_tests {
 
     #[test]
     fn test_assemble10() {
-        let mut table = Table::new();
+        let mut table = Table::new().set_name("MyTable");
         let worksheet = Worksheet::new();
 
         table.cell_range.first_row = 1;
@@ -565,8 +555,6 @@ mod table_tests {
             table.cell_range.last_col,
             table.show_header_row,
         );
-
-        table.set_name("MyTable");
 
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();

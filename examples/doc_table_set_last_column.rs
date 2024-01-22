@@ -32,10 +32,6 @@ fn main() -> Result<(), XlsxError> {
         worksheet.set_column_width(col_num, 12)?;
     }
 
-    // Create a new table and configure the last column highlighting.
-    let mut table = Table::new();
-    table.set_last_column(true);
-
     // Add a structured reference formula to the last column and set the header
     // caption. The last column in `add_table()` should be extended to account
     // for this extra column.
@@ -49,7 +45,9 @@ fn main() -> Result<(), XlsxError> {
             .set_header("Totals")
             .set_formula("SUM(Table1[@[Column2]:[Column5]])"),
     ];
-    table.set_columns(&columns);
+
+    // Create a new table and configure the last column highlighting.
+    let table = Table::new().set_last_column(true).set_columns(&columns);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 6, &table)?;

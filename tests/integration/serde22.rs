@@ -71,9 +71,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_total_function(TableFunction::Var),
     ];
 
-    let mut table = Table::new();
-    table.set_columns(&columns);
-    table.set_total_row(true);
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     worksheet.add_table(2, 1, 5, 10, &table)?;
 
@@ -128,7 +126,6 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     };
 
     // Create a user defined table.
-    let mut table = Table::new();
     let columns = vec![
         TableColumn::new().set_total_label("Total"),
         TableColumn::default(),
@@ -142,8 +139,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         TableColumn::new().set_total_function(TableFunction::Var),
     ];
 
-    table.set_columns(&columns);
-    table.set_total_row(true);
+    let table = Table::new().set_columns(&columns).set_total_row(true);
 
     let header_options = SerializeFieldOptions::new()
         .set_table(&table)

@@ -32,12 +32,9 @@ fn main() -> Result<(), XlsxError> {
         worksheet.set_column_width(col_num, 12)?;
     }
 
-    // Create a new table and configure the banded columns.
-    let mut table = Table::new();
-    table.set_banded_columns(true);
-
-    // Turn off banded rows for clarity.
-    table.set_banded_rows(false);
+    // Create a new table and configure the banded columns (but turn off banded
+    // rows for clarity).
+    let table = Table::new().set_banded_columns(true).set_banded_rows(false);
 
     // Add the table to the worksheet.
     worksheet.add_table(2, 1, 6, 5, &table)?;
