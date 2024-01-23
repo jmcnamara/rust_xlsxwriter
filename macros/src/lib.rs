@@ -280,6 +280,78 @@ use syn::{
 ///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_hide_headers.png">
 ///
 ///
+/// - `#[xlsx(table_default)`
+///
+///   The `table_default` container attribute adds a worksheet [`Table`]
+///   structure with default formatting to the serialized area:
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         #[xlsx(table_default)]
+///         struct Produce {
+///             fruit: &'static str,
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_table_default.png">
+///
+///
+/// - `#[xlsx(table_style)`
+///
+///   The `table_style` container attribute adds a worksheet [`Table`]
+///   structure with a user specified [`TableStyle`] to the serialized area:
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         #[xlsx(table_style = TableStyle::Medium10)]
+///         struct Produce {
+///             fruit: &'static str,
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_table_style.png">
+///
+///
+/// - `#[xlsx(table = Table)`
+///
+///   The `table` container attribute adds a user defined worksheet [`Table`]
+///   structure to the serialized area:
+///
+///   ```
+///   # use rust_xlsxwriter::XlsxSerialize;
+///   # use serde::Serialize;
+///   #
+///   # fn main() {
+///         #[derive(XlsxSerialize, Serialize)]
+///         #[xlsx(table = Table::new())]
+///         struct Produce {
+///             fruit: &'static str,
+///             cost: f64,
+///         }
+///   # }
+///   ```
+///
+///   <img
+///   src="https://rustxlsxwriter.github.io/images/xlsxserialize_table_default.png">
+///
+///   See the [Working with attribute
+///   Formats](#working-with-attribute-formats) section below for information on
+///   how to wrap complex objects like [`Format`] or [`Table`] in a function so
+///   it can be used as an attribute parameter.
 ///
 ///
 /// ## Field `xlsx` attributes
@@ -580,6 +652,12 @@ use syn::{
 /// [`Format`]:
 ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
 ///
+/// [`Table`]:
+///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Table.html
+///
+/// [`TableStyle`]:
+///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.TableStyle.html
+///
 /// [`Format::set_num_format()`]:
 ///     https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#method.set_num_format
 ///
@@ -604,8 +682,8 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
     let mut field_case = "original".to_string();
     let mut custom_fields = Vec::new();
     let mut field_options = quote!();
-    let mut has_format_object = false;
-    let mut format_use_statements = quote!();
+    let mut has_includes = false;
+    let mut use_statements = quote!();
 
     // Parse and handle container attributes.
     for attribute_tokens in &ast.attrs {
@@ -614,8 +692,18 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
                 // Handle container #[xlsx(hide_headers)] attribute.
                 HeaderAttributeTypes::HideHeaders => {
                     field_options = quote! {
+                        #field_options
                         .hide_headers(true)
-                    }
+                    };
+                }
+
+                // Handle container #[xlsx(table_default)] attribute.
+                HeaderAttributeTypes::TableDefault => {
+                    field_options = quote! {
+                        #field_options
+                        .set_table_default()
+                    };
+                    has_includes = true;
                 }
 
                 // Handle container #[xlsx(header_format = "")] attribute.
@@ -624,7 +712,25 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
                         #field_options
                         .set_header_format(#format)
                     };
-                    has_format_object = true;
+                    has_includes = true;
+                }
+
+                // Handle container #[xlsx(table_style = "")] attribute.
+                HeaderAttributeTypes::TableStyle(style) => {
+                    field_options = quote! {
+                        #field_options
+                        .set_table_style(#style)
+                    };
+                    has_includes = true;
+                }
+
+                // Handle container #[xlsx(table = "")] attribute.
+                HeaderAttributeTypes::Table(table) => {
+                    field_options = quote! {
+                        #field_options
+                        .set_table(#table)
+                    };
+                    has_includes = true;
                 }
 
                 // Handle container #[serde(rename = "")] attribute.
@@ -680,7 +786,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
                                         #custom_field_methods
                                         .set_header_format(#format)
                                     };
-                                    has_format_object = true;
+                                    has_includes = true;
                                 }
 
                                 // Handle the #[xlsx(value_format = Format)] field attribute.
@@ -689,7 +795,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
                                         #custom_field_methods
                                         .set_value_format(#format)
                                     };
-                                    has_format_object = true;
+                                    has_includes = true;
                                 }
 
                                 // Handle the #[xlsx(column_format = Format)] field attribute.
@@ -698,7 +804,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
                                         #custom_field_methods
                                         .set_column_format(#format)
                                     };
-                                    has_format_object = true;
+                                    has_includes = true;
                                 }
 
                                 // Handle the #[xlsx(num_format = "")] field attribute.
@@ -766,13 +872,14 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
         }
     }
 
-    // If the code includes Format::new() then provide some "use" statements.
-    if has_format_object {
-        format_use_statements = quote!(
+    // If the code includes Format::new() or Table::new() then provide some
+    // "use" statements.
+    if has_includes {
+        use_statements = quote!(
             #[allow(unused_imports)]
             use ::rust_xlsxwriter::{
                 Color, Format, FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern,
-                FormatScript, FormatUnderline,
+                FormatScript, FormatUnderline, Table, TableColumn, TableFunction, TableStyle,
             };
         );
     }
@@ -782,7 +889,7 @@ pub fn excel_serialize_derive(input: TokenStream) -> TokenStream {
     let code = quote! {
         #[doc(hidden)]
         const _: () = {
-            #format_use_statements
+            #use_statements
             impl #impl_generics ::rust_xlsxwriter::XlsxSerialize for #struct_type #type_generics #where_clause {
                 fn to_serialize_field_options() -> ::rust_xlsxwriter::SerializeFieldOptions {
                     let custom_headers = [
@@ -826,11 +933,30 @@ fn parse_header_attribute(attribute: &Attribute) -> Vec<HeaderAttributeTypes> {
                 attributes.push(HeaderAttributeTypes::HideHeaders);
                 Ok(())
             }
+            // Handle the #[xlsx(table_default)] container attribute.
+            else if meta.path.is_ident("table_default") {
+                attributes.push(HeaderAttributeTypes::TableDefault);
+                Ok(())
+            }
             // Handle the #[xlsx(header_format = Format)] container attribute.
             else if meta.path.is_ident("header_format") {
                 let value = meta.value()?;
                 let token = value.parse()?;
                 attributes.push(HeaderAttributeTypes::HeaderFormat(token));
+                Ok(())
+            }
+            // Handle the #[xlsx(table_style = TableStyle::*)] container attribute.
+            else if meta.path.is_ident("table_style") {
+                let value = meta.value()?;
+                let token = value.parse()?;
+                attributes.push(HeaderAttributeTypes::TableStyle(token));
+                Ok(())
+            }
+            // Handle the #[xlsx(table = TableStyle::new())] container attribute.
+            else if meta.path.is_ident("table") {
+                let value = meta.value()?;
+                let token = value.parse()?;
+                attributes.push(HeaderAttributeTypes::Table(token));
                 Ok(())
             }
             // Handle any unrecognized attributes as an error.
@@ -896,6 +1022,9 @@ enum HeaderAttributeTypes {
     Error(TokenStream),
     HideHeaders,
     HeaderFormat(Expr),
+    TableDefault,
+    TableStyle(Expr),
+    Table(Expr),
     SerdeRename(LitStr),
     SerdeRenameAll(LitStr),
 }
