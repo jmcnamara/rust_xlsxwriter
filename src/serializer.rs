@@ -1886,7 +1886,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::{ColNum, Format, RowNum, Table, Worksheet, XlsxError};
+use crate::{ColNum, Format, RowNum, Table, TableStyle, Worksheet, XlsxError};
 use serde::de::Visitor;
 use serde::{ser, Deserialize, Deserializer, Serialize};
 
@@ -2424,8 +2424,15 @@ impl SerializeFieldOptions {
 
     /// TODO
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-    pub fn set_default_table(mut self) -> SerializeFieldOptions {
+    pub fn set_table_default(mut self) -> SerializeFieldOptions {
         self.table = Some(Table::new());
+        self
+    }
+
+    /// TODO
+    #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+    pub fn set_table_style(mut self, style: TableStyle) -> SerializeFieldOptions {
+        self.table = Some(Table::new().set_style(style));
         self
     }
 

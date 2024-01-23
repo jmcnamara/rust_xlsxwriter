@@ -53,7 +53,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     };
 
     let header_options = SerializeFieldOptions::new()
-        .set_default_table()
+        .set_table_default()
         .hide_headers(true)
         .set_custom_headers(&[
             CustomSerializeField::new("Column1").set_column_width(10.288),
