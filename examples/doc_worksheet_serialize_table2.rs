@@ -2,11 +2,12 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
-//! Example of serializing Serde derived structs to an Excel worksheet using
-//! `rust_xlsxwriter`.
+//! The following example demonstrates serializing instances of a Serde derived
+//! data structure to a worksheet with a worksheet table and a user defined
+//! style.
 
-use rust_xlsxwriter::{Workbook, XlsxError, XlsxSerialize};
-use serde::Serialize;
+use rust_xlsxwriter::{SerializeFieldOptions, Workbook, XlsxError};
+use serde::{Deserialize, Serialize};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -15,13 +16,9 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a serializable struct.
-    #[derive(XlsxSerialize, Serialize)]
-    #[xlsx(table = Table::new())]
-    #[serde(rename_all = "PascalCase")]
+    #[derive(Deserialize, Serialize)]
     struct Produce {
         fruit: &'static str,
-
-        #[xlsx(value_format = Format::new().set_num_format("$0.00"))]
         cost: f64,
     }
 
@@ -41,15 +38,19 @@ fn main() -> Result<(), XlsxError> {
         cost: 0.75,
     };
 
-    // Set the serialization location and headers.
-    worksheet.set_serialize_headers::<Produce>(0, 0)?;
+    // Set the header options.
+    let header_options =
+        SerializeFieldOptions::new().set_table_style(rust_xlsxwriter::TableStyle::Medium10);
+
+    // Set the serialization location and custom headers.
+    worksheet.deserialize_headers_with_options::<Produce>(0, 0, &header_options)?;
 
     // Serialize the data.
     worksheet.serialize(&item1)?;
     worksheet.serialize(&item2)?;
     worksheet.serialize(&item3)?;
 
-    // Save the file to disk.
+    // Save the file.
     workbook.save("serialize.xlsx")?;
 
     Ok(())

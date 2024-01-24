@@ -8,6 +8,7 @@
 use crate::common;
 use rust_xlsxwriter::{
     CustomSerializeField, SerializeFieldOptions, Table, TableStyle, Workbook, XlsxError,
+    XlsxSerialize,
 };
 use serde::Serialize;
 
@@ -71,6 +72,46 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization. Test Worksheet table.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    #[derive(Serialize, XlsxSerialize)]
+    #[serde(rename_all = "PascalCase")]
+    #[xlsx(table_style = TableStyle::Medium10)]
+    struct MyStruct {
+        #[xlsx(column_width = 10.288)]
+        column1: Option<f64>,
+
+        #[xlsx(column_width = 10.288)]
+        column2: Option<f64>,
+
+        #[xlsx(column_width = 10.288)]
+        column3: Option<f64>,
+
+        #[xlsx(column_width = 10.288)]
+        column4: Option<f64>,
+    }
+
+    worksheet.set_serialize_headers::<MyStruct>(2, 2)?;
+
+    let data = MyStruct {
+        column1: None,
+        column2: None,
+        column3: None,
+        column4: None,
+    };
+
+    for _ in 1..=10 {
+        worksheet.serialize(&data)?;
+    }
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde25_1() {
     let test_runner = common::TestRunner::new()
@@ -89,6 +130,18 @@ fn test_serde25_2() {
         .set_name("table24")
         .set_function(create_new_xlsx_file_2)
         .unique("serde25_2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde25_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("table24")
+        .set_function(create_new_xlsx_file_3)
+        .unique("serde25_3")
         .initialize();
 
     test_runner.assert_eq();

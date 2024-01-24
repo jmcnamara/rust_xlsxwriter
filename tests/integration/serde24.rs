@@ -8,6 +8,7 @@
 use crate::common;
 use rust_xlsxwriter::{
     CustomSerializeField, Format, SerializeFieldOptions, Table, TableColumn, Workbook, XlsxError,
+    XlsxSerialize,
 };
 use serde::Serialize;
 
@@ -117,14 +118,12 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.format_dxf_index(&format2);
     worksheet.format_dxf_index(&format1);
 
-    let columns = vec![
+    let table = Table::new().set_columns(&[
         TableColumn::default(),
         TableColumn::new().set_format(&format1),
         TableColumn::new().set_format(&format2),
         TableColumn::new().set_format(&format3),
-    ];
-
-    let table = Table::new().set_columns(&columns);
+    ]);
 
     let header_options = SerializeFieldOptions::new()
         .set_table(&table)
@@ -136,6 +135,86 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         ]);
 
     worksheet.serialize_headers_with_options(1, 2, &data[0], &header_options)?;
+
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde serialization. Test Worksheet table.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    let format1 = Format::new().set_num_format("0.00;[Red]0.00");
+    let format2 = Format::new().set_num_format("0.00_ ;\\-0.00\\ ");
+    let format3 = Format::new().set_num_format("0.00_ ;[Red]\\-0.00\\ ");
+
+    // Manually set the indices to get the same order as the target file.
+    worksheet.format_dxf_index(&format3);
+    worksheet.format_dxf_index(&format2);
+    worksheet.format_dxf_index(&format1);
+
+    fn my_table() -> Table {
+        let format1 = Format::new().set_num_format("0.00;[Red]0.00");
+        let format2 = Format::new().set_num_format("0.00_ ;\\-0.00\\ ");
+        let format3 = Format::new().set_num_format("0.00_ ;[Red]\\-0.00\\ ");
+
+        Table::new().set_columns(&[
+            TableColumn::default(),
+            TableColumn::new().set_format(format1),
+            TableColumn::new().set_format(format2),
+            TableColumn::new().set_format(format3),
+        ])
+    }
+
+    #[derive(Serialize, XlsxSerialize)]
+    #[serde(rename_all = "PascalCase")]
+    #[xlsx(table = my_table())]
+    struct MyStruct<'a> {
+        #[xlsx(column_width = 10.288)]
+        column1: &'a str,
+
+        #[xlsx(column_width = 10.288)]
+        column2: u16,
+
+        #[xlsx(column_width = 10.288)]
+        column3: u16,
+
+        #[xlsx(column_width = 10.288)]
+        column4: u16,
+    }
+
+    let data = [
+        MyStruct {
+            column1: "Foo",
+            column2: 1234,
+            column3: 2000,
+            column4: 4321,
+        },
+        MyStruct {
+            column1: "Bar",
+            column2: 1256,
+            column3: 4000,
+            column4: 4320,
+        },
+        MyStruct {
+            column1: "Baz",
+            column2: 2234,
+            column3: 3000,
+            column4: 4332,
+        },
+        MyStruct {
+            column1: "Bop",
+            column2: 1324,
+            column3: 1000,
+            column4: 4333,
+        },
+    ];
+
+    worksheet.set_serialize_headers::<MyStruct>(1, 2)?;
 
     worksheet.serialize(&data)?;
 
@@ -162,6 +241,18 @@ fn test_serde24_2() {
         .set_name("table14")
         .set_function(create_new_xlsx_file_2)
         .unique("serde24_2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde24_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("table14")
+        .set_function(create_new_xlsx_file_3)
+        .unique("serde24_3")
         .initialize();
 
     test_runner.assert_eq();

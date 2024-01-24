@@ -2386,3 +2386,14 @@ impl fmt::Display for TableStyle {
         }
     }
 }
+
+/// Convert a [`Table`] ref to a [`Table`] object.
+///
+/// This is used as a syntactic shortcut for serialize APIs to allow either
+/// `&Table` or `Table`.
+///
+impl From<&Table> for Table {
+    fn from(value: &Table) -> Table {
+        (*value).clone()
+    }
+}
