@@ -2029,7 +2029,7 @@ impl SerializerState {
         &mut self,
         name: &str,
     ) -> Result<(RowNum, ColNum, RowNum, ColNum), XlsxError> {
-        let Some(header_config) = self.structs.get_mut(name) else {
+        let Some(header_config) = self.structs.get(name) else {
             return Err(XlsxError::ParameterError(format!(
                 "Unknown serialized struct '{name}'"
             )));
@@ -2040,6 +2040,33 @@ impl SerializerState {
             header_config.min_col,
             header_config.max_row - 1,
             header_config.max_col,
+        ))
+    }
+
+    // Get dimensions of a column in a serialization area. This is the internal
+    // function for worksheet.get_serialize_column_dimensions().
+    pub(crate) fn get_column_dimensions(
+        &mut self,
+        struct_name: &str,
+        field_name: &str,
+    ) -> Result<(RowNum, ColNum, RowNum, ColNum), XlsxError> {
+        let Some(header_config) = self.structs.get(struct_name) else {
+            return Err(XlsxError::ParameterError(format!(
+                "Unknown serialized struct '{struct_name}'"
+            )));
+        };
+
+        let Some(field) = header_config.fields.get(field_name) else {
+            return Err(XlsxError::ParameterError(format!(
+                "Unknown serialized field '{field_name}'"
+            )));
+        };
+
+        Ok((
+            header_config.min_row,
+            field.col,
+            header_config.max_row - 1,
+            field.col,
         ))
     }
 

@@ -97,6 +97,16 @@ path = "examples/doc_worksheet_serialize.rs"
 required-features = ["serde"]
 
 [[example]]
+name = "doc_worksheet_serialize_dimensions1"
+path = "examples/doc_worksheet_serialize_dimensions1.rs"
+required-features = ["serde"]
+
+[[example]]
+name = "doc_worksheet_serialize_dimensions2"
+path = "examples/doc_worksheet_serialize_dimensions2.rs"
+required-features = ["serde"]
+
+[[example]]
 name = "doc_worksheet_serialize_headers1"
 path = "examples/doc_worksheet_serialize_headers1.rs"
 required-features = ["serde"]
@@ -300,6 +310,7 @@ required-features = ["serde"]
 name = "doc_xlsxserialize_value_format"
 path = "examples/doc_xlsxserialize_value_format.rs"
 required-features = ["serde"]
+
 
 #
 # Examples to run only when `serde` and `chrono` is enabled.

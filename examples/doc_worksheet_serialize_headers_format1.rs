@@ -3,7 +3,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates formatting headers during serialization.
-//!
+
 use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
 use serde::Serialize;
 

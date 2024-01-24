@@ -73,6 +73,55 @@ mod worksheet_tests {
     }
 
     #[test]
+    #[cfg(feature = "serde")]
+    fn get_serialize_dimensions() {
+        let mut worksheet = Worksheet::new();
+
+        #[derive(Serialize)]
+        struct MyStruct {
+            column1: u8,
+            column2: u8,
+            column3: u8,
+            column4: u8,
+        }
+
+        let data = MyStruct {
+            column1: 1,
+            column2: 2,
+            column3: 3,
+            column4: 4,
+        };
+
+        worksheet.serialize_headers(2, 2, &data).unwrap();
+
+        for _ in 1..=10 {
+            worksheet.serialize(&data).unwrap();
+        }
+
+        let result = worksheet.get_serialize_dimensions("MyStruct").unwrap();
+        assert_eq!((2, 2, 12, 5), result);
+
+        let result = worksheet
+            .get_serialize_column_dimensions("MyStruct", "column1")
+            .unwrap();
+        assert_eq!((2, 2, 12, 2), result);
+
+        let result = worksheet
+            .get_serialize_column_dimensions("MyStruct", "column4")
+            .unwrap();
+        assert_eq!((2, 5, 12, 5), result);
+
+        let result = worksheet.get_serialize_dimensions("Doesn't exist");
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+
+        let result = worksheet.get_serialize_column_dimensions("Doesn't exist", "column1");
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+
+        let result = worksheet.get_serialize_column_dimensions("MyStruct", "Doesn't exist");
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+    }
+
+    #[test]
     fn row_matches_list_filter_blanks() {
         let mut worksheet = Worksheet::new();
         let bold = Format::new().set_bold();

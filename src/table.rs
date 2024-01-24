@@ -2074,7 +2074,7 @@ impl fmt::Display for TableFunction {
 /// The `TableStyle` enum defines the worksheet table styles.
 ///
 /// Excel supports 61 different styles for tables divided into Light, Medium and
-/// Dark categories. You can set one of these styles using a [`TableStyle`] enum
+/// Dark categories. You can set one of these styles using a `TableStyle` enum
 /// value.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/table_styles.png">
