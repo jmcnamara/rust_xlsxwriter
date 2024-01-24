@@ -5,14 +5,26 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.62.0] - 2023-01-XX
+## [0.62.0] - 2023-01-24
 
 ### Added
 
-- Added support for adding worksheet [`Table`] as a serialization format.
+- Added support for adding a worksheet [`Table`] as a serialization format. See [`SerializeFieldOptions::set_table()`].
+
+- Added [`Worksheet::get_serialize_dimensions()`] and
+  [`Worksheet::get_serialize_column_dimensions()`] methods to get dimensions
+  from a serialized range.
 
 - Updated polars dependency to 0.36.2 to pick up Polars `AnyData` changes for
   [`polars_excel_writer`].
+
+
+[`Worksheet::get_serialize_dimensions()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.get_serialize_dimensions
+
+[`Worksheet::get_serialize_column_dimensions()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.get_serialize_column_dimensions
+
+
+[`SerializeFieldOptions::set_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/struct.SerializeFieldOptions.html#method.set_table
 
 
 ### Changed
