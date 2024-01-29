@@ -231,7 +231,7 @@ pub fn cell_range_absolute(
     }
 }
 
-/// Serialize a Chrono naive date/time to and Excel value.
+/// Serialize a Chrono naive date/time to an Excel value.
 ///
 /// This is a helper function for serializing [`Chrono`] naive date/time fields
 /// using [Serde](https://serde.rs). "Naive" in the Chrono sense means that the
@@ -295,7 +295,7 @@ where
     serializer.serialize_f64(datetime.to_excel_serial_date())
 }
 
-/// Serialize an `Option<>` Chrono naive date/time to and Excel value.
+/// Serialize an [`Option`] Chrono naive date/time to an Excel value.
 ///
 /// This is a helper function for serializing [`Chrono`] naive date/time fields
 /// using [Serde](https://serde.rs). "Naive" in the Chrono sense means that the
