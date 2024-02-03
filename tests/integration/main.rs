@@ -488,6 +488,7 @@ mod format20;
 mod format21;
 mod format22;
 mod format23;
+mod format24;
 mod header_image01;
 mod header_image02;
 mod header_image03;

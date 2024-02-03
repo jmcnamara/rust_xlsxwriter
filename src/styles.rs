@@ -610,13 +610,16 @@ impl<'a> Styles<'a> {
         let mut horizontal_align = alignment.horizontal;
         let mut shrink = alignment.shrink;
 
-        // Indent is only allowed for horizontal "left", "right" and
-        // "distributed". If it is defined for any other alignment or no
-        // alignment has been set then default to left alignment.
+        // Indent is only allowed for some alignment properties. If it is
+        // defined for any other alignment or no alignment has been set then
+        // default to left alignment.
         if alignment.indent > 0
             && horizontal_align != FormatAlign::Left
             && horizontal_align != FormatAlign::Right
             && horizontal_align != FormatAlign::Distributed
+            && alignment.vertical != FormatAlign::Top
+            && alignment.vertical != FormatAlign::Bottom
+            && alignment.vertical != FormatAlign::Distributed
         {
             horizontal_align = FormatAlign::Left;
         }
@@ -673,13 +676,13 @@ impl<'a> Styles<'a> {
             _ => {}
         }
 
+        if alignment.rotation != 0 {
+            attributes.push(("textRotation", alignment.rotation.to_string()));
+        }
+
         // Set other alignment properties.
         if alignment.indent != 0 {
             attributes.push(("indent", alignment.indent.to_string()));
-        }
-
-        if alignment.rotation != 0 {
-            attributes.push(("textRotation", alignment.rotation.to_string()));
         }
 
         if alignment.text_wrap {
