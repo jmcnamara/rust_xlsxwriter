@@ -7,7 +7,7 @@
 #[cfg(test)]
 mod utility_tests {
 
-    use crate::utility;
+    use crate::{utility, XlsxError};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -274,5 +274,78 @@ mod utility_tests {
         for (string, exp) in tests {
             assert_eq!(exp, utility::pixel_width(string));
         }
+    }
+
+    #[test]
+    fn check_invalid_worksheet_names() {
+        let result = utility::check_sheet_name("");
+        assert!(matches!(result, Err(XlsxError::SheetnameCannotBeBlank(_))));
+
+        let name = "name_that_is_longer_than_thirty_one_characters";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(result, Err(XlsxError::SheetnameLengthExceeded(_))));
+
+        let name = "name_with_special_character_[";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
+
+        let name = "name_with_special_character_]";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
+
+        let name = "name_with_special_character_:";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
+
+        let name = "name_with_special_character_*";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
+
+        let name = "name_with_special_character_?";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
+
+        let name = "name_with_special_character_/";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
+
+        let name = "name_with_special_character_\\";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+        ));
+
+        let name = "'start with apostrophe";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(_))
+        ));
+
+        let name = "end with apostrophe'";
+        let result = utility::check_sheet_name(name);
+        assert!(matches!(
+            result,
+            Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(_))
+        ));
     }
 }

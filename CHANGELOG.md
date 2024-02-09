@@ -5,6 +5,21 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.63.0] - 2023-XX-XX
+
+### Added
+
+- Added [`utility::check_sheet_name()`] function to allow checking for valid
+  worksheet names according to Excel's naming rules. This functionality was
+  previously `pub(crate)` private.
+
+  [Feature Request #83].
+
+  [Feature Request #83]: https://github.com/jmcnamara/rust_xlsxwriter/pull/83
+
+  [`utility::check_sheet_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.check_sheet_name.html
+
+
 ## [0.62.0] - 2023-01-24
 
 ### Added

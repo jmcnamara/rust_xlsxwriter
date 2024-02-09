@@ -7,11 +7,9 @@
 //! Utility functions for `rust_xlsxwriter`.
 //!
 //! The `rust_xlsxwriter` library provides a number of utility functions for
-//! dealing with cell ranges. These can be used for creating formula strings.
+//! dealing with cell ranges, Chrono Serde serialization, and other helper
+//! method.
 //!
-//! Note, in general you shouldn't use these functions to create input for APIs
-//! that accept string ranges since these is always a similar primary API that
-//! accepts numeric ranges.
 //!
 //! # Examples:
 //!
@@ -285,6 +283,7 @@ pub fn cell_range_absolute(
 /// ```
 ///
 #[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub fn serialize_chrono_naive_to_excel<S>(
     datetime: impl IntoExcelDateTime,
     serializer: S,
@@ -295,7 +294,7 @@ where
     serializer.serialize_f64(datetime.to_excel_serial_date())
 }
 
-/// Serialize an [`Option`] Chrono naive date/time to an Excel value.
+/// Serialize an `Option` Chrono naive date/time to an Excel value.
 ///
 /// This is a helper function for serializing [`Chrono`] naive date/time fields
 /// using [Serde](https://serde.rs). "Naive" in the Chrono sense means that the
@@ -355,6 +354,7 @@ where
 /// ```
 ///
 #[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub fn serialize_chrono_option_naive_to_excel<S>(
     datetime: &Option<impl IntoExcelDateTime>,
     serializer: S,
@@ -408,6 +408,66 @@ pub(crate) fn quote_sheetname(sheetname: &str) -> String {
     sheetname
 }
 
+/// Check that a worksheet name is valid in Excel.
+///
+/// This function checks if an worksheet name is valid according to the Excel
+/// rules:
+///
+/// * The name is less than 32 characters.
+/// * The name isn't blank.
+/// * The name doesn't contain any of the characters: `[ ] : * ? / \`.
+/// * The name doesn't start or end with an apostrophe.
+///
+/// The worksheet name "History" isn't allowed in English versions of Excel
+/// since it is a reserved name. However it is allowed in some other language
+/// versions so this function doesn't raise it as an error. Overall it is best
+/// to avoid using it.
+///
+/// The rules for worksheet names in Excel are explained in the [Microsoft
+/// Office documentation].
+///
+/// [Microsoft Office documentation]:
+///     https://support.office.com/en-ie/article/rename-a-worksheet-3f1f7148-ee83-404d-8ef0-9ff99fbad1f9
+///
+/// # Parameters
+///
+/// * `name` - The worksheet name. It must follow the Excel rules, shown above.
+///
+/// # Errors
+///
+/// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name cannot be blank.
+/// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name exceeds Excel's
+///   limit of 31 characters.
+/// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name cannot
+///   contain invalid characters: `[ ] : * ? / \`
+/// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name cannot
+///   start or end with an apostrophe.
+///
+/// # Examples
+///
+/// The following example demonstrates testing for a valid worksheet name.
+///
+/// ```
+/// # // This code is available in examples/doc_utility_check_sheet_name.rs
+/// #
+/// # use rust_xlsxwriter::{utility, XlsxError};
+/// #
+/// fn main() -> Result<(), XlsxError> {
+///     // This worksheet name is valid.
+///     utility::check_sheet_name("2030-01-01")?;
+///
+///     // This worksheet name isn't valid due to the forward slashes.
+///     utility::check_sheet_name("2030/01/01")?;
+///
+///     Ok(())
+/// }
+///
+pub fn check_sheet_name(name: &str) -> Result<(), XlsxError> {
+    let error_message = format!("Invalid Excel worksheet name '{name}'");
+    validate_sheetname(name, &error_message)
+}
+
+// Internal function to validate worksheet name.
 pub(crate) fn validate_sheetname(name: &str, message: &str) -> Result<(), XlsxError> {
     // Check that the sheet name isn't blank.
     if name.is_empty() {
@@ -488,11 +548,11 @@ pub(crate) fn hash_password(password: &str) -> u16 {
     }
 
     for byte in password.as_bytes().iter().rev() {
-        hash = ((hash >> 14) & 0x01) | ((hash << 1) & 0x7fff);
+        hash = ((hash >> 14) & 0x01) | ((hash << 1) & 0x7FFF);
         hash ^= u16::from(*byte);
     }
 
-    hash = ((hash >> 14) & 0x01) | ((hash << 1) & 0x7fff);
+    hash = ((hash >> 14) & 0x01) | ((hash << 1) & 0x7FFF);
     hash ^= length;
     hash ^= 0xCE4B;
 
