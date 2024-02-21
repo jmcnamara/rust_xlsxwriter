@@ -57,6 +57,23 @@ impl Relationship {
         ));
     }
 
+    // Add container relationship to xlsx .rels xml files.
+    pub(crate) fn add_office_relationship(
+        &mut self,
+        version: &str,
+        rel_type: &str,
+        target: &str,
+        target_mode: &str,
+    ) {
+        let office_schema = "http://schemas.microsoft.com/office";
+
+        self.relationships.push((
+            format!("{office_schema}/{version}/relationships/{rel_type}"),
+            target.to_string(),
+            target_mode.to_string(),
+        ));
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------

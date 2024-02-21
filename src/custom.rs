@@ -45,7 +45,7 @@ impl Custom {
             self.write_property(property, pid + 2);
         }
 
-        // Close the Properties tag.
+        // Close the final tag.
         self.writer.xml_end_tag("Properties");
     }
 

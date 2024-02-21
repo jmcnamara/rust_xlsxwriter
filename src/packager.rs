@@ -56,6 +56,10 @@ use crate::custom::Custom;
 use crate::error::XlsxError;
 use crate::metadata::Metadata;
 use crate::relationship::Relationship;
+use crate::rich_value::RichValue;
+use crate::rich_value_rel::RichValueRel;
+use crate::rich_value_structure::RichValueStructure;
+use crate::rich_value_types::RichValueTypes;
 use crate::shared_strings::SharedStrings;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
@@ -171,8 +175,13 @@ impl<W: Write + Seek + Send> Packager<W> {
             }
         }
 
-        if options.has_dynamic_arrays {
-            self.write_metadata_file()?;
+        if options.has_metadata {
+            self.write_metadata_file(options)?;
+        }
+
+        if options.has_embedded_images {
+            self.write_rich_value_rels_file(workbook)?;
+            self.write_rich_value_files(workbook, options)?;
         }
 
         // Close the zip file.
@@ -209,8 +218,12 @@ impl<W: Write + Seek + Send> Packager<W> {
             content_types.add_share_strings();
         }
 
-        if options.has_dynamic_arrays {
+        if options.has_metadata {
             content_types.add_metadata();
+        }
+
+        if options.has_embedded_images {
+            content_types.add_rich_value();
         }
 
         if options.has_vml {
@@ -286,8 +299,33 @@ impl<W: Write + Seek + Send> Packager<W> {
             rels.add_document_relationship("sharedStrings", "sharedStrings.xml", "");
         }
 
-        if options.has_dynamic_arrays {
+        if options.has_metadata {
             rels.add_document_relationship("sheetMetadata", "metadata.xml", "");
+        }
+
+        if options.has_embedded_images {
+            rels.add_office_relationship(
+                "2022/10",
+                "richValueRel",
+                "richData/richValueRel.xml",
+                "",
+            );
+
+            rels.add_office_relationship("2017/06", "rdRichValue", "richData/rdrichvalue.xml", "");
+
+            rels.add_office_relationship(
+                "2017/06",
+                "rdRichValueStructure",
+                "richData/rdrichvaluestructure.xml",
+                "",
+            );
+
+            rels.add_office_relationship(
+                "2017/06",
+                "rdRichValueTypes",
+                "richData/rdRichValueTypes.xml",
+                "",
+            );
         }
 
         self.zip
@@ -377,6 +415,30 @@ impl<W: Write + Seek + Send> Packager<W> {
         }
 
         let filename = format!("xl/drawings/_rels/vmlDrawing{index}.vml.rels");
+
+        self.zip.start_file(filename, self.zip_options)?;
+
+        rels.assemble_xml_file();
+        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write a richValueRel.xml.rels file.
+    pub(crate) fn write_rich_value_rels_file(
+        &mut self,
+        workbook: &mut Workbook,
+    ) -> Result<(), XlsxError> {
+        let mut rels = Relationship::new();
+
+        let mut index = 1;
+        for image in &workbook.embedded_images {
+            let target = format!("../media/image{index}.{}", image.image_type.extension());
+            rels.add_document_relationship("image", &target, "");
+            index += 1;
+        }
+
+        let filename = "xl/richData/_rels/richValueRel.xml.rels";
 
         self.zip.start_file(filename, self.zip_options)?;
 
@@ -513,13 +575,91 @@ impl<W: Write + Seek + Send> Packager<W> {
     }
 
     // Write the metadata.xml file.
-    fn write_metadata_file(&mut self) -> Result<(), XlsxError> {
+    fn write_metadata_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut metadata = Metadata::new();
+        metadata.has_dynamic_functions = options.has_dynamic_functions;
+        metadata.has_embedded_images = options.has_embedded_images;
+        metadata.num_embedded_images = options.num_embedded_images;
 
         self.zip.start_file("xl/metadata.xml", self.zip_options)?;
 
         metadata.assemble_xml_file();
         self.zip.write_all(metadata.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write the various RichValue files.
+    fn write_rich_value_files(
+        &mut self,
+        workbook: &Workbook,
+        options: &PackagerOptions,
+    ) -> Result<(), XlsxError> {
+        self.write_rich_value_file(workbook)?;
+        self.write_rich_value_types_file()?;
+        self.write_rich_value_structure_file(options)?;
+        self.write_rich_value_rel_file(options)?;
+
+        Ok(())
+    }
+
+    // Write the rdrichvalue.xml file.
+    fn write_rich_value_file(&mut self, workbook: &Workbook) -> Result<(), XlsxError> {
+        let mut rich_value = RichValue::new(&workbook.embedded_images);
+
+        self.zip
+            .start_file("xl/richData/rdrichvalue.xml", self.zip_options)?;
+
+        rich_value.assemble_xml_file();
+        self.zip.write_all(rich_value.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write the rdRichValueTypes.xml file.
+    fn write_rich_value_types_file(&mut self) -> Result<(), XlsxError> {
+        let mut rich_value_types = RichValueTypes::new();
+
+        self.zip
+            .start_file("xl/richData/rdRichValueTypes.xml", self.zip_options)?;
+
+        rich_value_types.assemble_xml_file();
+        self.zip
+            .write_all(rich_value_types.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write the rdrichvaluestructure.xml file.
+    fn write_rich_value_structure_file(
+        &mut self,
+        options: &PackagerOptions,
+    ) -> Result<(), XlsxError> {
+        let mut rich_value_structure = RichValueStructure::new();
+        rich_value_structure.has_embedded_image_descriptions =
+            options.has_embedded_image_descriptions;
+
+        self.zip
+            .start_file("xl/richData/rdrichvaluestructure.xml", self.zip_options)?;
+
+        rich_value_structure.assemble_xml_file();
+        self.zip
+            .write_all(rich_value_structure.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write the richValueRel.xml file.
+    fn write_rich_value_rel_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
+        let mut rich_value_rel = RichValueRel::new();
+        rich_value_rel.num_embedded_images = options.num_embedded_images;
+
+        self.zip
+            .start_file("xl/richData/richValueRel.xml", self.zip_options)?;
+
+        rich_value_rel.assemble_xml_file();
+        self.zip
+            .write_all(rich_value_rel.writer.xmlfile.get_ref())?;
 
         Ok(())
     }
@@ -570,6 +710,15 @@ impl<W: Write + Seek + Send> Packager<W> {
         let mut index = 1;
         let mut unique_worksheet_images = HashSet::new();
         let mut unique_header_footer_images = HashSet::new();
+
+        for image in &workbook.embedded_images {
+            let filename = format!("xl/media/image{index}.{}", image.image_type.extension());
+            self.zip
+                .start_file(filename, self.zip_options_for_binary_files)?;
+
+            self.zip.write_all(&image.data)?;
+            index += 1;
+        }
 
         for worksheet in &mut workbook.worksheets {
             for image in worksheet.images.values() {
@@ -640,7 +789,9 @@ impl<W: Write + Seek + Send> Packager<W> {
 // Internal struct to pass options to the Packager struct.
 pub(crate) struct PackagerOptions {
     pub(crate) has_sst_table: bool,
-    pub(crate) has_dynamic_arrays: bool,
+    pub(crate) has_metadata: bool,
+    pub(crate) has_dynamic_functions: bool,
+    pub(crate) has_embedded_images: bool,
     pub(crate) has_vml: bool,
     pub(crate) num_worksheets: u16,
     pub(crate) num_drawings: u16,
@@ -651,6 +802,8 @@ pub(crate) struct PackagerOptions {
     pub(crate) defined_names: Vec<String>,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     pub(crate) properties: DocProperties,
+    pub(crate) num_embedded_images: u32,
+    pub(crate) has_embedded_image_descriptions: bool,
 }
 
 impl PackagerOptions {
@@ -658,7 +811,9 @@ impl PackagerOptions {
     pub(crate) fn new() -> PackagerOptions {
         PackagerOptions {
             has_sst_table: false,
-            has_dynamic_arrays: false,
+            has_metadata: false,
+            has_dynamic_functions: false,
+            has_embedded_images: false,
             has_vml: false,
             num_worksheets: 0,
             num_drawings: 0,
@@ -669,6 +824,8 @@ impl PackagerOptions {
             defined_names: vec![],
             image_types: [false; NUM_IMAGE_FORMATS],
             properties: DocProperties::new(),
+            num_embedded_images: 0,
+            has_embedded_image_descriptions: false,
         }
     }
 }

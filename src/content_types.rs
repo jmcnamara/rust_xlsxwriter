@@ -122,6 +122,26 @@ impl ContentTypes {
         );
     }
 
+    // Add the rdRichValue* files to the ContentTypes overrides.
+    pub(crate) fn add_rich_value(&mut self) {
+        self.add_override(
+            "/xl/richData/rdRichValueTypes.xml",
+            "application/vnd.ms-excel.rdrichvaluetypes+xml",
+        );
+        self.add_override(
+            "/xl/richData/rdrichvalue.xml",
+            "application/vnd.ms-excel.rdrichvalue+xml",
+        );
+        self.add_override(
+            "/xl/richData/rdrichvaluestructure.xml",
+            "application/vnd.ms-excel.rdrichvaluestructure+xml",
+        );
+        self.add_override(
+            "/xl/richData/richValueRel.xml",
+            "application/vnd.ms-excel.richvaluerel+xml",
+        );
+    }
+
     // Add the custom properties to the ContentTypes overrides.
     pub(crate) fn add_custom_properties(&mut self) {
         self.add_override(

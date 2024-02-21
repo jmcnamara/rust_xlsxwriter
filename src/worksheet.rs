@@ -160,6 +160,7 @@ pub struct Worksheet {
     pub(crate) header_footer_images: [Option<Image>; 6],
     pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
     pub(crate) tables: Vec<Table>,
+    pub(crate) has_embedded_image_descriptions: bool,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
@@ -226,6 +227,8 @@ pub struct Worksheet {
     has_conditional_formats: bool,
     use_x14_extensions: bool,
     has_x14_conditional_formats: bool,
+    pub(crate) embedded_images: Vec<Image>,
+    embedded_image_ids: HashMap<u64, u32>,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -414,6 +417,9 @@ impl Worksheet {
             has_conditional_formats: false,
             use_x14_extensions: false,
             has_x14_conditional_formats: false,
+            embedded_images: vec![],
+            embedded_image_ids: HashMap::new(),
+            has_embedded_image_descriptions: false,
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -3745,6 +3751,51 @@ impl Worksheet {
         image.set_scale_to_size(width, height, keep_aspect_ratio);
 
         self.images.insert((row, col), image);
+
+        Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    pub fn embed_image(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let image_id = match self.embedded_image_ids.get(&image.hash) {
+            Some(image_id) => *image_id,
+            None => {
+                let image_id = 1 + self.embedded_image_ids.len() as u32;
+                self.embedded_image_ids.insert(image.hash, image_id);
+                self.embedded_images.push(image.clone());
+                image_id
+            }
+        };
+
+        // Check for alt text in the image.
+        if !image.alt_text.is_empty() {
+            self.has_embedded_image_descriptions = true;
+        }
+
+        // Store the used image type for the Content Type file.
+        self.image_types[image.image_type.clone() as usize] = true;
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::Error {
+            xf_index: 0,
+            value: image_id,
+        };
+
+        // Store the cell error value.
+        self.insert_cell(row, col, cell);
 
         Ok(self)
     }
@@ -9669,8 +9720,8 @@ impl Worksheet {
                             // Excel's default format: mm/dd/yyyy.
                             CellType::DateTime { .. } => 68,
 
-                            // Ignore blank cells, like Excel.
-                            CellType::Blank { .. } => 0,
+                            // Ignore the following types which don't add to the width.
+                            CellType::Blank { .. } | CellType::Error { .. } => 0,
                         };
 
                         // If the cell is in an autofilter header we add an
@@ -10584,6 +10635,7 @@ impl Worksheet {
     pub(crate) fn prepare_worksheet_images(
         &mut self,
         image_ids: &mut HashMap<u64, u32>,
+        image_id: &mut u32,
         drawing_id: u32,
     ) {
         let mut rel_ids: HashMap<u64, u32> = HashMap::new();
@@ -10595,9 +10647,9 @@ impl Worksheet {
             let image_id = match image_ids.get(&image.hash) {
                 Some(image_id) => *image_id,
                 None => {
-                    let image_id = 1 + image_ids.len() as u32;
-                    image_ids.insert(image.hash, image_id);
-                    image_id
+                    *image_id += 1;
+                    image_ids.insert(image.hash, *image_id);
+                    *image_id
                 }
             };
 
@@ -11165,6 +11217,7 @@ impl Worksheet {
             if let Some(cell) = columns.get_mut(&col) {
                 match cell {
                     CellType::Blank { xf_index, .. }
+                    | CellType::Error { xf_index, .. }
                     | CellType::String { xf_index, .. }
                     | CellType::Number { xf_index, .. }
                     | CellType::Boolean { xf_index, .. }
@@ -12028,6 +12081,10 @@ impl Worksheet {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                         self.write_boolean_cell(row_num, col_num, *boolean, xf_index);
                     }
+                    CellType::Error { value, xf_index } => {
+                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                        self.write_error_cell(row_num, col_num, *value, xf_index);
+                    }
                 }
             }
             self.writer.xml_end_tag("row");
@@ -12290,6 +12347,33 @@ impl Worksheet {
                 col_name,
                 row + 1,
                 boolean
+            )
+            .expect(XML_WRITE_ERROR);
+        }
+    }
+
+    // Write the <c> element for an error cell. We currently only support the
+    // #VALUE! error type which is used for embedded images.
+    fn write_error_cell(&mut self, row: RowNum, col: ColNum, value: u32, xf_index: u32) {
+        let col_name = Self::col_to_name(&mut self.col_names, col);
+
+        if xf_index > 0 {
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}" s="{}" t="e" vm="{}"><v>#VALUE!</v></c>"#,
+                col_name,
+                row + 1,
+                xf_index,
+                value
+            )
+            .expect(XML_WRITE_ERROR);
+        } else {
+            write!(
+                &mut self.writer.xmlfile,
+                r#"<c r="{}{}" t="e" vm="{}"><v>#VALUE!</v></c>"#,
+                col_name,
+                row + 1,
+                value
             )
             .expect(XML_WRITE_ERROR);
         }
@@ -13249,6 +13333,10 @@ enum CellType {
     Boolean {
         boolean: bool,
         xf_index: u32,
+    },
+    Error {
+        xf_index: u32,
+        value: u32,
     },
     Formula {
         formula: Box<str>,

@@ -21,7 +21,7 @@ use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 use crate::{
     utility, Border, ChartRange, ChartRangeCacheData, ColNum, DefinedName, DefinedNameType,
-    DocProperties, Fill, Font, RowNum, Visible, NUM_IMAGE_FORMATS,
+    DocProperties, Fill, Font, Image, RowNum, Visible, NUM_IMAGE_FORMATS,
 };
 use crate::{Color, FormatPattern};
 
@@ -105,6 +105,7 @@ pub struct Workbook {
     pub(crate) border_count: u16,
     pub(crate) num_formats: Vec<String>,
     pub(crate) has_hyperlink_style: bool,
+    pub(crate) embedded_images: Vec<Image>,
     xf_indices: HashMap<Format, u32>,
     dxf_indices: HashMap<Format, u32>,
     active_tab: u16,
@@ -181,6 +182,7 @@ impl Workbook {
             user_defined_names: vec![],
             xf_indices: HashMap::new(),
             dxf_indices: HashMap::new(),
+            embedded_images: vec![],
         };
 
         // Initialize the workbook with the same function used to reset it.
@@ -1232,13 +1234,24 @@ impl Workbook {
         let mut drawing_id = 1;
         let mut vml_drawing_id = 1;
 
+        // TODO
+        self.embedded_images = self.worksheets[0].embedded_images.clone();
+
+        let mut image_id = self.embedded_images.len() as u32;
+
+        //let mut drawing_id = 1 + self.embedded_images.len() as u32;
+
         // These are the image ids for each unique image file.
         let mut worksheet_image_ids: HashMap<u64, u32> = HashMap::new();
         let mut header_footer_image_ids: HashMap<u64, u32> = HashMap::new();
 
         for worksheet in &mut self.worksheets {
             if !worksheet.images.is_empty() {
-                worksheet.prepare_worksheet_images(&mut worksheet_image_ids, drawing_id);
+                worksheet.prepare_worksheet_images(
+                    &mut worksheet_image_ids,
+                    &mut image_id,
+                    drawing_id,
+                );
             }
 
             if !worksheet.charts.is_empty() {
@@ -1605,6 +1618,7 @@ impl Workbook {
     ) -> Result<PackagerOptions, XlsxError> {
         package_options.num_worksheets = self.worksheets.len() as u16;
         package_options.doc_security = self.read_only_mode;
+        package_options.num_embedded_images = self.embedded_images.len() as u32;
 
         let mut defined_names = self.user_defined_names.clone();
         let mut sheet_names: HashMap<String, u16> = HashMap::new();
@@ -1629,7 +1643,16 @@ impl Workbook {
             }
 
             if worksheet.has_dynamic_arrays {
-                package_options.has_dynamic_arrays = true;
+                package_options.has_metadata = true;
+                package_options.has_dynamic_functions = true;
+            }
+
+            if !worksheet.embedded_images.is_empty() {
+                package_options.has_metadata = true;
+                package_options.has_embedded_images = true;
+                if worksheet.has_embedded_image_descriptions {
+                    package_options.has_embedded_image_descriptions = true;
+                }
             }
 
             if worksheet.has_header_footer_images() {
