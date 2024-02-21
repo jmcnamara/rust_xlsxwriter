@@ -647,8 +647,8 @@ impl Worksheet {
         row: RowNum,
         col: ColNum,
         data: T,
-        format: &'a Format,
-    ) -> Result<&mut Worksheet, XlsxError>
+        format: &Format,
+    ) -> Result<&'a mut Worksheet, XlsxError>
     where
         T: IntoExcelData,
     {
@@ -12771,7 +12771,7 @@ impl Worksheet {
 ///         worksheet: &'a mut Worksheet,
 ///         row: RowNum,
 ///         col: ColNum,
-///         format: &'a Format,
+///         format: &Format,
 ///     ) -> Result<&'a mut Worksheet, XlsxError> {
 ///         // Convert the Unix time to an Excel datetime.
 ///         let datetime = 25569.0 + (self.seconds as f64 / (24.0 * 60.0 * 60.0));
@@ -12817,7 +12817,7 @@ pub trait IntoExcelData {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError>;
 }
 
@@ -12838,7 +12838,7 @@ macro_rules! write_string_trait_impl {
                 worksheet: &'a mut Worksheet,
                 row: RowNum,
                 col: ColNum,
-                format: &'a Format,
+                format: &Format,
             ) -> Result<&'a mut Worksheet, XlsxError> {
                 worksheet.store_string(row, col, self.into(), Some(format))
             }
@@ -12864,7 +12864,7 @@ macro_rules! write_number_trait_impl {
                 worksheet: &'a mut Worksheet,
                 row: RowNum,
                 col: ColNum,
-                format: &'a Format,
+                format: &Format,
             ) -> Result<&'a mut Worksheet, XlsxError> {
                 worksheet.store_number(row, col, self, Some(format))
             }
@@ -12891,7 +12891,7 @@ macro_rules! write_number_trait_impl {
                 worksheet: &'a mut Worksheet,
                 row: RowNum,
                 col: ColNum,
-                format: &'a Format,
+                format: &Format,
             ) -> Result<&'a mut Worksheet, XlsxError> {
                 worksheet.store_number(row, col, self as f64, Some(format))
             }
@@ -12915,7 +12915,7 @@ impl IntoExcelData for bool {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         worksheet.store_boolean(row, col, self, Some(format))
     }
@@ -12937,7 +12937,7 @@ impl IntoExcelData for &ExcelDateTime {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let number = self.to_excel();
         worksheet.store_datetime(row, col, number, Some(format))
@@ -12960,7 +12960,7 @@ impl IntoExcelData for ExcelDateTime {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let number = self.to_excel_serial_date();
         worksheet.store_datetime(row, col, number, Some(format))
@@ -12985,7 +12985,7 @@ impl IntoExcelData for &NaiveDateTime {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_datetime_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
@@ -13010,7 +13010,7 @@ impl IntoExcelData for &NaiveDate {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_date_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
@@ -13035,7 +13035,7 @@ impl IntoExcelData for &NaiveTime {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_time_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
@@ -13057,7 +13057,7 @@ impl IntoExcelData for Formula {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         worksheet.store_formula(row, col, self, Some(format))
     }
@@ -13078,7 +13078,7 @@ impl IntoExcelData for &Formula {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         worksheet.store_formula(row, col, (*self).clone(), Some(format))
     }
@@ -13099,7 +13099,7 @@ impl IntoExcelData for Url {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         worksheet.store_url(row, col, self, Some(format))
     }
@@ -13123,7 +13123,7 @@ impl<T: IntoExcelData> IntoExcelData for Option<T> {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         match self {
             Some(data) => worksheet.write_with_format(row, col, data, format),
@@ -13150,7 +13150,7 @@ impl<T: IntoExcelData, E: IntoExcelData> IntoExcelData for Result<T, E> {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         match self {
             Ok(data) => worksheet.write_with_format(row, col, data, format),
