@@ -77,7 +77,7 @@ impl IntoExcelData for UnixTime {
         worksheet: &'a mut Worksheet,
         row: RowNum,
         col: ColNum,
-        format: &'a Format,
+        format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         // Convert the Unix time to an Excel datetime.
         let datetime = 25569.0 + (self.seconds as f64 / (24.0 * 60.0 * 60.0));
