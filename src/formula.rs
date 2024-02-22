@@ -250,9 +250,9 @@ use std::borrow::Cow;
 /// The following special case functions were also added with Dynamic Arrays:
 ///
 /// - `SINGLE`: Explained below in [The Implicit Intersection Operator
-///   "@"](#the-implicit-intersection-operator-)
+///   `@`](#the-implicit-intersection-operator-)
 /// - `ANCHORARRAY`:  Explained below in [The Spilled Range Operator
-///   "#"](#the-spilled-range-operator-)
+///   `#`](#the-spilled-range-operator-)
 ///
 ///
 /// ## Dynamic Arrays - An introduction
@@ -407,7 +407,7 @@ use std::borrow::Cow;
 ///     worksheet.write_dynamic_formula(1, 9, "=COUNTA(ANCHORARRAY(F2))")?;
 /// ```
 ///
-/// ## The Excel 365 LAMBDA() function
+/// ## The Excel 365 `LAMBDA()` function
 ///
 /// Recent versions of Excel 365 have introduced a powerful new function/feature
 /// called `LAMBDA()`. This is similar to closure expressions in Rust or [lambda

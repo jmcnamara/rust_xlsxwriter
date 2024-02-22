@@ -42,7 +42,7 @@ cargo run --example app_demo  # or any other example
 27. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
 28. [Chart: Chart data table](#chart-chart-data-table)
 29. [Chart: Chart data tools](#chart-chart-data-tools)
-30. [Extending generic write() to handle user data types](#extending-generic-write-to-handle-user-data-types)
+30. [Extending generic `write()` to handle user data types](#extending-generic-`write`-to-handle-user-data-types)
 31. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
 32. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
 33. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
@@ -50,7 +50,7 @@ cargo run --example app_demo  # or any other example
 35. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
 36. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
 37. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-38. [Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+38. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-`lambda`-function-example-of-using-the-excel-365-`lambda`-function)
 
 
 # Hello World: Simple getting started example
@@ -4412,7 +4412,7 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
-# Extending generic write() to handle user data types
+# Extending generic `write()` to handle user data types
 
 Example of how to extend the the `rust_xlsxwriter`[`worksheet.write()`] method using the
 [`IntoExcelData`] trait to handle arbitrary user data that can be mapped to one
@@ -5301,7 +5301,7 @@ fn write_worksheet_data(worksheet: &mut Worksheet, header: &Format) -> Result<()
 ```
 
 
-# Excel LAMBDA() function: Example of using the Excel 365 LAMBDA() function
+# Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function
 
 An example of using the new Excel `LAMBDA()` function with the`rust_xlsxwriter`
 library.
