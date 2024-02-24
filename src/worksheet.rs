@@ -3765,39 +3765,21 @@ impl Worksheet {
         col: ColNum,
         image: &Image,
     ) -> Result<&mut Worksheet, XlsxError> {
-        // Check row and columns are in the allowed range.
-        if !self.check_dimensions(row, col) {
-            return Err(XlsxError::RowColumnLimitError);
-        }
+        self.store_embedded_image(row, col, image, None)
+    }
 
-        let image_id = match self.embedded_image_ids.get(&image.hash) {
-            Some(image_id) => *image_id,
-            None => {
-                let image_id = 1 + self.embedded_image_ids.len() as u32;
-                self.embedded_image_ids.insert(image.hash, image_id);
-                self.embedded_images.push(image.clone());
-                image_id
-            }
-        };
-
-        // Check for alt text in the image.
-        if !image.alt_text.is_empty() {
-            self.has_embedded_image_descriptions = true;
-        }
-
-        // Store the used image type for the Content Type file.
-        self.image_types[image.image_type.clone() as usize] = true;
-
-        // Create the appropriate cell type to hold the data.
-        let cell = CellType::Error {
-            xf_index: 0,
-            value: image_id,
-        };
-
-        // Store the cell error value.
-        self.insert_cell(row, col, cell);
-
-        Ok(self)
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    pub fn embed_image_with_format(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.store_embedded_image(row, col, image, Some(format))
     }
 
     /// Add a chart to a worksheet.
@@ -10380,6 +10362,70 @@ impl Worksheet {
         Ok(self)
     }
 
+    // TODO
+    //
+    fn store_embedded_image(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+        format: Option<&Format>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let image_id = match self.embedded_image_ids.get(&image.hash) {
+            Some(image_id) => *image_id,
+            None => {
+                let image_id = 1 + self.embedded_image_ids.len() as u32;
+                self.embedded_image_ids.insert(image.hash, image_id);
+                self.embedded_images.push(image.clone());
+                image_id
+            }
+        };
+
+        // Check for alt text in the image.
+        if !image.alt_text.is_empty() {
+            self.has_embedded_image_descriptions = true;
+        }
+
+        // Store the used image type for the Content Type file.
+        self.image_types[image.image_type.clone() as usize] = true;
+
+        // Store the image hyperlink, if any.
+        if let Some(url) = &image.url {
+            let mut hyperlink = Hyperlink::new(url.clone())?;
+            hyperlink.display = true;
+
+            self.hyperlinks.insert((row, col), hyperlink);
+        }
+
+        // Get the index of the format object, if any.
+        let xf_index = match format {
+            Some(format) => self.format_xf_index(format),
+            None => match image.url {
+                Some(_) => {
+                    let format = Format::new().set_hyperlink();
+                    self.format_xf_index(&format)
+                }
+                None => 0,
+            },
+        };
+
+        // Create the appropriate cell type to hold the data.
+        let cell = CellType::Error {
+            xf_index,
+            value: image_id,
+        };
+
+        // Store the cell error value.
+        self.insert_cell(row, col, cell);
+
+        Ok(self)
+    }
+
     // A rich string is handled in Excel like any other shared string except
     // that it has inline font markup within the string. To generate the
     // required font xml we use an instance of the Style struct.
@@ -11765,6 +11811,10 @@ impl Worksheet {
 
                 if !hyperlink.location.is_empty() {
                     attributes.push(("location", hyperlink.location.to_string()));
+                }
+
+                if hyperlink.display {
+                    attributes.push(("display", hyperlink.url.to_string()));
                 }
 
                 if !hyperlink.tip.is_empty() {
@@ -13398,6 +13448,7 @@ struct Hyperlink {
     text: String,
     tip: String,
     location: String,
+    display: bool,
     link_type: HyperlinkType,
     ref_id: u16,
 }
@@ -13409,6 +13460,7 @@ impl Hyperlink {
             text: url.text,
             tip: url.tip,
             location: String::new(),
+            display: false,
             link_type: HyperlinkType::Unknown,
             ref_id: 0,
         };

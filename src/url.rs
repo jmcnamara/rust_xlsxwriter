@@ -137,6 +137,7 @@
 /// Excel has a limit of around 2080 characters in the url string. Urls beyond
 /// this limit will raise an error when written.
 ///
+#[derive(Clone, Debug)]
 pub struct Url {
     pub(crate) link: String,
     pub(crate) text: String,

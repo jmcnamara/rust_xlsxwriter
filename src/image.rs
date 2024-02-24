@@ -17,7 +17,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use crate::drawing::{DrawingObject, DrawingType};
-use crate::XlsxError;
+use crate::{Url, XlsxError};
 
 #[derive(Clone, Debug)]
 /// The `Image` struct is used to create an object to represent an image that
@@ -73,6 +73,7 @@ pub struct Image {
     pub(crate) hash: u64,
     pub(crate) data: Vec<u8>,
     pub(crate) drawing_type: DrawingType,
+    pub(crate) url: Option<Url>,
 }
 
 impl Image {
@@ -265,6 +266,7 @@ impl Image {
             hash: 0,
             data: buffer.to_vec(),
             drawing_type: DrawingType::Image,
+            url: None,
         };
 
         Self::process_image(&mut image)?;
@@ -650,6 +652,12 @@ impl Image {
     ///
     pub fn set_object_movement(&mut self, option: ObjectMovement) -> &mut Image {
         self.object_movement = option;
+        self
+    }
+
+    /// TODO
+    pub fn set_url(&mut self, link: impl Into<Url>) -> &mut Image {
+        self.url = Some(link.into());
         self
     }
 
