@@ -655,7 +655,20 @@ impl Image {
         self
     }
 
-    /// TODO
+    /// Set a Url/Hyperlink for an image.
+    ///
+    /// Set a Url/Hyperlink for an image so that when the user clicks on it they
+    /// are redirected to an internal or external location.
+    ///
+    /// See [`Url`] for an explanation of the URIs supported by Excel an for
+    /// other options that can be set.
+    ///
+    /// Note, this is currently only supported for embedded images added via
+    /// [`Worksheet::embed_image()`](crate::Worksheet::embed_image) so it is
+    /// undocumented for now. This functionality will be added to other image
+    /// types in a future version.
+    ///
+    #[doc(hidden)]
     pub fn set_url(&mut self, link: impl Into<Url>) -> &mut Image {
         self.url = Some(link.into());
         self

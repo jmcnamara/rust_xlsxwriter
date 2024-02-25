@@ -6,6 +6,9 @@
 //! that they are scaled to a cell. This approach can be useful if you are
 //! building up a spreadsheet of products with a column of images for each
 //! product.
+//!
+//! See also the `app_embedded_image.rs` example that shows a better approach
+//! for newer versions of Excel.
 
 use rust_xlsxwriter::{Format, FormatAlign, Image, Workbook, XlsxError};
 

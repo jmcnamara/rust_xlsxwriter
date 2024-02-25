@@ -161,6 +161,8 @@ pub struct Worksheet {
     pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
     pub(crate) tables: Vec<Table>,
     pub(crate) has_embedded_image_descriptions: bool,
+    pub(crate) embedded_images: Vec<Image>,
+    pub(crate) global_embedded_image_indices: Vec<u32>,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
@@ -227,7 +229,7 @@ pub struct Worksheet {
     has_conditional_formats: bool,
     use_x14_extensions: bool,
     has_x14_conditional_formats: bool,
-    pub(crate) embedded_images: Vec<Image>,
+
     embedded_image_ids: HashMap<u64, u32>,
 
     #[cfg(feature = "serde")]
@@ -419,6 +421,7 @@ impl Worksheet {
             has_x14_conditional_formats: false,
             embedded_images: vec![],
             embedded_image_ids: HashMap::new(),
+            global_embedded_image_indices: vec![],
             has_embedded_image_descriptions: false,
 
             #[cfg(feature = "serde")]
@@ -3569,8 +3572,9 @@ impl Worksheet {
     /// Add an image to a worksheet at a pixel offset within a cell location.
     /// The image should be encapsulated in an [`Image`] object.
     ///
-    /// This method is similar to [`insert_image()`](Worksheet::insert_image)
-    /// except that the image can be offset from the top left of the cell.
+    /// This method is similar to
+    /// [`Worksheet::insert_image()`](Worksheet::insert_image) except that the
+    /// image can be offset from the top left of the cell.
     ///
     /// Note, it is possible to offset the image outside the target cell if
     /// required.
@@ -3590,8 +3594,8 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// This example shows how to add an image to a worksheet at an offset within
-    /// the cell.
+    /// This example shows how to add an image to a worksheet at an offset
+    /// within the cell.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_insert_image_with_offset.rs
@@ -3620,7 +3624,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_insert_image_with_offset.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_insert_image_with_offset.png">
     ///
     pub fn insert_image_with_offset(
         &mut self,
@@ -3644,15 +3649,138 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// Embed an image to a worksheet and fit it to a cell.
+    ///
+    /// This method can be used to embed a image into a worksheet cell and have
+    /// the image automatically scale to the width and height of the cell. The
+    /// X/Y scaling of the image is preserved but the size of the image is
+    /// adjusted to fit the largest possible width or height depending on the
+    /// cell dimensions.
+    ///
+    /// This is the equivalent of Excel's menu option to insert an image using
+    /// the option to "Place in Cell" which is only available in Excel 365
+    /// versions from 2023 onwards. For older versions of Excel a `#VALUE!`
+    /// error is displayed.
+    ///
+    /// The image should be encapsulated in an [`Image`] object. See
+    /// [`Worksheet::insert_image()`](Worksheet::insert_image) above for details
+    /// on the supported image types.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `image` - The [`Image`] to insert into the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// An example of embedding images into a worksheet cells using
+    /// `rust_xlsxwriter`. This image scales to size of the cell and moves with
+    /// it.
+    ///
+    /// This is the equivalent of Excel's menu option to insert an image using
+    /// the option to "Place in Cell".
+    ///
+    /// ```
+    /// # // This code is available in examples/app_embedded_images.rs
+    /// #
+    /// use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create a new image object.
+    ///     let image = Image::new("examples/rust_logo.png")?;
+    ///
+    ///     // Widen the first column to make the caption clearer.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///     worksheet.write(0, 0, "Embed images that scale to the cell size")?;
+    ///
+    ///     // Change cell widths/heights to demonstrate the image differences.
+    ///     worksheet.set_column_width(1, 14)?;
+    ///     worksheet.set_row_height(1, 60)?;
+    ///     worksheet.set_row_height(3, 90)?;
+    ///
+    ///     // Embed the images in cells of different widths/heights.
+    ///     worksheet.embed_image(1, 1, &image)?;
+    ///     worksheet.embed_image(3, 1, &image)?;
+    ///
+    ///     // Save the file to disk.
+    ///     workbook.save("embedded_images.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/embedded_images.png">
+    ///
+    pub fn embed_image(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.store_embedded_image(row, col, image, None)
+    }
+
+    /// Embed an image to a worksheet and fit it to a formatted cell.
+    ///
+    /// This method can be used to embed a image into a worksheet cell and have
+    /// the image automatically scale to the width and height of the cell. This
+    /// is similar to the [`Worksheet::embed_image()`](Worksheet::embed_image)
+    /// above but it allows you to add an additional cell format using
+    /// [`Format`]. This is occasionally useful if you want to set a cell border
+    /// around the image or a cell background color.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `image` - The [`Image`] to insert into the cell.
+    /// * `format` - The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    pub fn embed_image_with_format(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        image: &Image,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.store_embedded_image(row, col, image, Some(format))
+    }
+
     /// Add an image to a worksheet and fit it to a cell.
     ///
     /// Add an image to a worksheet and scale it so that it fits in a cell. This
-    /// method can be useful when creating a product spreadsheet with a column
-    /// of images for each product. The image should be encapsulated in an
-    /// [`Image`] object. See [`insert_image()`](Worksheet::insert_image) above
-    /// for details on the supported image types. The scaling calculation for
-    /// this method takes into account the DPI of the image in the same way that
-    /// Excel does.
+    /// is similar in effect to
+    /// [`Worksheet::embed_image()`](Worksheet::embed_image) but in Excel's
+    /// terminology it inserts the image placed *over* the cell instead of *in*
+    /// the cell. The only advantage of this method is that the output file will
+    /// work will all versions of Excel. The `Worksheet::embed_image()` method
+    /// only works with versions of Excel from 2003 onwards.
+    ///
+    /// This method can be useful when creating a product spreadsheet with a
+    /// column of images for each product. The image should be encapsulated in
+    /// an [`Image`] object. See [`insert_image()`](Worksheet::insert_image)
+    /// above for details on the supported image types. The scaling calculation
+    /// for this method takes into account the DPI of the image in the same way
+    /// that Excel does.
     ///
     /// There are two options, which are controlled by the `keep_aspect_ratio`
     /// parameter. The image can be scaled vertically and horizontally to occupy
@@ -3676,10 +3804,10 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// An example of inserting images into a worksheet using `rust_xlsxwriter` so
-    /// that they are scaled to a cell. This approach can be useful if you are
-    /// building up a spreadsheet of products with a column of images for each
-    /// product.
+    /// An example of inserting images into a worksheet using `rust_xlsxwriter`
+    /// so that they are scaled to a cell. This approach can be useful if you
+    /// are building up a spreadsheet of products with a column of images for
+    /// each product.
     ///
     /// ```
     /// # // This code is available in examples/app_images_fit_to_cell.rs
@@ -3753,33 +3881,6 @@ impl Worksheet {
         self.images.insert((row, col), image);
 
         Ok(self)
-    }
-
-    /// TODO
-    ///
-    /// # Errors
-    ///
-    pub fn embed_image(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        image: &Image,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        self.store_embedded_image(row, col, image, None)
-    }
-
-    /// TODO
-    ///
-    /// # Errors
-    ///
-    pub fn embed_image_with_format(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        image: &Image,
-        format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        self.store_embedded_image(row, col, image, Some(format))
     }
 
     /// Add a chart to a worksheet.
@@ -10362,8 +10463,7 @@ impl Worksheet {
         Ok(self)
     }
 
-    // TODO
-    //
+    // Store a reference to an embedded cell image.
     fn store_embedded_image(
         &mut self,
         row: RowNum,
@@ -10379,7 +10479,7 @@ impl Worksheet {
         let image_id = match self.embedded_image_ids.get(&image.hash) {
             Some(image_id) => *image_id,
             None => {
-                let image_id = 1 + self.embedded_image_ids.len() as u32;
+                let image_id = self.embedded_image_ids.len() as u32;
                 self.embedded_image_ids.insert(image.hash, image_id);
                 self.embedded_images.push(image.clone());
                 image_id
@@ -12133,7 +12233,8 @@ impl Worksheet {
                     }
                     CellType::Error { value, xf_index } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        self.write_error_cell(row_num, col_num, *value, xf_index);
+                        let image_id = self.global_embedded_image_indices[*value as usize];
+                        self.write_error_cell(row_num, col_num, image_id, xf_index);
                     }
                 }
             }

@@ -1188,6 +1188,9 @@ impl Workbook {
             worksheet.sheet_index = i;
         }
 
+        // Generate a global array of embedded images from the worksheets.
+        self.prepare_embedded_images();
+
         // Convert the images in the workbooks into drawing files and rel links.
         self.prepare_drawings();
 
@@ -1228,18 +1231,47 @@ impl Workbook {
         self.active_tab = active_index as u16;
     }
 
+    // Convert any embedded images in the worksheets to a global reference. Each
+    // worksheet like have a local index to an embedded cell image. We need to
+    // map these local references to a worksheet/global id that takes into
+    // account duplicate images.
+    fn prepare_embedded_images(&mut self) {
+        let mut embedded_images = vec![];
+        let mut image_ids: HashMap<u64, u32> = HashMap::new();
+        let mut global_image_id = 0;
+
+        for worksheet in &mut self.worksheets {
+            if worksheet.embedded_images.is_empty() {
+                continue;
+            }
+
+            let mut global_embedded_image_ids = vec![];
+            for image in &worksheet.embedded_images {
+                let image_id = match image_ids.get(&image.hash) {
+                    Some(image_id) => *image_id,
+                    None => {
+                        global_image_id += 1;
+                        embedded_images.push(image.clone());
+                        image_ids.insert(image.hash, global_image_id);
+                        global_image_id
+                    }
+                };
+
+                global_embedded_image_ids.push(image_id);
+            }
+
+            worksheet.global_embedded_image_indices = global_embedded_image_ids;
+        }
+
+        self.embedded_images = embedded_images;
+    }
+
     // Convert the images in the workbooks into drawing files and rel links.
     fn prepare_drawings(&mut self) {
         let mut chart_id = 1;
         let mut drawing_id = 1;
         let mut vml_drawing_id = 1;
-
-        // TODO
-        self.embedded_images = self.worksheets[0].embedded_images.clone();
-
         let mut image_id = self.embedded_images.len() as u32;
-
-        //let mut drawing_id = 1 + self.embedded_images.len() as u32;
 
         // These are the image ids for each unique image file.
         let mut worksheet_image_ids: HashMap<u64, u32> = HashMap::new();

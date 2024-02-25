@@ -25,32 +25,33 @@ cargo run --example app_demo  # or any other example
 10. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
 11. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
 12. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
-13. [Insert images: Inserting images to fit cell](#insert-images-inserting-images-to-fit-cell)
-14. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
-15. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
-16. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
-17. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
-18. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
-19. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
-20. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
-21. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
-22. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
-23. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
-24. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
-25. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
-26. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
-27. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-28. [Chart: Chart data table](#chart-chart-data-table)
-29. [Chart: Chart data tools](#chart-chart-data-tools)
-30. [Extending generic `write()` to handle user data types](#extending-generic-`write`-to-handle-user-data-types)
-31. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-32. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-33. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-34. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-35. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-36. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-37. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-38. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-`lambda`-function-example-of-using-the-excel-365-`lambda`-function)
+13. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
+14. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
+15. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
+16. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
+17. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
+18. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
+19. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
+20. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
+21. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
+22. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
+23. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
+24. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
+25. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
+26. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
+27. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
+28. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
+29. [Chart: Chart data table](#chart-chart-data-table)
+30. [Chart: Chart data tools](#chart-chart-data-tools)
+31. [Extending generic `write()` to handle user data types](#extending-generic-`write`-to-handle-user-data-types)
+32. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+33. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+34. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+35. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+36. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+37. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+38. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+39. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-`lambda`-function-example-of-using-the-excel-365-`lambda`-function)
 
 
 # Hello World: Simple getting started example
@@ -2157,11 +2158,69 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
-# Insert images: Inserting images to fit cell
+# Insert images: Embedding an image in a cell
+
+An example of embedding images into a worksheet cells using `rust_xlsxwriter`.
+This image scales to size of the cell and moves with it.
+
+This approach can be useful if you are building up a spreadsheet of products
+with a column of images for each product.
+
+This is the equivalent of Excel's menu option to insert an image using the
+option to "Place in Cell" which is only available in Excel 365 versions from
+2023 onwards. For older versions of Excel a `#VALUE!` error is displayed.
+
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/embedded_images.png">
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_embedded_images.rs
+
+use rust_xlsxwriter::{Image, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Create a new image object.
+    let image = Image::new("examples/rust_logo.png")?;
+
+    // Widen the first column to make the caption clearer.
+    worksheet.set_column_width(0, 30)?;
+    worksheet.write(0, 0, "Embed images that scale to the cell size")?;
+
+    // Change cell widths/heights to demonstrate the image differences.
+    worksheet.set_column_width(1, 14)?;
+    worksheet.set_row_height(1, 60)?;
+    worksheet.set_row_height(3, 90)?;
+
+    // Embed the images in cells of different widths/heights.
+    worksheet.embed_image(1, 1, &image)?;
+    worksheet.embed_image(3, 1, &image)?;
+
+    // Save the file to disk.
+    workbook.save("embedded_images.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Insert images: Inserting images to fit a cell
 
 An example of inserting images into a worksheet using `rust_xlsxwriter`so that
 they are scaled to a cell. This approach can be useful if you are building up a
 spreadsheet of products with a column of images for each product.
+
+See the [Embedding images in cells](#insert-images-embedding-an-image-in-a-cell) example that
+shows a better approach for newer versions of Excel.
 
 **Image of the output file:**
 
@@ -2171,6 +2230,9 @@ spreadsheet of products with a column of images for each product.
 
 ```rust
 // Sample code from examples/app_images_fit_to_cell.rs
+
+//! See also the `app_embedded_image.rs` example that shows a better approach
+//! for newer versions of Excel.
 
 use rust_xlsxwriter::{Format, FormatAlign, Image, Workbook, XlsxError};
 
