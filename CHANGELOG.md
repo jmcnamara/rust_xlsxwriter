@@ -5,9 +5,32 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.63.0] - 2023-XX-XX
+## [0.63.0] - 2023-02-25
 
 ### Added
+
+- Added support for embedding images into worksheets with
+  [`worksheet.embed_image()`] and [`worksheet.embed_image_with_format()`] and
+  the [Image] struct. See the [Embedded Images] example.
+
+  This can be useful if you are building up a spreadsheet of products with a
+  column of images for each product. Embedded images move with the cell so they
+  can be used in worksheet tables or data ranges that will be sorted or
+  filtered.
+
+  This functionality is the equivalent of Excel's menu option to insert an image
+  using the option to "Place in Cell" which is available in Excel 365 versions
+  from 2023 onwards.
+
+  [`worksheet.embed_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.embed_image
+  [`worksheet.embed_image_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.embed_image_with_format
+
+  [Embedded Images]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#insert-images-embedding-an-image-in-a-cell
+
+
+- Updated polars dependency to 0.37.2 to pick up latest Polars additions for
+  [`polars_excel_writer`].
+
 
 - Added [`utility::check_sheet_name()`] function to allow checking for valid
   worksheet names according to Excel's naming rules. This functionality was
@@ -17,8 +40,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Feature Request #83]: https://github.com/jmcnamara/rust_xlsxwriter/pull/83
 
-  [`utility::check_sheet_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.check_sheet_name.html
+  [`utility::check_sheet_name()`]:
+      https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.check_sheet_name.html
 
+### Removed
+
+- Removed unnecessary lifetime on [`Format`] objects used in Worksheet `write()`
+  methods. This allows the the [`IntoExcelData`] trait to be defined for user
+  types and have them include a default format. See [Feature Request #85].
+
+  [Feature Request #85]: https://github.com/jmcnamara/rust_xlsxwriter/pull/85
+  [`Format`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
 
 ## [0.62.0] - 2023-01-24
 

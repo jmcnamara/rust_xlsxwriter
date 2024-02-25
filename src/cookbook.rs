@@ -43,7 +43,7 @@ cargo run --example app_demo  # or any other example
 28. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
 29. [Chart: Chart data table](#chart-chart-data-table)
 30. [Chart: Chart data tools](#chart-chart-data-tools)
-31. [Extending generic `write()` to handle user data types](#extending-generic-`write`-to-handle-user-data-types)
+31. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
 32. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
 33. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
 34. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
@@ -51,7 +51,7 @@ cargo run --example app_demo  # or any other example
 36. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
 37. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
 38. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-39. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-`lambda`-function-example-of-using-the-excel-365-`lambda`-function)
+39. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example

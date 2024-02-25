@@ -104,6 +104,15 @@ documentation and generally show how an individual function works.
   functions are new to Excel 365. The examples mirror the examples in the
   Excel documentation for these functions.
 
+* `app_embedded_images.rs` - An example of embedding images into a
+  worksheet cells using rust_xlsxwriter. This image scales to size of the
+  cell and moves with it. This approach can be useful if you are building
+  up a spreadsheet of products with a column of images for each product.
+  This is the equivalent of Excel's menu option to insert an image using
+  the option to "Place in Cell" which is only available in Excel 365
+  versions from 2023 onwards. For older versions of Excel a `#VALUE!` error
+  is displayed.
+
 * `app_file_to_memory.rs` - An example of creating a simple Excel xlsx file
   in an in memory Vec<u8> buffer using the rust_xlsxwriter library.
 
@@ -127,7 +136,9 @@ documentation and generally show how an individual function works.
 * `app_images_fit_to_cell.rs` - An example of inserting images into a
   worksheet using rust_xlsxwriter so that they are scaled to a cell. This
   approach can be useful if you are building up a spreadsheet of products
-  with a column of images for each product.
+  with a column of images for each product. See also the
+  `app_embedded_image.rs` example that shows a better approach for newer
+  versions of Excel.
 
 * `app_lambda.rs` - An example of using the new Excel LAMBDA() function
   with the rust_xlsxwriter library.
@@ -913,6 +924,9 @@ documentation and generally show how an individual function works.
 * `doc_url_set_text.rs` - Demonstrates writing a url to a worksheet with
   alternative text.
 
+* `doc_utility_check_sheet_name.rs` - Demonstrates testing for a valid
+  worksheet name.
+
 * `doc_workbook_add_worksheet.rs` - Demonstrates creating adding worksheets
   to a workbook.
 
@@ -1057,6 +1071,14 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_serialize_datetime5.rs` - Example of a serializable struct
   with an Option Chrono Naive value with a helper function.
 
+* `doc_worksheet_serialize_dimensions1.rs` - Example of getting the
+  dimensions of some serialized data. In this example we use the dimensions
+  to set a conditional format range.
+
+* `doc_worksheet_serialize_dimensions2.rs` - Example of getting the
+  field/column dimensions of some serialized data. In this example we use
+  the dimensions to set a conditional format range.
+
 * `doc_worksheet_serialize_headers1.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet.
 
@@ -1138,6 +1160,18 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_serialize_intro2.rs` - Demonstrates serializing instances
   of a Serde derived data structure to a worksheet. This version uses
   header deserialization.
+
+* `doc_worksheet_serialize_table1.rs` - Demonstrates serializing instances
+  of a Serde derived data structure to a worksheet with a default worksheet
+  table.
+
+* `doc_worksheet_serialize_table2.rs` - Demonstrates serializing instances
+  of a Serde derived data structure to a worksheet with a worksheet table
+  and a user defined style.
+
+* `doc_worksheet_serialize_table3.rs` - Demonstrates serializing instances
+  of a Serde derived data structure to a worksheet with a user defined
+  worksheet table.
 
 * `doc_worksheet_serialize_vectors.rs` - Demonstrates serializing instances
   of a Serde derived data structure with vectors to a worksheet.
@@ -1386,6 +1420,18 @@ documentation and generally show how an individual function works.
   `XlsxSerialize` trait.
 
 * `doc_xlsxserialize_skip2.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_table.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_table_default.rs` - Example of serializing Serde
+  derived structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_table_style.rs` - Example of serializing Serde derived
   structs to an Excel worksheet using `rust_xlsxwriter` and the
   `XlsxSerialize` trait.
 

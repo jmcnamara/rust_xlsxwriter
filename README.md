@@ -123,8 +123,8 @@ frequently.
 
 Recent changes:
 
+- Added support for Excel 365 embedded worksheet images.
 - Added support for Serde serialization.
-- Added support for Conditional Formatting.
 
 See the full [Release Notes and Changelog].
 
