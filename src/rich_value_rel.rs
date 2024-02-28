@@ -16,7 +16,7 @@ impl RichValueRel {
     // Crate public methods.
     // -----------------------------------------------------------------------
 
-    // Create a new App struct.
+    // Create a new RichValueRel struct.
     pub(crate) fn new() -> RichValueRel {
         let writer = XMLWriter::new();
 

@@ -16,7 +16,7 @@ impl<'a> RichValue<'a> {
     // Crate public methods.
     // -----------------------------------------------------------------------
 
-    // Create a new App struct.
+    // Create a new RichValue struct.
     pub(crate) fn new(embedded_images: &Vec<Image>) -> RichValue {
         let writer = XMLWriter::new();
 
