@@ -41,7 +41,7 @@ use crate::{
     utility, Chart, ChartRangeCacheData, ChartRangeCacheDataType, Color, ConditionalFormat,
     ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
     HeaderImagePosition, Image, IntoColor, IntoExcelDateTime, ObjectMovement, ProtectionOptions,
-    Table, TableFunction, Url,
+    Sparkline, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -229,6 +229,8 @@ pub struct Worksheet {
     has_conditional_formats: bool,
     use_x14_extensions: bool,
     has_x14_conditional_formats: bool,
+    has_sparklines: bool,
+    sparklines: Vec<Sparkline>,
 
     embedded_image_ids: HashMap<u64, u32>,
 
@@ -423,6 +425,8 @@ impl Worksheet {
             embedded_image_ids: HashMap::new(),
             global_embedded_image_indices: vec![],
             has_embedded_image_descriptions: false,
+            has_sparklines: false,
+            sparklines: vec![],
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -5302,7 +5306,6 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell1.png">
     ///
-
     pub fn add_conditional_format<T>(
         &mut self,
         first_row: RowNum,
@@ -5367,6 +5370,45 @@ impl Worksheet {
                 entry.insert(rules);
             }
         }
+
+        Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    pub fn add_sparkline(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        sparkline: &Sparkline,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check that the sparkline has a range.
+        if !sparkline.range.has_data() {
+            return Err(XlsxError::ParameterError(
+                "Sparkline range not set".to_string(),
+            ));
+        }
+
+        // Check that the sparkline range is valid.
+        sparkline.range.validate()?;
+
+        // Clone the sparkline and set the cell.
+        let mut sparkline = sparkline.clone();
+        sparkline.cell = utility::row_col_to_cell(row, col);
+
+        // Store the sparkline.
+        self.sparklines.push(sparkline);
+
+        // Set some global worksheet flags.
+        self.use_x14_extensions = true;
+        self.has_sparklines = true;
 
         Ok(self)
     }
@@ -12298,6 +12340,10 @@ impl Worksheet {
             attributes.push(("spans", span_range.to_string()));
         }
 
+        if self.use_x14_extensions {
+            attributes.push(("x14ac:dyDescent", "0.25".to_string()));
+        }
+
         if let Some(row_options) = row_options {
             let xf_index = row_options.xf_index;
 
@@ -12893,25 +12939,100 @@ impl Worksheet {
 
     // Write the <extLst> element.
     fn write_extensions(&mut self) {
-        let attributes = [
-            (
-                "xmlns:x14",
-                "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main",
-            ),
-            ("uri", "{78C0D931-6437-407d-A8EE-F0AAD7539E65}"),
-        ];
-
         self.writer.xml_start_tag_only("extLst");
-        self.writer.xml_start_tag("ext", &attributes);
 
+        // Write the x14:conditionalFormattings element.
         if self.has_x14_conditional_formats {
-            // Write the x14:conditionalFormattings element.
+            let attributes = [
+                (
+                    "xmlns:x14",
+                    "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main",
+                ),
+                ("uri", "{78C0D931-6437-407d-A8EE-F0AAD7539E65}"),
+            ];
+            self.writer.xml_start_tag("ext", &attributes);
             self.write_conditional_formattings();
+        }
+
+        // Write the x14:sparklineGroups element.
+        if self.has_sparklines {
+            let attributes = [
+                (
+                    "xmlns:x14",
+                    "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main",
+                ),
+                ("uri", "{05C60535-1F16-4fd2-B633-F4F36F0B64E0}"),
+            ];
+            self.writer.xml_start_tag("ext", &attributes);
+            self.write_sparkline_groups();
         }
 
         self.writer.xml_end_tag("ext");
 
         self.writer.xml_end_tag("extLst");
+    }
+
+    // Write the <x14:sparklineGroups> element.
+    fn write_sparkline_groups(&mut self) {
+        let attributes = [(
+            "xmlns:xm",
+            "http://schemas.microsoft.com/office/excel/2006/main",
+        )];
+
+        self.writer
+            .xml_start_tag("x14:sparklineGroups", &attributes);
+
+        for sparkline in &self.sparklines.clone() {
+            // Write the x14:sparklineGroup element.
+            self.write_sparkline_group(sparkline);
+        }
+
+        self.writer.xml_end_tag("x14:sparklineGroups");
+    }
+
+    // Write the <x14:sparklineGroup> element.
+    fn write_sparkline_group(&mut self, sparkline: &Sparkline) {
+        let mut attributes = vec![];
+
+        if sparkline.has_gap {
+            attributes.push(("displayEmptyCellsAs", "gap".to_string()));
+        }
+
+        self.writer.xml_start_tag("x14:sparklineGroup", &attributes);
+
+        // Write the sparkline color elements.
+        self.write_sparkline_color("x14:colorSeries", sparkline.series_color);
+        self.write_sparkline_color("x14:colorNegative", sparkline.negative_color);
+        self.write_sparkline_color("x14:colorAxis", sparkline.axis_color);
+        self.write_sparkline_color("x14:colorMarkers", sparkline.marker_color);
+        self.write_sparkline_color("x14:colorFirst", sparkline.first_color);
+        self.write_sparkline_color("x14:colorLast", sparkline.last_color);
+        self.write_sparkline_color("x14:colorHigh", sparkline.high_color);
+        self.write_sparkline_color("x14:colorLow", sparkline.low_color);
+
+        // Write the x14:sparklines element.
+        self.write_sparklines(sparkline);
+
+        self.writer.xml_end_tag("x14:sparklineGroup");
+    }
+
+    // Write a sparkline <x14:color*> element.
+    fn write_sparkline_color(&mut self, name: &str, color: Color) {
+        self.writer.xml_empty_tag(name, &color.attributes());
+    }
+
+    // Write the <x14:sparklines> element.
+    fn write_sparklines(&mut self, sparkline: &Sparkline) {
+        self.writer.xml_start_tag_only("x14:sparklines");
+        self.writer.xml_start_tag_only("x14:sparkline");
+
+        self.writer
+            .xml_data_element_only("xm:f", &sparkline.range.formula());
+        self.writer
+            .xml_data_element_only("xm:sqref", &sparkline.cell);
+
+        self.writer.xml_end_tag("x14:sparkline");
+        self.writer.xml_end_tag("x14:sparklines");
     }
 }
 

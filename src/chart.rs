@@ -3254,7 +3254,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:numRef");
 
         // Write the c:f element.
-        self.write_range_formula(&range.formula());
+        self.write_range_formula(&range.formula_abs());
 
         // Write the c:numCache element.
         if range.cache.has_data() {
@@ -3269,7 +3269,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:strRef");
 
         // Write the c:f element.
-        self.write_range_formula(&range.formula());
+        self.write_range_formula(&range.formula_abs());
 
         // Write the c:strCache element.
         if range.cache.has_data() {
@@ -7535,6 +7535,17 @@ impl ChartRange {
 
     // Convert the row/col range into a chart range string.
     pub(crate) fn formula(&self) -> String {
+        utility::chart_range(
+            &self.sheet_name,
+            self.first_row,
+            self.first_col,
+            self.last_row,
+            self.last_col,
+        )
+    }
+
+    // Convert the row/col range into an absolute chart range string.
+    pub(crate) fn formula_abs(&self) -> String {
         utility::chart_range_abs(
             &self.sheet_name,
             self.first_row,
@@ -7570,33 +7581,33 @@ impl ChartRange {
 
     // Check that the row/column values in the range are valid.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
-        let range = self.formula();
+        let range = self.formula_abs();
 
-        let error_message = format!("Sheet name in chart series range: {range}");
+        let error_message = format!("Sheet name error for range: '{range}'");
         utility::validate_sheetname(&self.sheet_name, &error_message)?;
 
         if self.first_row > self.last_row {
             return Err(XlsxError::ChartError(format!(
-                "Chart series range '{range}' has a first row greater than the last row"
+                "Range '{range}' has a first row greater than the last row"
             )));
         }
 
         if self.first_col > self.last_col {
             return Err(XlsxError::ChartError(format!(
-                "Chart series range '{range}' has a first column greater than the last column"
+                "Range '{range}' has a first column greater than the last column"
             )));
         }
 
         if self.first_row >= ROW_MAX || self.last_row >= ROW_MAX {
             return Err(XlsxError::ChartError(format!(
-                "Chart series range '{range}' has a first row greater than Excel limit of 1048576"
+                "Range '{range}' has a first row greater than Excel limit of 1048576"
             )));
         }
 
         if self.first_col >= COL_MAX || self.last_col >= COL_MAX {
-            return Err(XlsxError::ChartError(
-                format!("Chart series range '{range}' has a first column greater than Excel limit of XFD/16384"),
-            ));
+            return Err(XlsxError::ChartError(format!(
+                "Range '{range}' has a first column greater than Excel limit of XFD/16384"
+            )));
         }
 
         Ok(())

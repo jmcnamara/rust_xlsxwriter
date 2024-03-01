@@ -368,8 +368,28 @@ where
     }
 }
 
-// Convert zero indexed row and col cell references to a chart absolute
-// Sheet1!$A$1:$B$1 style range string.
+// Convert zero indexed row and col cell references to a non-absolute chart
+// "Sheet1!A1:B1" style range string.
+pub(crate) fn chart_range(
+    sheet_name: &str,
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
+) -> String {
+    let sheet_name = quote_sheetname(sheet_name);
+    let range1 = row_col_to_cell(first_row, first_col);
+    let range2 = row_col_to_cell(last_row, last_col);
+
+    if range1 == range2 {
+        format!("{sheet_name}!{range1}")
+    } else {
+        format!("{sheet_name}!{range1}:{range2}")
+    }
+}
+
+// Convert zero indexed row and col cell references to an absolute chart
+// "Sheet1!$A$1:$B$1" style range string.
 pub(crate) fn chart_range_abs(
     sheet_name: &str,
     first_row: RowNum,

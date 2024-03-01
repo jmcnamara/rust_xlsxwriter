@@ -281,17 +281,17 @@ mod chart_tests {
     fn test_range_from_string() {
         let range_string = "=Sheet1!$A$1:$A$5";
         let range = ChartRange::new_from_string(range_string);
-        assert_eq!("Sheet1!$A$1:$A$5", range.formula());
+        assert_eq!("Sheet1!$A$1:$A$5", range.formula_abs());
         assert_eq!("Sheet1", range.sheet_name);
 
         let range_string = "Sheet1!$A$1:$A$5";
         let range = ChartRange::new_from_string(range_string);
-        assert_eq!("Sheet1!$A$1:$A$5", range.formula());
+        assert_eq!("Sheet1!$A$1:$A$5", range.formula_abs());
         assert_eq!("Sheet1", range.sheet_name);
 
         let range_string = "Sheet 1!$A$1:$A$5";
         let range = ChartRange::new_from_string(range_string);
-        assert_eq!("'Sheet 1'!$A$1:$A$5", range.formula());
+        assert_eq!("'Sheet 1'!$A$1:$A$5", range.formula_abs());
         assert_eq!("Sheet 1", range.sheet_name);
     }
 }
