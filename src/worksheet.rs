@@ -38,10 +38,10 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, Chart, ChartRangeCacheData, ChartRangeCacheDataType, Color, ConditionalFormat,
-    ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
+    utility, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType, Color,
+    ConditionalFormat, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
     HeaderImagePosition, Image, IntoColor, IntoExcelDateTime, ObjectMovement, ProtectionOptions,
-    Sparkline, Table, TableFunction, Url,
+    Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -12982,9 +12982,10 @@ impl Worksheet {
         self.writer
             .xml_start_tag("x14:sparklineGroups", &attributes);
 
-        for sparkline in &self.sparklines.clone() {
+        let sparklines = self.sparklines.clone();
+        for sparkline in sparklines.into_iter().rev() {
             // Write the x14:sparklineGroup element.
-            self.write_sparkline_group(sparkline);
+            self.write_sparkline_group(&sparkline);
         }
 
         self.writer.xml_end_tag("x14:sparklineGroups");
@@ -12994,21 +12995,106 @@ impl Worksheet {
     fn write_sparkline_group(&mut self, sparkline: &Sparkline) {
         let mut attributes = vec![];
 
-        if sparkline.has_gap {
-            attributes.push(("displayEmptyCellsAs", "gap".to_string()));
+        if let Some(max) = sparkline.custom_max {
+            attributes.push(("manualMax", max.to_string()));
+        }
+
+        if let Some(min) = sparkline.custom_min {
+            attributes.push(("manualMin", min.to_string()));
+        }
+
+        match sparkline.sparkline_type {
+            SparklineType::Column => {
+                attributes.push(("type", "column".to_string()));
+            }
+            SparklineType::WinLose => {
+                attributes.push(("type", "stacked".to_string()));
+            }
+            SparklineType::Line => {}
+        }
+
+        if let Some(weight) = sparkline.line_weight {
+            attributes.push(("lineWeight", weight.to_string()));
+        }
+
+        if sparkline.date_range.has_data() {
+            attributes.push(("dateAxis", "1".to_string()));
+        }
+
+        match sparkline.show_empty_cells_as {
+            ChartEmptyCells::Gaps | ChartEmptyCells::Connected => {
+                attributes.push((
+                    "displayEmptyCellsAs",
+                    sparkline.show_empty_cells_as.to_string(),
+                ));
+            }
+            ChartEmptyCells::Zero => {}
+        }
+
+        if sparkline.show_markers {
+            attributes.push(("markers", "1".to_string()));
+        }
+
+        if sparkline.show_high_point {
+            attributes.push(("high", "1".to_string()));
+        }
+
+        if sparkline.show_low_point {
+            attributes.push(("low", "1".to_string()));
+        }
+
+        if sparkline.show_first_point {
+            attributes.push(("first", "1".to_string()));
+        }
+
+        if sparkline.show_last_point {
+            attributes.push(("last", "1".to_string()));
+        }
+
+        if sparkline.show_negative_points {
+            attributes.push(("negative", "1".to_string()));
+        }
+
+        if sparkline.show_axis {
+            attributes.push(("displayXAxis", "1".to_string()));
+        }
+
+        if sparkline.show_hidden_data {
+            attributes.push(("displayHidden", "1".to_string()));
+        }
+
+        if sparkline.custom_min.is_some() {
+            attributes.push(("minAxisType", "custom".to_string()));
+        } else if sparkline.group_min {
+            attributes.push(("minAxisType", "group".to_string()));
+        }
+
+        if sparkline.custom_max.is_some() {
+            attributes.push(("maxAxisType", "custom".to_string()));
+        } else if sparkline.group_max {
+            attributes.push(("maxAxisType", "group".to_string()));
+        }
+
+        if sparkline.show_reversed {
+            attributes.push(("rightToLeft", "1".to_string()));
         }
 
         self.writer.xml_start_tag("x14:sparklineGroup", &attributes);
 
         // Write the sparkline color elements.
         self.write_sparkline_color("x14:colorSeries", sparkline.series_color);
-        self.write_sparkline_color("x14:colorNegative", sparkline.negative_color);
+        self.write_sparkline_color("x14:colorNegative", sparkline.negative_points_color);
         self.write_sparkline_color("x14:colorAxis", sparkline.axis_color);
-        self.write_sparkline_color("x14:colorMarkers", sparkline.marker_color);
-        self.write_sparkline_color("x14:colorFirst", sparkline.first_color);
-        self.write_sparkline_color("x14:colorLast", sparkline.last_color);
-        self.write_sparkline_color("x14:colorHigh", sparkline.high_color);
-        self.write_sparkline_color("x14:colorLow", sparkline.low_color);
+        self.write_sparkline_color("x14:colorMarkers", sparkline.markers_color);
+        self.write_sparkline_color("x14:colorFirst", sparkline.first_point_color);
+        self.write_sparkline_color("x14:colorLast", sparkline.last_point_color);
+        self.write_sparkline_color("x14:colorHigh", sparkline.high_point_color);
+        self.write_sparkline_color("x14:colorLow", sparkline.low_point_color);
+
+        if sparkline.date_range.has_data() {
+            self.writer
+                .xml_data_element_only("xm:f", &sparkline.date_range.formula());
+        }
 
         // Write the x14:sparklines element.
         self.write_sparklines(sparkline);
