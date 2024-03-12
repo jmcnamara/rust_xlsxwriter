@@ -4,13 +4,478 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
+//! # Working with Sparklines
+//!
+//! Sparklines are a feature of Excel 2010+ which allows you to add small charts
+//! to worksheet cells. These are useful for showing visual trends in data in a
+//! compact format.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/sparklines1.png">
+//!
+//! The following code was used to generate the above file.
+//!
+//!
+//! ```rust
+//! # // This code is available in examples/app_sparklines1.rs
+//! #
+//! use rust_xlsxwriter::{Sparkline, SparklineType, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Create a new Excel file object.
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Some sample data to plot.
+//!     let data = [[-2, 2, 3, -1, 0], [30, 20, 33, 20, 15], [1, -1, -1, 1, -1]];
+//!
+//!     worksheet.write_row_matrix(0, 0, data)?;
+//!
+//!     // Add a line sparkline (the default) with markers.
+//!     let sparkline1 = Sparkline::new()
+//!         .set_range(("Sheet1", 0, 0, 0, 4))
+//!         .show_markers(true);
+//!
+//!     worksheet.add_sparkline(0, 5, &sparkline1)?;
+//!
+//!     // Add a column sparkline with non-default style.
+//!     let sparkline2 = Sparkline::new()
+//!         .set_range(("Sheet1", 1, 0, 1, 4))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(12);
+//!
+//!     worksheet.add_sparkline(1, 5, &sparkline2)?;
+//!
+//!     // Add a win/loss sparkline with negative values highlighted.
+//!     let sparkline3 = Sparkline::new()
+//!         .set_range(("Sheet1", 2, 0, 2, 4))
+//!         .set_type(SparklineType::WinLose)
+//!         .show_negative_points(true);
+//!
+//!     worksheet.add_sparkline(2, 5, &sparkline3)?;
+//!
+//!     // Save the file to disk.
+//!     workbook.save("sparklines1.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! All of the properties that can be set for Excel sparklines can be set in
+//! `rust_xlsxwriter`. For example:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/sparklines2.png">
+//!
+//! The following code was used to generate the above file.
+//!
+//! ```rust
+//! # // This code is available in examples/app_sparklines2.rs
+//! #
+//! use rust_xlsxwriter::{Format, Sparkline, SparklineType, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Create a new Excel file object.
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet1 = workbook.add_worksheet();
+//!     let mut row = 1;
+//!
+//!     // Set the columns widths to make the output clearer.
+//!     worksheet1.set_column_width(0, 14)?;
+//!     worksheet1.set_column_width(1, 50)?;
+//!     worksheet1.set_zoom(150);
+//!
+//!     // Add some headings.
+//!     let bold = Format::new().set_bold();
+//!     worksheet1.write_with_format(0, 0, "Sparkline", &bold)?;
+//!     worksheet1.write_with_format(0, 1, "Description", &bold)?;
+//!
+//!     //
+//!     // Add a default line sparkline.
+//!     //
+//!     let text = "A default line sparkline.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new().set_range(("Sheet2", 0, 0, 0, 9));
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a default column sparkline.
+//!     //
+//!     let text = "A default column sparkline.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 1, 0, 1, 9))
+//!         .set_type(SparklineType::Column);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a default win/loss sparkline.
+//!     //
+//!     let text = "A default win/loss sparkline.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 2, 0, 2, 9))
+//!         .set_type(SparklineType::WinLose);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 2;
+//!
+//!     //
+//!     // Add a line sparkline with markers.
+//!     //
+//!     let text = "Line with markers.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 0, 0, 0, 9))
+//!         .show_markers(true);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a line sparkline with high and low points.
+//!     //
+//!     let text = "Line with high and low points.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 0, 0, 0, 9))
+//!         .show_high_point(true)
+//!         .show_low_point(true);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a line sparkline with first and last points.
+//!     //
+//!     let text = "Line with first and last point markers.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 0, 0, 0, 9))
+//!         .show_first_point(true)
+//!         .show_last_point(true);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a line sparkline with negative point markers.
+//!     //
+//!     let text = "Line with negative point markers.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 0, 0, 0, 9))
+//!         .show_negative_points(true);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a line sparkline with axis.
+//!     //
+//!     let text = "Line with axis.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 0, 0, 0, 9))
+//!         .show_axis(true);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 2;
+//!
+//!     //
+//!     // Add a column sparkline with style 1. The default style.
+//!     //
+//!     let text = "Column with style 1. The default.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 1, 0, 1, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(1);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a column sparkline with style 2.
+//!     //
+//!     let text = "Column with style 2.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 1, 0, 1, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(2);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a column sparkline with style 3.
+//!     //
+//!     let text = "Column with style 3.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 1, 0, 1, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(3);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a column sparkline with style 4.
+//!     //
+//!     let text = "Column with style 4.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 1, 0, 1, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(4);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a column sparkline with style 5.
+//!     //
+//!     let text = "Column with style 5.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 1, 0, 1, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(5);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a column sparkline with style 6.
+//!     //
+//!     let text = "Column with style 6.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 1, 0, 1, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(6);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a column sparkline with a user defined color.
+//!     //
+//!     let text = "Column with a user defined color.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 1, 0, 1, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_sparkline_color("#E965E0");
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 2;
+//!
+//!     //
+//!     // Add a win/loss sparkline.
+//!     //
+//!     let text = "A win/loss sparkline.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 2, 0, 2, 9))
+//!         .set_type(SparklineType::WinLose);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a win/loss sparkline with negative points highlighted.
+//!     //
+//!     let text = "A win/loss sparkline with negative points highlighted.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 2, 0, 2, 9))
+//!         .set_type(SparklineType::WinLose)
+//!         .show_negative_points(true);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 2;
+//!
+//!     //
+//!     // Add a left to right (the default) sparkline.
+//!     //
+//!     let text = "A left to right column (the default).";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 3, 0, 3, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(20);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Add a right to left sparkline.
+//!     //
+//!     let text = "A right to left column.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 3, 0, 3, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(20)
+//!         .set_right_to_left(true);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     row += 1;
+//!
+//!     //
+//!     // Sparkline and text in one cell. This just requires writing text to the
+//!     // same cell as the sparkline.
+//!     //
+//!     let text = "Sparkline and text in one cell.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 3, 0, 3, 9))
+//!         .set_type(SparklineType::Column)
+//!         .set_style(20);
+//!
+//!     worksheet1.add_sparkline(row, 0, &sparkline)?;
+//!     worksheet1.write(row, 0, "Growth")?;
+//!     row += 2;
+//!
+//!     //
+//!     // "A grouped sparkline. User changes are applied to all three. Not that the
+//!     // sparkline range is a 2D range and the sparkline is positioned in a 1D
+//!     // range of cells.
+//!     //
+//!     let text = "A grouped sparkline. Changes are applied to all three.";
+//!     worksheet1.write(row, 1, text)?;
+//!
+//!     let sparkline = Sparkline::new()
+//!         .set_range(("Sheet2", 4, 0, 6, 9))
+//!         .show_markers(true);
+//!
+//!     worksheet1.add_sparkline_group(row, 0, row + 2, 0, &sparkline)?;
+//!
+//!     //
+//!     // Add a worksheet with the data to plot on a separate worksheet.
+//!     //
+//!     let worksheet2 = workbook.add_worksheet();
+//!
+//!     // Some sample data to plot.
+//!     let data = [
+//!         // Simple line data.
+//!         [-2, 2, 3, -1, 0, -2, 3, 2, 1, 0],
+//!         // Simple column data.
+//!         [30, 20, 33, 20, 15, 5, 5, 15, 10, 15],
+//!         // Simple win/loss data.
+//!         [1, 1, -1, -1, 1, -1, 1, 1, 1, -1],
+//!         // Unbalanced histogram.
+//!         [5, 6, 7, 10, 15, 20, 30, 50, 70, 100],
+//!         // Data for the grouped sparkline example.
+//!         [-2, 2, 3, -1, 0, -2, 3, 2, 1, 0],
+//!         [3, -1, 0, -2, 3, 2, 1, 0, 2, 1],
+//!         [0, -2, 3, 2, 1, 0, 1, 2, 3, 1],
+//!     ];
+//!
+//!     worksheet2.write_row_matrix(0, 0, data)?;
+//!
+//!     // Save the file to disk.
+//!     workbook.save("sparklines2.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
 #![warn(missing_docs)]
 
-use crate::{ChartEmptyCells, ChartRange, Color, IntoChartRange, IntoColor};
+use crate::{
+    utility, ChartEmptyCells, ChartRange, ColNum, Color, IntoChartRange, IntoColor, RowNum,
+};
 
 mod tests;
 
-/// TODO
+/// The `Sparkline` struct is used to create an object to represent a sparkline
+/// that can be inserted into a worksheet.
+///
+/// Sparklines are a feature of Excel 2010+ which allows you to add small charts
+/// to worksheet cells. These are useful for showing visual trends in data in a
+/// compact format.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/sparklines1.png">
+///
+/// The following example was used to generate the above file.
+///
+/// ```
+/// # // This code is available in examples/app_sparklines1.rs
+/// #
+/// use rust_xlsxwriter::{Sparkline, SparklineType, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Some sample data to plot.
+///     let data = [[-2, 2, 3, -1, 0], [30, 20, 33, 20, 15], [1, -1, -1, 1, -1]];
+///
+///     worksheet.write_row_matrix(0, 0, data)?;
+///
+///     // Add a line sparkline (the default) with markers.
+///     let sparkline1 = Sparkline::new()
+///         .set_range(("Sheet1", 0, 0, 0, 4))
+///         .show_markers(true);
+///
+///     worksheet.add_sparkline(0, 5, &sparkline1)?;
+///
+///     // Add a column sparkline with non-default style.
+///     let sparkline2 = Sparkline::new()
+///         .set_range(("Sheet1", 1, 0, 1, 4))
+///         .set_type(SparklineType::Column)
+///         .set_style(12);
+///
+///     worksheet.add_sparkline(1, 5, &sparkline2)?;
+///
+///     // Add a win/loss sparkline with negative values highlighted.
+///     let sparkline3 = Sparkline::new()
+///         .set_range(("Sheet1", 2, 0, 2, 4))
+///         .set_type(SparklineType::WinLose)
+///         .show_negative_points(true);
+///
+///     worksheet.add_sparkline(2, 5, &sparkline3)?;
+///
+///     // Save the file to disk.
+///     workbook.save("sparklines1.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
 #[derive(Clone)]
 pub struct Sparkline {
     pub(crate) series_color: Color,
@@ -21,9 +486,9 @@ pub struct Sparkline {
     pub(crate) last_point_color: Color,
     pub(crate) high_point_color: Color,
     pub(crate) low_point_color: Color,
-    pub(crate) range: ChartRange,
+    pub(crate) data_range: ChartRange,
     pub(crate) date_range: ChartRange,
-    pub(crate) cell: String,
+    pub(crate) ranges: Vec<(String, String)>,
     pub(crate) sparkline_type: SparklineType,
     pub(crate) show_high_point: bool,
     pub(crate) show_low_point: bool,
@@ -33,13 +498,14 @@ pub struct Sparkline {
     pub(crate) show_markers: bool,
     pub(crate) show_axis: bool,
     pub(crate) show_hidden_data: bool,
-    pub(crate) show_reversed: bool,
+    pub(crate) show_right_to_left: bool,
     pub(crate) show_empty_cells_as: ChartEmptyCells,
     pub(crate) line_weight: Option<f64>,
     pub(crate) custom_min: Option<f64>,
     pub(crate) custom_max: Option<f64>,
     pub(crate) group_max: bool,
     pub(crate) group_min: bool,
+    data_row_order: bool,
 }
 
 #[allow(clippy::new_without_default)]
@@ -55,9 +521,9 @@ impl Sparkline {
             last_point_color: Color::Theme(4, 3),
             high_point_color: Color::Theme(4, 0),
             low_point_color: Color::Theme(4, 0),
-            range: ChartRange::default(),
+            data_range: ChartRange::default(),
             date_range: ChartRange::default(),
-            cell: String::new(),
+            ranges: vec![],
             sparkline_type: SparklineType::Line,
             show_high_point: false,
             show_low_point: false,
@@ -67,39 +533,66 @@ impl Sparkline {
             show_markers: false,
             show_axis: false,
             show_hidden_data: false,
-            show_reversed: false,
+            show_right_to_left: false,
             show_empty_cells_as: ChartEmptyCells::Gaps,
             line_weight: None,
             custom_min: None,
             custom_max: None,
             group_max: false,
             group_min: false,
+            data_row_order: true,
         }
     }
 
-    /// Set the range to which the sparkline applies.
+    /// Set the range of the sparkline data.
     ///
-    /// Excel graphs sparklines for using a user specified range as the Y values
-    /// for the vertical axis of the plot. It uses evenly spaced X values for
-    /// the horizontal axis.
+    /// This method is used to set the location of the data from which the
+    /// sparkline will be plotted. This constitutes the Y values of the
+    /// sparkline.
     ///
-    /// It is also possible to use a user specified range of dates for the X
-    /// values using the
+    /// The X values are taken as evenly spaced values although it is also
+    /// possible to specify date values for the X axis using the
     /// [`Sparkline::set_date_range`](Sparkline::set_date_range) method.
     ///
+    /// The range can either be a 1D range when used with
+    /// [`Worksheet::add_sparkline()`](crate::Worksheet::add_sparkline()) or a
+    /// 2D range with used with
+    /// [`Worksheet::add_sparkline_group()`](crate::Worksheet::add_sparkline_group()).
     ///
+    /// # Parameters
+    ///
+    /// * `range` - A 1 or 2D range that contains the data that will be plotted
+    ///   in the sparkline. This can specified in different ways, see
+    ///   [`IntoChartRange`] for details.
     ///
     pub fn set_range<T>(mut self, range: T) -> Sparkline
     where
         T: IntoChartRange,
     {
-        self.range = range.new_chart_range();
+        self.data_range = range.new_chart_range();
         self
     }
 
     /// Set the type of sparkline.
     ///
-    /// TODO
+    /// Set the type of the sparkline to be either:
+    ///
+    /// * [`SparklineType::Line`]: A line style sparkline. This is the default.
+    ///
+    ///   <img src="https://rustxlsxwriter.github.io/images/sparkline_type_line.png">
+    ///
+    /// * [`SparklineType::Column`]: A histogram style sparkline.
+    ///
+    ///   <img src="https://rustxlsxwriter.github.io/images/sparkline_type_column.png">
+    ///
+    /// * [`SparklineType::WinLose`]: A positive/negative style sparkline. It
+    ///   looks similar to a histogram but all the bars are the same height,
+    ///
+    ///   <img src="https://rustxlsxwriter.github.io/images/sparkline_type_winlose.png">
+    ///
+    /// # Parameters
+    ///
+    /// * `sparkline_type` - A [`SparklineType`] value.
     ///
     pub fn set_type(mut self, sparkline_type: SparklineType) -> Sparkline {
         self.sparkline_type = sparkline_type;
@@ -107,6 +600,8 @@ impl Sparkline {
     }
 
     /// Display the highest point in a sparkline with a marker.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_high_point.png">
     ///
     /// # Parameters
     ///
@@ -119,6 +614,8 @@ impl Sparkline {
 
     /// Display the lowest point in a sparkline with a marker.
     ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_low_point.png">
+    ///
     /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
@@ -129,6 +626,8 @@ impl Sparkline {
     }
 
     /// Display the first point in a sparkline with a marker.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_first_point.png">
     ///
     /// # Parameters
     ///
@@ -141,6 +640,8 @@ impl Sparkline {
 
     /// Display the last point in a sparkline with a marker.
     ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_last_point.png">
+    ///
     /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
@@ -151,6 +652,8 @@ impl Sparkline {
     }
 
     /// Display the negative points in a sparkline with markers.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_negative_points.png">
     ///
     /// # Parameters
     ///
@@ -163,6 +666,8 @@ impl Sparkline {
 
     /// Display markers for all points in the sparkline.
     ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_markers.png">
+    ///
     /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
@@ -173,6 +678,8 @@ impl Sparkline {
     }
 
     /// Display the horizontal axis for a sparkline.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_axis.png">
     ///
     /// # Parameters
     ///
@@ -185,6 +692,7 @@ impl Sparkline {
 
     /// Display data from hidden rows or columns in a sparkline.
     ///
+
     /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
@@ -196,6 +704,14 @@ impl Sparkline {
 
     /// Set the option for displaying empty cells in a sparkline.
     ///
+    /// The options are:
+    ///
+    /// * [`ChartEmptyCells::Gaps`]: Show empty cells in the chart as gaps. The
+    ///   default.
+    /// * [`ChartEmptyCells::Zero`]: Show empty cells in the chart as zeroes.
+    /// * [`ChartEmptyCells::Connected`]: Show empty cells in the chart
+    ///   connected by a line to the previous point.
+    ///
     /// # Parameters
     ///
     /// `option` - A [`ChartEmptyCells`] enum value.
@@ -206,14 +722,17 @@ impl Sparkline {
         self
     }
 
-    /// Display the sparkline in reversed order.
+    /// Display the sparkline in right to left, reversed order.
+    ///
+    /// Change the default direction of the sparkline so that it is plotted from
+    /// right to left instead of the default left to right.
     ///
     /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
-    pub fn set_reverse(mut self, enable: bool) -> Sparkline {
-        self.show_reversed = enable;
+    pub fn set_right_to_left(mut self, enable: bool) -> Sparkline {
+        self.show_right_to_left = enable;
         self
     }
 
@@ -438,20 +957,39 @@ impl Sparkline {
         self
     }
 
-    /// Set the an option date axis for the sparkline data.
+    /// Set the an optional date axis for the sparkline data.
     ///
-    /// In general Excel graphs sparklines at equally spaced X intervals. However,
-    /// it is also possible to specify an optional range of dates that can be
-    /// used as the X values `set_date_range()`.
+    /// In general Excel graphs sparklines at equally spaced X intervals.
+    /// However, it is also possible to specify an optional range of dates that
+    /// can be used as the X values `set_date_range()`.
     ///
+    /// # Parameters
     ///
-    /// TODO
+    /// * `range` - A 1D range that contains the dates used to plot the
+    ///   sparkline. This can specified in different ways, see
+    ///   [`IntoChartRange`] for details.
     ///
     pub fn set_date_range<T>(mut self, range: T) -> Sparkline
     where
         T: IntoChartRange,
     {
         self.date_range = range.new_chart_range();
+        self
+    }
+
+    /// Change the data range order for 2D data ranges in grouped sparklines.
+    ///
+    /// When creating grouped sparklines via the
+    /// [`Worksheet::add_sparkline_group()`](crate::Worksheet::add_sparkline_group())
+    /// method the data range that the sparkline is applied to is
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    pub fn set_column_order(mut self, enable: bool) -> Sparkline {
+        self.data_row_order = !enable;
         self
     }
 
@@ -801,6 +1339,42 @@ impl Sparkline {
 
         self
     }
+
+    // Add a single sparkline to a cell.
+    pub(crate) fn add_cell_range(&mut self, row: RowNum, col: ColNum) {
+        let cell = utility::row_col_to_cell(row, col);
+        let range = self.data_range.formula();
+
+        self.ranges.push((cell, range));
+    }
+
+    // Add a group sparkline to a range.
+    pub(crate) fn add_group_range(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+    ) {
+        let cell_row_order = last_col - first_col == 0;
+        self.data_range.set_baseline(self.data_row_order);
+
+        if cell_row_order {
+            for row in first_row..=last_row {
+                let cell = utility::row_col_to_cell(row, first_col);
+                let range = self.data_range.formula();
+                self.ranges.push((cell, range));
+                self.data_range.increment(self.data_row_order);
+            }
+        } else {
+            for col in first_col..=last_col {
+                let cell = utility::row_col_to_cell(first_row, col);
+                let range = self.data_range.formula();
+                self.ranges.push((cell, range));
+                self.data_range.increment(self.data_row_order);
+            }
+        }
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -815,12 +1389,21 @@ impl Sparkline {
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum SparklineType {
     /// A line style sparkline. This is the default.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_type_line.png">
+    ///
     Line,
 
     /// A histogram style sparkline.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_type_column.png">
+    ///
     Column,
 
     /// A positive/negative style sparkline. It looks similar to a histogram but
-    /// all the points are the same height,
+    /// all the bars are the same height,
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_type_winlose.png">
+    ///
     WinLose,
 }

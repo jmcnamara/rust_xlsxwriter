@@ -85,6 +85,7 @@ features are:
 - Page/Printing Setup support.
 - Merged ranges.
 - Conditional formatting.
+- Sparklines.
 - Worksheet PNG/JPEG/GIF/BMP images.
 - Rich multi-format strings.
 - Defined names.

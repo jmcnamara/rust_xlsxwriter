@@ -29,6 +29,7 @@
 //! - Page/Printing Setup support.
 //! - Merged ranges.
 //! - Conditional formatting.
+//! - Sparklines.
 //! - Worksheet PNG/JPEG/GIF/BMP images.
 //! - Rich multi-format strings.
 //! - Defined names.
@@ -53,6 +54,7 @@
 //! - [`Image`]: The interface for images used in worksheets.
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.
+//! - [`Sparklines`](crate::sparkline): Working with Sparklines.
 //! - [`ExcelDateTime`]: A type to represent dates and times in Excel format.
 //! - [`Formula`]: A type for Excel formulas.
 //! - [`Url`]: A type for URLs/Hyperlinks used in worksheets.
@@ -178,7 +180,6 @@ mod rich_value_structure;
 mod rich_value_types;
 mod shared_strings;
 mod shared_strings_table;
-mod sparkline;
 mod styles;
 mod table;
 mod theme;
@@ -195,6 +196,7 @@ pub mod serializer;
 pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
+pub mod sparkline;
 pub mod tutorial;
 pub mod utility;
 

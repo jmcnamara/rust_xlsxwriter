@@ -5390,18 +5390,73 @@ impl Worksheet {
         }
 
         // Check that the sparkline has a range.
-        if !sparkline.range.has_data() {
+        if !sparkline.data_range.has_data() {
             return Err(XlsxError::ParameterError(
-                "Sparkline range not set".to_string(),
+                "Sparkline data range not set".to_string(),
             ));
         }
 
         // Check that the sparkline range is valid.
-        sparkline.range.validate()?;
+        sparkline.data_range.validate()?;
 
-        // Clone the sparkline and set the cell.
+        // Clone the sparkline and set a data range.
         let mut sparkline = sparkline.clone();
-        sparkline.cell = utility::row_col_to_cell(row, col);
+        sparkline.add_cell_range(row, col);
+
+        // Store the sparkline.
+        self.sparklines.push(sparkline);
+
+        // Set some global worksheet flags.
+        self.use_x14_extensions = true;
+        self.has_sparklines = true;
+
+        Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    pub fn add_sparkline_group(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        sparkline: &Sparkline,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Check that the cell location is a 1D/scalar range.
+        if last_row - first_row > 0 && last_col - first_col > 0 {
+            return Err(XlsxError::ParameterError(
+                format!("Sparkline group location `({first_row}, {first_col}, {last_row}, {last_col})` must be a 1D/scalar range"),
+            ));
+        }
+
+        // Check that the sparkline has a range.
+        if !sparkline.data_range.has_data() {
+            return Err(XlsxError::ParameterError(
+                "Sparkline data range not set".to_string(),
+            ));
+        }
+
+        // Check that the sparkline range is valid.
+        sparkline.data_range.validate()?;
+
+        // Clone the sparkline and set a data range.
+        let mut sparkline = sparkline.clone();
+        sparkline.add_group_range(first_row, first_col, last_row, last_col);
 
         // Store the sparkline.
         self.sparklines.push(sparkline);
@@ -13075,7 +13130,7 @@ impl Worksheet {
             attributes.push(("maxAxisType", "group".to_string()));
         }
 
-        if sparkline.show_reversed {
+        if sparkline.show_right_to_left {
             attributes.push(("rightToLeft", "1".to_string()));
         }
 
@@ -13110,14 +13165,15 @@ impl Worksheet {
     // Write the <x14:sparklines> element.
     fn write_sparklines(&mut self, sparkline: &Sparkline) {
         self.writer.xml_start_tag_only("x14:sparklines");
-        self.writer.xml_start_tag_only("x14:sparkline");
 
-        self.writer
-            .xml_data_element_only("xm:f", &sparkline.range.formula());
-        self.writer
-            .xml_data_element_only("xm:sqref", &sparkline.cell);
+        for range in &sparkline.ranges {
+            self.writer.xml_start_tag_only("x14:sparkline");
 
-        self.writer.xml_end_tag("x14:sparkline");
+            self.writer.xml_data_element_only("xm:f", &range.1);
+            self.writer.xml_data_element_only("xm:sqref", &range.0);
+
+            self.writer.xml_end_tag("x14:sparkline");
+        }
         self.writer.xml_end_tag("x14:sparklines");
     }
 }

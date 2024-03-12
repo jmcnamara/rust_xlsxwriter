@@ -2217,6 +2217,13 @@ impl Chart {
 
     /// Set the option for displaying empty cells in a chart.
     ///
+    /// The options are:
+    ///
+    /// * [`ChartEmptyCells::Gaps`]: Show empty cells in the chart as gaps. The
+    ///   default.
+    /// * [`ChartEmptyCells::Zero`]: Show empty cells in the chart as zeroes.
+    /// * [`ChartEmptyCells::Connected`]: Show empty cells in the chart
+    ///   connected by a line to the previous point.
     ///
     /// # Parameters
     ///
@@ -7579,6 +7586,28 @@ impl ChartRange {
         std::cmp::max(row_range, col_range)
     }
 
+    // Set the start point in a 2D range. This is used to start incremental
+    // ranges, see below.
+    pub(crate) fn set_baseline(&mut self, row_order: bool) {
+        if row_order {
+            self.last_row = self.first_row;
+        } else {
+            self.last_col = self.first_col;
+        }
+    }
+
+    // Increment a 1D slice in a 2D range. Used to generate sequential cell
+    // ranges.
+    pub(crate) fn increment(&mut self, row_order: bool) {
+        if row_order {
+            self.first_row += 1;
+            self.last_row = self.first_row;
+        } else {
+            self.first_col += 1;
+            self.last_col = self.first_col;
+        }
+    }
+
     // Check that the row/column values in the range are valid.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
         let range = self.formula_abs();
@@ -7616,7 +7645,7 @@ impl ChartRange {
     /// Add data to the `ChartRange` cache.
     ///
     /// This method is only used to populate the chart data caches in test code.
-    /// The library reads and populates the cache automatically.
+    /// Outside of tests the library reads and populates the cache automatically.
     ///
     /// # Parameters
     ///
