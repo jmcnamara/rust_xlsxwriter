@@ -7,8 +7,8 @@
 //! # Working with Sparklines
 //!
 //! Sparklines are a feature of Excel 2010+ which allows you to add small charts
-//! to worksheet cells. These are useful for showing visual trends in data in a
-//! compact format.
+//! to worksheet cells. These are useful for showing data trends in a compact
+//! visual format.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/sparklines1.png">
 //!
@@ -62,8 +62,20 @@
 //! }
 //! ```
 //!
-//! All of the properties that can be set for Excel sparklines can be set in
-//! `rust_xlsxwriter`. For example:
+//! In Excel sparklines can be added as a single entity in a cell that refers to
+//! a 1D data range or as a "group" sparkline that is applied across a 1D range
+//! and refers to data in a 2D range. A grouped sparkline uses one sparkline for
+//! the specified range and any changes to it are applied to the entire
+//! sparkline group.
+//!
+//! The [`Worksheet::add_sparkline()`](crate::Worksheet::add_sparkline) method
+//! shown allows you to add a sparkline to a single cell that displays data from
+//! a 1D range of cells whereas the
+//! [`Worksheet::add_sparkline_group()`](crate::Worksheet::add_sparkline_group())
+//! method applies the group sparkline to a range.
+//!
+//! Both of these methods are shown in the example below along with a
+//! demonstration of various properties that can be set for Excel sparklines:
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/sparklines2.png">
 //!
@@ -422,8 +434,8 @@ mod tests;
 /// that can be inserted into a worksheet.
 ///
 /// Sparklines are a feature of Excel 2010+ which allows you to add small charts
-/// to worksheet cells. These are useful for showing visual trends in data in a
-/// compact format.
+/// to worksheet cells. These are useful for showing data trends in a compact
+/// visual format.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/sparklines1.png">
 ///
@@ -475,6 +487,18 @@ mod tests;
 ///     Ok(())
 /// }
 /// ```
+///
+/// In Excel sparklines can be added as a single entity in a cell that refers to
+/// a 1D data range or as a "group" sparkline that is applied across a 1D range
+/// and refers to data in a 2D range. A grouped sparkline uses one sparkline for
+/// the specified range and any changes to it are applied to the entire
+/// sparkline group.
+///
+/// The [`Worksheet::add_sparkline()`](crate::Worksheet::add_sparkline) method
+/// shown allows you to add a sparkline to a single cell that displays data from
+/// a 1D range of cells whereas the
+/// [`Worksheet::add_sparkline_group()`](crate::Worksheet::add_sparkline_group())
+/// method applies the group sparkline to a range.
 ///
 #[derive(Clone)]
 pub struct Sparkline {
@@ -550,8 +574,9 @@ impl Sparkline {
     /// sparkline will be plotted. This constitutes the Y values of the
     /// sparkline.
     ///
-    /// The X values are taken as evenly spaced values although it is also
-    /// possible to specify date values for the X axis using the
+    /// By default the X values of the sparkline are taken as evenly spaced
+    /// increments. However, it is also possible to specify date values for the
+    /// X axis using the
     /// [`Sparkline::set_date_range`](Sparkline::set_date_range) method.
     ///
     /// The range can either be a 1D range when used with
@@ -561,7 +586,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `range` - A 1 or 2D range that contains the data that will be plotted
+    /// * `range` - A 1D or 2D range that contains the data that will be plotted
     ///   in the sparkline. This can specified in different ways, see
     ///   [`IntoChartRange`] for details.
     ///
@@ -575,7 +600,7 @@ impl Sparkline {
 
     /// Set the type of sparkline.
     ///
-    /// Set the type of the sparkline to be either:
+    /// The type of the sparkline can be one of the following:
     ///
     /// * [`SparklineType::Line`]: A line style sparkline. This is the default.
     ///
@@ -599,7 +624,7 @@ impl Sparkline {
         self
     }
 
-    /// Display the highest point in a sparkline with a marker.
+    /// Display the highest point(s) in a sparkline with a marker.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/sparkline_high_point.png">
     ///
@@ -612,7 +637,7 @@ impl Sparkline {
         self
     }
 
-    /// Display the lowest point in a sparkline with a marker.
+    /// Display the lowest point(s) in a sparkline with a marker.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/sparkline_low_point.png">
     ///
@@ -742,6 +767,45 @@ impl Sparkline {
     ///
     /// * `color` - The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait such as a html string.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a sparkline to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_sparkline_set_sparkline_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Sparkline, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some sample data to plot.
+    /// #     worksheet.write_row(0, 0, [-2, 2, 3, -1, 0])?;
+    /// #
+    ///     // Create a default line sparkline and set its color.
+    ///     let sparkline = Sparkline::new()
+    ///         .set_range(("Sheet1", 0, 0, 0, 4))
+    ///         .set_sparkline_color("#CF6348");
+    ///
+    ///     // Add it to the worksheet.
+    ///     worksheet.add_sparkline(0, 5, &sparkline)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("sparkline.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/sparkline_set_sparkline_color.png">
+    ///
     ///
     pub fn set_sparkline_color<T>(mut self, color: T) -> Sparkline
     where
@@ -922,7 +986,7 @@ impl Sparkline {
     /// Set the maximum vertical value for a group of sparklines.
     ///
     /// Set the maximum vertical value for a group of sparklines based on the
-    /// maximum value for the group.
+    /// maximum value of the group.
     ///
     /// # Parameters
     ///
@@ -941,7 +1005,7 @@ impl Sparkline {
     /// Set the minimum vertical value for a group of sparklines.
     ///
     /// Set the minimum vertical value for a group of sparklines based on the
-    /// minimum value for the group.
+    /// minimum value of the group.
     ///
     /// # Parameters
     ///
@@ -981,8 +1045,9 @@ impl Sparkline {
     ///
     /// When creating grouped sparklines via the
     /// [`Worksheet::add_sparkline_group()`](crate::Worksheet::add_sparkline_group())
-    /// method the data range that the sparkline is applied to is
-    ///
+    /// method the data range that the sparkline is applied to is in row major
+    /// order, i.e., row by row. If required you can change this to column major
+    /// order using this method.
     ///
     /// # Parameters
     ///

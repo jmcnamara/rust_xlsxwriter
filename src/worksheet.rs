@@ -5374,9 +5374,66 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
+    /// Add a sparkline to a worksheet cell.
+    ///
+    /// Sparklines are a feature of Excel 2010+ which allows you to add small
+    /// charts to worksheet cells. These are useful for showing data trends in a
+    /// compact visual format.
+    ///
+    /// The `add_sparkline()` method allows you to add a sparkline to a single
+    /// cell that displays data from a 1D range of cells.
+    ///
+    /// The sparkline can be configured with all the parameters supported by
+    /// Excel. See [`Sparkline`] for details.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `sparkline` - The [`Sparkline`] to insert into the cell.
     ///
     /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * TODO - add sparkline errors.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a sparkline to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_add_sparkline.rs
+    /// #
+    /// # use rust_xlsxwriter::{Sparkline, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add some sample data to plot.
+    ///     worksheet.write_row(0, 0, [-2, 2, 3, -1, 0])?;
+    ///
+    ///     // Create a default line sparkline that plots the 1D data range.
+    ///     let sparkline = Sparkline::new().set_range(("Sheet1", 0, 0, 0, 4));
+    ///
+    ///     // Add it to the worksheet.
+    ///     worksheet.add_sparkline(0, 5, &sparkline)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_add_sparkline.png">
     ///
     pub fn add_sparkline(
         &mut self,
@@ -5413,9 +5470,82 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
+    /// Add a sparkline group to a worksheet range.
+    ///
+    /// Sparklines are a feature of Excel 2010+ which allows you to add small
+    /// charts to worksheet cells. These are useful for showing data trends in a
+    /// compact visual format.
+    ///
+    /// In Excel sparklines can be added as a single entity in a cell that
+    /// refers to a 1D data range or as a "group" sparkline that is applied
+    /// across a 1D range and refers to data in a 2D range. A grouped sparkline
+    /// uses one sparkline for the specified range and any changes to it are
+    /// applied to the entire sparkline group.
+    ///
+    /// The [`Worksheet::add_sparkline()`](Worksheet::add_sparkline) method
+    /// shown above allows you to add a sparkline to a single cell that displays
+    /// data from a 1D range of cells whereas `add_sparkline_group()` applies
+    /// the group sparkline to a range.
+    ///
+    /// The sparkline can be configured with all the parameters supported by
+    /// Excel. See [`Sparkline`] for details.
+    ///
+    /// # Parameters
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `sparkline` - The [`Sparkline`] to insert into the cell.
     ///
     /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    /// * TODO - add sparkline errors.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a sparkline group to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_add_sparkline_group.rs
+    /// #
+    /// # use rust_xlsxwriter::{Sparkline, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add some sample data to plot.
+    ///     let data = [
+    ///         [-2,  2,  3, -1,  0],
+    ///         [30, 20, 33, 20, 15],
+    ///         [1,  -1, -1,  1, -1]
+    ///     ];
+    ///     worksheet.write_row_matrix(0, 0, data)?;
+    ///
+    ///     // Create a default line sparkline that plots the 2D data range.
+    ///     let sparkline = Sparkline::new().set_range(("Sheet1", 0, 0, 2, 4));
+    ///
+    ///     // Add it to the worksheet as a sparkline group.
+    ///     worksheet.add_sparkline_group(0, 5, 2, 5, &sparkline)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_add_sparkline_group.png">
     ///
     pub fn add_sparkline_group(
         &mut self,

@@ -166,6 +166,16 @@ documentation and generally show how an individual function works.
 * `app_serialize.rs` - Example of serializing Serde derived structs to an
   Excel worksheet using `rust_xlsxwriter`.
 
+* `app_sparklines1.rs` - Example of adding sparklines to an Excel
+  spreadsheet using the rust_xlsxwriter library. Sparklines are small
+  charts that fit in a single cell and are used to show trends in data.
+
+* `app_sparklines2.rs` - Example of adding sparklines to an Excel
+  spreadsheet using the rust_xlsxwriter library. Sparklines are small
+  charts that fit in a single cell and are used to show trends in data.
+  This example shows the majority of the properties that can applied to
+  sparklines.
+
 * `app_tables.rs` - Example of how to add tables to a worksheet using the
   rust_xlsxwriter library. Tables in Excel are used to group rows and
   columns of data into a single structure that can be referenced in a
@@ -865,6 +875,9 @@ documentation and generally show how an individual function works.
 * `doc_properties_custom.rs` - An example of setting custom/user defined
   workbook document properties.
 
+* `doc_sparkline_set_sparkline_color.rs` - Demonstrates adding a sparkline
+  to a worksheet.
+
 * `doc_table_set_autofilter.rs` - Example of turning off the autofilter in
   a worksheet table.
 
@@ -996,6 +1009,12 @@ documentation and generally show how an individual function works.
 
 * `doc_working_with_formulas_syntax.rs` - Demonstrates some common formula
   syntax errors.
+
+* `doc_worksheet_add_sparkline.rs` - Demonstrates adding a sparkline to a
+  worksheet.
+
+* `doc_worksheet_add_sparkline_group.rs` - Demonstrates adding a sparkline
+  group to a worksheet.
 
 * `doc_worksheet_autofilter.rs` - Demonstrates setting a simple autofilter
   in a worksheet.
