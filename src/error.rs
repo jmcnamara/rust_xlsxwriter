@@ -87,6 +87,10 @@ pub enum XlsxError {
     /// chart is configured incorrectly.
     ChartError(String),
 
+    /// A general error that is raised when a sparkline parameter is incorrect
+    /// or a sparkline is configured incorrectly.
+    SparklineError(String),
+
     /// A general error when one of the parameters supplied to a
     /// [`ExcelDateTime`](crate::ExcelDateTime) method is outside Excel's
     /// allowable ranges.
@@ -258,6 +262,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::ChartError(error) => {
                 write!(f, "Chart error: '{error}'.")
+            }
+
+            XlsxError::SparklineError(error) => {
+                write!(f, "Sparkline error: '{error}'.")
             }
 
             XlsxError::DateTimeRangeError(error) => {

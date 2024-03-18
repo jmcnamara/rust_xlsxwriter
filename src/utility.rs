@@ -408,6 +408,26 @@ pub(crate) fn chart_range_abs(
     }
 }
 
+// Convert zero indexed row and col cell references to a range and tuple string
+// suitable for an error message.
+pub(crate) fn chart_error_range(
+    sheet_name: &str,
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
+) -> String {
+    let sheet_name = quote_sheetname(sheet_name);
+    let range1 = row_col_to_cell(first_row, first_col);
+    let range2 = row_col_to_cell(last_row, last_col);
+
+    if range1 == range2 {
+        format!("{sheet_name}!{range1}/({first_row}, {first_col})")
+    } else {
+        format!("{sheet_name}!{range1}:{range2}/({first_row}, {first_col}, {last_row}, {last_col})")
+    }
+}
+
 // Create a quoted version of a worksheet name. Excel single quotes worksheet
 // names that contain spaces and some other characters.
 pub(crate) fn quote_sheetname(sheetname: &str) -> String {

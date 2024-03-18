@@ -5394,9 +5394,20 @@ impl Worksheet {
     ///
     /// # Errors
     ///
+    /// * [`XlsxError::SparklineError`] - An error that is raised when there is
+    ///   an parameter error with the sparkline.
+    /// * [`XlsxError::ChartError`] - An error that is raised when there is an
+    ///   parameter error with the data range for the sparkline.
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * TODO - add sparkline errors.
+    /// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
+    ///   cannot be blank.
+    /// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
+    ///   exceeds Excel's limit of 31 characters.
+    /// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
+    ///   chart range cannot contain invalid characters: `[ ] : * ? / \`
+    /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
+    ///   chart range cannot start or end with an apostrophe.
     ///
     /// # Examples
     ///
@@ -5448,13 +5459,21 @@ impl Worksheet {
 
         // Check that the sparkline has a range.
         if !sparkline.data_range.has_data() {
-            return Err(XlsxError::ParameterError(
+            return Err(XlsxError::SparklineError(
                 "Sparkline data range not set".to_string(),
             ));
         }
 
         // Check that the sparkline range is valid.
         sparkline.data_range.validate()?;
+
+        // Check that the sparkline range is 1D.
+        if !sparkline.data_range.is_1d() {
+            let range = sparkline.data_range.error_range();
+            return Err(XlsxError::SparklineError(format!(
+                "Sparkline data range '{range}' must be a 1D range"
+            )));
+        }
 
         // Clone the sparkline and set a data range.
         let mut sparkline = sparkline.clone();
@@ -5500,15 +5519,27 @@ impl Worksheet {
     ///
     /// # Errors
     ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::SparklineError`] - An error that is raised when there is
+    ///   an parameter error with the sparkline.
+    /// * [`XlsxError::ChartError`] - An error that is raised when there is an
+    ///   parameter error with the data range for the sparkline.
     /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
-    ///   row.
-    /// * TODO - add sparkline errors.
+    /// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
+    ///   cannot be blank.
+    /// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
+    ///   exceeds Excel's limit of 31 characters.
+    /// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
+    ///   chart range cannot contain invalid characters: `[ ] : * ? / \`
+    /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
+    ///   chart range cannot start or end with an apostrophe.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates adding a sparkline group to a worksheet.
+    /// The following example demonstrates adding a sparkline group to a
+    /// worksheet.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_add_sparkline_group.rs
@@ -5545,7 +5576,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_add_sparkline_group.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_add_sparkline_group.png">
     ///
     pub fn add_sparkline_group(
         &mut self,
@@ -5567,22 +5599,37 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-        // Check that the cell location is a 1D/scalar range.
-        if last_row - first_row > 0 && last_col - first_col > 0 {
-            return Err(XlsxError::ParameterError(
-                format!("Sparkline group location `({first_row}, {first_col}, {last_row}, {last_col})` must be a 1D/scalar range"),
-            ));
-        }
-
         // Check that the sparkline has a range.
         if !sparkline.data_range.has_data() {
-            return Err(XlsxError::ParameterError(
+            return Err(XlsxError::SparklineError(
                 "Sparkline data range not set".to_string(),
             ));
         }
 
         // Check that the sparkline range is valid.
         sparkline.data_range.validate()?;
+
+        // Check that the sparkline range is 2D.
+        if sparkline.data_range.is_1d() {
+            let range = sparkline.data_range.error_range();
+            return Err(XlsxError::SparklineError(format!(
+                "Sparkline data range '{range}' must be a 2D range"
+            )));
+        }
+
+        // Check that the group data range matches 1 dimension of the sparkline
+        // data range.
+        let row_range = (last_row - first_row + 1) as usize;
+        let col_range = (last_col - first_col + 1) as usize;
+        let num_cells = std::cmp::max(row_range, col_range);
+        let (num_rows, num_cols) = sparkline.data_range.number_of_range_points();
+        if num_cells != num_rows && num_cells != num_cols {
+            let cell_range = format!("({first_row}, {first_col}, {last_row}, {last_col})");
+            let sparkline_range = sparkline.data_range.error_range();
+            return Err(XlsxError::SparklineError(format!(
+                "Sparkline group range '{cell_range}' doesn't match dimensions of data range '{sparkline_range}'"
+            )));
+        }
 
         // Clone the sparkline and set a data range.
         let mut sparkline = sparkline.clone();

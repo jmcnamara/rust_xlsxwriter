@@ -7562,6 +7562,17 @@ impl ChartRange {
         )
     }
 
+    // Convert the row/col range into a range error string.
+    pub(crate) fn error_range(&self) -> String {
+        utility::chart_error_range(
+            &self.sheet_name,
+            self.first_row,
+            self.first_col,
+            self.last_row,
+            self.last_col,
+        )
+    }
+
     // Unique key to identify/find the range of values to build the cache.
     pub(crate) fn key(&self) -> (String, RowNum, ColNum, RowNum, ColNum) {
         (
@@ -7578,12 +7589,20 @@ impl ChartRange {
         !self.sheet_name.is_empty()
     }
 
-    // Get the number of data points in the range.
+    // Get the number of X or Y data points in the range.
     pub(crate) fn number_of_points(&self) -> usize {
         let row_range = (self.last_row - self.first_row + 1) as usize;
         let col_range = (self.last_col - self.first_col + 1) as usize;
 
         std::cmp::max(row_range, col_range)
+    }
+
+    // Get the number of X and Y data points in the range.
+    pub(crate) fn number_of_range_points(&self) -> (usize, usize) {
+        let row_range = (self.last_row - self.first_row + 1) as usize;
+        let col_range = (self.last_col - self.first_col + 1) as usize;
+
+        (row_range, col_range)
     }
 
     // Set the start point in a 2D range. This is used to start incremental
@@ -7610,7 +7629,7 @@ impl ChartRange {
 
     // Check that the row/column values in the range are valid.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
-        let range = self.formula_abs();
+        let range = self.error_range();
 
         let error_message = format!("Sheet name error for range: '{range}'");
         utility::validate_sheetname(&self.sheet_name, &error_message)?;
@@ -7640,6 +7659,11 @@ impl ChartRange {
         }
 
         Ok(())
+    }
+
+    // Check that the range is 1D.
+    pub(crate) fn is_1d(&self) -> bool {
+        self.last_row - self.first_row == 0 || self.last_col - self.first_col == 0
     }
 
     /// Add data to the `ChartRange` cache.
