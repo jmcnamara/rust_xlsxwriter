@@ -124,6 +124,7 @@ frequently.
 
 Recent changes:
 
+- Added support for worksheet sparklines.
 - Added support for Excel 365 embedded worksheet images.
 - Added support for Serde serialization.
 
