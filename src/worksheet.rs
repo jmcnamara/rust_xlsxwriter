@@ -192,6 +192,7 @@ pub struct Worksheet {
     print_options_changed: bool,
     center_horizontally: bool,
     center_vertically: bool,
+    screen_gridlines: bool,
     print_gridlines: bool,
     print_black_and_white: bool,
     print_draft: bool,
@@ -372,6 +373,7 @@ impl Worksheet {
             print_options_changed: false,
             center_horizontally: false,
             center_vertically: false,
+            screen_gridlines: true,
             print_gridlines: false,
             print_black_and_white: false,
             print_draft: false,
@@ -9573,10 +9575,63 @@ impl Worksheet {
         self
     }
 
+    /// Set the option to turn on/off the screen gridlines.
+    ///
+    /// The `set_screen_gridlines()` method is use to turn on/off gridlines on
+    /// displayed worksheet. It is on by default.
+    ///
+    /// To turn on/off the printed gridlines see the
+    /// [`Worksheet::set_print_gridlines()`] method below.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates turn off the worksheet worksheet screen
+    /// gridlines.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_screen_gridlines.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     worksheet.write(0, 0, "Hello")?;
+    ///
+    ///     // Turn off the screen gridlines.
+    ///     worksheet.set_screen_gridlines(false);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_screen_gridlines.png">
+    ///
+    pub fn set_screen_gridlines(&mut self, enable: bool) -> &mut Worksheet {
+        self.screen_gridlines = enable;
+
+        self
+    }
+
     /// Set the page setup option to turn on printed gridlines.
     ///
     /// The `set_print_gridlines()` method is use to turn on/off gridlines on
     /// the printed pages. It is off by default.
+    ///
+    /// To turn on/off the screen gridlines see the
+    /// [`Worksheet::set_screen_gridlines()`] method above.
+    ///
     ///
     /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
     /// Setup].
@@ -11884,6 +11939,10 @@ impl Worksheet {
     // Write the <sheetView> element.
     fn write_sheet_view(&mut self) {
         let mut attributes = vec![];
+
+        if !self.screen_gridlines {
+            attributes.push(("showGridLines", "0".to_string()));
+        }
 
         if self.right_to_left {
             attributes.push(("rightToLeft", "1".to_string()));

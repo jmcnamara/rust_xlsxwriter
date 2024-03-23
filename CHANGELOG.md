@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.64.1] - 2023-03-XX
+
+### Added
+
+  - Added the [`worksheet::set_screen_gridlines()`] method to turn on/offscreen gridlines.
+
+  [`worksheet::set_screen_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_screen_gridlines
+
+
 ## [0.64.0] - 2023-03-18
 
 ### Added
@@ -24,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added support for embedding images into worksheets with
-  [`worksheet.embed_image()`] and [`worksheet.embed_image_with_format()`] and
+  [`worksheet::embed_image()`] and [`worksheet::embed_image_with_format()`] and
   the [Image] struct. See the [Embedded Images] example.
 
   This can be useful if you are building up a spreadsheet of products with a
@@ -36,8 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   using the option to "Place in Cell" which is available in Excel 365 versions
   from 2023 onwards.
 
-  [`worksheet.embed_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.embed_image
-  [`worksheet.embed_image_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.embed_image_with_format
+  [`worksheet::embed_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.embed_image
+  [`worksheet::embed_image_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.embed_image_with_format
 
   [Embedded Images]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#insert-images-embedding-an-image-in-a-cell
 

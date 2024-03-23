@@ -1287,6 +1287,9 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_set_row_hidden.rs` - Demonstrates hiding a worksheet row.
 
+* `doc_worksheet_set_screen_gridlines.rs` - Demonstrates turn off the
+  worksheet worksheet screen gridlines.
+
 * `doc_worksheet_set_selected.rs` - Demonstrates selecting worksheet in a
   workbook. The active worksheet is selected by default so in this example
   the first two worksheets are selected.
