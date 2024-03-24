@@ -4,6 +4,1046 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
+//! # Working with Worksheets
+//!
+//! The [`Worksheet`] struct struct represents an Excel worksheet. It handles
+//! operations such as writing data to cells or formatting worksheet layout.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/demo.png">
+//!
+//! Sample code to generate the Excel file shown above.
+//!
+//! ```rust
+//! # // This code is available in examples/app_demo.rs
+//! #
+//! use rust_xlsxwriter::*;
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Create a new Excel file object.
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Create some formats to use in the worksheet.
+//!     let bold_format = Format::new().set_bold();
+//!     let decimal_format = Format::new().set_num_format("0.000");
+//!     let date_format = Format::new().set_num_format("yyyy-mm-dd");
+//!     let merge_format = Format::new()
+//!         .set_border(FormatBorder::Thin)
+//!         .set_align(FormatAlign::Center);
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Set the column width for clarity.
+//!     worksheet.set_column_width(0, 22)?;
+//!
+//!     // Write a string without formatting.
+//!     worksheet.write(0, 0, "Hello")?;
+//!
+//!     // Write a string with the bold format defined above.
+//!     worksheet.write_with_format(1, 0, "World", &bold_format)?;
+//!
+//!     // Write some numbers.
+//!     worksheet.write(2, 0, 1)?;
+//!     worksheet.write(3, 0, 2.34)?;
+//!
+//!     // Write a number with formatting.
+//!     worksheet.write_with_format(4, 0, 3.00, &decimal_format)?;
+//!
+//!     // Write a formula.
+//!     worksheet.write(5, 0, Formula::new("=SIN(PI()/4)"))?;
+//!
+//!     // Write a date.
+//!     let date = ExcelDateTime::from_ymd(2023, 1, 25)?;
+//!     worksheet.write_with_format(6, 0, &date, &date_format)?;
+//!
+//!     // Write some links.
+//!     worksheet.write(7, 0, Url::new("https://www.rust-lang.org"))?;
+//!     worksheet.write(8, 0, Url::new("https://www.rust-lang.org").set_text("Rust"))?;
+//!
+//!     // Write some merged cells.
+//!     worksheet.merge_range(9, 0, 9, 1, "Merged cells", &merge_format)?;
+//!
+//!     // Insert an image.
+//!     let image = Image::new("examples/rust_logo.png")?;
+//!     worksheet.insert_image(1, 2, &image)?;
+//!
+//!     // Save the file to disk.
+//!     workbook.save("demo.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! For more details on the Worksheet APIs for [`Worksheet`] and the sections
+//! below.
+//!
+//! # Contents
+//!
+//! - [Creating worksheets](#creating-worksheets)
+//!   - [Working with `add_worksheet()` and the borrow
+//!     checker](#working-with-add_worksheet-and-the-borrow-checker)
+//!   - [Working with `Worksheet::new()` and the borrow
+//!     checker](#working-with-worksheetnew-and-the-borrow-checker)
+//!   - [Using `add_worksheet()` versus
+//!     `Worksheet::new()`](#using-add_worksheet-versus--worksheetnew)
+//! - [Page Setup](#page-setup)
+//!   - [Page Setup - Page](#page-setup---page)
+//!   - [Page Setup - Margins](#page-setup---margins)
+//!   - [Page Setup - Header/Footer](#page-setup---headerfooter)
+//!   - [Page Setup - Sheet](#page-setup---sheet)
+//! - [Adding Headers and Footers](#adding-headers-and-footers)
+//! - [Autofitting column widths](#autofitting-column-widths)
+//! - [Working with worksheet tabs](#working-with-worksheet-tabs)
+//!   - [Worksheet names](#worksheet-names)
+//!   - [Setting the active worksheet](#setting-the-active-worksheet)
+//!   - [Setting worksheet tab colors](#setting-worksheet-tab-colors)
+//!   - [Hiding worksheets](#hiding-worksheets)
+//!   - [Selecting worksheets](#selecting-worksheets)
+//! - [Worksheet protection](#worksheet-protection)
+//!   - [Setting a protection password](#setting-a-protection-password)
+//!   - [Choosing which worksheet elements to
+//!     protect](#choosing-which-worksheet-elements-to-protect)
+//!   - [Workbook protection](#workbook-protection)
+//!   - [Read-only workbook](#read-only-workbook)
+//!
+//!
+//! # Creating worksheets
+//!
+//! There are two ways of creating a worksheet object with `rust_xlsxwriter`:
+//! via the [`Workbook::add_worksheet()`] method and via the
+//! [`Worksheet::new()`] constructor.
+//!
+//! The first method ties the worksheet to a workbook object that will
+//! automatically write the worksheet it when the file is saved, whereas the
+//! second method creates a worksheet that is independent of a workbook. The
+//! second method has the advantage of keeping the worksheet free of the
+//! workbook borrow checking until needed, as explained below.
+//!
+//!
+//! ## Working with `add_worksheet()` and the borrow checker
+//!
+//! Due to borrow checking rules you can only have one active reference to a
+//! worksheet object created by [`Workbook::add_worksheet()`] since that method
+//! returns a mutable reference to an element of an internal vector.
+//!
+//! For a workbook with multiple worksheets this restriction is generally
+//! workable if you can create and use the worksheets sequentially since you
+//! will only need to have one reference at any one time.
+//!
+//! However, if you can’t structure your code to work sequentially then you can
+//! get a reference to a previously created worksheet using
+//! [`Workbook::worksheet_from_index()`]. The standard borrow checking rules
+//! still apply so you will have to give up ownership of any other worksheet
+//! reference prior to calling this method.
+//!
+//! For example:
+//!
+//! ```
+//! # // This code is available in examples/doc_workbook_worksheet_from_index.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//!     // Start with a reference to worksheet1.
+//!     let mut worksheet1 = workbook.add_worksheet();
+//!     worksheet1.write_string(0, 0, "Hello")?;
+//!
+//!     // If we don't try to use the workbook1 reference again we can
+//!     // just switch to using a reference to worksheet2.
+//!     let mut worksheet2 = workbook.add_worksheet();
+//!     worksheet2.write_string(0, 0, "Hello")?;
+//!
+//!     // Stop using worksheet2 and move back to worksheet1.
+//!     worksheet1 = workbook.worksheet_from_index(0)?;
+//!     worksheet1.write_string(1, 0, "Sheet1")?;
+//!
+//!     // Stop using worksheet1 and move back to worksheet2.
+//!     worksheet2 = workbook.worksheet_from_index(1)?;
+//!     worksheet2.write_string(1, 0, "Sheet2")?;
+//! #
+//! #     workbook.save("workbook.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! You can also use [`Workbook::worksheet_from_name()`] to do something similar
+//! using the worksheet names:
+//!
+//! ```
+//! # // This code is available in examples/doc_workbook_worksheet_from_name.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//!     // Start with a reference to worksheet1.
+//!     let mut worksheet1 = workbook.add_worksheet();
+//!     let name1 = worksheet1.name(); // "Sheet1"
+//!     worksheet1.write_string(0, 0, "Hello")?;
+//!
+//!     // If we don't try to use the workbook1 reference again we can
+//!     // just switch to using a reference to worksheet2.
+//!     let mut worksheet2 = workbook.add_worksheet().set_name("Data")?;
+//!     let name2 = worksheet2.name();
+//!     worksheet2.write_string(0, 0, "Hello")?;
+//!
+//!     // Stop using worksheet2 and move back to worksheet1.
+//!     worksheet1 = workbook.worksheet_from_name(&name1)?;
+//!     worksheet1.write_string(1, 0, "Sheet1")?;
+//!
+//!     // Stop using worksheet1 and move back to worksheet2.
+//!     worksheet2 = workbook.worksheet_from_name(&name2)?;
+//!     worksheet2.write_string(1, 0, "Sheet2")?;
+//! #
+//! #     workbook.save("workbook.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Additionally can use [`Workbook::worksheets_mut()`] to get a reference to
+//! the the vector that holds the worksheets. This can be used, for instance, to
+//! iterate over all the worksheets in a workbook:
+//!
+//! ```
+//! # // This code is available in examples/doc_workbook_worksheets_mut.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//!     // Add three worksheets to the workbook.
+//!     let _worksheet1 = workbook.add_worksheet();
+//!     let _worksheet2 = workbook.add_worksheet();
+//!     let _worksheet3 = workbook.add_worksheet();
+//!
+//!     // Write the same data to all three worksheets.
+//!     for worksheet in workbook.worksheets_mut() {
+//!         worksheet.write_string(0, 0, "Hello")?;
+//!         worksheet.write_number(1, 0, 12345)?;
+//!     }
+//!
+//!     // If you are careful you can use standard slice operations.
+//!     workbook.worksheets_mut().swap(0, 1);
+//! #
+//! #     workbook.save("workbook.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Note the use of the [slice] operation which gives the following:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/workbook_worksheets_mut.png">
+//!
+//! All three worksheets in the output file have the same data and `Sheet2` and
+//! `Sheet1` have swapped position, as can be seen from the image.
+//!
+//! ## Working with `Worksheet::new()` and the borrow checker
+//!
+//! As outlined above it is also possible to create a Worksheet object via
+//! [`Worksheet::new()`], as you would expect. Since this type of Worksheet
+//! instance isn't tied to a Workbook it isn't subject to the additional borrow
+//! checking rules that entails.
+//!
+//! As such you can create and work with several Worksheet instances and then
+//! add them to the Workbook when you are finished via the
+//! [`Workbook::push_worksheet()`] method:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_new.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//!     // Create a new workbook.
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Create new worksheets.
+//!     let mut worksheet1 = Worksheet::new();
+//!     let mut worksheet2 = Worksheet::new();
+//!
+//!     // Use the first workbook.
+//!     worksheet1.write_string(0, 0, "Hello")?;
+//!     worksheet1.write_string(1, 0, "Sheet1")?;
+//!
+//!     // Use the second workbook.
+//!     worksheet2.write_string(0, 0, "Hello")?;
+//!     worksheet2.write_string(1, 0, "Sheet2")?;
+//!
+//!     // Add the worksheets to the workbook.
+//!     workbook.push_worksheet(worksheet1);
+//!     workbook.push_worksheet(worksheet2);
+//!
+//!     // Save the workbook.
+//!     workbook.save("worksheets.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! ## Using `add_worksheet()` versus  `Worksheet::new()`
+//!
+//! Since there are two ways of doing, effectively, the same thing you will
+//! probably wonder which is best.
+//!
+//! The author mainly uses `add_worksheet()` and most of the library and
+//! documentation examples are structured to work with that method. In addition,
+//! the Excel xlsx file format has very tight coupling between it's
+//! sub-components and it is possible that some future `rust_xlsxwriter`
+//! functionality will require Worksheets and other Workbook objects to be
+//! `registered` with a parent Workbook in order for them to work. However,
+//! there aren't currently any features like that, and the author will seek to
+//! avoid them as much as possible.
+//!
+//! One common use case that works better with `Worksheet::new()` and
+//! `Workbook::push_worksheet()` is creating worksheets to run in a
+//! parallelized/async mode. However, it is worth noting that there isn't a
+//! guaranteed performance benefit from creating and working with worksheets in
+//! parallelized/async mode since the main overhead comes from **writing** the
+//! worksheets which will occur after the worksheets are joined back to the main
+//! workbook `save()` thread. In addition `rust_xlsxwriter` already parallelizes
+//! the writing of worksheets as much as possible.
+//!
+//! [`Workbook::add_worksheet()`]: crate::Workbook::add_worksheet
+//! [`Workbook::worksheets_mut()`]: crate::Workbook::worksheets_mut
+//! [`Workbook::push_worksheet()`]: crate::Workbook::push_worksheet
+//! [`Workbook::worksheet_from_name()`]: crate::Workbook::worksheet_from_name
+//! [`Workbook::worksheet_from_index()`]: crate::Workbook::worksheet_from_index
+//!
+//!
+//! # Page Setup
+//!
+//! The sections below look at the elements of the Excel Page Setup dialog and
+//! the equivalent `rust_xlsxwriter` methods.
+//!
+//! For more, general, information about the page setup options in Excel see the
+//! Microsoft documentation on [Page Setup].
+//!
+//! [Page Setup]:
+//!     https://support.microsoft.com/en-us/office/page-setup-71c20d94-b13e-48fd-9800-cedd1fec6da3
+//!
+//! ## Page Setup - Page
+//!
+//! The page Setup "Page" dialog looks like this:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/page_setup01.png">
+//!
+//! The equivalent `rust_xlsxwriter` methods are:
+//!
+//! 1. [`Worksheet::set_portrait()`]
+//! 2. [`Worksheet::set_landscape()`]
+//! 3. [`Worksheet::set_print_scale()`]
+//! 4. [`Worksheet::set_print_fit_to_pages()`]
+//! 5. [`Worksheet::set_print_first_page_number()`]
+//!
+//! Note, for [`Worksheet::set_print_fit_to_pages()`] a common requirement is to
+//! fit the printed output to `n` pages wide but have the height be as long as
+//! necessary. To achieve this set the `height` to 0:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_print_fit_to_pages.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//! #     // Add a worksheet to the workbook.
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//!     // Set the printed output to fit 1 page wide and as long as necessary.
+//!     worksheet.set_print_fit_to_pages(1, 0);
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//!
+//! ## Page Setup - Margins
+//!
+//! The page Setup "Margins" dialog looks like this:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/page_setup02.png">
+//!
+//! The equivalent `rust_xlsxwriter` methods are:
+//!
+//! 1. [`Worksheet::set_margins()`]
+//! 2. [`Worksheet::set_print_center_horizontally()`]
+//! 3. [`Worksheet::set_print_center_vertically()`]
+//!
+//!
+//! ## Page Setup - Header/Footer
+//!
+//! The page Setup "Header/Footer" dialog looks like this:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/page_setup03.png">
+//!
+//! The equivalent `rust_xlsxwriter` methods are:
+//!
+//! 1. [`Worksheet::set_header()`]
+//! 2. [`Worksheet::set_footer()`]
+//! 3. [`Worksheet::set_header_footer_scale_with_doc()`]
+//! 4. [`Worksheet::set_header_footer_align_with_page()`]
+//!
+//! Headers and footers are explained in more detail in a subsequent section
+//! below on [Adding Headers and Footers](#adding-headers-and-footers).
+//!
+//! Note, the options for different first, odd and even pages are not supported
+//! in `rust_xlsxwriter`.
+//!
+//! ## Page Setup - Sheet
+//!
+//! The page Setup "Sheet" dialog looks like this:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/page_setup04.png">
+//!
+//! The equivalent `rust_xlsxwriter` methods are:
+//!
+//! 1. [`Worksheet::set_print_area()`]
+//! 2. [`Worksheet::set_repeat_rows()`]
+//! 3. [`Worksheet::set_repeat_columns()`]
+//! 4. [`Worksheet::set_print_gridlines()`]
+//! 5. [`Worksheet::set_print_black_and_white()`]
+//! 6. [`Worksheet::set_print_draft()`]
+//! 7. [`Worksheet::set_print_headings()`]
+//! 8. [`Worksheet::set_page_order()`]
+//!
+//!
+//! # Adding Headers and Footers
+//!
+//!
+//! Headers and footers can be added to worksheets using the
+//! [`Worksheet::set_header()`] and [`Worksheet::set_footer()`] methods.
+//!
+//! Headers and footers are generated using a string which is a combination of
+//! plain text and optional control characters defined by Excel.
+//!
+//! The available control characters are:
+//!
+//! | Control              | Category      | Description           |
+//! | -------------------- | ------------- | --------------------- |
+//! | `&L`                 | Alignment     | Left                  |
+//! | `&C`                 |               | Center                |
+//! | `&R`                 |               | Right                 |
+//! | `&[Page]`  or `&P`   | Information   | Page number           |
+//! | `&[Pages]` or `&N`   |               | Total number of pages |
+//! | `&[Date]`  or `&D`   |               | Date                  |
+//! | `&[Time]`  or `&T`   |               | Time                  |
+//! | `&[File]`  or `&F`   |               | File name             |
+//! | `&[Tab]`   or `&A`   |               | Worksheet name        |
+//! | `&[Path]`  or `&Z`   |               | Workbook path         |
+//! | `&fontsize`          | Font          | Font size             |
+//! | `&"font,style"`      |               | Font name and style   |
+//! | `&U`                 |               | Single underline      |
+//! | `&E`                 |               | Double underline      |
+//! | `&S`                 |               | Strikethrough         |
+//! | `&X`                 |               | Superscript           |
+//! | `&Y`                 |               | Subscript             |
+//! | `&[Picture]` or `&G` | Images        | Picture/image         |
+//! | `&&`                 | Miscellaneous | Literal ampersand &   |
+//!
+//! Some of the placeholder variables have a long version like `&[Page]` and a
+//! short version like `&P`. The longer version is displayed in the Excel
+//! interface but the shorter version is the way that it is stored in the file
+//! format. Either version is okay since `rust_xlsxwriter` will translate as
+//! required.
+//!
+//! Headers and footers have 3 edit areas to the left, center and right. Text
+//! can be aligned to these areas by prefixing the text with the control
+//! characters `&L`, `&C` and `&R`.
+//!
+//! For example:
+//!
+//! ```text
+//! worksheet.set_header("&LHello");
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header01.png">
+//!
+//!
+//! ```text
+//! worksheet.set_header("&CHello");
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header02.png">
+//!
+//! ```text
+//! worksheet.set_header("&RHello");
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header03.png">
+//!
+//! You can also have text in each of the alignment areas:
+//!
+//! ```text
+//! worksheet.set_header("&LCiao&CBello&RCielo");
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header04.png">
+//!
+//! The information control characters act as variables/templates that Excel
+//! will update/expand as the workbook or worksheet changes.
+//!
+//! ```text
+//! worksheet.set_header("&CPage &[Page] of &[Pages]");
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header05.png">
+//!
+//!
+//! Times and dates are in the user's default format:
+//!
+//! ```text
+//! worksheet.set_header("&CUpdated at &[Time]");
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header06.png">
+//!
+//! To insert an image in use `&[Picture]` or `&G`. You will also need to use
+//! [`Worksheet::set_header_image()`] to set the corresponding image:
+//!
+//! ```text
+//! let image = Image::new("examples/watermark.png")?;
+//!
+//! worksheet.set_header("&C&[Picture]");
+//! worksheet.set_header_image(&image, XlsxImagePosition::Center);
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header10.png">
+//!
+//! To include a single literal ampersand `&` in a header or footer you should
+//! use a double ampersand `&&`:
+//!
+//! ```text
+//! worksheet.set_header("&CCuriouser && Curiouser - Attorneys at Law");
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header07.png">
+//!
+//! You can specify the font size of a section of the text by prefixing it with
+//! the control character `&n` where `n` is the font size:
+//!
+//! ```text
+//! worksheet.set_header("&C&20Big Hello");
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header08.png">
+//!
+//!
+//! You can specify the font of a section of the text by prefixing it with the
+//! control sequence `&"font,style"` where `fontname` is a font name such as
+//! Windows font descriptions: "Regular", "Italic", "Bold" or "Bold Italic":
+//! "Courier New" or "Times New Roman" and `style` is one of the standard
+//! Windows font descriptions like “Regular”, “Italic”, “Bold” or “Bold Italic”:
+//!
+//! ```text
+//! worksheet.set_header(r#"&C&"Courier New,Bold Italic"Hello"#);
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/header09.png">
+//!
+//! It is possible to combine all of these features together to create complex
+//! headers and footers. If you set up a complex header in Excel you can
+//! transfer it to `rust_xlsxwriter` by inspecting the string in the Excel file.
+//! For example the following shows how unzip and grep the Excel XML sub-files
+//! on a Linux system. The example uses libxml's xmllint to format the XML for
+//! clarity:
+//!
+//! ```bash
+//! $ unzip myfile.xlsm -d myfile
+//! $ xmllint --format `find myfile -name "*.xml" | xargs` | \
+//!     egrep "Header|Footer" | sed 's/&amp;/\&/g'
+//!
+//!  <headerFooter scaleWithDoc="0">
+//!    <oddHeader>&L&P</oddHeader>
+//!  </headerFooter>
+//! ```
+//!
+//! **Note**: Excel requires that the header or footer string be less than 256
+//! characters, including the control characters. Strings longer than this will
+//! not be written, and a warning will be output.
+//!
+//! # Autofitting column widths
+//!
+//! Column widths in a `rust_xlsxwriter` worksheet can be adjusted automatically
+//! using the [`Worksheet::autofit()`] method.
+//!
+//! There is no option in the xlsx file format that can be used to say "autofit
+//! columns on loading". Auto-fitting of columns is something that Excel does at
+//! runtime when it has access to all of the worksheet information as well as
+//! the Windows functions for calculating display areas based on fonts and
+//! formatting.
+//!
+//! As such [`Worksheet::autofit()`] simulates this behavior by calculating
+//! string widths using metrics taken from Excel. This isn't perfect but for
+//! most cases it should be sufficient and if not you can set your own widths,
+//! see below.
+//!
+//! The `Worksheet::autofit()` method ignores columns that already have an
+//! explicit column width set via
+//! [`set_column_width()`](Worksheet::set_column_width()) or
+//! [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()) if it is
+//! greater than the calculated maximum width. Alternatively, calling these
+//! methods after `Worksheet::autofit()` will override the autofit value.
+//!
+//! **Note**, `Worksheet::autofit()` iterates through all the cells in a
+//! worksheet that have been populated with data and performs a length
+//! calculation on each one, so it can have a performance overhead for larger
+//! worksheets.
+//!
+//!
+//! # Working with worksheet tabs
+//!
+//! Worksheet tabs in Excel allow the user to differentiate between different
+//! worksheets.
+//!
+//! Worksheets in a workbook can be highlighted via the tab name, color,
+//! position or the fact that it is active when the user opens the workbook.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/worksheet_tabs.png">
+//!
+//! The `rust_xlsxwriter` library provides a number of methods, explained below,
+//! to emulate this functionality.
+//!
+//! ## Worksheet names
+//!
+//! The worksheet name can be set with [`Worksheet::set_name()`]:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_name.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//!     let _worksheet1 = workbook.add_worksheet(); // Defaults to Sheet1
+//!     let _worksheet2 = workbook.add_worksheet().set_name("Foglio2");
+//!     let _worksheet3 = workbook.add_worksheet().set_name("Data");
+//!     let _worksheet4 = workbook.add_worksheet(); // Defaults to Sheet4
+//! #
+//! #     workbook.save("worksheets.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Which gives the following output:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/worksheet_set_name.png">
+//!
+//! Excel applies various rules to worksheet names such as:
+//!
+//! * The name must be less than 32 characters.
+//! * The name cannot be blank.
+//! * The name cannot contain any of the characters: `[ ] : * ? / \`.
+//! * The name cannot start or end with an apostrophe.
+//! * The name shouldn't be "History" (case-insensitive) since that is reserved
+//!   by Excel.
+//! * The name must not be a duplicate (case-insensitive) of another worksheet
+//!   name used in the workbook.
+//!
+//! The rules for worksheet names in Excel are explained in the [Microsoft
+//! Office documentation].
+//!
+//! ## Setting the active worksheet
+//!
+//! In Excel the visible worksheet in a group of worksheets is known as the
+//! active worksheet. Since only one worksheet is in the foreground at any one
+//! time there can only be one active worksheet.
+//!
+//! With `rust_xlsxwriter` the [`Worksheet::set_active()`] method is used to
+//! specify which worksheet is active. If no worksheet is set as the active
+//! worksheet then the default is to have the first one active, like in Excel.
+//!
+//! Here is an example of making the second worksheet active:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_active.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//!     let worksheet1 = Worksheet::new();
+//!     let worksheet3 = Worksheet::new();
+//!     let mut worksheet2 = Worksheet::new();
+//!
+//!     worksheet2.set_active(true);
+//!
+//!     workbook.push_worksheet(worksheet1);
+//!     workbook.push_worksheet(worksheet2);
+//!     workbook.push_worksheet(worksheet3);
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Which gives the following output:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/worksheet_set_active.png">
+//!
+//! If you have a lot of worksheets then they may not all fit on the screen at
+//! the same time. In cases like that the active worksheet will still be visible
+//! but its tab may not be. In those rare cases you can use the
+//! [`Worksheet::set_first_tab()`] method to set the first visible tab (not
+//! worksheet) in a group of worksheets.
+//!
+//! ## Setting worksheet tab colors
+//!
+//! Another way of highlighting one or more worksheets in Excel is to set the
+//! tab color. With `rust_xlsxwriter` this is achieved with
+//! [`Worksheet::set_tab_color()`] and a [`Color`] color:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_tab_color.rs
+//! #
+//! # use rust_xlsxwriter::{Color, Workbook, Worksheet, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//!     let mut worksheet1 = Worksheet::new();
+//!     let mut worksheet2 = Worksheet::new();
+//!     let mut worksheet3 = Worksheet::new();
+//!     let mut worksheet4 = Worksheet::new();
+//!
+//!     worksheet1.set_tab_color(Color::Red);
+//!     worksheet2.set_tab_color(Color::Green);
+//!     worksheet3.set_tab_color(Color::RGB(0xFF9900));
+//!
+//!     // worksheet4 will have the default color.
+//!     worksheet4.set_active(true);
+//!
+//!     workbook.push_worksheet(worksheet1);
+//!     workbook.push_worksheet(worksheet2);
+//!     workbook.push_worksheet(worksheet3);
+//!     workbook.push_worksheet(worksheet4);
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Which gives the following output:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_set_tab_color.png">
+//!
+//! ## Hiding worksheets
+//!
+//! Sometimes it is desirable to hide worksheets if they contain a lot of
+//! intermediate data or calculations that end user doesn't need to see. With
+//! `rust_xlsxwriter` this is achieved with the [`Worksheet::set_hidden()`]
+//! method:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_hidden.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//!     let worksheet1 = Worksheet::new();
+//!     let worksheet3 = Worksheet::new();
+//!     let mut worksheet2 = Worksheet::new();
+//!
+//!     worksheet2.set_hidden(true);
+//!
+//!     workbook.push_worksheet(worksheet1);
+//!     workbook.push_worksheet(worksheet2);
+//!     workbook.push_worksheet(worksheet3);
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Which gives the following output:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/worksheet_set_hidden.png">
+//!
+//! In Excel a hidden worksheet can not be activated or selected so
+//! [`Worksheet::set_hidden()`] is mutually exclusive with the
+//! [`Worksheet::set_active()`] and [`Worksheet::set_selected()`] methods. In
+//! addition, since the first worksheet will default to being the active
+//! worksheet, you cannot hide the first worksheet without activating another
+//! sheet.
+//!
+//!
+//! ## Selecting worksheets
+//!
+//! A selected worksheet has its tab highlighted. Selecting worksheets is a way
+//! of grouping them together so that, for example, several worksheets could be
+//! printed in one go.
+//!
+//! The [`Worksheet::set_selected()`] method is used to indicate that a
+//! worksheet is selected in a multi-sheet workbook.
+//!
+//! A worksheet that has been activated via the [`Worksheet::set_active()`]
+//! method
+//! will also appear as selected.
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_selected.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, Worksheet, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//!     let worksheet1 = Worksheet::new();
+//!     let worksheet3 = Worksheet::new();
+//!     let mut worksheet2 = Worksheet::new();
+//!
+//!     worksheet2.set_selected(true);
+//!
+//!     workbook.push_worksheet(worksheet1);
+//!     workbook.push_worksheet(worksheet2);
+//!     workbook.push_worksheet(worksheet3);
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Which gives the following output. Note that Sheet 1 and Sheet2 are selected
+//! but Sheet3 isn't:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_set_selected.png">
+//!
+//! [`Color`]: crate::Color
+//! [Microsoft Office documentation]:
+//!     https://support.office.com/en-ie/article/rename-a-worksheet-3f1f7148-ee83-404d-8ef0-9ff99fbad1f9
+//!
+//!
+//! # Worksheet protection
+//!
+//! It is occasionally necessary to lock all or parts of a worksheet to prevent
+//! unintentional editing. For example you may have certain fields that you want
+//! a user to update but have other instruction or calculation cells that you
+//! don't want modified.
+//!
+//! In Excel you do this by turning on the "*Review -> Sheet Protect*" option
+//! and in `rust_xlsxwriter` you can use the [`Worksheet::protect()`] method:
+//!
+//! ```
+//! # // This code is available in examples/app_worksheet_protection.rs
+//! #
+//! use rust_xlsxwriter::{Format, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Create a new Excel file object.
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Create some format objects.
+//!     let unlocked = Format::new().set_unlocked();
+//!     let hidden = Format::new().set_hidden();
+//!
+//!     // Protect the worksheet to turn on cell locking.
+//!     worksheet.protect();
+//!
+//!     // Examples of cell locking and hiding.
+//!     worksheet.write_string(0, 0, "Cell B1 is locked. It cannot be edited.")?;
+//!     worksheet.write_formula(0, 1, "=1+2")?; // Locked by default.
+//!
+//!     worksheet.write_string(1, 0, "Cell B2 is unlocked. It can be edited.")?;
+//!     worksheet.write_formula_with_format(1, 1, "=1+2", &unlocked)?;
+//!
+//!     worksheet.write_string(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
+//!     worksheet.write_formula_with_format(2, 1, "=1+2", &hidden)?;
+//!
+//!     worksheet.write_string(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
+//!     worksheet.write_string(5, 0, "to remove the worksheet protection.")?;
+//!
+//!     worksheet.autofit();
+//!
+//!     // Save the file to disk.
+//!     workbook.save("worksheet_protection.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! The key parts of this example are:
+//!
+//! - In Excel all cells have a default "locked" format so once a worksheet is
+//!   protected the cells cannot be changed.
+//! - To allow some cells to be edited you can set a "unlocked" format.
+//! - You can also "hide" formulas in a protected worksheet.
+//!
+//! The output from the program will look like the following. Note that cell
+//! "B2", which was unlocked in the example, has been edited.
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/app_worksheet_protection.png">
+//!
+//! And this is the alert you get if you try to edit a locked cell.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/protection_alert.png">
+//!
+//! ## Setting a protection password
+//!
+//! You can deter a user from turning off worksheet protection by adding a
+//! worksheet level password using the [`Worksheet::protect_with_password()`]
+//! method:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_protect_with_password.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//! #     // Add a worksheet to the workbook.
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//!     // Protect the worksheet from modification.
+//!     worksheet.protect_with_password("abc123");
+//! #
+//! #     worksheet.write_string(0, 0, "Unlock the worksheet to edit the cell")?;
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! This gives the following dialog when the user tries to unprotect the
+//! worksheet.
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_password.png">
+//!
+//! **Note**: Worksheet level passwords in Excel offer **very weak protection**.
+//! They do not encrypt your data and are very easy to deactivate. Full workbook
+//! encryption is not supported by `rust_xlsxwriter`. See the section on
+//! [Workbook Protection](#workbook-protection) below.
+//!
+//! ## Choosing which worksheet elements to protect
+//!
+//! Excel allows you to control which objects or actions on the worksheet that
+//! are protected. The default Excel options are:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options1.png">
+//!
+//! Almost all the options are protected by default apart from "Select locked
+//! cells" and "Select unlocked cells".
+//!
+//! If you wish to turn on or off any of these options you can use the
+//! [`ProtectionOptions`] struct and the [`Worksheet::protect_with_options()`]
+//! method. For example:
+//!
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_protect_with_options.rs
+//! #
+//! # use rust_xlsxwriter::{ProtectionOptions, Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//! #     // Add a worksheet to the workbook.
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//!     // Set some of the options and use the defaults for everything else.
+//!     let options = ProtectionOptions {
+//!         insert_columns: true,
+//!         insert_rows: true,
+//!         ..ProtectionOptions::default()
+//!     };
+//!
+//!     // Set the protection options.
+//!     worksheet.protect_with_options(&options);
+//! #
+//! #     worksheet.write_string(0, 0, "Unlock the worksheet to edit the cell")?;
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! This changes the allowed options to:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options2.png">
+//!
+//!
+//! ## Workbook protection
+//!
+//! As noted above `rust_xlsxwriter` doesn't provide workbook level
+//! encryption/protection and it is unlikely that it will be added.
+//!
+//! However, it is possible to encrypt an `rust_xlsxwriter` file using a third
+//! party open source tool called [msoffice-crypt]. This works for macOS, Linux
+//! and Windows:
+//!
+//! ```bash
+//! msoffice-crypt.exe -e -p password clear.xlsx encrypted.xlsx
+//! ```
+//!
+//!
+//! ## Read-only workbook
+//!
+//! If you wish to have an Excel workbook open as read-only by default then you
+//! can use the [`Workbook::read_only_recommended()`] method:
+//!
+//! ```
+//! # // This code is available in examples/doc_workbook_read_only_recommended.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #
+//! #     let _worksheet = workbook.add_worksheet();
+//! #
+//!     workbook.read_only_recommended();
+//! #
+//! #     workbook.save("workbook.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! This presents the user of the file with an option to open it in "read-only"
+//! mode. This means that any changes to the file can’t be saved back to the
+//! same file and must be saved to a new file.
+//!
+//! The alert looks like this:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/workbook_read_only_recommended.png">
+//!
+//!
+//! [msoffice-crypt]: https://github.com/herumi/msoffice
+//! [`ProtectionOptions`]: crate::ProtectionOptions
+//! [`Workbook::read_only_recommended()`]:
+//!     crate::Workbook::read_only_recommended
+//!
 #![warn(missing_docs)]
 mod tests;
 
@@ -270,10 +1310,8 @@ impl Worksheet {
     /// [`workbook.push_worksheet`](crate::Workbook::push_worksheet) in order
     /// for it to be written to a file.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Creating worksheets]
-    /// and working with the borrow checker.
-    ///
-    /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
+    /// See also the documentation on [Creating
+    /// worksheets](#creating-worksheets) and working with the borrow checker.
     ///
     /// # Examples
     ///
@@ -9208,11 +10246,8 @@ impl Worksheet {
     /// This option determines whether the headers and footers use the same
     /// scaling as the worksheet. This defaults to "on" in Excel.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Header/Footer](../worksheet/index.html#page-setup---header/footer).
     ///
     /// # Parameters
     ///
@@ -9234,16 +10269,12 @@ impl Worksheet {
     /// This option determines whether the headers and footers align with the
     /// left and right margins of the worksheet. This defaults to "on" in Excel.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Header/Footer](../worksheet/index.html#page-setup---header/footer).
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
-    ///S
+    /// * `enable` - Turn the property on/off. It is on by default. S
     pub fn set_header_footer_align_with_page(&mut self, enable: bool) -> &mut Worksheet {
         self.header_footer_align_with_page = enable;
 
@@ -9342,11 +10373,8 @@ impl Worksheet {
     /// will only have and effect if you have a header/footer with the `&[Page]`
     /// control character, see [`set_header()`](Worksheet::set_header()).
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Page](../worksheet/index.html#page-setup---page).
     ///
     /// # Parameters
     ///
@@ -9354,8 +10382,8 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates setting the page number on the printed
-    /// page.
+    /// The following example demonstrates setting the page number on the
+    /// printed page.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_print_first_page_number.rs
@@ -9391,11 +10419,8 @@ impl Worksheet {
     /// does not affect the scale of the visible page in Excel. For that you
     /// should use [`set_zoom()`](Worksheet::set_zoom).
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Page](../worksheet/index.html#page-setup---page).
     ///
     /// # Parameters
     ///
@@ -9471,11 +10496,8 @@ impl Worksheet {
     ///   [`set_paper_size()`](Worksheet::set_paper_size) or else Excel will
     ///   default to "US Letter".
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Page](../worksheet/index.html#page-setup---page).
     ///
     /// # Parameters
     ///
@@ -9484,10 +10506,10 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates setting the scale of the worksheet to fit
-    /// a defined number of pages vertically and horizontally. This example shows a
-    /// common use case which is to fit the printed output to 1 page wide but have
-    /// the height be as long as necessary.
+    /// The following example demonstrates setting the scale of the worksheet to
+    /// fit a defined number of pages vertically and horizontally. This example
+    /// shows a common use case which is to fit the printed output to 1 page
+    /// wide but have the height be as long as necessary.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_print_fit_to_pages.rs
@@ -9511,7 +10533,8 @@ impl Worksheet {
     ///
     /// Output:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_print_fit_to_pages.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_print_fit_to_pages.png">
     ///
     pub fn set_print_fit_to_pages(&mut self, width: u16, height: u16) -> &mut Worksheet {
         self.fit_width = width;
@@ -9530,11 +10553,8 @@ impl Worksheet {
     /// Center the worksheet data horizontally between the margins on the
     /// printed page
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Margins](../worksheet/index.html#page-setup---margins).
     ///
     /// # Parameters
     ///
@@ -9552,14 +10572,11 @@ impl Worksheet {
 
     /// Center the printed page vertically.
     ///
-    /// Center the worksheet data vertically between the margins on the
-    /// printed page
+    /// Center the worksheet data vertically between the margins on the printed
+    /// page
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Margins](../worksheet/index.html#page-setup---margins).
     ///
     /// # Parameters
     ///
@@ -9633,11 +10650,8 @@ impl Worksheet {
     /// [`Worksheet::set_screen_gridlines()`] method above.
     ///
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Sheet](../worksheet/index.html#page-setup---sheet).
     ///
     /// # Parameters
     ///
@@ -9658,11 +10672,8 @@ impl Worksheet {
     /// This `set_print_black_and_white()` method can be used to force printing
     /// in black and white only. It is off by default.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Sheet](../worksheet/index.html#page-setup---sheet).
     ///
     /// # Parameters
     ///
@@ -9679,9 +10690,8 @@ impl Worksheet {
 
     /// Set the page setup option to print in draft quality.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page Setup].
-    ///
-    /// [Worksheet - Page Setup]: https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Sheet](../worksheet/index.html#page-setup---sheet).
     ///
     /// # Parameters
     ///
@@ -9702,11 +10712,8 @@ impl Worksheet {
     /// The `set_print_headings()` method turns on the row and column headers
     /// when printing a worksheet. This option is off by default.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Worksheet - Page
-    /// Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the documentation on [Worksheet Page Setup -
+    /// Sheet](../worksheet/index.html#page-setup---sheet).
     ///
     /// # Parameters
     ///
@@ -9737,11 +10744,8 @@ impl Worksheet {
     /// In these examples 16,383 is the maximum column and 1,048,575 is the
     /// maximum row (zero indexed).
     ///
-    /// See also the example below and the `rust_xlsxwriter` documentation on
-    /// [Worksheet - Page Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See also the example below and the documentation on
+    /// [Worksheet Page Setup - Sheet](../worksheet/index.html#page-setup---sheet).
     ///
     /// # Parameters
     ///
@@ -9835,11 +10839,8 @@ impl Worksheet {
     /// For large Excel documents it is often desirable to have the first row or
     /// rows of the worksheet print out at the top of each page.
     ///
-    /// See the example below and the `rust_xlsxwriter` documentation on
-    /// [Worksheet - Page Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See the example below and the documentation on [Worksheet Page Setup -
+    /// Sheet](../worksheet/index.html#page-setup---sheet).
     ///
     /// # Parameters
     ///
@@ -9882,7 +10883,8 @@ impl Worksheet {
     ///
     /// Output file, page setup dialog for worksheet2:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_repeat_rows.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_repeat_rows.png">
     ///
     pub fn set_repeat_rows(
         &mut self,
@@ -9915,11 +10917,8 @@ impl Worksheet {
     /// or columns of the worksheet print out at the left hand side of each
     /// page.
     ///
-    /// See the example below and the `rust_xlsxwriter` documentation on
-    /// [Worksheet - Page Setup].
-    ///
-    /// [Worksheet - Page Setup]:
-    ///     https://rustxlsxwriter.github.io/worksheet/page_setup.html
+    /// See the example below and the documentation on [Worksheet Page Setup -
+    /// Sheet](../worksheet/index.html#page-setup---sheet).
     ///
     /// # Parameters
     ///
@@ -9962,7 +10961,8 @@ impl Worksheet {
     ///
     /// Output file, page setup dialog for worksheet2:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_repeat_columns.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_repeat_columns.png">
     ///
     pub fn set_repeat_columns(
         &mut self,
