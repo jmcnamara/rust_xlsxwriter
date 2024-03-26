@@ -5974,14 +5974,14 @@ impl ConditionalFormatIconSet {
     /// # #[allow(unused_variables)]
     /// # fn main() {
     ///     // Default rules for three symbol icon sets.
-    ///     let icons3 = vec![
+    ///     let icons3 = [
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 33),
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 67),
     ///     ];
     ///
     ///     // Default rules for four symbol icon sets.
-    ///     let icons4 = vec![
+    ///     let icons4 = [
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 25),
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 50),
@@ -5989,7 +5989,7 @@ impl ConditionalFormatIconSet {
     ///     ];
     ///
     ///     // Default rules for five symbol icon sets.
-    ///     let icons5 = vec![
+    ///     let icons5 = [
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 0),
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 20),
     ///         ConditionalFormatCustomIcon::new().set_rule(ConditionalFormatType::Percent, 40),
