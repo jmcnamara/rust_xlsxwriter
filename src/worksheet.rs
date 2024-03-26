@@ -74,8 +74,8 @@
 //! }
 //! ```
 //!
-//! For more details on the Worksheet APIs for [`Worksheet`] and the sections
-//! below.
+//! For more details on the Worksheet APIs for see the [`Worksheet`]
+//! documentation and the sections below.
 //!
 //! # Contents
 //!
@@ -796,8 +796,7 @@
 //! worksheet is selected in a multi-sheet workbook.
 //!
 //! A worksheet that has been activated via the [`Worksheet::set_active()`]
-//! method
-//! will also appear as selected.
+//! method will also appear as selected.
 //!
 //! ```
 //! # // This code is available in examples/doc_worksheet_set_selected.rs
@@ -1311,7 +1310,8 @@ impl Worksheet {
     /// for it to be written to a file.
     ///
     /// See also the documentation on [Creating
-    /// worksheets](#creating-worksheets) and working with the borrow checker.
+    /// worksheets](../worksheet/index.html#creating-worksheets) and working
+    /// with the borrow checker.
     ///
     /// # Examples
     ///
@@ -10247,7 +10247,7 @@ impl Worksheet {
     /// scaling as the worksheet. This defaults to "on" in Excel.
     ///
     /// See also the documentation on [Worksheet Page Setup -
-    /// Header/Footer](../worksheet/index.html#page-setup---header/footer).
+    /// Header/Footer](../worksheet/index.html#page-setup---headerfooter).
     ///
     /// # Parameters
     ///
@@ -10270,7 +10270,7 @@ impl Worksheet {
     /// left and right margins of the worksheet. This defaults to "on" in Excel.
     ///
     /// See also the documentation on [Worksheet Page Setup -
-    /// Header/Footer](../worksheet/index.html#page-setup---header/footer).
+    /// Header/Footer](../worksheet/index.html#page-setup---headerfooter).
     ///
     /// # Parameters
     ///

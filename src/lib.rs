@@ -42,17 +42,19 @@
 //!
 //! - [`Tutorial`](crate::tutorial): A getting started and tutorial guide.
 //! - [`Cookbook`](crate::cookbook): Examples of using `rust_xlsxwriter`.
+//! - [`Working with Workbooks`](crate::worksheet): High level introduction on
+//!   creating and working with workbooks.
 //! - [`Workbook`]: The entry point for creating an Excel workbook of
 //!   worksheets.
 //! - [`Working with Worksheets`](crate::worksheet): High level introduction on
 //!   creating and working with worksheets.
-//!    - [`Worksheet`]: The main spreadsheet canvas for writing data and objects
-//!   to a worksheet.
+//! - [`Worksheet`]: The main spreadsheet canvas for writing data and objects to
+//!   a worksheet.
 //! - [`Format`]: The interface for adding formatting to worksheets and other
 //!   objects.
 //! - [`Working with charts`](crate::chart): High level introduction on creating
 //!   and using charts.
-//!    - [`Chart`] struct: The interface for creating worksheet charts.
+//! - [`Chart`] struct: The interface for creating worksheet charts.
 //! - [`Table`]: The interface for worksheet tables.
 //! - [`Image`]: The interface for images used in worksheets.
 //! - [`Conditional Formats`](crate::conditional_format): Working with
@@ -188,7 +190,6 @@ mod table;
 mod theme;
 mod url;
 mod vml;
-mod workbook;
 mod xmlwriter;
 
 #[cfg(feature = "serde")]
@@ -201,6 +202,7 @@ pub mod cookbook;
 pub mod sparkline;
 pub mod tutorial;
 pub mod utility;
+pub mod workbook;
 pub mod worksheet;
 
 #[cfg(test)]
@@ -217,7 +219,6 @@ pub use properties::*;
 pub use protection::*;
 pub use table::*;
 pub use url::*;
-pub use workbook::*;
 
 #[doc(hidden)]
 pub use chart::*;
@@ -230,6 +231,9 @@ pub use sparkline::*;
 
 #[doc(hidden)]
 pub use worksheet::*;
+
+#[doc(hidden)]
+pub use workbook::*;
 
 #[doc(hidden)]
 pub use utility::*;

@@ -4,6 +4,215 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
+//! # Working with Workbooks
+//!
+//! The [`Workbook`] struct represents an Excel file in it's entirety. It is the
+//! starting point for creating a new Excel xlsx file.
+//!
+//!
+//! ```
+//! # // This code is available in examples/doc_workbook_new.rs
+//! #
+//! use rust_xlsxwriter::{Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!
+//!     let _worksheet = workbook.add_worksheet();
+//!
+//!     workbook.save("workbook.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
+//!
+//!
+//! For more details on the Worksheet APIs for see the [`Worksheet`]
+//! documentation and the sections below.
+//!
+//! # Contents
+//!
+//! - [Creating and saving an xlsx file](#creating-and-saving-an-xlsx-file)
+//! - [Checksum of a saved file](#checksum-of-a-saved-file)
+//!
+//!
+//! # Creating and saving an xlsx file
+//!
+//! Creating a  [`Workbook`] struct instance to represent an Excel xlsx file is
+//! done via the [`Workbook::new()`] method:
+//!
+//!
+//! ```
+//! # // This code is available in examples/doc_workbook_new.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!
+//! #     let _worksheet = workbook.add_worksheet();
+//! #
+//! #     workbook.save("workbook.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Once you are finished writing data via a worksheet you can save it with the
+//! [`Workbook::save()`] method:
+//!
+//! ```
+//! # // This code is available in examples/doc_workbook_new.rs
+//! #
+//! use rust_xlsxwriter::{Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!
+//!     let _worksheet = workbook.add_worksheet();
+//!
+//!     workbook.save("workbook.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! This will you a simple output file like the following.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
+//!
+//! The  `save()` method takes a [`std::path`] or path/filename string. You can
+//! also save the xlsx file data to a `Vec<u8>` buffer via the
+//! [`Workbook::save_to_buffer()`] method:
+//!
+//! ```
+//! # // This code is available in examples/doc_workbook_save_to_buffer.rs
+//! #
+//! use rust_xlsxwriter::{Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!
+//!     let worksheet = workbook.add_worksheet();
+//!     worksheet.write_string(0, 0, "Hello")?;
+//!
+//!     let buf = workbook.save_to_buffer()?;
+//!
+//!     println!("File size: {}", buf.len());
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! This can be useful if you intend to stream the data.
+//!
+//!
+//! # Checksum of a saved file
+//!
+//!
+//! A common issue that occurs with `rust_xlsxwriter`, but also with Excel, is
+//! that running the same program twice doesn't generate the same file, byte for
+//! byte. This can cause issues with applications that do checksumming for
+//! testing purposes.
+//!
+//! For example consider the following simple `rust_xlsxwriter` program:
+//!
+//! ```
+//! # // This code is available in examples/doc_properties_checksum1.rs
+//! #
+//! use rust_xlsxwriter::{Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     worksheet.write_string(0, 0, "Hello")?;
+//!
+//!     workbook.save("properties.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! If we run this several times, with a small delay, we will get different
+//! checksums as shown below:
+//!
+//! ```bash
+//! $ cargo run --example doc_properties_checksum1
+//!
+//! $ sum properties.xlsx
+//! 62457 6 properties.xlsx
+//!
+//! $ sleep 2
+//!
+//! $ cargo run --example doc_properties_checksum1
+//!
+//! $ sum properties.xlsx
+//! 56692 6 properties.xlsx # Different to previous.
+//! ```
+//!
+//! This is due to a file creation datetime that is included in the file and
+//! which changes each time a new file is created.
+//!
+//! The relevant section of the `docProps/core.xml` sub-file in the xlsx format
+//! looks like this:
+//!
+//! ```xml
+//! <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+//! <cp:coreProperties>
+//!   <dc:creator/>
+//!   <cp:lastModifiedBy/>
+//!   <dcterms:created xsi:type="dcterms:W3CDTF">2023-01-08T00:23:58Z</dcterms:created>
+//!   <dcterms:modified xsi:type="dcterms:W3CDTF">2023-01-08T00:23:58Z</dcterms:modified>
+//! </cp:coreProperties>
+//! ```
+//!
+//! If required this can be avoided by setting a constant creation date in the
+//! document properties metadata:
+//!
+//!
+//! ```
+//! # // This code is available in examples/doc_properties_checksum2.rs
+//! #
+//! use rust_xlsxwriter::{DocProperties, ExcelDateTime, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Create a file creation date for the file.
+//!     let date = ExcelDateTime::from_ymd(2023, 1, 1)?;
+//!
+//!     // Add it to the document metadata.
+//!     let properties = DocProperties::new().set_creation_datetime(&date);
+//!     workbook.set_properties(&properties);
+//!
+//!     let worksheet = workbook.add_worksheet();
+//!     worksheet.write_string(0, 0, "Hello")?;
+//!
+//!     workbook.save("properties.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Then we will get the same checksum for the same output every time:
+//!
+//! ```bash
+//! $ cargo run --example doc_properties_checksum2
+//!
+//! $ sum properties.xlsx 8914 6 properties.xlsx
+//!
+//! $ sleep 2
+//!
+//! $ cargo run --example doc_properties_checksum2
+//!
+//! $ sum properties.xlsx 8914 6 properties.xlsx # Same as previous
+//! ```
+//!
+//! For more details see [`DocProperties`] and [`Workbook::set_properties()`].
+//!
 #![warn(missing_docs)]
 
 mod tests;
@@ -208,10 +417,10 @@ impl Workbook {
     /// [`Worksheet::new()`] and then later adding them to the workbook with
     /// [`workbook.push_worksheet`](Workbook::push_worksheet).
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Creating worksheets]
-    /// and working with the borrow checker.
+    /// See also the documentation on [Creating worksheets] and working with the
+    /// borrow checker.
     ///
-    /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
+    /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
     ///
     /// # Examples
     ///
@@ -276,10 +485,10 @@ impl Workbook {
     /// reference prior to calling this method. See the example below.
     ///
     /// See also [`worksheet_from_name()`](Workbook::worksheet_from_name) and
-    /// the `rust_xlsxwriter` documentation on [Creating worksheets]
-    /// and working with the borrow checker.
+    /// the documentation on [Creating worksheets] and working with the borrow
+    /// checker.
     ///
-    /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
+    /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
     ///
     /// # Parameters
     ///
@@ -362,8 +571,10 @@ impl Workbook {
     /// [`worksheet.name()`](Worksheet::name) method to get the name.
     ///
     /// See also [`worksheet_from_index()`](Workbook::worksheet_from_index) and
-    /// the `rust_xlsxwriter` documentation on [Creating worksheets] and working
-    /// with the borrow checker.
+    /// the documentation on [Creating worksheets] and working with the borrow
+    /// checker.
+    ///
+    /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
     ///
     /// # Parameters
     ///
@@ -437,11 +648,10 @@ impl Workbook {
     /// If you are careful you can also use some of the standard [slice]
     /// operations on the vector reference, see below.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Creating worksheets]
-    /// and working with the borrow checker.
+    /// See also the documentation on [Creating worksheets] and working with the
+    /// borrow checker.
     ///
-    /// [Creating worksheets]:
-    ///     https://rustxlsxwriter.github.io/worksheet/create.html
+    /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
     ///
     /// # Examples
     ///
@@ -542,10 +752,10 @@ impl Workbook {
     /// When working with the independent worksheet object you can add it to a
     /// workbook using `push_worksheet()`, see the example below.
     ///
-    /// See also the `rust_xlsxwriter` documentation on [Creating worksheets]
-    /// and working with the borrow checker.
+    /// See also the documentation on [Creating worksheets] and working with the
+    /// borrow checker.
     ///
-    /// [Creating worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
+    /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
     ///
     /// # Parameters
     ///
@@ -951,7 +1161,8 @@ impl Workbook {
     /// Set the Excel document metadata properties.
     ///
     /// Set various Excel document metadata properties such as Author or
-    /// Creation Date. It is used in conjunction with the [`DocProperties`] struct.
+    /// Creation Date. It is used in conjunction with the [`DocProperties`]
+    /// struct.
     ///
     /// # Parameters
     ///
@@ -1000,8 +1211,8 @@ impl Workbook {
     ///
     ///
     /// The document properties can also be used to set a constant creation date
-    /// so that a file generated by a `rust_xlsxwriter` program will have the same
-    /// checksum no matter when it is created.
+    /// so that a file generated by a `rust_xlsxwriter` program will have the
+    /// same checksum no matter when it is created.
     ///
     ///
     /// ```
@@ -1028,10 +1239,8 @@ impl Workbook {
     /// }
     /// ```
     ///
-    ///  See also [Checksum of a saved file].
-    ///
-    /// [Checksum of a saved file]:
-    ///     https://rustxlsxwriter.github.io/workbook/checksum.html
+    ///  See also [Checksum of a saved
+    ///  file](../workbook/index.html#checksum-of-a-saved-file).
     ///
     pub fn set_properties(&mut self, properties: &DocProperties) -> &mut Workbook {
         self.properties = properties.clone();
