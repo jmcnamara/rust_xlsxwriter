@@ -42,7 +42,7 @@
 //!
 //! - [`Tutorial`](crate::tutorial): A getting started and tutorial guide.
 //! - [`Cookbook`](crate::cookbook): Examples of using `rust_xlsxwriter`.
-//! - [`Working with Workbooks`](crate::worksheet): High level introduction on
+//! - [`Working with Workbooks`](crate::workbook): High level introduction on
 //!   creating and working with workbooks.
 //! - [`Workbook`]: The entry point for creating an Excel workbook of
 //!   worksheets.
