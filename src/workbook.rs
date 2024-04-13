@@ -229,7 +229,7 @@ use crate::packager::PackagerOptions;
 use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 use crate::{
-    utility, Border, ChartRange, ChartRangeCacheData, ColNum, DefinedName, DefinedNameType,
+    utility, Border, Chart, ChartRange, ChartRangeCacheData, ColNum, DefinedName, DefinedNameType,
     DocProperties, Fill, Font, Image, RowNum, Visible, NUM_IMAGE_FORMATS,
 };
 use crate::{Color, FormatPattern};
@@ -1561,23 +1561,10 @@ impl Workbook {
         for worksheet in &self.worksheets {
             if !worksheet.charts.is_empty() {
                 for chart in worksheet.charts.values() {
-                    Self::insert_to_chart_cache(&chart.title.range, &mut chart_caches);
-                    Self::insert_to_chart_cache(&chart.x_axis.title.range, &mut chart_caches);
-                    Self::insert_to_chart_cache(&chart.y_axis.title.range, &mut chart_caches);
+                    Self::insert_chart_ranges_to_cache(chart, &mut chart_caches);
 
-                    for series in &chart.series {
-                        Self::insert_to_chart_cache(&series.title.range, &mut chart_caches);
-                        Self::insert_to_chart_cache(&series.value_range, &mut chart_caches);
-                        Self::insert_to_chart_cache(&series.category_range, &mut chart_caches);
-
-                        for data_label in &series.custom_data_labels {
-                            Self::insert_to_chart_cache(&data_label.title.range, &mut chart_caches);
-                        }
-
-                        if let Some(error_bars) = &series.y_error_bars {
-                            Self::insert_to_chart_cache(&error_bars.plus_range, &mut chart_caches);
-                            Self::insert_to_chart_cache(&error_bars.minus_range, &mut chart_caches);
-                        }
+                    if let Some(chart) = &chart.combined_chart {
+                        Self::insert_chart_ranges_to_cache(chart, &mut chart_caches);
                     }
                 }
             }
@@ -1601,42 +1588,78 @@ impl Workbook {
         for worksheet in &mut self.worksheets {
             if !worksheet.charts.is_empty() {
                 for chart in worksheet.charts.values_mut() {
-                    Self::update_range_cache(&mut chart.title.range, &mut chart_caches);
-                    Self::update_range_cache(&mut chart.x_axis.title.range, &mut chart_caches);
-                    Self::update_range_cache(&mut chart.y_axis.title.range, &mut chart_caches);
+                    Self::update_chart_ranges_from_cache(chart, &mut chart_caches);
 
-                    for series in &mut chart.series {
-                        Self::update_range_cache(&mut series.title.range, &mut chart_caches);
-                        Self::update_range_cache(&mut series.value_range, &mut chart_caches);
-                        Self::update_range_cache(&mut series.category_range, &mut chart_caches);
-
-                        for data_label in &mut series.custom_data_labels {
-                            if let Some(cache) = chart_caches.get(&data_label.title.range.key()) {
-                                data_label.title.range.cache = cache.clone();
-                            }
-                        }
-
-                        if let Some(error_bars) = &mut series.y_error_bars {
-                            Self::update_range_cache(&mut error_bars.plus_range, &mut chart_caches);
-                            Self::update_range_cache(
-                                &mut error_bars.minus_range,
-                                &mut chart_caches,
-                            );
-                        }
-
-                        if let Some(error_bars) = &mut series.x_error_bars {
-                            Self::update_range_cache(&mut error_bars.plus_range, &mut chart_caches);
-                            Self::update_range_cache(
-                                &mut error_bars.minus_range,
-                                &mut chart_caches,
-                            );
-                        }
+                    if let Some(chart) = &mut chart.combined_chart {
+                        Self::update_chart_ranges_from_cache(chart, &mut chart_caches);
                     }
                 }
             }
         }
 
         Ok(())
+    }
+
+    // Insert all the various chart ranges into the lookup range cache.
+    fn insert_chart_ranges_to_cache(
+        chart: &Chart,
+        chart_caches: &mut HashMap<(String, RowNum, ColNum, RowNum, ColNum), ChartRangeCacheData>,
+    ) {
+        Self::insert_to_chart_cache(&chart.title.range, chart_caches);
+        Self::insert_to_chart_cache(&chart.x_axis.title.range, chart_caches);
+        Self::insert_to_chart_cache(&chart.y_axis.title.range, chart_caches);
+
+        for series in &chart.series {
+            Self::insert_to_chart_cache(&series.title.range, chart_caches);
+            Self::insert_to_chart_cache(&series.value_range, chart_caches);
+            Self::insert_to_chart_cache(&series.category_range, chart_caches);
+
+            for data_label in &series.custom_data_labels {
+                Self::insert_to_chart_cache(&data_label.title.range, chart_caches);
+            }
+
+            if let Some(error_bars) = &series.y_error_bars {
+                Self::insert_to_chart_cache(&error_bars.plus_range, chart_caches);
+                Self::insert_to_chart_cache(&error_bars.minus_range, chart_caches);
+            }
+
+            if let Some(error_bars) = &series.x_error_bars {
+                Self::insert_to_chart_cache(&error_bars.plus_range, chart_caches);
+                Self::insert_to_chart_cache(&error_bars.minus_range, chart_caches);
+            }
+        }
+    }
+
+    // Update all the various chart ranges from the lookup range cache.
+    fn update_chart_ranges_from_cache(
+        chart: &mut Chart,
+        chart_caches: &mut HashMap<(String, RowNum, ColNum, RowNum, ColNum), ChartRangeCacheData>,
+    ) {
+        Self::update_range_cache(&mut chart.title.range, chart_caches);
+        Self::update_range_cache(&mut chart.x_axis.title.range, chart_caches);
+        Self::update_range_cache(&mut chart.y_axis.title.range, chart_caches);
+
+        for series in &mut chart.series {
+            Self::update_range_cache(&mut series.title.range, chart_caches);
+            Self::update_range_cache(&mut series.value_range, chart_caches);
+            Self::update_range_cache(&mut series.category_range, chart_caches);
+
+            for data_label in &mut series.custom_data_labels {
+                if let Some(cache) = chart_caches.get(&data_label.title.range.key()) {
+                    data_label.title.range.cache = cache.clone();
+                }
+            }
+
+            if let Some(error_bars) = &mut series.y_error_bars {
+                Self::update_range_cache(&mut error_bars.plus_range, chart_caches);
+                Self::update_range_cache(&mut error_bars.minus_range, chart_caches);
+            }
+
+            if let Some(error_bars) = &mut series.x_error_bars {
+                Self::update_range_cache(&mut error_bars.plus_range, chart_caches);
+                Self::update_range_cache(&mut error_bars.minus_range, chart_caches);
+            }
+        }
     }
 
     // Insert a chart range (expressed as a hash/key value) into the chart cache

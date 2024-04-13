@@ -382,7 +382,7 @@
 mod tests;
 
 use regex::Regex;
-use std::fmt;
+use std::{fmt, mem};
 
 use crate::{
     drawing::{DrawingObject, DrawingType},
@@ -469,8 +469,9 @@ pub struct Chart {
     pub(crate) legend: ChartLegend,
     pub(crate) chart_area_format: ChartFormat,
     pub(crate) plot_area_format: ChartFormat,
+    pub(crate) combined_chart: Option<Box<Chart>>,
     grouping: ChartGrouping,
-    show_empty_cells_as: ChartEmptyCells,
+    show_empty_cells_as: Option<ChartEmptyCells>,
     show_hidden_data: bool,
     show_na_as_empty: bool,
     default_num_format: String,
@@ -488,6 +489,7 @@ pub struct Chart {
     has_drop_lines: bool,
     drop_lines_format: ChartFormat,
     table: Option<ChartDataTable>,
+    base_series_index: usize,
 }
 
 impl Chart {
@@ -582,7 +584,7 @@ impl Chart {
             chart_area_format: ChartFormat::default(),
             plot_area_format: ChartFormat::default(),
             grouping: ChartGrouping::Standard,
-            show_empty_cells_as: ChartEmptyCells::Gaps,
+            show_empty_cells_as: None,
             show_hidden_data: false,
             show_na_as_empty: false,
             default_num_format: "General".to_string(),
@@ -601,6 +603,8 @@ impl Chart {
             has_drop_lines: false,
             drop_lines_format: ChartFormat::default(),
             table: None,
+            combined_chart: None,
+            base_series_index: 0,
         };
 
         match chart_type {
@@ -1062,6 +1066,17 @@ impl Chart {
     ///
     pub fn legend(&mut self) -> &mut ChartLegend {
         &mut self.legend
+    }
+
+    /// Create a combination chart with a secondary chart.
+    ///
+    /// TODO explain chart `combine()`.
+    ///
+    ///
+    pub fn combine(&mut self, chart: &Chart) -> &mut Chart {
+        self.combined_chart = Some(Box::new(chart.clone()));
+
+        self
     }
 
     /// Set the chart style type.
@@ -2230,7 +2245,7 @@ impl Chart {
     /// `option` - A [`ChartEmptyCells`] enum value.
     ///
     pub fn show_empty_cells_as(&mut self, option: ChartEmptyCells) -> &mut Chart {
-        self.show_empty_cells_as = option;
+        self.show_empty_cells_as = Some(option);
 
         self
     }
@@ -2836,40 +2851,17 @@ impl Chart {
         // Write the c:layout element.
         self.write_layout();
 
-        match self.chart_type {
-            ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
-                self.write_area_chart();
-            }
+        // Write the <c:xxxChart> element for each chart type.
+        self.write_chart_type();
 
-            ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
-                self.write_bar_chart();
-            }
+        // Write the combined chart.
+        if let Some(combined_chart) = &mut self.combined_chart {
+            combined_chart.axis_ids = self.axis_ids;
+            combined_chart.base_series_index = self.series.len();
 
-            ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
-                self.write_column_chart();
-            }
-
-            ChartType::Doughnut => self.write_doughnut_chart(),
-
-            ChartType::Line | ChartType::LineStacked | ChartType::LinePercentStacked => {
-                self.write_line_chart();
-            }
-
-            ChartType::Pie => self.write_pie_chart(),
-
-            ChartType::Radar | ChartType::RadarWithMarkers | ChartType::RadarFilled => {
-                self.write_radar_chart();
-            }
-
-            ChartType::Scatter
-            | ChartType::ScatterStraight
-            | ChartType::ScatterStraightWithMarkers
-            | ChartType::ScatterSmooth
-            | ChartType::ScatterSmoothWithMarkers => self.write_scatter_chart(),
-
-            ChartType::Stock => {
-                self.write_stock_chart();
-            }
+            mem::swap(&mut combined_chart.writer, &mut self.writer);
+            combined_chart.write_chart_type();
+            mem::swap(&mut combined_chart.writer, &mut self.writer);
         }
 
         // Reverse the X and Y axes for Bar charts.
@@ -2915,6 +2907,45 @@ impl Chart {
         self.write_sp_pr(&self.plot_area_format.clone());
 
         self.writer.xml_end_tag("c:plotArea");
+    }
+
+    // Write the <c:xxxChart> element.
+    fn write_chart_type(&mut self) {
+        match self.chart_type {
+            ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
+                self.write_area_chart();
+            }
+
+            ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
+                self.write_bar_chart();
+            }
+
+            ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
+                self.write_column_chart();
+            }
+
+            ChartType::Doughnut => self.write_doughnut_chart(),
+
+            ChartType::Line | ChartType::LineStacked | ChartType::LinePercentStacked => {
+                self.write_line_chart();
+            }
+
+            ChartType::Pie => self.write_pie_chart(),
+
+            ChartType::Radar | ChartType::RadarWithMarkers | ChartType::RadarFilled => {
+                self.write_radar_chart();
+            }
+
+            ChartType::Scatter
+            | ChartType::ScatterStraight
+            | ChartType::ScatterStraightWithMarkers
+            | ChartType::ScatterSmooth
+            | ChartType::ScatterSmoothWithMarkers => self.write_scatter_chart(),
+
+            ChartType::Stock => {
+                self.write_stock_chart();
+            }
+        }
     }
 
     // Write the <c:layout> element.
@@ -2969,10 +3000,10 @@ impl Chart {
             }
 
             // Write the c:idx element.
-            self.write_idx(index);
+            self.write_idx(self.base_series_index + index);
 
             // Write the c:order element.
-            self.write_order(index);
+            self.write_order(self.base_series_index + index);
 
             self.write_series_title(&series.title);
 
@@ -5574,13 +5605,11 @@ impl Chart {
 
     // Write the <c:dispBlanksAs> element.
     fn write_disp_blanks_as(&mut self) {
-        if self.show_empty_cells_as == ChartEmptyCells::Gaps {
-            return;
+        if let Some(show_empty_cells) = self.show_empty_cells_as {
+            let attributes = [("val", show_empty_cells.to_string())];
+
+            self.writer.xml_empty_tag("c:dispBlanksAs", &attributes);
         }
-
-        let attributes = [("val", self.show_empty_cells_as.to_string())];
-
-        self.writer.xml_empty_tag("c:dispBlanksAs", &attributes);
     }
 
     // Write the <dispNaAsBlank> element. This is an Excel 16 extension.

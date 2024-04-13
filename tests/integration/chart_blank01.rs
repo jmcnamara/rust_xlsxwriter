@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Chart, ChartEmptyCells, ChartSeries, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartSeries, ChartType, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -30,8 +30,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     // Set the chart axis ids to match the random values in the Excel file.
     chart.set_axis_ids(45705856, 45843584);
-
-    chart.show_empty_cells_as(ChartEmptyCells::Gaps);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
