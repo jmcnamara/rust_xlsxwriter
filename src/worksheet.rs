@@ -9772,7 +9772,7 @@ impl Worksheet {
     /// This method is used in conjunction with the
     /// [`set_freeze_panes()`](Worksheet::set_freeze_panes) method to set the
     /// top most visible cell in the scrolling range. For example you may want
-    /// to freeze the top row a but have the worksheet pre-scrolled so that cell
+    /// to freeze the top row but have the worksheet pre-scrolled so that cell
     /// `A20` is visible in the scrolled area. See the example below.
     ///
     /// # Parameters

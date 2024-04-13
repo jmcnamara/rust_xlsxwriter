@@ -42,20 +42,33 @@
 //!
 //! - [`Tutorial`](crate::tutorial): A getting started and tutorial guide.
 //! - [`Cookbook`](crate::cookbook): Examples of using `rust_xlsxwriter`.
-//! - [`Working with Workbooks`](crate::workbook): High level introduction on
-//!   creating and working with workbooks.
+//!
+//! <p>
+//!
 //! - [`Workbook`]: The entry point for creating an Excel workbook of
 //!   worksheets.
-//! - [`Working with Worksheets`](crate::worksheet): High level introduction on
-//!   creating and working with worksheets.
+//! - [`Working with Workbooks`](crate::workbook): A higher level introduction
+//!   to creating and working with workbooks.
+//! </p>
+//!
+//! <p>
+//!
 //! - [`Worksheet`]: The main spreadsheet canvas for writing data and objects to
 //!   a worksheet.
+//! - [`Working with Worksheets`](crate::worksheet): A higher level introduction
+//!    to creating and working with worksheets.
+//! </p>
+//!
+//! <p>
+//!
+//! - [`Chart`] struct: The interface for creating worksheet charts.
+//! - [`Working with charts`](crate::chart): A higher level introduction to
+//!   creating and using charts.
+//! </p>
+//!
 //! - [`Format`]: The interface for adding formatting to worksheets and other
 //!   objects.
-//! - [`Working with charts`](crate::chart): High level introduction on creating
-//!   and using charts.
-//! - [`Chart`] struct: The interface for creating worksheet charts.
-//! - [`Table`]: The interface for worksheet tables.
+//!  - [`Table`]: The interface for worksheet tables.
 //! - [`Image`]: The interface for images used in worksheets.
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.
