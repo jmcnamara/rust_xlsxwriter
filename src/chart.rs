@@ -460,12 +460,15 @@ pub struct Chart {
     scale_width: f64,
     scale_height: f64,
     axis_ids: (u32, u32),
+    axis2_ids: (u32, u32),
     category_has_num_format: bool,
     chart_type: ChartType,
     chart_group_type: ChartType,
     pub(crate) title: ChartTitle,
     pub(crate) x_axis: ChartAxis,
     pub(crate) y_axis: ChartAxis,
+    pub(crate) x2_axis: ChartAxis,
+    pub(crate) y2_axis: ChartAxis,
     pub(crate) legend: ChartLegend,
     pub(crate) chart_area_format: ChartFormat,
     pub(crate) plot_area_format: ChartFormat,
@@ -489,7 +492,9 @@ pub struct Chart {
     has_drop_lines: bool,
     drop_lines_format: ChartFormat,
     table: Option<ChartDataTable>,
-    base_series_index: usize,
+    series_index: usize,
+    has_secondary_axis: bool,
+    has_crosses: bool,
 }
 
 impl Chart {
@@ -573,6 +578,7 @@ impl Chart {
             drawing_type: DrawingType::Chart,
 
             axis_ids: (0, 0),
+            axis2_ids: (0, 0),
             series: vec![],
             category_has_num_format: false,
             chart_type,
@@ -580,6 +586,8 @@ impl Chart {
             title: ChartTitle::new(),
             x_axis: ChartAxis::new(),
             y_axis: ChartAxis::new(),
+            x2_axis: ChartAxis::new(),
+            y2_axis: ChartAxis::new(),
             legend: ChartLegend::new(),
             chart_area_format: ChartFormat::default(),
             plot_area_format: ChartFormat::default(),
@@ -604,7 +612,9 @@ impl Chart {
             drop_lines_format: ChartFormat::default(),
             table: None,
             combined_chart: None,
-            base_series_index: 0,
+            series_index: 0,
+            has_secondary_axis: false,
+            has_crosses: true,
         };
 
         match chart_type {
@@ -2266,19 +2276,34 @@ impl Chart {
         self
     }
 
-    /// Set default values for the chart axis ids.
+    /// Set default values for the primary chart axis ids.
     ///
-    /// This is mainly used to ensure that the axis ids used in testing match
-    /// the semi-randomized values in the target Excel file.
+    /// This is mainly used to ensure that the primary axis ids used in testing
+    /// match the semi-randomized values in the target Excel file.
     ///
     /// # Parameters
     ///
-    /// `axis_id1` - X-axis id.
-    /// `axis_id2` - Y-axis id.
+    /// - `axis_id1`: X-axis id.
+    /// - `axis_id2`: Y-axis id.
     ///
     #[doc(hidden)]
     pub fn set_axis_ids(&mut self, axis_id1: u32, axis_id2: u32) {
         self.axis_ids = (axis_id1, axis_id2);
+    }
+
+    /// Set default values for the secondary chart axis ids.
+    ///
+    /// This is mainly used to ensure that the secondary axis ids used in
+    /// testing match the semi-randomized values in the target Excel file.
+    ///
+    /// # Parameters
+    ///
+    /// - `axis_id1`: X-axis id.
+    /// - `axis_id2`: Y-axis id.
+    ///
+    #[doc(hidden)]
+    pub fn set_axis2_ids(&mut self, axis_id1: u32, axis_id2: u32) {
+        self.axis2_ids = (axis_id1, axis_id2);
     }
 
     // -----------------------------------------------------------------------
@@ -2286,15 +2311,14 @@ impl Chart {
     // -----------------------------------------------------------------------
 
     // Set chart unique axis ids.
-    pub(crate) fn add_axis_ids(&mut self) {
+    pub(crate) fn add_axis_ids(&mut self, chart_id: u32) {
         if self.axis_ids.0 != 0 {
             return;
         }
 
-        let axis_id_1 = (5000 + self.id) * 10000 + 1;
-        let axis_id_2 = axis_id_1 + 1;
-
-        self.axis_ids = (axis_id_1, axis_id_2);
+        let axis_id = (5000 + chart_id) * 10000 + 1;
+        self.axis_ids = (axis_id, axis_id + 1);
+        self.axis2_ids = (axis_id + 2, axis_id + 3);
     }
 
     // Check for any legend entries that have been hidden/deleted via the
@@ -2335,12 +2359,25 @@ impl Chart {
         deleted_entries
     }
 
+    // todo
+    fn check_for_secondary_axis(&mut self) {
+        // TODO
+        for series in &self.series {
+            if series.y2_axis {
+                self.has_secondary_axis = true;
+                return;
+            }
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Chart specific methods.
     // -----------------------------------------------------------------------
 
     // Initialize area charts.
     fn initialize_area_chart(mut self) -> Chart {
+        self.has_crosses = false;
+
         self.x_axis.axis_type = ChartAxisType::Category;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
         self.x_axis.position_between_ticks = false;
@@ -2349,6 +2386,15 @@ impl Chart {
         self.y_axis.axis_position = ChartAxisPosition::Left;
         self.y_axis.title.is_horizontal = true;
         self.y_axis.major_gridlines = true;
+
+        self.x2_axis.axis_type = ChartAxisType::Category;
+        self.x2_axis.position_between_ticks = false;
+        self.x2_axis.crossing = ChartAxisCrossing::Max;
+        self.x2_axis.is_hidden = true;
+        self.x2_axis.label_position = ChartAxisLabelPosition::None;
+
+        self.y2_axis.axis_type = ChartAxisType::Value;
+        self.y2_axis.axis_position = ChartAxisPosition::Left;
 
         self.chart_group_type = ChartType::Area;
 
@@ -2369,6 +2415,8 @@ impl Chart {
     // Initialize bar charts. Bar chart category/value axes are reversed in
     // comparison to other charts. Some of the defaults reflect this.
     fn initialize_bar_chart(mut self) -> Chart {
+        self.has_crosses = false;
+
         self.x_axis.axis_type = ChartAxisType::Value;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
         self.x_axis.major_gridlines = true;
@@ -2376,6 +2424,16 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Category;
         self.y_axis.axis_position = ChartAxisPosition::Left;
         self.y_axis.title.is_horizontal = true;
+
+        self.x2_axis.axis_type = ChartAxisType::Category;
+        self.x2_axis.axis_position = ChartAxisPosition::Bottom;
+        self.x2_axis.crossing = ChartAxisCrossing::Automatic;
+
+        self.y2_axis.axis_type = ChartAxisType::Value;
+        self.y2_axis.axis_position = ChartAxisPosition::Left;
+        self.y2_axis.crossing = ChartAxisCrossing::Max;
+        self.y2_axis.is_hidden = true;
+        self.y2_axis.label_position = ChartAxisLabelPosition::None;
 
         self.chart_group_type = ChartType::Bar;
 
@@ -2405,6 +2463,14 @@ impl Chart {
         self.y_axis.axis_type = ChartAxisType::Value;
         self.y_axis.axis_position = ChartAxisPosition::Left;
         self.y_axis.major_gridlines = true;
+
+        self.x2_axis.axis_type = ChartAxisType::Category;
+        self.x2_axis.crossing = ChartAxisCrossing::Max;
+        self.x2_axis.is_hidden = true;
+        self.x2_axis.label_position = ChartAxisLabelPosition::None;
+
+        self.y2_axis.axis_type = ChartAxisType::Value;
+        self.y2_axis.axis_position = ChartAxisPosition::Left;
 
         self.chart_group_type = ChartType::Column;
 
@@ -2444,6 +2510,14 @@ impl Chart {
         self.y_axis.axis_position = ChartAxisPosition::Left;
         self.y_axis.title.is_horizontal = true;
         self.y_axis.major_gridlines = true;
+
+        self.x2_axis.axis_type = ChartAxisType::Category;
+        self.x2_axis.crossing = ChartAxisCrossing::Max;
+        self.x2_axis.is_hidden = true;
+        self.x2_axis.label_position = ChartAxisLabelPosition::None;
+
+        self.y2_axis.axis_type = ChartAxisType::Value;
+        self.y2_axis.axis_position = ChartAxisPosition::Left;
 
         self.chart_group_type = ChartType::Line;
 
@@ -2500,6 +2574,16 @@ impl Chart {
         self.y_axis.title.is_horizontal = true;
         self.y_axis.major_gridlines = true;
 
+        self.x2_axis.axis_type = ChartAxisType::Value;
+        self.x2_axis.position_between_ticks = false;
+        self.x2_axis.crossing = ChartAxisCrossing::Max;
+        self.x2_axis.is_hidden = true;
+        self.x2_axis.label_position = ChartAxisLabelPosition::None;
+
+        self.y2_axis.axis_type = ChartAxisType::Value;
+        self.y2_axis.axis_position = ChartAxisPosition::Left;
+        self.y2_axis.position_between_ticks = false;
+
         self.chart_group_type = ChartType::Scatter;
 
         self.default_label_position = ChartDataLabelPosition::Right;
@@ -2509,6 +2593,8 @@ impl Chart {
 
     // Initialize stock charts.
     fn initialize_stock_chart(mut self) -> Chart {
+        self.has_crosses = false;
+
         self.x_axis.axis_type = ChartAxisType::Date;
         self.x_axis.axis_position = ChartAxisPosition::Bottom;
         self.x_axis.automatic = true;
@@ -2518,6 +2604,15 @@ impl Chart {
         self.y_axis.title.is_horizontal = true;
         self.y_axis.major_gridlines = true;
 
+        self.x2_axis.axis_type = ChartAxisType::Date;
+        self.x2_axis.crossing = ChartAxisCrossing::Max;
+        self.x2_axis.is_hidden = true;
+        self.x2_axis.label_position = ChartAxisLabelPosition::None;
+        self.x2_axis.automatic = true;
+
+        self.y2_axis.axis_type = ChartAxisType::Value;
+        self.y2_axis.axis_position = ChartAxisPosition::Left;
+
         self.chart_group_type = ChartType::Stock;
         self.default_label_position = ChartDataLabelPosition::Right;
 
@@ -2525,14 +2620,20 @@ impl Chart {
     }
 
     // Write the <c:areaChart> element for Column charts.
-    fn write_area_chart(&mut self) {
+    fn write_area_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:areaChart");
 
         // Write the c:grouping element.
         self.write_grouping();
 
         // Write the c:ser elements.
-        self.write_series();
+        self.write_series(&series);
 
         if self.has_drop_lines {
             // Write the c:dropLines element.
@@ -2540,13 +2641,19 @@ impl Chart {
         }
 
         // Write the c:axId elements.
-        self.write_ax_ids();
+        self.write_ax_ids(primary_axis);
 
         self.writer.xml_end_tag("c:areaChart");
     }
 
     // Write the <c:barChart> element for Bar charts.
-    fn write_bar_chart(&mut self) {
+    fn write_bar_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:barChart");
 
         // Write the c:barDir element.
@@ -2556,7 +2663,7 @@ impl Chart {
         self.write_grouping();
 
         // Write the c:ser elements.
-        self.write_series();
+        self.write_series(&series);
 
         if self.gap != 150 {
             // Write the c:gapWidth element.
@@ -2569,13 +2676,19 @@ impl Chart {
         }
 
         // Write the c:axId elements.
-        self.write_ax_ids();
+        self.write_ax_ids(primary_axis);
 
         self.writer.xml_end_tag("c:barChart");
     }
 
     // Write the <c:barChart> element for Column charts.
-    fn write_column_chart(&mut self) {
+    fn write_column_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:barChart");
 
         // Write the c:barDir element.
@@ -2585,7 +2698,7 @@ impl Chart {
         self.write_grouping();
 
         // Write the c:ser elements.
-        self.write_series();
+        self.write_series(&series);
 
         if self.gap != 150 {
             // Write the c:gapWidth element.
@@ -2598,20 +2711,26 @@ impl Chart {
         }
 
         // Write the c:axId elements.
-        self.write_ax_ids();
+        self.write_ax_ids(primary_axis);
 
         self.writer.xml_end_tag("c:barChart");
     }
 
     // Write the <c:doughnutChart> element for Column charts.
-    fn write_doughnut_chart(&mut self) {
+    fn write_doughnut_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:doughnutChart");
 
         // Write the c:varyColors element.
         self.write_vary_colors();
 
         // Write the c:ser elements.
-        self.write_series();
+        self.write_series(&series);
 
         // Write the c:firstSliceAng element.
         self.write_first_slice_ang();
@@ -2623,14 +2742,20 @@ impl Chart {
     }
 
     // Write the <c:lineChart>element.
-    fn write_line_chart(&mut self) {
+    fn write_line_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:lineChart");
 
         // Write the c:grouping element.
         self.write_grouping();
 
         // Write the c:ser elements.
-        self.write_series();
+        self.write_series(&series);
 
         if self.has_drop_lines {
             // Write the c:dropLines element.
@@ -2651,20 +2776,26 @@ impl Chart {
         self.write_marker_value();
 
         // Write the c:axId elements.
-        self.write_ax_ids();
+        self.write_ax_ids(primary_axis);
 
         self.writer.xml_end_tag("c:lineChart");
     }
 
     // Write the <c:pieChart> element for Column charts.
-    fn write_pie_chart(&mut self) {
+    fn write_pie_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:pieChart");
 
         // Write the c:varyColors element.
         self.write_vary_colors();
 
         // Write the c:ser elements.
-        self.write_series();
+        self.write_series(&series);
 
         // Write the c:firstSliceAng element.
         self.write_first_slice_ang();
@@ -2673,50 +2804,68 @@ impl Chart {
     }
 
     // Write the <c:radarChart>element.
-    fn write_radar_chart(&mut self) {
+    fn write_radar_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:radarChart");
 
         // Write the c:radarStyle element.
         self.write_radar_style();
 
         // Write the c:ser elements.
-        self.write_series();
+        self.write_series(&series);
 
         // Write the c:axId elements.
-        self.write_ax_ids();
+        self.write_ax_ids(primary_axis);
 
         self.writer.xml_end_tag("c:radarChart");
     }
 
     // Write the <c:scatterChart>element.
-    fn write_scatter_chart(&mut self) {
+    fn write_scatter_chart(&mut self, primary_axis: bool) {
+        let mut series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:scatterChart");
 
         // Write the c:scatterStyle element.
         self.write_scatter_style();
 
         // Write the c:ser elements.
-        self.write_scatter_series();
+        self.write_scatter_series(&mut series);
 
         // Write the c:axId elements.
-        self.write_ax_ids();
+        self.write_ax_ids(primary_axis);
 
         self.writer.xml_end_tag("c:scatterChart");
     }
 
     // Write the <c:stockChart>element.
-    fn write_stock_chart(&mut self) {
+    fn write_stock_chart(&mut self, primary_axis: bool) {
+        let series = self.get_series(primary_axis);
+
+        if series.is_empty() {
+            return;
+        }
+
         self.writer.xml_start_tag_only("c:stockChart");
 
         // Write the c:ser elements.
-        self.write_series();
+        self.write_series(&series);
 
         if self.has_drop_lines {
             // Write the c:dropLines element.
             self.write_drop_lines();
         }
 
-        if self.has_high_low_lines {
+        if primary_axis && self.has_high_low_lines {
             // Write the c:hiLowLines element.
             self.write_hi_low_lines();
         }
@@ -2727,7 +2876,7 @@ impl Chart {
         }
 
         // Write the c:axId elements.
-        self.write_ax_ids();
+        self.write_ax_ids(primary_axis);
 
         self.writer.xml_end_tag("c:stockChart");
     }
@@ -2846,6 +2995,7 @@ impl Chart {
 
     // Write the <c:plotArea> element.
     fn write_plot_area(&mut self) {
+        self.series_index = 0;
         self.writer.xml_start_tag_only("c:plotArea");
 
         // Write the c:layout element.
@@ -2857,16 +3007,19 @@ impl Chart {
         // Write the combined chart.
         if let Some(combined_chart) = &mut self.combined_chart {
             combined_chart.axis_ids = self.axis_ids;
-            combined_chart.base_series_index = self.series.len();
+            combined_chart.series_index = self.series.len();
 
             mem::swap(&mut combined_chart.writer, &mut self.writer);
             combined_chart.write_chart_type();
             mem::swap(&mut combined_chart.writer, &mut self.writer);
         }
 
+        let mut x_axis = self.x_axis.clone();
+        let mut y_axis = self.y_axis.clone();
+
         // Reverse the X and Y axes for Bar charts.
         if self.chart_group_type == ChartType::Bar {
-            std::mem::swap(&mut self.x_axis, &mut self.y_axis);
+            std::mem::swap(&mut x_axis, &mut y_axis);
         }
 
         match self.chart_group_type {
@@ -2874,28 +3027,59 @@ impl Chart {
 
             ChartType::Scatter => {
                 // Write the c:valAx element.
-                self.write_cat_val_ax();
+                self.write_cat_val_ax(&x_axis, &y_axis, self.axis_ids);
 
                 // Write the c:valAx element.
-                self.write_val_ax();
+                self.write_val_ax(&x_axis, &y_axis, self.axis_ids);
             }
             _ => {
                 if self.x_axis.axis_type == ChartAxisType::Date {
                     // Write the c:dateAx element.
-                    self.write_date_ax();
+                    self.write_date_ax(&x_axis, &y_axis, self.axis_ids);
                 } else {
                     // Write the c:catAx element.
-                    self.write_cat_ax();
+                    self.write_cat_ax(&x_axis, &y_axis, self.axis_ids);
                 }
 
                 // Write the c:valAx element.
-                self.write_val_ax();
+                self.write_val_ax(&x_axis, &y_axis, self.axis_ids);
             }
         }
 
-        // Reset the X and Y axes for Bar charts.
-        if self.chart_group_type == ChartType::Bar {
-            std::mem::swap(&mut self.x_axis, &mut self.y_axis);
+        // TODO
+        self.check_for_secondary_axis();
+        if self.has_secondary_axis {
+            let mut x_axis = self.x2_axis.clone();
+            let mut y_axis = self.y2_axis.clone();
+
+            // Reverse the X and Y axes for Bar charts.
+            if self.chart_group_type == ChartType::Bar {
+                std::mem::swap(&mut x_axis, &mut y_axis);
+            }
+
+            match self.chart_group_type {
+                ChartType::Pie | ChartType::Doughnut => {}
+
+                ChartType::Scatter => {
+                    // Write the c:valAx element.
+                    self.write_cat_val_ax(&x_axis, &y_axis, self.axis2_ids);
+
+                    // Write the c:valAx element.
+                    self.write_val_ax(&x_axis, &y_axis, self.axis2_ids);
+                }
+                _ => {
+                    // Write the c:valAx element.
+                    self.write_val_ax(&x_axis, &y_axis, self.axis2_ids);
+
+                    if self.x_axis.axis_type == ChartAxisType::Date {
+                        // Write the c:dateAx element.
+                        self.write_date_ax(&x_axis, &y_axis, self.axis2_ids);
+                    } else {
+                        // Write the c:catAx element.
+                        self.write_cat_ax(&x_axis, &y_axis, self.axis2_ids);
+                    }
+                }
+            }
         }
 
         // Write the c:dTable element.
@@ -2913,37 +3097,52 @@ impl Chart {
     fn write_chart_type(&mut self) {
         match self.chart_type {
             ChartType::Area | ChartType::AreaStacked | ChartType::AreaPercentStacked => {
-                self.write_area_chart();
+                self.write_area_chart(true);
+                self.write_area_chart(false);
             }
 
             ChartType::Bar | ChartType::BarStacked | ChartType::BarPercentStacked => {
-                self.write_bar_chart();
+                self.write_bar_chart(true);
+                self.write_bar_chart(false);
             }
 
             ChartType::Column | ChartType::ColumnStacked | ChartType::ColumnPercentStacked => {
-                self.write_column_chart();
+                self.write_column_chart(true);
+                self.write_column_chart(false);
             }
 
-            ChartType::Doughnut => self.write_doughnut_chart(),
+            ChartType::Doughnut => {
+                self.write_doughnut_chart(true);
+                self.write_doughnut_chart(false);
+            }
 
             ChartType::Line | ChartType::LineStacked | ChartType::LinePercentStacked => {
-                self.write_line_chart();
+                self.write_line_chart(true);
+                self.write_line_chart(false);
             }
 
-            ChartType::Pie => self.write_pie_chart(),
+            ChartType::Pie => {
+                self.write_pie_chart(true);
+                self.write_pie_chart(false);
+            }
 
             ChartType::Radar | ChartType::RadarWithMarkers | ChartType::RadarFilled => {
-                self.write_radar_chart();
+                self.write_radar_chart(true);
+                self.write_radar_chart(false);
             }
 
             ChartType::Scatter
             | ChartType::ScatterStraight
             | ChartType::ScatterStraightWithMarkers
             | ChartType::ScatterSmooth
-            | ChartType::ScatterSmoothWithMarkers => self.write_scatter_chart(),
+            | ChartType::ScatterSmoothWithMarkers => {
+                self.write_scatter_chart(true);
+                self.write_scatter_chart(false);
+            }
 
             ChartType::Stock => {
-                self.write_stock_chart();
+                self.write_stock_chart(true);
+                self.write_stock_chart(false);
             }
         }
     }
@@ -2982,9 +3181,22 @@ impl Chart {
         self.writer.xml_empty_tag("c:scatterStyle", &attributes);
     }
 
+    // Get the primary/secondary series for the chart.
+    fn get_series(&self, primary_axis: bool) -> Vec<ChartSeries> {
+        let mut series_copy = vec![];
+
+        for each_series in &self.series {
+            if each_series.y2_axis != primary_axis {
+                series_copy.push(each_series.clone());
+            }
+        }
+
+        series_copy
+    }
+
     // Write the <c:ser> element.
-    fn write_series(&mut self) {
-        for (index, series) in self.series.clone().iter_mut().enumerate() {
+    fn write_series(&mut self, series: &Vec<ChartSeries>) {
+        for series in series {
             let max_points = series.value_range.number_of_points();
 
             self.writer.xml_start_tag_only("c:ser");
@@ -3000,10 +3212,10 @@ impl Chart {
             }
 
             // Write the c:idx element.
-            self.write_idx(self.base_series_index + index);
+            self.write_idx(self.series_index);
 
             // Write the c:order element.
-            self.write_order(self.base_series_index + index);
+            self.write_order(self.series_index);
 
             self.write_series_title(&series.title);
 
@@ -3077,22 +3289,24 @@ impl Chart {
                 }
             }
 
+            self.series_index += 1;
+
             self.writer.xml_end_tag("c:ser");
         }
     }
 
     // Write the <c:ser> element for scatter charts.
-    fn write_scatter_series(&mut self) {
-        for (index, series) in self.series.clone().iter_mut().enumerate() {
+    fn write_scatter_series(&mut self, series: &mut Vec<ChartSeries>) {
+        for series in series {
             let max_points = series.value_range.number_of_points();
 
             self.writer.xml_start_tag_only("c:ser");
 
             // Write the c:idx element.
-            self.write_idx(index);
+            self.write_idx(self.series_index);
 
             // Write the c:order element.
-            self.write_order(index);
+            self.write_order(self.series_index);
 
             self.write_series_title(&series.title);
 
@@ -3157,6 +3371,8 @@ impl Chart {
                     self.write_smooth();
                 }
             }
+
+            self.series_index += 1;
 
             self.writer.xml_end_tag("c:ser");
         }
@@ -3390,9 +3606,14 @@ impl Chart {
     }
 
     // Write both <c:axId> elements.
-    fn write_ax_ids(&mut self) {
-        self.write_ax_id(self.axis_ids.0);
-        self.write_ax_id(self.axis_ids.1);
+    fn write_ax_ids(&mut self, primary_axis: bool) {
+        if primary_axis {
+            self.write_ax_id(self.axis_ids.0);
+            self.write_ax_id(self.axis_ids.1);
+        } else {
+            self.write_ax_id(self.axis2_ids.0);
+            self.write_ax_id(self.axis2_ids.1);
+        }
     }
 
     // Write the <c:axId> element.
@@ -3407,101 +3628,95 @@ impl Chart {
     // -----------------------------------------------------------------------
 
     // Write the <c:catAx> element.
-    fn write_cat_ax(&mut self) {
+    fn write_cat_ax(&mut self, x_axis: &ChartAxis, y_axis: &ChartAxis, axis_ids: (u32, u32)) {
         self.writer.xml_start_tag_only("c:catAx");
 
-        self.write_ax_id(self.axis_ids.0);
+        self.write_ax_id(axis_ids.0);
 
         // Write the c:scaling element.
-        self.write_scaling(&self.x_axis.clone());
+        self.write_scaling(x_axis);
 
-        if self.x_axis.is_hidden {
+        if x_axis.is_hidden {
             self.write_delete();
         }
 
         // Write the c:axPos element.
-        self.write_ax_pos(
-            self.x_axis.axis_position,
-            self.y_axis.reverse,
-            self.y_axis.crossing,
-        );
+        self.write_ax_pos(x_axis.axis_position, y_axis.reverse, y_axis.crossing);
 
-        self.write_major_gridlines(self.x_axis.clone());
-        self.write_minor_gridlines(self.x_axis.clone());
+        self.write_major_gridlines(x_axis);
+        self.write_minor_gridlines(x_axis);
 
         // Write the c:title element.
-        self.write_chart_title(&self.x_axis.title.clone());
+        self.write_chart_title(&x_axis.title);
 
         // Write the c:numFmt element.
-        if !self.x_axis.num_format.is_empty() {
-            self.write_number_format(
-                &self.x_axis.num_format.clone(),
-                self.x_axis.num_format_linked_to_source,
-            );
+        if !x_axis.num_format.is_empty() {
+            self.write_number_format(&x_axis.num_format, x_axis.num_format_linked_to_source);
         } else if self.category_has_num_format {
             self.write_number_format("General", true);
         }
 
         // Write the c:majorTickMark element.
-        if let Some(tick_type) = self.x_axis.major_tick_type {
+        if let Some(tick_type) = x_axis.major_tick_type {
             self.write_major_tick_mark(tick_type);
         }
 
         // Write the c:minorTickMark element.
-        if let Some(tick_type) = self.x_axis.minor_tick_type {
+        if let Some(tick_type) = x_axis.minor_tick_type {
             self.write_minor_tick_mark(tick_type);
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_label_position(self.x_axis.label_position);
+        self.write_tick_label_position(x_axis.label_position);
 
-        if self.x_axis.format.has_formatting() {
+        if x_axis.format.has_formatting() {
             // Write the c:spPr formatting element.
-            self.write_sp_pr(&self.x_axis.format.clone());
+            self.write_sp_pr(&x_axis.format);
         }
 
         // Write the axis font elements.
-        if let Some(font) = &self.x_axis.font {
-            self.write_axis_font(&font.clone());
+        if let Some(font) = &x_axis.font {
+            self.write_axis_font(font);
         }
 
         // Write the c:crossAx element.
-        self.write_cross_ax(self.axis_ids.1);
+        self.write_cross_ax(axis_ids.1);
 
-        // Write the c:crosses element. Note, the X crossing comes from the Y
-        // axis.
-        match self.y_axis.crossing {
-            ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
-                self.write_crosses(&self.y_axis.crossing.to_string());
-            }
-            ChartAxisCrossing::AxisValue(_) => {
-                self.write_crosses_at(&self.y_axis.crossing.to_string());
-            }
-            ChartAxisCrossing::CategoryNumber(_) => {
-                // Ignore Category crossing on a Value axis.
-                self.write_crosses(&ChartAxisCrossing::Automatic.to_string());
+        // Write the c:crosses element. Note, the X crossing comes from the Y axis.
+        if self.has_crosses || !x_axis.is_hidden {
+            match y_axis.crossing {
+                ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
+                    self.write_crosses(&y_axis.crossing.to_string());
+                }
+                ChartAxisCrossing::AxisValue(_) => {
+                    self.write_crosses_at(&y_axis.crossing.to_string());
+                }
+                ChartAxisCrossing::CategoryNumber(_) => {
+                    // Ignore Category crossing on a Value axis.
+                    self.write_crosses(&ChartAxisCrossing::Automatic.to_string());
+                }
             }
         }
 
         // Write the c:auto element.
-        if !self.x_axis.automatic {
+        if !x_axis.automatic {
             self.write_auto();
         }
 
         // Write the c:lblAlgn element.
-        self.write_lbl_algn(&self.x_axis.label_alignment.to_string());
+        self.write_lbl_algn(&x_axis.label_alignment.to_string());
 
         // Write the c:lblOffset element.
         self.write_lbl_offset();
 
         // Write the c:tickLblSkip element.
-        if self.x_axis.label_interval > 1 {
-            self.write_tick_lbl_skip(self.x_axis.label_interval);
+        if x_axis.label_interval > 1 {
+            self.write_tick_lbl_skip(x_axis.label_interval);
         }
 
         // Write the c:tickMarkSkip element.
-        if self.x_axis.tick_interval > 1 {
-            self.write_tick_mark_skip(self.x_axis.tick_interval);
+        if x_axis.tick_interval > 1 {
+            self.write_tick_mark_skip(x_axis.tick_interval);
         }
 
         self.writer.xml_end_tag("c:catAx");
@@ -3512,84 +3727,78 @@ impl Chart {
     // -----------------------------------------------------------------------
 
     // Write the <c:dateAx> element.
-    fn write_date_ax(&mut self) {
+    fn write_date_ax(&mut self, x_axis: &ChartAxis, y_axis: &ChartAxis, axis_ids: (u32, u32)) {
         self.writer.xml_start_tag_only("c:dateAx");
 
-        self.write_ax_id(self.axis_ids.0);
+        self.write_ax_id(axis_ids.0);
 
         // Write the c:scaling element.
-        self.write_scaling(&self.x_axis.clone());
+        self.write_scaling(x_axis);
 
-        if self.x_axis.is_hidden {
+        if x_axis.is_hidden {
             self.write_delete();
         }
 
         // Write the c:axPos element.
-        self.write_ax_pos(
-            self.x_axis.axis_position,
-            self.y_axis.reverse,
-            self.y_axis.crossing,
-        );
+        self.write_ax_pos(x_axis.axis_position, y_axis.reverse, y_axis.crossing);
 
-        self.write_major_gridlines(self.x_axis.clone());
-        self.write_minor_gridlines(self.x_axis.clone());
+        self.write_major_gridlines(x_axis);
+        self.write_minor_gridlines(x_axis);
 
         // Write the c:title element.
-        self.write_chart_title(&self.x_axis.title.clone());
+        self.write_chart_title(&x_axis.title);
 
         // Write the c:numFmt element.
-        if !self.x_axis.num_format.is_empty() {
-            self.write_number_format(
-                &self.x_axis.num_format.clone(),
-                self.x_axis.num_format_linked_to_source,
-            );
+        if !x_axis.num_format.is_empty() {
+            self.write_number_format(&x_axis.num_format, x_axis.num_format_linked_to_source);
         } else if self.category_has_num_format {
             self.write_number_format("dd/mm/yyyy", true);
         }
 
         // Write the c:majorTickMark element.
-        if let Some(tick_type) = self.x_axis.major_tick_type {
+        if let Some(tick_type) = x_axis.major_tick_type {
             self.write_major_tick_mark(tick_type);
         }
 
         // Write the c:minorTickMark element.
-        if let Some(tick_type) = self.x_axis.minor_tick_type {
+        if let Some(tick_type) = x_axis.minor_tick_type {
             self.write_minor_tick_mark(tick_type);
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_label_position(self.x_axis.label_position);
+        self.write_tick_label_position(x_axis.label_position);
 
-        if self.x_axis.format.has_formatting() {
+        if x_axis.format.has_formatting() {
             // Write the c:spPr formatting element.
-            self.write_sp_pr(&self.x_axis.format.clone());
+            self.write_sp_pr(&x_axis.format);
         }
 
         // Write the axis font elements.
-        if let Some(font) = &self.x_axis.font {
+        if let Some(font) = &x_axis.font {
             self.write_axis_font(&font.clone());
         }
 
         // Write the c:crossAx element.
-        self.write_cross_ax(self.axis_ids.1);
+        self.write_cross_ax(axis_ids.1);
 
-        // Write the c:crosses element. Note, the X crossing comes from the Y
-        // axis.
-        match self.y_axis.crossing {
-            ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
-                self.write_crosses(&self.y_axis.crossing.to_string());
-            }
-            ChartAxisCrossing::AxisValue(_) => {
-                self.write_crosses_at(&self.y_axis.crossing.to_string());
-            }
-            ChartAxisCrossing::CategoryNumber(_) => {
-                // Ignore Category crossing on a Value axis.
-                self.write_crosses(&ChartAxisCrossing::Automatic.to_string());
+        // Write the c:crosses element. Note, the X crossing comes from the Y axis.
+        if self.has_crosses || !x_axis.is_hidden {
+            match y_axis.crossing {
+                ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
+                    self.write_crosses(&y_axis.crossing.to_string());
+                }
+                ChartAxisCrossing::AxisValue(_) => {
+                    self.write_crosses_at(&y_axis.crossing.to_string());
+                }
+                ChartAxisCrossing::CategoryNumber(_) => {
+                    // Ignore Category crossing on a Value axis.
+                    self.write_crosses(&ChartAxisCrossing::Automatic.to_string());
+                }
             }
         }
 
         // Write the c:auto element.
-        if self.x_axis.automatic {
+        if x_axis.automatic {
             self.write_auto();
         }
 
@@ -3597,32 +3806,32 @@ impl Chart {
         self.write_lbl_offset();
 
         // Write the c:tickLblSkip element.
-        if self.x_axis.label_interval > 1 {
-            self.write_tick_lbl_skip(self.x_axis.label_interval);
+        if x_axis.label_interval > 1 {
+            self.write_tick_lbl_skip(x_axis.label_interval);
         }
 
         // Write the c:tickMarkSkip element.
-        if self.x_axis.tick_interval > 1 {
-            self.write_tick_mark_skip(self.x_axis.tick_interval);
+        if x_axis.tick_interval > 1 {
+            self.write_tick_mark_skip(x_axis.tick_interval);
         }
 
         // Write the c:majorUnit element.
-        if !self.x_axis.major_unit.is_empty() {
-            self.write_major_unit(self.x_axis.major_unit.clone());
+        if !x_axis.major_unit.is_empty() {
+            self.write_major_unit(&x_axis.major_unit);
         }
 
         // Write the c:majorTimeUnit element.
-        if let Some(unit) = self.x_axis.major_unit_date_type {
+        if let Some(unit) = x_axis.major_unit_date_type {
             self.write_major_time_unit(unit);
         }
 
         // Write the c:minorUnit element.
-        if !self.x_axis.minor_unit.is_empty() {
-            self.write_minor_unit(self.x_axis.minor_unit.clone());
+        if !x_axis.minor_unit.is_empty() {
+            self.write_minor_unit(&x_axis.minor_unit);
         }
 
         // Write the c:minorTimeUnit element.
-        if let Some(unit) = self.x_axis.minor_unit_date_type {
+        if let Some(unit) = x_axis.minor_unit_date_type {
             self.write_minor_time_unit(unit);
         }
 
@@ -3634,97 +3843,87 @@ impl Chart {
     // -----------------------------------------------------------------------
 
     // Write the <c:valAx> element.
-    fn write_val_ax(&mut self) {
+    fn write_val_ax(&mut self, x_axis: &ChartAxis, y_axis: &ChartAxis, axis_ids: (u32, u32)) {
         self.writer.xml_start_tag_only("c:valAx");
 
-        self.write_ax_id(self.axis_ids.1);
+        self.write_ax_id(axis_ids.1);
 
         // Write the c:scaling element.
-        self.write_scaling(&self.y_axis.clone());
+        self.write_scaling(y_axis);
 
-        if self.y_axis.is_hidden {
+        if y_axis.is_hidden {
             self.write_delete();
         }
         // Write the c:axPos element.
-        self.write_ax_pos(
-            self.y_axis.axis_position,
-            self.x_axis.reverse,
-            self.x_axis.crossing,
-        );
+        self.write_ax_pos(y_axis.axis_position, x_axis.reverse, x_axis.crossing);
 
         // Write the Gridlines elements.
-        self.write_major_gridlines(self.y_axis.clone());
-        self.write_minor_gridlines(self.y_axis.clone());
+        self.write_major_gridlines(y_axis);
+        self.write_minor_gridlines(y_axis);
 
         // Write the c:title element.
-        self.write_chart_title(&self.y_axis.title.clone());
+        self.write_chart_title(&y_axis.title);
 
         // Write the c:numFmt element.
-        if self.y_axis.num_format.is_empty() {
+        if y_axis.num_format.is_empty() {
             self.write_number_format(&self.default_num_format.clone(), true);
         } else {
-            self.write_number_format(
-                &self.y_axis.num_format.clone(),
-                self.y_axis.num_format_linked_to_source,
-            );
+            self.write_number_format(&y_axis.num_format, y_axis.num_format_linked_to_source);
         }
 
         // Write the c:majorTickMark element.
-        if let Some(position) = self.y_axis.major_tick_type {
+        if let Some(position) = y_axis.major_tick_type {
             self.write_major_tick_mark(position);
         }
 
         // Write the c:minorTickMark element.
-        if let Some(position) = self.y_axis.minor_tick_type {
+        if let Some(position) = y_axis.minor_tick_type {
             self.write_minor_tick_mark(position);
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_label_position(self.y_axis.label_position);
+        self.write_tick_label_position(y_axis.label_position);
 
-        if self.y_axis.format.has_formatting() {
+        if y_axis.format.has_formatting() {
             // Write the c:spPr formatting element.
-            self.write_sp_pr(&self.y_axis.format.clone());
+            self.write_sp_pr(&y_axis.format);
         }
 
         // Write the axis font elements.
-        if let Some(font) = &self.y_axis.font {
-            self.write_axis_font(&font.clone());
+        if let Some(font) = &y_axis.font {
+            self.write_axis_font(font);
         }
 
         // Write the c:crossAx element.
-        self.write_cross_ax(self.axis_ids.0);
+        self.write_cross_ax(axis_ids.0);
 
         // Write the c:crosses element. Note, the Y crossing comes from the X
         // axis.
-        match self.x_axis.crossing {
+        match x_axis.crossing {
             ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
-                self.write_crosses(&self.x_axis.crossing.to_string());
+                self.write_crosses(&x_axis.crossing.to_string());
             }
             ChartAxisCrossing::CategoryNumber(_) | ChartAxisCrossing::AxisValue(_) => {
-                self.write_crosses_at(&self.x_axis.crossing.to_string());
+                self.write_crosses_at(&x_axis.crossing.to_string());
             }
         }
 
         // Write the c:crossBetween element.
-        self.write_cross_between(self.x_axis.position_between_ticks);
+        self.write_cross_between(x_axis.position_between_ticks);
 
         // Write the c:majorUnit element.
-        if self.y_axis.axis_type != ChartAxisType::Category && !self.y_axis.major_unit.is_empty() {
-            self.write_major_unit(self.y_axis.major_unit.clone());
+        if y_axis.axis_type != ChartAxisType::Category && !y_axis.major_unit.is_empty() {
+            self.write_major_unit(&y_axis.major_unit);
         }
 
         // Write the c:minorUnit element.
-        if self.y_axis.axis_type != ChartAxisType::Category && !self.y_axis.minor_unit.is_empty() {
-            self.write_minor_unit(self.y_axis.minor_unit.clone());
+        if y_axis.axis_type != ChartAxisType::Category && !y_axis.minor_unit.is_empty() {
+            self.write_minor_unit(&y_axis.minor_unit);
         }
 
         // Write the c:dispUnits element.
-        if self.y_axis.display_units_type != ChartAxisDisplayUnitType::None {
-            self.write_disp_units(
-                self.y_axis.display_units_type,
-                self.y_axis.display_units_visible,
-            );
+        if y_axis.display_units_type != ChartAxisDisplayUnitType::None {
+            self.write_disp_units(y_axis.display_units_type, y_axis.display_units_visible);
         }
 
         self.writer.xml_end_tag("c:valAx");
@@ -3735,98 +3934,88 @@ impl Chart {
     // -----------------------------------------------------------------------
 
     // Write the category <c:valAx> element for scatter charts.
-    fn write_cat_val_ax(&mut self) {
+    fn write_cat_val_ax(&mut self, x_axis: &ChartAxis, y_axis: &ChartAxis, axis_ids: (u32, u32)) {
         self.writer.xml_start_tag_only("c:valAx");
 
-        self.write_ax_id(self.axis_ids.0);
+        self.write_ax_id(axis_ids.0);
 
         // Write the c:scaling element.
-        self.write_scaling(&self.x_axis.clone());
+        self.write_scaling(x_axis);
 
-        if self.x_axis.is_hidden {
+        if x_axis.is_hidden {
             self.write_delete();
         }
 
         // Write the c:axPos element.
-        self.write_ax_pos(
-            self.x_axis.axis_position,
-            self.y_axis.reverse,
-            self.y_axis.crossing,
-        );
+        self.write_ax_pos(x_axis.axis_position, y_axis.reverse, y_axis.crossing);
 
         // Write the Gridlines elements.
-        self.write_major_gridlines(self.x_axis.clone());
-        self.write_minor_gridlines(self.x_axis.clone());
+        self.write_major_gridlines(x_axis);
+        self.write_minor_gridlines(x_axis);
 
         // Write the c:title element.
-        self.write_chart_title(&self.x_axis.title.clone());
+        self.write_chart_title(&x_axis.title);
 
         // Write the c:numFmt element.
-        if self.x_axis.num_format.is_empty() {
+        if x_axis.num_format.is_empty() {
             self.write_number_format(&self.default_num_format.clone(), true);
         } else {
-            self.write_number_format(
-                &self.x_axis.num_format.clone(),
-                self.x_axis.num_format_linked_to_source,
-            );
+            self.write_number_format(&x_axis.num_format, x_axis.num_format_linked_to_source);
         }
 
         // Write the c:majorTickMark element.
-        if let Some(position) = self.x_axis.major_tick_type {
+        if let Some(position) = x_axis.major_tick_type {
             self.write_major_tick_mark(position);
         }
 
         // Write the c:minorTickMark element.
-        if let Some(position) = self.x_axis.minor_tick_type {
+        if let Some(position) = x_axis.minor_tick_type {
             self.write_minor_tick_mark(position);
         }
 
         // Write the c:tickLblPos element.
-        self.write_tick_label_position(self.x_axis.label_position);
+        self.write_tick_label_position(x_axis.label_position);
 
-        if self.x_axis.format.has_formatting() {
+        if x_axis.format.has_formatting() {
             // Write the c:spPr formatting element.
-            self.write_sp_pr(&self.x_axis.format.clone());
+            self.write_sp_pr(&x_axis.format);
         }
 
         // Write the axis font elements.
-        if let Some(font) = &self.x_axis.font {
-            self.write_axis_font(&font.clone());
+        if let Some(font) = &x_axis.font {
+            self.write_axis_font(font);
         }
 
         // Write the c:crossAx element.
-        self.write_cross_ax(self.axis_ids.1);
+        self.write_cross_ax(axis_ids.1);
 
         // Write the c:crosses element. Note, the X crossing comes from the Y
         // axis.
-        match self.y_axis.crossing {
+        match y_axis.crossing {
             ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
-                self.write_crosses(&self.y_axis.crossing.to_string());
+                self.write_crosses(&y_axis.crossing.to_string());
             }
             ChartAxisCrossing::CategoryNumber(_) | ChartAxisCrossing::AxisValue(_) => {
-                self.write_crosses_at(&self.y_axis.crossing.to_string());
+                self.write_crosses_at(&y_axis.crossing.to_string());
             }
         }
 
         // Write the c:crossBetween element.
-        self.write_cross_between(self.y_axis.position_between_ticks);
+        self.write_cross_between(y_axis.position_between_ticks);
 
         // Write the c:majorUnit element.
-        if self.x_axis.axis_type != ChartAxisType::Category && !self.x_axis.major_unit.is_empty() {
-            self.write_major_unit(self.x_axis.major_unit.clone());
+        if x_axis.axis_type != ChartAxisType::Category && !x_axis.major_unit.is_empty() {
+            self.write_major_unit(&x_axis.major_unit);
         }
 
         // Write the c:minorUnit element.
-        if self.x_axis.axis_type != ChartAxisType::Category && !self.x_axis.minor_unit.is_empty() {
-            self.write_minor_unit(self.x_axis.minor_unit.clone());
+        if x_axis.axis_type != ChartAxisType::Category && !x_axis.minor_unit.is_empty() {
+            self.write_minor_unit(&x_axis.minor_unit);
         }
 
         // Write the c:dispUnits element.
-        if self.x_axis.display_units_type != ChartAxisDisplayUnitType::None {
-            self.write_disp_units(
-                self.x_axis.display_units_type,
-                self.x_axis.display_units_visible,
-            );
+        if x_axis.display_units_type != ChartAxisDisplayUnitType::None {
+            self.write_disp_units(x_axis.display_units_type, x_axis.display_units_visible);
         }
 
         self.writer.xml_end_tag("c:valAx");
@@ -3918,7 +4107,7 @@ impl Chart {
     }
 
     // Write the <c:majorGridlines> element.
-    fn write_major_gridlines(&mut self, axis: ChartAxis) {
+    fn write_major_gridlines(&mut self, axis: &ChartAxis) {
         if axis.major_gridlines {
             if let Some(line) = &axis.major_gridlines_line {
                 self.writer.xml_start_tag_only("c:majorGridlines");
@@ -3936,7 +4125,7 @@ impl Chart {
     }
 
     // Write the <c:minorGridlines> element.
-    fn write_minor_gridlines(&mut self, axis: ChartAxis) {
+    fn write_minor_gridlines(&mut self, axis: &ChartAxis) {
         if axis.minor_gridlines {
             if let Some(line) = &axis.minor_gridlines_line {
                 self.writer.xml_start_tag_only("c:minorGridlines");
@@ -4028,15 +4217,15 @@ impl Chart {
     }
 
     // Write the <c:majorUnit> element.
-    fn write_major_unit(&mut self, value: String) {
-        let attributes = [("val", value)];
+    fn write_major_unit(&mut self, value: &String) {
+        let attributes = [("val", value.to_string())];
 
         self.writer.xml_empty_tag("c:majorUnit", &attributes);
     }
 
     // Write the <c:minorUnit> element.
-    fn write_minor_unit(&mut self, value: String) {
-        let attributes = [("val", value)];
+    fn write_minor_unit(&mut self, value: &String) {
+        let attributes = [("val", value.to_string())];
 
         self.writer.xml_empty_tag("c:minorUnit", &attributes);
     }
@@ -5912,6 +6101,7 @@ pub struct ChartSeries {
     pub(crate) y_error_bars: Option<ChartErrorBars>,
     pub(crate) delete_from_legend: bool,
     pub(crate) smooth: Option<bool>,
+    pub(crate) y2_axis: bool,
 }
 
 #[allow(clippy::new_without_default)]
@@ -6027,6 +6217,7 @@ impl ChartSeries {
             y_error_bars: None,
             delete_from_legend: false,
             smooth: None,
+            y2_axis: false,
         }
     }
 
@@ -6190,6 +6381,12 @@ impl ChartSeries {
         T: IntoChartRange,
     {
         self.category_range = range.new_chart_range();
+        self
+    }
+
+    /// TODO set y2 axis
+    pub fn set_y2_axis(&mut self, enable: bool) -> &mut ChartSeries {
+        self.y2_axis = enable;
         self
     }
 

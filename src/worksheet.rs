@@ -12239,7 +12239,7 @@ impl Worksheet {
     pub(crate) fn prepare_worksheet_charts(&mut self, mut chart_id: u32, drawing_id: u32) -> u32 {
         for chart in self.charts.values_mut() {
             chart.id = chart_id;
-            chart.add_axis_ids();
+            chart.add_axis_ids(chart_id);
             chart_id += 1;
         }
 
