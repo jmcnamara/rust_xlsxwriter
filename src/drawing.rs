@@ -162,7 +162,7 @@ impl Drawing {
         let mut name = format!("{name} {index}");
 
         if !drawing_info.name.is_empty() {
-            name = drawing_info.name.clone();
+            name.clone_from(&drawing_info.name);
         }
 
         let mut attributes = vec![("id", id.to_string()), ("name", name)];

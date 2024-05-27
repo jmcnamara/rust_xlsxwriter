@@ -8184,7 +8184,7 @@ impl ChartTitle {
         // If the name didn't convert to a populated range then it probably just
         // a simple string title.
         if !self.range.has_data() {
-            self.name = self.range.range_string.clone();
+            self.name.clone_from(&self.range.range_string);
         }
 
         self

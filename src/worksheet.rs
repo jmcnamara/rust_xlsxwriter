@@ -15093,7 +15093,7 @@ impl Hyperlink {
             self.link_type = HyperlinkType::Url;
 
             if self.text.is_empty() {
-                self.text = self.url.clone();
+                self.text.clone_from(&self.url);
             }
 
             // Split the url into url + #anchor if that exists.
@@ -15115,7 +15115,7 @@ impl Hyperlink {
             self.location = self.url.replacen("internal:", "", 1);
 
             if self.text.is_empty() {
-                self.text = self.location.clone();
+                self.text.clone_from(&self.location);
             }
         } else if self.url.starts_with("file://") {
             // Handle links to other files or cells in other Excel files.
@@ -15125,7 +15125,7 @@ impl Hyperlink {
 
             // Links to local files aren't prefixed with file:///.
             if !REMOTE_FILE.is_match(&bare_link) {
-                self.url = bare_link.clone();
+                self.url.clone_from(&bare_link);
             }
 
             if self.text.is_empty() {

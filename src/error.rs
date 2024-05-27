@@ -144,14 +144,14 @@ pub enum XlsxError {
     /// or to convert other Error types to.
     CustomError(String),
 
-    /// Wrapper for a variety of [std::io::Error] errors such as file
+    /// Wrapper for a variety of [`std::io::Error`] errors such as file
     /// permissions when writing the xlsx file to disk. This can be caused by an
     /// non-existent parent directory or, commonly on Windows, if the file is
     /// already open in Excel.
     IoError(std::io::Error),
 
-    /// Wrapper for a variety of [zip::result::ZipError] errors from
-    /// [zip::ZipWriter]. These relate to errors arising from creating
+    /// Wrapper for a variety of [`zip::result::ZipError`] errors from
+    /// [`zip::ZipWriter`]. These relate to errors arising from creating
     /// the xlsx file zip container.
     ZipError(zip::result::ZipError),
 

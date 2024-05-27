@@ -1174,7 +1174,7 @@ impl Table {
         // Set the column header names,
         for (index, column) in self.columns.iter_mut().enumerate() {
             if column.name.is_empty() {
-                column.name = default_headers[index].clone();
+                column.name.clone_from(&default_headers[index]);
             }
 
             if seen_column_names.contains(&column.name.to_lowercase()) {
