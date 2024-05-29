@@ -1023,6 +1023,28 @@ impl Chart {
         &mut self.y_axis
     }
 
+    /// Get the chart X2-Axis object in order to set its properties.
+    ///
+    /// Get a reference to the chart's X2-Axis [`ChartAxis`] object in order to
+    /// set its properties.
+    ///
+    /// See the [`chart.x_axis()`][Chart::x_axis] method above.
+    ///
+    pub fn x2_axis(&mut self) -> &mut ChartAxis {
+        &mut self.x2_axis
+    }
+
+    /// Get the chart Y2-Axis object in order to set its properties.
+    ///
+    /// Get a reference to the chart's Y2-Axis [`ChartAxis`] object in order to
+    /// set its properties.
+    ///
+    /// See the [`chart.x_axis()`][Chart::x_axis] method above.
+    ///
+    pub fn y2_axis(&mut self) -> &mut ChartAxis {
+        &mut self.y2_axis
+    }
+
     /// Get the chart legend object in order to set its properties.
     ///
     /// Get a reference to the chart's [`ChartLegend`] object in order to set
@@ -2318,7 +2340,12 @@ impl Chart {
 
         let axis_id = (5000 + chart_id) * 10000 + 1;
         self.axis_ids = (axis_id, axis_id + 1);
-        self.axis2_ids = (axis_id + 2, axis_id + 3);
+
+        if self.combined_chart.is_none() {
+            self.axis2_ids = (axis_id + 2, axis_id + 3);
+        } else {
+            self.axis2_ids = (axis_id + 10_000_000, axis_id + 10_000_001);
+        }
     }
 
     // Check for any legend entries that have been hidden/deleted via the
@@ -2361,7 +2388,14 @@ impl Chart {
 
     // todo
     fn check_for_secondary_axis(&mut self) {
-        // TODO
+        if let Some(combined_chart) = &self.combined_chart {
+            for series in &combined_chart.series {
+                if series.y2_axis {
+                    self.has_secondary_axis = true;
+                }
+            }
+        }
+
         for series in &self.series {
             if series.y2_axis {
                 self.has_secondary_axis = true;
@@ -3007,6 +3041,7 @@ impl Chart {
         // Write the combined chart.
         if let Some(combined_chart) = &mut self.combined_chart {
             combined_chart.axis_ids = self.axis_ids;
+            combined_chart.axis2_ids = self.axis2_ids;
             combined_chart.series_index = self.series.len();
 
             mem::swap(&mut combined_chart.writer, &mut self.writer);
@@ -3051,13 +3086,18 @@ impl Chart {
         if self.has_secondary_axis {
             let mut x_axis = self.x2_axis.clone();
             let mut y_axis = self.y2_axis.clone();
+            let mut chart_group_type = self.chart_group_type;
+
+            if let Some(combined_chart) = &self.combined_chart {
+                chart_group_type = combined_chart.chart_group_type;
+            }
 
             // Reverse the X and Y axes for Bar charts.
-            if self.chart_group_type == ChartType::Bar {
+            if chart_group_type == ChartType::Bar {
                 std::mem::swap(&mut x_axis, &mut y_axis);
             }
 
-            match self.chart_group_type {
+            match chart_group_type {
                 ChartType::Pie | ChartType::Doughnut => {}
 
                 ChartType::Scatter => {
@@ -3897,8 +3937,7 @@ impl Chart {
         // Write the c:crossAx element.
         self.write_cross_ax(axis_ids.0);
 
-        // Write the c:crosses element. Note, the Y crossing comes from the X
-        // axis.
+        // Write the c:crosses element. Note, the Y crossing comes from the X axis.
         match x_axis.crossing {
             ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
                 self.write_crosses(&x_axis.crossing.to_string());
@@ -3989,8 +4028,7 @@ impl Chart {
         // Write the c:crossAx element.
         self.write_cross_ax(axis_ids.1);
 
-        // Write the c:crosses element. Note, the X crossing comes from the Y
-        // axis.
+        // Write the c:crosses element. Note, the X crossing comes from the Y axis.
         match y_axis.crossing {
             ChartAxisCrossing::Automatic | ChartAxisCrossing::Min | ChartAxisCrossing::Max => {
                 self.write_crosses(&y_axis.crossing.to_string());
@@ -11582,6 +11620,10 @@ impl ChartAxis {
     ///
     /// Hide the number or label section of the chart axis.
     ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off.
+    ///
     /// # Examples
     ///
     /// A chart example demonstrating hiding the chart axes.
@@ -11609,8 +11651,8 @@ impl ChartAxis {
     ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
     ///
     ///     // Hide both axes.
-    ///     chart.x_axis().set_hidden();
-    ///     chart.y_axis().set_hidden();
+    ///     chart.x_axis().set_hidden(true);
+    ///     chart.y_axis().set_hidden(true);
     ///
     ///     // Hide legend for clarity.
     ///     chart.legend().set_hidden();
@@ -11629,8 +11671,8 @@ impl ChartAxis {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_hidden.png">
     ///
-    pub fn set_hidden(&mut self) -> &mut ChartAxis {
-        self.is_hidden = true;
+    pub fn set_hidden(&mut self, enable: bool) -> &mut ChartAxis {
+        self.is_hidden = enable;
         self
     }
 }

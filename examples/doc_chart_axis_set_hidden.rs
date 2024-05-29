@@ -24,8 +24,8 @@ fn main() -> Result<(), XlsxError> {
     chart.add_series().set_values("Sheet1!$A$1:$A$5");
 
     // Hide both axes.
-    chart.x_axis().set_hidden();
-    chart.y_axis().set_hidden();
+    chart.x_axis().set_hidden(true);
+    chart.y_axis().set_hidden(true);
 
     // Hide legend for clarity.
     chart.legend().set_hidden();
