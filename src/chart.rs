@@ -3087,9 +3087,11 @@ impl Chart {
             let mut x_axis = self.x2_axis.clone();
             let mut y_axis = self.y2_axis.clone();
             let mut chart_group_type = self.chart_group_type;
+            let mut is_combined = false;
 
             if let Some(combined_chart) = &self.combined_chart {
                 chart_group_type = combined_chart.chart_group_type;
+                is_combined = true;
             }
 
             // Reverse the X and Y axes for Bar charts.
@@ -3101,11 +3103,14 @@ impl Chart {
                 ChartType::Pie | ChartType::Doughnut => {}
 
                 ChartType::Scatter => {
-                    // Write the c:valAx element.
-                    self.write_cat_val_ax(&x_axis, &y_axis, self.axis2_ids);
-
-                    // Write the c:valAx element.
-                    self.write_val_ax(&x_axis, &y_axis, self.axis2_ids);
+                    // The Cat and Value axes order changes depending on type.
+                    if is_combined {
+                        self.write_val_ax(&x_axis, &y_axis, self.axis2_ids);
+                        self.write_cat_val_ax(&x_axis, &y_axis, self.axis2_ids);
+                    } else {
+                        self.write_cat_val_ax(&x_axis, &y_axis, self.axis2_ids);
+                        self.write_val_ax(&x_axis, &y_axis, self.axis2_ids);
+                    }
                 }
                 _ => {
                     // Write the c:valAx element.
