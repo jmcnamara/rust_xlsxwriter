@@ -478,8 +478,7 @@ pub struct Chart {
     show_hidden_data: bool,
     show_na_as_empty: bool,
     default_num_format: String,
-    has_overlap: bool,
-    overlap: i8,
+    overlap: Option<i8>,
     gap: u16,
     style: u8,
     hole_size: u8,
@@ -596,8 +595,7 @@ impl Chart {
             show_hidden_data: false,
             show_na_as_empty: false,
             default_num_format: "General".to_string(),
-            has_overlap: false,
-            overlap: 0,
+            overlap: None,
             gap: 150,
             style: 2,
             hole_size: 50,
@@ -2475,13 +2473,11 @@ impl Chart {
             self.grouping = ChartGrouping::Clustered;
         } else if self.chart_type == ChartType::BarStacked {
             self.grouping = ChartGrouping::Stacked;
-            self.has_overlap = true;
-            self.overlap = 100;
+            self.overlap = Some(100);
         } else if self.chart_type == ChartType::BarPercentStacked {
             self.grouping = ChartGrouping::PercentStacked;
             self.default_num_format = "0%".to_string();
-            self.has_overlap = true;
-            self.overlap = 100;
+            self.overlap = Some(100);
         }
 
         self.default_label_position = ChartDataLabelPosition::OutsideEnd;
@@ -2512,13 +2508,11 @@ impl Chart {
             self.grouping = ChartGrouping::Clustered;
         } else if self.chart_type == ChartType::ColumnStacked {
             self.grouping = ChartGrouping::Stacked;
-            self.has_overlap = true;
-            self.overlap = 100;
+            self.overlap = Some(100);
         } else if self.chart_type == ChartType::ColumnPercentStacked {
             self.grouping = ChartGrouping::PercentStacked;
             self.default_num_format = "0%".to_string();
-            self.has_overlap = true;
-            self.overlap = 100;
+            self.overlap = Some(100);
         }
 
         self.default_label_position = ChartDataLabelPosition::OutsideEnd;
@@ -2704,10 +2698,8 @@ impl Chart {
             self.write_gap_width(self.gap);
         }
 
-        if self.has_overlap {
-            // Write the c:overlap element.
-            self.write_overlap();
-        }
+        // Write the c:overlap element.
+        self.write_overlap();
 
         // Write the c:axId elements.
         self.write_ax_ids(primary_axis);
@@ -2739,10 +2731,8 @@ impl Chart {
             self.write_gap_width(self.gap);
         }
 
-        if self.overlap != 0 {
-            // Write the c:overlap element.
-            self.write_overlap();
-        }
+        // Write the c:overlap element.
+        self.write_overlap();
 
         // Write the c:axId elements.
         self.write_ax_ids(primary_axis);
@@ -3247,7 +3237,7 @@ impl Chart {
             self.writer.xml_start_tag_only("c:ser");
 
             // Copy a series overlap to the parent chart.
-            if series.overlap != 0 {
+            if series.overlap.is_some() {
                 self.overlap = series.overlap;
             }
 
@@ -5668,9 +5658,11 @@ impl Chart {
 
     // Write the <c:overlap> element.
     fn write_overlap(&mut self) {
-        let attributes = [("val", self.overlap.to_string())];
+        if let Some(overlap) = &self.overlap {
+            let attributes = [("val", overlap.to_string())];
 
-        self.writer.xml_empty_tag("c:overlap", &attributes);
+            self.writer.xml_empty_tag("c:overlap", &attributes);
+        }
     }
 
     // Write the <c:smooth> element.
@@ -6136,7 +6128,7 @@ pub struct ChartSeries {
     pub(crate) custom_data_labels: Vec<ChartDataLabel>,
     pub(crate) points: Vec<ChartPoint>,
     pub(crate) gap: u16,
-    pub(crate) overlap: i8,
+    pub(crate) overlap: Option<i8>,
     pub(crate) invert_if_negative: bool,
     pub(crate) inverted_color: Color,
     pub(crate) trendline: ChartTrendline,
@@ -6252,7 +6244,7 @@ impl ChartSeries {
             points: vec![],
             custom_data_labels: vec![],
             gap: 150,
-            overlap: 0,
+            overlap: None,
             invert_if_negative: false,
             inverted_color: Color::Default,
             trendline: ChartTrendline::new(),
@@ -7405,7 +7397,7 @@ impl ChartSeries {
     ///
     pub fn set_overlap(&mut self, overlap: i8) -> &mut ChartSeries {
         if (-100..=100).contains(&overlap) {
-            self.overlap = overlap;
+            self.overlap = Some(overlap);
         }
         self
     }
@@ -14917,6 +14909,12 @@ impl ChartFont {
     ///
     pub fn set_character_set(&mut self, character_set: u8) -> &mut ChartFont {
         self.character_set = character_set;
+        self
+    }
+
+    /// TODO Hide. Test only.
+    pub fn set_default_bold(&mut self, enable: bool) -> &mut ChartFont {
+        self.has_default_bold = enable;
         self
     }
 
