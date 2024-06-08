@@ -9621,7 +9621,7 @@ impl ChartDataLabel {
     }
 }
 
-/// The `ChartMarkerType` enum defines the [`Chart`] data label positions.
+/// The `ChartDataLabelPosition` enum defines the [`Chart`] data label positions.
 ///
 /// In Excel the available data label positions vary for different chart
 /// types. The available, and default, positions are:
