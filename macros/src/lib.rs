@@ -569,7 +569,7 @@ use syn::{
 ///         .set_background_color("C6EFCE");
 ///
 ///     #[derive(XlsxSerialize, Serialize)]
-///     #[xlsx(header_format = &my_header_format)] // Wont' work.
+///     #[xlsx(header_format = &my_header_format)] // Won't work.
 ///     struct Produce {
 ///         fruit: &'static str,
 ///         cost: f64,
