@@ -38,22 +38,25 @@ cargo run --example app_demo  # or any other example
 23. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
 24. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
 25. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
-26. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
-27. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
-28. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-29. [Chart: Chart data table](#chart-chart-data-table)
-30. [Chart: Chart data tools](#chart-chart-data-tools)
-31. [Sparklines example](#sparklines-example)
-32. [Sparklines example with properties set](#sparklines-example-with-properties-set)
-33. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
-34. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-35. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-36. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-37. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-38. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-39. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-40. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-41. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+26. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
+27. [Chart: Create a combined chart](#chart-create-a-combined-chart)
+28. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
+29. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
+30. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
+31. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
+32. [Chart: Chart data table](#chart-chart-data-table)
+33. [Chart: Chart data tools](#chart-chart-data-tools)
+34. [Sparklines example](#sparklines-example)
+35. [Sparklines example with properties set](#sparklines-example-with-properties-set)
+36. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
+37. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+38. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+39. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+40. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+41. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+42. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+43. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+44. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -577,7 +580,7 @@ fn main() -> Result<(), XlsxError> {
 This is an example of creating merged cells ranges in Excel using
 [`worksheet.merge_range()`].
 
-[`worksheet.merge_range()`]: crate::Worksheet::merge_range
+[`worksheet.merge_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet::merge_range
 
 The `merge_range()` method only handles strings but it can be used to merge
 other data types, such as number, as shown below.
@@ -914,8 +917,8 @@ headers and total row of a table should be configured via a [`Table`] struct but
 the table data can be added via standard [`worksheet.write()`]methods.
 
 [`Table`]: crate::Table
-[`worksheet.write()`]: crate::Worksheet::write
-[`worksheet.add_table()`]: crate::Worksheet::add_table
+[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet::write
+[`worksheet.add_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet::add_table
 
 ## Some examples:
 
@@ -3874,6 +3877,306 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
+# Chart: Using a secondary axis
+
+
+Example of creating an Excel Line chart with a secondary axis by setting the
+[`ChartSeries::set_y2_axis()`] or [`ChartSeries::set_x2_axis()`] property for
+one of more series in the chart.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_chart_secondary_axis.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_chart_secondary_axis.rs
+
+use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    // Add the worksheet data that the charts will refer to.
+    worksheet.write_with_format(0, 0, "Aliens", &bold)?;
+    worksheet.write_with_format(0, 1, "Humans", &bold)?;
+    worksheet.write_column(1, 0, [2, 3, 4, 5, 6, 7])?;
+    worksheet.write_column(1, 1, [10, 40, 50, 20, 10, 50])?;
+
+    // Create a new line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure a series with a secondary axis.
+    chart
+        .add_series()
+        .set_name("Sheet1!$A$1")
+        .set_values("Sheet1!$A$2:$A$7")
+        .set_y2_axis(true);
+
+    // Configure another series that defaults to the primary axis.
+    chart
+        .add_series()
+        .set_name("Sheet1!$B$1")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    // Add a chart title and some axis labels.
+    chart.title().set_name("Survey results");
+    chart.x_axis().set_name("Days");
+    chart.y_axis().set_name("Population");
+    chart.y2_axis().set_name("Laser wounds");
+    chart.y_axis().set_major_gridlines(false);
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(1, 3, &chart, 25, 10)?;
+
+    workbook.save("chart_secondary_axis.xlsx")?;
+
+    Ok(())
+}
+```
+
+[`ChartSeries::set_y2_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries::set_y2_axis
+[`ChartSeries::set_x2_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries::set_x2_axis
+
+
+
+# Chart: Create a combined chart
+
+Example of creating combined Excel charts from two different chart types.
+
+**Image of the output file:**
+
+In the first example we create a combined column and line chart that share the
+same X and Y axes:
+
+<img src="https://rustxlsxwriter.github.io/images/app_chart_combined1.png">
+
+In the second example we create a similar combined column and line chart except
+that the secondary chart has a secondary Y axis:
+
+<img src="https://rustxlsxwriter.github.io/images/app_chart_combined2.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_chart_combined.rs
+
+use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    // Add the worksheet data that the charts will refer to.
+    let headings = ["Number", "Sample", "Target"];
+    worksheet.write_row_with_format(0, 0, headings, &bold)?;
+
+    let data = [
+        [2, 3, 4, 5, 6, 7],
+        [10, 40, 50, 20, 10, 50],
+        [30, 60, 70, 50, 40, 30],
+    ];
+    worksheet.write_column_matrix(1, 0, data)?;
+
+    // -----------------------------------------------------------------------
+    // In the first example we will create a combined column and line chart.
+    // The charts will share the same X and Y axes.
+    // -----------------------------------------------------------------------
+    let mut column_chart = Chart::new(ChartType::Column);
+
+    // Configure the data series for the primary chart.
+    column_chart
+        .add_series()
+        .set_name("Sheet1!$B$1")
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    // Create a new line chart. This will use this as the secondary chart.
+    let mut line_chart = Chart::new(ChartType::Line);
+
+    // Configure the data series for the secondary chart.
+    line_chart
+        .add_series()
+        .set_name("Sheet1!$C$1")
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7");
+
+    // Combine the charts.
+    column_chart.combine(&line_chart);
+
+    // Add a chart title and some axis labels. Note, this is done via the
+    // primary chart.
+    column_chart
+        .title()
+        .set_name("Combined chart with same Y axis");
+    column_chart.x_axis().set_name("Test number");
+    column_chart.y_axis().set_name("Sample length (mm)");
+
+    // Add the primary chart to the worksheet.
+    worksheet.insert_chart(1, 4, &column_chart)?;
+
+    // -----------------------------------------------------------------------
+    // In the second example we will create a similar combined column and line
+    // chart except that the secondary chart will have a secondary Y axis.
+    // -----------------------------------------------------------------------
+    let mut column_chart = Chart::new(ChartType::Column);
+
+    // Configure the data series for the primary chart.
+    column_chart
+        .add_series()
+        .set_name("Sheet1!$B$1")
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    // Create a new line chart. This will use this as the secondary chart.
+    let mut line_chart = Chart::new(ChartType::Line);
+
+    // Configure the data series for the secondary chart.
+    line_chart
+        .add_series()
+        .set_name("Sheet1!$C$1")
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7")
+        .set_y2_axis(true);
+
+    // Combine the charts.
+    column_chart.combine(&line_chart);
+
+    // Configure the data series for the secondary chart. We also set a
+    // secondary Y axis via (y2_axis). This is the only difference between
+    // this and the first example, apart from the axis label below.
+    column_chart
+        .title()
+        .set_name("Combine chart with secondary Y axis");
+    column_chart.x_axis().set_name("Test number");
+    column_chart.y_axis().set_name("Sample length (mm)");
+
+    // Note: the y2 properties are set via the primary chart.
+    column_chart.y2_axis().set_name("Target length (mm)");
+
+    // Add the primary chart to the worksheet.
+    worksheet.insert_chart(17, 4, &column_chart)?;
+
+    // Save the file to disk.
+    workbook.save("chart_combined.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Chart: Create a combined pareto chart
+
+Example of creating a Pareto chart with a secondary chart and axis.
+
+A Pareto chart is a type of chart that combines a Column/Histogram chart and a
+Chart. Individual values are represented in descending order by the columns and
+the cumulative total is represented by the line approaching 100% on a second
+axis.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_chart_pareto.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_chart_pareto.rs
+
+use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Formats used in the workbook.
+    let bold = Format::new().set_bold();
+    let percent_format = Format::new().set_num_format("0%");
+
+    // Add the worksheet data that the charts will refer to.
+    let headings = ["Reason", "Number", "Percentage"];
+
+    let reasons = [
+        "Traffic",
+        "Child care",
+        "Public Transport",
+        "Weather",
+        "Overslept",
+        "Emergency",
+    ];
+
+    let numbers = [60, 40, 20, 15, 10, 5];
+    let percents = [0.440, 0.667, 0.800, 0.900, 0.967, 1.00];
+
+    worksheet.write_row_with_format(0, 0, headings, &bold)?;
+    worksheet.write_column(1, 0, reasons)?;
+    worksheet.write_column(1, 1, numbers)?;
+    worksheet.write_column_with_format(1, 2, percents, &percent_format)?;
+
+    // Widen the columns for visibility.
+    worksheet.set_column_width(0, 15)?;
+    worksheet.set_column_width(1, 10)?;
+    worksheet.set_column_width(2, 10)?;
+
+    //
+    // Create a new Column chart. This will be the primary chart.
+    //
+    let mut column_chart = Chart::new(ChartType::Column);
+
+    // Configure a series on the primary axis.
+    column_chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7");
+
+    // Add a chart title.
+    column_chart.title().set_name("Reasons for lateness");
+
+    // Turn off the chart legend.
+    column_chart.legend().set_hidden();
+
+    // Set the  name and scale of the Y axes. Note, the secondary axis is set
+    // from the primary chart.
+    column_chart
+        .y_axis()
+        .set_name("Respondents (number)")
+        .set_min(0)
+        .set_max(120);
+
+    column_chart.y2_axis().set_max(1);
+
+    //
+    // Create a new Line chart. This will be the secondary chart.
+    //
+    let mut line_chart = Chart::new(ChartType::Line);
+
+    // Add a series on the secondary axis.
+    line_chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7")
+        .set_y2_axis(true);
+
+    // Combine the charts.
+    column_chart.combine(&line_chart);
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart(1, 5, &column_chart)?;
+
+    workbook.save("chart_pareto.xlsx")?;
+
+    Ok(())
+}
+```
+
+
 # Chart: Pattern Fill: Example of a chart with Pattern Fill
 
 A example of creating column charts with fill patterns using the [`ChartFormat`]
@@ -3957,8 +4260,8 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-[`ChartFormat`]: crate::ChartFormat
-[`ChartPatternFill`]: crate::ChartPatternFill
+[`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart_struct.ChartFormat
+[`ChartPatternFill`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart_struct.ChartPatternFill
 
 
 # Chart: Gradient Fill: Example of a chart with Gradient Fill
@@ -4056,8 +4359,8 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-[`ChartFormat`]: crate::ChartFormat
-[`ChartGradientFill`]: crate::ChartGradientFill
+[`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartFormat
+[`ChartGradientFill`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart_struct.ChartGradientFill
 
 
 # Chart: Styles: Example of setting default chart styles
@@ -4914,7 +5217,7 @@ this is for demonstration purposes only. The [`ExcelDateTime`] struct in
 [Unix Time]: https://en.wikipedia.org/wiki/Unix_time
 [`IntoExcelData`]: crate::IntoExcelData
 [`ExcelDateTime`]: crate::ExcelDateTime
-[`worksheet.write()`]: crate::Worksheet::write
+[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet::write
 
 **Image of the output file:**
 

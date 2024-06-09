@@ -95,7 +95,7 @@ fn main() -> Result<(), XlsxError> {
     column_chart.x_axis().set_name("Test number");
     column_chart.y_axis().set_name("Sample length (mm)");
 
-    // Note: the y2 properties are on the primary chart.
+    // Note: the y2 properties are set via the primary chart.
     column_chart.y2_axis().set_name("Target length (mm)");
 
     // Add the primary chart to the worksheet.
