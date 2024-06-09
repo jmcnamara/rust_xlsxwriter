@@ -227,14 +227,15 @@ location in the worksheet:
 > performance of the generic `write()` method is just as fast.
 >
 > There are also worksheet methods for writing arrays of data or arrays of
-> arrays of data that can be useful in cases where you don't need to add
-> specific formatting:
+> arrays of data that can be useful in cases where the data to be added is in
+> a vector format:
 >
 > - [`worksheet.write_row()`](crate::Worksheet::write_row)
 > - [`worksheet.write_column()`](crate::Worksheet::write_column)
 > - [`worksheet.write_row_matrix()`](crate::Worksheet::write_row_matrix)
 > - [`worksheet.write_column_matrix()`](crate::Worksheet::write_column_matrix)
-
+> - [`worksheet.write_row_with_format()`](crate::Worksheet::write_row_with_format)
+> - [`worksheet.write_column_with_format()`](crate::Worksheet::write_column_with_format)
 
 Throughout `rust_xlsxwriter` rows and columns are zero indexed. So the first
 cell in a worksheet `(0, 0)` is equivalent to the Excel notation of `A1`.
