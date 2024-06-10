@@ -124,9 +124,10 @@ frequently.
 
 Recent changes:
 
+- Added support for combined charts and chart secondary axes.
 - Added support for worksheet sparklines.
 - Added support for Excel 365 embedded worksheet images.
-- Added support for Serde serialization.
+
 
 See the full [Release Notes and Changelog].
 

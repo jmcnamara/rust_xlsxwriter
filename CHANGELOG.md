@@ -5,6 +5,16 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.65.0] - 2023-06-11
+
+### Added
+
+  - Added support for [Chart Secondary Axes] and [Combined Charts].
+
+  [Chart Secondary Axes]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#secondary-axes
+  [Combined Charts]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#combined-charts
+
+
 ## [0.64.2] - 2023-04-13
 
 ### Fixed
