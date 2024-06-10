@@ -362,18 +362,316 @@
 //! properties can only be set for value axes (and date axes). The documentation
 //! calls out the type of axis to which properties apply.
 //!
+//! ## Secondary Axes
 //!
+//! It is possible to add a secondary axis of the same type to a chart by
+//! setting the [`ChartSeries::set_y2_axis()`] property of the series:
+//!
+//! ```
+//! # // This code is available in examples/doc_chart_series_set_y2_axis.rs
+//! #
+//! # use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//! #     // Add the worksheet data that the charts will refer to.
+//! #     worksheet.write_column(0, 0, [2, 3, 4, 5, 6, 7])?;
+//! #     worksheet.write_column(0, 1, [10, 40, 50, 20, 10, 50])?;
+//! #
+//!     // Create a new line chart.
+//!     let mut chart = Chart::new(ChartType::Line);
+//!
+//!     // Configure a series that defaults to the primary axis.
+//!     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+//!
+//!     // Configure another series with a secondary axis.
+//!     chart
+//!         .add_series()
+//!         .set_values("Sheet1!$B$1:$B$6")
+//!         .set_y2_axis(true);
+//!
+//!     // Add some axis labels.
+//!     chart.y_axis().set_name("Y axis");
+//!     chart.y2_axis().set_name("Y2 axis");
+//!
+//!     // Move the legend to the bottom for clarity.
+//!     chart.legend().set_position(ChartLegendPosition::Bottom);
+//!
+//!     // Add the chart to the worksheet.
+//!     worksheet.insert_chart_with_offset(0, 2, &chart, 5, 5)?;
+//!
+//! #     workbook.save("chart.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Output file:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/chart_series_set_y2_axis.png">
+//!
+//! It is also possible to have a secondary, combined, chart either with a
+//! shared or secondary axis, see below.
+//!
+//!
+//! ## Combined Charts
+//!
+//! In Excel is also possible to combine two different chart types, for example
+//! a column and line chart to create a Pareto chart. In `rust_xlsxwriter` you
+//! can replicate this by creating a new chart instance as the primary chart and
+//! then create a secondary chart of a different type and combine it with the
+//! primary chart using the [`Chart::combine()`] method.
+//!
+//! The combined secondary chart can share the same Y axis as the primary chart
+//! or it can use a secondary Y2 axis. An example of each is shown below.
+//!
+//! Combined Column and Line chart with the same Y axis.
+//!
+//! ```
+//! # // This code is available in examples/doc_chart_combine1.rs
+//! #
+//! # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//! #     // Add the worksheet data that the charts will refer to.
+//! #     let data = [
+//! #         [2, 3, 4, 5, 6, 7],
+//! #         [10, 40, 50, 20, 10, 50],
+//! #         [30, 60, 70, 50, 40, 30],
+//! #     ];
+//! #     worksheet.write_column_matrix(0, 0, data)?;
+//! #
+//!     // Create a new Column chart. This will be the primary chart.
+//!     let mut column_chart = Chart::new(ChartType::Column);
+//!
+//!     // Configure the data series for the primary chart.
+//!     column_chart
+//!         .add_series()
+//!         .set_categories("Sheet1!$A$1:$A$6")
+//!         .set_values("Sheet1!$B$1:$B$6");
+//!
+//!     // Create a new line chart. This will use this as the secondary chart.
+//!     let mut line_chart = Chart::new(ChartType::Line);
+//!
+//!     // Configure the data series for the secondary chart.
+//!     line_chart
+//!         .add_series()
+//!         .set_categories("Sheet1!$A$1:$A$6")
+//!         .set_values("Sheet1!$C$1:$C$6");
+//!
+//!     // Combine the charts.
+//!     column_chart.combine(&line_chart);
+//!
+//!     // Add some axis labels. Note, this is done via the primary chart.
+//!     column_chart.x_axis().set_name("X axis");
+//!     column_chart.y_axis().set_name("Y axis");
+//!
+//!     // Add the primary chart to the worksheet.
+//!     worksheet.insert_chart_with_offset(0, 3, &column_chart, 5, 5)?;
+//!
+//! #     // Save the file to disk.
+//! #     workbook.save("chart.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Output file:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_combine1.png">
+//!
+//!
+//! Combined Column and Line chart with the Column values are on the primary Y
+//! axis and the Line chart values on the secondary Y2 axis.
+//!
+//! ```
+//! # // This code is available in examples/doc_chart_combine2.rs
+//! #
+//! # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//! #     // Add the worksheet data that the charts will refer to.
+//! #     let data = [
+//! #         [2, 3, 4, 5, 6, 7],
+//! #         [10, 40, 50, 20, 10, 50],
+//! #         [30, 60, 70, 50, 40, 30],
+//! #     ];
+//! #     worksheet.write_column_matrix(0, 0, data)?;
+//! #
+//! #     // Create a new Column chart. This will be the primary chart.
+//!     let mut column_chart = Chart::new(ChartType::Column);
+//!
+//!     // Configure the data series for the primary chart.
+//!     column_chart
+//!         .add_series()
+//!         .set_categories("Sheet1!$A$1:$A$6")
+//!         .set_values("Sheet1!$B$1:$B$6");
+//!
+//!     // Create a new line chart. This will use this as the secondary chart.
+//!     let mut line_chart = Chart::new(ChartType::Line);
+//!
+//!     // Configure the data series for the secondary chart. This series is also
+//!     // assigned to the secondary Y2 axis.
+//!     line_chart
+//!         .add_series()
+//!         .set_categories("Sheet1!$A$1:$A$6")
+//!         .set_values("Sheet1!$C$1:$C$6")
+//!         .set_y2_axis(true);
+//!
+//!     // Combine the charts.
+//!     column_chart.combine(&line_chart);
+//!
+//!     // Add some axis labels. Note, this is done via the primary chart.
+//!     column_chart.x_axis().set_name("X axis");
+//!     column_chart.y_axis().set_name("Y axis");
+//!
+//!     // The y2 axis properties are set also via the primary chart.
+//!     column_chart.y2_axis().set_name("Y2 axis");
+//!
+//!     // Add the primary chart to the worksheet.
+//!     worksheet.insert_chart_with_offset(0, 3, &column_chart, 5, 5)?;
+//!
+//! #     // Save the file to disk.
+//! #     workbook.save("chart.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Output file:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chart_combine2.png">
+//!
+//! The following is a slightly more realistic example of combining chart types
+//! to create a [Pareto Chart](https://en.wikipedia.org/wiki/Pareto_chart).
+//!
+//! ```
+//! # // This code is available in examples/app_chart_pareto.rs
+//! #
+//! use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Formats used in the workbook.
+//!     let bold = Format::new().set_bold();
+//!     let percent_format = Format::new().set_num_format("0%");
+//!
+//!     // Add the worksheet data that the charts will refer to.
+//!     let headings = ["Reason", "Number", "Percentage"];
+//!
+//!     let reasons = [
+//!         "Traffic",
+//!         "Child care",
+//!         "Public Transport",
+//!         "Weather",
+//!         "Overslept",
+//!         "Emergency",
+//!     ];
+//!
+//!     let numbers = [60, 40, 20, 15, 10, 5];
+//!     let percents = [0.440, 0.667, 0.800, 0.900, 0.967, 1.00];
+//!
+//!     worksheet.write_row_with_format(0, 0, headings, &bold)?;
+//!     worksheet.write_column(1, 0, reasons)?;
+//!     worksheet.write_column(1, 1, numbers)?;
+//!     worksheet.write_column_with_format(1, 2, percents, &percent_format)?;
+//!
+//!     // Widen the columns for visibility.
+//!     worksheet.set_column_width(0, 15)?;
+//!     worksheet.set_column_width(1, 10)?;
+//!     worksheet.set_column_width(2, 10)?;
+//!
+//!     //
+//!     // Create a new Column chart. This will be the primary chart.
+//!     //
+//!     let mut column_chart = Chart::new(ChartType::Column);
+//!
+//!     // Configure a series on the primary axis.
+//!     column_chart
+//!         .add_series()
+//!         .set_categories("Sheet1!$A$2:$A$7")
+//!         .set_values("Sheet1!$B$2:$B$7");
+//!
+//!     // Add a chart title.
+//!     column_chart.title().set_name("Reasons for lateness");
+//!
+//!     // Turn off the chart legend.
+//!     column_chart.legend().set_hidden();
+//!
+//!     // Set the  name and scale of the Y axes. Note, the secondary axis is set
+//!     // from the primary chart.
+//!     column_chart
+//!         .y_axis()
+//!         .set_name("Respondents (number)")
+//!         .set_min(0)
+//!         .set_max(120);
+//!
+//!     column_chart.y2_axis().set_max(1);
+//!
+//!     //
+//!     // Create a new Line chart. This will be the secondary chart.
+//!     //
+//!     let mut line_chart = Chart::new(ChartType::Line);
+//!
+//!     // Add a series on the secondary axis.
+//!     line_chart
+//!         .add_series()
+//!         .set_categories("Sheet1!$A$2:$A$7")
+//!         .set_values("Sheet1!$C$2:$C$7")
+//!         .set_y2_axis(true);
+//!
+//!     // Combine the charts.
+//!     column_chart.combine(&line_chart);
+//!
+//!     // Add the chart to the worksheet.
+//!     worksheet.insert_chart(1, 5, &column_chart)?;
+//!
+//!     workbook.save("chart_pareto.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Chart from the output file:
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/app_chart_pareto.png">
+//!
+//! The examples above use the concept of a *primary* and *secondary* chart. The
+//! primary chart is the chart that defines the primary X and Y axis. It is also
+//! used for setting all chart properties apart from the secondary data series.
+//! For instance the chart title and axes properties should be set via the
+//! primary chart.
+//!
+//! There are some limitations in the `rust_xlsxwriter` implementation of
+//! combined charts:
+//!
+//! - Only two charts can be combined.
+//! - Scatter charts cannot currently be used as a primary chart but they can be
+//!   used as a secondary chart.
+//! - Bar charts can only combine secondary charts on a secondary axis. This is
+//!   an Excel limitation.
 //!
 //!
 //! ## Future work
 //!
 //! Future additions to chart support in `rust_xlsxwriter` include:
 //!
-//! - Combined charts to allow x2/y2 axes.
 //! - Chartsheets - Worksheets that only display a chart.
 //! - Some chart element layout options.
 //!
-//! See the [Chart Roadmap] on the `rust_xlsxwriter` GitHub for more information.
+//! See the [Chart Roadmap] on the `rust_xlsxwriter` GitHub for more
+//! information.
 //!
 //! [Chart Roadmap]: https://github.com/jmcnamara/rust_xlsxwriter/issues/19
 //!
@@ -1098,9 +1396,152 @@ impl Chart {
         &mut self.legend
     }
 
-    /// Create a combination chart with a secondary chart.
+    /// Create a combined chart from two different chart types.
     ///
-    /// TODO explain chart `combine()`.
+    /// In Excel is also possible to combine two different chart types, for
+    /// example a column and line chart to create a Pareto chart. In
+    /// `rust_xlsxwriter` you can replicate this by creating a new chart
+    /// instance as the primary chart and then create a secondary chart of a
+    /// different type and combine it with the primary chart using the
+    /// `Chart::combine()` method.
+    ///
+    /// The combined secondary chart can share the same Y axis as the primary
+    /// chart or it can use a secondary Y2 axis. An example of each is shown
+    /// below.
+    ///
+    /// See [Combined Charts](crate::chart#combined-charts) for additional
+    /// information on combined charts and also some limitations.
+    ///
+    /// # Parameters
+    ///
+    /// * `chart` - The [`Chart`] to insert into the cell.
+    ///
+    /// # Examples
+    ///
+    /// An example of creating a combined Column and Line chart. In this example
+    /// they share the same primary Y axis.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_combine1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add the worksheet data that the charts will refer to.
+    /// #     let data = [
+    /// #         [2, 3, 4, 5, 6, 7],
+    /// #         [10, 40, 50, 20, 10, 50],
+    /// #         [30, 60, 70, 50, 40, 30],
+    /// #     ];
+    /// #     worksheet.write_column_matrix(0, 0, data)?;
+    /// #
+    ///     // Create a new Column chart. This will be the primary chart.
+    ///     let mut column_chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Configure the data series for the primary chart.
+    ///     column_chart
+    ///         .add_series()
+    ///         .set_categories("Sheet1!$A$1:$A$6")
+    ///         .set_values("Sheet1!$B$1:$B$6");
+    ///
+    ///     // Create a new line chart. This will use this as the secondary chart.
+    ///     let mut line_chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Configure the data series for the secondary chart.
+    ///     line_chart
+    ///         .add_series()
+    ///         .set_categories("Sheet1!$A$1:$A$6")
+    ///         .set_values("Sheet1!$C$1:$C$6");
+    ///
+    ///     // Combine the charts.
+    ///     column_chart.combine(&line_chart);
+    ///
+    ///     // Add some axis labels. Note, this is done via the primary chart.
+    ///     column_chart.x_axis().set_name("X axis");
+    ///     column_chart.y_axis().set_name("Y axis");
+    ///
+    ///     // Add the primary chart to the worksheet.
+    ///     worksheet.insert_chart_with_offset(0, 3, &column_chart, 5, 5)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_combine1.png">
+    ///
+    ///
+    /// An example of creating a combined Column and Line chart. In this example
+    /// the Column values are on the primary Y axis and the Line chart values
+    /// are on the secondary Y2 axis.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_combine2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add the worksheet data that the charts will refer to.
+    /// #     let data = [
+    /// #         [2, 3, 4, 5, 6, 7],
+    /// #         [10, 40, 50, 20, 10, 50],
+    /// #         [30, 60, 70, 50, 40, 30],
+    /// #     ];
+    /// #     worksheet.write_column_matrix(0, 0, data)?;
+    /// #
+    /// #     // Create a new Column chart. This will be the primary chart.
+    ///     let mut column_chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Configure the data series for the primary chart.
+    ///     column_chart
+    ///         .add_series()
+    ///         .set_categories("Sheet1!$A$1:$A$6")
+    ///         .set_values("Sheet1!$B$1:$B$6");
+    ///
+    ///     // Create a new line chart. This will use this as the secondary chart.
+    ///     let mut line_chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Configure the data series for the secondary chart. This series is also
+    ///     // assigned to the secondary Y2 axis.
+    ///     line_chart
+    ///         .add_series()
+    ///         .set_categories("Sheet1!$A$1:$A$6")
+    ///         .set_values("Sheet1!$C$1:$C$6")
+    ///         .set_y2_axis(true);
+    ///
+    ///     // Combine the charts.
+    ///     column_chart.combine(&line_chart);
+    ///
+    ///     // Add some axis labels. Note, this is done via the primary chart.
+    ///     column_chart.x_axis().set_name("X axis");
+    ///     column_chart.y_axis().set_name("Y axis");
+    ///
+    ///     // The y2 axis properties are set also via the primary chart.
+    ///     column_chart.y2_axis().set_name("Y2 axis");
+    ///
+    ///     // Add the primary chart to the worksheet.
+    ///     worksheet.insert_chart_with_offset(0, 3, &column_chart, 5, 5)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_combine2.png">
     ///
     ///
     pub fn combine(&mut self, chart: &Chart) -> &mut Chart {
@@ -2384,7 +2825,8 @@ impl Chart {
         deleted_entries
     }
 
-    // todo
+    // Check if the primary chart or optional combined chart have a secondary
+    // data series.
     fn check_for_secondary_axis(&mut self) {
         if let Some(combined_chart) = &self.combined_chart {
             for series in &combined_chart.series {
@@ -3071,7 +3513,7 @@ impl Chart {
             }
         }
 
-        // TODO
+        // Handle any secondary axes due to secondary data series.
         self.check_for_secondary_axis();
         if self.has_secondary_axis {
             let mut x_axis = self.x2_axis.clone();
@@ -6419,7 +6861,67 @@ impl ChartSeries {
         self
     }
 
-    /// TODO set y2 axis
+    /// Plot the chart series on a secondary Y axis.
+    ///
+    /// It is possible to add a secondary axis of the same type to a chart by
+    /// setting the `y2_axis` property of the series. See [Chart Secondary
+    /// Axes](crate::chart#secondary-axes)
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting a secondary Y axis.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_series_set_y2_axis.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add the worksheet data that the charts will refer to.
+    /// #     worksheet.write_column(0, 0, [2, 3, 4, 5, 6, 7])?;
+    /// #     worksheet.write_column(0, 1, [10, 40, 50, 20, 10, 50])?;
+    /// #
+    /// #     // Create a new line chart.
+    ///     let mut chart = Chart::new(ChartType::Line);
+    ///
+    ///     // Configure a series that defaults to the primary axis.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///     // Configure another series with a secondary axis.
+    ///     chart
+    ///         .add_series()
+    ///         .set_values("Sheet1!$B$1:$B$6")
+    ///         .set_y2_axis(true);
+    ///
+    ///     // Add some axis labels.
+    ///     chart.y_axis().set_name("Y axis");
+    ///     chart.y2_axis().set_name("Y2 axis");
+    ///
+    ///     // Move the legend to the bottom for clarity.
+    ///     chart.legend().set_position(ChartLegendPosition::Bottom);
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart_with_offset(0, 2, &chart, 5, 5)?;
+    ///
+    ///     workbook.save("chart.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_y2_axis.png">
+    ///
     pub fn set_y2_axis(&mut self, enable: bool) -> &mut ChartSeries {
         self.y2_axis = enable;
         self
@@ -14912,7 +15414,11 @@ impl ChartFont {
         self
     }
 
-    /// TODO Hide. Test only.
+    #[doc(hidden)]
+    /// Set the default bold property for the font.
+    ///
+    /// The is mainly only required for testing to ensure strict compliance with
+    /// Excel's output.
     pub fn set_default_bold(&mut self, enable: bool) -> &mut ChartFont {
         self.has_default_bold = enable;
         self

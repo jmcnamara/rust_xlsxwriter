@@ -4935,7 +4935,7 @@ impl Worksheet {
     ///
     /// * `row` - The zero indexed row number.
     /// * `col` - The zero indexed column number.
-    /// * `image` - The [`Image`] to insert into the cell.
+    /// * `chart` - The [`Chart`] to insert into the cell.
     ///
     /// # Errors
     ///

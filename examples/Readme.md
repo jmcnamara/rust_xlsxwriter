@@ -33,6 +33,9 @@ documentation and generally show how an individual function works.
 * `app_chart_column.rs` - An example of creating column charts using the
   rust_xlsxwriter library.
 
+* `app_chart_combined.rs` - An example of creating combined charts using
+  the rust_xlsxwriter library.
+
 * `app_chart_data_table.rs` - An example of creating Excel Column charts
   with data tables using the rust_xlsxwriter library.
 
@@ -48,6 +51,9 @@ documentation and generally show how an individual function works.
 * `app_chart_line.rs` - An example of creating line charts using the
   rust_xlsxwriter library.
 
+* `app_chart_pareto.rs` - An example of creating a Pareto chart using the
+  rust_xlsxwriter library.
+
 * `app_chart_pattern.rs` - An example of creating column charts with fill
   patterns using the rust_xlsxwriter library.
 
@@ -59,6 +65,9 @@ documentation and generally show how an individual function works.
 
 * `app_chart_scatter.rs` - An example of creating scatter charts using the
   rust_xlsxwriter library.
+
+* `app_chart_secondary_axis.rs` - An example of creating an Excel Line
+  chart with a secondary axis using the rust_xlsxwriter library.
 
 * `app_chart_stock.rs` - An example of creating Stock charts using the
   rust_xlsxwriter library. Note, Volume variants of the Excel stock charts
@@ -285,6 +294,13 @@ documentation and generally show how an individual function works.
 * `doc_chart_border_formatting.rs` - An example of formatting the border in
   a chart element.
 
+* `doc_chart_combine1.rs` - An example of creating a combined Column and
+  Line chart. In this example they share the same primary Y axis.
+
+* `doc_chart_combine2.rs` - An example of creating a combined Column and
+  Line chart. In this example the Column values are on the primary Y axis
+  and the Line chart values are on the secondary Y2 axis.
+
 * `doc_chart_data_labels.rs` - An example of adding data labels to a chart
   series.
 
@@ -439,6 +455,9 @@ documentation and generally show how an individual function works.
 
 * `doc_chart_series_set_values.rs` - A chart example demonstrating setting
   the chart series values.
+
+* `doc_chart_series_set_y2_axis.rs` - A chart example demonstrating setting
+  a secondary Y axis.
 
 * `doc_chart_set_chart_area_format.rs` - An example of formatting the chart
   "area" of a chart. In Excel the chart area is the background area behind
