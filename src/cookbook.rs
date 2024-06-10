@@ -62,7 +62,7 @@ cargo run --example app_demo  # or any other example
 # Hello World: Simple getting started example
 
 Program to create a simple Hello World style Excel spreadsheet using the
-`rust_xlsxwriter`library.
+`rust_xlsxwriter` library.
 
 **Image of the output file:**
 
@@ -174,7 +174,7 @@ fn main() -> Result<(), XlsxError> {
 # Cell formatting: Demonstrates various formatting options
 
 An example of the various cell formatting options that are available in the
-`rust_xlsxwriter`library. These are laid out on worksheets that correspond to the
+`rust_xlsxwriter` library. These are laid out on worksheets that correspond to the
 sections of the Excel "Format Cells" dialog.
 
 **Image of the output file:**
@@ -578,9 +578,9 @@ fn main() -> Result<(), XlsxError> {
 # Merging cells: An example of merging cell ranges
 
 This is an example of creating merged cells ranges in Excel using
-[`worksheet.merge_range()`].
+[`Worksheet::merge_range()`].
 
-[`worksheet.merge_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet::merge_range
+[`Worksheet::merge_range()`]: crate::Worksheet::merge_range
 
 The `merge_range()` method only handles strings but it can be used to merge
 other data types, such as number, as shown below.
@@ -639,7 +639,7 @@ fn main() -> Result<(), XlsxError> {
 
 # Autofilters: Add an autofilter to a worksheet
 
-An example of how to create autofilters with the `rust_xlsxwriter`library..
+An example of how to create autofilters with the `rust_xlsxwriter` library.
 
 An autofilter is a way of adding drop down lists to the headers of a 2D range of
 worksheet data. This allows users to filter the data based on simple criteria so
@@ -912,13 +912,13 @@ shown in the ribbon bar.
 
 <img src="https://rustxlsxwriter.github.io/images/table_intro.png">
 
-A table is added to a worksheet via the [`worksheet.add_table()`]method. The
+A table is added to a worksheet via the [`Worksheet::add_table()`]method. The
 headers and total row of a table should be configured via a [`Table`] struct but
-the table data can be added via standard [`worksheet.write()`]methods.
+the table data can be added via standard [`Worksheet::write()`]methods.
 
 [`Table`]: crate::Table
-[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet::write
-[`worksheet.add_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet::add_table
+[`Worksheet::write()`]: crate::Worksheet::write
+[`Worksheet::add_table()`]: crate::Worksheet::add_table
 
 ## Some examples:
 
@@ -3939,8 +3939,8 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-[`ChartSeries::set_y2_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries::set_y2_axis
-[`ChartSeries::set_x2_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries::set_x2_axis
+[`ChartSeries::set_y2_axis()`]: crate::ChartSeries::set_y2_axis
+[`ChartSeries::set_x2_axis()`]: crate::ChartSeries::set_y2_axis
 
 
 
@@ -4260,8 +4260,8 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-[`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart_struct.ChartFormat
-[`ChartPatternFill`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart_struct.ChartPatternFill
+[`ChartFormat`]: crate::ChartFormat
+[`ChartPatternFill`]: crate::ChartPatternFill
 
 
 # Chart: Gradient Fill: Example of a chart with Gradient Fill
@@ -4359,8 +4359,8 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-[`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartFormat
-[`ChartGradientFill`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart_struct.ChartGradientFill
+[`ChartFormat`]: crate::ChartFormat
+[`ChartGradientFill`]: crate::ChartGradientFill
 
 
 # Chart: Styles: Example of setting default chart styles
@@ -5204,7 +5204,7 @@ fn main() -> Result<(), XlsxError> {
 
 # Extending generic `write()` to handle user data types
 
-Example of how to extend the the `rust_xlsxwriter`[`worksheet.write()`] method using the
+Example of how to extend the the `rust_xlsxwriter`[`Worksheet::write()`] method using the
 [`IntoExcelData`] trait to handle arbitrary user data that can be mapped to one
 of the main Excel data types.
 
@@ -5217,7 +5217,7 @@ this is for demonstration purposes only. The [`ExcelDateTime`] struct in
 [Unix Time]: https://en.wikipedia.org/wiki/Unix_time
 [`IntoExcelData`]: crate::IntoExcelData
 [`ExcelDateTime`]: crate::ExcelDateTime
-[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet::write
+[`Worksheet::write()`]: crate::Worksheet::write
 
 **Image of the output file:**
 
@@ -5425,7 +5425,7 @@ fn main() -> Result<(), XlsxError> {
 # Setting document properties Set the metadata properties for a workbook
 
 An example of setting workbook document properties for a file created using the
-`rust_xlsxwriter`library.
+`rust_xlsxwriter` library.
 
 **Image of the output file:**
 
@@ -5610,7 +5610,7 @@ fn main() -> Result<(), XlsxError> {
 # Hyperlinks: Add hyperlinks to a worksheet
 
 This is an example of a program to create demonstrate creating links in a
-worksheet using the `rust_xlsxwriter`library.
+worksheet using the `rust_xlsxwriter` library.
 
 The links can be to external urls, to external files or internally to cells in
 the workbook.
