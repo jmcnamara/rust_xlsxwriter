@@ -45,7 +45,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .add_series()
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 2, 4, 2))
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     chart1.combine(&chart2);
     worksheet.insert_chart(8, 4, &chart1)?;

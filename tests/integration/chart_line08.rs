@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartAxisLabelPosition, ChartType, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -15,14 +15,14 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Add some test data for the chart(s).
-    worksheet.write_column(0, 0, [27, 33, 44, 12, 1])?;
-    worksheet.write_column(0, 1, [6, 8, 6, 4, 2])?;
-    worksheet.write_column(0, 2, [20, 10, 30, 50, 40])?;
-    worksheet.write_column(0, 3, [0, 27, 23, 30, 40])?;
+    worksheet.write_column(0, 0, [1, 2, 3, 4, 5])?;
+    worksheet.write_column(0, 1, [10, 40, 50, 20, 10])?;
+    worksheet.write_column(0, 2, [1, 2, 3, 4, 5, 6, 7])?;
+    worksheet.write_column(0, 3, [30, 10, 20, 40, 30, 10, 20])?;
 
-    let mut chart = Chart::new(ChartType::Scatter);
-    chart.set_axis_ids(63597952, 63616128);
-    chart.set_axis2_ids(63617664, 63619456);
+    let mut chart = Chart::new(ChartType::Line);
+    chart.set_axis_ids(77034624, 77036544);
+    chart.set_axis2_ids(95388032, 103040896);
 
     chart
         .add_series()
@@ -31,9 +31,18 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     chart
         .add_series()
-        .set_categories(("Sheet1", 0, 2, 4, 2))
-        .set_values(("Sheet1", 0, 3, 4, 3))
+        .set_categories(("Sheet1", 0, 2, 6, 2))
+        .set_values(("Sheet1", 0, 3, 6, 3))
         .set_secondary_axis(true);
+
+    chart
+        .x2_axis()
+        .set_label_position(ChartAxisLabelPosition::NextTo)
+        .set_hidden(false);
+
+    chart
+        .y2_axis()
+        .set_crossing(rust_xlsxwriter::ChartAxisCrossing::Max);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -43,11 +52,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_scatter07() {
+fn test_chart_line08() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_scatter07")
+        .set_name("chart_line08")
         .set_function(create_new_xlsx_file)
-        .ignore_elements("xl/workbook.xml", "<fileVersion")
         .initialize();
 
     test_runner.assert_eq();

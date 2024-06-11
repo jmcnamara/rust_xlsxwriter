@@ -26,7 +26,7 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_name("Sheet1!$A$1")
         .set_values("Sheet1!$A$2:$A$7")
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     // Configure another series that defaults to the primary axis.
     chart

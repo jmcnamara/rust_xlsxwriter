@@ -3881,8 +3881,8 @@ fn main() -> Result<(), XlsxError> {
 
 
 Example of creating an Excel Line chart with a secondary axis by setting the
-[`ChartSeries::set_y2_axis()`] or [`ChartSeries::set_x2_axis()`] property for
-one of more series in the chart.
+[`ChartSeries::set_secondary_axis()`] property for one of more series in the
+chart.
 
 **Image of the output file:**
 
@@ -3915,7 +3915,7 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_name("Sheet1!$A$1")
         .set_values("Sheet1!$A$2:$A$7")
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     // Configure another series that defaults to the primary axis.
     chart
@@ -3939,8 +3939,7 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-[`ChartSeries::set_y2_axis()`]: crate::ChartSeries::set_y2_axis
-[`ChartSeries::set_x2_axis()`]: crate::ChartSeries::set_y2_axis
+[`ChartSeries::set_secondary_axis()`]: crate::ChartSeries::set_secondary_axis
 
 
 
@@ -4043,7 +4042,7 @@ fn main() -> Result<(), XlsxError> {
         .set_name("Sheet1!$C$1")
         .set_categories("Sheet1!$A$2:$A$7")
         .set_values("Sheet1!$C$2:$C$7")
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     // Combine the charts.
     column_chart.combine(&line_chart);
@@ -4162,7 +4161,7 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_categories("Sheet1!$A$2:$A$7")
         .set_values("Sheet1!$C$2:$C$7")
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     // Combine the charts.
     column_chart.combine(&line_chart);

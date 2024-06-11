@@ -365,10 +365,10 @@
 //! ## Secondary Axes
 //!
 //! It is possible to add a secondary axis of the same type to a chart by
-//! setting the [`ChartSeries::set_y2_axis()`] property of the series:
+//! setting the [`ChartSeries::set_secondary_axis()`] property of the series:
 //!
 //! ```
-//! # // This code is available in examples/doc_chart_series_set_y2_axis.rs
+//! # // This code is available in examples/doc_chart_series_set_secondary_axis.rs
 //! #
 //! # use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
 //! #
@@ -390,7 +390,7 @@
 //!     chart
 //!         .add_series()
 //!         .set_values("Sheet1!$B$1:$B$6")
-//!         .set_y2_axis(true);
+//!         .set_secondary_axis(true);
 //!
 //!     // Add some axis labels.
 //!     chart.y_axis().set_name("Y axis");
@@ -411,7 +411,7 @@
 //! Output file:
 //!
 //! <img
-//! src="https://rustxlsxwriter.github.io/images/chart_series_set_y2_axis.png">
+//! src="https://rustxlsxwriter.github.io/images/chart_series_set_secondary_axis.png">
 //!
 //! It is also possible to have a secondary, combined, chart either with a
 //! shared or secondary axis, see below.
@@ -525,7 +525,7 @@
 //!         .add_series()
 //!         .set_categories("Sheet1!$A$1:$A$6")
 //!         .set_values("Sheet1!$C$1:$C$6")
-//!         .set_y2_axis(true);
+//!         .set_secondary_axis(true);
 //!
 //!     // Combine the charts.
 //!     column_chart.combine(&line_chart);
@@ -629,7 +629,7 @@
 //!         .add_series()
 //!         .set_categories("Sheet1!$A$2:$A$7")
 //!         .set_values("Sheet1!$C$2:$C$7")
-//!         .set_y2_axis(true);
+//!         .set_secondary_axis(true);
 //!
 //!     // Combine the charts.
 //!     column_chart.combine(&line_chart);
@@ -1517,7 +1517,7 @@ impl Chart {
     ///         .add_series()
     ///         .set_categories("Sheet1!$A$1:$A$6")
     ///         .set_values("Sheet1!$C$1:$C$6")
-    ///         .set_y2_axis(true);
+    ///         .set_secondary_axis(true);
     ///
     ///     // Combine the charts.
     ///     column_chart.combine(&line_chart);
@@ -2830,14 +2830,14 @@ impl Chart {
     fn check_for_secondary_axis(&mut self) {
         if let Some(combined_chart) = &self.combined_chart {
             for series in &combined_chart.series {
-                if series.y2_axis {
+                if series.secondary_axis {
                     self.has_secondary_axis = true;
                 }
             }
         }
 
         for series in &self.series {
-            if series.y2_axis {
+            if series.secondary_axis {
                 self.has_secondary_axis = true;
                 return;
             }
@@ -3663,7 +3663,7 @@ impl Chart {
         let mut series_copy = vec![];
 
         for each_series in &self.series {
-            if each_series.y2_axis != primary_axis {
+            if each_series.secondary_axis != primary_axis {
                 series_copy.push(each_series.clone());
             }
         }
@@ -6578,7 +6578,7 @@ pub struct ChartSeries {
     pub(crate) y_error_bars: Option<ChartErrorBars>,
     pub(crate) delete_from_legend: bool,
     pub(crate) smooth: Option<bool>,
-    pub(crate) y2_axis: bool,
+    pub(crate) secondary_axis: bool,
 }
 
 #[allow(clippy::new_without_default)]
@@ -6694,7 +6694,7 @@ impl ChartSeries {
             y_error_bars: None,
             delete_from_legend: false,
             smooth: None,
-            y2_axis: false,
+            secondary_axis: false,
         }
     }
 
@@ -6861,10 +6861,10 @@ impl ChartSeries {
         self
     }
 
-    /// Plot the chart series on a secondary Y axis.
+    /// Plot the chart series on the secondary axis.
     ///
     /// It is possible to add a secondary axis of the same type to a chart by
-    /// setting the `y2_axis` property of the series. See [Chart Secondary
+    /// setting the `secondary_axis` property of the series. See [Chart Secondary
     /// Axes](crate::chart#secondary-axes)
     ///
     ///
@@ -6877,7 +6877,7 @@ impl ChartSeries {
     /// A chart example demonstrating setting a secondary Y axis.
     ///
     /// ```
-    /// # // This code is available in examples/doc_chart_series_set_y2_axis.rs
+    /// # // This code is available in examples/doc_chart_series_set_secondary_axis.rs
     /// #
     /// # use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
     /// #
@@ -6899,7 +6899,7 @@ impl ChartSeries {
     ///     chart
     ///         .add_series()
     ///         .set_values("Sheet1!$B$1:$B$6")
-    ///         .set_y2_axis(true);
+    ///         .set_secondary_axis(true);
     ///
     ///     // Add some axis labels.
     ///     chart.y_axis().set_name("Y axis");
@@ -6920,10 +6920,10 @@ impl ChartSeries {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_y2_axis.png">
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_secondary_axis.png">
     ///
-    pub fn set_y2_axis(&mut self, enable: bool) -> &mut ChartSeries {
-        self.y2_axis = enable;
+    pub fn set_secondary_axis(&mut self, enable: bool) -> &mut ChartSeries {
+        self.secondary_axis = enable;
         self
     }
 

@@ -456,7 +456,7 @@ documentation and generally show how an individual function works.
 * `doc_chart_series_set_values.rs` - A chart example demonstrating setting
   the chart series values.
 
-* `doc_chart_series_set_y2_axis.rs` - A chart example demonstrating setting
+* `doc_chart_series_set_secondary_axis.rs` - A chart example demonstrating setting
   a secondary Y axis.
 
 * `doc_chart_set_chart_area_format.rs` - An example of formatting the chart

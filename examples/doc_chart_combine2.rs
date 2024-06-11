@@ -37,7 +37,7 @@ fn main() -> Result<(), XlsxError> {
         .add_series()
         .set_categories("Sheet1!$A$1:$A$6")
         .set_values("Sheet1!$C$1:$C$6")
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     // Combine the charts.
     column_chart.combine(&line_chart);

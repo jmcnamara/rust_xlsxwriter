@@ -33,7 +33,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_values(("Sheet1", 0, 1, 4, 1))
         .set_overlap(-27)
         .set_gap(251)
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     chart
         .y2_axis()

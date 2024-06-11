@@ -27,7 +27,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values(("Sheet1", 0, 1, 4, 1))
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     worksheet.insert_chart(8, 4, &chart)?;
 

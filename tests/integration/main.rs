@@ -391,6 +391,8 @@ mod chart_line03;
 mod chart_line04;
 mod chart_line05;
 mod chart_line06;
+mod chart_line07;
+mod chart_line08;
 mod chart_name01;
 mod chart_name02;
 mod chart_name03;

@@ -24,7 +24,7 @@ fn main() -> Result<(), XlsxError> {
     chart
         .add_series()
         .set_values("Sheet1!$B$1:$B$6")
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     // Add some axis labels.
     chart.y_axis().set_name("Y axis");

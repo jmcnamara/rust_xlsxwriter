@@ -70,7 +70,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_type(ChartMarkerType::ShortDash)
                 .set_size(3),
         )
-        .set_y2_axis(true);
+        .set_secondary_axis(true);
 
     chart.set_high_low_lines(true);
 
