@@ -5,6 +5,19 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.66.0] - 2023-06-12
+
+### Added
+
+  - Added example of using a secondary X axis. See [Chart Secondary Axes].
+
+### Changed
+
+  - Changed `ChartSeries::set_y2_axis()` to `ChartSeries::set_secondary_axis()` for API consistency.
+
+   [`ChartSeries::set_secondary_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartSeries.html#method.set_secondary_axis
+
+
 ## [0.65.0] - 2023-06-11
 
 ### Added

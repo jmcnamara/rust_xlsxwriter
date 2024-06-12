@@ -45,6 +45,14 @@ documentation and generally show how an individual function works.
 * `app_chart_doughnut.rs` - An example of creating doughnut charts using
   the rust_xlsxwriter library.
 
+* `app_chart_gauge.rs` - An example of creating a Gauge Chart in Excel
+  using the rust_xlsxwriter library. A Gauge Chart isn't a native chart
+  type in Excel. It is constructed by combining a doughnut chart and a pie
+  chart and by using some non-filled elements to hide parts of the default
+  charts. This example follows the following online example of how to
+  create a [Gauge Chart] in Excel. [Gauge Chart]:
+  https://www.excel-easy.com/examples/gauge-chart.html
+
 * `app_chart_gradient.rs` - An example of creating a chart with gradient
   fills using the rust_xlsxwriter library.
 
@@ -453,11 +461,16 @@ documentation and generally show how an individual function works.
   series gap and overlap. Note that it only needs to be applied to one of
   the series in the chart.
 
+* `doc_chart_series_set_secondary_axis.rs` - A chart example demonstrating
+  setting a secondary Y axis.
+
+* `doc_chart_series_set_secondary_axis2.rs` - A chart example demonstrating
+  using a secondary X and Y axis. The secondary X axis is only available
+  for chart series that have a category range that is different from the
+  primary category range.
+
 * `doc_chart_series_set_values.rs` - A chart example demonstrating setting
   the chart series values.
-
-* `doc_chart_series_set_secondary_axis.rs` - A chart example demonstrating setting
-  a secondary Y axis.
 
 * `doc_chart_set_chart_area_format.rs` - An example of formatting the chart
   "area" of a chart. In Excel the chart area is the background area behind

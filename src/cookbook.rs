@@ -46,17 +46,18 @@ cargo run --example app_demo  # or any other example
 31. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
 32. [Chart: Chart data table](#chart-chart-data-table)
 33. [Chart: Chart data tools](#chart-chart-data-tools)
-34. [Sparklines example](#sparklines-example)
-35. [Sparklines example with properties set](#sparklines-example-with-properties-set)
-36. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
-37. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-38. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-39. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-40. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-41. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-42. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-43. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-44. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+34. [Chart: Gauge Chart](#chart-gauge-chart)
+35. [Sparklines example](#sparklines-example)
+36. [Sparklines example with properties set](#sparklines-example-with-properties-set)
+37. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
+38. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+39. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+40. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+41. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+42. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+43. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+44. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+45. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -3942,6 +3943,83 @@ fn main() -> Result<(), XlsxError> {
 [`ChartSeries::set_secondary_axis()`]: crate::ChartSeries::set_secondary_axis
 
 
+In general secondary axes are used for displaying different Y values for the
+same category range. However it is also possible to display a secondary X axis
+for series that use a different category range. See the example below.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/chart_series_set_secondary_axis2.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/doc_chart_series_set_secondary_axis2.rs
+
+use rust_xlsxwriter::{
+    Chart, ChartAxisCrossing, ChartAxisLabelPosition, ChartLegendPosition, ChartType, Workbook,
+    XlsxError,
+};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Add the worksheet data that the charts will refer to.
+    worksheet.write_column(0, 0, [1, 2, 3, 4, 5])?;
+    worksheet.write_column(0, 1, [10, 40, 50, 20, 10])?;
+    worksheet.write_column(0, 2, [1, 2, 3, 4, 5, 6, 7])?;
+    worksheet.write_column(0, 3, [30, 10, 20, 40, 30, 10, 20])?;
+
+    // Create a new line chart.
+    let mut chart = Chart::new(ChartType::Line);
+
+    // Configure a series that defaults to the primary axis.
+    chart
+        .add_series()
+        .set_categories(("Sheet1", 0, 0, 4, 0))
+        .set_values(("Sheet1", 0, 1, 4, 1));
+
+    // Configure another series with a secondary axis. Note that the category
+    // range is different to the primary axes series.
+    chart
+        .add_series()
+        .set_categories(("Sheet1", 0, 2, 6, 2))
+        .set_values(("Sheet1", 0, 3, 6, 3))
+        .set_secondary_axis(true);
+
+    // Make the secondary X axis visible (it is hidden by default) and also
+    // position the labels so they are next to the axis and therefore visible.
+    chart
+        .x2_axis()
+        .set_hidden(false)
+        .set_label_position(ChartAxisLabelPosition::NextTo);
+
+    // Set the X2 axis to cross the Y2 axis at the max value so it appears at
+    // the top of the chart.
+    chart.y2_axis().set_crossing(ChartAxisCrossing::Max);
+
+    // Add some axis labels.
+    chart.x_axis().set_name("X axis");
+    chart.y_axis().set_name("Y axis");
+    chart.x2_axis().set_name("X2 axis");
+    chart.y2_axis().set_name("Y2 axis");
+
+    // Move the legend to the bottom for clarity.
+    chart.legend().set_position(ChartLegendPosition::Bottom);
+
+    // Add the chart to the worksheet.
+    worksheet.insert_chart_with_offset(0, 4, &chart, 5, 5)?;
+
+    workbook.save("chart.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+
 
 # Chart: Create a combined chart
 
@@ -4776,6 +4854,109 @@ fn main() -> Result<(), XlsxError> {
     Ok(())
 }
 ```
+
+
+# Chart: Gauge Chart
+
+
+A Gauge Chart isn't a native chart type in Excel. It is constructed by combining
+a doughnut chart and a pie chart and by using some non-filled elements to hide
+parts of the default charts. This example follows the following online example
+of how to create a [Gauge Chart] in Excel.
+
+[Gauge Chart]: https://www.excel-easy.com/examples/gauge-chart.html
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_chart_gauge.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_chart_gauge.rs
+
+use rust_xlsxwriter::{
+    Chart, ChartFormat, ChartPoint, ChartSolidFill, ChartType, Workbook, XlsxError,
+};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    // Add some data for the Doughnut and Pie charts. This is set up so the
+    // gauge goes from 0-100. It is initially set at 75%.
+    worksheet.write(1, 7, "Donut")?;
+    worksheet.write(1, 8, "Pie")?;
+    worksheet.write_column(2, 7, [25, 50, 25, 100])?;
+    worksheet.write_column(2, 8, [75, 1, 124])?;
+
+    // Configure the doughnut chart as the background for the gauge. We add some
+    // custom colors for the Red-Orange-Green of the dial and one non-filled segment.
+    let mut chart_doughnut = Chart::new(ChartType::Doughnut);
+
+    let points = vec![
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
+        ),
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFC000")),
+        ),
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#00B050")),
+        ),
+        ChartPoint::new().set_format(ChartFormat::new().set_no_fill()),
+    ];
+
+    // Add the chart series.
+    chart_doughnut
+        .add_series()
+        .set_values(("Sheet1", 2, 7, 5, 7))
+        .set_name(("Sheet1", 1, 7))
+        .set_points(&points);
+
+    // Turn off the chart legend.
+    chart_doughnut.legend().set_hidden();
+
+    // Rotate chart so the gauge parts are above the horizontal.
+    chart_doughnut.set_rotation(270);
+
+    // Turn off the chart fill and border.
+    chart_doughnut.set_chart_area_format(ChartFormat::new().set_no_fill().set_no_border());
+
+    // Configure a pie chart as the needle for the gauge.
+    let mut chart_pie = Chart::new(ChartType::Pie);
+    let points = vec![
+        ChartPoint::new().set_format(ChartFormat::new().set_no_fill()),
+        ChartPoint::new().set_format(
+            ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
+        ),
+        ChartPoint::new().set_format(ChartFormat::new().set_no_fill()),
+    ];
+
+    // Add the chart series.
+    chart_pie
+        .add_series()
+        .set_values(("Sheet1", 2, 8, 5, 8))
+        .set_name(("Sheet1", 1, 8))
+        .set_points(&points);
+
+    // Rotate the pie chart/needle to align with the doughnut/gauge.
+    chart_pie.set_rotation(270);
+
+    // Combine the pie and doughnut charts.
+    chart_doughnut.combine(&chart_pie);
+
+    // Insert the chart into the worksheet.
+    worksheet.insert_chart(0, 0, &chart_doughnut)?;
+
+    workbook.save("chart_gauge.xlsx")?;
+
+    Ok(())
+}
+```
+
 
 
 # Sparklines example
