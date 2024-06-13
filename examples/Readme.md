@@ -180,6 +180,10 @@ documentation and generally show how an individual function works.
   left-to-right to right-to-left, as required by some middle eastern
   versions of Excel.
 
+* `app_sensitivity_label.rs` - An example adding a Sensitivity Label to an
+  Excel file using custom document properties. See the main docs for an
+  explanation of how to extract the metadata.
+
 * `app_serialize.rs` - Example of serializing Serde derived structs to an
   Excel worksheet using `rust_xlsxwriter`.
 

@@ -13668,6 +13668,15 @@ impl Worksheet {
     fn write_number_cell(&mut self, row: RowNum, col: ColNum, number: f64, xf_index: u32) {
         let col_name = Self::col_to_name(&mut self.col_names, col);
 
+        // Use the optional ryu crate to format f64 cell number data as a
+        // string. Note, the the slightly faster `format_finite()` buffer
+        // function is safe to use here since nan/inf numbers are filtered out
+        // at the `store_number()` level and written as strings.
+        #[cfg(feature = "ryu")]
+        let mut buffer = ryu::Buffer::new();
+        #[cfg(feature = "ryu")]
+        let number = buffer.format_finite(number);
+
         if xf_index > 0 {
             write!(
                 &mut self.writer.xmlfile,
