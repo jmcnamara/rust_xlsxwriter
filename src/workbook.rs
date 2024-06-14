@@ -1417,7 +1417,7 @@ impl Workbook {
         package_options = self.set_package_options(package_options)?;
 
         // Create the Packager object that will assemble the zip/xlsx file.
-        let mut packager = Packager::new(writer);
+        let packager = Packager::new(writer);
         packager.assemble_file(self, &package_options)?;
 
         Ok(())

@@ -46,7 +46,7 @@ use std::io::{Seek, Write};
 #[cfg(not(target_arch = "wasm32"))]
 use std::thread;
 
-use zip::write::FileOptions;
+use zip::write::SimpleFileOptions;
 use zip::{DateTime, ZipWriter};
 
 use crate::app::App;
@@ -72,8 +72,8 @@ use crate::{DocProperties, NUM_IMAGE_FORMATS};
 // Packager struct to assembler the xlsx file.
 pub struct Packager<W: Write + Seek> {
     zip: ZipWriter<W>,
-    zip_options: FileOptions,
-    zip_options_for_binary_files: FileOptions,
+    zip_options: SimpleFileOptions,
+    zip_options_for_binary_files: SimpleFileOptions,
 }
 
 impl<W: Write + Seek + Send> Packager<W> {
@@ -85,7 +85,7 @@ impl<W: Write + Seek + Send> Packager<W> {
     pub(crate) fn new(writer: W) -> Packager<W> {
         let zip = zip::ZipWriter::new(writer);
 
-        let zip_options = FileOptions::default()
+        let zip_options = SimpleFileOptions::default()
             .compression_method(zip::CompressionMethod::Deflated)
             .unix_permissions(0o600)
             .last_modified_time(DateTime::default())
@@ -103,7 +103,7 @@ impl<W: Write + Seek + Send> Packager<W> {
 
     // Write the xml files that make up the xlsx OPC package.
     pub(crate) fn assemble_file(
-        &mut self,
+        mut self,
         workbook: &mut Workbook,
         options: &PackagerOptions,
     ) -> Result<(), XlsxError> {
