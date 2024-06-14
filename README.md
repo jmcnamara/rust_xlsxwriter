@@ -120,6 +120,11 @@ frequently.
 - `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow compilation
   for wasm/JavaScript targets.
 
+- `ryu`: Adds a dependency on `ryu`. This speeds up writing numeric
+  worksheet cells for large data files. It gives a performance boost above
+  300,000 numeric cells and can be up to 30% faster than the default number
+  formatting for 5,000,000 numeric cells.
+
 ## Release notes
 
 Recent changes:
