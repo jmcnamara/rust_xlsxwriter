@@ -15,6 +15,13 @@ macro_rules! assert_result {
     };
 }
 
+macro_rules! static_regex {
+    ($re:literal) => {{
+        static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+        RE.get_or_init(|| regex::Regex::new($re).unwrap())
+    }};
+}
+
 #[cfg(test)]
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
@@ -302,42 +309,35 @@ fn compare_xlsx_files(
             exp_xml_string = exp_xml_string.replace("John", "");
 
             // Remove creation date from core.xml file.
-            lazy_static! {
-                static ref UTC_DATE: Regex =
-                    Regex::new(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z").unwrap();
-            }
-            exp_xml_string = UTC_DATE.replace_all(&exp_xml_string, "").to_string();
-            got_xml_string = UTC_DATE.replace_all(&got_xml_string, "").to_string();
+            let utc_date = static_regex!(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z");
+            exp_xml_string = utc_date.replace_all(&exp_xml_string, "").to_string();
+            got_xml_string = utc_date.replace_all(&got_xml_string, "").to_string();
         }
 
         // Remove workbookView dimensions which are almost always different and
         // calcPr which can have different Excel version ids.
         if filename == "xl/workbook.xml" {
-            lazy_static! {
-                static ref WORKBOOK_VIEW: Regex = Regex::new(r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#).unwrap();
-            }
-            exp_xml_string = WORKBOOK_VIEW
+            let workbook_view = static_regex!(
+                r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#
+            );
+            exp_xml_string = workbook_view
                 .replace(&exp_xml_string, "<workbookView")
                 .to_string();
-            got_xml_string = WORKBOOK_VIEW
+            got_xml_string = workbook_view
                 .replace(&got_xml_string, "<workbookView")
                 .to_string();
 
-            lazy_static! {
-                static ref CALC_PARA: Regex = Regex::new(r"<calcPr[^>]*>").unwrap();
-            }
-            exp_xml_string = CALC_PARA.replace(&exp_xml_string, "<calcPr/>").to_string();
-            got_xml_string = CALC_PARA.replace(&got_xml_string, "<calcPr/>").to_string();
+            let calc_para = static_regex!(r"<calcPr[^>]*>");
+            exp_xml_string = calc_para.replace(&exp_xml_string, "<calcPr/>").to_string();
+            got_xml_string = calc_para.replace(&got_xml_string, "<calcPr/>").to_string();
         }
 
         // The pageMargins element in chart files often contain values like
         // "0.75000000000000011" instead of "0.75". We simplify/round these to
         // make comparison easier.
         if filename.starts_with("xl/charts/chart") {
-            lazy_static! {
-                static ref DIGITS: Regex = Regex::new(r"000000000000\d+").unwrap();
-            }
-            exp_xml_string = DIGITS.replace_all(&exp_xml_string, "").to_string();
+            let digits = static_regex!(r"000000000000\d+");
+            exp_xml_string = digits.replace_all(&exp_xml_string, "").to_string();
         }
 
         // The option ryu crate adds a trailing ".0" at the end of integer
@@ -402,12 +402,10 @@ fn compare_xlsx_files(
 
 // Convert XML string/doc into a vector for comparison testing.
 fn xml_to_vec(xml_string: &str) -> Vec<String> {
-    lazy_static! {
-        static ref ELEMENT_DIVIDES: Regex = Regex::new(r">\s*<").unwrap();
-    }
+    let element_dividers = static_regex!(r">\s*<");
 
     let mut xml_elements: Vec<String> = Vec::new();
-    let tokens: Vec<&str> = ELEMENT_DIVIDES.split(xml_string).collect();
+    let tokens: Vec<&str> = element_dividers.split(xml_string).collect();
 
     for token in &tokens {
         let mut element = token.trim().to_string();
@@ -429,12 +427,10 @@ fn xml_to_vec(xml_string: &str) -> Vec<String> {
 // Convert VML string/doc into a vector for comparison testing. Excel VML tends
 // to be less structured than other XML so it needs more massaging.
 pub(crate) fn vml_to_vec(vml_string: &str) -> Vec<String> {
-    lazy_static! {
-        static ref WHITESPACE: Regex = Regex::new(r"\s+").unwrap();
-    }
+    let whitespace = static_regex!(r"\s+");
 
     let mut vml_string = vml_string.replace(['\r', '\n'], "");
-    vml_string = WHITESPACE.replace_all(&vml_string, " ").into();
+    vml_string = whitespace.replace_all(&vml_string, " ").into();
 
     vml_string = vml_string
         .replace("; ", ";")

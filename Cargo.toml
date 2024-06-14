@@ -15,7 +15,6 @@ rust-version = "1.73.0" # For zip.rs compatibility.
 chrono = {version = "0.4.31", default-features = false, features = ["clock", "wasmbind", "serde"], optional = true}
 zip = {version = "2.1.3 ", default-features = false, features = ["deflate"]}
 regex = "1.7.3"
-lazy_static = "1.4.0"
 polars= {version = "0.38.3", default-features = false, features = [], optional = true}
 js-sys = {version = "0.3.64", optional = true}
 wasm-bindgen = {version = "0.2.87", optional = true}

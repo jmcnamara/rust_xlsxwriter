@@ -1057,8 +1057,6 @@ use std::sync::Arc;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-use regex::Regex;
-
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -1077,10 +1075,10 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    utility, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType, Color,
-    ConditionalFormat, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
-    HeaderImagePosition, Image, IntoColor, IntoExcelDateTime, ObjectMovement, ProtectionOptions,
-    Sparkline, SparklineType, Table, TableFunction, Url,
+    static_regex, utility, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType,
+    Color, ConditionalFormat, ExcelDateTime, FilterCondition, FilterCriteria, FilterData,
+    FilterDataType, HeaderImagePosition, Image, IntoColor, IntoExcelDateTime, ObjectMovement,
+    ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -12567,16 +12565,14 @@ impl Worksheet {
     // Check that there is a header/footer &[Picture] variable in the correct
     // position to match the corresponding image object.
     fn verify_header_footer_image(string: &str, position: &HeaderImagePosition) -> bool {
-        lazy_static! {
-            static ref LEFT: Regex = Regex::new(r"(&[L].*)(:?&[CR])?").unwrap();
-            static ref RIGHT: Regex = Regex::new(r"(&[R].*)(:?&[LC])?").unwrap();
-            static ref CENTER: Regex = Regex::new(r"(&[C].*)(:?&[LR])?").unwrap();
-        }
+        let left = static_regex!(r"(&[L].*)(:?&[CR])?");
+        let right = static_regex!(r"(&[R].*)(:?&[LC])?");
+        let center = static_regex!(r"(&[C].*)(:?&[LR])?");
 
         let caps = match position {
-            HeaderImagePosition::Left => LEFT.captures(string),
-            HeaderImagePosition::Right => RIGHT.captures(string),
-            HeaderImagePosition::Center => CENTER.captures(string),
+            HeaderImagePosition::Left => left.captures(string),
+            HeaderImagePosition::Right => right.captures(string),
+            HeaderImagePosition::Center => center.captures(string),
         };
 
         match caps {
@@ -15094,13 +15090,11 @@ impl Hyperlink {
     // This method handles a variety of different string processing that needs
     // to be done for links and targets associated with Excel hyperlinks.
     fn initialize(&mut self) {
-        lazy_static! {
-            static ref URL: Regex = Regex::new(r"^(ftp|http)s?://").unwrap();
-            static ref URL_ESCAPE: Regex = Regex::new(r"%[0-9a-fA-F]{2}").unwrap();
-            static ref REMOTE_FILE: Regex = Regex::new(r"^(\\\\|\w:)").unwrap();
-        }
+        let url_escape = static_regex!(r"%[0-9a-fA-F]{2}");
+        let remote_file = static_regex!(r"^(\\\\|\w:)");
+        let url_protocol = static_regex!(r"^(ftp|http)s?://");
 
-        if URL.is_match(&self.url) {
+        if url_protocol.is_match(&self.url) {
             // Handle web links like http://.
             self.link_type = HyperlinkType::Url;
 
@@ -15136,7 +15130,7 @@ impl Hyperlink {
             let bare_link = bare_link.replacen("file://", "", 1);
 
             // Links to local files aren't prefixed with file:///.
-            if !REMOTE_FILE.is_match(&bare_link) {
+            if !remote_file.is_match(&bare_link) {
                 self.url.clone_from(&bare_link);
             }
 
@@ -15153,7 +15147,7 @@ impl Hyperlink {
         }
 
         // Escape any url characters in the url string.
-        if !URL_ESCAPE.is_match(&self.url) {
+        if !url_escape.is_match(&self.url) {
             self.url = crate::xmlwriter::escape_url(&self.url).into();
         }
     }

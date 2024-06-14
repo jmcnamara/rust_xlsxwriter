@@ -8,7 +8,7 @@
 
 mod tests;
 
-use std::{collections::HashMap, fmt, hash::Hash};
+use std::{collections::HashMap, fmt, hash::Hash, sync::OnceLock};
 
 /// The `Format` struct is used to define cell formatting for data in a worksheet.
 ///
@@ -601,10 +601,10 @@ impl Format {
 
     // Check if the format is in the default/unmodified condition.
     pub(crate) fn is_default(&self) -> bool {
-        lazy_static! {
-            static ref DEFAULT_STATE: Format = Format::default();
-        };
-        self == &*DEFAULT_STATE
+        static DEFAULT_STATE: OnceLock<Format> = OnceLock::new();
+        let default_state = DEFAULT_STATE.get_or_init(Format::default);
+
+        self == default_state
     }
 
     // -----------------------------------------------------------------------
@@ -2306,10 +2306,10 @@ pub(crate) struct Border {
 impl Border {
     // Check if the border is in the default/unmodified condition.
     pub(crate) fn is_default(&self) -> bool {
-        lazy_static! {
-            static ref DEFAULT_STATE: Border = Border::default();
-        };
-        self == &*DEFAULT_STATE
+        static DEFAULT_STATE: OnceLock<Border> = OnceLock::new();
+        let default_state = DEFAULT_STATE.get_or_init(Border::default);
+
+        self == default_state
     }
 }
 

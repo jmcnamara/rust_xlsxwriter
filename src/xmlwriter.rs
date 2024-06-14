@@ -8,11 +8,10 @@
 
 mod tests;
 
+use crate::static_regex;
 use std::borrow::Cow;
 use std::io::{Cursor, Write};
 use std::str;
-
-use regex::Regex;
 
 pub(crate) const XML_WRITE_ERROR: &str = "Couldn't write to xml file";
 
@@ -295,10 +294,8 @@ where
 // strings of that type by encoding the leading underscore. So "\0" -> _x0000_
 // and "_x0000_" -> _x005F_x0000_.
 fn escape_xml_escapes(si_string: &str) -> Cow<str> {
-    lazy_static! {
-        static ref XML_ESCAPE: Regex = Regex::new("(_x[0-9a-fA-F]{4}_)").unwrap();
-    }
-    XML_ESCAPE.replace_all(si_string, "_x005F$1")
+    let xml_escape = static_regex!("(_x[0-9a-fA-F]{4}_)");
+    xml_escape.replace_all(si_string, "_x005F$1")
 }
 
 // Trait to write attribute tuple values to an XML file.

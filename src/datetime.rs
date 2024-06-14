@@ -7,8 +7,6 @@
 #![warn(missing_docs)]
 mod tests;
 
-use regex::Regex;
-
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -22,6 +20,7 @@ use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 )))]
 use std::time::SystemTime;
 
+use crate::static_regex;
 use crate::XlsxError;
 
 const DAY_SECONDS: u64 = 24 * 60 * 60;
@@ -243,13 +242,12 @@ impl ExcelDateTime {
     /// src="https://rustxlsxwriter.github.io/images/datetime_parse_from_str.png">
     ///
     pub fn parse_from_str(datetime: &str) -> Result<ExcelDateTime, XlsxError> {
-        lazy_static! {
-            static ref DATE: Regex = Regex::new(r"\b(\d\d\d\d)-(\d\d)-(\d\d)").unwrap();
-            static ref TIME: Regex = Regex::new(r"(\d+):(\d\d)(:(\d\d(\.\d+)?))?").unwrap();
-        }
+        let date_regex = static_regex!(r"\b(\d\d\d\d)-(\d\d)-(\d\d)");
+        let time_regex = static_regex!(r"(\d+):(\d\d)(:(\d\d(\.\d+)?))?");
+
         let mut matched = false;
 
-        let mut dt = match DATE.captures(datetime) {
+        let mut dt = match date_regex.captures(datetime) {
             Some(caps) => {
                 let year = caps.get(1).unwrap().as_str().parse::<u16>().unwrap();
                 let month = caps.get(2).unwrap().as_str().parse::<u8>().unwrap();
@@ -261,7 +259,7 @@ impl ExcelDateTime {
             None => Ok(ExcelDateTime::default()),
         };
 
-        if let Some(caps) = TIME.captures(datetime) {
+        if let Some(caps) = time_regex.captures(datetime) {
             let hour = caps.get(1).unwrap().as_str().parse::<u16>().unwrap();
             let min = caps.get(2).unwrap().as_str().parse::<u8>().unwrap();
 

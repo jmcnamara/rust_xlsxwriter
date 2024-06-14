@@ -753,11 +753,11 @@
 
 mod tests;
 
-use regex::Regex;
-use std::{fmt, mem};
+use std::{fmt, mem, sync::OnceLock};
 
 use crate::{
     drawing::{DrawingObject, DrawingType},
+    static_regex,
     utility::{self, ToXmlBoolean},
     xmlwriter::XMLWriter,
     ColNum, Color, IntoColor, IntoExcelDateTime, ObjectMovement, RowNum, XlsxError, COL_MAX,
@@ -8334,11 +8334,8 @@ impl ChartRange {
     /// ```
     ///
     pub fn new_from_string(range_string: &str) -> ChartRange {
-        lazy_static! {
-            static ref CHART_CELL: Regex = Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+)").unwrap();
-            static ref CHART_RANGE: Regex =
-                Regex::new(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+):\$?(\w+)\$?(\d+)").unwrap();
-        }
+        let chart_cell = static_regex!(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+)");
+        let chart_range = static_regex!(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+):\$?(\w+)\$?(\d+)");
 
         let mut sheet_name = "";
         let mut first_row = 0;
@@ -8346,13 +8343,13 @@ impl ChartRange {
         let mut last_row = 0;
         let mut last_col = 0;
 
-        if let Some(caps) = CHART_RANGE.captures(range_string) {
+        if let Some(caps) = chart_range.captures(range_string) {
             sheet_name = caps.get(1).unwrap().as_str();
             first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
             last_row = caps.get(5).unwrap().as_str().parse::<u32>().unwrap() - 1;
             first_col = utility::column_name_to_number(caps.get(2).unwrap().as_str());
             last_col = utility::column_name_to_number(caps.get(4).unwrap().as_str());
-        } else if let Some(caps) = CHART_CELL.captures(range_string) {
+        } else if let Some(caps) = chart_cell.captures(range_string) {
             sheet_name = caps.get(1).unwrap().as_str();
             first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
             first_col = utility::column_name_to_number(caps.get(2).unwrap().as_str());
@@ -10190,10 +10187,10 @@ impl ChartDataLabel {
 
     // Check if the data label is in the default/unmodified condition.
     pub(crate) fn is_default(&self) -> bool {
-        lazy_static! {
-            static ref DEFAULT_STATE: ChartDataLabel = ChartDataLabel::default();
-        };
-        self == &*DEFAULT_STATE
+        static DEFAULT_STATE: OnceLock<ChartDataLabel> = OnceLock::new();
+        let default_state = DEFAULT_STATE.get_or_init(ChartDataLabel::default);
+
+        self == default_state
     }
 }
 

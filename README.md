@@ -101,8 +101,8 @@ frequently.
 
 ## Features
 
-- `default`: Includes all the standard functionality. Has dependencies on `zip`,
-  `regex` and `lazy_static`.
+- `default`: Includes all the standard functionality. Has dependencies on `zip`
+  and `regex` only.
 
 
 - `serde`: Adds supports for Serde serialization. This is off by default.
