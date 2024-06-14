@@ -14616,7 +14616,8 @@ macro_rules! write_number_trait_impl {
 }
 write_number_trait_impl!(u8 i8 u16 i16 u32 i32 f32 f64);
 
-// Note: Excel doesn't support saving the full range of i64/u64 in f64.
+// Note: Excel doesn't support saving the full range of i64/u64 in f64 so this
+// is documented as a loss of precision.
 macro_rules! write_number_trait_impl {
     ($($t:ty)*) => ($(
         impl IntoExcelData for $t {
@@ -14626,6 +14627,7 @@ macro_rules! write_number_trait_impl {
                 row: RowNum,
                 col: ColNum,
             ) -> Result<&mut Worksheet, XlsxError> {
+                #[allow(clippy::cast_precision_loss)]
                 worksheet.store_number(row, col, self as f64, None)
             }
 
@@ -14636,6 +14638,7 @@ macro_rules! write_number_trait_impl {
                 col: ColNum,
                 format: &Format,
             ) -> Result<&'a mut Worksheet, XlsxError> {
+                #[allow(clippy::cast_precision_loss)]
                 worksheet.store_number(row, col, self as f64, Some(format))
             }
         }
