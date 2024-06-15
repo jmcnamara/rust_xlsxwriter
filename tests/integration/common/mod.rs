@@ -340,9 +340,9 @@ fn compare_xlsx_files(
             exp_xml_string = digits.replace_all(&exp_xml_string, "").to_string();
         }
 
-        // The option ryu crate adds a trailing ".0" at the end of integer
-        // values stored as float, so that 1234 in Excel/std lib becomes 1234.0.
-        // The following fixes that in the generated file to allow comparison.
+        // The optional ryu crate adds a trailing ".0" at the end of integer
+        // values, i.e., 1234 in Excel/std lib becomes 1234.0. The following
+        // replacement fixes that in the generated file to allow comparison.
         #[cfg(feature = "ryu")]
         if filename.starts_with("xl/worksheets/sheet") {
             got_xml_string = got_xml_string.replace(".0</v>", "</v>");
