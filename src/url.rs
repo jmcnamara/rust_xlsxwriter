@@ -6,6 +6,10 @@
 
 #![warn(missing_docs)]
 
+use crate::{static_regex, XlsxError, MAX_PARAMETER_LEN};
+
+const MAX_URL_LEN: usize = 2_080;
+
 /// The `Url` struct is used to define a worksheet url.
 ///
 /// The `Url` struct creates a url type that can be used to write worksheet
@@ -139,9 +143,14 @@
 ///
 #[derive(Clone, Debug)]
 pub struct Url {
-    pub(crate) link: String,
-    pub(crate) text: String,
-    pub(crate) tip: String,
+    pub(crate) url_link: String,
+    pub(crate) rel_link: String,
+    pub(crate) user_text: String,
+    pub(crate) tool_tip: String,
+    pub(crate) rel_anchor: String,
+    pub(crate) rel_display: bool,
+    pub(crate) link_type: HyperlinkType,
+    pub(crate) rel_id: u32,
 }
 
 impl Url {
@@ -152,10 +161,17 @@ impl Url {
     /// `link` - A string like type representing a URL.
     ///
     pub fn new(link: impl Into<String>) -> Url {
+        let link = link.into();
+
         Url {
-            link: link.into(),
-            text: String::new(),
-            tip: String::new(),
+            url_link: link.clone(),            // The worksheet hyperlink url.
+            user_text: String::new(),          // Text the user sees. May be the same as the url.
+            rel_link: link.clone(),            // The url as it appears in a relationship file.
+            rel_anchor: String::new(),         // Equivalent to a url anchor_fragment.
+            rel_display: false,                // Relationship display setting.
+            rel_id: 0,                         // Relationship id.
+            tool_tip: String::new(),           // The mouseover tool tip.
+            link_type: HyperlinkType::Unknown, // Url, file, internal.
         }
     }
 
@@ -199,7 +215,7 @@ impl Url {
     /// <img src="https://rustxlsxwriter.github.io/images/url_set_text.png">
     ///
     pub fn set_text(mut self, text: impl Into<String>) -> Url {
-        self.text = text.into();
+        self.user_text = text.into();
         self
     }
 
@@ -212,13 +228,186 @@ impl Url {
     /// `tip` - The url tip, as a string or string like type.
     ///
     pub fn set_tip(mut self, tip: impl Into<String>) -> Url {
-        self.tip = tip.into();
+        self.tool_tip = tip.into();
         self
     }
+
+    // -----------------------------------------------------------------------
+    // Crate level helper methods.
+    // -----------------------------------------------------------------------
+
+    pub(crate) fn initialize(&mut self) -> Result<(), XlsxError> {
+        self.parse_url()?;
+
+        // Check the url string lengths are within Excel's limits. The user text
+        // length is checked by write_string_with_format().
+        if self.url_link.chars().count() > MAX_URL_LEN
+            || self.rel_anchor.chars().count() > MAX_URL_LEN
+        {
+            return Err(XlsxError::MaxUrlLengthExceeded);
+        }
+
+        // Escape hyperlink strings after length checks.
+        self.escape_strings();
+
+        if self.tool_tip.chars().count() > MAX_PARAMETER_LEN {
+            return Err(XlsxError::ParameterError(
+                "Hyperlink tool tip must be less than or equal to Excel's limit of characters"
+                    .to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    // This method handles a variety of different string processing required for
+    // links and targets associated with Excel's urls/hyperlinks.
+    pub(crate) fn parse_url(&mut self) -> Result<(), XlsxError> {
+        let remote_file = static_regex!(r"^(\\\\|\w:)");
+        let url_protocol = static_regex!(r"^(ftp|http)s?://");
+        let original_url = self.url_link.clone();
+
+        if url_protocol.is_match(&self.url_link) {
+            // Handle web links like https://.
+            self.link_type = HyperlinkType::Url;
+
+            if self.user_text.is_empty() {
+                self.user_text.clone_from(&self.url_link);
+            }
+
+            // Split the url into url + #anchor if that exists.
+            let parts: Vec<&str> = self.url_link.splitn(2, '#').collect();
+            if parts.len() == 2 {
+                self.rel_anchor = parts[1].to_string();
+                self.url_link = parts[0].to_string();
+            }
+        } else if self.url_link.starts_with("mailto:") {
+            // Handle mail address links.
+            self.link_type = HyperlinkType::Url;
+
+            if self.user_text.is_empty() {
+                self.user_text = self.url_link.replacen("mailto:", "", 1);
+            }
+        } else if self.url_link.starts_with("internal:") {
+            // Handle links to cells within the workbook.
+            self.link_type = HyperlinkType::Internal;
+            self.rel_anchor = self.url_link.replacen("internal:", "", 1);
+
+            if self.user_text.is_empty() {
+                self.user_text.clone_from(&self.rel_anchor);
+            }
+        } else if self.url_link.starts_with("file://") {
+            // Handle links to other files or cells in other Excel files.
+            self.link_type = HyperlinkType::File;
+            let link_path = self.url_link.replacen("file:///", "", 1);
+            let link_path = link_path.replacen("file://", "", 1);
+
+            // Links to local files aren't prefixed with file:///.
+            if !remote_file.is_match(&link_path) {
+                self.url_link.clone_from(&link_path);
+            }
+
+            self.rel_link.clone_from(&self.url_link);
+            if !remote_file.is_match(&link_path) {
+                self.rel_link = self.rel_link.replace('\\', "/");
+            }
+
+            if self.user_text.is_empty() {
+                self.user_text = link_path;
+            }
+
+            // Split the url into url + #anchor if that exists.
+            let parts: Vec<&str> = self.url_link.splitn(2, '#').collect();
+            if parts.len() == 2 {
+                self.rel_anchor = parts[1].to_string();
+                self.url_link = parts[0].to_string();
+            }
+        } else {
+            return Err(XlsxError::UnknownUrlType(original_url));
+        }
+
+        Ok(())
+    }
+
+    // Escape hyperlink string variants.
+    pub(crate) fn escape_strings(&mut self) {
+        let url_escape = static_regex!(r"%[0-9a-fA-F]{2}");
+
+        // Escape any url characters in the url string.
+        if !url_escape.is_match(&self.url_link) {
+            self.url_link = crate::xmlwriter::escape_url(&self.url_link).into();
+        }
+
+        // Escape the link used in the relationship file, except for internal
+        // links which are generally sheet/cell locations.
+        if self.link_type != HyperlinkType::Internal && !url_escape.is_match(&self.rel_link) {
+            self.rel_link = crate::xmlwriter::escape_url(&self.rel_link).into();
+        }
+
+        // Excel additionally escapes # to %23 in file paths.
+        if self.link_type == HyperlinkType::File {
+            self.rel_link = self.rel_link.replace('#', "%23");
+        }
+    }
+
+    // Increment the relationship id for some types only.
+    pub(crate) fn increment_rel_id(&mut self, rel_id: u32) -> u32 {
+        match self.link_type {
+            HyperlinkType::Url | HyperlinkType::File => {
+                self.rel_id = rel_id;
+                rel_id + 1
+            }
+            _ => rel_id,
+        }
+    }
+
+    // Get the target for relationship ids.
+    pub(crate) fn target(&mut self) -> String {
+        let mut target = self.rel_link.clone();
+
+        if self.link_type == HyperlinkType::Internal {
+            target = target.replace("internal:", "#");
+        }
+
+        target
+    }
+
+    // Get the target mode for relationship ids.
+    pub(crate) fn target_mode(&mut self) -> String {
+        let mut target_mode = String::from("External");
+
+        if self.link_type == HyperlinkType::Internal {
+            target_mode = String::new();
+        }
+
+        target_mode
+    }
 }
+
+// -----------------------------------------------------------------------
+// Traits.
+// -----------------------------------------------------------------------
 
 impl From<&str> for Url {
     fn from(value: &str) -> Url {
         Url::new(value)
     }
+}
+
+impl From<&Url> for Url {
+    fn from(value: &Url) -> Url {
+        value.clone()
+    }
+}
+
+// -----------------------------------------------------------------------
+// HyperlinkType enum.
+// -----------------------------------------------------------------------
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum HyperlinkType {
+    Unknown,
+    Url,
+    Internal,
+    File,
 }

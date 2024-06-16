@@ -729,7 +729,7 @@ impl<W: Write + Seek + Send> Packager<W> {
                         .start_file(filename, self.zip_options_for_binary_files)?;
 
                     self.zip.write_all(&image.data)?;
-                    unique_worksheet_images.insert(image.hash);
+                    unique_worksheet_images.insert(image.hash.clone());
                     index += 1;
                 }
             }

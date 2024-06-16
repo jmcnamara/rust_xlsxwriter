@@ -6,7 +6,7 @@
 
 mod tests;
 
-use crate::{xmlwriter::XMLWriter, ObjectMovement};
+use crate::{xmlwriter::XMLWriter, ObjectMovement, Url};
 
 pub struct Drawing {
     pub(crate) writer: XMLWriter,
@@ -171,9 +171,18 @@ impl Drawing {
             attributes.push(("descr", drawing_info.description.clone()));
         }
 
-        if drawing_info.decorative {
+        if drawing_info.decorative || drawing_info.url.is_some() {
             self.writer.xml_start_tag("xdr:cNvPr", &attributes);
-            self.write_decorative();
+
+            if let Some(hyperlink) = &drawing_info.url {
+                // Write the a:hlinkClick element.
+                self.write_hyperlink(hyperlink);
+            }
+
+            if drawing_info.decorative {
+                self.write_decorative();
+            }
+
             self.writer.xml_end_tag("xdr:cNvPr");
         } else {
             self.writer.xml_empty_tag("xdr:cNvPr", &attributes);
@@ -212,6 +221,23 @@ impl Drawing {
 
         self.writer.xml_end_tag("a:ext");
         self.writer.xml_end_tag("a:extLst");
+    }
+
+    // Write the <a:hlinkClick> element.
+    fn write_hyperlink(&mut self, hyperlink: &Url) {
+        let mut attributes = vec![
+            (
+                "xmlns:r",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships".to_string(),
+            ),
+            ("r:id", format!("rId{}", hyperlink.rel_id)),
+        ];
+
+        if !hyperlink.tool_tip.is_empty() {
+            attributes.push(("tooltip", hyperlink.tool_tip.clone()));
+        }
+
+        self.writer.xml_empty_tag("a:hlinkClick", &attributes);
     }
 
     // Write the <a:picLocks> element.
@@ -309,7 +335,7 @@ impl Drawing {
         self.write_xfrm();
 
         // Write the a:graphic element.
-        self.write_a_graphic(index);
+        self.write_a_graphic(drawing_info.rel_id);
 
         self.writer.xml_end_tag("xdr:graphicFrame");
     }
@@ -427,6 +453,7 @@ pub(crate) struct DrawingInfo {
     pub(crate) object_movement: ObjectMovement,
     pub(crate) rel_id: u32,
     pub(crate) drawing_type: DrawingType,
+    pub(crate) url: Option<Url>,
 }
 
 #[derive(Clone, Copy, Debug)]

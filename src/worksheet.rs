@@ -1077,8 +1077,8 @@ use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
     static_regex, utility, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType,
     Color, ConditionalFormat, ExcelDateTime, FilterCondition, FilterCriteria, FilterData,
-    FilterDataType, HeaderImagePosition, Image, IntoColor, IntoExcelDateTime, ObjectMovement,
-    ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
+    FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoColor, IntoExcelDateTime,
+    ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -1091,12 +1091,11 @@ pub type ColNum = u16;
 
 pub(crate) const COL_MAX: ColNum = 16_384;
 pub(crate) const ROW_MAX: RowNum = 1_048_576;
-const MAX_URL_LEN: usize = 2_080;
+pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
+pub(crate) const MAX_PARAMETER_LEN: usize = 255;
 const MAX_STRING_LEN: usize = 32_767;
-const MAX_PARAMETER_LEN: usize = 255;
 const DEFAULT_COL_WIDTH: f64 = 8.43;
 const DEFAULT_ROW_HEIGHT: f64 = 15.0;
-pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 /// The `Worksheet` struct represents an Excel worksheet. It handles operations
@@ -1249,8 +1248,8 @@ pub struct Worksheet {
     default_result: Box<str>,
     use_future_functions: bool,
     panes: Panes,
-    hyperlinks: BTreeMap<(RowNum, ColNum), Hyperlink>,
-    rel_count: u16,
+    hyperlinks: BTreeMap<(RowNum, ColNum), Url>,
+    rel_count: u32,
     protection_on: bool,
     protection_hash: u16,
     protection_options: ProtectionOptions,
@@ -1270,7 +1269,7 @@ pub struct Worksheet {
     has_sparklines: bool,
     sparklines: Vec<Sparkline>,
 
-    embedded_image_ids: HashMap<u64, u32>,
+    embedded_image_ids: HashMap<String, u32>,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -3480,6 +3479,8 @@ impl Worksheet {
     ///   Excel's limit of 2080 characters.
     /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
+    /// * [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
+    ///   Excel's limit of 255 characters.
     ///
     /// # Examples
     ///
@@ -3569,7 +3570,7 @@ impl Worksheet {
         link: impl Into<Url>,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_url(row, col, link.into(), None)
+        self.store_url(row, col, &link.into(), None)
     }
 
     /// Write a url/hyperlink to a worksheet cell with an alternative text.
@@ -3600,6 +3601,8 @@ impl Worksheet {
     ///   Excel's limit of 2080 characters.
     /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
+    /// * [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
+    ///   Excel's limit of 255 characters.
     ///
     /// # Examples
     ///
@@ -3665,7 +3668,7 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         let link = link.into().set_text(text.into());
-        self.store_url(row, col, link, None)
+        self.store_url(row, col, &link, None)
     }
 
     /// Write a url/hyperlink to a worksheet cell with a user defined format
@@ -3691,6 +3694,8 @@ impl Worksheet {
     ///   Excel's limit of 2080 characters.
     /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
+    /// * [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
+    ///   Excel's limit of 255 characters.
     ///
     /// # Examples
     ///
@@ -3735,7 +3740,7 @@ impl Worksheet {
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
-        self.store_url(row, col, link.into(), Some(format))
+        self.store_url(row, col, &link.into(), Some(format))
     }
 
     #[doc(hidden)] // Hide the docs since this is more easily done with a Url struct.
@@ -3769,7 +3774,8 @@ impl Worksheet {
     ///   Excel's limit of 2080 characters or the screen tip exceed 255 characters.
     /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
-    ///
+    /// * [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
+    ///   Excel's limit of 255 characters.
     pub fn write_url_with_options(
         &mut self,
         row: RowNum,
@@ -3781,7 +3787,7 @@ impl Worksheet {
     ) -> Result<&mut Worksheet, XlsxError> {
         // Store the cell data.
         let link = link.into().set_text(text.into()).set_tip(tip.into());
-        self.store_url(row, col, link, format)
+        self.store_url(row, col, &link, format)
     }
 
     /// Write a formatted date and/or time to a worksheet cell.
@@ -11772,16 +11778,19 @@ impl Worksheet {
         &mut self,
         row: RowNum,
         col: ColNum,
-        url: Url,
+        url: &Url,
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let hyperlink = Hyperlink::new(url)?;
+        let mut hyperlink = url.clone();
+        hyperlink.initialize()?;
 
         match format {
-            Some(format) => self.write_string_with_format(row, col, &hyperlink.text, format)?,
+            Some(format) => {
+                self.write_string_with_format(row, col, &hyperlink.user_text, format)?
+            }
             None => {
                 let hyperlink_format = Format::new().set_hyperlink();
-                self.write_string_with_format(row, col, &hyperlink.text, &hyperlink_format)?
+                self.write_string_with_format(row, col, &hyperlink.user_text, &hyperlink_format)?
             }
         };
 
@@ -11807,7 +11816,7 @@ impl Worksheet {
             Some(image_id) => *image_id,
             None => {
                 let image_id = self.embedded_image_ids.len() as u32;
-                self.embedded_image_ids.insert(image.hash, image_id);
+                self.embedded_image_ids.insert(image.hash.clone(), image_id);
                 self.embedded_images.push(image.clone());
                 image_id
             }
@@ -11823,8 +11832,8 @@ impl Worksheet {
 
         // Store the image hyperlink, if any.
         if let Some(url) = &image.url {
-            let mut hyperlink = Hyperlink::new(url.clone())?;
-            hyperlink.display = true;
+            let mut hyperlink = url.clone();
+            hyperlink.rel_display = true;
 
             self.hyperlinks.insert((row, col), hyperlink);
         }
@@ -12107,30 +12116,61 @@ impl Worksheet {
     // Drawing object. Also set the rel linkages between the files.
     pub(crate) fn prepare_worksheet_images(
         &mut self,
-        image_ids: &mut HashMap<u64, u32>,
+        image_ids: &mut HashMap<String, u32>,
         image_id: &mut u32,
         drawing_id: u32,
     ) {
-        let mut rel_ids: HashMap<u64, u32> = HashMap::new();
+        let mut rel_ids: HashMap<String, u32> = HashMap::new();
 
         for (cell, image) in &self.images.clone() {
             let row = cell.0;
             let col = cell.1;
+            let mut drawing_hyperlink = None;
 
             let image_id = match image_ids.get(&image.hash) {
                 Some(image_id) => *image_id,
                 None => {
                     *image_id += 1;
-                    image_ids.insert(image.hash, *image_id);
+                    image_ids.insert(image.hash.clone(), *image_id);
                     *image_id
                 }
             };
 
+            // Handle optional hyperlink in the image.
+            if let Some(hyperlink) = &image.url {
+                let mut hyperlink = hyperlink.clone();
+
+                let target = hyperlink.target();
+                let target_mode = hyperlink.target_mode();
+
+                let rel_id = match rel_ids.get(&hyperlink.url_link) {
+                    Some(rel_id) => *rel_id,
+                    None => {
+                        let rel_id = 1 + rel_ids.len() as u32;
+                        rel_ids.insert(hyperlink.url_link.clone(), rel_id);
+
+                        // Store the linkage to the drawings rels file.
+                        self.drawing_relationships.push((
+                            "hyperlink".to_string(),
+                            target,
+                            target_mode,
+                        ));
+
+                        rel_id
+                    }
+                };
+
+                hyperlink.rel_id = rel_id;
+
+                drawing_hyperlink = Some(hyperlink);
+            }
+
+            // Store the image references.
             let rel_id = match rel_ids.get(&image.hash) {
                 Some(rel_id) => *rel_id,
                 None => {
                     let rel_id = 1 + rel_ids.len() as u32;
-                    rel_ids.insert(image.hash, rel_id);
+                    rel_ids.insert(image.hash.clone(), rel_id);
 
                     // Store the linkage to the drawings rels file.
                     let image_name =
@@ -12149,6 +12189,7 @@ impl Worksheet {
             // drawing object.
             let mut drawing_info = self.position_object_emus(row, col, image);
             drawing_info.rel_id = rel_id;
+            drawing_info.url.clone_from(&drawing_hyperlink);
             self.drawing.drawings.push(drawing_info);
 
             // Store the used image type for the Content Type file.
@@ -12171,17 +12212,17 @@ impl Worksheet {
     // than an Drawing file.
     pub(crate) fn prepare_header_footer_images(
         &mut self,
-        image_ids: &mut HashMap<u64, u32>,
+        image_ids: &mut HashMap<String, u32>,
         base_image_id: u32,
         drawing_id: u32,
     ) {
-        let mut rel_ids: HashMap<u64, u32> = HashMap::new();
+        let mut rel_ids: HashMap<String, u32> = HashMap::new();
         for image in self.header_footer_images.clone().into_iter().flatten() {
             let image_id = match image_ids.get(&image.hash) {
                 Some(image_id) => *image_id,
                 None => {
                     let image_id = 1 + base_image_id + image_ids.len() as u32;
-                    image_ids.insert(image.hash, image_id);
+                    image_ids.insert(image.hash.clone(), image_id);
                     image_id
                 }
             };
@@ -12190,7 +12231,7 @@ impl Worksheet {
                 Some(rel_id) => *rel_id,
                 None => {
                     let rel_id = 1 + rel_ids.len() as u32;
-                    rel_ids.insert(image.hash, rel_id);
+                    rel_ids.insert(image.hash.clone(), rel_id);
 
                     // Store the linkage to the drawings rels file.
                     let image_name =
@@ -12241,6 +12282,7 @@ impl Worksheet {
             chart_id += 1;
         }
 
+        let mut rel_id = self.drawing_relationships.len() as u32;
         for (cell, chart) in &mut self.charts.clone() {
             let row = cell.0;
             let col = cell.1;
@@ -12254,7 +12296,9 @@ impl Worksheet {
 
             // Convert the chart dimensions to drawing dimensions and store the
             // drawing object.
-            let drawing_info = self.position_object_emus(row, col, chart);
+            let mut drawing_info = self.position_object_emus(row, col, chart);
+            rel_id += 1;
+            drawing_info.rel_id = rel_id;
             self.drawing.drawings.push(drawing_info);
         }
 
@@ -12474,6 +12518,7 @@ impl Worksheet {
             object_movement: object.object_movement(),
             drawing_type: object.drawing_type(),
             rel_id: 0,
+            url: None,
         }
     }
 
@@ -13121,13 +13166,13 @@ impl Worksheet {
     fn write_hyperlinks(&mut self) {
         self.writer.xml_start_tag_only("hyperlinks");
 
-        let mut ref_id = 1u16;
+        let mut rel_id = 1u32;
         for (cell, hyperlink) in &mut self.hyperlinks.clone() {
-            ref_id = hyperlink.increment_ref_id(ref_id);
+            rel_id = hyperlink.increment_rel_id(rel_id);
             self.write_hyperlink(cell.0, cell.1, hyperlink);
         }
 
-        self.rel_count = ref_id - 1;
+        self.rel_count = rel_id - 1;
 
         self.writer.xml_end_tag("hyperlinks");
     }
@@ -13230,42 +13275,42 @@ impl Worksheet {
     }
 
     // Write the <hyperlink> element.
-    fn write_hyperlink(&mut self, row: RowNum, col: ColNum, hyperlink: &Hyperlink) {
+    fn write_hyperlink(&mut self, row: RowNum, col: ColNum, hyperlink: &Url) {
         let mut attributes = vec![("ref", utility::row_col_to_cell(row, col))];
 
         match hyperlink.link_type {
             HyperlinkType::Url | HyperlinkType::File => {
-                let ref_id = hyperlink.ref_id;
-                attributes.push(("r:id", format!("rId{ref_id}")));
+                let rel_id = hyperlink.rel_id;
+                attributes.push(("r:id", format!("rId{rel_id}")));
 
-                if !hyperlink.location.is_empty() {
-                    attributes.push(("location", hyperlink.location.to_string()));
+                if !hyperlink.rel_anchor.is_empty() {
+                    attributes.push(("location", hyperlink.rel_anchor.to_string()));
                 }
 
-                if hyperlink.display {
-                    attributes.push(("display", hyperlink.url.to_string()));
+                if hyperlink.rel_display {
+                    attributes.push(("display", hyperlink.url_link.to_string()));
                 }
 
-                if !hyperlink.tip.is_empty() {
-                    attributes.push(("tooltip", hyperlink.tip.to_string()));
+                if !hyperlink.tool_tip.is_empty() {
+                    attributes.push(("tooltip", hyperlink.tool_tip.to_string()));
                 }
 
                 // Store the linkage to the worksheets rels file.
                 self.hyperlink_relationships.push((
                     "hyperlink".to_string(),
-                    hyperlink.url.to_string(),
+                    hyperlink.url_link.to_string(),
                     "External".to_string(),
                 ));
             }
             HyperlinkType::Internal => {
                 // Internal links don't use the rel file reference id.
-                attributes.push(("location", hyperlink.location.to_string()));
+                attributes.push(("location", hyperlink.rel_anchor.to_string()));
 
-                if !hyperlink.tip.is_empty() {
-                    attributes.push(("tooltip", hyperlink.tip.to_string()));
+                if !hyperlink.tool_tip.is_empty() {
+                    attributes.push(("tooltip", hyperlink.tool_tip.to_string()));
                 }
 
-                attributes.push(("display", hyperlink.text.to_string()));
+                attributes.push(("display", hyperlink.user_text.to_string()));
             }
             HyperlinkType::Unknown => {}
         }
@@ -14073,7 +14118,7 @@ impl Worksheet {
     }
 
     // Write the <tablePart> element.
-    fn write_table_part(&mut self, index: u16) {
+    fn write_table_part(&mut self, index: u32) {
         let attributes = [("r:id", format!("rId{index}"))];
 
         self.writer.xml_empty_tag("tablePart", &attributes);
@@ -14833,6 +14878,27 @@ impl IntoExcelData for Url {
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
+        worksheet.store_url(row, col, &self, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        worksheet.store_url(row, col, &self, Some(format))
+    }
+}
+
+impl IntoExcelData for &Url {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
         worksheet.store_url(row, col, self, None)
     }
 
@@ -15047,129 +15113,6 @@ impl Panes {
             utility::row_col_to_cell(self.top_cell.0, self.top_cell.1)
         }
     }
-}
-
-#[derive(Clone)]
-// Simple struct for handling different Excel hyperlinks types.
-struct Hyperlink {
-    url: String,
-    text: String,
-    tip: String,
-    location: String,
-    display: bool,
-    link_type: HyperlinkType,
-    ref_id: u16,
-}
-
-impl Hyperlink {
-    fn new(url: Url) -> Result<Hyperlink, XlsxError> {
-        let mut hyperlink = Hyperlink {
-            url: url.link,
-            text: url.text,
-            tip: url.tip,
-            location: String::new(),
-            display: false,
-            link_type: HyperlinkType::Unknown,
-            ref_id: 0,
-        };
-
-        Self::initialize(&mut hyperlink);
-
-        // Check the hyperlink string lengths are within Excel's limits. The text
-        // length is checked by write_string_with_format().
-        if hyperlink.url.chars().count() > MAX_URL_LEN
-            || hyperlink.location.chars().count() > MAX_URL_LEN
-            || hyperlink.tip.chars().count() > MAX_PARAMETER_LEN
-        {
-            return Err(XlsxError::MaxUrlLengthExceeded);
-        }
-
-        Ok(hyperlink)
-    }
-
-    // This method handles a variety of different string processing that needs
-    // to be done for links and targets associated with Excel hyperlinks.
-    fn initialize(&mut self) {
-        let url_escape = static_regex!(r"%[0-9a-fA-F]{2}");
-        let remote_file = static_regex!(r"^(\\\\|\w:)");
-        let url_protocol = static_regex!(r"^(ftp|http)s?://");
-
-        if url_protocol.is_match(&self.url) {
-            // Handle web links like http://.
-            self.link_type = HyperlinkType::Url;
-
-            if self.text.is_empty() {
-                self.text.clone_from(&self.url);
-            }
-
-            // Split the url into url + #anchor if that exists.
-            let parts: Vec<&str> = self.url.splitn(2, '#').collect();
-            if parts.len() == 2 {
-                self.location = parts[1].to_string();
-                self.url = parts[0].to_string();
-            }
-        } else if self.url.starts_with("mailto:") {
-            // Handle mail address links.
-            self.link_type = HyperlinkType::Url;
-
-            if self.text.is_empty() {
-                self.text = self.url.replacen("mailto:", "", 1);
-            }
-        } else if self.url.starts_with("internal:") {
-            // Handle links to cells within the workbook.
-            self.link_type = HyperlinkType::Internal;
-            self.location = self.url.replacen("internal:", "", 1);
-
-            if self.text.is_empty() {
-                self.text.clone_from(&self.location);
-            }
-        } else if self.url.starts_with("file://") {
-            // Handle links to other files or cells in other Excel files.
-            self.link_type = HyperlinkType::File;
-            let bare_link = self.url.replacen("file:///", "", 1);
-            let bare_link = bare_link.replacen("file://", "", 1);
-
-            // Links to local files aren't prefixed with file:///.
-            if !remote_file.is_match(&bare_link) {
-                self.url.clone_from(&bare_link);
-            }
-
-            if self.text.is_empty() {
-                self.text = bare_link;
-            }
-
-            // Split the url into url + #anchor if that exists.
-            let parts: Vec<&str> = self.url.splitn(2, '#').collect();
-            if parts.len() == 2 {
-                self.location = parts[1].to_string();
-                self.url = parts[0].to_string();
-            }
-        }
-
-        // Escape any url characters in the url string.
-        if !url_escape.is_match(&self.url) {
-            self.url = crate::xmlwriter::escape_url(&self.url).into();
-        }
-    }
-
-    // Increment the ref id
-    fn increment_ref_id(&mut self, ref_id: u16) -> u16 {
-        match self.link_type {
-            HyperlinkType::Url | HyperlinkType::File => {
-                self.ref_id = ref_id;
-                ref_id + 1
-            }
-            _ => ref_id,
-        }
-    }
-}
-
-#[derive(Clone)]
-enum HyperlinkType {
-    Unknown,
-    Url,
-    Internal,
-    File,
 }
 
 // Struct to hold and transform data for the various defined names variants:

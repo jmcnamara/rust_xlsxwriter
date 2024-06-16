@@ -3,21 +3,30 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Image, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartType, Image, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
+    worksheet.write(0, 0, 1)?;
+    worksheet.write(1, 0, 2)?;
+
+    let mut chart = Chart::new(ChartType::Pie);
+    chart.add_series().set_values(("Sheet1", 0, 0, 1, 0));
+
+    worksheet.insert_chart(11, 4, &chart)?;
 
     let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_url("http://www.cpan.org/")?;
+    image
+        .set_alt_text("red.png")
+        .set_url("https://github.com/jmcnamara")?;
 
-    worksheet.embed_image(0, 0, &image)?;
+    worksheet.insert_image(8, 4, &image)?;
 
     workbook.save(filename)?;
 
@@ -25,9 +34,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_embed_image10() {
+fn test_hyperlink36() {
     let test_runner = common::TestRunner::new()
-        .set_name("embed_image10")
+        .set_name("hyperlink36")
         .set_function(create_new_xlsx_file)
         .initialize();
 
