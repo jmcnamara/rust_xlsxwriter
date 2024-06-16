@@ -1,103 +1,21 @@
-// url - A module for representing Excel worksheet Urls.
+// hyperlink - A struct to represent Excel hyperlinks.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
-#![warn(missing_docs)]
-
-use crate::{static_regex, XlsxError, MAX_PARAMETER_LEN};
+use crate::{static_regex, Url, XlsxError, MAX_PARAMETER_LEN};
 
 const MAX_URL_LEN: usize = 2_080;
 
-/// The `Url` struct is used to define a worksheet url.
+/// A struct to represent different Excel hyperlinks types.
 ///
-/// The `Url` struct creates a url type that can be used to write worksheet
-/// urls.
+/// Hyperlinks are used in worksheets cells and also in images (and although not
+/// currently supported) other shapes and objects. In general hyperlinks are
+/// stored as a `rel_id` (relationship id) that references a `_rels/*.xml.rels`
+/// file where the actual link is stored.
 ///
-/// In general you would use the
-/// [`worksheet.write_url()`](crate::Worksheet::write_url) with a string
-/// representation of the url, like this:
-///
-/// ```
-/// # // This code is available in examples/doc_url_intro1.rs
-/// #
-/// # use rust_xlsxwriter::{Workbook, XlsxError};
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     // Create a new Excel file object.
-/// #     let mut workbook = Workbook::new();
-/// #
-/// #     // Add a worksheet to the workbook.
-/// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Write a url with a simple string argument.
-///     worksheet.write_url(0, 0, "https://www.rust-lang.org")?;
-/// #
-/// #     // Save the file to disk.
-/// #     workbook.save("worksheet.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
-/// ```
-///
-/// The url will then be displayed as expected in Excel:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/url_intro1.png">
-///
-/// In order to differentiate a url from an ordinary string (for example when
-/// storing it in a data structure) you can also represent the url with a
-/// [`Url`] struct:
-///
-/// ```
-/// # // This code is available in examples/doc_url_intro2.rs
-/// #
-/// # use rust_xlsxwriter::{Url, Workbook, XlsxError};
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     // Create a new Excel file object.
-/// #     let mut workbook = Workbook::new();
-/// #
-/// #     // Add a worksheet to the workbook.
-/// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Write a url with a Url struct.
-///     worksheet.write_url(0, 0, Url::new("https://www.rust-lang.org"))?;
-/// #
-/// #     // Save the file to disk.
-/// #     workbook.save("worksheet.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
-/// ```
-///
-/// Using a `Url` struct also allows you to write a url using the generic
-/// [`worksheet.write()`](crate::Worksheet::write) method:
-///
-/// ```
-/// # // This code is available in examples/doc_url_intro3.rs
-/// #
-/// # use rust_xlsxwriter::{Url, Workbook, XlsxError};
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     // Create a new Excel file object.
-/// #     let mut workbook = Workbook::new();
-/// #
-/// #     // Add a worksheet to the workbook.
-/// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Write a url with a Url struct and generic write().
-///     worksheet.write(0, 0, Url::new("https://www.rust-lang.org"))?;
-/// #
-/// #     // Save the file to disk.
-/// #     workbook.save("worksheet.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
-/// ```
-///
-/// There are 3 types of url/link supported by Excel and the `rust_xlsxwriter`
-/// library:
+/// There are 3 types of url/link supported by Excel:
 ///
 /// 1. Web based URIs like:
 ///
@@ -133,7 +51,7 @@ const MAX_URL_LEN: usize = 2_080;
 ///    non alphanumeric characters are single quoted as follows `'Sales
 ///    Data'!A1`.
 ///
-/// The library will escape the following characters in URLs as required by
+/// The struct will escape the following characters in URLs as required by
 /// Excel, ``\s " < > \ [ ] ` ^ { }``, unless the URL already contains `%xx`
 /// style escapes. In which case it is assumed that the URL was escaped
 /// correctly by the user and will by passed directly to Excel.
@@ -142,7 +60,7 @@ const MAX_URL_LEN: usize = 2_080;
 /// this limit will raise an error when written.
 ///
 #[derive(Clone, Debug)]
-pub struct Url {
+pub(crate) struct Hyperlink {
     pub(crate) url_link: String,
     pub(crate) rel_link: String,
     pub(crate) user_text: String,
@@ -153,116 +71,45 @@ pub struct Url {
     pub(crate) rel_id: u32,
 }
 
-impl Url {
-    /// Create a new Url struct.
-    ///
-    /// # Parameters
-    ///
-    /// `link` - A string like type representing a URL.
-    ///
-    pub fn new(link: impl Into<String>) -> Url {
-        let link = link.into();
-
-        Url {
-            url_link: link.clone(),            // The worksheet hyperlink url.
-            user_text: String::new(),          // Text the user sees. May be the same as the url.
-            rel_link: link.clone(),            // The url as it appears in a relationship file.
+impl Hyperlink {
+    pub(crate) fn new(url: &Url) -> Result<Hyperlink, XlsxError> {
+        let mut hyperlink = Hyperlink {
+            url_link: url.link.clone(),        // The worksheet hyperlink url.
+            user_text: url.text.clone(),       // Text the user sees. May be the same as the url.
+            rel_link: url.link.clone(),        // The url as it appears in a relationship file.
             rel_anchor: String::new(),         // Equivalent to a url anchor_fragment.
             rel_display: false,                // Relationship display setting.
             rel_id: 0,                         // Relationship id.
-            tool_tip: String::new(),           // The mouseover tool tip.
+            tool_tip: url.tip.clone(),         // The mouseover tool tip.
             link_type: HyperlinkType::Unknown, // Url, file, internal.
-        }
-    }
+        };
 
-    /// Set the alternative text for the url.
-    ///
-    /// Set an alternative, user friendly, text for the url.
-    ///
-    /// # Parameters
-    ///
-    /// `text` - The alternative text, as a string or string like type.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates writing a url to a worksheet with
-    /// alternative text.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_url_set_text.rs
-    /// #
-    /// # use rust_xlsxwriter::{Url, Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     // Create a new Excel file object.
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Write a url with a Url struct and alternative text.
-    ///     worksheet.write(0, 0, Url::new("https://www.rust-lang.org").set_text("Learn Rust"))?;
-    /// #
-    /// #     // Save the file to disk.
-    /// #     workbook.save("worksheet.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/url_set_text.png">
-    ///
-    pub fn set_text(mut self, text: impl Into<String>) -> Url {
-        self.user_text = text.into();
-        self
-    }
+        Self::parse_url(&mut hyperlink)?;
 
-    /// Set the screen tip for the url.
-    ///
-    /// Set a screen tip when the user does a mouseover of the url.
-    ///
-    /// # Parameters
-    ///
-    /// `tip` - The url tip, as a string or string like type.
-    ///
-    pub fn set_tip(mut self, tip: impl Into<String>) -> Url {
-        self.tool_tip = tip.into();
-        self
-    }
-
-    // -----------------------------------------------------------------------
-    // Crate level helper methods.
-    // -----------------------------------------------------------------------
-
-    pub(crate) fn initialize(&mut self) -> Result<(), XlsxError> {
-        self.parse_url()?;
-
-        // Check the url string lengths are within Excel's limits. The user text
-        // length is checked by write_string_with_format().
-        if self.url_link.chars().count() > MAX_URL_LEN
-            || self.rel_anchor.chars().count() > MAX_URL_LEN
+        // Check the hyperlink string lengths are within Excel's limits. The
+        // user text length is checked by write_string_with_format().
+        if hyperlink.url_link.chars().count() > MAX_URL_LEN
+            || hyperlink.rel_anchor.chars().count() > MAX_URL_LEN
         {
             return Err(XlsxError::MaxUrlLengthExceeded);
         }
 
         // Escape hyperlink strings after length checks.
-        self.escape_strings();
+        Self::escape_strings(&mut hyperlink);
 
-        if self.tool_tip.chars().count() > MAX_PARAMETER_LEN {
+        if hyperlink.tool_tip.chars().count() > MAX_PARAMETER_LEN {
             return Err(XlsxError::ParameterError(
                 "Hyperlink tool tip must be less than or equal to Excel's limit of characters"
                     .to_string(),
             ));
         }
 
-        Ok(())
+        Ok(hyperlink)
     }
 
     // This method handles a variety of different string processing required for
-    // links and targets associated with Excel's urls/hyperlinks.
-    pub(crate) fn parse_url(&mut self) -> Result<(), XlsxError> {
+    // links and targets associated with Excel's hyperlinks.
+    fn parse_url(&mut self) -> Result<(), XlsxError> {
         let remote_file = static_regex!(r"^(\\\\|\w:)");
         let url_protocol = static_regex!(r"^(ftp|http)s?://");
         let original_url = self.url_link.clone();
@@ -330,7 +177,7 @@ impl Url {
     }
 
     // Escape hyperlink string variants.
-    pub(crate) fn escape_strings(&mut self) {
+    fn escape_strings(&mut self) {
         let url_escape = static_regex!(r"%[0-9a-fA-F]{2}");
 
         // Escape any url characters in the url string.
@@ -383,26 +230,6 @@ impl Url {
         target_mode
     }
 }
-
-// -----------------------------------------------------------------------
-// Traits.
-// -----------------------------------------------------------------------
-
-impl From<&str> for Url {
-    fn from(value: &str) -> Url {
-        Url::new(value)
-    }
-}
-
-impl From<&Url> for Url {
-    fn from(value: &Url) -> Url {
-        value.clone()
-    }
-}
-
-// -----------------------------------------------------------------------
-// HyperlinkType enum.
-// -----------------------------------------------------------------------
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum HyperlinkType {

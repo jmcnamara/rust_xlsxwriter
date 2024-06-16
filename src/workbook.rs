@@ -1446,7 +1446,7 @@ impl Workbook {
     // account duplicate images.
     fn prepare_embedded_images(&mut self) {
         let mut embedded_images = vec![];
-        let mut image_ids: HashMap<u64, u32> = HashMap::new();
+        let mut image_ids: HashMap<String, u32> = HashMap::new();
         let mut global_image_id = 0;
 
         for worksheet in &mut self.worksheets {
@@ -1461,7 +1461,7 @@ impl Workbook {
                     None => {
                         global_image_id += 1;
                         embedded_images.push(image.clone());
-                        image_ids.insert(image.hash, global_image_id);
+                        image_ids.insert(image.hash.clone(), global_image_id);
                         global_image_id
                     }
                 };
@@ -1483,8 +1483,8 @@ impl Workbook {
         let mut image_id = self.embedded_images.len() as u32;
 
         // These are the image ids for each unique image file.
-        let mut worksheet_image_ids: HashMap<u64, u32> = HashMap::new();
-        let mut header_footer_image_ids: HashMap<u64, u32> = HashMap::new();
+        let mut worksheet_image_ids: HashMap<String, u32> = HashMap::new();
+        let mut header_footer_image_ids: HashMap<String, u32> = HashMap::new();
 
         for worksheet in &mut self.worksheets {
             if !worksheet.images.is_empty() {
@@ -2129,7 +2129,7 @@ impl Workbook {
     // Write the <sheet> element.
     fn write_sheet(&mut self, name: &str, visible: Visible, index: u16) {
         let sheet_id = format!("{index}");
-        let ref_id = format!("rId{index}");
+        let rel_id = format!("rId{index}");
 
         let mut attributes = vec![("name", name.to_string()), ("sheetId", sheet_id)];
 
@@ -2139,7 +2139,7 @@ impl Workbook {
             Visible::VeryHidden => attributes.push(("state", "veryHidden".to_string())),
         }
 
-        attributes.push(("r:id", ref_id));
+        attributes.push(("r:id", rel_id));
 
         self.writer.xml_empty_tag("sheet", &attributes);
     }

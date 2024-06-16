@@ -42,6 +42,7 @@ mod drawing_tests {
             rel_id: 1,
             object_movement: ObjectMovement::MoveButDontSizeWithCells,
             drawing_type: DrawingType::Image,
+            url: None,
         };
 
         drawing.drawings.push(drawing_info);

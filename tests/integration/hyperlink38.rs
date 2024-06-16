@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2023, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
 use rust_xlsxwriter::{Image, Workbook, XlsxError};
@@ -15,9 +15,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_url("http://www.cpan.org/")?;
+    image
+        .set_alt_text("red.png")
+        .set_url("internal:Sheet1!A1")?;
 
-    worksheet.embed_image(0, 0, &image)?;
+    worksheet.insert_image(8, 4, &image)?;
 
     workbook.save(filename)?;
 
@@ -25,9 +27,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_embed_image10() {
+fn test_hyperlink38() {
     let test_runner = common::TestRunner::new()
-        .set_name("embed_image10")
+        .set_name("hyperlink38")
         .set_function(create_new_xlsx_file)
         .initialize();
 

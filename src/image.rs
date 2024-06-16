@@ -70,7 +70,7 @@ pub struct Image {
     pub(crate) object_movement: ObjectMovement,
     pub(crate) is_header: bool,
     pub(crate) decorative: bool,
-    pub(crate) hash: u64,
+    pub(crate) hash: String,
     pub(crate) data: Vec<u8>,
     pub(crate) drawing_type: DrawingType,
     pub(crate) url: Option<Url>,
@@ -263,7 +263,7 @@ impl Image {
             object_movement: ObjectMovement::MoveButDontSizeWithCells,
             is_header: true,
             decorative: false,
-            hash: 0,
+            hash: String::new(),
             data: buffer.to_vec(),
             drawing_type: DrawingType::Image,
             url: None,
@@ -660,18 +660,30 @@ impl Image {
     /// Set a Url/Hyperlink for an image so that when the user clicks on it they
     /// are redirected to an internal or external location.
     ///
-    /// See [`Url`] for an explanation of the URIs supported by Excel an for
+    /// See [`Url`] for an explanation of the URIs supported by Excel and for
     /// other options that can be set.
     ///
-    /// Note, this is currently only supported for embedded images added via
-    /// [`Worksheet::embed_image()`](crate::Worksheet::embed_image) so it is
-    /// undocumented for now. This functionality will be added to other image
-    /// types in a future version.
+    /// # Parameters
     ///
-    #[doc(hidden)]
-    pub fn set_url(&mut self, link: impl Into<Url>) -> &mut Image {
-        self.url = Some(link.into());
-        self
+    /// * `link` - The url/hyperlink associate with the image as a string or
+    ///   [`Url`].
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    ///   Excel's limit of 2080 characters.
+    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    ///   [`Worksheet::write_url()`](crate::Worksheet::write_url).
+    /// * [`XlsxError::ParameterError`] - URL mouseover tool tip exceeds Excel's
+    ///   limit of 255 characters.
+    ///
+    pub fn set_url(&mut self, link: impl Into<Url>) -> Result<&Image, XlsxError> {
+        let mut url = link.into();
+        url.initialize()?;
+
+        self.url = Some(url);
+
+        Ok(self)
     }
 
     /// Get the width of the image used for the size calculations in Excel.
@@ -826,7 +838,7 @@ impl Image {
         // Set a hash for the image to allow removal of duplicates.
         let mut hasher = DefaultHasher::new();
         data.hash(&mut hasher);
-        self.hash = hasher.finish();
+        self.hash = hasher.finish().to_string();
 
         Ok(())
     }
