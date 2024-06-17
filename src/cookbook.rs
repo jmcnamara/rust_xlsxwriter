@@ -5736,9 +5736,9 @@ $ xmllint --format myfile/docProps/custom.xml
 The MSIP (Microsoft Information Protection) labels in the `name` attributes
 contain a GUID that is unique to each company. The `SiteId` field will also be
 unique to your company/location. The meaning of each of these fields is
-explained in the the following Microsoft document on [Apply sensitivity labels to your files and email].
-Once you have identified the necessary metadata you can add it to a new document
-as shown below.
+explained in the the following Microsoft document on [Microsoft Information
+Protection SDK - Metadata]. Once you have identified the necessary metadata you
+can add it to a new document as shown below.
 
 Note, some sensitivity labels require that the document is encrypted. In order
 to extract the required metadata you will need to unencrypt the file which may
@@ -5751,7 +5751,7 @@ tool such as [msoffice-crypt].
 
 [Apply sensitivity labels to your files and email]: https://support.microsoft.com/en-us/office/apply-sensitivity-labels-to-your-files-and-email-2f96e7cd-d5a4-403b-8bd7-4cc636bae0f9
 
-[Microsoft Information Protection SDK - Metadata]: https://learn.microsoft.com/en-us/information-protection/develop/concept-mip-metadata>
+[Microsoft Information Protection SDK - Metadata]: https://learn.microsoft.com/en-us/information-protection/develop/concept-mip-metadata
 
 
 **Image of the output file:**

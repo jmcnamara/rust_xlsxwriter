@@ -5,6 +5,46 @@ All notable changes to rust_xlsxwriter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.67.0] - 2023-06-17
+
+### Added
+
+  - Updated the default `zip.rs` requirement to v2+ to pick up a fix for
+    [zip-rs/zip2#100] when dealing with 64k+ internal files in an xlsx
+    container. As a result of this, `rust_xlsxwriter` now has a matching `msrv`
+    (Minimum Supported Rust Version) of v1.73.0.
+
+  - Replaced the dependency on `lazy_static` with `std::cell::OnceLock`. The
+    only non-optional requirements are now `zip` and `regex`. This was made
+    possible by the above `msrv` update. See [Feature Request #24].
+
+  - Added an optional dependency on the [ryu] crate to speed up writing large
+    amounts of worksheet numeric data. The feature flag is `ryu`.
+
+    This feature has a benefit when writing more than 300,000 numeric data
+    cells. When writing 5,000,000 numeric cells it can be 30% faster than the
+    standard feature set. See the following [performance analysis] but also
+    please test it for your own scenario when enabling it since a performance
+    improvement is not guaranteed in all cases.
+
+  - Added Excel [Sensitivity Label] cookbook example and explanation.
+
+    Sensitivity Labels are a property that can be added to an Office 365
+    document to indicate that it is compliant with a company’s information
+    protection policies. Sensitivity Labels have designations like
+    “Confidential”, “Internal use only”, or “Public” depending on the policies
+    implemented by the company. They are generally only enabled for enterprise
+    versions of Office.
+
+  - Updated all dependency versions to the latest current values.
+
+    [ryu]: https://docs.rs/ryu/latest/ryu/index.html
+    [zip-rs/zip2#100]: https://github.com/zip-rs/zip2/issues/100
+    [Sensitivity Label]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#setting-the-sensitivity-label
+    [Feature Request #24]: https://github.com/jmcnamara/rust_xlsxwriter/issues/24
+    [performance analysis]: https://github.com/jmcnamara/rust_xlsxwriter/issues/93
+
+
 ## [0.66.0] - 2023-06-12
 
 ### Added
@@ -95,7 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Feature Request #83].
 
-  [Feature Request #83]: https://github.com/jmcnamara/rust_xlsxwriter/pull/83
+  [Feature Request #83]: https://github.com/jmcnamara/rust_xlsxwriter/issues/83
 
   [`utility::check_sheet_name()`]:
       https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.check_sheet_name.html
@@ -106,7 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   methods. This allows the the [`IntoExcelData`] trait to be defined for user
   types and have them include a default format. See [Feature Request #85].
 
-  [Feature Request #85]: https://github.com/jmcnamara/rust_xlsxwriter/pull/85
+  [Feature Request #85]: https://github.com/jmcnamara/rust_xlsxwriter/issues/85
   [`Format`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
 
 ## [0.62.0] - 2023-01-24
@@ -152,7 +192,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Feature Request #66].
 
-  [Feature Request #66]: https://github.com/jmcnamara/rust_xlsxwriter/pull/66
+  [Feature Request #66]: https://github.com/jmcnamara/rust_xlsxwriter/issues/66
 
   [Controlling Excel output via `XlsxSerialize` and struct attributes]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#controlling-excel-output-via-xlsxserialize-and-struct-attributes
 
@@ -161,7 +201,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Feature Request #72].
 
-  [Feature Request #72]: https://github.com/jmcnamara/rust_xlsxwriter/pull/72
+  [Feature Request #72]: https://github.com/jmcnamara/rust_xlsxwriter/issues/72
 
 
 ## [0.60.0] - 2023-01-02
@@ -182,8 +222,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Feature Request #64].
 
-[Feature Request #63]: https://github.com/jmcnamara/rust_xlsxwriter/pull/63
-[Feature Request #64]: https://github.com/jmcnamara/rust_xlsxwriter/pull/64
+[Feature Request #63]: https://github.com/jmcnamara/rust_xlsxwriter/issues/63
+[Feature Request #64]: https://github.com/jmcnamara/rust_xlsxwriter/issues/64
 [Setting serialization headers]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/index.html#setting-serialization-headers
 [`CustomSerializeField`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/serializer/struct.CustomSerializeField.html
 
@@ -194,7 +234,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added [`serialize_chrono_option_naive_to_excel()`] to help serialization of
   `Option` Chrono types. [Feature Request #62].
 
-[Feature Request #62]: https://github.com/jmcnamara/rust_xlsxwriter/pull/62
+[Feature Request #62]: https://github.com/jmcnamara/rust_xlsxwriter/issues/62
 
 [`serialize_chrono_option_naive_to_excel()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.serialize_chrono_option_naive_to_excel.html
 
@@ -235,7 +275,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [Feature Request #59].
 
-[Feature Request #59]: https://github.com/jmcnamara/rust_xlsxwriter/pull/59
+[Feature Request #59]: https://github.com/jmcnamara/rust_xlsxwriter/issues/59
 
 
 ## [0.55.0] - 2023-11-21
@@ -566,7 +606,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`Url`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Url.html
 [`Color`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.Color.html
 [`Formula`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Formula.html
-[Feature Request #16]: https://github.com/jmcnamara/rust_xlsxwriter/pull/16
+[Feature Request #16]: https://github.com/jmcnamara/rust_xlsxwriter/issues/16
 [`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write
 [`worksheet.write_row()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_row
 [`worksheet.write_column()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_column
