@@ -305,12 +305,10 @@ impl Image {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     // Create a new image object.
-    ///     let mut image = Image::new("examples/rust_logo.png")?;
-    ///
-    ///     // Set the image scale.
-    ///     image.set_scale_height(0.75);
-    ///     image.set_scale_width(0.75);
+    ///     // Create a new image object and set the image scale.
+    ///     let image = Image::new("examples/rust_logo.png")?
+    ///         .set_scale_height(0.75)
+    ///         .set_scale_width(0.75);
     ///
     ///     // Insert the image.
     ///     worksheet.insert_image(1, 2, &image)?;
@@ -327,7 +325,7 @@ impl Image {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/image_set_scale_width.png">
     ///
-    pub fn set_scale_height(&mut self, scale: f64) -> &mut Image {
+    pub fn set_scale_height(mut self, scale: f64) -> Image {
         if scale <= 0.0 {
             return self;
         }
@@ -345,7 +343,7 @@ impl Image {
     ///
     /// * `scale` - The scale ratio.
     ///
-    pub fn set_scale_width(&mut self, scale: f64) -> &mut Image {
+    pub fn set_scale_width(mut self, scale: f64) -> Image {
         if scale <= 0.0 {
             return self;
         }
@@ -420,14 +418,14 @@ impl Image {
     ///     worksheet.insert_image(0, 1, &image)?;
     ///
     ///     // Scale the image to fit the entire cell.
-    ///     image.set_scale_to_size(200, 140, false);
+    ///     image = image.set_scale_to_size(200, 140, false);
     ///     worksheet.write_with_format(2, 0, "Image scaled to fit cell:", &center)?;
     ///     worksheet.insert_image(2, 1, &image)?;
     ///
     ///     // Scale the image to fit the defined size region while maintaining the
     ///     // aspect ratio. In this case it is scaled to the smaller of the width or
     ///     // height scales.
-    ///     image.set_scale_to_size(200, 140, true);
+    ///     image = image.set_scale_to_size(200, 140, true);
     ///     worksheet.write_with_format(4, 0, "Image scaled with a fixed aspect ratio:", &center)?;
     ///     worksheet.insert_image(4, 1, &image)?;
     /// #
@@ -443,12 +441,7 @@ impl Image {
     /// <img src="https://rustxlsxwriter.github.io/images/image_set_scale_to_size.png">
     ///
     ///
-    pub fn set_scale_to_size<T>(
-        &mut self,
-        width: T,
-        height: T,
-        keep_aspect_ratio: bool,
-    ) -> &mut Image
+    pub fn set_scale_to_size<T>(mut self, width: T, height: T, keep_aspect_ratio: bool) -> Image
     where
         T: Into<f64> + Copy,
     {
@@ -467,8 +460,8 @@ impl Image {
             }
         }
 
-        self.set_scale_width(scale_width);
-        self.set_scale_height(scale_height);
+        self = self.set_scale_width(scale_width);
+        self = self.set_scale_height(scale_height);
 
         self
     }
@@ -505,13 +498,12 @@ impl Image {
     /// #    // Add a worksheet to the workbook.
     /// #    let worksheet = workbook.add_worksheet();
     /// #
-    ///    // Create a new image object.
-    ///     let mut image = Image::new("examples/rust_logo.png")?;
-    ///
-    ///    // Set the alternative text.
-    ///    image.set_alt_text("A circular logo with gear teeth on the outside \
-    ///                        and a large letter R on the inside.\n\n\
-    ///                        The logo of the Rust programming language.");
+    ///    // Create a new image object and set the alternative text.
+    ///    let image = Image::new("examples/rust_logo.png")?.set_alt_text(
+    ///        "A circular logo with gear teeth on the outside \
+    ///        and a large letter R on the inside.\n\n\
+    ///        The logo of the Rust programming language.",
+    ///    );
     ///
     /// #    // Insert the image.
     /// #    worksheet.insert_image(1, 2, &image)?;
@@ -528,7 +520,7 @@ impl Image {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/image_set_alt_text.png">
     ///
-    pub fn set_alt_text(&mut self, alt_text: impl Into<String>) -> &mut Image {
+    pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Image {
         self.alt_text = alt_text.into();
         self
     }
@@ -563,10 +555,8 @@ impl Image {
     /// #    // Add a worksheet to the workbook.
     /// #    let worksheet = workbook.add_worksheet();
     /// #
-    /// #    // Create a new image object.
-    ///    let mut image = Image::new("examples/rust_logo.png")?;
-    ///
-    ///    image.set_decorative(true);
+    ///    // Create a new image object.
+    ///    let image = Image::new("examples/rust_logo.png")?.set_decorative(true);
     ///
     /// #    // Insert the image.
     /// #    worksheet.insert_image(1, 2, &image)?;
@@ -583,7 +573,7 @@ impl Image {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/image_set_decorative.png">
     ///
-    pub fn set_decorative(&mut self, enable: bool) -> &mut Image {
+    pub fn set_decorative(mut self, enable: bool) -> Image {
         self.decorative = enable;
         self
     }
@@ -629,11 +619,9 @@ impl Image {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     // Create a new image object.
-    ///     let mut image = Image::new("examples/rust_logo.png")?;
-    ///
-    ///     // Set the object movement/positioning options.
-    ///     image.set_object_movement(ObjectMovement::MoveButDontSizeWithCells);
+    ///     // Create a new image and set the object movement/positioning options.
+    ///     let image = Image::new("examples/rust_logo.png")?
+    ///         .set_object_movement(ObjectMovement::MoveButDontSizeWithCells);
     ///
     ///     // Insert the image.
     ///     worksheet.insert_image(1, 2, &image)?;
@@ -650,7 +638,7 @@ impl Image {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/image_set_object_movement.png">
     ///
-    pub fn set_object_movement(&mut self, option: ObjectMovement) -> &mut Image {
+    pub fn set_object_movement(mut self, option: ObjectMovement) -> Image {
         self.object_movement = option;
         self
     }
@@ -677,7 +665,7 @@ impl Image {
     /// * [`XlsxError::ParameterError`] - URL mouseover tool tip exceeds Excel's
     ///   limit of 255 characters.
     ///
-    pub fn set_url(&mut self, link: impl Into<Url>) -> Result<&Image, XlsxError> {
+    pub fn set_url(mut self, link: impl Into<Url>) -> Result<Image, XlsxError> {
         let mut url = link.into();
         url.initialize()?;
 
@@ -797,7 +785,7 @@ impl Image {
     /// `name` - The VML object name/description.
     ///
     #[doc(hidden)]
-    pub fn set_vml_name(&mut self, name: impl Into<String>) -> &mut Image {
+    pub fn set_vml_name(mut self, name: impl Into<String>) -> Image {
         self.vml_name = name.into();
         self
     }

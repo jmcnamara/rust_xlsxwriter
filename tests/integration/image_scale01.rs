@@ -18,15 +18,14 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_row_height_pixels(2, 64)?;
     worksheet.set_row_height_pixels(4, 64)?;
 
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_alt_text("red.png");
+    let mut image = Image::new("tests/input/images/red.png")?.set_alt_text("red.png");
 
     worksheet.insert_image(0, 0, &image)?;
 
-    image.set_scale_width(6.0).set_scale_height(2.0);
+    image = image.set_scale_width(6.0).set_scale_height(2.0);
     worksheet.insert_image(2, 0, &image)?;
 
-    image.set_scale_width(2.0).set_scale_height(2.0);
+    image = image.set_scale_width(2.0).set_scale_height(2.0);
     worksheet.insert_image(4, 0, &image)?;
 
     workbook.save(filename)?;
@@ -44,8 +43,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_row_height_pixels(2, 64)?;
     worksheet.set_row_height_pixels(4, 64)?;
 
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_alt_text("red.png");
+    let image = Image::new("tests/input/images/red.png")?.set_alt_text("red.png");
 
     worksheet.insert_image(0, 0, &image)?;
 

@@ -80,8 +80,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         0x00, 0xa2, 0x8a, 0x28, 0x00, 0xa2, 0x8a, 0x28, 0x03, 0xff, 0xd9,
     ];
 
-    let mut image = Image::new_from_buffer(&buf)?;
-    image.set_vml_name("red");
+    let image = Image::new_from_buffer(&buf)?.set_vml_name("red");
 
     worksheet.set_header("&L&G");
     worksheet.set_header_image(&image, HeaderImagePosition::Left)?;

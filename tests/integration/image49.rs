@@ -14,56 +14,44 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet1 = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/blue.png")?;
-    image.set_alt_text("blue.png");
+    let image = Image::new("tests/input/images/blue.png")?.set_alt_text("blue.png");
     worksheet1.insert_image(0, 0, &image)?;
 
-    let mut image_red_jpg = Image::new("tests/input/images/red.jpg")?;
-    image_red_jpg.set_alt_text("red.jpg");
+    let image_red_jpg = Image::new("tests/input/images/red.jpg")?.set_alt_text("red.jpg");
     worksheet1.insert_image(2, 1, &image_red_jpg)?;
 
-    let mut image_yellow_jpg = Image::new("tests/input/images/yellow.jpg")?;
-    image_yellow_jpg.set_alt_text("yellow.jpg");
+    let image_yellow_jpg = Image::new("tests/input/images/yellow.jpg")?.set_alt_text("yellow.jpg");
     worksheet1.insert_image(4, 3, &image_yellow_jpg)?;
 
-    let mut image_grey_png = Image::new("tests/input/images/grey.png")?;
-    image_grey_png.set_alt_text("grey.png");
+    let image_grey_png = Image::new("tests/input/images/grey.png")?.set_alt_text("grey.png");
     worksheet1.insert_image(8, 5, &image_grey_png)?;
 
     let worksheet2 = workbook.add_worksheet();
 
-    let mut image_blue_png = Image::new("tests/input/images/blue.png")?;
-    image_blue_png.set_alt_text("blue.png");
+    let image_blue_png = Image::new("tests/input/images/blue.png")?.set_alt_text("blue.png");
     worksheet2.insert_image(0, 0, &image_blue_png)?;
 
-    let mut image_red_jpg = Image::new("tests/input/images/red.jpg")?;
-    image_red_jpg.set_alt_text("red.jpg");
+    let image_red_jpg = Image::new("tests/input/images/red.jpg")?.set_alt_text("red.jpg");
     worksheet2.insert_image(2, 1, &image_red_jpg)?;
 
-    let mut image_yellow_jpg = Image::new("tests/input/images/yellow.jpg")?;
-    image_yellow_jpg.set_alt_text("yellow.jpg");
+    let image_yellow_jpg = Image::new("tests/input/images/yellow.jpg")?.set_alt_text("yellow.jpg");
     worksheet2.insert_image(4, 3, &image_yellow_jpg)?;
 
-    let mut image_greg_png = Image::new("tests/input/images/grey.png")?;
-    image_greg_png.set_alt_text("grey.png");
+    let image_greg_png = Image::new("tests/input/images/grey.png")?.set_alt_text("grey.png");
     worksheet2.insert_image(8, 5, &image_greg_png)?;
 
     let worksheet3 = workbook.add_worksheet();
 
-    let mut image_blue_png = Image::new("tests/input/images/blue.png")?;
-    image_blue_png.set_alt_text("blue.png");
+    let image_blue_png = Image::new("tests/input/images/blue.png")?.set_alt_text("blue.png");
     worksheet3.insert_image(0, 0, &image_blue_png)?;
 
-    let mut image_red_jpg = Image::new("tests/input/images/red.jpg")?;
-    image_red_jpg.set_alt_text("red.jpg");
+    let image_red_jpg = Image::new("tests/input/images/red.jpg")?.set_alt_text("red.jpg");
     worksheet3.insert_image(2, 1, &image_red_jpg)?;
 
-    let mut image_yellow_jpg = Image::new("tests/input/images/yellow.jpg")?;
-    image_yellow_jpg.set_alt_text("yellow.jpg");
+    let image_yellow_jpg = Image::new("tests/input/images/yellow.jpg")?.set_alt_text("yellow.jpg");
     worksheet3.insert_image(4, 3, &image_yellow_jpg)?;
 
-    let mut image_grey_png = Image::new("tests/input/images/grey.png")?;
-    image_grey_png.set_alt_text("grey.png");
+    let image_grey_png = Image::new("tests/input/images/grey.png")?.set_alt_text("grey.png");
     worksheet3.insert_image(8, 5, &image_grey_png)?;
 
     workbook.save(filename)?;

@@ -14,9 +14,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/grey.png")?;
-
-    image
+    let image = Image::new("tests/input/images/grey.png")?
         .set_alt_text("grey.png")
         .set_scale_width(0.5)
         .set_scale_height(0.5);
@@ -34,9 +32,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/grey.png")?;
-
-    image
+    let image = Image::new("tests/input/images/grey.png")?
         .set_alt_text("grey.png")
         .set_scale_to_size(99.0 / 2.0, 69.0 / 2.0, false);
 

@@ -15,8 +15,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     let url = Url::new("https://github.com/jmcnamara").set_tip("GitHub");
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_alt_text("red.png").set_url(&url)?;
+    let image = Image::new("tests/input/images/red.png")?
+        .set_alt_text("red.png")
+        .set_url(url)?;
 
     worksheet.insert_image(8, 4, &image)?;
 

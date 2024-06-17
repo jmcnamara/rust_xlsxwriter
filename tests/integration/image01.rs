@@ -14,8 +14,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_alt_text("red.png");
+    let image = Image::new("tests/input/images/red.png")?.set_alt_text("red.png");
 
     worksheet.insert_image(8, 4, &image)?;
 
@@ -47,8 +46,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
         0x44, 0xae, 0x42, 0x60, 0x82,
     ];
 
-    let mut image = Image::new_from_buffer(&buf)?;
-    image.set_alt_text("red.png");
+    let image = Image::new_from_buffer(&buf)?.set_alt_text("red.png");
 
     worksheet.insert_image(8, 4, &image)?;
 

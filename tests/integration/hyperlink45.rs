@@ -13,8 +13,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image
+    let image = Image::new("tests/input/images/red.png")?
         .set_alt_text("red.png")
         .set_url(r"file:///\\Vboxsvr\share\foo bar.xlsx#'Some Sheet'!A1")?;
 

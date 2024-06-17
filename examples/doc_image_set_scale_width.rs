@@ -14,12 +14,10 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Create a new image object.
-    let mut image = Image::new("examples/rust_logo.png")?;
-
-    // Set the image scale.
-    image.set_scale_height(0.75);
-    image.set_scale_width(0.75);
+    // Create a new image object and set the image scale.
+    let image = Image::new("examples/rust_logo.png")?
+        .set_scale_height(0.75)
+        .set_scale_width(0.75);
 
     // Insert the image.
     worksheet.insert_image(1, 2, &image)?;

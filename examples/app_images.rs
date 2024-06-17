@@ -29,7 +29,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Insert an image with scaling.
     worksheet.write_string(15, 0, "Insert a scaled image:")?;
-    image.set_scale_width(0.75).set_scale_height(0.75);
+    image = image.set_scale_width(0.75).set_scale_height(0.75);
     worksheet.insert_image(15, 1, &image)?;
 
     // Save the file to disk.

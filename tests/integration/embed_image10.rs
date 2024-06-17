@@ -14,8 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_url("http://www.cpan.org/")?;
+    let image = Image::new("tests/input/images/red.png")?.set_url("http://www.cpan.org/")?;
 
     worksheet.embed_image(0, 0, &image)?;
 

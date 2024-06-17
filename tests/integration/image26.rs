@@ -14,20 +14,16 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/black_72.png")?;
-    image.set_alt_text("black_72.png");
+    let image = Image::new("tests/input/images/black_72.png")?.set_alt_text("black_72.png");
 
     worksheet.insert_image(1, 1, &image)?;
-    let mut image = Image::new("tests/input/images/black_96.png")?;
-    image.set_alt_text("black_96.png");
+    let image = Image::new("tests/input/images/black_96.png")?.set_alt_text("black_96.png");
 
     worksheet.insert_image(7, 1, &image)?;
-    let mut image = Image::new("tests/input/images/black_150.png")?;
-    image.set_alt_text("black_150.png");
+    let image = Image::new("tests/input/images/black_150.png")?.set_alt_text("black_150.png");
 
     worksheet.insert_image(12, 1, &image)?;
-    let mut image = Image::new("tests/input/images/black_300.png")?;
-    image.set_alt_text("black_300.png");
+    let image = Image::new("tests/input/images/black_300.png")?.set_alt_text("black_300.png");
 
     worksheet.insert_image(16, 1, &image)?;
 

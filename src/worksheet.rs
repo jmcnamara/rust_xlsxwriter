@@ -4923,8 +4923,9 @@ impl Worksheet {
         let width = self.column_pixel_width(col, image.object_movement);
         let height = self.row_pixel_height(row, image.object_movement);
 
-        let mut image = image.clone();
-        image.set_scale_to_size(width, height, keep_aspect_ratio);
+        let image = image
+            .clone()
+            .set_scale_to_size(width, height, keep_aspect_ratio);
 
         self.images.insert((row, col), image);
 
@@ -10119,9 +10120,9 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     /// #     // Scale the image so it fits in the header.
-    ///     let mut image = Image::new("examples/rust_logo.png")?;
-    /// #     image.set_scale_height(0.5);
-    /// #     image.set_scale_width(0.5);
+    ///       let image = Image::new("examples/rust_logo.png")?
+    ///           .set_scale_height(0.5)
+    ///           .set_scale_width(0.5);
     /// #
     ///     // Insert the watermark image in the header.
     ///     worksheet.set_header("&C&[Picture]");

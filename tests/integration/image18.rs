@@ -17,8 +17,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_row_height(1, 96)?;
     worksheet.set_column_width(2, 18)?;
 
-    let mut image = Image::new("tests/input/images/issue32.png")?;
-    image.set_alt_text("issue32.png");
+    let image = Image::new("tests/input/images/issue32.png")?.set_alt_text("issue32.png");
 
     worksheet.insert_image_with_offset(1, 2, &image, 5, 5)?;
 

@@ -13,8 +13,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/rust_logo.png")?;
-    image.set_alt_text("Line 1.\n\nLine 2.");
+    let image = Image::new("tests/input/images/rust_logo.png")?.set_alt_text("Line 1.\n\nLine 2.");
 
     worksheet.insert_image(8, 4, &image)?;
 
