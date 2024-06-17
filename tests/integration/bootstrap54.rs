@@ -14,9 +14,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/red.jpg")?;
-    image.set_scale_width(2.0);
-    image.set_scale_height(0.5);
+    let image = Image::new("tests/input/images/red.jpg")?
+        .set_scale_width(2.0)
+        .set_scale_height(0.5);
 
     worksheet.set_header("&L&G");
     worksheet.set_header_image(&image, HeaderImagePosition::Left)?;

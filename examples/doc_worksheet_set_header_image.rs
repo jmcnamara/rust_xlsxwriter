@@ -14,9 +14,9 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Scale the image so it fits in the header.
-    let mut image = Image::new("examples/rust_logo.png")?;
-    image.set_scale_height(0.5);
-    image.set_scale_width(0.5);
+    let image = Image::new("examples/rust_logo.png")?
+        .set_scale_height(0.5)
+        .set_scale_width(0.5);
 
     // Insert the watermark image in the header.
     worksheet.set_header("&C&[Picture]");

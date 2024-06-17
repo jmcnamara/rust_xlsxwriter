@@ -13,29 +13,25 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
-    let mut image = Image::new("tests/input/images/blue.png")?;
-    image
+    let image = Image::new("tests/input/images/blue.png")?
         .set_alt_text("blue.png")
         .set_url("https://github.com/foo")?;
 
     worksheet.insert_image(0, 0, &image)?;
 
-    let mut image = Image::new("tests/input/images/red.jpg")?;
-    image
+    let image = Image::new("tests/input/images/red.jpg")?
         .set_alt_text("red.jpg")
         .set_url("https://github.com/bar")?;
 
     worksheet.insert_image(2, 1, &image)?;
 
-    let mut image = Image::new("tests/input/images/yellow.jpg")?;
-    image
+    let image = Image::new("tests/input/images/yellow.jpg")?
         .set_alt_text("yellow.jpg")
         .set_url("https://github.com/baz")?;
 
     worksheet.insert_image(4, 3, &image)?;
 
-    let mut image = Image::new("tests/input/images/grey.png")?;
-    image
+    let image = Image::new("tests/input/images/grey.png")?
         .set_alt_text("grey.png")
         .set_url("https://github.com/boo")?;
 

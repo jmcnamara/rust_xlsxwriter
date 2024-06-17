@@ -16,9 +16,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a new image object.
-    let mut image = Image::new("examples/rust_logo.png")?;
-
-    image.set_decorative(true);
+    let image = Image::new("examples/rust_logo.png")?.set_decorative(true);
 
     // Insert the image.
     worksheet.insert_image(1, 2, &image)?;

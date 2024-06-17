@@ -24,8 +24,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.write_url(15, 0, "http://perl.com/")?;
 
-    let mut image = Image::new("tests/input/images/blue.png")?;
-    image.set_alt_text("blue.png");
+    let image = Image::new("tests/input/images/blue.png")?.set_alt_text("blue.png");
 
     worksheet.insert_image(3, 0, &image)?;
 

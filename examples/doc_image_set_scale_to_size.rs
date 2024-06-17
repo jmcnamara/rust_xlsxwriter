@@ -33,14 +33,14 @@ fn main() -> Result<(), XlsxError> {
     worksheet.insert_image(0, 1, &image)?;
 
     // Scale the image to fit the entire cell.
-    image.set_scale_to_size(200, 140, false);
+    image = image.set_scale_to_size(200, 140, false);
     worksheet.write_with_format(2, 0, "Image scaled to fit cell:", &center)?;
     worksheet.insert_image(2, 1, &image)?;
 
     // Scale the image to fit the defined size region while maintaining the
     // aspect ratio. In this case it is scaled to the smaller of the width or
     // height scales.
-    image.set_scale_to_size(200, 140, true);
+    image = image.set_scale_to_size(200, 140, true);
     worksheet.write_with_format(4, 0, "Image scaled with a fixed aspect ratio:", &center)?;
     worksheet.insert_image(4, 1, &image)?;
 

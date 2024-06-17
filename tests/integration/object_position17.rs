@@ -20,8 +20,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     // Workaround to set the column dimension.
     worksheet.set_column_format(1, &Format::default())?;
 
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_alt_text("red.png");
+    let image = Image::new("tests/input/images/red.png")?.set_alt_text("red.png");
 
     worksheet.insert_image_with_offset(8, 0, &image, 192, 0)?;
 

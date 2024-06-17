@@ -16,8 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.write_url(0, 0, "https://github.com/jmcnamara")?;
 
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image
+    let image = Image::new("tests/input/images/red.png")?
         .set_alt_text("red.png")
         .set_url("https://github.com/jmcnamara")?;
 

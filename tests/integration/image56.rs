@@ -14,8 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut image = Image::new("tests/input/images/red.gif")?;
-    image.set_alt_text("red.gif");
+    let image = Image::new("tests/input/images/red.gif")?.set_alt_text("red.gif");
 
     worksheet.insert_image(8, 4, &image)?;
 

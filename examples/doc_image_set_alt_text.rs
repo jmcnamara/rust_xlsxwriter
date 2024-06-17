@@ -14,14 +14,11 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Create a new image object.
-    let mut image = Image::new("examples/rust_logo.png")?;
-
-    // Set the alternative text.
-    image.set_alt_text(
+    // Create a new image object and set the alternative text.
+    let image = Image::new("examples/rust_logo.png")?.set_alt_text(
         "A circular logo with gear teeth on the outside \
-                        and a large letter R on the inside.\n\n\
-                        The logo of the Rust programming language.",
+        and a large letter R on the inside.\n\n\
+        The logo of the Rust programming language.",
     );
 
     // Insert the image.

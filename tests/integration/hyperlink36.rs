@@ -21,8 +21,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.insert_chart(11, 4, &chart)?;
 
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image
+    let image = Image::new("tests/input/images/red.png")?
         .set_alt_text("red.png")
         .set_url("https://github.com/jmcnamara")?;
 

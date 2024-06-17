@@ -21,8 +21,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet3 = workbook.add_worksheet();
     worksheet3.set_portrait();
 
-    let mut image = Image::new("tests/input/images/red.png")?;
-    image.set_alt_text("red.png");
+    let image = Image::new("tests/input/images/red.png")?.set_alt_text("red.png");
 
     worksheet3.insert_image(8, 4, &image)?;
 

@@ -2154,7 +2154,7 @@ fn main() -> Result<(), XlsxError> {
 
     // Insert an image with scaling.
     worksheet.write_string(15, 0, "Insert a scaled image:")?;
-    image.set_scale_width(0.75).set_scale_height(0.75);
+    image = image.set_scale_width(0.75).set_scale_height(0.75);
     worksheet.insert_image(15, 1, &image)?;
 
     // Save the file to disk.
@@ -5886,9 +5886,9 @@ fn main() -> Result<(), XlsxError> {
     worksheet3.set_view_page_layout();
     worksheet3.write_string(0, 0, "Some text")?;
 
-    let mut image = Image::new("examples/rust_logo.png")?;
-    image.set_scale_height(0.5);
-    image.set_scale_width(0.5);
+    let image = Image::new("examples/rust_logo.png")?
+        .set_scale_height(0.5)
+        .set_scale_width(0.5);
 
     worksheet3.set_header("&L&[Picture]");
     worksheet3.set_header_image(&image, HeaderImagePosition::Left)?;
