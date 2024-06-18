@@ -129,9 +129,9 @@ frequently.
 
 Recent changes:
 
+- Added support for links in images.
 - Added support for combined charts and chart secondary axes.
 - Added support for worksheet sparklines.
-- Added support for Excel 365 embedded worksheet images.
 
 
 See the full [Release Notes and Changelog].
