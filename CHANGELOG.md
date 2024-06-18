@@ -1,9 +1,23 @@
 # Changelog
 
-All notable changes to rust_xlsxwriter will be documented in this file.
+All notable changes to `rust_xlsxwriter` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.68.0] - 2023-06-18
+
+### Added
+
+  - Added support for urls in images. [Feature Request #91].
+
+    [Feature Request #91]: https://github.com/jmcnamara/rust_xlsxwriter/issues/91
+
+### Changed
+
+  - Changed the method signatures of the [`Image`] helper methods from `&mut
+    self` to `mut self` to allow method chaining. This is an API/ABI break.
+
 
 ## [0.67.0] - 2023-06-17
 
@@ -108,7 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added support for embedding images into worksheets with
   [`worksheet::embed_image()`] and [`worksheet::embed_image_with_format()`] and
-  the [Image] struct. See the [Embedded Images] example.
+  the [`Image`] struct. See the [Embedded Images] example.
 
   This can be useful if you are building up a spreadsheet of products with a
   column of images for each product. Embedded images move with the cell so they
@@ -1093,7 +1107,7 @@ Added more page setup methods.
 
 - Added support for inserting images into worksheets with
   [`worksheet.insert_image()`] and [`worksheet.insert_image_with_offset()`] and
-  the [Image] struct.
+  the [`Image`] struct.
 
   See also the [images example] in the user guide.
 
@@ -1106,7 +1120,7 @@ Added more page setup methods.
 - The [`workbook.save()`] method has been extended to handle paths or strings.
   The `workbook.save_to_path()` method has been removed. See [PR #15].
 
-[Image]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
+[`Image`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
 [PR #15]: https://github.com/jmcnamara/rust_xlsxwriter/pull/15
 [images example]: https://rustxlsxwriter.github.io/examples/images.html
 [`worksheet.insert_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.insert_image
@@ -1322,7 +1336,7 @@ restructures the Workbook constructor/destructor sequence and introduces a
   - [`worksheet.set_footer()`]
   - [`worksheet.set_margins()`]
 
-  See also the rust_xlsxwriter user documentation on [Adding Headers and
+  See also the `rust_xlsxwriter` user documentation on [Adding Headers and
   Footers].
 
 [`worksheet.set_header()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.set_header
@@ -1358,7 +1372,7 @@ restructures the Workbook constructor/destructor sequence and introduces a
   [`worksheet.write_array()`] and
   [`worksheet.write_dynamic_array_formula_with_format()`].
 
-See also the rust_xlsxwriter user documentation on [Dynamic Array support].
+See also the `rust_xlsxwriter` user documentation on [Dynamic Array support].
 
 [`worksheet.write_array()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_array_formula
 [`worksheet.write_dynamic_array_formula_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Worksheet.html#method.write_dynamic_array_formula

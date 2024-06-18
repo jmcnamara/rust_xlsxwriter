@@ -66,6 +66,8 @@
 //!   creating and using charts.
 //! </p>
 //!
+//! <p>
+//!
 //! - [`Format`]: The interface for adding formatting to worksheets and other
 //!   objects.
 //!  - [`Table`]: The interface for worksheet tables.
@@ -78,15 +80,16 @@
 //! - [`Url`]: A type for URLs/Hyperlinks used in worksheets.
 //! - [`DocProperties`]: The interface used to create an object to represent
 //!   document metadata properties.
+//! </p>
+//!
+//! - [`Changelog`](crate::changelog): Release notes and changelog.
 //!
 //! Other external documentation:
 //!
 //! - [User Guide]: Working with the `rust_xlsxwriter` library.
-//! - [Release Notes].
 //! - [Roadmap of planned features].
 //!
 //! [User Guide]: https://rustxlsxwriter.github.io/index.html
-//! [Release Notes]: https://rustxlsxwriter.github.io/changelog.html
 //! [Roadmap of planned features]:
 //!     https://github.com/jmcnamara/rust_xlsxwriter/issues/1
 //!
@@ -217,6 +220,7 @@ pub mod conditional_format;
 pub mod cookbook;
 pub mod sparkline;
 pub mod tutorial;
+pub mod changelog;
 pub mod utility;
 pub mod workbook;
 pub mod worksheet;

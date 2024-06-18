@@ -742,8 +742,8 @@ following resources for more information:
 - [Release Notes].
 - [Roadmap of planned features].
 
+[Release Notes]: crate::changelog
 [User Guide]: https://rustxlsxwriter.github.io/index.html
-[Release Notes]: https://rustxlsxwriter.github.io/changelog.html
 [Roadmap of planned features]:
     https://github.com/jmcnamara/rust_xlsxwriter/issues/1
 
