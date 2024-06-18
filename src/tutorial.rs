@@ -34,7 +34,7 @@ using it to write Excel xlsx files.
 
 # Getting started
 
-In order to use the `rust_xlsxwriter` in a application or in another library you
+To use the `rust_xlsxwriter` in an application or in another library you
 will need add it as a dependency to the `Cargo.toml` file of your project.
 
 To demonstrate the steps required we will start with a small sample application.
@@ -116,7 +116,7 @@ slightly more realistic tutorial example.
 
 # Tutorial
 
-In order to look at some of the basic but more useful features of the
+To look at some of the basic but more useful features of the
 `rust_xlsxwriter` library we will create an application to summarize some
 monthly expenses into a spreadsheet.
 
@@ -266,7 +266,7 @@ spreadsheet shown in the image above.:
 ## Tutorial Part 2: Adding some formatting
 
 The previous example converted the required data into an Excel file but it
-looked a little bare. In order to make the information clearer we can add some
+looked a little bare. To make the information clearer we can add some
 simple formatting, like this:
 
 <img src="https://rustxlsxwriter.github.io/images/tutorial2.png">
@@ -331,7 +331,7 @@ The main difference between this and the previous program is that we have added
 two [`Format`](crate::Format) objects that we can use to format cells in the
 spreadsheet.
 
-`Format` objects represent all of the formatting properties that can be applied
+`Format` objects represent all the formatting properties that can be applied
 to a cell in Excel such as fonts, number formatting, colors and borders. This is
 explained in more detail in the [`Format`](crate::Format) struct documentation.
 
@@ -440,7 +440,7 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 Dates and times in Excel are floating point numbers that have a format applied
-to display them in the desired way. In order to handle dates and times with
+to display them in the desired way. To handle dates and times with
 `rust_xlsxwriter` we create them using a [`ExcelDateTime`](crate::ExcelDateTime)
 instance and format them with an Excel number format.
 
@@ -608,7 +608,7 @@ following:
 ```
 
 This allows the range to change dynamically if we add new elements to our `data`
-vector and also ensures that the worksheet name is quoted properly (when
+vector and ensures that the worksheet name is quoted properly (when
 required).
 
 The other section of the code that had a hard-coded string is the formula
@@ -714,7 +714,7 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-This gives the same output to the previous version but it is now future proof
+This gives the same output to the previous version, but it is now future proof
 for any changes to our input data:
 
 <img src="https://rustxlsxwriter.github.io/images/tutorial5.png">

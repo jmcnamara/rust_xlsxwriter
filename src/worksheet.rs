@@ -4540,7 +4540,7 @@ impl Worksheet {
     ///
     /// - PNG
     /// - JPG
-    /// - GIF: The image can be an animated gif in more resent versions of
+    /// - GIF: The image can be an animated gif in more recent versions of
     ///   Excel.
     /// - BMP: BMP images are only supported for backward compatibility. In
     ///   general it is best to avoid BMP images since they are not compressed.

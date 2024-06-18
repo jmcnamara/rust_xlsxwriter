@@ -31,8 +31,8 @@ pub enum XlsxError {
     /// an Excel limit or syntax. The nature of the error is in the error string.
     ParameterError(String),
 
-    /// Error returned when a row or column argument exceeds Excel's limits of
-    /// 1,048,576 rows and 16,384 columns for a worksheet.
+    /// Row or column argument exceeds Excel's limits of 1,048,576 rows and
+    /// 16,384 columns for a worksheet.
     RowColumnLimitError,
 
     /// First row or column is greater than last row or column in a range
@@ -48,7 +48,7 @@ pub enum XlsxError {
     /// Worksheet name is already in use in the workbook.
     SheetnameReused(String),
 
-    /// Worksheet name cannot contain invalid characters: `[ ] : * ? / \`
+    /// Worksheet name cannot contain any of the following invalid characters: `[ ] : * ? / \`
     SheetnameContainsInvalidCharacter(String),
 
     /// Worksheet name cannot start or end with an apostrophe.
@@ -63,31 +63,30 @@ pub enum XlsxError {
     /// A merge range cannot be a single cell in Excel.
     MergeRangeSingleCell,
 
-    /// The merge range overlaps a previous merge range.
+    /// The merge range overlaps a previous merge range. This is a strictly
+    /// prohibited by Excel.
     MergeRangeOverlaps(String, String),
-
-    /// The table range overlaps a previous table range.
-    TableRangeOverlaps(String, String),
 
     /// URL string exceeds Excel's url of 2080 characters.
     MaxUrlLengthExceeded,
 
     /// Unknown url type. The URL/URIs supported by Excel are `http://`,
     /// `https://`, `ftp://`, `ftps://`, `mailto:`, `file://` and the
-    /// pseudo-uri `internal:`:
+    /// pseudo-uri `internal:`.
     UnknownUrlType(String),
 
-    /// Unknown image type. The supported image formats are PNG, JPG, GIF and BMP.
+    /// Unknown image type. The supported image formats are PNG, JPG, GIF and
+    /// BMP. See [`Image`](crate::Image) for details.
     UnknownImageType,
 
-    /// Image has 0 width or height, or the dimensions couldn't be read.
+    /// Image has zero width or height, or the dimensions couldn't be read.
     ImageDimensionError,
 
-    /// A general error that is raised when a chart parameter is incorrect or a
+    /// A general error that is raised when a chart parameter is incorrect, or a
     /// chart is configured incorrectly.
     ChartError(String),
 
-    /// A general error that is raised when a sparkline parameter is incorrect
+    /// A general error that is raised when a sparkline parameter is incorrect,
     /// or a sparkline is configured incorrectly.
     SparklineError(String),
 
@@ -95,8 +94,8 @@ pub enum XlsxError {
     /// [`ExcelDateTime`](crate::ExcelDateTime) method is outside Excel's
     /// allowable ranges.
     ///
-    /// For dates Excel allows dates in the range 1899-12-31 to 9999-12-31. For
-    /// hours the range is generally 0-24 although larger ranges can be used to
+    /// Excel restricts dates to the range 1899-12-31 to 9999-12-31. For hours
+    /// the range is generally 0-24 although larger ranges can be used to
     /// indicate durations. Minutes should be in the range 0-60 and seconds
     /// should be in the range 0.0-59.999. Excel only supports millisecond
     /// resolution.
@@ -129,7 +128,11 @@ pub enum XlsxError {
     ///
     DateTimeParseError(String),
 
-    /// A general error that is raised when a table parameter is incorrect or a
+    /// The table range overlaps a previous table range. This is a strictly
+    /// prohibited by Excel.
+    TableRangeOverlaps(String, String),
+
+    /// A general error that is raised when a table parameter is incorrect, or a
     /// table is configured incorrectly.
     TableError(String),
 
@@ -141,11 +144,11 @@ pub enum XlsxError {
     ConditionalFormatError(String),
 
     /// A customizable error that can be used by third parties to raise errors
-    /// or to convert other Error types to.
+    /// or as a conversion target for other Error types.
     CustomError(String),
 
     /// Wrapper for a variety of [`std::io::Error`] errors such as file
-    /// permissions when writing the xlsx file to disk. This can be caused by an
+    /// permissions when writing the xlsx file to disk. This can be caused by a
     /// non-existent parent directory or, commonly on Windows, if the file is
     /// already open in Excel.
     IoError(std::io::Error),
@@ -156,7 +159,7 @@ pub enum XlsxError {
     ZipError(zip::result::ZipError),
 
     /// A general error that is raised when serializing data via the Serde
-    /// serializer.
+    /// serializer. This requires the `serde` feature to be enabled.
     #[cfg(feature = "serde")]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     SerdeError(String),
