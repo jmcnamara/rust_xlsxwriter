@@ -25,7 +25,7 @@ fn main() -> Result<(), XlsxError> {
     chart.legend().set_position(ChartLegendPosition::Top);
 
     // Overlay the chart legend on the plot area.
-    chart.legend().set_overlay();
+    chart.legend().set_overlay(true);
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

@@ -841,10 +841,11 @@ pub struct Chart {
     pub(crate) y_axis: ChartAxis,
     pub(crate) x2_axis: ChartAxis,
     pub(crate) y2_axis: ChartAxis,
-    pub(crate) legend: ChartLegend,
-    pub(crate) chart_area_format: ChartFormat,
-    pub(crate) plot_area_format: ChartFormat,
     pub(crate) combined_chart: Option<Box<Chart>>,
+    legend: ChartLegend,
+    chart_area_format: ChartFormat,
+    plot_area_format: ChartFormat,
+    plot_area_layout: ChartLayout,
     grouping: ChartGrouping,
     show_empty_cells_as: Option<ChartEmptyCells>,
     show_hidden_data: bool,
@@ -962,6 +963,7 @@ impl Chart {
             legend: ChartLegend::new(),
             chart_area_format: ChartFormat::default(),
             plot_area_format: ChartFormat::default(),
+            plot_area_layout: ChartLayout::default(),
             grouping: ChartGrouping::Standard,
             show_empty_cells_as: None,
             show_hidden_data: false,
@@ -1869,6 +1871,16 @@ impl Chart {
         T: IntoChartFormat,
     {
         self.plot_area_format = format.new_chart_format();
+        self
+    }
+
+    /// TODO
+    pub fn set_plot_area_layout(&mut self, layout: &ChartLayout) -> &mut Chart {
+        let mut layout = layout.clone();
+        layout.has_inner = true;
+        layout.has_dimensions = true;
+
+        self.plot_area_layout = layout;
         self
     }
 
@@ -3539,7 +3551,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:plotArea");
 
         // Write the c:layout element.
-        self.write_layout();
+        self.write_layout(&self.plot_area_layout.clone());
 
         // Write the <c:xxxChart> element for each chart type.
         self.write_chart_type();
@@ -3699,8 +3711,54 @@ impl Chart {
     }
 
     // Write the <c:layout> element.
-    fn write_layout(&mut self) {
-        self.writer.xml_empty_tag_only("c:layout");
+    fn write_layout(&mut self, layout: &ChartLayout) {
+        if layout.is_not_default() {
+            self.writer.xml_start_tag_only("c:layout");
+
+            // Write the c:manualLayout element.
+            self.write_manual_layout(layout);
+
+            self.writer.xml_end_tag("c:layout");
+        } else {
+            self.writer.xml_empty_tag_only("c:layout");
+        }
+    }
+
+    // Write the <c:manualLayout> element.
+    fn write_manual_layout(&mut self, layout: &ChartLayout) {
+        self.writer.xml_start_tag_only("c:manualLayout");
+
+        if layout.has_inner {
+            self.writer
+                .xml_empty_tag("c:layoutTarget", &[("val", "inner")]);
+        }
+
+        self.writer.xml_empty_tag("c:xMode", &[("val", "edge")]);
+        self.writer.xml_empty_tag("c:yMode", &[("val", "edge")]);
+
+        if let Some(value) = layout.x_offset {
+            let attributes = [("val", value.to_string())];
+            self.writer.xml_empty_tag("c:x", &attributes);
+        }
+
+        if let Some(value) = layout.y_offset {
+            let attributes = [("val", value.to_string())];
+            self.writer.xml_empty_tag("c:y", &attributes);
+        }
+
+        if layout.has_dimensions {
+            if let Some(value) = layout.width {
+                let attributes = [("val", value.to_string())];
+                self.writer.xml_empty_tag("c:w", &attributes);
+            }
+
+            if let Some(value) = layout.height {
+                let attributes = [("val", value.to_string())];
+                self.writer.xml_empty_tag("c:h", &attributes);
+            }
+        }
+
+        self.writer.xml_end_tag("c:manualLayout");
     }
 
     // Write the <c:barDir> element.
@@ -4820,7 +4878,8 @@ impl Chart {
         self.writer.xml_start_tag_only("c:dispUnitsLbl");
 
         // Write the c:layout element.
-        self.write_layout();
+        let layout = ChartLayout::default();
+        self.write_layout(&layout);
 
         self.writer.xml_end_tag("c:dispUnitsLbl");
     }
@@ -4848,13 +4907,15 @@ impl Chart {
         }
 
         // Write the c:layout element.
-        self.write_layout();
+        self.write_layout(&self.legend.layout.clone());
 
         // Write the c:spPr formatting element.
         self.write_sp_pr(&self.legend.format.clone());
 
         // Write the c:overlay element.
-        self.write_overlay();
+        if self.legend.has_overlay {
+            self.write_overlay();
+        }
 
         // Pie/Doughnut charts set the "rtl" flag to "0" in the legend font even
         // though "0" is implied. To match Excel output we set it if it hasn't
@@ -4904,13 +4965,7 @@ impl Chart {
 
     // Write the <c:overlay> element.
     fn write_overlay(&mut self) {
-        if !self.legend.has_overlay {
-            return;
-        }
-
-        let attributes = [("val", "1")];
-
-        self.writer.xml_empty_tag("c:overlay", &attributes);
+        self.writer.xml_empty_tag("c:overlay", &[("val", "1")]);
     }
 
     // Write the <c:plotVisOnly> element.
@@ -5061,7 +5116,8 @@ impl Chart {
 
                 if write_layout {
                     // Write the c:layout element.
-                    self.write_layout();
+                    let layout = ChartLayout::default();
+                    self.write_layout(&layout);
                 }
 
                 // Write the c:tx element.
@@ -5248,7 +5304,8 @@ impl Chart {
         self.writer.xml_start_tag_only("c:trendlineLbl");
 
         // Write the c:layout element.
-        self.write_layout();
+        let layout = ChartLayout::default();
+        self.write_layout(&layout);
 
         self.write_number_format("General", false);
 
@@ -6210,7 +6267,12 @@ impl Chart {
         self.write_tx_formula(title);
 
         // Write the c:layout element.
-        self.write_layout();
+        self.write_layout(&title.layout);
+
+        // Write the c:overlay element.
+        if title.has_overlay {
+            self.write_overlay();
+        }
 
         if title.format.has_formatting() {
             // Write the c:spPr formatting element.
@@ -6241,7 +6303,12 @@ impl Chart {
         self.write_tx_rich(title);
 
         // Write the c:layout element.
-        self.write_layout();
+        self.write_layout(&title.layout);
+
+        // Write the c:overlay element.
+        if title.has_overlay {
+            self.write_overlay();
+        }
 
         if title.format.has_formatting() {
             // Write the c:spPr element.
@@ -6256,7 +6323,12 @@ impl Chart {
         self.writer.xml_start_tag_only("c:title");
 
         // Write the c:layout element.
-        self.write_layout();
+        self.write_layout(&title.layout);
+
+        // Write the c:overlay element.
+        if title.has_overlay {
+            self.write_overlay();
+        }
 
         // Write the c:spPr element.
         self.write_sp_pr(&title.format.clone());
@@ -8708,6 +8780,8 @@ pub struct ChartTitle {
     hidden: bool,
     is_horizontal: bool,
     ignore_rich_para: bool,
+    layout: ChartLayout,
+    has_overlay: bool,
 }
 
 impl ChartTitle {
@@ -8720,6 +8794,8 @@ impl ChartTitle {
             hidden: false,
             is_horizontal: false,
             ignore_rich_para: false,
+            layout: ChartLayout::default(),
+            has_overlay: false,
         }
     }
 
@@ -8965,6 +9041,27 @@ impl ChartTitle {
         }
 
         self.font = font;
+        self
+    }
+
+    /// Set the chart title as overlaid on the chart.
+    ///
+    /// TODO
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
+    ///
+    pub fn set_overlay(&mut self, enable: bool) -> &mut ChartTitle {
+        self.has_overlay = enable;
+        self
+    }
+
+    /// TODO
+    pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartTitle {
+        self.layout = layout.clone();
         self
     }
 }
@@ -12245,6 +12342,12 @@ impl ChartAxis {
         self.is_hidden = enable;
         self
     }
+
+    /// TODO
+    pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartAxis {
+        self.title.layout = layout.clone();
+        self
+    }
 }
 
 #[derive(Clone, PartialEq)]
@@ -12629,6 +12732,7 @@ pub struct ChartLegend {
     pub(crate) format: ChartFormat,
     pub(crate) font: Option<ChartFont>,
     deleted_entries: Vec<usize>,
+    layout: ChartLayout,
 }
 
 impl ChartLegend {
@@ -12640,6 +12744,7 @@ impl ChartLegend {
             format: ChartFormat::default(),
             font: None,
             deleted_entries: vec![],
+            layout: ChartLayout::default(),
         }
     }
 
@@ -12768,6 +12873,10 @@ impl ChartLegend {
     ///
     /// This can be turned off using the `set_overlay()` method.
     ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is off by default.
+    ///
     /// # Examples
     ///
     /// An example of overlaying the chart legend on the plot area.
@@ -12796,7 +12905,7 @@ impl ChartLegend {
     /// #     chart.legend().set_position(ChartLegendPosition::Top);
     /// #
     /// #     // Overlay the chart legend on the plot area.
-    /// #     chart.legend().set_overlay();
+    /// #     chart.legend().set_overlay(true);
     /// #
     /// #     // Add the chart to the worksheet.
     /// #     worksheet.insert_chart(0, 2, &chart)?;
@@ -12812,8 +12921,18 @@ impl ChartLegend {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_legend_set_overlay.png">
     ///
-    pub fn set_overlay(&mut self) -> &mut ChartLegend {
-        self.has_overlay = true;
+    pub fn set_overlay(&mut self, enable: bool) -> &mut ChartLegend {
+        self.has_overlay = enable;
+        self
+    }
+
+    /// TODO
+    pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartLegend {
+        let mut layout = layout.clone();
+        layout.has_dimensions = true;
+
+        self.layout = layout;
+
         self
     }
 
@@ -17231,5 +17350,79 @@ impl fmt::Display for ChartAxisLabelAlignment {
             Self::Right => write!(f, "r"),
             Self::Center => write!(f, "ctr"),
         }
+    }
+}
+
+// -----------------------------------------------------------------------
+// ChartLayout
+// -----------------------------------------------------------------------
+
+/// The `ChartLayout` struct represents a TODO.
+///
+
+///
+#[derive(Clone, PartialEq)]
+pub struct ChartLayout {
+    pub(crate) x_offset: Option<f64>,
+    pub(crate) y_offset: Option<f64>,
+    pub(crate) width: Option<f64>,
+    pub(crate) height: Option<f64>,
+    pub(crate) has_inner: bool,
+    pub(crate) has_dimensions: bool,
+}
+
+impl Default for ChartLayout {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartLayout {
+    /// Create a new `ChartLayout` object to represent a Chart point.
+    ///
+    pub fn new() -> ChartLayout {
+        ChartLayout {
+            x_offset: None,
+            y_offset: None,
+            width: None,
+            height: None,
+            has_inner: false,
+            has_dimensions: false,
+        }
+    }
+
+    /// Todo.
+    ///
+    pub fn set_x_offset(mut self, offset: f64) -> ChartLayout {
+        self.x_offset = Some(offset);
+        self
+    }
+
+    /// Todo.
+    ///
+    pub fn set_y_offset(mut self, offset: f64) -> ChartLayout {
+        self.y_offset = Some(offset);
+        self
+    }
+
+    /// Todo.
+    ///
+    pub fn set_width(mut self, offset: f64) -> ChartLayout {
+        self.width = Some(offset);
+        self
+    }
+
+    /// Todo.
+    ///
+    pub fn set_height(mut self, offset: f64) -> ChartLayout {
+        self.height = Some(offset);
+        self
+    }
+
+    pub(crate) fn is_not_default(&self) -> bool {
+        self.x_offset.is_some()
+            || self.y_offset.is_some()
+            || self.width.is_some()
+            || self.height.is_some()
     }
 }

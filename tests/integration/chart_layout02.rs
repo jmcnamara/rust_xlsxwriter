@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartLayout, ChartType, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -22,18 +22,19 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    let mut chart = Chart::new(ChartType::Line);
+    let mut chart = Chart::new(ChartType::Column);
+    chart.set_axis_ids(68311296, 69198208);
     chart.add_series().set_values(("Sheet1", 0, 0, 4, 0));
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
-    // Set the chart axis ids to match the random values in the Excel file.
-    chart.set_axis_ids(93548928, 93550464);
+    let layout = ChartLayout::new()
+        .set_x_offset(0.80197353455818)
+        .set_y_offset(0.37442403032954)
+        .set_width(0.12858202099737)
+        .set_height(0.25115157480314);
 
-    chart
-        .legend()
-        .set_position(ChartLegendPosition::TopRight)
-        .set_overlay(true);
+    chart.legend().set_layout(&layout);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -43,9 +44,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_legend04() {
+fn test_chart_layout02() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_legend04")
+        .set_name("chart_layout02")
         .set_function(create_new_xlsx_file)
         .initialize();
 

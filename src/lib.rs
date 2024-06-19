@@ -215,12 +215,12 @@ mod xmlwriter;
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub mod serializer;
 
+pub mod changelog;
 pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
 pub mod sparkline;
 pub mod tutorial;
-pub mod changelog;
 pub mod utility;
 pub mod workbook;
 pub mod worksheet;

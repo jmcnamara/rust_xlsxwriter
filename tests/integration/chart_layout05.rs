@@ -6,34 +6,43 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Chart, ChartLegendPosition, ChartType, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartLayout, ChartType, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-
     let worksheet = workbook.add_worksheet();
 
     // Add some test data for the chart(s).
-    let data = [[1, 2, 3], [2, 4, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
+    let data = [[1, 8, 3], [2, 7, 6], [3, 6, 9], [4, 8, 12], [5, 10, 15]];
     for (row_num, row_data) in data.iter().enumerate() {
         for (col_num, col_data) in row_data.iter().enumerate() {
             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
         }
     }
 
-    let mut chart = Chart::new(ChartType::Line);
-    chart.add_series().set_values(("Sheet1", 0, 0, 4, 0));
-    chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
-    chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
-
-    // Set the chart axis ids to match the random values in the Excel file.
-    chart.set_axis_ids(93548928, 93550464);
+    let mut chart = Chart::new(ChartType::Area);
+    chart.set_axis_ids(43495808, 43497728);
+    chart
+        .add_series()
+        .set_categories(("Sheet1", 0, 0, 4, 0))
+        .set_values(("Sheet1", 0, 1, 4, 1));
 
     chart
-        .legend()
-        .set_position(ChartLegendPosition::TopRight)
-        .set_overlay(true);
+        .add_series()
+        .set_categories(("Sheet1", 0, 0, 4, 0))
+        .set_values(("Sheet1", 0, 2, 4, 2));
+
+    let layout1 = ChartLayout::new()
+        .set_x_offset(0.346203193350831)
+        .set_y_offset(0.850902595508894);
+
+    let layout2 = ChartLayout::new()
+        .set_x_offset(0.213888888888888)
+        .set_y_offset(0.263499198016914);
+
+    chart.x_axis().set_name("XXX").set_layout(&layout1);
+    chart.y_axis().set_name("YYY").set_layout(&layout2);
 
     worksheet.insert_chart(8, 4, &chart)?;
 
@@ -43,9 +52,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_chart_legend04() {
+fn test_chart_layout05() {
     let test_runner = common::TestRunner::new()
-        .set_name("chart_legend04")
+        .set_name("chart_layout05")
         .set_function(create_new_xlsx_file)
         .initialize();
 
