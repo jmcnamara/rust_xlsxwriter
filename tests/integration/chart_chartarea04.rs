@@ -68,13 +68,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_size(3),
         );
 
-    chart.set_chart_area_format(
+    chart.chart_area().set_format(
         ChartFormat::new()
             .set_border(ChartLine::new().set_color("#FF0000"))
             .set_solid_fill(ChartSolidFill::new().set_color("#00B050")),
     );
 
-    chart.set_plot_area_format(
+    chart.plot_area().set_format(
         ChartFormat::new()
             .set_border(ChartLine::new().set_dash_type(ChartLineDashType::DashDot))
             .set_solid_fill(ChartSolidFill::new().set_color("#FFC000")),

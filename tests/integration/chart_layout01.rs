@@ -29,12 +29,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
     let layout = ChartLayout::new()
-        .set_x_offset(0.13171062992125)
-        .set_y_offset(0.26436351706036)
-        .set_width(0.73970734908136)
-        .set_height(0.5713732137649);
+        .set_offset(0.13171062992125, 0.26436351706036)
+        .set_dimensions(0.73970734908136, 0.5713732137649);
 
-    chart.set_plot_area_layout(&layout);
+    chart.plot_area().set_layout(&layout);
 
     worksheet.insert_chart(8, 4, &chart)?;
 

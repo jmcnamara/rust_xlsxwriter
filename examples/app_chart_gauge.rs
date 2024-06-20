@@ -60,7 +60,9 @@ fn main() -> Result<(), XlsxError> {
     chart_doughnut.set_rotation(270);
 
     // Turn off the chart fill and border.
-    chart_doughnut.set_chart_area_format(ChartFormat::new().set_no_fill().set_no_border());
+    chart_doughnut
+        .chart_area()
+        .set_format(ChartFormat::new().set_no_fill().set_no_border());
 
     // Configure a pie chart as the needle for the gauge.
     let mut chart_pie = Chart::new(ChartType::Pie);

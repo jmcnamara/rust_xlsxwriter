@@ -439,6 +439,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_pattern_fill_set_pattern.rs` - An example of setting a pattern
   fill for a chart element.
 
+* `doc_chart_plot_area_set_layout.rs` - An example of setting the layout of
+  a chart element, in this case the chart plot area.
+
 * `doc_chart_push_series.rs` - An example of creating a chart series as a
   standalone object and then adding it to a chart via the
   [`chart.push_series()`](Chart::add_series) method.
@@ -524,8 +527,8 @@ documentation and generally show how an individual function works.
   size for doughnut charts.
 
 * `doc_chart_set_plot_area_format.rs` - An example of formatting the chart
-  "area" of a chart. In Excel the plot area is the area between the axes on
-  which the chart series are plotted.
+  plot area of a chart. In Excel the plot area is the area between the axes
+  on which the chart series are plotted.
 
 * `doc_chart_set_point_colors.rs` - An example of setting the individual
   segment colors of a Pie chart.

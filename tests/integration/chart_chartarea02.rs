@@ -31,13 +31,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
-    chart.set_chart_area_format(
+    chart.chart_area().set_format(
         ChartFormat::new()
             .set_no_line()
             .set_solid_fill(ChartSolidFill::new().set_color(Color::Red)),
     );
 
-    chart.set_plot_area_format(
+    chart.plot_area().set_format(
         ChartFormat::new()
             .set_border(
                 ChartLine::new()

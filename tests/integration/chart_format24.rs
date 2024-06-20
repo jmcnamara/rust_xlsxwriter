@@ -33,7 +33,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 2, 4, 2));
 
-    chart.set_chart_area_format(
+    chart.chart_area().set_format(
         ChartFormat::new().set_solid_fill(
             ChartSolidFill::new()
                 .set_color("#FFFF00")
@@ -41,7 +41,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         ),
     );
 
-    chart.set_plot_area_format(
+    chart.plot_area().set_format(
         ChartFormat::new().set_solid_fill(
             ChartSolidFill::new()
                 .set_color("#FF0000")

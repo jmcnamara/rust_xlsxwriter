@@ -33,16 +33,12 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_categories(("Sheet1", 0, 0, 4, 0))
         .set_values(("Sheet1", 0, 2, 4, 2));
 
-    let layout1 = ChartLayout::new()
-        .set_x_offset(0.346203193350831)
-        .set_y_offset(0.850902595508894);
+    let layout1 = ChartLayout::new().set_offset(0.346203193350831, 0.850902595508894);
 
-    let layout2 = ChartLayout::new()
-        .set_x_offset(0.213888888888888)
-        .set_y_offset(0.263499198016914);
+    let layout2 = ChartLayout::new().set_offset(0.213888888888888, 0.263499198016914);
 
-    chart.x_axis().set_name("XXX").set_layout(&layout1);
-    chart.y_axis().set_name("YYY").set_layout(&layout2);
+    chart.x_axis().set_name("XXX").set_label_layout(&layout1);
+    chart.y_axis().set_name("YYY").set_label_layout(&layout2);
 
     worksheet.insert_chart(8, 4, &chart)?;
 

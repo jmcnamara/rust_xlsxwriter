@@ -2,8 +2,8 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
-//! An example of formatting the chart "area" of a chart. In Excel the plot area
-//! is the area between the axes on which the chart series are plotted.
+//! An example of formatting the chart plot area of a chart. In Excel the plot
+//! area is the area between the axes on which the chart series are plotted.
 
 use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
 
@@ -25,9 +25,9 @@ fn main() -> Result<(), XlsxError> {
     // Add a data series with formatting.
     chart.add_series().set_values("Sheet1!$A$1:$A$6");
 
-    chart.set_plot_area_format(
-        ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFFB3")),
-    );
+    chart
+        .plot_area()
+        .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFFB3")));
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

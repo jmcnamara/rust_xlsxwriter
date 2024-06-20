@@ -4415,11 +4415,13 @@ fn main() -> Result<(), XlsxError> {
     //
     // Create a gradient profile and add it to chart plot area.
     //
-    chart.set_plot_area_format(ChartGradientFill::new().set_gradient_stops(&[
-        ChartGradientStop::new("#FFEFD1", 0),
-        ChartGradientStop::new("#F0EBD5", 50),
-        ChartGradientStop::new("#B69F66", 100),
-    ]));
+    chart
+        .plot_area()
+        .set_format(ChartGradientFill::new().set_gradient_stops(&[
+            ChartGradientStop::new("#FFEFD1", 0),
+            ChartGradientStop::new("#F0EBD5", 50),
+            ChartGradientStop::new("#B69F66", 100),
+        ]));
 
     // Add some axis labels.
     chart.x_axis().set_name("Test number");
@@ -4924,7 +4926,9 @@ fn main() -> Result<(), XlsxError> {
     chart_doughnut.set_rotation(270);
 
     // Turn off the chart fill and border.
-    chart_doughnut.set_chart_area_format(ChartFormat::new().set_no_fill().set_no_border());
+    chart_doughnut
+        .chart_area()
+        .set_format(ChartFormat::new().set_no_fill().set_no_border());
 
     // Configure a pie chart as the needle for the gauge.
     let mut chart_pie = Chart::new(ChartType::Pie);

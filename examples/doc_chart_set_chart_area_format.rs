@@ -25,9 +25,9 @@ fn main() -> Result<(), XlsxError> {
     // Add a data series with formatting.
     chart.add_series().set_values("Sheet1!$A$1:$A$6");
 
-    chart.set_chart_area_format(
-        ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFFB3")),
-    );
+    chart
+        .chart_area()
+        .set_format(ChartFormat::new().set_solid_fill(ChartSolidFill::new().set_color("#FFFFB3")));
 
     // Add the chart to the worksheet.
     worksheet.insert_chart(0, 2, &chart)?;

@@ -46,7 +46,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart_doughnut.show_empty_cells_as(ChartEmptyCells::Gaps);
     chart_doughnut.legend().set_hidden();
     chart_doughnut.set_rotation(270);
-    chart_doughnut.set_chart_area_format(ChartFormat::new().set_no_fill().set_no_border());
+    chart_doughnut
+        .chart_area()
+        .set_format(ChartFormat::new().set_no_fill().set_no_border());
 
     let mut chart_pie = Chart::new(ChartType::Pie);
 

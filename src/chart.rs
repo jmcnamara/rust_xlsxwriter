@@ -842,10 +842,9 @@ pub struct Chart {
     pub(crate) x2_axis: ChartAxis,
     pub(crate) y2_axis: ChartAxis,
     pub(crate) combined_chart: Option<Box<Chart>>,
+    pub(crate) chart_area: ChartArea,
+    pub(crate) plot_area: ChartPlotArea,
     legend: ChartLegend,
-    chart_area_format: ChartFormat,
-    plot_area_format: ChartFormat,
-    plot_area_layout: ChartLayout,
     grouping: ChartGrouping,
     show_empty_cells_as: Option<ChartEmptyCells>,
     show_hidden_data: bool,
@@ -961,9 +960,8 @@ impl Chart {
             x2_axis: ChartAxis::new(),
             y2_axis: ChartAxis::new(),
             legend: ChartLegend::new(),
-            chart_area_format: ChartFormat::default(),
-            plot_area_format: ChartFormat::default(),
-            plot_area_layout: ChartLayout::default(),
+            chart_area: ChartArea::default(),
+            plot_area: ChartPlotArea::default(),
             grouping: ChartGrouping::Standard,
             show_empty_cells_as: None,
             show_hidden_data: false,
@@ -1472,6 +1470,128 @@ impl Chart {
         &mut self.legend
     }
 
+    /// Get the chart area object in order to set its properties.
+    ///
+    /// Get a reference to the chart's [`ChartArea`] object in order to set its
+    /// properties. The `ChartArea` is a representation of the background area
+    /// object of an Excel chart.
+    ///
+    /// # Examples
+    ///
+    /// An example of getting a reference to and formatting the chart area of a
+    /// chart. In Excel the chart area is the background area behind the chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_chart_area_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    /// #     let mut chart = Chart::new(ChartType::Column);
+    /// #
+    /// #     // Add a data series with formatting.
+    /// #     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    /// #
+    ///         chart.chart_area()
+    ///             .set_format(
+    ///                 ChartFormat::new().set_solid_fill(
+    ///                     ChartSolidFill::new().set_color("#FFFFB3")
+    ///                 ),
+    ///         );
+    /// #
+    /// #     // Add the chart to the worksheet.
+    /// #     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_chart_area_format.png">
+    ///
+    pub fn chart_area(&mut self) -> &mut ChartArea {
+        &mut self.chart_area
+    }
+
+    /// Get the chart plot area object in order to set its properties.
+    ///
+    /// Get a reference to the chart's [`ChartPlotArea`] object in order to set
+    /// its properties. The `ChartPlotArea` struct is a representation of the
+    /// plotting area an Excel chart.
+    ///
+    /// # Examples
+    ///
+    /// An example of getting a reference to and formatting the chart plot area
+    /// of a chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_plot_area_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    /// #     let mut chart = Chart::new(ChartType::Column);
+    /// #
+    /// #     // Add a data series with formatting.
+    /// #     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    /// #
+    ///         chart.plot_area()
+    ///             .set_format(
+    ///                 ChartFormat::new().set_solid_fill(
+    ///                     ChartSolidFill::new()
+    ///                         .set_color("#FFFFB3")
+    ///                 ),
+    ///         );
+    /// #
+    /// #     // Add the chart to the worksheet.
+    /// #     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_plot_area_format.png">
+    ///
+    ///
+    pub fn plot_area(&mut self) -> &mut ChartPlotArea {
+        &mut self.plot_area
+    }
+
     /// Create a combined chart from two different chart types.
     ///
     /// In Excel is also possible to combine two different chart types, for
@@ -1707,180 +1827,6 @@ impl Chart {
             eprintln!("Style id '{style}' outside Excel range: 1 <= style <= 48.");
         }
 
-        self
-    }
-
-    /// Set the formatting properties for the chart area.
-    ///
-    /// Set the formatting properties for a chart area via a [`ChartFormat`]
-    /// object or a sub struct that implements [`IntoChartFormat`]. In Excel the
-    /// chart area is the background area behind the chart.
-    ///
-    /// The formatting that can be applied via a [`ChartFormat`] object are:
-    ///
-    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
-    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
-    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
-    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
-    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
-    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
-    ///   A synonym for [`ChartLine`] depending on context.
-    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
-    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
-    ///
-    /// # Parameters
-    ///
-    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
-    /// convert into a `ChartFormat` instance. See the docs for
-    /// [`IntoChartFormat`] for details.
-    ///
-    /// # Examples
-    ///
-    /// An example of formatting the chart "area" of a chart. In Excel the chart
-    /// area is the background area behind the chart.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_chart_set_chart_area_format.rs
-    /// #
-    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the chart.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new chart.
-    ///     let mut chart = Chart::new(ChartType::Column);
-    ///
-    ///     // Add a data series with formatting.
-    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
-    ///
-    ///         chart.set_chart_area_format(
-    ///             ChartFormat::new().set_solid_fill(
-    ///                 ChartSolidFill::new()
-    ///                     .set_color("#FFFFB3")
-    ///             ),
-    ///         );
-    ///
-    ///     // Add the chart to the worksheet.
-    ///     worksheet.insert_chart(0, 2, &chart)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("chart.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_set_chart_area_format.png">
-    ///
-    pub fn set_chart_area_format<T>(&mut self, format: T) -> &mut Chart
-    where
-        T: IntoChartFormat,
-    {
-        self.chart_area_format = format.new_chart_format();
-        self
-    }
-
-    /// Set the formatting properties for the plot area.
-    ///
-    /// Set the formatting properties for a chart plot area via a
-    /// [`ChartFormat`] object. In Excel the plot area is the area between the
-    /// axes on which the chart series are plotted.
-    ///
-    /// The formatting that can be applied via a [`ChartFormat`] object are:
-    ///
-    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
-    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
-    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
-    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
-    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
-    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
-    ///   A synonym for [`ChartLine`] depending on context.
-    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
-    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
-    ///
-    /// # Parameters
-    ///
-    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
-    /// convert into a `ChartFormat` instance. See the docs for
-    /// [`IntoChartFormat`] for details.
-    ///
-    /// # Examples
-    ///
-    /// An example of formatting the chart "area" of a chart. In Excel the plot
-    /// area is the area between the axes on which the chart series are plotted.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_chart_set_plot_area_format.rs
-    /// #
-    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the chart.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new chart.
-    ///     let mut chart = Chart::new(ChartType::Column);
-    ///
-    ///     // Add a data series with formatting.
-    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
-    ///
-    ///         chart.set_plot_area_format(
-    ///             ChartFormat::new().set_solid_fill(
-    ///                 ChartSolidFill::new()
-    ///                     .set_color("#FFFFB3")
-    ///             ),
-    ///         );
-    ///
-    ///     // Add the chart to the worksheet.
-    ///     worksheet.insert_chart(0, 2, &chart)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("chart.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_set_plot_area_format.png">
-    ///
-    pub fn set_plot_area_format<T>(&mut self, format: T) -> &mut Chart
-    where
-        T: IntoChartFormat,
-    {
-        self.plot_area_format = format.new_chart_format();
-        self
-    }
-
-    /// TODO
-    pub fn set_plot_area_layout(&mut self, layout: &ChartLayout) -> &mut Chart {
-        let mut layout = layout.clone();
-        layout.has_inner = true;
-        layout.has_dimensions = true;
-
-        self.plot_area_layout = layout;
         self
     }
 
@@ -2830,8 +2776,8 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// - `axis_id1`: X-axis id.
-    /// - `axis_id2`: Y-axis id.
+    /// * `axis_id1`: X-axis id.
+    /// * `axis_id2`: Y-axis id.
     ///
     #[doc(hidden)]
     pub fn set_axis_ids(&mut self, axis_id1: u32, axis_id2: u32) {
@@ -2845,8 +2791,8 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// - `axis_id1`: X-axis id.
-    /// - `axis_id2`: Y-axis id.
+    /// * `axis_id1`: X-axis id.
+    /// * `axis_id2`: Y-axis id.
     ///
     #[doc(hidden)]
     pub fn set_axis2_ids(&mut self, axis_id1: u32, axis_id2: u32) {
@@ -3456,7 +3402,7 @@ impl Chart {
         self.write_chart();
 
         // Write the c:spPr element.
-        self.write_sp_pr(&self.chart_area_format.clone());
+        self.write_sp_pr(&self.chart_area.format.clone());
 
         // Write the c:printSettings element.
         self.write_print_settings();
@@ -3551,7 +3497,7 @@ impl Chart {
         self.writer.xml_start_tag_only("c:plotArea");
 
         // Write the c:layout element.
-        self.write_layout(&self.plot_area_layout.clone());
+        self.write_layout(&self.plot_area.layout.clone());
 
         // Write the <c:xxxChart> element for each chart type.
         self.write_chart_type();
@@ -3651,7 +3597,7 @@ impl Chart {
         }
 
         // Write the c:spPr element.
-        self.write_sp_pr(&self.plot_area_format.clone());
+        self.write_sp_pr(&self.plot_area.format.clone());
 
         self.writer.xml_end_tag("c:plotArea");
     }
@@ -8865,8 +8811,8 @@ impl ChartTitle {
     {
         self.range = name.new_chart_range();
 
-        // If the name didn't convert to a populated range then it probably just
-        // a simple string title.
+        // If the name didn't convert to a populated range then it is probably
+        // just a simple string title.
         if !self.range.has_data() {
             self.name.clone_from(&self.range.range_string);
         }
@@ -9044,24 +8990,31 @@ impl ChartTitle {
         self
     }
 
+    /// Set the manual position of the chart title.
+    ///
+    /// This method is used to simulate manual positioning of a chart title. See
+    /// [`ChartLayout`] for more details.
+    ///
+    /// Note, to position the title over the plot area of the chart you will
+    /// also need to set the [`ChartTitle::set_overlay()`] property.
+    ///
+    /// # Parameters
+    ///
+    /// * `layout`: A [`ChartLayout`] struct reference.
+    ///
+    pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartTitle {
+        self.layout = layout.clone();
+        self
+    }
+
     /// Set the chart title as overlaid on the chart.
-    ///
-    /// TODO
-    ///
     ///
     /// # Parameters
     ///
     /// * `enable` - Turn the property on/off. It is off by default.
     ///
-    ///
     pub fn set_overlay(&mut self, enable: bool) -> &mut ChartTitle {
         self.has_overlay = enable;
-        self
-    }
-
-    /// TODO
-    pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartTitle {
-        self.layout = layout.clone();
         self
     }
 }
@@ -12343,8 +12296,16 @@ impl ChartAxis {
         self
     }
 
-    /// TODO
-    pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartAxis {
+    /// Set the manual position of the chart axis label.
+    ///
+    /// This method is used to simulate manual positioning of a chart axis
+    /// label. See [`ChartLayout`] for more details.
+    ///
+    /// # Parameters
+    ///
+    /// - `layout`: A [`ChartLayout`] struct reference.
+    ///
+    pub fn set_label_layout(&mut self, layout: &ChartLayout) -> &mut ChartAxis {
         self.title.layout = layout.clone();
         self
     }
@@ -12926,7 +12887,18 @@ impl ChartLegend {
         self
     }
 
-    /// TODO
+    /// Set the manual position of the chart axis legend.
+    ///
+    /// This method is used to simulate manual positioning of a chart legend.
+    /// See [`ChartLayout`] for more details.
+    ///
+    /// Note, to position the title over the plot area of the chart you will
+    /// also need to set the [`ChartLegend::set_overlay()`] property.
+    ///
+    /// # Parameters
+    ///
+    /// - `layout`: A [`ChartLayout`] struct reference.
+    ///
     pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartLegend {
         let mut layout = layout.clone();
         layout.has_dimensions = true;
@@ -17354,12 +17326,542 @@ impl fmt::Display for ChartAxisLabelAlignment {
 }
 
 // -----------------------------------------------------------------------
+// ChartArea
+// -----------------------------------------------------------------------
+
+/// The `ChartArea` struct is a representation of the background area object of
+/// an Excel chart.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_area_dialog.png">
+///
+/// The `ChartArea` struct can be used to configure properties of the chart area
+/// such as the formatting and is usually obtained via the
+/// [`chart.chart_area()`][Chart::chart_area] method.
+///
+/// It is used in conjunction with the [`Chart`] struct.
+///
+/// # Examples
+///
+/// An example of formatting the chart area of a chart.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_set_chart_area_format.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a new chart.
+/// #     let mut chart = Chart::new(ChartType::Column);
+/// #
+/// #     // Add a data series with formatting.
+/// #     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+/// #
+///         chart.chart_area()
+///             .set_format(
+///                 ChartFormat::new().set_solid_fill(
+///                     ChartSolidFill::new().set_color("#FFFFB3")
+///                 ),
+///         );
+/// #
+/// #     // Add the chart to the worksheet.
+/// #     worksheet.insert_chart(0, 2, &chart)?;
+/// #
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_set_chart_area_format.png">
+///
+#[derive(Clone, PartialEq)]
+pub struct ChartArea {
+    pub(crate) format: ChartFormat,
+}
+
+impl Default for ChartArea {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartArea {
+    /// Create a new `ChartArea` object to represent the background area object
+    /// of an Excel chart.
+    ///
+    pub fn new() -> ChartArea {
+        ChartArea {
+            format: ChartFormat::default(),
+        }
+    }
+
+    /// Set the formatting properties for the chart area.
+    ///
+    /// Set the formatting properties for a chart area via a [`ChartFormat`]
+    /// object or a sub struct that implements [`IntoChartFormat`]. In Excel the
+    /// chart area is the background area behind the chart.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    ///
+    /// # Parameters
+    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the chart "area" of a chart. In Excel the chart
+    /// area is the background area behind the chart.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_chart_area_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///         chart.chart_area()
+    ///             .set_format(
+    ///                 ChartFormat::new().set_solid_fill(
+    ///                     ChartSolidFill::new().set_color("#FFFFB3")
+    ///                 ),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_chart_area_format.png">
+    ///
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartArea
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
+        self
+    }
+}
+
+// -----------------------------------------------------------------------
+// ChartPlotArea
+// -----------------------------------------------------------------------
+
+/// The `ChartPlotArea` struct is a representation of the plotting area an Excel
+/// chart.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/plot_area_dialog.png">
+///
+/// The `ChartPlotArea` struct can be used to configure properties of the chart
+/// plot area such as the formatting and layout and is usually obtained via the
+/// [`chart.plot_area()`][Chart::plot_area] method.
+///
+/// It is used in conjunction with the [`Chart`] struct.
+///
+/// # Examples
+///
+/// An example of formatting the chart plot area of a chart.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_set_plot_area_format.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a new chart.
+/// #     let mut chart = Chart::new(ChartType::Column);
+/// #
+/// #     // Add a data series with formatting.
+/// #     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+/// #
+///         chart.plot_area()
+///             .set_format(
+///                 ChartFormat::new().set_solid_fill(
+///                     ChartSolidFill::new()
+///                         .set_color("#FFFFB3")
+///                 ),
+///         );
+/// #
+/// #     // Add the chart to the worksheet.
+/// #     worksheet.insert_chart(0, 2, &chart)?;
+/// #
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_set_plot_area_format.png">
+///
+///
+#[derive(Clone, PartialEq)]
+pub struct ChartPlotArea {
+    pub(crate) format: ChartFormat,
+    pub(crate) layout: ChartLayout,
+}
+
+impl Default for ChartPlotArea {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ChartPlotArea {
+    /// Create a new `ChartPlotArea` object to represent the plotting area
+    /// object of an Excel chart.
+    ///
+    pub fn new() -> ChartPlotArea {
+        ChartPlotArea {
+            format: ChartFormat::default(),
+            layout: ChartLayout::default(),
+        }
+    }
+
+    /// Set the formatting properties for the plot area.
+    ///
+    /// Set the formatting properties for a chart plot area via a
+    /// [`ChartFormat`] object. In Excel the plot area is the area between the
+    /// axes on which the chart series are plotted.
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    ///
+    /// # Parameters
+    ///
+    /// - `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    ///    convert into a `ChartFormat` instance. See the docs for
+    ///    [`IntoChartFormat`] for details.
+    ///
+    /// # Examples
+    ///
+    /// An example of formatting the chart plot area of a chart. In Excel the plot
+    /// area is the area between the axes on which the chart series are plotted.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_set_plot_area_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartFormat, ChartSolidFill, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$6");
+    ///
+    ///         chart.plot_area()
+    ///             .set_format(
+    ///                 ChartFormat::new().set_solid_fill(
+    ///                     ChartSolidFill::new()
+    ///                         .set_color("#FFFFB3")
+    ///                 ),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_plot_area_format.png">
+    ///
+    ///
+    pub fn set_format<T>(&mut self, format: T) -> &mut ChartPlotArea
+    where
+        T: IntoChartFormat,
+    {
+        self.format = format.new_chart_format();
+        self
+    }
+
+    /// Set the manual position of the plot area.
+    ///
+    /// This method is used to simulate manual positioning of a chart plot area.
+    /// See [`ChartLayout`] for more details.
+    ///
+    /// # Parameters
+    ///
+    /// * `layout`: A [`ChartLayout`] struct reference.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting the layout of a chart element, in this case the
+    /// chart plot area.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_plot_area_set_layout.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartLayout, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///     chart.add_series().set_values(("Sheet1", 0, 0, 5, 0));
+    ///
+    ///     // Set a chart title and turn off legend for clarity.
+    ///     chart.title().set_name("Standard layout");
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the stand chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    ///
+    ///     // Create a new layout.
+    ///     let layout = ChartLayout::new()
+    ///         .set_offset(0.20, 0.30)
+    ///         .set_dimensions(0.70, 0.50);
+    ///
+    ///     // Apply the layout to the chart plot area.
+    ///     chart.plot_area().set_layout(&layout);
+    ///
+    ///     // Set a chart title and turn off legend for clarity.
+    ///     chart.title().set_name("Modified layout");
+    ///     chart.legend().set_hidden();
+    ///
+    ///     // Add the modified chart to the worksheet.
+    ///     worksheet.insert_chart(16, 2, &chart)?;
+    ///
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_plot_area_set_layout.png">
+    ///
+    pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartPlotArea {
+        let mut layout = layout.clone();
+        layout.has_inner = true;
+        layout.has_dimensions = true;
+
+        self.layout = layout;
+        self
+    }
+}
+
+// -----------------------------------------------------------------------
 // ChartLayout
 // -----------------------------------------------------------------------
 
-/// The `ChartLayout` struct represents a TODO.
+/// The `ChartLayout` struct represents the dimensions required to position some
+/// chart objects.
 ///
-
+/// Excel allows the user to positions chart objects like axis labels or the
+/// legend is two ways.
+///
+/// The first method is via standard positions such as top, bottom, left and
+/// right. The `rust_xlsxwriter` library replicates this via enums such as
+/// [`ChartAxisLabelPosition`] and [`ChartLegendPosition`] and the associated
+/// methods that use them.
+///
+/// The second method Excel supports is manual positioning of elements such as
+/// the chart axis labels, the chart legend, the chart plot area and the chart
+/// title. The `rust_xlsxwriter` library replicates this type of positing via
+/// the `ChartLayout` struct.
+///
+/// The layout units used by Excel are relative units expressed as a percentage
+/// of the chart dimensions and are `f64` values in the range `0.0 < x <= 1.0`.
+/// The process Excel uses to calculate these dimensions is shown below:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_layout.png">
+///
+/// With reference to the above figure the layout units are calculated as
+/// follows:
+///
+/// ```text
+///     x = a / W
+///     y = b / H
+/// ```
+///
+/// These units are cumbersome and can vary depending on other elements in the
+/// chart such as text lengths. However, these are the units that are required
+/// by Excel to allow relative positioning. Some trial and error is generally
+/// required.
+///
+/// For [`ChartPlotArea`] and [`ChartLegend`] you can also set the width and
+/// height based on the following calculation.
+///
+/// ```text
+///     width  = w / W
+///     height = h / H
+/// ```
+///
+/// For other text based objects the width and height are changed by the font
+/// dimensions.
+///
+/// The [`Chart`] objects and methods that support `ChartLayout` are:
+///
+/// - [`ChartTitle::set_layout()`]
+/// - [`ChartLegend::set_layout()`]
+/// - [`ChartPlotArea::set_layout()`]
+/// - [`ChartAxis::set_label_layout()`]
+///
+///
+/// # Examples
+///
+/// An example of setting the layout of a chart element, in this case the chart
+/// plot area.
+///
+/// ```
+/// # // This code is available in examples/doc_chart_plot_area_set_layout.rs
+/// #
+/// # use rust_xlsxwriter::{Chart, ChartLayout, ChartType, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the chart.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a new chart.
+///     let mut chart = Chart::new(ChartType::Column);
+///     chart.add_series().set_values(("Sheet1", 0, 0, 5, 0));
+///
+///     // Set a chart title and turn off legend for clarity.
+///     chart.title().set_name("Standard layout");
+///     chart.legend().set_hidden();
+///
+///     // Add the stand chart to the worksheet.
+///     worksheet.insert_chart(0, 2, &chart)?;
+///
+///     // Create a new layout.
+///     let layout = ChartLayout::new()
+///         .set_offset(0.20, 0.30)
+///         .set_dimensions(0.70, 0.50);
+///
+///     // Apply the layout to the chart plot area.
+///     chart.plot_area().set_layout(&layout);
+///
+///     // Set a chart title and turn off legend for clarity.
+///     chart.title().set_name("Modified layout");
+///     chart.legend().set_hidden();
+///
+///     // Add the modified chart to the worksheet.
+///     worksheet.insert_chart(16, 2, &chart)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("chart.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/chart_plot_area_set_layout.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ChartLayout {
@@ -17378,7 +17880,8 @@ impl Default for ChartLayout {
 }
 
 impl ChartLayout {
-    /// Create a new `ChartLayout` object to represent a Chart point.
+    /// Create a new `ChartLayout` object to represent the layout dimensions for
+    /// a chart object.
     ///
     pub fn new() -> ChartLayout {
         ChartLayout {
@@ -17391,31 +17894,75 @@ impl ChartLayout {
         }
     }
 
-    /// Todo.
+    /// Set the offset for a layout.
     ///
-    pub fn set_x_offset(mut self, offset: f64) -> ChartLayout {
-        self.x_offset = Some(offset);
+    /// With reference to the figure below the layout units are calculated as
+    /// follows:
+    ///
+    /// ```text
+    ///     x = a / W
+    ///     y = b / H
+    /// ```
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_layout.png">
+    ///
+    /// See [`ChartLayout`] above for an explanation of chart layouts and the
+    /// units used.
+    ///
+    /// # Parameters
+    ///
+    /// * `x_offset`: A `f64` value in the range `0.0 < x <= 1.0`.
+    /// * `y_offset`: A `f64` value in the range `0.0 < y <= 1.0`.
+    ///
+    pub fn set_offset(mut self, x_offset: f64, y_offset: f64) -> ChartLayout {
+        if !(0.0..=1.0).contains(&x_offset) {
+            eprintln!("X offset '{x_offset}' outside Excel range: 0.0 < x <= 1.0.");
+            return self;
+        }
+        if !(0.0..=1.0).contains(&y_offset) {
+            eprintln!("Y offset '{y_offset}' outside Excel range: 0.0 < y <= 1.0.");
+            return self;
+        }
+
+        self.x_offset = Some(x_offset);
+        self.y_offset = Some(y_offset);
         self
     }
 
-    /// Todo.
+    /// Set the dimensions for a layout.
     ///
-    pub fn set_y_offset(mut self, offset: f64) -> ChartLayout {
-        self.y_offset = Some(offset);
-        self
-    }
+    /// With reference to the figure above the dimension units are calculated as
+    /// follows:
+    ///
+    /// ```text
+    ///     width  = w / W
+    ///     height = h / H
+    /// ```
+    ///
+    /// The dimensions are only used for [`ChartPlotArea`] and [`ChartLegend`].
+    /// For other text based objects the width and height are changed by the
+    /// font dimensions.
+    ///
+    /// See [`ChartLayout`] above for an explanation of chart layouts and the
+    /// units used.
+    ///
+    /// # Parameters
+    ///
+    /// * `width`: A `f64` value in the range `0.0 < width <= 1.0`.
+    /// * `height`: A `f64` value in the range `0.0 < height <= 1.0`.
+    ///
+    pub fn set_dimensions(mut self, width: f64, height: f64) -> ChartLayout {
+        if !(0.0..=1.0).contains(&width) {
+            eprintln!("Width '{width}' outside Excel range: 0.0 < width <= 1.0.");
+            return self;
+        }
+        if !(0.0..=1.0).contains(&height) {
+            eprintln!("Height '{height}' outside Excel range: 0.0 < height <= 1.0.");
+            return self;
+        }
 
-    /// Todo.
-    ///
-    pub fn set_width(mut self, offset: f64) -> ChartLayout {
-        self.width = Some(offset);
-        self
-    }
-
-    /// Todo.
-    ///
-    pub fn set_height(mut self, offset: f64) -> ChartLayout {
-        self.height = Some(offset);
+        self.width = Some(width);
+        self.height = Some(height);
         self
     }
 

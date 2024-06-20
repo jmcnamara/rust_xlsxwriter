@@ -62,11 +62,13 @@ fn main() -> Result<(), XlsxError> {
     //
     // Create a gradient profile and add it to chart plot area.
     //
-    chart.set_plot_area_format(ChartGradientFill::new().set_gradient_stops(&[
-        ChartGradientStop::new("#FFEFD1", 0),
-        ChartGradientStop::new("#F0EBD5", 50),
-        ChartGradientStop::new("#B69F66", 100),
-    ]));
+    chart
+        .plot_area()
+        .set_format(ChartGradientFill::new().set_gradient_stops(&[
+            ChartGradientStop::new("#FFEFD1", 0),
+            ChartGradientStop::new("#F0EBD5", 50),
+            ChartGradientStop::new("#B69F66", 100),
+        ]));
 
     // Add some axis labels.
     chart.x_axis().set_name("Test number");

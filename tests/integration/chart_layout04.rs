@@ -29,11 +29,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
     let layout = ChartLayout::new()
-        .set_x_offset(0.42631933508311465)
-        .set_y_offset(0.14351851851851852)
+        .set_offset(0.42631933508311465, 0.14351851851851852)
         // Width and height should be ignored.
-        .set_width(0.123456)
-        .set_height(0.123456);
+        .set_dimensions(0.123456, 0.123456);
 
     chart.title().set_name("Title").set_layout(&layout);
 

@@ -28,9 +28,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
-    let layout = ChartLayout::new()
-        .set_x_offset(0.359652668416448)
-        .set_y_offset(0.16203703703703703);
+    let layout = ChartLayout::new().set_offset(0.359652668416448, 0.16203703703703703);
 
     chart
         .title()

@@ -29,10 +29,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
     let layout = ChartLayout::new()
-        .set_x_offset(0.80197353455818)
-        .set_y_offset(0.37442403032954)
-        .set_width(0.12858202099737)
-        .set_height(0.25115157480314);
+        .set_offset(0.80197353455818, 0.37442403032954)
+        .set_dimensions(0.12858202099737, 0.25115157480314);
 
     chart.legend().set_layout(&layout);
 
