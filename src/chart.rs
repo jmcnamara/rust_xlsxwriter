@@ -8488,25 +8488,29 @@ impl ChartRange {
 
         if self.first_row > self.last_row {
             return Err(XlsxError::ChartError(format!(
-                "Range '{range}' has a first row greater than the last row"
+                "Range '{range}' has a first row '{}' greater than the last row '{}'",
+                self.first_row, self.last_row
             )));
         }
 
         if self.first_col > self.last_col {
             return Err(XlsxError::ChartError(format!(
-                "Range '{range}' has a first column greater than the last column"
+                "Range '{range}' has a first column '{}' greater than the last column '{}'",
+                self.first_col, self.last_col
             )));
         }
 
         if self.first_row >= ROW_MAX || self.last_row >= ROW_MAX {
             return Err(XlsxError::ChartError(format!(
-                "Range '{range}' has a first row greater than Excel limit of 1048576"
+                "Range '{range}' has a row '{}/{}' greater than Excel limit of 1048576",
+                self.first_row, self.last_row
             )));
         }
 
         if self.first_col >= COL_MAX || self.last_col >= COL_MAX {
             return Err(XlsxError::ChartError(format!(
-                "Range '{range}' has a first column greater than Excel limit of XFD/16384"
+                "Range '{range}' has a column '{}/{}' greater than Excel limit of XFD/16384",
+                self.first_col, self.last_col
             )));
         }
 
