@@ -15183,14 +15183,6 @@ impl DefinedName {
         }
     }
 
-    pub(crate) fn unquoted_sheet_name(&self) -> String {
-        if self.quoted_sheet_name.starts_with('\'') && self.quoted_sheet_name.ends_with('\'') {
-            self.quoted_sheet_name[1..self.quoted_sheet_name.len() - 1].to_string()
-        } else {
-            self.quoted_sheet_name.clone()
-        }
-    }
-
     // The defined names are stored in a sorted order based on lowercase
     // and modified versions of the actual defined name.
     pub(crate) fn set_sort_name(&mut self) {

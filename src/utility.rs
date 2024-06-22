@@ -27,8 +27,11 @@
 #![warn(missing_docs)]
 mod tests;
 
+use crate::static_regex;
 #[cfg(feature = "serde")]
 use crate::IntoExcelDateTime;
+use crate::COL_MAX;
+use crate::ROW_MAX;
 #[cfg(feature = "serde")]
 use serde::Serializer;
 
@@ -428,24 +431,123 @@ pub(crate) fn chart_error_range(
     }
 }
 
-// Create a quoted version of a worksheet name. Excel single quotes worksheet
-// names that contain spaces and some other characters.
+// Sheetnames used in references should be quoted if they contain any spaces,
+// special characters or if they look like a A1 or RC cell reference. The rules
+// are shown inline below.
+#[allow(clippy::if_same_then_else)]
 pub(crate) fn quote_sheetname(sheetname: &str) -> String {
     let mut sheetname = sheetname.to_string();
+    let uppercase_sheetname = sheetname.to_uppercase();
+    let mut requires_quoting = false;
+    let col_max = u64::from(COL_MAX);
+    let row_max = u64::from(ROW_MAX);
+
+    let quote_rule1 = static_regex!(r"[^\w\.\p{Emoji}]|[#]");
+    let quote_rule2 = static_regex!(r"^[\d\.\p{Emoji}]");
+    let quote_rule3 = static_regex!(r"^([A-Z]{1,3})(\d+)$");
+    let quote_rule4_row = static_regex!(r"^R(\d+)");
+    let quote_rule4_column = static_regex!(r"^R?C(\d+)");
 
     // Ignore strings that are already quoted.
     if !sheetname.starts_with('\'') {
-        // double quote and other single quotes.
-        sheetname = sheetname.replace('\'', "''");
+        // --------------------------------------------------------------------
+        // Rule 1. Sheet names that contain anything other than \w and "."
+        // characters must be quoted.
+        // --------------------------------------------------------------------
+        if quote_rule1.is_match(&sheetname) {
+            requires_quoting = true;
+        }
+        // --------------------------------------------------------------------
+        // Rule 2. Sheet names that start with a digit or "." must be quoted.
+        // --------------------------------------------------------------------
+        else if quote_rule2.is_match(&sheetname) {
+            requires_quoting = true;
+        }
+        // --------------------------------------------------------------------
+        // Rule 3. Sheet names must not be a valid A1 style cell reference.
+        // Valid means that the row and column range values must also be within
+        // Excel row and column limits.
+        // --------------------------------------------------------------------
+        else if let Some(caps) = quote_rule3.captures(&uppercase_sheetname) {
+            let col = column_name_to_number(caps.get(1).unwrap().as_str());
+            let col = u64::from(col + 1);
+            let row = caps
+                .get(2)
+                .unwrap()
+                .as_str()
+                .parse::<u64>()
+                .unwrap_or_default();
 
-        // Single quote the worksheet name if it contains any of the characters
-        // that Excel quotes when using the name in a formula.
-        if sheetname.contains(' ') || sheetname.contains('!') || sheetname.contains('\'') {
-            sheetname = format!("'{sheetname}'");
+            if row > 0 && row <= row_max && col <= col_max {
+                requires_quoting = true;
+            }
+        }
+        // --------------------------------------------------------------------
+        // Rule 4. Sheet names must not *start* with a valid RC style cell
+        // reference. Other characters after the valid RC reference are ignored
+        // by Excel. Valid means that the row and column range values must also
+        // be within Excel row and column limits.
+        //
+        // Note: references without trailing characters like R12345 or C12345
+        // are caught by Rule 3. Negative references like R-12345 are caught by
+        // Rule 1 due to dash.
+        // --------------------------------------------------------------------
+
+        // Rule 4a. Check for sheet names that start with R1 style references.
+        else if let Some(caps) = quote_rule4_row.captures(&uppercase_sheetname) {
+            let row = caps
+                .get(1)
+                .unwrap()
+                .as_str()
+                .parse::<u64>()
+                .unwrap_or_default();
+
+            if row > 0 && row <= row_max {
+                requires_quoting = true;
+            }
+        }
+        // Rule 4b. Check for sheet names that start with C1 or RC1 style
+        // references.
+        else if let Some(caps) = quote_rule4_column.captures(&uppercase_sheetname) {
+            let col = caps
+                .get(1)
+                .unwrap()
+                .as_str()
+                .parse::<u64>()
+                .unwrap_or_default();
+
+            if col > 0 && col <= col_max {
+                requires_quoting = true;
+            }
+        }
+        // Rule 4c. Check for some single R/C references.
+        else if uppercase_sheetname == "R"
+            || uppercase_sheetname == "C"
+            || uppercase_sheetname == "RC"
+        {
+            requires_quoting = true;
         }
     }
 
+    if requires_quoting {
+        // Double up any single quotes.
+        sheetname = sheetname.replace('\'', "''");
+
+        // Single quote the sheet name.
+        sheetname = format!("'{sheetname}'");
+    }
+
     sheetname
+}
+
+// Unquote an Excel single quoted string.
+pub(crate) fn unquote_sheetname(sheetname: &str) -> String {
+    if sheetname.starts_with('\'') && sheetname.ends_with('\'') {
+        let sheetname = sheetname[1..sheetname.len() - 1].to_string();
+        sheetname.replace("''", "'")
+    } else {
+        sheetname.to_string()
+    }
 }
 
 /// Check that a worksheet name is valid in Excel.

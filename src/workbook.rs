@@ -1968,7 +1968,7 @@ impl Workbook {
         // Map the sheet name and associated index so that we can map a sheet
         // reference in a Local/Sheet defined name to a worksheet index.
         for defined_name in &mut defined_names {
-            let sheet_name = defined_name.unquoted_sheet_name();
+            let sheet_name = utility::unquote_sheetname(&defined_name.quoted_sheet_name);
 
             if !sheet_name.is_empty() {
                 match sheet_names.get(&sheet_name) {
