@@ -5,6 +5,24 @@ All notable changes to `rust_xlsxwriter` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.69.0] - 2023-07-01
+
+### Added
+
+  - Added support for adjusting the layout position of chart elements: plot
+    area, legend, title and axis labels. See [`ChartLayout`].
+
+   [`ChartLayout`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartLayout.html
+
+### Fixed
+
+  - Fixed issue where a worksheet name required quoting when used with
+    `Worksheet::repeat_row()`. There was some checks to handle this but they
+    weren't comprehensive enough. [Issue #95].
+
+    [Issue #95]: https://github.com/jmcnamara/rust_xlsxwriter/issues/95
+
+
 ## [0.68.0] - 2023-06-18
 
 ### Added
