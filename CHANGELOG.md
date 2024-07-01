@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added support for adjusting the layout position of chart elements: plot
     area, legend, title and axis labels. See [`ChartLayout`].
 
-   [`ChartLayout`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ChartLayout.html
+   [`ChartLayout`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartLayout.html
 
 ### Fixed
 
