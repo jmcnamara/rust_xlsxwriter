@@ -219,6 +219,7 @@ pub mod changelog;
 pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
+pub mod data_validation;
 pub mod sparkline;
 pub mod tutorial;
 pub mod utility;
@@ -245,6 +246,9 @@ pub use chart::*;
 
 #[doc(hidden)]
 pub use conditional_format::*;
+
+#[doc(hidden)]
+pub use data_validation::*;
 
 #[doc(hidden)]
 pub use sparkline::*;

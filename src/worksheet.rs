@@ -1076,9 +1076,10 @@ use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
     static_regex, utility, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType,
-    Color, ConditionalFormat, ExcelDateTime, FilterCondition, FilterCriteria, FilterData,
-    FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoColor, IntoExcelDateTime,
-    ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
+    Color, ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRuleInternal,
+    DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
+    HeaderImagePosition, HyperlinkType, Image, IntoColor, IntoExcelDateTime, ObjectMovement,
+    ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -1263,6 +1264,7 @@ pub struct Worksheet {
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashSet<(RowNum, ColNum)>,
     conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Send>>>,
+    data_validations: BTreeMap<String, DataValidation>,
     has_conditional_formats: bool,
     use_x14_extensions: bool,
     has_x14_conditional_formats: bool,
@@ -1455,6 +1457,7 @@ impl Worksheet {
             has_drawing_object_linkage: false,
             cells_with_autofilter: HashSet::new(),
             conditional_formats: BTreeMap::new(),
+            data_validations: BTreeMap::new(),
             has_conditional_formats: false,
             use_x14_extensions: false,
             has_x14_conditional_formats: false,
@@ -6415,6 +6418,76 @@ impl Worksheet {
                 entry.insert(rules);
             }
         }
+
+        Ok(self)
+    }
+
+    /// Add a TODO.
+    ///
+    /// Conditional formatting is a feature of Excel which allows you to apply a
+    /// format to a cell or a range of cells based on certain criteria. This is
+    /// generally used to highlight particular values in a range of data.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/data_validation_cell_intro.png">
+    ///
+    /// The [`ConditionalFormat`](crate::data_validation) variants are used to represent the types of
+    /// conditional format that can be applied in Excel.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
+    ///   when a conditional formatting parameter is incorrect or missing.
+    ///
+    /// # Parameters
+    ///
+    /// * `first_row` - The first row of the range. (All zero indexed.)
+    /// * `first_col` - The first row of the range.
+    /// * `last_row` - The last row of the range.
+    /// * `last_col` - The last row of the range.
+    /// * `data_validation` - A conditional format instance that implements
+    ///   the [`ConditionalFormat`] trait. TODO
+    ///
+    pub fn add_data_validation(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        data_validation: &DataValidation,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        let mut data_validation = data_validation.clone();
+
+        // The "Any" validation type should be ignored if it doesn't have any
+        // input or error titles or messages. This is the same rule as Excel.
+        if data_validation.is_invalid_any() {
+            return Ok(self);
+        }
+
+        // Store the data validation based on its range.
+        let mut cell_range = utility::cell_range(first_row, first_col, last_row, last_col);
+        if !data_validation.multi_range.is_empty() {
+            cell_range.clone_from(&data_validation.multi_range);
+        }
+
+
+        self.data_validations.insert(cell_range, data_validation);
 
         Ok(self)
     }
@@ -12807,6 +12880,11 @@ impl Worksheet {
             self.write_conditional_formats();
         }
 
+        // Write the <dataValidations element.
+        if !self.data_validations.is_empty() {
+            self.write_data_validations();
+        }
+
         // Write the hyperlinks elements.
         if !self.hyperlinks.is_empty() {
             self.write_hyperlinks();
@@ -13273,6 +13351,139 @@ impl Worksheet {
         }
 
         self.writer.xml_end_tag("x14:conditionalFormattings");
+    }
+
+    // Write the <dataValidations> element.
+    fn write_data_validations(&mut self) {
+        let attributes = [("count", self.data_validations.len().to_string())];
+
+        self.writer.xml_start_tag("dataValidations", &attributes);
+
+        for (range, data_validation) in &self.data_validations.clone() {
+            // Write the dataValidation element.
+            self.write_data_validation(range, data_validation);
+        }
+
+        self.writer.xml_end_tag("dataValidations");
+    }
+
+    // Write the <dataValidation> element.
+    fn write_data_validation(&mut self, range: &String, data_validation: &DataValidation) {
+        // The Any type doesn't have a rule or values so handle that separately.
+        if data_validation.validation_type == DataValidationType::Any {
+            self.write_data_validation_any(range, data_validation);
+            return;
+        }
+
+        // Start the attributes.
+        let mut attributes = vec![("type", data_validation.validation_type.to_string())];
+
+        match data_validation.error_style {
+            DataValidationErrorStyle::Warning | DataValidationErrorStyle::Information => {
+                attributes.push(("errorStyle", data_validation.error_style.to_string()));
+            }
+            DataValidationErrorStyle::Stop => {}
+        }
+
+            match &data_validation.rule {
+                &DataValidationRuleInternal::Between(_, _)
+                | DataValidationRuleInternal::CustomFormula(_)
+                | DataValidationRuleInternal::ListSource(_) => {
+                    // Excel doesn't use an operator for these types.
+                }
+                _ => {
+                    attributes.push(("operator", data_validation.rule.to_string()));
+                }
+            };
+
+        if data_validation.ignore_blank {
+            attributes.push(("allowBlank", "1".to_string()));
+        }
+
+        if data_validation.show_input_message {
+            attributes.push(("showInputMessage", "1".to_string()));
+        }
+
+        if data_validation.show_error_message {
+            attributes.push(("showErrorMessage", "1".to_string()));
+        }
+
+        if !data_validation.error_title.is_empty() {
+            attributes.push(("errorTitle", data_validation.error_title.clone()));
+        }
+
+        if !data_validation.error_message.is_empty() {
+            attributes.push(("error", data_validation.error_message.clone()));
+        }
+
+        if !data_validation.input_title.is_empty() {
+            attributes.push(("promptTitle", data_validation.input_title.clone()));
+        }
+
+        if !data_validation.input_message.is_empty() {
+            attributes.push(("prompt", data_validation.input_message.clone()));
+        }
+
+        attributes.push(("sqref", range.to_string()));
+
+        self.writer.xml_start_tag("dataValidation", &attributes);
+
+        // Write the <formula1>/<formula2> elements.
+        match &data_validation.rule {
+            DataValidationRuleInternal::EqualTo(value)
+            | DataValidationRuleInternal::NotEqualTo(value)
+            | DataValidationRuleInternal::LessThan(value)
+            | DataValidationRuleInternal::LessThanOrEqualTo(value)
+            | DataValidationRuleInternal::GreaterThan(value)
+            | DataValidationRuleInternal::GreaterThanOrEqualTo(value)
+            | DataValidationRuleInternal::ListSource(value)
+            | DataValidationRuleInternal::CustomFormula(value) => {
+                self.writer.xml_data_element_only("formula1", value);
+            }
+            DataValidationRuleInternal::Between(min, max)
+            | DataValidationRuleInternal::NotBetween(min, max) => {
+                self.writer.xml_data_element_only("formula1", min);
+                self.writer.xml_data_element_only("formula2", max);
+            }
+        }
+        self.writer.xml_end_tag("dataValidation");
+    }
+
+    // Write the <dataValidation> element.
+    fn write_data_validation_any(&mut self, range: &String, data_validation: &DataValidation) {
+        let mut attributes = vec![];
+
+        if data_validation.ignore_blank {
+            attributes.push(("allowBlank", "1".to_string()));
+        }
+
+        if data_validation.show_input_message {
+            attributes.push(("showInputMessage", "1".to_string()));
+        }
+
+        if data_validation.show_error_message {
+            attributes.push(("showErrorMessage", "1".to_string()));
+        }
+
+        if !data_validation.error_title.is_empty() {
+            attributes.push(("errorTitle", data_validation.error_title.clone()));
+        }
+
+        if !data_validation.error_message.is_empty() {
+            attributes.push(("error", data_validation.error_message.clone()));
+        }
+
+        if !data_validation.input_title.is_empty() {
+            attributes.push(("promptTitle", data_validation.input_title.clone()));
+        }
+
+        if !data_validation.input_message.is_empty() {
+            attributes.push(("prompt", data_validation.input_message.clone()));
+        }
+
+        attributes.push(("sqref", range.to_string()));
+
+        self.writer.xml_empty_tag("dataValidation", &attributes);
     }
 
     // Write the <hyperlink> element.

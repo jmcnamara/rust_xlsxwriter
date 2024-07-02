@@ -143,6 +143,10 @@ pub enum XlsxError {
     /// incorrect or missing.
     ConditionalFormatError(String),
 
+    /// A general error that is raised when a data validation parameter is
+    /// incorrect or missing.
+    DataValidationError(String),
+
     /// A customizable error that can be used by third parties to raise errors
     /// or as a conversion target for other Error types.
     CustomError(String),
@@ -292,6 +296,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::ConditionalFormatError(error) => {
                 write!(f, "Conditional format error: '{error}'.")
+            }
+
+            XlsxError::DataValidationError(error) => {
+                write!(f, "Data validation error: '{error}'.")
             }
 
             XlsxError::CustomError(error) => {
