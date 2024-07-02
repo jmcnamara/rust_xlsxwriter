@@ -1,4 +1,4 @@
-// image - A module to represent Excel conditional formats.
+// conditional_format - A module to represent Excel conditional formats.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
@@ -6784,7 +6784,7 @@ conditional_format_value_from_type!(&NaiveDate & NaiveDateTime & NaiveTime);
 /// [`ConditionalFormatCell`].
 ///
 ///
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone)]
 pub enum ConditionalFormatCellRule<T: IntoConditionalFormatValue> {
     /// Show the conditional format for cells that are equal to the target value.
     EqualTo(T),
@@ -6834,7 +6834,7 @@ impl<T: IntoConditionalFormatValue> fmt::Display for ConditionalFormatCellRule<T
 /// [`ConditionalFormatCell`].
 ///
 ///
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone)]
 pub enum ConditionalFormatTopRule {
     /// Show the conditional format for cells that are in the top X.
     Top(u16),
@@ -6856,7 +6856,7 @@ pub enum ConditionalFormatTopRule {
 /// The `ConditionalFormatAverageRule` enum defines the conditional format
 /// criteria for [`ConditionalFormatCell`].
 ///
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone)]
 pub enum ConditionalFormatAverageRule {
     /// Show the conditional format for cells above the average for the range.
     /// This is the default.
@@ -6939,7 +6939,7 @@ impl fmt::Display for ConditionalFormatTextRule {
 /// The `ConditionalFormatDateRule` enum defines the conditional format
 /// criteria for [`ConditionalFormatDate`].
 ///
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone)]
 pub enum ConditionalFormatDateRule {
     /// Show the conditional format for dates occurring yesterday. This is the
     /// default.
@@ -7146,7 +7146,7 @@ pub enum ConditionalFormatType {
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_direction.png">
 ///
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone)]
 pub enum ConditionalFormatDataBarDirection {
     /// The bars go "Right to left" or "Left to right" depending on the context.
     /// This is the default.
@@ -7225,7 +7225,7 @@ pub enum ConditionalFormatDataBarDirection {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_axis_position.png">
 ///
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum ConditionalFormatDataBarAxisPosition {
     /// The axis is set automatically depending on whether the data contains
     /// negative values. This is the default.
