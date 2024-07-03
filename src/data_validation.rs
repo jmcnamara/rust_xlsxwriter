@@ -357,13 +357,25 @@ pub enum DataValidationType {
 
     /// TODO
     Decimal,
+
+    /// TODO
+    Date,
+
+    /// TODO
+    Time,
+
+    /// TODO
+    TextLength,
 }
 
 impl fmt::Display for DataValidationType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::Date => write!(f, "date"),
+            Self::Time => write!(f, "time"),
             Self::Whole => write!(f, "whole"),
             Self::Decimal => write!(f, "decimal"),
+            Self::TextLength => write!(f, "textLength"),
         }
     }
 }

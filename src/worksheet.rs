@@ -13419,7 +13419,7 @@ impl Worksheet {
         if let Some(rule) = &data_validation.rule {
             match rule {
                 DataValidationRule::Between(_, _) => {
-                    // Excel ignore this as a default.
+                    // Excel doesn't use an operator for these.
                 }
                 _ => {
                     attributes.push(("operator", rule.to_string()));
