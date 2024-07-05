@@ -97,9 +97,32 @@ impl DataValidation {
             DataValidationRule::NotBetween(min, max) => {
                 DataValidationRule::NotBetween(min.new_value(), max.new_value())
             }
+            DataValidationRule::CustomFormula(value) => {
+                DataValidationRule::CustomFormula(value.new_value())
+            }
+            DataValidationRule::ListSource(value) => {
+                DataValidationRule::ListSource(value.new_value())
+            }
         };
 
         self.rule = Some(rule);
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// TODO
+    ///
+    pub fn set_string_list(mut self, list: &[impl AsRef<str>]) -> DataValidation {
+        let joined_list = list
+            .iter()
+            .map(|s| s.as_ref().to_string().replace('"', "\"\""))
+            .collect::<Vec<String>>()
+            .join(",");
+
+        let joined_list = format!("\"{joined_list}\"");
+
+        self.rule = Some(DataValidationRule::ListSource(joined_list.new_value()));
         self
     }
 
@@ -366,14 +389,22 @@ pub enum DataValidationType {
 
     /// TODO
     TextLength,
+
+    /// TODO
+    Custom,
+
+    /// TODO
+    List,
 }
 
 impl fmt::Display for DataValidationType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Date => write!(f, "date"),
+            Self::List => write!(f, "list"),
             Self::Time => write!(f, "time"),
             Self::Whole => write!(f, "whole"),
+            Self::Custom => write!(f, "custom"),
             Self::Decimal => write!(f, "decimal"),
             Self::TextLength => write!(f, "textLength"),
         }
@@ -413,17 +444,25 @@ pub enum DataValidationRule<T: IntoDataValidationValue> {
 
     /// Show the conditional format for cells that are not between the target values.
     NotBetween(T, T),
+
+    /// TODO
+    CustomFormula(T),
+
+    /// TODO
+    ListSource(T),
 }
 
 impl<T: IntoDataValidationValue> fmt::Display for DataValidationRule<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::EqualTo(_) => write!(f, "equal"),
-            Self::Between(_, _) => write!(f, "between"),
             Self::LessThan(_) => write!(f, "lessThan"),
+            Self::Between(_, _) => write!(f, "between"),
+            Self::ListSource(_) => write!(f, "list"),
             Self::NotEqualTo(_) => write!(f, "notEqual"),
-            Self::NotBetween(_, _) => write!(f, "notBetween"),
             Self::GreaterThan(_) => write!(f, "greaterThan"),
+            Self::CustomFormula(_) => write!(f, ""),
+            Self::NotBetween(_, _) => write!(f, "notBetween"),
             Self::LessThanOrEqualTo(_) => write!(f, "lessThanOrEqual"),
             Self::GreaterThanOrEqualTo(_) => write!(f, "greaterThanOrEqual"),
         }

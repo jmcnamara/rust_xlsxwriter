@@ -13418,8 +13418,10 @@ impl Worksheet {
 
         if let Some(rule) = &data_validation.rule {
             match rule {
-                DataValidationRule::Between(_, _) => {
-                    // Excel doesn't use an operator for these.
+                DataValidationRule::Between(_, _)
+                | DataValidationRule::CustomFormula(_)
+                | DataValidationRule::ListSource(_) => {
+                    // Excel doesn't use an operator for these types.
                 }
                 _ => {
                     attributes.push(("operator", rule.to_string()));
@@ -13466,7 +13468,9 @@ impl Worksheet {
             | DataValidationRule::LessThan(value)
             | DataValidationRule::LessThanOrEqualTo(value)
             | DataValidationRule::GreaterThan(value)
-            | DataValidationRule::GreaterThanOrEqualTo(value) => {
+            | DataValidationRule::GreaterThanOrEqualTo(value)
+            | DataValidationRule::ListSource(value)
+            | DataValidationRule::CustomFormula(value) => {
                 self.writer.xml_data_element_only("formula1", &value.value);
             }
             DataValidationRule::Between(min, max) | DataValidationRule::NotBetween(min, max) => {
