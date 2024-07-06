@@ -63,7 +63,13 @@ impl DataValidation {
     /// TODO
     ///
     pub fn set_type(mut self, validation_type: DataValidationType) -> DataValidation {
+        // todo
+        if validation_type == DataValidationType::Any {
+            self.rule = Some(DataValidationRule::EqualTo(0.into()));
+        }
+
         self.validation_type = Some(validation_type);
+
         self
     }
 
@@ -202,8 +208,18 @@ impl DataValidation {
         self
     }
 
-    // Validate the conditional format.
-    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+    // Validate the data validation.
+    pub(crate) fn validate(&mut self) -> Result<(), XlsxError> {
+        let Some(validation_type) = &self.validation_type else {
+            return Err(XlsxError::DataValidationError(
+                "DataValidation type must be set".to_string(),
+            ));
+        };
+
+        if *validation_type == DataValidationType::Any {
+            self.rule = Some(DataValidationRule::Between(0.into(), 0.into()));
+        }
+
         if self.rule.is_none() {
             return Err(XlsxError::DataValidationError(
                 "DataValidation rule must be set".to_string(),
@@ -211,6 +227,20 @@ impl DataValidation {
         }
 
         Ok(())
+    }
+
+    // The "Any" validation type should be ignored if it doesn't have any input
+    // or error titles or messages. This is the same rule as Excel.
+    pub(crate) fn is_invalid_any(&mut self) -> bool {
+        let Some(validation_type) = &self.validation_type else {
+            return false;
+        };
+
+        *validation_type == DataValidationType::Any
+            && self.input_title.is_empty()
+            && self.input_message.is_empty()
+            && self.error_title.is_empty()
+            && self.error_message.is_empty()
     }
 }
 
@@ -373,7 +403,7 @@ data_validation_value_from_type!(&NaiveDate & NaiveDateTime & NaiveTime);
 /// The `DataValidationType` enum defines TODO
 ///
 ///
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum DataValidationType {
     /// TODO
     Whole,
@@ -395,11 +425,15 @@ pub enum DataValidationType {
 
     /// TODO
     List,
+
+    /// TODO
+    Any,
 }
 
 impl fmt::Display for DataValidationType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::Any => write!(f, "any"),
             Self::Date => write!(f, "date"),
             Self::List => write!(f, "list"),
             Self::Time => write!(f, "time"),

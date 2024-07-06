@@ -1077,7 +1077,7 @@ use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
     static_regex, utility, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType,
     Color, ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRule,
-    ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
+    DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
     HeaderImagePosition, HyperlinkType, Image, IntoColor, IntoExcelDateTime, ObjectMovement,
     ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
 };
@@ -6472,7 +6472,17 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-        let data_validation = data_validation.clone();
+
+
+        let mut data_validation = data_validation.clone();
+
+
+        // The "Any" validation type should be ignored if it doesn't have any
+        // input or error titles or messages. This is the same rule as Excel.
+        if data_validation.is_invalid_any() {
+            return Ok(self);
+        }
+
 
         // Store the conditional formats based on their range.
         let cell_range = utility::cell_range(first_row, first_col, last_row, last_col);
@@ -13405,9 +13415,16 @@ impl Worksheet {
             return;
         };
 
-        let mut attributes = vec![];
 
-        attributes.push(("type", validation_type.to_string()));
+        // The Any type doesn't have a rule or values so handle that separately.
+        if *validation_type == DataValidationType::Any {
+            self.write_data_validation_any(range, data_validation);
+            return;
+
+        }
+
+        // Start the attributes.
+        let mut attributes = vec![("type", validation_type.to_string())];
 
         match data_validation.error_style {
             DataValidationErrorStyle::Warning | DataValidationErrorStyle::Information => {
@@ -13462,24 +13479,66 @@ impl Worksheet {
         self.writer.xml_start_tag("dataValidation", &attributes);
 
         // Write the <formula1>/<formula2> elements.
-        match rule {
-            DataValidationRule::EqualTo(value)
-            | DataValidationRule::NotEqualTo(value)
-            | DataValidationRule::LessThan(value)
-            | DataValidationRule::LessThanOrEqualTo(value)
-            | DataValidationRule::GreaterThan(value)
-            | DataValidationRule::GreaterThanOrEqualTo(value)
-            | DataValidationRule::ListSource(value)
-            | DataValidationRule::CustomFormula(value) => {
-                self.writer.xml_data_element_only("formula1", &value.value);
+            match rule {
+                DataValidationRule::EqualTo(value)
+                | DataValidationRule::NotEqualTo(value)
+                | DataValidationRule::LessThan(value)
+                | DataValidationRule::LessThanOrEqualTo(value)
+                | DataValidationRule::GreaterThan(value)
+                | DataValidationRule::GreaterThanOrEqualTo(value)
+                | DataValidationRule::ListSource(value)
+                | DataValidationRule::CustomFormula(value) => {
+                    self.writer.xml_data_element_only("formula1", &value.value);
+                }
+                DataValidationRule::Between(min, max)
+                | DataValidationRule::NotBetween(min, max) => {
+                    self.writer.xml_data_element_only("formula1", &min.value);
+                    self.writer.xml_data_element_only("formula2", &max.value);
+                }
             }
-            DataValidationRule::Between(min, max) | DataValidationRule::NotBetween(min, max) => {
-                self.writer.xml_data_element_only("formula1", &min.value);
-                self.writer.xml_data_element_only("formula2", &max.value);
-            }
-        }
         self.writer.xml_end_tag("dataValidation");
     }
+
+
+
+    // Write the <dataValidation> element.
+    fn write_data_validation_any(&mut self, range: &String, data_validation: &DataValidation) {
+        let mut attributes = vec![];
+
+
+        if data_validation.ignore_blank {
+            attributes.push(("allowBlank", "1".to_string()));
+        }
+
+        if data_validation.show_input_message {
+            attributes.push(("showInputMessage", "1".to_string()));
+        }
+
+        if data_validation.show_error_message {
+            attributes.push(("showErrorMessage", "1".to_string()));
+        }
+
+        if !data_validation.error_title.is_empty() {
+            attributes.push(("errorTitle", data_validation.error_title.clone()));
+        }
+
+        if !data_validation.error_message.is_empty() {
+            attributes.push(("error", data_validation.error_message.clone()));
+        }
+
+        if !data_validation.input_title.is_empty() {
+            attributes.push(("promptTitle", data_validation.input_title.clone()));
+        }
+
+        if !data_validation.input_message.is_empty() {
+            attributes.push(("prompt", data_validation.input_message.clone()));
+        }
+
+        attributes.push(("sqref", range.to_string()));
+
+        self.writer.xml_empty_tag("dataValidation", &attributes);
+    }
+
 
     // Write the <hyperlink> element.
     fn write_hyperlink(&mut self, row: RowNum, col: ColNum, hyperlink: &Url) {
