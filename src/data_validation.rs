@@ -15,7 +15,7 @@ mod tests;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-use crate::{ExcelDateTime, Formula, XlsxError};
+use crate::{ExcelDateTime, Formula, IntoExcelDateTime, XlsxError};
 use std::{borrow::Cow, fmt};
 
 // -----------------------------------------------------------------------
@@ -29,7 +29,7 @@ use std::{borrow::Cow, fmt};
 #[derive(Clone)]
 pub struct DataValidation {
     pub(crate) validation_type: Option<DataValidationType>,
-    pub(crate) rule: Option<DataValidationRule<DataValidationValue>>,
+    pub(crate) rule: Option<DataValidationRuleInternal>,
     pub(crate) ignore_blank: bool,
     pub(crate) show_input_message: bool,
     pub(crate) show_error_message: bool,
@@ -62,14 +62,9 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn set_type(mut self, validation_type: DataValidationType) -> DataValidation {
-        // todo
-        if validation_type == DataValidationType::Any {
-            self.rule = Some(DataValidationRule::EqualTo(0.into()));
-        }
-
-        self.validation_type = Some(validation_type);
-
+    pub fn allow_any_type(mut self) -> DataValidation {
+        self.rule = Some(DataValidationRuleInternal::EqualTo(String::new()));
+        self.validation_type = Some(DataValidationType::Any);
         self
     }
 
@@ -77,41 +72,11 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn set_rule<T>(mut self, rule: DataValidationRule<T>) -> DataValidation
-    where
-        T: IntoDataValidationValue,
-    {
-        // Change from a generic type to a concrete DataValidationValue type.
-        let rule = match rule {
-            DataValidationRule::EqualTo(value) => DataValidationRule::EqualTo(value.new_value()),
-            DataValidationRule::NotEqualTo(value) => {
-                DataValidationRule::NotEqualTo(value.new_value())
-            }
-            DataValidationRule::GreaterThan(value) => {
-                DataValidationRule::GreaterThan(value.new_value())
-            }
-            DataValidationRule::GreaterThanOrEqualTo(value) => {
-                DataValidationRule::GreaterThanOrEqualTo(value.new_value())
-            }
-            DataValidationRule::LessThan(value) => DataValidationRule::LessThan(value.new_value()),
-            DataValidationRule::LessThanOrEqualTo(value) => {
-                DataValidationRule::LessThanOrEqualTo(value.new_value())
-            }
-            DataValidationRule::Between(min, max) => {
-                DataValidationRule::Between(min.new_value(), max.new_value())
-            }
-            DataValidationRule::NotBetween(min, max) => {
-                DataValidationRule::NotBetween(min.new_value(), max.new_value())
-            }
-            DataValidationRule::CustomFormula(value) => {
-                DataValidationRule::CustomFormula(value.new_value())
-            }
-            DataValidationRule::ListSource(value) => {
-                DataValidationRule::ListSource(value.new_value())
-            }
-        };
-
+    pub fn allow_whole_number(mut self, rule: DataValidationRule<i32>) -> DataValidation {
+        // Change from a generic rule to a concrete internal rule.
+        let rule = rule.to_internal_rule();
         self.rule = Some(rule);
+        self.validation_type = Some(DataValidationType::Whole);
         self
     }
 
@@ -119,7 +84,19 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn set_string_list(mut self, list: &[impl AsRef<str>]) -> DataValidation {
+    pub fn allow_decimal_number(mut self, rule: DataValidationRule<f64>) -> DataValidation {
+        // Change from a generic rule to a concrete internal rule.
+        let rule = rule.to_internal_rule();
+        self.rule = Some(rule);
+        self.validation_type = Some(DataValidationType::Decimal);
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// TODO
+    ///
+    pub fn allow_list_strings(mut self, list: &[impl AsRef<str>]) -> DataValidation {
         let joined_list = list
             .iter()
             .map(|s| s.as_ref().to_string().replace('"', "\"\""))
@@ -136,7 +113,62 @@ impl DataValidation {
 
         let joined_list = format!("\"{joined_list}\"");
 
-        self.rule = Some(DataValidationRule::ListSource(joined_list.new_value()));
+        self.rule = Some(DataValidationRuleInternal::ListSource(joined_list));
+        self.validation_type = Some(DataValidationType::List);
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// TODO
+    ///
+    pub fn allow_date(
+        mut self,
+        rule: DataValidationRule<impl IntoExcelDateTime + IntoDataValidationValue>,
+    ) -> DataValidation {
+        // Change from a generic rule to a concrete internal rule.
+        let rule = rule.to_internal_rule();
+        self.rule = Some(rule);
+        self.validation_type = Some(DataValidationType::Date);
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// TODO
+    ///
+    pub fn allow_time(
+        mut self,
+        rule: DataValidationRule<impl IntoExcelDateTime + IntoDataValidationValue>,
+    ) -> DataValidation {
+        // Change from a generic rule to a concrete internal rule.
+        let rule = rule.to_internal_rule();
+        self.rule = Some(rule);
+        self.validation_type = Some(DataValidationType::Time);
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// TODO
+    ///
+    pub fn allow_text_length(mut self, rule: DataValidationRule<u32>) -> DataValidation {
+        // Change from a generic rule to a concrete internal rule.
+        let rule = rule.to_internal_rule();
+        self.rule = Some(rule);
+        self.validation_type = Some(DataValidationType::TextLength);
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// TODO
+    ///
+    pub fn allow_custom_formula(mut self, rule: Formula) -> DataValidation {
+        let formula = rule.expand_formula(true).to_string();
+        self.rule = Some(DataValidationRuleInternal::CustomFormula(formula));
+
+        self.validation_type = Some(DataValidationType::Custom);
         self
     }
 
@@ -260,8 +292,9 @@ impl DataValidation {
             ));
         };
 
+        // TODO - remove
         if *validation_type == DataValidationType::Any {
-            self.rule = Some(DataValidationRule::Between(0.into(), 0.into()));
+            self.rule = Some(DataValidationRuleInternal::EqualTo(String::new()));
         }
 
         if self.rule.is_none() {
@@ -325,6 +358,12 @@ impl DataValidationValue {
             value: value.into(),
             is_string: false,
         }
+    }
+}
+
+impl fmt::Display for DataValidationValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.value)
     }
 }
 
@@ -410,11 +449,11 @@ impl From<&NaiveTime> for DataValidationValue {
 ///
 pub trait IntoDataValidationValue {
     /// Function to turn types into a [`DataValidationValue`] enum value.
-    fn new_value(self) -> DataValidationValue;
+    fn new_value(&self) -> DataValidationValue;
 }
 
 impl IntoDataValidationValue for DataValidationValue {
-    fn new_value(self) -> DataValidationValue {
+    fn new_value(&self) -> DataValidationValue {
         self.clone()
     }
 }
@@ -422,18 +461,23 @@ impl IntoDataValidationValue for DataValidationValue {
 macro_rules! data_validation_value_from_type {
     ($($t:ty)*) => ($(
         impl IntoDataValidationValue for $t {
-            fn new_value(self) -> DataValidationValue {
-                self.into()
+            fn new_value(&self) -> DataValidationValue {
+                (*self).into()
             }
         }
     )*)
 }
 
+impl IntoDataValidationValue for ExcelDateTime {
+    fn new_value(&self) -> DataValidationValue {
+        self.into()
+    }
+}
+
 data_validation_value_from_type!(
-    &str &String String Cow<'_, str>
     u8 i8 u16 i16 u32 i32 f32 f64
-    Formula
-    ExcelDateTime &ExcelDateTime
+    //Formula
+    &ExcelDateTime
 );
 
 #[cfg(feature = "chrono")]
@@ -499,38 +543,94 @@ impl fmt::Display for DataValidationType {
 ///
 #[derive(Clone)]
 pub enum DataValidationRule<T: IntoDataValidationValue> {
-    /// Show the conditional format for cells that are equal to the target value.
+    /// TODO.
     EqualTo(T),
 
-    /// Show the conditional format for cells that are not equal to the target value.
+    /// TODO.
     NotEqualTo(T),
 
-    /// Show the conditional format for cells that are greater than the target value.
+    /// TODO.
     GreaterThan(T),
 
-    /// Show the conditional format for cells that are greater than or equal to the target value.
+    /// TODO.
     GreaterThanOrEqualTo(T),
 
-    /// Show the conditional format for cells that are less than the target value.
+    /// TODO.
     LessThan(T),
 
-    /// Show the conditional format for cells that are less than or equal to the target value.
+    /// TODO.
     LessThanOrEqualTo(T),
 
-    /// Show the conditional format for cells that are between the target values.
+    /// TODO.
     Between(T, T),
 
-    /// Show the conditional format for cells that are not between the target values.
+    /// TODO.
     NotBetween(T, T),
-
-    /// TODO
-    CustomFormula(T),
-
-    /// TODO
-    ListSource(T),
 }
 
-impl<T: IntoDataValidationValue> fmt::Display for DataValidationRule<T> {
+impl<T: IntoDataValidationValue> DataValidationRule<T> {
+    fn to_internal_rule(&self) -> DataValidationRuleInternal {
+        match &self {
+            DataValidationRule::EqualTo(value) => {
+                DataValidationRuleInternal::EqualTo(value.new_value().to_string())
+            }
+            DataValidationRule::NotEqualTo(value) => {
+                DataValidationRuleInternal::NotEqualTo(value.new_value().to_string())
+            }
+            DataValidationRule::GreaterThan(value) => {
+                DataValidationRuleInternal::GreaterThan(value.new_value().to_string())
+            }
+
+            DataValidationRule::GreaterThanOrEqualTo(value) => {
+                DataValidationRuleInternal::GreaterThanOrEqualTo(value.new_value().to_string())
+            }
+            DataValidationRule::LessThan(value) => {
+                DataValidationRuleInternal::LessThan(value.new_value().to_string())
+            }
+            DataValidationRule::LessThanOrEqualTo(value) => {
+                DataValidationRuleInternal::LessThanOrEqualTo(value.new_value().to_string())
+            }
+            DataValidationRule::Between(min, max) => DataValidationRuleInternal::Between(
+                min.new_value().to_string(),
+                max.new_value().to_string(),
+            ),
+            DataValidationRule::NotBetween(min, max) => DataValidationRuleInternal::NotBetween(
+                min.new_value().to_string(),
+                max.new_value().to_string(),
+            ),
+        }
+    }
+}
+
+// -----------------------------------------------------------------------
+// DataValidationRuleInternal
+// -----------------------------------------------------------------------
+
+// TODO
+#[derive(Clone)]
+pub(crate) enum DataValidationRuleInternal {
+    EqualTo(String),
+
+    NotEqualTo(String),
+
+    GreaterThan(String),
+
+    GreaterThanOrEqualTo(String),
+
+    LessThan(String),
+
+    LessThanOrEqualTo(String),
+
+    Between(String, String),
+
+    NotBetween(String, String),
+
+    CustomFormula(String),
+
+    ListSource(String),
+}
+
+impl fmt::Display for DataValidationRuleInternal {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::EqualTo(_) => write!(f, "equal"),

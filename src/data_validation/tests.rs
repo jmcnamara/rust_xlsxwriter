@@ -11,8 +11,8 @@ mod data_validation_tests {
     use crate::DataValidation;
     use crate::DataValidationErrorStyle;
     use crate::DataValidationRule;
-    use crate::DataValidationType;
     use crate::ExcelDateTime;
+    use crate::Formula;
     use crate::Worksheet;
     use crate::XlsxError;
 
@@ -23,9 +23,8 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::GreaterThan(0));
+        let data_validation =
+            DataValidation::new().allow_whole_number(DataValidationRule::GreaterThan(0));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -64,9 +63,8 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Decimal)
-            .set_rule(DataValidationRule::Between(1.0, 2.0));
+        let data_validation =
+            DataValidation::new().allow_decimal_number(DataValidationRule::Between(1.0, 2.0));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -107,8 +105,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::LessThan(10))
+            .allow_whole_number(DataValidationRule::LessThan(10))
             .ignore_blank(false);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -149,8 +146,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::LessThan(10))
+            .allow_whole_number(DataValidationRule::LessThan(10))
             .show_input_message(false);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -191,8 +187,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::LessThan(10))
+            .allow_whole_number(DataValidationRule::LessThan(10))
             .show_error_message(false);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -233,8 +228,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::LessThan(10))
+            .allow_whole_number(DataValidationRule::LessThan(10))
             .show_error_message(false);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -275,8 +269,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::NotEqualTo(10))
+            .allow_whole_number(DataValidationRule::NotEqualTo(10))
             .set_input_title("Title 1");
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -317,8 +310,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::NotEqualTo(10))
+            .allow_whole_number(DataValidationRule::NotEqualTo(10))
             .set_input_title("Title 1")
             .set_input_message("Message 1");
 
@@ -360,8 +352,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::NotEqualTo(10))
+            .allow_whole_number(DataValidationRule::NotEqualTo(10))
             .set_error_title("Title 2")
             .set_error_message("Message 2")
             .set_input_title("Title 1")
@@ -405,8 +396,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::NotEqualTo(10))
+            .allow_whole_number(DataValidationRule::NotEqualTo(10))
             .set_error_style(DataValidationErrorStyle::Warning);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -447,8 +437,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Whole)
-            .set_rule(DataValidationRule::NotEqualTo(10))
+            .allow_whole_number(DataValidationRule::NotEqualTo(10))
             .set_error_style(DataValidationErrorStyle::Information);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -488,9 +477,9 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Date)
-            .set_rule(DataValidationRule::GreaterThan(45658));
+        let data_validation = DataValidation::new().allow_date(DataValidationRule::GreaterThan(
+            ExcelDateTime::parse_from_str("2025-01-01")?,
+        ));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -529,11 +518,9 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Date)
-            .set_rule(DataValidationRule::GreaterThan(
-                ExcelDateTime::parse_from_str("2025-01-01")?,
-            ));
+        let data_validation = DataValidation::new().allow_date(DataValidationRule::GreaterThan(
+            &ExcelDateTime::parse_from_str("2025-01-01")?,
+        ));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -572,9 +559,9 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Time)
-            .set_rule(DataValidationRule::GreaterThan(0.5));
+        let data_validation = DataValidation::new().allow_time(DataValidationRule::GreaterThan(
+            ExcelDateTime::parse_from_str("12:00")?,
+        ));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -613,11 +600,9 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Time)
-            .set_rule(DataValidationRule::GreaterThan(
-                ExcelDateTime::parse_from_str("12:00")?,
-            ));
+        let data_validation = DataValidation::new().allow_time(DataValidationRule::GreaterThan(
+            &ExcelDateTime::parse_from_str("12:00")?,
+        ));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -656,9 +641,8 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::TextLength)
-            .set_rule(DataValidationRule::GreaterThan(6));
+        let data_validation =
+            DataValidation::new().allow_text_length(DataValidationRule::GreaterThan(6));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -693,13 +677,11 @@ mod data_validation_tests {
     }
 
     #[test]
-    fn data_validation_15() -> Result<(), XlsxError> {
+    fn data_validation_15_1() -> Result<(), XlsxError> {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Custom)
-            .set_rule(DataValidationRule::CustomFormula(6));
+        let data_validation = DataValidation::new().allow_custom_formula(Formula::new("=6"));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -734,13 +716,89 @@ mod data_validation_tests {
     }
 
     #[test]
+    fn data_validation_15_2() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let data_validation = DataValidation::new().allow_custom_formula("6".into());
+
+        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <dataValidations count="1">
+                <dataValidation type="custom" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
+                  <formula1>6</formula1>
+                </dataValidation>
+              </dataValidations>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_validation_16_() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let data_validation = DataValidation::new().allow_list_strings(&["Foo", "Bar", "Baz"]);
+
+        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <dataValidations count="1">
+                <dataValidation type="list" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
+                  <formula1>"Foo,Bar,Baz"</formula1>
+                </dataValidation>
+              </dataValidations>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
     fn data_validation_16_1() -> Result<(), XlsxError> {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::List)
-            .set_rule(DataValidationRule::ListSource("\"Foo,Bar,Baz\""));
+        let data_validation = DataValidation::new().allow_list_strings(&["Foo", "Bar", "Baz"]);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -779,54 +837,11 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::List)
-            .set_string_list(&["Foo", "Bar", "Baz"]);
-
-        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
-
-        worksheet.assemble_xml_file();
-
-        let got = worksheet.writer.read_to_str();
-        let got = xml_to_vec(got);
-
-        let expected = xml_to_vec(
-            r#"
-            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-              <dimension ref="A1"/>
-              <sheetViews>
-                <sheetView tabSelected="1" workbookViewId="0"/>
-              </sheetViews>
-              <sheetFormatPr defaultRowHeight="15"/>
-              <sheetData/>
-              <dataValidations count="1">
-                <dataValidation type="list" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
-                  <formula1>"Foo,Bar,Baz"</formula1>
-                </dataValidation>
-              </dataValidations>
-              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
-            </worksheet>
-            "#,
-        );
-
-        assert_eq!(expected, got);
-
-        Ok(())
-    }
-
-    #[test]
-    fn data_validation_16_3() -> Result<(), XlsxError> {
-        let mut worksheet = Worksheet::new();
-        worksheet.set_selected(true);
-
-        let data_validation = DataValidation::new()
-            .set_type(DataValidationType::List)
-            .set_string_list(&[
-                String::from("Foo"),
-                String::from("Bar"),
-                String::from("Baz"),
-            ]);
+        let data_validation = DataValidation::new().allow_list_strings(&[
+            String::from("Foo"),
+            String::from("Bar"),
+            String::from("Baz"),
+        ]);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -866,7 +881,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Any)
+            .allow_any_type()
             .set_input_title("Title 1");
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -905,7 +920,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Any)
+            .allow_any_type()
             .set_input_message("Message 1");
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -944,7 +959,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Any)
+            .allow_any_type()
             .set_error_title("Title 2")
             .set_error_message("Message 2");
 
@@ -984,7 +999,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         // Check for empty "Any" validation.
-        let data_validation = DataValidation::new().set_type(DataValidationType::Any);
+        let data_validation = DataValidation::new().allow_any_type();
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -1031,14 +1046,16 @@ mod data_validation_tests {
 
         // Check for invalid string lengths.
         let data_validation = DataValidation::new()
-            .set_type(DataValidationType::Any)
+            .allow_any_type()
             .set_input_title(invalid_title)
             .set_input_message(&invalid_message)
             .set_error_title(invalid_title)
-            .set_error_message(&invalid_message)
-            .set_string_list(&list_values);
+            .set_error_message(&invalid_message);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        // Check for invalid string list. Todo - add extra test/check here.
+        DataValidation::new().allow_list_strings(&list_values);
 
         worksheet.assemble_xml_file();
 

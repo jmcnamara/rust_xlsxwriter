@@ -1076,7 +1076,7 @@ use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
     static_regex, utility, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType,
-    Color, ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRule,
+    Color, ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRuleInternal,
     DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
     HeaderImagePosition, HyperlinkType, Image, IntoColor, IntoExcelDateTime, ObjectMovement,
     ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
@@ -6487,6 +6487,8 @@ impl Worksheet {
         // if !multi_range.is_empty() {
         //     cell_range = multi_range;
         // }
+
+        dbg!(&cell_range);
 
         // Validate the conditional format.
         data_validation.validate()?;
@@ -13429,9 +13431,9 @@ impl Worksheet {
 
         if let Some(rule) = &data_validation.rule {
             match rule {
-                DataValidationRule::Between(_, _)
-                | DataValidationRule::CustomFormula(_)
-                | DataValidationRule::ListSource(_) => {
+                &DataValidationRuleInternal::Between(_, _)
+                | DataValidationRuleInternal::CustomFormula(_)
+                | DataValidationRuleInternal::ListSource(_) => {
                     // Excel doesn't use an operator for these types.
                 }
                 _ => {
@@ -13474,19 +13476,20 @@ impl Worksheet {
 
         // Write the <formula1>/<formula2> elements.
         match rule {
-            DataValidationRule::EqualTo(value)
-            | DataValidationRule::NotEqualTo(value)
-            | DataValidationRule::LessThan(value)
-            | DataValidationRule::LessThanOrEqualTo(value)
-            | DataValidationRule::GreaterThan(value)
-            | DataValidationRule::GreaterThanOrEqualTo(value)
-            | DataValidationRule::ListSource(value)
-            | DataValidationRule::CustomFormula(value) => {
-                self.writer.xml_data_element_only("formula1", &value.value);
+            DataValidationRuleInternal::EqualTo(value)
+            | DataValidationRuleInternal::NotEqualTo(value)
+            | DataValidationRuleInternal::LessThan(value)
+            | DataValidationRuleInternal::LessThanOrEqualTo(value)
+            | DataValidationRuleInternal::GreaterThan(value)
+            | DataValidationRuleInternal::GreaterThanOrEqualTo(value)
+            | DataValidationRuleInternal::ListSource(value)
+            | DataValidationRuleInternal::CustomFormula(value) => {
+                self.writer.xml_data_element_only("formula1", value);
             }
-            DataValidationRule::Between(min, max) | DataValidationRule::NotBetween(min, max) => {
-                self.writer.xml_data_element_only("formula1", &min.value);
-                self.writer.xml_data_element_only("formula2", &max.value);
+            DataValidationRuleInternal::Between(min, max)
+            | DataValidationRuleInternal::NotBetween(min, max) => {
+                self.writer.xml_data_element_only("formula1", min);
+                self.writer.xml_data_element_only("formula2", max);
             }
         }
         self.writer.xml_end_tag("dataValidation");
