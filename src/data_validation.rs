@@ -126,6 +126,14 @@ impl DataValidation {
             .collect::<Vec<String>>()
             .join(",");
 
+        let length = joined_list.chars().count();
+        if length > 255 {
+            eprintln!(
+                "Validation list length '{length }' including commas is greater than Excel's limit of 255 characters: {joined_list}"
+            );
+            return self;
+        }
+
         let joined_list = format!("\"{joined_list}\"");
 
         self.rule = Some(DataValidationRule::ListSource(joined_list.new_value()));
@@ -163,9 +171,18 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn set_input_title(mut self, title: impl Into<String>) -> DataValidation {
-        // TODO add string length check.
-        self.input_title = title.into();
+    pub fn set_input_title(mut self, text: impl Into<String>) -> DataValidation {
+        let text = text.into();
+        let length = text.chars().count();
+
+        if length > 32 {
+            eprintln!(
+                "Validation title length '{length }' greater than Excel's limit of 32 characters."
+            );
+            return self;
+        }
+
+        self.input_title = text;
         self
     }
 
@@ -173,9 +190,18 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn set_input_message(mut self, title: impl Into<String>) -> DataValidation {
-        // TODO add string length check.
-        self.input_message = title.into();
+    pub fn set_input_message(mut self, text: impl Into<String>) -> DataValidation {
+        let text = text.into();
+        let length = text.chars().count();
+
+        if length > 255 {
+            eprintln!(
+                "Validation message length '{length }' greater than Excel's limit of 255 characters."
+            );
+            return self;
+        }
+
+        self.input_message = text;
         self
     }
 
@@ -183,9 +209,18 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn set_error_title(mut self, title: impl Into<String>) -> DataValidation {
-        // TODO add string length check.
-        self.error_title = title.into();
+    pub fn set_error_title(mut self, text: impl Into<String>) -> DataValidation {
+        let text = text.into();
+        let length = text.chars().count();
+
+        if length > 32 {
+            eprintln!(
+                "Validation title length '{length }' greater than Excel's limit of 32 characters."
+            );
+            return self;
+        }
+
+        self.error_title = text;
         self
     }
 
@@ -193,9 +228,18 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn set_error_message(mut self, title: impl Into<String>) -> DataValidation {
-        // TODO add string length check.
-        self.error_message = title.into();
+    pub fn set_error_message(mut self, text: impl Into<String>) -> DataValidation {
+        let text = text.into();
+        let length = text.chars().count();
+
+        if length > 255 {
+            eprintln!(
+                "Validation message length '{length }' greater than Excel's limit of 255 characters."
+            );
+            return self;
+        }
+
+        self.error_message = text;
         self
     }
 

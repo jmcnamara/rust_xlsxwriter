@@ -1012,4 +1012,56 @@ mod data_validation_tests {
 
         Ok(())
     }
+
+    #[test]
+    fn data_validation_21() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let invalid_title = "This exceeds Excel's title limits";
+        let padding = ["a"; 221];
+        let invalid_message = "This exceeds Excel's message limits".to_string() + &padding.concat();
+        let list_values = [
+            "Foobar", "Foobas", "Foobat", "Foobau", "Foobav", "Foobaw", "Foobax", "Foobay",
+            "Foobaz", "Foobba", "Foobbb", "Foobbc", "Foobbd", "Foobbe", "Foobbf", "Foobbg",
+            "Foobbh", "Foobbi", "Foobbj", "Foobbk", "Foobbl", "Foobbm", "Foobbn", "Foobbo",
+            "Foobbp", "Foobbq", "Foobbr", "Foobbs", "Foobbt", "Foobbu", "Foobbv", "Foobbw",
+            "Foobbx", "Foobby", "Foobbz", "Foobca", "End1",
+        ];
+
+        // Check for invalid string lengths.
+        let data_validation = DataValidation::new()
+            .set_type(DataValidationType::Any)
+            .set_input_title(invalid_title)
+            .set_input_message(&invalid_message)
+            .set_error_title(invalid_title)
+            .set_error_message(&invalid_message)
+            .set_string_list(&list_values);
+
+        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
 }

@@ -6472,17 +6472,13 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
-
-
         let mut data_validation = data_validation.clone();
-
 
         // The "Any" validation type should be ignored if it doesn't have any
         // input or error titles or messages. This is the same rule as Excel.
         if data_validation.is_invalid_any() {
             return Ok(self);
         }
-
 
         // Store the conditional formats based on their range.
         let cell_range = utility::cell_range(first_row, first_col, last_row, last_col);
@@ -13415,12 +13411,10 @@ impl Worksheet {
             return;
         };
 
-
         // The Any type doesn't have a rule or values so handle that separately.
         if *validation_type == DataValidationType::Any {
             self.write_data_validation_any(range, data_validation);
             return;
-
         }
 
         // Start the attributes.
@@ -13479,32 +13473,28 @@ impl Worksheet {
         self.writer.xml_start_tag("dataValidation", &attributes);
 
         // Write the <formula1>/<formula2> elements.
-            match rule {
-                DataValidationRule::EqualTo(value)
-                | DataValidationRule::NotEqualTo(value)
-                | DataValidationRule::LessThan(value)
-                | DataValidationRule::LessThanOrEqualTo(value)
-                | DataValidationRule::GreaterThan(value)
-                | DataValidationRule::GreaterThanOrEqualTo(value)
-                | DataValidationRule::ListSource(value)
-                | DataValidationRule::CustomFormula(value) => {
-                    self.writer.xml_data_element_only("formula1", &value.value);
-                }
-                DataValidationRule::Between(min, max)
-                | DataValidationRule::NotBetween(min, max) => {
-                    self.writer.xml_data_element_only("formula1", &min.value);
-                    self.writer.xml_data_element_only("formula2", &max.value);
-                }
+        match rule {
+            DataValidationRule::EqualTo(value)
+            | DataValidationRule::NotEqualTo(value)
+            | DataValidationRule::LessThan(value)
+            | DataValidationRule::LessThanOrEqualTo(value)
+            | DataValidationRule::GreaterThan(value)
+            | DataValidationRule::GreaterThanOrEqualTo(value)
+            | DataValidationRule::ListSource(value)
+            | DataValidationRule::CustomFormula(value) => {
+                self.writer.xml_data_element_only("formula1", &value.value);
             }
+            DataValidationRule::Between(min, max) | DataValidationRule::NotBetween(min, max) => {
+                self.writer.xml_data_element_only("formula1", &min.value);
+                self.writer.xml_data_element_only("formula2", &max.value);
+            }
+        }
         self.writer.xml_end_tag("dataValidation");
     }
-
-
 
     // Write the <dataValidation> element.
     fn write_data_validation_any(&mut self, range: &String, data_validation: &DataValidation) {
         let mut attributes = vec![];
-
 
         if data_validation.ignore_blank {
             attributes.push(("allowBlank", "1".to_string()));
@@ -13538,7 +13528,6 @@ impl Worksheet {
 
         self.writer.xml_empty_tag("dataValidation", &attributes);
     }
-
 
     // Write the <hyperlink> element.
     fn write_hyperlink(&mut self, row: RowNum, col: ColNum, hyperlink: &Url) {
