@@ -15,7 +15,10 @@ mod tests;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-use crate::{ExcelDateTime, Formula, IntoExcelDateTime, XlsxError};
+use crate::{
+    static_regex, utility, ColNum, ExcelDateTime, Formula, IntoExcelDateTime, RowNum, XlsxError,
+    COL_MAX, ROW_MAX,
+};
 use std::{borrow::Cow, fmt};
 
 // -----------------------------------------------------------------------
@@ -62,7 +65,7 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn allow_any_type(mut self) -> DataValidation {
+    pub fn allow_any_value(mut self) -> DataValidation {
         self.rule = Some(DataValidationRuleInternal::EqualTo(String::new()));
         self.validation_type = Some(DataValidationType::Any);
         self
@@ -73,6 +76,21 @@ impl DataValidation {
     /// TODO
     ///
     pub fn allow_whole_number(mut self, rule: DataValidationRule<i32>) -> DataValidation {
+        // Change from a generic rule to a concrete internal rule.
+        let rule = rule.to_internal_rule();
+        self.rule = Some(rule);
+        self.validation_type = Some(DataValidationType::Whole);
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// TODO
+    ///
+    pub fn allow_whole_number_from_cell(
+        mut self,
+        rule: DataValidationRule<DataValidationRange>,
+    ) -> DataValidation {
         // Change from a generic rule to a concrete internal rule.
         let rule = rule.to_internal_rule();
         self.rule = Some(rule);
@@ -96,7 +114,7 @@ impl DataValidation {
     ///
     /// TODO
     ///
-    pub fn allow_list_strings(mut self, list: &[impl AsRef<str>]) -> DataValidation {
+    pub fn allow_list_from_strings(mut self, list: &[impl AsRef<str>]) -> DataValidation {
         let joined_list = list
             .iter()
             .map(|s| s.as_ref().to_string().replace('"', "\"\""))
@@ -349,14 +367,12 @@ impl DataValidation {
 #[derive(Clone)]
 pub struct DataValidationValue {
     pub(crate) value: String,
-    pub(crate) is_string: bool,
 }
 
 impl DataValidationValue {
     pub(crate) fn new_from_string(value: impl Into<String>) -> DataValidationValue {
         DataValidationValue {
             value: value.into(),
-            is_string: false,
         }
     }
 }
@@ -372,9 +388,7 @@ macro_rules! data_validation_value_from_string {
     ($($t:ty)*) => ($(
         impl From<$t> for DataValidationValue {
             fn from(value: $t) -> DataValidationValue {
-                let mut value = DataValidationValue::new_from_string(value);
-                value.is_string = true;
-                value
+                DataValidationValue::new_from_string(value)
             }
         }
     )*)
@@ -391,6 +405,12 @@ macro_rules! data_validation_value_from_number {
     )*)
 }
 data_validation_value_from_number!(u8 i8 u16 i16 u32 i32 f32 f64);
+
+impl From<&DataValidationRange> for DataValidationValue {
+    fn from(value: &DataValidationRange) -> DataValidationValue {
+        DataValidationValue::new_from_string(value.to_string())
+    }
+}
 
 impl From<Formula> for DataValidationValue {
     fn from(value: Formula) -> DataValidationValue {
@@ -468,21 +488,250 @@ macro_rules! data_validation_value_from_type {
     )*)
 }
 
+data_validation_value_from_type!(
+    u8 i8 u16 i16 u32 i32 f32 f64
+    &ExcelDateTime
+);
+
 impl IntoDataValidationValue for ExcelDateTime {
     fn new_value(&self) -> DataValidationValue {
         self.into()
     }
 }
 
-data_validation_value_from_type!(
-    u8 i8 u16 i16 u32 i32 f32 f64
-    //Formula
-    &ExcelDateTime
-);
+impl IntoDataValidationValue for DataValidationRange {
+    fn new_value(&self) -> DataValidationValue {
+        self.into()
+    }
+}
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 data_validation_value_from_type!(&NaiveDate & NaiveDateTime & NaiveTime);
+
+// -----------------------------------------------------------------------
+// DataValidationRange
+// -----------------------------------------------------------------------
+
+/// TODO
+pub struct DataValidationRange {
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
+    range_string: String,
+}
+
+impl DataValidationRange {
+    /// Create a new `DataValidationRange` from a worksheet cell 2 tuple.
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a new data validation range.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_DataValidationRange_new_from_range.rs TODO
+    /// #
+    /// # use rust_xlsxwriter::DataValidationRange;
+    /// #
+    /// # #[allow(unused_variables)]
+    /// # fn main() {
+    ///     // Same as "A5".
+    ///     let range = DataValidationRange::new_from_cell(4, 0);
+    /// # }
+    /// ```
+    ///
+    pub fn new_from_cell(row: RowNum, col: ColNum) -> Result<DataValidationRange, XlsxError> {
+        let mut range = DataValidationRange {
+            first_row: row,
+            first_col: col,
+            last_row: row,
+            last_col: col,
+            range_string: String::new(),
+        };
+
+        Self::validate(&range)?;
+        Self::cells_to_range(&mut range);
+
+        Ok(range)
+    }
+
+    /// Create a new `DataValidationRange` from a worksheet cell 4 tuple range.
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a new data validation range.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_DataValidationRange_new_from_range.rs TODO
+    /// #
+    /// # use rust_xlsxwriter::DataValidationRange;
+    /// #
+    /// # #[allow(unused_variables)]
+    /// # fn main() {
+    ///     // Same as "A1:A5".
+    ///     let range = DataValidationRange::new_from_range(0, 0, 4, 0);
+    /// # }
+    /// ```
+    ///
+    pub fn new_from_range(
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+    ) -> Result<DataValidationRange, XlsxError> {
+        let mut range = DataValidationRange {
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+            range_string: String::new(),
+        };
+
+        Self::validate(&range)?;
+        Self::cells_to_range(&mut range);
+
+        Ok(range)
+    }
+
+    /// Create a new `DataValidationRange` from an Excel range formula.
+    ///
+    ///
+    /// # Errors
+    ///
+    /// TODO
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a new chart range.
+    ///
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_DataValidationRange_new_from_string.rs
+    /// #
+    /// # use rust_xlsxwriter::DataValidationRange;
+    /// #
+    /// # #[allow(unused_variables)]
+    /// # fn main() {
+    ///     let range = DataValidationRange::new_from_string("$A$1:$A$5");
+    /// # }
+    /// ```
+    ///
+    pub fn new_from_string(range_string: &str) -> Result<DataValidationRange, XlsxError> {
+        let cell = static_regex!(r"^\$?([A-Z]+)\$?(\d+)$");
+        let range = static_regex!(r"\$?([A-Z]+)\$?(\d+):\$?([A-Z]+)\$?(\d+)$");
+
+        let first_row;
+        let first_col;
+        let last_row;
+        let last_col;
+
+        if let Some(caps) = range.captures(range_string) {
+            first_row = caps.get(2).unwrap().as_str().parse::<u32>().unwrap() - 1;
+            last_row = caps.get(4).unwrap().as_str().parse::<u32>().unwrap() - 1;
+            first_col = utility::column_name_to_number(caps.get(1).unwrap().as_str());
+            last_col = utility::column_name_to_number(caps.get(3).unwrap().as_str());
+        } else if let Some(caps) = cell.captures(range_string) {
+            first_row = caps.get(2).unwrap().as_str().parse::<u32>().unwrap() - 1;
+            first_col = utility::column_name_to_number(caps.get(1).unwrap().as_str());
+            last_row = first_row;
+            last_col = first_col;
+        } else {
+            return Err(XlsxError::DataValidationError(format!(
+                "Couldn't parse cell range '{range_string}'"
+            )));
+        }
+
+        let range = DataValidationRange {
+            first_row,
+            first_col,
+            last_row,
+            last_col,
+            range_string: range_string.to_string(),
+        };
+
+        Self::validate(&range)?;
+
+        Ok(range)
+    }
+
+    // Convert the row/col into a range string.
+    pub(crate) fn cells_to_range(&mut self) {
+        let range1 = utility::row_col_to_cell(self.first_row, self.first_col);
+        let range2 = utility::row_col_to_cell(self.last_row, self.last_col);
+
+        if range1 == range2 {
+            self.range_string = range1;
+        } else {
+            self.range_string = format!("{range1}:{range2}");
+        }
+    }
+
+    // Convert the row/col into a range error string.
+    pub(crate) fn error_range(&self) -> String {
+        let last_row = self.last_row;
+        let last_col = self.last_col;
+        let first_row = self.first_row;
+        let first_col = self.first_col;
+
+        let range1 = utility::row_col_to_cell(self.first_row, self.first_col);
+        let range2 = utility::row_col_to_cell(self.last_row, self.last_col);
+
+        if range1 == range2 {
+            format!("{range1}/({first_row}, {first_col})")
+        } else {
+            format!("{range1}:{range2}/({first_row}, {first_col}, {last_row}, {last_col})")
+        }
+    }
+
+    // Check that the row/column values in the range are valid.
+    pub(crate) fn validate(&self) -> Result<(), XlsxError> {
+        let range = self.error_range();
+
+        if self.first_row > self.last_row {
+            return Err(XlsxError::DataValidationError(format!(
+                "Range '{range}' has a first row '{}' greater than the last row '{}'",
+                self.first_row, self.last_row
+            )));
+        }
+
+        if self.first_col > self.last_col {
+            return Err(XlsxError::DataValidationError(format!(
+                "Range '{range}' has a first column '{}' greater than the last column '{}'",
+                self.first_col, self.last_col
+            )));
+        }
+
+        if self.first_row >= ROW_MAX || self.last_row >= ROW_MAX {
+            return Err(XlsxError::DataValidationError(format!(
+                "Range '{range}' has a row '{}/{}' greater than Excel limit of 1048576",
+                self.first_row, self.last_row
+            )));
+        }
+
+        if self.first_col >= COL_MAX || self.last_col >= COL_MAX {
+            return Err(XlsxError::DataValidationError(format!(
+                "Range '{range}' has a column '{}/{}' greater than Excel limit of XFD/16384",
+                self.first_col, self.last_col
+            )));
+        }
+
+        Ok(())
+    }
+}
+
+impl fmt::Display for DataValidationRange {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.range_string)
+    }
+}
 
 // -----------------------------------------------------------------------
 // DataValidationType

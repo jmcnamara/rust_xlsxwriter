@@ -10,6 +10,7 @@ mod data_validation_tests {
     use crate::test_functions::xml_to_vec;
     use crate::DataValidation;
     use crate::DataValidationErrorStyle;
+    use crate::DataValidationRange;
     use crate::DataValidationRule;
     use crate::ExcelDateTime;
     use crate::Formula;
@@ -19,12 +20,39 @@ mod data_validation_tests {
     use pretty_assertions::assert_eq;
 
     #[test]
+    fn test_range_errors() {
+        let result = DataValidationRange::new_from_string("J13$");
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        let result = DataValidationRange::new_from_string("J13:J14$");
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        let result = DataValidationRange::new_from_string("A1048577");
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        let result = DataValidationRange::new_from_cell(1_048_577, 0);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        let result = DataValidationRange::new_from_cell(0, 16_384);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        let result = DataValidationRange::new_from_range(1, 1, 0, 0);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        let result = DataValidationRange::new_from_range(0, 0, 1_048_577, 0);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        let result = DataValidationRange::new_from_range(0, 0, 1, 16_384);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+    }
+
+    #[test]
     fn data_validation_01() -> Result<(), XlsxError> {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
         let data_validation =
-            DataValidation::new().allow_whole_number(DataValidationRule::GreaterThan(0));
+            DataValidation::new().allow_whole_number(DataValidationRule::GreaterThan(-10));
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -45,7 +73,7 @@ mod data_validation_tests {
               <sheetData/>
               <dataValidations count="1">
                 <dataValidation type="whole" operator="greaterThan" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
-                  <formula1>0</formula1>
+                  <formula1>-10</formula1>
                 </dataValidation>
               </dataValidations>
               <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
@@ -759,7 +787,7 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new().allow_list_strings(&["Foo", "Bar", "Baz"]);
+        let data_validation = DataValidation::new().allow_list_from_strings(&["Foo", "Bar", "Baz"]);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -798,7 +826,7 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new().allow_list_strings(&["Foo", "Bar", "Baz"]);
+        let data_validation = DataValidation::new().allow_list_from_strings(&["Foo", "Bar", "Baz"]);
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -837,7 +865,7 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new().allow_list_strings(&[
+        let data_validation = DataValidation::new().allow_list_from_strings(&[
             String::from("Foo"),
             String::from("Bar"),
             String::from("Baz"),
@@ -881,7 +909,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .allow_any_type()
+            .allow_any_value()
             .set_input_title("Title 1");
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -920,7 +948,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .allow_any_type()
+            .allow_any_value()
             .set_input_message("Message 1");
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
@@ -959,7 +987,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         let data_validation = DataValidation::new()
-            .allow_any_type()
+            .allow_any_value()
             .set_error_title("Title 2")
             .set_error_message("Message 2");
 
@@ -999,7 +1027,7 @@ mod data_validation_tests {
         worksheet.set_selected(true);
 
         // Check for empty "Any" validation.
-        let data_validation = DataValidation::new().allow_any_type();
+        let data_validation = DataValidation::new().allow_any_value();
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -1046,7 +1074,7 @@ mod data_validation_tests {
 
         // Check for invalid string lengths.
         let data_validation = DataValidation::new()
-            .allow_any_type()
+            .allow_any_value()
             .set_input_title(invalid_title)
             .set_input_message(&invalid_message)
             .set_error_title(invalid_title)
@@ -1055,7 +1083,7 @@ mod data_validation_tests {
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
         // Check for invalid string list. Todo - add extra test/check here.
-        DataValidation::new().allow_list_strings(&list_values);
+        DataValidation::new().allow_list_from_strings(&list_values);
 
         worksheet.assemble_xml_file();
 
@@ -1072,6 +1100,170 @@ mod data_validation_tests {
               </sheetViews>
               <sheetFormatPr defaultRowHeight="15"/>
               <sheetData/>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_validation_22_1() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let data_validation = DataValidation::new().allow_whole_number_from_cell(
+            DataValidationRule::EqualTo(DataValidationRange::new_from_string("J13")?),
+        );
+
+        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <dataValidations count="1">
+                <dataValidation type="whole" operator="equal" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
+                  <formula1>J13</formula1>
+                </dataValidation>
+              </dataValidations>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_validation_22_2() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let data_validation = DataValidation::new().allow_whole_number_from_cell(
+            DataValidationRule::EqualTo(DataValidationRange::new_from_range(12, 9, 12, 9)?),
+        );
+
+        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <dataValidations count="1">
+                <dataValidation type="whole" operator="equal" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
+                  <formula1>J13</formula1>
+                </dataValidation>
+              </dataValidations>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_validation_22_3() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let data_validation = DataValidation::new().allow_whole_number_from_cell(
+            DataValidationRule::EqualTo(DataValidationRange::new_from_cell(12, 9)?),
+        );
+
+        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <dataValidations count="1">
+                <dataValidation type="whole" operator="equal" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
+                  <formula1>J13</formula1>
+                </dataValidation>
+              </dataValidations>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
+
+    #[test]
+    fn data_validation_23() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let data_validation = DataValidation::new().allow_whole_number_from_cell(
+            DataValidationRule::EqualTo(DataValidationRange::new_from_string("$J13")?),
+        );
+
+        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <dataValidations count="1">
+                <dataValidation type="whole" operator="equal" allowBlank="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
+                  <formula1>$J13</formula1>
+                </dataValidation>
+              </dataValidations>
               <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
             </worksheet>
             "#,

@@ -6488,8 +6488,6 @@ impl Worksheet {
         //     cell_range = multi_range;
         // }
 
-        dbg!(&cell_range);
-
         // Validate the conditional format.
         data_validation.validate()?;
 
