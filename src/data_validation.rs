@@ -28,11 +28,12 @@ use std::fmt;
 ///
 #[derive(Clone)]
 pub struct DataValidation {
-    pub(crate) validation_type: Option<DataValidationType>,
-    pub(crate) rule: Option<DataValidationRuleInternal>,
+    pub(crate) validation_type: DataValidationType,
+    pub(crate) rule: DataValidationRuleInternal,
     pub(crate) ignore_blank: bool,
     pub(crate) show_input_message: bool,
     pub(crate) show_error_message: bool,
+    pub(crate) multi_range: String,
     pub(crate) input_title: String,
     pub(crate) error_title: String,
     pub(crate) input_message: String,
@@ -45,11 +46,12 @@ impl DataValidation {
     #[allow(clippy::new_without_default)]
     pub fn new() -> DataValidation {
         DataValidation {
-            validation_type: None,
-            rule: None,
+            validation_type: DataValidationType::Any,
+            rule: DataValidationRuleInternal::EqualTo(String::new()),
             ignore_blank: true,
             show_input_message: true,
             show_error_message: true,
+            multi_range: String::new(),
             input_title: String::new(),
             error_title: String::new(),
             input_message: String::new(),
@@ -63,8 +65,8 @@ impl DataValidation {
     /// TODO
     ///
     pub fn allow_any_value(mut self) -> DataValidation {
-        self.rule = Some(DataValidationRuleInternal::EqualTo(String::new()));
-        self.validation_type = Some(DataValidationType::Any);
+        self.rule = DataValidationRuleInternal::EqualTo(String::new());
+        self.validation_type = DataValidationType::Any;
         self
     }
 
@@ -73,9 +75,8 @@ impl DataValidation {
     /// TODO
     ///
     pub fn allow_whole_number(mut self, rule: DataValidationRule<i32>) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::Whole);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::Whole;
         self
     }
 
@@ -87,9 +88,8 @@ impl DataValidation {
         mut self,
         rule: DataValidationRule<Formula>,
     ) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::Whole);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::Whole;
         self
     }
 
@@ -98,9 +98,8 @@ impl DataValidation {
     /// TODO
     ///
     pub fn allow_decimal_number(mut self, rule: DataValidationRule<f64>) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::Decimal);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::Decimal;
         self
     }
 
@@ -112,9 +111,8 @@ impl DataValidation {
         mut self,
         rule: DataValidationRule<Formula>,
     ) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::Decimal);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::Decimal;
         self
     }
 
@@ -143,8 +141,8 @@ impl DataValidation {
 
         let joined_list = format!("\"{joined_list}\"");
 
-        self.rule = Some(DataValidationRuleInternal::ListSource(joined_list));
-        self.validation_type = Some(DataValidationType::List);
+        self.rule = DataValidationRuleInternal::ListSource(joined_list);
+        self.validation_type = DataValidationType::List;
         Ok(self)
     }
 
@@ -154,8 +152,8 @@ impl DataValidation {
     ///
     pub fn allow_list_formula(mut self, rule: Formula) -> DataValidation {
         let formula = rule.expand_formula(true).to_string();
-        self.rule = Some(DataValidationRuleInternal::ListSource(formula));
-        self.validation_type = Some(DataValidationType::List);
+        self.rule = DataValidationRuleInternal::ListSource(formula);
+        self.validation_type = DataValidationType::List;
         self
     }
 
@@ -167,9 +165,8 @@ impl DataValidation {
         mut self,
         rule: DataValidationRule<impl IntoExcelDateTime + IntoDataValidationValue>,
     ) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::Date);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::Date;
         self
     }
 
@@ -178,9 +175,8 @@ impl DataValidation {
     /// TODO
     ///
     pub fn allow_date_formula(mut self, rule: DataValidationRule<Formula>) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::Date);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::Date;
         self
     }
 
@@ -192,9 +188,8 @@ impl DataValidation {
         mut self,
         rule: DataValidationRule<impl IntoExcelDateTime + IntoDataValidationValue>,
     ) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::Time);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::Time;
         self
     }
 
@@ -203,9 +198,8 @@ impl DataValidation {
     /// TODO
     ///
     pub fn allow_time_formula(mut self, rule: DataValidationRule<Formula>) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::Time);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::Time;
         self
     }
 
@@ -214,9 +208,8 @@ impl DataValidation {
     /// TODO
     ///
     pub fn allow_text_length(mut self, rule: DataValidationRule<u32>) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::TextLength);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::TextLength;
         self
     }
 
@@ -228,9 +221,8 @@ impl DataValidation {
         mut self,
         rule: DataValidationRule<Formula>,
     ) -> DataValidation {
-        let rule = rule.to_internal_rule();
-        self.rule = Some(rule);
-        self.validation_type = Some(DataValidationType::TextLength);
+        self.rule = rule.to_internal_rule();
+        self.validation_type = DataValidationType::TextLength;
         self
     }
 
@@ -240,9 +232,8 @@ impl DataValidation {
     ///
     pub fn allow_custom_formula(mut self, rule: Formula) -> DataValidation {
         let formula = rule.expand_formula(true).to_string();
-        self.rule = Some(DataValidationRuleInternal::CustomFormula(formula));
-
-        self.validation_type = Some(DataValidationType::Custom);
+        self.rule = DataValidationRuleInternal::CustomFormula(formula);
+        self.validation_type = DataValidationType::Custom;
         self
     }
 
@@ -358,36 +349,37 @@ impl DataValidation {
         self
     }
 
-    // Validate the data validation.
-    pub(crate) fn validate(&mut self) -> Result<(), XlsxError> {
-        let Some(validation_type) = &self.validation_type else {
-            return Err(XlsxError::DataValidationError(
-                "DataValidation type must be set".to_string(),
-            ));
-        };
-
-        // TODO - remove
-        if *validation_type == DataValidationType::Any {
-            self.rule = Some(DataValidationRuleInternal::EqualTo(String::new()));
-        }
-
-        if self.rule.is_none() {
-            return Err(XlsxError::DataValidationError(
-                "DataValidation rule must be set".to_string(),
-            ));
-        }
-
-        Ok(())
+    /// Set an additional multi-cell range for the conditional format.
+    ///
+    /// The `set_multi_range()` method is used to extend a conditional
+    /// format over non-contiguous ranges like `"B3:D6 I3:K6 B9:D12
+    /// I9:K12"`.
+    ///
+    /// See [Selecting a non-contiguous
+    /// range](crate::conditional_format#selecting-a-non-contiguous-range)
+    /// for more information.
+    ///
+    /// # Parameters
+    ///
+    /// * `range` - A string like type representing an Excel range.
+    ///
+    ///   Note, you can use an Excel range like `"$B$3:$D$6,$I$3:$K$6"` or
+    ///   omit the `$` anchors and replace the commas with spaces to have a
+    ///   clearer range like `"B3:D6 I3:K6"`. The documentation and examples
+    ///   use the latter format for clarity but it you are copying and
+    ///   pasting from Excel you can use the first format.
+    ///
+    ///   Note, if the range is invalid then Excel will omit it silently.
+    ///
+    pub fn set_multi_range(mut self, range: impl Into<String>) -> DataValidation {
+        self.multi_range = range.into().replace('$', "").replace(',', " ");
+        self
     }
 
     // The "Any" validation type should be ignored if it doesn't have any input
     // or error titles or messages. This is the same rule as Excel.
     pub(crate) fn is_invalid_any(&mut self) -> bool {
-        let Some(validation_type) = &self.validation_type else {
-            return false;
-        };
-
-        *validation_type == DataValidationType::Any
+        self.validation_type == DataValidationType::Any
             && self.input_title.is_empty()
             && self.input_message.is_empty()
             && self.error_title.is_empty()

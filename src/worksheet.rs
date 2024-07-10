@@ -6480,48 +6480,14 @@ impl Worksheet {
             return Ok(self);
         }
 
-        // Store the conditional formats based on their range.
-        let cell_range = utility::cell_range(first_row, first_col, last_row, last_col);
-        //data_validation.range = cell_range;
-        // let multi_range = data_validation.multi_range();
-        // if !multi_range.is_empty() {
-        //     cell_range = multi_range;
-        // }
+        // Store the data validation based on its range.
+        let mut cell_range = utility::cell_range(first_row, first_col, last_row, last_col);
+        if !data_validation.multi_range.is_empty() {
+            cell_range.clone_from(&data_validation.multi_range);
+        }
 
-        // Validate the conditional format.
-        data_validation.validate()?;
 
         self.data_validations.insert(cell_range, data_validation);
-
-        // // Check for extended Excel 2010 data bars/icons.
-        // if data_validation.has_x14_extensions() {
-        //     self.use_x14_extensions = true;
-        //     self.has_x14_data_validations = true;
-        // }
-
-        // // Only write standard cond formats for non-x14 icons.
-        // if !data_validation.has_x14_only() {
-        //     self.has_data_validations = true;
-        // }
-
-        // // Set the dxf format local index if required.
-        // if let Some(format) = data_validation.format_as_mut() {
-        //     format.dxf_index = self.format_dxf_index(format);
-        // }
-
-        // match self.data_validations.entry(cell_range) {
-        //     Entry::Occupied(mut entry) => {
-        //         // The conditional format range already exists. Append the rule.
-        //         let rules = entry.get_mut();
-        //         rules.push(data_validation);
-        //     }
-        //     Entry::Vacant(entry) => {
-        //         // The row doesn't exist, create a new row with columns and insert
-        //         // the cell value.
-        //         let rules = vec![data_validation];
-        //         entry.insert(rules);
-        //     }
-        // }
 
         Ok(self)
     }
@@ -13403,22 +13369,14 @@ impl Worksheet {
 
     // Write the <dataValidation> element.
     fn write_data_validation(&mut self, range: &String, data_validation: &DataValidation) {
-        let Some(validation_type) = &data_validation.validation_type else {
-            return;
-        };
-
-        let Some(rule) = &data_validation.rule else {
-            return;
-        };
-
         // The Any type doesn't have a rule or values so handle that separately.
-        if *validation_type == DataValidationType::Any {
+        if data_validation.validation_type == DataValidationType::Any {
             self.write_data_validation_any(range, data_validation);
             return;
         }
 
         // Start the attributes.
-        let mut attributes = vec![("type", validation_type.to_string())];
+        let mut attributes = vec![("type", data_validation.validation_type.to_string())];
 
         match data_validation.error_style {
             DataValidationErrorStyle::Warning | DataValidationErrorStyle::Information => {
@@ -13427,18 +13385,16 @@ impl Worksheet {
             DataValidationErrorStyle::Stop => {}
         }
 
-        if let Some(rule) = &data_validation.rule {
-            match rule {
+            match &data_validation.rule {
                 &DataValidationRuleInternal::Between(_, _)
                 | DataValidationRuleInternal::CustomFormula(_)
                 | DataValidationRuleInternal::ListSource(_) => {
                     // Excel doesn't use an operator for these types.
                 }
                 _ => {
-                    attributes.push(("operator", rule.to_string()));
+                    attributes.push(("operator", data_validation.rule.to_string()));
                 }
-            }
-        }
+            };
 
         if data_validation.ignore_blank {
             attributes.push(("allowBlank", "1".to_string()));
@@ -13473,7 +13429,7 @@ impl Worksheet {
         self.writer.xml_start_tag("dataValidation", &attributes);
 
         // Write the <formula1>/<formula2> elements.
-        match rule {
+        match &data_validation.rule {
             DataValidationRuleInternal::EqualTo(value)
             | DataValidationRuleInternal::NotEqualTo(value)
             | DataValidationRuleInternal::LessThan(value)
