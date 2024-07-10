@@ -13389,7 +13389,7 @@ impl Worksheet {
 
     // Write the <dataValidations> element.
     fn write_data_validations(&mut self) {
-        let attributes = [("count", "1".to_string())];
+        let attributes = [("count", self.data_validations.len().to_string())];
 
         self.writer.xml_start_tag("dataValidations", &attributes);
 
