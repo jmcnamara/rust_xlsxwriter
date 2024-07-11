@@ -186,6 +186,7 @@ mod app;
 mod content_types;
 mod core;
 mod custom;
+mod data_validation;
 mod datetime;
 mod drawing;
 mod error;
@@ -219,7 +220,6 @@ pub mod changelog;
 pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
-pub mod data_validation;
 pub mod sparkline;
 pub mod tutorial;
 pub mod utility;
@@ -230,6 +230,7 @@ pub mod worksheet;
 mod test_functions;
 
 // Re-export the public APIs.
+pub use data_validation::*;
 pub use datetime::*;
 pub use error::*;
 pub use filter::*;
@@ -246,9 +247,6 @@ pub use chart::*;
 
 #[doc(hidden)]
 pub use conditional_format::*;
-
-#[doc(hidden)]
-pub use data_validation::*;
 
 #[doc(hidden)]
 pub use sparkline::*;

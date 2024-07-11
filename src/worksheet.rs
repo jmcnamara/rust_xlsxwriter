@@ -6422,17 +6422,15 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// Add a TODO.
+    /// Add a data validation to one or more cells to restrict user input based
+    /// on types and rules.
     ///
-    /// Conditional formatting is a feature of Excel which allows you to apply a
-    /// format to a cell or a range of cells based on certain criteria. This is
-    /// generally used to highlight particular values in a range of data.
+    /// Data validation is a feature of Excel which allows you to restrict the
+    /// data that a user enters in a cell and to display associated help and
+    /// warning messages. It also allows you to restrict input to values in a
+    /// dropdown list.
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/data_validation_cell_intro.png">
-    ///
-    /// The [`ConditionalFormat`](crate::data_validation) variants are used to represent the types of
-    /// conditional format that can be applied in Excel.
+    /// See [`DataValidation`] for more information and examples.
     ///
     /// # Errors
     ///
@@ -6440,8 +6438,6 @@ impl Worksheet {
     ///   worksheet limits.
     /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
-    /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
-    ///   when a conditional formatting parameter is incorrect or missing.
     ///
     /// # Parameters
     ///
@@ -6449,8 +6445,75 @@ impl Worksheet {
     /// * `first_col` - The first row of the range.
     /// * `last_row` - The last row of the range.
     /// * `last_col` - The last row of the range.
-    /// * `data_validation` - A conditional format instance that implements
-    ///   the [`ConditionalFormat`] trait. TODO
+    /// * `data_validation` - A [`DataValidation`] data validation instance.
+    ///
+    /// # Examples
+    ///
+    /// Example of adding a data validation to a worksheet cell. This validation
+    /// uses an input message to explain to the user what type of input is required.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_data_validation_intro1.rs
+    /// #
+    /// use rust_xlsxwriter::{DataValidation, DataValidationRule, Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.write(1, 0, "Enter rating in cell D2:")?;
+    ///
+    ///     let data_validation = DataValidation::new()
+    ///         .allow_whole_number(DataValidationRule::Between(1, 5))
+    ///         .set_input_title("Enter a star rating!")
+    ///         .set_input_message("Enter rating 1-5.\nWhole numbers only.")
+    ///         .set_error_title("Value outside allowed range")
+    ///         .set_error_message("The input value must be an integer in the range 1-5.");
+    ///
+    ///     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
+    ///
+    ///     // Save the file.
+    ///     workbook.save("data_validation.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/data_validation_intro1.png">
+    ///
+    /// Example of adding a data validation to a worksheet cell. This validation
+    /// restricts users to a selection of values from a dropdown list.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_data_validation_allow_list_strings.rs
+    /// #
+    /// use rust_xlsxwriter::{DataValidation, Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     worksheet.write(1, 0, "Select value in cell D2:")?;
+    ///
+    ///     let data_validation =
+    ///         DataValidation::new().allow_list_strings(&["Pass", "Fail", "Incomplete"])?;
+    ///
+    ///     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
+    ///
+    ///     // Save the file.
+    ///     workbook.save("data_validation.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_strings.png">
     ///
     pub fn add_data_validation(
         &mut self,
@@ -6485,7 +6548,6 @@ impl Worksheet {
         if !data_validation.multi_range.is_empty() {
             cell_range.clone_from(&data_validation.multi_range);
         }
-
 
         self.data_validations.insert(cell_range, data_validation);
 
@@ -13385,16 +13447,16 @@ impl Worksheet {
             DataValidationErrorStyle::Stop => {}
         }
 
-            match &data_validation.rule {
-                &DataValidationRuleInternal::Between(_, _)
-                | DataValidationRuleInternal::CustomFormula(_)
-                | DataValidationRuleInternal::ListSource(_) => {
-                    // Excel doesn't use an operator for these types.
-                }
-                _ => {
-                    attributes.push(("operator", data_validation.rule.to_string()));
-                }
-            };
+        match &data_validation.rule {
+            &DataValidationRuleInternal::Between(_, _)
+            | DataValidationRuleInternal::CustomFormula(_)
+            | DataValidationRuleInternal::ListSource(_) => {
+                // Excel doesn't use an operator for these types.
+            }
+            _ => {
+                attributes.push(("operator", data_validation.rule.to_string()));
+            }
+        };
 
         if data_validation.ignore_blank {
             attributes.push(("allowBlank", "1".to_string()));
