@@ -6422,17 +6422,20 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// Add a TODO.
+    /// Add a data validation to one or more cells to restrict user input based
+    /// on types and rules.
     ///
-    /// Conditional formatting is a feature of Excel which allows you to apply a
-    /// format to a cell or a range of cells based on certain criteria. This is
-    /// generally used to highlight particular values in a range of data.
+    /// Data validation is a feature of Excel which allows you to restrict the
+    /// data that a user enters in a cell and to display associated help and
+    /// warning messages. It also allows you to restrict input to values in a
+    /// dropdown list.
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/data_validation_cell_intro.png">
+    /// A typical use case might be to restrict data in a cell to integer values
+    /// in a certain range, to provide a help message to indicate the required
+    /// value and to issue a warning if the input data doesn't meet the stated
+    /// criteria.
     ///
-    /// The [`ConditionalFormat`](crate::data_validation) variants are used to represent the types of
-    /// conditional format that can be applied in Excel.
+    /// TODO
     ///
     /// # Errors
     ///
@@ -6440,8 +6443,8 @@ impl Worksheet {
     ///   worksheet limits.
     /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
-    /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
-    ///   when a conditional formatting parameter is incorrect or missing.
+    /// * [`XlsxError::DataValidationError`] - A general error that is raised
+    ///   when a data validation parameter is incorrect or missing.
     ///
     /// # Parameters
     ///
@@ -6449,8 +6452,7 @@ impl Worksheet {
     /// * `first_col` - The first row of the range.
     /// * `last_row` - The last row of the range.
     /// * `last_col` - The last row of the range.
-    /// * `data_validation` - A conditional format instance that implements
-    ///   the [`ConditionalFormat`] trait. TODO
+    /// * `data_validation` - A [`DataValidation`] data validation instance.
     ///
     pub fn add_data_validation(
         &mut self,
@@ -6485,7 +6487,6 @@ impl Worksheet {
         if !data_validation.multi_range.is_empty() {
             cell_range.clone_from(&data_validation.multi_range);
         }
-
 
         self.data_validations.insert(cell_range, data_validation);
 
@@ -13385,16 +13386,16 @@ impl Worksheet {
             DataValidationErrorStyle::Stop => {}
         }
 
-            match &data_validation.rule {
-                &DataValidationRuleInternal::Between(_, _)
-                | DataValidationRuleInternal::CustomFormula(_)
-                | DataValidationRuleInternal::ListSource(_) => {
-                    // Excel doesn't use an operator for these types.
-                }
-                _ => {
-                    attributes.push(("operator", data_validation.rule.to_string()));
-                }
-            };
+        match &data_validation.rule {
+            &DataValidationRuleInternal::Between(_, _)
+            | DataValidationRuleInternal::CustomFormula(_)
+            | DataValidationRuleInternal::ListSource(_) => {
+                // Excel doesn't use an operator for these types.
+            }
+            _ => {
+                attributes.push(("operator", data_validation.rule.to_string()));
+            }
+        };
 
         if data_validation.ignore_blank {
             attributes.push(("allowBlank", "1".to_string()));

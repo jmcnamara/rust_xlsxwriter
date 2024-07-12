@@ -134,12 +134,12 @@ fn main() -> Result<(), XlsxError> {
     // -----------------------------------------------------------------------
     // Example 8. Limiting input to a date in a fixed range.
     // -----------------------------------------------------------------------
-    let text = "Enter a date between 1/1/2013 and 12/12/2013";
+    let text = "Enter a date between 1/1/2025 and 12/12/2025";
     worksheet.write(16, 0, text)?;
 
     let data_validation = DataValidation::new().allow_date(DataValidationRule::Between(
-        ExcelDateTime::parse_from_str("2013-01-01")?,
-        ExcelDateTime::parse_from_str("2013-12-12")?,
+        ExcelDateTime::parse_from_str("2025-01-01")?,
+        ExcelDateTime::parse_from_str("2025-12-12")?,
     ));
 
     worksheet.add_data_validation(16, 1, 16, 1, &data_validation)?;
@@ -174,7 +174,7 @@ fn main() -> Result<(), XlsxError> {
     let text = "Enter a value if the following is true '=AND(F5=50,G5=60)'";
     worksheet.write(22, 0, text)?;
 
-    let data_validation = DataValidation::new().allow_custom_formula("=AND(F5=50,G5=60)".into());
+    let data_validation = DataValidation::new().allow_custom("=AND(F5=50,G5=60)".into());
 
     worksheet.add_data_validation(22, 1, 22, 1, &data_validation)?;
 
