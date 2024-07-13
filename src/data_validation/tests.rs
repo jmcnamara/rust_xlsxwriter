@@ -273,7 +273,7 @@ mod data_validation_tests {
 
         let data_validation = DataValidation::new()
             .allow_whole_number(DataValidationRule::NotEqualTo(10))
-            .set_input_title("Title 1");
+            .set_input_title("Title 1")?;
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -314,8 +314,8 @@ mod data_validation_tests {
 
         let data_validation = DataValidation::new()
             .allow_whole_number(DataValidationRule::NotEqualTo(10))
-            .set_input_title("Title 1")
-            .set_input_message("Message 1");
+            .set_input_title("Title 1")?
+            .set_input_message("Message 1")?;
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -356,10 +356,10 @@ mod data_validation_tests {
 
         let data_validation = DataValidation::new()
             .allow_whole_number(DataValidationRule::NotEqualTo(10))
-            .set_error_title("Title 2")
-            .set_error_message("Message 2")
-            .set_input_title("Title 1")
-            .set_input_message("Message 1");
+            .set_error_title("Title 2")?
+            .set_error_message("Message 2")?
+            .set_input_title("Title 1")?
+            .set_input_message("Message 1")?;
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -1147,7 +1147,7 @@ mod data_validation_tests {
 
         let data_validation = DataValidation::new()
             .allow_any_value()
-            .set_input_title("Title 1");
+            .set_input_title("Title 1")?;
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -1184,7 +1184,7 @@ mod data_validation_tests {
         let mut worksheet = Worksheet::new();
         worksheet.set_selected(true);
 
-        let data_validation = DataValidation::new().set_input_title("Title 1");
+        let data_validation = DataValidation::new().set_input_title("Title 1")?;
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -1223,7 +1223,7 @@ mod data_validation_tests {
 
         let data_validation = DataValidation::new()
             .allow_any_value()
-            .set_input_message("Message 1");
+            .set_input_message("Message 1")?;
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -1262,8 +1262,8 @@ mod data_validation_tests {
 
         let data_validation = DataValidation::new()
             .allow_any_value()
-            .set_error_title("Title 2")
-            .set_error_message("Message 2");
+            .set_error_title("Title 2")?
+            .set_error_message("Message 2")?;
 
         worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
 
@@ -1347,14 +1347,20 @@ mod data_validation_tests {
         ];
 
         // Check for invalid string lengths.
-        let data_validation = DataValidation::new()
-            .allow_any_value()
-            .set_input_title(invalid_title)
-            .set_input_message(&invalid_message)
-            .set_error_title(invalid_title)
-            .set_error_message(&invalid_message);
+        let result = DataValidation::new().set_input_title(invalid_title);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
 
-        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+        // Check for invalid string lengths.
+        let result = DataValidation::new().set_input_message(&invalid_message);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        // Check for invalid string lengths.
+        let result = DataValidation::new().set_error_title(invalid_title);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
+
+        // Check for invalid string lengths.
+        let result = DataValidation::new().set_error_message(&invalid_message);
+        assert!(matches!(result, Err(XlsxError::DataValidationError(_))));
 
         // Check for invalid string list.
         let result = DataValidation::new().allow_list_strings(&list_values);

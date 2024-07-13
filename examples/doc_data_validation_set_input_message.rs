@@ -16,8 +16,8 @@ fn main() -> Result<(), XlsxError> {
 
     let data_validation = DataValidation::new()
         .allow_whole_number(DataValidationRule::Between(1, 5))
-        .set_input_title("Enter a star rating!")
-        .set_input_message("Enter rating 1-5.\nWhole numbers only.");
+        .set_input_title("Enter a star rating!")?
+        .set_input_message("Enter rating 1-5.\nWhole numbers only.")?;
 
     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
 

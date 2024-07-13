@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
 
     let data_validation = DataValidation::new()
         .allow_whole_number(DataValidationRule::Between(1, 10))
-        .set_error_title("Danger, Will Robinson!");
+        .set_error_title("Danger, Will Robinson!")?;
 
     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
 

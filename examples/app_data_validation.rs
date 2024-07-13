@@ -186,8 +186,8 @@ fn main() -> Result<(), XlsxError> {
 
     let data_validation = DataValidation::new()
         .allow_whole_number(DataValidationRule::Between(1, 100))
-        .set_input_title("Enter an integer:")
-        .set_input_message("between 1 and 100");
+        .set_input_title("Enter an integer:")?
+        .set_input_message("between 1 and 100")?;
 
     worksheet.add_data_validation(24, 1, 24, 1, &data_validation)?;
 
@@ -199,10 +199,10 @@ fn main() -> Result<(), XlsxError> {
 
     let data_validation = DataValidation::new()
         .allow_whole_number(DataValidationRule::Between(1, 100))
-        .set_input_title("Enter an integer:")
-        .set_input_message("between 1 and 100")
-        .set_error_title("Input value is not valid!")
-        .set_error_message("It should be an integer between 1 and 100");
+        .set_input_title("Enter an integer:")?
+        .set_input_message("between 1 and 100")?
+        .set_error_title("Input value is not valid!")?
+        .set_error_message("It should be an integer between 1 and 100")?;
 
     worksheet.add_data_validation(26, 1, 26, 1, &data_validation)?;
 
@@ -214,10 +214,10 @@ fn main() -> Result<(), XlsxError> {
 
     let data_validation = DataValidation::new()
         .allow_whole_number(DataValidationRule::Between(1, 100))
-        .set_input_title("Enter an integer:")
-        .set_input_message("between 1 and 100")
-        .set_error_title("Input value is not valid!")
-        .set_error_message("It should be an integer between 1 and 100")
+        .set_input_title("Enter an integer:")?
+        .set_input_message("between 1 and 100")?
+        .set_error_title("Input value is not valid!")?
+        .set_error_message("It should be an integer between 1 and 100")?
         .set_error_style(DataValidationErrorStyle::Information);
 
     worksheet.add_data_validation(28, 1, 28, 1, &data_validation)?;

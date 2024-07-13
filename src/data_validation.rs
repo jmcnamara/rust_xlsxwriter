@@ -53,10 +53,10 @@ use std::fmt;
 ///
 ///     let data_validation = DataValidation::new()
 ///         .allow_whole_number(DataValidationRule::Between(1, 5))
-///         .set_input_title("Enter a star rating!")
-///         .set_input_message("Enter rating 1-5.\nWhole numbers only.")
-///         .set_error_title("Value outside allowed range")
-///         .set_error_message("The input value must be an integer in the range 1-5.");
+///         .set_input_title("Enter a star rating!")?
+///         .set_input_message("Enter rating 1-5.\nWhole numbers only.")?
+///         .set_error_title("Value outside allowed range")?
+///         .set_error_message("The input value must be an integer in the range 1-5.")?;
 ///
 ///     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
 ///
@@ -1013,26 +1013,28 @@ impl DataValidation {
     /// The title is only visible if there is also an input message. See the
     /// [`DataValidation::set_input_message()`] example below.
     ///
-    /// Note, Excel limits the title to 32 characters.
+    /// # Errors
+    ///
+    /// * [`XlsxError::DataValidationError`] - The length of the title exceeds
+    ///   Excel's limit of 32 characters.
     ///
     /// # Parameters
     ///
     /// * `text` - Title string. Must be less than or equal to the Excel limit
     ///   of 32 characters.
     ///
-    pub fn set_input_title(mut self, text: impl Into<String>) -> DataValidation {
+    pub fn set_input_title(mut self, text: impl Into<String>) -> Result<DataValidation, XlsxError> {
         let text = text.into();
         let length = text.chars().count();
 
         if length > 32 {
-            eprintln!(
+            return Err(XlsxError::DataValidationError(format!(
                 "Validation title length '{length}' greater than Excel's limit of 32 characters."
-            );
-            return self;
+            )));
         }
 
         self.input_title = text;
-        self
+        Ok(self)
     }
 
     /// Set the input message when a data validation cell is entered.
@@ -1041,7 +1043,10 @@ impl DataValidation {
     /// is entered. This can we used to explain to the user what the data
     /// validation rules are for the cell.
     ///
-    /// Note, Excel limits the message text to 255 characters.
+    /// # Errors
+    ///
+    /// * [`XlsxError::DataValidationError`] - The length of the message exceeds
+    ///   Excel's limit of 255 characters.
     ///
     /// # Parameters
     ///
@@ -1069,8 +1074,8 @@ impl DataValidation {
     /// #
     ///     let data_validation = DataValidation::new()
     ///         .allow_whole_number(DataValidationRule::Between(1, 5))
-    ///         .set_input_title("Enter a star rating!")
-    ///         .set_input_message("Enter rating 1-5.\nWhole numbers only.");
+    ///         .set_input_title("Enter a star rating!")?
+    ///         .set_input_message("Enter rating 1-5.\nWhole numbers only.")?;
     ///
     ///     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
     /// #
@@ -1086,19 +1091,21 @@ impl DataValidation {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/data_validation_set_input_message.png">
     ///
-    pub fn set_input_message(mut self, text: impl Into<String>) -> DataValidation {
+    pub fn set_input_message(
+        mut self,
+        text: impl Into<String>,
+    ) -> Result<DataValidation, XlsxError> {
         let text = text.into();
         let length = text.chars().count();
 
         if length > 255 {
-            eprintln!(
-                "Validation message length '{length}' greater than Excel's limit of 255 characters."
-            );
-            return self;
+            return Err(XlsxError::DataValidationError(format!(
+                    "Validation message length '{length}' greater than Excel's limit of 255 characters."
+            )));
         }
 
         self.input_message = text;
-        self
+        Ok(self)
     }
 
     /// Toggle option to show an error message when there is a validation error.
@@ -1124,7 +1131,10 @@ impl DataValidation {
     /// This option is used to set a title in bold for the error message when
     /// there is a validation error.
     ///
-    /// Note, Excel limits the title to 32 characters.
+    /// # Errors
+    ///
+    /// * [`XlsxError::DataValidationError`] - The length of the title exceeds
+    ///   Excel's limit of 32 characters.
     ///
     /// # Parameters
     ///
@@ -1150,7 +1160,7 @@ impl DataValidation {
     /// #
     ///     let data_validation = DataValidation::new()
     ///         .allow_whole_number(DataValidationRule::Between(1, 10))
-    ///         .set_error_title("Danger, Will Robinson!");
+    ///         .set_error_title("Danger, Will Robinson!")?;
     ///
     ///     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
     ///
@@ -1165,19 +1175,18 @@ impl DataValidation {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/data_validation_set_error_title.png">
     ///
-    pub fn set_error_title(mut self, text: impl Into<String>) -> DataValidation {
+    pub fn set_error_title(mut self, text: impl Into<String>) -> Result<DataValidation, XlsxError> {
         let text = text.into();
         let length = text.chars().count();
 
         if length > 32 {
-            eprintln!(
+            return Err(XlsxError::DataValidationError(format!(
                 "Validation title length '{length}' greater than Excel's limit of 32 characters."
-            );
-            return self;
+            )));
         }
 
         self.error_title = text;
-        self
+        Ok(self)
     }
 
     /// Set the error message when a data validation cell is entered.
@@ -1186,7 +1195,10 @@ impl DataValidation {
     /// is entered. This can we used to explain to the user what the data
     /// validation rules are for the cell.
     ///
-    /// Note, Excel limits the message text to 255 characters.
+    /// # Errors
+    ///
+    /// * [`XlsxError::DataValidationError`] - The length of the message exceeds
+    ///   Excel's limit of 255 characters.
     ///
     /// # Parameters
     ///
@@ -1213,8 +1225,8 @@ impl DataValidation {
     /// #
     ///     let data_validation = DataValidation::new()
     ///         .allow_whole_number(DataValidationRule::Between(1, 10))
-    ///         .set_error_title("Value outside allowed range")
-    ///         .set_error_message("The input value must be an integer in the range 1-10.");
+    ///         .set_error_title("Value outside allowed range")?
+    ///         .set_error_message("The input value must be an integer in the range 1-10.")?;
     ///
     ///     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
     ///
@@ -1229,19 +1241,21 @@ impl DataValidation {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/data_validation_set_error_message.png">
     ///
-    pub fn set_error_message(mut self, text: impl Into<String>) -> DataValidation {
+    pub fn set_error_message(
+        mut self,
+        text: impl Into<String>,
+    ) -> Result<DataValidation, XlsxError> {
         let text = text.into();
         let length = text.chars().count();
 
         if length > 255 {
-            eprintln!(
-                "Validation message length '{length}' greater than Excel's limit of 255 characters."
-            );
-            return self;
+            return Err(XlsxError::DataValidationError(format!(
+                    "Validation message length '{length}' greater than Excel's limit of 255 characters."
+            )));
         }
 
         self.error_message = text;
-        self
+        Ok(self)
     }
 
     /// Set the style of the error dialog type for a data validation.
