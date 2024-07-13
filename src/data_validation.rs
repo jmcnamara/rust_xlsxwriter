@@ -182,6 +182,7 @@ pub struct DataValidation {
     pub(crate) ignore_blank: bool,
     pub(crate) show_input_message: bool,
     pub(crate) show_error_message: bool,
+    pub(crate) show_dropdown: bool,
     pub(crate) multi_range: String,
     pub(crate) input_title: String,
     pub(crate) error_title: String,
@@ -205,6 +206,7 @@ impl DataValidation {
             ignore_blank: true,
             show_input_message: true,
             show_error_message: true,
+            show_dropdown: true,
             multi_range: String::new(),
             input_title: String::new(),
             error_title: String::new(),
@@ -983,6 +985,28 @@ impl DataValidation {
     ///
     pub fn ignore_blank(mut self, enable: bool) -> DataValidation {
         self.ignore_blank = enable;
+        self
+    }
+
+    /// Turn on/off the in-cell dropdown for list data validations.
+    ///
+    /// By default the Excel list data validation has an "In-cell drop-down"
+    /// option turned on. This shows a dropdown arrow for list style data
+    /// validations and displays the list items.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_strings_dialog.png">
+    ///
+    /// If this option is turned off the data validation will restrict input to
+    /// the specified list values but it won't display a visual indicator of
+    /// what those values are.
+    ///
+    /// # Parameters
+    ///
+    /// * `enable` - Turn the property on/off. It is on by default.
+    ///
+    pub fn show_dropdown(mut self, enable: bool) -> DataValidation {
+        self.show_dropdown = enable;
         self
     }
 

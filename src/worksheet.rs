@@ -13462,6 +13462,10 @@ impl Worksheet {
             attributes.push(("allowBlank", "1".to_string()));
         }
 
+        if !data_validation.show_dropdown {
+            attributes.push(("showDropDown", "1".to_string()));
+        }
+
         if data_validation.show_input_message {
             attributes.push(("showInputMessage", "1".to_string()));
         }
@@ -13517,6 +13521,10 @@ impl Worksheet {
 
         if data_validation.ignore_blank {
             attributes.push(("allowBlank", "1".to_string()));
+        }
+
+        if !data_validation.show_dropdown {
+            attributes.push(("showDropDown", "1".to_string()));
         }
 
         if data_validation.show_input_message {

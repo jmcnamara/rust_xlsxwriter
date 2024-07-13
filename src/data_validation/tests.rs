@@ -1630,4 +1630,45 @@ mod data_validation_tests {
 
         Ok(())
     }
+
+    #[test]
+    fn data_validation_27() -> Result<(), XlsxError> {
+        let mut worksheet = Worksheet::new();
+        worksheet.set_selected(true);
+
+        let data_validation = DataValidation::new()
+            .allow_list_strings(&["Foo", "Bar", "Baz"])?
+            .show_dropdown(false);
+
+        worksheet.add_data_validation(0, 0, 0, 0, &data_validation)?;
+
+        worksheet.assemble_xml_file();
+
+        let got = worksheet.writer.read_to_str();
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+            <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+              <dimension ref="A1"/>
+              <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0"/>
+              </sheetViews>
+              <sheetFormatPr defaultRowHeight="15"/>
+              <sheetData/>
+              <dataValidations count="1">
+                <dataValidation type="list" allowBlank="1" showDropDown="1" showInputMessage="1" showErrorMessage="1" sqref="A1">
+                  <formula1>"Foo,Bar,Baz"</formula1>
+                </dataValidation>
+              </dataValidations>
+              <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+            </worksheet>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+
+        Ok(())
+    }
 }
