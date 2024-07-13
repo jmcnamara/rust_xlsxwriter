@@ -105,6 +105,12 @@ documentation and generally show how an individual function works.
   formatting allows you to apply a format to a cell or a range of cells
   based on user defined rule.
 
+* `app_data_validation.rs` - Example of how to add data validation and
+  dropdown lists using the rust_xlsxwriter library. Data validation is a
+  feature of Excel which allows you to restrict the data that a user enters
+  in a cell and to display help and warning messages. It also allows you to
+  restrict input to values in a drop down list.
+
 * `app_defined_name.rs` - Example of how to create defined names using the
   rust_xlsxwriter library. This functionality is used to define user
   friendly variable names to represent a value, a single cell,	or a range
@@ -745,6 +751,72 @@ documentation and generally show how an individual function works.
 * `doc_conditional_format_top.rs` - Example of how to add Top and Bottom
   conditional formatting to a worksheet. Top 10 values are in light red.
   Bottom 10 values are in light green.
+
+* `doc_data_validation_allow_custom.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts input to
+  text/strings that are uppercase.
+
+* `doc_data_validation_allow_date.rs` - Example of adding a data validation
+  to a worksheet cell. This validation restricts input to date values in a
+  fixed range.
+
+* `doc_data_validation_allow_decimal_number.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts input to
+  floating point values in a fixed range.
+
+* `doc_data_validation_allow_decimal_number_formula.rs` - Example of adding
+  a data validation to a worksheet cell. This validation restricts input to
+  floating point values based on a value from another cell.
+
+* `doc_data_validation_allow_list_formula.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts users to a
+  selection of values from a dropdown list. The list data is provided from
+  a cell range.
+
+* `doc_data_validation_allow_list_strings.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts users to a
+  selection of values from a dropdown list.
+
+* `doc_data_validation_allow_list_strings2.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts users to a
+  selection of values from a dropdown list. This example shows how to
+  pre-populate a default choice.
+
+* `doc_data_validation_allow_text_length.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts input to
+  strings whose length is in a fixed range.
+
+* `doc_data_validation_allow_time.rs` - Example of adding a data validation
+  to a worksheet cell. This validation restricts input to time values in a
+  fixed range.
+
+* `doc_data_validation_allow_whole_number.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts input to
+  integer values in a fixed range.
+
+* `doc_data_validation_allow_whole_number_formula.rs` - Example of adding a
+  data validation to a worksheet cell. This validation restricts input to
+  integer values based on a value from another cell.
+
+* `doc_data_validation_allow_whole_number_formula2.rs` - Example of adding
+  a data validation to a worksheet cell. This validation restricts input to
+  integer values based on a value from another cell.
+
+* `doc_data_validation_intro1.rs` - Example of adding a data validation to
+  a worksheet cell. This validation uses an input message to explain to the
+  user what type of input is required.
+
+* `doc_data_validation_set_error_message.rs` - Example of adding a data
+  validation to a worksheet cell. This validation shows a custom error
+  message.
+
+* `doc_data_validation_set_error_title.rs` - Example of adding a data
+  validation to a worksheet cell. This validation shows a custom error
+  title.
+
+* `doc_data_validation_set_input_message.rs` - Example of adding a data
+  validation to a worksheet cell. This validation uses an input message to
+  explain to the user what type of input is required.
 
 * `doc_datetime_and_hms.rs` - Demonstrates writing formatted datetimes in
   an Excel worksheet.

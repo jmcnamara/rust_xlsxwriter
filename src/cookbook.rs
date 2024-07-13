@@ -21,44 +21,45 @@ cargo run --example app_demo  # or any other example
 6. [Autofilters: Add an autofilter to a worksheet](#autofilters-add-an-autofilter-to-a-worksheet)
 7. [Adding worksheet tables](#adding-worksheet-tables)
 8. [Adding Conditional Formatting](#adding-conditional-formatting)
-9. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
-10. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
-11. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
-12. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
-13. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
-14. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
-15. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
-16. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
-17. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
-18. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
-19. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
-20. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
-21. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
-22. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
-23. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
-24. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
-25. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
-26. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
-27. [Chart: Create a combined chart](#chart-create-a-combined-chart)
-28. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
-29. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
-30. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
-31. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-32. [Chart: Chart data table](#chart-chart-data-table)
-33. [Chart: Chart data tools](#chart-chart-data-tools)
-34. [Chart: Gauge Chart](#chart-gauge-chart)
-35. [Sparklines example](#sparklines-example)
-36. [Sparklines example with properties set](#sparklines-example-with-properties-set)
-37. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
-38. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-39. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-40. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-41. [Setting the Sensitivity Label](#setting-the-sensitivity-label)
-42. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-43. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-44. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-45. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-46. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+9. [Data Validation: add cell validation and dropdowns](#data-validation-add-cell-validation-and-dropdowns)
+10. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
+11. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
+12. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
+13. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
+14. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
+15. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
+16. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
+17. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
+18. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
+19. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
+20. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
+21. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
+22. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
+23. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
+24. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
+25. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
+26. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
+27. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
+28. [Chart: Create a combined chart](#chart-create-a-combined-chart)
+29. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
+30. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
+31. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
+32. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
+33. [Chart: Chart data table](#chart-chart-data-table)
+34. [Chart: Chart data tools](#chart-chart-data-tools)
+35. [Chart: Gauge Chart](#chart-gauge-chart)
+36. [Sparklines example](#sparklines-example)
+37. [Sparklines example with properties set](#sparklines-example-with-properties-set)
+38. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
+39. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+40. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+41. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+42. [Setting the Sensitivity Label](#setting-the-sensitivity-label)
+43. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+44. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+45. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+46. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+47. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -1931,6 +1932,248 @@ Code to generate the above example:
         ConditionalFormatIconSet::new().set_icon_type(ConditionalFormatIconType::FiveQuadrants);
 
     worksheet.add_conditional_format(13, 1, 13, 5, &conditional_format)?;
+```
+
+
+# Data Validation: add cell validation and dropdowns
+
+Example of how to add data validation and dropdown lists using the
+`rust_xlsxwriter` library.
+
+Data validation is a feature of Excel which allows you to restrict the data that
+a user enters in a cell and to display help and warning messages. It also allows
+you to restrict input to values in a drop down list.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_data_validation.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_data_validation.rs
+
+use rust_xlsxwriter::{
+    DataValidation, DataValidationErrorStyle, DataValidationRule, ExcelDateTime, Format,
+    FormatAlign, FormatBorder, Formula, Workbook, XlsxError,
+};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Add a format for the header cells.
+    let header_format = Format::new()
+        .set_background_color("C6EFCE")
+        .set_border(FormatBorder::Thin)
+        .set_bold()
+        .set_indent(1)
+        .set_text_wrap()
+        .set_align(FormatAlign::VerticalCenter);
+
+    // Set up layout of the worksheet.
+    worksheet.set_column_width(0, 68)?;
+    worksheet.set_column_width(1, 15)?;
+    worksheet.set_column_width(3, 15)?;
+    worksheet.set_row_height(0, 36)?;
+
+    // Write the header cells and some data that will be used in the examples.
+    let heading1 = "Some examples of data validations";
+    let heading2 = "Enter values in this column";
+    let heading3 = "Sample Data";
+
+    worksheet.write_with_format(0, 0, heading1, &header_format)?;
+    worksheet.write_with_format(0, 1, heading2, &header_format)?;
+    worksheet.write_with_format(0, 3, heading3, &header_format)?;
+
+    worksheet.write(2, 3, "Integers")?;
+    worksheet.write(2, 4, 1)?;
+    worksheet.write(2, 5, 10)?;
+
+    worksheet.write_row(3, 3, ["List data", "open", "high", "close"])?;
+
+    worksheet.write(4, 3, "Formula")?;
+    worksheet.write(4, 4, Formula::new("=AND(F5=50,G5=60)"))?;
+    worksheet.write(4, 5, 50)?;
+    worksheet.write(4, 6, 60)?;
+
+    // -----------------------------------------------------------------------
+    // Example 1. Limiting input to an integer in a fixed range.
+    // -----------------------------------------------------------------------
+    let text = "Enter an integer between 1 and 10";
+    worksheet.write(2, 0, text)?;
+
+    let data_validation =
+        DataValidation::new().allow_whole_number(DataValidationRule::Between(1, 10));
+
+    worksheet.add_data_validation(2, 1, 2, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 2. Limiting input to an integer outside a fixed range.
+    // -----------------------------------------------------------------------
+    let text = "Enter an integer that is not between 1 and 10 (using cell references)";
+    worksheet.write(4, 0, text)?;
+
+    let data_validation = DataValidation::new()
+        .allow_whole_number_formula(DataValidationRule::NotBetween("=E3".into(), "=F3".into()));
+
+    worksheet.add_data_validation(4, 1, 4, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 3. Limiting input to an integer greater than a fixed value.
+    // -----------------------------------------------------------------------
+    let text = "Enter an integer greater than 0";
+    worksheet.write(6, 0, text)?;
+
+    let data_validation =
+        DataValidation::new().allow_whole_number(DataValidationRule::GreaterThan(0));
+
+    worksheet.add_data_validation(6, 1, 6, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 4. Limiting input to an integer less than a fixed value.
+    // -----------------------------------------------------------------------
+    let text = "Enter an integer less than 10";
+    worksheet.write(8, 0, text)?;
+
+    let data_validation =
+        DataValidation::new().allow_whole_number(DataValidationRule::LessThan(10));
+
+    worksheet.add_data_validation(8, 1, 8, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 5. Limiting input to a decimal in a fixed range.
+    // -----------------------------------------------------------------------
+    let text = "Enter a decimal between 0.1 and 0.5";
+    worksheet.write(10, 0, text)?;
+
+    let data_validation =
+        DataValidation::new().allow_decimal_number(DataValidationRule::Between(0.1, 0.5));
+
+    worksheet.add_data_validation(10, 1, 10, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 6. Limiting input to a value in a dropdown list.
+    // -----------------------------------------------------------------------
+    let text = "Select a value from a drop down list";
+    worksheet.write(12, 0, text)?;
+
+    let data_validation = DataValidation::new().allow_list_strings(&["open", "high", "close"])?;
+
+    worksheet.add_data_validation(12, 1, 12, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 7. Limiting input to a value in a dropdown list.
+    // -----------------------------------------------------------------------
+    let text = "Select a value from a drop down list (using a cell range)";
+    worksheet.write(14, 0, text)?;
+
+    let data_validation = DataValidation::new().allow_list_formula("=$E$4:$G$4".into());
+
+    worksheet.add_data_validation(14, 1, 14, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 8. Limiting input to a date in a fixed range.
+    // -----------------------------------------------------------------------
+    let text = "Enter a date between 1/1/2025 and 12/12/2025";
+    worksheet.write(16, 0, text)?;
+
+    let data_validation = DataValidation::new().allow_date(DataValidationRule::Between(
+        ExcelDateTime::parse_from_str("2025-01-01")?,
+        ExcelDateTime::parse_from_str("2025-12-12")?,
+    ));
+
+    worksheet.add_data_validation(16, 1, 16, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 9. Limiting input to a time in a fixed range.
+    // -----------------------------------------------------------------------
+    let text = "Enter a time between 6:00 and 12:00";
+    worksheet.write(18, 0, text)?;
+
+    let data_validation = DataValidation::new().allow_time(DataValidationRule::Between(
+        ExcelDateTime::parse_from_str("6:00")?,
+        ExcelDateTime::parse_from_str("12:00")?,
+    ));
+
+    worksheet.add_data_validation(18, 1, 18, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 10. Limiting input to a string greater than a fixed length.
+    // -----------------------------------------------------------------------
+    let text = "Enter a string longer than 3 characters";
+    worksheet.write(20, 0, text)?;
+
+    let data_validation =
+        DataValidation::new().allow_text_length(DataValidationRule::GreaterThan(3));
+
+    worksheet.add_data_validation(20, 1, 20, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 11. Limiting input based on a formula.
+    // -----------------------------------------------------------------------
+    let text = "Enter a value if the following is true '=AND(F5=50,G5=60)'";
+    worksheet.write(22, 0, text)?;
+
+    let data_validation = DataValidation::new().allow_custom("=AND(F5=50,G5=60)".into());
+
+    worksheet.add_data_validation(22, 1, 22, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 12. Displaying and modifying data validation messages.
+    // -----------------------------------------------------------------------
+    let text = "Displays a message when you select the cell";
+    worksheet.write(24, 0, text)?;
+
+    let data_validation = DataValidation::new()
+        .allow_whole_number(DataValidationRule::Between(1, 100))
+        .set_input_title("Enter an integer:")?
+        .set_input_message("between 1 and 100")?;
+
+    worksheet.add_data_validation(24, 1, 24, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 13. Displaying and modifying data validation messages.
+    // -----------------------------------------------------------------------
+    let text = "Display a custom error message when integer isn't between 1 and 100";
+    worksheet.write(26, 0, text)?;
+
+    let data_validation = DataValidation::new()
+        .allow_whole_number(DataValidationRule::Between(1, 100))
+        .set_input_title("Enter an integer:")?
+        .set_input_message("between 1 and 100")?
+        .set_error_title("Input value is not valid!")?
+        .set_error_message("It should be an integer between 1 and 100")?;
+
+    worksheet.add_data_validation(26, 1, 26, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Example 14. Displaying and modifying data validation messages.
+    // -----------------------------------------------------------------------
+    let text = "Display a custom info message when integer isn't between 1 and 100";
+    worksheet.write(28, 0, text)?;
+
+    let data_validation = DataValidation::new()
+        .allow_whole_number(DataValidationRule::Between(1, 100))
+        .set_input_title("Enter an integer:")?
+        .set_input_message("between 1 and 100")?
+        .set_error_title("Input value is not valid!")?
+        .set_error_message("It should be an integer between 1 and 100")?
+        .set_error_style(DataValidationErrorStyle::Information);
+
+    worksheet.add_data_validation(28, 1, 28, 1, &data_validation)?;
+
+    // -----------------------------------------------------------------------
+    // Save and close the file.
+    // -----------------------------------------------------------------------
+    workbook.save("data_validation.xlsx")?;
+
+    Ok(())
+}
 ```
 
 

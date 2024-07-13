@@ -3,7 +3,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! Example of adding a data validation to a worksheet cell. This validation
-//! restricts input to strings whose lengths is in a fixed range.
+//! restricts input to strings whose length is in a fixed range.
 
 use rust_xlsxwriter::{DataValidation, DataValidationRule, Workbook, XlsxError};
 

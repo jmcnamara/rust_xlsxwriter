@@ -18,7 +18,7 @@ use std::fmt;
 // DataValidation
 // -----------------------------------------------------------------------
 
-/// The `DataValidation` struct represents a cell Data Validation.
+/// The `DataValidation` struct represents a data validation in Excel.
 ///
 /// `DataValidation` is used in conjunction with the
 /// [`Worksheet::add_data_validation()`](crate::Worksheet::add_data_validation)
@@ -30,14 +30,15 @@ use std::fmt;
 /// that a user enters in a cell and to display associated help and warning
 /// messages. It also allows you to restrict input to values in a dropdown list.
 ///
-/// A typical use case might be to restrict data in a cell to integer values in
-/// a certain range, to provide a help message to indicate the required value,
-/// and to issue a warning if the input data doesn't meet the stated criteria.
+/// A typical use case would be to restrict data in a cell to integer values
+/// within a certain range, to provide a help message to explain the required
+/// value, and to issue a warning if the input data doesn't meet the defined
+/// criteria. For example:
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/data_validation_intro1.png">
 ///
-/// This example was created with the following code:
+/// The example above was created with the following code:
 ///
 /// ```
 /// # // This code is available in examples/doc_data_validation_intro1.rs
@@ -73,7 +74,7 @@ use std::fmt;
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_strings.png">
 ///
-/// This example was created with the following code:
+/// The example above was created with the following code:
 ///
 /// ```
 /// # // This code is available in examples/doc_data_validation_allow_list_strings.rs
@@ -105,8 +106,9 @@ use std::fmt;
 /// ## Using cell references in Data Validations
 ///
 /// Excel allows the values for data validation to be either a "literal" number,
-/// date or time value or a cell reference such as `=D1`. In the `DataValidation`
-/// interfaces these are represented using a [`Formula`] value, like this:
+/// date or time value or a cell reference such as `=D1`. In the
+/// `DataValidation` interfaces the cell reference values are represented using
+/// a [`Formula`] value, like this:
 ///
 /// ```
 /// # // This code is available in examples/doc_data_validation_allow_whole_number_formula2.rs
@@ -139,7 +141,7 @@ use std::fmt;
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/data_validation_allow_whole_number_formula.png">
 ///
-/// As a syntactic shorthand you can also use `into()` like this:
+/// As a syntactic shorthand you can also use `into()` for `Formula` like this:
 ///
 /// ```
 /// # // This code is available in examples/doc_data_validation_allow_whole_number_formula.rs
@@ -167,13 +169,12 @@ use std::fmt;
 /// # }
 /// ```
 ///
-/// APIs that use [`Formula`] can also take Excel formulas, where that makes
-/// sense.
+/// APIs that use [`Formula`] can also take Excel formulas, where appropriate.
 ///
 /// **Note**: the contents of the `Formula` aren't validated by
-/// `rust_xlsxwriter` so you should take care to ensure that the ranges or
-/// formulas are valid in Excel if you are using anything other than a simple
-/// range.
+/// `rust_xlsxwriter` so if you are using anything other than a simple cell
+/// reference you should take care to ensure that the ranges or formulas are
+/// valid in Excel.
 ///
 #[derive(Clone)]
 pub struct DataValidation {
@@ -196,7 +197,7 @@ impl DataValidation {
     ///
     /// The default type of a new data validation is equivalent to Excel's "Any"
     /// data validation. Refer to the `allow_TYPE()` functions below to
-    /// constrain the data validation to defined types and apply rules.
+    /// constrain the data validation to defined types and to apply rules.
     ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> DataValidation {
@@ -460,13 +461,14 @@ impl DataValidation {
     /// Set a data validation rule to restrict cell input to a selection of
     /// strings via a dropdown menu.
     ///
-    /// **Note**: Excel has a 255 character limit to the the string used to
-    /// store the comma-separated list of strings, including the commas. An
-    /// example of the comma-separated string is shown in the Excel Data
-    /// Validation dialog below. This limit makes it unsuitable for long lists
-    /// such as a list of provinces or states. For longer lists it is better to
-    /// place the string values somewhere in the Excel workbook and refer to
-    /// them using a range formula via the
+    /// This type of validation presents the user with a list of allowed strings
+    /// via a dropdown menu similar to online forms.
+    ///
+    /// Excel has a 255 character limit to the the string used to store the
+    /// comma-separated list of strings, including the commas. This limit makes
+    /// it unsuitable for long lists such as a list of provinces or states. For
+    /// longer lists it is better to place the string values somewhere in the
+    /// Excel workbook and refer to them using a range formula via the
     /// [`DataValidation::allow_list_formula()`] method shown below.
     ///
     /// # Parameters
@@ -475,9 +477,9 @@ impl DataValidation {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DataValidationError`] - The length of the accumulated
+    /// * [`XlsxError::DataValidationError`] - The length of the combined
     ///   comma-separated list of strings, including commas, exceeds Excel's
-    ///   limit of 255 characters, see the note above.
+    ///   limit of 255 characters, see the explanation above.
     ///
     /// # Examples
     ///
@@ -645,9 +647,9 @@ impl DataValidation {
     /// on [`DataValidationRule`] rules such as "between" or "less than". Excel
     /// refers to this data validation type as "Date".
     ///
-    /// The method uses dates that implement [`IntoExcelDateTime`]. The main
-    /// date type supported is [`ExcelDateTime`]. If the `chrono` feature is
-    /// enabled you can use [`chrono::NaiveDate`].
+    /// This method uses date types that implement [`IntoExcelDateTime`]. The
+    /// main date type supported is [`ExcelDateTime`]. If the `chrono` feature
+    /// is enabled you can also use [`chrono::NaiveDate`].
     ///
     /// [`chrono::NaiveDate`]:
     ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
@@ -733,9 +735,9 @@ impl DataValidation {
     /// on [`DataValidationRule`] rules such as "between" or "less than". Excel
     /// refers to this data validation type as "Time".
     ///
-    /// The method uses time types that implement [`IntoExcelDateTime`]. The
+    /// This method uses time types that implement [`IntoExcelDateTime`]. The
     /// main time type supported is [`ExcelDateTime`]. If the `chrono` feature
-    /// is enabled you can use [`chrono::NaiveTime`].
+    /// is enabled you can also use [`chrono::NaiveTime`].
     ///
     /// [`chrono::NaiveTime`]:
     ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
@@ -831,7 +833,7 @@ impl DataValidation {
     /// # Examples
     ///
     /// Example of adding a data validation to a worksheet cell. This validation
-    /// restricts input to strings whose lengths is in a fixed range.
+    /// restricts input to strings whose length is in a fixed range.
     ///
     /// ```
     /// # // This code is available in examples/doc_data_validation_allow_text_length.rs
@@ -953,7 +955,7 @@ impl DataValidation {
     /// Set a data validation to allow any input data.
     ///
     /// The "Any" data validation type doesn't restrict data input and is mainly
-    /// used allow access to the "Input Message" dialog when a user enters data
+    /// used to allow access to the "Input Message" dialog when a user enters data
     /// in a cell.
     ///
     /// This is the default validation type for [`DataValidation`] if no other
@@ -1213,11 +1215,11 @@ impl DataValidation {
         Ok(self)
     }
 
-    /// Set the error message when a data validation cell is entered.
+    /// Set the error message when there is a validation error.
     ///
-    /// This option is used to set an error message when a data validation cell
-    /// is entered. This can we used to explain to the user what the data
-    /// validation rules are for the cell.
+    /// This option is used to set an error message when there is a validation
+    /// error. This can we used to explain to the user what the data validation
+    /// rules are for the cell.
     ///
     /// # Errors
     ///
@@ -1263,7 +1265,8 @@ impl DataValidation {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/data_validation_set_error_message.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/data_validation_set_error_message.png">
     ///
     pub fn set_error_message(
         mut self,

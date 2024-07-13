@@ -29,6 +29,7 @@
 //! - Page/Printing Setup support.
 //! - Merged ranges.
 //! - Conditional formatting.
+//! - Data validation.
 //! - Sparklines.
 //! - Worksheet PNG/JPEG/GIF/BMP images.
 //! - Rich multi-format strings.
@@ -74,6 +75,7 @@
 //! - [`Image`]: The interface for images used in worksheets.
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.
+//! - [`DataValidation`]: Working with data validation in worksheets.
 //! - [`Sparklines`](crate::sparkline): Working with Sparklines.
 //! - [`ExcelDateTime`]: A type to represent dates and times in Excel format.
 //! - [`Formula`]: A type for Excel formulas.
