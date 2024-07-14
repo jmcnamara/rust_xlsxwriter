@@ -130,9 +130,9 @@ frequently.
 
 Recent changes:
 
+- Added support for data validation.
 - Added support for links in images.
 - Added support for combined charts and chart secondary axes.
-- Added support for worksheet sparklines.
 
 
 See the full [Release Notes and Changelog].
