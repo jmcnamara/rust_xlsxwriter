@@ -1337,7 +1337,7 @@ mod data_validation_tests {
 
         let invalid_title = "This exceeds Excel's title limits";
         let padding = ["a"; 221];
-        let invalid_message = "This exceeds Excel's message limits".to_string() + &padding.concat();
+        let invalid_message = format!("This exceeds Excel's message limits{}", padding.concat());
         let list_values = [
             "Foobar", "Foobas", "Foobat", "Foobau", "Foobav", "Foobaw", "Foobax", "Foobay",
             "Foobaz", "Foobba", "Foobbb", "Foobbc", "Foobbd", "Foobbe", "Foobbf", "Foobbg",

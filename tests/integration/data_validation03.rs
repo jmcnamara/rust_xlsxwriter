@@ -23,7 +23,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let input_title = "This is the longest input title1";
     let padding = ["a"; 221];
-    let input_message = "This is the longest input message ".to_string() + &padding.concat();
+    let input_message = format!("This is the longest input message {}", padding.concat());
     let list_values = [
         "Foobar", "Foobas", "Foobat", "Foobau", "Foobav", "Foobaw", "Foobax", "Foobay", "Foobaz",
         "Foobba", "Foobbb", "Foobbc", "Foobbd", "Foobbe", "Foobbf", "Foobbg", "Foobbh", "Foobbi",
