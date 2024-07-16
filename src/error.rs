@@ -147,6 +147,17 @@ pub enum XlsxError {
     /// incorrect or missing.
     DataValidationError(String),
 
+    /// A general error raised when a VBA name doesn't meet Excel's criteria as
+    /// defined by the following rules:
+    ///
+    /// * The name must be less than 32 characters.
+    /// * The name can only contain word characters: letters, numbers and
+    ///   underscores.
+    /// * The name must start with a letter.
+    /// * The name cannot be blank.
+    ///
+    VbaNameError(String),
+
     /// A customizable error that can be used by third parties to raise errors
     /// or as a conversion target for other Error types.
     CustomError(String),
@@ -300,6 +311,10 @@ impl fmt::Display for XlsxError {
 
             XlsxError::DataValidationError(error) => {
                 write!(f, "Data validation error: '{error}'.")
+            }
+
+            XlsxError::VbaNameError(error) => {
+                write!(f, "VBA name error: '{error}'.")
             }
 
             XlsxError::CustomError(error) => {

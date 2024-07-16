@@ -218,9 +218,10 @@
 mod tests;
 
 use std::collections::{HashMap, HashSet};
-use std::io::{Cursor, Seek, Write};
+use std::fs::File;
+use std::io::{BufReader, Cursor, Read, Seek, Write};
 use std::mem;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -315,6 +316,11 @@ pub struct Workbook {
     pub(crate) num_formats: Vec<String>,
     pub(crate) has_hyperlink_style: bool,
     pub(crate) embedded_images: Vec<Image>,
+    pub(crate) vba_project: Vec<u8>,
+    pub(crate) vba_signature: Vec<u8>,
+    pub(crate) vba_codename: Option<String>,
+    pub(crate) is_xlsm_file: bool,
+
     xf_indices: HashMap<Format, u32>,
     dxf_indices: HashMap<Format, u32>,
     active_tab: u16,
@@ -392,6 +398,10 @@ impl Workbook {
             xf_indices: HashMap::new(),
             dxf_indices: HashMap::new(),
             embedded_images: vec![],
+            is_xlsm_file: false,
+            vba_project: vec![],
+            vba_signature: vec![],
+            vba_codename: None,
         };
 
         // Initialize the workbook with the same function used to reset it.
@@ -1247,6 +1257,225 @@ impl Workbook {
         self
     }
 
+    /// Add a vba macro file to the workbook.
+    ///
+    /// The `add_vba_project()` method can be used to add macros or functions to
+    /// a workbook using a binary VBA project file that has been extracted from
+    /// an existing Excel `xlsm` file.
+    ///
+    /// An Excel `xlsm` file is structurally the same as an `xlsx` file except
+    /// that it contains an additional `vbaProject.bin` binary file containing
+    /// VBA functions and/or macros.
+    ///
+    /// The `vbaProject.bin` in a `xlsm` file is a binary OLE COM container.
+    /// This was the format used in older `xls` versions of Excel prior to Excel
+    /// 2007. Unlike other components of an xlsx/xlsm file the data isn't stored
+    /// in XML format. Instead the functions and macros as stored as a
+    /// pre-parsed binary format. As such it wouldn't be feasible to
+    /// programmatically define macros and create a `vbaProject.bin` file from
+    /// scratch.
+    ///
+    /// Instead, as a workaround, the Rust
+    /// [`vba_extract`](https://crates.io/crates/vba_extract) utility is used to
+    /// extract `vbaProject.bin` files from existing xlsm files which you can
+    /// then add to `rust_xlsxwriter` files.
+    ///
+    /// The utility can be installed via `cargo`:
+    ///
+    /// ```bash
+    /// $ cargo install vba_extract
+    /// ```
+    ///
+    /// Once `vba_extract` is installed it can be used as follows:
+    ///
+    /// ```bash
+    /// $ vba_extract macro_file.xlsm
+    ///
+    /// Extracted: vbaProject.bin
+    /// ```
+    ///
+    /// If the VBA project is signed, `vba_extract` also extracts the
+    /// `vbaProjectSignature.bin` file from the xlsm file (see below).
+    ///
+    /// The process is explained in detail in [Working with VBA
+    /// macros](crate::macros).
+    ///
+    /// Only one `vbaProject.bin` file can be added per workbook. The name
+    /// doesn’t have to be `vbaProject.bin`. Any suitable path/name for an
+    /// existing VBA bin file will do.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
+    ///   restricted.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding macros to an `rust_xlsxwriter` file using a VBA
+    /// macros file extracted from an existing Excel xlsm file.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_macros.rs
+    /// #
+    /// use rust_xlsxwriter::{Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add the VBA macro file.
+    ///     workbook.add_vba_project("examples/vbaProject.bin")?;
+    ///
+    ///     // Add a worksheet and some text.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Widen the first column for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     worksheet.write(2, 0, "Run macro say_hello()")?;
+    ///
+    ///     // Save the file to disk. Note the `.xlsm` extension. This is required by
+    ///     // Excel or it raise a warning.
+    ///     workbook.save("macros.xlsm")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/app_macros.png">
+    ///
+    pub fn add_vba_project<P: AsRef<Path>>(&mut self, path: P) -> Result<&mut Workbook, XlsxError> {
+        let mut path_buf = PathBuf::new();
+        path_buf.push(path);
+
+        let file = File::open(path_buf)?;
+        let mut reader = BufReader::new(file);
+        let mut data = vec![];
+        reader.read_to_end(&mut data)?;
+
+        self.vba_project = data;
+        self.is_xlsm_file = true;
+
+        if self.vba_codename.is_none() {
+            self.vba_codename = Some("ThisWorkbook".to_string());
+        }
+
+        Ok(self)
+    }
+
+    /// Add a signed vba macro file to the workbook.
+    ///
+    /// The `add_vba_project_with_signature()` method can be used to add signed
+    /// macros or functions to a workbook using a binary VBA project file that
+    /// has been extracted from an existing Excel `xlsm` file.
+    ///
+    /// VBA macros can be signed in Excel to allow for further control over
+    /// execution. The signature part is added to the `xlsm` file in a binary
+    /// called `vbaProjectSignature.bin` which must be used in conjunction with
+    /// `vbaProject.bin`, see above.
+    ///
+    /// The Rust [`vba_extract`](https://crates.io/crates/vba_extract) utility
+    /// will extract the `vbaProject.bin` and `vbaProjectSignature.bin` files
+    /// from an `xlsm` file with signed macros.
+    ///
+    ///
+    /// See [`Workbook::add_vba_project()`] above and [Working with VBA
+    /// macros](crate::macros) for more details.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
+    ///   restricted.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates a simple example of adding a vba
+    /// project to an xlsm file.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_macros_signed.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # #[allow(unused_variables)]
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     workbook.add_vba_project_with_signature(
+    ///         "examples/vbaProject.bin",
+    ///         "examples/vbaProjectSignature.bin",
+    ///     )?;
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Note the `.xlsm` extension.
+    /// #     workbook.save("macros.xlsm")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    pub fn add_vba_project_with_signature<P: AsRef<Path>>(
+        &mut self,
+        project: P,
+        signature: P,
+    ) -> Result<&mut Workbook, XlsxError> {
+        // Add the project binary file.
+        self.add_vba_project(project)?;
+
+        // Add the signature binary file.
+        let mut path_buf = PathBuf::new();
+        path_buf.push(signature);
+
+        let file = File::open(path_buf)?;
+        let mut reader = BufReader::new(file);
+        let mut data = vec![];
+        reader.read_to_end(&mut data)?;
+
+        self.vba_signature = data;
+
+        Ok(self)
+    }
+
+    /// Set the workbook name used in VBA macros.
+    ///
+    /// This method can be used to set the VBA name for the workbook. This is
+    /// sometimes required when a VBA macro included via
+    /// [`Workbook::add_vba_project()`] makes reference to the workbook with a
+    /// name other than the default Excel VBA name of `ThisWorkbook`.
+    ///
+    /// See also the
+    /// [`Worksheet::set_vba_name()`](crate::Worksheet::set_vba_name()) method
+    /// for setting a worksheet VBA name.
+    ///
+    /// The name must be a valid Excel VBA object name as defined by the
+    /// following rules:
+    ///
+    /// * The name must be less than 32 characters.
+    /// * The name can only contain word characters: letters, numbers and
+    ///   underscores.
+    /// * The name must start with a letter.
+    /// * The name cannot be blank.
+    ///
+    /// # Parameters
+    ///
+    /// * `name` - The vba name. It must follow the Excel rules, shown above.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::VbaNameError`] - The name doesn't meet one of Excel's
+    ///   criteria, shown above.
+    ///
+    pub fn set_vba_name(&mut self, name: impl Into<String>) -> Result<&mut Workbook, XlsxError> {
+        let name = name.into();
+        utility::validate_vba_name(&name)?;
+        self.vba_codename = Some(name);
+
+        Ok(self)
+    }
+
     /// Add a recommendation to open the file in “read-only” mode.
     ///
     /// This method can be used to set the Excel “Read-only Recommended” option
@@ -1335,7 +1564,7 @@ impl Workbook {
             }
         }
 
-        // Check for duplicate sheet names, which aren't allowed by Excel
+        // Check for duplicate sheet names, which aren't allowed by Excel.
         let mut unique_worksheet_names = HashSet::new();
         for worksheet in &self.worksheets {
             let worksheet_name = worksheet.name.to_lowercase();
@@ -1395,6 +1624,16 @@ impl Workbook {
 
             // Set the index of the worksheets.
             worksheet.sheet_index = i;
+
+            // Set a default codename for the worksheet if the overall workbook
+            // is a xlsm file. Note that the VBA sheet naming scheme is based on
+            // SheetN and not on the actual sheet name.
+            if self.is_xlsm_file {
+                let codename = format!("Sheet{}", i + 1);
+                if worksheet.vba_codename.is_none() {
+                    worksheet.vba_codename = Some(codename);
+                }
+            }
         }
 
         // Generate a global array of embedded images from the worksheets.
@@ -1887,6 +2126,9 @@ impl Workbook {
         let mut defined_names = self.user_defined_names.clone();
         let mut sheet_names: HashMap<String, u16> = HashMap::new();
 
+        package_options.is_xlsm_file = self.is_xlsm_file;
+        package_options.has_vba_signature = !self.vba_signature.is_empty();
+
         // Iterate over the worksheets to capture workbook and update the
         // package options metadata.
         for (sheet_index, worksheet) in self.worksheets.iter().enumerate() {
@@ -2052,12 +2294,16 @@ impl Workbook {
 
     // Write the <fileVersion> element.
     fn write_file_version(&mut self) {
-        let attributes = [
+        let mut attributes = vec![
             ("appName", "xl"),
             ("lastEdited", "4"),
             ("lowestEdited", "4"),
             ("rupBuild", "4505"),
         ];
+
+        if self.is_xlsm_file {
+            attributes.push(("codeName", "{37E998C4-C9E5-D4B9-71C8-EB1FF731991C}"));
+        }
 
         self.writer.xml_empty_tag("fileVersion", &attributes);
     }
@@ -2071,7 +2317,13 @@ impl Workbook {
 
     // Write the <workbookPr> element.
     fn write_workbook_pr(&mut self) {
-        let attributes = [("defaultThemeVersion", "124226")];
+        let mut attributes = vec![];
+
+        if let Some(codename) = &self.vba_codename {
+            attributes.push(("codeName", codename.clone()));
+        }
+
+        attributes.push(("defaultThemeVersion", "124226".to_string()));
 
         self.writer.xml_empty_tag("workbookPr", &attributes);
     }

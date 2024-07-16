@@ -222,6 +222,7 @@ pub mod changelog;
 pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
+pub mod macros;
 pub mod sparkline;
 pub mod tutorial;
 pub mod utility;

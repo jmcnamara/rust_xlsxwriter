@@ -45,6 +45,7 @@ where
     test_name: &'a str,
     test_function: Option<F>,
     unique: &'a str,
+    has_macros: bool,
     input_filename: String,
     output_filename: String,
     ignore_files: HashSet<&'a str>,
@@ -60,6 +61,7 @@ where
             test_name: "",
             test_function: None,
             unique: "",
+            has_macros: false,
             input_filename: String::new(),
             output_filename: String::new(),
             ignore_files: HashSet::new(),
@@ -103,6 +105,13 @@ where
         self
     }
 
+    // Take different naming for xlsm files into account.
+    #[allow(dead_code)]
+    pub fn has_macros(mut self) -> TestRunner<'a, F> {
+        self.has_macros = true;
+        self
+    }
+
     // Ignore certain elements with xml files.
     #[allow(dead_code)]
     pub fn ignore_elements(mut self, filename: &'a str, pattern: &'a str) -> TestRunner<'a, F> {
@@ -112,13 +121,17 @@ where
 
     // Initialize the in/out filenames once other properties have been set.
     pub fn initialize(mut self) -> TestRunner<'a, F> {
-        self.input_filename = format!("tests/input/{}.xlsx", self.test_name);
+        let extension = if self.has_macros { ".xlsm" } else { ".xlsx" };
+
+        self.input_filename = format!("tests/input/{}{}", self.test_name, extension);
 
         if self.unique.is_empty() {
-            self.output_filename = format!("tests/output/rs_{}.xlsx", self.test_name);
+            self.output_filename = format!("tests/output/rs_{}{}", self.test_name, extension);
         } else {
-            self.output_filename =
-                format!("tests/output/rs_{}_{}.xlsx", self.test_name, self.unique);
+            self.output_filename = format!(
+                "tests/output/rs_{}_{}{}",
+                self.test_name, self.unique, extension
+            );
         }
 
         self
@@ -487,6 +500,7 @@ fn is_binary_file(filename: &str) -> bool {
         || filename.ends_with(".jpeg")
         || filename.ends_with(".bmp")
         || filename.ends_with(".gif")
+        || filename.ends_with(".bin")
 }
 
 // Create the data structure used in the autofilter tests.

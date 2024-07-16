@@ -52,11 +52,6 @@ impl ContentTypes {
                     "/xl/theme/theme1.xml".to_string(),
                     "application/vnd.openxmlformats-officedocument.theme+xml".to_string(),
                 ),
-                (
-                    "/xl/workbook.xml".to_string(),
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
-                        .to_string(),
-                ),
             ],
         }
     }
@@ -68,7 +63,7 @@ impl ContentTypes {
     }
 
     // Add elements to the ContentTypes overrides.
-    fn add_override(&mut self, part_name: &str, content_type: &str) {
+    pub(crate) fn add_override(&mut self, part_name: &str, content_type: &str) {
         self.overrides
             .push((part_name.to_string(), content_type.to_string()));
     }

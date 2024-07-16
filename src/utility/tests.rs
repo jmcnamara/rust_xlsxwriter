@@ -484,4 +484,32 @@ mod utility_tests {
             Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(_))
         ));
     }
+
+    #[test]
+    fn check_invalid_vba_names() {
+        let result = utility::validate_vba_name("ValidName");
+        assert!(matches!(result, Ok(())));
+
+        let result = utility::validate_vba_name("Alphanumeric_characters_123");
+        assert!(matches!(result, Ok(())));
+
+        let result = utility::validate_vba_name("");
+        assert!(matches!(result, Err(XlsxError::VbaNameError(_))));
+
+        let name = "name_that_is_longer_than_thirty_one_characters";
+        let result = utility::validate_vba_name(name);
+        assert!(matches!(result, Err(XlsxError::VbaNameError(_))));
+
+        let name = "name_with_non_word_character_*";
+        let result = utility::validate_vba_name(name);
+        assert!(matches!(result, Err(XlsxError::VbaNameError(_))));
+
+        let name = "1name_starts_with_non_letter_char";
+        let result = utility::validate_vba_name(name);
+        assert!(matches!(result, Err(XlsxError::VbaNameError(_))));
+
+        let name = "_name_starts_with_non_letter_char";
+        let result = utility::validate_vba_name(name);
+        assert!(matches!(result, Err(XlsxError::VbaNameError(_))));
+    }
 }

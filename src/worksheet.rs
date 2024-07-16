@@ -114,7 +114,7 @@
 //! [`Worksheet::new()`] constructor.
 //!
 //! The first method ties the worksheet to a workbook object that will
-//! automatically write the worksheet it when the file is saved, whereas the
+//! automatically write the worksheet when the file is saved, whereas the
 //! second method creates a worksheet that is independent of a workbook. The
 //! second method has the advantage of keeping the worksheet free of the
 //! workbook borrow checking until needed, as explained below.
@@ -1200,6 +1200,7 @@ pub struct Worksheet {
     pub(crate) has_embedded_image_descriptions: bool,
     pub(crate) embedded_images: Vec<Image>,
     pub(crate) global_embedded_image_indices: Vec<u32>,
+    pub(crate) vba_codename: Option<String>,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
@@ -1467,6 +1468,7 @@ impl Worksheet {
             has_embedded_image_descriptions: false,
             has_sparklines: false,
             sparklines: vec![],
+            vba_codename: None,
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -11313,6 +11315,46 @@ impl Worksheet {
         self
     }
 
+    /// Set the worksheet name used in VBA macros.
+    ///
+    /// This method can be used to set the VBA name for the worksheet. This is
+    /// sometimes required when a VBA macro included via
+    /// [`Workbook::add_vba_project()`](crate::Workbook::add_vba_project())
+    /// makes reference to the worksheet with a name other than the default
+    /// Excel VBA names of `Sheet1`, `Sheet2`, etc.
+    ///
+    /// See also the
+    /// [`Workbook::set_vba_name()`](crate::Workbook::set_vba_name()) method for
+    /// setting the workbook VBA name.
+    ///
+    /// The name must be a valid Excel VBA object name as defined by the
+    /// following rules:
+    ///
+    /// * The name must be less than 32 characters.
+    /// * The name can only contain word characters: letters, numbers and
+    ///   underscores.
+    /// * The name must start with a letter.
+    /// * The name cannot be blank.
+    ///
+    /// The name must be also be unique across the worksheets in the workbook.
+    ///
+    /// # Parameters
+    ///
+    /// * `name` - The vba name. It must follow the Excel rules, shown above.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::VbaNameError`] - The name doesn't meet one of Excel's
+    ///   criteria, shown above.
+    ///
+    pub fn set_vba_name(&mut self, name: impl Into<String>) -> Result<&mut Worksheet, XlsxError> {
+        let name = name.into();
+        utility::validate_vba_name(&name)?;
+        self.vba_codename = Some(name);
+
+        Ok(self)
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -13037,11 +13079,15 @@ impl Worksheet {
         if self.filter_conditions.is_empty()
             && !self.fit_to_page
             && (self.tab_color == Color::Default || self.tab_color == Color::Automatic)
+            && self.vba_codename.is_none()
         {
             return;
         }
 
         let mut attributes = vec![];
+        if let Some(codename) = &self.vba_codename {
+            attributes.push(("codeName", codename.clone()));
+        }
         if !self.filter_conditions.is_empty() {
             attributes.push(("filterMode", "1".to_string()));
         }

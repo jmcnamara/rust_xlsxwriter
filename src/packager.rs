@@ -160,6 +160,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.write_image_files(workbook)?;
         self.write_chart_files(workbook)?;
         self.write_table_files(workbook)?;
+        self.write_vba_project(workbook)?;
 
         let mut image_index = 1;
         let mut vml_index = 1;
@@ -197,6 +198,27 @@ impl<W: Write + Seek + Send> Packager<W> {
     // Write the [ContentTypes].xml file.
     fn write_content_types_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut content_types = ContentTypes::new();
+
+        // Change the workbook application types based on whether it is an xlsx
+        // or xlsm file.
+        if options.is_xlsm_file {
+            content_types.add_override(
+                "/xl/workbook.xml",
+                "application/vnd.ms-excel.sheet.macroEnabled.main+xml",
+            );
+
+            if options.has_vba_signature {
+                content_types.add_override(
+                    "/xl/vbaProjectSignature.bin",
+                    "application/vnd.ms-office.vbaProjectSignature",
+                );
+            }
+        } else {
+            content_types.add_override(
+                "/xl/workbook.xml",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml",
+            );
+        }
 
         for i in 0..options.num_worksheets {
             content_types.add_worksheet_name(i + 1);
@@ -251,6 +273,10 @@ impl<W: Write + Seek + Send> Packager<W> {
             content_types.add_custom_properties();
         }
 
+        if options.is_xlsm_file {
+            content_types.add_default("bin", "application/vnd.ms-office.vbaProject");
+        }
+
         self.zip
             .start_file("[Content_Types].xml", self.zip_options)?;
 
@@ -301,6 +327,10 @@ impl<W: Write + Seek + Send> Packager<W> {
 
         if options.has_metadata {
             rels.add_document_relationship("sheetMetadata", "metadata.xml", "");
+        }
+
+        if options.is_xlsm_file {
+            rels.add_office_relationship("2006", "vbaProject", "vbaProject.bin", "");
         }
 
         if options.has_embedded_images {
@@ -439,6 +469,22 @@ impl<W: Write + Seek + Send> Packager<W> {
         }
 
         let filename = "xl/richData/_rels/richValueRel.xml.rels";
+
+        self.zip.start_file(filename, self.zip_options)?;
+
+        rels.assemble_xml_file();
+        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write a vbaProject.bin.rels file.
+    pub(crate) fn write_vba_project_rels_file(&mut self) -> Result<(), XlsxError> {
+        let mut rels = Relationship::new();
+
+        rels.add_office_relationship("2006", "vbaProjectSignature", "vbaProjectSignature.bin", "");
+
+        let filename = "xl/_rels/vbaProject.bin.rels";
 
         self.zip.start_file(filename, self.zip_options)?;
 
@@ -784,6 +830,38 @@ impl<W: Write + Seek + Send> Packager<W> {
 
         Ok(())
     }
+
+    // Write the vba project file.
+    fn write_vba_project(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        if !workbook.is_xlsm_file {
+            return Ok(());
+        }
+
+        let filename = "xl/vbaProject.bin";
+        self.zip
+            .start_file(filename, self.zip_options_for_binary_files)?;
+        self.zip.write_all(&workbook.vba_project)?;
+
+        // Write the VBA signature file, if present.
+        self.write_vba_signature(workbook)
+    }
+
+    // Write the vba signature file.
+    fn write_vba_signature(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        if workbook.vba_signature.is_empty() {
+            return Ok(());
+        }
+
+        let filename = "xl/vbaProjectSignature.bin";
+        self.zip
+            .start_file(filename, self.zip_options_for_binary_files)?;
+        self.zip.write_all(&workbook.vba_signature)?;
+
+        // Write the associated .rels file.
+        self.write_vba_project_rels_file()?;
+
+        Ok(())
+    }
 }
 
 // Internal struct to pass options to the Packager struct.
@@ -793,6 +871,8 @@ pub(crate) struct PackagerOptions {
     pub(crate) has_dynamic_functions: bool,
     pub(crate) has_embedded_images: bool,
     pub(crate) has_vml: bool,
+    pub(crate) is_xlsm_file: bool,
+    pub(crate) has_vba_signature: bool,
     pub(crate) num_worksheets: u16,
     pub(crate) num_drawings: u16,
     pub(crate) num_charts: u16,
@@ -815,6 +895,8 @@ impl PackagerOptions {
             has_dynamic_functions: false,
             has_embedded_images: false,
             has_vml: false,
+            is_xlsm_file: false,
+            has_vba_signature: false,
             num_worksheets: 0,
             num_drawings: 0,
             num_charts: 0,

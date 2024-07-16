@@ -638,6 +638,41 @@ pub(crate) fn validate_sheetname(name: &str, message: &str) -> Result<(), XlsxEr
     Ok(())
 }
 
+// Internal function to validate VBA code names.
+pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
+    let non_word_char = static_regex!(r"\W");
+
+    // Check that the  name isn't blank.
+    if name.is_empty() {
+        return Err(XlsxError::VbaNameError(
+            "VBA name cannot be blank".to_string(),
+        ));
+    }
+
+    // Check that name is <= 31, an Excel limit.
+    if name.chars().count() > 31 {
+        return Err(XlsxError::VbaNameError(
+            "VBA name exceeds Excel limit of 31 characters: {name}".to_string(),
+        ));
+    }
+
+    // Check for anything other than letters, numbers, and underscores.
+    if non_word_char.is_match(name) {
+        return Err(XlsxError::VbaNameError(
+            "VBA name contains non-word character: {name}".to_string(),
+        ));
+    }
+
+    // Check that the name starts with a letter.
+    if !name.chars().next().unwrap().is_alphabetic() {
+        return Err(XlsxError::VbaNameError(
+            "VBA name must start with letter character: {name}".to_string(),
+        ));
+    }
+
+    Ok(())
+}
+
 // Get the pixel width of a string based on character widths taken from Excel.
 // Non-ascii characters are given a default width of 8 pixels.
 #[allow(clippy::match_same_arms)]
