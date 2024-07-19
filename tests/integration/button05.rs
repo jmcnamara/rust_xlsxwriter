@@ -15,8 +15,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     let button = Button::new()
-        .set_scale_height(1.5)
-        .set_scale_width(2.0)
+        .set_height(30)
+        .set_width(128)
         .set_macro("my_macro");
 
     worksheet.insert_button(1, 2, &button)?;

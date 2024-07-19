@@ -5097,9 +5097,15 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// Add a button to a worksheet.
+    /// Add a Excel Form Control button object to a worksheet.
     ///
-    /// Add a [`Button`] to a worksheet at a cell location.
+    /// Add a [`Button`] to a worksheet at a cell location. The worksheet button
+    /// object is mainly provided as a way of triggering a VBA macro, see
+    /// [Working with VBA macros](crate::macros) for more details.
+    ///
+    /// Note, Button is the only VBA Control supported by `rust_xlsxwriter`. It
+    /// is unlikely that any other Excel form elements will be added in the
+    /// future due to the implementation effort required.
     ///
     /// # Parameters
     ///
@@ -5114,7 +5120,49 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// TODO
+    /// An example of adding macros to an `rust_xlsxwriter` file using a VBA
+    /// macros file extracted from an existing Excel xlsm file.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_macros.rs
+    /// #
+    /// use rust_xlsxwriter::{Button, Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add the VBA macro file.
+    ///     workbook.add_vba_project("examples/vbaProject.bin")?;
+    ///
+    ///     // Add a worksheet and some text.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Widen the first column for clarity.
+    ///     worksheet.set_column_width(0, 30)?;
+    ///
+    ///     worksheet.write(2, 0, "Press the button to say hello:")?;
+    ///
+    ///     // Add a button tied to a macro in the VBA project.
+    ///     let button = Button::new()
+    ///         .set_caption("Press Me")
+    ///         .set_macro("say_hello")
+    ///         .set_width(80)
+    ///         .set_height(30);
+    ///
+    ///     worksheet.insert_button(2, 1, &button)?;
+    ///
+    ///     // Save the file to disk. Note the `.xlsm` extension. This is required by
+    ///     // Excel or it raise a warning.
+    ///     workbook.save("macros.xlsm")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/app_macros.png">
     ///
     pub fn insert_button(
         &mut self,
@@ -5127,10 +5175,10 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// Add a button to a worksheet at an offset.
+    /// Add a Excel Form Control button object to a  at an offset.
     ///
     /// Add a [`Button`] to a worksheet  at a pixel offset within a cell
-    /// location.
+    /// location. See [`Worksheet::insert_button()`] above
     ///
     /// # Errors
     ///
@@ -5144,10 +5192,6 @@ impl Worksheet {
     /// * `button` - The [`Button`] to insert into the cell.
     /// * `x_offset`: The horizontal offset within the cell in pixels.
     /// * `y_offset`: The vertical offset within the cell in pixels.
-    ///
-    /// # Examples
-    ///
-    /// TODO
     ///
     pub fn insert_button_with_offset(
         &mut self,

@@ -36,6 +36,7 @@
 //! - Defined names.
 //! - Autofilters.
 //! - Worksheet Tables.
+//! - Support for macros.
 //!
 //! [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
 //!
@@ -76,6 +77,7 @@
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.
 //! - [`DataValidation`]: Working with data validation in worksheets.
+//! - [`Macros`](crate::macros): Working with Macros.
 //! - [`Sparklines`](crate::sparkline): Working with Sparklines.
 //! - [`ExcelDateTime`]: A type to represent dates and times in Excel format.
 //! - [`Formula`]: A type for Excel formulas.

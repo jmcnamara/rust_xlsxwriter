@@ -110,11 +110,13 @@ Once the `vbaProject.bin` file has been extracted it can be added to the
 ```
 
 
-Here is a complete example which adds a macro file with a dialog:
+Here is a complete example which adds a macro file with a dialog. It also uses a
+button, via [`Worksheet::insert_button()`](crate::Worksheet::insert_button), to
+trigger the macro:
 
 ```
 # // This code is available in examples/app_macros.rs
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Button, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // Create a new Excel file object.
@@ -129,7 +131,16 @@ fn main() -> Result<(), XlsxError> {
     // Widen the first column for clarity.
     worksheet.set_column_width(0, 30)?;
 
-    worksheet.write(2, 0, "Run macro say_hello()")?;
+    worksheet.write(2, 0, "Press the button to say hello:")?;
+
+    // Add a button tied to a macro in the VBA project.
+    let button = Button::new()
+        .set_caption("Press Me")
+        .set_macro("say_hello")
+        .set_width(80)
+        .set_height(30);
+
+    worksheet.insert_button(2, 1, &button)?;
 
     // Save the file to disk. Note the `.xlsm` extension. This is required by
     // Excel or it raise a warning.

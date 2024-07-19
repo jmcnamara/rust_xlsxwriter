@@ -2547,7 +2547,7 @@ impl Chart {
 
     /// Set the height scale for the chart.
     ///
-    /// Set the height scale for the chart relative to 1.0/100%. This is a
+    /// Set the height scale for the chart relative to 1.0 (i.e. 100%). This is a
     /// syntactic alternative to [`chart.set_height()`](Chart::set_height).
     ///
     /// # Parameters
@@ -2565,7 +2565,7 @@ impl Chart {
 
     /// Set the width scale for the chart.
     ///
-    /// Set the width scale for the chart relative to 1.0/100%. This is a
+    /// Set the width scale for the chart relative to 1.0 (i.e. 100%). This is a
     /// syntactic alternative to [`chart.set_width()`](Chart::set_width).
     ///
     /// # Parameters

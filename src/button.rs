@@ -11,16 +11,68 @@ use crate::vml::VmlInfo;
 use crate::{ObjectMovement, DEFAULT_COL_WIDTH_PIXELS, DEFAULT_ROW_HEIGHT_PIXELS};
 
 #[derive(Clone, Debug)]
-/// The `Button` struct is used to create an object to represent an button that
-/// can be inserted into a worksheet.
+/// The `Button` struct represents an worksheet button object.
 ///
-/// TODO
+/// The `Button` struct is used to create an Excel "Form Control" button object
+/// to represent a button on a worksheet.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/doc_button_intro.png">
+///
+/// The worksheet button object is mainly provided as a way of triggering a VBA
+/// macro, see [Working with VBA macros](crate::macros) for more details. It is
+/// used in conjunction with the
+/// [`Worksheet::insert_button()`](crate::Worksheet::insert_button) method.
+///
+/// Note, Button is the only VBA Control supported by `rust_xlsxwriter`. It is
+/// unlikely that any other Excel form elements will be added in the future due
+/// to the implementation effort required.
+///
+/// Here is a complete example with a button that has a macro attached to it.
+///
+/// ```
+/// # // This code is available in examples/app_macros.rs
+/// #
+/// use rust_xlsxwriter::{Button, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Add the VBA macro file.
+///     workbook.add_vba_project("examples/vbaProject.bin")?;
+///
+///     // Add a worksheet and some text.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Widen the first column for clarity.
+///     worksheet.set_column_width(0, 30)?;
+///
+///     worksheet.write(2, 0, "Press the button to say hello:")?;
+///
+///     // Add a button tied to a macro in the VBA project.
+///     let button = Button::new()
+///         .set_caption("Press Me")
+///         .set_macro("say_hello")
+///         .set_width(80)
+///         .set_height(30);
+///
+///     worksheet.insert_button(2, 1, &button)?;
+///
+///     // Save the file to disk. Note the `.xlsm` extension. This is required by
+///     // Excel or it raise a warning.
+///     workbook.save("macros.xlsm")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/app_macros.png">
 ///
 pub struct Button {
     height: f64,
     width: f64,
-    scale_width: f64,
-    scale_height: f64,
     pub(crate) x_offset: u32,
     pub(crate) y_offset: u32,
     pub(crate) name: String,
@@ -41,141 +93,164 @@ impl Button {
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    /// Create a new Button object TODO.
+    /// Create a new Button object to represent an Excel Form Control button.
     ///
     pub fn new() -> Button {
         Button {
-            height: f64::from(DEFAULT_ROW_HEIGHT_PIXELS),
-            width: f64::from(DEFAULT_COL_WIDTH_PIXELS),
-            scale_width: 1.0,
-            scale_height: 1.0,
             x_offset: 0,
             y_offset: 0,
+            width: f64::from(DEFAULT_COL_WIDTH_PIXELS),
+            height: f64::from(DEFAULT_ROW_HEIGHT_PIXELS),
             name: String::new(),
-            macro_name: String::new(),
             alt_text: String::new(),
+            macro_name: String::new(),
             object_movement: ObjectMovement::MoveAndSizeWithCells,
             decorative: false,
         }
     }
 
-    /// Set the button caption. TODO.
+    /// Set the button caption.
     ///
-    /// TODO
+    /// The default button caption in Excel is "Button 1", "Button 2" etc. This
+    /// method can be used to change that caption to some other text.
     ///
     /// # Parameters
     ///
-    /// `todo` - TODO.
+    /// `caption` - The text to display on the button. It must be less than or
+    /// equal to 255 characters.
+    ///
+    /// # Examples
+    ///
+    /// An example of adding an Excel Form Control button to a worksheet. This
+    /// example demonstrates setting the button caption.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_button_set_caption.rs
+    /// #
+    /// # use rust_xlsxwriter::{Button, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add a button with a default caption.
+    ///     let button = Button::new();
+    ///     worksheet.insert_button(2, 1, &button)?;
+    ///
+    ///     // Add a button with a user defined caption.
+    ///     let button = Button::new().set_caption("Press Me");
+    ///     worksheet.insert_button(4, 1, &button)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("button.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/button_set_caption.png">
     ///
     pub fn set_caption(mut self, caption: impl Into<String>) -> Button {
-        self.name = caption.into();
+        let caption = caption.into();
+        if caption.chars().count() > 255 {
+            eprintln!("Button caption is greater than Excel's limit of 255 characters.");
+            return self;
+        }
+
+        self.name = caption;
         self
     }
 
-    /// Set the button caption. TODO.
-    ///
-    /// TODO
+    /// Set the macro associated with the button.
+
+    /// The `set_macro()` method can be used to associate an existing VBA macro
+    /// with a button object. See [Working with VBA macros](crate::macros) for
+    /// more details on macros in `rust_xlsxwriter`.
     ///
     /// # Parameters
     ///
-    /// `todo` - TODO.
+    /// `name` - The macro name. It should be the same as it appears in the
+    /// Excel macros dialog.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/button_macro_dialog.png">
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of adding an Excel Form Control button to a worksheet. This
+    /// example demonstrates setting the button macro.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_button_set_macro.rs
+    /// #
+    /// # use rust_xlsxwriter::{Button, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add the VBA macro file.
+    /// #     workbook.add_vba_project("examples/vbaProject.bin")?;
+    /// #
+    /// #     // Add a worksheet and some text.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add a button tied to a macro in the VBA project.
+    ///     let button = Button::new().set_macro("say_hello");
+    ///
+    ///     worksheet.insert_button(2, 1, &button)?;
+    /// #
+    /// #     // Save the file to disk. Note the `.xlsm` extension.
+    /// #     workbook.save("macros.xlsm")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
     ///
     pub fn set_macro(mut self, name: impl Into<String>) -> Button {
         self.macro_name = name.into();
         self
     }
 
-    /// Set the height scale for the button relative to 1.0/100%.
+    /// Set the width of the button in pixels.
     ///
     /// # Parameters
     ///
-    /// * `scale` - The scale ratio.
+    /// * `width` - The button width in pixels.
     ///
-    /// TODO example
-    ///
-    pub fn set_scale_height(mut self, scale: f64) -> Button {
-        if scale <= 0.0 {
+    pub fn set_width(mut self, width: u32) -> Button {
+        if width == 0 {
             return self;
         }
 
-        self.scale_height = scale;
+        self.width = f64::from(width);
         self
     }
 
-    /// Set the width scale for the button relative to 1.0/100%.
+    /// Set the height of the button in pixels.
     ///
     /// # Parameters
     ///
-    /// * `scale` - The scale ratio.
+    /// * `height` - The button height in pixels.
     ///
-    pub fn set_scale_width(mut self, scale: f64) -> Button {
-        if scale <= 0.0 {
+    pub fn set_height(mut self, height: u32) -> Button {
+        if height == 0 {
             return self;
         }
-
-        self.scale_width = scale;
+        self.height = f64::from(height);
         self
     }
 
-    /// Set the width and height scale to achieve a specific size. TODO
+    /// Set the alt text for the button to help accessibility.
     ///
-    /// Calculate and set the horizontal and vertical scales for an button in
-    /// order to display it at a fixed width and height in a worksheet. This is
-    /// most commonly used to scale an button so that it fits within a cell or a
-    /// specific region in a worksheet.
-    ///
-    /// There are two options, which are controlled by the `keep_aspect_ratio`
-    /// parameter. The button can be scaled vertically and horizontally to give
-    /// the specified with and height or the aspect ratio of the button can be
-    /// maintained so that the button is scaled to the lesser of the horizontal
-    /// or vertical sizes. See the example below.
-    ///
-    /// See also the
-    /// [`worksheet.insert_button_fit_to_cell()`](crate::Worksheet::insert_button_fit_to_cell)
-    /// method.
-    ///
-    /// # Parameters
-    ///
-    /// * `width` - The target width in pixels to scale the button to.
-    /// * `height` - The target height in pixels to scale the button to.
-    /// * `keep_aspect_ratio` - Boolean value to maintain the aspect ratio of
-    ///   the button if `true` or scale independently in the horizontal and
-    ///   vertical directions if `false`.
-    ///
-    /// Note: the `width` and `height` can mainly be considered as pixel sizes.
-    /// However, f64 values are allowed for cases where a fractional size is
-    /// required
-    ///
-    ///
-    pub fn set_scale_to_size<T>(mut self, width: T, height: T, keep_aspect_ratio: bool) -> Button
-    where
-        T: Into<f64> + Copy,
-    {
-        if width.into() == 0.0 || height.into() == 0.0 {
-            return self;
-        }
-
-        let mut scale_width = width.into() / self.width();
-        let mut scale_height = height.into() / self.height();
-
-        if keep_aspect_ratio {
-            if scale_width < scale_height {
-                scale_height = scale_width;
-            } else {
-                scale_width = scale_height;
-            }
-        }
-
-        self = self.set_scale_width(scale_width);
-        self = self.set_scale_height(scale_height);
-
-        self
-    }
-
-    /// Set the alt text for the button. TODO
-    ///
-    /// Set the alt text for the button to help accessibility. The alt text is
-    /// used with screen readers to help people with visual disabilities.
+    /// The alt text is used with screen readers to help people with visual
+    /// disabilities.
     ///
     /// See the following Microsoft documentation on [Everything you need to
     /// know to write effective alt
@@ -185,80 +260,43 @@ impl Button {
     ///
     /// * `alt_text` - The alt text string to add to the button.
     ///
-    /// # Examples
-    ///
     pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Button {
-        self.alt_text = alt_text.into();
+        let alt_text = alt_text.into();
+        if alt_text.chars().count() > 255 {
+            eprintln!("Button caption is greater than Excel's limit of 255 characters.");
+            return self;
+        }
+
+        self.alt_text = alt_text;
         self
     }
 
     /// Set the object movement options for a worksheet button.
     ///
     /// Set the option to define how an button will behave in Excel if the cells
-    /// under the button are moved, deleted, or have their size changed. In Excel
-    /// the options are:
+    /// under the button are moved, deleted, or have their size changed. In
+    /// Excel the options are:
     ///
     /// 1. Move and size with cells.
     /// 2. Move but don't size with cells.
     /// 3. Don't move or size with cells.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/buttons/object_movement.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
     ///
     /// These values are defined in the [`ObjectMovement`] enum.
     ///
-    /// The [`ObjectMovement`] enum also provides an additional option to
-    /// "Move and size with cells - after the button is inserted" to allow buttons
-    /// to be hidden in rows or columns. In Excel this equates to option 1 above
+    /// The [`ObjectMovement`] enum also provides an additional option to "Move
+    /// and size with cells - after the button is inserted" to allow buttons to
+    /// be hidden in rows or columns. In Excel this equates to option 1 above
     /// but the internal button position calculations are handled differently.
     ///
     /// # Parameters
     ///
     /// * `option` - An button/object positioning behavior defined by the
     ///   [`ObjectMovement`] enum.
-    ///
-    /// # Examples
-    ///
-    ///  TODO
-    ///
     pub fn set_object_movement(mut self, option: ObjectMovement) -> Button {
         self.object_movement = option;
         self
-    }
-
-    /// Get the width of the button used for the size calculations in Excel.
-    ///
-    /// TODO.
-    ///
-    /// # Examples
-    ///
-    /// This example shows how to get some of the properties of an Button that
-    /// will be used in an Excel worksheet.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_button_dimensions.rs
-    /// #
-    /// # use rust_xlsxwriter::{Button, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    ///     let button = Button::new();
-    ///
-    ///     assert_eq!(106.0, button.width());
-    ///     assert_eq!(106.0, button.height());
-    ///     assert_eq!(96.0, button.width_dpi());
-    ///     assert_eq!(96.0, button.height_dpi());
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    pub fn width(&self) -> f64 {
-        self.width
-    }
-
-    /// Get the height of the button used for the size calculations in Excel. See
-    /// the example above.
-    ///
-    pub fn height(&self) -> f64 {
-        self.height
     }
 
     // Buttons are stored in a vmlDrawing file. We create a struct to store the
@@ -290,11 +328,11 @@ impl DrawingObject for Button {
     }
 
     fn width_scaled(&self) -> f64 {
-        self.width * self.scale_width
+        self.width
     }
 
     fn height_scaled(&self) -> f64 {
-        self.height * self.scale_height
+        self.height
     }
 
     fn object_movement(&self) -> ObjectMovement {
@@ -317,7 +355,3 @@ impl DrawingObject for Button {
         DrawingType::Button
     }
 }
-
-// -----------------------------------------------------------------------
-// Helper enums/structs/functions.
-// -----------------------------------------------------------------------

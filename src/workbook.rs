@@ -1317,7 +1317,7 @@ impl Workbook {
     /// ```
     /// # // This code is available in examples/app_macros.rs
     /// #
-    /// use rust_xlsxwriter::{Workbook, XlsxError};
+    /// use rust_xlsxwriter::{Button, Workbook, XlsxError};
     ///
     /// fn main() -> Result<(), XlsxError> {
     ///     // Create a new Excel file object.
@@ -1332,7 +1332,16 @@ impl Workbook {
     ///     // Widen the first column for clarity.
     ///     worksheet.set_column_width(0, 30)?;
     ///
-    ///     worksheet.write(2, 0, "Run macro say_hello()")?;
+    ///     worksheet.write(2, 0, "Press the button to say hello:")?;
+    ///
+    ///     // Add a button tied to a macro in the VBA project.
+    ///     let button = Button::new()
+    ///         .set_caption("Press Me")
+    ///         .set_macro("say_hello")
+    ///         .set_width(80)
+    ///         .set_height(30);
+    ///
+    ///     worksheet.insert_button(2, 1, &button)?;
     ///
     ///     // Save the file to disk. Note the `.xlsm` extension. This is required by
     ///     // Excel or it raise a warning.

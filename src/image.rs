@@ -346,7 +346,7 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `height` - The The logical image height in pixels.
+    /// * `height` - The logical image height in pixels.
     ///
     pub fn set_height(mut self, height: u32) -> Image {
         if height == 0 {

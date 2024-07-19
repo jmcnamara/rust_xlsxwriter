@@ -51,15 +51,16 @@ cargo run --example app_demo  # or any other example
 36. [Sparklines example](#sparklines-example)
 37. [Sparklines example with properties set](#sparklines-example-with-properties-set)
 38. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
-39. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-40. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-41. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-42. [Setting the Sensitivity Label](#setting-the-sensitivity-label)
-43. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-44. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-45. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-46. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-47. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+39. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+40. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+41. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
+42. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
+43. [Setting the Sensitivity Label](#setting-the-sensitivity-label)
+44. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+45. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+46. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+47. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+48. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -5738,6 +5739,57 @@ impl IntoExcelData for UnixTime {
     }
 }
 ```
+
+
+# Macros: Adding macros to a workbook
+
+An example of adding macros to an `rust_xlsxwriter` file using a VBA macros
+file extracted from an existing Excel xlsm file.
+
+The [`vba_extract`](https://crates.io/crates/vba_extract) utility can be used to
+extract the `vbaProject.bin` file.
+
+Output:
+
+<img src="https://rustxlsxwriter.github.io/images/app_macros.png">
+
+```rust
+// Sample code from examples/app_macros.rs
+
+use rust_xlsxwriter::{Button, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add the VBA macro file.
+    workbook.add_vba_project("examples/vbaProject.bin")?;
+
+    // Add a worksheet and some text.
+    let worksheet = workbook.add_worksheet();
+
+    // Widen the first column for clarity.
+    worksheet.set_column_width(0, 30)?;
+
+    worksheet.write(2, 0, "Press the button to say hello:")?;
+
+    // Add a button tied to a macro in the VBA project.
+    let button = Button::new()
+        .set_caption("Press Me")
+        .set_macro("say_hello")
+        .set_width(80)
+        .set_height(30);
+
+    worksheet.insert_button(2, 1, &button)?;
+
+    // Save the file to disk. Note the `.xlsm` extension. This is required by
+    // Excel or it raise a warning.
+    workbook.save("macros.xlsm")?;
+
+    Ok(())
+}
+```
+
 
 
 # Defined names: using user defined variable names in worksheets

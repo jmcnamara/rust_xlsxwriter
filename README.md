@@ -93,6 +93,7 @@ features are:
 - Autofilters.
 - Worksheet Tables.
 - Serde serialization support.
+- Support for macros.
 
 `rust_xlsxwriter` is under active development and new features will be added
 frequently.

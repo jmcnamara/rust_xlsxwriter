@@ -166,6 +166,11 @@ documentation and generally show how an individual function works.
 * `app_lambda.rs` - An example of using the new Excel LAMBDA() function
   with the rust_xlsxwriter library.
 
+* `app_macros.rs` - An example of adding macros to an `rust_xlsxwriter`
+  file using a VBA macros file extracted from an existing Excel xlsm file.
+  The `vba_extract` utility (https://crates.io/crates/vba_extract) can be
+  used to extract the `vbaProject.bin` file.
+
 * `app_merge_range.rs` - An example of creating merged ranges in a
   worksheet using the rust_xlsxwriter library.
 
@@ -240,6 +245,14 @@ documentation and generally show how an individual function works.
   `rust_xlsxwriter` `write()` method using the IntoExcelData trait to
   handle arbitrary user data that can be mapped to one of the main Excel
   data types.
+
+* `doc_button_set_caption.rs` - An example of adding an Excel Form Control
+  button to a worksheet. This example demonstrates setting the button
+  caption.
+
+* `doc_button_set_macro.rs` - An example of adding an Excel Form Control
+  button to a worksheet. This example demonstrates setting the button
+  macro.
 
 * `doc_chart_add_series.rs` - An example of creating a chart series via
   [`chart.add_series()`](Chart::add_series).
@@ -968,11 +981,30 @@ documentation and generally show how an individual function works.
   image object and use it to insert the image into a worksheet. The image
   in this case is scaled.
 
+* `doc_image_set_width.rs` - This example shows how to create an image
+  object and use it to insert the image into a worksheet. The image in this
+  case is scaled by setting the height and width.
+
 * `doc_into_chart_format.rs` - An example of passing chart formatting
   parameters via the [`IntoChartFormat`] trait.
 
 * `doc_into_color.rs` - An example of the different types of color syntax
   that is supported by the [`IntoColor`] trait.
+
+* `doc_macros_add.rs` - Demonstrates a simple example of adding a vba
+  project to an xlsm file.
+
+* `doc_macros_calc.rs` - Demonstrates a simple example of adding a vba
+  project to an xlsm file.
+
+* `doc_macros_name.rs` - Demonstrates a simple example of adding a vba
+  project to an xlsm file.
+
+* `doc_macros_save.rs` - Demonstrates a simple example of adding a vba
+  project to an xlsm file.
+
+* `doc_macros_signed.rs` - Demonstrates a simple example of adding a vba
+  project to an xlsm file.
 
 * `doc_properties_checksum1.rs` - Create a simple workbook to demonstrate
   the changing checksum due to the changing creation date.
