@@ -111,14 +111,14 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `path` - The path of the image file to read e as a `&str` or as a
+    /// - `path`: The path of the image file to read e as a `&str` or as a
     ///   [`std::path`] `Path` or `PathBuf` instance.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::UnknownImageType`] - Unknown image type. The supported
+    /// - [`XlsxError::UnknownImageType`] - Unknown image type. The supported
     ///   image formats are PNG, JPG, GIF and BMP.
-    /// * [`XlsxError::ImageDimensionError`] - Image has 0 width or height, or
+    /// - [`XlsxError::ImageDimensionError`] - Image has 0 width or height, or
     ///   the dimensions couldn't be read.
     ///
     /// # Examples
@@ -184,13 +184,13 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `buffer` - The image data as a u8 array or vector.
+    /// - `buffer`: The image data as a u8 array or vector.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::UnknownImageType`] - Unknown image type. The supported
+    /// - [`XlsxError::UnknownImageType`] - Unknown image type. The supported
     ///   image formats are PNG, JPG, GIF and BMP.
-    /// * [`XlsxError::ImageDimensionError`] - Image has 0 width or height, or
+    /// - [`XlsxError::ImageDimensionError`] - Image has 0 width or height, or
     ///   the dimensions couldn't be read.
     ///
     /// # Examples
@@ -287,7 +287,7 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `width` - The logical image width in pixels.
+    /// - `width`: The logical image width in pixels.
     ///
     /// # Examples
     ///
@@ -346,7 +346,7 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `height` - The logical image height in pixels.
+    /// - `height`: The logical image height in pixels.
     ///
     pub fn set_height(mut self, height: u32) -> Image {
         if height == 0 {
@@ -370,7 +370,7 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `scale` - The scale ratio.
+    /// - `scale`: The scale ratio.
     ///
     /// # Examples
     ///
@@ -425,7 +425,7 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `scale` - The scale ratio.
+    /// - `scale`: The scale ratio.
     ///
     pub fn set_scale_width(mut self, scale: f64) -> Image {
         if scale <= 0.0 {
@@ -456,9 +456,9 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `width` - The target width in pixels to scale the image to.
-    /// * `height` - The target height in pixels to scale the image to.
-    /// * `keep_aspect_ratio` - Boolean value to maintain the aspect ratio of
+    /// - `width`: The target width in pixels to scale the image to.
+    /// - `height`: The target height in pixels to scale the image to.
+    /// - `keep_aspect_ratio`: Boolean value to maintain the aspect ratio of
     ///   the image if `true` or scale independently in the horizontal and
     ///   vertical directions if `false`.
     ///
@@ -561,7 +561,7 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `alt_text` - The alt text string to add to the image.
+    /// - `alt_text`: The alt text string to add to the image.
     ///
     /// # Examples
     ///
@@ -619,7 +619,7 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -683,7 +683,7 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `option` - An image/object positioning behavior defined by the
+    /// - `option`: An image/object positioning behavior defined by the
     ///   [`ObjectMovement`] enum.
     ///
     /// # Examples
@@ -737,16 +737,16 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// * `link` - The url/hyperlink associate with the image as a string or
+    /// - `link`: The url/hyperlink associate with the image as a string or
     ///   [`Url`].
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    /// - [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
     ///   Excel's limit of 2080 characters.
-    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    /// - [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   [`Worksheet::write_url()`](crate::Worksheet::write_url).
-    /// * [`XlsxError::ParameterError`] - URL mouseover tool tip exceeds Excel's
+    /// - [`XlsxError::ParameterError`] - URL mouseover tool tip exceeds Excel's
     ///   limit of 255 characters.
     ///
     pub fn set_url(mut self, link: impl Into<Url>) -> Result<Image, XlsxError> {

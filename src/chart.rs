@@ -1610,7 +1610,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `chart` - The [`Chart`] to insert into the cell.
+    /// - `chart`: The [`Chart`] to insert into the cell.
     ///
     /// # Examples
     ///
@@ -1760,7 +1760,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `style` - A integer value in the range 1-48.
+    /// - `style`: A integer value in the range 1-48.
     ///
     /// # Examples
     ///
@@ -1838,7 +1838,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `rotation`: The rotation of the first segment of a Pie/Doughnut chart.
+    /// - `rotation`: The rotation of the first segment of a Pie/Doughnut chart.
     /// The range is 0 <= rotation <= 360 and the default is 0.
     ///
     ///
@@ -1896,8 +1896,8 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `hole_size`: The hole size for a Doughnut chart. The range is 0 <=
-    /// `hole_size` <= 90 and the default is 50.
+    /// - `hole_size`: The hole size for a Doughnut chart. The range is 0 <=
+    ///   `hole_size` <= 90 and the default is 50.
     ///
     ///
     /// # Examples
@@ -1939,7 +1939,8 @@ impl Chart {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_hole_size.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_hole_size.png">
     ///
     pub fn set_hole_size(&mut self, hole_size: u8) -> &mut Chart {
         if (0..=90).contains(&hole_size) {
@@ -1955,7 +1956,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -2101,6 +2102,11 @@ impl Chart {
     ///
     /// Set the formatting for negative "Down" bars on an "Up-Down" chart
     /// element. See the documentation for [`Chart::set_up_bar_format()`].
+    /// # Parameters
+    ///
+    /// - `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    ///   convert into a `ChartFormat` instance. See the docs for
+    ///   [`IntoChartFormat`] for details.
     ///
     pub fn set_down_bar_format<T>(&mut self, format: T) -> &mut Chart
     where
@@ -2119,7 +2125,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -2187,7 +2193,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// - `format`: A [`ChartFormat`] struct reference or a sub struct that will
     ///   convert into a `ChartFormat` instance. See the docs for
     ///   [`IntoChartFormat`] for details.
     ///
@@ -2262,7 +2268,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     /// # Examples
     ///
     /// An example of setting drop lines for a chart.
@@ -2329,7 +2335,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// - `format`: A [`ChartFormat`] struct reference or a sub struct that will
     ///   convert into a `ChartFormat` instance. See the docs for
     ///   [`IntoChartFormat`] for details.
     ///
@@ -2411,7 +2417,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `table`: A [`ChartDataTable`] reference.
+    /// - `table`: A [`ChartDataTable`] reference.
     ///
     /// # Examples
     ///
@@ -2471,7 +2477,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `width` - The chart width in pixels.
+    /// - `width`: The chart width in pixels.
     ///
     /// # Examples
     ///
@@ -2534,7 +2540,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `height` - The chart height in pixels.
+    /// - `height`: The chart height in pixels.
     ///
     pub fn set_height(&mut self, height: u32) -> &mut Chart {
         if height == 0 {
@@ -2552,7 +2558,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `scale` - The scale ratio.
+    /// - `scale`: The scale ratio.
     ///
     pub fn set_scale_height(&mut self, scale: f64) -> &mut Chart {
         if scale <= 0.0 {
@@ -2570,7 +2576,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `scale` - The scale ratio.
+    /// - `scale`: The scale ratio.
     ///
     pub fn set_scale_width(&mut self, scale: f64) -> &mut Chart {
         if scale <= 0.0 {
@@ -2592,7 +2598,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `name` - A user defined name for the chart.
+    /// - `name`: A user defined name for the chart.
     ///
     pub fn set_name(&mut self, name: impl Into<String>) -> &mut Chart {
         self.name = name.into();
@@ -2610,7 +2616,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `alt_text` - The alt text string to add to the chart.
+    /// - `alt_text`: The alt text string to add to the chart.
     ///
     pub fn set_alt_text(&mut self, alt_text: impl Into<String>) -> &mut Chart {
         self.alt_text = alt_text.into();
@@ -2626,7 +2632,7 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_decorative(&mut self, enable: bool) -> &mut Chart {
         self.decorative = enable;
@@ -2666,15 +2672,15 @@ impl Chart {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::ChartError`] - A general error that is raised when a
+    /// - [`XlsxError::ChartError`] - A general error that is raised when a
     ///   chart parameter is incorrect or a chart is configured incorrectly.
-    /// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
+    /// - [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
     ///   cannot be blank.
-    /// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
+    /// - [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
     ///   exceeds Excel's limit of 31 characters.
-    /// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
+    /// - [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
     ///   chart range cannot contain invalid characters: `[ ] : * ? / \`
-    /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
+    /// - [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
     ///   chart range cannot start or end with an apostrophe.
     ///
     pub fn validate(&mut self) -> Result<&mut Chart, XlsxError> {
@@ -2737,10 +2743,10 @@ impl Chart {
     ///
     /// The options are:
     ///
-    /// * [`ChartEmptyCells::Gaps`]: Show empty cells in the chart as gaps. The
+    /// - [`ChartEmptyCells::Gaps`]: Show empty cells in the chart as gaps. The
     ///   default.
-    /// * [`ChartEmptyCells::Zero`]: Show empty cells in the chart as zeroes.
-    /// * [`ChartEmptyCells::Connected`]: Show empty cells in the chart
+    /// - [`ChartEmptyCells::Zero`]: Show empty cells in the chart as zeroes.
+    /// - [`ChartEmptyCells::Connected`]: Show empty cells in the chart
     ///   connected by a line to the previous point.
     ///
     /// # Parameters
@@ -2776,8 +2782,8 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `axis_id1`: X-axis id.
-    /// * `axis_id2`: Y-axis id.
+    /// - `axis_id1`: X-axis id.
+    /// - `axis_id2`: Y-axis id.
     ///
     #[doc(hidden)]
     pub fn set_axis_ids(&mut self, axis_id1: u32, axis_id2: u32) {
@@ -2791,8 +2797,8 @@ impl Chart {
     ///
     /// # Parameters
     ///
-    /// * `axis_id1`: X-axis id.
-    /// * `axis_id2`: Y-axis id.
+    /// - `axis_id1`: X-axis id.
+    /// - `axis_id2`: Y-axis id.
     ///
     #[doc(hidden)]
     pub fn set_axis2_ids(&mut self, axis_id1: u32, axis_id2: u32) {
@@ -6804,7 +6810,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `range` - The range property which can be one of two generic types:
+    /// - `range`: The range property which can be one of two generic types:
     ///    - A string with an Excel like range formula such as
     ///      `"Sheet1!$A$1:$A$3"`.
     ///    - A tuple that can be used to create the range programmatically using
@@ -6880,7 +6886,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `range` - The range property which can be one of two generic types:
+    /// - `range`: The range property which can be one of two generic types:
     ///    - A string with an Excel like range formula such as
     ///      `"Sheet1!$A$1:$A$3"`.
     ///    - A tuple that can be used to create the range programmatically using
@@ -6962,7 +6968,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -7029,7 +7035,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `range` - The range property which can be one of the following generic
+    /// - `range`: The range property which can be one of the following generic
     ///   types:
     ///    - A simple string title.
     ///    - A string with an Excel like range formula such as `"Sheet1!$A$1"`.
@@ -7937,7 +7943,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `overlap`: Overlap percentage of columns in Bar/Column charts. The
+    /// - `overlap`: Overlap percentage of columns in Bar/Column charts. The
     /// range is -100 <= overlap <= 100 and the default is 0.
     ///
     /// # Examples
@@ -8007,7 +8013,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `gap`: Gap percentage of columns in Bar/Column charts. The range is 0
+    /// - `gap`: Gap percentage of columns in Bar/Column charts. The range is 0
     /// <= gap <= 500 and the default is 150.
     ///
     /// See the example for [`series.set_overlap()`](ChartSeries::set_overlap)
@@ -8032,7 +8038,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. The default depends on the chart
+    /// - `enable`: Turn the property on/off. The default depends on the chart
     ///   type.
     ///
     pub fn set_smooth(&mut self, enable: bool) -> &mut ChartSeries {
@@ -8117,7 +8123,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `color` - The inverse color property defined by a [`Color`] enum
+    /// - `color`: The inverse color property defined by a [`Color`] enum
     ///   value.
     ///
     /// # Examples
@@ -8195,7 +8201,7 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -8338,7 +8344,6 @@ impl ChartRange {
     /// # Examples
     ///
     /// The following example demonstrates creating a new chart range.
-    ///
     ///
     /// ```
     /// # // This code is available in examples/doc_chartrange_new_from_string.rs
@@ -8529,8 +8534,8 @@ impl ChartRange {
     ///
     /// # Parameters
     ///
-    /// * `data` - Array of string data to populate the chart cache.
-    /// * `is_numeric` - The chart cache date is numeric.
+    /// - `data`: Array of string data to populate the chart cache.
+    /// - `is_numeric`: The chart cache date is numeric.
     ///
     #[allow(dead_code)] // This is only used for internal testing.
     pub(crate) fn set_cache(
@@ -8759,7 +8764,7 @@ impl ChartTitle {
     ///
     /// # Parameters
     ///
-    /// * `range` - The range property which can be one of the following generic
+    /// - `range`: The range property which can be one of the following generic
     ///   types:
     ///    - A simple string title.
     ///    - A string with an Excel like range formula such as `"Sheet1!$A$1"`.
@@ -9004,7 +9009,7 @@ impl ChartTitle {
     ///
     /// # Parameters
     ///
-    /// * `layout`: A [`ChartLayout`] struct reference.
+    /// - `layout`: A [`ChartLayout`] struct reference.
     ///
     pub fn set_layout(&mut self, layout: &ChartLayout) -> &mut ChartTitle {
         self.layout = layout.clone();
@@ -9015,7 +9020,7 @@ impl ChartTitle {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_overlay(&mut self, enable: bool) -> &mut ChartTitle {
         self.has_overlay = enable;
@@ -9908,7 +9913,7 @@ impl ChartDataLabel {
     ///
     /// # Parameters
     ///
-    /// * `num_format` - The number format property.
+    /// - `num_format`: The number format property.
     ///
     ///
     /// # Examples
@@ -10008,7 +10013,7 @@ impl ChartDataLabel {
     ///
     /// # Parameters
     ///
-    /// * `value` - A [`IntoChartRange`] property which can be one of the
+    /// - `value`: A [`IntoChartRange`] property which can be one of the
     ///   following generic types:
     ///    - A simple string title.
     ///    - A string with an Excel like range formula such as `"Sheet1!$A$1"`.
@@ -10582,7 +10587,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `range` - The range property which can be one of the following generic
+    /// - `range`: The range property which can be one of the following generic
     ///   types:
     ///    - A simple string title.
     ///    - A string with an Excel like range formula such as `"Sheet1!$A$1"`.
@@ -10858,7 +10863,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `num_format` - The number format property.
+    /// - `num_format`: The number format property.
     ///
     /// # Examples
     ///
@@ -10933,7 +10938,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -11008,7 +11013,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_text_axis(&mut self, enable: bool) -> &mut ChartAxis {
         self.set_automatic_axis(enable);
@@ -11019,7 +11024,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_automatic_axis(&mut self, enable: bool) -> &mut ChartAxis {
         self.automatic = enable;
@@ -11039,7 +11044,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `crossing` - A [`ChartAxisCrossing`] enum value.
+    /// - `crossing`: A [`ChartAxisCrossing`] enum value.
     ///
     /// # Examples
     ///
@@ -11475,7 +11480,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
+    /// - `unit`: A [`ChartAxisDateUnitType`] enum value.
     ///
     /// # Examples
     ///
@@ -11535,7 +11540,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off.
+    /// - `enable`: Turn the property on/off.
     ///
     pub fn set_display_units_visible(&mut self, enable: bool) -> &mut ChartAxis {
         self.display_units_visible = enable;
@@ -11546,7 +11551,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
+    /// - `unit`: A [`ChartAxisDateUnitType`] enum value.
     ///
     pub fn set_major_unit_date_type(&mut self, unit_type: ChartAxisDateUnitType) -> &mut ChartAxis {
         self.major_unit_date_type = Some(unit_type);
@@ -11557,7 +11562,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
+    /// - `unit`: A [`ChartAxisDateUnitType`] enum value.
     ///
     pub fn set_minor_unit_date_type(&mut self, unit_type: ChartAxisDateUnitType) -> &mut ChartAxis {
         self.minor_unit_date_type = Some(unit_type);
@@ -11568,7 +11573,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `unit` - A [`ChartAxisDateUnitType`] enum value.
+    /// - `unit`: A [`ChartAxisDateUnitType`] enum value.
     ///
     pub fn set_label_alignment(&mut self, alignment: ChartAxisLabelAlignment) -> &mut ChartAxis {
         self.label_alignment = alignment;
@@ -11582,7 +11587,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default for X axes.
+    /// - `enable`: Turn the property on/off. It is off by default for X axes.
     ///
     /// # Examples
     ///
@@ -11643,7 +11648,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -11704,7 +11709,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `line` - A [`ChartLine`] struct reference.
+    /// - `line`: A [`ChartLine`] struct reference.
     ///
     /// # Examples
     ///
@@ -11767,7 +11772,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `line` - A [`ChartLine`] struct reference.
+    /// - `line`: A [`ChartLine`] struct reference.
     ///
     /// # Examples
     ///
@@ -11830,7 +11835,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `position` - A [`ChartAxisLabelPosition`] enum value.
+    /// - `position`: A [`ChartAxisLabelPosition`] enum value.
     ///
     /// # Examples
     ///
@@ -11902,7 +11907,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. Its default value depends on the
+    /// - `enable`: Turn the property on/off. Its default value depends on the
     ///   chart type.
     ///
     /// # Examples
@@ -11971,7 +11976,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `interval` - The interval for the category labels. The default is 1.
+    /// - `interval`: The interval for the category labels. The default is 1.
     ///
     /// # Examples
     ///
@@ -12036,7 +12041,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `interval` - The interval for the category ticks. The default is 1.
+    /// - `interval`: The interval for the category ticks. The default is 1.
     ///
     /// # Examples
     ///
@@ -12100,7 +12105,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `tick_type` - a [`ChartAxisTickType`] enum value.
+    /// - `tick_type`: a [`ChartAxisTickType`] enum value.
     ///
     /// # Examples
     ///
@@ -12166,7 +12171,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `tick_type` - a [`ChartAxisTickType`] enum value.
+    /// - `tick_type`: a [`ChartAxisTickType`] enum value.
     ///
     pub fn set_minor_tick_type(&mut self, tick_type: ChartAxisTickType) -> &mut ChartAxis {
         self.minor_tick_type = Some(tick_type);
@@ -12184,7 +12189,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `base` - The logarithm base. Should be >= 2.
+    /// - `base`: The logarithm base. Should be >= 2.
     ///
     /// # Examples
     ///
@@ -12246,7 +12251,7 @@ impl ChartAxis {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off.
+    /// - `enable`: Turn the property on/off.
     ///
     /// # Examples
     ///
@@ -12840,7 +12845,7 @@ impl ChartLegend {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -13031,7 +13036,7 @@ impl ChartLegend {
     ///
     /// # Parameters
     ///
-    /// * `entries` - A slice ref of [`usize`] zero-indexed indices of the
+    /// - `entries`: A slice ref of [`usize`] zero-indexed indices of the
     ///   series names to be hidden.
     ///
     /// # Examples
@@ -13319,7 +13324,7 @@ impl ChartFormat {
     ///
     /// # Parameters
     ///
-    /// * `line` - A [`ChartLine`] struct reference.
+    /// - `line`: A [`ChartLine`] struct reference.
     ///
     pub fn set_line(&mut self, line: &ChartLine) -> &mut ChartFormat {
         self.line = Some(line.clone());
@@ -13335,7 +13340,7 @@ impl ChartFormat {
     ///
     /// # Parameters
     ///
-    /// * `line` - A [`ChartLine`] struct reference.
+    /// - `line`: A [`ChartLine`] struct reference.
     ///
     /// # Examples
     ///
@@ -13576,7 +13581,7 @@ impl ChartFormat {
     ///
     /// # Parameters
     ///
-    /// * `fill` - A [`ChartSolidFill`] struct reference.
+    /// - `fill`: A [`ChartSolidFill`] struct reference.
     ///
     /// # Examples
     ///
@@ -13640,7 +13645,7 @@ impl ChartFormat {
     ///
     /// # Parameters
     ///
-    /// * `fill` - A [`ChartPatternFill`] struct reference.
+    /// - `fill`: A [`ChartPatternFill`] struct reference.
     ///
     /// # Examples
     ///
@@ -13708,7 +13713,7 @@ impl ChartFormat {
     ///
     /// # Parameters
     ///
-    /// * `fill` - A [`ChartGradientFill`] struct reference.
+    /// - `fill`: A [`ChartGradientFill`] struct reference.
     ///
     /// # Examples
     ///
@@ -13876,7 +13881,7 @@ impl ChartLine {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or
+    /// - `color`: The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -13939,7 +13944,7 @@ impl ChartLine {
     ///
     /// # Parameters
     ///
-    /// * `width` - The width should be specified in increments of 0.25 of a
+    /// - `width`: The width should be specified in increments of 0.25 of a
     /// point as in Excel. The width can be an number type that convert [`Into`]
     /// [`f64`].
     ///
@@ -14004,7 +14009,7 @@ impl ChartLine {
     ///
     /// # Parameters
     ///
-    /// * `dash_type` - A [`ChartLineDashType`] enum value.
+    /// - `dash_type`: A [`ChartLineDashType`] enum value.
     ///
     /// # Examples
     ///
@@ -14068,7 +14073,7 @@ impl ChartLine {
     ///
     /// # Parameters
     ///
-    /// * `transparency` - The color transparency in the range 0 <= transparency
+    /// - `transparency`: The color transparency in the range 0 <= transparency
     ///   <= 100. The default value is 0.
     ///
     /// # Examples
@@ -14133,7 +14138,7 @@ impl ChartLine {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off (not hidden) by
+    /// - `enable`: Turn the property on/off. It is off (not hidden) by
     ///   default.
     ///
     pub fn set_hidden(&mut self, enable: bool) -> &mut ChartLine {
@@ -14296,7 +14301,7 @@ impl ChartSolidFill {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or
+    /// - `color`: The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -14362,7 +14367,7 @@ impl ChartSolidFill {
     ///
     /// # Parameters
     ///
-    /// * `transparency` - The color transparency in the range 0 <= transparency
+    /// - `transparency`: The color transparency in the range 0 <= transparency
     ///   <= 100. The default value is 0.
     ///
     /// # Examples
@@ -14514,7 +14519,7 @@ impl ChartPatternFill {
     ///
     /// # Parameters
     ///
-    /// * `pattern` - The pattern property defined by a [`ChartPatternFillType`] enum value.
+    /// - `pattern`: The pattern property defined by a [`ChartPatternFillType`] enum value.
     ///
     ///
     /// # Examples
@@ -14576,7 +14581,7 @@ impl ChartPatternFill {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or
+    /// - `color`: The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -14651,7 +14656,7 @@ impl ChartPatternFill {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or
+    /// - `color`: The color property defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_foreground_color<T>(&mut self, color: T) -> &mut ChartPatternFill
@@ -15254,7 +15259,7 @@ impl ChartFont {
     ///
     /// # Parameters
     ///
-    /// * `color` - The font color property defined by a [`Color`] enum
+    /// - `color`: The font color property defined by a [`Color`] enum
     ///   value.
     ///
     /// # Examples
@@ -15322,7 +15327,7 @@ impl ChartFont {
     ///
     /// # Parameters
     ///
-    /// * `font_name` - The font name property.
+    /// - `font_name`: The font name property.
     ///
     ///
     /// # Examples
@@ -15383,7 +15388,7 @@ impl ChartFont {
     ///
     /// # Parameters
     ///
-    /// * `font_size` - The font size property.
+    /// - `font_size`: The font size property.
     ///
     /// # Examples
     ///
@@ -15448,7 +15453,7 @@ impl ChartFont {
     ///
     /// # Parameters
     ///
-    /// * `rotation` - The rotation angle in the range `-90 <= rotation <= 90`.
+    /// - `rotation`: The rotation angle in the range `-90 <= rotation <= 90`.
     ///   Two special case values are supported:
     ///   - `270`: Stacked text, where the text runs from top to bottom.
     ///   - `271`: A special variant of stacked text for East Asian fonts.
@@ -15545,7 +15550,7 @@ impl ChartFont {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_right_to_left(&mut self, enable: bool) -> &mut ChartFont {
         self.right_to_left = Some(enable);
@@ -15559,7 +15564,7 @@ impl ChartFont {
     ///
     /// # Parameters
     ///
-    /// * `family` - The font family property.
+    /// - `family`: The font family property.
     ///
     pub fn set_pitch_family(&mut self, family: u8) -> &mut ChartFont {
         self.pitch_family = family;
@@ -15573,7 +15578,7 @@ impl ChartFont {
     ///
     /// # Parameters
     ///
-    /// * `character_set` - The font character set property.
+    /// - `character_set`: The font character set property.
     ///
     pub fn set_character_set(&mut self, character_set: u8) -> &mut ChartFont {
         self.character_set = character_set;
@@ -15585,6 +15590,11 @@ impl ChartFont {
     ///
     /// The is mainly only required for testing to ensure strict compliance with
     /// Excel's output.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
     pub fn set_default_bold(&mut self, enable: bool) -> &mut ChartFont {
         self.has_default_bold = enable;
         self
@@ -15705,7 +15715,7 @@ impl ChartTrendline {
     ///
     /// # Parameters
     ///
-    /// * `trend` - A [`ChartTrendlineType`] enum reference.
+    /// - `trend`: A [`ChartTrendlineType`] enum reference.
     ///
     /// # Examples
     ///
@@ -15982,7 +15992,7 @@ impl ChartTrendline {
     ///
     /// # Parameters
     ///
-    /// * `name` - The custom string to name the trendline in the chart legend.
+    /// - `name`: The custom string to name the trendline in the chart legend.
     ///
     /// # Examples
     ///
@@ -16047,7 +16057,7 @@ impl ChartTrendline {
     ///
     /// # Parameters
     ///
-    /// * `period` - The forward period value.
+    /// - `period`: The forward period value.
     ///
     pub fn set_forward_period(&mut self, period: impl Into<f64>) -> &mut ChartTrendline {
         self.forward_period = period.into();
@@ -16060,7 +16070,7 @@ impl ChartTrendline {
     ///
     /// # Parameters
     ///
-    /// * `period` - The backward period value.
+    /// - `period`: The backward period value.
     ///
     pub fn set_backward_period(&mut self, period: impl Into<f64>) -> &mut ChartTrendline {
         self.backward_period = period.into();
@@ -16074,7 +16084,7 @@ impl ChartTrendline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn display_equation(&mut self, enable: bool) -> &mut ChartTrendline {
         self.display_equation = enable;
@@ -16095,7 +16105,7 @@ impl ChartTrendline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn display_r_squared(&mut self, enable: bool) -> &mut ChartTrendline {
         self.display_r_squared = enable;
@@ -16108,7 +16118,7 @@ impl ChartTrendline {
     ///
     /// # Parameters
     ///
-    /// * `intercept` - The intercept with the Y-axis.
+    /// - `intercept`: The intercept with the Y-axis.
     ///
     pub fn set_intercept(&mut self, intercept: impl Into<f64>) -> &mut ChartTrendline {
         self.intercept = Some(intercept.into());
@@ -16127,7 +16137,7 @@ impl ChartTrendline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -16549,7 +16559,7 @@ impl ChartGradientFill {
     ///
     /// # Parameters
     ///
-    /// * `angle` - The angle of the linear gradient fill in the range `0 <=
+    /// - `angle`: The angle of the linear gradient fill in the range `0 <=
     ///   angle < 360`. The default angle is 90 degrees.
     ///
     pub fn set_angle(&mut self, angle: u16) -> &mut ChartGradientFill {
@@ -16643,9 +16653,9 @@ impl ChartGradientStop {
     ///
     /// # Parameters
     ///
-    /// * `color` - The gradient stop color property defined by a [`Color`] enum
+    /// - `color`: The gradient stop color property defined by a [`Color`] enum
     ///   value.
-    /// * `position` - The gradient stop position in the range 0-100.
+    /// - `position`: The gradient stop position in the range 0-100.
     ///
     /// # Examples
     ///
@@ -16823,7 +16833,7 @@ impl ChartErrorBars {
     ///
     /// # Parameters
     ///
-    /// * `error_type` - A [`ChartErrorBarsType`] enum reference.
+    /// - `error_type`: A [`ChartErrorBarsType`] enum reference.
     ///
     pub fn set_type(&mut self, error_type: ChartErrorBarsType) -> &mut ChartErrorBars {
         match &error_type {
@@ -16866,7 +16876,7 @@ impl ChartErrorBars {
     ///
     /// # Parameters
     ///
-    /// * `direction` - A [`ChartErrorBarsDirection`] enum reference.
+    /// - `direction`: A [`ChartErrorBarsDirection`] enum reference.
     ///
     pub fn set_direction(&mut self, direction: ChartErrorBarsDirection) -> &mut ChartErrorBars {
         self.direction = direction;
@@ -16877,7 +16887,7 @@ impl ChartErrorBars {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn set_end_cap(&mut self, enable: bool) -> &mut ChartErrorBars {
         self.has_end_cap = enable;
@@ -17080,7 +17090,7 @@ impl ChartDataTable {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn show_horizontal_borders(mut self, enable: bool) -> ChartDataTable {
         self.show_horizontal_borders = enable;
@@ -17091,7 +17101,7 @@ impl ChartDataTable {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn show_vertical_borders(mut self, enable: bool) -> ChartDataTable {
         self.show_vertical_borders = enable;
@@ -17102,7 +17112,7 @@ impl ChartDataTable {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn show_outline_borders(mut self, enable: bool) -> ChartDataTable {
         self.show_outline_borders = enable;
@@ -17113,7 +17123,7 @@ impl ChartDataTable {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_legend_keys(mut self, enable: bool) -> ChartDataTable {
         self.show_legend_keys = enable;
@@ -17677,7 +17687,7 @@ impl ChartPlotArea {
     ///
     /// # Parameters
     ///
-    /// * `layout`: A [`ChartLayout`] struct reference.
+    /// - `layout`: A [`ChartLayout`] struct reference.
     ///
     /// # Examples
     ///
@@ -17915,8 +17925,8 @@ impl ChartLayout {
     ///
     /// # Parameters
     ///
-    /// * `x_offset`: A `f64` value in the range `0.0 < x <= 1.0`.
-    /// * `y_offset`: A `f64` value in the range `0.0 < y <= 1.0`.
+    /// - `x_offset`: A `f64` value in the range `0.0 < x <= 1.0`.
+    /// - `y_offset`: A `f64` value in the range `0.0 < y <= 1.0`.
     ///
     pub fn set_offset(mut self, x_offset: f64, y_offset: f64) -> ChartLayout {
         if !(0.0..=1.0).contains(&x_offset) {
@@ -17952,8 +17962,8 @@ impl ChartLayout {
     ///
     /// # Parameters
     ///
-    /// * `width`: A `f64` value in the range `0.0 < width <= 1.0`.
-    /// * `height`: A `f64` value in the range `0.0 < height <= 1.0`.
+    /// - `width`: A `f64` value in the range `0.0 < width <= 1.0`.
+    /// - `height`: A `f64` value in the range `0.0 < height <= 1.0`.
     ///
     pub fn set_dimensions(mut self, width: f64, height: f64) -> ChartLayout {
         if !(0.0..=1.0).contains(&width) {

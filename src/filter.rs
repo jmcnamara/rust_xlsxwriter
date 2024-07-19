@@ -433,7 +433,7 @@ impl FilterCondition {
     ///
     /// # Parameters
     ///
-    /// * `value` - The value can be a `&str`,`f64` or `i32` type for which the
+    /// - `value`: The value can be a `&str`,`f64` or `i32` type for which the
     ///   [`IntoFilterData`] trait is implemented.
     ///
     /// # Examples
@@ -639,9 +639,9 @@ impl FilterCondition {
     ///
     /// # Parameters
     ///
-    /// * `value` - The value can be a `&str`,`f64` or `i32` type for which the
+    /// - `value`: The value can be a `&str`,`f64` or `i32` type for which the
     ///   [`IntoFilterData`] trait is implemented.
-    /// * `criteria` - The criteria/operator to use in the filter as defined by
+    /// - `criteria`: The criteria/operator to use in the filter as defined by
     ///   the [`FilterCriteria`] struct.
     ///
     /// # Examples

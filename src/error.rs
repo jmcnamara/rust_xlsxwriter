@@ -150,11 +150,11 @@ pub enum XlsxError {
     /// A general error raised when a VBA name doesn't meet Excel's criteria as
     /// defined by the following rules:
     ///
-    /// * The name must be less than 32 characters.
-    /// * The name can only contain word characters: letters, numbers and
+    /// - The name must be less than 32 characters.
+    /// - The name can only contain word characters: letters, numbers and
     ///   underscores.
-    /// * The name must start with a letter.
-    /// * The name cannot be blank.
+    /// - The name must start with a letter.
+    /// - The name cannot be blank.
     ///
     VbaNameError(String),
 

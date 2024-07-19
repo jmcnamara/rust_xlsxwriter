@@ -1492,18 +1492,18 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `name` - The worksheet name. It must follow the Excel rules, shown
+    /// - `name`: The worksheet name. It must follow the Excel rules, shown
     ///   below.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name cannot be
+    /// - [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name cannot be
     ///   blank.
-    /// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name exceeds
+    /// - [`XlsxError::SheetnameLengthExceeded`] - Worksheet name exceeds
     ///   Excel's limit of 31 characters.
-    /// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name
+    /// - [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name
     ///   cannot contain invalid characters: `[ ] : * ? / \`
-    /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name
+    /// - [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name
     ///   cannot start or end with an apostrophe.
     ///
     /// # Examples
@@ -1536,13 +1536,13 @@ impl Worksheet {
     ///
     /// The worksheet name must be a valid Excel worksheet name, i.e:
     ///
-    /// * The name is less than 32 characters.
-    /// * The name isn't blank.
-    /// * The name doesn't contain any of the characters: `[ ] : * ? / \`.
-    /// * The name doesn't start or end with an apostrophe.
-    /// * The name shouldn't be "History" (case-insensitive) since that is
+    /// - The name is less than 32 characters.
+    /// - The name isn't blank.
+    /// - The name doesn't contain any of the characters: `[ ] : * ? / \`.
+    /// - The name doesn't start or end with an apostrophe.
+    /// - The name shouldn't be "History" (case-insensitive) since that is
     ///   reserved by Excel.
-    /// * It must not be a duplicate of another worksheet name used in the
+    /// - It must not be a duplicate of another worksheet name used in the
     ///   workbook.
     ///
     /// The rules for worksheet names in Excel are explained in the [Microsoft
@@ -1638,16 +1638,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data` - An type that implements the  [`IntoExcelData`] trait.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data`: An type that implements the  [`IntoExcelData`] trait.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     pub fn write(
@@ -1694,16 +1694,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data` - An type that implements the  [`IntoExcelData`] trait.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data`: An type that implements the  [`IntoExcelData`] trait.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     pub fn write_with_format<'a, T>(
@@ -1733,17 +1733,17 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data` - Arrays or array-like data structures that implement
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data`: Arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     /// # Examples
@@ -1866,18 +1866,18 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data` - Arrays or array-like data structures that implement
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data`: Arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
-    /// * `format` - The [`Format`] property for the data.
+    /// - `format`: The [`Format`] property for the data.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     pub fn write_row_with_format<I>(
@@ -1914,16 +1914,16 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data` - Arrays or array-like data structures that implement
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data`: Arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
     ///
@@ -1990,18 +1990,18 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data` - Arrays or array-like data structures that implement
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data`: Arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
-    /// * `format` - The [`Format`] property for the data.
+    /// - `format`: The [`Format`] property for the data.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     pub fn write_column_with_format<I>(
@@ -2039,16 +2039,16 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data` - 2D arrays or array-like data structures that implement
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data`: 2D arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
     ///
@@ -2124,16 +2124,16 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data` - 2D arrays or array-like data structures that implement
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data`: 2D arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
     ///
@@ -2223,13 +2223,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `number` - The number to write to the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `number`: The number to write to the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -2312,14 +2312,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `number` - The number to write to the cell.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `number`: The number to write to the cell.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -2382,15 +2382,15 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `string` - The string to write to the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `string`: The string to write to the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     /// # Examples
@@ -2458,16 +2458,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `string` - The string to write to the cell.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `string`: The string to write to the cell.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     /// # Examples
@@ -2527,7 +2527,7 @@ impl Worksheet {
     /// The basic rule is to break the string into pairs of [`Format`] and
     /// [`str`] fragments. So if we look at the above string again:
     ///
-    /// * This is **bold** and this is *italic*
+    /// - This is **bold** and this is *italic*
     ///
     /// The would be broken down into 4 fragments:
     ///
@@ -2564,18 +2564,18 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `rich_string` - An array reference of `(&Format, &str)` tuples. See
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `rich_string`: An array reference of `(&Format, &str)` tuples. See
     ///   the Errors section below for the restrictions.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::ParameterError`] - The following error cases will raise a
+    /// - [`XlsxError::ParameterError`] - The following error cases will raise a
     ///   `ParameterError` error:
     ///   * If any of the str elements is empty. Excel doesn't allow this.
     ///   * If there isn't at least one `(&Format, &str)` tuple element in the
@@ -2667,19 +2667,19 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `rich_string` - An array reference of `(&Format, &str)` tuples. See
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `rich_string`: An array reference of `(&Format, &str)` tuples. See
     ///   the Errors section below for the restrictions.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::ParameterError`] - The following error cases will raise a
+    /// - [`XlsxError::ParameterError`] - The following error cases will raise a
     ///   `ParameterError` error:
     ///   * If any of the str elements is empty. Excel doesn't allow this.
     ///   * If there isn't at least one `(&Format, &str)` tuple element in the
@@ -2758,13 +2758,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -2823,14 +2823,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -2902,17 +2902,17 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    /// - [`XlsxError::RowColumnOrderError`] - First row or column is larger
     ///   than the last row or column.
     ///
     /// # Examples
@@ -2998,18 +2998,18 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
     ///
     /// # Examples
@@ -3099,17 +3099,17 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
     ///
     /// # Examples
@@ -3202,18 +3202,18 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    /// - [`XlsxError::RowColumnOrderError`] - First row or column is larger
     ///   than the last row or column.
     ///
     /// # Examples
@@ -3292,13 +3292,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     pub fn write_dynamic_formula(
@@ -3330,14 +3330,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `formula` - The formula to write to the cell as a string or [`Formula`].
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     pub fn write_dynamic_formula_with_format(
@@ -3366,13 +3366,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -3473,27 +3473,27 @@ impl Worksheet {
     ///
     /// For other variants of this function see:
     ///
-    /// * [`write_url_with_text()`](Worksheet::write_url_with_text()) to add
+    /// - [`write_url_with_text()`](Worksheet::write_url_with_text()) to add
     ///   alternative text to the link.
-    /// * [`write_url_with_format()`](Worksheet::write_url_with_format()) to add
+    /// - [`write_url_with_format()`](Worksheet::write_url_with_format()) to add
     ///   an alternative format to the link.
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `string` - The url string to write to the cell.
-    /// * `link` - The url/hyperlink to write to the cell as a string or [`Url`].
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `string`: The url string to write to the cell.
+    /// - `link`: The url/hyperlink to write to the cell as a string or [`Url`].
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    /// - [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
     ///   Excel's limit of 2080 characters.
-    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    /// - [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
-    /// * [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
+    /// - [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
     ///   Excel's limit of 255 characters.
     ///
     /// # Examples
@@ -3600,22 +3600,22 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `link` - The url/hyperlink to write to the cell as a string or [`Url`].
-    /// * `text` - The alternative string to write to the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `link`: The url/hyperlink to write to the cell as a string or [`Url`].
+    /// - `text`: The alternative string to write to the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - Text string exceeds Excel's
+    /// - [`XlsxError::MaxStringLengthExceeded`] - Text string exceeds Excel's
     ///   limit of 32,767 characters.
-    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    /// - [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
     ///   Excel's limit of 2080 characters.
-    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    /// - [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
-    /// * [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
+    /// - [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
     ///   Excel's limit of 255 characters.
     ///
     /// # Examples
@@ -3695,20 +3695,20 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `link` - The url/hyperlink to write to the cell as a string or [`Url`].
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `link`: The url/hyperlink to write to the cell as a string or [`Url`].
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    /// - [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
     ///   Excel's limit of 2080 characters.
-    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    /// - [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
-    /// * [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
+    /// - [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
     ///   Excel's limit of 255 characters.
     ///
     /// # Examples
@@ -3767,28 +3767,28 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `link` - The url/hyperlink to write to the cell as a string or [`Url`].
-    /// * `text` - The alternative string to write to the cell.
-    /// * `tip` - The screen tip string to display when the user hovers over the
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `link`: The url/hyperlink to write to the cell as a string or [`Url`].
+    /// - `text`: The alternative string to write to the cell.
+    /// - `tip`: The screen tip string to display when the user hovers over the
     ///   url cell.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// The `text` and `tip` parameters are optional and can be set as a blank
     /// string. The `format` is an `Option<>` parameter and can be specified as `None` if not required.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - Text string exceeds Excel's
+    /// - [`XlsxError::MaxStringLengthExceeded`] - Text string exceeds Excel's
     ///   limit of 32,767 characters.
-    /// * [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    /// - [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
     ///   Excel's limit of 2080 characters or the screen tip exceed 255 characters.
-    /// * [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    /// - [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
-    /// * [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
+    /// - [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
     ///   Excel's limit of 255 characters.
     pub fn write_url_with_options(
         &mut self,
@@ -3829,14 +3829,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `datetime` - A date/time instance that implements [`IntoExcelDateTime`].
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `datetime`: A date/time instance that implements [`IntoExcelDateTime`].
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4014,14 +4014,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `datetime` - A date/time instance that implements
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `datetime`: A date/time instance that implements
     ///   [`IntoExcelDateTime`].
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4113,14 +4113,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `date` - A date/time instance that implements [`IntoExcelDateTime`].
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `date`: A date/time instance that implements [`IntoExcelDateTime`].
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4208,14 +4208,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `time` - A date/time instance that implements [`IntoExcelDateTime`].
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `time`: A date/time instance that implements [`IntoExcelDateTime`].
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4283,13 +4283,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `boolean` - The boolean value to write to the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `boolean`: The boolean value to write to the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4339,14 +4339,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `boolean` - The boolean value to write to the cell.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `boolean`: The boolean value to write to the cell.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4405,23 +4405,23 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `string` - The string to write to the cell. Other types can also be
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `string`: The string to write to the cell. Other types can also be
     ///   handled. See the documentation above and the example below.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
-    /// * [`XlsxError::MergeRangeSingleCell`] - A merge range cannot be a single
+    /// - [`XlsxError::MergeRangeSingleCell`] - A merge range cannot be a single
     ///   cell in Excel.
-    /// * [`XlsxError::MergeRangeOverlaps`] - The merge range overlaps a
+    /// - [`XlsxError::MergeRangeOverlaps`] - The merge range overlaps a
     ///   previous merge range.
     ///
     ///
@@ -4575,13 +4575,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `image` - The [`Image`] to insert into the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `image`: The [`Image`] to insert into the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4643,15 +4643,15 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `image` - The [`Image`] to insert into the cell.
-    /// * `x_offset`: The horizontal offset within the cell in pixels.
-    /// * `y_offset`: The vertical offset within the cell in pixels.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `image`: The [`Image`] to insert into the cell.
+    /// - `x_offset`: The horizontal offset within the cell in pixels.
+    /// - `y_offset`: The vertical offset within the cell in pixels.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4730,13 +4730,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `image` - The [`Image`] to insert into the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `image`: The [`Image`] to insert into the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4807,14 +4807,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `image` - The [`Image`] to insert into the cell.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `image`: The [`Image`] to insert into the cell.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     pub fn embed_image_with_format(
@@ -4852,16 +4852,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `image` - The [`Image`] to insert into the cell.
-    /// * `keep_aspect_ratio` - Boolean value to maintain the aspect ratio of
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `image`: The [`Image`] to insert into the cell.
+    /// - `keep_aspect_ratio`: Boolean value to maintain the aspect ratio of
     ///   the image if `true` or scale independently in the horizontal and
     ///   vertical directions if `false`.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -4952,15 +4952,15 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `chart` - The [`Chart`] to insert into the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `chart`: The [`Chart`] to insert into the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::ChartError`] - A general error that is raised when a
+    /// - [`XlsxError::ChartError`] - A general error that is raised when a
     ///   chart parameter is incorrect or a chart is configured incorrectly.
     ///
     /// # Examples
@@ -5019,18 +5019,18 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::ChartError`] - A general error that is raised when a
+    /// - [`XlsxError::ChartError`] - A general error that is raised when a
     /// chart parameter is incorrect or a chart is configured incorrectly.
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `chart` - The [`Chart`] to insert into the cell.
-    /// * `x_offset`: The horizontal offset within the cell in pixels.
-    /// * `y_offset`: The vertical offset within the cell in pixels.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `chart`: The [`Chart`] to insert into the cell.
+    /// - `x_offset`: The horizontal offset within the cell in pixels.
+    /// - `y_offset`: The vertical offset within the cell in pixels.
     ///
     /// # Examples
     ///
@@ -5109,13 +5109,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `button` - The [`Button`] to insert into the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `button`: The [`Button`] to insert into the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -5182,16 +5182,16 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `button` - The [`Button`] to insert into the cell.
-    /// * `x_offset`: The horizontal offset within the cell in pixels.
-    /// * `y_offset`: The vertical offset within the cell in pixels.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `button`: The [`Button`] to insert into the cell.
+    /// - `x_offset`: The horizontal offset within the cell in pixels.
+    /// - `y_offset`: The vertical offset within the cell in pixels.
     ///
     pub fn insert_button_with_offset(
         &mut self,
@@ -5227,12 +5227,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `height` - The row height in character units.
+    /// - `row`: The zero indexed row number.
+    /// - `height`: The row height in character units.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
     ///
     /// # Examples
@@ -5313,12 +5313,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `height` - The row height in pixels.
+    /// - `row`: The zero indexed row number.
+    /// - `height`: The row height in pixels.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
     ///
     /// # Examples
@@ -5373,12 +5373,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
     ///
     /// # Examples
@@ -5457,11 +5457,11 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
+    /// - `row`: The zero indexed row number.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
     ///
     /// # Examples
@@ -5527,11 +5527,11 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
+    /// - `row`: The zero indexed row number.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
     ///
     pub fn set_row_unhidden(&mut self, row: RowNum) -> Result<&mut Worksheet, XlsxError> {
@@ -5571,12 +5571,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `col` - The zero indexed column number.
-    /// * `width` - The row width in character units.
+    /// - `col`: The zero indexed column number.
+    /// - `width`: The row width in character units.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
     ///   limits.
     ///
     /// # Examples
@@ -5651,12 +5651,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `col` - The zero indexed column number.
-    /// * `width` - The row width in pixels.
+    /// - `col`: The zero indexed column number.
+    /// - `width`: The row width in pixels.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
     ///   limits.
     ///
     /// # Examples
@@ -5727,12 +5727,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `col` - The zero indexed column number.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `col`: The zero indexed column number.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
     ///   limits.
     ///
     /// # Examples
@@ -5814,11 +5814,11 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `col` - The zero indexed column number.
+    /// - `col`: The zero indexed column number.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
     ///   limits.
     ///
     /// # Examples
@@ -5891,16 +5891,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
     ///
     /// # Examples
@@ -6027,15 +6027,15 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `col` - The zero indexed column number.
-    /// * `filter_condition` - The column filter condition defined by the
+    /// - `col`: The zero indexed column number.
+    /// - `filter_condition`: The column filter condition defined by the
     ///   [`FilterCondition`] struct.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
     ///   limits.
-    /// * [`XlsxError::ParameterError`] - Parameter error for the following
+    /// - [`XlsxError::ParameterError`] - Parameter error for the following
     ///   issues:
     ///   - The [`autofilter()`](Worksheet::autofilter) range hasn't been set.
     ///   - The column is outside the [`autofilter()`](Worksheet::autofilter)
@@ -6176,10 +6176,10 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
     ///
     /// Note, you need to ensure that the `first_row` and `last_row` range
     /// includes all the rows for the table including the header and the total
@@ -6188,11 +6188,11 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
-    /// * [`XlsxError::TableError`] - A general error that is raised when a
+    /// - [`XlsxError::TableError`] - A general error that is raised when a
     ///   table parameter is incorrect or a table is configured incorrectly.
     ///
     /// # Examples
@@ -6394,20 +6394,20 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
-    /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
+    /// - [`XlsxError::ConditionalFormatError`] - A general error that is raised
     ///   when a conditional formatting parameter is incorrect or missing.
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `conditional_format` - A conditional format instance that implements
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `conditional_format`: A conditional format instance that implements
     ///   the [`ConditionalFormat`] trait.
     ///
     /// # Examples
@@ -6564,18 +6564,18 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `data_validation` - A [`DataValidation`] data validation instance.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `data_validation`: A [`DataValidation`] data validation instance.
     ///
     /// # Examples
     ///
@@ -6698,25 +6698,25 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `sparkline` - The [`Sparkline`] to insert into the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `sparkline`: The [`Sparkline`] to insert into the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::SparklineError`] - An error that is raised when there is
+    /// - [`XlsxError::SparklineError`] - An error that is raised when there is
     ///   an parameter error with the sparkline.
-    /// * [`XlsxError::ChartError`] - An error that is raised when there is an
+    /// - [`XlsxError::ChartError`] - An error that is raised when there is an
     ///   parameter error with the data range for the sparkline.
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
+    /// - [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
     ///   cannot be blank.
-    /// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
+    /// - [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
     ///   exceeds Excel's limit of 31 characters.
-    /// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
+    /// - [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
     ///   chart range cannot contain invalid characters: `[ ] : * ? / \`
-    /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
+    /// - [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
     ///   chart range cannot start or end with an apostrophe.
     ///
     /// # Examples
@@ -6821,29 +6821,29 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `sparkline` - The [`Sparkline`] to insert into the cell.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `sparkline`: The [`Sparkline`] to insert into the cell.
     ///
     /// # Errors
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::SparklineError`] - An error that is raised when there is
+    /// - [`XlsxError::SparklineError`] - An error that is raised when there is
     ///   an parameter error with the sparkline.
-    /// * [`XlsxError::ChartError`] - An error that is raised when there is an
+    /// - [`XlsxError::ChartError`] - An error that is raised when there is an
     ///   parameter error with the data range for the sparkline.
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
+    /// - [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name in chart range
     ///   cannot be blank.
-    /// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
+    /// - [`XlsxError::SheetnameLengthExceeded`] - Worksheet name in chart range
     ///   exceeds Excel's limit of 31 characters.
-    /// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
+    /// - [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name in
     ///   chart range cannot contain invalid characters: `[ ] : * ? / \`
-    /// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
+    /// - [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name in
     ///   chart range cannot start or end with an apostrophe.
     ///
     /// # Examples
@@ -7049,7 +7049,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `password` - The password string. Note, only ascii text passwords are
+    /// - `password`: The password string. Note, only ascii text passwords are
     ///   supported. Passing the empty string "" is the same as turning on
     ///   protection without a password.
     ///
@@ -7169,16 +7169,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
     ///
     /// # Examples
@@ -7239,20 +7239,20 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
-    /// * `name` - The name of the range instead of `RangeN`. Can be blank if not
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `name`: The name of the range instead of `RangeN`. Can be blank if not
     ///   required.
-    /// * `password` - The password to prevent modification of the range. Can be
+    /// - `password`: The password to prevent modification of the range. Can be
     ///   blank if not required.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
     ///
     /// # Examples
@@ -7336,14 +7336,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -7423,12 +7423,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -7502,9 +7502,9 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `result` - The formula result to write to the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `result`: The formula result to write to the cell.
     ///
     /// # Warnings
     ///
@@ -7587,7 +7587,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `result` - The default formula result to write to the cell.
+    /// - `result`: The default formula result to write to the cell.
     ///
     /// # Examples
     ///
@@ -7640,7 +7640,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -7744,16 +7744,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `data_structure` - A reference to a struct that implements the
+    /// - `data_structure`: A reference to a struct that implements the
     ///   [`serde::Serializer`] trait.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    /// - [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
     ///
     /// # Examples
@@ -7846,18 +7846,18 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data_structure` - A reference to a struct that implements the
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data_structure`: A reference to a struct that implements the
     ///   [`serde::Serializer`] trait.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    /// - [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
     ///
     /// # Examples
@@ -8009,19 +8009,19 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data_structure` - A reference to a struct that implements the
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data_structure`: A reference to a struct that implements the
     ///   [`serde::Serializer`] trait.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    /// - [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
     ///
     /// # Examples
@@ -8137,19 +8137,19 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `data_structure` - A reference to a struct that implements the
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `data_structure`: A reference to a struct that implements the
     ///   [`serde::Serializer`] trait.
-    /// * `header_options` - A [`SerializeFieldOptions`] instance.
+    /// - `header_options`: A [`SerializeFieldOptions`] instance.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    /// - [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
     ///
     /// # Examples
@@ -8267,16 +8267,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    /// - [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
     ///
     /// # Examples
@@ -8369,17 +8369,17 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `format` - The [`Format`] property for the cell.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    /// - [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
     ///
     /// # Examples
@@ -8491,17 +8491,17 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
-    /// * `header_options` - A [`SerializeFieldOptions`] instance.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `header_options`: A [`SerializeFieldOptions`] instance.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    /// - [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
     ///
     /// # Examples
@@ -8615,16 +8615,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
-    /// * [`XlsxError::SerdeError`] - Errors encountered during the Serde
+    /// - [`XlsxError::SerdeError`] - Errors encountered during the Serde
     ///   serialization.
     ///
     /// # Examples
@@ -8716,11 +8716,11 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `struct_name` - The name/type of the target struct as a string.
+    /// - `struct_name`: The name/type of the target struct as a string.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::ParameterError`] - Unknown or unserialized struct name.
+    /// - [`XlsxError::ParameterError`] - Unknown or unserialized struct name.
     ///
     /// # Examples
     ///
@@ -8832,13 +8832,13 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `struct_name` - The name/type of the target struct, as a string.
-    /// * `struct_name` - The name of the field in the target struct, as a
+    /// - `struct_name`: The name/type of the target struct, as a string.
+    /// - `struct_name`: The name of the field in the target struct, as a
     ///   string.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::ParameterError`] - Unknown or unserialized struct name or
+    /// - [`XlsxError::ParameterError`] - Unknown or unserialized struct name or
     ///   field.
     ///
     ///
@@ -9226,7 +9226,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -9293,7 +9293,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -9353,7 +9353,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -9415,7 +9415,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -9473,6 +9473,10 @@ impl Worksheet {
     /// The Excel worksheet `xlSheetVeryHidden` option can only be unset
     /// programmatically by VBA.
     ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
     pub fn set_very_hidden(&mut self, enable: bool) -> &mut Worksheet {
         if enable {
             self.visible = Visible::VeryHidden;
@@ -9502,7 +9506,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_first_tab(&mut self, enable: bool) -> &mut Worksheet {
         self.first_sheet = enable;
@@ -9522,7 +9526,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `color` - The tab color property defined by a [`Color`] enum
+    /// - `color`: The tab color property defined by a [`Color`] enum
     ///   value.
     ///
     /// # Examples
@@ -9633,7 +9637,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `paper_size` - The paper size index from the list above .
+    /// - `paper_size`: The paper size index from the list above .
     ///
     /// # Examples
     ///
@@ -9681,7 +9685,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. Set `true` to get "Down, then
+    /// - `enable`: Turn the property on/off. Set `true` to get "Down, then
     ///   over" (the default) and `false` to get "Over, then down".
     ///
     /// # Examples
@@ -9804,7 +9808,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `breaks` - A list of one or more row numbers where the page breaks
+    /// - `breaks`: A list of one or more row numbers where the page breaks
     ///   occur. To create a page break between rows 20 and 21 you must specify
     ///   the break at row 21. However in zero index notation this is actually
     ///   row 20. So you can pretend for a small while that you are using 1
@@ -9812,9 +9816,9 @@ impl Worksheet {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::ParameterError`] - The number of page breaks exceeds
+    /// - [`XlsxError::ParameterError`] - The number of page breaks exceeds
     ///   Excel's limit of 1023 page breaks.
     ///
     /// # Examples
@@ -9873,14 +9877,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `breaks` - A list of one or more column numbers where the page breaks
+    /// - `breaks`: A list of one or more column numbers where the page breaks
     ///   occur.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::ParameterError`] - The number of page breaks exceeds
+    /// - [`XlsxError::ParameterError`] - The number of page breaks exceeds
     ///   Excel's limit of 1023 page breaks.
     ///
     pub fn set_vertical_page_breaks(
@@ -9915,7 +9919,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `zoom` - The worksheet zoom level.
+    /// - `zoom`: The worksheet zoom level.
     ///
     /// # Examples
     ///
@@ -9972,12 +9976,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -10047,12 +10051,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `row` - The zero indexed row number.
-    /// * `col` - The zero indexed column number.
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     ///
     /// # Examples
@@ -10259,7 +10263,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `header` - The header string with optional control characters.
+    /// - `header`: The header string with optional control characters.
     ///
     /// # Examples
     ///
@@ -10325,7 +10329,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `footer` - The footer string with optional control characters.
+    /// - `footer`: The footer string with optional control characters.
     ///
     pub fn set_footer(&mut self, footer: impl Into<String>) -> &mut Worksheet {
         let footer = footer.into();
@@ -10360,12 +10364,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `position` - The image position as defined by the [`HeaderImagePosition`]
+    /// - `position`: The image position as defined by the [`HeaderImagePosition`]
     ///   enum.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::ParameterError`] - Parameter error if there isn't a
+    /// - [`XlsxError::ParameterError`] - Parameter error if there isn't a
     ///   corresponding `&[Picture]`/`&[G]` variable in the header string.
     ///
     /// # Examples
@@ -10480,12 +10484,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `position` - The image position as defined by the [`HeaderImagePosition`]
+    /// - `position`: The image position as defined by the [`HeaderImagePosition`]
     ///   enum.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::ParameterError`] - Parameter error if there isn't a
+    /// - [`XlsxError::ParameterError`] - Parameter error if there isn't a
     ///   corresponding `&[Picture]`/`&[G]` variable in the header string.
     ///
     pub fn set_footer_image(
@@ -10521,7 +10525,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn set_header_footer_scale_with_doc(&mut self, enable: bool) -> &mut Worksheet {
         self.header_footer_scale_with_doc = enable;
@@ -10544,7 +10548,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default. S
+    /// - `enable`: Turn the property on/off. It is on by default. S
     pub fn set_header_footer_align_with_page(&mut self, enable: bool) -> &mut Worksheet {
         self.header_footer_align_with_page = enable;
 
@@ -10564,12 +10568,12 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `left` - Left margin in inches. Excel default is 0.7.
-    /// * `right` - Right margin in inches. Excel default is 0.7.
-    /// * `top` - Top margin in inches. Excel default is 0.75.
-    /// * `bottom` - Bottom margin in inches. Excel default is 0.75.
-    /// * `header` - Header margin in inches. Excel default is 0.3.
-    /// * `footer` - Footer margin in inches. Excel default is 0.3.
+    /// - `left`: Left margin in inches. Excel default is 0.7.
+    /// - `right`: Right margin in inches. Excel default is 0.7.
+    /// - `top`: Top margin in inches. Excel default is 0.75.
+    /// - `bottom`: Bottom margin in inches. Excel default is 0.75.
+    /// - `header`: Header margin in inches. Excel default is 0.3.
+    /// - `footer`: Footer margin in inches. Excel default is 0.3.
     ///
     /// # Examples
     ///
@@ -10648,7 +10652,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `page_number` - The page number of the first printed page.
+    /// - `page_number`: The page number of the first printed page.
     ///
     /// # Examples
     ///
@@ -10694,7 +10698,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `scale` - The print scale factor.
+    /// - `scale`: The print scale factor.
     ///
     /// # Examples
     ///
@@ -10771,8 +10775,8 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `width` - Number of pages horizontally.
-    /// * `height` - Number of pages vertically.
+    /// - `width`: Number of pages horizontally.
+    /// - `height`: Number of pages vertically.
     ///
     /// # Examples
     ///
@@ -10828,7 +10832,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_print_center_horizontally(&mut self, enable: bool) -> &mut Worksheet {
         self.center_horizontally = enable;
@@ -10850,7 +10854,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_print_center_vertically(&mut self, enable: bool) -> &mut Worksheet {
         self.center_vertically = enable;
@@ -10872,7 +10876,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     /// # Examples
     ///
@@ -10925,7 +10929,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_print_gridlines(&mut self, enable: bool) -> &mut Worksheet {
         self.print_gridlines = enable;
@@ -10947,7 +10951,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_print_black_and_white(&mut self, enable: bool) -> &mut Worksheet {
         self.print_black_and_white = enable;
@@ -10965,7 +10969,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_print_draft(&mut self, enable: bool) -> &mut Worksheet {
         self.print_draft = enable;
@@ -10987,7 +10991,7 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_print_headings(&mut self, enable: bool) -> &mut Worksheet {
         self.print_headings = enable;
@@ -11019,16 +11023,16 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (All zero indexed.)
-    /// * `first_col` - The first row of the range.
-    /// * `last_row` - The last row of the range.
-    /// * `last_col` - The last row of the range.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    /// - [`XlsxError::RowColumnOrderError`] - First row or column is larger
     ///   than the last row or column.
     ///
     /// # Examples
@@ -11114,14 +11118,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_row` - The first row of the range. (Zero indexed.)
-    /// * `last_row` - The last row of the range.
+    /// - `first_row`: The first row of the range. (Zero indexed.)
+    /// - `last_row`: The last row of the range.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
     ///
     /// # Examples
@@ -11192,14 +11196,14 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// * `first_col` - The first row of the range. (Zero indexed.)
-    /// * `last_col` - The last row of the range.
+    /// - `first_col`: The first row of the range. (Zero indexed.)
+    /// - `last_col`: The last row of the range.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    /// - [`XlsxError::RowColumnOrderError`] - First row or column is larger
     ///   than the last row or column.
     ///
     /// # Examples
@@ -11458,21 +11462,21 @@ impl Worksheet {
     /// The name must be a valid Excel VBA object name as defined by the
     /// following rules:
     ///
-    /// * The name must be less than 32 characters.
-    /// * The name can only contain word characters: letters, numbers and
+    /// - The name must be less than 32 characters.
+    /// - The name can only contain word characters: letters, numbers and
     ///   underscores.
-    /// * The name must start with a letter.
-    /// * The name cannot be blank.
+    /// - The name must start with a letter.
+    /// - The name cannot be blank.
     ///
     /// The name must be also be unique across the worksheets in the workbook.
     ///
     /// # Parameters
     ///
-    /// * `name` - The vba name. It must follow the Excel rules, shown above.
+    /// - `name`: The vba name. It must follow the Excel rules, shown above.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::VbaNameError`] - The name doesn't meet one of Excel's
+    /// - [`XlsxError::VbaNameError`] - The name doesn't meet one of Excel's
     ///   criteria, shown above.
     ///
     pub fn set_vba_name(&mut self, name: impl Into<String>) -> Result<&mut Worksheet, XlsxError> {
@@ -15065,9 +15069,9 @@ pub trait IntoExcelData {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     fn write(
@@ -15081,9 +15085,9 @@ pub trait IntoExcelData {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// * [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
     ///   of 32,767 characters.
     ///
     fn write_with_format<'a>(

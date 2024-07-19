@@ -502,11 +502,11 @@ impl Workbook {
     ///
     /// # Parameters
     ///
-    /// * `index` - The index of the worksheet to get a reference to.
+    /// - `index`: The index of the worksheet to get a reference to.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::UnknownWorksheetNameOrIndex`] - Error when trying to
+    /// - [`XlsxError::UnknownWorksheetNameOrIndex`] - Error when trying to
     ///   retrieve a worksheet reference by index. This is usually an index out
     ///   of bounds error.
     ///
@@ -588,11 +588,11 @@ impl Workbook {
     ///
     /// # Parameters
     ///
-    /// * `name` - The name of the worksheet to get a reference to.
+    /// - `name`: The name of the worksheet to get a reference to.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::UnknownWorksheetNameOrIndex`] - Error when trying to
+    /// - [`XlsxError::UnknownWorksheetNameOrIndex`] - Error when trying to
     ///   retrieve a worksheet reference by index. This is usually an index out
     ///   of bounds error.
     ///
@@ -769,7 +769,7 @@ impl Workbook {
     ///
     /// # Parameters
     ///
-    /// * `worksheet` - The worksheet to add to the workbook.
+    /// - `worksheet`: The worksheet to add to the workbook.
     ///
     /// # Examples
     ///
@@ -826,18 +826,18 @@ impl Workbook {
     ///
     /// # Parameters
     ///
-    /// * `path` - The path of the new Excel file to create as a `&str` or as a
+    /// - `path`: The path of the new Excel file to create as a `&str` or as a
     ///   [`std::path`] `Path` or `PathBuf` instance.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
+    /// - [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
     ///   the workbook.
-    /// * [`XlsxError::TableNameReused`] - Worksheet Table name is already in
+    /// - [`XlsxError::TableNameReused`] - Worksheet Table name is already in
     ///   use in the workbook.
-    /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    /// - [`XlsxError::IoError`] - A wrapper for various IO errors when creating
     ///   the xlsx file, or its sub-files.
-    /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
+    /// - [`XlsxError::ZipError`] - A wrapper for various zip errors when
     ///   creating the xlsx file, or its sub-files.
     ///
     /// # Examples
@@ -902,11 +902,11 @@ impl Workbook {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
+    /// - [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
     ///   the workbook.
-    /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    /// - [`XlsxError::IoError`] - A wrapper for various IO errors when creating
     ///   the xlsx file, or its sub-files.
-    /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
+    /// - [`XlsxError::ZipError`] - A wrapper for various zip errors when
     ///   creating the xlsx file, or its sub-files.
     ///
     /// # Examples
@@ -947,13 +947,17 @@ impl Workbook {
     /// types that implement the [`Write`] trait such as the [`std::fs::File`]
     /// type or buffers.
     ///
+    /// # Parameters
+    ///
+    /// - `writer`: An object that implements the [`Write`] trait.
+    ///
     /// # Errors
     ///
-    /// * [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
+    /// - [`XlsxError::SheetnameReused`] - Worksheet name is already in use in
     ///   the workbook.
-    /// * [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    /// - [`XlsxError::IoError`] - A wrapper for various IO errors when creating
     ///   the xlsx file, or its sub-files.
-    /// * [`XlsxError::ZipError`] - A wrapper for various zip errors when
+    /// - [`XlsxError::ZipError`] - A wrapper for various zip errors when
     ///   creating the xlsx file, or its sub-files.
     ///
     /// # Examples
@@ -1048,12 +1052,12 @@ impl Workbook {
     ///
     /// # Parameters
     ///
-    /// * `name` - The variable name to define.
-    /// * `formula` - The formula, value or range that the name defines..
+    /// - `name`: The variable name to define.
+    /// - `formula`: The formula, value or range that the name defines..
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::ParameterError`] - The following Excel error cases will
+    /// - [`XlsxError::ParameterError`] - The following Excel error cases will
     ///   raise a `ParameterError` error:
     ///   * If the name doesn't start with a letter or underscore.
     ///   * If the name contains `,/*[]:\"'` or `space`.
@@ -1176,7 +1180,7 @@ impl Workbook {
     ///
     /// # Parameters
     ///
-    /// * `properties` - A reference to a [`DocProperties`] object.
+    /// - `properties`: A reference to a [`DocProperties`] object.
     ///
     /// # Examples
     ///
@@ -1304,9 +1308,13 @@ impl Workbook {
     /// doesn’t have to be `vbaProject.bin`. Any suitable path/name for an
     /// existing VBA bin file will do.
     ///
+    /// # Parameters
+    ///
+    /// - `project`: A path to a `vbaProject.bin` file.
+    ///
     /// # Errors
     ///
-    /// * [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
+    /// - [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
     ///   restricted.
     ///
     /// # Examples
@@ -1393,9 +1401,14 @@ impl Workbook {
     /// See [`Workbook::add_vba_project()`] above and [Working with VBA
     /// macros](crate::macros) for more details.
     ///
+    /// # Parameters
+    ///
+    /// - `project`: A path to a `vbaProject.bin` file.
+    /// - `signature`: A path to a `vbaProjectSignature.bin` file.
+    ///
     /// # Errors
     ///
-    /// * [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
+    /// - [`XlsxError::IoError`] - I/O errors if the path doesn't exist or is
     ///   restricted.
     ///
     /// # Examples
@@ -1462,19 +1475,19 @@ impl Workbook {
     /// The name must be a valid Excel VBA object name as defined by the
     /// following rules:
     ///
-    /// * The name must be less than 32 characters.
-    /// * The name can only contain word characters: letters, numbers and
+    /// - The name must be less than 32 characters.
+    /// - The name can only contain word characters: letters, numbers and
     ///   underscores.
-    /// * The name must start with a letter.
-    /// * The name cannot be blank.
+    /// - The name must start with a letter.
+    /// - The name cannot be blank.
     ///
     /// # Parameters
     ///
-    /// * `name` - The vba name. It must follow the Excel rules, shown above.
+    /// - `name`: The vba name. It must follow the Excel rules, shown above.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::VbaNameError`] - The name doesn't meet one of Excel's
+    /// - [`XlsxError::VbaNameError`] - The name doesn't meet one of Excel's
     ///   criteria, shown above.
     ///
     pub fn set_vba_name(&mut self, name: impl Into<String>) -> Result<&mut Workbook, XlsxError> {

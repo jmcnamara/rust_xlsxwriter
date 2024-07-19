@@ -2259,7 +2259,7 @@ impl SerializeFieldOptions {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the header.
+    /// - `format`: The [`Format`] property for the header.
     ///
     ///
     /// # Examples
@@ -2344,7 +2344,7 @@ impl SerializeFieldOptions {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -2425,7 +2425,7 @@ impl SerializeFieldOptions {
     ///
     /// # Parameters
     ///
-    /// * `custom_headers` - An array of [`CustomSerializeField`] values.
+    /// - `custom_headers`: An array of [`CustomSerializeField`] values.
     ///
     /// # Examples
     ///
@@ -2604,6 +2604,10 @@ impl SerializeFieldOptions {
     ///
     /// See [`Table`] for more details on worksheet tables.
     ///
+    /// # Parameters
+    ///
+    /// - `style`: A [`TableStyle`] enum value.
+    ///
     /// # Examples
     ///
     /// The following example demonstrates serializing instances of a Serde derived
@@ -2680,6 +2684,10 @@ impl SerializeFieldOptions {
     /// structure to a serialized area.
     ///
     /// See [`Table`] for more details on worksheet tables.
+    ///
+    /// # Parameters
+    ///
+    /// - `table`: A [`Table`] or object that implements `Into<Table>`.
     ///
     /// # Examples
     ///
@@ -2778,7 +2786,7 @@ impl SerializeFieldOptions {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -2892,7 +2900,7 @@ impl SerializeFieldOptions {
     ///
     /// # Parameters
     ///
-    /// * `name` - The name of the struct being serialized.
+    /// - `name`: The name of the struct being serialized.
     ///
     #[doc(hidden)]
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
@@ -3029,7 +3037,7 @@ impl CustomSerializeField {
     ///
     /// # Parameters
     ///
-    /// * `field_name` - The name of the serialized field to map to the header.
+    /// - `field_name`: The name of the serialized field to map to the header.
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn new(field_name: impl Into<String>) -> CustomSerializeField {
@@ -3073,7 +3081,7 @@ impl CustomSerializeField {
     ///
     /// # Parameters
     ///
-    /// * `name` - A string like name to use as the header.
+    /// - `name`: A string like name to use as the header.
     ///
     /// # Examples
     ///
@@ -3160,7 +3168,7 @@ impl CustomSerializeField {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the custom header.
+    /// - `format`: The [`Format`] property for the custom header.
     ///
     #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
     pub fn set_header_format(mut self, format: impl Into<Format>) -> CustomSerializeField {
@@ -3185,7 +3193,7 @@ impl CustomSerializeField {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     /// # Examples
     ///
@@ -3287,7 +3295,7 @@ impl CustomSerializeField {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for cells corresponding to the
+    /// - `format`: The [`Format`] property for cells corresponding to the
     ///   field/header.
     ///
     /// # Examples
@@ -3392,7 +3400,7 @@ impl CustomSerializeField {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -3479,7 +3487,7 @@ impl CustomSerializeField {
     ///
     /// # Parameters
     ///
-    /// * `width` - The row width in character units.
+    /// - `width`: The row width in character units.
     ///
     pub fn set_column_width(mut self, width: impl Into<f64>) -> CustomSerializeField {
         self.width = Some(width.into());
@@ -3497,7 +3505,7 @@ impl CustomSerializeField {
     ///
     /// # Parameters
     ///
-    /// * `width` - The row width in character units.
+    /// - `width`: The row width in character units.
     ///
     pub fn set_column_width_pixels(mut self, width: u16) -> CustomSerializeField {
         self.pixel_width = Some(width);

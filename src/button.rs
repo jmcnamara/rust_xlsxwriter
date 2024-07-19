@@ -222,7 +222,7 @@ impl Button {
     ///
     /// # Parameters
     ///
-    /// * `width` - The button width in pixels.
+    /// - `width`: The button width in pixels.
     ///
     pub fn set_width(mut self, width: u32) -> Button {
         if width == 0 {
@@ -237,7 +237,7 @@ impl Button {
     ///
     /// # Parameters
     ///
-    /// * `height` - The button height in pixels.
+    /// - `height`: The button height in pixels.
     ///
     pub fn set_height(mut self, height: u32) -> Button {
         if height == 0 {
@@ -258,7 +258,7 @@ impl Button {
     ///
     /// # Parameters
     ///
-    /// * `alt_text` - The alt text string to add to the button.
+    /// - `alt_text`: The alt text string to add to the button.
     ///
     pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Button {
         let alt_text = alt_text.into();
@@ -292,7 +292,7 @@ impl Button {
     ///
     /// # Parameters
     ///
-    /// * `option` - An button/object positioning behavior defined by the
+    /// - `option`: An button/object positioning behavior defined by the
     ///   [`ObjectMovement`] enum.
     pub fn set_object_movement(mut self, option: ObjectMovement) -> Button {
         self.object_movement = option;

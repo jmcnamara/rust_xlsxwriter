@@ -586,7 +586,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `range` - A 1D or 2D range that contains the data that will be plotted
+    /// - `range`: A 1D or 2D range that contains the data that will be plotted
     ///   in the sparkline. This can specified in different ways, see
     ///   [`IntoChartRange`] for details.
     ///
@@ -602,22 +602,22 @@ impl Sparkline {
     ///
     /// The type of the sparkline can be one of the following:
     ///
-    /// * [`SparklineType::Line`]: A line style sparkline. This is the default.
+    /// - [`SparklineType::Line`]: A line style sparkline. This is the default.
     ///
     ///   <img src="https://rustxlsxwriter.github.io/images/sparkline_type_line.png">
     ///
-    /// * [`SparklineType::Column`]: A histogram style sparkline.
+    /// - [`SparklineType::Column`]: A histogram style sparkline.
     ///
     ///   <img src="https://rustxlsxwriter.github.io/images/sparkline_type_column.png">
     ///
-    /// * [`SparklineType::WinLose`]: A positive/negative style sparkline. It
+    /// - [`SparklineType::WinLose`]: A positive/negative style sparkline. It
     ///   looks similar to a histogram but all the bars are the same height,
     ///
     ///   <img src="https://rustxlsxwriter.github.io/images/sparkline_type_winlose.png">
     ///
     /// # Parameters
     ///
-    /// * `sparkline_type` - A [`SparklineType`] value.
+    /// - `sparkline_type`: A [`SparklineType`] value.
     ///
     pub fn set_type(mut self, sparkline_type: SparklineType) -> Sparkline {
         self.sparkline_type = sparkline_type;
@@ -630,7 +630,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_high_point(mut self, enable: bool) -> Sparkline {
         self.show_high_point = enable;
@@ -643,7 +643,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_low_point(mut self, enable: bool) -> Sparkline {
         self.show_low_point = enable;
@@ -656,7 +656,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_first_point(mut self, enable: bool) -> Sparkline {
         self.show_first_point = enable;
@@ -669,7 +669,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_last_point(mut self, enable: bool) -> Sparkline {
         self.show_last_point = enable;
@@ -682,7 +682,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_negative_points(mut self, enable: bool) -> Sparkline {
         self.show_negative_points = enable;
@@ -695,7 +695,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_markers(mut self, enable: bool) -> Sparkline {
         self.show_markers = enable;
@@ -708,7 +708,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_axis(mut self, enable: bool) -> Sparkline {
         self.show_axis = enable;
@@ -720,7 +720,7 @@ impl Sparkline {
 
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn show_hidden_data(mut self, enable: bool) -> Sparkline {
         self.show_hidden_data = enable;
@@ -731,10 +731,10 @@ impl Sparkline {
     ///
     /// The options are:
     ///
-    /// * [`ChartEmptyCells::Gaps`]: Show empty cells in the chart as gaps. The
+    /// - [`ChartEmptyCells::Gaps`]: Show empty cells in the chart as gaps. The
     ///   default.
-    /// * [`ChartEmptyCells::Zero`]: Show empty cells in the chart as zeroes.
-    /// * [`ChartEmptyCells::Connected`]: Show empty cells in the chart
+    /// - [`ChartEmptyCells::Zero`]: Show empty cells in the chart as zeroes.
+    /// - [`ChartEmptyCells::Connected`]: Show empty cells in the chart
     ///   connected by a line to the previous point.
     ///
     /// # Parameters
@@ -754,7 +754,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_right_to_left(mut self, enable: bool) -> Sparkline {
         self.show_right_to_left = enable;
@@ -765,7 +765,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait such as a html string.
     ///
     /// # Examples
@@ -822,7 +822,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait such as a html string.
     ///
     pub fn set_high_point_color<T>(mut self, color: T) -> Sparkline
@@ -841,7 +841,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait such as a html string.
     ///
     pub fn set_low_point_color<T>(mut self, color: T) -> Sparkline
@@ -860,7 +860,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait such as a html string.
     ///
     pub fn set_first_point_color<T>(mut self, color: T) -> Sparkline
@@ -879,7 +879,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait such as a html string.
     ///
     pub fn set_last_point_color<T>(mut self, color: T) -> Sparkline
@@ -898,7 +898,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait such as a html string.
     ///
     pub fn set_negative_points_color<T>(mut self, color: T) -> Sparkline
@@ -917,7 +917,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait such as a html string.
     ///
     pub fn set_markers_color<T>(mut self, color: T) -> Sparkline
@@ -936,7 +936,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `weight` - The weight/width of the sparkline line. The width can be an
+    /// - `weight`: The weight/width of the sparkline line. The width can be an
     /// number type that convert [`Into`] [`f64`]. The default is 0.75.
     ///
     pub fn set_line_weight<T>(mut self, weight: T) -> Sparkline
@@ -990,7 +990,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_group_max(mut self, enable: bool) -> Sparkline {
         self.group_max = enable;
@@ -1009,7 +1009,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_group_min(mut self, enable: bool) -> Sparkline {
         self.group_min = enable;
@@ -1029,7 +1029,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `range` - A 1D range that contains the dates used to plot the
+    /// - `range`: A 1D range that contains the dates used to plot the
     ///   sparkline. This can specified in different ways, see
     ///   [`IntoChartRange`] for details.
     ///
@@ -1051,7 +1051,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_column_order(mut self, enable: bool) -> Sparkline {
         self.data_row_order = !enable;
@@ -1069,7 +1069,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// * `style` - A integer value in the range 1-36.
+    /// - `style`: A integer value in the range 1-36.
     ///
     #[allow(clippy::too_many_lines)]
     #[allow(clippy::unreadable_literal)]

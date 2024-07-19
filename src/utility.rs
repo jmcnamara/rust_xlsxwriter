@@ -259,7 +259,7 @@ pub fn cell_range_absolute(
 ///
 /// # Errors
 ///
-/// * [`XlsxError::SerdeError`] - A wrapped serialization error.
+/// - [`XlsxError::SerdeError`] - A wrapped serialization error.
 ///
 /// # Examples
 ///
@@ -329,7 +329,7 @@ where
 ///
 /// # Errors
 ///
-/// * [`XlsxError::SerdeError`] - A wrapped serialization error.
+/// - [`XlsxError::SerdeError`] - A wrapped serialization error.
 ///
 /// # Examples
 ///
@@ -555,10 +555,10 @@ pub(crate) fn unquote_sheetname(sheetname: &str) -> String {
 /// This function checks if an worksheet name is valid according to the Excel
 /// rules:
 ///
-/// * The name is less than 32 characters.
-/// * The name isn't blank.
-/// * The name doesn't contain any of the characters: `[ ] : * ? / \`.
-/// * The name doesn't start or end with an apostrophe.
+/// - The name is less than 32 characters.
+/// - The name isn't blank.
+/// - The name doesn't contain any of the characters: `[ ] : * ? / \`.
+/// - The name doesn't start or end with an apostrophe.
 ///
 /// The worksheet name "History" isn't allowed in English versions of Excel
 /// since it is a reserved name. However it is allowed in some other language
@@ -573,16 +573,16 @@ pub(crate) fn unquote_sheetname(sheetname: &str) -> String {
 ///
 /// # Parameters
 ///
-/// * `name` - The worksheet name. It must follow the Excel rules, shown above.
+/// - `name`: The worksheet name. It must follow the Excel rules, shown above.
 ///
 /// # Errors
 ///
-/// * [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name cannot be blank.
-/// * [`XlsxError::SheetnameLengthExceeded`] - Worksheet name exceeds Excel's
+/// - [`XlsxError::SheetnameCannotBeBlank`] - Worksheet name cannot be blank.
+/// - [`XlsxError::SheetnameLengthExceeded`] - Worksheet name exceeds Excel's
 ///   limit of 31 characters.
-/// * [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name cannot
+/// - [`XlsxError::SheetnameContainsInvalidCharacter`] - Worksheet name cannot
 ///   contain invalid characters: `[ ] : * ? / \`
-/// * [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name cannot
+/// - [`XlsxError::SheetnameStartsOrEndsWithApostrophe`] - Worksheet name cannot
 ///   start or end with an apostrophe.
 ///
 /// # Examples

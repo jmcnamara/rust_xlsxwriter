@@ -185,9 +185,9 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
     ///   date or time is outside Excel's allowed ranges.
-    /// * [`XlsxError::DateTimeParseError`] - The input string couldn't be parsed
+    /// - [`XlsxError::DateTimeParseError`] - The input string couldn't be parsed
     ///   into a date/time.
     ///
     /// # Examples
@@ -283,13 +283,13 @@ impl ExcelDateTime {
     ///
     /// # Parameters
     ///
-    /// * `year` - Integer year in range 1900-9999.
-    /// * `month` - Integer month in the range 1-12.
-    /// * `day` - Integer day in the range 1-31 (depending on year/month).
+    /// - `year`: Integer year in range 1900-9999.
+    /// - `month`: Integer month in the range 1-12.
+    /// - `day`: Integer day in the range 1-31 (depending on year/month).
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
     ///   date or time is outside Excel's allowed ranges. Excel dates must be in the
     ///   range 1900-01-01 to 9999-12-31.
     ///
@@ -360,15 +360,15 @@ impl ExcelDateTime {
     ///
     /// # Parameters
     ///
-    /// * `hour` - Integer hour. Generally in the range 0-23 but can be greater
+    /// - `hour`: Integer hour. Generally in the range 0-23 but can be greater
     ///   than 24 for time durations.
-    /// * `min` - Integer minutes in the range 0-59.
-    /// * `sec` - Integer or float seconds in the range 0-59.999. Excel only
+    /// - `min`: Integer minutes in the range 0-59.
+    /// - `sec`: Integer or float seconds in the range 0-59.999. Excel only
     ///   supports millisecond precision.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
     ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
@@ -426,16 +426,16 @@ impl ExcelDateTime {
     ///
     /// # Parameters
     ///
-    /// * `hour` - Integer hour. Generally in the range 0-23 but can be greater
+    /// - `hour`: Integer hour. Generally in the range 0-23 but can be greater
     ///   than 24 for time durations.
-    /// * `min` - Integer minutes in the range 0-59.
-    /// * `sec` - Integer seconds in the range 0-59.
-    /// * `milli` - Integer milliseconds in the range 0-999. Excel only supports
+    /// - `min`: Integer minutes in the range 0-59.
+    /// - `sec`: Integer seconds in the range 0-59.
+    /// - `milli`: Integer milliseconds in the range 0-999. Excel only supports
     ///   millisecond precision.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
     ///   date or time is outside Excel's allowed ranges.
     ///
     ///
@@ -500,14 +500,14 @@ impl ExcelDateTime {
     ///
     /// # Parameters
     ///
-    /// * `hour` - Integer hours in the range 0-23.
-    /// * `min` - Integer minutes in the range 0-59.
-    /// * `sec` - Integer or float seconds in the range 0-59.999. Excel only
+    /// - `hour`: Integer hours in the range 0-23.
+    /// - `min`: Integer minutes in the range 0-59.
+    /// - `sec`: Integer or float seconds in the range 0-59.999. Excel only
     ///   supports millisecond precision.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
     ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
@@ -590,15 +590,15 @@ impl ExcelDateTime {
     ///
     /// # Parameters
     ///
-    /// * `hour` - Integer hours in the range 0-23.
-    /// * `min` - Integer minutes in the range 0-59.
-    /// * `sec` - Integer seconds in the range 0-59.
-    /// * `milli` - Integer milliseconds in the range 0-999. Excel only supports
+    /// - `hour`: Integer hours in the range 0-23.
+    /// - `min`: Integer minutes in the range 0-59.
+    /// - `sec`: Integer seconds in the range 0-59.
+    /// - `milli`: Integer milliseconds in the range 0-999. Excel only supports
     ///   millisecond precision.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
     ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
@@ -686,12 +686,12 @@ impl ExcelDateTime {
     ///
     /// # Parameters
     ///
-    /// * `number` - Excel serial date in the range 0.0 to 2,958,466.0 (years
+    /// - `number`: Excel serial date in the range 0.0 to 2,958,466.0 (years
     ///   1900 to 9999).
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
     ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples
@@ -764,12 +764,12 @@ impl ExcelDateTime {
     ///
     /// # Parameters
     ///
-    /// * `timestamp` - Unix time in the range -2,209,075,200 to 253,402,300,800
+    /// - `timestamp`: Unix time in the range -2,209,075,200 to 253,402,300,800
     ///   (years 1900 to 9999).
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DateTimeRangeError`] - One of the values used to create the
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
     ///   date or time is outside Excel's allowed ranges.
     ///
     /// # Examples

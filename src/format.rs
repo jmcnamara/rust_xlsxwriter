@@ -627,7 +627,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `num_format` - The number format property.
+    /// - `num_format`: The number format property.
     ///
     /// # Examples
     ///
@@ -746,7 +746,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `num_format_index` - The index to one of the inbuilt formats shown in
+    /// - `num_format_index`: The index to one of the inbuilt formats shown in
     ///   the table above.
     ///
     /// # Examples
@@ -906,7 +906,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The font color property defined by a [`Color`] enum
+    /// - `color`: The font color property defined by a [`Color`] enum
     ///   value.
     ///
     /// # Examples
@@ -959,7 +959,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `font_name` - The font name property.
+    /// - `font_name`: The font name property.
     ///
     /// # Examples
     ///
@@ -1010,7 +1010,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `font_size` - The font size property.
+    /// - `font_size`: The font size property.
     ///
     /// # Examples
     ///
@@ -1054,7 +1054,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `font_scheme` - The font scheme property.
+    /// - `font_scheme`: The font scheme property.
     ///
     pub fn set_font_scheme(mut self, font_scheme: impl Into<String>) -> Format {
         self.font.scheme = font_scheme.into();
@@ -1068,7 +1068,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `font_family` - The font family property.
+    /// - `font_family`: The font family property.
     ///
     pub fn set_font_family(mut self, font_family: u8) -> Format {
         self.font.family = font_family;
@@ -1082,7 +1082,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `font_charset` - The font character set property.
+    /// - `font_charset`: The font character set property.
     ///
     pub fn set_font_charset(mut self, font_charset: u8) -> Format {
         self.font.charset = font_charset;
@@ -1097,7 +1097,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `underline` - The underline type defined by a [`FormatUnderline`] enum
+    /// - `underline`: The underline type defined by a [`FormatUnderline`] enum
     ///   value.
     ///
     /// # Examples
@@ -1186,7 +1186,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `font_script` - The font superscript or subscript property via a
+    /// - `font_script`: The font superscript or subscript property via a
     ///   [`FormatScript`] enum.
     ///
     ///
@@ -1202,7 +1202,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `align` - The vertical and or horizontal alignment direction as
+    /// - `align`: The vertical and or horizontal alignment direction as
     ///   defined by the [`FormatAlign`] enum.
     ///
     /// # Examples
@@ -1341,7 +1341,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `indent` - The indentation level for the cell.
+    /// - `indent`: The indentation level for the cell.
     ///
     /// # Examples
     ///
@@ -1388,7 +1388,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `rotation` - The rotation angle.
+    /// - `rotation`: The rotation angle.
     ///
     /// # Examples
     ///
@@ -1449,7 +1449,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `reading_direction` - The reading order property, should be 0, 1, or
+    /// - `reading_direction`: The reading order property, should be 0, 1, or
     ///   2, where these values refer to:
     ///
     ///   0. The reading direction is determined heuristically by Excel
@@ -1550,7 +1550,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `pattern` - The pattern property defined by a [`FormatPattern`] enum
+    /// - `pattern`: The pattern property defined by a [`FormatPattern`] enum
     ///   value.
     ///
     /// # Examples
@@ -1606,7 +1606,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The background color property defined by a [`Color`]
+    /// - `color`: The background color property defined by a [`Color`]
     ///   enum value or a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -1663,7 +1663,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The foreground color property defined by a [`Color`]
+    /// - `color`: The foreground color property defined by a [`Color`]
     ///   enum value or a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -1726,7 +1726,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `border` - The border property as defined by a [`FormatBorder`] enum
+    /// - `border`: The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
     /// # Examples
@@ -1788,7 +1788,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The border color as defined by a [`Color`] enum value or
+    /// - `color`: The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -1853,7 +1853,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `border` - The border property as defined by a [`FormatBorder`] enum
+    /// - `border`: The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
     pub fn set_border_top(mut self, border: FormatBorder) -> Format {
@@ -1866,7 +1866,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The border color as defined by a [`Color`] enum value or
+    /// - `color`: The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_top_color<T>(mut self, color: T) -> Format
@@ -1886,7 +1886,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `border` - The border property as defined by a [`FormatBorder`] enum
+    /// - `border`: The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
     pub fn set_border_bottom(mut self, border: FormatBorder) -> Format {
@@ -1899,7 +1899,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The border color as defined by a [`Color`] enum value or
+    /// - `color`: The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_bottom_color<T>(mut self, color: T) -> Format
@@ -1919,7 +1919,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `border` - The border property as defined by a [`FormatBorder`] enum
+    /// - `border`: The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
     pub fn set_border_left(mut self, border: FormatBorder) -> Format {
@@ -1932,7 +1932,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The border color as defined by a [`Color`] enum value or
+    /// - `color`: The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_left_color<T>(mut self, color: T) -> Format
@@ -1952,7 +1952,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `border` - The border property as defined by a [`FormatBorder`] enum
+    /// - `border`: The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
     pub fn set_border_right(mut self, border: FormatBorder) -> Format {
@@ -1965,7 +1965,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The border color as defined by a [`Color`] enum value or
+    /// - `color`: The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_right_color<T>(mut self, color: T) -> Format
@@ -1989,7 +1989,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `border` - The border property as defined by a [`FormatBorder`] enum
+    /// - `border`: The border property as defined by a [`FormatBorder`] enum
     ///   value.
     ///
     /// # Examples
@@ -2048,7 +2048,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `color` - The border color as defined by a [`Color`] enum value or
+    /// - `color`: The border color as defined by a [`Color`] enum value or
     ///   a type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_diagonal_color<T>(mut self, color: T) -> Format
@@ -2068,7 +2068,7 @@ impl Format {
     ///
     /// # Parameters
     ///
-    /// * `border_type` - The diagonal border type as defined by a
+    /// - `border_type`: The diagonal border type as defined by a
     ///   [`FormatDiagonalBorder`] enum value.
     ///
     pub fn set_border_diagonal_type(mut self, border_type: FormatDiagonalBorder) -> Format {

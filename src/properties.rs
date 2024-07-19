@@ -389,7 +389,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `title` - The title string property.
+    /// - `title`: The title string property.
     ///
     pub fn set_title(mut self, title: impl Into<String>) -> DocProperties {
         self.title = title.into();
@@ -404,7 +404,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `subject` - The subject string property.
+    /// - `subject`: The subject string property.
     ///
     pub fn set_subject(mut self, subject: impl Into<String>) -> DocProperties {
         self.subject = subject.into();
@@ -419,7 +419,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `manager` - The manager string property.
+    /// - `manager`: The manager string property.
     ///
     pub fn set_manager(mut self, manager: impl Into<String>) -> DocProperties {
         self.manager = manager.into();
@@ -434,7 +434,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `company` - The company string property.
+    /// - `company`: The company string property.
     ///
     pub fn set_company(mut self, company: impl Into<String>) -> DocProperties {
         self.company = company.into();
@@ -449,7 +449,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `category` - The category string property.
+    /// - `category`: The category string property.
     ///
     pub fn set_category(mut self, category: impl Into<String>) -> DocProperties {
         self.category = category.into();
@@ -464,7 +464,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `author` - The author string property.
+    /// - `author`: The author string property.
     ///
     pub fn set_author(mut self, author: impl Into<String>) -> DocProperties {
         self.author = author.into();
@@ -479,7 +479,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `keywords` - The keywords string property.
+    /// - `keywords`: The keywords string property.
     ///
     pub fn set_keywords(mut self, keywords: impl Into<String>) -> DocProperties {
         self.keywords = keywords.into();
@@ -495,7 +495,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `comment` - The comment string property.
+    /// - `comment`: The comment string property.
     ///
     pub fn set_comment(mut self, comment: impl Into<String>) -> DocProperties {
         self.comment = comment.into();
@@ -510,7 +510,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `status` - The status string property.
+    /// - `status`: The status string property.
     ///
     pub fn set_status(mut self, status: impl Into<String>) -> DocProperties {
         self.status = status.into();
@@ -525,7 +525,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `hyperlink_base` - The hyperlink base string property.
+    /// - `hyperlink_base`: The hyperlink base string property.
     ///
     pub fn set_hyperlink_base(mut self, hyperlink_base: impl Into<String>) -> DocProperties {
         self.hyperlink_base = hyperlink_base.into();
@@ -541,7 +541,7 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `datetime` - The creation date property. A type that implements
+    /// - `datetime`: The creation date property. A type that implements
     ///   [`IntoCustomDateTimeUtc`].
     ///
     /// [`chrono::DateTime`]:
@@ -565,8 +565,8 @@ impl DocProperties {
     ///
     /// # Parameters
     ///
-    /// * `name` - The user defined name of the custom property.
-    /// * `value` - The value can be a [`&str`], [`f64`], [`i32`] [`bool`],
+    /// - `name`: The user defined name of the custom property.
+    /// - `value`: The value can be a [`&str`], [`f64`], [`i32`] [`bool`],
     ///   [`ExcelDateTime`] or [`chrono::DateTime<Utc>`] type for which the
     ///   `IntoCustomProperty` trait is implemented.
     ///

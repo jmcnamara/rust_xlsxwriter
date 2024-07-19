@@ -230,7 +230,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     /// # Examples
     ///
@@ -420,7 +420,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     ///
     /// # Examples
@@ -560,7 +560,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     /// # Examples
     ///
     /// Example of turning off the banded rows property in a worksheet table.
@@ -626,7 +626,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -694,7 +694,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -762,7 +762,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -843,7 +843,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     /// # Examples
     ///
@@ -915,7 +915,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `columns` - An array reference of [`TableColumn`] structs. Use
+    /// - `columns`: An array reference of [`TableColumn`] structs. Use
     ///   `TableColumn::default()` to get default values.
     ///
     ///
@@ -1012,7 +1012,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `name` - The name of the table. It must be unique across the workbook.
+    /// - `name`: The name of the table. It must be unique across the workbook.
     ///
     /// # Examples
     ///
@@ -1082,7 +1082,7 @@ impl Table {
     ///
     /// # Parameters
     ///
-    /// * `style` - a [`TableStyle`] enum value.
+    /// - `style`: a [`TableStyle`] enum value.
     ///
     /// # Examples
     ///
@@ -1479,7 +1479,7 @@ impl TableColumn {
     ///
     /// # Parameters
     ///
-    /// * `caption` - The caption/name of the column header. It must be unique
+    /// - `caption`: The caption/name of the column header. It must be unique
     ///   for the table.
     ///
     /// # Examples
@@ -1571,7 +1571,7 @@ impl TableColumn {
     ///
     /// # Parameters
     ///
-    /// * `function` - A [`TableFunction`] enum value equivalent to one of the
+    /// - `function`: A [`TableFunction`] enum value equivalent to one of the
     ///   available Excel `SUBTOTAL()` options.
     ///
     /// # Examples
@@ -1655,7 +1655,7 @@ impl TableColumn {
     ///
     /// # Parameters
     ///
-    /// * `label` - The label/caption of the total row of the column.
+    /// - `label`: The label/caption of the total row of the column.
     ///
     pub fn set_total_label(mut self, label: impl Into<String>) -> TableColumn {
         self.total_label = label.into();
@@ -1676,7 +1676,7 @@ impl TableColumn {
     ///
     /// # Parameters
     ///
-    /// * `formula` - The formula to be applied to the column as a string or
+    /// - `formula`: The formula to be applied to the column as a string or
     ///   [`Formula`].
     ///
     /// # Examples
@@ -1764,7 +1764,7 @@ impl TableColumn {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the data cells in the column.
+    /// - `format`: The [`Format`] property for the data cells in the column.
     ///
     /// # Examples
     ///
@@ -1841,7 +1841,7 @@ impl TableColumn {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the column header.
+    /// - `format`: The [`Format`] property for the column header.
     ///
     /// # Examples
     ///

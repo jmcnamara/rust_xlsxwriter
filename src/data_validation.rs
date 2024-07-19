@@ -227,7 +227,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with [`i32`] values.
+    /// - `rule`: A [`DataValidationRule`] with [`i32`] values.
     ///
     /// # Examples
     ///
@@ -285,7 +285,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with cell references using
+    /// - `rule`: A [`DataValidationRule`] with cell references using
     ///   [`Formula`] values. See [Using cell references in Data Validations].
     ///
     /// [Using cell references in Data Validations]:
@@ -347,7 +347,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with [`f64`] values.
+    /// - `rule`: A [`DataValidationRule`] with [`f64`] values.
     ///
     /// # Examples
     ///
@@ -406,7 +406,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with cell references using
+    /// - `rule`: A [`DataValidationRule`] with cell references using
     ///   [`Formula`] values. See [Using cell references in Data Validations].
     ///
     /// [Using cell references in Data Validations]:
@@ -473,11 +473,11 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `list` - A list of string like objects.
+    /// - `list`: A list of string like objects.
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DataValidationError`] - The length of the combined
+    /// - [`XlsxError::DataValidationError`] - The length of the combined
     ///   comma-separated list of strings, including commas, exceeds Excel's
     ///   limit of 255 characters, see the explanation above.
     ///
@@ -584,7 +584,7 @@ impl DataValidation {
     /// Validations] and the example below.
     ///
     /// # Parameters
-    /// * `list` - A cell range reference such as `=B1:B9`, `=$B$1:$B$9` or
+    /// - `list`: A cell range reference such as `=B1:B9`, `=$B$1:$B$9` or
     ///   `=Sheet2!B1:B9` using a [`Formula`]. See [Using cell references in
     ///   Data Validations].
     ///
@@ -656,7 +656,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with [`IntoExcelDateTime`] values.
+    /// - `rule`: A [`DataValidationRule`] with [`IntoExcelDateTime`] values.
     ///
     /// # Examples
     ///
@@ -717,7 +717,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with cell references using
+    /// - `rule`: A [`DataValidationRule`] with cell references using
     ///   [`Formula`] values. See [Using cell references in Data Validations].
     ///
     /// [Using cell references in Data Validations]:
@@ -744,7 +744,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with [`IntoExcelDateTime`] values.
+    /// - `rule`: A [`DataValidationRule`] with [`IntoExcelDateTime`] values.
     ///
     /// # Examples
     ///
@@ -805,7 +805,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with cell references using
+    /// - `rule`: A [`DataValidationRule`] with cell references using
     ///   [`Formula`] values. See [Using cell references in Data Validations].
     ///
     /// [Using cell references in Data Validations]:
@@ -828,7 +828,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with [`u32`] values.
+    /// - `rule`: A [`DataValidationRule`] with [`u32`] values.
     ///
     /// # Examples
     ///
@@ -884,7 +884,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`DataValidationRule`] with cell references using
+    /// - `rule`: A [`DataValidationRule`] with cell references using
     ///   [`Formula`] values. See [Using cell references in Data Validations].
     ///
     /// [Using cell references in Data Validations]:
@@ -907,7 +907,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`Formula`] value. You should ensure that the formula is
+    /// - `rule`: A [`Formula`] value. You should ensure that the formula is
     ///   valid in Excel.
     ///
     /// # Examples
@@ -983,7 +983,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn ignore_blank(mut self, enable: bool) -> DataValidation {
         self.ignore_blank = enable;
@@ -1005,7 +1005,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn show_dropdown(mut self, enable: bool) -> DataValidation {
         self.show_dropdown = enable;
@@ -1024,7 +1024,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn show_input_message(mut self, enable: bool) -> DataValidation {
         self.show_input_message = enable;
@@ -1041,12 +1041,12 @@ impl DataValidation {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DataValidationError`] - The length of the title exceeds
+    /// - [`XlsxError::DataValidationError`] - The length of the title exceeds
     ///   Excel's limit of 32 characters.
     ///
     /// # Parameters
     ///
-    /// * `text` - Title string. Must be less than or equal to the Excel limit
+    /// - `text`: Title string. Must be less than or equal to the Excel limit
     ///   of 32 characters.
     ///
     pub fn set_input_title(mut self, text: impl Into<String>) -> Result<DataValidation, XlsxError> {
@@ -1071,12 +1071,12 @@ impl DataValidation {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DataValidationError`] - The length of the message exceeds
+    /// - [`XlsxError::DataValidationError`] - The length of the message exceeds
     ///   Excel's limit of 255 characters.
     ///
     /// # Parameters
     ///
-    /// * `text` - Message string. Must be less than or equal to the Excel limit
+    /// - `text`: Message string. Must be less than or equal to the Excel limit
     ///   of 255 characters. The string can contain newlines to split it over
     ///   several lines.
     ///
@@ -1145,7 +1145,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     pub fn show_error_message(mut self, enable: bool) -> DataValidation {
         self.show_error_message = enable;
@@ -1159,12 +1159,12 @@ impl DataValidation {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DataValidationError`] - The length of the title exceeds
+    /// - [`XlsxError::DataValidationError`] - The length of the title exceeds
     ///   Excel's limit of 32 characters.
     ///
     /// # Parameters
     ///
-    /// * `text` - Title string. Must be less than or equal to the Excel limit
+    /// - `text`: Title string. Must be less than or equal to the Excel limit
     ///   of 32 characters.
     ///
     /// # Examples
@@ -1223,12 +1223,12 @@ impl DataValidation {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::DataValidationError`] - The length of the message exceeds
+    /// - [`XlsxError::DataValidationError`] - The length of the message exceeds
     ///   Excel's limit of 255 characters.
     ///
     /// # Parameters
     ///
-    /// * `text` - Message string. Must be less than or equal to the Excel limit
+    /// - `text`: Message string. Must be less than or equal to the Excel limit
     ///   of 255 characters. The string can contain newlines to split it over
     ///   several lines.
     ///
@@ -1292,7 +1292,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `error_style` - A [`DataValidationErrorStyle`] enum value.
+    /// - `error_style`: A [`DataValidationErrorStyle`] enum value.
     ///
     pub fn set_error_style(mut self, error_style: DataValidationErrorStyle) -> DataValidation {
         self.error_style = error_style;
@@ -1306,7 +1306,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// * `range` - A string like type representing an Excel range.
+    /// - `range`: A string like type representing an Excel range.
     ///
     pub fn set_multi_range(mut self, range: impl Into<String>) -> DataValidation {
         self.multi_range = range.into().replace('$', "").replace(',', " ");

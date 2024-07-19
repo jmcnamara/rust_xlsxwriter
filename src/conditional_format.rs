@@ -927,7 +927,7 @@ pub trait ConditionalFormat {
     ///
     /// # Errors
     ///
-    /// * [`XlsxError::ConditionalFormatError`] - A general error that is raised
+    /// - [`XlsxError::ConditionalFormatError`] - A general error that is raised
     ///   when a conditional formatting parameter is incorrect or missing.
     ///
     fn validate(&self) -> Result<(), XlsxError>;
@@ -1222,7 +1222,7 @@ impl ConditionalFormatCell {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`ConditionalFormatCellRule`] enum value.
+    /// - `rule`: A [`ConditionalFormatCellRule`] enum value.
     ///
     /// # Examples
     ///
@@ -1380,7 +1380,7 @@ impl ConditionalFormatCell {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatCell {
         self.format = Some(format.into());
@@ -1586,7 +1586,7 @@ impl ConditionalFormatBlank {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatBlank {
         self.format = Some(format.into());
@@ -1789,7 +1789,7 @@ impl ConditionalFormatError {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatError {
         self.format = Some(format.into());
@@ -1993,7 +1993,7 @@ impl ConditionalFormatDuplicate {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatDuplicate {
         self.format = Some(format.into());
@@ -2185,7 +2185,7 @@ impl ConditionalFormatFormula {
     ///
     /// # Parameters
     ///
-    /// * `value` - A [`Formula`] value or type that converts "into" a `Formula`
+    /// - `value`: A [`Formula`] value or type that converts "into" a `Formula`
     ///   such as a `&str` or `&Formula`.
     ///
     /// # Examples
@@ -2277,7 +2277,7 @@ impl ConditionalFormatFormula {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatFormula {
         self.format = Some(format.into());
@@ -2456,7 +2456,7 @@ impl ConditionalFormatAverage {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`ConditionalFormatAverageRule`] enum value.
+    /// - `rule`: A [`ConditionalFormatAverageRule`] enum value.
     ///
     pub fn set_rule(mut self, criteria: ConditionalFormatAverageRule) -> ConditionalFormatAverage {
         self.criteria = criteria;
@@ -2475,7 +2475,7 @@ impl ConditionalFormatAverage {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatAverage {
         self.format = Some(format.into());
@@ -2698,6 +2698,10 @@ impl ConditionalFormatTop {
 
     /// Set the top/bottom rank of the conditional format.
     ///
+    /// # Parameters
+    ///
+    /// - `rule`: A [`ConditionalFormatTextRule`] enum value.
+    ///
     /// See the example above.
     ///
     pub fn set_rule(mut self, rule: ConditionalFormatTopRule) -> ConditionalFormatTop {
@@ -2717,7 +2721,7 @@ impl ConditionalFormatTop {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatTop {
         self.format = Some(format.into());
@@ -2952,7 +2956,7 @@ impl ConditionalFormatText {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`ConditionalFormatTextRule`] enum value.
+    /// - `rule`: A [`ConditionalFormatTextRule`] enum value.
     ///
     pub fn set_rule(mut self, rule: ConditionalFormatTextRule) -> ConditionalFormatText {
         self.rule = Some(rule);
@@ -2971,7 +2975,7 @@ impl ConditionalFormatText {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatText {
         self.format = Some(format.into());
@@ -3217,7 +3221,7 @@ impl ConditionalFormatDate {
     ///
     /// # Parameters
     ///
-    /// * `rule` - A [`ConditionalFormatDateRule`] enum value.
+    /// - `rule`: A [`ConditionalFormatDateRule`] enum value.
     ///
     pub fn set_rule(mut self, criteria: ConditionalFormatDateRule) -> ConditionalFormatDate {
         self.rule = criteria;
@@ -3236,7 +3240,7 @@ impl ConditionalFormatDate {
     ///
     /// # Parameters
     ///
-    /// * `format` - The [`Format`] property for the conditional format.
+    /// - `format`: The [`Format`] property for the conditional format.
     ///
     pub fn set_format(mut self, format: impl Into<Format>) -> ConditionalFormatDate {
         self.format = Some(format.into());
@@ -3478,8 +3482,8 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    /// - `rule_type`: A [`ConditionalFormatType`] enum value.
+    /// - `value`: Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
@@ -3575,8 +3579,8 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    /// - `rule_type`: A [`ConditionalFormatType`] enum value.
+    /// - `value`: Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
@@ -3623,7 +3627,7 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -3691,7 +3695,7 @@ impl ConditionalFormat2ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     pub fn set_maximum_color<T>(mut self, color: T) -> ConditionalFormat2ColorScale
@@ -3952,8 +3956,8 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    /// - `rule_type`: A [`ConditionalFormatType`] enum value.
+    /// - `value`: Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
@@ -4049,8 +4053,8 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    /// - `rule_type`: A [`ConditionalFormatType`] enum value.
+    /// - `value`: Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
@@ -4098,8 +4102,8 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    /// - `rule_type`: A [`ConditionalFormatType`] enum value.
+    /// - `value`: Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
@@ -4146,7 +4150,7 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -4215,7 +4219,7 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     pub fn set_midpoint_color<T>(mut self, color: T) -> ConditionalFormat3ColorScale
@@ -4237,7 +4241,7 @@ impl ConditionalFormat3ColorScale {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     pub fn set_maximum_color<T>(mut self, color: T) -> ConditionalFormat3ColorScale
@@ -4499,8 +4503,8 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    /// - `rule_type`: A [`ConditionalFormatType`] enum value.
+    /// - `value`: Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
@@ -4593,8 +4597,8 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    /// - `rule_type`: A [`ConditionalFormatType`] enum value.
+    /// - `value`: Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
@@ -4638,7 +4642,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -4703,7 +4707,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -4767,7 +4771,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -4833,7 +4837,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
@@ -4897,7 +4901,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -4950,7 +4954,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is on by default.
+    /// - `enable`: Turn the property on/off. It is on by default.
     ///
     /// # Examples
     ///
@@ -5005,7 +5009,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `direction`- A [`ConditionalFormatDataBarDirection`] enum value.
+    /// - `direction`: A [`ConditionalFormatDataBarDirection`] enum value.
     ///
     /// # Examples
     ///
@@ -5064,7 +5068,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -5120,7 +5124,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `position`- A [`ConditionalFormatDataBarAxisPosition`] enum value.
+    /// - `position`: A [`ConditionalFormatDataBarAxisPosition`] enum value.
     ///
     /// # Examples
     ///
@@ -5196,7 +5200,7 @@ impl ConditionalFormatDataBar {
     ///
     /// # Parameters
     ///
-    /// * `color` - The color property defined by a [`Color`] enum value or a
+    /// - `color`: The color property defined by a [`Color`] enum value or a
     ///   type that implements the [`IntoColor`] trait.
     ///
     ///
@@ -5773,7 +5777,7 @@ impl ConditionalFormatIconSet {
     ///
     /// # Parameters
     ///
-    /// * `icon_type` - A [`ConditionalFormatIconType`] enum value.
+    /// - `icon_type`: A [`ConditionalFormatIconType`] enum value.
     ///
     pub fn set_icon_type(
         mut self,
@@ -5841,7 +5845,7 @@ impl ConditionalFormatIconSet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -5902,7 +5906,7 @@ impl ConditionalFormatIconSet {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     /// # Examples
     ///
@@ -6402,8 +6406,8 @@ impl ConditionalFormatCustomIcon {
     ///
     /// # Parameters
     ///
-    /// * `rule_type`- A [`ConditionalFormatType`] enum value.
-    /// * `value` - Any type that can convert into a [`ConditionalFormatValue`]
+    /// - `rule_type`: A [`ConditionalFormatType`] enum value.
+    /// - `value`: Any type that can convert into a [`ConditionalFormatValue`]
     ///   such as numbers, dates, times and formula ranges. String values are
     ///   ignored in this type of conditional format.
     ///
@@ -6459,8 +6463,8 @@ impl ConditionalFormatCustomIcon {
     ///
     /// # Parameters
     ///
-    /// * `icon_type`- A [`ConditionalFormatIconType`] enum value.
-    /// * `index` - Index to the icon within the type. See the indexes shown in
+    /// - `icon_type`: A [`ConditionalFormatIconType`] enum value.
+    /// - `index`: Index to the icon within the type. See the indexes shown in
     ///   the images for [`ConditionalFormatIconType`].
     ///
     ///
@@ -6582,7 +6586,7 @@ impl ConditionalFormatCustomIcon {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_no_icon(mut self, enable: bool) -> ConditionalFormatCustomIcon {
         self.no_icon = enable;
@@ -6596,7 +6600,7 @@ impl ConditionalFormatCustomIcon {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_greater_than(mut self, enable: bool) -> ConditionalFormatCustomIcon {
         self.greater_than = enable;
@@ -7099,7 +7103,7 @@ pub enum ConditionalFormatType {
 ///
 /// # Parameters
 ///
-/// * `direction`- A [`ConditionalFormatDataBarDirection`] enum value.
+/// - `direction`: A [`ConditionalFormatDataBarDirection`] enum value.
 ///
 /// # Examples
 ///
@@ -7416,7 +7420,7 @@ macro_rules! generate_conditional_common_methods {
         ///
         /// # Parameters
         ///
-        /// * `range` - A string like type representing an Excel range.
+        /// - `range`: A string like type representing an Excel range.
         ///
         ///   Note, you can use an Excel range like `"$B$3:$D$6,$I$3:$K$6"` or
         ///   omit the `$` anchors and replace the commas with spaces to have a
@@ -7440,7 +7444,7 @@ macro_rules! generate_conditional_common_methods {
         ///
         /// # Parameters
         ///
-        /// * `enable` - Turn the property on/off. It is off by default.
+        /// - `enable`: Turn the property on/off. It is off by default.
         ///
         pub fn set_stop_if_true(mut self, enable: bool) -> $t {
             self.stop_if_true = enable;
@@ -7503,7 +7507,7 @@ impl ConditionalFormatCell {
     ///
     /// # Parameters
     ///
-    /// * `range` - A string like type representing an Excel range.
+    /// - `range`: A string like type representing an Excel range.
     ///
     ///   Note, you can use an Excel range like `"$B$3:$D$6,$I$3:$K$6"` or
     ///   omit the `$` anchors and replace the commas with spaces to have a
@@ -7527,7 +7531,7 @@ impl ConditionalFormatCell {
     ///
     /// # Parameters
     ///
-    /// * `enable` - Turn the property on/off. It is off by default.
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
     pub fn set_stop_if_true(mut self, enable: bool) -> ConditionalFormatCell {
         self.stop_if_true = enable;
