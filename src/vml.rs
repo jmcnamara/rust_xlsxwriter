@@ -6,10 +6,11 @@
 
 mod tests;
 
-use crate::xmlwriter::XMLWriter;
+use crate::{drawing::DrawingInfo, xmlwriter::XMLWriter};
 
 pub struct Vml {
     pub(crate) writer: XMLWriter,
+    pub(crate) buttons: Vec<VmlInfo>,
     pub(crate) header_images: Vec<VmlInfo>,
     pub(crate) data_id: u32,
     pub(crate) shape_id: u32,
@@ -26,10 +27,17 @@ impl Vml {
 
         Vml {
             writer,
+            buttons: vec![],
             header_images: vec![],
             data_id: 0,
             shape_id: 0,
         }
+    }
+
+    // Adjust pixel dimensions from 96 dpi to 72 dpi with the 0.25 rounding used
+    // by Excel.
+    fn vml_dpi_size(dimension: f64) -> f64 {
+        (dimension + 0.25).floor() * 72.0 / 96.0
     }
 
     // -----------------------------------------------------------------------
@@ -43,6 +51,18 @@ impl Vml {
 
         // Write the o:shapelayout element.
         self.write_shapelayout();
+
+        if !self.buttons.is_empty() {
+            // Write the v:shapetype element.
+            self.write_button_shapetype();
+
+            for (z_index, vml_info) in self.buttons.clone().iter().enumerate() {
+                self.shape_id += 1;
+
+                // Write the v:shape element.
+                self.write_button_shape(self.shape_id, z_index + 1, vml_info);
+            }
+        }
 
         if !self.header_images.is_empty() {
             // Write the v:shapetype element.
@@ -93,7 +113,30 @@ impl Vml {
         self.writer.xml_empty_tag("o:idmap", &attributes);
     }
 
-    // Write the <v:shapetype> element.
+    // Write the <v:shapetype> element for button.
+    fn write_button_shapetype(&mut self) {
+        let attributes = [
+            ("id", "_x0000_t201"),
+            ("coordsize", "21600,21600"),
+            ("o:spt", "201"),
+            ("path", "m,l,21600r21600,l21600,xe"),
+        ];
+
+        self.writer.xml_start_tag("v:shapetype", &attributes);
+
+        // Write the v:stroke element.
+        self.write_stroke();
+
+        // Write the v:path element.
+        self.write_button_path();
+
+        // Write the o:lock element.
+        self.write_shapetype_lock();
+
+        self.writer.xml_end_tag("v:shapetype");
+    }
+
+    // Write the <v:shapetype> element for header images.
     fn write_image_shapetype(&mut self) {
         let attributes = [
             ("id", "_x0000_t75"),
@@ -114,10 +157,10 @@ impl Vml {
         self.write_formulas();
 
         // Write the v:path element.
-        self.write_path();
+        self.write_image_path();
 
         // Write the o:lock element.
-        self.write_shapetype_lock();
+        self.write_aspect_ratio_lock();
 
         self.writer.xml_end_tag("v:shapetype");
     }
@@ -155,8 +198,21 @@ impl Vml {
         self.writer.xml_empty_tag("v:f", &attributes);
     }
 
-    // Write the <v:path> element.
-    fn write_path(&mut self) {
+    // Write the <v:path> element for buttons.
+    fn write_button_path(&mut self) {
+        let attributes = [
+            ("shadowok", "f"),
+            ("o:extrusionok", "f"),
+            ("strokeok", "f"),
+            ("fillok", "f"),
+            ("o:connecttype", "rect"),
+        ];
+
+        self.writer.xml_empty_tag("v:path", &attributes);
+    }
+
+    // Write the <v:path> element for header images.
+    fn write_image_path(&mut self) {
         let attributes = [
             ("o:extrusionok", "f"),
             ("gradientshapeok", "t"),
@@ -168,15 +224,71 @@ impl Vml {
 
     // Write the <o:lock> element.
     fn write_shapetype_lock(&mut self) {
+        let attributes = [("v:ext", "edit"), ("shapetype", "t")];
+
+        self.writer.xml_empty_tag("o:lock", &attributes);
+    }
+
+    // Write the <o:lock> element.
+    fn write_aspect_ratio_lock(&mut self) {
         let attributes = [("v:ext", "edit"), ("aspectratio", "t")];
 
         self.writer.xml_empty_tag("o:lock", &attributes);
     }
 
-    // Write the <v:shape> element.
+    // Write the <v:shape> element for buttons.
+    #[allow(clippy::cast_precision_loss)]
+    fn write_button_shape(&mut self, vml_shape_id: u32, z_index: usize, vml_info: &VmlInfo) {
+        let top = Self::vml_dpi_size(vml_info.drawing_info.row_absolute as f64);
+        let left = Self::vml_dpi_size(vml_info.drawing_info.col_absolute as f64);
+        let width = Self::vml_dpi_size(vml_info.drawing_info.width);
+        let height = Self::vml_dpi_size(vml_info.drawing_info.height);
+
+        let style = format!(
+            "position:absolute;\
+             margin-left:{left}pt;\
+             margin-top:{top}pt;\
+             width:{width}pt;\
+             height:{height}pt;\
+             z-index:{z_index};\
+             mso-wrap-style:tight"
+        );
+
+        let shape_id = format!("_x0000_s{vml_shape_id}");
+
+        let mut attributes = vec![("id", shape_id), ("type", "#_x0000_t201".to_string())];
+
+        if !vml_info.alt_text.is_empty() {
+            attributes.push(("alt", vml_info.alt_text.clone()));
+        }
+
+        attributes.push(("style", style));
+        attributes.push(("o:button", "t".to_string()));
+        attributes.push(("fillcolor", "buttonFace [67]".to_string()));
+        attributes.push(("strokecolor", "windowText [64]".to_string()));
+        attributes.push(("o:insetmode", "auto".to_string()));
+
+        self.writer.xml_start_tag("v:shape", &attributes);
+
+        // Write the v:fill element.
+        self.write_fill();
+
+        // Write the o:lock element.
+        self.write_rotation_lock(vml_info);
+
+        // Write the v:textbox element.
+        self.write_button_textbox(vml_info);
+
+        // Write the x:ClientData element.
+        self.write_button_client_data(vml_info);
+
+        self.writer.xml_end_tag("v:shape");
+    }
+
+    // Write the <v:shape> element for header images.
     fn write_image_shape(&mut self, z_index: usize, vml_info: &VmlInfo) {
-        let width = vml_info.width;
-        let height = vml_info.height;
+        let width = Self::vml_dpi_size(vml_info.width);
+        let height = Self::vml_dpi_size(vml_info.height);
 
         let style = format!(
             "position:absolute;\
@@ -190,7 +302,7 @@ impl Vml {
         let shape_id = format!("_x0000_s{}", self.shape_id);
 
         let attributes = [
-            ("id", vml_info.position.to_string()),
+            ("id", vml_info.header_position.to_string()),
             ("o:spid", shape_id),
             ("type", "#_x0000_t75".to_string()),
             ("style", style),
@@ -202,7 +314,7 @@ impl Vml {
         self.write_imagedata(vml_info);
 
         // Write the o:lock element.
-        self.write_shape_lock(vml_info);
+        self.write_rotation_lock(vml_info);
 
         self.writer.xml_end_tag("v:shape");
     }
@@ -211,14 +323,14 @@ impl Vml {
     fn write_imagedata(&mut self, vml_info: &VmlInfo) {
         let attributes = [
             ("o:relid", format!("rId{}", vml_info.rel_id)),
-            ("o:title", vml_info.title.to_string()),
+            ("o:title", vml_info.name.to_string()),
         ];
 
         self.writer.xml_empty_tag("v:imagedata", &attributes);
     }
 
     // Write the <o:lock> element.
-    fn write_shape_lock(&mut self, vml_info: &VmlInfo) {
+    fn write_rotation_lock(&mut self, vml_info: &VmlInfo) {
         let mut attributes = vec![("v:ext", "edit".to_string()), ("rotation", "t".to_string())];
 
         if vml_info.is_scaled {
@@ -226,6 +338,122 @@ impl Vml {
         }
 
         self.writer.xml_empty_tag("o:lock", &attributes);
+    }
+
+    // Write the <v:fill> element.
+    fn write_fill(&mut self) {
+        let attributes = [
+            ("color2", "buttonFace [67]".to_string()),
+            ("o:detectmouseclick", "t".to_string()),
+        ];
+
+        self.writer.xml_empty_tag("v:fill", &attributes);
+    }
+
+    // Write the <v:textbox> element.
+    fn write_button_textbox(&mut self, vml_info: &VmlInfo) {
+        let attributes = [("style", "mso-direction-alt:auto"), ("o:singleclick", "f")];
+
+        self.writer.xml_start_tag("v:textbox", &attributes);
+
+        // Write the div element.
+        self.write_button_div(vml_info);
+
+        self.writer.xml_end_tag("v:textbox");
+    }
+
+    // Write the <div> element.
+    fn write_button_div(&mut self, vml_info: &VmlInfo) {
+        let attributes = [("style", "text-align:center")];
+
+        self.writer.xml_start_tag("div", &attributes);
+
+        // Write the font element.
+        self.write_button_font(vml_info);
+
+        self.writer.xml_end_tag("div");
+    }
+
+    // Write the <font> element.
+    fn write_button_font(&mut self, vml_info: &VmlInfo) {
+        let attributes = [
+            ("face", "Calibri".to_string()),
+            ("size", "220".to_string()),
+            ("color", "#000000".to_string()),
+        ];
+
+        self.writer
+            .xml_data_element("font", &vml_info.name, &attributes);
+    }
+
+    // Write the <x:ClientData> element.
+    fn write_button_client_data(&mut self, vml_info: &VmlInfo) {
+        let attributes = [("ObjectType", "Button")];
+
+        self.writer.xml_start_tag("x:ClientData", &attributes);
+
+        // Write the x:Anchor element.
+        self.write_anchor(vml_info);
+
+        // Write the x:PrintObject element.
+        self.write_print_object();
+
+        // Write the x:AutoFill element.
+        self.write_auto_fill();
+
+        // Write the x:FmlaMacro element.
+        self.write_fmla_macro(vml_info);
+
+        // Write the x:TextHAlign element.
+        self.write_text_halign();
+
+        // Write the x:TextVAlign element.
+        self.write_text_valign();
+
+        self.writer.xml_end_tag("x:ClientData");
+    }
+
+    // Write the <x:Anchor> element.
+    fn write_anchor(&mut self, vml_info: &VmlInfo) {
+        let anchor = format!(
+            "{}, {}, {}, {}, {}, {}, {}, {}",
+            vml_info.drawing_info.from.col,
+            vml_info.drawing_info.from.col_offset,
+            vml_info.drawing_info.from.row,
+            vml_info.drawing_info.from.row_offset,
+            vml_info.drawing_info.to.col,
+            vml_info.drawing_info.to.col_offset,
+            vml_info.drawing_info.to.row,
+            vml_info.drawing_info.to.row_offset,
+        );
+
+        self.writer.xml_data_element_only("x:Anchor", &anchor);
+    }
+
+    // Write the <x:PrintObject> element.
+    fn write_print_object(&mut self) {
+        self.writer.xml_data_element_only("x:PrintObject", "False");
+    }
+
+    // Write the <x:AutoFill> element.
+    fn write_auto_fill(&mut self) {
+        self.writer.xml_data_element_only("x:AutoFill", "False");
+    }
+
+    // Write the <x:FmlaMacro> element.
+    fn write_fmla_macro(&mut self, vml_info: &VmlInfo) {
+        self.writer
+            .xml_data_element_only("x:FmlaMacro", &vml_info.macro_name);
+    }
+
+    // Write the <x:TextHAlign> element.
+    fn write_text_halign(&mut self) {
+        self.writer.xml_data_element_only("x:TextHAlign", "Center");
+    }
+
+    // Write the <x:TextVAlign> element.
+    fn write_text_valign(&mut self) {
+        self.writer.xml_data_element_only("x:TextVAlign", "Center");
     }
 }
 
@@ -236,8 +464,27 @@ impl Vml {
 pub(crate) struct VmlInfo {
     pub(crate) width: f64,
     pub(crate) height: f64,
-    pub(crate) title: String,
+    pub(crate) name: String,
+    pub(crate) alt_text: String,
+    pub(crate) macro_name: String,
     pub(crate) rel_id: u32,
-    pub(crate) position: String,
+    pub(crate) header_position: String,
     pub(crate) is_scaled: bool,
+    pub(crate) drawing_info: DrawingInfo,
+}
+
+impl Default for VmlInfo {
+    fn default() -> Self {
+        VmlInfo {
+            width: 0.0,
+            height: 0.0,
+            name: String::new(),
+            alt_text: String::new(),
+            macro_name: String::new(),
+            rel_id: 0,
+            header_position: String::new(),
+            is_scaled: false,
+            drawing_info: DrawingInfo::default(),
+        }
+    }
 }

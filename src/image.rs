@@ -17,6 +17,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use crate::drawing::{DrawingObject, DrawingType};
+use crate::vml::VmlInfo;
 use crate::{Url, XlsxError};
 
 #[derive(Clone, Debug)]
@@ -728,53 +729,6 @@ impl Image {
         self.height_dpi
     }
 
-    // Get the image width as used by header/footer VML.
-    pub(crate) fn vml_width(&self) -> f64 {
-        // Scale the height/width by the resolution, relative to 72dpi.
-        let mut width = self.width * 72.0 / self.width_dpi * self.scale_width;
-
-        // Excel uses a rounding based around 72 and 96 dpi.
-        width = width * 96.0 / 72.0 + 0.25;
-        width.floor() * 72.0 / 96.0
-    }
-
-    // Get the image height as used by header/footer VML.
-    pub(crate) fn vml_height(&self) -> f64 {
-        // Scale the height/width by the resolution, relative to 72dpi.
-        let mut height = self.height * 72.0 / self.height_dpi * self.scale_height;
-
-        // Excel uses a rounding based around 72 and 96 dpi.
-        height = height * 96.0 / 72.0 + 0.25;
-        height.floor() * 72.0 / 96.0
-    }
-
-    // Get the image short name as used by header/footer VML.
-    pub(crate) fn vml_name(&self) -> String {
-        self.vml_name.clone()
-    }
-
-    // Check if the image scale has changed. Mainly used by header/footer VML.
-    pub(crate) fn is_scaled(&self) -> bool {
-        self.scale_height != 1.0 || self.scale_width != 1.0
-    }
-
-    // Get the image position string as used by header/footer VML.
-    pub(crate) fn vml_position(&self) -> String {
-        if self.is_header {
-            match self.header_position {
-                HeaderImagePosition::Left => "LH".to_string(),
-                HeaderImagePosition::Right => "RH".to_string(),
-                HeaderImagePosition::Center => "CH".to_string(),
-            }
-        } else {
-            match self.header_position {
-                HeaderImagePosition::Left => "LF".to_string(),
-                HeaderImagePosition::Right => "RF".to_string(),
-                HeaderImagePosition::Center => "CF".to_string(),
-            }
-        }
-    }
-
     /// Set an internal name used for header/footer images.
     ///
     /// This method sets an internal image name used by header/footer VML. It is
@@ -788,6 +742,58 @@ impl Image {
     pub fn set_vml_name(mut self, name: impl Into<String>) -> Image {
         self.vml_name = name.into();
         self
+    }
+
+    // Header images are stored in a vmlDrawing file. We create a struct
+    // to store the required image information in that format.
+    pub(crate) fn vml_info(&self) -> VmlInfo {
+        VmlInfo {
+            width: self.vml_width(),
+            height: self.vml_height(),
+            name: self.vml_name(),
+            header_position: self.vml_position(),
+            is_scaled: self.is_scaled(),
+            ..Default::default()
+        }
+    }
+
+    // Get the image width as used by header/footer VML.
+    fn vml_width(&self) -> f64 {
+        // Scale the image dimension relative to 96dpi.
+        self.width * 96.0 / self.width_dpi * self.scale_width
+    }
+
+    // Get the image height as used by header/footer VML.
+    fn vml_height(&self) -> f64 {
+        // Scale the image dimension relative to 96dpi.
+        self.height * 96.0 / self.height_dpi * self.scale_height
+    }
+
+    // Get the image short name as used by header/footer VML.
+    fn vml_name(&self) -> String {
+        self.vml_name.clone()
+    }
+
+    // Check if the image scale has changed. Mainly used by header/footer VML.
+    pub(crate) fn is_scaled(&self) -> bool {
+        self.scale_height != 1.0 || self.scale_width != 1.0
+    }
+
+    // Get the image position string as used by header/footer VML.
+    fn vml_position(&self) -> String {
+        if self.is_header {
+            match self.header_position {
+                HeaderImagePosition::Left => "LH".to_string(),
+                HeaderImagePosition::Right => "RH".to_string(),
+                HeaderImagePosition::Center => "CH".to_string(),
+            }
+        } else {
+            match self.header_position {
+                HeaderImagePosition::Left => "LF".to_string(),
+                HeaderImagePosition::Right => "RF".to_string(),
+                HeaderImagePosition::Center => "CF".to_string(),
+            }
+        }
     }
 
     // -----------------------------------------------------------------------

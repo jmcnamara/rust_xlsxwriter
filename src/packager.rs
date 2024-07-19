@@ -732,19 +732,35 @@ impl<W: Write + Seek + Send> Packager<W> {
     fn write_vml_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut index = 1;
         for worksheet in &mut workbook.worksheets {
-            if worksheet.has_header_footer_images() {
-                let filename = format!("xl/drawings/vmlDrawing{index}.vml");
-                self.zip.start_file(filename, self.zip_options)?;
+            if worksheet.has_header_footer_images() || worksheet.has_vml {
+                if worksheet.has_vml {
+                    let filename = format!("xl/drawings/vmlDrawing{index}.vml");
+                    self.zip.start_file(filename, self.zip_options)?;
 
-                let mut vml = Vml::new();
-                vml.header_images
-                    .append(&mut worksheet.header_footer_vml_info);
-                vml.data_id = index;
-                vml.shape_id = 1024 * index;
-                vml.assemble_xml_file();
+                    let mut vml = Vml::new();
+                    vml.buttons.append(&mut worksheet.button_vml_info);
+                    vml.data_id = index;
+                    vml.shape_id = 1024 * index;
+                    vml.assemble_xml_file();
 
-                self.zip.write_all(vml.writer.xmlfile.get_ref())?;
-                index += 1;
+                    self.zip.write_all(vml.writer.xmlfile.get_ref())?;
+                    index += 1;
+                }
+
+                if worksheet.has_header_footer_images() {
+                    let filename = format!("xl/drawings/vmlDrawing{index}.vml");
+                    self.zip.start_file(filename, self.zip_options)?;
+
+                    let mut vml = Vml::new();
+                    vml.header_images
+                        .append(&mut worksheet.header_footer_vml_info);
+                    vml.data_id = index;
+                    vml.shape_id = 1024 * index;
+                    vml.assemble_xml_file();
+
+                    self.zip.write_all(vml.writer.xmlfile.get_ref())?;
+                    index += 1;
+                }
             }
         }
 

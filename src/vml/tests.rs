@@ -17,12 +17,13 @@ mod theme_tests {
         let mut vml = Vml::new();
 
         let vml_info = VmlInfo {
-            width: 24.0,
-            height: 24.0,
-            title: "red".to_string(),
+            width: 32.0,
+            height: 32.0,
+            name: "red".to_string(),
             rel_id: 1,
-            position: "LH".to_string(),
+            header_position: "LH".to_string(),
             is_scaled: false,
+            ..Default::default()
         };
 
         vml.header_images.push(vml_info);
@@ -75,21 +76,23 @@ mod theme_tests {
         let mut vml = Vml::new();
 
         let vml_info1 = VmlInfo {
-            width: 24.0,
-            height: 24.0,
-            title: "red".to_string(),
+            width: 32.0,
+            height: 32.0,
+            name: "red".to_string(),
             rel_id: 1,
-            position: "LH".to_string(),
+            header_position: "LH".to_string(),
             is_scaled: false,
+            ..Default::default()
         };
 
         let vml_info2 = VmlInfo {
-            width: 17.25,
-            height: 17.25,
-            title: "blue".to_string(),
+            width: 23.0,
+            height: 23.0,
+            name: "blue".to_string(),
             rel_id: 2,
-            position: "CH".to_string(),
+            header_position: "CH".to_string(),
             is_scaled: false,
+            ..Default::default()
         };
 
         vml.header_images.push(vml_info1);

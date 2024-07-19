@@ -1642,6 +1642,9 @@ impl Workbook {
         // Convert the images in the workbooks into drawing files and rel links.
         self.prepare_drawings();
 
+        // Prepare the worksheet VML elements such as buttons and header images.
+        self.prepare_vml();
+
         // Fill the chart data caches from worksheet data.
         self.prepare_chart_cache_data()?;
 
@@ -1677,6 +1680,24 @@ impl Workbook {
         }
         self.worksheets[active_index].set_active(true);
         self.active_tab = active_index as u16;
+    }
+
+    // Prepare the worksheet VML elements such as buttons and header images.
+    fn prepare_vml(&mut self) {
+        let mut vml_drawing_id = 1;
+
+        for worksheet in &mut self.worksheets {
+            if !worksheet.buttons.is_empty() {
+                worksheet.prepare_vml_objects();
+                worksheet.add_vml_drawing_rel_link(vml_drawing_id);
+                vml_drawing_id += 1;
+            }
+
+            if worksheet.has_header_footer_images() {
+                worksheet.add_vml_drawing_rel_link(vml_drawing_id);
+                vml_drawing_id += 1;
+            }
+        }
     }
 
     // Convert any embedded images in the worksheets to a global reference. Each
@@ -1718,7 +1739,6 @@ impl Workbook {
     fn prepare_drawings(&mut self) {
         let mut chart_id = 1;
         let mut drawing_id = 1;
-        let mut vml_drawing_id = 1;
         let mut image_id = self.embedded_images.len() as u32;
 
         // These are the image ids for each unique image file.
@@ -1747,12 +1767,7 @@ impl Workbook {
                 // The header/footer images are counted from the last worksheet id.
                 let base_image_id = worksheet_image_ids.len() as u32;
 
-                worksheet.prepare_header_footer_images(
-                    &mut header_footer_image_ids,
-                    base_image_id,
-                    vml_drawing_id,
-                );
-                vml_drawing_id += 1;
+                worksheet.prepare_header_footer_images(&mut header_footer_image_ids, base_image_id);
             }
         }
     }
@@ -2161,7 +2176,7 @@ impl Workbook {
                 }
             }
 
-            if worksheet.has_header_footer_images() {
+            if worksheet.has_vml || worksheet.has_header_footer_images() {
                 package_options.has_vml = true;
             }
 

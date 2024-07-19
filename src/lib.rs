@@ -185,6 +185,7 @@
 //!   formatting for 5,000,000 numeric cells.
 //!
 mod app;
+mod button;
 mod content_types;
 mod core;
 mod custom;
@@ -233,6 +234,7 @@ pub mod worksheet;
 mod test_functions;
 
 // Re-export the public APIs.
+pub use button::*;
 pub use data_validation::*;
 pub use datetime::*;
 pub use error::*;

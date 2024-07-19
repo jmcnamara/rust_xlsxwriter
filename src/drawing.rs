@@ -87,6 +87,7 @@ impl Drawing {
         match drawing_info.drawing_type {
             DrawingType::Image => self.write_pic(index, drawing_info),
             DrawingType::Chart => self.write_graphic_frame(index, drawing_info),
+            DrawingType::Button => {}
         }
 
         self.writer.xml_empty_tag_only("xdr:clientData");
@@ -439,6 +440,40 @@ pub(crate) struct DrawingCoordinates {
     pub(crate) row_offset: f64,
 }
 
+impl Default for DrawingInfo {
+    fn default() -> Self {
+        let from = DrawingCoordinates {
+            col: 0,
+            row: 0,
+            col_offset: 0.0,
+            row_offset: 0.0,
+        };
+
+        let to = DrawingCoordinates {
+            col: 0,
+            row: 0,
+            col_offset: 0.0,
+            row_offset: 0.0,
+        };
+
+        DrawingInfo {
+            from,
+            to,
+            col_absolute: 0,
+            row_absolute: 0,
+            width: 0.0,
+            height: 0.0,
+            name: String::new(),
+            description: String::new(),
+            decorative: false,
+            rel_id: 0,
+            object_movement: ObjectMovement::MoveButDontSizeWithCells,
+            drawing_type: DrawingType::Image,
+            url: None,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub(crate) struct DrawingInfo {
     pub(crate) from: DrawingCoordinates,
@@ -460,6 +495,7 @@ pub(crate) struct DrawingInfo {
 pub(crate) enum DrawingType {
     Image,
     Chart,
+    Button,
 }
 
 // Trait for object such as Images and Charts that translate to a Drawing object.

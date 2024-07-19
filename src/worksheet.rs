@@ -1075,11 +1075,12 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    static_regex, utility, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType,
-    Color, ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRuleInternal,
-    DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
-    HeaderImagePosition, HyperlinkType, Image, IntoColor, IntoExcelDateTime, ObjectMovement,
-    ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
+    static_regex, utility, Button, Chart, ChartEmptyCells, ChartRangeCacheData,
+    ChartRangeCacheDataType, Color, ConditionalFormat, DataValidation, DataValidationErrorStyle,
+    DataValidationRuleInternal, DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria,
+    FilterData, FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoColor,
+    IntoExcelDateTime, ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table,
+    TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -1094,9 +1095,11 @@ pub(crate) const COL_MAX: ColNum = 16_384;
 pub(crate) const ROW_MAX: RowNum = 1_048_576;
 pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 pub(crate) const MAX_PARAMETER_LEN: usize = 255;
-const MAX_STRING_LEN: usize = 32_767;
+pub(crate) const DEFAULT_COL_WIDTH_PIXELS: u32 = 64;
+pub(crate) const DEFAULT_ROW_HEIGHT_PIXELS: u32 = 20;
 const DEFAULT_COL_WIDTH: f64 = 8.43;
 const DEFAULT_ROW_HEIGHT: f64 = 15.0;
+const MAX_STRING_LEN: usize = 32_767;
 const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 /// The `Worksheet` struct represents an Excel worksheet. It handles operations
@@ -1184,6 +1187,7 @@ pub struct Worksheet {
     pub(crate) autofilter_area: String,
     pub(crate) xf_formats: Vec<Format>,
     pub(crate) dxf_formats: Vec<Format>,
+    pub(crate) has_vml: bool,
     pub(crate) has_hyperlink_style: bool,
     pub(crate) table_relationships: Vec<(String, String, String)>,
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
@@ -1191,11 +1195,13 @@ pub struct Worksheet {
     pub(crate) drawing_relationships: Vec<(String, String, String)>,
     pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
     pub(crate) images: BTreeMap<(RowNum, ColNum), Image>,
+    pub(crate) button_vml_info: Vec<VmlInfo>,
     pub(crate) header_footer_vml_info: Vec<VmlInfo>,
     pub(crate) drawing: Drawing,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     pub(crate) header_footer_images: [Option<Image>; 6],
     pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
+    pub(crate) buttons: BTreeMap<(RowNum, ColNum), Button>,
     pub(crate) tables: Vec<Table>,
     pub(crate) has_embedded_image_descriptions: bool,
     pub(crate) embedded_images: Vec<Image>,
@@ -1375,6 +1381,7 @@ impl Worksheet {
             visible: Visible::Default,
             first_sheet: false,
             uses_string_table: false,
+            has_vml: false,
             has_dynamic_arrays: false,
             print_area_defined_name: DefinedName::new(),
             repeat_row_cols_defined_name: DefinedName::new(),
@@ -1443,6 +1450,7 @@ impl Worksheet {
             image_types: [false; NUM_IMAGE_FORMATS],
             header_footer_images: [None, None, None, None, None, None],
             header_footer_vml_info: vec![],
+            button_vml_info: vec![],
             rel_count: 0,
             protection_on: false,
             protection_hash: 0,
@@ -1455,6 +1463,7 @@ impl Worksheet {
             filter_conditions: BTreeMap::new(),
             filter_automatic_off: false,
             charts: BTreeMap::new(),
+            buttons: BTreeMap::new(),
             has_drawing_object_linkage: false,
             cells_with_autofilter: HashSet::new(),
             conditional_formats: BTreeMap::new(),
@@ -5084,6 +5093,81 @@ impl Worksheet {
         chart.y_offset = y_offset;
 
         self.charts.insert((row, col), chart);
+
+        Ok(self)
+    }
+
+    /// Add a button to a worksheet.
+    ///
+    /// Add a [`Button`] to a worksheet at a cell location.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `button` - The [`Button`] to insert into the cell.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// TODO
+    ///
+    pub fn insert_button(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        button: &Button,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.insert_button_with_offset(row, col, button, 0, 0)?;
+
+        Ok(self)
+    }
+
+    /// Add a button to a worksheet at an offset.
+    ///
+    /// Add a [`Button`] to a worksheet  at a pixel offset within a cell
+    /// location.
+    ///
+    /// # Errors
+    ///
+    /// * [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Parameters
+    ///
+    /// * `row` - The zero indexed row number.
+    /// * `col` - The zero indexed column number.
+    /// * `button` - The [`Button`] to insert into the cell.
+    /// * `x_offset`: The horizontal offset within the cell in pixels.
+    /// * `y_offset`: The vertical offset within the cell in pixels.
+    ///
+    /// # Examples
+    ///
+    /// TODO
+    ///
+    pub fn insert_button_with_offset(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        button: &Button,
+        x_offset: u32,
+        y_offset: u32,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let mut button = button.clone();
+        button.x_offset = x_offset;
+        button.y_offset = y_offset;
+
+        self.buttons.insert((row, col), button);
+        self.has_vml = true;
 
         Ok(self)
     }
@@ -12392,7 +12476,6 @@ impl Worksheet {
         &mut self,
         image_ids: &mut HashMap<String, u32>,
         base_image_id: u32,
-        drawing_id: u32,
     ) {
         let mut rel_ids: HashMap<String, u32> = HashMap::new();
         for image in self.header_footer_images.clone().into_iter().flatten() {
@@ -12424,16 +12507,10 @@ impl Worksheet {
                 }
             };
 
-            // Header images are stored in a vmlDrawing file. We create a struct
-            // to store the required image information in that format.
-            let vml_info = VmlInfo {
-                width: image.vml_width(),
-                height: image.vml_height(),
-                title: image.vml_name(),
-                rel_id,
-                position: image.vml_position(),
-                is_scaled: image.is_scaled(),
-            };
+            // Convert the header image to a VmlInfo structure for storing in a
+            // vmlDrawing file..
+            let mut vml_info = image.vml_info();
+            vml_info.rel_id = rel_id;
 
             // Store the header/footer vml data.
             self.header_footer_vml_info.push(vml_info);
@@ -12441,14 +12518,42 @@ impl Worksheet {
             // Store the used image type for the Content Type file.
             self.image_types[image.image_type as usize] = true;
         }
+    }
 
-        // Store the linkage to the worksheets rels file.
+    // Store the linkage to the worksheets rels file.
+    pub(crate) fn add_vml_drawing_rel_link(&mut self, drawing_id: u32) {
         let vml_drawing_name = format!("../drawings/vmlDrawing{drawing_id}.vml");
         self.drawing_object_relationships.push((
             "vmlDrawing".to_string(),
             vml_drawing_name,
             String::new(),
         ));
+    }
+
+    // Convert buttons into VML objects.
+    pub(crate) fn prepare_vml_objects(&mut self) {
+        let mut button_id = 1;
+        for ((row, col), button) in self.buttons.clone() {
+            // Convert the button to a VmlInfo structure for storing in a vmlDrawing file.
+            let mut button = button.clone();
+            if button.name.is_empty() {
+                button.name = format!("Button {button_id}");
+            }
+
+            if button.macro_name.is_empty() {
+                button.macro_name = format!("[0]!Button{button_id}_Click");
+            } else {
+                button.macro_name = format!("[0]!{}", button.macro_name);
+            }
+
+            let mut vml_info = button.vml_info();
+            vml_info.drawing_info = self.position_object_pixels(row, col, &button);
+
+            // Store the button vml data.
+            self.button_vml_info.push(vml_info);
+
+            button_id += 1;
+        }
     }
 
     // Convert the chart dimensions into drawing dimensions and add them to the
@@ -13025,6 +13130,11 @@ impl Worksheet {
         // Write the drawing element.
         if !self.drawing.drawings.is_empty() {
             self.write_drawing();
+        }
+
+        // Write the legacyDrawing element.
+        if self.has_vml {
+            self.write_legacy_drawing();
         }
 
         // Write the legacyDrawingHF element.
@@ -14417,6 +14527,14 @@ impl Worksheet {
         let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
         self.writer.xml_empty_tag("drawing", &attributes);
+    }
+
+    // Write the <legacyDrawing> element.
+    fn write_legacy_drawing(&mut self) {
+        self.rel_count += 1;
+        let attributes = [("r:id", format!("rId{}", self.rel_count))];
+
+        self.writer.xml_empty_tag("legacyDrawing", &attributes);
     }
 
     // Write the <legacyDrawingHF> element.
