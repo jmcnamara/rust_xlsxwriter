@@ -131,8 +131,8 @@ frequently.
 
 Recent changes:
 
+- Added support for adding VBA macros.
 - Added support for data validation.
-- Added support for links in images.
 - Added support for combined charts and chart secondary axes.
 
 

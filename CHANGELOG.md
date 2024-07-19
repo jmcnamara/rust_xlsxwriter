@@ -5,6 +5,33 @@ All notable changes to `rust_xlsxwriter` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.71.0] - 2023-07-20
+
+### Added
+
+  - Added support for adding VBA Macros to `rust_xlsxwriter` using files
+    extracted from Excel files.
+
+    An Excel `xlsm` file is structurally the same as an `xlsx` file except that
+    it contains an additional `vbaProject.bin` binary file containing VBA
+    functions and/or macros.
+
+    Unlike other components of an xlsx/xlsm file this data isn't stored in an
+    XML format. Instead the functions and macros as stored as a pre-parsed
+    binary format. As such it wouldn't be feasible to programmatically define
+    macros and create a `vbaProject.bin` file from scratch (at least not in the
+    remaining lifespan and interest levels of the author).
+
+    Instead, as a workaround, the Rust [`vba_extract`] utility is used to
+    extract `vbaProject.bin` files from existing xlsm files which can then be
+    added to `rust_xlsxwriter` files.
+
+     See [Working with VBA Macros].
+
+    [`vba_extract`]: https://crates.io/crates/vba_extract
+    [Working with VBA Macros]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/macros/index.html
+
+
 ## [0.70.0] - 2023-07-14
 
 ### Added
