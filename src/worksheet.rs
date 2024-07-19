@@ -2527,7 +2527,7 @@ impl Worksheet {
     /// The basic rule is to break the string into pairs of [`Format`] and
     /// [`str`] fragments. So if we look at the above string again:
     ///
-    /// - This is **bold** and this is *italic*
+    /// &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is **bold** and this is *italic*
     ///
     /// The would be broken down into 4 fragments:
     ///

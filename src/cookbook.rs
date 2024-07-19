@@ -19,8 +19,8 @@ cargo run --example app_demo  # or any other example
 4. [Format colors: Create a palette of the available colors](#format-colors-create-a-palette-of-the-available-colors)
 5. [Merging cells: An example of merging cell ranges](#merging-cells-an-example-of-merging-cell-ranges)
 6. [Autofilters: Add an autofilter to a worksheet](#autofilters-add-an-autofilter-to-a-worksheet)
-7. [Adding worksheet tables](#adding-worksheet-tables)
-8. [Adding Conditional Formatting](#adding-conditional-formatting)
+7. [Tables: Adding worksheet tables](#tables-adding-worksheet-tables)
+8. [Conditional Formatting: Adding conditional formatting to worksheets](#conditional-formatting-adding-conditional-formatting-to-worksheets)
 9. [Data Validation: add cell validation and dropdowns](#data-validation-add-cell-validation-and-dropdowns)
 10. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
 11. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
@@ -48,14 +48,14 @@ cargo run --example app_demo  # or any other example
 33. [Chart: Chart data table](#chart-chart-data-table)
 34. [Chart: Chart data tools](#chart-chart-data-tools)
 35. [Chart: Gauge Chart](#chart-gauge-chart)
-36. [Sparklines example](#sparklines-example)
-37. [Sparklines example with properties set](#sparklines-example-with-properties-set)
-38. [Extending generic `write()` to handle user data types](#extending-generic-write-to-handle-user-data-types)
+36. [Sparklines: simple example](#sparklines-simple-example)
+37. [Sparklines: advanced example](#sparklines-advanced-example)
+38. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
 39. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
 40. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-41. [Setting cell protection in a worksheet](#setting-cell-protection-in-a-worksheet)
-42. [Setting document properties Set the metadata properties for a workbook](#setting-document-properties-set-the-metadata-properties-for-a-workbook)
-43. [Setting the Sensitivity Label](#setting-the-sensitivity-label)
+41. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+42. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+43. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
 44. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
 45. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
 46. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
@@ -904,7 +904,7 @@ pub fn populate_autofilter_data(
 ```
 
 
-# Adding worksheet tables
+# Tables: Adding worksheet tables
 
 Tables in Excel are a way of grouping a range of cells into a single entity
 that has common formatting or that can be referenced from formulas. Tables
@@ -1435,7 +1435,7 @@ Code to generate the above example:
 ```
 
 
-# Adding Conditional Formatting
+# Conditional Formatting: Adding conditional formatting to worksheets
 
 Conditional formatting is a feature of Excel which allows you to apply a format
 to a cell or a range of cells based on user defined rules. For example you might
@@ -5208,7 +5208,7 @@ fn main() -> Result<(), XlsxError> {
 
 
 
-# Sparklines example
+# Sparklines: simple example
 
 Example of adding sparklines to an Excel spreadsheet using the `rust_xlsxwriter`
 library.
@@ -5272,7 +5272,7 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
-# Sparklines example with properties set
+# Sparklines: advanced example
 
 Example of adding sparklines to an Excel spreadsheet using the
 `rust_xlsxwriter` library.
@@ -5631,7 +5631,7 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
-# Extending generic `write()` to handle user data types
+# Traits: Extending generic `write()` to handle user data types
 
 Example of how to extend the the `rust_xlsxwriter`[`Worksheet::write()`] method using the
 [`IntoExcelData`] trait to handle arbitrary user data that can be mapped to one
@@ -5848,7 +5848,7 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
-# Setting cell protection in a worksheet
+# Cell Protection: Setting cell protection in a worksheet
 
 Example of cell locking and formula hiding in an Excel worksheet using worksheet
 protection.
@@ -5902,7 +5902,7 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
-# Setting document properties Set the metadata properties for a workbook
+# Document Properties: Setting document metadata properties for a workbook
 
 An example of setting workbook document properties for a file created using the
 `rust_xlsxwriter` library.
@@ -5945,7 +5945,7 @@ fn main() -> Result<(), XlsxError> {
 ```
 
 
-# Setting the Sensitivity Label
+# Document Properties: Setting the Sensitivity Label
 
 Sensitivity Labels are a property that can be added to an Office 365 document to
 indicate that it is compliant with a company's information protection policies.
