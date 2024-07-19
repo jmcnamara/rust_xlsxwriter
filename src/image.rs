@@ -275,9 +275,92 @@ impl Image {
         Ok(image)
     }
 
+    /// Set the width of the chart.
+    ///
+    /// Set the displayed width of the image in pixels. As with Excel this sets
+    /// a logical size for the image, it doesn't rescale the actual image. This
+    /// allows the user to get back the original unscaled image.
+    ///
+    /// **Note for macOS Excel users**: the width shown on Excel for macOS can
+    /// be different from the width on Windows. This is an Excel issue and not a
+    /// `rust_xlsxwriter` issue.
+    ///
+    /// # Parameters
+    ///
+    /// * `width` - The logical image width in pixels.
+    ///
+    /// # Examples
+    ///
+    /// This example shows how to create an image object and use it to insert
+    /// the image into a worksheet. The image in this case is scaled by setting
+    /// the height and width.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_image_set_width.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new image object and set the image logical sizes.
+    ///     let image = Image::new("examples/rust_logo.png")?
+    ///         .set_height(80)
+    ///         .set_width(80);
+    ///
+    ///     // Insert the image.
+    ///     worksheet.insert_image(1, 2, &image)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/image_set_scale_width.png">
+    ///
+    pub fn set_width(mut self, width: u32) -> Image {
+        if width == 0 {
+            return self;
+        }
+
+        // Set the scale width rather than the actual height.
+        self.scale_width = f64::from(width) / self.width;
+        self
+    }
+
+    /// Set the height of the image.
+    ///
+    /// Set the displayed height of the image in pixels. As with Excel this sets
+    /// a logical size for the image, it doesn't rescale the actual image. This
+    /// allows the user to get back the original unscaled image. See the example
+    /// above.
+    ///
+    /// # Parameters
+    ///
+    /// * `height` - The The logical image height in pixels.
+    ///
+    pub fn set_height(mut self, height: u32) -> Image {
+        if height == 0 {
+            return self;
+        }
+
+        // Set the scale height rather than the actual height.
+        self.scale_height = f64::from(height) / self.height;
+        self
+    }
+
     /// Set the height scale for the image.
     ///
-    /// Set the height scale for the image relative to 1.0/100%. As with Excel
+    /// Set the height scale for the image relative to 1.0 (i.e. 100%). As with Excel
     /// this sets a logical scale for the image, it doesn't rescale the actual
     /// image. This allows the user to get back the original unscaled image.
     ///
@@ -337,7 +420,7 @@ impl Image {
 
     /// Set the width scale for the image.
     ///
-    /// Set the width scale for the image relative to 1.0/100%. See the
+    /// Set the width scale for the image relative to 1.0 (i.e. 100%). See the
     /// [`set_scale_height()`](Image::set_scale_height) method for details.
     ///
     /// # Parameters
@@ -677,6 +760,9 @@ impl Image {
 
     /// Get the width of the image used for the size calculations in Excel.
     ///
+    /// Note, this gets the actual pixel width of the image and not the
+    /// logical/scaled width set via [`Image::set_width()`].
+    ///
     /// # Examples
     ///
     /// This example shows how to get some of the properties of an Image that
@@ -704,6 +790,9 @@ impl Image {
 
     /// Get the height of the image used for the size calculations in Excel. See
     /// the example above.
+    ///
+    /// Note, this gets the actual pixel height of the image and not the
+    /// logical/scaled height set via [`Image::set_height()`].
     ///
     pub fn height(&self) -> f64 {
         self.height

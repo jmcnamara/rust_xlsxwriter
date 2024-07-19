@@ -56,6 +56,31 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test to demonstrate adding image scaling.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.set_column_width_pixels(0, 192)?;
+    worksheet.set_row_height_pixels(2, 64)?;
+    worksheet.set_row_height_pixels(4, 64)?;
+
+    let mut image = Image::new("tests/input/images/red.png")?.set_alt_text("red.png");
+
+    worksheet.insert_image(0, 0, &image)?;
+
+    image = image.set_width(192).set_height(64);
+    worksheet.insert_image(2, 0, &image)?;
+
+    image = image.set_width(64).set_height(64);
+    worksheet.insert_image(4, 0, &image)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_image_scale01_1() {
     let test_runner = common::TestRunner::new()
@@ -74,6 +99,18 @@ fn test_image_scale01_2() {
         .set_name("image_scale01")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_image_scale01_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("image_scale01")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();
