@@ -1079,7 +1079,7 @@ use crate::{
     ChartRangeCacheDataType, Color, ConditionalFormat, DataValidation, DataValidationErrorStyle,
     DataValidationRuleInternal, DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria,
     FilterData, FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoColor,
-    IntoExcelDateTime, ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table,
+    IntoExcelDateTime, Note, ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table,
     TableFunction, Url,
 };
 
@@ -1193,20 +1193,26 @@ pub struct Worksheet {
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
     pub(crate) drawing_object_relationships: Vec<(String, String, String)>,
     pub(crate) drawing_relationships: Vec<(String, String, String)>,
+    pub(crate) comment_relationships: Vec<(String, String, String)>,
     pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
     pub(crate) images: BTreeMap<(RowNum, ColNum), Image>,
-    pub(crate) button_vml_info: Vec<VmlInfo>,
+    pub(crate) buttons_vml_info: Vec<VmlInfo>,
+    pub(crate) comments_vml_info: Vec<VmlInfo>,
     pub(crate) header_footer_vml_info: Vec<VmlInfo>,
     pub(crate) drawing: Drawing,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     pub(crate) header_footer_images: [Option<Image>; 6],
     pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
     pub(crate) buttons: BTreeMap<(RowNum, ColNum), Button>,
+    pub(crate) notes: BTreeMap<RowNum, BTreeMap<ColNum, Note>>,
     pub(crate) tables: Vec<Table>,
     pub(crate) has_embedded_image_descriptions: bool,
     pub(crate) embedded_images: Vec<Image>,
     pub(crate) global_embedded_image_indices: Vec<u32>,
     pub(crate) vba_codename: Option<String>,
+    pub(crate) note_authors: BTreeMap<String, usize>,
+    pub(crate) vml_data_id: String,
+    pub(crate) vml_shape_id: u32,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
@@ -1277,8 +1283,8 @@ pub struct Worksheet {
     has_x14_conditional_formats: bool,
     has_sparklines: bool,
     sparklines: Vec<Sparkline>,
-
     embedded_image_ids: HashMap<String, u32>,
+    default_note_author: String,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -1444,13 +1450,15 @@ impl Worksheet {
             hyperlink_relationships: vec![],
             drawing_object_relationships: vec![],
             drawing_relationships: vec![],
+            comment_relationships: vec![],
             vml_drawing_relationships: vec![],
             images: BTreeMap::new(),
             drawing: Drawing::new(),
             image_types: [false; NUM_IMAGE_FORMATS],
             header_footer_images: [None, None, None, None, None, None],
             header_footer_vml_info: vec![],
-            button_vml_info: vec![],
+            buttons_vml_info: vec![],
+            comments_vml_info: vec![],
             rel_count: 0,
             protection_on: false,
             protection_hash: 0,
@@ -1464,6 +1472,7 @@ impl Worksheet {
             filter_automatic_off: false,
             charts: BTreeMap::new(),
             buttons: BTreeMap::new(),
+            notes: BTreeMap::new(),
             has_drawing_object_linkage: false,
             cells_with_autofilter: HashSet::new(),
             conditional_formats: BTreeMap::new(),
@@ -1478,6 +1487,10 @@ impl Worksheet {
             has_sparklines: false,
             sparklines: vec![],
             vba_codename: None,
+            default_note_author: "Author".to_string(),
+            note_authors: BTreeMap::new(),
+            vml_data_id: String::new(),
+            vml_shape_id: 0,
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -5095,6 +5108,103 @@ impl Worksheet {
         self.charts.insert((row, col), chart);
 
         Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::MaxStringLengthExceeded`] - Text exceeds Excel's limit
+    ///   of 32,767 characters.
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `button`: The [`Button`] to insert into the cell.
+    /// - `x_offset`: The horizontal offset within the cell in pixels.
+    /// - `y_offset`: The vertical offset within the cell in pixels.
+    ///
+    pub fn insert_note(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        note: &Note,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        //  Check that the string is < Excel limit of 32767 chars.
+        if note.text.chars().count() > MAX_STRING_LEN {
+            return Err(XlsxError::MaxStringLengthExceeded);
+        }
+
+        let mut note = note.clone();
+
+        // Set the cell that the Note refers to. This is different form the cell
+        // where the note appears.
+        note.cell_row = row;
+        note.cell_col = col;
+
+        // Set the author name.
+        let note_author = match &note.author {
+            Some(author) => author,
+            None => &self.default_note_author,
+        };
+
+        // Convert the name to an id.
+        match self.note_authors.get(note_author) {
+            Some(id) => {
+                note.author_id = Some(*id);
+            }
+            None => {
+                let id = self.note_authors.len();
+                self.note_authors.insert(note_author.clone(), id);
+                note.author_id = Some(id);
+            }
+        }
+
+        // Store the note in a structure similar to the worksheet data table
+        // since notes also affect the calculation of <row> span attributes.
+        match self.notes.entry(row) {
+            Entry::Occupied(mut entry) => {
+                // The row already exists. Insert/replace column value.
+                let columns = entry.get_mut();
+                columns.insert(col, note);
+            }
+            Entry::Vacant(entry) => {
+                // The row doesn't exist, create a new row with columns and
+                // insert the cell value.
+                let columns = BTreeMap::from([(col, note)]);
+                entry.insert(columns);
+            }
+        }
+
+        self.has_vml = true;
+
+        Ok(self)
+    }
+
+    /// TODO.
+    pub fn set_default_note_author(&mut self, author: impl Into<String>) -> &mut Worksheet {
+        let author = author.into();
+        if author.chars().count() > 52 {
+            eprintln!("Author string must be less than the Excel limit of 52 characters: {author}");
+            return self;
+        }
+
+        if !self.note_authors.contains_key(&author) {
+            let id = self.note_authors.len();
+            self.note_authors.insert(author.clone(), id);
+        }
+
+        self.default_note_author = author;
+
+        self
     }
 
     /// Add a Excel Form Control button object to a worksheet.
@@ -12186,7 +12296,17 @@ impl Worksheet {
         // Create a Style struct object to generate the font xml.
         let xf_formats: Vec<Format> = vec![];
         let dxf_formats: Vec<Format> = vec![];
-        let mut styler = Styles::new(&xf_formats, &dxf_formats, 0, 0, 0, vec![], false, true);
+        let mut styler = Styles::new(
+            &xf_formats,
+            &dxf_formats,
+            0,
+            0,
+            0,
+            vec![],
+            false,
+            false,
+            true,
+        );
         let mut raw_string = String::new();
 
         let mut first_segment = true;
@@ -12568,7 +12688,7 @@ impl Worksheet {
         }
     }
 
-    // Store the linkage to the worksheets rels file.
+    // Store the vmlDrawingN.xml file linkage to the worksheets rels file.
     pub(crate) fn add_vml_drawing_rel_link(&mut self, drawing_id: u32) {
         let vml_drawing_name = format!("../drawings/vmlDrawing{drawing_id}.vml");
         self.drawing_object_relationships.push((
@@ -12579,10 +12699,30 @@ impl Worksheet {
     }
 
     // Convert buttons into VML objects.
-    pub(crate) fn prepare_vml_objects(&mut self) {
+    pub(crate) fn prepare_vml_objects(&mut self, vml_data_id: u32, vml_shape_id: u32) -> u32 {
         let mut button_id = 1;
+        let mut note_count = 0;
+
+        // Convert the Note objects to VmlInfo objects, along with their dimensions.
+        for (cell_row, columns) in &self.notes.clone() {
+            for (cell_col, note) in columns {
+                let note_row = note.row();
+                let note_col = note.col();
+
+                let mut vml_info = note.vml_info();
+                vml_info.drawing_info = self.position_object_pixels(note_row, note_col, note);
+                vml_info.row = *cell_row;
+                vml_info.col = *cell_col;
+
+                // Store the note vml data.
+                self.comments_vml_info.push(vml_info);
+
+                note_count += 1;
+            }
+        }
+
+        // Convert the Button objects to VmlInfo objects, along with their dimensions.
         for ((row, col), button) in self.buttons.clone() {
-            // Convert the button to a VmlInfo structure for storing in a vmlDrawing file.
             let mut button = button.clone();
             if button.name.is_empty() {
                 button.name = format!("Button {button_id}");
@@ -12598,10 +12738,32 @@ impl Worksheet {
             vml_info.drawing_info = self.position_object_pixels(row, col, &button);
 
             // Store the button vml data.
-            self.button_vml_info.push(vml_info);
+            self.buttons_vml_info.push(vml_info);
 
             button_id += 1;
         }
+
+        // The VML o:idmap data id contains a comma separated range when there
+        // is more than one 1024 block of comments, like this: data="1,2".
+        dbg!(note_count);
+        let mut oid_map = vml_data_id.to_string();
+
+        for i in 0..note_count / 1024 {
+            let next_id = vml_data_id + i + 1;
+            oid_map = format!("{oid_map},{next_id}");
+        }
+
+        self.vml_data_id = oid_map;
+        self.vml_shape_id = vml_shape_id;
+
+        note_count
+    }
+
+    // Store the commentN.xml file linkage to the worksheets rels file.
+    pub(crate) fn add_comment_rel_link(&mut self, comment_id: u32) {
+        let comment_name = format!("../comments{comment_id}.xml");
+        self.comment_relationships
+            .push(("comments".to_string(), comment_name, String::new()));
     }
 
     // Convert the chart dimensions into drawing dimensions and add them to the
@@ -12918,6 +13080,7 @@ impl Worksheet {
         self.drawing_object_relationships.clear();
         self.drawing_relationships.clear();
         self.vml_drawing_relationships.clear();
+        self.comment_relationships.clear();
         self.header_footer_vml_info.clear();
     }
 
@@ -13477,7 +13640,7 @@ impl Worksheet {
 
     // Write the <sheetData> element.
     fn write_sheet_data(&mut self) {
-        if self.data_table.is_empty() && self.changed_rows.is_empty() {
+        if self.data_table.is_empty() && self.notes.is_empty() && self.changed_rows.is_empty() {
             self.writer.xml_empty_tag_only("sheetData");
         } else {
             self.writer.xml_start_tag_only("sheetData");
@@ -14016,7 +14179,7 @@ impl Worksheet {
     fn write_data_table(&mut self) {
         let spans = self.calculate_spans();
 
-        // Swap out the worksheet data structures so we can iterate over it and
+        // Swap out the worksheet data structures so we can iterate over them and
         // still call self.write_xml() methods.
         let mut temp_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>> = BTreeMap::new();
         let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
@@ -14028,14 +14191,17 @@ impl Worksheet {
             let span = spans.get(&span_index).map(AsRef::as_ref);
 
             let row_options = temp_changed_rows.get(&row_num);
+            let row_has_notes = self.notes.contains_key(&row_num);
 
+            // If there is no column data then only the <row> metadata needs updating.
             let Some(columns) = temp_table.get(&row_num) else {
-                if row_options.is_some() {
+                if row_options.is_some() || row_has_notes {
                     self.write_table_row(row_num, span, row_options, false);
                 }
                 continue;
             };
 
+            // The row has data. Write it out cell by cell.
             self.write_table_row(row_num, span, row_options, true);
             for (&col_num, cell) in columns {
                 match cell {
@@ -14116,6 +14282,18 @@ impl Worksheet {
 
         for row_num in self.dimensions.first_row..=self.dimensions.last_row {
             if let Some(columns) = self.data_table.get(&row_num) {
+                for &col_num in columns.keys() {
+                    if span_min == COL_MAX {
+                        span_min = col_num;
+                        span_max = col_num;
+                    } else {
+                        span_min = cmp::min(span_min, col_num);
+                        span_max = cmp::max(span_max, col_num);
+                    }
+                }
+            }
+
+            if let Some(columns) = self.notes.get(&row_num) {
                 for &col_num in columns.keys() {
                     if span_min == COL_MAX {
                         span_min = col_num;

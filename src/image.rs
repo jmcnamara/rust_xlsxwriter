@@ -605,7 +605,13 @@ impl Image {
     /// src="https://rustxlsxwriter.github.io/images/image_set_alt_text.png">
     ///
     pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Image {
-        self.alt_text = alt_text.into();
+        let alt_text = alt_text.into();
+        if alt_text.chars().count() > 255 {
+            eprintln!("Alternative text is greater than Excel's limit of 255 characters.");
+            return self;
+        }
+
+        self.alt_text = alt_text;
         self
     }
 
@@ -839,7 +845,7 @@ impl Image {
         VmlInfo {
             width: self.vml_width(),
             height: self.vml_height(),
-            name: self.vml_name(),
+            text: self.vml_name(),
             header_position: self.vml_position(),
             is_scaled: self.is_scaled(),
             ..Default::default()

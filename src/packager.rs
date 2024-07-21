@@ -67,7 +67,7 @@ use crate::theme::Theme;
 use crate::vml::Vml;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
-use crate::{DocProperties, NUM_IMAGE_FORMATS};
+use crate::{Comment, DocProperties, NUM_IMAGE_FORMATS};
 
 // Packager struct to assembler the xlsx file.
 pub struct Packager<W: Write + Seek> {
@@ -157,6 +157,7 @@ impl<W: Write + Seek + Send> Packager<W> {
 
         self.write_drawing_files(workbook)?;
         self.write_vml_files(workbook)?;
+        self.write_comment_files(workbook)?;
         self.write_image_files(workbook)?;
         self.write_chart_files(workbook)?;
         self.write_table_files(workbook)?;
@@ -234,6 +235,10 @@ impl<W: Write + Seek + Send> Packager<W> {
 
         for i in 0..options.num_tables {
             content_types.add_table_name(i + 1);
+        }
+
+        for i in 0..options.num_comments {
+            content_types.add_comments_name(i + 1);
         }
 
         if options.has_sst_table {
@@ -400,6 +405,10 @@ impl<W: Write + Seek + Send> Packager<W> {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
+        for relationship in &worksheet.comment_relationships {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
         let filename = format!("xl/worksheets/_rels/sheet{index}.xml.rels");
 
         self.zip.start_file(filename, self.zip_options)?;
@@ -531,6 +540,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             workbook.border_count,
             workbook.num_formats.clone(),
             workbook.has_hyperlink_style,
+            workbook.has_comments,
             false,
         );
 
@@ -728,9 +738,32 @@ impl<W: Write + Seek + Send> Packager<W> {
         Ok(())
     }
 
+    // Write the comment files.
+    fn write_comment_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
+        let mut index = 1;
+        for worksheet in &mut workbook.worksheets {
+            if !worksheet.notes.is_empty() {
+                let filename = format!("xl/comments{index}.xml");
+                self.zip.start_file(filename, self.zip_options)?;
+
+                let mut comment = Comment::new();
+                comment.notes = worksheet.notes.clone();
+                comment.note_authors = worksheet.note_authors.clone();
+
+                comment.assemble_xml_file();
+
+                self.zip.write_all(comment.writer.xmlfile.get_ref())?;
+                index += 1;
+            }
+        }
+
+        Ok(())
+    }
+
     // Write the vml files.
     fn write_vml_files(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         let mut index = 1;
+        let mut header_data_id = 1;
         for worksheet in &mut workbook.worksheets {
             if worksheet.has_header_footer_images() || worksheet.has_vml {
                 if worksheet.has_vml {
@@ -738,9 +771,12 @@ impl<W: Write + Seek + Send> Packager<W> {
                     self.zip.start_file(filename, self.zip_options)?;
 
                     let mut vml = Vml::new();
-                    vml.buttons.append(&mut worksheet.button_vml_info);
-                    vml.data_id = index;
-                    vml.shape_id = 1024 * index;
+                    vml.buttons.append(&mut worksheet.buttons_vml_info);
+                    vml.comments.append(&mut worksheet.comments_vml_info);
+
+                    vml.data_id.clone_from(&worksheet.vml_data_id);
+
+                    vml.shape_id = worksheet.vml_shape_id;
                     vml.assemble_xml_file();
 
                     self.zip.write_all(vml.writer.xmlfile.get_ref())?;
@@ -754,7 +790,10 @@ impl<W: Write + Seek + Send> Packager<W> {
                     let mut vml = Vml::new();
                     vml.header_images
                         .append(&mut worksheet.header_footer_vml_info);
-                    vml.data_id = index;
+
+                    vml.data_id = format!("{header_data_id}");
+                    header_data_id += 1;
+
                     vml.shape_id = 1024 * index;
                     vml.assemble_xml_file();
 
@@ -893,6 +932,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) num_drawings: u16,
     pub(crate) num_charts: u16,
     pub(crate) num_tables: u16,
+    pub(crate) num_comments: u16,
     pub(crate) doc_security: u8,
     pub(crate) worksheet_names: Vec<String>,
     pub(crate) defined_names: Vec<String>,
@@ -917,6 +957,7 @@ impl PackagerOptions {
             num_drawings: 0,
             num_charts: 0,
             num_tables: 0,
+            num_comments: 0,
             doc_security: 0,
             worksheet_names: vec![],
             defined_names: vec![],

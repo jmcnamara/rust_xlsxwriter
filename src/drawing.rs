@@ -87,7 +87,7 @@ impl Drawing {
         match drawing_info.drawing_type {
             DrawingType::Image => self.write_pic(index, drawing_info),
             DrawingType::Chart => self.write_graphic_frame(index, drawing_info),
-            DrawingType::Button => {}
+            DrawingType::Vml => {}
         }
 
         self.writer.xml_empty_tag_only("xdr:clientData");
@@ -495,7 +495,7 @@ pub(crate) struct DrawingInfo {
 pub(crate) enum DrawingType {
     Image,
     Chart,
-    Button,
+    Vml,
 }
 
 // Trait for object such as Images and Charts that translate to a Drawing object.

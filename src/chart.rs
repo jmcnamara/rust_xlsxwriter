@@ -2619,7 +2619,13 @@ impl Chart {
     /// - `alt_text`: The alt text string to add to the chart.
     ///
     pub fn set_alt_text(&mut self, alt_text: impl Into<String>) -> &mut Chart {
-        self.alt_text = alt_text.into();
+        let alt_text = alt_text.into();
+        if alt_text.chars().count() > 255 {
+            eprintln!("Alternative text is greater than Excel's limit of 255 characters.");
+            return self;
+        }
+
+        self.alt_text = alt_text;
         self
     }
 

@@ -10,7 +10,7 @@ use crate::drawing::{DrawingObject, DrawingType};
 use crate::vml::VmlInfo;
 use crate::{ObjectMovement, DEFAULT_COL_WIDTH_PIXELS, DEFAULT_ROW_HEIGHT_PIXELS};
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 /// The `Button` struct represents an worksheet button object.
 ///
 /// The `Button` struct is used to create an Excel "Form Control" button object
@@ -167,7 +167,7 @@ impl Button {
     }
 
     /// Set the macro associated with the button.
-
+    ///
     /// The `set_macro()` method can be used to associate an existing VBA macro
     /// with a button object. See [Working with VBA macros](crate::macros) for
     /// more details on macros in `rust_xlsxwriter`.
@@ -263,7 +263,7 @@ impl Button {
     pub fn set_alt_text(mut self, alt_text: impl Into<String>) -> Button {
         let alt_text = alt_text.into();
         if alt_text.chars().count() > 255 {
-            eprintln!("Button caption is greater than Excel's limit of 255 characters.");
+            eprintln!("Alternative text is greater than Excel's limit of 255 characters.");
             return self;
         }
 
@@ -305,7 +305,7 @@ impl Button {
         VmlInfo {
             width: self.width,
             height: self.height,
-            name: self.name.clone(),
+            text: self.name.clone(),
             alt_text: self.alt_text.clone(),
             macro_name: self.macro_name.clone(),
             ..Default::default()
@@ -352,6 +352,6 @@ impl DrawingObject for Button {
     }
 
     fn drawing_type(&self) -> DrawingType {
-        DrawingType::Button
+        DrawingType::Vml
     }
 }

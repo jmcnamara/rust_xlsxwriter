@@ -19,7 +19,7 @@ mod theme_tests {
         let vml_info = VmlInfo {
             width: 32.0,
             height: 32.0,
-            name: "red".to_string(),
+            text: "red".to_string(),
             rel_id: 1,
             header_position: "LH".to_string(),
             is_scaled: false,
@@ -27,7 +27,7 @@ mod theme_tests {
         };
 
         vml.header_images.push(vml_info);
-        vml.data_id = 1;
+        vml.data_id = 1.to_string();
         vml.shape_id = 1024;
 
         vml.assemble_xml_file();
@@ -78,7 +78,7 @@ mod theme_tests {
         let vml_info1 = VmlInfo {
             width: 32.0,
             height: 32.0,
-            name: "red".to_string(),
+            text: "red".to_string(),
             rel_id: 1,
             header_position: "LH".to_string(),
             is_scaled: false,
@@ -88,7 +88,7 @@ mod theme_tests {
         let vml_info2 = VmlInfo {
             width: 23.0,
             height: 23.0,
-            name: "blue".to_string(),
+            text: "blue".to_string(),
             rel_id: 2,
             header_position: "CH".to_string(),
             is_scaled: false,
@@ -97,7 +97,7 @@ mod theme_tests {
 
         vml.header_images.push(vml_info1);
         vml.header_images.push(vml_info2);
-        vml.data_id = 1;
+        vml.data_id = 1.to_string();
         vml.shape_id = 1024;
 
         vml.assemble_xml_file();

@@ -320,6 +320,7 @@ pub struct Workbook {
     pub(crate) vba_signature: Vec<u8>,
     pub(crate) vba_codename: Option<String>,
     pub(crate) is_xlsm_file: bool,
+    pub(crate) has_comments: bool,
 
     xf_indices: HashMap<Format, u32>,
     dxf_indices: HashMap<Format, u32>,
@@ -402,6 +403,7 @@ impl Workbook {
             vba_project: vec![],
             vba_signature: vec![],
             vba_codename: None,
+            has_comments: false,
         };
 
         // Initialize the workbook with the same function used to reset it.
@@ -1706,13 +1708,26 @@ impl Workbook {
 
     // Prepare the worksheet VML elements such as buttons and header images.
     fn prepare_vml(&mut self) {
+        let mut comment_id = 1;
         let mut vml_drawing_id = 1;
+        let mut vml_data_id = 1;
+        let mut vml_shape_id = 1024;
 
         for worksheet in &mut self.worksheets {
-            if !worksheet.buttons.is_empty() {
-                worksheet.prepare_vml_objects();
+            if worksheet.has_vml {
+                let note_count = worksheet.prepare_vml_objects(vml_data_id, vml_shape_id);
                 worksheet.add_vml_drawing_rel_link(vml_drawing_id);
                 vml_drawing_id += 1;
+
+                if !worksheet.notes.is_empty() {
+                    worksheet.add_comment_rel_link(comment_id);
+                    comment_id += 1;
+                    self.has_comments = true;
+                }
+
+                // Each VML should start with a shape id incremented by 1024.
+                vml_data_id += (1024 + note_count) / 1024;
+                vml_shape_id += 1024 * ((1024 + note_count) / 1024);
             }
 
             if worksheet.has_header_footer_images() {
@@ -2212,6 +2227,10 @@ impl Workbook {
 
             if !worksheet.tables.is_empty() {
                 package_options.num_tables += worksheet.tables.len() as u16;
+            }
+
+            if !worksheet.notes.is_empty() {
+                package_options.num_comments += 1;
             }
 
             // Store the autofilter areas which are a category of defined name.

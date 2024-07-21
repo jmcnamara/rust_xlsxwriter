@@ -22,6 +22,7 @@ pub struct Styles<'a> {
     border_count: u16,
     num_formats: Vec<String>,
     has_hyperlink_style: bool,
+    has_comments: bool,
     is_rich_string_style: bool,
 }
 
@@ -41,6 +42,7 @@ impl<'a> Styles<'a> {
         border_count: u16,
         num_formats: Vec<String>,
         has_hyperlink_style: bool,
+        has_comments: bool,
         is_rich_string_style: bool,
     ) -> Styles<'a> {
         let writer = XMLWriter::new();
@@ -54,6 +56,7 @@ impl<'a> Styles<'a> {
             border_count,
             num_formats,
             has_hyperlink_style,
+            has_comments,
             is_rich_string_style,
         }
     }
@@ -112,7 +115,12 @@ impl<'a> Styles<'a> {
 
     // Write the <fonts> element.
     fn write_fonts(&mut self) {
-        let attributes = [("count", self.font_count.to_string())];
+        let mut count = self.font_count;
+        if self.has_comments {
+            count += 1;
+        }
+
+        let attributes = [("count", count.to_string())];
 
         self.writer.xml_start_tag("fonts", &attributes);
 
@@ -122,6 +130,12 @@ impl<'a> Styles<'a> {
             if xf_format.has_font {
                 self.write_font(&xf_format.font, false);
             }
+        }
+
+        // Add the additional font for cell comments/notes. This isn't currently
+        // configurable and probably won't be.
+        if self.has_comments {
+            self.write_comment_font();
         }
 
         self.writer.xml_end_tag("fonts");
@@ -268,6 +282,18 @@ impl<'a> Styles<'a> {
         }
 
         self.writer.xml_empty_tag("u", &attributes);
+    }
+
+    // Write the <font> element for comments.
+    fn write_comment_font(&mut self) {
+        self.writer.xml_start_tag_only("font");
+
+        self.writer.xml_empty_tag("sz", &[("val", "8")]);
+        self.writer.xml_empty_tag("color", &[("indexed", "81")]);
+        self.writer.xml_empty_tag("name", &[("val", "Tahoma")]);
+        self.writer.xml_empty_tag("family", &[("val", "2")]);
+
+        self.writer.xml_end_tag("font");
     }
 
     // Write the <vertAlign> element.

@@ -188,6 +188,7 @@
 //!
 mod app;
 mod button;
+mod comment;
 mod content_types;
 mod core;
 mod custom;
@@ -200,6 +201,7 @@ mod format;
 mod formula;
 mod image;
 mod metadata;
+mod note;
 mod packager;
 mod properties;
 mod protection;
@@ -237,6 +239,7 @@ mod test_functions;
 
 // Re-export the public APIs.
 pub use button::*;
+pub use comment::*;
 pub use data_validation::*;
 pub use datetime::*;
 pub use error::*;
@@ -244,6 +247,7 @@ pub use filter::*;
 pub use format::*;
 pub use formula::*;
 pub use image::*;
+pub use note::*;
 pub use properties::*;
 pub use protection::*;
 pub use table::*;

@@ -20,7 +20,17 @@ mod styles_tests {
 
         let xf_formats = vec![xf_format];
         let dxf_formats = vec![];
-        let mut styles = Styles::new(&xf_formats, &dxf_formats, 1, 2, 1, vec![], false, false);
+        let mut styles = Styles::new(
+            &xf_formats,
+            &dxf_formats,
+            1,
+            2,
+            1,
+            vec![],
+            false,
+            false,
+            false,
+        );
 
         styles.assemble_xml_file();
 
