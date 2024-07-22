@@ -8,7 +8,7 @@
 
 use crate::drawing::{DrawingObject, DrawingType};
 use crate::vml::VmlInfo;
-use crate::{ColNum, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
+use crate::{ColNum, Format, IntoColor, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
 
 #[derive(Clone)]
 /// The `Note` struct represents an worksheet note object.
@@ -31,6 +31,8 @@ pub struct Note {
     pub(crate) alt_text: String,
     pub(crate) object_movement: ObjectMovement,
     pub(crate) decorative: bool,
+    pub(crate) is_visible: Option<bool>,
+    pub(crate) format: Format,
 }
 
 impl Note {
@@ -41,6 +43,11 @@ impl Note {
     /// Create a new Note object to represent an Excel Form Control note.
     ///
     pub fn new(text: impl Into<String>) -> Note {
+        let format = Format::new()
+            .set_background_color("#FFFFE1")
+            .set_font_name("Tahoma")
+            .set_font_size(8);
+
         Note {
             row: None,
             col: None,
@@ -58,6 +65,8 @@ impl Note {
             alt_text: String::new(),
             object_movement: ObjectMovement::DontMoveOrSizeWithCells,
             decorative: false,
+            is_visible: None,
+            format,
         }
     }
 
@@ -104,6 +113,107 @@ impl Note {
         }
 
         self.author = Some(author);
+        self
+    }
+
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `todo`:
+    ///
+    pub fn set_visible(mut self, enable: bool) -> Note {
+        self.is_visible = Some(enable);
+        self
+    }
+
+    /// Set the TODO pattern background color property.
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// - `color`: The background color property defined by a
+    ///   [`Color`](crate::Color) enum value or a type that implements the
+    ///   [`IntoColor`] trait.
+    ///
+    pub fn set_background_color<T>(mut self, color: T) -> Note
+    where
+        T: IntoColor,
+    {
+        let color = color.new_color();
+        if color.is_valid() {
+            self.format.fill.background_color = color;
+        }
+
+        self
+    }
+
+    /// Set the Format font name property. TODO
+    ///
+    /// Set the font for a cell format. Excel can only display fonts that are
+    /// installed on the system that it is running on. Therefore it is generally
+    /// best to use standard Excel fonts.
+    ///
+    /// # Parameters
+    ///
+    /// - `font_name`: The font name property.
+    ///
+    pub fn set_font_name(mut self, font_name: impl Into<String>) -> Note {
+        self.format.font.name = font_name.into();
+
+        if self.format.font.name != "Calibri" {
+            self.format.font.scheme = String::new();
+        }
+
+        self
+    }
+
+    /// Set the Format font size property. TODO
+    ///
+    /// Set the font size of the cell format. The size is generally an integer
+    /// value but Excel allows x.5 values (hence the property is a f64 or
+    /// types that can convert [`Into`] a f64).
+    ///
+    /// Excel adjusts the height of a row to accommodate the largest font size
+    /// in the row.
+    ///
+    /// # Parameters
+    ///
+    /// - `font_size`: The font size property.
+    ///
+    pub fn set_font_size<T>(mut self, font_size: T) -> Note
+    where
+        T: Into<f64>,
+    {
+        self.format.font.size = font_size.into().to_string();
+        self
+    }
+
+    /// Set the Format font family property. TODO.
+    ///
+    /// Set the font family. This is usually an integer in the range 1-4. This
+    /// function is implemented for completeness but is rarely used in practice.
+    ///
+    /// # Parameters
+    ///
+    /// - `font_family`: The font family property.
+    ///
+    pub fn set_font_family(mut self, font_family: u8) -> Note {
+        self.format.font.family = font_family;
+        self
+    }
+
+    /// Set the [`Format`] of the conditional format rule.
+    ///
+    /// Set the [`Format`] todo.
+    ///
+    ///
+    /// # Parameters
+    ///
+    /// - `format`: The [`Format`] property for the cell Note.
+    ///
+    pub fn set_format(mut self, format: impl Into<Format>) -> Note {
+        self.format = format.into();
         self
     }
 
@@ -167,6 +277,8 @@ impl Note {
             height: self.height,
             text: self.text.clone(),
             alt_text: self.alt_text.clone(),
+            is_visible: self.is_visible.unwrap_or(false),
+            fill_color: self.format.fill.background_color.vml_rgb_hex_value(),
             ..Default::default()
         }
     }

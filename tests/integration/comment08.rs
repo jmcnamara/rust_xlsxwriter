@@ -12,24 +12,25 @@ use rust_xlsxwriter::{Note, Workbook, XlsxError};
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet1 = workbook.add_worksheet();
-    worksheet1.set_default_note_author("John");
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_default_note_author("John");
 
     let note = Note::new("Some text");
+    worksheet.insert_note(0, 0, &note)?;
 
-    for row in 0..=127 {
-        for col in 0..=15 {
-            worksheet1.insert_note(row, col, &note)?;
-        }
-    }
+    let note = Note::new("Some text");
+    worksheet.insert_note(1, 0, &note)?;
 
-    let _worksheet2 = workbook.add_worksheet();
+    let note = Note::new("Some text").set_visible(false);
+    worksheet.insert_note(2, 0, &note)?;
 
-    let worksheet3 = workbook.add_worksheet();
-    worksheet3.set_default_note_author("John");
+    let note = Note::new("Some text").set_visible(true);
+    worksheet.insert_note(3, 0, &note)?;
 
-    let note = Note::new("More text");
-    worksheet3.insert_note(0, 0, &note)?;
+    let note = Note::new("Some text");
+    worksheet.insert_note(4, 0, &note)?;
+
+    worksheet.show_notes();
 
     workbook.save(filename)?;
 
@@ -37,9 +38,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_comment05() {
+fn test_comment08() {
     let test_runner = common::TestRunner::new()
-        .set_name("comment05")
+        .set_name("comment08")
         .set_function(create_new_xlsx_file)
         .initialize();
 

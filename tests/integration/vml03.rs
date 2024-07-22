@@ -6,30 +6,39 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Note, Workbook, XlsxError};
+use rust_xlsxwriter::{Button, Note, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
+    // Worksheet 1.
     let worksheet1 = workbook.add_worksheet();
     worksheet1.set_default_note_author("John");
+    worksheet1.write(0, 0, "Foo")?;
 
     let note = Note::new("Some text");
+    worksheet1.insert_note(1, 1, &note)?;
 
-    for row in 0..=127 {
-        for col in 0..=15 {
-            worksheet1.insert_note(row, col, &note)?;
-        }
-    }
+    let button = Button::new();
+    worksheet1.insert_button(3, 2, &button)?;
+    worksheet1.insert_button(7, 4, &button)?;
 
+    // Worksheet 2.
     let _worksheet2 = workbook.add_worksheet();
 
+    // Worksheet 3.
     let worksheet3 = workbook.add_worksheet();
     worksheet3.set_default_note_author("John");
+    worksheet3.write(0, 0, "Bar")?;
 
     let note = Note::new("More text");
-    worksheet3.insert_note(0, 0, &note)?;
+    worksheet3.insert_note(6, 2, &note)?;
+
+    let button = Button::new();
+    worksheet3.insert_button(1, 1, &button)?;
+    worksheet3.insert_button(3, 2, &button)?;
+    worksheet3.insert_button(7, 4, &button)?;
 
     workbook.save(filename)?;
 
@@ -37,9 +46,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_comment05() {
+fn test_vml03() {
     let test_runner = common::TestRunner::new()
-        .set_name("comment05")
+        .set_name("vml03")
         .set_function(create_new_xlsx_file)
         .initialize();
 

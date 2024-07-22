@@ -1285,6 +1285,7 @@ pub struct Worksheet {
     sparklines: Vec<Sparkline>,
     embedded_image_ids: HashMap<String, u32>,
     default_note_author: String,
+    show_notes: bool,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -1489,6 +1490,7 @@ impl Worksheet {
             vba_codename: None,
             default_note_author: "Author".to_string(),
             note_authors: BTreeMap::new(),
+            show_notes: false,
             vml_data_id: String::new(),
             vml_shape_id: 0,
 
@@ -5204,6 +5206,12 @@ impl Worksheet {
 
         self.default_note_author = author;
 
+        self
+    }
+
+    /// TODO.
+    pub fn show_notes(&mut self) -> &mut Worksheet {
+        self.show_notes = true;
         self
     }
 
@@ -12320,12 +12328,12 @@ impl Worksheet {
             // Accumulate the string segments into a unformatted string.
             raw_string.push_str(string);
 
-            let attributes =
-                if string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']) {
-                    vec![("xml:space", "preserve")]
-                } else {
-                    vec![]
-                };
+            let whitespace = ['\t', '\n', ' '];
+            let attributes = if string.starts_with(whitespace) || string.ends_with(whitespace) {
+                vec![("xml:space", "preserve")]
+            } else {
+                vec![]
+            };
 
             // First segment doesn't require a font run for the default format.
             if format.is_default() && first_segment {
@@ -12703,11 +12711,24 @@ impl Worksheet {
         let mut button_id = 1;
         let mut note_count = 0;
 
+        // TODO
+        for columns in self.notes.values_mut() {
+            for note in columns.values_mut() {
+                if self.show_notes && note.is_visible.is_none() {
+                    note.is_visible = Some(true);
+                }
+            }
+        }
+
         // Convert the Note objects to VmlInfo objects, along with their dimensions.
         for (cell_row, columns) in &self.notes.clone() {
             for (cell_col, note) in columns {
                 let note_row = note.row();
                 let note_col = note.col();
+
+                // TODO
+                // self.format_xf_index
+                // self.get_cell_xf_index(xf_index, row_options, col_num)
 
                 let mut vml_info = note.vml_info();
                 vml_info.drawing_info = self.position_object_pixels(note_row, note_col, note);
@@ -12745,7 +12766,6 @@ impl Worksheet {
 
         // The VML o:idmap data id contains a comma separated range when there
         // is more than one 1024 block of comments, like this: data="1,2".
-        dbg!(note_count);
         let mut oid_map = vml_data_id.to_string();
 
         for i in 0..note_count / 1024 {

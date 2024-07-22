@@ -58,10 +58,11 @@ impl SharedStrings {
     fn write_sst_strings(&mut self, string_table: &SharedStringsTable) {
         let mut insertion_order_strings = Vec::from_iter(string_table.strings.iter());
         insertion_order_strings.sort_by_key(|x| x.1);
+        let whitespace = ['\t', '\n', ' '];
 
         for (string, _) in insertion_order_strings {
             let preserve_whitespace =
-                string.starts_with(['\t', '\n', ' ']) || string.ends_with(['\t', '\n', ' ']);
+                string.starts_with(whitespace) || string.ends_with(whitespace);
 
             if string.starts_with("<r>") && string.ends_with("</r>") {
                 self.writer.xml_rich_si_element(string);

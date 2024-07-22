@@ -2560,6 +2560,18 @@ impl Color {
         }
     }
 
+    // Get the RGB hex value for a VML fill color in "#rrggbb" format.
+    pub(crate) fn vml_rgb_hex_value(self) -> String {
+        match self {
+            // Use Comment default color for non RGB colors.
+            Color::Theme(_, _) | Color::Default | Color::Automatic => "#ffffe1".to_string(),
+            _ => {
+                let rgb_color = Self::rgb_hex_value(self).to_lowercase();
+                format!("#{rgb_color}")
+            }
+        }
+    }
+
     // Get the ARGB hex value for a color. The alpha channel is always FF.
     pub(crate) fn argb_hex_value(self) -> String {
         format!("FF{}", self.rgb_hex_value())

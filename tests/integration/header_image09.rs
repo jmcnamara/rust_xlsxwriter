@@ -6,21 +6,30 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Button, Workbook, XlsxError};
+use rust_xlsxwriter::{HeaderImagePosition, Image, Note, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let button = Button::new();
-
     // Worksheet 1.
     let worksheet1 = workbook.add_worksheet();
-    worksheet1.insert_button(1, 2, &button)?;
+    worksheet1.set_portrait();
+    worksheet1.set_default_note_author("John");
+
+    worksheet1.write(0, 0, "Foo")?;
+
+    let note = Note::new("Some text");
+    worksheet1.insert_note(1, 1, &note)?;
 
     // Worksheet 2.
     let worksheet2 = workbook.add_worksheet();
-    worksheet2.insert_button(4, 4, &button)?;
+    worksheet2.set_portrait();
+
+    let image = Image::new("tests/input/images/red.jpg")?;
+
+    worksheet2.set_header("&L&G");
+    worksheet2.set_header_image(&image, HeaderImagePosition::Left)?;
 
     workbook.save(filename)?;
 
@@ -28,9 +37,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_button04() {
+fn test_header_image09() {
     let test_runner = common::TestRunner::new()
-        .set_name("button04")
+        .set_name("header_image09")
         .set_function(create_new_xlsx_file)
         .initialize();
 

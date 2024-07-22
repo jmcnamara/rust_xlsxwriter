@@ -48,6 +48,8 @@ impl Vml {
 
     // Assemble and write the XML file.
     pub fn assemble_xml_file(&mut self) {
+        let mut z_index = 0;
+
         // Write the xml element.
         self.write_xml_namespace();
 
@@ -58,11 +60,12 @@ impl Vml {
             // Write the v:shapetype element.
             self.write_button_shapetype();
 
-            for (z_index, vml_info) in self.buttons.clone().iter().enumerate() {
+            for vml_info in &self.buttons.clone() {
                 self.shape_id += 1;
+                z_index += 1;
 
                 // Write the v:shape element.
-                self.write_button_shape(self.shape_id, z_index + 1, vml_info);
+                self.write_button_shape(self.shape_id, z_index, vml_info);
             }
         }
 
@@ -70,11 +73,12 @@ impl Vml {
             // Write the v:shapetype element.
             self.write_comment_shapetype();
 
-            for (z_index, vml_info) in self.comments.clone().iter().enumerate() {
+            for vml_info in &self.comments.clone() {
                 self.shape_id += 1;
+                z_index += 1;
 
                 // Write the v:shape element.
-                self.write_comment_shape(self.shape_id, z_index + 1, vml_info);
+                self.write_comment_shape(self.shape_id, z_index, vml_info);
             }
         }
 
@@ -286,7 +290,7 @@ impl Vml {
 
     // Write the <v:shape> element for buttons.
     #[allow(clippy::cast_precision_loss)]
-    fn write_button_shape(&mut self, vml_shape_id: u32, z_index: usize, vml_info: &VmlInfo) {
+    fn write_button_shape(&mut self, vml_shape_id: u32, z_index: u32, vml_info: &VmlInfo) {
         let top = Self::vml_dpi_size(vml_info.drawing_info.row_absolute as f64);
         let left = Self::vml_dpi_size(vml_info.drawing_info.col_absolute as f64);
         let width = Self::vml_dpi_size(vml_info.drawing_info.width);
@@ -312,7 +316,7 @@ impl Vml {
 
         attributes.push(("style", style));
         attributes.push(("o:button", "t".to_string()));
-        attributes.push(("fillcolor", "buttonFace [67]".to_string()));
+        attributes.push(("fillcolor", vml_info.fill_color.clone()));
         attributes.push(("strokecolor", "windowText [64]".to_string()));
         attributes.push(("o:insetmode", "auto".to_string()));
 
@@ -335,21 +339,26 @@ impl Vml {
 
     // Write the <v:shape> element for comments.
     #[allow(clippy::cast_precision_loss)]
-    fn write_comment_shape(&mut self, vml_shape_id: u32, z_index: usize, vml_info: &VmlInfo) {
+    fn write_comment_shape(&mut self, vml_shape_id: u32, z_index: u32, vml_info: &VmlInfo) {
         let top = Self::vml_dpi_size(vml_info.drawing_info.row_absolute as f64);
         let left = Self::vml_dpi_size(vml_info.drawing_info.col_absolute as f64);
         let width = Self::vml_dpi_size(vml_info.drawing_info.width);
         let height = Self::vml_dpi_size(vml_info.drawing_info.height);
 
-        let style = format!(
+        let mut style = format!(
             "position:absolute;\
              margin-left:{left}pt;\
              margin-top:{top}pt;\
              width:{width}pt;\
              height:{height}pt;\
-             z-index:{z_index};\
-             visibility:hidden"
+             z-index:{z_index};"
         );
+
+        if vml_info.is_visible {
+            style += "visibility:visible";
+        } else {
+            style += "visibility:hidden";
+        }
 
         let shape_id = format!("_x0000_s{vml_shape_id}");
 
@@ -360,7 +369,7 @@ impl Vml {
         }
 
         attributes.push(("style", style));
-        attributes.push(("fillcolor", "#ffffe1".to_string()));
+        attributes.push(("fillcolor", vml_info.fill_color.clone()));
         attributes.push(("o:insetmode", "auto".to_string()));
 
         self.writer.xml_start_tag("v:shape", &attributes);
@@ -559,6 +568,11 @@ impl Vml {
         // Write the x:Column element.
         self.write_column(vml_info.col);
 
+        // Write the <x:Visible> element.
+        if vml_info.is_visible {
+            self.writer.xml_empty_tag_only("x:Visible");
+        }
+
         self.writer.xml_end_tag("x:ClientData");
     }
 
@@ -640,6 +654,8 @@ pub(crate) struct VmlInfo {
     pub(crate) header_position: String,
     pub(crate) is_scaled: bool,
     pub(crate) drawing_info: DrawingInfo,
+    pub(crate) is_visible: bool,
+    pub(crate) fill_color: String,
 }
 
 impl Default for VmlInfo {
@@ -656,6 +672,8 @@ impl Default for VmlInfo {
             header_position: String::new(),
             is_scaled: false,
             drawing_info: DrawingInfo::default(),
+            is_visible: false,
+            fill_color: String::new(),
         }
     }
 }

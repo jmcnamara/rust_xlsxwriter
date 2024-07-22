@@ -164,16 +164,11 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.write_vba_project(workbook)?;
 
         let mut image_index = 1;
-        let mut vml_index = 1;
 
         for worksheet in &mut workbook.worksheets {
             if !worksheet.drawing_relationships.is_empty() {
                 self.write_drawing_rels_file(&worksheet.drawing_relationships, image_index)?;
                 image_index += 1;
-            }
-            if !worksheet.vml_drawing_relationships.is_empty() {
-                self.write_vml_drawing_rels_file(&worksheet.vml_drawing_relationships, vml_index)?;
-                vml_index += 1;
             }
         }
 
@@ -445,7 +440,7 @@ impl<W: Write + Seek + Send> Packager<W> {
     pub(crate) fn write_vml_drawing_rels_file(
         &mut self,
         relationships: &[(String, String, String)],
-        index: usize,
+        index: u32,
     ) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
@@ -792,12 +787,16 @@ impl<W: Write + Seek + Send> Packager<W> {
                         .append(&mut worksheet.header_footer_vml_info);
 
                     vml.data_id = format!("{header_data_id}");
+                    vml.shape_id = 1024 * header_data_id;
                     header_data_id += 1;
 
-                    vml.shape_id = 1024 * index;
                     vml.assemble_xml_file();
 
                     self.zip.write_all(vml.writer.xmlfile.get_ref())?;
+
+                    // The rels file index must match the vmlDrawing file index.
+                    self.write_vml_drawing_rels_file(&worksheet.vml_drawing_relationships, index)?;
+
                     index += 1;
                 }
             }

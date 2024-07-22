@@ -18,11 +18,16 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_width(3, 10.288)?;
     worksheet.set_column_width(4, 10.288)?;
     worksheet.set_column_width(5, 10.288)?;
+    worksheet.set_column_width(6, 10.288)?;
+    worksheet.set_column_width(7, 10.288)?;
 
     let table = Table::new();
     worksheet.add_table(2, 2, 12, 5, &table)?;
+    worksheet.add_table(14, 5, 19, 7, &table)?;
+    worksheet.add_table(22, 2, 29, 3, &table)?;
 
     worksheet.write_url_with_format(0, 0, "http://perl.com/", &Format::default())?;
+    worksheet.write_url_with_format(0, 2, "http://perl.com/", &Format::default())?;
 
     let image = Image::new("tests/input/images/blue.png")?.set_alt_text("blue.png");
 
@@ -41,9 +46,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_table05() {
+fn test_table06() {
     let test_runner = common::TestRunner::new()
-        .set_name("table05")
+        .set_name("table06")
         // We ignore these files since the order of the strings is different
         // from Excel and we are testing for rel file creation and order.
         .ignore_file("xl/sharedStrings.xml")

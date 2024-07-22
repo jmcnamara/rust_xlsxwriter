@@ -308,6 +308,7 @@ impl Button {
             text: self.name.clone(),
             alt_text: self.alt_text.clone(),
             macro_name: self.macro_name.clone(),
+            fill_color: "buttonFace [67]".to_string(),
             ..Default::default()
         }
     }

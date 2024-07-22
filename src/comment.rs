@@ -114,48 +114,48 @@ impl Comment {
         self.writer.xml_start_tag("comment", &attributes);
 
         // Write the text element.
-        self.write_text_block(&note.text);
+        self.write_text_block(note);
 
         self.writer.xml_end_tag("comment");
     }
 
     // Write the <text> element.
-    fn write_text_block(&mut self, text: &str) {
+    fn write_text_block(&mut self, note: &Note) {
         self.writer.xml_start_tag_only("text");
         self.writer.xml_start_tag_only("r");
 
         // Write the rPr element.
-        self.write_paragraph_run();
+        self.write_paragraph_run(note);
 
         // Write the t text element.
-        self.write_text(text);
+        self.write_text(&note.text);
 
         self.writer.xml_end_tag("r");
         self.writer.xml_end_tag("text");
     }
 
     // Write the <rPr> element.
-    fn write_paragraph_run(&mut self) {
+    fn write_paragraph_run(&mut self, note: &Note) {
         self.writer.xml_start_tag_only("rPr");
 
         // Write the sz element.
-        self.write_font_size();
+        self.write_font_size(note);
 
         // Write the color element.
         self.write_font_color();
 
         // Write the rFont element.
-        self.write_font_name();
+        self.write_font_name(note);
 
         // Write the family element.
-        self.write_font_family();
+        self.write_font_family(note);
 
         self.writer.xml_end_tag("rPr");
     }
 
     // Write the <sz> element.
-    fn write_font_size(&mut self) {
-        let attributes = [("val", "8".to_string())];
+    fn write_font_size(&mut self, note: &Note) {
+        let attributes = [("val", note.format.font.size.to_string())];
 
         self.writer.xml_empty_tag("sz", &attributes);
     }
@@ -168,21 +168,28 @@ impl Comment {
     }
 
     // Write the <rFont> element.
-    fn write_font_name(&mut self) {
-        let attributes = [("val", "Tahoma".to_string())];
+    fn write_font_name(&mut self, note: &Note) {
+        let attributes = [("val", note.format.font.name.clone())];
 
         self.writer.xml_empty_tag("rFont", &attributes);
     }
 
     // Write the <family> element.
-    fn write_font_family(&mut self) {
-        let attributes = [("val", "2".to_string())];
+    fn write_font_family(&mut self, note: &Note) {
+        let attributes = [("val", note.format.font.family.to_string())];
 
         self.writer.xml_empty_tag("family", &attributes);
     }
 
     // Write the <t> element.
     fn write_text(&mut self, text: &str) {
-        self.writer.xml_data_element_only("t", text);
+        let whitespace = ['\t', '\n', ' '];
+        let attributes = if text.starts_with(whitespace) || text.ends_with(whitespace) {
+            vec![("xml:space", "preserve")]
+        } else {
+            vec![]
+        };
+
+        self.writer.xml_data_element("t", text, &attributes);
     }
 }
