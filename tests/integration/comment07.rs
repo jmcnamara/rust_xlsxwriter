@@ -15,19 +15,19 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     worksheet.set_default_note_author("John");
 
-    let note = Note::new("Some text");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet.insert_note(0, 0, &note)?;
 
-    let note = Note::new("Some text");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet.insert_note(1, 0, &note)?;
 
-    let note = Note::new("Some text");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet.insert_note(2, 0, &note)?;
 
-    let note = Note::new("Some text");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet.insert_note(3, 0, &note)?;
 
-    let note = Note::new("Some text");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet.insert_note(4, 0, &note)?;
 
     worksheet.show_notes();

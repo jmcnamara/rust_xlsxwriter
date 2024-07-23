@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.write_with_format(0, 0, "Foo", &format1)?;
 
-    let note = Note::new("Some text");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet.insert_note(1, 1, &note)?;
 
     workbook.save(filename)?;

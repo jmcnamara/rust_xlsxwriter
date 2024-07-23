@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Note, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
-fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -17,23 +17,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.write(0, 0, "Foo")?;
 
-    let note = Note::new("Some text");
-    worksheet.insert_note(1, 1, &note)?;
-
-    workbook.save(filename)?;
-
-    Ok(())
-}
-
-// Explicitly set author name.
-fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
-    let mut workbook = Workbook::new();
-
-    let worksheet = workbook.add_worksheet();
-
-    worksheet.write(0, 0, "Foo")?;
-
-    let note = Note::new("Some text").set_author("John");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet.insert_note(1, 1, &note)?;
 
     workbook.save(filename)?;
@@ -42,23 +26,10 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_comment01_1() {
+fn test_comment01() {
     let test_runner = common::TestRunner::new()
         .set_name("comment01")
-        .unique("1")
-        .set_function(create_new_xlsx_file_1)
-        .initialize();
-
-    test_runner.assert_eq();
-    test_runner.cleanup();
-}
-
-#[test]
-fn test_comment01_2() {
-    let test_runner = common::TestRunner::new()
-        .set_name("comment01")
-        .unique("2")
-        .set_function(create_new_xlsx_file_2)
+        .set_function(create_new_xlsx_file)
         .initialize();
 
     test_runner.assert_eq();

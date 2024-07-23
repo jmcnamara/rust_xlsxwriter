@@ -1284,7 +1284,6 @@ pub struct Worksheet {
     has_sparklines: bool,
     sparklines: Vec<Sparkline>,
     embedded_image_ids: HashMap<String, u32>,
-    default_note_author: String,
     show_notes: bool,
 
     #[cfg(feature = "serde")]
@@ -1488,8 +1487,7 @@ impl Worksheet {
             has_sparklines: false,
             sparklines: vec![],
             vba_codename: None,
-            default_note_author: "Author".to_string(),
-            note_authors: BTreeMap::new(),
+            note_authors: BTreeMap::from([("Author".to_string(), 0)]),
             show_notes: false,
             vml_data_id: String::new(),
             vml_shape_id: 0,
@@ -5152,24 +5150,6 @@ impl Worksheet {
         note.cell_row = row;
         note.cell_col = col;
 
-        // Set the author name.
-        let note_author = match &note.author {
-            Some(author) => author,
-            None => &self.default_note_author,
-        };
-
-        // Convert the name to an id.
-        match self.note_authors.get(note_author) {
-            Some(id) => {
-                note.author_id = Some(*id);
-            }
-            None => {
-                let id = self.note_authors.len();
-                self.note_authors.insert(note_author.clone(), id);
-                note.author_id = Some(id);
-            }
-        }
-
         // Store the note in a structure similar to the worksheet data table
         // since notes also affect the calculation of <row> span attributes.
         match self.notes.entry(row) {
@@ -5199,12 +5179,7 @@ impl Worksheet {
             return self;
         }
 
-        if !self.note_authors.contains_key(&author) {
-            let id = self.note_authors.len();
-            self.note_authors.insert(author.clone(), id);
-        }
-
-        self.default_note_author = author;
+        self.note_authors = BTreeMap::from([(author, 0)]);
 
         self
     }
@@ -12711,11 +12686,29 @@ impl Worksheet {
         let mut button_id = 1;
         let mut note_count = 0;
 
-        // TODO
+        // Modify Note visibility and author according to worksheet settings.
         for columns in self.notes.values_mut() {
             for note in columns.values_mut() {
+                // Set all notes visible if required.
                 if self.show_notes && note.is_visible.is_none() {
                     note.is_visible = Some(true);
+                }
+
+                // Check for a user defined author name.
+                let Some(note_author) = &note.author else {
+                    continue;
+                };
+
+                // Convert the name to an id.
+                match self.note_authors.get(note_author) {
+                    Some(id) => {
+                        note.author_id = *id;
+                    }
+                    None => {
+                        let id = self.note_authors.len();
+                        self.note_authors.insert(note_author.clone(), id);
+                        note.author_id = id;
+                    }
                 }
             }
         }
@@ -12725,10 +12718,6 @@ impl Worksheet {
             for (cell_col, note) in columns {
                 let note_row = note.row();
                 let note_col = note.col();
-
-                // TODO
-                // self.format_xf_index
-                // self.get_cell_xf_index(xf_index, row_options, col_num)
 
                 let mut vml_info = note.vml_info();
                 vml_info.drawing_info = self.position_object_pixels(note_row, note_col, note);

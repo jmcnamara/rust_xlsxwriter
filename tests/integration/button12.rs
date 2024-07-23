@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet1 = workbook.add_worksheet();
     worksheet1.set_default_note_author("John");
 
-    let note = Note::new("Some text");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet1.insert_note(0, 0, &note)?;
 
     let button = Button::new();
@@ -29,7 +29,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet3 = workbook.add_worksheet();
     worksheet3.set_default_note_author("John");
 
-    let note = Note::new("More text");
+    let note = Note::new("More text").set_author_prefix(false);
     worksheet3.insert_note(2, 2, &note)?;
 
     workbook.save(filename)?;

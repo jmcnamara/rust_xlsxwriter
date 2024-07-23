@@ -22,7 +22,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
         .set_font_size(10)
         .set_font_family(3);
 
-    let note = Note::new("Some text").set_format(format);
+    let note = Note::new("Some text")
+        .set_author_prefix(false)
+        .set_format(format);
     worksheet.insert_note(1, 1, &note)?;
 
     workbook.save(filename)?;
@@ -39,6 +41,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(0, 0, "Foo")?;
 
     let note = Note::new("Some text")
+        .set_author_prefix(false)
         .set_font_name("Courier")
         .set_font_size(10)
         .set_font_family(3);

@@ -100,6 +100,7 @@ mod bootstrap68;
 mod bootstrap69;
 mod bootstrap70;
 mod bootstrap71;
+mod bootstrap72;
 mod button01;
 mod button02;
 mod button03;

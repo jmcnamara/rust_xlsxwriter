@@ -17,10 +17,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.write(0, 0, "Foo")?;
 
-    let note = Note::new("Some text");
+    let note = Note::new("Some text").set_author_prefix(false);
     worksheet.insert_note(1, 1, &note)?;
 
-    let note = Note::new("More text");
+    let note = Note::new("More text").set_author_prefix(false);
     worksheet.insert_note(16, 3, &note)?;
 
     let button = Button::new();

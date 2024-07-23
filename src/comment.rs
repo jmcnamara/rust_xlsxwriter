@@ -16,7 +16,7 @@ use crate::{utility, xmlwriter::XMLWriter, ColNum, Note, RowNum};
 pub struct Comment {
     pub(crate) writer: XMLWriter,
     pub(crate) notes: BTreeMap<RowNum, BTreeMap<ColNum, Note>>,
-    pub(crate) note_authors: BTreeMap<String, usize>,
+    pub(crate) note_authors: Vec<String>,
 }
 
 impl Comment {
@@ -31,7 +31,7 @@ impl Comment {
         Comment {
             writer,
             notes: BTreeMap::new(),
-            note_authors: BTreeMap::new(),
+            note_authors: vec![],
         }
     }
 
@@ -74,8 +74,8 @@ impl Comment {
 
         self.writer.xml_start_tag_only("authors");
 
-        let authors: Vec<String> = self.note_authors.keys().cloned().collect();
-        for author in &authors {
+        //let authors: Vec<String> = self.note_authors.keys().cloned().collect();
+        for author in &self.note_authors.clone() {
             // Write the author element.
             self.write_author(author);
         }
@@ -105,11 +105,7 @@ impl Comment {
     // Write the <comment> element.
     fn write_comment(&mut self, row: RowNum, col: ColNum, note: &Note) {
         let cell = utility::row_col_to_cell(row, col);
-        let mut attributes = vec![("ref", cell)];
-
-        if let Some(id) = note.author_id {
-            attributes.push(("authorId", id.to_string()));
-        }
+        let attributes = vec![("ref", cell), ("authorId", note.author_id.to_string())];
 
         self.writer.xml_start_tag("comment", &attributes);
 
@@ -122,21 +118,46 @@ impl Comment {
     // Write the <text> element.
     fn write_text_block(&mut self, note: &Note) {
         self.writer.xml_start_tag_only("text");
-        self.writer.xml_start_tag_only("r");
 
         // Write the rPr element.
-        self.write_paragraph_run(note);
+        if note.has_author_prefix {
+            // Write the bold author run.
+            self.writer.xml_start_tag_only("r");
+            self.write_paragraph_run(note, true);
 
-        // Write the t text element.
-        self.write_text(&note.text);
+            let author = match &self.note_authors.get(note.author_id) {
+                Some(author) => format!("{author}:"),
+                None => "Author:".to_string(),
+            };
 
-        self.writer.xml_end_tag("r");
+            self.write_text(&author);
+            self.writer.xml_end_tag("r");
+
+            // Write the text on a new line.
+            self.writer.xml_start_tag_only("r");
+            self.write_paragraph_run(note, false);
+
+            let text = format!("\n{}", note.text);
+            self.write_text(&text);
+
+            self.writer.xml_end_tag("r");
+        } else {
+            self.writer.xml_start_tag_only("r");
+            self.write_paragraph_run(note, false);
+            self.write_text(&note.text);
+            self.writer.xml_end_tag("r");
+        }
+
         self.writer.xml_end_tag("text");
     }
 
     // Write the <rPr> element.
-    fn write_paragraph_run(&mut self, note: &Note) {
+    fn write_paragraph_run(&mut self, note: &Note, has_bold: bool) {
         self.writer.xml_start_tag_only("rPr");
+
+        if has_bold {
+            self.writer.xml_empty_tag_only("b");
+        }
 
         // Write the sz element.
         self.write_font_size(note);

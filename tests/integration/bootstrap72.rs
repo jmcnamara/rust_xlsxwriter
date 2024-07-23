@@ -6,24 +6,18 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Button, Note, Workbook, XlsxError};
+use rust_xlsxwriter::{Note, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    // Worksheet 1.
-    let worksheet1 = workbook.add_worksheet();
-    worksheet1.set_default_note_author("John");
+    let worksheet = workbook.add_worksheet();
 
-    let note = Note::new("Foo").set_author_prefix(false);
-    worksheet1.insert_note(0, 0, &note)?;
+    worksheet.write(0, 0, "Foo")?;
 
-    // Worksheet 2.
-    let worksheet2 = workbook.add_worksheet();
-
-    let button = Button::new();
-    worksheet2.insert_button(1, 2, &button)?;
+    let note = Note::new("Some text").set_author_prefix(true);
+    worksheet.insert_note(1, 1, &note)?;
 
     workbook.save(filename)?;
 
@@ -31,9 +25,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_button09() {
+fn test_bootstrap72() {
     let test_runner = common::TestRunner::new()
-        .set_name("button09")
+        .set_name("bootstrap72")
         .set_function(create_new_xlsx_file)
         .initialize();
 

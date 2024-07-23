@@ -743,7 +743,7 @@ impl<W: Write + Seek + Send> Packager<W> {
 
                 let mut comment = Comment::new();
                 comment.notes = worksheet.notes.clone();
-                comment.note_authors = worksheet.note_authors.clone();
+                comment.note_authors = worksheet.note_authors.keys().cloned().collect();
 
                 comment.assemble_xml_file();
 

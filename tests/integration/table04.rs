@@ -23,10 +23,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.add_table(2, 2, 12, 5, &table)?;
 
     worksheet.set_default_note_author("John");
-    let note = Note::new("Test1");
+    let note = Note::new("Test1").set_author_prefix(false);
     worksheet.insert_note(0, 7, &note)?;
 
-    let note = Note::new("Test2");
+    let note = Note::new("Test2").set_author_prefix(false);
     worksheet.insert_note(0, 9, &note)?;
 
     worksheet.write_url_with_format(0, 0, "http://perl.com/", &Format::default())?;

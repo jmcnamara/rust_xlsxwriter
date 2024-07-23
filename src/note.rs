@@ -24,7 +24,8 @@ pub struct Note {
     y_offset: Option<u32>,
 
     pub(crate) author: Option<String>,
-    pub(crate) author_id: Option<usize>,
+    pub(crate) author_id: usize,
+    pub(crate) has_author_prefix: bool,
     pub(crate) cell_row: RowNum,
     pub(crate) cell_col: ColNum,
     pub(crate) text: String,
@@ -58,7 +59,8 @@ impl Note {
             cell_col: 0,
 
             author: None,
-            author_id: None,
+            author_id: 0,
+            has_author_prefix: true,
             width: 128.0,
             height: 74.0,
             text: text.into(),
@@ -113,6 +115,17 @@ impl Note {
         }
 
         self.author = Some(author);
+        self
+    }
+
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `todo`:
+    ///
+    pub fn set_author_prefix(mut self, enable: bool) -> Note {
+        self.has_author_prefix = enable;
         self
     }
 
