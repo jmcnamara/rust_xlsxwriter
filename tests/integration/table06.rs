@@ -34,10 +34,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.insert_image(3, 0, &image)?;
 
     worksheet.set_default_note_author("John");
-    let note = Note::new("Test1").set_author_prefix(false);
+    let note = Note::new("Test1").add_author_prefix(false);
     worksheet.insert_note(0, 7, &note)?;
 
-    let note = Note::new("Test2").set_author_prefix(false);
+    let note = Note::new("Test2").add_author_prefix(false);
     worksheet.insert_note(0, 9, &note)?;
 
     workbook.save(filename)?;

@@ -12,7 +12,8 @@ use crate::{utility, xmlwriter::XMLWriter, ColNum, Note, RowNum};
 
 /// A struct to represent a Comment.
 ///
-/// TODO.
+/// Comments is the older name for Notes.
+///
 pub struct Comment {
     pub(crate) writer: XMLWriter,
     pub(crate) notes: BTreeMap<RowNum, BTreeMap<ColNum, Note>>,

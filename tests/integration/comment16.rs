@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(6, 2, "Bar")?;
     worksheet.write(13, 6, "Baz")?;
 
-    let note = Note::new("Some text").set_author_prefix(false);
+    let note = Note::new("Some text").add_author_prefix(false);
     worksheet.insert_note(0, 0, &note)?;
     worksheet.insert_note(0, 3, &note)?;
     worksheet.insert_note(6, 2, &note)?;

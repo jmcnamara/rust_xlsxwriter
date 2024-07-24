@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.write(0, 0, "Foo")?;
 
-    let note = Note::new("Some text").set_author_prefix(true);
+    let note = Note::new("Some text").add_author_prefix(true);
     worksheet.insert_note(1, 1, &note)?;
 
     workbook.save(filename)?;

@@ -22,14 +22,14 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet2 = workbook.add_worksheet();
     worksheet2.set_default_note_author("John");
 
-    let note = Note::new("Some text").set_author_prefix(false);
+    let note = Note::new("Some text").add_author_prefix(false);
     worksheet2.insert_note(1, 1, &note)?;
 
     // Worksheet 3.
     let worksheet3 = workbook.add_worksheet();
     worksheet3.set_default_note_author("John");
 
-    let note = Note::new("More text").set_author_prefix(false);
+    let note = Note::new("More text").add_author_prefix(false);
     worksheet3.insert_note(2, 2, &note)?;
 
     workbook.save(filename)?;

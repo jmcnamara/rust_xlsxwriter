@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet1.set_default_note_author("John");
     worksheet1.write(0, 0, "Foo")?;
 
-    let note = Note::new("Some text").set_author_prefix(false);
+    let note = Note::new("Some text").add_author_prefix(false);
     worksheet1.insert_note(1, 1, &note)?;
 
     let _worksheet2 = workbook.add_worksheet();
@@ -25,7 +25,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet3.set_default_note_author("John");
     worksheet3.write(0, 0, "Bar")?;
 
-    let note = Note::new("More text").set_author_prefix(false);
+    let note = Note::new("More text").add_author_prefix(false);
     worksheet3.insert_note(6, 2, &note)?;
 
     workbook.save(filename)?;

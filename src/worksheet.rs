@@ -5110,22 +5110,84 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
+    /// Add a Note to a cell.
+    ///
+    /// A Note is a post-it style message that is revealed when the user mouses
+    /// over a worksheet cell. The presence of a Note is indicated by a small
+    /// red triangle in the upper right-hand corner of the cell.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/doc_note_intro.png">
+    ///
+    /// In versions of Excel prior to Office 365 Notes were referred to as
+    /// "Comments". The name Comment is now used for a newer style threaded
+    /// comment and Note is used for the older non threaded version. See the
+    /// Microsoft docs on [The difference between threaded comments and notes].
+    ///
+    /// [The difference between threaded comments and notes]:
+    ///     https://support.microsoft.com/en-us/office/the-difference-between-threaded-comments-and-notes-75a51eec-4092-42ab-abf8-7669077b7be3
+    ///
+    /// See [`Note`] for details on the properties of Notes.
     ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::MaxStringLengthExceeded`] - Text exceeds Excel's limit
-    ///   of 32,767 characters.
+    /// - [`XlsxError::MaxStringLengthExceeded`] - Text exceeds Excel's limit of
+    ///   32,713 characters.
     ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
     /// - `col`: The zero indexed column number.
-    /// - `button`: The [`Button`] to insert into the cell.
-    /// - `x_offset`: The horizontal offset within the cell in pixels.
-    /// - `y_offset`: The vertical offset within the cell in pixels.
+    /// - `note`: The [`Note`] to insert into the cell.
+    ///
+    /// # Examples
+    ///
+    /// An example of writing cell Notes to a worksheet using the
+    /// rust_xlsxwriter library.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_notes.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Widen the first column for clarity.
+    /// #     worksheet.set_column_width(0, 16)?;
+    /// #
+    /// #     // Write some data.
+    /// #     let party_items = [
+    /// #         "Invitations",
+    /// #         "Doors",
+    /// #         "Flowers",
+    /// #         "Champagne",
+    /// #         "Menu",
+    /// #         "Peter",
+    /// #     ];
+    /// #     worksheet.write_column(0, 0, party_items)?;
+    /// #
+    ///     // Create a new worksheet Note.
+    ///     let note = Note::new("I will get the flowers myself").set_author("Clarissa Dalloway");
+    ///
+    ///     // Add the note to a cell.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("notes.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/app_notes.png">
     ///
     pub fn insert_note(
         &mut self,
@@ -5138,15 +5200,15 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        //  Check that the string is < Excel limit of 32767 chars.
-        if note.text.chars().count() > MAX_STRING_LEN {
+        //  Check that the string is < Excel limit of 32767 chars, - 54
+        //  characters to allow for the author name prefix.
+        if note.text.chars().count() > MAX_STRING_LEN - 54 {
             return Err(XlsxError::MaxStringLengthExceeded);
         }
 
-        let mut note = note.clone();
-
         // Set the cell that the Note refers to. This is different form the cell
         // where the note appears.
+        let mut note = note.clone();
         note.cell_row = row;
         note.cell_col = col;
 

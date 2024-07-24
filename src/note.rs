@@ -13,7 +13,64 @@ use crate::{ColNum, Format, IntoColor, ObjectMovement, RowNum, COL_MAX, ROW_MAX}
 #[derive(Clone)]
 /// The `Note` struct represents an worksheet note object.
 ///
-/// TODO
+/// A Note is a post-it style message that is revealed when the user mouses
+/// over a worksheet cell. The presence of a Note is indicated by a small
+/// red triangle in the upper right-hand corner of the cell.
+///
+/// <img src="https://rustxlsxwriter.github.io/images/app_notes.png">
+///
+/// The above file was created using the following code:
+///
+/// ```
+/// # // This code is available in examples/app_notes.rs
+/// #
+/// use rust_xlsxwriter::{Note, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Widen the first column for clarity.
+///     worksheet.set_column_width(0, 16)?;
+///
+///     // Write some data.
+///     let party_items = [
+///         "Invitations",
+///         "Doors",
+///         "Flowers",
+///         "Champagne",
+///         "Menu",
+///         "Peter",
+///     ];
+///     worksheet.write_column(0, 0, party_items)?;
+///
+///     // Create a new worksheet Note.
+///     let note = Note::new("I will get the flowers myself").set_author("Clarissa Dalloway");
+///
+///     // Add the note to a cell.
+///     worksheet.insert_note(2, 0, &note)?;
+///
+///     // Save the file to disk.
+///     workbook.save("notes.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// In versions of Excel prior to Office 365 Notes were referred to as
+/// "Comments". The name Comment is now used for a newer style threaded
+/// comment and Note is used for the older non threaded version. See the
+/// Microsoft docs on [The difference between threaded comments and notes].
+///
+/// [The difference between threaded comments and notes]:
+///     https://support.microsoft.com/en-us/office/the-difference-between-threaded-comments-and-notes-75a51eec-4092-42ab-abf8-7669077b7be3
+///
+///
+///
+///
 ///
 pub struct Note {
     height: f64,
@@ -41,7 +98,39 @@ impl Note {
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    /// Create a new Note object to represent an Excel Form Control note.
+    /// Create a new Note object to represent an Excel cell note.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a note to a worksheet cell.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_note_new.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let note = Note::new("Some text for the note");
+    ///
+    ///     // Add the note to a worksheet cell.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("notes.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/note_new.png">
     ///
     pub fn new(text: impl Into<String>) -> Note {
         let format = Format::new()
@@ -72,11 +161,156 @@ impl Note {
         }
     }
 
+    /// Set the note author name.
+    ///
+    /// The author name appears in two places: at the start of the note text in
+    /// bold and at the bottom of the worksheet in the status bar.
+    ///
+    /// If no name is specified the default name "Author" will be applied to the
+    /// comment.
+    ///
+    /// TODO
+    /// [`Worksheet::set_default_note_author`](crate::Worksheet::set_default_note_author).
+    ///
+    /// # Parameters
+    ///
+    /// - `name`: The note author name. Must be less than the Excel limit of 54
+    ///   characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a note to a worksheet cell.
+    /// This example also sets the author name.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_note_set_author.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let note = Note::new("Some text for the note").set_author("Rust");
+    ///
+    ///     // Add the note to a worksheet cell.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("notes.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/note_set_author.png">
+    ///
+    pub fn set_author(mut self, name: impl Into<String>) -> Note {
+        let author = name.into();
+        if author.chars().count() > 54 {
+            eprintln!("Author name is greater than Excel's limit of 54 characters.");
+            return self;
+        }
+
+        self.author = Some(author);
+        self
+    }
+
+    /// Prefix the note text with the author name.
+    ///
+    /// By default Excel, and `rust_xlsxwriter` prefix the author name to the
+    /// note text (see the previous examples). If you prefer to have the note
+    /// text without the author name you can use this option to turn it off.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is on by default.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a note to a worksheet cell.
+    /// This example turns off the author name in the note.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_note_add_author_prefix.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let note = Note::new("Some text for the note")
+    ///         .add_author_prefix(false)
+    ///         .set_author("Rust"); // This is ignored in the Note.
+    ///
+    ///     // Add the note to a worksheet cell.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("notes.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/note_add_author_prefix.png">
+    ///
+    pub fn add_author_prefix(mut self, enable: bool) -> Note {
+        self.has_author_prefix = enable;
+        self
+    }
+
     /// Set the width of the note in pixels.
+    ///
+    /// The default width of an Excel note is 128 pixels.
     ///
     /// # Parameters
     ///
     /// - `width`: The note width in pixels.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a note to a worksheet cell. This
+    /// example also changes the note dimensions.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_note_set_width.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let note = Note::new("Some text for the note")
+    ///         .set_width(200)
+    ///         .set_height(200);
+    ///
+    ///     // Add the note to a worksheet cell.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("notes.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/note_set_width.png">
     ///
     pub fn set_width(mut self, width: u32) -> Note {
         if width == 0 {
@@ -88,6 +322,8 @@ impl Note {
     }
 
     /// Set the height of the note in pixels.
+    ///
+    /// The default height of an Excel note is 74 pixels. See the example above.
     ///
     /// # Parameters
     ///
@@ -101,53 +337,101 @@ impl Note {
         self
     }
 
-    /// Set the TODO
+    /// Make the note visible with the file loads.
     ///
-    /// # Parameters
+    /// By default Excel hides cell comments until the user mouses over the
+    /// parent cell. However, if required you can make the comment visible
+    /// without requiring an interaction from the user.
     ///
-    /// - `name`: The aTODO
-    ///
-    pub fn set_author(mut self, name: impl Into<String>) -> Note {
-        let author = name.into();
-        if author.chars().count() > 54 {
-            eprintln!("Author name is greater than Excel's limit of 54 characters.");
-            return self;
-        }
-
-        self.author = Some(author);
-        self
-    }
-
     /// TODO
+    /// [`Worksheet::show_notes`](crate::Worksheet::show_notes).
     ///
     /// # Parameters
     ///
-    /// - `todo`:
+    /// - `enable`: Turn the property on/off. It is off by default.
     ///
-    pub fn set_author_prefix(mut self, enable: bool) -> Note {
-        self.has_author_prefix = enable;
-        self
-    }
-
-    /// TODO
+    /// # Examples
     ///
-    /// # Parameters
+    /// The following example demonstrates adding a note to a worksheet cell. This
+    /// example makes the note visible by default.
     ///
-    /// - `todo`:
+    /// ```
+    /// # // This code is available in examples/doc_note_set_visible.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let note = Note::new("Some text for the note").set_visible(true);
+    ///
+    ///     // Add the note to a worksheet cell.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("notes.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/note_set_visible.png">
     ///
     pub fn set_visible(mut self, enable: bool) -> Note {
         self.is_visible = Some(enable);
         self
     }
 
-    /// Set the TODO pattern background color property.
+    /// Set the background color for the note.
     ///
+    /// The default background color for a Note is `#FFFFE1`. If required this
+    /// method can be used to set it to a different RGB color.
     ///
     /// # Parameters
     ///
     /// - `color`: The background color property defined by a
     ///   [`Color`](crate::Color) enum value or a type that implements the
-    ///   [`IntoColor`] trait.
+    ///   [`IntoColor`] trait. Only the `Color::Name` and `Color::RGB()`
+    ///   variants are supported. Theme style colors aren't support by Excel for
+    ///   Notes.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a note to a worksheet cell.
+    /// This example also sets the background color.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_note_set_background_color.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let note = Note::new("Some text for the note").set_background_color("#80ff80");
+    ///
+    ///     // Add the note to a worksheet cell.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    ///
+    /// #     // Save the file to disk.
+    /// #     workbook.save("notes.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/note_set_background_color.png">
     ///
     pub fn set_background_color<T>(mut self, color: T) -> Note
     where
