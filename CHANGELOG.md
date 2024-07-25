@@ -5,7 +5,7 @@ All notable changes to `rust_xlsxwriter` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.71.0] - 2023-07-20
+## [0.71.0] - 2024-07-20
 
 ### Added
 
@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [Working with VBA Macros]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/macros/index.html
 
 
-## [0.70.0] - 2023-07-14
+## [0.70.0] - 2024-07-14
 
 ### Added
 
@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [`DataValidation`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.DataValidation.html
 
 
-## [0.69.0] - 2023-07-01
+## [0.69.0] - 2024-07-01
 
 ### Added
 
@@ -65,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [Issue #95]: https://github.com/jmcnamara/rust_xlsxwriter/issues/95
 
 
-## [0.68.0] - 2023-06-18
+## [0.68.0] - 2024-06-18
 
 ### Added
 
@@ -79,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     self` to `mut self` to allow method chaining. This is an API/ABI break.
 
 
-## [0.67.0] - 2023-06-17
+## [0.67.0] - 2024-06-17
 
 ### Added
 
@@ -119,7 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     [performance analysis]: https://github.com/jmcnamara/rust_xlsxwriter/issues/93
 
 
-## [0.66.0] - 2023-06-12
+## [0.66.0] - 2024-06-12
 
 ### Added
 
@@ -132,7 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    [`ChartSeries::set_secondary_axis()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_secondary_axis
 
 
-## [0.65.0] - 2023-06-11
+## [0.65.0] - 2024-06-11
 
 ### Added
 
@@ -142,14 +142,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Combined Charts]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#combined-charts
 
 
-## [0.64.2] - 2023-04-13
+## [0.64.2] - 2024-04-13
 
 ### Fixed
 
   - Fixed internal links in table of contents.
 
 
-## [0.64.1] - 2023-03-26
+## [0.64.1] - 2024-03-26
 
 ### Added
 
@@ -163,7 +163,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Working with Worksheets]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/index.html
 
 
-## [0.64.0] - 2023-03-18
+## [0.64.0] - 2024-03-18
 
 ### Added
 
@@ -176,7 +176,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Working with Sparklines]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/sparkline/index.html
 
 
-## [0.63.0] - 2023-02-25
+## [0.63.0] - 2024-02-25
 
 ### Added
 
@@ -223,7 +223,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Feature Request #85]: https://github.com/jmcnamara/rust_xlsxwriter/issues/85
   [`Format`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
 
-## [0.62.0] - 2023-01-24
+## [0.62.0] - 2024-01-24
 
 ### Added
 
@@ -253,7 +253,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [0.61.0] - 2023-01-13
+## [0.61.0] - 2024-01-13
 
 ### Added
 
@@ -278,7 +278,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Feature Request #72]: https://github.com/jmcnamara/rust_xlsxwriter/issues/72
 
 
-## [0.60.0] - 2023-01-02
+## [0.60.0] - 2024-01-02
 
 ### Added
 
