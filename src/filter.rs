@@ -477,7 +477,7 @@ impl FilterCondition {
     ///         .add_list_filter("West")
     ///         .add_list_filter("South");
     ///     worksheet.filter_column(0, &filter_condition)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -545,7 +545,7 @@ impl FilterCondition {
     ///     let filter_condition = FilterCondition::new().add_list_blanks_filter();
     ///
     ///     worksheet.filter_column(0, &filter_condition)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -609,7 +609,7 @@ impl FilterCondition {
     ///     let filter_condition =
     ///         FilterCondition::new().add_custom_filter(FilterCriteria::NotEqualTo, " ");
     ///     worksheet.filter_column(0, &filter_condition)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -683,7 +683,7 @@ impl FilterCondition {
     ///         .add_custom_filter(FilterCriteria::GreaterThanOrEqualTo, 4000)
     ///         .add_custom_filter(FilterCriteria::LessThanOrEqualTo, 8000);
     ///     worksheet.filter_column(1, &filter_condition)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())

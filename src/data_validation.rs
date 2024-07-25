@@ -1189,7 +1189,7 @@ impl DataValidation {
     ///         .set_error_title("Danger, Will Robinson!")?;
     ///
     ///     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("data_validation.xlsx")?;
     /// #
@@ -1255,7 +1255,7 @@ impl DataValidation {
     ///         .set_error_message("The input value must be an integer in the range 1-10.")?;
     ///
     ///     worksheet.add_data_validation(1, 3, 1, 3, &data_validation)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("data_validation.xlsx")?;
     /// #

@@ -3221,7 +3221,7 @@ impl CustomSerializeField {
     ///         .set_background_color("C6EFCE");
     ///
     ///     let currency_format = Format::new().set_num_format("$0.00");
-    ///
+    /// #
     /// #     // Create a serializable struct.
     /// #     #[derive(Deserialize, Serialize)]
     /// #     struct Produce {
@@ -3319,7 +3319,7 @@ impl CustomSerializeField {
     /// #
     ///     // Set a cell value format.
     ///     let value_format = Format::new().set_num_format("$0.00");
-    ///
+    /// #
     /// #     // Create a serializable struct.
     /// #     #[derive(Deserialize, Serialize)]
     /// #     struct Produce {

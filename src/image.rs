@@ -232,7 +232,7 @@ impl Image {
     ///
     ///     // Insert the image.
     ///     worksheet.insert_image(1, 2, &image)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("image.xlsx")?;
     /// #
@@ -588,7 +588,7 @@ impl Image {
     ///        and a large letter R on the inside.\n\n\
     ///        The logo of the Rust programming language.",
     ///    );
-    ///
+    /// #
     /// #    // Insert the image.
     /// #    worksheet.insert_image(1, 2, &image)?;
     /// #
@@ -647,7 +647,7 @@ impl Image {
     /// #
     ///    // Create a new image object.
     ///    let image = Image::new("examples/rust_logo.png")?.set_decorative(true);
-    ///
+    /// #
     /// #    // Insert the image.
     /// #    worksheet.insert_image(1, 2, &image)?;
     /// #
@@ -715,7 +715,7 @@ impl Image {
     ///
     ///     // Insert the image.
     ///     worksheet.insert_image(1, 2, &image)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("image.xlsx")?;
     /// #

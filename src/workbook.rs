@@ -540,7 +540,7 @@ impl Workbook {
     ///     // Stop using worksheet1 and move back to worksheet2.
     ///     worksheet2 = workbook.worksheet_from_index(1)?;
     ///     worksheet2.write_string(1, 0, "Sheet2")?;
-    ///
+    /// #
     /// #     workbook.save("workbook.xlsx")?;
     /// #
     /// #     Ok(())
@@ -626,7 +626,7 @@ impl Workbook {
     ///     // Stop using worksheet1 and move back to worksheet2.
     ///     worksheet2 = workbook.worksheet_from_index(1)?;
     ///     worksheet2.write_string(1, 0, "Sheet2")?;
-    ///
+    /// #
     /// #     workbook.save("workbook.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1091,7 +1091,7 @@ impl Workbook {
     ///
     ///     // Define a local/worksheet name. Over-rides the "Sales" name above.
     ///     workbook.define_name("Sheet2!Sales", "=Sheet2!$G$1:$G$10")?;
-    ///
+    /// #
     /// #     // Write some text in the file and one of the defined names in a formula.
     /// #     for worksheet in workbook.worksheets_mut() {
     /// #         worksheet.set_column_width(0, 45)?;
@@ -1208,9 +1208,9 @@ impl Workbook {
     ///         .set_comment("Created with Rust and rust_xlsxwriter");
     ///
     ///     workbook.set_properties(&properties);
-    ///
+    /// #
     /// #     let worksheet = workbook.add_worksheet();
-    ///
+    /// #
     /// #     worksheet.set_column_width(0, 30)?;
     /// #     worksheet.write_string(0, 0, "See File -> Info -> Properties")?;
     /// #

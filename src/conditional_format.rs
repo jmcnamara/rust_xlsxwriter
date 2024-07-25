@@ -1257,7 +1257,7 @@ impl ConditionalFormatCell {
     ///         .set_format(format);
     ///
     ///     worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -1301,7 +1301,7 @@ impl ConditionalFormatCell {
     ///         .set_format(format);
     ///
     ///     worksheet.add_conditional_format(0, 0, 9, 0, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -2247,7 +2247,7 @@ impl ConditionalFormatFormula {
     ///         .set_format(format2);
     ///
     ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -4674,7 +4674,7 @@ impl ConditionalFormatDataBar {
     ///     let conditional_format = ConditionalFormatDataBar::new().set_fill_color("009933");
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -4739,7 +4739,7 @@ impl ConditionalFormatDataBar {
     ///     let conditional_format = ConditionalFormatDataBar::new().set_border_color("FF0000");
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -4803,7 +4803,7 @@ impl ConditionalFormatDataBar {
     ///     let conditional_format = ConditionalFormatDataBar::new().set_negative_fill_color("009933");
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -4870,7 +4870,7 @@ impl ConditionalFormatDataBar {
     ///         .set_negative_border_color("000000");
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -4932,7 +4932,7 @@ impl ConditionalFormatDataBar {
     ///     let conditional_format = ConditionalFormatDataBar::new().set_solid_fill(true);
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -4985,7 +4985,7 @@ impl ConditionalFormatDataBar {
     ///     let conditional_format = ConditionalFormatDataBar::new().set_border_off(true);
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -5043,7 +5043,7 @@ impl ConditionalFormatDataBar {
     ///         .set_direction(ConditionalFormatDataBarDirection::RightToLeft);
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -5099,7 +5099,7 @@ impl ConditionalFormatDataBar {
     ///     let conditional_format = ConditionalFormatDataBar::new().set_bar_only(true);
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -5172,7 +5172,7 @@ impl ConditionalFormatDataBar {
     ///         .set_axis_position(ConditionalFormatDataBarAxisPosition::None);
     ///
     ///     worksheet.add_conditional_format(2, 7, 11, 7, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -5233,7 +5233,7 @@ impl ConditionalFormatDataBar {
     ///     let conditional_format = ConditionalFormatDataBar::new().set_axis_color("FF0000");
     ///
     ///     worksheet.add_conditional_format(2, 3, 11, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -5885,7 +5885,7 @@ impl ConditionalFormatIconSet {
     ///         .reverse_icons(true);
     ///
     ///     worksheet.add_conditional_format(2, 1, 2, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -5946,7 +5946,7 @@ impl ConditionalFormatIconSet {
     ///         .show_icons_only(true);
     ///
     ///     worksheet.add_conditional_format(2, 1, 2, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -6051,7 +6051,7 @@ impl ConditionalFormatIconSet {
     ///         .set_icons(&icons);
     ///
     ///     worksheet.add_conditional_format(2, 1, 2, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -6514,7 +6514,7 @@ impl ConditionalFormatCustomIcon {
     ///         .set_icons(&icons);
     ///
     ///     worksheet.add_conditional_format(2, 1, 2, 3, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #

@@ -497,7 +497,7 @@ impl Format {
     /// ```
     /// # // This code is available in examples/doc_format_new.rs
     /// use rust_xlsxwriter::Format;
-    ///
+    /// #
     /// # #[allow(unused_variables)]
     /// fn main() {
     ///
@@ -979,7 +979,7 @@ impl Format {
     ///     let format = Format::new().set_font_name("Avenir Black Oblique");
     ///
     ///     worksheet.write_string_with_format(0, 0, "Avenir Black Oblique", &format)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1029,7 +1029,7 @@ impl Format {
     ///     let format = Format::new().set_font_size(30);
     ///
     ///     worksheet.write_string_with_format(0, 0, "Font Size 30", &format)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1126,7 +1126,7 @@ impl Format {
     ///     worksheet.write_string_with_format(2, 0, "Double",            &format3)?;
     ///     worksheet.write_string_with_format(3, 0, "Single Accounting", &format4)?;
     ///     worksheet.write_string_with_format(4, 0, "Double Accounting", &format5)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1162,7 +1162,7 @@ impl Format {
     ///     let format = Format::new().set_font_strikethrough();
     ///
     ///     worksheet.write_string_with_format(0, 0, "Strikethrough Text", &format)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1246,7 +1246,7 @@ impl Format {
     ///     worksheet.write_string_with_format(1, 0, "Top - Left", &format2)?;
     ///     worksheet.write_string_with_format(2, 0, "Center - Center", &format3)?;
     ///     worksheet.write_string_with_format(3, 0, "Bottom - Right", &format4)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1313,7 +1313,7 @@ impl Format {
     ///     worksheet.write_string(0, 0, "Some text that isn't wrapped")?;
     ///     worksheet.write_string_with_format(1, 0, "Some text that is wrapped", &format1)?;
     ///     worksheet.write_string_with_format(2, 0, "Some text\nthat is\nwrapped\nat newlines", &format1)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1364,7 +1364,7 @@ impl Format {
     ///     worksheet.write_string(0, 0, "Indent 0")?;
     ///     worksheet.write_string_with_format(1, 0, "Indent 1", &format1)?;
     ///     worksheet.write_string_with_format(2, 0, "Indent 2", &format2)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1417,7 +1417,7 @@ impl Format {
     ///     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
     ///     worksheet.write_string_with_format(1, 0, "Rust", &format2)?;
     ///     worksheet.write_string_with_format(2, 0, "Rust", &format3)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1480,7 +1480,7 @@ impl Format {
     ///     worksheet.write_string(0, 0, "نص عربي / English text")?;
     ///     worksheet.write_string_with_format(1, 0, "نص عربي / English text", &format1)?;
     ///     worksheet.write_string_with_format(2, 0, "نص عربي / English text", &format2)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1523,7 +1523,7 @@ impl Format {
     ///     let format1 = Format::new().set_shrink();
     ///
     ///     worksheet.write_string_with_format(0, 0, "Shrink text to fit", &format1)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1581,7 +1581,7 @@ impl Format {
     ///
     ///     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
     ///     worksheet.write_blank(1, 0, &format2)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1629,7 +1629,7 @@ impl Format {
     ///     let format1 = Format::new().set_background_color(Color::Green);
     ///
     ///     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1688,7 +1688,7 @@ impl Format {
     ///         .set_pattern(FormatPattern::DarkVertical);
     ///
     ///     worksheet.write_blank(0, 0, &format1)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1750,7 +1750,7 @@ impl Format {
     ///     worksheet.write_blank(1, 1, &format1)?;
     ///     worksheet.write_blank(3, 1, &format2)?;
     ///     worksheet.write_blank(5, 1, &format3)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1820,7 +1820,7 @@ impl Format {
     ///     worksheet.write_blank(1, 1, &format1)?;
     ///     worksheet.write_blank(3, 1, &format2)?;
     ///     worksheet.write_blank(5, 1, &format3)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2027,7 +2027,7 @@ impl Format {
     ///     worksheet.write_blank(3, 1, &format2)?;
     ///     worksheet.write_blank(5, 1, &format3)?;
     ///     worksheet.write_blank(7, 1, &format4)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2130,7 +2130,7 @@ impl Format {
     ///
     ///     worksheet.write_string(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
     ///     worksheet.write_formula_with_format(2, 1, "=1+2", &hidden)?;
-    ///
+    /// #
     /// #     worksheet.write_string(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
     /// #     worksheet.write_string(5, 0, "to remove the worksheet protection.")?;
     /// #
@@ -2196,7 +2196,7 @@ impl Format {
     ///     // invalid formula and raise an error. The quote prefix adds a virtual quote
     ///     // to the start of the string and prevents this from happening.
     ///     worksheet.write_string_with_format(0, 0, "=Hello", &format)?;
-    ///
+    /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
     /// #     Ok(())

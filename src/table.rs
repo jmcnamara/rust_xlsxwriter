@@ -324,7 +324,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 5, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -383,7 +383,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -464,7 +464,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 7, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -526,7 +526,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 7, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -600,7 +600,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -669,7 +669,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -736,7 +736,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -818,7 +818,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 6, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -884,7 +884,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -980,7 +980,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 7, 6, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -1053,7 +1053,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -1123,7 +1123,7 @@ impl Table {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -1530,7 +1530,7 @@ impl TableColumn {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -1625,7 +1625,7 @@ impl TableColumn {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 7, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -1731,7 +1731,7 @@ impl TableColumn {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 6, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #
@@ -1817,7 +1817,7 @@ impl TableColumn {
     ///
     ///     // Add the table to the worksheet.
     ///     worksheet.add_table(2, 1, 6, 5, &table)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("tables.xlsx")?;
     /// #

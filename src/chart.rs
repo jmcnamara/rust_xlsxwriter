@@ -1661,7 +1661,7 @@ impl Chart {
     ///
     ///     // Add the primary chart to the worksheet.
     ///     worksheet.insert_chart_with_offset(0, 3, &column_chart, 5, 5)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -1727,7 +1727,7 @@ impl Chart {
     ///
     ///     // Add the primary chart to the worksheet.
     ///     worksheet.insert_chart_with_offset(0, 3, &column_chart, 5, 5)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -1997,7 +1997,7 @@ impl Chart {
     ///     chart.set_up_down_bars(true);
     ///
     ///     worksheet.insert_chart(0, 4, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -2076,7 +2076,7 @@ impl Chart {
     ///         );
     ///
     ///     worksheet.insert_chart(0, 4, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -2166,7 +2166,7 @@ impl Chart {
     ///     chart.set_high_low_lines(true);
     ///
     ///     worksheet.insert_chart(0, 4, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -2238,7 +2238,7 @@ impl Chart {
     ///         .set_high_low_lines_format(ChartLine::new().set_color("#FF0000"));
     ///
     ///     worksheet.insert_chart(0, 4, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -2308,7 +2308,7 @@ impl Chart {
     ///     chart.set_drop_lines(true);
     ///
     ///     worksheet.insert_chart(0, 4, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -2380,7 +2380,7 @@ impl Chart {
     ///         .set_drop_lines_format(ChartLine::new().set_color("#FF0000"));
     ///
     ///     worksheet.insert_chart(0, 4, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -2452,7 +2452,7 @@ impl Chart {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 4, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -7902,7 +7902,7 @@ impl ChartSeries {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -10989,7 +10989,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 3, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -11100,7 +11100,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -11335,7 +11335,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 3, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -11524,7 +11524,7 @@ impl ChartAxis {
     ///
     ///     // Add the chart to the worksheet.
     ///     worksheet.insert_chart(0, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #
@@ -17742,7 +17742,7 @@ impl ChartPlotArea {
     ///
     ///     // Add the modified chart to the worksheet.
     ///     worksheet.insert_chart(16, 2, &chart)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("chart.xlsx")?;
     /// #

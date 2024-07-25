@@ -358,7 +358,7 @@ impl Note {
     ///
     ///     // Add the note to a worksheet cell.
     ///     worksheet.insert_note(2, 0, &note)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("notes.xlsx")?;
     /// #
@@ -478,7 +478,7 @@ impl Note {
     ///
     ///     // Add the note to a worksheet cell.
     ///     worksheet.insert_note(2, 0, &note)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("notes.xlsx")?;
     /// #

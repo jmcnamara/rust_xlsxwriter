@@ -803,7 +803,7 @@ impl ExcelDateTime {
     ///     worksheet.write_with_format(0, 0, &datetime1, &format)?;
     ///     worksheet.write_with_format(1, 0, &datetime2, &format)?;
     ///     worksheet.write_with_format(2, 0, &datetime3, &format)?;
-    ///
+    /// #
     /// #     workbook.save("datetime.xlsx")?;
     /// #
     /// #     Ok(())

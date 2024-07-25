@@ -1605,7 +1605,7 @@ impl Worksheet {
     ///     // Try name() using a user defined sheet name.
     ///     let worksheet = workbook.add_worksheet().set_name("Data")?;
     ///     assert_eq!("Data", worksheet.name());
-    ///
+    /// #
     /// #    workbook.save("workbook.xlsx")?;
     /// #
     /// #    Ok(())
@@ -2275,7 +2275,7 @@ impl Worksheet {
     ///     // Note Excel normally ignores trailing decimal zeros
     ///     // when the number is unformatted.
     ///     worksheet.write_number(7, 0, 1234.50000)?;
-    ///
+    /// #
     /// #     workbook.save("numbers.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2359,7 +2359,7 @@ impl Worksheet {
     ///     worksheet.write_number_with_format(1, 0, 1234.5, &currency_format)?;
     ///     worksheet.write_number_with_format(2, 0, 0.3300, &percentage_format)?;
     ///     worksheet.write_number_with_format(3, 0, 1234.5, &bold_italic_format)?;
-    ///
+    /// #
     /// #     workbook.save("numbers.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2507,7 +2507,7 @@ impl Worksheet {
     ///     worksheet.write_string_with_format(1, 0, "שָׁלוֹם",      &bold_format)?;
     ///     worksheet.write_string_with_format(2, 0, "नमस्ते",      &italic_format)?;
     ///     worksheet.write_string_with_format(3, 0, "こんにちは", &italic_format)?;
-    ///
+    /// #
     /// #     workbook.save("strings.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2638,7 +2638,7 @@ impl Worksheet {
     ///         (&red,     &text[25..]),
     ///     ];
     ///     worksheet.write_rich_string(1, 0, &segments)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -2804,7 +2804,7 @@ impl Worksheet {
     ///     worksheet.write_formula(3, 0, r#"=IF(A3>1,"Yes", "No")"#)?;
     ///     worksheet.write_formula(4, 0, "=AVERAGE(1, 2, 3, 4)")?;
     ///     worksheet.write_formula(5, 0, r#"=DATEVALUE("1-Jan-2023")"#)?;
-    ///
+    /// #
     /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2872,7 +2872,7 @@ impl Worksheet {
     ///     worksheet.write_formula_with_format(1, 0, "=A1*2", &bold_format)?;
     ///     worksheet.write_formula_with_format(2, 0, "=SIN(PI()/4)", &italic_format)?;
     ///     worksheet.write_formula_with_format(3, 0, "=AVERAGE(1, 2, 3, 4)", &italic_format)?;
-    ///
+    /// #
     /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2953,7 +2953,7 @@ impl Worksheet {
     /// #
     ///     // Write an array formula that returns a single value.
     ///     worksheet.write_array_formula(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}")?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3053,7 +3053,7 @@ impl Worksheet {
     /// #
     ///     // Write an array formula that returns a single value.
     ///     worksheet.write_array_formula_with_format(0, 0, 0, 0, "{=SUM(B1:C1*B2:C2)}", &bold)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3413,7 +3413,7 @@ impl Worksheet {
     ///
     ///     worksheet.write_blank(1, 1, &format1)?;
     ///     worksheet.write_blank(3, 1, &format2)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -3550,7 +3550,7 @@ impl Worksheet {
     ///     let worksheet2 = workbook.add_worksheet();
     ///     worksheet2.write_string(3, 2, "Here I am")?;
     ///     worksheet2.write_url_with_text(4, 2, "internal:Sheet1!A6", "Go back")?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("hyperlinks.xlsx")?;
     /// #
@@ -3747,7 +3747,7 @@ impl Worksheet {
     ///
     ///     // Write a url with an alternative format.
     ///     worksheet.write_url_with_format(0, 0, "https://www.rust-lang.org", &link_format)?;
-    ///
+    /// #
     /// #    // Save the file to disk.
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
@@ -3887,7 +3887,7 @@ impl Worksheet {
     ///     worksheet.write_datetime_with_format(2, 0, &datetime, &format3)?;
     ///     worksheet.write_datetime_with_format(3, 0, &datetime, &format4)?;
     ///     worksheet.write_datetime_with_format(4, 0, &datetime, &format5)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -3930,7 +3930,7 @@ impl Worksheet {
     ///     worksheet.write_datetime_with_format(2, 0, &date, &format3)?;
     ///     worksheet.write_datetime_with_format(3, 0, &date, &format4)?;
     ///     worksheet.write_datetime_with_format(4, 0, &date, &format5)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -3973,7 +3973,7 @@ impl Worksheet {
     ///     worksheet.write_datetime_with_format(2, 0, &time, &format3)?;
     ///     worksheet.write_datetime_with_format(3, 0, &time, &format4)?;
     ///     worksheet.write_datetime_with_format(4, 0, &time, &format5)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -4171,7 +4171,7 @@ impl Worksheet {
     ///     worksheet.write_date_with_format(2, 0, &date, &format3)?;
     ///     worksheet.write_date_with_format(3, 0, &date, &format4)?;
     ///     worksheet.write_date_with_format(4, 0, &date, &format5)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -4266,7 +4266,7 @@ impl Worksheet {
     ///     worksheet.write_time_with_format(2, 0, &time, &format3)?;
     ///     worksheet.write_time_with_format(3, 0, &time, &format4)?;
     ///     worksheet.write_time_with_format(4, 0, &time, &format5)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -4322,7 +4322,7 @@ impl Worksheet {
     ///
     ///     worksheet.write_boolean(0, 0, true)?;
     ///     worksheet.write_boolean(1, 0, false)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -4382,7 +4382,7 @@ impl Worksheet {
     ///
     ///     worksheet.write_boolean_with_format(0, 0, true, &bold)?;
     ///     worksheet.write_boolean_with_format(1, 0, false, &bold)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -4478,7 +4478,7 @@ impl Worksheet {
     ///         .set_background_color(Color::Silver);
     ///
     ///     worksheet.merge_range(7, 1, 8, 3, "Merged cells", &format)?;
-    ///
+    /// #
     /// #    // Save the file to disk.
     /// #     workbook.save("merge_range.xlsx")?;
     /// #
@@ -4689,7 +4689,7 @@ impl Worksheet {
     ///
     ///     // Insert the image at an offset.
     ///     worksheet.insert_image_with_offset(1, 2, &image, 10, 5)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("image.xlsx")?;
     /// #
@@ -5512,7 +5512,7 @@ impl Worksheet {
     ///
     ///     // Set the row height in Excel character units.
     ///     worksheet.set_row_height(2, 30)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -5597,7 +5597,7 @@ impl Worksheet {
     ///
     ///     // Set the row height in pixels.
     ///     worksheet.set_row_height_pixels(2, 40)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -5663,7 +5663,7 @@ impl Worksheet {
     ///
     ///     // Add some formatted text that overrides the row format.
     ///     worksheet.write_string_with_format(1, 2, "Hello", &bold_format)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -5861,7 +5861,7 @@ impl Worksheet {
     ///     worksheet.set_column_width(2, 16)?;
     ///     worksheet.set_column_width(4, 4)?;
     ///     worksheet.set_column_width(5, 4)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -5941,7 +5941,7 @@ impl Worksheet {
     ///     worksheet.set_column_width_pixels(2, 117)?;
     ///     worksheet.set_column_width_pixels(4, 33)?;
     ///     worksheet.set_column_width_pixels(5, 33)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -6019,7 +6019,7 @@ impl Worksheet {
     ///
     ///     // Add some formatted text that overrides the column format.
     ///     worksheet.write_string_with_format(2, 1, "Hello", &bold_format)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -6337,7 +6337,7 @@ impl Worksheet {
     ///     // column.
     ///     let filter_condition = FilterCondition::new().add_list_filter("East");
     ///     worksheet.filter_column(0, &filter_condition)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -6728,7 +6728,7 @@ impl Worksheet {
     ///         .set_format(format2);
     ///
     ///     worksheet.add_conditional_format(2, 1, 11, 10, &conditional_format)?;
-    ///
+    /// #
     /// #     // Save the file.
     /// #     workbook.save("conditional_format.xlsx")?;
     /// #
@@ -7263,7 +7263,7 @@ impl Worksheet {
     ///
     ///     worksheet.write_string(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
     ///     worksheet.write_formula_with_format(2, 1, "=1+2", &hidden)?;
-    ///
+    /// #
     /// #     worksheet.write_string(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
     /// #     worksheet.write_string(5, 0, "to remove the worksheet protection.")?;
     /// #
@@ -7328,7 +7328,7 @@ impl Worksheet {
     ///
     ///     // Protect the worksheet from modification.
     ///     worksheet.protect_with_password("abc123");
-    ///
+    /// #
     /// #     worksheet.write_string(0, 0, "Unlock the worksheet to edit the cell")?;
     /// #
     /// #     workbook.save("worksheet.xlsx")?;
@@ -7393,7 +7393,7 @@ impl Worksheet {
     ///
     ///     // Set the protection options.
     ///     worksheet.protect_with_options(&options);
-    ///
+    /// #
     /// #     worksheet.write_string(0, 0, "Unlock the worksheet to edit the cell")?;
     /// #
     /// #     workbook.save("worksheet.xlsx")?;
@@ -7462,7 +7462,7 @@ impl Worksheet {
     ///
     ///     // Unprotect single cell B3 by repeating (row, col).
     ///     worksheet.unprotect_range(2, 1, 2, 1)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -7533,7 +7533,7 @@ impl Worksheet {
     ///
     ///     // Unprotect range D4:F10 and give it a user defined name.
     ///     worksheet.unprotect_range_with_options(4, 3, 9, 5, "MyRange", "")?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -7709,7 +7709,7 @@ impl Worksheet {
     ///
     ///     // Also make this the active/selected cell.
     ///     worksheet.set_selection(31, 26, 31, 26)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -7864,7 +7864,7 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     worksheet.set_formula_result_default("");
-    ///
+    /// #
     /// #     workbook.save("formulas.xlsx")?;
     /// #
     /// #     Ok(())
@@ -9526,7 +9526,7 @@ impl Worksheet {
     ///     worksheet2.write_string(0, 0, "نص عربي / English text")?;
     ///     worksheet2.write_string_with_format(1, 0, "نص عربي / English text", &format_left_to_right)?;
     ///     worksheet2.write_string_with_format(2, 0, "نص عربي / English text", &format_right_to_left)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -9570,7 +9570,7 @@ impl Worksheet {
     ///     let mut worksheet2 = Worksheet::new();
     ///
     ///     worksheet2.set_active(true);
-    ///
+    /// #
     /// #   workbook.push_worksheet(worksheet1);
     /// #   workbook.push_worksheet(worksheet2);
     /// #   workbook.push_worksheet(worksheet3);
@@ -9631,7 +9631,7 @@ impl Worksheet {
     ///     let mut worksheet2 = Worksheet::new();
     ///
     ///     worksheet2.set_selected(true);
-    ///
+    /// #
     /// #   workbook.push_worksheet(worksheet1);
     /// #   workbook.push_worksheet(worksheet2);
     /// #   workbook.push_worksheet(worksheet3);
@@ -9691,7 +9691,7 @@ impl Worksheet {
     ///     let mut worksheet2 = Worksheet::new();
     ///
     ///     worksheet2.set_hidden(true);
-    ///
+    /// #
     /// #    workbook.push_worksheet(worksheet1);
     /// #    workbook.push_worksheet(worksheet2);
     /// #    workbook.push_worksheet(worksheet3);
@@ -9809,7 +9809,7 @@ impl Worksheet {
     ///
     ///     // worksheet4 will have the default color.
     ///     worksheet4.set_active(true);
-    ///
+    /// #
     /// #    workbook.push_worksheet(worksheet1);
     /// #    workbook.push_worksheet(worksheet2);
     /// #    workbook.push_worksheet(worksheet3);
@@ -10000,7 +10000,7 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     worksheet.set_landscape();
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -10195,7 +10195,7 @@ impl Worksheet {
     /// #
     ///     worksheet.write_string(0, 0, "Hello")?;
     ///     worksheet.set_zoom(200);
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -10269,7 +10269,7 @@ impl Worksheet {
     ///
     ///     // Freeze the top row and leftmost column.
     ///     worksheet3.set_freeze_panes(1, 1)?;
-    ///
+    /// #
     /// #     workbook.push_worksheet(worksheet1);
     /// #     workbook.push_worksheet(worksheet2);
     /// #     workbook.push_worksheet(worksheet3);
@@ -10338,7 +10338,7 @@ impl Worksheet {
     ///
     ///     // Pre-scroll to the row 20.
     ///     worksheet.set_freeze_panes_top_cell(19, 0)?;
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -10538,7 +10538,7 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     worksheet.set_header("&CPage &P of &N");
-    ///
+    /// #
     /// #     worksheet.write_string(0, 0, "Hello")?;
     /// #     worksheet.write_string(200, 0, "Hello")?;
     /// #     worksheet.set_view_page_layout();
@@ -10653,7 +10653,7 @@ impl Worksheet {
     ///     // Insert the watermark image in the header.
     ///     worksheet.set_header("&C&[Picture]");
     ///     worksheet.set_header_image(&image, HeaderImagePosition::Center)?;
-    ///
+    /// #
     /// #     // Increase the top margin to 1.2 for clarity. The -1.0 values are ignored.
     /// #     worksheet.set_margins(-1.0, -1.0, 1.2, -1.0, -1.0, -1.0);
     /// #
@@ -10848,7 +10848,7 @@ impl Worksheet {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     worksheet.set_margins(1.0, 1.25, 1.5, 1.75, 0.75, 0.25);
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -10929,7 +10929,7 @@ impl Worksheet {
     /// #
     ///     worksheet.set_header("&CPage &P of &N");
     ///     worksheet.set_print_first_page_number(2);
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -10975,7 +10975,7 @@ impl Worksheet {
     /// #
     ///     // Scale the printed worksheet to 50%.
     ///     worksheet.set_print_scale(50);
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
@@ -11055,7 +11055,7 @@ impl Worksheet {
     /// #
     ///     // Set the printed output to fit 1 page wide and as long as necessary.
     ///     worksheet.set_print_fit_to_pages(1, 0);
-    ///
+    /// #
     /// #     workbook.save("worksheet.xlsx")?;
     /// #
     /// #     Ok(())
