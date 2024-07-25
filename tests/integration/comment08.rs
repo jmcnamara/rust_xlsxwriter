@@ -34,7 +34,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let note = Note::new("Some text").add_author_prefix(false);
     worksheet.insert_note(4, 0, &note)?;
 
-    worksheet.show_notes();
+    worksheet.show_all_notes(true);
 
     workbook.save(filename)?;
 

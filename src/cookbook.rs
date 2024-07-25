@@ -22,45 +22,46 @@ cargo run --example app_demo  # or any other example
 7. [Tables: Adding worksheet tables](#tables-adding-worksheet-tables)
 8. [Conditional Formatting: Adding conditional formatting to worksheets](#conditional-formatting-adding-conditional-formatting-to-worksheets)
 9. [Data Validation: add cell validation and dropdowns](#data-validation-add-cell-validation-and-dropdowns)
-10. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
-11. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
-12. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
-13. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
-14. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
-15. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
-16. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
-17. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
-18. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
-19. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
-20. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
-21. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
-22. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
-23. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
-24. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
-25. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
-26. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
-27. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
-28. [Chart: Create a combined chart](#chart-create-a-combined-chart)
-29. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
-30. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
-31. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
-32. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
-33. [Chart: Chart data table](#chart-chart-data-table)
-34. [Chart: Chart data tools](#chart-chart-data-tools)
-35. [Chart: Gauge Chart](#chart-gauge-chart)
-36. [Sparklines: simple example](#sparklines-simple-example)
-37. [Sparklines: advanced example](#sparklines-advanced-example)
-38. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
-39. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-40. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-41. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-42. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-43. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-44. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-45. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-46. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-47. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-48. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+10. [Notes: Adding notes to worksheet cells](#notes-adding-notes-to-worksheet-cells)
+11. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
+12. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
+13. [Autofitting Columns: Example of autofitting column widths](#autofitting-columns-example-of-autofitting-column-widths)
+14. [Insert images: Add images to a worksheet](#insert-images-add-images-to-a-worksheet)
+15. [Insert images: Embedding an image in a cell](#insert-images-embedding-an-image-in-a-cell)
+16. [Insert images: Inserting images to fit a cell](#insert-images-inserting-images-to-fit-a-cell)
+17. [Adding a watermark: Adding a watermark to a worksheet by adding an image to the header](#adding-a-watermark-adding-a-watermark-to-a-worksheet-by-adding-an-image-to-the-header)
+18. [Chart: Simple: Simple getting started chart example](#chart-simple-simple-getting-started-chart-example)
+19. [Chart: Area: Excel Area chart example](#chart-area-excel-area-chart-example)
+20. [Chart: Bar: Excel Bar chart example](#chart-bar-excel-bar-chart-example)
+21. [Chart: Column: Excel Column chart example](#chart-column-excel-column-chart-example)
+22. [Chart: Line: Excel Line chart example](#chart-line-excel-line-chart-example)
+23. [Chart: Scatter: Excel Scatter chart example](#chart-scatter-excel-scatter-chart-example)
+24. [Chart: Pie: Excel Pie chart example](#chart-pie-excel-pie-chart-example)
+25. [Chart: Doughnut: Excel Doughnut chart example](#chart-doughnut-excel-doughnut-chart-example)
+26. [Chart: Radar: Excel Radar chart example](#chart-radar-excel-radar-chart-example)
+27. [Chart: Stock: Excel Stock chart example](#chart-stock-excel-stock-chart-example)
+28. [Chart: Using a secondary axis](#chart-using-a-secondary-axis)
+29. [Chart: Create a combined chart](#chart-create-a-combined-chart)
+30. [Chart: Create a combined pareto chart](#chart-create-a-combined-pareto-chart)
+31. [Chart: Pattern Fill: Example of a chart with Pattern Fill](#chart-pattern-fill-example-of-a-chart-with-pattern-fill)
+32. [Chart: Gradient Fill: Example of a chart with Gradient Fill](#chart-gradient-fill-example-of-a-chart-with-gradient-fill)
+33. [Chart: Styles: Example of setting default chart styles](#chart-styles-example-of-setting-default-chart-styles)
+34. [Chart: Chart data table](#chart-chart-data-table)
+35. [Chart: Chart data tools](#chart-chart-data-tools)
+36. [Chart: Gauge Chart](#chart-gauge-chart)
+37. [Sparklines: simple example](#sparklines-simple-example)
+38. [Sparklines: advanced example](#sparklines-advanced-example)
+39. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
+40. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+41. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+42. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+43. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+44. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+45. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+46. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+47. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+48. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+49. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -2172,6 +2173,60 @@ fn main() -> Result<(), XlsxError> {
     // Save and close the file.
     // -----------------------------------------------------------------------
     workbook.save("data_validation.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Notes: Adding notes to worksheet cells
+
+An example of writing cell Notes to a worksheet.
+
+A Note is a post-it style message that is revealed when the user mouses
+over a worksheet cell. The presence of a Note is indicated by a small
+red triangle in the upper right-hand corner of the cell.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_notes.png">
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_notes.rs
+
+use rust_xlsxwriter::{Note, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Widen the first column for clarity.
+    worksheet.set_column_width(0, 16)?;
+
+    // Write some data.
+    let party_items = [
+        "Invitations",
+        "Doors",
+        "Flowers",
+        "Champagne",
+        "Menu",
+        "Peter",
+    ];
+    worksheet.write_column(0, 0, party_items)?;
+
+    // Create a new worksheet Note.
+    let note = Note::new("I will get the flowers myself").set_author("Clarissa Dalloway");
+
+    // Add the note to a cell.
+    worksheet.insert_note(2, 0, &note)?;
+
+    // Save the file to disk.
+    workbook.save("notes.xlsx")?;
 
     Ok(())
 }
@@ -5749,7 +5804,7 @@ file extracted from an existing Excel xlsm file.
 The [`vba_extract`](https://crates.io/crates/vba_extract) utility can be used to
 extract the `vbaProject.bin` file.
 
-Output:
+**Image of the output file:**
 
 <img src="https://rustxlsxwriter.github.io/images/app_macros.png">
 

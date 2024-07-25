@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
+
+//! The following example demonstrates adding a note to a worksheet cell. This
+//! example reuses the Note object and reset the test.
+
+use rust_xlsxwriter::{Note, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    // Create a new note.
+    let mut note = Note::new("Some text for the note");
+
+    // Add the note to a worksheet cell.
+    worksheet.insert_note(2, 0, &note)?;
+
+    // Reuse the Note with different text.
+    note.reset_text("Some other text");
+
+    // Add the note to another worksheet cell.
+    worksheet.insert_note(4, 0, &note)?;
+
+    // Save the file to disk.
+    workbook.save("notes.xlsx")?;
+
+    Ok(())
+}

@@ -174,6 +174,9 @@ documentation and generally show how an individual function works.
 * `app_merge_range.rs` - An example of creating merged ranges in a
   worksheet using the rust_xlsxwriter library.
 
+* `app_notes.rs` - An example of writing cell Notes to a worksheet using
+  the rust_xlsxwriter library.
+
 * `app_panes.rs` - A simple example of setting some "freeze" panes in
   worksheets using the rust_xlsxwriter library.
 
@@ -1006,6 +1009,26 @@ documentation and generally show how an individual function works.
 * `doc_macros_signed.rs` - Demonstrates a simple example of adding a vba
   project to an xlsm file.
 
+* `doc_note_add_author_prefix.rs` - Demonstrates adding a note to a
+  worksheet cell. This example turns off the author name in the note.
+
+* `doc_note_new.rs` - Demonstrates adding a note to a worksheet cell.
+
+* `doc_note_reset_text.rs` - Demonstrates adding a note to a worksheet
+  cell. This example reuses the Note object and reset the test.
+
+* `doc_note_set_author.rs` - Demonstrates adding a note to a worksheet
+  cell. This example also sets the author name.
+
+* `doc_note_set_background_color.rs` - Demonstrates adding a note to a
+  worksheet cell. This example also sets the background color.
+
+* `doc_note_set_visible.rs` - Demonstrates adding a note to a worksheet
+  cell. This example makes the note visible by default.
+
+* `doc_note_set_width.rs` - Demonstrates adding a note to a worksheet cell.
+  This example also changes the note dimensions.
+
 * `doc_properties_checksum1.rs` - Create a simple workbook to demonstrate
   the changing checksum due to the changing creation date.
 
@@ -1353,6 +1376,9 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_column_width_pixels.rs` - Demonstrates setting the
   width of columns in Excel in pixels.
 
+* `doc_worksheet_set_default_note_author.rs` - Demonstrates adding notes to
+  a worksheet and setting the default author name.
+
 * `doc_worksheet_set_formula_result.rs` - Demonstrates manually setting the
   result of a formula. Note, this is only required for non-Excel
   applications that don't calculate formula results.
@@ -1450,6 +1476,9 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_set_zoom.rs` - Demonstrates setting the worksheet zoom
   level.
+
+* `doc_worksheet_show_all_notes.rs` - Demonstrates adding notes to a
+  worksheet and setting the worksheet property to make them all visible.
 
 * `doc_worksheet_unprotect_range.rs` - Demonstrates unprotecting ranges in
   a protected worksheet.

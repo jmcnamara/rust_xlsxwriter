@@ -1284,7 +1284,7 @@ pub struct Worksheet {
     has_sparklines: bool,
     sparklines: Vec<Sparkline>,
     embedded_image_ids: HashMap<String, u32>,
-    show_notes: bool,
+    show_all_notes: bool,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -1488,7 +1488,7 @@ impl Worksheet {
             sparklines: vec![],
             vba_codename: None,
             note_authors: BTreeMap::from([("Author".to_string(), 0)]),
-            show_notes: false,
+            show_all_notes: false,
             vml_data_id: String::new(),
             vml_shape_id: 0,
 
@@ -5144,7 +5144,7 @@ impl Worksheet {
     /// # Examples
     ///
     /// An example of writing cell Notes to a worksheet using the
-    /// rust_xlsxwriter library.
+    /// `rust_xlsxwriter` library.
     ///
     /// ```
     /// # // This code is available in examples/app_notes.rs
@@ -5233,22 +5233,124 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO.
-    pub fn set_default_note_author(&mut self, author: impl Into<String>) -> &mut Worksheet {
-        let author = author.into();
-        if author.chars().count() > 52 {
-            eprintln!("Author string must be less than the Excel limit of 52 characters: {author}");
-            return self;
-        }
-
-        self.note_authors = BTreeMap::from([(author, 0)]);
-
+    /// Make all worksheet notes visible when the file loads.
+    ///
+    /// By default Excel hides cell notes until the user mouses over the parent
+    /// cell. However, if required you can make all worksheet notes visible when
+    /// the worksheet loads. You can also make individual notes visible using
+    /// the [`Note::set_visible()`](crate::Note::set_visible) method.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding notes to a worksheet and
+    /// setting the worksheet property to make them all visible.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_show_all_notes.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let note = Note::new("Some text for the note");
+    ///
+    ///     // Add the note to some worksheet cells.
+    ///     worksheet.insert_note(1, 0, &note)?;
+    ///     worksheet.insert_note(3, 3, &note)?;
+    ///     worksheet.insert_note(6, 0, &note)?;
+    ///     worksheet.insert_note(8, 3, &note)?;
+    ///
+    ///     // Display all the notes in the worksheet.
+    ///     worksheet.show_all_notes(true);
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_show_all_notes.png">
+    ///
+    pub fn show_all_notes(&mut self, enable: bool) -> &mut Worksheet {
+        self.show_all_notes = enable;
         self
     }
 
-    /// TODO.
-    pub fn show_notes(&mut self) -> &mut Worksheet {
-        self.show_notes = true;
+    /// Set the default author name for all the notes in the worksheet.
+    ///
+    /// The Note author is the creator of the note. In Excel the author name is
+    /// taken from the user name in the options/preference dialog. The note
+    /// author name appears in two places: at the start of the note text in bold
+    /// and at the bottom of the worksheet in the status bar.
+    ///
+    /// If no name is specified the default name "Author" will be applied to the
+    /// note. The author name for individual notes can be set via the
+    /// [`Note::set_author()`](crate::Note::set_author) method. Alternatively
+    /// this method can be used to set the default author name for all notes in
+    /// a worksheet.
+    ///
+    /// # Parameters
+    ///
+    /// - `name`: The note author name. Must be less than or equal to the Excel
+    ///   limit of 52 characters.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding notes to a worksheet and setting
+    /// the default author name.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_default_note_author.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let note = Note::new("Some text for the note");
+    ///
+    ///     // Add the note to some worksheet cells.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    ///
+    ///     // Display all the notes in the worksheet.
+    ///     worksheet.set_default_note_author("Rust");
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_default_note_author.png">
+    ///
+    pub fn set_default_note_author(&mut self, name: impl Into<String>) -> &mut Worksheet {
+        let name = name.into();
+        if name.chars().count() > 52 {
+            eprintln!("Author string must be less than the Excel limit of 52 characters: {name}");
+            return self;
+        }
+
+        self.note_authors = BTreeMap::from([(name, 0)]);
+
         self
     }
 
@@ -12752,7 +12854,7 @@ impl Worksheet {
         for columns in self.notes.values_mut() {
             for note in columns.values_mut() {
                 // Set all notes visible if required.
-                if self.show_notes && note.is_visible.is_none() {
+                if self.show_all_notes && note.is_visible.is_none() {
                     note.is_visible = Some(true);
                 }
 

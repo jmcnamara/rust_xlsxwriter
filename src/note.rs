@@ -167,15 +167,17 @@ impl Note {
     /// bold and at the bottom of the worksheet in the status bar.
     ///
     /// If no name is specified the default name "Author" will be applied to the
-    /// comment.
+    /// note.
     ///
-    /// TODO
-    /// [`Worksheet::set_default_note_author`](crate::Worksheet::set_default_note_author).
+    /// You can also set the default author name for all notes in a worksheet
+    /// via the
+    /// [`Worksheet::set_default_note_author`](crate::Worksheet::set_default_note_author)
+    /// method.
     ///
     /// # Parameters
     ///
-    /// - `name`: The note author name. Must be less than the Excel limit of 54
-    ///   characters.
+    /// - `name`: The note author name. Must be less than or equal to the Excel
+    ///   limit of 52 characters.
     ///
     /// # Examples
     ///
@@ -211,8 +213,8 @@ impl Note {
     ///
     pub fn set_author(mut self, name: impl Into<String>) -> Note {
         let author = name.into();
-        if author.chars().count() > 54 {
-            eprintln!("Author name is greater than Excel's limit of 54 characters.");
+        if author.chars().count() > 52 {
+            eprintln!("Author name is greater than Excel's limit of 52 characters.");
             return self;
         }
 
@@ -252,7 +254,7 @@ impl Note {
     ///
     ///     // Add the note to a worksheet cell.
     ///     worksheet.insert_note(2, 0, &note)?;
-    ///
+    /// #
     /// #     // Save the file to disk.
     /// #     workbook.save("notes.xlsx")?;
     /// #
@@ -267,6 +269,62 @@ impl Note {
     ///
     pub fn add_author_prefix(mut self, enable: bool) -> Note {
         self.has_author_prefix = enable;
+        self
+    }
+
+    /// Reset the text in the note.
+    ///
+    /// In general the text of the note is set in the the [`Note::new()`]
+    /// constructor but if required you can use the `reset_text()` method to
+    /// reset the text for a note. This allows a single `Note` instance to be
+    /// used multiple times and avoid the small overhead of creating a new
+    /// instance each time.
+    ///
+    /// # Parameters
+    ///
+    /// - `text`: The text for the note.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding a note to a worksheet cell.
+    /// This example reuses the Note object and reset the test.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_note_reset_text.rs
+    /// #
+    /// # use rust_xlsxwriter::{Note, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a new note.
+    ///     let mut note = Note::new("Some text for the note");
+    ///
+    ///     // Add the note to a worksheet cell.
+    ///     worksheet.insert_note(2, 0, &note)?;
+    ///
+    ///     // Reuse the Note with different text.
+    ///     note.reset_text("Some other text");
+    ///
+    ///     // Add the note to another worksheet cell.
+    ///     worksheet.insert_note(4, 0, &note)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("notes.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/note_reset_text.png">
+    ///
+    ///
+    pub fn reset_text(&mut self, text: impl Into<String>) -> &mut Note {
+        self.text = text.into();
         self
     }
 
@@ -337,14 +395,14 @@ impl Note {
         self
     }
 
-    /// Make the note visible with the file loads.
+    /// Make the note visible when the file loads.
     ///
-    /// By default Excel hides cell comments until the user mouses over the
-    /// parent cell. However, if required you can make the comment visible
-    /// without requiring an interaction from the user.
+    /// By default Excel hides cell note until the user mouses over the parent
+    /// cell. However, if required you can make the note visible without
+    /// requiring an interaction from the user.
     ///
-    /// TODO
-    /// [`Worksheet::show_notes`](crate::Worksheet::show_notes).
+    /// You can also all notes in a worksheet visible via the
+    /// [`Worksheet::show_all_notes`](crate::Worksheet::show_all_notes) method.
     ///
     /// # Parameters
     ///
@@ -352,8 +410,8 @@ impl Note {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates adding a note to a worksheet cell. This
-    /// example makes the note visible by default.
+    /// The following example demonstrates adding a note to a worksheet cell.
+    /// This example makes the note visible by default.
     ///
     /// ```
     /// # // This code is available in examples/doc_note_set_visible.rs
@@ -445,15 +503,15 @@ impl Note {
         self
     }
 
-    /// Set the Format font name property. TODO
+    /// Set the font name for the note.
     ///
-    /// Set the font for a cell format. Excel can only display fonts that are
+    /// Set the font for a cell note. Excel can only display fonts that are
     /// installed on the system that it is running on. Therefore it is generally
     /// best to use standard Excel fonts.
     ///
     /// # Parameters
     ///
-    /// - `font_name`: The font name property.
+    /// - `font_name`: The font name for the note.
     ///
     pub fn set_font_name(mut self, font_name: impl Into<String>) -> Note {
         self.format.font.name = font_name.into();
@@ -465,18 +523,15 @@ impl Note {
         self
     }
 
-    /// Set the Format font size property. TODO
+    /// Set the font size for the note.
     ///
     /// Set the font size of the cell format. The size is generally an integer
     /// value but Excel allows x.5 values (hence the property is a f64 or
     /// types that can convert [`Into`] a f64).
     ///
-    /// Excel adjusts the height of a row to accommodate the largest font size
-    /// in the row.
-    ///
     /// # Parameters
     ///
-    /// - `font_size`: The font size property.
+    /// - `font_size`: The font size for the note.
     ///
     pub fn set_font_size<T>(mut self, font_size: T) -> Note
     where
@@ -486,29 +541,33 @@ impl Note {
         self
     }
 
-    /// Set the Format font family property. TODO.
+    /// Set the font family for the note.
     ///
     /// Set the font family. This is usually an integer in the range 1-4. This
     /// function is implemented for completeness but is rarely used in practice.
     ///
     /// # Parameters
     ///
-    /// - `font_family`: The font family property.
+    /// - `font_family`: The font family for the note.
     ///
+    #[doc(hidden)]
     pub fn set_font_family(mut self, font_family: u8) -> Note {
         self.format.font.family = font_family;
         self
     }
 
-    /// Set the [`Format`] of the conditional format rule.
+    /// Set the [`Format`] of the note.
     ///
-    /// Set the [`Format`] todo.
+    /// Set the font or background properties of a note using a [`Format`]
+    /// object. Only the font name, size and background color are supported.
     ///
+    /// This API is currently experimental and may go away in the future.
     ///
     /// # Parameters
     ///
-    /// - `format`: The [`Format`] property for the cell Note.
+    /// - `format`: The [`Format`] property for the note.
     ///
+    #[doc(hidden)]
     pub fn set_format(mut self, format: impl Into<Format>) -> Note {
         self.format = format.into();
         self
@@ -580,7 +639,8 @@ impl Note {
         }
     }
 
-    //TODO
+    // Notes have a stand row offset relative to the parent cell except at the
+    // top and bottom of the worksheet.
     pub(crate) fn row(&self) -> RowNum {
         match self.row {
             Some(row) => row,
@@ -600,7 +660,8 @@ impl Note {
         }
     }
 
-    //TODO
+    // Notes have a stand column offset relative to the parent cell except at
+    // the right side of the worksheet.
     pub(crate) fn col(&self) -> ColNum {
         match self.col {
             Some(col) => col,
