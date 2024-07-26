@@ -21,4 +21,4 @@ jobs:
       run: cargo build --verbose
 
     - name: Run the tests for the default feature set
-      run: cargo test --test '*'
+      run: cargo test --test integration
