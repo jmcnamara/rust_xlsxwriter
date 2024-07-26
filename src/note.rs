@@ -13,9 +13,9 @@ use crate::{ColNum, Format, IntoColor, ObjectMovement, RowNum, COL_MAX, ROW_MAX}
 #[derive(Clone)]
 /// The `Note` struct represents an worksheet note object.
 ///
-/// A Note is a post-it style message that is revealed when the user mouses
-/// over a worksheet cell. The presence of a Note is indicated by a small
-/// red triangle in the upper right-hand corner of the cell.
+/// A Note is a post-it style message that is revealed when the user mouses over
+/// a worksheet cell. The presence of a Note is indicated by a small red
+/// triangle in the upper right-hand corner of the cell.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/app_notes.png">
 ///
@@ -60,17 +60,20 @@ use crate::{ColNum, Format, IntoColor, ObjectMovement, RowNum, COL_MAX, ROW_MAX}
 /// }
 /// ```
 ///
+/// Notes are used in conjunction with the
+/// [`Worksheet::insert_note()`](crate::Worksheet::insert_note) method.
+///
 /// In versions of Excel prior to Office 365 Notes were referred to as
-/// "Comments". The name Comment is now used for a newer style threaded
-/// comment and Note is used for the older non threaded version. See the
-/// Microsoft docs on [The difference between threaded comments and notes].
+/// "Comments". The name Comment is now used for a newer style threaded comment
+/// and Note is used for the older non threaded version. See the Microsoft docs
+/// on [The difference between threaded comments and notes].
 ///
 /// [The difference between threaded comments and notes]:
 ///     https://support.microsoft.com/en-us/office/the-difference-between-threaded-comments-and-notes-75a51eec-4092-42ab-abf8-7669077b7be3
 ///
-///
-///
-///
+/// Note, the newer Threaded Comments are unlikely to be added to
+/// `rust_xlsxwriter`due to fact that is relies on company specific metadata to
+/// identify the comment author.
 ///
 pub struct Note {
     height: f64,
@@ -100,6 +103,7 @@ impl Note {
 
     /// Create a new Note object to represent an Excel cell note.
     ///
+    /// The text of the Note is added in the constructor.
     ///
     /// # Examples
     ///
@@ -171,7 +175,7 @@ impl Note {
     ///
     /// You can also set the default author name for all notes in a worksheet
     /// via the
-    /// [`Worksheet::set_default_note_author`](crate::Worksheet::set_default_note_author)
+    /// [`Worksheet::set_default_note_author()`](crate::Worksheet::set_default_note_author)
     /// method.
     ///
     /// # Parameters
@@ -224,7 +228,7 @@ impl Note {
 
     /// Prefix the note text with the author name.
     ///
-    /// By default Excel, and `rust_xlsxwriter` prefix the author name to the
+    /// By default Excel, and `rust_xlsxwriter`, prefixes the author name to the
     /// note text (see the previous examples). If you prefer to have the note
     /// text without the author name you can use this option to turn it off.
     ///
@@ -277,7 +281,7 @@ impl Note {
     /// In general the text of the note is set in the the [`Note::new()`]
     /// constructor but if required you can use the `reset_text()` method to
     /// reset the text for a note. This allows a single `Note` instance to be
-    /// used multiple times and avoid the small overhead of creating a new
+    /// used multiple times and avoids the small overhead of creating a new
     /// instance each time.
     ///
     /// # Parameters
@@ -397,12 +401,13 @@ impl Note {
 
     /// Make the note visible when the file loads.
     ///
-    /// By default Excel hides cell note until the user mouses over the parent
+    /// By default Excel hides cell notes until the user mouses over the parent
     /// cell. However, if required you can make the note visible without
     /// requiring an interaction from the user.
     ///
-    /// You can also all notes in a worksheet visible via the
-    /// [`Worksheet::show_all_notes`](crate::Worksheet::show_all_notes) method.
+    /// You can also make all notes in a worksheet visible via the
+    /// [`Worksheet::show_all_notes()`](crate::Worksheet::show_all_notes)
+    /// method.
     ///
     /// # Parameters
     ///

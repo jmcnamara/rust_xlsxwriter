@@ -86,6 +86,7 @@ features are:
 - Merged ranges.
 - Conditional formatting.
 - Data validation.
+- Cell Notes.
 - Sparklines.
 - Worksheet PNG/JPEG/GIF/BMP images.
 - Rich multi-format strings.
@@ -131,10 +132,9 @@ frequently.
 
 Recent changes:
 
+- Added support for adding Cell Notes.
 - Added support for adding VBA macros.
 - Added support for data validation.
-- Added support for combined charts and chart secondary axes.
-
 
 See the full [Release Notes and Changelog].
 

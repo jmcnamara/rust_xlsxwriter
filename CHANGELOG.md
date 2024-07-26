@@ -5,6 +5,25 @@ All notable changes to `rust_xlsxwriter` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.72.0] - 2024-07-26
+
+### Added
+
+  - Added support for cell Notes (previously called Comments). See the
+    documentation for [`Note`].
+
+    A Note is a post-it style message that is revealed when the user mouses over
+    a worksheet cell. The presence of a Note is indicated by a small red
+    triangle in the upper right-hand corner of the cell.
+
+    In versions of Excel prior to Office 365 Notes were referred to as
+    "Comments". The name Comment is now used for a newer style threaded comment
+    and Note is used for the older non threaded version.
+
+    [`Note`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Note.html
+
+
+
 ## [0.71.0] - 2024-07-20
 
 ### Added

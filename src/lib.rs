@@ -30,6 +30,7 @@
 //! - Merged ranges.
 //! - Conditional formatting.
 //! - Data validation.
+//! - Cell Notes.
 //! - Sparklines.
 //! - Worksheet PNG/JPEG/GIF/BMP images.
 //! - Rich multi-format strings.
@@ -77,6 +78,7 @@
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.
 //! - [`DataValidation`]: Working with data validation in worksheets.
+//! - [`Note`]: Adding Notes to worksheet cells.
 //! - [`Macros`](crate::macros): Working with Macros.
 //! - [`Sparklines`](crate::sparkline): Working with Sparklines.
 //! - [`ExcelDateTime`]: A type to represent dates and times in Excel format.
@@ -239,7 +241,6 @@ mod test_functions;
 
 // Re-export the public APIs.
 pub use button::*;
-pub use comment::*;
 pub use data_validation::*;
 pub use datetime::*;
 pub use error::*;
@@ -255,6 +256,9 @@ pub use url::*;
 
 #[doc(hidden)]
 pub use chart::*;
+
+#[doc(hidden)]
+pub use comment::*;
 
 #[doc(hidden)]
 pub use conditional_format::*;
