@@ -214,23 +214,23 @@ impl Vml {
     fn write_formulas(&mut self) {
         self.writer.xml_start_tag_only("v:formulas");
 
-        self.write_formula_with_format("if lineDrawn pixelLineWidth 0");
-        self.write_formula_with_format("sum @0 1 0");
-        self.write_formula_with_format("sum 0 0 @1");
-        self.write_formula_with_format("prod @2 1 2");
-        self.write_formula_with_format("prod @3 21600 pixelWidth");
-        self.write_formula_with_format("prod @3 21600 pixelHeight");
-        self.write_formula_with_format("sum @0 0 1");
-        self.write_formula_with_format("prod @6 1 2");
-        self.write_formula_with_format("prod @7 21600 pixelWidth");
-        self.write_formula_with_format("sum @8 21600 0");
-        self.write_formula_with_format("prod @7 21600 pixelHeight");
-        self.write_formula_with_format("sum @10 21600 0");
+        self.write_formula("if lineDrawn pixelLineWidth 0");
+        self.write_formula("sum @0 1 0");
+        self.write_formula("sum 0 0 @1");
+        self.write_formula("prod @2 1 2");
+        self.write_formula("prod @3 21600 pixelWidth");
+        self.write_formula("prod @3 21600 pixelHeight");
+        self.write_formula("sum @0 0 1");
+        self.write_formula("prod @6 1 2");
+        self.write_formula("prod @7 21600 pixelWidth");
+        self.write_formula("sum @8 21600 0");
+        self.write_formula("prod @7 21600 pixelHeight");
+        self.write_formula("sum @10 21600 0");
 
         self.writer.xml_end_tag("v:formulas");
     }
     // Write the <v:f> element.
-    fn write_formula_with_format(&mut self, equation: &str) {
+    fn write_formula(&mut self, equation: &str) {
         let attributes = [("eqn", equation.to_string())];
 
         self.writer.xml_empty_tag("v:f", &attributes);
