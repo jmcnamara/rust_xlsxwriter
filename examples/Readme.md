@@ -1216,6 +1216,9 @@ documentation and generally show how an individual function works.
   filter. Excel uses both of these methods depending on the data being
   filtered.
 
+* `doc_worksheet_hide_unused_rows.rs` - Demonstrates efficiently hiding the
+  unused rows in a worksheet.
+
 * `doc_worksheet_insert_chart_with_offset.rs` - Example of adding a chart
   to a worksheet with a pixel offset within the cell.
 
@@ -1378,6 +1381,9 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_set_default_note_author.rs` - Demonstrates adding notes to
   a worksheet and setting the default author name.
+
+* `doc_worksheet_set_default_row_height.rs` - Demonstrates setting the
+  default row height for all rows in a worksheet.
 
 * `doc_worksheet_set_formula_result.rs` - Demonstrates manually setting the
   result of a formula. Note, this is only required for non-Excel

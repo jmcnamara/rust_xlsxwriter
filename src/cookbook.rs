@@ -21,7 +21,7 @@ cargo run --example app_demo  # or any other example
 6. [Autofilters: Add an autofilter to a worksheet](#autofilters-add-an-autofilter-to-a-worksheet)
 7. [Tables: Adding worksheet tables](#tables-adding-worksheet-tables)
 8. [Conditional Formatting: Adding conditional formatting to worksheets](#conditional-formatting-adding-conditional-formatting-to-worksheets)
-9. [Data Validation: add cell validation and dropdowns](#data-validation-add-cell-validation-and-dropdowns)
+9. [Data Validation: Add cell validation and dropdowns](#data-validation-add-cell-validation-and-dropdowns)
 10. [Notes: Adding notes to worksheet cells](#notes-adding-notes-to-worksheet-cells)
 11. [Rich strings: Add multi-font rich strings to a worksheet](#rich-strings-add-multi-font-rich-strings-to-a-worksheet)
 12. [Right to left display: Set a worksheet into right to left display mode](#right-to-left-display-set-a-worksheet-into-right-to-left-display-mode)
@@ -1937,7 +1937,7 @@ Code to generate the above example:
 ```
 
 
-# Data Validation: add cell validation and dropdowns
+# Data Validation: Add cell validation and dropdowns
 
 Example of how to add data validation and dropdown lists using the
 `rust_xlsxwriter` library.

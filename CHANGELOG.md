@@ -5,6 +5,19 @@ All notable changes to `rust_xlsxwriter` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.73.0] - 2024-08-02
+
+### Added
+
+- Added support for setting the default worksheet row height and also hiding all
+  unused rows.
+
+  See [`Worksheet::set_default_row_height()`] and  [`Worksheet::hide_unused_rows()`].
+
+  [`Worksheet::hide_unused_rows()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.hide_unused_rows
+  [`Worksheet::set_default_row_height()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_default_row_height
+
+
 ## [0.72.0] - 2024-07-26
 
 ### Added
