@@ -1285,6 +1285,8 @@ pub struct Worksheet {
     sparklines: Vec<Sparkline>,
     embedded_image_ids: HashMap<String, u32>,
     show_all_notes: bool,
+    user_default_row_height: f64,
+    hide_unused_rows: bool,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -1491,6 +1493,8 @@ impl Worksheet {
             show_all_notes: false,
             vml_data_id: String::new(),
             vml_shape_id: 0,
+            user_default_row_height: DEFAULT_ROW_HEIGHT,
+            hide_unused_rows: false,
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -5695,7 +5699,7 @@ impl Worksheet {
             Some(row_options) => row_options.xf_index = xf_index,
             None => {
                 let row_options = RowOptions {
-                    height: DEFAULT_ROW_HEIGHT,
+                    height: self.user_default_row_height,
                     xf_index,
                     hidden: false,
                 };
@@ -5765,7 +5769,7 @@ impl Worksheet {
             Some(row_options) => row_options.hidden = true,
             None => {
                 let row_options = RowOptions {
-                    height: DEFAULT_ROW_HEIGHT,
+                    height: self.user_default_row_height,
                     xf_index: 0,
                     hidden: true,
                 };
@@ -5806,6 +5810,150 @@ impl Worksheet {
         }
 
         Ok(self)
+    }
+
+    /// Set the default row height for all rows in a worksheet, efficiently.
+    ///
+    /// This method can be used to efficiently set the default row height for
+    /// all rows in a worksheet. It is efficient because it uses an Excel
+    /// optimization to adjust the row heights with a single XML element. By
+    /// contrast, using [`Worksheet::set_row_height()`] for every row in a
+    /// worksheet would require a million XML elements and would result in a
+    /// very large file.
+    ///
+    /// The height is specified in character units, where the default height is
+    /// 15. Excel allows height values in increments of 0.25.
+    ///
+    /// Individual row heights can be set via [`Worksheet::set_row_height()`].
+    ///
+    /// Note, there is no equivalent method for columns because the file format
+    /// already optimizes the storage of a large number of contiguous columns.
+    ///
+    /// # Parameters
+    ///
+    /// - `height`: The row height in character units. Must be greater than 0.0.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the default row height for
+    /// all rows in a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_default_row_height.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Set the default row height in Excel character units.
+    ///     worksheet.set_default_row_height(30);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_default_row_height.png">
+    ///
+    pub fn set_default_row_height(&mut self, height: impl Into<f64>) -> &mut Worksheet {
+        let height = height.into();
+        if height <= 0.0 {
+            return self;
+        }
+
+        self.user_default_row_height = height;
+        self
+    }
+
+    /// Set the default row height in pixels for all rows in a worksheet,
+    /// efficiently.
+    ///
+    /// The `set_default_row_height_pixels()` method is used to change the
+    /// default height of all rows in a worksheet. See
+    /// [`Worksheet::set_default_row_height()`] above for an explanation.
+    ///
+    /// The height is specified in pixels, where the default height is 20.
+    ///
+    /// # Parameters
+    ///
+    /// - `height`: The row height in pixels.
+    ///
+    pub fn set_default_row_height_pixels(&mut self, height: u16) -> &mut Worksheet {
+        let height = 0.75 * f64::from(height);
+        self.set_default_row_height(height)
+    }
+
+    /// Hide all unused rows in a worksheet, efficiently.
+    ///
+    /// This method can be used to efficiently hide unused rows in a worksheet.
+    /// It is efficient because it uses an Excel optimization to hide the rows
+    /// with a single XML element. By contrast, using
+    /// [`Worksheet::set_row_hidden()`] for the majority of rows in a worksheet
+    /// would require a million XML elements and would result in a very large
+    /// file.
+    ///
+    /// "Unused" in this context means that the row doesn't contain data,
+    /// formatting, or any changes such as the row height.
+    ///
+    /// To hide individual rows use the [`Worksheet::set_row_hidden()`] method.
+    ///
+    /// Note, there is no equivalent method for columns because the file format
+    /// already optimizes the storage of a large number of contiguous columns.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates efficiently hiding the unused rows in
+    /// a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_hide_unused_rows.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write some data.
+    ///     worksheet.write(0, 0, "First row")?;
+    ///     worksheet.write(6, 0, "Last row")?;
+    ///
+    ///     // Set the row height for the blank rows so that they are "used".
+    ///     for row in 1..6 {
+    ///         worksheet.set_row_height(row, 15)?;
+    ///     }
+    ///
+    ///     // Hide all the unused rows.
+    ///     worksheet.hide_unused_rows(true);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_hide_unused_rows.png">
+    ///
+    pub fn hide_unused_rows(&mut self, enable: bool) -> &mut Worksheet {
+        self.hide_unused_rows = enable;
+        self
     }
 
     /// Set the width for a worksheet column.
@@ -13229,7 +13377,7 @@ impl Worksheet {
                     (row_options.height * 4.0 / 3.0) as u32
                 }
             }
-            None => 20,
+            None => (self.user_default_row_height * 4.0 / 3.0) as u32,
         }
     }
 
@@ -13802,10 +13950,18 @@ impl Worksheet {
 
     // Write the <sheetFormatPr> element.
     fn write_sheet_format_pr(&mut self) {
-        let mut attributes = vec![("defaultRowHeight", "15")];
+        let mut attributes = vec![("defaultRowHeight", self.user_default_row_height.to_string())];
+
+        if self.user_default_row_height != DEFAULT_ROW_HEIGHT {
+            attributes.push(("customHeight", "1".to_string()));
+        }
+
+        if self.hide_unused_rows {
+            attributes.push(("zeroHeight", "1".to_string()));
+        }
 
         if self.use_x14_extensions {
-            attributes.push(("x14ac:dyDescent", "0.25"));
+            attributes.push(("x14ac:dyDescent", "0.25".to_string()));
         }
 
         self.writer.xml_empty_tag("sheetFormatPr", &attributes);
@@ -14533,6 +14689,9 @@ impl Worksheet {
             if row_options.height != DEFAULT_ROW_HEIGHT {
                 attributes.push(("customHeight", "1".to_string()));
             }
+        } else if self.user_default_row_height != DEFAULT_ROW_HEIGHT {
+            attributes.push(("ht", self.user_default_row_height.to_string()));
+            attributes.push(("customHeight", "1".to_string()));
         }
 
         if has_data {

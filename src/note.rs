@@ -72,8 +72,8 @@ use crate::{ColNum, Format, IntoColor, ObjectMovement, RowNum, COL_MAX, ROW_MAX}
 ///     https://support.microsoft.com/en-us/office/the-difference-between-threaded-comments-and-notes-75a51eec-4092-42ab-abf8-7669077b7be3
 ///
 /// Note, the newer Threaded Comments are unlikely to be added to
-/// `rust_xlsxwriter`due to fact that is relies on company specific metadata to
-/// identify the comment author.
+/// `rust_xlsxwriter` due to the fact that the feature relies on company
+/// specific metadata to identify the comment author.
 ///
 pub struct Note {
     height: f64,
