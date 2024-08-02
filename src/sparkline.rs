@@ -937,7 +937,7 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `weight`: The weight/width of the sparkline line. The width can be an
-    /// number type that convert [`Into`] [`f64`]. The default is 0.75.
+    ///   number type that convert [`Into`] [`f64`]. The default is 0.75.
     ///
     pub fn set_line_weight<T>(mut self, weight: T) -> Sparkline
     where

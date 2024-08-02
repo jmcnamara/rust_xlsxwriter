@@ -447,8 +447,8 @@ instance and format them with an Excel number format.
 > **Reading ahead**:
 
 > If you enable the `chrono` feature in `rust_xlsxwriter`  you can also use
-  [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or [`chrono::NaiveTime`]
-  instances.
+> [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or [`chrono::NaiveTime`]
+> instances.
 
 [`chrono::NaiveDate`]:
     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html

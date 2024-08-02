@@ -5039,7 +5039,7 @@ impl Worksheet {
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     /// - [`XlsxError::ChartError`] - A general error that is raised when a
-    /// chart parameter is incorrect or a chart is configured incorrectly.
+    ///   chart parameter is incorrect or a chart is configured incorrectly.
     ///
     /// # Parameters
     ///
@@ -5086,7 +5086,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_insert_chart_with_offset.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_insert_chart_with_offset.png">
     ///
     pub fn insert_chart_with_offset(
         &mut self,

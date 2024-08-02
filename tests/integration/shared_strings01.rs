@@ -15,7 +15,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     for i in 0u8..127 {
-        worksheet.write_string(i as u32, 0, &(i as char).to_string())?;
+        worksheet.write_string(i as u32, 0, (i as char).to_string())?;
     }
 
     workbook.save(filename)?;

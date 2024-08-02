@@ -1839,7 +1839,7 @@ impl Chart {
     /// # Parameters
     ///
     /// - `rotation`: The rotation of the first segment of a Pie/Doughnut chart.
-    /// The range is 0 <= rotation <= 360 and the default is 0.
+    ///   The range is 0 <= rotation <= 360 and the default is 0.
     ///
     ///
     /// # Examples
@@ -1881,7 +1881,8 @@ impl Chart {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_set_rotation.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_set_rotation.png">
     ///
     pub fn set_rotation(&mut self, rotation: u16) -> &mut Chart {
         if (0..=360).contains(&rotation) {
@@ -7950,12 +7951,12 @@ impl ChartSeries {
     /// # Parameters
     ///
     /// - `overlap`: Overlap percentage of columns in Bar/Column charts. The
-    /// range is -100 <= overlap <= 100 and the default is 0.
+    ///   range is -100 <= overlap <= 100 and the default is 0.
     ///
     /// # Examples
     ///
-    /// an example of setting the chart series gap and overlap. Note that it only
-    /// needs to be applied to one of the series in the chart.
+    /// an example of setting the chart series gap and overlap. Note that it
+    /// only needs to be applied to one of the series in the chart.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_series_set_overlap.rs
@@ -8020,7 +8021,7 @@ impl ChartSeries {
     /// # Parameters
     ///
     /// - `gap`: Gap percentage of columns in Bar/Column charts. The range is 0
-    /// <= gap <= 500 and the default is 150.
+    ///   <= gap <= 500 and the default is 150.
     ///
     /// See the example for [`series.set_overlap()`](ChartSeries::set_overlap)
     /// above.
@@ -13951,8 +13952,8 @@ impl ChartLine {
     /// # Parameters
     ///
     /// - `width`: The width should be specified in increments of 0.25 of a
-    /// point as in Excel. The width can be an number type that convert [`Into`]
-    /// [`f64`].
+    ///   point as in Excel. The width can be an number type that convert
+    ///   [`Into`] [`f64`].
     ///
     /// # Examples
     ///
