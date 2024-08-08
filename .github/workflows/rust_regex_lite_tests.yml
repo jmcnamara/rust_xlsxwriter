@@ -1,0 +1,21 @@
+name: Rust - test regex-lite feature
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run the tests for the regex-lite feature set
+      run: cargo test --no-default-features --features regex-lite --test integration
