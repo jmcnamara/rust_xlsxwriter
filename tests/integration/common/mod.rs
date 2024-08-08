@@ -17,8 +17,17 @@ macro_rules! assert_result {
 
 macro_rules! static_regex {
     ($re:literal) => {{
-        static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-        RE.get_or_init(|| regex::Regex::new($re).unwrap())
+        #[cfg(feature = "regex-lite")]
+        {
+            static RE: std::sync::OnceLock<regex_lite::Regex> = std::sync::OnceLock::new();
+            RE.get_or_init(|| regex_lite::Regex::new($re).unwrap())
+        }
+
+        #[cfg(not(feature = "regex-lite"))]
+        {
+            static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+            RE.get_or_init(|| regex::Regex::new($re).unwrap())
+        }
     }};
 }
 
@@ -32,7 +41,6 @@ use std::hash::{Hash, Hasher};
 use std::io::Read;
 
 use pretty_assertions::assert_eq;
-use regex::Regex;
 use rust_xlsxwriter::XlsxError;
 
 // Simple test runner struct and methods to create a new xlsx output file and
@@ -383,7 +391,12 @@ fn compare_xlsx_files(
         // changes in the lower decimal places.
         if ignore_elements.contains_key(filename.as_str()) {
             let pattern = ignore_elements.get(filename.as_str()).unwrap();
-            let re = Regex::new(pattern).unwrap();
+
+            #[cfg(not(feature = "regex-lite"))]
+            let re = regex::Regex::new(pattern).unwrap();
+
+            #[cfg(feature = "regex-lite")]
+            let re = regex_lite::Regex::new(pattern).unwrap();
 
             exp_xml_vec = exp_xml_vec
                 .into_iter()
