@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -21,7 +21,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
             worksheet.write_number(row_num as u32, col_num as u16, *col_data)?;
         }
     }
-    worksheet.write_with_format(1, 1, "", &Format::default())?;
+
+    worksheet.clear_cell(1, 1);
 
     let mut chart = Chart::new(ChartType::Bar);
     chart.set_axis_ids(46202880, 46204416);

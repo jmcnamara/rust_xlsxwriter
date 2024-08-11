@@ -9613,6 +9613,46 @@ impl Worksheet {
     }
 
     // -----------------------------------------------------------------------
+    // Worksheet overlay/formatting methods.
+    // -----------------------------------------------------------------------
+
+    /// TODO
+    pub fn clear_cell(&mut self, row: RowNum, col: ColNum) -> &mut Worksheet {
+        // If cell is outside the allowed range it doesn't need to be cleared.
+        if !self.check_dimensions_only(row, col) {
+            return self;
+        }
+
+        self.clear_cell_internal(row, col);
+
+        self
+    }
+
+    /// TODO
+    pub fn clear_cell_data(&mut self, row: RowNum, col: ColNum) -> &mut Worksheet {
+        // If cell is outside the allowed range it doesn't need to be cleared.
+        if !self.check_dimensions_only(row, col) {
+            return self;
+        }
+
+        self.clear_cell_data_internal(row, col);
+
+        self
+    }
+
+    /// TODO
+    pub fn clear_cell_format(&mut self, row: RowNum, col: ColNum) -> &mut Worksheet {
+        // If cell is outside the allowed range it doesn't need to be cleared.
+        if !self.check_dimensions_only(row, col) {
+            return self;
+        }
+
+        self.clear_cell_format_internal(row, col);
+
+        self
+    }
+
+    // -----------------------------------------------------------------------
     // Worksheet page setup methods.
     // -----------------------------------------------------------------------
 
@@ -12657,6 +12697,78 @@ impl Worksheet {
         }
     }
 
+    // Clear the data and formatting from a worksheet cell. Ignores non-existing
+    // cells.
+    fn clear_cell_internal(&mut self, row: RowNum, col: ColNum) {
+        let Some(columns) = self.data_table.get_mut(&row) else {
+            return;
+        };
+
+        columns.remove(&col);
+    }
+
+    // Clear the formatting from a worksheet cell. Ignores non-existing cells.
+    fn clear_cell_format_internal(&mut self, row: RowNum, col: ColNum) {
+        self.update_cell_format(row, col, 0);
+    }
+
+    // Clear the data from a worksheet cell. Ignores non-existing cells.
+    fn clear_cell_data_internal(&mut self, row: RowNum, col: ColNum) {
+        let Some(columns) = self.data_table.get_mut(&row) else {
+            return;
+        };
+
+        let Some(cell) = columns.get_mut(&col) else {
+            return;
+        };
+
+        // Check the existing format index fo the cell.
+        let xf_index = match cell {
+            CellType::Blank { xf_index, .. }
+            | CellType::Error { xf_index, .. }
+            | CellType::String { xf_index, .. }
+            | CellType::Number { xf_index, .. }
+            | CellType::Boolean { xf_index, .. }
+            | CellType::Formula { xf_index, .. }
+            | CellType::DateTime { xf_index, .. }
+            | CellType::RichString { xf_index, .. }
+            | CellType::ArrayFormula { xf_index, .. } => *xf_index,
+        };
+
+        if xf_index == 0 {
+            // If the cell no formatting we remove the cell entry.
+            columns.remove(&col);
+        } else {
+            // If the cell has formatting we replace it with a blank cell.
+            columns.insert(col, CellType::Blank { xf_index });
+        }
+    }
+
+    // Update the format index in a worksheet cell. Ignores non-existing cells.
+    fn update_cell_format(&mut self, row: RowNum, col: ColNum, format_id: u32) {
+        let Some(columns) = self.data_table.get_mut(&row) else {
+            return;
+        };
+
+        let Some(cell) = columns.get_mut(&col) else {
+            return;
+        };
+
+        match cell {
+            CellType::Blank { xf_index, .. }
+            | CellType::Error { xf_index, .. }
+            | CellType::String { xf_index, .. }
+            | CellType::Number { xf_index, .. }
+            | CellType::Boolean { xf_index, .. }
+            | CellType::Formula { xf_index, .. }
+            | CellType::DateTime { xf_index, .. }
+            | CellType::RichString { xf_index, .. }
+            | CellType::ArrayFormula { xf_index, .. } => {
+                *xf_index = format_id;
+            }
+        }
+    }
+
     // Store the column width in Excel character units. Updates to the width can
     // come from the external user or from the internal autofit() routines.
     fn store_column_width(&mut self, col: ColNum, width: f64, autofit: bool) {
@@ -13541,31 +13653,6 @@ impl Worksheet {
         }
 
         headers
-    }
-
-    // Update a format index in an existing cell. Ignores non-existing cells.
-    fn update_cell_format(&mut self, row: RowNum, col: ColNum, format_id: u32) -> &mut Worksheet {
-        if let Some(columns) = self.data_table.get_mut(&row) {
-            if let Some(cell) = columns.get_mut(&col) {
-                match cell {
-                    CellType::Blank { xf_index, .. }
-                    | CellType::Error { xf_index, .. }
-                    | CellType::String { xf_index, .. }
-                    | CellType::Number { xf_index, .. }
-                    | CellType::Boolean { xf_index, .. }
-                    | CellType::Formula { xf_index, .. }
-                    | CellType::DateTime { xf_index, .. }
-                    | CellType::RichString { xf_index, .. }
-                    | CellType::ArrayFormula { xf_index, .. } => {
-                        if *xf_index == 0 {
-                            *xf_index = format_id;
-                        }
-                    }
-                }
-            }
-        }
-
-        self
     }
 
     // -----------------------------------------------------------------------
