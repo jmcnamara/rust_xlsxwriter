@@ -9717,6 +9717,53 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    /// Todo
+    ///
+    pub fn set_cell_range_format_with_border(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        cell_format: &Format,
+        border_format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        if first_row == last_row && first_col == last_col {
+            self.set_range_border_cell(first_row, first_col, cell_format, border_format)?;
+        } else if first_row == last_row {
+            self.set_range_border_row(first_row, first_col, last_col, cell_format, border_format)?;
+        } else if first_col == last_col {
+            self.set_range_border_col(first_row, last_row, first_col, cell_format, border_format)?;
+        } else {
+            self.set_range_border_range(
+                first_row,
+                last_row,
+                first_col,
+                last_col,
+                cell_format,
+                border_format,
+            )?;
+        }
+
+        Ok(self)
+    }
+
     // -----------------------------------------------------------------------
     // Worksheet page setup methods.
     // -----------------------------------------------------------------------
@@ -12882,6 +12929,225 @@ impl Worksheet {
             // If the cell has formatting we replace it with a blank cell.
             columns.insert(col, CellType::Blank { xf_index });
         }
+    }
+
+    // TODO
+    fn set_range_border_cell(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        cell_format: &Format,
+        border_format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let cell_format =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::All);
+
+        self.set_cell_format(row, col, &cell_format)
+    }
+
+    // TODO
+    fn set_range_border_row(
+        &mut self,
+        row: RowNum,
+        first_col: ColNum,
+        last_col: ColNum,
+        cell_format: &Format,
+        border_format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let left_format =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::RowLeft);
+
+        let right_format =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::RowRight);
+
+        let center_format =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::RowCenter);
+
+        for col in first_col..=last_col {
+            if col == first_col {
+                self.set_cell_format(row, col, &left_format)?;
+            } else if col == last_col {
+                self.set_cell_format(row, col, &right_format)?;
+            } else {
+                self.set_cell_format(row, col, &center_format)?;
+            }
+        }
+
+        Ok(self)
+    }
+
+    // TODO
+    fn set_range_border_col(
+        &mut self,
+        first_row: RowNum,
+        last_row: RowNum,
+        col: ColNum,
+        cell_format: &Format,
+        border_format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let top_format =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::ColTop);
+
+        let bottom_format =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::ColBottom);
+
+        let center_format =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::ColCenter);
+
+        for row in first_row..=last_row {
+            if row == first_row {
+                self.set_cell_format(row, col, &top_format)?;
+            } else if row == last_row {
+                self.set_cell_format(row, col, &bottom_format)?;
+            } else {
+                self.set_cell_format(row, col, &center_format)?;
+            }
+        }
+
+        Ok(self)
+    }
+
+    // TODO
+    fn set_range_border_range(
+        &mut self,
+        first_row: RowNum,
+        last_row: RowNum,
+        first_col: ColNum,
+        last_col: ColNum,
+        cell_format: &Format,
+        border_format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let top_left =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::TopLeft);
+
+        let top_center =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::TopCenter);
+
+        let top_right =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::TopRight);
+
+        let center_left =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::CenterLeft);
+
+        let center_center =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::CenterCenter);
+
+        let center_right =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::CenterRight);
+
+        let bottom_left =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::BottomLeft);
+
+        let bottom_center =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::BottomCenter);
+
+        let bottom_right =
+            Self::combined_border_format(cell_format, border_format, BorderPosition::BottomRight);
+
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                if row == first_row {
+                    if col == first_col {
+                        self.set_cell_format(row, col, &top_left)?;
+                    } else if col == last_col {
+                        self.set_cell_format(row, col, &top_right)?;
+                    } else {
+                        self.set_cell_format(row, col, &top_center)?;
+                    }
+                } else if row == last_row {
+                    if col == first_col {
+                        self.set_cell_format(row, col, &bottom_left)?;
+                    } else if col == last_col {
+                        self.set_cell_format(row, col, &bottom_right)?;
+                    } else {
+                        self.set_cell_format(row, col, &bottom_center)?;
+                    }
+                } else if col == first_col {
+                    self.set_cell_format(row, col, &center_left)?;
+                } else if col == last_col {
+                    self.set_cell_format(row, col, &center_right)?;
+                } else {
+                    self.set_cell_format(row, col, &center_center)?;
+                }
+            }
+        }
+
+        Ok(self)
+    }
+
+    // TODO
+    fn combined_border_format(
+        cell_format: &Format,
+        border_format: &Format,
+        position: BorderPosition,
+    ) -> Format {
+        let mut cell_format = cell_format.clone();
+
+        // Top.
+        match position {
+            BorderPosition::All
+            | BorderPosition::RowLeft
+            | BorderPosition::RowCenter
+            | BorderPosition::RowRight
+            | BorderPosition::ColTop
+            | BorderPosition::TopLeft
+            | BorderPosition::TopCenter
+            | BorderPosition::TopRight => {
+                cell_format.borders.top_style = border_format.borders.top_style;
+                cell_format.borders.top_color = border_format.borders.top_color;
+            }
+            _ => {}
+        }
+
+        // Bottom.
+        match position {
+            BorderPosition::All
+            | BorderPosition::RowLeft
+            | BorderPosition::RowCenter
+            | BorderPosition::RowRight
+            | BorderPosition::ColBottom
+            | BorderPosition::BottomLeft
+            | BorderPosition::BottomCenter
+            | BorderPosition::BottomRight => {
+                cell_format.borders.bottom_style = border_format.borders.bottom_style;
+                cell_format.borders.bottom_color = border_format.borders.bottom_color;
+            }
+            _ => {}
+        }
+
+        // Left.
+        match position {
+            BorderPosition::All
+            | BorderPosition::RowLeft
+            | BorderPosition::ColTop
+            | BorderPosition::ColCenter
+            | BorderPosition::ColBottom
+            | BorderPosition::TopLeft
+            | BorderPosition::CenterLeft
+            | BorderPosition::BottomLeft => {
+                cell_format.borders.left_style = border_format.borders.left_style;
+                cell_format.borders.left_color = border_format.borders.left_color;
+            }
+            _ => {}
+        }
+
+        // Right.
+        match position {
+            BorderPosition::All
+            | BorderPosition::RowRight
+            | BorderPosition::ColTop
+            | BorderPosition::ColCenter
+            | BorderPosition::ColBottom
+            | BorderPosition::TopRight
+            | BorderPosition::CenterRight
+            | BorderPosition::BottomRight => {
+                cell_format.borders.right_style = border_format.borders.right_style;
+                cell_format.borders.right_color = border_format.borders.right_color;
+            }
+            _ => {}
+        }
+
+        cell_format
     }
 
     // Store the column width in Excel character units. Updates to the width can
@@ -16484,4 +16750,23 @@ pub(crate) enum Visible {
     Default,
     Hidden,
     VeryHidden,
+}
+
+pub(crate) enum BorderPosition {
+    All,
+    RowLeft,
+    RowCenter,
+    RowRight,
+    ColTop,
+    ColCenter,
+    ColBottom,
+    TopLeft,
+    TopCenter,
+    TopRight,
+    CenterLeft,
+    CenterCenter,
+    CenterRight,
+    BottomLeft,
+    BottomCenter,
+    BottomRight,
 }
