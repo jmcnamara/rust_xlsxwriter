@@ -39,8 +39,31 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test with standard methods and no post write changes.
+// Test writing the data and formatting separately.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    // Add the data, unformatted.
+    worksheet.write(2, 1, 123)?;
+    worksheet.write(2, 3, 123)?;
+
+    // Add the formatting separately.
+    worksheet.set_cell_format(2, 3, &bold)?;
+    worksheet.set_cell_format(2, 5, &bold)?;
+
+    // This default format in an empty cell should be ignored.
+    worksheet.set_cell_format(2, 4, &Format::default())?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test with standard methods and no post write changes.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -73,6 +96,18 @@ fn test_overlay01_2() {
         .set_name("overlay01")
         .unique("2")
         .set_function(create_new_xlsx_file_2)
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_overlay01_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("overlay01")
+        .unique("3")
+        .set_function(create_new_xlsx_file_3)
         .initialize();
 
     test_runner.assert_eq();

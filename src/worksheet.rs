@@ -9652,6 +9652,71 @@ impl Worksheet {
         self
     }
 
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    /// Todo
+    ///
+    pub fn set_cell_format(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Get the index of the format object.
+        let xf_index = self.format_xf_index(format);
+
+        // Insert the format in a new or existing cell.
+        self.insert_cell_format(row, col, xf_index);
+
+        Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    /// Todo
+    ///
+    pub fn set_cell_range_format(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Get the index of the format object.
+        let xf_index = self.format_xf_index(format);
+
+        // Insert the format in a new or existing cells.
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                self.insert_cell_format(row, col, xf_index);
+            }
+        }
+
+        Ok(self)
+    }
+
     // -----------------------------------------------------------------------
     // Worksheet page setup methods.
     // -----------------------------------------------------------------------
@@ -12697,6 +12762,81 @@ impl Worksheet {
         }
     }
 
+    // Insert a cell format value into the worksheet data table structure. This
+    // function creates a new blank cell if no other cell value exists.
+    fn insert_cell_format(&mut self, row: RowNum, col: ColNum, format_id: u32) {
+        match self.data_table.entry(row) {
+            Entry::Occupied(mut entry) => {
+                // The row already exists.
+                let columns = entry.get_mut();
+
+                match columns.get_mut(&col) {
+                    // The cell exists, so update the format.
+                    Some(cell) => match cell {
+                        CellType::Blank { xf_index, .. }
+                        | CellType::Error { xf_index, .. }
+                        | CellType::String { xf_index, .. }
+                        | CellType::Number { xf_index, .. }
+                        | CellType::Boolean { xf_index, .. }
+                        | CellType::Formula { xf_index, .. }
+                        | CellType::DateTime { xf_index, .. }
+                        | CellType::RichString { xf_index, .. }
+                        | CellType::ArrayFormula { xf_index, .. } => {
+                            *xf_index = format_id;
+                        }
+                    },
+
+                    // The cell doesn't exist so add a blank cell with the format.
+                    None => {
+                        let cell = CellType::Blank {
+                            xf_index: format_id,
+                        };
+
+                        columns.insert(col, cell);
+                    }
+                }
+            }
+            Entry::Vacant(entry) => {
+                // The row doesn't exist, create a new row and insert a blank
+                // cell if it has a non-default format.
+                if format_id > 0 {
+                    let cell = CellType::Blank {
+                        xf_index: format_id,
+                    };
+
+                    let columns = BTreeMap::from([(col, cell)]);
+                    entry.insert(columns);
+                }
+            }
+        }
+    }
+
+    // Update the format index in a worksheet cell. This function ignores
+    // non-existing cells (unlike the previous function).
+    fn update_cell_format(&mut self, row: RowNum, col: ColNum, format_id: u32) {
+        let Some(columns) = self.data_table.get_mut(&row) else {
+            return;
+        };
+
+        let Some(cell) = columns.get_mut(&col) else {
+            return;
+        };
+
+        match cell {
+            CellType::Blank { xf_index, .. }
+            | CellType::Error { xf_index, .. }
+            | CellType::String { xf_index, .. }
+            | CellType::Number { xf_index, .. }
+            | CellType::Boolean { xf_index, .. }
+            | CellType::Formula { xf_index, .. }
+            | CellType::DateTime { xf_index, .. }
+            | CellType::RichString { xf_index, .. }
+            | CellType::ArrayFormula { xf_index, .. } => {
+                *xf_index = format_id;
+            }
+        }
+    }
+
     // Clear the data and formatting from a worksheet cell. Ignores non-existing
     // cells.
     fn clear_cell_internal(&mut self, row: RowNum, col: ColNum) {
@@ -12741,31 +12881,6 @@ impl Worksheet {
         } else {
             // If the cell has formatting we replace it with a blank cell.
             columns.insert(col, CellType::Blank { xf_index });
-        }
-    }
-
-    // Update the format index in a worksheet cell. Ignores non-existing cells.
-    fn update_cell_format(&mut self, row: RowNum, col: ColNum, format_id: u32) {
-        let Some(columns) = self.data_table.get_mut(&row) else {
-            return;
-        };
-
-        let Some(cell) = columns.get_mut(&col) else {
-            return;
-        };
-
-        match cell {
-            CellType::Blank { xf_index, .. }
-            | CellType::Error { xf_index, .. }
-            | CellType::String { xf_index, .. }
-            | CellType::Number { xf_index, .. }
-            | CellType::Boolean { xf_index, .. }
-            | CellType::Formula { xf_index, .. }
-            | CellType::DateTime { xf_index, .. }
-            | CellType::RichString { xf_index, .. }
-            | CellType::ArrayFormula { xf_index, .. } => {
-                *xf_index = format_id;
-            }
         }
     }
 
