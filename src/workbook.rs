@@ -346,8 +346,8 @@ impl Workbook {
     ///
     /// The `Workbook::new()` constructor is used to create a new Excel workbook
     /// object. This is used to create worksheets and add data prior to saving
-    /// everything to an xlsx file with [`save()`](Workbook::save), or
-    /// [`save_to_buffer()`](Workbook::save_to_buffer).
+    /// everything to an xlsx file with [`Workbook::save()`], or
+    /// [`Workbook::save_to_buffer()`].
     ///
     /// **Note**: `rust_xlsxwriter` can only create new files. It cannot read or
     /// modify existing files.
@@ -420,14 +420,14 @@ impl Workbook {
     /// The worksheets will be given standard Excel name like `Sheet1`,
     /// `Sheet2`, etc. Alternatively, the name can be set using
     /// `worksheet.set_name()`, see the example below and the docs for
-    /// [`worksheet.set_name()`](Worksheet::set_name).
+    /// [`Worksheet::set_name()`](Worksheet::set_name).
     ///
     /// The `add_worksheet()` method returns a borrowed mutable reference to a
     /// Worksheet instance owned by the Workbook so only one worksheet can be in
     /// existence at a time, see the example below. This limitation can be
     /// avoided, if necessary, by creating standalone Worksheet objects via
     /// [`Worksheet::new()`] and then later adding them to the workbook with
-    /// [`workbook.push_worksheet`](Workbook::push_worksheet).
+    /// [`Workbook::push_worksheet`].
     ///
     /// See also the documentation on [Creating worksheets] and working with the
     /// borrow checker.
@@ -481,9 +481,8 @@ impl Workbook {
 
     /// Get a worksheet reference by index.
     ///
-    /// Get a reference to a worksheet created via
-    /// [`workbook.add_worksheet()`](Workbook::add_worksheet) using an index
-    /// based on the creation order.
+    /// Get a reference to a worksheet created via [`Workbook::add_worksheet()`]
+    /// using an index based on the creation order.
     ///
     /// Due to borrow checking rules you can only have one active reference to a
     /// worksheet object created by `add_worksheet()` since that method always
@@ -496,9 +495,8 @@ impl Workbook {
     /// apply so you will have to give up ownership of any other worksheet
     /// reference prior to calling this method. See the example below.
     ///
-    /// See also [`worksheet_from_name()`](Workbook::worksheet_from_name) and
-    /// the documentation on [Creating worksheets] and working with the borrow
-    /// checker.
+    /// See also [`Workbook::worksheet_from_name()`] and the documentation on
+    /// [Creating worksheets] and working with the borrow checker.
     ///
     /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
     ///
@@ -562,9 +560,8 @@ impl Workbook {
 
     /// Get a worksheet reference by name.
     ///
-    /// Get a reference to a worksheet created via
-    /// [`workbook.add_worksheet()`](Workbook::add_worksheet) using the sheet
-    /// name.
+    /// Get a reference to a worksheet created via [`Workbook::add_worksheet()`]
+    /// using the sheet name.
     ///
     /// Due to borrow checking rules you can only have one active reference to a
     /// worksheet object created by `add_worksheet()` since that method always
@@ -579,12 +576,11 @@ impl Workbook {
     ///
     /// Worksheet names are usually "Sheet1", "Sheet2", etc., or else a user
     /// define name that was set using
-    /// [`worksheet.set_name()`](Worksheet::set_name). You can also use the
-    /// [`worksheet.name()`](Worksheet::name) method to get the name.
+    /// [`Worksheet::set_name()`](Worksheet::set_name). You can also use the
+    /// [`Worksheet::name()`](Worksheet::name) method to get the name.
     ///
-    /// See also [`worksheet_from_index()`](Workbook::worksheet_from_index) and
-    /// the documentation on [Creating worksheets] and working with the borrow
-    /// checker.
+    /// See also [`Workbook::worksheet_from_index()`] and the documentation on
+    /// [Creating worksheets] and working with the borrow checker.
     ///
     /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
     ///
@@ -711,9 +707,8 @@ impl Workbook {
     /// Get a reference to the vector of worksheets.
     ///
     /// Get a reference to the vector of Worksheets used by the Workbook
-    /// instance. This is less useful than
-    /// [`worksheets_mut`](Workbook::worksheets_mut) version since a mutable
-    /// reference is required for most worksheet operations.
+    /// instance. This is less useful than [`Workbook::worksheets_mut`] version
+    /// since a mutable reference is required for most worksheet operations.
     ///
     /// # Examples
     ///
@@ -754,12 +749,12 @@ impl Workbook {
     /// Add a worksheet created directly using `Workbook::new()` to a workbook.
     ///
     /// There are two way of creating a worksheet object with `rust_xlsxwriter`:
-    /// via the [`workbook.add_worksheet()`](Workbook::add_worksheet) method and
-    /// via the [`Worksheet::new()`] constructor. The first method ties the
-    /// worksheet to the workbook object that will write it automatically when
-    /// the file is saved, whereas the second method creates a worksheet that is
-    /// independent of a workbook. This has certain advantages in keeping the
-    /// worksheet free of the workbook borrow checking until you wish to add it.
+    /// via the [`Workbook::add_worksheet()`] method and via the
+    /// [`Worksheet::new()`] constructor. The first method ties the worksheet to
+    /// the workbook object that will write it automatically when the file is
+    /// saved, whereas the second method creates a worksheet that is independent
+    /// of a workbook. This has certain advantages in keeping the worksheet free
+    /// of the workbook borrow checking until you wish to add it.
     ///
     /// When working with the independent worksheet object you can add it to a
     /// workbook using `push_worksheet()`, see the example below.
@@ -899,8 +894,8 @@ impl Workbook {
     /// Save the Workbook as an xlsx file and return it as a byte vector.
     ///
     /// The workbook `save_to_buffer()` method is similar to the
-    /// [`save()`](Workbook::save) method except that it returns the xlsx file
-    /// as a `Vec<u8>` buffer suitable for streaming in a web application.
+    /// [`Workbook::save()`] method except that it returns the xlsx file as a
+    /// `Vec<u8>` buffer suitable for streaming in a web application.
     ///
     /// # Errors
     ///
@@ -945,9 +940,9 @@ impl Workbook {
     /// Save the Workbook as an xlsx file to a user supplied file/buffer.
     ///
     /// The workbook `save_to_writer()` method is similar to the
-    /// [`save()`](Workbook::save) method except that it writes the xlsx file to
-    /// types that implement the [`Write`] trait such as the [`std::fs::File`]
-    /// type or buffers.
+    /// [`Workbook::save()`] method except that it writes the xlsx file to types
+    /// that implement the [`Write`] trait such as the [`std::fs::File`] type or
+    /// buffers.
     ///
     /// # Parameters
     ///

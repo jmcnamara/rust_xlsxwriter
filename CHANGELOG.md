@@ -323,7 +323,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added additional support for serialization header and field options via
   [`CustomSerializeField`].
 
-- Added support for writing `Result<T, E>` with [`worksheet.write()`] when `T`
+- Added support for writing `Result<T, E>` with [`Worksheet::write()`] when `T`
   and `E` are supported types.
 
   [Feature Request #64].
@@ -377,7 +377,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   release to use extended enums. This is an API change with the version released
   earlier this week but it provides a cleaner interface.
 
-- Added support for `Option<T>` wrapped types to [`worksheet.write()`].
+- Added support for `Option<T>` wrapped types to [`Worksheet::write()`].
 
   [Feature Request #59].
 
@@ -496,8 +496,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for chart trendlines (Linear, Polynomial, Moving Average, etc.)
   via the [`ChartTrendline`] struct and methods.
 
-- Added the [`worksheet.set_very_hidden()`] method to hide a worksheet similar
-  to the [`worksheet.set_hidden()`] method. The difference is that the worksheet
+- Added the [`Worksheet::set_very_hidden()`] method to hide a worksheet similar
+  to the [`Worksheet::set_hidden()`] method. The difference is that the worksheet
   can only be unhidden by VBA and cannot be unhidden in the the Excel user
   interface.
 
@@ -509,7 +509,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [`ChartTrendline`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartTrendline.html
-[`worksheet.set_very_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_very_hidden
+[`Worksheet::set_very_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_very_hidden
 [future functions]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Formula.html#formulas-added-in-excel-2010-and-later
 
 
@@ -519,13 +519,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added chart options to control how non-data cells are displayed.
 
-  - [`chart.show_empty_cells_as()`]
-  - [`chart.show_na_as_empty_cell()`]
-  - [`chart.show_hidden_data()`]
+  - [`Chart::show_empty_cells_as()`]
+  - [`Chart::show_na_as_empty_cell()`]
+  - [`Chart::show_hidden_data()`]
 
-[`chart.show_hidden_data()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_hidden_data
-[`chart.show_empty_cells_as()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_empty_cells_as
-[`chart.show_na_as_empty_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_na_as_empty_cell
+[`Chart::show_hidden_data()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_hidden_data
+[`Chart::show_empty_cells_as()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_empty_cells_as
+[`Chart::show_na_as_empty_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.show_na_as_empty_cell
 
 
 - Updated Polar's dependency and `PolarError` import to reflect changes in Polars v 0.33.2.
@@ -549,11 +549,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   See the [rust_xlsx_wasm_example] sample application that demonstrates
   accessing `rust_xlsxwriter` code from JavaScript, Node.js, Deno and Wasmtime.
 
-- Added [`workbook.save_to_writer()`] method to make it easier to interact with
+- Added [`Workbook::save_to_writer()`] method to make it easier to interact with
   interfaces that implement the `<W: Write>` trait.
 
 [rust_xlsx_wasm_example]: https://github.com/Clipi-12/rust_xlsx_wasm_example
-[`workbook.save_to_writer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.save_to_writer
+[`Workbook::save_to_writer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.save_to_writer
 
 
 ## [0.46.0] - 2023-08-20
@@ -593,10 +593,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added support for worksheet [`Table`] header and cell formatting via the
-  [`tablecolumn.set_format()`] and [`tablecolumn.set_header_format()`] methods.
+  [`TableColumn::set_format()`] and [`TableColumn::set_header_format()`] methods.
 
-[`tablecolumn.set_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn.html#method.set_format
-[`tablecolumn.set_header_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn.html#method.set_header_format
+[`TableColumn::set_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn::html#method.set_format
+[`TableColumn::set_header_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn::html#method.set_header_format
 
 
 ## [0.42.0] - 2023-07-11
@@ -671,34 +671,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   The `worksheet.write_date()` and `worksheet.write_time()` methods have been
   moved to "undocumented" since the same functionality is available via
-  [`worksheet.write_datetime()`]. This is a soft deprecation.
+  [`Worksheet::write_datetime()`]. This is a soft deprecation.
 
 [`Chrono`]: https://docs.rs/chrono/latest/chrono
 [`ExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.ExcelDateTime.html
 [`IntoExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoExcelDateTime.html
-[`worksheet.write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_datetime
+[`Worksheet::write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_datetime
 
 
 ## [0.40.0] - 2023-05-31
 
 - Added support for worksheet tables. See [`Table`] and the
-  [`worksheet.add_table()`] method.
+  [`Worksheet::add_table()`] method.
 
-- Added support for the `bool` type in the generic [`worksheet.write()`] method.
+- Added support for the `bool` type in the generic [`Worksheet::write()`] method.
 
 [`Table`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Table.html
-[`worksheet.add_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.add_table
+[`Worksheet::add_table()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.add_table
 
 
 ## [0.39.0] - 2023-05-23
 
 ### Added
 
-- Added [`worksheet.write_row()`], [`worksheet.write_column()`],
-  [`worksheet.write_row_matrix()`] and [`worksheet.write_column_matrix()`]
+- Added [`Worksheet::write_row()`], [`Worksheet::write_column()`],
+  [`Worksheet::write_row_matrix()`] and [`Worksheet::write_column_matrix()`]
   methods to write arrays/iterators of data.
 
-- Added [`Formula`] and [`Url`] types to use with generic [`worksheet.write()`].
+- Added [`Formula`] and [`Url`] types to use with generic [`Worksheet::write()`].
 
   [Feature Request #16].
 
@@ -713,11 +713,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`Color`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.Color.html
 [`Formula`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Formula.html
 [Feature Request #16]: https://github.com/jmcnamara/rust_xlsxwriter/issues/16
-[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write
-[`worksheet.write_row()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_row
-[`worksheet.write_column()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_column
-[`worksheet.write_row_matrix()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_row_matrix
-[`worksheet.write_column_matrix()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_column_matrix
+[`Worksheet::write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write
+[`Worksheet::write_row()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_row
+[`Worksheet::write_column()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_column
+[`Worksheet::write_row_matrix()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_row_matrix
+[`Worksheet::write_column_matrix()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_column_matrix
 
 
 ## [0.38.0] - 2023-05-05
@@ -726,45 +726,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added several Chart axis and series methods:
 
-  - [`chartaxis.set_hidden()`]
-  - [`chartaxis.set_label_interval()`]
-  - [`chartaxis.set_label_position()`]
-  - [`chartaxis.set_log_base()`]
-  - [`chartaxis.set_major_gridlines()`]
-  - [`chartaxis.set_major_gridlines_line()`]
-  - [`chartaxis.set_major_tick_type()`]
-  - [`chartaxis.set_major_unit()`]
-  - [`chartaxis.set_max()`]
-  - [`chartaxis.set_min()`]
-  - [`chartaxis.set_minor_gridlines()`]
-  - [`chartaxis.set_minor_gridlines_line()`]
-  - [`chartaxis.set_minor_tick_type()`]
-  - [`chartaxis.set_minor_unit()`]
-  - [`chartaxis.set_position_between_ticks()`]
-  - [`chartaxis.set_reverse()`]
-  - [`chartaxis.set_tick_interval()`]
-  - [`chartseries.set_invert_if_negative()`]
-  - [`chartseries.set_invert_if_negative_color()`]
+  - [`ChartAxis::set_hidden()`]
+  - [`ChartAxis::set_label_interval()`]
+  - [`ChartAxis::set_label_position()`]
+  - [`ChartAxis::set_log_base()`]
+  - [`ChartAxis::set_major_gridlines()`]
+  - [`ChartAxis::set_major_gridlines_line()`]
+  - [`ChartAxis::set_major_tick_type()`]
+  - [`ChartAxis::set_major_unit()`]
+  - [`ChartAxis::set_max()`]
+  - [`ChartAxis::set_min()`]
+  - [`ChartAxis::set_minor_gridlines()`]
+  - [`ChartAxis::set_minor_gridlines_line()`]
+  - [`ChartAxis::set_minor_tick_type()`]
+  - [`ChartAxis::set_minor_unit()`]
+  - [`ChartAxis::set_position_between_ticks()`]
+  - [`ChartAxis::set_reverse()`]
+  - [`ChartAxis::set_tick_interval()`]
+  - [`ChartSeries::set_invert_if_negative()`]
+  - [`ChartSeries::set_invert_if_negative_color()`]
 
-[`chartaxis.set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_hidden
-[`chartaxis.set_label_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_label_interval
-[`chartaxis.set_label_position()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_label_position
-[`chartaxis.set_log_base()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_log_base
-[`chartaxis.set_major_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_gridlines
-[`chartaxis.set_major_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_gridlines_line
-[`chartaxis.set_major_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_tick_type
-[`chartaxis.set_major_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_unit
-[`chartaxis.set_max()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_max
-[`chartaxis.set_min()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_min
-[`chartaxis.set_minor_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_gridlines
-[`chartaxis.set_minor_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_gridlines_line
-[`chartaxis.set_minor_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_tick_type
-[`chartaxis.set_minor_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_unit
-[`chartaxis.set_position_between_ticks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_position_between_ticks
-[`chartaxis.set_reverse()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_reverse
-[`chartaxis.set_tick_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_tick_interval
-[`chartseries.set_invert_if_negative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_invert_if_negative
-[`chartseries.set_invert_if_negative_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_invert_if_negative_color
+[`ChartAxis::set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_hidden
+[`ChartAxis::set_label_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_label_interval
+[`ChartAxis::set_label_position()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_label_position
+[`ChartAxis::set_log_base()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_log_base
+[`ChartAxis::set_major_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_gridlines
+[`ChartAxis::set_major_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_gridlines_line
+[`ChartAxis::set_major_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_tick_type
+[`ChartAxis::set_major_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_major_unit
+[`ChartAxis::set_max()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_max
+[`ChartAxis::set_min()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_min
+[`ChartAxis::set_minor_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_gridlines
+[`ChartAxis::set_minor_gridlines_line()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_gridlines_line
+[`ChartAxis::set_minor_tick_type()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_tick_type
+[`ChartAxis::set_minor_unit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_minor_unit
+[`ChartAxis::set_position_between_ticks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_position_between_ticks
+[`ChartAxis::set_reverse()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_reverse
+[`ChartAxis::set_tick_interval()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartAxis.html#method.set_tick_interval
+[`ChartSeries::set_invert_if_negative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_invert_if_negative
+[`ChartSeries::set_invert_if_negative_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_invert_if_negative_color
 
 
 ## [0.37.0] - 2023-04-30
@@ -774,15 +774,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added font formatting support to chart titles, legends, axes and data labels
   via [`ChartFont`] and various `set_font()` methods.
 
-- Made [`worksheet.write_string()`] and [`worksheet.write()`] more generic via
+- Made [`Worksheet::write_string()`] and [`Worksheet::write()`] more generic via
   `impl Into<String>` to allow them to handle `&str`, `&String`, `String`, and
   `Cow<>` types.
 
   See [GitHub Feature Request #35].
 
 [`ChartFont`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartFont.html
-[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_string
-[`worksheet.write_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_string
+[`Worksheet::write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_string
+[`Worksheet::write_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_string
 [GitHub Feature Request #35]: https://github.com/jmcnamara/rust_xlsxwriter/issues/35
 
 
@@ -812,11 +812,11 @@ Fix cargo/release issue with 0.36.0 release.
 ### Added
 
 - Added support for Chart Series data labels including custom data labels. See
-  [`ChartDataLabel`], [`chart.series.set_data_label()`] and [`chart.series.set_custom_data_labels()`].
+  [`ChartDataLabel`], [`Chart::series.set_data_label()`] and [`Chart::series.set_custom_data_labels()`].
 
 [`ChartDataLabel`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartDataLabel.html
-[`chart.series.set_data_label()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_data_label
-[`chart.series.set_custom_data_labels()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_custom_data_labels
+[`Chart::series.set_data_label()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_data_label
+[`Chart::series.set_custom_data_labels()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_custom_data_labels
 
 
 ## [0.34.0] - 2023-04-12
@@ -853,7 +853,7 @@ Performance improvement release.
 - Added support for formatting and setting chart markers via the [`ChartMarker`]
   struct.
 
-- Added [`chart.set_rotation()`] and [`chart.set_hole_size()`] methods for Pie and Doughnut charts.
+- Added [`Chart::set_rotation()`] and [`Chart::set_hole_size()`] methods for Pie and Doughnut charts.
 
 - Added support to differentiate between `Color::Default` and
   `Color::Automatic` colors for Excel elements. These are usually equivalent
@@ -863,8 +863,8 @@ Performance improvement release.
 [Pie Chart]: https://rustxlsxwriter.github.io/examples/pie_chart.html
 [`ChartPoint`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartPoint.html
 [`ChartMarker`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartMarker.html
-[`chart.set_rotation()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_rotation
-[`chart.set_hole_size()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_hole_size
+[`Chart::set_rotation()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_rotation
+[`Chart::set_hole_size()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html#method.set_hole_size
 
 
 ## [0.32.0] - 2023-04-03
@@ -898,22 +898,22 @@ Performance improvement release.
   `object.set_color(Color::RGB(0xFF7F50))`. This addition doesn't require
   any API changes from the end user.
 
-- Added [`worksheet.insert_image_fit_to_cell()`] method to add an image to a
+- Added [`Worksheet::insert_image_fit_to_cell()`] method to add an image to a
   worksheet and scale it so that it fits in a cell. This method can be useful
   when creating a product spreadsheet with a column of images for each product.
 
   See also the [insert_image_to_fit] example in the user guide.
 
-- Added [`chart.series.set_gap()`] and [`chart.series.set_overlap()`] method to control layout
+- Added [`Chart::series.set_gap()`] and [`Chart::series.set_overlap()`] method to control layout
   of histogram style charts.
 
 [`IntoColor`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoColor.html
 [`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartFormat.html
 [Chart Fill Pattern]: https://rustxlsxwriter.github.io/examples/chart_pattern.html
 [insert_image_to_fit]: https://rustxlsxwriter.github.io/examples/insert_image_to_fit.html
-[`chart.series.set_gap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_gap
-[`chart.series.set_overlap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_overlap
-[`worksheet.insert_image_fit_to_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image_fit_to_cell
+[`Chart::series.set_gap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_gap
+[`Chart::series.set_overlap()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartSeries.html#method.set_overlap
+[`Worksheet::insert_image_fit_to_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image_fit_to_cell
 
 
 ## [0.29.0] - 2023-03-16
@@ -923,7 +923,7 @@ Performance improvement release.
 - Added support for resizing and object positioning to the [`Chart`] struct.
 
 - Added handling for `chrono` date/time types to the generic
-  [`worksheet.write()`] method.
+  [`Worksheet::write()`] method.
 
 
 ## [0.28.0] - 2023-03-14
@@ -940,23 +940,23 @@ Performance improvement release.
 ### Added
 
 - Added support for Charts via the [`Chart`] struct and the
-  [`worksheet.insert_chart()`] method. See also the [Chart Examples] in the user
+  [`Worksheet::insert_chart()`] method. See also the [Chart Examples] in the user
   guide.
 
-- Added a generic [`worksheet.write()`] method that writes string or number
+- Added a generic [`Worksheet::write()`] method that writes string or number
   types. This will be extended in an upcoming release to provide a single
   `write()` method for all of the currently supported types.
 
-  It also allows the user to extend [`worksheet.write()`] to handle user defined
+  It also allows the user to extend [`Worksheet::write()`] to handle user defined
   types via the [`IntoExcelData`] trait. See also the [Writing Generic data]
   example in the user guide.
 
 [`Chart`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.Chart.html
 [Chart Examples]: https://rustxlsxwriter.github.io/examples/simple_chart.html
 [`IntoExcelData`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/trait.IntoExcelData.html
-[`worksheet.write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write
+[`Worksheet::write()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write
 [Writing Generic data]: https://rustxlsxwriter.github.io/examples/generic_write.html
-[`worksheet.insert_chart()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_chart
+[`Worksheet::insert_chart()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_chart
 
 
 ## [0.26.0] - 2023-02-03
@@ -1017,8 +1017,8 @@ Performance improvement release.
 
 ### Added
 
-- Added ability to filter columns in [`worksheet.autofilter()`] ranges via
-  [`worksheet.filter_column()`] and [`FilterCondition`].
+- Added ability to filter columns in [`Worksheet::autofilter()`] ranges via
+  [`Worksheet::filter_column()`] and [`FilterCondition`].
 
   The library automatically hides any rows that don't match the supplied
   criteria. This is an additional feature that isn't available in the other
@@ -1028,8 +1028,8 @@ Performance improvement release.
 
 [`FilterCondition`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.FilterCondition.html
 [Working with Autofilters]: https://rustxlsxwriter.github.io/formulas/autofilters.html
-[`worksheet.autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofilter
-[`worksheet.filter_column()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.filter_column
+[`Worksheet::autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofilter
+[`Worksheet::filter_column()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.filter_column
 
 
 ## [0.24.0] - 2023-01-18
@@ -1037,14 +1037,14 @@ Performance improvement release.
 ### Added
 
 - Added support for hiding rows and columns (to hide intermediate calculations)
-  via the [`worksheet.set_column_hidden()`] and[`worksheet.set_row_hidden()`]
+  via the [`Worksheet::set_column_hidden()`] and[`Worksheet::set_row_hidden()`]
   method. This is also a required precursor to adding autofilter conditions.
 - Added the [ObjectMovement] enum to control how a worksheet object, such a
   an image, moves when the cells underneath it are moved, resized or deleted.
 
 [ObjectMovement]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.ObjectMovement.html
-[`worksheet.set_row_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_row_hidden
-[`worksheet.set_column_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_column_hidden
+[`Worksheet::set_row_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_row_hidden
+[`Worksheet::set_column_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_column_hidden
 
 ## [0.23.0] - 2023-01-16
 
@@ -1052,33 +1052,33 @@ Performance improvement release.
 
 Added more page setup methods.
 
-- Added [`worksheet.set_selection()`] method to select a cell or range of cells in a worksheet.
-- Added [`worksheet.set_top_left_cell()`] method to set the top and leftmost visible cell.
-- Added [`worksheet.set_page_breaks()`] method to add page breaks to a worksheet.
+- Added [`Worksheet::set_selection()`] method to select a cell or range of cells in a worksheet.
+- Added [`Worksheet::set_top_left_cell()`] method to set the top and leftmost visible cell.
+- Added [`Worksheet::set_page_breaks()`] method to add page breaks to a worksheet.
 
-[`worksheet.set_selection()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_selection
-[`worksheet.set_page_breaks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_breaks
-[`worksheet.set_top_left_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_top_left_cell
+[`Worksheet::set_selection()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_selection
+[`Worksheet::set_page_breaks()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_breaks
+[`Worksheet::set_top_left_cell()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_top_left_cell
 
 
 ## [0.22.0] - 2023-01-13
 
 ### Added
 
-- Added support for worksheet protection via the [`worksheet.protect()`],
-  [`worksheet.protect_with_password()`] and [`worksheet.protect_with_options()`].
+- Added support for worksheet protection via the [`Worksheet::protect()`],
+  [`Worksheet::protect_with_password()`] and [`Worksheet::protect_with_options()`].
 
   See also the section on [Worksheet protection] in the user guide.
 
 - Add option to make the xlsx file read-only when opened by Excel via the
-  [`workbook.read_only_recommended()`] method.
+  [`Workbook::read_only_recommended()`] method.
 
 
 [Worksheet protection]:  https://rustxlsxwriter.github.io/worksheet/protection.html
-[`worksheet.protect()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect
-[`worksheet.protect_with_options()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect_with_options
-[`workbook.read_only_recommended()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.read_only_recommended
-[`worksheet.protect_with_password()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect_with_password
+[`Worksheet::protect()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect
+[`Worksheet::protect_with_options()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect_with_options
+[`Workbook::read_only_recommended()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.read_only_recommended
+[`Worksheet::protect_with_password()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.protect_with_password
 
 
 ## [0.21.0] - 2023-01-09
@@ -1094,17 +1094,17 @@ Added more page setup methods.
 
 ### Changed
 
-- Change date/time parameters to references in [`worksheet.write_datetime()`],
+- Change date/time parameters to references in [`Worksheet::write_datetime()`],
   `worksheet.write_date()` and `worksheet.write_time()` for consistency.
 
-[`worksheet.write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_datetime
+[`Worksheet::write_datetime()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_datetime
 
 
 ## [0.20.0] - 2023-01-06
 
 ### Added
 
-- Improved fitting algorithm for [`worksheet.autofit()`]. See also the
+- Improved fitting algorithm for [`Worksheet::autofit()`]. See also the
   [app_autofit] sample application.
 
 ### Changed
@@ -1118,19 +1118,19 @@ Added more page setup methods.
 ### Added
 
 - Added support for created defined variable names at a workbook and worksheet
-  level via [`workbook.define_name()`].
+  level via [`Workbook::define_name()`].
 
   See also [Using defined names] in the user guide.
 
-- Added initial support for autofilters via [`worksheet.autofilter()`].
+- Added initial support for autofilters via [`Worksheet::autofilter()`].
 
   Note, adding filter criteria isn't currently supported. That will be added in
   an upcoming version. See also [Adding Autofilters] in the user guide.
 
 [Adding Autofilters]: https://rustxlsxwriter.github.io/examples/autofilter.html
 [Using defined names]: https://rustxlsxwriter.github.io/examples/defined_names.html
-[`worksheet.autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofilter
-[`workbook.define_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.define_name
+[`Worksheet::autofilter()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofilter
+[`Workbook::define_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.define_name
 
 
 ## [0.18.0] - 2022-12-19
@@ -1138,14 +1138,14 @@ Added more page setup methods.
 ### Added
 
 - Added support for "rich" strings with multiple font formats via
-  [`worksheet.write_rich_string()`] and [`worksheet.write_rich_string_with_format()`].
+  [`Worksheet::write_rich_string()`] and [`Worksheet::write_rich_string_with_format()`].
   For example strings like "This is **bold** and this is *italic*".
 
   See also the [Rich strings example] in the user guide.
 
 [Rich strings example]: https://rustxlsxwriter.github.io/examples/rich_strings.html
-[`worksheet.write_rich_string_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_rich_string_with_format
-[`worksheet.write_rich_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_rich_string
+[`Worksheet::write_rich_string_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_rich_string_with_format
+[`Worksheet::write_rich_string()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_rich_string
 
 ## [0.17.1] - 2022-12-18
 
@@ -1160,14 +1160,14 @@ Added more page setup methods.
 ### Added
 
 - Added support for images in headers/footers via the
-  [`worksheet.set_header_image()`] and [`worksheet.set_footer_image()`] methods.
+  [`Worksheet::set_header_image()`] and [`Worksheet::set_footer_image()`] methods.
 
   See the [Headers and Footers] and [Adding a watermark] examples in the user guide.
 
 [Headers and Footers]: https://rustxlsxwriter.github.io/examples/headers.html
 [Adding a watermark]: https://rustxlsxwriter.github.io/examples/watermark.html
-[`worksheet.set_footer_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer_image
-[`worksheet.set_header_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_image
+[`Worksheet::set_footer_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer_image
+[`Worksheet::set_header_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_image
 
 
 ## [0.16.0] - 2022-12-09
@@ -1182,13 +1182,13 @@ Added more page setup methods.
 
 ### Added
 
-- Added support for images in buffers via [`image.new_from_buffer()`].
+- Added support for images in buffers via [`Image::new_from_buffer()`].
 
-- Added image accessability features via [`image.set_alt_text()`] and[`image.set_decorative()`].
+- Added image accessability features via [`Image::set_alt_text()`] and[`Image::set_decorative()`].
 
-[`image.set_alt_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_alt_text
-[`image.set_decorative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_decorative
-[`image.new_from_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.new_from_buffer
+[`Image::set_alt_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_alt_text
+[`Image::set_decorative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_decorative
+[`Image::new_from_buffer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.new_from_buffer
 
 
 ## [0.14.0] - 2022-12-05
@@ -1196,7 +1196,7 @@ Added more page setup methods.
 ### Added
 
 - Added support for inserting images into worksheets with
-  [`worksheet.insert_image()`] and [`worksheet.insert_image_with_offset()`] and
+  [`Worksheet::insert_image()`] and [`Worksheet::insert_image_with_offset()`] and
   the [`Image`] struct.
 
   See also the [images example] in the user guide.
@@ -1207,14 +1207,14 @@ Added more page setup methods.
 
 ### Removed
 
-- The [`workbook.save()`] method has been extended to handle paths or strings.
+- The [`Workbook::save()`] method has been extended to handle paths or strings.
   The `workbook.save_to_path()` method has been removed. See [PR #15].
 
 [`Image`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html
 [PR #15]: https://github.com/jmcnamara/rust_xlsxwriter/pull/15
 [images example]: https://rustxlsxwriter.github.io/examples/images.html
-[`worksheet.insert_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image
-[`worksheet.insert_image_with_offset()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image_with_offset
+[`Worksheet::insert_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image
+[`Worksheet::insert_image_with_offset()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_image_with_offset
 
 
 ## [0.13.0] - 2022-11-21
@@ -1223,16 +1223,16 @@ Added more page setup methods.
 
 - Added support for writing hyperlinks in worksheets via the following methods:
 
-  - [`worksheet.write_url()`] to write a link with a default hyperlink format style.
-  - [`worksheet.write_url_with_text()`] to add alternative text to the link.
-  - [`worksheet.write_url_with_format()`] to add an alternative format to the link.
+  - [`Worksheet::write_url()`] to write a link with a default hyperlink format style.
+  - [`Worksheet::write_url_with_text()`] to add alternative text to the link.
+  - [`Worksheet::write_url_with_format()`] to add an alternative format to the link.
 
 See also the [hyperlinks example] in the user guide.
 
 [hyperlinks example]: https://rustxlsxwriter.github.io/examples/hyperlinks.html
-[`worksheet.write_url()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url
-[`worksheet.write_url_with_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url_with_text
-[`worksheet.write_url_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url_with_format
+[`Worksheet::write_url()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url
+[`Worksheet::write_url_with_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url_with_text
+[`Worksheet::write_url_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_url_with_format
 
 
 ## [0.12.1] - 2022-11-09
@@ -1248,13 +1248,13 @@ See also the [hyperlinks example] in the user guide.
 
 ### Added
 
-- Added [`worksheet.merge_range()`] method.
+- Added [`Worksheet::merge_range()`] method.
 - Added support for Theme colors to [`Color`]. See also [Working with
   Colors] in the user guide.
 
 [`Color`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/enum.Color.html
 [Working with Colors]: https://rustxlsxwriter.github.io/colors/intro.html
-[`worksheet.merge_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.merge_range
+[`Worksheet::merge_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.merge_range
 
 
 ## [0.11.0] - 2022-11-04
@@ -1263,19 +1263,19 @@ See also the [hyperlinks example] in the user guide.
 
 - Added several worksheet methods for working with worksheet tabs:
 
-  - [`worksheet.set_active()`]: Set the active/visible worksheet.
-  - [`worksheet.set_tab_color()`]: Set the tab color.
-  - [`worksheet.set_hidden()`]: Hide a worksheet.
-  - [`worksheet.set_selected()`]: Set a worksheet as selected.
-  - [`worksheet.set_first_tab()`]: Set the first visible tab.
+  - [`Worksheet::set_active()`]: Set the active/visible worksheet.
+  - [`Worksheet::set_tab_color()`]: Set the tab color.
+  - [`Worksheet::set_hidden()`]: Hide a worksheet.
+  - [`Worksheet::set_selected()`]: Set a worksheet as selected.
+  - [`Worksheet::set_first_tab()`]: Set the first visible tab.
 
   See also [Working with worksheet tabs] in the user guide.
 
-[`worksheet.set_active()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_active
-[`worksheet.set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_hidden
-[`worksheet.set_selected()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_selected
-[`worksheet.set_tab_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_tab_color
-[`worksheet.set_first_tab()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_first_tab
+[`Worksheet::set_active()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_active
+[`Worksheet::set_hidden()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_hidden
+[`Worksheet::set_selected()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_selected
+[`Worksheet::set_tab_color()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_tab_color
+[`Worksheet::set_first_tab()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_first_tab
 [Working with worksheet tabs]: https://rustxlsxwriter.github.io/worksheet/tabs.html
 
 
@@ -1283,16 +1283,16 @@ See also the [hyperlinks example] in the user guide.
 
 ### Added
 
-- Added a simulated [`worksheet.autofit()`] method to automatically adjust
+- Added a simulated [`Worksheet::autofit()`] method to automatically adjust
   the width of columns with data. See also the [app_autofit] sample application.
 
-- Added the [`worksheet.set_freeze_panes()`] method to set "freeze" panes for
+- Added the [`Worksheet::set_freeze_panes()`] method to set "freeze" panes for
   worksheets. See also the [app_panes] example application.
 
 [app_panes]: https://rustxlsxwriter.github.io/examples/panes.html
 [app_autofit]: https://rustxlsxwriter.github.io/examples/autofit.html
-[`worksheet.autofit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
-[`worksheet.set_freeze_panes()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_freeze_panes
+[`Worksheet::autofit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit
+[`Worksheet::set_freeze_panes()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_freeze_panes
 
 ## [0.9.0] - 2022-10-31
 
@@ -1303,7 +1303,7 @@ restructures the Workbook constructor/destructor sequence and introduces a
 ### Changed
 
 - The [`Workbook::new()`] method no longer takes a filename. Instead the naming
-  of the file has move to a [`workbook.save()`] method which replaces
+  of the file has move to a [`Workbook::save()`] method which replaces
   `workbook.close()`.
 
 
@@ -1311,24 +1311,24 @@ restructures the Workbook constructor/destructor sequence and introduces a
 
 - Added new methods to get references to worksheet objects used by the workbook:
 
-  - [`workbook.worksheet_from_name()`]
-  - [`workbook.worksheet_from_index()`]
-  - [`workbook.worksheets_mut()`]
+  - [`Workbook::worksheet_from_name()`]
+  - [`Workbook::worksheet_from_index()`]
+  - [`Workbook::worksheets_mut()`]
 
 - Made the [`Worksheet::new()`] method public and added the
-  [`workbook.push_worksheet()`] to add Worksheet instances to a Workbook. See
+  [`Workbook::push_worksheet()`] to add Worksheet instances to a Workbook. See
   also the `rust_xlsxwriter` documentation on [Creating Worksheets] and working
   with the borrow checker.
 
 [`Workbook::new()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.new
 [`Worksheet::new()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.new
 
-[`workbook.save()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.save
+[`Workbook::save()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.save
 [Creating Worksheets]: https://rustxlsxwriter.github.io/worksheet/create.html
-[`workbook.worksheets_mut()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheets_mut
-[`workbook.push_worksheet()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.push_worksheet
-[`workbook.worksheet_from_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheet_from_name
-[`workbook.worksheet_from_index()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheet_from_index
+[`Workbook::worksheets_mut()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheets_mut
+[`Workbook::push_worksheet()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.push_worksheet
+[`Workbook::worksheet_from_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheet_from_name
+[`Workbook::worksheet_from_index()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.worksheet_from_index
 
 
 ## [0.8.0] - 2022-10-28
@@ -1349,60 +1349,60 @@ restructures the Workbook constructor/destructor sequence and introduces a
 
 - Page Setup - Page
 
-  - [`worksheet.set_portrait()`]
-  - [`worksheet.set_landscape()`]
-  - [`worksheet.set_print_scale()`]
-  - [`worksheet.set_print_fit_to_pages()`]
-  - [`worksheet.set_print_first_page_number()`]
+  - [`Worksheet::set_portrait()`]
+  - [`Worksheet::set_landscape()`]
+  - [`Worksheet::set_print_scale()`]
+  - [`Worksheet::set_print_fit_to_pages()`]
+  - [`Worksheet::set_print_first_page_number()`]
 
-[`worksheet.set_portrait()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_portrait
-[`worksheet.set_landscape()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_landscape
-[`worksheet.set_print_scale()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_scale
-[`worksheet.set_print_fit_to_pages()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_fit_to_pages
-[`worksheet.set_print_first_page_number()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_first_page_number
+[`Worksheet::set_portrait()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_portrait
+[`Worksheet::set_landscape()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_landscape
+[`Worksheet::set_print_scale()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_scale
+[`Worksheet::set_print_fit_to_pages()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_fit_to_pages
+[`Worksheet::set_print_first_page_number()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_first_page_number
 
 - Page Setup - Margins
 
-  - [`worksheet.set_margins()`]
-  - [`worksheet.set_print_center_horizontally()`]
-  - [`worksheet.set_print_center_vertically()`]
+  - [`Worksheet::set_margins()`]
+  - [`Worksheet::set_print_center_horizontally()`]
+  - [`Worksheet::set_print_center_vertically()`]
 
-[`worksheet.set_margins()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_margins
-[`worksheet.set_print_center_horizontally()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_center_horizontally
-[`worksheet.set_print_center_vertically()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_center_vertically
+[`Worksheet::set_margins()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_margins
+[`Worksheet::set_print_center_horizontally()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_center_horizontally
+[`Worksheet::set_print_center_vertically()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_center_vertically
 
 
 - Page Setup - Header/Footer
 
-  - [`worksheet.set_header()`]
-  - [`worksheet.set_footer()`]
-  - [`worksheet.set_header_footer_scale_with_doc()`]
-  - [`worksheet.set_header_footer_align_with_page()`]
+  - [`Worksheet::set_header()`]
+  - [`Worksheet::set_footer()`]
+  - [`Worksheet::set_header_footer_scale_with_doc()`]
+  - [`Worksheet::set_header_footer_align_with_page()`]
 
-[`worksheet.set_header()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header
-[`worksheet.set_footer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer
-[`worksheet.set_header_footer_scale_with_doc()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_footer_scale_with_doc
-[`worksheet.set_header_footer_align_with_page()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_footer_align_with_page
+[`Worksheet::set_header()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header
+[`Worksheet::set_footer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer
+[`Worksheet::set_header_footer_scale_with_doc()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_footer_scale_with_doc
+[`Worksheet::set_header_footer_align_with_page()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header_footer_align_with_page
 
 - Page Setup - Sheet
 
-  - [`worksheet.set_print_area()`]
-  - [`worksheet.set_repeat_rows()`]
-  - [`worksheet.set_repeat_columns()`]
-  - [`worksheet.set_print_gridlines()`]
-  - [`worksheet.set_print_black_and_white()`]
-  - [`worksheet.set_print_draft()`]
-  - [`worksheet.set_print_headings()`]
-  - [`worksheet.set_page_order()`]
+  - [`Worksheet::set_print_area()`]
+  - [`Worksheet::set_repeat_rows()`]
+  - [`Worksheet::set_repeat_columns()`]
+  - [`Worksheet::set_print_gridlines()`]
+  - [`Worksheet::set_print_black_and_white()`]
+  - [`Worksheet::set_print_draft()`]
+  - [`Worksheet::set_print_headings()`]
+  - [`Worksheet::set_page_order()`]
 
-[`worksheet.set_print_area()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_area
-[`worksheet.set_repeat_rows()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_repeat_rows
-[`worksheet.set_repeat_columns()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_repeat_columns
-[`worksheet.set_print_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_gridlines
-[`worksheet.set_print_black_and_white()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_black_and_white
-[`worksheet.set_print_draft()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_draft
-[`worksheet.set_print_headings()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_headings
-[`worksheet.set_page_order()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_order
+[`Worksheet::set_print_area()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_area
+[`Worksheet::set_repeat_rows()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_repeat_rows
+[`Worksheet::set_repeat_columns()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_repeat_columns
+[`Worksheet::set_print_gridlines()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_gridlines
+[`Worksheet::set_print_black_and_white()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_black_and_white
+[`Worksheet::set_print_draft()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_draft
+[`Worksheet::set_print_headings()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_print_headings
+[`Worksheet::set_page_order()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_order
 
 ### Fixes
 
@@ -1417,16 +1417,16 @@ restructures the Workbook constructor/destructor sequence and introduces a
 
 - Added more page setup methods:
 
-  - [`worksheet.set_header()`]
-  - [`worksheet.set_footer()`]
-  - [`worksheet.set_margins()`]
+  - [`Worksheet::set_header()`]
+  - [`Worksheet::set_footer()`]
+  - [`Worksheet::set_margins()`]
 
   See also the `rust_xlsxwriter` user documentation on [Adding Headers and
   Footers].
 
-[`worksheet.set_header()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header
-[`worksheet.set_footer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer
-[`worksheet.set_margins()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_margins
+[`Worksheet::set_header()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_header
+[`Worksheet::set_footer()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_footer
+[`Worksheet::set_margins()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_margins
 [Adding Headers and Footers]: https://rustxlsxwriter.github.io/worksheet/headers.html
 
 ## [0.5.0] - 2022-10-16
@@ -1435,32 +1435,32 @@ restructures the Workbook constructor/destructor sequence and introduces a
 
 - Added page setup methods:
 
-  - [`worksheet.set_zoom()`]
-  - [`worksheet.set_landscape()`]
-  - [`worksheet.set_paper_size()`]
-  - [`worksheet.set_page_order()`]
-  - [`worksheet.set_view_page_layout()`]
-  - [`worksheet.set_view_page_break_preview()`]
+  - [`Worksheet::set_zoom()`]
+  - [`Worksheet::set_landscape()`]
+  - [`Worksheet::set_paper_size()`]
+  - [`Worksheet::set_page_order()`]
+  - [`Worksheet::set_view_page_layout()`]
+  - [`Worksheet::set_view_page_break_preview()`]
 
-[`worksheet.set_zoom()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_zoom
-[`worksheet.set_paper_size()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_paper_size
-[`worksheet.set_page_order()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_order
-[`worksheet.set_landscape()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_landscape
-[`worksheet.set_view_page_layout()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_view_page_layout
-[`worksheet.set_view_page_break_preview()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_view_page_break_preview
+[`Worksheet::set_zoom()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_zoom
+[`Worksheet::set_paper_size()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_paper_size
+[`Worksheet::set_page_order()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_page_order
+[`Worksheet::set_landscape()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_landscape
+[`Worksheet::set_view_page_layout()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_view_page_layout
+[`Worksheet::set_view_page_break_preview()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_view_page_break_preview
 
 ## [0.4.0] - 2022-10-10
 
 ### Added
 
 - Added support for array formulas and dynamic array formulas via
-  [`worksheet.write_array()`] and
-  [`worksheet.write_dynamic_array_formula_with_format()`].
+  [`Worksheet::write_array()`] and
+  [`Worksheet::write_dynamic_array_formula_with_format()`].
 
 See also the `rust_xlsxwriter` user documentation on [Dynamic Array support].
 
-[`worksheet.write_array()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_array_formula
-[`worksheet.write_dynamic_array_formula_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_dynamic_array_formula
+[`Worksheet::write_array()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_array_formula
+[`Worksheet::write_dynamic_array_formula_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_dynamic_array_formula
 
 [Dynamic Array support]: https://rustxlsxwriter.github.io/formulas/dynamic_arrays.html
 
@@ -1475,10 +1475,10 @@ See also the `rust_xlsxwriter` user documentation on [Dynamic Array support].
 
 ### Added
 
-- Added [`worksheet.write_boolean_with_format()`] method to support writing Excel boolean
+- Added [`Worksheet::write_boolean_with_format()`] method to support writing Excel boolean
   values.
 
-[`worksheet.write_boolean_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_boolean
+[`Worksheet::write_boolean_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_boolean
 
 ## [0.2.1] - 2022-09-22
 

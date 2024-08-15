@@ -27,10 +27,10 @@ use crate::{
 /// <img src="https://rustxlsxwriter.github.io/images/table_intro.png">
 ///
 /// A table is added to a worksheet via the
-/// [`worksheet.add_table()`](crate::Worksheet::add_table) method. The headers
+/// [`Worksheet::add_table()`](crate::Worksheet::add_table) method. The headers
 /// and total row of a table should be configured via a `Table` struct but the
 /// table data can be added via standard
-/// [`worksheet.write()`](crate::Worksheet::write) methods:
+/// [`Worksheet::write()`](crate::Worksheet::write) methods:
 ///
 /// ```
 /// # // This code is available in examples/doc_table_set_columns.rs
@@ -223,8 +223,8 @@ impl Table {
     ///
     /// The header row will display default captions such as `Column 1`, `Column
     /// 2`, etc. These captions can be overridden using the
-    /// [`set_columns()`](Table::set_columns) method, see the examples below.
-    /// They shouldn't be written, or overwritten using standard
+    /// [`Table::set_columns()`] method, see the examples below. They shouldn't
+    /// be written, or overwritten using standard
     /// [`Worksheet::write()`](crate::Worksheet::write) methods since that will
     /// cause a warning when the file is loaded in Excel.
     ///
@@ -556,7 +556,7 @@ impl Table {
     /// see the example below.
     ///
     /// Note, you can also select a table style without banded rows using the
-    /// [`table.set_style`](Table::set_style) method.
+    /// [`Table::set_style()`] method.
     ///
     /// # Parameters
     ///
@@ -1367,8 +1367,7 @@ impl Table {
 /// - The total row subtotal function.
 /// - A formula for the column.
 ///
-/// This struct is used in conjunction with the
-/// [`table.set_columns()`](Table::set_columns) method.
+/// This struct is used in conjunction with the [`Table::set_columns()`] method.
 ///
 /// # Examples
 ///
@@ -1475,7 +1474,7 @@ impl TableColumn {
     ///
     /// The column header names in a table must be different from each other.
     /// Non-unique names will raise a validation error when using
-    /// [`worksheet.add_table()`](crate::Worksheet::add_table).
+    /// [`Worksheet::add_table()`](crate::Worksheet::add_table).
     ///
     /// # Parameters
     ///
@@ -1755,7 +1754,7 @@ impl TableColumn {
     ///
     /// It is sometimes required to format the data in the columns of a table.
     /// This can be done using the standard
-    /// [`worksheet.write_with_format()`](crate::Worksheet::write_with_format)) method
+    /// [`Worksheet::write_with_format()`](crate::Worksheet::write_with_format)) method
     /// but format can also be applied separately using
     /// `TableColumn.set_format()`.
     ///
@@ -2079,8 +2078,8 @@ impl fmt::Display for TableFunction {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/table_styles.png">
 ///
-/// The style is set via the [`table.set_style`](Table::set_style) method. The
-/// default table style in Excel is equivalent to [`TableStyle::Medium9`].
+/// The style is set via the [`Table::set_style()`] method. The default table
+/// style in Excel is equivalent to [`TableStyle::Medium9`].
 ///
 /// # Examples
 ///

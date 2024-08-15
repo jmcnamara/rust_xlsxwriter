@@ -175,12 +175,11 @@ impl Image {
         Ok(image)
     }
 
-    ///
     /// Create an Image object from a u8 buffer. The image can then be inserted
     /// into a worksheet.
     ///
-    /// This method is similar to [`new()`](Image::new), see above, except the
-    /// image data can be in a buffer instead of a file path.
+    /// This method is similar to [`Image::new`], see above, except the image
+    /// data can be in a buffer instead of a file path.
     ///
     /// # Parameters
     ///
@@ -421,7 +420,7 @@ impl Image {
     /// Set the width scale for the image.
     ///
     /// Set the width scale for the image relative to 1.0 (i.e. 100%). See the
-    /// [`set_scale_height()`](Image::set_scale_height) method for details.
+    /// [`Image::set_scale_height()`] method for details.
     ///
     /// # Parameters
     ///
@@ -451,7 +450,7 @@ impl Image {
     /// or vertical sizes. See the example below.
     ///
     /// See also the
-    /// [`worksheet.insert_image_fit_to_cell()`](crate::Worksheet::insert_image_fit_to_cell)
+    /// [`Worksheet::insert_image_fit_to_cell()`](crate::Worksheet::insert_image_fit_to_cell)
     /// method.
     ///
     /// # Parameters
@@ -1126,7 +1125,7 @@ impl DrawingObject for Image {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
 ///
-/// Used with [`image.set_object_movement`](Image::set_object_movement).
+/// Used with [`Image::set_object_movement()`].
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub enum ObjectMovement {
@@ -1149,8 +1148,8 @@ pub enum ObjectMovement {
 /// The `HeaderImagePosition` enum defines the image position in a header or footer.
 ///
 /// Used with the
-/// [`worksheet.set_header_image()`](crate::Worksheet::set_header_image) and
-/// [`worksheet.set_footer_image()`](crate::Worksheet::set_footer_image)
+/// [`Worksheet::set_header_image()`](crate::Worksheet::set_header_image) and
+/// [`Worksheet::set_footer_image()`](crate::Worksheet::set_footer_image)
 /// methods.
 ///
 #[derive(Clone, Debug)]

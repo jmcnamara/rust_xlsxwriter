@@ -733,11 +733,10 @@
 //! see below.
 //!
 //! The `Worksheet::autofit()` method ignores columns that already have an
-//! explicit column width set via
-//! [`set_column_width()`](Worksheet::set_column_width()) or
-//! [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()) if it is
-//! greater than the calculated maximum width. Alternatively, calling these
-//! methods after `Worksheet::autofit()` will override the autofit value.
+//! explicit column width set via [`Worksheet::set_column_width()`] or
+//! [`Worksheet::set_column_width_pixels()`] if it is greater than the
+//! calculated maximum width. Alternatively, calling these methods after
+//! `Worksheet::autofit()` will override the autofit value.
 //!
 //! **Note**, `Worksheet::autofit()` iterates through all the cells in a
 //! worksheet that have been populated with data and performs a length
@@ -1454,7 +1453,7 @@ impl Worksheet {
     /// adding it to a workbook.
     ///
     /// There are two way of creating a worksheet object with `rust_xlsxwriter`:
-    /// via the [`workbook.add_worksheet()`](crate::Workbook::add_worksheet)
+    /// via the [`Workbook::add_worksheet()`](crate::Workbook::add_worksheet)
     /// method and via the [`Worksheet::new()`] constructor. The first method
     /// ties the worksheet to the workbook object that will write it
     /// automatically when the file is saved, whereas the second method creates
@@ -1464,7 +1463,7 @@ impl Worksheet {
     ///
     /// When working with an independent worksheet object you will need to add
     /// it to a workbook using
-    /// [`workbook.push_worksheet`](crate::Workbook::push_worksheet) in order
+    /// [`Workbook::push_worksheet`](crate::Workbook::push_worksheet) in order
     /// for it to be written to a file.
     ///
     /// See also the documentation on [Creating
@@ -1727,11 +1726,11 @@ impl Worksheet {
     ///
     /// Get the worksheet name that was set automatically such as Sheet1,
     /// Sheet2, etc., or that was set by the user using
-    /// [`set_name()`](Worksheet::set_name).
+    /// [`Worksheet::set_name()`].
     ///
     /// The worksheet name can be used to get a reference to a worksheet object
     /// using the
-    /// [`workbook.worksheet_from_name()`](crate::Workbook::worksheet_from_name)
+    /// [`Workbook::worksheet_from_name()`](crate::Workbook::worksheet_from_name)
     /// method.
     ///
     /// # Examples
@@ -1889,8 +1888,8 @@ impl Worksheet {
     /// implement [`IntoIterator`] and that contain a data type that implements
     /// [`IntoExcelData`].
     ///
-    /// See also [`worksheet.write_column()`](Worksheet::write_column) for a
-    /// similar function that works in an orthogonal direction.
+    /// See also [`Worksheet::write_column()`] for a similar function that works
+    /// in an orthogonal direction.
     ///
     /// # Parameters
     ///
@@ -2070,8 +2069,8 @@ impl Worksheet {
     /// implement [`IntoIterator`] and that contain a data type that implements
     /// [`IntoExcelData`].
     ///
-    /// See also [`worksheet.write_row()`](Worksheet::write_row) for a similar
-    /// function that works in an orthogonal direction.
+    /// See also [`Worksheet::write_row()`] for a similar function that works in
+    /// an orthogonal direction.
     ///
     /// # Errors
     ///
@@ -2194,9 +2193,8 @@ impl Worksheet {
     /// implement [`IntoIterator`] and that contain a data type that implements
     /// [`IntoExcelData`].
     ///
-    /// See also
-    /// [`worksheet.write_column_matrix()`](Worksheet::write_column_matrix) for
-    /// a similar function that works in an orthogonal direction.
+    /// See also [`Worksheet::write_column_matrix()`] for a similar function
+    /// that works in an orthogonal direction.
     ///
     /// # Errors
     ///
@@ -2280,8 +2278,8 @@ impl Worksheet {
     /// implement [`IntoIterator`] and that contain a data type that implements
     /// [`IntoExcelData`].
     ///
-    /// See also [`worksheet.write_row_matrix()`](Worksheet::write_row_matrix)
-    /// for a similar function that works in an orthogonal direction.
+    /// See also [`Worksheet::write_row_matrix()`] for a similar function that
+    /// works in an orthogonal direction.
     ///
     /// # Errors
     ///
@@ -2360,7 +2358,7 @@ impl Worksheet {
     ///
     /// Write an unformatted number to a worksheet cell. To write a formatted
     /// number see the
-    /// [`write_number_with_format()`](Worksheet::write_number_with_format())
+    /// [`Worksheet::write_number_with_format()`]
     /// method below.
     ///
     /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
@@ -2467,9 +2465,8 @@ impl Worksheet {
     /// store the number with a loss of precision outside Excel's integer range
     /// of +/- 999,999,999,999,999 (15 digits).
     ///
-    /// Excel doesn't have handling for NaN or INF floating point numbers.
-    /// These will be stored as the strings "Nan", "INF", and "-INF" strings
-    /// instead.
+    /// Excel doesn't have handling for NaN or INF floating point numbers. These
+    /// will be stored as the strings "Nan", "INF", and "-INF" strings instead.
     ///
     /// # Parameters
     ///
@@ -2516,7 +2513,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_number_with_format.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_number_with_format.png">
     ///
     ///
     pub fn write_number_with_format(
@@ -2533,9 +2531,7 @@ impl Worksheet {
     /// Write an unformatted string to a worksheet cell.
     ///
     /// Write an unformatted string to a worksheet cell. To write a formatted
-    /// string see the
-    /// [`write_string_with_format()`](Worksheet::write_string_with_format())
-    /// method below.
+    /// string see the [`Worksheet::write_string_with_format()`] method below.
     ///
     /// Excel only supports UTF-8 text in the xlsx file format. Any Rust UTF-8
     /// encoded string can be written with this method. The maximum string size
@@ -2682,13 +2678,13 @@ impl Worksheet {
     /// The `write_rich_string()` method is used to write strings with multiple
     /// font formats within the string. For example strings like "This is
     /// **bold** and this is *italic*". For strings with a single format you can
-    /// use the more common
-    /// [`write_string_with_format()`](Worksheet::write_string) method.
+    /// use the more common [`Worksheet::write_string_with_format()`] method.
     ///
     /// The basic rule is to break the string into pairs of [`Format`] and
     /// [`str`] fragments. So if we look at the above string again:
     ///
-    /// &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is **bold** and this is *italic*
+    /// &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is **bold** and this is
+    /// *italic*
     ///
     /// The would be broken down into 4 fragments:
     ///
@@ -2720,15 +2716,14 @@ impl Worksheet {
     /// string with a yellow background. It is possible to have a yellow
     /// background for the entire cell or to format other cell properties using
     /// an additional [`Format`] object and the
-    /// [`write_rich_string_with_format()`](Worksheet::write_rich_string)
-    /// method, see below.
+    /// [`Worksheet::write_rich_string_with_format()`] method, see below.
     ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
     /// - `col`: The zero indexed column number.
-    /// - `rich_string`: An array reference of `(&Format, &str)` tuples. See
-    ///   the Errors section below for the restrictions.
+    /// - `rich_string`: An array reference of `(&Format, &str)` tuples. See the
+    ///   Errors section below for the restrictions.
     ///
     /// # Errors
     ///
@@ -2813,25 +2808,24 @@ impl Worksheet {
     /// Write a "rich" string with multiple formats to a worksheet cell, with an
     /// additional cell format.
     ///
-    /// The `write_rich_string_with_format()` method is used to write strings with multiple
-    /// font formats within the string. For example strings like "This is
-    /// **bold** and this is *italic*". It also allows you to add an additional
-    /// [`Format`] to the cell so that you can, for example, center the text in
-    /// the cell.
+    /// The `write_rich_string_with_format()` method is used to write strings
+    /// with multiple font formats within the string. For example strings like
+    /// "This is **bold** and this is *italic*". It also allows you to add an
+    /// additional [`Format`] to the cell so that you can, for example, center
+    /// the text in the cell.
     ///
     /// The syntax for creating and using `(&Format, &str)` tuples to create the
-    /// rich string is shown above in
-    /// [`write_rich_string()`](Worksheet::write_rich_string).
+    /// rich string is shown above in [`Worksheet::write_rich_string()`].
     ///
     /// For strings with a single format you can use the more common
-    /// [`write_string_with_format()`](Worksheet::write_string) method.
+    /// [`Worksheet::write_string_with_format()`] method.
     ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
     /// - `col`: The zero indexed column number.
-    /// - `rich_string`: An array reference of `(&Format, &str)` tuples. See
-    ///   the Errors section below for the restrictions.
+    /// - `rich_string`: An array reference of `(&Format, &str)` tuples. See the
+    ///   Errors section below for the restrictions.
     /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -3330,9 +3324,9 @@ impl Worksheet {
     /// Write a formatted dynamic array formula to a worksheet cell or range of
     /// cells.
     ///
-    /// The `write_dynamic_array_formula_with_format()` function writes an Excel 365 dynamic
-    /// array formula to a cell range. Some examples of functions that return
-    /// dynamic arrays are:
+    /// The `write_dynamic_array_formula_with_format()` function writes an Excel
+    /// 365 dynamic array formula to a cell range. Some examples of functions
+    /// that return dynamic arrays are:
     ///
     /// - `FILTER()`
     /// - `RANDARRAY()`
@@ -3350,8 +3344,8 @@ impl Worksheet {
     /// range that the return values will be written to with the `first_` and
     /// `last_` parameters. If the array formula returns a single value then the
     /// first_ and last_ parameters should be the same, as shown in the example
-    /// below or use the
-    /// [`write_dynamic_formula_with_format()`](Worksheet::write_dynamic_formula_with_format()) method.
+    /// below or use the [`Worksheet::write_dynamic_formula_with_format()`]
+    /// method.
     ///
     /// For more details see the `rust_xlsxwriter` documentation section on
     /// [Dynamic Array support] and the [Dynamic array formulas] example.
@@ -3367,7 +3361,8 @@ impl Worksheet {
     /// - `first_col`: The first row of the range.
     /// - `last_row`: The last row of the range.
     /// - `last_col`: The last row of the range.
-    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
+    /// - `formula`: The formula to write to the cell as a string or
+    ///   [`Formula`].
     /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -3437,11 +3432,11 @@ impl Worksheet {
     /// Write a dynamic formula to a worksheet cell.
     ///
     /// The `write_dynamic_formula()` method is similar to the
-    /// [`write_dynamic_array_formula()`](Worksheet::write_dynamic_array_formula())
-    /// method, shown above, except that it writes a dynamic array formula to a
-    /// single cell, rather than a range. This is a syntactic shortcut since the
-    /// array range isn't generally known for a dynamic range and specifying the
-    /// initial cell is sufficient for Excel.
+    /// [`Worksheet::write_dynamic_array_formula()`] method, shown above, except
+    /// that it writes a dynamic array formula to a single cell, rather than a
+    /// range. This is a syntactic shortcut since the array range isn't
+    /// generally known for a dynamic range and specifying the initial cell is
+    /// sufficient for Excel.
     ///
     /// For more details see the `rust_xlsxwriter` documentation section on
     /// [Dynamic Array support] and the [Dynamic array formulas] example.
@@ -3455,7 +3450,8 @@ impl Worksheet {
     ///
     /// - `row`: The zero indexed row number.
     /// - `col`: The zero indexed column number.
-    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
+    /// - `formula`: The formula to write to the cell as a string or
+    ///   [`Formula`].
     ///
     /// # Errors
     ///
@@ -3475,11 +3471,11 @@ impl Worksheet {
     /// Write a formatted dynamic formula to a worksheet cell.
     ///
     /// The `write_dynamic_formula_with_format()` method is similar to the
-    /// [`write_dynamic_array_formula_with_format()`](Worksheet::write_dynamic_array_formula_with_format())
-    /// method, shown above, except that it writes a dynamic array formula to a
-    /// single cell, rather than a range. This is a syntactic shortcut since the
-    /// array range isn't generally known for a dynamic range and specifying the
-    /// initial cell is sufficient for Excel.
+    /// [`Worksheet::write_dynamic_array_formula_with_format()`] method, shown
+    /// above, except that it writes a dynamic array formula to a single cell,
+    /// rather than a range. This is a syntactic shortcut since the array range
+    /// isn't generally known for a dynamic range and specifying the initial
+    /// cell is sufficient for Excel.
     ///
     /// For more details see the `rust_xlsxwriter` documentation section on
     /// [Dynamic Array support] and the [Dynamic array formulas] example.
@@ -3493,7 +3489,8 @@ impl Worksheet {
     ///
     /// - `row`: The zero indexed row number.
     /// - `col`: The zero indexed column number.
-    /// - `formula`: The formula to write to the cell as a string or [`Formula`].
+    /// - `formula`: The formula to write to the cell as a string or
+    ///   [`Formula`].
     /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -3634,10 +3631,10 @@ impl Worksheet {
     ///
     /// For other variants of this function see:
     ///
-    /// - [`write_url_with_text()`](Worksheet::write_url_with_text()) to add
-    ///   alternative text to the link.
-    /// - [`write_url_with_format()`](Worksheet::write_url_with_format()) to add
-    ///   an alternative format to the link.
+    /// - [`Worksheet::write_url_with_text()`] to add alternative text to the
+    ///   link.
+    /// - [`Worksheet::write_url_with_format()`] to add an alternative format to
+    ///   the link.
     ///
     /// # Parameters
     ///
@@ -3753,11 +3750,10 @@ impl Worksheet {
     /// Write a url/hyperlink to a worksheet cell with an alternative, user
     /// friendly, text and the default Excel "Hyperlink" cell style.
     ///
-    /// This method is similar to [`write_url()`](Worksheet::write_url())  except
-    /// that you can specify an alternative string for the url. For example you
-    /// could have a cell contain the link [Learn
-    /// Rust](https://www.rust-lang.org) instead of the raw link
-    /// <https://www.rust-lang.org>.
+    /// This method is similar to [`Worksheet::write_url()`]  except that you
+    /// can specify an alternative string for the url. For example you could
+    /// have a cell contain the link [Learn Rust](https://www.rust-lang.org)
+    /// instead of the raw link <https://www.rust-lang.org>.
     ///
     /// # Parameters
     ///
@@ -3808,7 +3804,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_text.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_text.png">
     ///
     /// You can also write the url using a [`Url`] struct:
     ///
@@ -3851,8 +3848,8 @@ impl Worksheet {
     /// Write a url/hyperlink to a worksheet cell with a user defined format
     /// instead of the default Excel "Hyperlink" cell style.
     ///
-    /// This method is similar to [`write_url()`](Worksheet::write_url())
-    /// except that you can specify an alternative format for the url.
+    /// This method is similar to [`Worksheet::write_url()`] except that you can
+    /// specify an alternative format for the url.
     ///
     /// # Parameters
     ///
@@ -3874,7 +3871,8 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates writing a url with alternative format.
+    /// The following example demonstrates writing a url with alternative
+    /// format.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_write_url_with_format.rs
@@ -3905,7 +3903,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_format.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_url_with_format.png">
     ///
     pub fn write_url_with_format(
         &mut self,
@@ -3922,9 +3921,8 @@ impl Worksheet {
     ///
     /// Write a url/hyperlink to a worksheet cell with various options
     ///
-    /// This method is similar to [`write_url()`](Worksheet::write_url()) and
-    /// variant methods except that you can also add a screen tip message, if
-    /// required.
+    /// This method is similar to [`Worksheet::write_url()`] and variant methods
+    /// except that you can also add a screen tip message, if required.
     ///
     /// # Parameters
     ///
@@ -3937,7 +3935,8 @@ impl Worksheet {
     /// - `format`: The [`Format`] property for the cell.
     ///
     /// The `text` and `tip` parameters are optional and can be set as a blank
-    /// string. The `format` is an `Option<>` parameter and can be specified as `None` if not required.
+    /// string. The `format` is an `Option<>` parameter and can be specified as
+    /// `None` if not required.
     ///
     /// # Errors
     ///
@@ -3946,11 +3945,13 @@ impl Worksheet {
     /// - [`XlsxError::MaxStringLengthExceeded`] - Text string exceeds Excel's
     ///   limit of 32,767 characters.
     /// - [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
-    ///   Excel's limit of 2080 characters or the screen tip exceed 255 characters.
+    ///   Excel's limit of 2080 characters or the screen tip exceed 255
+    ///   characters.
     /// - [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
     ///   the supported types listed above.
     /// - [`XlsxError::ParameterError`] - [`Url`] mouseover tool tip exceeds
     ///   Excel's limit of 255 characters.
+    ///
     pub fn write_url_with_options(
         &mut self,
         row: RowNum,
@@ -4795,8 +4796,7 @@ impl Worksheet {
     /// Add an image to a worksheet at a pixel offset within a cell location.
     /// The image should be encapsulated in an [`Image`] object.
     ///
-    /// This method is similar to
-    /// [`Worksheet::insert_image()`](Worksheet::insert_image) except that the
+    /// This method is similar to [`Worksheet::insert_image()`] except that the
     /// image can be offset from the top left of the cell.
     ///
     /// Note, it is possible to offset the image outside the target cell if
@@ -4886,8 +4886,8 @@ impl Worksheet {
     /// error is displayed.
     ///
     /// The image should be encapsulated in an [`Image`] object. See
-    /// [`Worksheet::insert_image()`](Worksheet::insert_image) above for details
-    /// on the supported image types.
+    /// [`Worksheet::insert_image()`] above for details on the supported image
+    /// types.
     ///
     /// # Parameters
     ///
@@ -4961,10 +4961,10 @@ impl Worksheet {
     ///
     /// This method can be used to embed a image into a worksheet cell and have
     /// the image automatically scale to the width and height of the cell. This
-    /// is similar to the [`Worksheet::embed_image()`](Worksheet::embed_image)
-    /// above but it allows you to add an additional cell format using
-    /// [`Format`]. This is occasionally useful if you want to set a cell border
-    /// around the image or a cell background color.
+    /// is similar to the [`Worksheet::embed_image()`] above but it allows you
+    /// to add an additional cell format using [`Format`]. This is occasionally
+    /// useful if you want to set a cell border around the image or a cell
+    /// background color.
     ///
     /// # Parameters
     ///
@@ -4991,8 +4991,7 @@ impl Worksheet {
     /// Add an image to a worksheet and fit it to a cell.
     ///
     /// Add an image to a worksheet and scale it so that it fits in a cell. This
-    /// is similar in effect to
-    /// [`Worksheet::embed_image()`](Worksheet::embed_image) but in Excel's
+    /// is similar in effect to [`Worksheet::embed_image()`] but in Excel's
     /// terminology it inserts the image placed *over* the cell instead of *in*
     /// the cell. The only advantage of this method is that the output file will
     /// work will all versions of Excel. The `Worksheet::embed_image()` method
@@ -5000,10 +4999,9 @@ impl Worksheet {
     ///
     /// This method can be useful when creating a product spreadsheet with a
     /// column of images for each product. The image should be encapsulated in
-    /// an [`Image`] object. See [`insert_image()`](Worksheet::insert_image)
-    /// above for details on the supported image types. The scaling calculation
-    /// for this method takes into account the DPI of the image in the same way
-    /// that Excel does.
+    /// an [`Image`] object. See [`Worksheet::insert_image()`] above for details
+    /// on the supported image types. The scaling calculation for this method
+    /// takes into account the DPI of the image in the same way that Excel does.
     ///
     /// There are two options, which are controlled by the `keep_aspect_ratio`
     /// parameter. The image can be scaled vertically and horizontally to occupy
@@ -5016,9 +5014,9 @@ impl Worksheet {
     /// - `row`: The zero indexed row number.
     /// - `col`: The zero indexed column number.
     /// - `image`: The [`Image`] to insert into the cell.
-    /// - `keep_aspect_ratio`: Boolean value to maintain the aspect ratio of
-    ///   the image if `true` or scale independently in the horizontal and
-    ///   vertical directions if `false`.
+    /// - `keep_aspect_ratio`: Boolean value to maintain the aspect ratio of the
+    ///   image if `true` or scale independently in the horizontal and vertical
+    ///   directions if `false`.
     ///
     /// # Errors
     ///
@@ -5629,7 +5627,7 @@ impl Worksheet {
     /// height is 15. Excel allows height values in increments of 0.25.
     ///
     /// To specify the height in pixels use the
-    /// [`set_row_height_pixels()`](Worksheet::set_row_height_pixels()) method.
+    /// [`Worksheet::set_row_height_pixels()`] method.
     ///
     /// # Parameters
     ///
@@ -5669,7 +5667,8 @@ impl Worksheet {
     /// ```
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_row_height.png">
     ///
     pub fn set_row_height(
         &mut self,
@@ -5715,7 +5714,7 @@ impl Worksheet {
     /// height is 20.
     ///
     /// To specify the height in Excel's character units use the
-    /// [`set_row_height()`](Worksheet::set_row_height()) method.
+    /// [`Worksheet::set_row_height()`] method.
     ///
     /// # Parameters
     ///
@@ -6113,11 +6112,9 @@ impl Worksheet {
     /// complex. See the [following explanation of column
     /// widths](https://support.microsoft.com/en-us/kb/214123) from the
     /// Microsoft support documentation for more details. To set the width in
-    /// pixels use the
-    /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels())
-    /// method.
+    /// pixels use the [`Worksheet::set_column_width_pixels()`] method.
     ///
-    /// See also the [`autofit()`](Worksheet::autofit()) method.
+    /// See also the [`Worksheet::autofit()`] method.
     ///
     /// # Parameters
     ///
@@ -6163,7 +6160,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
     ///
     pub fn set_column_width(
         &mut self,
@@ -6195,9 +6193,9 @@ impl Worksheet {
     /// worksheet column.
     ///
     /// To set the width in Excel character units use the
-    /// [`set_column_width()`](Worksheet::set_column_width()) method.
+    /// [`Worksheet::set_column_width()`] method.
     ///
-    /// See also the [`autofit()`](Worksheet::autofit()) method.
+    /// See also the [`Worksheet::autofit()`] method.
     ///
     /// # Parameters
     ///
@@ -6243,7 +6241,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_width.png">
     ///
     pub fn set_column_width_pixels(
         &mut self,
@@ -6432,9 +6431,8 @@ impl Worksheet {
     /// data based on simple criteria so that some data is shown and some is
     /// hidden.
     ///
-    /// See the [`filter_column`](Worksheet::filter_column) method for an
-    /// explanation of how to set a filter conditions for columns in the
-    /// autofilter range.
+    /// See the [`Worksheet::filter_column`] method for an explanation of how to
+    /// set a filter conditions for columns in the autofilter range.
     ///
     /// Note, Excel only allows one autofilter range per worksheet so calling
     /// this method multiple times will overwrite the previous range.
@@ -6495,7 +6493,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_autofilter.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_autofilter.png">
     ///
     pub fn autofilter(
         &mut self,
@@ -6539,9 +6538,9 @@ impl Worksheet {
 
     /// Set the filter condition for a column in an autofilter range.
     ///
-    /// The [`autofilter()`](Worksheet::autofilter) method sets the cell range
-    /// for an autofilter but in order to filter rows within the filter area you
-    /// must also add a filter condition.
+    /// The [`Worksheet::autofilter()`] method sets the cell range for an
+    /// autofilter but in order to filter rows within the filter area you must
+    /// also add a filter condition.
     ///
     /// Excel supports two main types of filter. The first, and most common, is
     /// a list filter where the user selects the items to filter from a list of
@@ -6587,9 +6586,8 @@ impl Worksheet {
     ///   limits.
     /// - [`XlsxError::ParameterError`] - Parameter error for the following
     ///   issues:
-    ///   - The [`autofilter()`](Worksheet::autofilter) range hasn't been set.
-    ///   - The column is outside the [`autofilter()`](Worksheet::autofilter)
-    ///     range.
+    ///   - The [`Worksheet::autofilter()`] range hasn't been set.
+    ///   - The column is outside the [`Worksheet::autofilter()`] range.
     ///   - The [`FilterCondition`] doesn't have a condition set.
     ///
     /// # Examples
@@ -6716,7 +6714,7 @@ impl Worksheet {
     ///
     /// The headers and total row of a table should be configured via a
     /// [`Table`] struct but the table data can be added via standard
-    /// [`worksheet.write()`](Worksheet::write) methods.
+    /// [`Worksheet::write()`] methods.
     ///
     /// For more information on tables see the Microsoft documentation on
     /// [Overview of Excel tables].
@@ -7361,10 +7359,9 @@ impl Worksheet {
     /// uses one sparkline for the specified range and any changes to it are
     /// applied to the entire sparkline group.
     ///
-    /// The [`Worksheet::add_sparkline()`](Worksheet::add_sparkline) method
-    /// shown above allows you to add a sparkline to a single cell that displays
-    /// data from a 1D range of cells whereas `add_sparkline_group()` applies
-    /// the group sparkline to a range.
+    /// The [`Worksheet::add_sparkline()`] method shown above allows you to add
+    /// a sparkline to a single cell that displays data from a 1D range of cells
+    /// whereas `add_sparkline_group()` applies the group sparkline to a range.
     ///
     /// The sparkline can be configured with all the parameters supported by
     /// Excel. See [`Sparkline`] for details.
@@ -7517,9 +7514,9 @@ impl Worksheet {
     /// src="https://rustxlsxwriter.github.io/images/protection_alert.png">
     ///
     /// These properties can be set using the
-    /// [`format.set_locked()`](Format::set_locked)
-    /// [`format.set_unlocked()`](Format::set_unlocked) and
-    /// [`worksheet.set_hidden()`](Format::set_hidden) format methods. All cells
+    /// [`Format::set_locked()`](Format::set_locked)
+    /// [`Format::set_unlocked()`](Format::set_unlocked) and
+    /// [`Worksheet::set_hidden()`](Format::set_hidden) format methods. All cells
     /// have the `locked` property turned on by default (see the example below)
     /// so in general you don't have to explicitly turn it on.
     ///
@@ -7583,15 +7580,16 @@ impl Worksheet {
     /// Protect a worksheet from modification with a password.
     ///
     /// The `protect_with_password()` method is like the
-    /// [`protect()`](Worksheet::protect) method, see above, except that you can
-    /// add an optional, weak, password to prevent modification.
+    /// [`Worksheet::protect()`] method, see above, except that you can add an
+    /// optional, weak, password to prevent modification.
     ///
     /// **Note**: Worksheet level passwords in Excel offer very weak protection.
     /// They do not encrypt your data and are very easy to deactivate. Full
     /// workbook encryption is not supported by `rust_xlsxwriter`. However, it
-    /// is possible to encrypt an `rust_xlsxwriter` file using a third party open
-    /// source tool called [msoffice-crypt](https://github.com/herumi/msoffice).
-    /// This works for macOS, Linux and Windows:
+    /// is possible to encrypt an `rust_xlsxwriter` file using a third party
+    /// open source tool called
+    /// [msoffice-crypt](https://github.com/herumi/msoffice). This works for
+    /// macOS, Linux and Windows:
     ///
     /// ```text
     /// msoffice-crypt.exe -e -p password clear.xlsx encrypted.xlsx
@@ -7645,12 +7643,12 @@ impl Worksheet {
     /// Specify which worksheet elements should, or shouldn't, be protected.
     ///
     /// The `protect_with_password()` method is like the
-    /// [`protect()`](Worksheet::protect) method, see above, except it also
-    /// specifies which worksheet elements should, or shouldn't, be protected.
+    /// [`Worksheet::protect()`] method, see above, except it also specifies
+    /// which worksheet elements should, or shouldn't, be protected.
     ///
     /// You can specify which worksheet elements protection should be on or off
-    /// via a [`ProtectionOptions`] struct reference. The Excel options
-    /// with their default states are shown below:
+    /// via a [`ProtectionOptions`] struct reference. The Excel options with
+    /// their default states are shown below:
     ///
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_protect_with_options1.png">
@@ -7710,11 +7708,10 @@ impl Worksheet {
 
     /// Unprotect a range of cells in a protected worksheet.
     ///
-    /// As shown in the example for the
-    /// [`worksheet.protect()`](Worksheet::protect) method it is possible to
-    /// unprotect a cell by setting the format `unprotect` property. Excel also
-    /// offers an interface to unprotect larger ranges of cells. This is
-    /// replicated in `rust_xlsxwriter` using the `unprotect_range()` method,
+    /// As shown in the example for the [`Worksheet::protect()`] method it is
+    /// possible to unprotect a cell by setting the format `unprotect` property.
+    /// Excel also offers an interface to unprotect larger ranges of cells. This
+    /// is replicated in `rust_xlsxwriter` using the `unprotect_range()` method,
     /// see the example below.
     ///
     /// # Parameters
@@ -7779,13 +7776,12 @@ impl Worksheet {
 
     /// Unprotect a range of cells in a protected worksheet, with options.
     ///
-    /// This method is similar to
-    /// [`unprotect_range()`](Worksheet::unprotect_range), see above, expect that
-    /// it allows you to specify two additional parameters to set the name of
-    /// the range (instead of the default `Range1` .. `RangeN`) and also a optional
-    /// weak password (see
-    /// [`protect_with_password()`](Worksheet::protect_with_password) for an
-    /// explanation of what weak means here).
+    /// This method is similar to [`Worksheet::unprotect_range()`], see above,
+    /// expect that it allows you to specify two additional parameters to set
+    /// the name of the range (instead of the default `Range1` .. `RangeN`) and
+    /// also a optional weak password (see
+    /// [`Worksheet::protect_with_password()`] for an explanation of what weak
+    /// means here).
     ///
     /// # Parameters
     ///
@@ -7835,7 +7831,8 @@ impl Worksheet {
     ///
     /// Dialog from the output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_unprotect_range_with_options.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_unprotect_range_with_options.png">
     ///
     pub fn unprotect_range_with_options(
         &mut self,
@@ -8037,11 +8034,11 @@ impl Worksheet {
     /// Write a user defined result to a worksheet formula cell.
     ///
     /// The `rust_xlsxwriter` library doesn’t calculate the result of a formula
-    /// written using [`write_formula_with_format()`](Worksheet::write_formula_with_format()) or
-    /// [`write_formula()`](Worksheet::write_formula()). Instead it
-    /// stores the value 0 as the formula result. It then sets a global flag in
-    /// the xlsx file to say that all formulas and functions should be
-    /// recalculated when the file is opened.
+    /// written using [`Worksheet::write_formula_with_format()`] or
+    /// [`Worksheet::write_formula()`]. Instead it stores the value 0 as the
+    /// formula result. It then sets a global flag in the xlsx file to say that
+    /// all formulas and functions should be recalculated when the file is
+    /// opened.
     ///
     /// This works fine with Excel and other spreadsheet applications. However,
     /// applications that don’t have a facility to calculate formulas will only
@@ -8063,9 +8060,9 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates manually setting the result of a formula.
-    /// Note, this is only required for non-Excel applications that don't calculate
-    /// formula results.
+    /// The following example demonstrates manually setting the result of a
+    /// formula. Note, this is only required for non-Excel applications that
+    /// don't calculate formula results.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_formula_result.rs
@@ -8125,14 +8122,14 @@ impl Worksheet {
     /// Write the default formula result for worksheet formulas.
     ///
     /// The `rust_xlsxwriter` library doesn’t calculate the result of a formula
-    /// written using [`write_formula_with_format()`](Worksheet::write_formula_with_format()) or
-    /// [`write_formula()`](Worksheet::write_formula()). Instead it
-    /// stores the value 0 as the formula result. It then sets a global flag in
-    /// the xlsx file to say that all formulas and functions should be
-    /// recalculated when the file is opened.
+    /// written using [`Worksheet::write_formula_with_format()`] or
+    /// [`Worksheet::write_formula()`]. Instead it stores the value 0 as the
+    /// formula result. It then sets a global flag in the xlsx file to say that
+    /// all formulas and functions should be recalculated when the file is
+    /// opened.
     ///
-    /// However, for `LibreOffice` the default formula result should be set to the
-    /// empty string literal `""`, via the `set_formula_result_default()`
+    /// However, for `LibreOffice` the default formula result should be set to
+    /// the empty string literal `""`, via the `set_formula_result_default()`
     /// method, to force calculation of the result.
     ///
     /// # Parameters
@@ -8180,8 +8177,8 @@ impl Worksheet {
     /// `CHISQ.DIST.RT` , `CONFIDENCE.NORM`, `STDEV.P`, `STDEV.S` and
     /// `WORKDAY.INTL`.
     ///
-    /// When written using [`write_formula()`](Worksheet::write_formula()) these
-    /// functions need to be fully qualified with a prefix such as `_xlfn.`
+    /// When written using [`Worksheet::write_formula()`] these functions need
+    /// to be fully qualified with a prefix such as `_xlfn.`
     ///
     /// Alternatively you can use the `worksheet.use_future_functions()`
     /// function to have `rust_xlsxwriter` automatically handle future functions
@@ -10383,8 +10380,7 @@ impl Worksheet {
     /// A selected worksheet has its tab highlighted. Selecting worksheets is a
     /// way of grouping them together so that, for example, several worksheets
     /// could be printed in one go. A worksheet that has been activated via the
-    /// [`set_active()`](Worksheet::set_active) method will also appear as
-    /// selected.
+    /// [`Worksheet::set_active()`] method will also appear as selected.
     ///
     /// # Parameters
     ///
@@ -10392,9 +10388,9 @@ impl Worksheet {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates selecting worksheet in a workbook. The
-    /// active worksheet is selected by default so in this example the first two
-    /// worksheets are selected.
+    /// The following example demonstrates selecting worksheet in a workbook.
+    /// The active worksheet is selected by default so in this example the first
+    /// two worksheets are selected.
     ///
     /// ```
     /// # // This code is available in examples/doc_worksheet_set_selected.rs
@@ -10422,7 +10418,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_selected.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_selected.png">
     ///
     pub fn set_selected(&mut self, enable: bool) -> &mut Worksheet {
         self.selected = enable;
@@ -10442,11 +10439,10 @@ impl Worksheet {
     /// data or calculations.
     ///
     /// In Excel a hidden worksheet can not be activated or selected so this
-    /// method is mutually exclusive with the
-    /// [`set_active()`](Worksheet::set_active) and
-    /// [`set_selected()`](Worksheet::set_selected) methods. In addition, since
-    /// the first worksheet will default to being the active worksheet, you
-    /// cannot hide the first worksheet without activating another sheet.
+    /// method is mutually exclusive with the [`Worksheet::set_active()`] and
+    /// [`Worksheet::set_selected()`] methods. In addition, since the first
+    /// worksheet will default to being the active worksheet, you cannot hide
+    /// the first worksheet without activating another sheet.
     ///
     /// # Parameters
     ///
@@ -10482,7 +10478,8 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_hidden.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_hidden.png">
     ///
     pub fn set_hidden(&mut self, enable: bool) -> &mut Worksheet {
         if enable {
@@ -10503,10 +10500,10 @@ impl Worksheet {
     /// Hide a worksheet. Can only be unhidden in Excel by VBA.
     ///
     /// The `set_very_hidden()` method can be used to hide a worksheet similar
-    /// to the [`set_hidden()`](Worksheet::set_hidden) method. The difference is
-    /// that the worksheet cannot be unhidden in the the Excel user interface.
-    /// The Excel worksheet `xlSheetVeryHidden` option can only be unset
-    /// programmatically by VBA.
+    /// to the [`Worksheet::set_hidden()`] method. The difference is that the
+    /// worksheet cannot be unhidden in the the Excel user interface. The Excel
+    /// worksheet `xlSheetVeryHidden` option can only be unset programmatically
+    /// by VBA.
     ///
     /// # Parameters
     ///
@@ -10530,11 +10527,11 @@ impl Worksheet {
 
     /// Set current worksheet as the first visible sheet tab.
     ///
-    /// The [`set_active()`](Worksheet::set_active)  method determines
-    /// which worksheet is initially selected. However, if there are a large
-    /// number of worksheets the selected worksheet may not appear on the
-    /// screen. To avoid this you can select which is the leftmost visible
-    /// worksheet tab using `set_first_tab()`.
+    /// The [`Worksheet::set_active()`]  method determines which worksheet is
+    /// initially selected. However, if there are a large number of worksheets
+    /// the selected worksheet may not appear on the screen. To avoid this you
+    /// can select which is the leftmost visible worksheet tab using
+    /// `set_first_tab()`.
     ///
     /// This method is not required very often. The default is the first
     /// worksheet.
@@ -10908,7 +10905,7 @@ impl Worksheet {
     ///
     /// The `set_vertical_page_breaks()` method adds vertical page breaks to a
     /// worksheet. This is much less common than the
-    /// [`set_page_breaks()`](Worksheet::set_page_breaks) method shown above.
+    /// [`Worksheet::set_page_breaks()`] method shown above.
     ///
     /// # Parameters
     ///
@@ -10950,7 +10947,7 @@ impl Worksheet {
     ///
     /// The default zoom level is 100. The `set_zoom()` method does not affect
     /// the scale of the printed page in Excel. For that you should use
-    /// [`set_print_scale()`](Worksheet::set_print_scale).
+    /// [`Worksheet::set_print_scale()`].
     ///
     /// # Parameters
     ///
@@ -11079,10 +11076,10 @@ impl Worksheet {
     /// Set the top most cell in the scrolling area of a freeze pane.
     ///
     /// This method is used in conjunction with the
-    /// [`set_freeze_panes()`](Worksheet::set_freeze_panes) method to set the
-    /// top most visible cell in the scrolling range. For example you may want
-    /// to freeze the top row but have the worksheet pre-scrolled so that cell
-    /// `A20` is visible in the scrolled area. See the example below.
+    /// [`Worksheet::set_freeze_panes()`] method to set the top most visible
+    /// cell in the scrolling range. For example you may want to freeze the top
+    /// row but have the worksheet pre-scrolled so that cell `A20` is visible in
+    /// the scrolled area. See the example below.
     ///
     /// # Parameters
     ///
@@ -11359,8 +11356,8 @@ impl Worksheet {
     ///
     /// The `set_footer()` method can be used to set the footer for a worksheet.
     ///
-    /// See the documentation for [`set_header()`](Worksheet::set_header()) for
-    /// more details on the syntax of the header/footer string.
+    /// See the documentation for [`Worksheet::set_header()`] for more details
+    /// on the syntax of the header/footer string.
     ///
     /// # Parameters
     ///
@@ -11393,14 +11390,13 @@ impl Worksheet {
     ///
     /// Insert an image in a worksheet header in one of the 3 sections supported
     /// by Excel: Left, Center and Right. This needs to be preceded by a call to
-    /// [`worksheet.set_header()`](Worksheet::set_header) where a corresponding
-    /// `&[Picture]` element is added to the header formatting string such as
-    /// `"&L&[Picture]"`.
+    /// [`Worksheet::set_header()`] where a corresponding `&[Picture]` element
+    /// is added to the header formatting string such as `"&L&[Picture]"`.
     ///
     /// # Parameters
     ///
-    /// - `position`: The image position as defined by the [`HeaderImagePosition`]
-    ///   enum.
+    /// - `position`: The image position as defined by the
+    ///   [`HeaderImagePosition`] enum.
     ///
     /// # Errors
     ///
@@ -11451,8 +11447,9 @@ impl Worksheet {
     /// src="https://rustxlsxwriter.github.io/images/worksheet_set_header_image.png">
     ///
     /// An example of adding a worksheet watermark image using the
-    /// `rust_xlsxwriter` library. This is based on the method of putting an image
-    /// in the worksheet header as suggested in the [Microsoft documentation].
+    /// `rust_xlsxwriter` library. This is based on the method of putting an
+    /// image in the worksheet header as suggested in the [Microsoft
+    /// documentation].
     ///
     /// [Microsoft documentation]:
     ///     https://support.microsoft.com/en-us/office/add-a-watermark-in-excel-a372182a-d733-484e-825c-18ddf3edf009
@@ -11514,13 +11511,13 @@ impl Worksheet {
 
     /// Insert an image in a worksheet footer.
     ///
-    /// See the documentation for
-    /// [`set_header_image()`](Worksheet::set_header_image()) for more details.
+    /// See the documentation for [`Worksheet::set_header_image()`] for more
+    /// details.
     ///
     /// # Parameters
     ///
-    /// - `position`: The image position as defined by the [`HeaderImagePosition`]
-    ///   enum.
+    /// - `position`: The image position as defined by the
+    ///   [`HeaderImagePosition`] enum.
     ///
     /// # Errors
     ///
@@ -11680,7 +11677,7 @@ impl Worksheet {
     /// The `set_print_first_page_number()` method is used to set the page
     /// number of the first page when the worksheet is printed out. This option
     /// will only have and effect if you have a header/footer with the `&[Page]`
-    /// control character, see [`set_header()`](Worksheet::set_header()).
+    /// control character, see [`Worksheet::set_header()`].
     ///
     /// See also the documentation on [Worksheet Page Setup -
     /// Page](../worksheet/index.html#page-setup---page).
@@ -11726,7 +11723,7 @@ impl Worksheet {
     ///
     /// The default scale factor is 100. The `set_print_scale()` method
     /// does not affect the scale of the visible page in Excel. For that you
-    /// should use [`set_zoom()`](Worksheet::set_zoom).
+    /// should use [`Worksheet::set_zoom()`].
     ///
     /// See also the documentation on [Worksheet Page Setup -
     /// Page](../worksheet/index.html#page-setup---page).
@@ -11801,9 +11798,8 @@ impl Worksheet {
     ///   that are defined in the worksheet.
     ///
     /// - When using `set_print_fit_to_pages()` it may also be required to set
-    ///   the printer paper size using
-    ///   [`set_paper_size()`](Worksheet::set_paper_size) or else Excel will
-    ///   default to "US Letter".
+    ///   the printer paper size using [`Worksheet::set_paper_size()`] or else
+    ///   Excel will default to "US Letter".
     ///
     /// See also the documentation on [Worksheet Page Setup -
     /// Page](../worksheet/index.html#page-setup---page).
@@ -12324,8 +12320,8 @@ impl Worksheet {
     ///
     /// This isn't perfect but for most cases it should be sufficient and if not
     /// you can adjust or prompt it by setting your own column widths via
-    /// [`set_column_width()`](Worksheet::set_column_width()) or
-    /// [`set_column_width_pixels()`](Worksheet::set_column_width_pixels()).
+    /// [`Worksheet::set_column_width()`] or
+    /// [`Worksheet::set_column_width_pixels()`].
     ///
     /// The `autofit()` method ignores columns that have already been explicitly
     /// set if the width is greater than the calculated autofit width.
@@ -16390,15 +16386,15 @@ impl Worksheet {
 /// Trait to map user defined types to one of the supported Excel native types.
 ///
 /// This trait allows you to map user defined types into a type that Excel
-/// supports and to write it via [`worksheet.write()`](Worksheet::write) and
-/// [`worksheet.write_with_format()`](Worksheet::write_with_format). Both of
-/// these methods need to be implemented for the trait. See the example below.
+/// supports and to write it via [`Worksheet::write()`] and
+/// [`Worksheet::write_with_format()`]. Both of these methods need to be
+/// implemented for the trait. See the example below.
 ///
 /// # Examples
 ///
-/// Example of how to extend the the `rust_xlsxwriter` `write()` method using the
-/// `IntoExcelData` trait to handle arbitrary user data that can be mapped to
-/// one of the main Excel data types.
+/// Example of how to extend the the `rust_xlsxwriter` `write()` method using
+/// the `IntoExcelData` trait to handle arbitrary user data that can be mapped
+/// to one of the main Excel data types.
 ///
 /// ```
 /// # // This code is available in examples/app_write_generic_data.rs

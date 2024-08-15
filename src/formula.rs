@@ -18,7 +18,7 @@ use crate::static_regex;
 /// worksheet formulas.
 ///
 /// In general you would use the
-/// [`worksheet.write_formula()`](crate::Worksheet::write_formula) with a string
+/// [`Worksheet::write_formula()`](crate::Worksheet::write_formula) with a string
 /// representation of the formula, like this:
 ///
 /// ```
@@ -71,7 +71,7 @@ use crate::static_regex;
 /// ```
 ///
 /// Using a `Formula` struct also allows you to write a formula using the
-/// generic [`worksheet.write()`](crate::Worksheet::write) method:
+/// generic [`Worksheet::write()`](crate::Worksheet::write) method:
 ///
 /// ```
 /// # // This code is available in examples/doc_working_with_formulas_intro3.rs
@@ -111,8 +111,8 @@ use crate::static_regex;
 /// viewers, PDF converters, and some mobile device applications.
 ///
 /// If required, it is also possible to specify the calculated result of the
-/// formula using the [`worksheet.set_formula_result()`] method or the
-/// [`formula.set_result()`](Formula::set_result) method:
+/// formula using the [`Worksheet::set_formula_result()`] method or the
+/// [`Formula::set_result()`](Formula::set_result) method:
 ///
 /// ```
 /// # // This code is available in examples/doc_worksheet_set_formula_result.rs
@@ -146,7 +146,7 @@ use crate::static_regex;
 /// One common spreadsheet application where the formula recalculation doesn't
 /// work is `LibreOffice` (see the following [issue report]). If you wish to
 /// force recalculation in `LibreOffice` you can use the
-/// [`worksheet.set_formula_result_default()`] method to set the default result
+/// [`Worksheet::set_formula_result_default()`] method to set the default result
 /// to an empty string:
 ///
 /// ```
@@ -169,8 +169,8 @@ use crate::static_regex;
 /// # }
 /// ```
 ///
-/// [`worksheet.set_formula_result()`]: crate::Worksheet::set_formula_result
-/// [`worksheet.set_formula_result_default()`]:
+/// [`Worksheet::set_formula_result()`]: crate::Worksheet::set_formula_result
+/// [`Worksheet::set_formula_result_default()`]:
 ///     crate::Worksheet::set_formula_result_default
 /// [issue report]: https://bugs.documentfoundation.org/show_bug.cgi?id=144819
 ///
@@ -287,15 +287,15 @@ use crate::static_regex;
 /// Microsoft documentation on [Dynamic array formulas vs. legacy CSE array
 /// formulas].
 ///
-/// In `rust_xlsxwriter` you can use the [`worksheet.write_array_formula()`]
+/// In `rust_xlsxwriter` you can use the [`Worksheet::write_array_formula()`]
 /// function to get a static/CSE range and
-/// [`worksheet.write_dynamic_array_formula()`] or
-/// [`worksheet.write_dynamic_formula()`] to get a dynamic range.
+/// [`Worksheet::write_dynamic_array_formula()`] or
+/// [`Worksheet::write_dynamic_formula()`] to get a dynamic range.
 ///
-/// [`worksheet.write_array_formula()`]: crate::Worksheet::write_array_formula
-/// [`worksheet.write_dynamic_formula()`]:
+/// [`Worksheet::write_array_formula()`]: crate::Worksheet::write_array_formula
+/// [`Worksheet::write_dynamic_formula()`]:
 ///     crate::Worksheet::write_dynamic_formula
-/// [`worksheet.write_dynamic_array_formula()`]:
+/// [`Worksheet::write_dynamic_array_formula()`]:
 ///     crate::Worksheet::write_dynamic_array_formula
 ///
 /// [Dynamic array formulas in Excel]:
@@ -349,7 +349,7 @@ use crate::static_regex;
 /// contains a "@" operator to show that it is implicitly using a single value
 /// from the given range.
 ///
-/// In Excel 365, and with [`worksheet.write_dynamic_formula()`] in
+/// In Excel 365, and with [`Worksheet::write_dynamic_formula()`] in
 /// `rust_xlsxwriter`, it would operate on the entire range and return an array
 /// of values:
 ///
@@ -360,8 +360,8 @@ use crate::static_regex;
 /// `rust_xlsxwriter` putting @s in my formulas". In practical terms if you
 /// encounter this operator, and you don't intend it to be there, then you
 /// should probably write the formula as a CSE or dynamic array function using
-/// [`worksheet.write_array_formula()`] or
-/// [`worksheet.write_dynamic_array_formula()`]
+/// [`Worksheet::write_array_formula()`] or
+/// [`Worksheet::write_dynamic_array_formula()`]
 ///
 ///
 /// A full explanation of this operator is given in the Microsoft documentation
@@ -500,11 +500,11 @@ use crate::static_regex;
 /// "Future Functions". Examples of these functions are `ACOT`, `CHISQ.DIST.RT`
 /// , `CONFIDENCE.NORM`, `STDEV.P`, `STDEV.S` and `WORKDAY.INTL`.
 ///
-/// When written using [`worksheet.write_formula()`] these functions need to be
+/// When written using [`Worksheet::write_formula()`] these functions need to be
 /// fully qualified with a prefix such as `_xlfn.`, as shown the table in the
 /// next section below.
 ///
-/// [`worksheet.write_formula()`]: crate::Worksheet::method.write_formula
+/// [`Worksheet::write_formula()`]: crate::Worksheet::method.write_formula
 ///
 /// If the prefix isn't included you will get an Excel function name error. For
 /// example:
@@ -527,10 +527,10 @@ use crate::static_regex;
 ///
 /// Note that the function is displayed by Excel without the prefix.
 ///
-/// Alternatively you can use the [`worksheet.use_future_functions()`] function
+/// Alternatively you can use the [`Worksheet::use_future_functions()`] function
 /// to have `rust_xlsxwriter` automatically handle future functions for you:
 ///
-/// [`worksheet.use_future_functions()`]: crate::Worksheet::use_future_functions
+/// [`Worksheet::use_future_functions()`]: crate::Worksheet::use_future_functions
 ///
 /// ```text
 ///    worksheet.use_future_functions(true);
@@ -754,8 +754,8 @@ use crate::static_regex;
 ///
 /// 5. If the function loads in Excel but appears with one or more `@` symbols
 ///    added then it is probably an array function and should be written using
-///    [`worksheet.write_array_formula()`] or
-///    [`worksheet.write_dynamic_array_formula()`] (see also [Dynamic Array
+///    [`Worksheet::write_array_formula()`] or
+///    [`Worksheet::write_dynamic_array_formula()`] (see also [Dynamic Array
 ///    support](#dynamic-array-support)).
 ///
 /// Finally if you have completed all the previous steps and still get a
@@ -861,7 +861,7 @@ impl Formula {
     /// need to be fully qualified with a prefix such as `_xlfn.`
     ///
     /// Alternatively you can use the
-    /// [`worksheet.use_future_functions()`](crate::Worksheet::use_future_functions)
+    /// [`Worksheet::use_future_functions()`](crate::Worksheet::use_future_functions)
     /// function to have `rust_xlsxwriter` automatically handle future functions
     /// for you, or use a [`Formula`] struct and the
     /// [`Formula::use_future_functions()`] method, see below.
@@ -933,7 +933,7 @@ impl Formula {
     /// is made automatically when writing the formula. In addition, the
     /// conversion is done automatically if you add a column formula to a table
     /// that is passed to
-    /// [`worksheet.add_table()`](crate::Worksheet::add_table()).
+    /// [`Worksheet::add_table()`](crate::Worksheet::add_table()).
     ///
     pub fn use_table_functions(mut self) -> Formula {
         self.expand_table_functions = true;

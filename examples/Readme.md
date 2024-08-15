@@ -258,7 +258,7 @@ documentation and generally show how an individual function works.
   macro.
 
 * `doc_chart_add_series.rs` - An example of creating a chart series via
-  [`chart.add_series()`](Chart::add_series).
+  [`Chart::add_series()`](Chart::add_series).
 
 * `doc_chart_axis_set_crossing.rs` - A chart example demonstrating setting
   the point where the axes will cross.
@@ -466,7 +466,7 @@ documentation and generally show how an individual function works.
 
 * `doc_chart_push_series.rs` - An example of creating a chart series as a
   standalone object and then adding it to a chart via the
-  [`chart.push_series()`](Chart::add_series) method.
+  [`Chart::push_series()`](Chart::add_series) method.
 
 * `doc_chart_series_delete_from_legend.rs` - A chart example demonstrating
   deleting/hiding a series name from the chart legend.

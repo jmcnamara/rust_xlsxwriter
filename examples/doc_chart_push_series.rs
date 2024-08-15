@@ -3,7 +3,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! An example of creating a chart series as a standalone object and then adding
-//! it to a chart via the [`chart.push_series()`](Chart::add_series) method.
+//! it to a chart via the [`Chart::push_series()`](Chart::add_series) method.
 
 use rust_xlsxwriter::{Chart, ChartSeries, ChartType, Workbook, XlsxError};
 

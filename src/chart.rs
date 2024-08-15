@@ -775,8 +775,8 @@ use crate::{
 /// [`ChartTitle`].
 ///
 /// Charts are added to the worksheets using the the
-/// [`worksheet.insert_chart()`](crate::Worksheet::insert_chart) or
-/// [`worksheet.insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
+/// [`Worksheet::insert_chart()`](crate::Worksheet::insert_chart) or
+/// [`Worksheet::insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
 /// methods.
 ///
 /// See also [Working with Charts](crate::chart) for a general introduction to
@@ -877,12 +877,11 @@ impl Chart {
     ///
     /// Create a new [`Chart`] object that can be configured and inserted into a
     /// worksheet using the
-    /// [`worksheet.insert_chart()`][crate::Worksheet::insert_chart].
+    /// [`Worksheet::insert_chart()`][crate::Worksheet::insert_chart].
     ///
     /// Once you have create a chart you will need to add at least one data
-    /// series via [`chart.add_series()`](Chart::add_series) and set a value
-    /// range for that series using
-    /// [`series.set_values()`][ChartSeries::set_values]. See the example below.
+    /// series via [`Chart::add_series()`] and set a value range for that series
+    /// using [`ChartSeries::set_values()`]. See the example below.
     ///
     /// There are some shortcut versions of `new()` such as [`Chart::new_pie()`]
     /// that are more useful/succinct for charts that don't have subtypes.
@@ -1130,8 +1129,8 @@ impl Chart {
     ///
     /// A chart series is usually created via this `add_series()` method.
     /// However, if required you can create a standalone `ChartSeries` object
-    /// and add it to a chart via the
-    /// [`chart.push_series()`](Chart::push_series) method, see below.
+    /// and add it to a chart via the [`Chart::push_series()`] method, see
+    /// below.
     ///
     /// # Examples
     ///
@@ -1204,7 +1203,7 @@ impl Chart {
     /// represented by a [`ChartSeries`] struct.
     ///
     /// A chart series is usually created via the
-    /// [`chart.add_series()`](Chart::add_series) method, see above. However, if
+    /// [`Chart::add_series()`] method, see above. However, if
     /// required you can create a standalone `ChartSeries` object and add it to
     /// a chart via this `chart.push_series()` method.
     ///
@@ -1387,7 +1386,7 @@ impl Chart {
     /// Get a reference to the chart's Y-Axis [`ChartAxis`] object in order to
     /// set its properties.
     ///
-    /// See the [`chart.x_axis()`][Chart::x_axis] method above.
+    /// See the [`Chart::x_axis()`][Chart::x_axis] method above.
     ///
     pub fn y_axis(&mut self) -> &mut ChartAxis {
         &mut self.y_axis
@@ -1398,7 +1397,7 @@ impl Chart {
     /// Get a reference to the chart's X2-Axis [`ChartAxis`] object in order to
     /// set its properties.
     ///
-    /// See the [`chart.x_axis()`][Chart::x_axis] method above.
+    /// See the [`Chart::x_axis()`][Chart::x_axis] method above.
     ///
     pub fn x2_axis(&mut self) -> &mut ChartAxis {
         &mut self.x2_axis
@@ -1409,7 +1408,7 @@ impl Chart {
     /// Get a reference to the chart's Y2-Axis [`ChartAxis`] object in order to
     /// set its properties.
     ///
-    /// See the [`chart.x_axis()`][Chart::x_axis] method above.
+    /// See the [`Chart::x_axis()`][Chart::x_axis] method above.
     ///
     pub fn y2_axis(&mut self) -> &mut ChartAxis {
         &mut self.y2_axis
@@ -2554,8 +2553,8 @@ impl Chart {
 
     /// Set the height scale for the chart.
     ///
-    /// Set the height scale for the chart relative to 1.0 (i.e. 100%). This is a
-    /// syntactic alternative to [`chart.set_height()`](Chart::set_height).
+    /// Set the height scale for the chart relative to 1.0 (i.e. 100%). This is
+    /// a syntactic alternative to [`Chart::set_height()`].
     ///
     /// # Parameters
     ///
@@ -2573,7 +2572,7 @@ impl Chart {
     /// Set the width scale for the chart.
     ///
     /// Set the width scale for the chart relative to 1.0 (i.e. 100%). This is a
-    /// syntactic alternative to [`chart.set_width()`](Chart::set_width).
+    /// syntactic alternative to [`Chart::set_width()`].
     ///
     /// # Parameters
     ///
@@ -2673,8 +2672,8 @@ impl Chart {
     ///
     /// Charts are validated using this methods when they are added to a
     /// worksheet using the
-    /// [`worksheet.insert_chart()`](crate::Worksheet::insert_chart) or
-    /// [`worksheet.insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
+    /// [`Worksheet::insert_chart()`](crate::Worksheet::insert_chart) or
+    /// [`Worksheet::insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
     /// methods. However, you can also call `chart.validate()` directly.
     ///
     /// # Errors
@@ -6696,17 +6695,14 @@ impl ChartSeries {
     ///
     /// It is used in conjunction with the [`Chart`] struct.
     ///
-    /// A chart series is usually created via the
-    /// [`chart.add_series()`](Chart::add_series) method, see the first example
-    /// below. However, if required you can create a standalone `ChartSeries`
-    /// object and add it to a chart via the
-    /// [`chart.push_series()`](Chart::push_series) method, see the second
-    /// example below.
+    /// A chart series is usually created via the [`Chart::add_series()`]
+    /// method, see the first example below. However, if required you can create
+    /// a standalone `ChartSeries` object and add it to a chart via the
+    /// [`Chart::push_series()`] method, see the second example below.
     ///
     /// # Examples
     ///
-    /// An example of creating a chart series via
-    /// [`chart.add_series()`](Chart::add_series).
+    /// An example of creating a chart series via [`Chart::add_series()`].
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_add_series.rs
@@ -6739,8 +6735,7 @@ impl ChartSeries {
     /// ```
     ///
     /// An example of creating a chart series as a standalone object and then
-    /// adding it to a chart via the [`chart.push_series()`](Chart::add_series)
-    /// method.
+    /// adding it to a chart via the [`Chart::push_series()`] method.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_push_series.rs
@@ -7293,10 +7288,10 @@ impl ChartSeries {
 
     /// Set custom data labels for a data series.
     ///
-    /// The [`set_data_label()`](ChartSeries::set_data_label) sets the data
-    /// label properties for every label in a series but it is occasionally
-    /// required to set separate properties for individual data labels, or set a
-    /// custom display value, or format or hide some of the labels. This can be
+    /// The [`ChartSeries::set_data_label()`] method sets the data label
+    /// properties for every label in a series but it is occasionally required
+    /// to set separate properties for individual data labels, or set a custom
+    /// display value, or format or hide some of the labels. This can be
     /// achieved with the `set_custom_data_labels()` method, see the examples
     /// below.
     ///
@@ -7705,23 +7700,22 @@ impl ChartSeries {
 
     /// Set the colors for points in a chart series.
     ///
-    /// As explained above, in the section on
-    /// [`set_points`](ChartSeries::set_points), the most common use case for
-    /// point formatting is to set the formatting of individual segments of Pie
-    /// charts, or in particular to set the colors of pie segments. For this
-    /// simple use case the [`set_points`](ChartSeries::set_points) method can be
-    /// overly verbose.
+    /// As explained above, in the section on [`ChartSeries::set_points()`], the
+    /// most common use case for point formatting is to set the formatting of
+    /// individual segments of Pie charts, or in particular to set the colors of
+    /// pie segments. For this simple use case the [`ChartSeries::set_points()`]
+    /// method can be overly verbose.
     ///
-    /// As a syntactic shortcut the `set_point_colors()` method allows you to set
-    /// the colors of chart points with a simpler interface.
+    /// As a syntactic shortcut the `set_point_colors()` method allows you to
+    /// set the colors of chart points with a simpler interface.
     ///
     /// Compare the example below with the previous more general example which
     /// both produce the same result.
     ///
     /// # Parameters
     ///
-    /// `colors`: a slice of [`Color`] enum values or types that will
-    /// convert into [`Color`] via [`IntoColor`].
+    /// `colors`: a slice of [`Color`] enum values or types that will convert
+    /// into [`Color`] via [`IntoColor`].
     ///
     ///
     ///
@@ -8023,8 +8017,7 @@ impl ChartSeries {
     /// - `gap`: Gap percentage of columns in Bar/Column charts. The range is 0
     ///   <= gap <= 500 and the default is 150.
     ///
-    /// See the example for [`series.set_overlap()`](ChartSeries::set_overlap)
-    /// above.
+    /// See the example for [`ChartSeries::set_overlap()`] above.
     ///
     pub fn set_gap(&mut self, gap: u16) -> &mut ChartSeries {
         if gap <= 500 {
@@ -8060,8 +8053,7 @@ impl ChartSeries {
     ///
     /// The negative values are shown as a white solid fill with a black border.
     /// To set the color of the negative part of the bar/column see
-    /// [`set_invert_if_negative_color()`](ChartSeries::set_invert_if_negative_color)
-    /// below.
+    /// [`ChartSeries::set_invert_if_negative_color()`] below.
     ///
     /// # Examples
     ///
@@ -8119,9 +8111,7 @@ impl ChartSeries {
     /// Set the inverted color for negative values in a column/bar chart series.
     ///
     /// Bar and Column charts in Excel offer a series property called "Invert if
-    /// negative" (see
-    /// [`set_invert_if_negative()`](ChartSeries::set_invert_if_negative)
-    /// above).
+    /// negative" (see [`ChartSeries::set_invert_if_negative()`] above).
     ///
     /// The negative values are usually shown as a white solid fill with a black
     /// border but the `set_invert_if_negative_color()` method can be use to set
@@ -8130,14 +8120,13 @@ impl ChartSeries {
     ///
     /// # Parameters
     ///
-    /// - `color`: The inverse color property defined by a [`Color`] enum
-    ///   value.
+    /// - `color`: The inverse color property defined by a [`Color`] enum value.
     ///
     /// # Examples
     ///
-    /// A chart example demonstrating setting the "Invert if negative" property and
-    /// associated color for a chart series. This also requires that you set a solid
-    /// fill color for the series.
+    /// A chart example demonstrating setting the "Invert if negative" property
+    /// and associated color for a chart series. This also requires that you set
+    /// a solid fill color for the series.
     ///
     /// ```
     /// # // This code is available in examples/doc_chart_series_set_invert_if_negative_color.rs
@@ -8180,7 +8169,8 @@ impl ChartSeries {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_series_set_invert_if_negative_color.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_series_set_invert_if_negative_color.png">
     ///
     pub fn set_invert_if_negative_color<T>(&mut self, color: T) -> &mut ChartSeries
     where
@@ -9992,10 +9982,9 @@ impl ChartDataLabel {
 
     /// Display the point Y value on the data label.
     ///
-    /// This is the same as [`show_value()`](ChartDataLabel::show_value) except
-    /// it is named differently in Excel for Scatter charts. The methods are
-    /// equivalent
-    /// and either one can be used for any chart type.
+    /// This is the same as [`ChartDataLabel::show_value()`] except it is named
+    /// differently in Excel for Scatter charts. The methods are equivalent and
+    /// either one can be used for any chart type.
     ///
     pub fn show_y_value(&mut self) -> &mut ChartDataLabel {
         self.show_value()
@@ -10003,8 +9992,7 @@ impl ChartDataLabel {
 
     /// Display the point X value on the data label.
     ///
-    /// This is the same as
-    /// [`show_category_name()`](ChartDataLabel::show_category_name) except it
+    /// This is the same as [`ChartDataLabel::show_category_name()`] except it
     /// is named differently in Excel for Scatter charts. The methods are
     /// equivalent and either one can be used for any chart type.
     ///
@@ -10015,8 +10003,8 @@ impl ChartDataLabel {
     /// Set the value for a custom data label.
     ///
     /// This method sets the value of a custom data label used with the
-    /// [`set_custom_data_labels()`](ChartSeries::set_custom_data_labels)
-    /// method. It is ignored if used with a series [`ChartDataLabel`].
+    /// [`ChartSeries::set_custom_data_labels()`] method. It is ignored if used
+    /// with a series [`ChartDataLabel`].
     ///
     /// # Parameters
     ///
@@ -10168,8 +10156,8 @@ impl ChartDataLabel {
     /// Set a custom data label as hidden.
     ///
     /// This method hides a custom data label used with the
-    /// [`set_custom_data_labels()`](ChartSeries::set_custom_data_labels)
-    /// method. It is ignored if used with a series [`ChartDataLabel`].
+    /// [`ChartSeries::set_custom_data_labels()`] method. It is ignored if used
+    /// with a series [`ChartDataLabel`].
     ///
     /// # Examples
     ///
@@ -10242,8 +10230,7 @@ impl ChartDataLabel {
     ///
     /// Converts a `&ChartDataLabel` reference into a [`ChartDataLabel`] so that
     /// it can be used as a custom data label with the
-    /// [`set_custom_data_labels()`](ChartSeries::set_custom_data_labels)
-    /// method.
+    /// [`ChartSeries::set_custom_data_labels()`] method.
     ///
     /// This is a syntactic shortcut for a simple `clone()`.
     ///
@@ -10667,9 +10654,9 @@ impl ChartAxis {
     /// See [`ChartFont`] for full details.
     ///
     ///
-    /// The name font property for an axis represents the font for
-    /// the axis title. To set the font for the category or value numbers use
-    /// the [`set_font()`](ChartAxis::set_font) method.
+    /// The name font property for an axis represents the font for the axis
+    /// title. To set the font for the category or value numbers use the
+    /// [`ChartAxis::set_font()`] method.
     ///
     /// # Parameters
     ///
@@ -10725,7 +10712,8 @@ impl ChartAxis {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name_font.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_axis_set_name_font.png">
     ///
     pub fn set_name_font(&mut self, font: &ChartFont) -> &mut ChartAxis {
         self.title.set_font(font);
@@ -10778,7 +10766,7 @@ impl ChartAxis {
     ///
     /// The font property for an axis represents the font for the category or
     /// value names or numbers. To set the font for the axis name/title use the
-    /// [`set_name_font()`](ChartAxis::set_name_font) method.
+    /// [`ChartAxis::set_name_font()`] method.
     ///
     /// # Parameters
     ///
@@ -12173,8 +12161,8 @@ impl ChartAxis {
 
     /// Set the type of minor tick for the axis.
     ///
-    /// See [`set_major_tick_type()`](ChartAxis::set_major_tick_type) above for
-    /// an explanation and example.
+    /// See [`ChartAxis::set_major_tick_type()`] above for an explanation and
+    /// example.
     ///
     /// # Parameters
     ///
@@ -12456,9 +12444,8 @@ impl fmt::Display for ChartAxisLabelPosition {
 /// - Outside only
 /// - Cross - inside and outside
 ///
-/// Used in conjunction with
-/// [`set_major_tick_type()`](ChartAxis::set_major_tick_type) and
-/// [`set_minor_tick_type()`](ChartAxis::set_minor_tick_type).
+/// Used in conjunction with [`ChartAxis::set_major_tick_type()`] and
+/// [`ChartAxis::set_minor_tick_type()`].
 ///
 /// # Examples
 ///
@@ -12651,7 +12638,7 @@ impl fmt::Display for ChartAxisDisplayUnitType {
 /// of the series in the chart.
 ///
 /// `ChartLegend` can be used to configure properties of the chart legend and is
-/// usually obtained via the [`chart.legend()`][Chart::legend] method.
+/// usually obtained via the [`Chart::legend()`][Chart::legend] method.
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
@@ -13117,9 +13104,8 @@ impl ChartLegend {
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/legend_position.png">
 ///
-/// These positions can be set using the
-/// [`chart.legend().set_position()`](ChartLegend::set_position) method and the
-/// `ChartLegendPosition` enum values.
+/// These positions can be set using the [`ChartLegend::set_position()`] method
+/// and the `ChartLegendPosition` enum values.
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartLegendPosition {
@@ -13156,8 +13142,7 @@ impl fmt::Display for ChartLegendPosition {
 /// This enum defines the Excel chart options for handling empty cell in the
 /// chart data ranges.
 ///
-/// These options can be set using the
-/// [`chart.show_empty_cells_as()`](Chart::show_empty_cells_as) method.
+/// These options can be set using the [`Chart::show_empty_cells_as()`] method.
 ///
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ChartEmptyCells {
@@ -15874,8 +15859,8 @@ impl ChartTrendline {
     /// Set the formatting properties for a chart trendline label via a
     /// [`ChartFormat`] object or a sub struct that implements
     /// [`IntoChartFormat`]. The label is displayed when you use the
-    /// [`display_equation()`](ChartTrendline::display_equation) or
-    /// [`display_r_squared()`](ChartTrendline::display_equation) methods.
+    /// [`ChartTrendline::display_equation()`] or
+    /// [`ChartTrendline::display_r_squared()`] methods.
     ///
     /// The formatting that can be applied via a [`ChartFormat`] object are:
     ///
@@ -15967,8 +15952,8 @@ impl ChartTrendline {
     ///
     /// Set the font properties of a chart trendline label using a [`ChartFont`]
     /// reference. The label is displayed when you use the
-    /// [`display_equation()`](ChartTrendline::display_equation) or
-    /// [`display_r_squared()`](ChartTrendline::display_equation) methods.
+    /// [`ChartTrendline::display_equation()`] or
+    /// [`ChartTrendline::display_r_squared()`] methods.
     ///
     /// Example font properties that can be set are:
     ///
@@ -17357,7 +17342,7 @@ impl fmt::Display for ChartAxisLabelAlignment {
 ///
 /// The `ChartArea` struct can be used to configure properties of the chart area
 /// such as the formatting and is usually obtained via the
-/// [`chart.chart_area()`][Chart::chart_area] method.
+/// [`Chart::chart_area()`][Chart::chart_area] method.
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///
@@ -17525,7 +17510,7 @@ impl ChartArea {
 ///
 /// The `ChartPlotArea` struct can be used to configure properties of the chart
 /// plot area such as the formatting and layout and is usually obtained via the
-/// [`chart.plot_area()`][Chart::plot_area] method.
+/// [`Chart::plot_area()`][Chart::plot_area] method.
 ///
 /// It is used in conjunction with the [`Chart`] struct.
 ///

@@ -10,7 +10,8 @@ mod tests;
 
 use std::{collections::HashMap, fmt, hash::Hash, sync::OnceLock};
 
-/// The `Format` struct is used to define cell formatting for data in a worksheet.
+/// The `Format` struct is used to define cell formatting for data in a
+/// worksheet.
 ///
 /// The properties of a cell that can be formatted include: fonts, colors,
 /// patterns, borders, alignment and number formatting.
@@ -148,47 +149,47 @@ use std::{collections::HashMap, fmt, hash::Hash, sync::OnceLock};
 /// the Excel "Format Cell" dialog, and the equivalent `rust_xlsxwriter` Format
 /// method:
 ///
-/// | Category        | Description           |  Method Name                                                          |
-/// | :-------------- | :-------------------- |  :------------------------------------------------------------------- |
-/// | **Number**      | Numeric format        |  [`set_num_format()`](Format::set_num_format())                       |
-/// | **Alignment**   | Horizontal align      |  [`set_align()`](Format::set_align())                                 |
-/// |                 | Vertical align        |  [`set_align()`](Format::set_align())                                 |
-/// |                 | Rotation              |  [`set_rotation()`](Format::set_rotation())                           |
-/// |                 | Text wrap             |  [`set_text_wrap()`](Format::set_text_wrap())                         |
-/// |                 | Indentation           |  [`set_indent()`](Format::set_indent())                               |
-/// |                 | Reading direction     |  [`set_reading_direction()`](Format::set_reading_direction())         |
-/// |                 | Shrink to fit         |  [`set_shrink()`](Format::set_shrink())                               |
-/// | **Font**        | Font type             |  [`set_font_name()`](Format::set_font_name())                         |
-/// |                 | Font size             |  [`set_font_size()`](Format::set_font_size())                         |
-/// |                 | Font color            |  [`set_font_color()`](Format::set_font_color())                       |
-/// |                 | Bold                  |  [`set_bold()`](Format::set_bold())                                   |
-/// |                 | Italic                |  [`set_italic()`](Format::set_italic())                               |
-/// |                 | Underline             |  [`set_underline()`](Format::set_underline())                         |
-/// |                 | Strikethrough         |  [`set_font_strikethrough()`](Format::set_font_strikethrough())       |
-/// |                 | Super/Subscript       |  [`set_font_script()`](Format::set_font_script())                     |
-/// | **Border**      | Cell border           |  [`set_border()`](Format::set_border())                               |
-/// |                 | Bottom border         |  [`set_border_bottom()`](Format::set_border_bottom())                 |
-/// |                 | Top border            |  [`set_border_top()`](Format::set_border_top())                       |
-/// |                 | Left border           |  [`set_border_left()`](Format::set_border_left())                     |
-/// |                 | Right border          |  [`set_border_right()`](Format::set_border_right())                   |
-/// |                 | Border color          |  [`set_border_color()`](Format::set_border_color())                   |
-/// |                 | Bottom color          |  [`set_border_bottom_color()`](Format::set_border_bottom_color())     |
-/// |                 | Top color             |  [`set_border_top_color()`](Format::set_border_top_color())           |
-/// |                 | Left color            |  [`set_border_left_color()`](Format::set_border_left_color())         |
-/// |                 | Right color           |  [`set_border_right_color()`](Format::set_border_right_color())       |
-/// |                 | Diagonal border       |  [`set_border_diagonal()`](Format::set_border_diagonal())             |
-/// |                 | Diagonal border color |  [`set_border_diagonal_color()`](Format::set_border_diagonal_color()) |
-/// |                 | Diagonal border type  |  [`set_border_diagonal_type()`](Format::set_border_diagonal_type())   |
-/// | **Fill**        | Cell pattern          |  [`set_pattern()`](Format::set_pattern())                             |
-/// |                 | Background color      |  [`set_background_color()`](Format::set_background_color())           |
-/// |                 | Foreground color      |  [`set_foreground_color()`](Format::set_foreground_color())           |
-/// | **Protection**  | Unlock cells          |  [`set_unlocked()`](Format::set_unlocked())                           |
-/// |                 | Hide formulas         |  [`set_hidden()`](Format::set_hidden())                               |
+/// | Category        | Description           |  Method Name                             |
+/// | :-------------- | :-------------------- |  :-------------------------------------- |
+/// | **Number**      | Numeric format        |  [`Format::set_num_format()`]            |
+/// | **Alignment**   | Horizontal align      |  [`Format::set_align()`]                 |
+/// |                 | Vertical align        |  [`Format::set_align()`]                 |
+/// |                 | Rotation              |  [`Format::set_rotation()`]              |
+/// |                 | Text wrap             |  [`Format::set_text_wrap()`]             |
+/// |                 | Indentation           |  [`Format::set_indent()`]                |
+/// |                 | Reading direction     |  [`Format::set_reading_direction()`]     |
+/// |                 | Shrink to fit         |  [`Format::set_shrink()`]                |
+/// | **Font**        | Font type             |  [`Format::set_font_name()`]             |
+/// |                 | Font size             |  [`Format::set_font_size()`]             |
+/// |                 | Font color            |  [`Format::set_font_color()`]            |
+/// |                 | Bold                  |  [`Format::set_bold()`]                  |
+/// |                 | Italic                |  [`Format::set_italic()`]                |
+/// |                 | Underline             |  [`Format::set_underline()`]             |
+/// |                 | Strikethrough         |  [`Format::set_font_strikethrough()`]    |
+/// |                 | Super/Subscript       |  [`Format::set_font_script()`]           |
+/// | **Border**      | Cell border           |  [`Format::set_border()`]                |
+/// |                 | Bottom border         |  [`Format::set_border_bottom()`]         |
+/// |                 | Top border            |  [`Format::set_border_top()`]            |
+/// |                 | Left border           |  [`Format::set_border_left()`]           |
+/// |                 | Right border          |  [`Format::set_border_right()`]          |
+/// |                 | Border color          |  [`Format::set_border_color()`]          |
+/// |                 | Bottom color          |  [`Format::set_border_bottom_color()`]   |
+/// |                 | Top color             |  [`Format::set_border_top_color()`]      |
+/// |                 | Left color            |  [`Format::set_border_left_color()`]     |
+/// |                 | Right color           |  [`Format::set_border_right_color()`]    |
+/// |                 | Diagonal border       |  [`Format::set_border_diagonal()`]       |
+/// |                 | Diagonal border color |  [`Format::set_border_diagonal_color()`] |
+/// |                 | Diagonal border type  |  [`Format::set_border_diagonal_type()`]  |
+/// | **Fill**        | Cell pattern          |  [`Format::set_pattern()`]               |
+/// |                 | Background color      |  [`Format::set_background_color()`]      |
+/// |                 | Foreground color      |  [`Format::set_foreground_color()`]      |
+/// | **Protection**  | Unlock cells          |  [`Format::set_unlocked()`]              |
+/// |                 | Hide formulas         |  [`Format::set_hidden()`]                |
 ///
 /// # Format Colors
 ///
-/// Format property colors are specified by using the [`Color`] enum with a
-/// Html style RGB integer value or a limited number of defined colors:
+/// Format property colors are specified by using the [`Color`] enum with a Html
+/// style RGB integer value or a limited number of defined colors:
 ///
 /// ```
 /// # // This code is available in examples/doc_enum_Color.rs
@@ -261,9 +262,9 @@ use std::{collections::HashMap, fmt, hash::Hash, sync::OnceLock};
 ///
 /// # Number Format Categories
 ///
-/// The [`set_num_format()`](Format::set_num_format) method is used to set the
-/// number format for numbers used with
-/// [`write_number_with_format()`](crate::Worksheet::write_number_with_format()):
+/// The [`Format::set_num_format()`] method is used to set the number format for
+/// numbers used with
+/// [`Worksheet::write_number_with_format()`](crate::Worksheet::write_number_with_format()):
 ///
 /// ```
 /// # // This code is available in examples/doc_format_currency1.rs
@@ -684,14 +685,14 @@ impl Format {
 
     /// Set the number format for a Format using a legacy format index.
     ///
-    /// This method is similar to [`set_num_format()`](Format::set_num_format)
-    /// except that it uses an index to a limited number of Excel's built-in,
-    /// and legacy, number formats.
+    /// This method is similar to [`Format::set_num_format()`] except that it
+    /// uses an index to a limited number of Excel's built-in, and legacy,
+    /// number formats.
     ///
     /// Unless you need to specifically access one of Excel's built-in number
-    /// formats the [`set_num_format()`](Format::set_num_format) method is a
-    /// better solution. This method is mainly included for backward
-    /// compatibility and completeness.
+    /// formats the [`Format::set_num_format()`] method is a better solution.
+    /// This method is mainly included for backward compatibility and
+    /// completeness.
     ///
     /// The Excel built-in number formats as shown in the table below:
     ///
@@ -742,7 +743,7 @@ impl Format {
     ///  - The dollar sign in the above format appears as the defined local
     ///    currency symbol.
     ///  - These formats can also be set via
-    ///    [`set_num_format()`](Format::set_num_format).
+    ///    [`Format::set_num_format()`].
     ///
     /// # Parameters
     ///
@@ -1291,7 +1292,7 @@ impl Format {
     ///
     /// Excel generally adjusts the height of the cell to fit the wrapped text
     /// unless a explicit row height has be set via
-    /// [`worksheet.set_row_height()`](crate::Worksheet::set_row_height()).
+    /// [`Worksheet::set_row_height()`](crate::Worksheet::set_row_height()).
     ///
     /// # Examples
     ///
@@ -1334,10 +1335,9 @@ impl Format {
     /// This method can be used to indent text in a cell.
     ///
     /// Indentation is a horizontal alignment property. It can be used in Excel
-    /// in conjunction with the [Left](FormatAlign::Left),
-    /// [Right](FormatAlign::Right) and [Distributed](FormatAlign::Distributed)
-    /// alignments. It will override any other horizontal properties that don't
-    /// support indentation.
+    /// in conjunction with the [`FormatAlign::Left`], [`FormatAlign::Right`]
+    /// and [`FormatAlign::Distributed`] alignments. It will override any other
+    /// horizontal properties that don't support indentation.
     ///
     /// # Parameters
     ///
@@ -1373,7 +1373,8 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_indent.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_indent.png">
     ///
     pub fn set_indent(mut self, indent: u8) -> Format {
         self.alignment.indent = indent;
@@ -1544,9 +1545,8 @@ impl Format {
     /// Set the pattern for a cell. The most commonly used pattern is
     /// [`FormatPattern::Solid`].
     ///
-    /// To set the pattern colors see
-    /// [`set_background_color()`](Format::set_background_color()) and
-    /// [`set_foreground_color()`](Format::set_foreground_color()).
+    /// To set the pattern colors see [`Format::set_background_color()`] and
+    /// [`Format::set_foreground_color()`].
     ///
     /// # Parameters
     ///
@@ -1590,7 +1590,8 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_pattern.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_pattern.png">
     ///
     pub fn set_pattern(mut self, pattern: FormatPattern) -> Format {
         self.fill.pattern = pattern;
@@ -1600,14 +1601,14 @@ impl Format {
     /// Set the Format pattern background color property.
     ///
     /// The `set_background_color` method can be used to set the background
-    /// color of a pattern. Patterns are defined via the
-    /// [`set_pattern`](Format::set_pattern()) method. If a pattern hasn't been
-    /// defined then a solid fill pattern is used as the default.
+    /// color of a pattern. Patterns are defined via the [`Format::set_pattern`]
+    /// method. If a pattern hasn't been defined then a solid fill pattern is
+    /// used as the default.
     ///
     /// # Parameters
     ///
-    /// - `color`: The background color property defined by a [`Color`]
-    ///   enum value or a type that implements the [`IntoColor`] trait.
+    /// - `color`: The background color property defined by a [`Color`] enum
+    ///   value or a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
     ///
@@ -1659,12 +1660,12 @@ impl Format {
     ///
     /// The `set_foreground_color` method can be used to set the
     /// foreground/pattern color of a pattern. Patterns are defined via the
-    /// [`set_pattern`](Format::set_pattern()) method.
+    /// [`Format::set_pattern`] method.
     ///
     /// # Parameters
     ///
-    /// - `color`: The foreground color property defined by a [`Color`]
-    ///   enum value or a type that implements the [`IntoColor`] trait.
+    /// - `color`: The foreground color property defined by a [`Color`] enum
+    ///   value or a type that implements the [`IntoColor`] trait.
     ///
     /// # Examples
     ///
@@ -1719,10 +1720,10 @@ impl Format {
     /// Set the cell border style. Individual border elements can be configured
     /// using the following methods with the same parameters:
     ///
-    /// - [`set_border_top()`](Format::set_border_top())
-    /// - [`set_border_left()`](Format::set_border_left())
-    /// - [`set_border_right()`](Format::set_border_right())
-    /// - [`set_border_color()`](Format::set_border_color())
+    /// - [`Format::set_border_top()`]
+    /// - [`Format::set_border_left()`]
+    /// - [`Format::set_border_right()`]
+    /// - [`Format::set_border_color()`]
     ///
     /// # Parameters
     ///
@@ -1775,10 +1776,10 @@ impl Format {
     /// Set the cell border color. Individual border elements can be configured
     /// using the following methods with the same parameters:
     ///
-    /// - [`set_border_top_color()`](Format::set_border_top_color())
-    /// - [`set_border_left_color()`](Format::set_border_left_color())
-    /// - [`set_border_right_color()`](Format::set_border_right_color())
-    /// - [`set_border_color_color()`](Format::set_border_color())
+    /// - [`Format::set_border_top_color()`]
+    /// - [`Format::set_border_left_color()`]
+    /// - [`Format::set_border_right_color()`]
+    /// - [`Format::set_border_bottom_color()`]
     ///
     /// Note: it is only, currently possible to set a border around a single
     /// cell. To set a border around a range of cells you will need to create
@@ -1848,8 +1849,9 @@ impl Format {
         self
     }
 
-    /// Set the cell top border style. See
-    /// [`set_border()`](Format::set_border()) for details.
+    /// Set the cell top border style.
+    ///
+    /// See [`Format::set_border()`] for details.
     ///
     /// # Parameters
     ///
@@ -1861,13 +1863,14 @@ impl Format {
         self
     }
 
-    /// Set the cell top border color. See
-    /// [`set_border_color()`](Format::set_border_color()) for details.
+    /// Set the cell top border color.
+    ///
+    /// See [`Format::set_border_color()`] for details.
     ///
     /// # Parameters
     ///
-    /// - `color`: The border color as defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    /// - `color`: The border color as defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_top_color<T>(mut self, color: T) -> Format
     where
@@ -1881,8 +1884,9 @@ impl Format {
         self
     }
 
-    /// Set the cell bottom border style. See
-    /// [`set_border()`](Format::set_border()) for details.
+    /// Set the cell bottom border style.
+    ///
+    /// See [`Format::set_border()`] for details.
     ///
     /// # Parameters
     ///
@@ -1894,13 +1898,14 @@ impl Format {
         self
     }
 
-    /// Set the cell bottom border color. See
-    /// [`set_border_color()`](Format::set_border_color()) for details.
+    /// Set the cell bottom border color.
+    ///
+    /// See [`Format::set_border_color()`] for details.
     ///
     /// # Parameters
     ///
-    /// - `color`: The border color as defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    /// - `color`: The border color as defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_bottom_color<T>(mut self, color: T) -> Format
     where
@@ -1914,8 +1919,9 @@ impl Format {
         self
     }
 
-    /// Set the cell left border style. See
-    /// [`set_border()`](Format::set_border()) for details.
+    /// Set the cell left border style.
+    ///
+    /// See [`Format::set_border()`] for details.
     ///
     /// # Parameters
     ///
@@ -1927,13 +1933,14 @@ impl Format {
         self
     }
 
-    /// Set the cell left border color. See
-    /// [`set_border_color()`](Format::set_border_color()) for details.
+    /// Set the cell left border color.
+    ///
+    /// See [`Format::set_border_color()`] for details.
     ///
     /// # Parameters
     ///
-    /// - `color`: The border color as defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    /// - `color`: The border color as defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_left_color<T>(mut self, color: T) -> Format
     where
@@ -1947,8 +1954,9 @@ impl Format {
         self
     }
 
-    /// Set the cell right border style. See
-    /// [`set_border()`](Format::set_border()) for details.
+    /// Set the cell right border style.
+    ///
+    /// See [`Format::set_border()`] for details.
     ///
     /// # Parameters
     ///
@@ -1960,13 +1968,14 @@ impl Format {
         self
     }
 
-    /// Set the cell right border color. See
-    /// [`set_border_color()`](Format::set_border_color()) for details.
+    /// Set the cell right border color.
+    ///
+    /// See [`Format::set_border_color()`] for details.
     ///
     /// # Parameters
     ///
-    /// - `color`: The border color as defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    /// - `color`: The border color as defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_right_color<T>(mut self, color: T) -> Format
     where
@@ -1983,9 +1992,8 @@ impl Format {
     /// Set the Format border diagonal property.
     ///
     /// Set the cell border diagonal line style. This method should be used in
-    /// conjunction with the
-    /// [`set_border_diagonal_type()`](Format::set_border_diagonal_type())
-    /// method to set the diagonal type.
+    /// conjunction with the [`Format::set_border_diagonal_type()`] method to
+    /// set the diagonal type.
     ///
     /// # Parameters
     ///
@@ -2036,20 +2044,22 @@ impl Format {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/format_set_border_diagonal.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/format_set_border_diagonal.png">
     ///
     pub fn set_border_diagonal(mut self, border: FormatBorder) -> Format {
         self.borders.diagonal_style = border;
         self
     }
 
-    /// Set the cell diagonal border color. See
-    /// [`set_border_diagonal()`](Format::set_border_diagonal()) for details.
+    /// Set the cell diagonal border color.
+    ///
+    /// See [`Format::set_border_diagonal()`] for details.
     ///
     /// # Parameters
     ///
-    /// - `color`: The border color as defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    /// - `color`: The border color as defined by a [`Color`] enum value or a
+    ///   type that implements the [`IntoColor`] trait.
     ///
     pub fn set_border_diagonal_color<T>(mut self, color: T) -> Format
     where
@@ -2063,8 +2073,9 @@ impl Format {
         self
     }
 
-    /// Set the cell diagonal border direction type. See
-    /// [`set_border_diagonal()`](Format::set_border_diagonal()) for details.
+    /// Set the cell diagonal border direction type.
+    ///
+    /// See [`Format::set_border_diagonal()`] for details.
     ///
     /// # Parameters
     ///
@@ -2095,7 +2106,7 @@ impl Format {
     /// This method can be used to allow modification of a cell in a protected
     /// worksheet. In Excel, cell locking is turned on by default for all cells.
     /// However, it only has an effect if the worksheet has been protected using
-    /// the [`worksheet.protect()`](crate::Worksheet::protect) method.
+    /// the [`Worksheet::protect()`](crate::Worksheet::protect) method.
     ///
     /// # Examples
     ///
@@ -2159,7 +2170,7 @@ impl Format {
     /// result. This is generally used to hide complex calculations from end
     /// users who are only interested in the result. It only has an effect if
     /// the worksheet has been protected using the
-    /// [`worksheet.protect()`](crate::Worksheet::protect) method.
+    /// [`Worksheet::protect()`](crate::Worksheet::protect) method.
     ///
     /// See the example above.
     ///
@@ -2213,49 +2224,63 @@ impl Format {
     }
 
     /// Unset the bold Format property back to its default "off" state.
-    /// The opposite of [`set_bold()`](Format::set_bold()).
+    ///
+    /// The opposite of [`Format::set_bold()`].
+    ///
     pub fn unset_bold(mut self) -> Format {
         self.font.bold = false;
         self
     }
 
     /// Unset the italic Format property back to its default "off" state.
-    /// The opposite of [`set_italic()`](Format::set_italic()).
+    ///
+    /// The opposite of [`Format::set_italic()`].
+    ///
     pub fn unset_italic(mut self) -> Format {
         self.font.italic = false;
         self
     }
 
     /// Unset the font strikethrough Format property back to its default "off" state.
-    /// The opposite of [`set_font_strikethrough()`](Format::set_font_strikethrough()).
+    ///
+    /// The opposite of [`Format::set_font_strikethrough()`].
+    ///
     pub fn unset_font_strikethrough(mut self) -> Format {
         self.font.strikethrough = false;
         self
     }
 
     /// Unset the text wrap Format property back to its default "off" state.
-    /// The opposite of [`set_text_wrap()`](Format::set_text_wrap()).
+    ///
+    /// The opposite of [`Format::set_text_wrap()`].
+    ///
     pub fn unset_text_wrap(mut self) -> Format {
         self.alignment.text_wrap = false;
         self
     }
 
     /// Unset the shrink Format property back to its default "off" state.
-    /// The opposite of [`set_shrink()`](Format::set_shrink()).
+    ///
+    /// The opposite of [`Format::set_shrink()`].
+    ///
     pub fn unset_shrink(mut self) -> Format {
         self.alignment.shrink = false;
         self
     }
 
     /// Set the locked Format property back to its default "on" state.
-    /// The opposite of [`set_unlocked()`](Format::set_unlocked()).
+    ///
+    /// The opposite of [`Format::set_unlocked()`].
+    ///
     pub fn set_locked(mut self) -> Format {
         self.locked = true;
         self
     }
 
     /// Unset the hidden Format property back to its default "off" state.
-    /// The opposite of [`set_hidden()`](Format::set_hidden()).
+    ///
+    /// The opposite of [`Format::set_hidden()`].
+    ///
     pub fn unset_hidden(mut self) -> Format {
         self.hidden = false;
         self
@@ -2269,7 +2294,9 @@ impl Format {
     }
 
     /// Unset the `quote_prefix` Format property back to its default "off" state.
-    /// The opposite of [`set_quote_prefix()`](Format::set_quote_prefix()).
+    ///
+    /// The opposite of [`Format::set_quote_prefix()`].
+    ///
     pub fn unset_quote_prefix(mut self) -> Format {
         self.quote_prefix = false;
         self
@@ -3106,8 +3133,7 @@ impl fmt::Display for FormatBorder {
 
 /// The `FormatDiagonalBorder` enum defines [`Format`] diagonal border types.
 ///
-/// This is used with the
-/// [`Format::set_border_diagonal()`](Format::set_border_diagonal()) method.
+/// This is used with the [`Format::set_border_diagonal()`] method.
 ///
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 pub enum FormatDiagonalBorder {

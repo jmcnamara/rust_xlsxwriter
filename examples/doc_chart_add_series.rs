@@ -3,7 +3,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! An example of creating a chart series via
-//! [`chart.add_series()`](Chart::add_series).
+//! [`Chart::add_series()`](Chart::add_series).
 
 use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
 

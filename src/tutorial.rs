@@ -195,18 +195,18 @@ let mut workbook = Workbook::new();
 existing files.
 
 The workbook object is then used to add a new worksheet via the
-[`workbook.add_worksheet()`](crate::Workbook::add_worksheet) method:
+[`Workbook::add_worksheet()`](crate::Workbook::add_worksheet) method:
 
 ```text
 let worksheet = workbook.add_worksheet();
 ```
 The worksheet will have a standard Excel name, in this case "Sheet1". You can
 specify the worksheet name using the
-[`worksheet.set_name()`](crate::Worksheet::set_name) method.
+[`Worksheet::set_name()`](crate::Worksheet::set_name) method.
 
 
 We then iterate over the data and use the
-[`worksheet.write()`](crate::Worksheet::write) method which converts common Rust
+[`Worksheet::write()`](crate::Worksheet::write) method which converts common Rust
 types to the equivalent Excel types and writes them to the specified `row, col`
 location in the worksheet:
 
@@ -221,8 +221,8 @@ location in the worksheet:
 > **Reading ahead**:
 >
 > There are other type specific write methods such as
-> [`worksheet.write_string()`](crate::Worksheet::write_string) and
-> [`worksheet.write_number()`](crate::Worksheet::write_number). However, these
+> [`Worksheet::write_string()`](crate::Worksheet::write_string) and
+> [`Worksheet::write_number()`](crate::Worksheet::write_number). However, these
 > aren't generally required and thanks to Rust's monomorphization the
 > performance of the generic `write()` method is just as fast.
 >
@@ -230,12 +230,12 @@ location in the worksheet:
 > arrays of data that can be useful in cases where the data to be added is in
 > a vector format:
 >
-> - [`worksheet.write_row()`](crate::Worksheet::write_row)
-> - [`worksheet.write_column()`](crate::Worksheet::write_column)
-> - [`worksheet.write_row_matrix()`](crate::Worksheet::write_row_matrix)
-> - [`worksheet.write_column_matrix()`](crate::Worksheet::write_column_matrix)
-> - [`worksheet.write_row_with_format()`](crate::Worksheet::write_row_with_format)
-> - [`worksheet.write_column_with_format()`](crate::Worksheet::write_column_with_format)
+> - [`Worksheet::write_row()`](crate::Worksheet::write_row)
+> - [`Worksheet::write_column()`](crate::Worksheet::write_column)
+> - [`Worksheet::write_row_matrix()`](crate::Worksheet::write_row_matrix)
+> - [`Worksheet::write_column_matrix()`](crate::Worksheet::write_column_matrix)
+> - [`Worksheet::write_row_with_format()`](crate::Worksheet::write_row_with_format)
+> - [`Worksheet::write_column_with_format()`](crate::Worksheet::write_column_with_format)
 
 Throughout `rust_xlsxwriter` rows and columns are zero indexed. So the first
 cell in a worksheet `(0, 0)` is equivalent to the Excel notation of `A1`.
@@ -248,7 +248,7 @@ To calculate the total of the items in the second column we add a
 ```
 
 Finally, we save and close the Excel file via the
-[`workbook.save()`](crate::Workbook::save) method which will generate the
+[`Workbook::save()`](crate::Workbook::save) method which will generate the
 spreadsheet shown in the image above.:
 
 ```text
@@ -257,10 +257,10 @@ spreadsheet shown in the image above.:
 
 > **Reading ahead**:
 >
-> The [`workbook.save()`](crate::Workbook::save) method takes a [`std::path`]
+> The [`Workbook::save()`](crate::Workbook::save) method takes a [`std::path`]
 > argument which can be a `Path`, `PathBuf` or a filename string. It is also
 > possible to save to a byte vector using
-> [`workbook.save_to_buffer()`](crate::Workbook::save_to_buffer).
+> [`Workbook::save_to_buffer()`](crate::Workbook::save_to_buffer).
 
 
 ## Tutorial Part 2: Adding some formatting
@@ -347,7 +347,7 @@ limited amount of the its functionality to add some simple formatting:
 ```
 
 We can use these formats with the
-[`worksheet.write_with_format()`](crate::Worksheet::write_with_format) method
+[`Worksheet::write_with_format()`](crate::Worksheet::write_with_format) method
 which writes data and formatting together, like these examples from the code:
 
 ```text
@@ -468,7 +468,7 @@ correctly in Excel:
 
 Another addition to our program is the make the "Date" column wider for
 clarity using the
-[`worksheet.set_column_width()`](crate::Worksheet.set_column_width) method.
+[`Worksheet::set_column_width()`](crate::Worksheet.set_column_width) method.
 
 
 ```text

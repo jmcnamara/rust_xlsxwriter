@@ -128,7 +128,7 @@ impl Default for ProtectionOptions {
 
 impl ProtectionOptions {
     /// Create a new [`ProtectionOptions`] object to use with the
-    /// [`worksheet.protect_with_options()`](crate::Worksheet::protect_with_options) method.
+    /// [`Worksheet::protect_with_options()`](crate::Worksheet::protect_with_options) method.
     ///
     pub fn new() -> ProtectionOptions {
         ProtectionOptions {

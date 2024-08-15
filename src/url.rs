@@ -16,7 +16,7 @@ const MAX_URL_LEN: usize = 2_080;
 /// urls.
 ///
 /// In general you would use the
-/// [`worksheet.write_url()`](crate::Worksheet::write_url) with a string
+/// [`Worksheet::write_url()`](crate::Worksheet::write_url) with a string
 /// representation of the url, like this:
 ///
 /// ```
@@ -72,7 +72,7 @@ const MAX_URL_LEN: usize = 2_080;
 /// ```
 ///
 /// Using a `Url` struct also allows you to write a url using the generic
-/// [`worksheet.write()`](crate::Worksheet::write) method:
+/// [`Worksheet::write()`](crate::Worksheet::write) method:
 ///
 /// ```
 /// # // This code is available in examples/doc_url_intro3.rs
