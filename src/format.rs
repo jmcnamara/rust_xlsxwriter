@@ -1781,12 +1781,6 @@ impl Format {
     /// - [`Format::set_border_right_color()`]
     /// - [`Format::set_border_bottom_color()`]
     ///
-    /// Note: it is only, currently possible to set a border around a single
-    /// cell. To set a border around a range of cells you will need to create
-    /// 4-8 individual border formats and apply them to the cells around the
-    /// required border. A later version of this library will provide helper
-    /// functions to do this more easily.
-    ///
     /// # Parameters
     ///
     /// - `color`: The border color as defined by a [`Color`] enum value or
