@@ -91,6 +91,7 @@
 //!   - [Page Setup - Margins](#page-setup---margins)
 //!   - [Page Setup - Header/Footer](#page-setup---headerfooter)
 //!   - [Page Setup - Sheet](#page-setup---sheet)
+//! - [Cell formatting](#cell-formatting)
 //! - [Adding Headers and Footers](#adding-headers-and-footers)
 //! - [Autofitting column widths](#autofitting-column-widths)
 //! - [Working with worksheet tabs](#working-with-worksheet-tabs)
@@ -114,10 +115,10 @@
 //! [`Worksheet::new()`] constructor.
 //!
 //! The first method ties the worksheet to a workbook object that will
-//! automatically write the worksheet when the file is saved, whereas the
-//! second method creates a worksheet that is independent of a workbook. The
-//! second method has the advantage of keeping the worksheet free of the
-//! workbook borrow checking until needed, as explained below.
+//! automatically write the worksheet when the file is saved, whereas the second
+//! method creates a worksheet that is independent of a workbook. The second
+//! method has the advantage of keeping the worksheet free of the workbook
+//! borrow checking until needed, as explained below.
 //!
 //!
 //! ## Working with `add_worksheet()` and the borrow checker
@@ -416,6 +417,149 @@
 //! 6. [`Worksheet::set_print_draft()`]
 //! 7. [`Worksheet::set_print_headings()`]
 //! 8. [`Worksheet::set_page_order()`]
+//!
+//!
+//! # Cell formatting
+//!
+//! In Excel the data in a worksheet cell is comprised of a type, a value and a
+//! format. When using `rust_xlsxwriter` the type is inferred and the value and
+//! format are generally written at the same time using methods like
+//! [`Worksheet::write_with_format()`]:
+//!
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_range_format2.rs
+//! #
+//! use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Create a new Excel file object.
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Add a format.
+//!     let border = Format::new().set_border(FormatBorder::Thin);
+//!
+//!     // Some data to write.
+//!     let data = [
+//!         [10, 11, 12, 13, 14],
+//!         [20, 21, 22, 23, 24],
+//!         [30, 31, 32, 33, 34],
+//!     ];
+//!
+//!     // Write the data with formatting.
+//!     for (row_num, col) in data.iter().enumerate() {
+//!         for (col_num, cell) in col.iter().enumerate() {
+//!             let row_num = row_num as u32 + 1;
+//!             let col_num = col_num as u16 + 1;
+//!             worksheet.write_with_format(row_num, col_num, *cell, &border)?;
+//!         }
+//!     }
+//!
+//!     workbook.save("worksheet.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Which produces an output file like this:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_set_range_format.png">
+//!
+//! However, it is sometimes easier to structure `rust_xlsxwriter` programs to
+//! write the data first and then add the formatting. To do that you can make
+//! use of the following worksheet methods:
+//!
+//! - [`Worksheet::set_cell_format()`]
+//! - [`Worksheet::set_range_format()`]
+//! - [`Worksheet::set_range_format_with_border()`]
+//!
+//! Here is an example with the same output as  the previous example where the
+//! data and formatting are handled separately:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_range_format.rs
+//! #
+//! use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Create a new Excel file object.
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Add a format.
+//!     let border = Format::new().set_border(FormatBorder::Thin);
+//!
+//!     // Write an array of data.
+//!     let data = [
+//!         [10, 11, 12, 13, 14],
+//!         [20, 21, 22, 23, 24],
+//!         [30, 31, 32, 33, 34],
+//!     ];
+//!     worksheet.write_row_matrix(1, 1, data)?;
+//!
+//!     // Add formatting to the cells.
+//!     worksheet.set_range_format(1, 1, 3, 5, &border)?;
+//!
+//!     workbook.save("worksheet.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//! The methodology of separating the data and the formatting is particularly
+//! useful when you need to add a border to a range, since that can require up
+//! to 9 separate formats and tracking of the cell positions. Here is an example
+//! with [`Worksheet::set_range_format_with_border()`]:
+//!
+//! ```
+//! # // This code is available in examples/doc_worksheet_set_range_format_with_border.rs
+//! #
+//! use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     // Create a new Excel file object.
+//!     let mut workbook = Workbook::new();
+//!
+//!     // Add a worksheet to the workbook.
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Add some formats.
+//!     let inner_border = Format::new().set_border(FormatBorder::Thin);
+//!     let outer_border = Format::new().set_border(FormatBorder::Double);
+//!
+//!     // Write an array of data.
+//!     let data = [
+//!         [10, 11, 12, 13, 14],
+//!         [20, 21, 22, 23, 24],
+//!         [30, 31, 32, 33, 34],
+//!     ];
+//!     worksheet.write_row_matrix(1, 1, data)?;
+//!
+//!     // Add formatting to the cells.
+//!     worksheet.set_range_format_with_border(1, 1, 3, 5, &inner_border, &outer_border)?;
+//!
+//!     workbook.save("worksheet.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! Which produces an output file like this:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_set_range_format_with_border.png">
+//!
+//!
+//! For use cases where the cell formatting changes based on cell values
+//! Conditional Formatting may be a better option (see [Working with Conditional
+//! Formats](../conditional_format/index.html)). Additionally, formatting a
+//! ranges of cells as a Worksheet Table may be a better option than simple cell
+//! formatting (see the [`Table`] section of the documentation).
 //!
 //!
 //! # Adding Headers and Footers
@@ -8096,6 +8240,491 @@ impl Worksheet {
     }
 
     // -----------------------------------------------------------------------
+    // Worksheet overlay/formatting methods.
+    // -----------------------------------------------------------------------
+
+    /// Add formatting to a cell without overwriting the cell data.
+    ///
+    /// In Excel the data in a worksheet cell is comprised of a type, a value
+    /// and a format. When using `rust_xlsxwriter` the type is inferred and the
+    /// value and format are generally written at the same time using methods
+    /// like [`Worksheet::write_with_format()`]. However, if required you can
+    /// write the data separately and then add the format using methods like
+    /// `set_cell_format()`.
+    ///
+    /// Although this method requires an additional step it allows for use cases
+    /// where it is easier to write a large amount of data in one go and then
+    /// figure out where formatting should be applied. See also the
+    /// documentation section on [Worksheet Cell
+    /// formatting](../worksheet/index.html#cell-formatting).
+    ///
+    /// For use cases where the cell formatting changes based on cell values
+    /// Conditional Formatting may be a better option (see [Working with
+    /// Conditional Formats](../conditional_format/index.html)).
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `format`: The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the format of a worksheet
+    /// cell separately from writing the cell data.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_cell_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some formats.
+    /// #     let red = Format::new().set_font_color("#FF0000");
+    /// #     let green = Format::new().set_font_color("#00FF00");
+    /// #
+    ///     // Write an array of data.
+    ///     let data = [
+    ///         [10, 11, 12, 13, 14],
+    ///         [20, 21, 22, 23, 24],
+    ///         [30, 31, 32, 33, 34],
+    ///     ];
+    ///     worksheet.write_row_matrix(1, 1, data)?;
+    ///
+    ///     // Add formatting to some of the cells.
+    ///     worksheet.set_cell_format(1, 1, &red)?;
+    ///     worksheet.set_cell_format(2, 3, &green)?;
+    ///     worksheet.set_cell_format(3, 5, &red)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_cell_format.png">
+    ///
+    pub fn set_cell_format(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and col are in the allowed range.
+        if !self.check_dimensions(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Get the index of the format object.
+        let xf_index = self.format_xf_index(format);
+
+        // Insert the format in a new or existing cell.
+        self.insert_cell_format(row, col, xf_index);
+
+        Ok(self)
+    }
+
+    /// Add formatting to a range of cells without overwriting the cell data.
+    ///
+    ///
+    /// In Excel the data in a worksheet cell is comprised of a type, a value
+    /// and a format. When using `rust_xlsxwriter` the type is inferred and the
+    /// value and format are generally written at the same time using methods
+    /// like [`Worksheet::write_with_format()`]. However, if required you can
+    /// write the data separately and then add the format using methods like
+    /// `set_range_format()` or [`Worksheet::set_cell_format()`] (see above).
+    ///
+    /// Although this method requires an additional step it allows for use cases
+    /// where it is easier to write a large amount of data in one go and then
+    /// figure out where formatting should be applied. See also the
+    /// documentation section on [Worksheet Cell
+    /// formatting](../worksheet/index.html#cell-formatting).
+    ///
+    /// For use cases where the cell formatting changes based on cell values
+    /// Conditional Formatting may be a better option (see [Working with
+    /// Conditional Formats](../conditional_format/index.html)).
+    ///
+    /// # Parameters
+    ///
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `format`: The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the format of worksheet cells
+    /// separately from writing the cell data.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_range_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add a format.
+    ///     let border = Format::new().set_border(FormatBorder::Thin);
+    ///
+    ///     // Write an array of data.
+    ///     let data = [
+    ///         [10, 11, 12, 13, 14],
+    ///         [20, 21, 22, 23, 24],
+    ///         [30, 31, 32, 33, 34],
+    ///     ];
+    ///     worksheet.write_row_matrix(1, 1, data)?;
+    ///
+    ///     // Add formatting to the cells.
+    ///     worksheet.set_range_format(1, 1, 3, 5, &border)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_range_format.png">
+    ///
+    pub fn set_range_format(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Get the index of the format object.
+        let xf_index = self.format_xf_index(format);
+
+        // Insert the format in a new or existing cells.
+        for row in first_row..=last_row {
+            for col in first_col..=last_col {
+                self.insert_cell_format(row, col, xf_index);
+            }
+        }
+
+        Ok(self)
+    }
+
+    /// Add formatting to a range of cells with an external border.
+    ///
+    /// This method is similar to the  [`Worksheet::set_range_format()`] method
+    /// (see above) except it also adds a border around the cell range.
+    ///
+    /// Add a border around a range of cells in Excel is generally easy to do
+    /// using the GUI interface. However, creating a border around a range of
+    /// cells programmatically is much harder since it requires the creation of
+    /// up to 9 separate formats and the tracking of where cells are relative to
+    /// the border.
+    ///
+    /// The `set_range_format_with_border()` is provided to simplify this task.
+    /// It allows you to specify one format for the cells and another for the
+    /// border.
+    ///
+    /// You should also consider formatting a range of cells as a Worksheet
+    /// Table may be a better option than simple cell formatting (see the
+    /// [`Table`] section of the documentation).
+    ///
+    /// # Parameters
+    ///
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `cell_format`: The [`Format`] property for the cells in the range. If
+    ///   you don't require internal formatting you can use `Format::default()`.
+    /// - `border_format`: The [`Format`] property for the border. Only the
+    ///   [`Format::set_border()`] and [`Format::set_border_color()`] properties
+    ///   are used.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the format of worksheet cells
+    /// separately from writing the cell data.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_range_format_with_border.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add some formats.
+    ///     let inner_border = Format::new().set_border(FormatBorder::Thin);
+    ///     let outer_border = Format::new().set_border(FormatBorder::Double);
+    ///
+    ///     // Write an array of data.
+    ///     let data = [
+    ///         [10, 11, 12, 13, 14],
+    ///         [20, 21, 22, 23, 24],
+    ///         [30, 31, 32, 33, 34],
+    ///     ];
+    ///     worksheet.write_row_matrix(1, 1, data)?;
+    ///
+    ///     // Add formatting to the cells.
+    ///     worksheet.set_range_format_with_border(1, 1, 3, 5, &inner_border, &outer_border)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_range_format_with_border.png">
+    ///
+    pub fn set_range_format_with_border(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        cell_format: &Format,
+        border_format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        if first_row == last_row && first_col == last_col {
+            self.set_range_border_cell(first_row, first_col, cell_format, border_format)?;
+        } else if first_row == last_row {
+            self.set_range_border_row(first_row, first_col, last_col, cell_format, border_format)?;
+        } else if first_col == last_col {
+            self.set_range_border_col(first_row, last_row, first_col, cell_format, border_format)?;
+        } else {
+            self.set_range_border_range(
+                first_row,
+                last_row,
+                first_col,
+                last_col,
+                cell_format,
+                border_format,
+            )?;
+        }
+
+        Ok(self)
+    }
+
+    /// Clear the data and formatting from a worksheet cell.
+    ///
+    /// This method can be used to clear data and formatting previously written
+    /// to a worksheet cell using one of the worksheet `write()` methods.
+    ///
+    /// This can occasionally be useful for scenarios where it is easier to add
+    /// data in bulk but then remove certain elements.
+    ///
+    /// This method only clears data, it doesn't clear images or conditional
+    /// formatting, or other non-data elements.
+    ///
+    /// Note, this method doesn't return a [`Result`] or errors. Instructions to
+    /// clear non-existent cells are simply ignored.
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates clearing some previously written cell
+    /// data and formatting from a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_clear_cell.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add a format.
+    /// #     let format = Format::new().set_font_color("#FF0000");
+    /// #
+    ///     // Some array data to write.
+    ///     let data = [
+    ///         [10, 11, 12, 13, 14],
+    ///         [20, 21, 22, 23, 24],
+    ///         [30, 31, 32, 33, 34],
+    ///     ];
+    ///
+    ///     // Write the array data as a series of rows.
+    ///     worksheet.write_row_with_format(0, 0, data[0], &format)?;
+    ///     worksheet.write_row_with_format(1, 0, data[1], &format)?;
+    ///     worksheet.write_row_with_format(2, 0, data[2], &format)?;
+    ///
+    ///     // Clear the first and last cell in the written data.
+    ///     worksheet.clear_cell(0, 0);
+    ///     worksheet.clear_cell(2, 4);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_clear_cell.png">
+    ///
+    pub fn clear_cell(&mut self, row: RowNum, col: ColNum) -> &mut Worksheet {
+        // If cell is outside the allowed range it doesn't need to be cleared.
+        if !self.check_dimensions_only(row, col) {
+            return self;
+        }
+
+        self.clear_cell_internal(row, col);
+
+        self
+    }
+
+    /// Clear the formatting from a worksheet cell.
+    ///
+    /// This method can be used to clear the formatting previously added to a
+    /// worksheet cell using one of the worksheet `write_with_format()` methods.
+    ///
+    /// This can occasionally be useful for scenarios where it is easier to add
+    /// formatted data in bulk but then remove the formatting from certain
+    /// elements.
+    ///
+    /// See also the [`Worksheet::set_cell_format()`] method for a similar
+    /// method to change the format of a cell.
+    ///
+    /// Note, this method doesn't return a [`Result`] or errors. Instructions to
+    /// clear non-existent cells are simply ignored.
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates clearing the formatting from some
+    /// previously written cells in a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_clear_cell_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add a format.
+    /// #     let format = Format::new().set_font_color("#FF0000");
+    /// #
+    ///     // Some array data to write.
+    ///     let data = [
+    ///         [10, 11, 12, 13, 14],
+    ///         [20, 21, 22, 23, 24],
+    ///         [30, 31, 32, 33, 34],
+    ///     ];
+    ///
+    ///     // Write the array data as a series of rows.
+    ///     worksheet.write_row_with_format(0, 0, data[0], &format)?;
+    ///     worksheet.write_row_with_format(1, 0, data[1], &format)?;
+    ///     worksheet.write_row_with_format(2, 0, data[2], &format)?;
+    ///
+    ///     // Clear the format from the first and last cells in the data.
+    ///     worksheet.clear_cell_format(0, 0);
+    ///     worksheet.clear_cell_format(2, 4);
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_clear_cell_format.png">
+    ///
+    pub fn clear_cell_format(&mut self, row: RowNum, col: ColNum) -> &mut Worksheet {
+        // If cell is outside the allowed range it doesn't need to be cleared.
+        if !self.check_dimensions_only(row, col) {
+            return self;
+        }
+
+        self.clear_cell_format_internal(row, col);
+
+        self
+    }
+
+    // -----------------------------------------------------------------------
     // Worksheet serde methods.
     // -----------------------------------------------------------------------
 
@@ -9610,158 +10239,6 @@ impl Worksheet {
         }
 
         self.add_table(min_row, min_col, max_row, max_col, table)
-    }
-
-    // -----------------------------------------------------------------------
-    // Worksheet overlay/formatting methods.
-    // -----------------------------------------------------------------------
-
-    /// TODO
-    pub fn clear_cell(&mut self, row: RowNum, col: ColNum) -> &mut Worksheet {
-        // If cell is outside the allowed range it doesn't need to be cleared.
-        if !self.check_dimensions_only(row, col) {
-            return self;
-        }
-
-        self.clear_cell_internal(row, col);
-
-        self
-    }
-
-    /// TODO
-    pub fn clear_cell_data(&mut self, row: RowNum, col: ColNum) -> &mut Worksheet {
-        // If cell is outside the allowed range it doesn't need to be cleared.
-        if !self.check_dimensions_only(row, col) {
-            return self;
-        }
-
-        self.clear_cell_data_internal(row, col);
-
-        self
-    }
-
-    /// TODO
-    pub fn clear_cell_format(&mut self, row: RowNum, col: ColNum) -> &mut Worksheet {
-        // If cell is outside the allowed range it doesn't need to be cleared.
-        if !self.check_dimensions_only(row, col) {
-            return self;
-        }
-
-        self.clear_cell_format_internal(row, col);
-
-        self
-    }
-
-    /// TODO
-    ///
-    /// # Errors
-    ///
-    /// Todo
-    ///
-    pub fn set_cell_format(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Check row and col are in the allowed range.
-        if !self.check_dimensions(row, col) {
-            return Err(XlsxError::RowColumnLimitError);
-        }
-
-        // Get the index of the format object.
-        let xf_index = self.format_xf_index(format);
-
-        // Insert the format in a new or existing cell.
-        self.insert_cell_format(row, col, xf_index);
-
-        Ok(self)
-    }
-
-    /// TODO
-    ///
-    /// # Errors
-    ///
-    /// Todo
-    ///
-    pub fn set_cell_range_format(
-        &mut self,
-        first_row: RowNum,
-        first_col: ColNum,
-        last_row: RowNum,
-        last_col: ColNum,
-        format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Check rows and cols are in the allowed range.
-        if !self.check_dimensions_only(first_row, first_col)
-            || !self.check_dimensions_only(last_row, last_col)
-        {
-            return Err(XlsxError::RowColumnLimitError);
-        }
-
-        // Check order of first/last values.
-        if first_row > last_row || first_col > last_col {
-            return Err(XlsxError::RowColumnOrderError);
-        }
-
-        // Get the index of the format object.
-        let xf_index = self.format_xf_index(format);
-
-        // Insert the format in a new or existing cells.
-        for row in first_row..=last_row {
-            for col in first_col..=last_col {
-                self.insert_cell_format(row, col, xf_index);
-            }
-        }
-
-        Ok(self)
-    }
-
-    /// TODO
-    ///
-    /// # Errors
-    ///
-    /// Todo
-    ///
-    pub fn set_cell_range_format_with_border(
-        &mut self,
-        first_row: RowNum,
-        first_col: ColNum,
-        last_row: RowNum,
-        last_col: ColNum,
-        cell_format: &Format,
-        border_format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Check rows and cols are in the allowed range.
-        if !self.check_dimensions_only(first_row, first_col)
-            || !self.check_dimensions_only(last_row, last_col)
-        {
-            return Err(XlsxError::RowColumnLimitError);
-        }
-
-        // Check order of first/last values.
-        if first_row > last_row || first_col > last_col {
-            return Err(XlsxError::RowColumnOrderError);
-        }
-
-        if first_row == last_row && first_col == last_col {
-            self.set_range_border_cell(first_row, first_col, cell_format, border_format)?;
-        } else if first_row == last_row {
-            self.set_range_border_row(first_row, first_col, last_col, cell_format, border_format)?;
-        } else if first_col == last_col {
-            self.set_range_border_col(first_row, last_row, first_col, cell_format, border_format)?;
-        } else {
-            self.set_range_border_range(
-                first_row,
-                last_row,
-                first_col,
-                last_col,
-                cell_format,
-                border_format,
-            )?;
-        }
-
-        Ok(self)
     }
 
     // -----------------------------------------------------------------------
@@ -12899,39 +13376,7 @@ impl Worksheet {
         self.update_cell_format(row, col, 0);
     }
 
-    // Clear the data from a worksheet cell. Ignores non-existing cells.
-    fn clear_cell_data_internal(&mut self, row: RowNum, col: ColNum) {
-        let Some(columns) = self.data_table.get_mut(&row) else {
-            return;
-        };
-
-        let Some(cell) = columns.get_mut(&col) else {
-            return;
-        };
-
-        // Check the existing format index fo the cell.
-        let xf_index = match cell {
-            CellType::Blank { xf_index, .. }
-            | CellType::Error { xf_index, .. }
-            | CellType::String { xf_index, .. }
-            | CellType::Number { xf_index, .. }
-            | CellType::Boolean { xf_index, .. }
-            | CellType::Formula { xf_index, .. }
-            | CellType::DateTime { xf_index, .. }
-            | CellType::RichString { xf_index, .. }
-            | CellType::ArrayFormula { xf_index, .. } => *xf_index,
-        };
-
-        if xf_index == 0 {
-            // If the cell no formatting we remove the cell entry.
-            columns.remove(&col);
-        } else {
-            // If the cell has formatting we replace it with a blank cell.
-            columns.insert(col, CellType::Blank { xf_index });
-        }
-    }
-
-    // TODO
+    // Set the border around a single cell.
     fn set_range_border_cell(
         &mut self,
         row: RowNum,
@@ -12945,7 +13390,7 @@ impl Worksheet {
         self.set_cell_format(row, col, &cell_format)
     }
 
-    // TODO
+    // Set the border around a row of cells.
     fn set_range_border_row(
         &mut self,
         row: RowNum,
@@ -12976,7 +13421,7 @@ impl Worksheet {
         Ok(self)
     }
 
-    // TODO
+    // Set the border around a column of cells.
     fn set_range_border_col(
         &mut self,
         first_row: RowNum,
@@ -13007,7 +13452,7 @@ impl Worksheet {
         Ok(self)
     }
 
-    // TODO
+    // Set the border around a range of cells.
     fn set_range_border_range(
         &mut self,
         first_row: RowNum,
@@ -13075,7 +13520,8 @@ impl Worksheet {
         Ok(self)
     }
 
-    // TODO
+    // Combine a cell format and a border format to create a new format that can
+    // be used when creating a range border.
     fn combined_border_format(
         cell_format: &Format,
         border_format: &Format,

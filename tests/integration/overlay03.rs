@@ -23,7 +23,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(2, 1, 123)?;
 
     // Add the formatting with border.
-    worksheet.set_cell_range_format_with_border(2, 1, 2, 1, &cell_format, &border_format)?;
+    worksheet.set_range_format_with_border(2, 1, 2, 1, &cell_format, &border_format)?;
 
     workbook.save(filename)?;
 

@@ -19,16 +19,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_with_format(2, 1, 123, &bold)?;
     worksheet.clear_cell_format(2, 1);
 
-    // Write a cell that isn't modified.
+    // Write cells that aren't modified.
     worksheet.write_with_format(2, 3, 123, &bold)?;
-
-    // Clear the data from a formatted cell.
-    worksheet.write_with_format(2, 5, 123, &bold)?;
-    worksheet.clear_cell_data(2, 5);
-
-    // Add and clear the data from an unformatted cell.
-    worksheet.write(2, 2, 333)?;
-    worksheet.clear_cell_data(2, 2);
+    worksheet.write_with_format(2, 5, "", &bold)?;
 
     // Add and remove a cell.
     worksheet.write_with_format(2, 4, 222, &bold)?;

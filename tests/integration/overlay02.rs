@@ -22,9 +22,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(8, 3, 123)?;
 
     // Add the formatting in ranges.
-    worksheet.set_cell_range_format(2, 1, 2, 1, &format)?;
-    worksheet.set_cell_range_format(4, 1, 4, 3, &format)?;
-    worksheet.set_cell_range_format(7, 1, 8, 3, &format)?;
+    worksheet.set_range_format(2, 1, 2, 1, &format)?;
+    worksheet.set_range_format(4, 1, 4, 3, &format)?;
+    worksheet.set_range_format(7, 1, 8, 3, &format)?;
 
     workbook.save(filename)?;
 

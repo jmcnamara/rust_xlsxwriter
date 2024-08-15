@@ -25,9 +25,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(6, 1, 123)?;
 
     // Add the formatting with border.
-    worksheet.set_cell_range_format_with_border(2, 1, 2, 4, &cell_format, &border_format)?;
-    worksheet.set_cell_range_format_with_border(4, 1, 4, 3, &cell_format, &border_format)?;
-    worksheet.set_cell_range_format_with_border(6, 1, 6, 2, &cell_format, &border_format)?;
+    worksheet.set_range_format_with_border(2, 1, 2, 4, &cell_format, &border_format)?;
+    worksheet.set_range_format_with_border(4, 1, 4, 3, &cell_format, &border_format)?;
+    worksheet.set_range_format_with_border(6, 1, 6, 2, &cell_format, &border_format)?;
 
     workbook.save(filename)?;
 

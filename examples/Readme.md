@@ -1188,6 +1188,12 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_autofit.rs` - Demonstrates auto-fitting the worksheet
   column widths based on the data in the columns.
 
+* `doc_worksheet_clear_cell.rs` - Demonstrates clearing some previously
+  written cell data and formatting from a worksheet.
+
+* `doc_worksheet_clear_cell_format.rs` - Demonstrates clearing the
+  formatting from some previously written cells in a worksheet.
+
 * `doc_worksheet_deserialize_headers1.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet.
 
@@ -1367,6 +1373,9 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_active.rs` - Demonstrates setting a worksheet as the
   visible worksheet when a file is opened.
 
+* `doc_worksheet_set_cell_format.rs` - Demonstrates setting the format of a
+  worksheet cell separately from writing the cell data.
+
 * `doc_worksheet_set_column_format.rs` - Demonstrates setting the format
   for a column in Excel.
 
@@ -1440,6 +1449,15 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_set_print_scale.rs` - Demonstrates setting the scale of
   the worksheet page when printed.
+
+* `doc_worksheet_set_range_format.rs` - Demonstrates setting the format of
+  worksheet cells separately from writing the cell data.
+
+* `doc_worksheet_set_range_format2.rs` - Demonstrates setting the format of
+  worksheet cells when writing the cell data.
+
+* `doc_worksheet_set_range_format_with_border.rs` - Demonstrates setting
+  the format for a range of worksheet cells and also adding a border.
 
 * `doc_worksheet_set_repeat_columns.rs` - Demonstrates setting the columns
   to repeat on each printed page.
