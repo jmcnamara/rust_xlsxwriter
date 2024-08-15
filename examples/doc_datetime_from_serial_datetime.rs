@@ -14,7 +14,7 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create a formats to use with the datetimes below.
-    let format = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    let format = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss");
 
     // Set the column width for clarity.
     worksheet.set_column_width(0, 30)?;

@@ -113,13 +113,13 @@ pub enum XlsxError {
     ///     yyyy-mm-dd
     ///
     /// Times:
-    ///     hh::mm
-    ///     hh::mm::ss
-    ///     hh::mm::ss.sss
+    ///     hh:mm
+    ///     hh:mm:ss
+    ///     hh:mm:ss.sss
     ///
     /// DateTimes:
-    ///     yyyy-mm-ddThh::mm::ss
-    ///     yyyy-mm-dd hh::mm::ss
+    ///     yyyy-mm-ddThh:mm:ss
+    ///     yyyy-mm-dd hh:mm:ss
     /// ```
     ///
     /// The time part of `DateTimes` can contain optional or fractional seconds

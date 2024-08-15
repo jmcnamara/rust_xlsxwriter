@@ -15,11 +15,11 @@ fn main() -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     // Create some formats to use with the datetimes below.
-    let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
-    let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
-    let format3 = Format::new().set_num_format("yyyy-mm-ddThh::mm:ss");
-    let format4 = Format::new().set_num_format("ddd dd mmm yyyy hh::mm");
-    let format5 = Format::new().set_num_format("dddd, mmmm dd, yyyy hh::mm");
+    let format1 = Format::new().set_num_format("dd/mm/yyyy hh:mm");
+    let format2 = Format::new().set_num_format("mm/dd/yyyy hh:mm");
+    let format3 = Format::new().set_num_format("yyyy-mm-ddThh:mm:ss");
+    let format4 = Format::new().set_num_format("ddd dd mmm yyyy hh:mm");
+    let format5 = Format::new().set_num_format("dddd, mmmm dd, yyyy hh:mm");
 
     // Set the column width for clarity.
     worksheet.set_column_width(0, 30)?;

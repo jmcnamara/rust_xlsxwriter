@@ -56,11 +56,11 @@ const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
 ///     let worksheet = workbook.add_worksheet();
 ///
 ///     // Create some formats to use with the datetimes below.
-///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
-///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
-///     let format3 = Format::new().set_num_format("yyyy-mm-ddThh::mm:ss");
-///     let format4 = Format::new().set_num_format("ddd dd mmm yyyy hh::mm");
-///     let format5 = Format::new().set_num_format("dddd, mmmm dd, yyyy hh::mm");
+///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh:mm");
+///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh:mm");
+///     let format3 = Format::new().set_num_format("yyyy-mm-ddThh:mm:ss");
+///     let format4 = Format::new().set_num_format("ddd dd mmm yyyy hh:mm");
+///     let format5 = Format::new().set_num_format("dddd, mmmm dd, yyyy hh:mm");
 ///
 ///     // Set the column width for clarity.
 ///     worksheet.set_column_width(0, 30)?;
@@ -153,13 +153,13 @@ impl ExcelDateTime {
     ///     yyyy-mm-dd
     ///
     /// Times:
-    ///     hh::mm
-    ///     hh::mm::ss
-    ///     hh::mm::ss.sss
+    ///     hh:mm
+    ///     hh:mm:ss
+    ///     hh:mm:ss.sss
     ///
     /// DateTimes:
-    ///     yyyy-mm-ddThh::mm::ss
-    ///     yyyy-mm-dd hh::mm::ss
+    ///     yyyy-mm-ddThh:mm:ss
+    ///     yyyy-mm-dd hh:mm:ss
     ///
     /// ```
     ///
@@ -207,9 +207,9 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Create some formats to use with the datetimes below.
-    ///     let format1 = Format::new().set_num_format("hh::mm:ss");
+    ///     let format1 = Format::new().set_num_format("hh:mm:ss");
     ///     let format2 = Format::new().set_num_format("yyyy-mm-dd");
-    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
@@ -310,11 +310,11 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Create some formats to use with the datetimes below.
-    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
-    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
-    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
-    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.0");
-    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.000");
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh:mm");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh:mm");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss");
+    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss.0");
+    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss.000");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
@@ -388,10 +388,10 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Create some formats to use with the datetimes below.
-    ///     let format1 = Format::new().set_num_format("hh::mm");
-    ///     let format2 = Format::new().set_num_format("hh::mm:ss");
-    ///     let format3 = Format::new().set_num_format("hh::mm:ss.0");
-    ///     let format4 = Format::new().set_num_format("hh::mm:ss.000");
+    ///     let format1 = Format::new().set_num_format("hh:mm");
+    ///     let format2 = Format::new().set_num_format("hh:mm:ss");
+    ///     let format3 = Format::new().set_num_format("hh:mm:ss.0");
+    ///     let format4 = Format::new().set_num_format("hh:mm:ss.000");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
@@ -456,10 +456,10 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Create some formats to use with the datetimes below.
-    ///     let format1 = Format::new().set_num_format("hh::mm");
-    ///     let format2 = Format::new().set_num_format("hh::mm:ss");
-    ///     let format3 = Format::new().set_num_format("hh::mm:ss.0");
-    ///     let format4 = Format::new().set_num_format("hh::mm:ss.000");
+    ///     let format1 = Format::new().set_num_format("hh:mm");
+    ///     let format2 = Format::new().set_num_format("hh:mm:ss");
+    ///     let format3 = Format::new().set_num_format("hh:mm:ss.0");
+    ///     let format4 = Format::new().set_num_format("hh:mm:ss.000");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
@@ -527,11 +527,11 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Create some formats to use with the datetimes below.
-    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
-    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
-    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
-    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.0");
-    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.000");
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh:mm");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh:mm");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss");
+    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss.0");
+    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss.000");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
@@ -618,11 +618,11 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Create some formats to use with the datetimes below.
-    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh::mm");
-    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh::mm");
-    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
-    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.0");
-    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss.000");
+    ///     let format1 = Format::new().set_num_format("dd/mm/yyyy hh:mm");
+    ///     let format2 = Format::new().set_num_format("mm/dd/yyyy hh:mm");
+    ///     let format3 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss");
+    ///     let format4 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss.0");
+    ///     let format5 = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss.000");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
@@ -711,7 +711,7 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     /// #
     ///     // Create a formats to use with the datetimes below.
-    ///     let format = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///     let format = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
@@ -789,7 +789,7 @@ impl ExcelDateTime {
     /// #     let worksheet = workbook.add_worksheet();
     ///
     ///     // Create a formats to use with the datetimes below.
-    ///     let format = Format::new().set_num_format("yyyy-mm-dd hh::mm:ss");
+    ///     let format = Format::new().set_num_format("yyyy-mm-dd hh:mm:ss");
     ///
     ///     // Set the column width for clarity.
     ///     worksheet.set_column_width(0, 30)?;
