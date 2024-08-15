@@ -1777,10 +1777,10 @@ impl Worksheet {
     /// - [`ExcelDateTime`].
     /// - [`Formula`].
     /// - [`Url`].
-    /// - [`Option<T>`]: If `T` is a supported type then write the [`Some`]
-    ///   value but ignore the [`None`].
-    /// - [`Result<T, E>`]: If `T` and `E` are supported types then write `T`
-    ///   or `E` depending on the result.
+    /// - [`Option<T>`]: If `T` is a supported type then the [`Some<T>`] value
+    ///   is written. The [`None`] value is ignored.
+    /// - [`Result<T, E>`]: If `T` and `E` are supported types then the `T` or
+    ///   `E` value is written depending on the result.
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
@@ -1833,10 +1833,10 @@ impl Worksheet {
     /// - [`ExcelDateTime`].
     /// - [`Formula`].
     /// - [`Url`].
-    /// - [`Option<T>`]: If `T` is a supported type then write the [`Some`]
-    ///   value or [`None`] as a formatted blank cell.
-    /// - [`Result<T, E>`]: If `T` and `E` are supported types then write `T`
-    ///   or `E` depending on the result.
+    /// - [`Option<T>`]: If `T` is a supported type then [`Some<T>`] is written
+    ///   as a formatted value or [`None`] is written as a formatted blank cell.
+    /// - [`Result<T, E>`]: If `T` and `E` are supported types then the `T` or
+    ///   `E` value is written depending on the result.
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
