@@ -17,9 +17,9 @@
 //! focus on performance and on fidelity with the file format created by Excel.
 //! It cannot be used to modify an existing file.
 //!
-//! `rust_xlsxwriter` is a port of the [`XlsxWriter`] Python module by the same
-//! author. Feature porting is a work in progress. The currently supported
-//! features are:
+//! `rust_xlsxwriter` is a rewrite of the Python [`XlsxWriter`] library in Rust
+//! by the same author and with some additional Rust-like features and APIs. The
+//! currently supported features are:
 //!
 //! - Support for writing all basic Excel data types.
 //! - Full cell formatting support.
