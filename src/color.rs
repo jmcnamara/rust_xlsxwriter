@@ -16,8 +16,8 @@ mod tests;
 /// 1. Predefined named colors like `Color::Green`.
 /// 2. User defined RGB colors such as `Color::RGB(0x4F026A)` using a format
 ///    similar to html colors like `#RRGGBB`, except as an integer.
-/// 3. Theme colors from the standard palette of 60 colors like
-///    `Color::Theme(9, 4)`. The theme colors are shown in the image below.
+/// 3. Theme colors from the standard palette of 60 colors like `Color::Theme(9,
+///    4)`. The theme colors are shown in the image below.
 ///
 ///    <img
 ///    src="https://rustxlsxwriter.github.io/images/theme_color_palette.png">
@@ -70,6 +70,70 @@ mod tests;
 /// Output file:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/enum_xlsxcolor.png">
+///
+/// An example of the different types of color syntax that is supported by the
+/// APIs that accept [`Color`] values and that support the `impl Into<Color>`
+/// trait.
+///
+/// ```
+/// # // This code is available in examples/doc_into_color.rs
+/// #
+/// use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Widen the column for clarity.
+///     worksheet.set_column_width_pixels(0, 80)?;
+///
+///     // Some examples with named color enum values.
+///     let color_format = Format::new().set_background_color(Color::Green);
+///     worksheet.write_string(0, 0, "Green")?;
+///     worksheet.write_blank(0, 1, &color_format)?;
+///
+///     let color_format = Format::new().set_background_color(Color::Red);
+///     worksheet.write_string(1, 0, "Red")?;
+///     worksheet.write_blank(1, 1, &color_format)?;
+///
+///     // Write a RGB color using the Color::RGB() enum method.
+///     let color_format = Format::new().set_background_color(Color::RGB(0xFF7F50));
+///     worksheet.write_string(2, 0, "#FF7F50")?;
+///     worksheet.write_blank(2, 1, &color_format)?;
+///
+///     // Write a RGB color with the shorter Html string variant.
+///     let color_format = Format::new().set_background_color("#6495ED");
+///     worksheet.write_string(3, 0, "#6495ED")?;
+///     worksheet.write_blank(3, 1, &color_format)?;
+///
+///     // Write a RGB color with a Html string (but without the `#`).
+///     let color_format = Format::new().set_background_color("DCDCDC");
+///     worksheet.write_string(4, 0, "#DCDCDC")?;
+///     worksheet.write_blank(4, 1, &color_format)?;
+///
+///     // Write a RGB color with the optional u32 variant.
+///     let color_format = Format::new().set_background_color(0xDAA520);
+///     worksheet.write_string(5, 0, "#DAA520")?;
+///     worksheet.write_blank(5, 1, &color_format)?;
+///
+///     // Add a Theme color.
+///     let color_format = Format::new().set_background_color(Color::Theme(4, 3));
+///     worksheet.write_string(6, 0, "Theme(4, 3)")?;
+///     worksheet.write_blank(6, 1, &color_format)?;
+///
+///     // Save the file to disk.
+///     workbook.save("into_color.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/into_color.png">
 ///
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 pub enum Color {
@@ -434,117 +498,26 @@ impl Color {
     }
 }
 
-/// Trait to map types into an `Color` value.
-///
-/// The `IntoColor` trait is used to map strings and other types, including
-/// `Color` itself, into [`Color`] enum values. This allows syntactic
-/// shorthand such as using Html "#RRGGBB" style strings as method arguments.
-///
-/// The types that support `IntoColor` are:
-///
-/// - [`Color`] enum variants:
-///   - Named colors such as `Color::Green`.
-///   - RBG colors such as `Color::RGB(0xFF7F50)`.
-///   - Theme colors such as `Color::Theme(4, 3)`.
-/// - Html string variants such as `"#6495ED"` or `"6495ED"`.
-/// - [u32] variants such as 0xDAA520.
-///
-/// See the example below.
-///
-/// # Examples
-///
-/// An example of the different types of color syntax that is supported by the
-/// [`IntoColor`] trait.
-///
-/// ```
-/// # // This code is available in examples/doc_into_color.rs
-/// #
-/// use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
-///
-/// fn main() -> Result<(), XlsxError> {
-///     // Create a new Excel file object.
-///     let mut workbook = Workbook::new();
-///
-///     // Add a worksheet.
-///     let worksheet = workbook.add_worksheet();
-///
-///     // Widen the column for clarity.
-///     worksheet.set_column_width_pixels(0, 80)?;
-///
-///     // Some examples with named color enum values.
-///     let color_format = Format::new().set_background_color(Color::Green);
-///     worksheet.write_string(0, 0, "Green")?;
-///     worksheet.write_blank(0, 1, &color_format)?;
-///
-///     let color_format = Format::new().set_background_color(Color::Red);
-///     worksheet.write_string(1, 0, "Red")?;
-///     worksheet.write_blank(1, 1, &color_format)?;
-///
-///     // Write a RGB color using the Color::RGB() enum method.
-///     let color_format = Format::new().set_background_color(Color::RGB(0xFF7F50));
-///     worksheet.write_string(2, 0, "#FF7F50")?;
-///     worksheet.write_blank(2, 1, &color_format)?;
-///
-///     // Write a RGB color with the shorter Html string variant.
-///     let color_format = Format::new().set_background_color("#6495ED");
-///     worksheet.write_string(3, 0, "#6495ED")?;
-///     worksheet.write_blank(3, 1, &color_format)?;
-///
-///     // Write a RGB color with a Html string (but without the `#`).
-///     let color_format = Format::new().set_background_color("DCDCDC");
-///     worksheet.write_string(4, 0, "#DCDCDC")?;
-///     worksheet.write_blank(4, 1, &color_format)?;
-///
-///     // Write a RGB color with the optional u32 variant.
-///     let color_format = Format::new().set_background_color(0xDAA520);
-///     worksheet.write_string(5, 0, "#DAA520")?;
-///     worksheet.write_blank(5, 1, &color_format)?;
-///
-///     // Add a Theme color.
-///     let color_format = Format::new().set_background_color(Color::Theme(4, 3));
-///     worksheet.write_string(6, 0, "Theme(4, 3)")?;
-///     worksheet.write_blank(6, 1, &color_format)?;
-///
-///     // Save the file to disk.
-///     workbook.save("into_color.xlsx")?;
-///
-///     Ok(())
-/// }
-/// ```
-///
-/// Output file:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/into_color.png">
-///
-pub trait IntoColor {
-    /// Function to turn types into a [`Color`] enum.
-    fn new_color(self) -> Color;
-}
-
-impl IntoColor for Color {
-    fn new_color(self) -> Color {
-        self
+/// Convert from a u32 RGB value line 0xDAA520 into a [`Color`] enum value.
+impl From<u32> for Color {
+    fn from(value: u32) -> Color {
+        Color::RGB(value)
     }
 }
 
-impl IntoColor for u32 {
-    fn new_color(self) -> Color {
-        Color::RGB(self)
-    }
-}
-
-impl IntoColor for &str {
-    fn new_color(self) -> Color {
-        let color = if let Some(hex_string) = self.strip_prefix('#') {
+/// Convert from a Html style color string line "#6495ED" into a [`Color`] enum value.
+impl From<&str> for Color {
+    fn from(value: &str) -> Color {
+        let color = if let Some(hex_string) = value.strip_prefix('#') {
             u32::from_str_radix(hex_string, 16)
         } else {
-            u32::from_str_radix(self, 16)
+            u32::from_str_radix(value, 16)
         };
 
         match color {
             Ok(color) => Color::RGB(color),
             Err(_) => {
-                eprintln!("Error parsing '{self}' to RGB color.");
+                eprintln!("Error parsing '{value}' to RGB color.");
                 Color::Default
             }
         }

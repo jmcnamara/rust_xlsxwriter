@@ -1209,7 +1209,6 @@ use crate::{
     SerializationHeaderConfig, SerializeFieldOptions, SerializerHeader, TableData, XlsxSerialize,
 };
 
-use crate::color::{Color, IntoColor};
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -1220,7 +1219,7 @@ use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
     static_regex, utility, Button, Chart, ChartEmptyCells, ChartRangeCacheData,
-    ChartRangeCacheDataType, ConditionalFormat, DataValidation, DataValidationErrorStyle,
+    ChartRangeCacheDataType, Color, ConditionalFormat, DataValidation, DataValidationErrorStyle,
     DataValidationRuleInternal, DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria,
     FilterData, FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note,
     ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
@@ -10600,8 +10599,8 @@ impl Worksheet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_tab_color.png">
     ///
-    pub fn set_tab_color(&mut self, color: impl IntoColor) -> &mut Worksheet {
-        let color = color.new_color();
+    pub fn set_tab_color(&mut self, color: impl Into<Color>) -> &mut Worksheet {
+        let color = color.into();
         if color.is_valid() {
             self.tab_color = color;
         }

@@ -6,12 +6,11 @@
 
 mod tests;
 
-use crate::color::Color;
 use crate::format::Format;
 use crate::xmlwriter::XMLWriter;
 use crate::{
-    Alignment, Border, Fill, Font, FormatAlign, FormatBorder, FormatDiagonalBorder, FormatPattern,
-    FormatScript, FormatUnderline,
+    Alignment, Border, Color, Fill, Font, FormatAlign, FormatBorder, FormatDiagonalBorder,
+    FormatPattern, FormatScript, FormatUnderline,
 };
 
 pub struct Styles<'a> {

@@ -10,7 +10,7 @@ mod tests;
 
 use std::{collections::HashMap, fmt, hash::Hash, sync::OnceLock};
 
-use crate::color::{Color, IntoColor};
+use crate::Color;
 
 /// The `Format` struct is used to define cell formatting for data in a
 /// worksheet.
@@ -942,11 +942,8 @@ impl Format {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/format_set_font_color.png">
     ///
-    pub fn set_font_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_font_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if color.is_valid() {
             self.font.color = color;
         }
@@ -1610,7 +1607,7 @@ impl Format {
     /// # Parameters
     ///
     /// - `color`: The background color property defined by a [`Color`] enum
-    ///   value or a type that implements the [`IntoColor`] trait.
+    ///   value or a type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -1646,11 +1643,8 @@ impl Format {
     ///
     ///
     ///
-    pub fn set_background_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_background_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if color.is_valid() {
             self.fill.background_color = color;
         }
@@ -1667,7 +1661,7 @@ impl Format {
     /// # Parameters
     ///
     /// - `color`: The foreground color property defined by a [`Color`] enum
-    ///   value or a type that implements the [`IntoColor`] trait.
+    ///   value or a type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -1705,11 +1699,8 @@ impl Format {
     ///
     ///
     ///
-    pub fn set_foreground_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_foreground_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if color.is_valid() {
             self.fill.foreground_color = color;
         }
@@ -1786,7 +1777,7 @@ impl Format {
     /// # Parameters
     ///
     /// - `color`: The border color as defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    ///   a type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -1829,11 +1820,8 @@ impl Format {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/format_set_border_color.png">
     ///
-    pub fn set_border_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_border_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if !color.is_valid() {
             return self;
         }
@@ -1866,13 +1854,10 @@ impl Format {
     /// # Parameters
     ///
     /// - `color`: The border color as defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_border_top_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_border_top_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if color.is_valid() {
             self.borders.top_color = color;
         }
@@ -1901,13 +1886,10 @@ impl Format {
     /// # Parameters
     ///
     /// - `color`: The border color as defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_border_bottom_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_border_bottom_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if color.is_valid() {
             self.borders.bottom_color = color;
         }
@@ -1936,13 +1918,10 @@ impl Format {
     /// # Parameters
     ///
     /// - `color`: The border color as defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_border_left_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_border_left_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if color.is_valid() {
             self.borders.left_color = color;
         }
@@ -1971,13 +1950,10 @@ impl Format {
     /// # Parameters
     ///
     /// - `color`: The border color as defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_border_right_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_border_right_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if color.is_valid() {
             self.borders.right_color = color;
         }
@@ -2055,13 +2031,10 @@ impl Format {
     /// # Parameters
     ///
     /// - `color`: The border color as defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_border_diagonal_color<T>(mut self, color: T) -> Format
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_border_diagonal_color(mut self, color: impl Into<Color>) -> Format {
+        let color = color.into();
         if color.is_valid() {
             self.borders.diagonal_color = color;
         }

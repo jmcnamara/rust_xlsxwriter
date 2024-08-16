@@ -892,7 +892,7 @@ Performance improvement release.
 
   See also the [Chart Fill Pattern] example in the user guide.
 
-- Added [`IntoColor`] trait to allow syntactic shortcuts for [`Color`]
+- Added `IntoColor` trait to allow syntactic shortcuts for [`Color`]
   parameters in methods. So now you can set a RGB color like this
   `object.set_color("#FF7F50")` instead of the more verbose
   `object.set_color(Color::RGB(0xFF7F50))`. This addition doesn't require
@@ -907,7 +907,6 @@ Performance improvement release.
 - Added [`Chart::series.set_gap()`] and [`Chart::series.set_overlap()`] method to control layout
   of histogram style charts.
 
-[`IntoColor`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoColor.html
 [`ChartFormat`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartFormat.html
 [Chart Fill Pattern]: https://rustxlsxwriter.github.io/examples/chart_pattern.html
 [insert_image_to_fit]: https://rustxlsxwriter.github.io/examples/insert_image_to_fit.html

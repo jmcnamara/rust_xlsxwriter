@@ -42,7 +42,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Use alterative IntoColor u32 variant.
+// Use alterative Into<Color> u32 variant.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -76,7 +76,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Use alterative IntoColor html string variant.
+// Use alterative Into<Color> html string variant.
 fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
@@ -110,7 +110,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Use alterative IntoColor html string variant.
+// Use alterative Into<Color> html string variant.
 fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 

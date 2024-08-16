@@ -6,10 +6,9 @@
 
 #![warn(missing_docs)]
 
-use crate::color::IntoColor;
 use crate::drawing::{DrawingObject, DrawingType};
 use crate::vml::VmlInfo;
-use crate::{ColNum, Format, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
+use crate::{ColNum, Color, Format, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
 
 #[derive(Clone)]
 /// The `Note` struct represents an worksheet note object.
@@ -459,10 +458,9 @@ impl Note {
     /// # Parameters
     ///
     /// - `color`: The background color property defined by a
-    ///   [`Color`](crate::Color) enum value or a type that implements the
-    ///   [`IntoColor`] trait. Only the `Color::Name` and `Color::RGB()`
-    ///   variants are supported. Theme style colors aren't support by Excel for
-    ///   Notes.
+    ///   [`Color`](crate::Color) enum value or a type that can convert [`Into`]
+    ///   a [`Color`]. Only the `Color::Name` and `Color::RGB()` variants are
+    ///   supported. Theme style colors aren't support by Excel for Notes.
     ///
     /// # Examples
     ///
@@ -497,11 +495,8 @@ impl Note {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/note_set_background_color.png">
     ///
-    pub fn set_background_color<T>(mut self, color: T) -> Note
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_background_color(mut self, color: impl Into<Color>) -> Note {
+        let color = color.into();
         if color.is_valid() {
             self.format.fill.background_color = color;
         }

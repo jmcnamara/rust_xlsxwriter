@@ -755,12 +755,11 @@ mod tests;
 
 use std::{fmt, mem, sync::OnceLock};
 
-use crate::color::{Color, IntoColor};
 use crate::drawing::{DrawingObject, DrawingType};
 use crate::utility::{self, ToXmlBoolean};
 
 use crate::{
-    static_regex, xmlwriter::XMLWriter, ColNum, IntoExcelDateTime, ObjectMovement, RowNum,
+    static_regex, xmlwriter::XMLWriter, ColNum, Color, IntoExcelDateTime, ObjectMovement, RowNum,
     XlsxError, COL_MAX, ROW_MAX,
 };
 
@@ -7715,7 +7714,7 @@ impl ChartSeries {
     /// # Parameters
     ///
     /// `colors`: a slice of [`Color`] enum values or types that will convert
-    /// into [`Color`] via [`IntoColor`].
+    /// into [`Color`].
     ///
     ///
     ///
@@ -7760,10 +7759,7 @@ impl ChartSeries {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_set_points.png">
     ///
-    pub fn set_point_colors<T>(&mut self, colors: &[T]) -> &mut ChartSeries
-    where
-        T: IntoColor + Copy,
-    {
+    pub fn set_point_colors(&mut self, colors: &[impl Into<Color> + Copy]) -> &mut ChartSeries {
         self.points = colors
             .iter()
             .map(|color| ChartPoint::new().set_format(ChartSolidFill::new().set_color(*color)))
@@ -8172,11 +8168,8 @@ impl ChartSeries {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/chart_series_set_invert_if_negative_color.png">
     ///
-    pub fn set_invert_if_negative_color<T>(&mut self, color: T) -> &mut ChartSeries
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_invert_if_negative_color(&mut self, color: impl Into<Color>) -> &mut ChartSeries {
+        let color = color.into();
         if color.is_valid() {
             self.invert_if_negative = true;
             self.inverted_color = color;
@@ -13874,7 +13867,7 @@ impl ChartLine {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    ///   a type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -13920,11 +13913,8 @@ impl ChartLine {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_color.png">
     ///
-    pub fn set_color<T>(&mut self, color: T) -> &mut ChartLine
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut ChartLine {
+        let color = color.into();
         if color.is_valid() {
             self.color = color;
         }
@@ -14294,7 +14284,7 @@ impl ChartSolidFill {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    ///   a type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -14340,11 +14330,8 @@ impl ChartSolidFill {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill_set_color.png">
     ///
-    pub fn set_color<T>(&mut self, color: T) -> &mut ChartSolidFill
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut ChartSolidFill {
+        let color = color.into();
         if color.is_valid() {
             self.color = color;
         }
@@ -14574,7 +14561,7 @@ impl ChartPatternFill {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    ///   a type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -14630,11 +14617,8 @@ impl ChartPatternFill {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
     ///
-    pub fn set_background_color<T>(&mut self, color: T) -> &mut ChartPatternFill
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_background_color(&mut self, color: impl Into<Color>) -> &mut ChartPatternFill {
+        let color = color.into();
         if color.is_valid() {
             self.background_color = color;
         }
@@ -14649,13 +14633,10 @@ impl ChartPatternFill {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or
-    ///   a type that implements the [`IntoColor`] trait.
+    ///   a type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_foreground_color<T>(&mut self, color: T) -> &mut ChartPatternFill
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_foreground_color(&mut self, color: impl Into<Color>) -> &mut ChartPatternFill {
+        let color = color.into();
         if color.is_valid() {
             self.foreground_color = color;
         }
@@ -15301,11 +15282,8 @@ impl ChartFont {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_color.png">
     ///
-    pub fn set_color<T>(&mut self, color: T) -> &mut ChartFont
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut ChartFont {
+        let color = color.into();
         if color.is_valid() {
             self.color = color;
         }
@@ -16667,11 +16645,8 @@ impl ChartGradientStop {
     ///     ];
     /// # }
     /// ```
-    pub fn new<T>(color: T, position: u8) -> ChartGradientStop
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn new(color: impl Into<Color>, position: u8) -> ChartGradientStop {
+        let color = color.into();
 
         // Check and warn but don't raise error since this is too deeply nested.
         // It will be rechecked and rejected at use.

@@ -424,8 +424,7 @@
 //!
 #![warn(missing_docs)]
 
-use crate::color::{Color, IntoColor};
-use crate::{utility, ChartEmptyCells, ChartRange, ColNum, IntoChartRange, RowNum};
+use crate::{utility, ChartEmptyCells, ChartRange, ColNum, Color, IntoChartRange, RowNum};
 
 mod tests;
 
@@ -765,7 +764,7 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait such as a html string.
+    ///   type that can convert [`Into`] a [`Color`] such as a html string.
     ///
     /// # Examples
     ///
@@ -806,11 +805,8 @@ impl Sparkline {
     /// <img src="https://rustxlsxwriter.github.io/images/sparkline_set_sparkline_color.png">
     ///
     ///
-    pub fn set_sparkline_color<T>(mut self, color: T) -> Sparkline
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_sparkline_color(mut self, color: impl Into<Color>) -> Sparkline {
+        let color = color.into();
         if color.is_valid() {
             self.series_color = color;
         }
@@ -822,13 +818,10 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait such as a html string.
+    ///   type that can convert [`Into`] a [`Color`] such as a html string.
     ///
-    pub fn set_high_point_color<T>(mut self, color: T) -> Sparkline
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_high_point_color(mut self, color: impl Into<Color>) -> Sparkline {
+        let color = color.into();
         if color.is_valid() {
             self.high_point_color = color;
             self.show_high_point = true;
@@ -841,13 +834,10 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait such as a html string.
+    ///   type that can convert [`Into`] a [`Color`] such as a html string.
     ///
-    pub fn set_low_point_color<T>(mut self, color: T) -> Sparkline
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_low_point_color(mut self, color: impl Into<Color>) -> Sparkline {
+        let color = color.into();
         if color.is_valid() {
             self.low_point_color = color;
             self.show_low_point = true;
@@ -860,13 +850,10 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait such as a html string.
+    ///   type that can convert [`Into`] a [`Color`] such as a html string.
     ///
-    pub fn set_first_point_color<T>(mut self, color: T) -> Sparkline
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_first_point_color(mut self, color: impl Into<Color>) -> Sparkline {
+        let color = color.into();
         if color.is_valid() {
             self.first_point_color = color;
             self.show_first_point = true;
@@ -879,13 +866,10 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait such as a html string.
+    ///   type that can convert [`Into`] a [`Color`] such as a html string.
     ///
-    pub fn set_last_point_color<T>(mut self, color: T) -> Sparkline
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_last_point_color(mut self, color: impl Into<Color>) -> Sparkline {
+        let color = color.into();
         if color.is_valid() {
             self.last_point_color = color;
             self.show_last_point = true;
@@ -898,13 +882,10 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait such as a html string.
+    ///   type that can convert [`Into`] a [`Color`] such as a html string.
     ///
-    pub fn set_negative_points_color<T>(mut self, color: T) -> Sparkline
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_negative_points_color(mut self, color: impl Into<Color>) -> Sparkline {
+        let color = color.into();
         if color.is_valid() {
             self.negative_points_color = color;
             self.show_negative_points = true;
@@ -917,13 +898,10 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait such as a html string.
+    ///   type that can convert [`Into`] a [`Color`] such as a html string.
     ///
-    pub fn set_markers_color<T>(mut self, color: T) -> Sparkline
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_markers_color(mut self, color: impl Into<Color>) -> Sparkline {
+        let color = color.into();
         if color.is_valid() {
             self.markers_color = color;
             self.show_markers = true;

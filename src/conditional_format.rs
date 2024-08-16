@@ -915,8 +915,7 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 use std::{borrow::Cow, fmt};
 
-use crate::color::{Color, IntoColor};
-use crate::{xmlwriter::XMLWriter, ExcelDateTime, Format, Formula, XlsxError};
+use crate::{xmlwriter::XMLWriter, Color, ExcelDateTime, Format, Formula, XlsxError};
 
 // -----------------------------------------------------------------------
 // ConditionalFormat trait
@@ -3630,7 +3629,7 @@ impl ConditionalFormat2ColorScale {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -3678,11 +3677,8 @@ impl ConditionalFormat2ColorScale {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_2color_set_color.png">
     ///
-    pub fn set_minimum_color<T>(mut self, color: T) -> ConditionalFormat2ColorScale
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_minimum_color(mut self, color: impl Into<Color>) -> ConditionalFormat2ColorScale {
+        let color = color.into();
         if color.is_valid() {
             self.min_color = color;
         }
@@ -3698,13 +3694,10 @@ impl ConditionalFormat2ColorScale {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_maximum_color<T>(mut self, color: T) -> ConditionalFormat2ColorScale
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_maximum_color(mut self, color: impl Into<Color>) -> ConditionalFormat2ColorScale {
+        let color = color.into();
         if color.is_valid() {
             self.max_color = color;
         }
@@ -4153,7 +4146,7 @@ impl ConditionalFormat3ColorScale {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -4202,11 +4195,8 @@ impl ConditionalFormat3ColorScale {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_3color_set_color.png">
     ///
-    pub fn set_minimum_color<T>(mut self, color: T) -> ConditionalFormat3ColorScale
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_minimum_color(mut self, color: impl Into<Color>) -> ConditionalFormat3ColorScale {
+        let color = color.into();
         if color.is_valid() {
             self.min_color = color;
         }
@@ -4222,13 +4212,10 @@ impl ConditionalFormat3ColorScale {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_midpoint_color<T>(mut self, color: T) -> ConditionalFormat3ColorScale
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_midpoint_color(mut self, color: impl Into<Color>) -> ConditionalFormat3ColorScale {
+        let color = color.into();
         if color.is_valid() {
             self.mid_color = color;
         }
@@ -4244,13 +4231,10 @@ impl ConditionalFormat3ColorScale {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_maximum_color<T>(mut self, color: T) -> ConditionalFormat3ColorScale
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_maximum_color(mut self, color: impl Into<Color>) -> ConditionalFormat3ColorScale {
+        let color = color.into();
         if color.is_valid() {
             self.max_color = color;
         }
@@ -4645,7 +4629,7 @@ impl ConditionalFormatDataBar {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -4689,11 +4673,8 @@ impl ConditionalFormatDataBar {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_fill_color.png">
     ///
-    pub fn set_fill_color<T>(mut self, color: T) -> ConditionalFormatDataBar
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_fill_color(mut self, color: impl Into<Color>) -> ConditionalFormatDataBar {
+        let color = color.into();
         if color.is_valid() {
             self.fill_color = color;
             self.border_color = color;
@@ -4710,7 +4691,7 @@ impl ConditionalFormatDataBar {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -4754,11 +4735,8 @@ impl ConditionalFormatDataBar {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_border_color.png">
     ///
-    pub fn set_border_color<T>(mut self, color: T) -> ConditionalFormatDataBar
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_border_color(mut self, color: impl Into<Color>) -> ConditionalFormatDataBar {
+        let color = color.into();
         if color.is_valid() {
             self.border_color = color;
         }
@@ -4774,7 +4752,7 @@ impl ConditionalFormatDataBar {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -4818,11 +4796,8 @@ impl ConditionalFormatDataBar {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_negative_fill_color.png">
     ///
-    pub fn set_negative_fill_color<T>(mut self, color: T) -> ConditionalFormatDataBar
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_negative_fill_color(mut self, color: impl Into<Color>) -> ConditionalFormatDataBar {
+        let color = color.into();
         if color.is_valid() {
             self.negative_fill_color = color;
             self.negative_border_color = color;
@@ -4840,7 +4815,7 @@ impl ConditionalFormatDataBar {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
     /// # Examples
     ///
@@ -4884,11 +4859,11 @@ impl ConditionalFormatDataBar {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_negative_border_color.png">
     ///
-    pub fn set_negative_border_color<T>(mut self, color: T) -> ConditionalFormatDataBar
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_negative_border_color(
+        mut self,
+        color: impl Into<Color>,
+    ) -> ConditionalFormatDataBar {
+        let color = color.into();
         if color.is_valid() {
             self.negative_border_color = color;
         }
@@ -5203,7 +5178,7 @@ impl ConditionalFormatDataBar {
     /// # Parameters
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or a
-    ///   type that implements the [`IntoColor`] trait.
+    ///   type that can convert [`Into`] a [`Color`].
     ///
     ///
     /// # Examples
@@ -5247,11 +5222,8 @@ impl ConditionalFormatDataBar {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_databar_set_axis_color.png">
     ///
-    pub fn set_axis_color<T>(mut self, color: T) -> ConditionalFormatDataBar
-    where
-        T: IntoColor,
-    {
-        let color = color.new_color();
+    pub fn set_axis_color(mut self, color: impl Into<Color>) -> ConditionalFormatDataBar {
+        let color = color.into();
         if color.is_valid() {
             self.axis_color = color;
         }

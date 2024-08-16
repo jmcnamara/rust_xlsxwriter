@@ -3,7 +3,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 //! An example of the different types of color syntax that is supported by the
-//! [`IntoColor`] trait.
+//! [`Into`] [`Color`] trait.
 
 use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 

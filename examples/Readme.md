@@ -992,7 +992,7 @@ documentation and generally show how an individual function works.
   parameters via the [`IntoChartFormat`] trait.
 
 * `doc_into_color.rs` - An example of the different types of color syntax
-  that is supported by the [`IntoColor`] trait.
+  that is supported by the [`Into`] [`Color`] trait.
 
 * `doc_macros_add.rs` - Demonstrates a simple example of adding a vba
   project to an xlsm file.
