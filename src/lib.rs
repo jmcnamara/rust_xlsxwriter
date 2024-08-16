@@ -190,6 +190,7 @@
 //!
 mod app;
 mod button;
+mod color;
 mod comment;
 mod content_types;
 mod core;
@@ -241,6 +242,7 @@ mod test_functions;
 
 // Re-export the public APIs.
 pub use button::*;
+pub use color::*;
 pub use data_validation::*;
 pub use datetime::*;
 pub use error::*;

@@ -913,8 +913,10 @@ mod tests;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-use crate::{xmlwriter::XMLWriter, Color, ExcelDateTime, Format, Formula, IntoColor, XlsxError};
 use std::{borrow::Cow, fmt};
+
+use crate::color::{Color, IntoColor};
+use crate::{xmlwriter::XMLWriter, ExcelDateTime, Format, Formula, XlsxError};
 
 // -----------------------------------------------------------------------
 // ConditionalFormat trait

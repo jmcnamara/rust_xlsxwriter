@@ -755,13 +755,13 @@ mod tests;
 
 use std::{fmt, mem, sync::OnceLock};
 
+use crate::color::{Color, IntoColor};
+use crate::drawing::{DrawingObject, DrawingType};
+use crate::utility::{self, ToXmlBoolean};
+
 use crate::{
-    drawing::{DrawingObject, DrawingType},
-    static_regex,
-    utility::{self, ToXmlBoolean},
-    xmlwriter::XMLWriter,
-    ColNum, Color, IntoColor, IntoExcelDateTime, ObjectMovement, RowNum, XlsxError, COL_MAX,
-    ROW_MAX,
+    static_regex, xmlwriter::XMLWriter, ColNum, IntoExcelDateTime, ObjectMovement, RowNum,
+    XlsxError, COL_MAX, ROW_MAX,
 };
 
 #[derive(Clone)]

@@ -223,6 +223,7 @@ use std::io::{BufReader, Cursor, Read, Seek, Write};
 use std::mem;
 use std::path::{Path, PathBuf};
 
+use crate::color::Color;
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::packager::Packager;
@@ -231,9 +232,8 @@ use crate::worksheet::Worksheet;
 use crate::xmlwriter::XMLWriter;
 use crate::{
     utility, Border, Chart, ChartRange, ChartRangeCacheData, ColNum, DefinedName, DefinedNameType,
-    DocProperties, Fill, Font, Image, RowNum, Visible, NUM_IMAGE_FORMATS,
+    DocProperties, Fill, Font, FormatPattern, Image, RowNum, Visible, NUM_IMAGE_FORMATS,
 };
-use crate::{Color, FormatPattern};
 
 /// The `Workbook` struct represents an Excel file in its entirety. It is the
 /// starting point for creating a new Excel xlsx file.

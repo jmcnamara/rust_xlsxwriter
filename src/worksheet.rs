@@ -1209,6 +1209,7 @@ use crate::{
     SerializationHeaderConfig, SerializeFieldOptions, SerializerHeader, TableData, XlsxSerialize,
 };
 
+use crate::color::{Color, IntoColor};
 use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
 use crate::error::XlsxError;
 use crate::format::Format;
@@ -1219,11 +1220,10 @@ use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
     static_regex, utility, Button, Chart, ChartEmptyCells, ChartRangeCacheData,
-    ChartRangeCacheDataType, Color, ConditionalFormat, DataValidation, DataValidationErrorStyle,
+    ChartRangeCacheDataType, ConditionalFormat, DataValidation, DataValidationErrorStyle,
     DataValidationRuleInternal, DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria,
-    FilterData, FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoColor,
-    IntoExcelDateTime, Note, ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table,
-    TableFunction, Url,
+    FilterData, FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note,
+    ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows

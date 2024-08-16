@@ -7,7 +7,7 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    Chart, ChartSolidFill, ChartTrendline, ChartTrendlineType, ChartType, Workbook, XlsxColor,
+    Chart, ChartSolidFill, ChartTrendline, ChartTrendlineType, ChartType, Color, Workbook,
     XlsxError,
 };
 
@@ -29,7 +29,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     trendline
         .set_type(ChartTrendlineType::Linear)
         .display_equation(true)
-        .set_label_format(ChartSolidFill::new().set_color(XlsxColor::Red));
+        .set_label_format(ChartSolidFill::new().set_color(Color::Red));
 
     let mut chart = Chart::new(ChartType::Line);
     chart.set_axis_ids(52978048, 52980352);

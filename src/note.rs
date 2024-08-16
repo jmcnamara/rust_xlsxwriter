@@ -6,9 +6,10 @@
 
 #![warn(missing_docs)]
 
+use crate::color::IntoColor;
 use crate::drawing::{DrawingObject, DrawingType};
 use crate::vml::VmlInfo;
-use crate::{ColNum, Format, IntoColor, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
+use crate::{ColNum, Format, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
 
 #[derive(Clone)]
 /// The `Note` struct represents an worksheet note object.

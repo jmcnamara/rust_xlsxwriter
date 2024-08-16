@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Format, Workbook, XlsxColor, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 // Test case to demonstrate creating a basic file with a font color.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -14,9 +14,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     // Add an error color and duplicate to the test.
     let format = Format::new()
-        .set_font_color(XlsxColor::RGB(0xFFEEEEEE)) // Error color.
-        .set_font_color(XlsxColor::RGB(0xFF0000))
-        .set_font_color(XlsxColor::RGB(0xFF0000)); // Duplicate.
+        .set_font_color(Color::RGB(0xFFEEEEEE)) // Error color.
+        .set_font_color(Color::RGB(0xFF0000))
+        .set_font_color(Color::RGB(0xFF0000)); // Duplicate.
 
     let worksheet = workbook.add_worksheet();
     worksheet.write_string_with_format(0, 0, "Hello", &format)?;

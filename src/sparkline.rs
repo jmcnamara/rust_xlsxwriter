@@ -424,9 +424,8 @@
 //!
 #![warn(missing_docs)]
 
-use crate::{
-    utility, ChartEmptyCells, ChartRange, ColNum, Color, IntoChartRange, IntoColor, RowNum,
-};
+use crate::color::{Color, IntoColor};
+use crate::{utility, ChartEmptyCells, ChartRange, ColNum, IntoChartRange, RowNum};
 
 mod tests;
 
