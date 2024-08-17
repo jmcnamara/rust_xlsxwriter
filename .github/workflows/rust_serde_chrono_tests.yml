@@ -17,5 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Run the tests for the serde feature set
-      run: cargo test --test integration serde --features serde --features chrono
+    - name: Run the integration tests for the serde+chrono feature set
+      run: cargo test --test integration --features chrono --features serde
+
+    - name: Run the lib tests for the serde+chrono feature set
+      run: cargo test --lib --features chrono --features serde

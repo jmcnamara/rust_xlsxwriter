@@ -20,5 +20,8 @@ jobs:
     - name: Build
       run: cargo build --verbose
 
-    - name: Run the tests for the default feature set
+    - name: Run the integration tests for the default feature set
       run: cargo test --test integration
+
+    - name: Run the lib tests for the default feature set
+      run: cargo test --lib
