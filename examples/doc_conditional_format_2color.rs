@@ -23,9 +23,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(2, 11, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 0..=12u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(0, 12, 6)?;
 
     // Write 2 color scale formats with standard Excel colors.
     let conditional_format = ConditionalFormat2ColorScale::new()

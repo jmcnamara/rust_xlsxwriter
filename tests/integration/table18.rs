@@ -15,9 +15,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     let text_wrap = Format::new().set_text_wrap();
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
     worksheet.set_row_height(2, 39)?;
     worksheet.write(15, 0, "hello")?;
 
@@ -47,9 +45,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     let text_wrap = Format::new().set_text_wrap();
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
     worksheet.set_row_height(2, 39)?;
     worksheet.write(15, 0, "hello")?;
 
@@ -78,9 +74,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     let text_wrap = Format::new().set_text_wrap();
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
     worksheet.set_row_height(2, 39)?;
     worksheet.write(15, 0, "hello")?;
 

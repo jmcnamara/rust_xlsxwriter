@@ -58,9 +58,7 @@ use crate::{
 ///     worksheet.write_row_matrix(3, 2, data)?;
 ///
 ///     // Set the column widths for clarity.
-///     for col_num in 1..=6u16 {
-///         worksheet.set_column_width(col_num, 12)?;
-///     }
+///     worksheet.set_column_range_width(1, 6, 12)?;
 ///
 ///     // Create a new table and configure it.
 ///     let columns = vec![
@@ -171,9 +169,7 @@ impl Table {
     ///     worksheet.write_row_matrix(3, 2, data)?;
     ///
     ///     // Set the column widths for clarity.
-    ///     for col_num in 1..=6u16 {
-    ///         worksheet.set_column_width(col_num, 12)?;
-    ///     }
+    ///     worksheet.set_column_range_width(1, 6, 12)?;
     ///
     ///     // Create a new table.
     ///     let table = Table::new();
@@ -262,9 +258,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table.
     ///     let table = Table::new();
@@ -315,9 +309,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(2, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and configure the header.
     ///     let table = Table::new().set_header_row(false);
@@ -365,9 +357,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Set the captions for the header row.
     ///     let columns = vec![
@@ -455,9 +445,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and configure the total row.
     ///     let table = Table::new().set_total_row(true);
@@ -506,9 +494,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Set the caption and subtotal in the total row.
     ///     let columns = vec![
@@ -591,9 +577,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and configure the banded rows.
     ///     let table = Table::new().set_banded_rows(false);
@@ -659,9 +643,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and configure the banded columns (but turn off banded
     ///     // rows for clarity).
@@ -727,9 +709,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and configure the first column highlighting.
     ///     let table = Table::new().set_first_column(true);
@@ -795,9 +775,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Add a structured reference formula to the last column and set the header
     ///     // caption. The last column in `add_table()` should be extended to account
@@ -875,9 +853,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and configure the autofilter.
     ///     let table = Table::new().set_autofilter(false);
@@ -949,9 +925,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and configure it.
     ///     let columns = vec![
@@ -1044,9 +1018,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and set the name.
     ///     let table = Table::new().set_name("ProduceSales");
@@ -1114,9 +1086,7 @@ impl Table {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a new table and set the style.
     ///     let table = Table::new().set_style(TableStyle::Medium10);
@@ -1399,9 +1369,7 @@ impl Table {
 ///     worksheet.write_row_matrix(3, 2, data)?;
 ///
 ///     // Set the column widths for clarity.
-///     for col_num in 1..=6u16 {
-///         worksheet.set_column_width(col_num, 12)?;
-///     }
+///     worksheet.set_column_range_width(1, 6, 12)?;
 ///
 ///     // Create a new table and configure it.
 ///     let columns = vec![
@@ -1511,9 +1479,7 @@ impl TableColumn {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Set the captions for the header row.
     ///     let columns = vec![
@@ -1604,9 +1570,7 @@ impl TableColumn {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Set the caption and subtotal in the total row.
     ///     let columns = vec![
@@ -1708,9 +1672,7 @@ impl TableColumn {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Add a structured reference formula to the last column and set the header
     ///     // caption.
@@ -1795,9 +1757,7 @@ impl TableColumn {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     ///     // Create a number format for number columns in the table.
     ///     let format = Format::new().set_num_format("$#,##0.00");
@@ -1872,9 +1832,7 @@ impl TableColumn {
     /// #     worksheet.write_row_matrix(3, 2, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=6u16 {
-    /// #         worksheet.set_column_width(col_num, 12)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 6, 12)?;
     /// #
     /// #     // Create formats for the columns headers.
     ///     let format1 = Format::new().set_font_color("#FF0000");
@@ -1988,9 +1946,7 @@ impl Default for TableColumn {
 /// #     worksheet.write_row_matrix(3, 2, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=6u16 {
-/// #         worksheet.set_column_width(col_num, 12)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 6, 12)?;
 /// #
 ///     // Set the caption and subtotal in the total row.
 ///     let columns = vec![
@@ -2111,9 +2067,7 @@ impl fmt::Display for TableFunction {
 /// #     worksheet.write_row_matrix(3, 2, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=6u16 {
-/// #         worksheet.set_column_width(col_num, 12)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 6, 12)?;
 /// #
 ///     // Create a new table and set the style.
 ///     let table = Table::new().set_style(TableStyle::Medium10);

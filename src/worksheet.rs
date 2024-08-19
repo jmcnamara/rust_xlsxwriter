@@ -6118,7 +6118,7 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `col`: The zero indexed column number.
-    /// - `width`: The row width in character units.
+    /// - `width`: The column width in character units.
     ///
     /// # Errors
     ///
@@ -6188,8 +6188,8 @@ impl Worksheet {
 
     /// Set the width for a worksheet column in pixels.
     ///
-    /// The `set_column_width()` method is used to change the default width of a
-    /// worksheet column.
+    /// The `set_column_width_pixels()` method is used to change the default
+    /// width in pixels of a worksheet column.
     ///
     /// To set the width in Excel character units use the
     /// [`Worksheet::set_column_width()`] method.
@@ -6199,7 +6199,7 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `col`: The zero indexed column number.
-    /// - `width`: The row width in pixels.
+    /// - `width`: The column width in pixels.
     ///
     /// # Errors
     ///
@@ -6417,6 +6417,153 @@ impl Worksheet {
                 };
                 self.changed_cols.insert(col, col_options);
             }
+        }
+
+        Ok(self)
+    }
+
+    /// Set the width for a range of columns.
+    ///
+    /// This is a syntactic shortcut for setting the width for a range of
+    /// contiguous cells. See [`Worksheet::set_column_width()`] for more
+    /// details on the single column version.
+    ///
+    /// # Parameters
+    ///
+    /// - `first_col`: The first row of the range. Zero indexed.
+    /// - `last_col`: The last row of the range.
+    /// - `width`: The column width in character units.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    ///   limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First column larger than the last
+    ///   column.
+    ///
+    pub fn set_column_range_width(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+        width: impl Into<f64>,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check order of first/last values.
+        if first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        let width = width.into();
+        for col_num in first_col..=last_col {
+            self.set_column_width(col_num, width)?;
+        }
+
+        Ok(self)
+    }
+
+    /// Set the pixel width for a range of columns.
+    ///
+    /// This is a syntactic shortcut for setting the width in pixels for a range of
+    /// contiguous cells. See [`Worksheet::set_column_width_pixels()`] for more
+    /// details on the single column version.
+    ///
+    /// # Parameters
+    ///
+    /// - `first_col`: The first row of the range. Zero indexed.
+    /// - `last_col`: The last row of the range.
+    /// - `width`: The column width in pixels.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    ///   limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First column larger than the last
+    ///   column.
+    ///
+    pub fn set_column_range_width_pixels(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+        width: u16,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check order of first/last values.
+        if first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        for col_num in first_col..=last_col {
+            self.set_column_width_pixels(col_num, width)?;
+        }
+
+        Ok(self)
+    }
+
+    /// Set the format for a range of columns.
+    ///
+    /// This is a syntactic shortcut for setting the format for a range of
+    /// contiguous cells. See [`Worksheet::set_column_format()`] for more
+    /// details on the single column version.
+    ///
+    /// # Parameters
+    ///
+    /// - `first_col`: The first row of the range. Zero indexed.
+    /// - `last_col`: The last row of the range.
+    /// - `format`: The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    ///   limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First column larger than the last
+    ///   column.
+    ///
+    pub fn set_column_range_format(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check order of first/last values.
+        if first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        for col_num in first_col..=last_col {
+            self.set_column_format(col_num, format)?;
+        }
+
+        Ok(self)
+    }
+
+    /// Hide a range of worksheet columns.
+    ///
+    /// This is a syntactic shortcut for hiding a range of contiguous cells. See
+    /// [`Worksheet::set_column_hidden()`] for more details on the single column
+    /// version.
+    ///
+    /// # Parameters
+    ///
+    /// - `first_col`: The first row of the range. Zero indexed.
+    /// - `last_col`: The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    ///   limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First column larger than the last
+    ///   column.
+    ///
+    pub fn set_column_range_hidden(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check order of first/last values.
+        if first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        for col_num in first_col..=last_col {
+            self.set_column_hidden(col_num)?;
         }
 
         Ok(self)
@@ -6770,9 +6917,7 @@ impl Worksheet {
     ///     worksheet.write_row_matrix(3, 2, data)?;
     ///
     ///     // Set the column widths for clarity.
-    ///     for col_num in 1..=6u16 {
-    ///         worksheet.set_column_width(col_num, 12)?;
-    ///     }
+    ///     worksheet.set_column_range_width(1, 6, 12)?;
     ///
     ///     // Create a new table and configure it.
     ///     let columns = vec![
@@ -6991,9 +7136,7 @@ impl Worksheet {
     /// #     worksheet.write_row_matrix(2, 1, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=10u16 {
-    /// #         worksheet.set_column_width(col_num, 6)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 10, 6)?;
     /// #
     /// #     // Add a format. Light red fill with dark red text.
     /// #     let format1 = Format::new()
@@ -14688,7 +14831,16 @@ impl Worksheet {
         let mut attributes = vec![];
         let mut range = "A1".to_string();
 
-        if self.dimensions.first_row != ROW_MAX
+        // Special case where all cols have been formatted but no row data.
+        if self.dimensions.first_row == 0
+            && self.dimensions.first_col == 0
+            && self.dimensions.last_row == 0
+            && self.dimensions.last_col == COL_MAX - 1
+        {
+            range = "A1".to_string();
+        }
+        // Must common case: some cells have been formatted.
+        else if self.dimensions.first_row != ROW_MAX
             || self.dimensions.first_col != COL_MAX
             || self.dimensions.last_row != 0
             || self.dimensions.last_col != 0

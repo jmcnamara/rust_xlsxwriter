@@ -14,9 +14,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
 
     let columns = vec![
         TableColumn::default(),
@@ -40,9 +38,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
 
     // Write the header string, the table should read this and add it.
     worksheet.write(2, 5, " Column4 ")?;

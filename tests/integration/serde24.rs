@@ -47,9 +47,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.format_dxf_index(&format2);
     worksheet.format_dxf_index(&format1);
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
 
     let columns = vec![
         TableColumn::default(),

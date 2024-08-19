@@ -39,9 +39,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(4, 5, 4332)?;
     worksheet.write(5, 5, 4333)?;
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
 
     let columns = vec![
         TableColumn::default(),
@@ -88,9 +86,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(4, 5, 4332)?;
     worksheet.write(5, 5, 4333)?;
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
 
     let columns = vec![
         TableColumn::default(),

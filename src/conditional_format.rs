@@ -45,9 +45,7 @@
 //! #     worksheet.write_row_matrix(2, 1, data)?;
 //! #
 //! #     // Set the column widths for clarity.
-//! #     for col_num in 1..=10u16 {
-//! #         worksheet.set_column_width(col_num, 6)?;
-//! #     }
+//! #     worksheet.set_column_range_width(1, 10, 6)?;
 //! #
 //! #     // Add a format. Light red fill with dark red text.
 //! #     let format1 = Format::new()
@@ -224,9 +222,7 @@
 //! #     worksheet.write_row_matrix(2, 1, data)?;
 //! #
 //! #     // Set the column widths for clarity.
-//! #     for col_num in 1..=10u16 {
-//! #         worksheet.set_column_width(col_num, 6)?;
-//! #     }
+//! #     worksheet.set_column_range_width(1, 10, 6)?;
 //! #
 //! #     // Add a format. Light red fill with dark red text.
 //! #     let format1 = Format::new()
@@ -1066,9 +1062,7 @@ generate_conditional_format_impls!(
 /// #     worksheet.write_row_matrix(2, 1, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=10u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 10, 6)?;
 /// #
 /// #     // Add a format. Light red fill with dark red text.
 /// #     let format1 = Format::new()
@@ -1143,9 +1137,7 @@ generate_conditional_format_impls!(
 /// #     worksheet.write_row_matrix(2, 1, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=10u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 10, 6)?;
 /// #
 /// #     // Add a format. Light red fill with dark red text.
 /// #     let format1 = Format::new()
@@ -1500,9 +1492,7 @@ impl ConditionalFormatCell {
 /// #     worksheet.write_column(0, 0, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=10u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 10, 6)?;
 /// #
 /// #     // Add a format. Light red fill with dark red text.
 /// #     let format1 = Format::new()
@@ -1703,9 +1693,7 @@ impl ConditionalFormatBlank {
 /// #     worksheet.write(11, 0, Formula::new("=1/1"))?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=10u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 10, 6)?;
 /// #
 /// #     // Add a format. Light red fill with dark red text.
 /// #     let format1 = Format::new()
@@ -1907,9 +1895,7 @@ impl ConditionalFormatError {
 /// #     worksheet.write_row_matrix(2, 1, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=10u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 10, 6)?;
 /// #
 /// #     // Add a format. Light red fill with dark red text.
 /// #     let format1 = Format::new()
@@ -2100,9 +2086,7 @@ impl ConditionalFormatDuplicate {
 /// #     worksheet.write_row_matrix(2, 1, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=10u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 10, 6)?;
 /// #
 /// #     // Add a format. Light red fill with dark red text.
 /// #     let format1 = Format::new()
@@ -2221,9 +2205,7 @@ impl ConditionalFormatFormula {
     /// #     worksheet.write_row_matrix(2, 1, data)?;
     /// #
     /// #     // Set the column widths for clarity.
-    /// #     for col_num in 1..=10u16 {
-    /// #         worksheet.set_column_width(col_num, 6)?;
-    /// #     }
+    /// #     worksheet.set_column_range_width(1, 10, 6)?;
     /// #
     /// #     // Add a format. Light red fill with dark red text.
     /// #     let format1 = Format::new()
@@ -2386,9 +2368,7 @@ impl ConditionalFormatFormula {
 /// #     worksheet.write_row_matrix(2, 1, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=10u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 10, 6)?;
 /// #
 /// #     // Add a format. Light red fill with dark red text.
 /// #     let format1 = Format::new()
@@ -2627,9 +2607,7 @@ impl ConditionalFormatAverage {
 /// #     worksheet.write_row_matrix(2, 1, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 1..=10u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(1, 10, 6)?;
 /// #
 /// #     // Add a format. Light red fill with dark red text.
 /// #     let format1 = Format::new()
@@ -3380,9 +3358,7 @@ impl ConditionalFormatDate {
 /// #     worksheet.write_column(2, 11, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 0..=12u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(0, 12, 6)?;
 /// #
 ///     // Write 2 color scale formats with standard Excel colors.
 ///     let conditional_format = ConditionalFormat2ColorScale::new()
@@ -3836,9 +3812,7 @@ impl ConditionalFormat2ColorScale {
 /// #     worksheet.write_column(2, 11, data)?;
 /// #
 /// #     // Set the column widths for clarity.
-/// #     for col_num in 0..=12u16 {
-/// #         worksheet.set_column_width(col_num, 6)?;
-/// #     }
+/// #     worksheet.set_column_range_width(0, 12, 6)?;
 /// #
 ///     // Write 3 color scale formats with standard Excel colors.
 ///     let conditional_format = ConditionalFormat3ColorScale::new()

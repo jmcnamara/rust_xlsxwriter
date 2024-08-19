@@ -6,45 +6,40 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Table, TableColumn, Workbook, XlsxError};
+use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
 
-// Write a table with a user specified header.
+// Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
+    let cell_format = Format::new()
+        .set_background_color("#FFFF00")
+        .set_border(FormatBorder::Thin)
+        .set_border_color("#FF0000");
 
-    worksheet.set_column_range_width(2, 3, 10.288)?;
-
-    worksheet.write(0, 0, "Column")?;
-
-    let columns = vec![TableColumn::new().set_header("Column")];
-
-    let table = Table::new().set_columns(&columns);
-
-    worksheet.add_table(2, 2, 12, 3, &table)?;
+    // Set the format for a range.
+    for col_num in 0..16_384 {
+        worksheet.set_column_format(col_num, &cell_format)?;
+    }
 
     workbook.save(filename)?;
 
     Ok(())
 }
 
-// Write a table that takes the header name from the worksheet cell data.
+// With the range version.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
+    let cell_format = Format::new()
+        .set_background_color("#FFFF00")
+        .set_border(FormatBorder::Thin)
+        .set_border_color("#FF0000");
 
-    worksheet.set_column_range_width(2, 3, 10.288)?;
-
-    worksheet.write(0, 0, "Column")?;
-
-    // Write the header string, the table should read this and add it.
-    worksheet.write(2, 2, "Column")?;
-
-    let table = Table::new();
-
-    worksheet.add_table(2, 2, 12, 3, &table)?;
+    // Set the format for a range.
+    worksheet.set_column_range_format(0, 16_383, &cell_format)?;
 
     workbook.save(filename)?;
 
@@ -52,11 +47,11 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_table21_1() {
+fn test_overlay07_1() {
     let test_runner = common::TestRunner::new()
-        .set_name("table21")
-        .set_function(create_new_xlsx_file_1)
+        .set_name("overlay07")
         .unique("1")
+        .set_function(create_new_xlsx_file_1)
         .initialize();
 
     test_runner.assert_eq();
@@ -64,11 +59,11 @@ fn test_table21_1() {
 }
 
 #[test]
-fn test_table21_2() {
+fn test_overlay07_2() {
     let test_runner = common::TestRunner::new()
-        .set_name("table21")
-        .set_function(create_new_xlsx_file_2)
+        .set_name("overlay07")
         .unique("2")
+        .set_function(create_new_xlsx_file_2)
         .initialize();
 
     test_runner.assert_eq();

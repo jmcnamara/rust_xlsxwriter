@@ -27,9 +27,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(3, 2, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Create a new table and set the style.
     let table = Table::new().set_style(TableStyle::Medium10);

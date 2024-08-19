@@ -26,9 +26,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_column(2, 2, items)?;
     worksheet.write_row_matrix(2, 3, data)?;
 
-    for col_num in 2..=5u16 {
-        worksheet.set_column_width(col_num, 10.288)?;
-    }
+    worksheet.set_column_range_width(2, 5, 10.288)?;
 
     let columns = vec![
         TableColumn::default(),

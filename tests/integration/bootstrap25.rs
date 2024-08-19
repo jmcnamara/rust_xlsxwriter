@@ -17,9 +17,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_width(1, 6.86)?;
     worksheet.set_column_width(0, 14)?; // Unsorted order.
     worksheet.set_column_width(0, 14)?; // Overwrite existing value.
-    worksheet.set_column_width(3, 0.92)?;
-    worksheet.set_column_width(4, 0.92)?;
-    worksheet.set_column_width(5, 0.92)?;
+    worksheet.set_column_range_width(3, 5, 0.92)?; // Range.
 
     worksheet.write_number(8, 0, 123)?; // A cell to test dimensions.
 
@@ -36,9 +34,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     worksheet.set_column_width_pixels(2, 53)?;
     worksheet.set_column_width_pixels(1, 53)?;
     worksheet.set_column_width_pixels(0, 103)?; // Unsorted order.
-    worksheet.set_column_width_pixels(3, 11)?;
-    worksheet.set_column_width_pixels(4, 11)?;
-    worksheet.set_column_width_pixels(5, 11)?;
+    worksheet.set_column_range_width_pixels(3, 5, 11)?; // Range.
 
     worksheet.write_number(8, 0, 123)?; // A cell to test dimensions.
 

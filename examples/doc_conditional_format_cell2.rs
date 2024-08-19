@@ -31,9 +31,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(2, 1, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=10u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(1, 10, 6)?;
 
     // Add a format. Light red fill with dark red text.
     let format1 = Format::new()

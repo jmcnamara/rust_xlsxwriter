@@ -714,6 +714,7 @@ mod overlay03;
 mod overlay04;
 mod overlay05;
 mod overlay06;
+mod overlay07;
 mod page_breaks01;
 mod page_breaks02;
 mod page_breaks03;

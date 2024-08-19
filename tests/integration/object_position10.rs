@@ -20,7 +20,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.insert_image(8, 4, &image)?;
 
-    worksheet.set_column_hidden(4)?;
+    // Use the "range" version here in order to test it.
+    worksheet.set_column_range_hidden(4, 4)?;
 
     workbook.save(filename)?;
 

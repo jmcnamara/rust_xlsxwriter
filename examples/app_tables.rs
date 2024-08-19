@@ -33,9 +33,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Default table with no data.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -56,9 +54,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Default table with data.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -83,9 +79,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table without default autofilter.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -110,9 +104,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table without default header row.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -137,9 +129,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Default table with 'First Column' and 'Last Column' options.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -164,9 +154,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table with banded columns but without default banded rows.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -191,9 +179,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table with user defined column headers.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -226,9 +212,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table with user defined column headers, and formulas.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -264,9 +248,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table with totals row (but no caption or totals).";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -302,9 +284,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table with totals row with user captions and functions.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -351,9 +331,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table with alternative Excel style.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;
@@ -403,9 +381,7 @@ fn main() -> Result<(), XlsxError> {
     let caption = "Table with Excel style removed.";
 
     // Set the column widths for clarity.
-    for col_num in 1..=6u16 {
-        worksheet.set_column_width(col_num, 12)?;
-    }
+    worksheet.set_column_range_width(1, 6, 12)?;
 
     // Write the caption.
     worksheet.write(0, 1, caption)?;

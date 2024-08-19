@@ -66,9 +66,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(2, 1, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=10u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(1, 10, 6)?;
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatCell::new()
@@ -100,9 +98,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(2, 1, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=10u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(1, 10, 6)?;
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatCell::new()
@@ -133,9 +129,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(2, 1, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=10u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(1, 10, 6)?;
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatDuplicate::new().set_format(&format1);
@@ -165,9 +159,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(2, 1, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=10u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(1, 10, 6)?;
 
     // Write a conditional format over a range. The default criteria is Above Average.
     let conditional_format = ConditionalFormatAverage::new().set_format(&format1);
@@ -196,9 +188,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(2, 1, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=10u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(1, 10, 6)?;
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatTop::new()
@@ -229,9 +219,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(2, 1, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=10u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(1, 10, 6)?;
 
     // Write a conditional format over a non-contiguous range.
     let conditional_format = ConditionalFormatCell::new()
@@ -264,9 +252,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_row_matrix(2, 1, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 1..=10u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(1, 10, 6)?;
 
     // Write a conditional format over a range.
     let conditional_format = ConditionalFormatFormula::new()
@@ -368,9 +354,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(2, 11, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 0..=12u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(0, 12, 6)?;
 
     // Write 2 color scale formats with standard Excel colors.
     let conditional_format = ConditionalFormat2ColorScale::new()
@@ -430,9 +414,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(2, 11, data)?;
 
     // Set the column widths for clarity.
-    for col_num in 0..=12u16 {
-        worksheet.set_column_width(col_num, 6)?;
-    }
+    worksheet.set_column_range_width(0, 12, 6)?;
 
     // Write 3 color scale formats with standard Excel colors.
     let conditional_format = ConditionalFormat3ColorScale::new()
