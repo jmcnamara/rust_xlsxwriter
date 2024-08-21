@@ -60,11 +60,6 @@ ryu = ["dep:ryu"]
 # `test-resave`: Developer only testing feature.
 test-resave = []
 
-# Turn off default testing of the docs beacuse it is slow. It can still be done
-# explicitly using the --doc flag and it is also tested in the CI.
-[lib]
-doctest = false
-
 #
 # Examples to run only when `chrono` is enabled.
 #

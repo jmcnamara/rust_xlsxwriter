@@ -19,3 +19,6 @@ jobs:
 
     - name: Test doc build for warnings
       run: RUSTDOCFLAGS="-D warnings" cargo doc
+
+    - name: Test the docs
+      run: cargo test --doc

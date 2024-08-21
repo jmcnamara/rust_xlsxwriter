@@ -17,6 +17,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Check the cargo version
+      run: cargo --version
+
+    - name: Check the clippy version
+      run: cargo clippy --version
+
     - name: Test for any clippy warnings
       run: cargo clippy --all-targets -- -Dwarnings
 

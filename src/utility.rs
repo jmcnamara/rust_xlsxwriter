@@ -589,7 +589,7 @@ pub(crate) fn unquote_sheetname(sheetname: &str) -> String {
 ///
 /// The following example demonstrates testing for a valid worksheet name.
 ///
-/// ```
+/// ```fail
 /// # // This code is available in examples/doc_utility_check_sheet_name.rs
 /// #
 /// # use rust_xlsxwriter::{utility, XlsxError};
