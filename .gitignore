@@ -3,8 +3,10 @@
 .DS_Store
 .vscode
 *.xlsx
+*.xlsm
 tests/input/~*
 !tests/input/*.xlsx
+!tests/input/*.xlsm
 tests/input/~*
 *.bak
 
