@@ -6503,6 +6503,12 @@ impl Worksheet {
     /// contiguous cells. See [`Worksheet::set_column_format()`] for more
     /// details on the single column version.
     ///
+    /// Note, this method can be used to set the cell format for the entire
+    /// worksheet when applied to all the columns in the worksheet (see the
+    /// example below). This is relatively efficient since it is stored as a
+    /// single XML element. This is also how Excel applies a format to an entire
+    /// worksheet.
+    ///
     /// # Parameters
     ///
     /// - `first_col`: The first row of the range. Zero indexed.
@@ -6515,6 +6521,46 @@ impl Worksheet {
     ///   limits.
     /// - [`XlsxError::RowColumnOrderError`] - First column larger than the last
     ///   column.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting the format for all the
+    /// columns in an Excel worksheet. This effectively, and efficiently, sets
+    /// the format for the entire worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_column_range_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, FormatBorder, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add a format.
+    ///     let cell_format = Format::new()
+    ///         .set_background_color("#F9F2EC")
+    ///         .set_border(FormatBorder::Thin);
+    ///
+    ///     // Set the column format for the entire worksheet.
+    ///     worksheet.set_column_range_format(0, 16_383, &cell_format)?;
+    ///
+    ///     // Add some unformatted text that adopts the column format.
+    ///     worksheet.write_string(1, 1, "Hello")?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_range_format.png">
     ///
     pub fn set_column_range_format(
         &mut self,
@@ -8497,6 +8543,13 @@ impl Worksheet {
     /// Conditional Formatting may be a better option (see [Working with
     /// Conditional Formats](../conditional_format/index.html)).
     ///
+    /// Note, this method should **not** be used to set the formatting for an
+    /// entire worksheet since it would add an XML element for each of the 34
+    /// billion cells in the worksheet which would result in a very large and
+    /// slow output file. To set the format for the entire worksheet see the
+    /// [`Worksheet::set_column_range_format()`] method.
+    ///
+    ///
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
@@ -8604,6 +8657,12 @@ impl Worksheet {
     /// You should also consider formatting a range of cells as a Worksheet
     /// Table may be a better option than simple cell formatting (see the
     /// [`Table`] section of the documentation).
+    ///
+    /// Note, this method should **not** be used to set the formatting for an
+    /// entire worksheet since it would add an XML element for each of the 34
+    /// billion cells in the worksheet which would result in a very large and
+    /// slow output file. To set the format for the entire worksheet see the
+    /// [`Worksheet::set_column_range_format()`] method.
     ///
     /// # Parameters
     ///
