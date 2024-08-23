@@ -8650,9 +8650,9 @@ impl Worksheet {
     /// up to 9 separate formats and the tracking of where cells are relative to
     /// the border.
     ///
-    /// The `set_range_format_with_border()` is provided to simplify this task.
-    /// It allows you to specify one format for the cells and another for the
-    /// border.
+    /// The `set_range_format_with_border()` method is provided to simplify this
+    /// task. It allows you to specify one format for the cells and another for
+    /// the border.
     ///
     /// You should also consider formatting a range of cells as a Worksheet
     /// Table may be a better option than simple cell formatting (see the

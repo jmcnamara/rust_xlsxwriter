@@ -307,7 +307,7 @@ some things to try:
    complexity.
 
 2. Check the code names that macros use to refer to the workbook and worksheets
-   (see the previous section above). In general VBA uses a code name of
+   (see above). In general VBA uses a code name of
    `ThisWorkbook` to refer to the current workbook and the sheet name (such as
    `Sheet1`) to refer to the worksheets. These are the defaults used by
    `rust_xlsxwriter`. If the macro uses other names, or the macro was extracted

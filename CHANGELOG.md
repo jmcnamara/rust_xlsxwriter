@@ -1,9 +1,40 @@
 # Changelog
 
-All notable changes to `rust_xlsxwriter` will be documented in this file.
+This is the changelog/release notes for the `rust_xlsxwriter` crate.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+
+## [0.74.0] - 2024-08-24
+
+### Added
+
+- Add methods to format cells separately from the data writing functions.
+
+  In Excel the data in a worksheet cell is comprised of a type, a value and a
+  format. When using `rust_xlsxwriter` the type is inferred and the value and
+  format are generally written at the same time using methods like
+  [`Worksheet::write_with_format()`].
+
+  However, if required you can write the data separately and then add the format
+  using the new methods like [`Worksheet::set_cell_format()`],
+  [`Worksheet::set_range_format()`] and
+  [`Worksheet::set_range_format_with_border()`].
+
+  [`Worksheet::set_cell_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_cell_format
+  [`Worksheet::set_range_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_range_format
+  [`Worksheet::write_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_with_format
+  [`Worksheet::set_range_format_with_border()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_range_format_with_border
+
+- Replaced the `IntoColor` trait with `Into<Color>` in all APIs. This doesn't
+  require a change by the end user (unless they implemented `IntoColor` for
+  their own type).
+
+- Updated polars dependency to 0.42.0 to pick up latest Polars additions for
+  [`polars_excel_writer`].
+
+
 
 ## [0.73.0] - 2024-08-02
 

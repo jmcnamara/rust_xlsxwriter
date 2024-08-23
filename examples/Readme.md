@@ -1382,6 +1382,10 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_column_hidden.rs` - Demonstrates hiding a worksheet
   column.
 
+* `doc_worksheet_set_column_range_format.rs` - Demonstrates setting the
+  format for all the columns in an Excel worksheet. This effectively, and
+  efficiently, sets the format for the entire worksheet.
+
 * `doc_worksheet_set_column_width.rs` - Demonstrates setting the width of
   columns in Excel.
 
