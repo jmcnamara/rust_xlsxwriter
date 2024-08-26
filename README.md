@@ -87,6 +87,7 @@ currently supported features are:
 - Conditional formatting.
 - Data validation.
 - Cell Notes.
+- Textboxes.
 - Sparklines.
 - Worksheet PNG/JPEG/GIF/BMP images.
 - Rich multi-format strings.
@@ -131,8 +132,8 @@ frequently.
 
 Recent changes:
 
+- Added support for adding Textbox shapes to worksheets.
 - Removed requirement on `regex` crate.
-- Added support for adding Cell Notes.
 - Added support for data validation.
 
 See the full [Release Notes and Changelog].

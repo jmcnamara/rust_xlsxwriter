@@ -31,6 +31,7 @@
 //! - Conditional formatting.
 //! - Data validation.
 //! - Cell Notes.
+//! - Textboxes.
 //! - Sparklines.
 //! - Worksheet PNG/JPEG/GIF/BMP images.
 //! - Rich multi-format strings.
@@ -79,6 +80,7 @@
 //!   conditional formatting in worksheets.
 //! - [`DataValidation`]: Working with data validation in worksheets.
 //! - [`Note`]: Adding Notes to worksheet cells.
+//! - [`Shape`]: Adding Textbox shapes to worksheets.
 //! - [`Macros`](crate::macros): Working with Macros.
 //! - [`Sparklines`](crate::sparkline): Working with Sparklines.
 //! - [`ExcelDateTime`]: A type to represent dates and times in Excel format.
@@ -213,6 +215,7 @@ mod rich_value;
 mod rich_value_rel;
 mod rich_value_structure;
 mod rich_value_types;
+mod shape;
 mod shared_strings;
 mod shared_strings_table;
 mod styles;
@@ -253,6 +256,7 @@ pub use image::*;
 pub use note::*;
 pub use properties::*;
 pub use protection::*;
+pub use shape::*;
 pub use table::*;
 pub use url::*;
 

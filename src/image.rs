@@ -1119,9 +1119,10 @@ impl DrawingObject for Image {
 /// The `ObjectMovement` enum defines the movement of worksheet objects such as
 /// images and charts.
 ///
-/// This enum defines the way control a worksheet object, such a an images or
-/// charts, moves when the cells underneath it are moved, resized or deleted.
-/// This equates to the following Excel options:
+/// This enum defines the way control a worksheet object such as [Image],
+/// [`Chart`](crate::Chart), [`Note`](crate::Note), [`Shape`](crate::Shape) or
+/// [`Button`](crate::Button) moves when the cells underneath it are moved,
+/// resized or deleted. This equates to the following Excel options:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/object_movement.png">
 ///
@@ -1140,8 +1141,8 @@ pub enum ObjectMovement {
     DontMoveOrSizeWithCells,
 
     /// Same as `MoveAndSizeWithCells` except hidden cells are applied after the
-    /// object is inserted. This allows the insertion of objects in hidden rows
-    /// or columns.
+    /// object is inserted. This allows the insertion of objects into hidden
+    /// rows or columns.
     MoveAndSizeWithCellsAfter,
 }
 

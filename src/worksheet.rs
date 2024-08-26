@@ -1222,7 +1222,7 @@ use crate::{
     ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRuleInternal,
     DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
     HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note, ObjectMovement,
-    ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
+    ProtectionOptions, Shape, Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -1331,22 +1331,16 @@ pub struct Worksheet {
     pub(crate) dxf_formats: Vec<Format>,
     pub(crate) has_vml: bool,
     pub(crate) has_hyperlink_style: bool,
-    pub(crate) table_relationships: Vec<(String, String, String)>,
-    pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
-    pub(crate) drawing_object_relationships: Vec<(String, String, String)>,
-    pub(crate) drawing_relationships: Vec<(String, String, String)>,
-    pub(crate) comment_relationships: Vec<(String, String, String)>,
-    pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
     pub(crate) images: BTreeMap<(RowNum, ColNum), Image>,
     pub(crate) buttons_vml_info: Vec<VmlInfo>,
     pub(crate) comments_vml_info: Vec<VmlInfo>,
-    pub(crate) header_footer_vml_info: Vec<VmlInfo>,
     pub(crate) drawing: Drawing,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     pub(crate) header_footer_images: [Option<Image>; 6],
     pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
     pub(crate) buttons: BTreeMap<(RowNum, ColNum), Button>,
     pub(crate) notes: BTreeMap<RowNum, BTreeMap<ColNum, Note>>,
+    pub(crate) shapes: BTreeMap<(RowNum, ColNum), Shape>,
     pub(crate) tables: Vec<Table>,
     pub(crate) has_embedded_image_descriptions: bool,
     pub(crate) embedded_images: Vec<Image>,
@@ -1355,6 +1349,16 @@ pub struct Worksheet {
     pub(crate) note_authors: BTreeMap<String, usize>,
     pub(crate) vml_data_id: String,
     pub(crate) vml_shape_id: u32,
+
+    // These collections need to be reset on resave.
+    drawing_rel_ids: HashMap<String, u32>,
+    pub(crate) comment_relationships: Vec<(String, String, String)>,
+    pub(crate) drawing_object_relationships: Vec<(String, String, String)>,
+    pub(crate) drawing_relationships: Vec<(String, String, String)>,
+    pub(crate) header_footer_vml_info: Vec<VmlInfo>,
+    pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
+    pub(crate) table_relationships: Vec<(String, String, String)>,
+    pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
@@ -1588,17 +1592,11 @@ impl Worksheet {
             panes,
             has_hyperlink_style: false,
             hyperlinks: BTreeMap::new(),
-            table_relationships: vec![],
-            hyperlink_relationships: vec![],
-            drawing_object_relationships: vec![],
-            drawing_relationships: vec![],
-            comment_relationships: vec![],
-            vml_drawing_relationships: vec![],
             images: BTreeMap::new(),
+            shapes: BTreeMap::new(),
             drawing: Drawing::new(),
             image_types: [false; NUM_IMAGE_FORMATS],
             header_footer_images: [None, None, None, None, None, None],
-            header_footer_vml_info: vec![],
             buttons_vml_info: vec![],
             comments_vml_info: vec![],
             rel_count: 0,
@@ -1635,6 +1633,16 @@ impl Worksheet {
             vml_shape_id: 0,
             user_default_row_height: DEFAULT_ROW_HEIGHT,
             hide_unused_rows: false,
+
+            // These collections need to be reset on resave.
+            comment_relationships: vec![],
+            drawing_object_relationships: vec![],
+            drawing_rel_ids: HashMap::new(),
+            drawing_relationships: vec![],
+            header_footer_vml_info: vec![],
+            hyperlink_relationships: vec![],
+            table_relationships: vec![],
+            vml_drawing_relationships: vec![],
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -5373,6 +5381,142 @@ impl Worksheet {
         }
 
         self.has_vml = true;
+
+        Ok(self)
+    }
+
+    /// Insert a textbox shape into a worksheet.
+    ///
+    /// This method can be used to insert an Excel Textbox shape with text into
+    /// a worksheet.
+    ///
+    /// See the [`Shape`] documentation for a detailed description of the
+    /// methods that can be used to configure the size and appearance of the
+    /// textbox.
+    ///
+    /// Note, no Excel shape other than Textbox is supported. See [Support for
+    /// other Excel shape
+    /// types](crate::Shape#support-for-other-excel-shape-types).
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_shape.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape and add some text.
+    ///     let textbox = Shape::textbox().set_text("This is some text");
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_insert_shape.png">
+    ///
+    pub fn insert_shape(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        shape: &Shape,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.insert_shape_with_offset(row, col, shape, 0, 0)?;
+
+        Ok(self)
+    }
+
+    /// Insert a textbox shape into a worksheet cell at an offset.
+    ///
+    /// This method can be used to insert an Excel Textbox shape with text into
+    /// a worksheet cell at a pixel offset.
+    ///
+    /// See the [`Shape`] documentation for a detailed description of the
+    /// methods that can be used to configure the size and appearance of the
+    /// textbox.
+    ///
+    /// Note, no Excel shape other than Textbox is supported. See [Support for
+    /// other Excel shape
+    /// types](crate::Shape#support-for-other-excel-shape-types).
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape to a worksheet cell at
+    /// an offset.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_shape_with_offset.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape and add some text.
+    ///     let textbox = Shape::textbox().set_text("This is some text");
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape_with_offset(1, 1, &textbox, 10, 5)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_insert_shape_with_offset.png">
+    ///
+    pub fn insert_shape_with_offset(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        shape: &Shape,
+        x_offset: u32,
+        y_offset: u32,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let mut shape = shape.clone();
+        shape.x_offset = x_offset;
+        shape.y_offset = y_offset;
+
+        self.shapes.insert((row, col), shape);
 
         Ok(self)
     }
@@ -13917,8 +14061,6 @@ impl Worksheet {
         image_id: &mut u32,
         drawing_id: u32,
     ) {
-        let mut rel_ids: HashMap<String, u32> = HashMap::new();
-
         for (cell, image) in &self.images.clone() {
             let row = cell.0;
             let col = cell.1;
@@ -13940,11 +14082,12 @@ impl Worksheet {
                 let target = hyperlink.target();
                 let target_mode = hyperlink.target_mode();
 
-                let rel_id = match rel_ids.get(&hyperlink.url_link) {
+                let rel_id = match self.drawing_rel_ids.get(&hyperlink.url_link) {
                     Some(rel_id) => *rel_id,
                     None => {
-                        let rel_id = 1 + rel_ids.len() as u32;
-                        rel_ids.insert(hyperlink.url_link.clone(), rel_id);
+                        let rel_id = 1 + self.drawing_rel_ids.len() as u32;
+                        self.drawing_rel_ids
+                            .insert(hyperlink.url_link.clone(), rel_id);
 
                         // Store the linkage to the drawings rels file.
                         self.drawing_relationships.push((
@@ -13963,11 +14106,11 @@ impl Worksheet {
             }
 
             // Store the image references.
-            let rel_id = match rel_ids.get(&image.hash) {
+            let rel_id = match self.drawing_rel_ids.get(&image.hash) {
                 Some(rel_id) => *rel_id,
                 None => {
-                    let rel_id = 1 + rel_ids.len() as u32;
-                    rel_ids.insert(image.hash.clone(), rel_id);
+                    let rel_id = 1 + self.drawing_rel_ids.len() as u32;
+                    self.drawing_rel_ids.insert(image.hash.clone(), rel_id);
 
                     // Store the linkage to the drawings rels file.
                     let image_name =
@@ -14002,6 +14145,70 @@ impl Worksheet {
         ));
 
         self.has_drawing_object_linkage = true;
+    }
+
+    // Convert the shape dimensions into drawing dimensions and add them to
+    // the Drawing object. Also set the rel linkages between the files.
+    pub(crate) fn prepare_worksheet_shapes(&mut self, shape_id: u32, drawing_id: u32) {
+        let mut shape_id = shape_id;
+
+        for (cell, shape) in &self.shapes.clone() {
+            let row = cell.0;
+            let col = cell.1;
+            let mut drawing_hyperlink = None;
+
+            // Handle optional hyperlink in the shape.
+            if let Some(hyperlink) = &shape.url {
+                let mut hyperlink = hyperlink.clone();
+
+                let target = hyperlink.target();
+                let target_mode = hyperlink.target_mode();
+
+                let rel_id = match self.drawing_rel_ids.get(&hyperlink.url_link) {
+                    Some(rel_id) => *rel_id,
+                    None => {
+                        let rel_id = 1 + self.drawing_rel_ids.len() as u32;
+                        self.drawing_rel_ids
+                            .insert(hyperlink.url_link.clone(), rel_id);
+
+                        // Store the linkage to the drawings rels file.
+                        self.drawing_relationships.push((
+                            "hyperlink".to_string(),
+                            target,
+                            target_mode,
+                        ));
+
+                        rel_id
+                    }
+                };
+
+                hyperlink.rel_id = rel_id;
+
+                drawing_hyperlink = Some(hyperlink);
+            }
+
+            // Convert the shape dimensions to drawing dimensions and store
+            // the drawing object.
+            let mut drawing_info = self.position_object_emus(row, col, shape);
+            drawing_info.rel_id = shape_id;
+            drawing_info.url.clone_from(&drawing_hyperlink);
+            self.drawing.drawings.push(drawing_info);
+            self.drawing.shapes.push(shape.clone());
+
+            shape_id += 1;
+        }
+
+        // Store the linkage to the worksheets rels file.
+        if self.drawing_object_relationships.is_empty() {
+            let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
+            self.drawing_object_relationships.push((
+                "drawing".to_string(),
+                drawing_name,
+                String::new(),
+            ));
+
+            self.has_drawing_object_linkage = true;
+        }
     }
 
     // Set up images used in headers and footers. Excel handles these
@@ -14161,7 +14368,8 @@ impl Worksheet {
 
     // Convert the chart dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
-    pub(crate) fn prepare_worksheet_charts(&mut self, mut chart_id: u32, drawing_id: u32) -> u32 {
+    pub(crate) fn prepare_worksheet_charts(&mut self, chart_id: u32, drawing_id: u32) {
+        let mut chart_id = chart_id;
         for chart in self.charts.values_mut() {
             chart.id = chart_id;
             chart.add_axis_ids(chart_id);
@@ -14169,6 +14377,8 @@ impl Worksheet {
         }
 
         let mut rel_id = self.drawing_relationships.len() as u32;
+        self.drawing_rel_ids.insert("Chart".to_string(), rel_id);
+
         for (cell, chart) in &mut self.charts.clone() {
             let row = cell.0;
             let col = cell.1;
@@ -14198,8 +14408,6 @@ impl Worksheet {
                 String::new(),
             ));
         }
-
-        chart_id
     }
 
     // Set a unique table id for each table and also set the rel linkages
@@ -14467,14 +14675,15 @@ impl Worksheet {
         }
 
         self.rel_count = 0;
-        self.drawing.drawings.clear();
-        self.table_relationships.clear();
-        self.hyperlink_relationships.clear();
-        self.drawing_object_relationships.clear();
-        self.drawing_relationships.clear();
-        self.vml_drawing_relationships.clear();
         self.comment_relationships.clear();
+        self.drawing_object_relationships.clear();
+        self.drawing_rel_ids.clear();
+        self.drawing_relationships.clear();
+        self.drawing.drawings.clear();
         self.header_footer_vml_info.clear();
+        self.hyperlink_relationships.clear();
+        self.table_relationships.clear();
+        self.vml_drawing_relationships.clear();
     }
 
     // Check if any external relationships are required.

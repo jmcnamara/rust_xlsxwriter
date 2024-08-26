@@ -1771,6 +1771,7 @@ impl Workbook {
     fn prepare_drawings(&mut self) {
         let mut chart_id = 1;
         let mut drawing_id = 1;
+        let mut shape_id = 1;
         let mut image_id = self.embedded_images.len() as u32;
 
         // These are the image ids for each unique image file.
@@ -1787,11 +1788,20 @@ impl Workbook {
             }
 
             if !worksheet.charts.is_empty() {
-                chart_id = worksheet.prepare_worksheet_charts(chart_id, drawing_id);
+                worksheet.prepare_worksheet_charts(chart_id, drawing_id);
+                chart_id += worksheet.charts.len() as u32;
+            }
+
+            if !worksheet.shapes.is_empty() {
+                worksheet.prepare_worksheet_shapes(shape_id, drawing_id);
+                shape_id += worksheet.shapes.len() as u32;
             }
 
             // Increase the drawing number/id for image/chart file.
-            if !worksheet.images.is_empty() || !worksheet.charts.is_empty() {
+            if !worksheet.images.is_empty()
+                || !worksheet.charts.is_empty()
+                || !worksheet.shapes.is_empty()
+            {
                 drawing_id += 1;
             }
 

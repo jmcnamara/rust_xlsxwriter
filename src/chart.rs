@@ -6473,6 +6473,7 @@ impl IntoChartRange for &String {
 ///
 /// - [`ChartLine`]
 /// - [`ChartSolidFill`]
+/// - [`ChartGradientFill`]
 /// - [`ChartPatternFill`]
 ///
 /// In order to pass one of these sub-structs as a parameter you would normally
@@ -14373,7 +14374,7 @@ impl ChartSolidFill {
     /// Set the transparency of a solid fill.
     ///
     /// Set the transparency of a solid fill color for a Chart element. You must
-    /// also specify a line color in order for the transparency to be applied.
+    /// also specify a fill color in order for the transparency to be applied.
     ///
     /// # Parameters
     ///
@@ -17166,9 +17167,13 @@ impl ChartDataTable {
     ///
     /// - [`ChartFont::set_bold()`]
     /// - [`ChartFont::set_italic()`]
+    /// - [`ChartFont::set_color()`]
     /// - [`ChartFont::set_name()`]
     /// - [`ChartFont::set_size()`]
     /// - [`ChartFont::set_rotation()`]
+    /// - [`ChartFont::set_underline()`]
+    /// - [`ChartFont::set_strikethrough()`]
+    /// - [`ChartFont::set_right_to_left()`]
     ///
     /// See [`ChartFont`] for full details.
     ///
