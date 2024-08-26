@@ -6,7 +6,7 @@
 
 #![warn(missing_docs)]
 
-use crate::{static_regex, XlsxError, MAX_PARAMETER_LEN};
+use crate::{XlsxError, MAX_PARAMETER_LEN};
 
 const MAX_URL_LEN: usize = 2_080;
 
@@ -263,11 +263,13 @@ impl Url {
     // This method handles a variety of different string processing required for
     // links and targets associated with Excel's urls/hyperlinks.
     pub(crate) fn parse_url(&mut self) -> Result<(), XlsxError> {
-        let remote_file = static_regex!(r"^(\\\\|\w:)");
-        let url_protocol = static_regex!(r"^(ftp|http)s?://");
         let original_url = self.url_link.clone();
 
-        if url_protocol.is_match(&self.url_link) {
+        if self.url_link.starts_with("http://")
+            || self.url_link.starts_with("https://")
+            || self.url_link.starts_with("ftp://")
+            || self.url_link.starts_with("ftps://")
+        {
             // Handle web links like https://.
             self.link_type = HyperlinkType::Url;
 
@@ -302,13 +304,16 @@ impl Url {
             let link_path = self.url_link.replacen("file:///", "", 1);
             let link_path = link_path.replacen("file://", "", 1);
 
-            // Links to local files aren't prefixed with file:///.
-            if !remote_file.is_match(&link_path) {
+            // Links to relative file paths should be stored without file:///.
+            let is_relative_path = Self::relative_path(&link_path);
+            if is_relative_path {
                 self.url_link.clone_from(&link_path);
             }
 
+            // Links to relative file paths should continue to use Windows "\"
+            // path separator. Other paths should use "/".
             self.rel_link.clone_from(&self.url_link);
-            if !remote_file.is_match(&link_path) {
+            if is_relative_path {
                 self.rel_link = self.rel_link.replace('\\', "/");
             }
 
@@ -331,16 +336,14 @@ impl Url {
 
     // Escape hyperlink string variants.
     pub(crate) fn escape_strings(&mut self) {
-        let url_escape = static_regex!(r"%[0-9a-fA-F]{2}");
-
         // Escape any url characters in the url string.
-        if !url_escape.is_match(&self.url_link) {
+        if !Self::is_escaped(&self.url_link) {
             self.url_link = crate::xmlwriter::escape_url(&self.url_link).into();
         }
 
         // Escape the link used in the relationship file, except for internal
         // links which are generally sheet/cell locations.
-        if self.link_type != HyperlinkType::Internal && !url_escape.is_match(&self.rel_link) {
+        if self.link_type != HyperlinkType::Internal && !Self::is_escaped(&self.rel_link) {
             self.rel_link = crate::xmlwriter::escape_url(&self.rel_link).into();
         }
 
@@ -381,6 +384,43 @@ impl Url {
         }
 
         target_mode
+    }
+
+    // Check for relative paths like "file.xlsx" or "../file.xlsx" as anything that
+    // isn't an absolute path like "\\share\file.xlsx" or "C:\temp\file.xlsx".
+    pub(crate) fn relative_path(url: &str) -> bool {
+        // Check for Windows network share links.
+        if url.starts_with(r"\\") {
+            return false;
+        }
+
+        // Check for Windows path links like C:\temp\file.xlsx.
+        if let Some(position) = url.find(':') {
+            if position == 1 && url.starts_with(|c: char| c.is_ascii()) {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    // Check if a URL string is already HTML escaped.
+    pub(crate) fn is_escaped(url: &str) -> bool {
+        if !url.contains('%') {
+            return false;
+        }
+
+        url.contains("%25")
+            || url.contains("%22")
+            || url.contains("%20")
+            || url.contains("%3c")
+            || url.contains("%3e")
+            || url.contains("%5b")
+            || url.contains("%5d")
+            || url.contains("%5e")
+            || url.contains("%60")
+            || url.contains("%7b")
+            || url.contains("%7d")
     }
 }
 
