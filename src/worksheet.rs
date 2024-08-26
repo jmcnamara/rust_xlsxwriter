@@ -1222,7 +1222,7 @@ use crate::{
     ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRuleInternal,
     DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
     HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note, ObjectMovement,
-    ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
+    ProtectionOptions, Shape, Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -1347,6 +1347,7 @@ pub struct Worksheet {
     pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
     pub(crate) buttons: BTreeMap<(RowNum, ColNum), Button>,
     pub(crate) notes: BTreeMap<RowNum, BTreeMap<ColNum, Note>>,
+    pub(crate) shapes: BTreeMap<(RowNum, ColNum), Shape>,
     pub(crate) tables: Vec<Table>,
     pub(crate) has_embedded_image_descriptions: bool,
     pub(crate) embedded_images: Vec<Image>,
@@ -1595,6 +1596,7 @@ impl Worksheet {
             comment_relationships: vec![],
             vml_drawing_relationships: vec![],
             images: BTreeMap::new(),
+            shapes: BTreeMap::new(),
             drawing: Drawing::new(),
             image_types: [false; NUM_IMAGE_FORMATS],
             header_footer_images: [None, None, None, None, None, None],
@@ -5373,6 +5375,47 @@ impl Worksheet {
         }
 
         self.has_vml = true;
+
+        Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    pub fn insert_textbox(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        textbox: &Shape,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.insert_textbox_with_offset(row, col, textbox, 0, 0)?;
+
+        Ok(self)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    pub fn insert_textbox_with_offset(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        textbox: &Shape,
+        x_offset: u32,
+        y_offset: u32,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check row and columns are in the allowed range.
+        if !self.check_dimensions_only(row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        let mut textbox = textbox.clone();
+        textbox.x_offset = x_offset;
+        textbox.y_offset = y_offset;
+
+        self.shapes.insert((row, col), textbox);
 
         Ok(self)
     }
@@ -14004,6 +14047,70 @@ impl Worksheet {
         self.has_drawing_object_linkage = true;
     }
 
+    // Convert the shape dimensions into drawing dimensions and add them to
+    // the Drawing object. Also set the rel linkages between the files.
+    pub(crate) fn prepare_worksheet_shapes(&mut self, shape_id: u32, drawing_id: u32) {
+        let mut rel_ids: HashMap<String, u32> = HashMap::new();
+        let mut shape_id = shape_id;
+
+        for (cell, shape) in &self.shapes.clone() {
+            let row = cell.0;
+            let col = cell.1;
+            let mut drawing_hyperlink = None;
+
+            // Handle optional hyperlink in the shape.
+            if let Some(hyperlink) = &shape.url {
+                let mut hyperlink = hyperlink.clone();
+
+                let target = hyperlink.target();
+                let target_mode = hyperlink.target_mode();
+
+                let rel_id = match rel_ids.get(&hyperlink.url_link) {
+                    Some(rel_id) => *rel_id,
+                    None => {
+                        let rel_id = 1 + rel_ids.len() as u32;
+                        rel_ids.insert(hyperlink.url_link.clone(), rel_id);
+
+                        // Store the linkage to the drawings rels file.
+                        self.drawing_relationships.push((
+                            "hyperlink".to_string(),
+                            target,
+                            target_mode,
+                        ));
+
+                        rel_id
+                    }
+                };
+
+                hyperlink.rel_id = rel_id;
+
+                drawing_hyperlink = Some(hyperlink);
+            }
+
+            // Convert the shape dimensions to drawing dimensions and store
+            // the drawing object.
+            let mut drawing_info = self.position_object_emus(row, col, shape);
+            drawing_info.rel_id = shape_id;
+            drawing_info.url.clone_from(&drawing_hyperlink);
+            drawing_info.format.clone_from(&shape.format);
+            self.drawing.drawings.push(drawing_info);
+
+            shape_id += 1;
+        }
+
+        // Store the linkage to the worksheets rels file.
+        if self.drawing_object_relationships.is_empty() {
+            let drawing_name = format!("../drawings/drawing{drawing_id}.xml");
+            self.drawing_object_relationships.push((
+                "drawing".to_string(),
+                drawing_name,
+                String::new(),
+            ));
+
+            self.has_drawing_object_linkage = true;
+        }
+    }
+
     // Set up images used in headers and footers. Excel handles these
     // differently from worksheet images and stores them in a VML file rather
     // than an Drawing file.
@@ -14161,7 +14268,8 @@ impl Worksheet {
 
     // Convert the chart dimensions into drawing dimensions and add them to the
     // Drawing object. Also set the rel linkages between the files.
-    pub(crate) fn prepare_worksheet_charts(&mut self, mut chart_id: u32, drawing_id: u32) -> u32 {
+    pub(crate) fn prepare_worksheet_charts(&mut self, chart_id: u32, drawing_id: u32) {
+        let mut chart_id = chart_id;
         for chart in self.charts.values_mut() {
             chart.id = chart_id;
             chart.add_axis_ids(chart_id);
@@ -14198,8 +14306,6 @@ impl Worksheet {
                 String::new(),
             ));
         }
-
-        chart_id
     }
 
     // Set a unique table id for each table and also set the rel linkages
@@ -14405,6 +14511,7 @@ impl Worksheet {
             drawing_type: object.drawing_type(),
             rel_id: 0,
             url: None,
+            format: None,
         }
     }
 

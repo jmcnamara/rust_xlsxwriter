@@ -213,6 +213,7 @@ mod rich_value;
 mod rich_value_rel;
 mod rich_value_structure;
 mod rich_value_types;
+mod shape;
 mod shared_strings;
 mod shared_strings_table;
 mod styles;
@@ -264,6 +265,9 @@ pub use comment::*;
 
 #[doc(hidden)]
 pub use conditional_format::*;
+
+#[doc(hidden)]
+pub use shape::*;
 
 #[doc(hidden)]
 pub use sparkline::*;
