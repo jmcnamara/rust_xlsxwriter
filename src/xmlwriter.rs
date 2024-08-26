@@ -8,7 +8,6 @@
 
 mod tests;
 
-use crate::static_regex;
 use std::borrow::Cow;
 use std::io::{Cursor, Write};
 use std::str;
@@ -293,9 +292,37 @@ where
 // Excel escapes control characters with _xHHHH_ and also escapes any literal
 // strings of that type by encoding the leading underscore. So "\0" -> _x0000_
 // and "_x0000_" -> _x005F_x0000_.
-fn escape_xml_escapes(si_string: &str) -> Cow<str> {
-    let xml_escape = static_regex!("(_x[0-9a-fA-F]{4}_)");
-    xml_escape.replace_all(si_string, "_x005F$1")
+fn escape_xml_escapes(original: &str) -> Cow<str> {
+    if original.contains("_x00") {
+        let string_end = original.len();
+        let escape_length = "_x0000_".len();
+        let mut escaped_string = original.to_string();
+
+        // Match from right so we can escape target string at the same indices.
+        let matches: Vec<_> = original.rmatch_indices("_x00").collect();
+
+        for (index, _) in matches {
+            if index + escape_length > string_end {
+                continue;
+            }
+
+            // Check that the digits in _xABCD_ are a valid hex code.
+            if original[index + 2..index + 6]
+                .chars()
+                .all(|c| c.is_ascii_hexdigit())
+            {
+                escaped_string.replace_range(index..index, "_x005F");
+            }
+        }
+
+        if escaped_string == original {
+            return Cow::Borrowed(original);
+        }
+
+        return Cow::Owned(escaped_string);
+    }
+
+    Cow::Borrowed(original)
 }
 
 // Trait to write attribute tuple values to an XML file.
