@@ -47,7 +47,7 @@ mod worksheet_tests {
     fn verify_header_footer_images() {
         let strings = [
             ("", HeaderImagePosition::Left, false),
-            ("&L&[Picture]", HeaderImagePosition::Left, true),
+            ("&L&G", HeaderImagePosition::Left, true),
             ("&R&[Picture]", HeaderImagePosition::Right, true),
             ("&C&[Picture]", HeaderImagePosition::Center, true),
             ("&R&[Picture]", HeaderImagePosition::Left, false),
@@ -61,6 +61,17 @@ mod worksheet_tests {
                 "&L&[Picture]&C&[Picture]",
                 HeaderImagePosition::Right,
                 false,
+            ),
+            ("&L&[Picture]", HeaderImagePosition::Left, true),
+            (
+                "&L&[Picture]&C&[Picture]&R&[Picture]",
+                HeaderImagePosition::Left,
+                true,
+            ),
+            (
+                "&C&[Picture]&L&G&R&[Picture]",
+                HeaderImagePosition::Left,
+                true,
             ),
         ];
 

@@ -1218,11 +1218,11 @@ use crate::styles::Styles;
 use crate::vml::VmlInfo;
 use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
 use crate::{
-    static_regex, utility, Button, Chart, ChartEmptyCells, ChartRangeCacheData,
-    ChartRangeCacheDataType, Color, ConditionalFormat, DataValidation, DataValidationErrorStyle,
-    DataValidationRuleInternal, DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria,
-    FilterData, FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note,
-    ObjectMovement, ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
+    utility, Button, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType, Color,
+    ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRuleInternal,
+    DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
+    HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note, ObjectMovement,
+    ProtectionOptions, Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -14562,22 +14562,52 @@ impl Worksheet {
     // Check that there is a header/footer &[Picture] variable in the correct
     // position to match the corresponding image object.
     fn verify_header_footer_image(string: &str, position: &HeaderImagePosition) -> bool {
-        let left = static_regex!(r"(&[L].*)(:?&[CR])?");
-        let right = static_regex!(r"(&[R].*)(:?&[LC])?");
-        let center = static_regex!(r"(&[C].*)(:?&[LR])?");
+        match position {
+            HeaderImagePosition::Left => {
+                let segments: Vec<&str> = string.split("&L").collect();
+                if segments.len() == 2 {
+                    let right_segment = segments[1];
+                    let segments: Vec<&str> = right_segment.split("&C").collect();
+                    let left_segment = segments[0];
 
-        let caps = match position {
-            HeaderImagePosition::Left => left.captures(string),
-            HeaderImagePosition::Right => right.captures(string),
-            HeaderImagePosition::Center => center.captures(string),
-        };
+                    let segments: Vec<&str> = left_segment.split("&R").collect();
+                    let left_segment = segments[0];
 
-        match caps {
-            Some(caps) => {
-                let segment = caps.get(1).unwrap().as_str();
-                segment.contains("&[Picture]") || segment.contains("&G")
+                    left_segment.contains("&[Picture]") || left_segment.contains("&G")
+                } else {
+                    false
+                }
             }
-            None => false,
+            HeaderImagePosition::Right => {
+                let segments: Vec<&str> = string.split("&R").collect();
+                if segments.len() == 2 {
+                    let right_segment = segments[1];
+                    let segments: Vec<&str> = right_segment.split("&C").collect();
+                    let left_segment = segments[0];
+
+                    let segments: Vec<&str> = left_segment.split("&L").collect();
+                    let left_segment = segments[0];
+
+                    left_segment.contains("&[Picture]") || left_segment.contains("&G")
+                } else {
+                    false
+                }
+            }
+            HeaderImagePosition::Center => {
+                let segments: Vec<&str> = string.split("&C").collect();
+                if segments.len() == 2 {
+                    let right_segment = segments[1];
+                    let segments: Vec<&str> = right_segment.split("&L").collect();
+                    let left_segment = segments[0];
+
+                    let segments: Vec<&str> = left_segment.split("&R").collect();
+                    let left_segment = segments[0];
+
+                    left_segment.contains("&[Picture]") || left_segment.contains("&G")
+                } else {
+                    false
+                }
+            }
         }
     }
 
