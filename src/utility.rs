@@ -27,7 +27,6 @@
 #![warn(missing_docs)]
 mod tests;
 
-use crate::static_regex;
 #[cfg(feature = "serde")]
 use crate::IntoExcelDateTime;
 use crate::COL_MAX;
@@ -442,11 +441,21 @@ pub(crate) fn quote_sheetname(sheetname: &str) -> String {
     let col_max = u64::from(COL_MAX);
     let row_max = u64::from(ROW_MAX);
 
-    let quote_rule1 = static_regex!(r"[^\w\.\p{Emoji}]|[#]");
-    let quote_rule2 = static_regex!(r"^[\d\.\p{Emoji}]");
-    let quote_rule3 = static_regex!(r"^([A-Z]{1,3})(\d+)$");
-    let quote_rule4_row = static_regex!(r"^R(\d+)");
-    let quote_rule4_column = static_regex!(r"^R?C(\d+)");
+    // When possible split the sheetname into a leading string and a trailing
+    // number. We use these to look for A1 and R1C1 style cell references.
+    let (string_part, number_part) = match sheetname.find(|c: char| c.is_ascii_digit()) {
+        Some(position) => (
+            (sheetname[..position]).to_uppercase(),
+            (sheetname[position..]).to_uppercase(),
+        ),
+        None => (String::new(), "0".to_string()),
+    };
+
+    // The number part of the sheet name can have trailing non-digit characters
+    // and still be a valid R1C1 match. However, to test the R1C1 row/col part
+    // we need to extract just the number part.
+    let mut number_parts = number_part.split(|c: char| !c.is_ascii_digit());
+    let rc_number_part = number_parts.next().unwrap_or_default();
 
     // Ignore strings that are already quoted.
     if !sheetname.starts_with('\'') {
@@ -454,13 +463,17 @@ pub(crate) fn quote_sheetname(sheetname: &str) -> String {
         // Rule 1. Sheet names that contain anything other than \w and "."
         // characters must be quoted.
         // --------------------------------------------------------------------
-        if quote_rule1.is_match(&sheetname) {
+
+        if !sheetname
+            .chars()
+            .all(|c| c.is_alphanumeric() || c == '_' || c == '.')
+        {
             requires_quoting = true;
         }
         // --------------------------------------------------------------------
         // Rule 2. Sheet names that start with a digit or "." must be quoted.
         // --------------------------------------------------------------------
-        else if quote_rule2.is_match(&sheetname) {
+        else if sheetname.starts_with(|c: char| c.is_ascii_digit() || c == '.') {
             requires_quoting = true;
         }
         // --------------------------------------------------------------------
@@ -468,15 +481,13 @@ pub(crate) fn quote_sheetname(sheetname: &str) -> String {
         // Valid means that the row and column range values must also be within
         // Excel row and column limits.
         // --------------------------------------------------------------------
-        else if let Some(caps) = quote_rule3.captures(&uppercase_sheetname) {
-            let col = column_name_to_number(caps.get(1).unwrap().as_str());
+        else if (1..=3).contains(&string_part.len())
+            && number_part.chars().all(|c| c.is_ascii_digit())
+        {
+            let col = column_name_to_number(&string_part);
             let col = u64::from(col + 1);
-            let row = caps
-                .get(2)
-                .unwrap()
-                .as_str()
-                .parse::<u64>()
-                .unwrap_or_default();
+
+            let row = number_part.parse::<u64>().unwrap_or_default();
 
             if row > 0 && row <= row_max && col <= col_max {
                 requires_quoting = true;
@@ -494,13 +505,8 @@ pub(crate) fn quote_sheetname(sheetname: &str) -> String {
         // --------------------------------------------------------------------
 
         // Rule 4a. Check for sheet names that start with R1 style references.
-        else if let Some(caps) = quote_rule4_row.captures(&uppercase_sheetname) {
-            let row = caps
-                .get(1)
-                .unwrap()
-                .as_str()
-                .parse::<u64>()
-                .unwrap_or_default();
+        else if string_part == "R" {
+            let row = rc_number_part.parse::<u64>().unwrap_or_default();
 
             if row > 0 && row <= row_max {
                 requires_quoting = true;
@@ -508,13 +514,8 @@ pub(crate) fn quote_sheetname(sheetname: &str) -> String {
         }
         // Rule 4b. Check for sheet names that start with C1 or RC1 style
         // references.
-        else if let Some(caps) = quote_rule4_column.captures(&uppercase_sheetname) {
-            let col = caps
-                .get(1)
-                .unwrap()
-                .as_str()
-                .parse::<u64>()
-                .unwrap_or_default();
+        else if string_part == "RC" || string_part == "C" {
+            let col = rc_number_part.parse::<u64>().unwrap_or_default();
 
             if col > 0 && col <= col_max {
                 requires_quoting = true;
@@ -640,8 +641,6 @@ pub(crate) fn validate_sheetname(name: &str, message: &str) -> Result<(), XlsxEr
 
 // Internal function to validate VBA code names.
 pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
-    let non_word_char = static_regex!(r"\W");
-
     // Check that the  name isn't blank.
     if name.is_empty() {
         return Err(XlsxError::VbaNameError(
@@ -657,7 +656,7 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
     }
 
     // Check for anything other than letters, numbers, and underscores.
-    if non_word_char.is_match(name) {
+    if !name.chars().all(|c| c.is_alphanumeric() || c == '_') {
         return Err(XlsxError::VbaNameError(
             "VBA name contains non-word character: {name}".to_string(),
         ));

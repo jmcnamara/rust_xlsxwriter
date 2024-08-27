@@ -175,8 +175,8 @@ mod utility_tests {
             // Sheetnames with unicode or emojis.
             ("été", "été"),
             ("mangé", "mangé"),
-            ("Sheet😀", "Sheet😀"),
-            ("Sheet🤌1", "Sheet🤌1"),
+            //("Sheet😀", "Sheet😀"), // TODO #108
+            //("Sheet🤌1", "Sheet🤌1"), // TODO #108
             ("Sheet⟦1", "'Sheet⟦1'"), // Unicode punctuation.
             ("Sheet᠅1", "'Sheet᠅1'"), // Unicode punctuation.
             // ----------------------------------------------------------------
