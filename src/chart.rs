@@ -759,8 +759,8 @@ use crate::drawing::{DrawingObject, DrawingType};
 use crate::utility::{self, ToXmlBoolean};
 
 use crate::{
-    static_regex, xmlwriter::XMLWriter, ColNum, Color, IntoExcelDateTime, ObjectMovement, RowNum,
-    XlsxError, COL_MAX, ROW_MAX,
+    xmlwriter::XMLWriter, ColNum, Color, IntoExcelDateTime, ObjectMovement, RowNum, XlsxError,
+    COL_MAX, ROW_MAX,
 };
 
 #[derive(Clone)]
@@ -8347,37 +8347,69 @@ impl ChartRange {
     /// ```
     ///
     pub fn new_from_string(range_string: &str) -> ChartRange {
-        let chart_cell = static_regex!(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+)");
-        let chart_range = static_regex!(r"^=?([^!]+)'?!\$?(\w+)\$?(\d+):\$?(\w+)\$?(\d+)");
 
+        // Default values. If the string parsing fails these values will remain
+        // the same and it will flag an invalid result.
         let mut sheet_name = "";
         let mut first_row = 0;
         let mut first_col = 0;
         let mut last_row = 0;
         let mut last_col = 0;
 
-        if let Some(caps) = chart_range.captures(range_string) {
-            sheet_name = caps.get(1).unwrap().as_str();
-            first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
-            last_row = caps.get(5).unwrap().as_str().parse::<u32>().unwrap() - 1;
-            first_col = utility::column_name_to_number(caps.get(2).unwrap().as_str());
-            last_col = utility::column_name_to_number(caps.get(4).unwrap().as_str());
-        } else if let Some(caps) = chart_cell.captures(range_string) {
-            sheet_name = caps.get(1).unwrap().as_str();
-            first_row = caps.get(3).unwrap().as_str().parse::<u32>().unwrap() - 1;
-            first_col = utility::column_name_to_number(caps.get(2).unwrap().as_str());
-            last_row = first_row;
-            last_col = first_col;
+        // Parse the chart range string into the worksheet name and range parts.
+        if let Some(position) = range_string.find('!') {
+            let range = &range_string[position + 1..].replace('$', "");
+
+            if utility::is_valid_range(range) {
+                sheet_name = &range_string[..position];
+                match range.find(':') {
+                    // Multi-cell range like A1:A5.
+                    Some(position) => {
+                        let first_cell = &range[..position];
+                        let last_cell = &range[position + 1..];
+
+                        let (first_col_string, first_row_string) =
+                            utility::split_cell_reference(first_cell);
+                        let (last_col_string, last_row_string) =
+                            utility::split_cell_reference(last_cell);
+
+                        first_row = first_row_string.parse::<u32>().unwrap_or_default();
+                        first_row = first_row.saturating_sub(1);
+
+                        last_row = last_row_string.parse::<u32>().unwrap_or_default();
+                        last_row = last_row.saturating_sub(1);
+
+                        first_col = utility::column_name_to_number(&first_col_string);
+                        last_col = utility::column_name_to_number(&last_col_string);
+                    }
+                    None => {
+                        // Single-cell range like A1.
+                        let (first_col_string, first_row_string) =
+                            utility::split_cell_reference(range);
+
+                        first_row = first_row_string.parse::<u32>().unwrap_or_default();
+                        first_row = first_row.saturating_sub(1);
+
+                        first_col = utility::column_name_to_number(&first_col_string);
+                        last_row = first_row;
+                        last_col = first_col;
+                    }
+                }
+            }
         }
 
-        let sheet_name: String = if sheet_name.starts_with('\'') && sheet_name.ends_with('\'') {
-            sheet_name[1..sheet_name.len() - 1].to_string()
-        } else {
-            sheet_name.to_string()
-        };
+        // Clean up the sheet name.
+        if sheet_name.starts_with('=') {
+            sheet_name = &sheet_name[1..];
+        }
+
+        // Strip the quotes from quoted sheet names.
+        if sheet_name.starts_with('\'') && sheet_name.ends_with('\'') {
+            sheet_name = &sheet_name[1..sheet_name.len() - 1];
+        }
 
         ChartRange {
-            sheet_name,
+            sheet_name: sheet_name.to_string(),
             first_row,
             first_col,
             last_row,

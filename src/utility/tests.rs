@@ -512,4 +512,15 @@ mod utility_tests {
         let result = utility::validate_vba_name(name);
         assert!(matches!(result, Err(XlsxError::VbaNameError(_))));
     }
+
+    #[test]
+    fn check_is_valid_range() {
+        assert_eq!(true, utility::is_valid_range("A1"));
+        assert_eq!(true, utility::is_valid_range("A1:B3"));
+
+        assert_eq!(false, utility::is_valid_range(""));
+        assert_eq!(false, utility::is_valid_range("1A"));
+        assert_eq!(false, utility::is_valid_range("a1"));
+        assert_eq!(false, utility::is_valid_range("1:3"));
+    }
 }

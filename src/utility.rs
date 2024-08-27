@@ -95,8 +95,11 @@ pub fn column_number_to_name(col_num: ColNum) -> String {
 /// ```
 ///
 pub fn column_name_to_number(column: &str) -> ColNum {
-    let mut col_num = 0;
+    if column.is_empty() {
+        return 0;
+    }
 
+    let mut col_num = 0;
     for char in column.chars() {
         col_num = (col_num * 26) + (char as u16 - 'A' as u16 + 1);
     }
@@ -441,15 +444,9 @@ pub(crate) fn quote_sheetname(sheetname: &str) -> String {
     let col_max = u64::from(COL_MAX);
     let row_max = u64::from(ROW_MAX);
 
-    // When possible split the sheetname into a leading string and a trailing
-    // number. We use these to look for A1 and R1C1 style cell references.
-    let (string_part, number_part) = match sheetname.find(|c: char| c.is_ascii_digit()) {
-        Some(position) => (
-            (sheetname[..position]).to_uppercase(),
-            (sheetname[position..]).to_uppercase(),
-        ),
-        None => (String::new(), "0".to_string()),
-    };
+    // Split sheetnames that look like A1 and R1C1 style cell references into a
+    // leading string and a trailing number.
+    let (string_part, number_part) = split_cell_reference(&sheetname);
 
     // The number part of the sheet name can have trailing non-digit characters
     // and still be a valid R1C1 match. However, to test the R1C1 row/col part
@@ -549,6 +546,43 @@ pub(crate) fn unquote_sheetname(sheetname: &str) -> String {
     } else {
         sheetname.to_string()
     }
+}
+
+// Split sheetnames that look like A1 and R1C1 style cell references into a
+// leading string and a trailing number.
+pub(crate) fn split_cell_reference(sheetname: &str) -> (String, String) {
+    match sheetname.find(|c: char| c.is_ascii_digit()) {
+        Some(position) => (
+            (sheetname[..position]).to_uppercase(),
+            (sheetname[position..]).to_uppercase(),
+        ),
+        None => (String::new(), String::new()),
+    }
+}
+
+// Check that a range string like "A1" or "A1:B3" are valid. This function
+// assumes that the '$' absolute anchor has already been stripped.
+pub(crate) fn is_valid_range(range: &str) -> bool {
+    if range.is_empty() {
+        return false;
+    }
+
+    // The range should start with a letter and end in a number.
+    if !range.starts_with(|c: char| c.is_ascii_uppercase())
+        || !range.ends_with(|c: char| c.is_ascii_digit())
+    {
+        return false;
+    }
+
+    // The range should only include the characters 'A-Z', '0-9' and ':'
+    if !range
+        .chars()
+        .all(|c: char| c.is_ascii_uppercase() || c.is_ascii_digit() || c == ':')
+    {
+        return false;
+    }
+
+    true
 }
 
 /// Check that a worksheet name is valid in Excel.
