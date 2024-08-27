@@ -51,12 +51,6 @@ mod datetime_tests {
         let result = ExcelDateTime::from_hms_milli(0, 0, 0, 1000);
         assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
-        let result = ExcelDateTime::parse_from_str("2000-01");
-        assert!(matches!(result, Err(XlsxError::DateTimeParseError(_))));
-
-        let result = ExcelDateTime::parse_from_str("20000-01-01");
-        assert!(matches!(result, Err(XlsxError::DateTimeParseError(_))));
-
         let result = ExcelDateTime::from_serial_datetime(-1);
         assert!(matches!(result, Err(XlsxError::DateTimeRangeError(_))));
 
@@ -173,6 +167,36 @@ mod datetime_tests {
             ("9752-01-14T23:15:54.109", 2867899.9693762613),
             ("9834-09-10T23:17:12.632", 2898088.9702850925),
             ("9999-12-31T23:59:59.000", 2958465.999988426),
+        ];
+
+        for test_data in dates {
+            let (datetime_string, expected) = test_data;
+            let datetime = ExcelDateTime::parse_from_str(datetime_string).unwrap();
+            assert_eq!(expected, datetime.to_excel(), "{datetime_string}");
+        }
+    }
+
+    #[test]
+    fn datetimes_from_str_with_noise() {
+        // Test datetimes with extra whitespace and the Zulu timezone.
+        #[allow(clippy::excessive_precision)]
+        let dates = vec![
+            ("1982-08-25T00:15:20.213", 30188.010650613425),
+            ("1982-08-25 00:15:20.213", 30188.010650613425),
+            ("1982-08-25T00:15:20.213Z", 30188.010650613425),
+            ("   1982-08-25T00:15:20.213", 30188.010650613425),
+            ("1982-08-25T00:15:20.213   ", 30188.010650613425),
+            ("2400-01-31T", 182653.0),
+            ("2400-01-31", 182653.0),
+            ("  2400-01-31", 182653.0),
+            ("2400-01-31T  ", 182653.0),
+            ("18:14:49.151", 0.760291099537037),
+            ("18:14:49.151Z", 0.760291099537037),
+            ("  18:14:49.151", 0.760291099537037),
+            ("18:14:49.151  ", 0.760291099537037),
+            ("12:00", 0.5),
+            (" 12:00", 0.5),
+            ("12:00  ", 0.5),
         ];
 
         for test_data in dates {

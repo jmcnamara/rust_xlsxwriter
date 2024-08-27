@@ -8347,7 +8347,6 @@ impl ChartRange {
     /// ```
     ///
     pub fn new_from_string(range_string: &str) -> ChartRange {
-
         // Default values. If the string parsing fails these values will remain
         // the same and it will flag an invalid result.
         let mut sheet_name = "";

@@ -20,7 +20,6 @@ use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
 )))]
 use std::time::SystemTime;
 
-use crate::static_regex;
 use crate::XlsxError;
 
 const DAY_SECONDS: u64 = 24 * 60 * 60;
@@ -241,42 +240,67 @@ impl ExcelDateTime {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/datetime_parse_from_str.png">
     ///
+    #[allow(clippy::get_first)]
     pub fn parse_from_str(datetime: &str) -> Result<ExcelDateTime, XlsxError> {
-        let date_regex = static_regex!(r"\b(\d\d\d\d)-(\d\d)-(\d\d)");
-        let time_regex = static_regex!(r"(\d+):(\d\d)(:(\d\d(\.\d+)?))?");
+        let date_parts: Vec<&str> = datetime.trim().split(&['-', 'T', 'Z', ' ', ':']).collect();
 
-        let mut matched = false;
+        // Match date and optional time.
+        if datetime.contains('-') {
+            let year = match date_parts.get(0) {
+                Some(token) => token.parse::<u16>().unwrap_or_default(),
+                None => 0,
+            };
 
-        let mut dt = match date_regex.captures(datetime) {
-            Some(caps) => {
-                let year = caps.get(1).unwrap().as_str().parse::<u16>().unwrap();
-                let month = caps.get(2).unwrap().as_str().parse::<u8>().unwrap();
-                let day = caps.get(3).unwrap().as_str().parse::<u8>().unwrap();
+            let month = match date_parts.get(1) {
+                Some(token) => token.parse::<u8>().unwrap_or_default(),
+                None => 0,
+            };
 
-                matched = true;
-                ExcelDateTime::from_ymd(year, month, day)
-            }
-            None => Ok(ExcelDateTime::default()),
-        };
+            let day = match date_parts.get(2) {
+                Some(token) => token.parse::<u8>().unwrap_or_default(),
+                None => 0,
+            };
 
-        if let Some(caps) = time_regex.captures(datetime) {
-            let hour = caps.get(1).unwrap().as_str().parse::<u16>().unwrap();
-            let min = caps.get(2).unwrap().as_str().parse::<u8>().unwrap();
+            let hour = match date_parts.get(3) {
+                Some(token) => token.parse::<u16>().unwrap_or_default(),
+                None => 0,
+            };
 
-            let sec = match caps.get(3) {
-                Some(_) => caps.get(4).unwrap().as_str().parse::<f64>().unwrap(),
+            let min = match date_parts.get(4) {
+                Some(token) => token.parse::<u8>().unwrap_or_default(),
+                None => 0,
+            };
+
+            let sec = match date_parts.get(5) {
+                Some(token) => token.parse::<f64>().unwrap_or_default(),
                 None => 0.0,
             };
 
-            matched = true;
-            dt = dt.unwrap().and_hms(hour, min, sec);
+            Ok(ExcelDateTime::from_ymd(year, month, day)?.and_hms(hour, min, sec)?)
         }
+        // Match time only.
+        else if datetime.contains(':') {
+            let hour = match date_parts.get(0) {
+                Some(token) => token.parse::<u16>().unwrap_or_default(),
+                None => 0,
+            };
 
-        if !matched {
-            return Err(XlsxError::DateTimeParseError(datetime.to_string()));
+            let min = match date_parts.get(1) {
+                Some(token) => token.parse::<u8>().unwrap_or_default(),
+                None => 0,
+            };
+
+            let sec = match date_parts.get(2) {
+                Some(token) => token.parse::<f64>().unwrap_or_default(),
+                None => 0.0,
+            };
+
+            Ok(ExcelDateTime::from_hms(hour, min, sec)?)
         }
-
-        dt
+        // No match.
+        else {
+            Err(XlsxError::DateTimeParseError(datetime.to_string()))
+        }
     }
 
     /// Create a `ExcelDateTime` instance from years, months and days.
