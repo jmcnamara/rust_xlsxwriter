@@ -8,9 +8,7 @@
 
 mod tests;
 
-use std::borrow::Cow;
-
-use crate::static_regex;
+use std::{collections::HashMap, sync::OnceLock};
 
 /// The `Formula` struct is used to define a worksheet formula.
 ///
@@ -775,10 +773,11 @@ use crate::static_regex;
 ///
 #[derive(Clone, PartialEq)]
 pub struct Formula {
-    formula_string: String,
+    pub(crate) formula_string: String,
+    pub(crate) has_dynamic_function: bool,
+    pub(crate) result: Box<str>,
     expand_future_functions: bool,
     expand_table_functions: bool,
-    pub(crate) result: Box<str>,
 }
 
 impl Formula {
@@ -788,12 +787,36 @@ impl Formula {
     ///
     /// `formula` - A string like type representing an Excel formula.
     ///
-    pub fn new(formula: impl Into<String>) -> Formula {
+    pub fn new(formula: impl AsRef<str>) -> Formula {
+        // Remove array formula braces and the leading = if they exist.
+        let mut formula = formula.as_ref();
+        if let Some(stripped) = formula.strip_prefix('{') {
+            formula = stripped;
+        }
+        if let Some(stripped) = formula.strip_prefix('=') {
+            formula = stripped;
+        }
+        if let Some(stripped) = formula.strip_suffix('}') {
+            formula = stripped;
+        }
+
+        // We need to escape future functions in a formula string. If the user
+        // has already done this we simply copy the string. In both cases we
+        // need to determine if it contains dynamic functions.
+        let (formula_string, has_dynamic_function) = if formula.contains("_xlfn.") {
+            // Already escaped.
+            Self::copy_escaped_formula(formula)
+        } else {
+            // Needs escaping.
+            Self::escape_formula(formula)
+        };
+
         Formula {
-            formula_string: formula.into(),
+            formula_string,
+            has_dynamic_function,
+            result: Box::from(""),
             expand_future_functions: false,
             expand_table_functions: false,
-            result: Box::from(""),
         }
     }
 
@@ -940,86 +963,343 @@ impl Formula {
         self
     }
 
-    // Check of a dynamic function/formula.
-    pub(crate) fn is_dynamic_function(&self) -> bool {
-        let dynamic_function = static_regex!(
-            r"\b(ANCHORARRAY|BYCOL|BYROW|CHOOSECOLS|CHOOSEROWS|DROP|EXPAND|FILTER|HSTACK|LAMBDA|MAKEARRAY|MAP|RANDARRAY|REDUCE|SCAN|SEQUENCE|SINGLE|SORT|SORTBY|SWITCH|TAKE|TEXTSPLIT|TOCOL|TOROW|UNIQUE|VSTACK|WRAPCOLS|WRAPROWS|XLOOKUP)\("
-        );
+    // Prefix any "future" functions in a formula with "_xlfn.". We parse the
+    // string to avoid replacements in string literal within the formula.
+    fn escape_formula(formula: &str) -> (String, bool) {
+        let mut start_position = 0;
+        let mut in_function = false;
+        let mut in_string_literal = false;
+        let mut has_dynamic_function = false;
+        let mut escaped_formula = String::with_capacity(formula.len());
 
-        dynamic_function.is_match(&self.formula_string)
-    }
+        for (current_position, char) in formula.char_indices() {
+            // Match the start/end of string literals. We track these to avoid
+            // escaping function names in strings. In Excel a double quote in a
+            // string literal is doubled, so this will also match escapes.
+            if char == '"' {
+                in_string_literal = !in_string_literal;
+            }
 
-    // Utility method to optionally strip equal sign and array braces from a
-    // formula and also expand out future and dynamic array formulas.
-    pub(crate) fn expand_formula(&self, global_expand_future_functions: bool) -> Box<str> {
-        let mut formula = self.formula_string.as_str();
+            // Copy the string literal.
+            if in_string_literal {
+                escaped_formula.push(char);
+                continue;
+            }
 
-        // Remove array formula braces and the leading = if they exist.
-        if let Some(stripped) = formula.strip_prefix('{') {
-            formula = stripped;
+            // Function names are comprised of "A-Z", "0-9" and ".".
+            let is_function_char =
+                char.is_ascii_uppercase() || char.is_ascii_digit() || char == '.';
+
+            // Simple state machine where we are either accumulating possible
+            // function names in a buffer for evaluation, or copying non-function
+            // name characters.
+            if in_function {
+                if !is_function_char {
+                    let token = &formula[start_position..current_position];
+
+                    // If the first non function char is an opening bracket then we
+                    // have found a function name.
+                    if char == '(' {
+                        // Check if function is an Excel "future" function.
+                        if let Some(function_type) = Self::future_functions(token) {
+                            // Add the future function prefix.
+                            escaped_formula.push_str("_xlfn.");
+
+                            // Some functions have an additional prefix.
+                            if *function_type == 2 {
+                                escaped_formula.push_str("_xlws.");
+                            }
+
+                            // Check if the function is "dynamic".
+                            has_dynamic_function |= *function_type > 0;
+                        }
+                    }
+
+                    // Copy the token, whether it is a function name or not.
+                    escaped_formula.push_str(token);
+                    escaped_formula.push(char);
+                    in_function = false;
+                }
+            } else if is_function_char {
+                // Match the start of a possible function name.
+                start_position = current_position;
+                in_function = true;
+            } else {
+                escaped_formula.push(char);
+            }
         }
-        if let Some(stripped) = formula.strip_prefix('=') {
-            formula = stripped;
-        }
-        if let Some(stripped) = formula.strip_suffix('}') {
-            formula = stripped;
-        }
 
-        // Exit if formula is already expanded by the user.
-        if formula.contains("_xlfn.") {
-            return Box::from(formula);
+        // Clean up any trailing buffer that wasn't a function.
+        if in_function {
+            escaped_formula.push_str(&formula[start_position..]);
         }
 
-        // Expand dynamic formulas.
-        let escaped_formula = Self::escape_dynamic_formulas1(formula);
-        let escaped_formula = Self::escape_dynamic_formulas2(&escaped_formula);
-
-        let formula = if self.expand_future_functions || global_expand_future_functions {
-            Self::escape_future_functions(&escaped_formula)
-        } else {
-            escaped_formula
-        };
-
-        let formula = if self.expand_table_functions {
-            Self::escape_table_functions(&formula)
-        } else {
-            formula
-        };
-
-        Box::from(formula)
+        (escaped_formula, has_dynamic_function)
     }
 
-    // Escape/expand the dynamic formula _xlfn functions.
-    fn escape_dynamic_formulas1(formula: &str) -> Cow<str> {
-        let xlfn = static_regex!(
-            r"\b(ANCHORARRAY|BYCOL|BYROW|CHOOSECOLS|CHOOSEROWS|DROP|EXPAND|HSTACK|LAMBDA|MAKEARRAY|MAP|RANDARRAY|REDUCE|SCAN|SEQUENCE|SINGLE|SORTBY|SWITCH|TAKE|TEXTSPLIT|TOCOL|TOROW|UNIQUE|VSTACK|WRAPCOLS|WRAPROWS|XLOOKUP)\("
-        );
+    // This is a version of the previous escape_formula() function that only
+    // checks to see if a user escaped string contains a dynamic function and
+    // returns a clone of the string.
+    fn copy_escaped_formula(formula: &str) -> (String, bool) {
+        let mut start_position = 0;
+        let mut in_function = false;
+        let mut in_string_literal = false;
+        let mut has_dynamic_function = false;
 
-        xlfn.replace_all(formula, "_xlfn.$1(")
+        for (current_position, char) in formula.char_indices() {
+            // Match the start/end of string literals. We track these to avoid
+            // matching function names in strings. In Excel a double quote in a
+            // string literal is doubled, so this will also match escapes.
+            if char == '"' {
+                in_string_literal = !in_string_literal;
+            }
+
+            // Ignore the string literal.
+            if in_string_literal {
+                continue;
+            }
+
+            // Function names are comprised of "A-Z", "0-9" and ".".
+            let is_function_char =
+                char.is_ascii_uppercase() || char.is_ascii_digit() || char == '.';
+            let is_function_start_char = char.is_ascii_uppercase() || char.is_ascii_digit();
+
+            // Simple state machine where we accumulate possible function names
+            // in a buffer for evaluation.
+            if in_function {
+                if !is_function_char {
+                    let token = &formula[start_position..current_position];
+
+                    // If the first non function char is an opening bracket then we
+                    // have found a function name.
+                    if char == '(' {
+                        // Check if function is an Excel "future" function.
+                        if let Some(function_type) = Self::future_functions(token) {
+                            has_dynamic_function |= *function_type > 0;
+                        }
+                    }
+
+                    in_function = false;
+                }
+            } else if is_function_start_char {
+                // Match the start of a possible function name.
+                start_position = current_position;
+                in_function = true;
+            }
+        }
+
+        (formula.to_string(), has_dynamic_function)
     }
 
-    // Escape/expand the dynamic formula _xlfn._xlws. functions.
-    fn escape_dynamic_formulas2(formula: &str) -> Cow<str> {
-        let xlws = static_regex!(r"\b(FILTER|SORT)\(");
+    // Escape/expand table functions. This mainly involves converting Excel 2010
+    // "@" table ref to 2007 "[#This Row],". We parse the string to avoid
+    // replacements in string literals within the formula.
+    pub(crate) fn escape_table_functions(mut self) -> Formula {
+        if !self.formula_string.contains('@') {
+            // No escaping required.
+            return self;
+        }
 
-        xlws.replace_all(formula, "_xlfn._xlws.$1(")
+        let mut in_string_literal = false;
+        let mut escaped_formula = String::with_capacity(self.formula_string.len());
+
+        for char in self.formula_string.chars() {
+            // Match the start/end of string literals to avoid escaping
+            // references in strings.
+            if char == '"' {
+                in_string_literal = !in_string_literal;
+            }
+
+            // Copy the string literal.
+            if in_string_literal {
+                escaped_formula.push(char);
+                continue;
+            }
+
+            // Replace table reference.
+            if char == '@' {
+                escaped_formula.push_str("[#This Row],");
+            } else {
+                escaped_formula.push(char);
+            }
+        }
+
+        self.formula_string = escaped_formula;
+        self
     }
 
-    // Escape/expand future/_xlfn functions.
-    fn escape_future_functions(formula: &str) -> Cow<str> {
-        let future = static_regex!(
-            r"\b(ACOTH|ACOT|AGGREGATE|ARABIC|ARRAYTOTEXT|BASE|BETA.DIST|BETA.INV|BINOM.DIST.RANGE|BINOM.DIST|BINOM.INV|BITAND|BITLSHIFT|BITOR|BITRSHIFT|BITXOR|CEILING.MATH|CEILING.PRECISE|CHISQ.DIST.RT|CHISQ.DIST|CHISQ.INV.RT|CHISQ.INV|CHISQ.TEST|COMBINA|CONCAT|CONFIDENCE.NORM|CONFIDENCE.T|COTH|COT|COVARIANCE.P|COVARIANCE.S|CSCH|CSC|DAYS|DECIMAL|ERF.PRECISE|ERFC.PRECISE|EXPON.DIST|F.DIST.RT|F.DIST|F.INV.RT|F.INV|F.TEST|FILTERXML|FLOOR.MATH|FLOOR.PRECISE|FORECAST.ETS.CONFINT|FORECAST.ETS.SEASONALITY|FORECAST.ETS.STAT|FORECAST.ETS|FORECAST.LINEAR|FORMULATEXT|GAMMA.DIST|GAMMA.INV|GAMMALN.PRECISE|GAMMA|GAUSS|HYPGEOM.DIST|IFNA|IFS|IMAGE|IMCOSH|IMCOT|IMCSCH|IMCSC|IMSECH|IMSEC|IMSINH|IMTAN|ISFORMULA|ISOMITTED|ISOWEEKNUM|LET|LOGNORM.DIST|LOGNORM.INV|MAXIFS|MINIFS|MODE.MULT|MODE.SNGL|MUNIT|NEGBINOM.DIST|NORM.DIST|NORM.INV|NORM.S.DIST|NORM.S.INV|NUMBERVALUE|PDURATION|PERCENTILE.EXC|PERCENTILE.INC|PERCENTRANK.EXC|PERCENTRANK.INC|PERMUTATIONA|PHI|POISSON.DIST|QUARTILE.EXC|QUARTILE.INC|QUERYSTRING|RANK.AVG|RANK.EQ|RRI|SECH|SEC|SHEETS|SHEET|SKEW.P|STDEV.P|STDEV.S|T.DIST.2T|T.DIST.RT|T.DIST|T.INV.2T|T.INV|T.TEST|TEXTAFTER|TEXTBEFORE|TEXTJOIN|UNICHAR|UNICODE|VALUETOTEXT|VAR.P|VAR.S|WEBSERVICE|WEIBULL.DIST|XMATCH|XOR|Z.TEST)\("
-        );
-
-        future.replace_all(formula, "_xlfn.$1(")
-    }
-
-    // Escape/expand table functions.
-    fn escape_table_functions(formula: &str) -> Cow<str> {
-        // Convert Excel 2010 "@" table ref to 2007 "#This Row".
-        let table = static_regex!(r"@");
-
-        table.replace_all(formula, "[#This Row],")
+    // This is a lookup table to match Excel "future" functions that require a
+    // prefix. The types are:
+    //     0 = Standard future functions.
+    //     1 = Future functions that are also dynamic functions.
+    //     2 = Dynamic function that require an additional prefix.
+    #[allow(clippy::too_many_lines)]
+    fn future_functions(function: &str) -> Option<&u8> {
+        static FUTURE_FUNCTIONS: OnceLock<HashMap<&str, u8>> = OnceLock::new();
+        FUTURE_FUNCTIONS
+            .get_or_init(|| {
+                HashMap::from([
+                    // Future functions.
+                    ("ACOTH", 0),
+                    ("ACOT", 0),
+                    ("AGGREGATE", 0),
+                    ("ARABIC", 0),
+                    ("ARRAYTOTEXT", 0),
+                    ("BASE", 0),
+                    ("BETA.DIST", 0),
+                    ("BETA.INV", 0),
+                    ("BINOM.DIST.RANGE", 0),
+                    ("BINOM.DIST", 0),
+                    ("BINOM.INV", 0),
+                    ("BITAND", 0),
+                    ("BITLSHIFT", 0),
+                    ("BITOR", 0),
+                    ("BITRSHIFT", 0),
+                    ("BITXOR", 0),
+                    ("CEILING.MATH", 0),
+                    ("CEILING.PRECISE", 0),
+                    ("CHISQ.DIST.RT", 0),
+                    ("CHISQ.DIST", 0),
+                    ("CHISQ.INV.RT", 0),
+                    ("CHISQ.INV", 0),
+                    ("CHISQ.TEST", 0),
+                    ("COMBINA", 0),
+                    ("CONCAT", 0),
+                    ("CONFIDENCE.NORM", 0),
+                    ("CONFIDENCE.T", 0),
+                    ("COTH", 0),
+                    ("COT", 0),
+                    ("COVARIANCE.P", 0),
+                    ("COVARIANCE.S", 0),
+                    ("CSCH", 0),
+                    ("CSC", 0),
+                    ("DAYS", 0),
+                    ("DECIMAL", 0),
+                    ("ERF.PRECISE", 0),
+                    ("ERFC.PRECISE", 0),
+                    ("EXPON.DIST", 0),
+                    ("F.DIST.RT", 0),
+                    ("F.DIST", 0),
+                    ("F.INV.RT", 0),
+                    ("F.INV", 0),
+                    ("F.TEST", 0),
+                    ("FILTERXML", 0),
+                    ("FLOOR.MATH", 0),
+                    ("FLOOR.PRECISE", 0),
+                    ("FORECAST.ETS.CONFINT", 0),
+                    ("FORECAST.ETS.SEASONALITY", 0),
+                    ("FORECAST.ETS.STAT", 0),
+                    ("FORECAST.ETS", 0),
+                    ("FORECAST.LINEAR", 0),
+                    ("FORMULATEXT", 0),
+                    ("GAMMA.DIST", 0),
+                    ("GAMMA.INV", 0),
+                    ("GAMMALN.PRECISE", 0),
+                    ("GAMMA", 0),
+                    ("GAUSS", 0),
+                    ("HYPGEOM.DIST", 0),
+                    ("IFNA", 0),
+                    ("IFS", 0),
+                    ("IMAGE", 0),
+                    ("IMCOSH", 0),
+                    ("IMCOT", 0),
+                    ("IMCSCH", 0),
+                    ("IMCSC", 0),
+                    ("IMSECH", 0),
+                    ("IMSEC", 0),
+                    ("IMSINH", 0),
+                    ("IMTAN", 0),
+                    ("ISFORMULA", 0),
+                    ("ISOMITTED", 0),
+                    ("ISOWEEKNUM", 0),
+                    ("LET", 0),
+                    ("LOGNORM.DIST", 0),
+                    ("LOGNORM.INV", 0),
+                    ("MAXIFS", 0),
+                    ("MINIFS", 0),
+                    ("MODE.MULT", 0),
+                    ("MODE.SNGL", 0),
+                    ("MUNIT", 0),
+                    ("NEGBINOM.DIST", 0),
+                    ("NORM.DIST", 0),
+                    ("NORM.INV", 0),
+                    ("NORM.S.DIST", 0),
+                    ("NORM.S.INV", 0),
+                    ("NUMBERVALUE", 0),
+                    ("PDURATION", 0),
+                    ("PERCENTILE.EXC", 0),
+                    ("PERCENTILE.INC", 0),
+                    ("PERCENTRANK.EXC", 0),
+                    ("PERCENTRANK.INC", 0),
+                    ("PERMUTATIONA", 0),
+                    ("PHI", 0),
+                    ("POISSON.DIST", 0),
+                    ("QUARTILE.EXC", 0),
+                    ("QUARTILE.INC", 0),
+                    ("QUERYSTRING", 0),
+                    ("RANK.AVG", 0),
+                    ("RANK.EQ", 0),
+                    ("RRI", 0),
+                    ("SECH", 0),
+                    ("SEC", 0),
+                    ("SHEETS", 0),
+                    ("SHEET", 0),
+                    ("SKEW.P", 0),
+                    ("STDEV.P", 0),
+                    ("STDEV.S", 0),
+                    ("T.DIST.2T", 0),
+                    ("T.DIST.RT", 0),
+                    ("T.DIST", 0),
+                    ("T.INV.2T", 0),
+                    ("T.INV", 0),
+                    ("T.TEST", 0),
+                    ("TEXTAFTER", 0),
+                    ("TEXTBEFORE", 0),
+                    ("TEXTJOIN", 0),
+                    ("UNICHAR", 0),
+                    ("UNICODE", 0),
+                    ("VALUETOTEXT", 0),
+                    ("VAR.P", 0),
+                    ("VAR.S", 0),
+                    ("WEBSERVICE", 0),
+                    ("WEIBULL.DIST", 0),
+                    ("XMATCH", 0),
+                    ("XOR", 0),
+                    ("Z.TEST", 0),
+                    // Dynamic functions.
+                    ("ANCHORARRAY", 1),
+                    ("BYCOL", 1),
+                    ("BYROW", 1),
+                    ("CHOOSECOLS", 1),
+                    ("CHOOSEROWS", 1),
+                    ("DROP", 1),
+                    ("EXPAND", 1),
+                    ("HSTACK", 1),
+                    ("LAMBDA", 1),
+                    ("MAKEARRAY", 1),
+                    ("MAP", 1),
+                    ("RANDARRAY", 1),
+                    ("REDUCE", 1),
+                    ("SCAN", 1),
+                    ("SEQUENCE", 1),
+                    ("SINGLE", 1),
+                    ("SORTBY", 1),
+                    ("SWITCH", 1),
+                    ("TAKE", 1),
+                    ("TEXTSPLIT", 1),
+                    ("TOCOL", 1),
+                    ("TOROW", 1),
+                    ("UNIQUE", 1),
+                    ("VSTACK", 1),
+                    ("WRAPCOLS", 1),
+                    ("WRAPROWS", 1),
+                    ("XLOOKUP", 1),
+                    // Special case dynamic functions.
+                    ("FILTER", 2),
+                    ("SORT", 2),
+                ])
+            })
+            .get(function)
     }
 }
 

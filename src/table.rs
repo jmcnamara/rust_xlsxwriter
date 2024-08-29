@@ -1282,12 +1282,12 @@ impl Table {
 
             if let Some(formula) = &column.formula {
                 // Write the calculatedColumnFormula element.
-                self.write_calculated_column_formula(&formula.expand_formula(true));
+                self.write_calculated_column_formula(&formula.formula_string);
             }
 
             if let TableFunction::Custom(formula) = &column.total_function {
                 // Write the totalsRowFormula element.
-                self.write_totals_row_formula(&formula.expand_formula(true));
+                self.write_totals_row_formula(&formula.formula_string);
             }
 
             self.writer.xml_end_tag("tableColumn");
@@ -1707,7 +1707,7 @@ impl TableColumn {
     ///
     pub fn set_formula(mut self, formula: impl Into<Formula>) -> TableColumn {
         let mut formula = formula.into();
-        formula = formula.clone().use_table_functions().use_future_functions();
+        formula = formula.clone().escape_table_functions();
         self.formula = Some(formula);
         self
     }

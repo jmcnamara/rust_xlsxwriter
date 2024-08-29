@@ -6,11 +6,10 @@
 
 #[cfg(test)]
 mod formula_tests {
-
     use crate::Formula;
 
     #[test]
-    fn test_dynamic_function_escapes() {
+    fn test_future_function_escapes() {
         let formula_strings = vec![
             // Test simple escapes for formulas.
             ("=foo()", "foo()"),
@@ -234,14 +233,77 @@ mod formula_tests {
             ),
         ];
 
-        for &(formula_string, expected) in &formula_strings {
+        for &(formula_string, expected_formula) in &formula_strings {
             let formula = Formula::new(formula_string);
-            let prepared_formula = formula.expand_formula(true);
-            assert_eq!(prepared_formula.as_ref(), expected);
-
-            let formula = Formula::new(formula_string).use_future_functions();
-            let prepared_formula = formula.expand_formula(false);
-            assert_eq!(prepared_formula.as_ref(), expected);
+            assert_eq!(formula.formula_string, expected_formula);
         }
+    }
+}
+
+#[test]
+fn test_parse_function_escapes() {
+    use crate::Formula;
+    // Slightly more rigorous tests of function edge case.
+    let formula_strings = vec![
+        // Test simple escapes for formulas.
+        ("", "", false),
+        ("FOO()", "FOO()", false),
+        ("=FOO()", "FOO()", false),
+        ("{=FOO()}", "FOO()", false),
+        ("FOO() + A1", "FOO() + A1", false),
+        (r#""FOO()""#, r#""FOO()""#, false),
+        (r#""FOO() 😀""#, r#""FOO() 😀""#, false),
+        (r#" "😀" & FOO()"#, r#" "😀" & FOO()"#, false),
+        (r#""FOO()"&"BAR()""#, r#""FOO()"&"BAR()""#, false),
+        (r#"""""&FOO()"#, r#"""""&FOO()"#, false),
+        ("SEQUENCE(10)", "_xlfn.SEQUENCE(10)", true),
+        (
+            r#"=INDEX(C:C,MATCH(MINIFS(A:A,A:A,">="&EDATE(A5,1)),A:A))"#,
+            r#"INDEX(C:C,MATCH(_xlfn.MINIFS(A:A,A:A,">="&EDATE(A5,1)),A:A))"#,
+            false,
+        ),
+        ("POISSON.DIST(A1:A3)", "_xlfn.POISSON.DIST(A1:A3)", false),
+        (
+            "SEQUENCE(10) + POISSON.DIST(A1:A3)",
+            "_xlfn.SEQUENCE(10) + _xlfn.POISSON.DIST(A1:A3)",
+            true,
+        ),
+        (
+            "_xlfn.SEQUENCE(10) + _xlfn.POISSON.DIST(A1:A3)",
+            "_xlfn.SEQUENCE(10) + _xlfn.POISSON.DIST(A1:A3)",
+            true,
+        ),
+        ("FILTER(A1:A10,1)", "_xlfn._xlws.FILTER(A1:A10,1)", true),
+    ];
+
+    for &(input_string, expected_formula, expected_dynamic) in &formula_strings {
+        let formula = Formula::new(input_string);
+        assert_eq!(formula.formula_string, expected_formula);
+        assert_eq!(formula.has_dynamic_function, expected_dynamic);
+    }
+}
+
+#[test]
+fn test_escape_table_functions() {
+    use crate::Formula;
+    // Test table escapes.
+    let formula_strings = vec![
+        ("", ""),
+        ("@", "[#This Row],"),
+        (r#""@""#, r#""@""#),
+        (
+            "SUM(Table1[@[Column1]:[Column3]])",
+            "SUM(Table1[[#This Row],[Column1]:[Column3]])",
+        ),
+        (
+            r#"=HYPERLINK(CONCAT("http://myweb.com:1677/'@md=d&path/to/sour/...'@/",[@CL],"?ac=10"),[@CL])"#,
+            r#"HYPERLINK(_xlfn.CONCAT("http://myweb.com:1677/'@md=d&path/to/sour/...'@/",[[#This Row],CL],"?ac=10"),[[#This Row],CL])"#,
+        ),
+    ];
+
+    for &(input_string, expected_formula) in &formula_strings {
+        let formula = Formula::new(input_string).escape_table_functions();
+
+        assert_eq!(formula.formula_string, expected_formula);
     }
 }

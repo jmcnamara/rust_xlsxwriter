@@ -13152,7 +13152,7 @@ impl Worksheet {
         format: Option<&Format>,
     ) -> Result<&mut Worksheet, XlsxError> {
         // Transfer to dynamic formula handling function.
-        if formula.is_dynamic_function() {
+        if formula.has_dynamic_function {
             return self.store_array_formula(row, col, row, col, formula, None, true);
         }
 
@@ -13176,7 +13176,7 @@ impl Worksheet {
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::Formula {
-            formula: formula.expand_formula(self.use_future_functions),
+            formula: Box::from(formula.formula_string),
             xf_index,
             result,
         };
@@ -13221,7 +13221,7 @@ impl Worksheet {
 
         // Check for a dynamic function in a standard static array formula.
         let mut is_dynamic = is_dynamic;
-        if !is_dynamic && formula.is_dynamic_function() {
+        if !is_dynamic && formula.has_dynamic_function {
             is_dynamic = true;
         }
 
@@ -13238,7 +13238,7 @@ impl Worksheet {
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::ArrayFormula {
-            formula: formula.expand_formula(self.use_future_functions),
+            formula: Box::from(formula.formula_string),
             xf_index,
             result,
             is_dynamic,

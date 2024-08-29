@@ -287,11 +287,3 @@ extern crate rust_xlsxwriter_derive;
 #[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 pub use rust_xlsxwriter_derive::XlsxSerialize;
-
-macro_rules! static_regex {
-    ($re:literal) => {{
-        static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-        RE.get_or_init(|| regex::Regex::new($re).unwrap())
-    }};
-}
-pub(crate) use static_regex;

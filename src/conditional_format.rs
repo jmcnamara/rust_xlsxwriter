@@ -2269,7 +2269,7 @@ impl ConditionalFormatFormula {
 
     // Validate the conditional format.
     pub(crate) fn validate(&self) -> Result<(), XlsxError> {
-        if self.formula.expand_formula(true).is_empty() {
+        if self.formula.formula_string.is_empty() {
             return Err(XlsxError::ConditionalFormatError(
                 "Formula value must be set".to_string(),
             ));
@@ -2306,7 +2306,7 @@ impl ConditionalFormatFormula {
 
         // Write the rule.
         writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_data_element_only("formula", &self.formula.expand_formula(true));
+        writer.xml_data_element_only("formula", &self.formula.formula_string);
         writer.xml_end_tag("cfRule");
 
         writer.read_to_string()
@@ -6643,7 +6643,7 @@ conditional_format_value_from_number!(u8 i8 u16 i16 u32 i32 f32 f64);
 
 impl From<Formula> for ConditionalFormatValue {
     fn from(value: Formula) -> ConditionalFormatValue {
-        ConditionalFormatValue::new_from_string(value.expand_formula(true))
+        ConditionalFormatValue::new_from_string(value.formula_string)
     }
 }
 

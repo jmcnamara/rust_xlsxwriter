@@ -635,7 +635,7 @@ impl DataValidation {
     /// src="https://rustxlsxwriter.github.io/images/data_validation_allow_list_formula_dialog.png">
     ///
     pub fn allow_list_formula(mut self, list: Formula) -> DataValidation {
-        let formula = list.expand_formula(true).to_string();
+        let formula = list.formula_string.clone();
         self.rule = DataValidationRuleInternal::ListSource(formula);
         self.validation_type = DataValidationType::List;
         self
@@ -946,7 +946,7 @@ impl DataValidation {
     /// src="https://rustxlsxwriter.github.io/images/data_validation_allow_custom_dialog.png">
     ///
     pub fn allow_custom(mut self, rule: Formula) -> DataValidation {
-        let formula = rule.expand_formula(true).to_string();
+        let formula = rule.formula_string.clone();
         self.rule = DataValidationRuleInternal::CustomFormula(formula);
         self.validation_type = DataValidationType::Custom;
         self
@@ -1359,7 +1359,7 @@ impl IntoDataValidationValue for f64 {
 
 impl IntoDataValidationValue for Formula {
     fn to_string_value(&self) -> String {
-        self.expand_formula(true).to_string()
+        self.formula_string.clone()
     }
 }
 
