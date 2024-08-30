@@ -171,8 +171,8 @@
 //! The following is a list of the features supports by the `rust_xlsxwriter`
 //! crate:
 //!
-//! - `default`: Includes all the standard functionality. Has dependencies on
-//!   `zip` and `regex` only.
+//! - `default`: Includes all the standard functionality. This has a dependency
+//!   on the `zip` crate only.
 //! - `serde`: Adds supports for Serde serialization. This is off by default.
 //! - `chrono`: Adds supports for Chrono date/time types to the API. This is off
 //!   by default.

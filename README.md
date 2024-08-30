@@ -104,9 +104,8 @@ frequently.
 
 ## Features
 
-- `default`: Includes all the standard functionality. Has dependencies on `zip`
-  and `regex` only.
-
+- `default`: Includes all the standard functionality. This has a dependency on
+  the `zip` crate only.
 
 - `serde`: Adds supports for Serde serialization. This is off by default.
 

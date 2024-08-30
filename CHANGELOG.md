@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.75.0] - 2024-09-xx
+
+### Removed
+
+- Removed dependency on the `regex.rs` crate for small binary sizes. The only
+  non-optional dependency is now `zip.rs`.
+
+- Removed the `Formula::use_future_functions()` and
+  `Formula::use_table_functions()` methods since there functionality is now
+  handled automatically as a result of the `regex` change.
+
 
 ## [0.74.0] - 2024-08-24
 
