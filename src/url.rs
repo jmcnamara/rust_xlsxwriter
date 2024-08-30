@@ -410,17 +410,22 @@ impl Url {
             return false;
         }
 
-        url.contains("%25")
-            || url.contains("%22")
-            || url.contains("%20")
-            || url.contains("%3c")
-            || url.contains("%3e")
-            || url.contains("%5b")
-            || url.contains("%5d")
-            || url.contains("%5e")
-            || url.contains("%60")
-            || url.contains("%7b")
-            || url.contains("%7d")
+        url.as_bytes().windows(3).any(|w| {
+            matches!(
+                w,
+                b"%25"
+                    | b"%22"
+                    | b"%20"
+                    | b"%3c"
+                    | b"%3e"
+                    | b"%5b"
+                    | b"%5d"
+                    | b"%5e"
+                    | b"%60"
+                    | b"%7b"
+                    | b"%7d"
+            )
+        })
     }
 }
 
