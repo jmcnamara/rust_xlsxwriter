@@ -1402,7 +1402,6 @@ pub struct Worksheet {
     margin_footer: f64,
     first_page_number: u16,
     default_result: Box<str>,
-    use_future_functions: bool,
     panes: Panes,
     hyperlinks: BTreeMap<(RowNum, ColNum), Url>,
     rel_count: u32,
@@ -1586,7 +1585,6 @@ impl Worksheet {
             margin_footer: 0.3,
             first_page_number: 0,
             default_result: Box::from("0"),
-            use_future_functions: false,
             panes,
             has_hyperlink_style: false,
             hyperlinks: BTreeMap::new(),
@@ -8352,76 +8350,6 @@ impl Worksheet {
     pub fn set_formula_result_default(&mut self, result: impl Into<String>) -> &mut Worksheet {
         self.default_result = Box::from(result.into());
         self
-    }
-
-    /// Enable the use of newer Excel future functions.
-    ///
-    /// Enable the use of newer Excel “future” functions without having to
-    /// prefix them with with `_xlfn`.
-    ///
-    /// Excel 2010 and later versions added functions which weren't defined in
-    /// the original file specification. These functions are referred to by
-    /// Microsoft as "Future Functions". Examples of these functions are `ACOT`,
-    /// `CHISQ.DIST.RT` , `CONFIDENCE.NORM`, `STDEV.P`, `STDEV.S` and
-    /// `WORKDAY.INTL`.
-    ///
-    /// When written using [`Worksheet::write_formula()`] these functions need
-    /// to be fully qualified with a prefix such as `_xlfn.`
-    ///
-    /// Alternatively you can use the `worksheet.use_future_functions()`
-    /// function to have `rust_xlsxwriter` automatically handle future functions
-    /// for you, or use a [`Formula`] struct and the
-    /// [`Formula::use_future_functions()`] method, see below.
-    ///
-    /// # Parameters
-    ///
-    /// - `enable`: Turn the property on/off. It is off by default.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates different ways to handle writing
-    /// Future Functions to a worksheet.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_worksheet_use_future_functions.rs
-    /// #
-    /// # use rust_xlsxwriter::{Formula, Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    ///     // The following is a "Future" function and will generate a "#NAME?" warning
-    ///     // in Excel.
-    ///     worksheet.write_formula(0, 0, "=ISFORMULA($B$1)")?;
-    ///
-    ///     // The following adds the required prefix. This will work without a warning.
-    ///     worksheet.write_formula(1, 0, "=_xlfn.ISFORMULA($B$1)")?;
-    ///
-    ///     // The following uses a Formula object and expands out any future functions.
-    ///     // This also works without a warning.
-    ///     worksheet.write_formula(2, 0, Formula::new("=ISFORMULA($B$1)").use_future_functions())?;
-    ///
-    ///     // The following expands out all future functions used in the worksheet from
-    ///     // this point forward. This also works without a warning.
-    ///     worksheet.use_future_functions(true);
-    ///     worksheet.write_formula(3, 0, "=ISFORMULA($B$1)")?;
-    /// #
-    /// #     workbook.save("worksheet.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_use_future_functions.png">
-    ///
-    pub fn use_future_functions(&mut self, enable: bool) {
-        self.use_future_functions = enable;
     }
 
     // -----------------------------------------------------------------------

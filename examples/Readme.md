@@ -1149,17 +1149,6 @@ documentation and generally show how an individual function works.
   function which generally returns one value turned into a dynamic function
   which returns a range of values.
 
-* `doc_working_with_formulas_future1.rs` - Demonstrates writing an Excel
-  "Future Function" without an explicit prefix, which results in an Excel
-  error.
-
-* `doc_working_with_formulas_future2.rs` - Demonstrates writing an Excel
-  "Future Function" with an explicit prefix.
-
-* `doc_working_with_formulas_future3.rs` - Demonstrates writing an Excel
-  "Future Function" with an implicit prefix and the use_future_functions()
-  method.
-
 * `doc_working_with_formulas_intro.rs` - Demonstrates writing a simple
   formula.
 
@@ -1513,9 +1502,6 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_unprotect_range_with_options.rs` - Demonstrates
   unprotecting ranges in a protected worksheet, with additional options.
-
-* `doc_worksheet_use_future_functions.rs` - Demonstrates different ways to
-  handle writing Future Functions to a worksheet.
 
 * `doc_worksheet_write_array_formula.rs` - Demonstrates writing an array
   formulas to a worksheet.

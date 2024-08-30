@@ -16,8 +16,8 @@ use std::{collections::HashMap, sync::OnceLock};
 /// worksheet formulas.
 ///
 /// In general you would use the
-/// [`Worksheet::write_formula()`](crate::Worksheet::write_formula) with a string
-/// representation of the formula, like this:
+/// [`Worksheet::write_formula()`](crate::Worksheet::write_formula) with a
+/// string representation of the formula, like this:
 ///
 /// ```
 /// # // This code is available in examples/doc_working_with_formulas_intro.rs
@@ -498,62 +498,22 @@ use std::{collections::HashMap, sync::OnceLock};
 /// "Future Functions". Examples of these functions are `ACOT`, `CHISQ.DIST.RT`
 /// , `CONFIDENCE.NORM`, `STDEV.P`, `STDEV.S` and `WORKDAY.INTL`.
 ///
-/// When written using [`Worksheet::write_formula()`] these functions need to be
-/// fully qualified with a prefix such as `_xlfn.`, as shown the table in the
-/// next section below.
+/// Although these formulas are displayed as normal in Excel they are stored
+/// with a prefix. For example `STDEV.S(B1:B5)` is stored in the Excel file as
+/// `xlfn.STDEV.S(B1:B5)`. The `rust_xlsxwriter` crate makes these changes
+/// automatically so in general you don't have to worry about this unless you
+/// are dealing with features such as Lambda functions, see above. However, if
+/// required you can manually prefix any required function with the `_xlfn.`
+/// prefix.
 ///
-/// [`Worksheet::write_formula()`]: crate::Worksheet::method.write_formula
-///
-/// If the prefix isn't included you will get an Excel function name error. For
-/// example:
-///
-/// ```text
-///     worksheet.write_formula(0, 0, "=STDEV.S(B1:B5)")?;
-/// ```
-///
-/// <img
-/// src="https://rustxlsxwriter.github.io/images/working_with_formulas3.png">
-///
-/// If the `_xlfn.` prefix is included you will get the correct result:
-///
-/// ```text
-///     worksheet.write_formula(0, 0, "=_xlfn.STDEV.S(B1:B5)")?;
-/// ```
-///
-/// <img
-/// src="https://rustxlsxwriter.github.io/images/working_with_formulas2.png">
-///
-/// Note that the function is displayed by Excel without the prefix.
-///
-/// Alternatively you can use the [`Worksheet::use_future_functions()`] function
-/// to have `rust_xlsxwriter` automatically handle future functions for you:
-///
-/// [`Worksheet::use_future_functions()`]: crate::Worksheet::use_future_functions
-///
-/// ```text
-///    worksheet.use_future_functions(true);
-///    worksheet.write_formula(0, 0, "=STDEV.S(B1:B5)")?;
-/// ```
-///
-/// Or if you are using a [`Formula`] struct you can use the
-/// [`Formula::use_future_functions()`] method:
-///
-/// ```text
-///     worksheet.write_formula(0, 0, Formula::new("=STDEV.S(B1:B5)").use_future_functions())?;
-/// ```
-///
-/// This will give the same correct result as the image above.
-///
-///
-/// ## List of Future Functions
-///
-/// The following list is taken from [MS XLSX extensions documentation on future
-/// functions].
+/// For completeness the following is a list of future functions taken from [MS
+/// XLSX extensions documentation on future functions].
 ///
 /// [MS XLSX extensions documentation on future functions]:
 ///     http://msdn.microsoft.com/en-us/library/dd907480%28v=office.12%29.aspx
 ///
-
+/// Note, the Python in Excel functions aren't simple functions and aren't
+/// supported.
 ///
 /// | Future Functions                 |
 /// | -------------------------------- |
@@ -601,6 +561,7 @@ use std::{collections::HashMap, sync::OnceLock};
 /// | `_xlfn.F.INV.RT`                 |
 /// | `_xlfn.F.INV`                    |
 /// | `_xlfn.F.TEST`                   |
+/// | `_xlfn.FIELDVALUE`               |
 /// | `_xlfn.FILTERXML`                |
 /// | `_xlfn.FLOOR.MATH`               |
 /// | `_xlfn.FLOOR.PRECISE`            |
@@ -618,7 +579,7 @@ use std::{collections::HashMap, sync::OnceLock};
 /// | `_xlfn.HYPGEOM.DIST`             |
 /// | `_xlfn.IFNA`                     |
 /// | `_xlfn.IFS`                      |
-/// | `_xlfn.IMAGE`                   |
+/// | `_xlfn.IMAGE`                    |
 /// | `_xlfn.IMCOSH`                   |
 /// | `_xlfn.IMCOT`                    |
 /// | `_xlfn.IMCSCH`                   |
@@ -628,6 +589,7 @@ use std::{collections::HashMap, sync::OnceLock};
 /// | `_xlfn.IMSINH`                   |
 /// | `_xlfn.IMTAN`                    |
 /// | `_xlfn.ISFORMULA`                |
+/// | `ISO.CEILING`                    |
 /// | `_xlfn.ISOMITTED`                |
 /// | `_xlfn.ISOWEEKNUM`               |
 /// | `_xlfn.LET`                      |
@@ -653,6 +615,10 @@ use std::{collections::HashMap, sync::OnceLock};
 /// | `_xlfn.PERMUTATIONA`             |
 /// | `_xlfn.PHI`                      |
 /// | `_xlfn.POISSON.DIST`             |
+/// | `_xlfn.PQSOURCE`                 |
+/// | `_xlfn.PYTHON_STR`               |
+/// | `_xlfn.PYTHON_TYPE`              |
+/// | `_xlfn.PYTHON_TYPENAME`          |
 /// | `_xlfn.QUARTILE.EXC`             |
 /// | `_xlfn.QUARTILE.INC`             |
 /// | `_xlfn.QUERYSTRING`              |
@@ -687,12 +653,8 @@ use std::{collections::HashMap, sync::OnceLock};
 /// | `_xlfn.XOR`                      |
 /// | `_xlfn.Z.TEST`                   |
 ///
-
 /// The dynamic array functions shown in the [Dynamic Array
-/// support](#dynamic-array-support) section are also future functions, however the
-/// `rust_xlsxwriter` library automatically adds the required prefixes on the
-/// fly so you don't have to add them explicitly.
-
+/// support](#dynamic-array-support) section are also future functions:
 ///
 /// | Dynamic Array Functions          |
 /// | -------------------------------- |
@@ -708,6 +670,7 @@ use std::{collections::HashMap, sync::OnceLock};
 /// | `_xlfn.LAMBDA`                   |
 /// | `_xlfn.MAKEARRAY`                |
 /// | `_xlfn.MAP`                      |
+/// | `_xlfn._xlws.PY`                 |
 /// | `_xlfn.RANDARRAY`                |
 /// | `_xlfn.REDUCE`                   |
 /// | `_xlfn.SCAN`                     |
@@ -726,7 +689,6 @@ use std::{collections::HashMap, sync::OnceLock};
 /// | `_xlfn.WRAPROWS`                 |
 /// | `_xlfn.XLOOKUP`                  |
 ///
-
 /// # Dealing with formula errors
 ///
 /// If there is an error in the syntax of a formula it is usually displayed in
@@ -869,97 +831,6 @@ impl Formula {
     ///
     pub fn set_result(mut self, result: impl Into<String>) -> Formula {
         self.result = Box::from(result.into());
-        self
-    }
-
-    /// Enable the use of newer Excel future functions in the formula.
-    ///
-    /// As explained above in [Formulas added in Excel 2010 and
-    /// later](#formulas-added-in-excel-2010-and-later), functions have been
-    /// added to Excel which weren't defined in the original file specification.
-    /// These functions are referred to by Microsoft as "Future Functions".
-    ///
-    /// When written using
-    /// [`write_formula()`](crate::Worksheet::write_formula()) these functions
-    /// need to be fully qualified with a prefix such as `_xlfn.`
-    ///
-    /// Alternatively you can use the
-    /// [`Worksheet::use_future_functions()`](crate::Worksheet::use_future_functions)
-    /// function to have `rust_xlsxwriter` automatically handle future functions
-    /// for you, or use a [`Formula`] struct and the
-    /// [`Formula::use_future_functions()`] method, see below.
-    ///
-    /// # Examples
-    ///
-    /// The following example demonstrates different ways to handle writing
-    /// Future Functions to a worksheet.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_worksheet_use_future_functions.rs
-    /// #
-    /// # use rust_xlsxwriter::{Formula, Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #
-    /// #     // Add a worksheet to the workbook.
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    ///     // The following is a "Future" function and will generate a "#NAME?" warning
-    ///     // in Excel.
-    ///     worksheet.write_formula(0, 0, "=ISFORMULA($B$1)")?;
-    ///
-    ///     // The following adds the required prefix. This will work without a warning.
-    ///     worksheet.write_formula(1, 0, "=_xlfn.ISFORMULA($B$1)")?;
-    ///
-    ///     // The following uses a Formula object and expands out any future functions.
-    ///     // This also works without a warning.
-    ///     worksheet.write_formula(2, 0, Formula::new("=ISFORMULA($B$1)").use_future_functions())?;
-    ///
-    ///     // The following expands out all future functions used in the worksheet from
-    ///     // this point forward. This also works without a warning.
-    ///     worksheet.use_future_functions(true);
-    ///     worksheet.write_formula(3, 0, "=ISFORMULA($B$1)")?;
-    /// #
-    /// #     workbook.save("worksheet.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_use_future_functions.png">
-    ///
-    pub fn use_future_functions(mut self) -> Formula {
-        self.expand_future_functions = true;
-        self
-    }
-
-    /// Enable backward compatible formulas in table.
-    ///
-    /// Worksheet tables in Excel (see [`Table`](crate::Table)) use "Structured
-    /// References" in formulas like this:
-    ///
-    /// ```text
-    ///    "SUM(Table1[@[Column1]:[Column3]])"
-    /// ```
-    ///
-    /// The `@` is a shorthand for the more explicit, but more verbose, `[#This
-    /// Row],` syntax. Excel automatically converts the structured row reference
-    /// to the shorter version if the table has more than one row. However, it
-    /// **stores** the formula in the longer `[#This Row],` syntax so
-    /// `rust_xlsxwriter` must also store it in that format.
-    ///
-    /// Setting the `use_table_functions()` property will ensure this conversion
-    /// is made automatically when writing the formula. In addition, the
-    /// conversion is done automatically if you add a column formula to a table
-    /// that is passed to
-    /// [`Worksheet::add_table()`](crate::Worksheet::add_table()).
-    ///
-    pub fn use_table_functions(mut self) -> Formula {
-        self.expand_table_functions = true;
         self
     }
 
@@ -1183,6 +1054,7 @@ impl Formula {
                     ("F.INV.RT", 0),
                     ("F.INV", 0),
                     ("F.TEST", 0),
+                    ("FIELDVALUE", 0),
                     ("FILTERXML", 0),
                     ("FLOOR.MATH", 0),
                     ("FLOOR.PRECISE", 0),
@@ -1234,6 +1106,10 @@ impl Formula {
                     ("PERMUTATIONA", 0),
                     ("PHI", 0),
                     ("POISSON.DIST", 0),
+                    ("PQSOURCE", 0),
+                    ("PYTHON_STR", 0),
+                    ("PYTHON_TYPE", 0),
+                    ("PYTHON_TYPENAME", 0),
                     ("QUARTILE.EXC", 0),
                     ("QUARTILE.INC", 0),
                     ("QUERYSTRING", 0),
@@ -1297,6 +1173,7 @@ impl Formula {
                     // Special case dynamic functions.
                     ("FILTER", 2),
                     ("SORT", 2),
+                    ("PY", 2),
                 ])
             })
             .get(function)

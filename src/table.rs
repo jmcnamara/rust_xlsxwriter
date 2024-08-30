@@ -1898,7 +1898,7 @@ impl TableColumn {
             TableFunction::StdDev => Formula::new(format!("SUBTOTAL(107,[{column_name}])")),
             TableFunction::Average => Formula::new(format!("SUBTOTAL(101,[{column_name}])")),
             TableFunction::CountNumbers => Formula::new(format!("SUBTOTAL(102,[{column_name}])")),
-            TableFunction::Custom(formula) => formula.clone().use_future_functions(),
+            TableFunction::Custom(formula) => formula.clone(),
         }
     }
 }
