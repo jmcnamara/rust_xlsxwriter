@@ -43,7 +43,7 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let format1 = Format::new().set_bold();
 
     worksheet.write(0, 0, Formula::new("=1+2+3-6"))?;
-    worksheet.write(1, 0, Formula::new("=SIN(0)".to_string()))?; // Uses String type.
+    worksheet.write(1, 0, Formula::new("=SIN(0)"))?;
     worksheet.write_with_format(2, 0, Formula::new("SIN(0)"), &format1)?; // No equals sign.
     worksheet.write(3, 0, Formula::new("=1+1").set_result("2"))?;
     worksheet.write_with_format(4, 0, Formula::new("1+1").set_result("2"), &format1)?;
