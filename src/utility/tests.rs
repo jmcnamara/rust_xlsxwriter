@@ -175,6 +175,7 @@ mod utility_tests {
             // Sheetnames with unicode or emojis.
             ("été", "été"),
             ("mangé", "mangé"),
+            ("Sheet©", "'Sheet©'"),
             ("Sheet😀", "Sheet😀"),
             ("Sheet🤌1", "Sheet🤌1"),
             ("Sheet⟦1", "'Sheet⟦1'"), // Unicode punctuation.
@@ -188,6 +189,7 @@ mod utility_tests {
             ("1Sheet1", "'1Sheet1'"),
             ("-Sheet1", "'-Sheet1'"),
             ("#Sheet1", "'#Sheet1'"),
+            ("©Sheet", "'©Sheet'"),
             ("😀Sheet", "'😀Sheet'"),
             ("🤌Sheet", "'🤌Sheet'"),
             // Sheetnames that are digits only also start with a non word char.
