@@ -5,12 +5,20 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.75.0] - 2024-09-xx
+## [0.75.0] - 2024-09-02
 
 ### Removed
 
-- Removed dependency on the `regex.rs` crate for small binary sizes. The only
+- Removed dependency on the `regex.rs` crate for smaller binary sizes. The only
   non-optional dependency is now `zip.rs`.
+
+  An example of the size difference is shown below for one of the sample apps:
+
+  | `app_hello_world` | v0.74.0 |v0.74.0 |
+  |-------------------|---------|--------|
+  | Debug             | 9.2M    | 4.2M   |
+  | Release           | 3.4M    | 1.6M   |
+
 
 - Removed the `Formula::use_future_functions()` and
   `Formula::use_table_functions()` methods since there functionality is now
@@ -637,8 +645,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for worksheet [`Table`] header and cell formatting via the
   [`TableColumn::set_format()`] and [`TableColumn::set_header_format()`] methods.
 
-[`TableColumn::set_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn::html#method.set_format
-[`TableColumn::set_header_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn::html#method.set_header_format
+[`TableColumn::set_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn.html#method.set_format
+[`TableColumn::set_header_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.TableColumn.html#method.set_header_format
 
 
 ## [0.42.0] - 2023-07-11

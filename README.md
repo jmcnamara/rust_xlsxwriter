@@ -131,8 +131,8 @@ frequently.
 
 Recent changes:
 
+- Removed requirement on `regex` crate.
 - Added support for adding Cell Notes.
-- Added support for adding VBA macros.
 - Added support for data validation.
 
 See the full [Release Notes and Changelog].
