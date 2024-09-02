@@ -7023,6 +7023,13 @@ impl Worksheet {
             return Err(XlsxError::RowColumnOrderError);
         }
 
+        // Check that the table has at least one valid row.
+        if first_row == last_row && table.show_header_row {
+            return Err(XlsxError::TableError(
+                "Table must have at least one row".to_string(),
+            ));
+        }
+
         let default_headers =
             self.default_table_headers(first_row, first_col, last_col, table.show_header_row);
 
