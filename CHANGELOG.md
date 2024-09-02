@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   An example of the size difference is shown below for one of the sample apps:
 
-  | `app_hello_world` | v0.74.0 |v0.74.0 |
+  | `app_hello_world` | v0.74.0 |v0.75.0 |
   |-------------------|---------|--------|
   | Debug             | 9.2M    | 4.2M   |
   | Release           | 3.4M    | 1.6M   |
