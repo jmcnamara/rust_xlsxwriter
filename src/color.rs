@@ -245,15 +245,6 @@ impl Color {
         }
     }
 
-    // Get the RGB hex value for textbox colors.
-    pub(crate) fn drawing_hex_value(self) -> String {
-        match self {
-            // Use empty string for non RGB colors.
-            Color::Theme(_, _) | Color::Default | Color::Automatic => String::new(),
-            _ => Self::rgb_hex_value(self),
-        }
-    }
-
     // Get the ARGB hex value for a color. The alpha channel is always FF.
     pub(crate) fn argb_hex_value(self) -> String {
         format!("FF{}", self.rgb_hex_value())

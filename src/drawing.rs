@@ -6,7 +6,10 @@
 
 mod tests;
 
-use crate::{xmlwriter::XMLWriter, Format, ObjectMovement, Url};
+use crate::{
+    xmlwriter::XMLWriter, Color, ObjectMovement, Shape, ShapeFormat, ShapeGradientFill,
+    ShapeGradientFillType, ShapeGradientStop, ShapeLine, ShapeLineDashType, ShapePatternFill, Url,
+};
 
 pub struct Drawing {
     pub(crate) writer: XMLWriter,
@@ -292,12 +295,12 @@ impl Drawing {
         // Write the a:prstGeom element.
         self.write_a_prst_geom();
 
-        if drawing_info.drawing_type == DrawingType::Shape {
+        if let Some(shape) = &drawing_info.shape {
             // Write the a:solidFill element.
-            self.write_a_solid_fill(drawing_info);
+            self.write_shape_formatting(&shape.format);
 
             // Write the a:ln element.
-            self.write_a_ln();
+            //self.write_a_ln();
         }
 
         self.writer.xml_end_tag("xdr:spPr");
@@ -478,56 +481,370 @@ impl Drawing {
         self.writer.xml_empty_tag("xdr:cNvSpPr", &attributes);
     }
 
-    // Write the <a:solidFill> element.
-    fn write_a_solid_fill(&mut self, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag_only("a:solidFill");
-
-        dbg!(drawing_info.format.is_some());
-
-        if let Some(format) = &drawing_info.format {
-            let color = format.fill.background_color.drawing_hex_value();
-
-            if color.is_empty() {
-                self.write_a_scheme_clr("lt1", false);
-            } else {
-                self.write_a_srgb_clr(&color);
-            }
+    // Write the formatting elements for shapes.
+    fn write_shape_formatting(&mut self, format: &ShapeFormat) {
+        if format.no_fill {
+            self.writer.xml_empty_tag_only("a:noFill");
+        } else if let Some(solid_fill) = &format.solid_fill {
+            // Write the a:solidFill element.
+            self.write_a_solid_fill(solid_fill.color, solid_fill.transparency);
+        } else if let Some(pattern_fill) = &format.pattern_fill {
+            // Write the a:pattFill element.
+            self.write_a_patt_fill(pattern_fill);
+        } else if let Some(gradient_fill) = &format.gradient_fill {
+            // Write the a:gradFill element.
+            self.write_gradient_fill(gradient_fill);
         } else {
-            self.write_a_scheme_clr("lt1", false);
+            // Write the a:solidFill element.
+            self.write_default_solid_fill();
         }
 
-        self.writer.xml_end_tag("a:solidFill");
+        if format.no_line {
+            // Write a default line with no fill.
+            self.write_a_ln_none();
+        } else if let Some(line) = &format.line {
+            // Write the a:ln element.
+            self.write_a_ln(line);
+        } else {
+            // Write the default a:ln element.
+            self.write_default_ln();
+        }
     }
 
-    // Write the <a:solidFill> element.
-    fn write_a_solid_fill_line(&mut self) {
+    // Write the default <a:ln> element.
+    fn write_default_ln(&mut self) {
+        let attributes = [("w", "9525"), ("cmpd", "sng")];
+
+        self.writer.xml_start_tag("a:ln", &attributes);
+
+        // Write the a:solidFill element.
+        self.write_line_solid_fill();
+
+        self.writer.xml_end_tag("a:ln");
+    }
+
+    // Write the <a:ln> element.
+    fn write_a_ln(&mut self, line: &ShapeLine) {
+        let mut attributes = vec![];
+
+        if let Some(width) = &line.width {
+            // Round width to nearest 0.25, like Excel.
+            let width = ((*width + 0.125) * 4.0).floor() / 4.0;
+
+            // Convert to Excel internal units.
+            let width = (12700.0 * width).ceil() as u32;
+
+            attributes.push(("w", width.to_string()));
+        }
+
+        attributes.push(("cmpd", "sng".to_string()));
+
+        if line.color != Color::Default || line.dash_type != ShapeLineDashType::Solid || line.hidden
+        {
+            self.writer.xml_start_tag("a:ln", &attributes);
+
+            if line.hidden {
+                // Write the a:noFill element.
+                self.write_a_no_fill();
+            } else {
+                if line.color != Color::Default {
+                    // Write the a:solidFill element.
+                    self.write_a_solid_fill(line.color, line.transparency);
+                }
+
+                if line.dash_type != ShapeLineDashType::Solid {
+                    // Write the a:prstDash element.
+                    self.write_a_prst_dash(line);
+                }
+            }
+
+            self.writer.xml_end_tag("a:ln");
+        } else {
+            self.writer.xml_empty_tag("a:ln", &attributes);
+        }
+    }
+
+    // Write the <a:ln> element.
+    fn write_a_ln_none(&mut self) {
+        let attributes = [("w", "9525"), ("cmpd", "sng")];
+
+        self.writer.xml_start_tag("a:ln", &attributes);
+
+        // Write the a:noFill element.
+        self.write_a_no_fill();
+
+        self.writer.xml_end_tag("a:ln");
+    }
+
+    // Write the <a:solidFill> element for the ln element.
+    fn write_line_solid_fill(&mut self) {
         self.writer.xml_start_tag_only("a:solidFill");
 
         // Write the a:schemeClr element.
-        self.write_a_scheme_clr("lt1", true);
+        self.write_default_scheme_clr("lt1", true);
 
         self.writer.xml_end_tag("a:solidFill");
     }
 
-    // Write the <a:srgbClr> element.
-    fn write_a_srgb_clr(&mut self, color: &str) {
-        let attributes = [("val", color)];
+    // Write the default <a:solidFill> element.
+    fn write_default_solid_fill(&mut self) {
+        self.writer.xml_start_tag_only("a:solidFill");
 
-        self.writer.xml_empty_tag("a:srgbClr", &attributes);
+        self.write_default_scheme_clr("lt1", false);
+
+        self.writer.xml_end_tag("a:solidFill");
+    }
+
+    // Write the <a:solidFill> element.
+    fn write_a_solid_fill(&mut self, color: Color, transparency: u8) {
+        self.writer.xml_start_tag_only("a:solidFill");
+
+        // Write the color element.
+        self.write_color(color, transparency);
+
+        self.writer.xml_end_tag("a:solidFill");
+    }
+
+    // Write the <a:pattFill> element.
+    fn write_a_patt_fill(&mut self, fill: &ShapePatternFill) {
+        let attributes = [("prst", fill.pattern.to_string())];
+
+        self.writer.xml_start_tag("a:pattFill", &attributes);
+
+        if fill.foreground_color != Color::Default {
+            // Write the <a:fgClr> element.
+            self.writer.xml_start_tag_only("a:fgClr");
+            self.write_color(fill.foreground_color, 0);
+            self.writer.xml_end_tag("a:fgClr");
+        }
+
+        if fill.background_color != Color::Default {
+            // Write the <a:bgClr> element.
+            self.writer.xml_start_tag_only("a:bgClr");
+            self.write_color(fill.background_color, 0);
+            self.writer.xml_end_tag("a:bgClr");
+        } else if fill.background_color == Color::Default && fill.foreground_color != Color::Default
+        {
+            // If there is a foreground color but no background color then we
+            // need to write a default background color.
+            self.writer.xml_start_tag_only("a:bgClr");
+            self.write_color(Color::White, 0);
+            self.writer.xml_end_tag("a:bgClr");
+        }
+
+        self.writer.xml_end_tag("a:pattFill");
+    }
+
+    // Write the <a:gradFill> element.
+    fn write_gradient_fill(&mut self, fill: &ShapeGradientFill) {
+        let mut attributes = vec![];
+
+        if fill.gradient_type != ShapeGradientFillType::Linear {
+            attributes.push(("flip", "none"));
+            attributes.push(("rotWithShape", "1"));
+        }
+
+        self.writer.xml_start_tag("a:gradFill", &attributes);
+        self.writer.xml_start_tag_only("a:gsLst");
+
+        for gradient_stop in &fill.gradient_stops {
+            // Write the a:gs element.
+            self.write_gradient_stop(gradient_stop);
+        }
+
+        self.writer.xml_end_tag("a:gsLst");
+
+        if fill.gradient_type == ShapeGradientFillType::Linear {
+            // Write the a:lin element.
+            self.write_gradient_fill_angle(fill.angle);
+        } else {
+            // Write the a:path element.
+            self.write_gradient_path(fill.gradient_type);
+        }
+
+        self.writer.xml_end_tag("a:gradFill");
+    }
+
+    // Write the <a:gs> element.
+    fn write_gradient_stop(&mut self, gradient_stop: &ShapeGradientStop) {
+        let position = 1000 * u32::from(gradient_stop.position);
+        let attributes = [("pos", position.to_string())];
+
+        self.writer.xml_start_tag("a:gs", &attributes);
+        self.write_color(gradient_stop.color, 0);
+
+        self.writer.xml_end_tag("a:gs");
+    }
+
+    // Write the <a:lin> element.
+    fn write_gradient_fill_angle(&mut self, angle: u16) {
+        let angle = 60_000 * u32::from(angle);
+        let attributes = [("ang", angle.to_string()), ("scaled", "0".to_string())];
+
+        self.writer.xml_empty_tag("a:lin", &attributes);
+    }
+
+    // Write the <a:path> element.
+    fn write_gradient_path(&mut self, gradient_type: ShapeGradientFillType) {
+        let mut attributes = vec![];
+
+        match gradient_type {
+            ShapeGradientFillType::Radial => attributes.push(("path", "circle")),
+            ShapeGradientFillType::Rectangular => attributes.push(("path", "rect")),
+            ShapeGradientFillType::Path => attributes.push(("path", "shape")),
+            ShapeGradientFillType::Linear => {}
+        }
+
+        self.writer.xml_start_tag("a:path", &attributes);
+
+        // Write the a:fillToRect element.
+        self.write_a_fill_to_rect(gradient_type);
+
+        self.writer.xml_end_tag("a:path");
+
+        // Write the a:tileRect element.
+        self.write_a_tile_rect(gradient_type);
+    }
+
+    // Write the <a:fillToRect> element.
+    fn write_a_fill_to_rect(&mut self, gradient_type: ShapeGradientFillType) {
+        let mut attributes = vec![];
+
+        match gradient_type {
+            ShapeGradientFillType::Path => {
+                attributes.push(("l", "50000"));
+                attributes.push(("t", "50000"));
+                attributes.push(("r", "50000"));
+                attributes.push(("b", "50000"));
+            }
+            _ => {
+                attributes.push(("l", "100000"));
+                attributes.push(("t", "100000"));
+            }
+        }
+
+        self.writer.xml_empty_tag("a:fillToRect", &attributes);
+    }
+
+    // Write the <a:tileRect> element.
+    fn write_a_tile_rect(&mut self, gradient_type: ShapeGradientFillType) {
+        let mut attributes = vec![];
+
+        match gradient_type {
+            ShapeGradientFillType::Rectangular | ShapeGradientFillType::Radial => {
+                attributes.push(("r", "-100000"));
+                attributes.push(("b", "-100000"));
+            }
+            _ => {}
+        }
+
+        self.writer.xml_empty_tag("a:tileRect", &attributes);
+    }
+
+    // Write the <a:srgbClr> element.
+    fn write_color(&mut self, color: Color, transparency: u8) {
+        match color {
+            Color::Theme(_, _) => {
+                let (scheme, lum_mod, lum_off) = color.chart_scheme();
+                if !scheme.is_empty() {
+                    // Write the a:schemeClr element.
+                    self.write_a_scheme_clr(scheme, lum_mod, lum_off, transparency);
+                }
+            }
+            Color::Automatic => {
+                let attributes = [("val", "window"), ("lastClr", "FFFFFF")];
+
+                self.writer.xml_empty_tag("a:sysClr", &attributes);
+            }
+            _ => {
+                let attributes = [("val", color.rgb_hex_value())];
+
+                if transparency > 0 {
+                    self.writer.xml_start_tag("a:srgbClr", &attributes);
+
+                    // Write the a:alpha element.
+                    self.write_a_alpha(transparency);
+
+                    self.writer.xml_end_tag("a:srgbClr");
+                } else {
+                    self.writer.xml_empty_tag("a:srgbClr", &attributes);
+                }
+            }
+        }
     }
 
     // Write the <a:schemeClr> element.
-    fn write_a_scheme_clr(&mut self, tone: &str, has_shade: bool) {
+    fn write_a_scheme_clr(&mut self, scheme: String, lum_mod: u32, lum_off: u32, transparency: u8) {
+        let attributes = [("val", scheme)];
+
+        if lum_mod > 0 || lum_off > 0 || transparency > 0 {
+            self.writer.xml_start_tag("a:schemeClr", &attributes);
+
+            if lum_mod > 0 {
+                // Write the a:lumMod element.
+                self.write_a_lum_mod(lum_mod);
+            }
+
+            if lum_off > 0 {
+                // Write the a:lumOff element.
+                self.write_a_lum_off(lum_off);
+            }
+
+            if transparency > 0 {
+                // Write the a:alpha element.
+                self.write_a_alpha(transparency);
+            }
+
+            self.writer.xml_end_tag("a:schemeClr");
+        } else {
+            self.writer.xml_empty_tag("a:schemeClr", &attributes);
+        }
+    }
+
+    // Write the <a:lumMod> element.
+    fn write_a_lum_mod(&mut self, lum_mod: u32) {
+        let attributes = [("val", lum_mod.to_string())];
+
+        self.writer.xml_empty_tag("a:lumMod", &attributes);
+    }
+
+    // Write the <a:lumOff> element.
+    fn write_a_lum_off(&mut self, lum_off: u32) {
+        let attributes = [("val", lum_off.to_string())];
+
+        self.writer.xml_empty_tag("a:lumOff", &attributes);
+    }
+
+    // Write the <a:alpha> element.
+    fn write_a_alpha(&mut self, transparency: u8) {
+        let transparency = u32::from(100 - transparency) * 1000;
+
+        let attributes = [("val", transparency.to_string())];
+
+        self.writer.xml_empty_tag("a:alpha", &attributes);
+    }
+
+    // Write the <a:noFill> element.
+    fn write_a_no_fill(&mut self) {
+        self.writer.xml_empty_tag_only("a:noFill");
+    }
+
+    // Write the <a:prstDash> element.
+    fn write_a_prst_dash(&mut self, line: &ShapeLine) {
+        let attributes = [("val", line.dash_type.to_string())];
+
+        self.writer.xml_empty_tag("a:prstDash", &attributes);
+    }
+
+    // Write the default <a:schemeClr> element for textboxes.
+    fn write_default_scheme_clr(&mut self, tone: &str, is_line: bool) {
         let mut attributes = vec![];
 
         attributes.push(("val", tone.to_string()));
 
-        if has_shade {
+        if is_line {
             self.writer.xml_start_tag("a:schemeClr", &attributes);
-
-            // Write the a:shade element.
             self.write_a_shade();
-
             self.writer.xml_end_tag("a:schemeClr");
         } else {
             self.writer.xml_empty_tag("a:schemeClr", &attributes);
@@ -541,17 +858,17 @@ impl Drawing {
         self.writer.xml_empty_tag("a:shade", &attributes);
     }
 
-    // Write the <a:ln> element.
-    fn write_a_ln(&mut self) {
-        let attributes = [("w", "9525"), ("cmpd", "sng")];
+    // Write the <a:ln> element. // TODO
+    // fn write_a_ln(&mut self) {
+    //     let attributes = [("w", "9525"), ("cmpd", "sng")];
 
-        self.writer.xml_start_tag("a:ln", &attributes);
+    //     self.writer.xml_start_tag("a:ln", &attributes);
 
-        // Write the a:solidFill element.
-        self.write_a_solid_fill_line();
+    //     // Write the a:solidFill element.
+    //     self.write_a_solid_fill_line();
 
-        self.writer.xml_end_tag("a:ln");
-    }
+    //     self.writer.xml_end_tag("a:ln");
+    // }
 
     // Write the <xdr:style> element.
     fn write_style(&mut self) {
@@ -622,7 +939,7 @@ impl Drawing {
         self.writer.xml_start_tag("a:fontRef", &attributes);
 
         // Write the a:schemeClr element.
-        self.write_a_scheme_clr("dk1", false);
+        self.write_default_scheme_clr("dk1", false);
 
         self.writer.xml_end_tag("a:fontRef");
     }
@@ -736,7 +1053,7 @@ impl Default for DrawingInfo {
             object_movement: ObjectMovement::MoveButDontSizeWithCells,
             drawing_type: DrawingType::Image,
             url: None,
-            format: None,
+            shape: None,
         }
     }
 }
@@ -756,7 +1073,7 @@ pub(crate) struct DrawingInfo {
     pub(crate) rel_id: u32,
     pub(crate) drawing_type: DrawingType,
     pub(crate) url: Option<Url>,
-    pub(crate) format: Option<Format>,
+    pub(crate) shape: Option<Shape>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

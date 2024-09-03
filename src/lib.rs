@@ -266,7 +266,7 @@ pub use comment::*;
 #[doc(hidden)]
 pub use conditional_format::*;
 
-#[doc(hidden)]
+//#[doc(hidden)] // todo
 pub use shape::*;
 
 #[doc(hidden)]

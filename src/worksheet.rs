@@ -14092,7 +14092,7 @@ impl Worksheet {
             let mut drawing_info = self.position_object_emus(row, col, shape);
             drawing_info.rel_id = shape_id;
             drawing_info.url.clone_from(&drawing_hyperlink);
-            drawing_info.format.clone_from(&shape.format);
+            drawing_info.shape = Some(shape.clone());
             self.drawing.drawings.push(drawing_info);
 
             shape_id += 1;
@@ -14511,7 +14511,7 @@ impl Worksheet {
             drawing_type: object.drawing_type(),
             rel_id: 0,
             url: None,
-            format: None,
+            shape: None,
         }
     }
 
