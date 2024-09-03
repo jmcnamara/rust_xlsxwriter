@@ -26,6 +26,7 @@ pub struct Shape {
     pub(crate) object_movement: ObjectMovement,
     pub(crate) decorative: bool,
     pub(crate) format: ShapeFormat,
+    pub(crate) font: ShapeFont,
     pub(crate) url: Option<Url>,
     pub(crate) _shape_type: ShapeType,
 }
@@ -55,6 +56,7 @@ impl Shape {
             object_movement: ObjectMovement::MoveAndSizeWithCells,
             decorative: false,
             format: ShapeFormat::default(),
+            font: ShapeFont::default(),
             url: None,
             _shape_type: ShapeType::TextBox,
         }
@@ -114,7 +116,7 @@ impl Shape {
         self
     }
 
-    /// Set the [`ShapeFormat`] of the shape.
+    /// Set the format properties of the shape.
     ///
     /// Set the font or background properties of a shape using a [`ShapeFormat`]
     /// object. TODO
@@ -130,6 +132,31 @@ impl Shape {
         T: IntoShapeFormat,
     {
         self.format = format.new_shape_format();
+        self
+    }
+
+    /// Set the font properties of of the shape.
+    ///
+    /// Set the font properties of a shape title using a [`ShapeFont`]
+    /// reference. Example font properties that can be set are:
+    ///
+    /// - [`ShapeFont::set_bold()`]
+    /// - [`ShapeFont::set_italic()`]
+    /// - [`ShapeFont::set_name()`]
+    /// - [`ShapeFont::set_size()`]
+    /// - [`ShapeFont::set_rotation()`]
+    ///
+    /// See [`ShapeFont`] for full details.
+    ///
+    /// # Parameters
+    ///
+    /// `font`: A [`ShapeFont`] struct reference to represent the font
+    /// properties.
+    ///
+    /// # Examples
+    ///
+    pub fn set_font(mut self, font: &ShapeFont) -> Shape {
+        self.font = font.clone();
         self
     }
 
@@ -2142,9 +2169,7 @@ impl fmt::Display for ShapePatternFillType {
 pub struct ShapeFont {
     // Shape/axis titles have a default bold font so we need to handle that as
     // an option.
-    pub(crate) bold: Option<bool>,
-    pub(crate) has_default_bold: bool,
-
+    pub(crate) bold: bool,
     pub(crate) italic: bool,
     pub(crate) underline: bool,
     pub(crate) name: String,
@@ -2169,18 +2194,17 @@ impl ShapeFont {
     ///
     pub fn new() -> ShapeFont {
         ShapeFont {
-            bold: None,
+            bold: false,
             italic: false,
             underline: false,
             name: String::new(),
-            size: 0.0,
+            size: 1100.0,
             color: Color::Default,
             strikethrough: false,
             pitch_family: 0,
             character_set: 0,
             rotation: None,
             has_baseline: false,
-            has_default_bold: false,
             right_to_left: None,
         }
     }
@@ -2235,7 +2259,7 @@ impl ShapeFont {
     /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_bold.png">
     ///
     pub fn set_bold(&mut self) -> &mut ShapeFont {
-        self.bold = Some(true);
+        self.bold = true;
         self
     }
 
@@ -2573,7 +2597,7 @@ impl ShapeFont {
     /// Excel. This method can be used to turn it off.
     ///
     pub fn unset_bold(&mut self) -> &mut ShapeFont {
-        self.bold = Some(false);
+        self.bold = false;
         self
     }
 
@@ -2620,19 +2644,9 @@ impl ShapeFont {
         self
     }
 
-    #[doc(hidden)]
-    /// Set the default bold property for the font.
-    ///
-    /// The is mainly only required for testing to ensure strict compliance with
-    /// Excel's output.
-    ///
-    /// # Parameters
-    ///
-    /// - `enable`: Turn the property on/off. It is off by default.
-    ///
-    pub fn set_default_bold(&mut self, enable: bool) -> &mut ShapeFont {
-        self.has_default_bold = enable;
-        self
+    // Internal check for font properties that need a sub-element.
+    pub(crate) fn is_latin(&self) -> bool {
+        !self.name.is_empty() || self.pitch_family > 0 || self.character_set > 0
     }
 }
 

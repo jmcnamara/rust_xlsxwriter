@@ -7,7 +7,7 @@
 mod tests;
 
 use crate::{
-    xmlwriter::XMLWriter, Color, ObjectMovement, Shape, ShapeFormat, ShapeGradientFill,
+    xmlwriter::XMLWriter, Color, ObjectMovement, Shape, ShapeFont, ShapeFormat, ShapeGradientFill,
     ShapeGradientFillType, ShapeGradientStop, ShapeLine, ShapeLineDashType, ShapePatternFill, Url,
 };
 
@@ -858,18 +858,6 @@ impl Drawing {
         self.writer.xml_empty_tag("a:shade", &attributes);
     }
 
-    // Write the <a:ln> element. // TODO
-    // fn write_a_ln(&mut self) {
-    //     let attributes = [("w", "9525"), ("cmpd", "sng")];
-
-    //     self.writer.xml_start_tag("a:ln", &attributes);
-
-    //     // Write the a:solidFill element.
-    //     self.write_a_solid_fill_line();
-
-    //     self.writer.xml_end_tag("a:ln");
-    // }
-
     // Write the <xdr:style> element.
     fn write_style(&mut self) {
         self.writer.xml_start_tag_only("xdr:style");
@@ -961,9 +949,15 @@ impl Drawing {
             drawing_info.name.clone()
         };
 
+        // Get the shape font.
+        let font = match &drawing_info.shape {
+            Some(shape) => shape.font.clone(),
+            None => ShapeFont::default(),
+        };
+
         for text in text.lines() {
             // Write the a:p element.
-            self.write_a_p(text);
+            self.write_a_p(text, &font);
         }
 
         self.writer.xml_end_tag("xdr:txBody");
@@ -982,14 +976,14 @@ impl Drawing {
     }
 
     // Write the <a:p> element.
-    fn write_a_p(&mut self, text: &str) {
+    fn write_a_p(&mut self, text: &str, font: &ShapeFont) {
         self.writer.xml_start_tag_only("a:p");
 
         if text.is_empty() {
-            self.write_a_end_para_rpr();
+            self.write_font_elements("a:endParaRPr", font);
         } else {
             self.writer.xml_start_tag_only("a:r");
-            self.write_a_r_pr();
+            self.write_font_elements("a:rPr", font);
             self.writer.xml_data_element_only("a:t", text);
             self.writer.xml_end_tag("a:r");
         }
@@ -997,18 +991,65 @@ impl Drawing {
         self.writer.xml_end_tag("a:p");
     }
 
-    // Write the <a:rPr> element.
-    fn write_a_r_pr(&mut self) {
-        let attributes = [("lang", "en-US"), ("sz", "1100")];
+    // Write font sub-elements shared between <a:defRPr> and <a:rPr> elements.
+    fn write_font_elements(&mut self, tag: &str, font: &ShapeFont) {
+        dbg!(&tag);
+        let mut attributes = vec![("lang", "en-US".to_string())];
 
-        self.writer.xml_empty_tag("a:rPr", &attributes);
+        if font.size > 0.0 {
+            attributes.push(("sz", font.size.to_string()));
+        }
+
+        if font.bold {
+            attributes.push(("b", "1".to_string()));
+        }
+
+        if font.italic {
+            attributes.push(("i", "1".to_string()));
+        }
+        if font.underline {
+            attributes.push(("u", "sng".to_string()));
+        }
+
+        if font.has_baseline {
+            attributes.push(("baseline", "0".to_string()));
+        }
+
+        if font.is_latin() || !font.color.is_auto_or_default() {
+            self.writer.xml_start_tag(tag, &attributes);
+
+            if !font.color.is_auto_or_default() {
+                self.write_a_solid_fill(font.color, 0);
+            }
+
+            if font.is_latin() {
+                self.write_a_latin("a:latin", font);
+                self.write_a_latin("a:cs", font);
+            }
+
+            self.writer.xml_end_tag(tag);
+        } else {
+            self.writer.xml_empty_tag(tag, &attributes);
+        }
     }
 
-    // Write the <a:endParaRPr> element.
-    fn write_a_end_para_rpr(&mut self) {
-        let attributes = [("lang", "en-US"), ("sz", "1100")];
+    // Write the <a:latin> element.
+    fn write_a_latin(&mut self, tag: &str, font: &ShapeFont) {
+        let mut attributes = vec![];
 
-        self.writer.xml_empty_tag("a:endParaRPr", &attributes);
+        if !font.name.is_empty() {
+            attributes.push(("typeface", font.name.to_string()));
+        }
+
+        if font.pitch_family > 0 {
+            attributes.push(("pitchFamily", font.pitch_family.to_string()));
+        }
+
+        if font.character_set > 0 || font.pitch_family > 0 {
+            attributes.push(("charset", font.character_set.to_string()));
+        }
+
+        self.writer.xml_empty_tag(tag, &attributes);
     }
 }
 
