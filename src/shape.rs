@@ -9,7 +9,7 @@
 use std::fmt;
 
 use crate::drawing::{DrawingObject, DrawingType};
-use crate::{Color, ObjectMovement, Url};
+use crate::{Color, Formula, ObjectMovement, Url, XlsxError};
 
 #[derive(Clone)]
 /// The `Shape` struct represents an worksheet shape object.
@@ -22,6 +22,7 @@ pub struct Shape {
     pub(crate) x_offset: u32,
     pub(crate) y_offset: u32,
     pub(crate) text: String,
+    pub(crate) text_link: Option<Formula>,
     pub(crate) alt_text: String,
     pub(crate) object_movement: ObjectMovement,
     pub(crate) decorative: bool,
@@ -52,6 +53,7 @@ impl Shape {
             width: 192.0,
             height: 120.0,
             text: String::new(),
+            text_link: None,
             alt_text: String::new(),
             object_movement: ObjectMovement::MoveAndSizeWithCells,
             decorative: false,
@@ -75,6 +77,22 @@ impl Shape {
     ///
     pub fn set_text(mut self, text: impl Into<String>) -> Shape {
         self.text = text.into();
+        self
+    }
+
+    /// Set the text link in the shape.
+    ///
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `text`: The text for the shape.
+    ///
+    /// # Examples
+    ///
+    ///
+    pub fn set_text_link(mut self, cell: impl Into<Formula>) -> Shape {
+        self.text_link = Some(cell.into());
         self
     }
 
@@ -158,6 +176,37 @@ impl Shape {
     pub fn set_font(mut self, font: &ShapeFont) -> Shape {
         self.font = font.clone();
         self
+    }
+
+    /// Set a Url/Hyperlink for a shape.
+    ///
+    /// Set a Url/Hyperlink for an image so that when the user clicks on it they
+    /// are redirected to an internal or external location.
+    ///
+    /// See [`Url`] for an explanation of the URIs supported by Excel and for
+    /// other options that can be set.
+    ///
+    /// # Parameters
+    ///
+    /// - `link`: The url/hyperlink associate with the image as a string or
+    ///   [`Url`].
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::MaxUrlLengthExceeded`] - URL string or anchor exceeds
+    ///   Excel's limit of 2080 characters.
+    /// - [`XlsxError::UnknownUrlType`] - The URL has an unknown URI type. See
+    ///   [`Worksheet::write_url()`](crate::Worksheet::write_url).
+    /// - [`XlsxError::ParameterError`] - URL mouseover tool tip exceeds Excel's
+    ///   limit of 255 characters.
+    ///
+    pub fn set_url(mut self, link: impl Into<Url>) -> Result<Shape, XlsxError> {
+        let mut url = link.into();
+        url.initialize()?;
+
+        self.url = Some(url);
+
+        Ok(self)
     }
 
     /// Set the alt text for the shape to help accessibility.

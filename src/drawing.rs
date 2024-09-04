@@ -14,6 +14,8 @@ use crate::{
 pub struct Drawing {
     pub(crate) writer: XMLWriter,
     pub(crate) drawings: Vec<DrawingInfo>,
+    pub(crate) shapes: Vec<Shape>,
+    shape_id: usize,
 }
 
 impl Drawing {
@@ -28,6 +30,8 @@ impl Drawing {
         Drawing {
             writer,
             drawings: vec![],
+            shapes: vec![],
+            shape_id: 0,
         }
     }
 
@@ -90,7 +94,12 @@ impl Drawing {
         match drawing_info.drawing_type {
             DrawingType::Image => self.write_pic(index, drawing_info),
             DrawingType::Chart => self.write_graphic_frame(index, drawing_info),
-            DrawingType::Shape => self.write_sp(index, drawing_info),
+            DrawingType::Shape => {
+                let shape = self.shapes[self.shape_id].clone();
+                self.shape_id += 1;
+
+                self.write_sp(index, drawing_info, &shape);
+            }
             DrawingType::Vml => {}
         }
 
@@ -295,13 +304,27 @@ impl Drawing {
         // Write the a:prstGeom element.
         self.write_a_prst_geom();
 
-        if let Some(shape) = &drawing_info.shape {
-            // Write the a:solidFill element.
-            self.write_shape_formatting(&shape.format);
+        self.writer.xml_end_tag("xdr:spPr");
+    }
 
-            // Write the a:ln element.
-            //self.write_a_ln();
-        }
+    // Write the <xdr:spPr> element.
+    fn write_shape_sp_pr(&mut self, drawing_info: &DrawingInfo, shape: &Shape) {
+        self.writer.xml_start_tag_only("xdr:spPr");
+        self.writer.xml_start_tag_only("a:xfrm");
+
+        // Write the a:off element.
+        self.write_a_off(drawing_info);
+
+        // Write the a:ext element.
+        self.write_a_ext(drawing_info);
+
+        self.writer.xml_end_tag("a:xfrm");
+
+        // Write the a:prstGeom element.
+        self.write_a_prst_geom();
+
+        // Write the a:solidFill element.
+        self.write_shape_formatting(&shape.format);
 
         self.writer.xml_end_tag("xdr:spPr");
     }
@@ -441,8 +464,17 @@ impl Drawing {
     }
 
     // Write the <xdr:sp> element.
-    fn write_sp(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        let attributes = [("macro", ""), ("textlink", "")];
+    fn write_sp(&mut self, index: u32, drawing_info: &DrawingInfo, shape: &Shape) {
+        let mut attributes = vec![("macro", String::new())];
+
+        match &shape.text_link {
+            Some(text_link) => {
+                attributes.push(("textlink", text_link.formula_string.clone()));
+            }
+            None => {
+                attributes.push(("textlink", String::new()));
+            }
+        }
 
         self.writer.xml_start_tag("xdr:sp", &attributes);
 
@@ -450,13 +482,13 @@ impl Drawing {
         self.write_nv_sp_pr(index, drawing_info);
 
         // Write the xdr:spPr element.
-        self.write_sp_pr(drawing_info);
+        self.write_shape_sp_pr(drawing_info, shape);
 
         // Write the xdr:style element.
         self.write_style();
 
         // Write the xdr:txBody element.
-        self.write_tx_body(drawing_info);
+        self.write_tx_body(drawing_info, shape);
 
         self.writer.xml_end_tag("xdr:sp");
     }
@@ -506,7 +538,7 @@ impl Drawing {
             // Write the a:ln element.
             self.write_a_ln(line);
         } else {
-            // Write the default a:ln element.
+            // Write the default a:ln element. // Todo. replace?
             self.write_default_ln();
         }
     }
@@ -538,11 +570,10 @@ impl Drawing {
         }
 
         attributes.push(("cmpd", "sng".to_string()));
+        self.writer.xml_start_tag("a:ln", &attributes);
 
         if line.color != Color::Default || line.dash_type != ShapeLineDashType::Solid || line.hidden
         {
-            self.writer.xml_start_tag("a:ln", &attributes);
-
             if line.hidden {
                 // Write the a:noFill element.
                 self.write_a_no_fill();
@@ -557,11 +588,12 @@ impl Drawing {
                     self.write_a_prst_dash(line);
                 }
             }
-
-            self.writer.xml_end_tag("a:ln");
         } else {
-            self.writer.xml_empty_tag("a:ln", &attributes);
+            // Write the a:solidFill element.
+            self.write_line_solid_fill();
         }
+
+        self.writer.xml_end_tag("a:ln");
     }
 
     // Write the <a:ln> element.
@@ -933,7 +965,7 @@ impl Drawing {
     }
 
     // Write the <xdr:txBody> element.
-    fn write_tx_body(&mut self, drawing_info: &DrawingInfo) {
+    fn write_tx_body(&mut self, drawing_info: &DrawingInfo, shape: &Shape) {
         self.writer.xml_start_tag_only("xdr:txBody");
 
         // Write the a:bodyPr element.
@@ -949,15 +981,9 @@ impl Drawing {
             drawing_info.name.clone()
         };
 
-        // Get the shape font.
-        let font = match &drawing_info.shape {
-            Some(shape) => shape.font.clone(),
-            None => ShapeFont::default(),
-        };
-
         for text in text.lines() {
             // Write the a:p element.
-            self.write_a_p(text, &font);
+            self.write_a_p(text, shape);
         }
 
         self.writer.xml_end_tag("xdr:txBody");
@@ -976,10 +1002,28 @@ impl Drawing {
     }
 
     // Write the <a:p> element.
-    fn write_a_p(&mut self, text: &str, font: &ShapeFont) {
+    fn write_a_p(&mut self, text: &str, shape: &Shape) {
+        let font = &shape.font;
+        let has_text_link = shape.text_link.is_some();
+
         self.writer.xml_start_tag_only("a:p");
 
-        if text.is_empty() {
+        if has_text_link {
+            self.write_a_fld();
+
+            if text.is_empty() {
+                self.write_font_elements("a:rPr", font);
+                self.writer.xml_data_element_only("a:t", " ");
+                self.writer.xml_end_tag("a:fld");
+                self.write_font_elements("a:endParaRPr", font);
+            } else {
+                self.write_font_elements("a:rPr", font);
+                self.writer.xml_empty_tag_only("a:pPr");
+                self.writer.xml_data_element_only("a:t", text);
+                self.writer.xml_end_tag("a:fld");
+                self.write_font_elements("a:endParaRPr", font);
+            }
+        } else if text.is_empty() {
             self.write_font_elements("a:endParaRPr", font);
         } else {
             self.writer.xml_start_tag_only("a:r");
@@ -993,7 +1037,6 @@ impl Drawing {
 
     // Write font sub-elements shared between <a:defRPr> and <a:rPr> elements.
     fn write_font_elements(&mut self, tag: &str, font: &ShapeFont) {
-        dbg!(&tag);
         let mut attributes = vec![("lang", "en-US".to_string())];
 
         if font.size > 0.0 {
@@ -1051,6 +1094,16 @@ impl Drawing {
 
         self.writer.xml_empty_tag(tag, &attributes);
     }
+
+    // Write the <a:fld> element.
+    fn write_a_fld(&mut self) {
+        let attributes = [
+            ("id", "{B8ADDEFE-BF52-4FD4-8C5D-6B85EF6FF707}"),
+            ("type", "TxLink"),
+        ];
+
+        self.writer.xml_start_tag("a:fld", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1094,7 +1147,6 @@ impl Default for DrawingInfo {
             object_movement: ObjectMovement::MoveButDontSizeWithCells,
             drawing_type: DrawingType::Image,
             url: None,
-            shape: None,
         }
     }
 }
@@ -1114,7 +1166,6 @@ pub(crate) struct DrawingInfo {
     pub(crate) rel_id: u32,
     pub(crate) drawing_type: DrawingType,
     pub(crate) url: Option<Url>,
-    pub(crate) shape: Option<Shape>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

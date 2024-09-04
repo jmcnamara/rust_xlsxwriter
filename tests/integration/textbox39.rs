@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Shape, ShapeFormat, Workbook, XlsxError};
+use rust_xlsxwriter::{Shape, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
@@ -16,9 +16,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let textbox = Shape::textbox()
         .set_text("This is some text")
-        .set_format(ShapeFormat::new().set_no_border());
+        .set_url("https://github.com/jmcnamara")?;
 
     worksheet.insert_textbox(8, 4, &textbox)?;
+    worksheet.insert_textbox(18, 4, &textbox)?;
 
     workbook.save(filename)?;
 
@@ -26,9 +27,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_textbox14() {
+fn test_textbox39() {
     let test_runner = common::TestRunner::new()
-        .set_name("textbox14")
+        .set_name("textbox39")
         .set_function(create_new_xlsx_file)
         .initialize();
 

@@ -1331,16 +1331,9 @@ pub struct Worksheet {
     pub(crate) dxf_formats: Vec<Format>,
     pub(crate) has_vml: bool,
     pub(crate) has_hyperlink_style: bool,
-    pub(crate) table_relationships: Vec<(String, String, String)>,
-    pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
-    pub(crate) drawing_object_relationships: Vec<(String, String, String)>,
-    pub(crate) drawing_relationships: Vec<(String, String, String)>,
-    pub(crate) comment_relationships: Vec<(String, String, String)>,
-    pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
     pub(crate) images: BTreeMap<(RowNum, ColNum), Image>,
     pub(crate) buttons_vml_info: Vec<VmlInfo>,
     pub(crate) comments_vml_info: Vec<VmlInfo>,
-    pub(crate) header_footer_vml_info: Vec<VmlInfo>,
     pub(crate) drawing: Drawing,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     pub(crate) header_footer_images: [Option<Image>; 6],
@@ -1356,6 +1349,16 @@ pub struct Worksheet {
     pub(crate) note_authors: BTreeMap<String, usize>,
     pub(crate) vml_data_id: String,
     pub(crate) vml_shape_id: u32,
+
+    // These collections need to be reset on resave.
+    drawing_rel_ids: HashMap<String, u32>,
+    pub(crate) comment_relationships: Vec<(String, String, String)>,
+    pub(crate) drawing_object_relationships: Vec<(String, String, String)>,
+    pub(crate) drawing_relationships: Vec<(String, String, String)>,
+    pub(crate) header_footer_vml_info: Vec<VmlInfo>,
+    pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
+    pub(crate) table_relationships: Vec<(String, String, String)>,
+    pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     merged_ranges: Vec<CellRange>,
@@ -1589,18 +1592,11 @@ impl Worksheet {
             panes,
             has_hyperlink_style: false,
             hyperlinks: BTreeMap::new(),
-            table_relationships: vec![],
-            hyperlink_relationships: vec![],
-            drawing_object_relationships: vec![],
-            drawing_relationships: vec![],
-            comment_relationships: vec![],
-            vml_drawing_relationships: vec![],
             images: BTreeMap::new(),
             shapes: BTreeMap::new(),
             drawing: Drawing::new(),
             image_types: [false; NUM_IMAGE_FORMATS],
             header_footer_images: [None, None, None, None, None, None],
-            header_footer_vml_info: vec![],
             buttons_vml_info: vec![],
             comments_vml_info: vec![],
             rel_count: 0,
@@ -1637,6 +1633,16 @@ impl Worksheet {
             vml_shape_id: 0,
             user_default_row_height: DEFAULT_ROW_HEIGHT,
             hide_unused_rows: false,
+
+            // These collections need to be reset on resave.
+            comment_relationships: vec![],
+            drawing_object_relationships: vec![],
+            drawing_rel_ids: HashMap::new(),
+            drawing_relationships: vec![],
+            header_footer_vml_info: vec![],
+            hyperlink_relationships: vec![],
+            table_relationships: vec![],
+            vml_drawing_relationships: vec![],
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -13960,8 +13966,6 @@ impl Worksheet {
         image_id: &mut u32,
         drawing_id: u32,
     ) {
-        let mut rel_ids: HashMap<String, u32> = HashMap::new();
-
         for (cell, image) in &self.images.clone() {
             let row = cell.0;
             let col = cell.1;
@@ -13983,11 +13987,12 @@ impl Worksheet {
                 let target = hyperlink.target();
                 let target_mode = hyperlink.target_mode();
 
-                let rel_id = match rel_ids.get(&hyperlink.url_link) {
+                let rel_id = match self.drawing_rel_ids.get(&hyperlink.url_link) {
                     Some(rel_id) => *rel_id,
                     None => {
-                        let rel_id = 1 + rel_ids.len() as u32;
-                        rel_ids.insert(hyperlink.url_link.clone(), rel_id);
+                        let rel_id = 1 + self.drawing_rel_ids.len() as u32;
+                        self.drawing_rel_ids
+                            .insert(hyperlink.url_link.clone(), rel_id);
 
                         // Store the linkage to the drawings rels file.
                         self.drawing_relationships.push((
@@ -14006,11 +14011,11 @@ impl Worksheet {
             }
 
             // Store the image references.
-            let rel_id = match rel_ids.get(&image.hash) {
+            let rel_id = match self.drawing_rel_ids.get(&image.hash) {
                 Some(rel_id) => *rel_id,
                 None => {
-                    let rel_id = 1 + rel_ids.len() as u32;
-                    rel_ids.insert(image.hash.clone(), rel_id);
+                    let rel_id = 1 + self.drawing_rel_ids.len() as u32;
+                    self.drawing_rel_ids.insert(image.hash.clone(), rel_id);
 
                     // Store the linkage to the drawings rels file.
                     let image_name =
@@ -14050,7 +14055,6 @@ impl Worksheet {
     // Convert the shape dimensions into drawing dimensions and add them to
     // the Drawing object. Also set the rel linkages between the files.
     pub(crate) fn prepare_worksheet_shapes(&mut self, shape_id: u32, drawing_id: u32) {
-        let mut rel_ids: HashMap<String, u32> = HashMap::new();
         let mut shape_id = shape_id;
 
         for (cell, shape) in &self.shapes.clone() {
@@ -14065,11 +14069,12 @@ impl Worksheet {
                 let target = hyperlink.target();
                 let target_mode = hyperlink.target_mode();
 
-                let rel_id = match rel_ids.get(&hyperlink.url_link) {
+                let rel_id = match self.drawing_rel_ids.get(&hyperlink.url_link) {
                     Some(rel_id) => *rel_id,
                     None => {
-                        let rel_id = 1 + rel_ids.len() as u32;
-                        rel_ids.insert(hyperlink.url_link.clone(), rel_id);
+                        let rel_id = 1 + self.drawing_rel_ids.len() as u32;
+                        self.drawing_rel_ids
+                            .insert(hyperlink.url_link.clone(), rel_id);
 
                         // Store the linkage to the drawings rels file.
                         self.drawing_relationships.push((
@@ -14092,8 +14097,8 @@ impl Worksheet {
             let mut drawing_info = self.position_object_emus(row, col, shape);
             drawing_info.rel_id = shape_id;
             drawing_info.url.clone_from(&drawing_hyperlink);
-            drawing_info.shape = Some(shape.clone());
             self.drawing.drawings.push(drawing_info);
+            self.drawing.shapes.push(shape.clone());
 
             shape_id += 1;
         }
@@ -14277,6 +14282,8 @@ impl Worksheet {
         }
 
         let mut rel_id = self.drawing_relationships.len() as u32;
+        self.drawing_rel_ids.insert("Chart".to_string(), rel_id);
+
         for (cell, chart) in &mut self.charts.clone() {
             let row = cell.0;
             let col = cell.1;
@@ -14511,7 +14518,6 @@ impl Worksheet {
             drawing_type: object.drawing_type(),
             rel_id: 0,
             url: None,
-            shape: None,
         }
     }
 
@@ -14574,14 +14580,15 @@ impl Worksheet {
         }
 
         self.rel_count = 0;
-        self.drawing.drawings.clear();
-        self.table_relationships.clear();
-        self.hyperlink_relationships.clear();
-        self.drawing_object_relationships.clear();
-        self.drawing_relationships.clear();
-        self.vml_drawing_relationships.clear();
         self.comment_relationships.clear();
+        self.drawing_object_relationships.clear();
+        self.drawing_rel_ids.clear();
+        self.drawing_relationships.clear();
+        self.drawing.drawings.clear();
         self.header_footer_vml_info.clear();
+        self.hyperlink_relationships.clear();
+        self.table_relationships.clear();
+        self.vml_drawing_relationships.clear();
     }
 
     // Check if any external relationships are required.
