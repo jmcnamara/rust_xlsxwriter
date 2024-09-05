@@ -8,7 +8,8 @@ mod tests;
 
 use crate::{
     xmlwriter::XMLWriter, Color, ObjectMovement, Shape, ShapeFont, ShapeFormat, ShapeGradientFill,
-    ShapeGradientFillType, ShapeGradientStop, ShapeLine, ShapeLineDashType, ShapePatternFill, Url,
+    ShapeGradientFillType, ShapeGradientStop, ShapeLine, ShapeLineDashType, ShapePatternFill,
+    ShapeTextDirection, ShapeTextHorizontalAlignment, Url,
 };
 
 pub struct Drawing {
@@ -958,7 +959,7 @@ impl Drawing {
         self.writer.xml_start_tag_only("xdr:txBody");
 
         // Write the a:bodyPr element.
-        self.write_a_body_pr();
+        self.write_a_body_pr(shape);
 
         // Write the a:lstStyle element.
         self.write_a_lst_style();
@@ -979,8 +980,47 @@ impl Drawing {
     }
 
     // Write the <a:bodyPr> element.
-    fn write_a_body_pr(&mut self) {
-        let attributes = [("wrap", "square"), ("rtlCol", "0"), ("anchor", "t")];
+    fn write_a_body_pr(&mut self, shape: &Shape) {
+        let mut attributes = vec![];
+
+        match shape.text_options.direction {
+            ShapeTextDirection::Horizontal => {}
+            ShapeTextDirection::Stacked => attributes.push(("vert", "wordArtVert".to_string())),
+            ShapeTextDirection::Rotate90 => attributes.push(("vert", "vert".to_string())),
+            ShapeTextDirection::Rotate270 => attributes.push(("vert", "vert270".to_string())),
+            ShapeTextDirection::Rotate270EastAsian => {
+                attributes.push(("vert", "eaVert".to_string()));
+            }
+        }
+
+        attributes.push(("wrap", "square".to_string()));
+        attributes.push(("rtlCol", "0".to_string()));
+
+        match shape.text_options.vertical_alignment {
+            crate::ShapeTextVerticalAlignment::Top => {
+                attributes.push(("anchor", "t".to_string()));
+            }
+            crate::ShapeTextVerticalAlignment::Middle => {
+                attributes.push(("anchor", "ctr".to_string()));
+                attributes.push(("anchorCtr", "0".to_string()));
+            }
+            crate::ShapeTextVerticalAlignment::Bottom => {
+                attributes.push(("anchor", "b".to_string()));
+                attributes.push(("anchorCtr", "0".to_string()));
+            }
+            crate::ShapeTextVerticalAlignment::TopCentered => {
+                attributes.push(("anchor", "t".to_string()));
+                attributes.push(("anchorCtr", "1".to_string()));
+            }
+            crate::ShapeTextVerticalAlignment::MiddleCentered => {
+                attributes.push(("anchor", "ctr".to_string()));
+                attributes.push(("anchorCtr", "1".to_string()));
+            }
+            crate::ShapeTextVerticalAlignment::BottomCentered => {
+                attributes.push(("anchor", "b".to_string()));
+                attributes.push(("anchorCtr", "1".to_string()));
+            }
+        }
 
         self.writer.xml_empty_tag("a:bodyPr", &attributes);
     }
@@ -996,6 +1036,7 @@ impl Drawing {
         let has_text_link = shape.text_link.is_some();
 
         self.writer.xml_start_tag_only("a:p");
+        self.write_text_alignment(shape);
 
         if has_text_link {
             self.write_a_fld();
@@ -1092,6 +1133,22 @@ impl Drawing {
         ];
 
         self.writer.xml_start_tag("a:fld", &attributes);
+    }
+
+    // Write the <a:rPr> element for horizontal text alignment.
+    fn write_text_alignment(&mut self, shape: &Shape) {
+        match shape.text_options.horizontal_alignment {
+            ShapeTextHorizontalAlignment::Default => {}
+            ShapeTextHorizontalAlignment::Left => {
+                self.writer.xml_empty_tag("a:pPr", &[("algn", "l")]);
+            }
+            ShapeTextHorizontalAlignment::Center => {
+                self.writer.xml_empty_tag("a:pPr", &[("algn", "ctr")]);
+            }
+            ShapeTextHorizontalAlignment::Right => {
+                self.writer.xml_empty_tag("a:pPr", &[("algn", "r")]);
+            }
+        }
     }
 }
 

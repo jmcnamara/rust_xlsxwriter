@@ -28,6 +28,7 @@ pub struct Shape {
     pub(crate) decorative: bool,
     pub(crate) format: ShapeFormat,
     pub(crate) font: ShapeFont,
+    pub(crate) text_options: ShapeText,
     pub(crate) url: Option<Url>,
     pub(crate) _shape_type: ShapeType,
 }
@@ -59,6 +60,7 @@ impl Shape {
             decorative: false,
             format: ShapeFormat::default(),
             font: ShapeFont::default(),
+            text_options: ShapeText::default(),
             url: None,
             _shape_type: ShapeType::TextBox,
         }
@@ -178,6 +180,12 @@ impl Shape {
         self
     }
 
+    /// TODO
+    pub fn set_text_options(mut self, text_options: &ShapeText) -> Shape {
+        self.text_options = text_options.clone();
+        self
+    }
+
     /// Set a Url/Hyperlink for a shape.
     ///
     /// Set a Url/Hyperlink for an image so that when the user clicks on it they
@@ -262,54 +270,6 @@ impl Shape {
     }
 }
 
-// TODO
-#[derive(Clone, PartialEq, Eq)]
-pub(crate) enum ShapeType {
-    // TODO
-    TextBox,
-}
-
-// Trait for objects that have a component stored in the drawing.xml file.
-impl DrawingObject for Shape {
-    #[allow(clippy::if_same_then_else)]
-    fn x_offset(&self) -> u32 {
-        self.x_offset
-    }
-
-    #[allow(clippy::if_same_then_else)]
-    fn y_offset(&self) -> u32 {
-        self.y_offset
-    }
-
-    fn width_scaled(&self) -> f64 {
-        self.width
-    }
-
-    fn height_scaled(&self) -> f64 {
-        self.height
-    }
-
-    fn object_movement(&self) -> ObjectMovement {
-        self.object_movement
-    }
-
-    fn name(&self) -> String {
-        self.text.clone()
-    }
-
-    fn alt_text(&self) -> String {
-        self.alt_text.clone()
-    }
-
-    fn decorative(&self) -> bool {
-        self.decorative
-    }
-
-    fn drawing_type(&self) -> DrawingType {
-        DrawingType::Shape
-    }
-}
-
 // -----------------------------------------------------------------------
 // ShapeFormat
 // -----------------------------------------------------------------------
@@ -321,7 +281,7 @@ impl DrawingObject for Shape {
 /// data series, the plot area, the shape area, the legend or individual points.
 /// It looks like this:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/shape_format_dialog.png">
+/// <img src="https://rustxlsxwriter.github.io/images/chart_format_dialog.png">
 ///
 /// The [`ShapeFormat`] struct represents many of these format options and just
 /// like Excel it offers a similar formatting interface for a number of the
@@ -532,7 +492,7 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_border_formatting.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png">
     ///
     pub fn set_border(self, line: &ShapeLine) -> ShapeFormat {
         self.set_line(line)
@@ -592,7 +552,7 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_format_set_no_line.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_line.png">
     ///
     pub fn set_no_line(mut self) -> ShapeFormat {
         self.no_line = true;
@@ -646,7 +606,7 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_format_set_no_border.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_border.png">
     ///
     pub fn set_no_border(self) -> ShapeFormat {
         self.set_no_line()
@@ -703,7 +663,7 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_format_set_no_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_fill.png">
     ///
     pub fn set_no_fill(mut self) -> ShapeFormat {
         self.no_fill = true;
@@ -767,7 +727,7 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
     ///
     pub fn set_solid_fill(mut self, fill: &ShapeSolidFill) -> ShapeFormat {
         self.solid_fill = Some(fill.clone());
@@ -835,7 +795,7 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
     ///
     pub fn set_pattern_fill(mut self, fill: &ShapePatternFill) -> ShapeFormat {
         self.pattern_fill = Some(fill.clone());
@@ -900,13 +860,17 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill.png">
     ///
     pub fn set_gradient_fill(mut self, fill: &ShapeGradientFill) -> ShapeFormat {
         self.gradient_fill = Some(fill.clone());
         self
     }
 }
+
+// -----------------------------------------------------------------------
+// ShapeLine
+// -----------------------------------------------------------------------
 
 /// The `ShapeLine` struct represents a shape line/border.
 ///
@@ -978,7 +942,7 @@ impl ShapeFormat {
 /// Output file:
 ///
 /// <img
-/// src="https://rustxlsxwriter.github.io/images/shape_line_formatting.png">
+/// src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapeLine {
@@ -1052,7 +1016,7 @@ impl ShapeLine {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_color.png">
     ///
     pub fn set_color(mut self, color: impl Into<Color>) -> ShapeLine {
         let color = color.into();
@@ -1114,7 +1078,7 @@ impl ShapeLine {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/shape_line_set_width.png">
+    /// src="https://rustxlsxwriter.github.io/images/chart_line_set_width.png">
     ///
     pub fn set_width<T>(mut self, width: T) -> ShapeLine
     where
@@ -1182,7 +1146,7 @@ impl ShapeLine {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_dash_type.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_dash_type.png">
     ///
     pub fn set_dash_type(mut self, dash_type: ShapeLineDashType) -> ShapeLine {
         self.dash_type = dash_type;
@@ -1244,7 +1208,7 @@ impl ShapeLine {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_transparency.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_transparency.png">
     ///
     pub fn set_transparency(mut self, transparency: u8) -> ShapeLine {
         if transparency <= 100 {
@@ -1338,9 +1302,13 @@ impl ShapeLine {
 /// Output file:
 ///
 /// <img
-/// src="https://rustxlsxwriter.github.io/images/shape_border_formatting.png">
+/// src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png">
 ///
 pub type ShapeBorder = ShapeLine;
+
+// -----------------------------------------------------------------------
+// ShapeSolidFill
+// -----------------------------------------------------------------------
 
 /// The `ShapeSolidFill` struct represents a the solid fill for a shape element.
 ///
@@ -1401,7 +1369,7 @@ pub type ShapeBorder = ShapeLine;
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill.png">
+/// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapeSolidFill {
@@ -1469,7 +1437,7 @@ impl ShapeSolidFill {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill_set_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill_set_color.png">
     ///
     pub fn set_color(mut self, color: impl Into<Color>) -> ShapeSolidFill {
         let color = color.into();
@@ -1538,7 +1506,7 @@ impl ShapeSolidFill {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
     ///
     pub fn set_transparency(mut self, transparency: u8) -> ShapeSolidFill {
         if transparency <= 100 {
@@ -1548,6 +1516,10 @@ impl ShapeSolidFill {
         self
     }
 }
+
+// -----------------------------------------------------------------------
+// ShapePatternFill
+// -----------------------------------------------------------------------
 
 /// The `ShapePatternFill` struct represents a the pattern fill for a shape
 /// element.
@@ -1612,7 +1584,7 @@ impl ShapeSolidFill {
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill.png">
+/// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapePatternFill {
@@ -1688,7 +1660,7 @@ impl ShapePatternFill {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_set_pattern.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_set_pattern.png">
     ///
     pub fn set_pattern(mut self, pattern: ShapePatternFillType) -> ShapePatternFill {
         self.pattern = pattern;
@@ -1756,7 +1728,7 @@ impl ShapePatternFill {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
     ///
     pub fn set_background_color(mut self, color: impl Into<Color>) -> ShapePatternFill {
         let color = color.into();
@@ -1786,47 +1758,589 @@ impl ShapePatternFill {
     }
 }
 
+// -----------------------------------------------------------------------
+// ShapeGradientFill
+// -----------------------------------------------------------------------
+
+/// The `ShapeGradientFill` struct represents a gradient fill for a shape
+/// element.
+///
+/// The [`ShapeGradientFill`] struct represents the formatting properties for
+/// the gradient fill of a Shape element. In Excel a gradient fill is comprised
+/// of two or more colors that are blended gradually along a gradient.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
+///
+/// `ShapeGradientFill` is a sub property of the [`ShapeFormat`] struct and is
+/// used with the [`ShapeFormat::set_gradient_fill()`] method.
+///
+/// It is used in conjunction with the [`Shape`] struct.
+///
+///
+/// # Examples
+///
+/// An example of setting a gradient fill for a shape element.
+///
+/// ```
+/// # // This code is available in examples/doc_shape_gradient_fill.rs
+/// #
+/// use rust_xlsxwriter::{
+///     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
+/// };
+///
+/// fn main() -> Result<(), XlsxError> {
+///     let mut workbook = Workbook::new();
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Add some data for the shape.
+///     worksheet.write(0, 0, 10)?;
+///     worksheet.write(1, 0, 40)?;
+///     worksheet.write(2, 0, 50)?;
+///     worksheet.write(3, 0, 20)?;
+///     worksheet.write(4, 0, 10)?;
+///     worksheet.write(5, 0, 50)?;
+///
+///     // Create a new shape.
+///   let mut shape = Shape::new(ShapeType::Column);
+///
+///     // Add a data series with formatting.
+///     shape
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .set_format(ShapeGradientFill::new().set_gradient_stops(&[
+///             ShapeGradientStop::new("#963735", 0),
+///             ShapeGradientStop::new("#F1DCDB", 100),
+///         ]));
+///
+///     // Add the shape to the worksheet.
+///     worksheet.insert_shape(0, 2, &shape)?;
+///
+///     // Save the file.
+///     workbook.save("shape.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill.png">
+///
+#[derive(Clone, PartialEq)]
+pub struct ShapeGradientFill {
+    pub(crate) gradient_type: ShapeGradientFillType,
+    pub(crate) gradient_stops: Vec<ShapeGradientStop>,
+    pub(crate) angle: u16,
+}
+
+impl Default for ShapeGradientFill {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ShapeGradientFill {
+    /// Create a new `ShapeGradientFill` object to represent a Shape gradient fill.
+    ///
+    pub fn new() -> ShapeGradientFill {
+        ShapeGradientFill {
+            gradient_type: ShapeGradientFillType::Linear,
+            gradient_stops: vec![],
+            angle: 90,
+        }
+    }
+
+    /// Set the type of the gradient fill.
+    ///
+    /// Change the default type of the gradient fill to one of the styles
+    /// supported by Excel.
+    ///
+    /// The four gradient types supported by Excel are:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill_types.png">
+    ///
+    /// # Parameters
+    ///
+    /// `gradient_type`: a [`ShapeGradientFillType`] enum value.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a gradient fill for a shape element with a non-default
+    /// gradient type.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_gradient_fill_set_type.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Shape, ShapeGradientFill, ShapeGradientFillType, ShapeGradientStop, ShapeType, Workbook,
+    /// #     XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the shape.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new shape.
+    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     shape
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(
+    ///             ShapeGradientFill::new()
+    ///                 .set_type(ShapeGradientFillType::Rectangular)
+    ///                 .set_gradient_stops(&[
+    ///                     ShapeGradientStop::new("#963735", 0),
+    ///                     ShapeGradientStop::new("#F1DCDB", 100),
+    ///                 ]),
+    ///         );
+    ///
+    ///     // Add the shape to the worksheet.
+    ///     worksheet.insert_shape(0, 2, &shape)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill_set_type.png">
+    ///
+    pub fn set_type(mut self, gradient_type: ShapeGradientFillType) -> ShapeGradientFill {
+        self.gradient_type = gradient_type;
+        self
+    }
+
+    /// Set the gradient stops (data points) for a shape gradient fill.
+    ///
+    /// A gradient stop, encapsulated by the [`ShapeGradientStop`] struct,
+    /// represents the properties of a data point that is used to generate a
+    /// gradient fill.
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
+    ///
+    /// Excel supports between 2 and 10 gradient stops which define the a color
+    /// and its position in the gradient as a percentage. These colors and
+    /// positions are used to interpolate a gradient fill.
+    ///
+    /// # Parameters
+    ///
+    /// `gradient_stops`: A slice ref of [`ShapeGradientStop`] values. As in
+    /// Excel there must be between 2 and 10 valid gradient stops.
+    ///
+    /// # Examples
+    ///
+    /// An example of setting a gradient fill for a shape element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_gradient_stops.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the shape.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new shape.
+    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///
+    ///     // Set the properties of the gradient stops.
+    ///     let gradient_stops = [
+    ///         ShapeGradientStop::new("#156B13", 0),
+    ///         ShapeGradientStop::new("#9CB86E", 50),
+    ///         ShapeGradientStop::new("#DDEBCF", 100),
+    ///     ];
+    ///
+    ///     // Add a data series with formatting.
+    ///     shape
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
+    ///
+    ///     // Add the shape to the worksheet.
+    ///     worksheet.insert_shape(0, 2, &shape)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/chart_gradient_stops.png">
+    ///
+    /// Note, it can be clearer to add the gradient stops directly to the format
+    /// as follows. This gives the same output as above.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_gradient_stops2.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the shape.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 40)?;
+    /// #     worksheet.write(2, 0, 50)?;
+    /// #     worksheet.write(3, 0, 20)?;
+    /// #     worksheet.write(4, 0, 10)?;
+    /// #     worksheet.write(5, 0, 50)?;
+    /// #
+    /// #     // Create a new shape.
+    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///
+    ///     // Add a data series with formatting.
+    ///     shape
+    ///         .add_series()
+    ///         .set_values("Sheet1!$A$1:$A$6")
+    ///         .set_format(ShapeGradientFill::new().set_gradient_stops(&[
+    ///             ShapeGradientStop::new("#156B13", 0),
+    ///             ShapeGradientStop::new("#9CB86E", 50),
+    ///             ShapeGradientStop::new("#DDEBCF", 100),
+    ///         ]));
+    ///
+    ///     // Add the shape to the worksheet.
+    ///     worksheet.insert_shape(0, 2, &shape)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    pub fn set_gradient_stops(mut self, gradient_stops: &[ShapeGradientStop]) -> ShapeGradientFill {
+        let mut valid_gradient_stops = vec![];
+
+        for gradient_stop in gradient_stops {
+            if gradient_stop.is_valid() {
+                valid_gradient_stops.push(gradient_stop.clone());
+            }
+        }
+
+        if (2..=10).contains(&valid_gradient_stops.len()) {
+            self.gradient_stops = valid_gradient_stops;
+        } else {
+            eprintln!("Gradient stops must contain between 2 and 10 valid entries.");
+        }
+
+        self
+    }
+
+    /// Set the angle of the linear gradient fill type.
+    ///
+    /// # Parameters
+    ///
+    /// - `angle`: The angle of the linear gradient fill in the range `0 <=
+    ///   angle < 360`. The default angle is 90 degrees.
+    ///
+    pub fn set_angle(mut self, angle: u16) -> ShapeGradientFill {
+        if (0..360).contains(&angle) {
+            self.angle = angle;
+        } else {
+            eprintln!("Gradient angle '{angle}' must be in the Excel range 0 <= angle < 360");
+        }
+        self
+    }
+}
+
+// -----------------------------------------------------------------------
+// ShapeGradientStop
+// -----------------------------------------------------------------------
+
+/// The `ShapeGradientStop` struct represents a gradient fill data point.
+///
+/// The [`ShapeGradientStop`] struct represents the properties of a data point
+/// (a stop) that is used to generate a gradient fill.
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
+///
+/// Excel supports between 2 and 10 gradient stops which define the a color and
+/// its position in the gradient as a percentage. These colors and positions
+/// are used to interpolate a gradient fill.
+///
+/// Gradient formats are generally used with the
+/// [`ShapeGradientFill::set_gradient_stops()`] method and
+/// [`ShapeGradientFill`].
+///
+/// # Examples
+///
+/// An example of setting a gradient fill for a shape element.
+///
+/// ```
+/// # // This code is available in examples/doc_shape_gradient_stops.rs
+/// #
+/// # use rust_xlsxwriter::{
+/// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
+/// # };
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+/// #     // Add some data for the shape.
+/// #     worksheet.write(0, 0, 10)?;
+/// #     worksheet.write(1, 0, 40)?;
+/// #     worksheet.write(2, 0, 50)?;
+/// #     worksheet.write(3, 0, 20)?;
+/// #     worksheet.write(4, 0, 10)?;
+/// #     worksheet.write(5, 0, 50)?;
+/// #
+/// #     // Create a new shape.
+///     let mut shape = Shape::new(ShapeType::Column);
+///
+///     // Set the properties of the gradient stops.
+///     let gradient_stops = [
+///         ShapeGradientStop::new("#156B13", 0),
+///         ShapeGradientStop::new("#9CB86E", 50),
+///         ShapeGradientStop::new("#DDEBCF", 100),
+///     ];
+///
+///     // Add a data series with formatting.
+///     shape
+///         .add_series()
+///         .set_values("Sheet1!$A$1:$A$6")
+///         .set_format(ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
+///
+///     // Add the shape to the worksheet.
+///     worksheet.insert_shape(0, 2, &shape)?;
+///
+/// #     // Save the file.
+/// #     workbook.save("shape.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_stops.png">
+///
+///
+#[derive(Clone, PartialEq)]
+pub struct ShapeGradientStop {
+    pub(crate) color: Color,
+    pub(crate) position: u8,
+}
+
+impl ShapeGradientStop {
+    /// Create a new `ShapeGradientStop` object to represent a Shape gradient fill stop.
+    ///
+    /// # Parameters
+    ///
+    /// - `color`: The gradient stop color property defined by a [`Color`] enum
+    ///   value.
+    /// - `position`: The gradient stop position in the range 0-100.
+    ///
+    /// # Examples
+    ///
+    /// An example of creating gradient stops for a gradient fill for a shape element.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_gradient_stops_new.rs
+    /// #
+    /// # use rust_xlsxwriter::ShapeGradientStop;
+    /// #
+    /// # #[allow(unused_variables)]
+    /// # fn main() {
+    ///     let gradient_stops = [
+    ///         ShapeGradientStop::new("#156B13", 0),
+    ///         ShapeGradientStop::new("#9CB86E", 50),
+    ///         ShapeGradientStop::new("#DDEBCF", 100),
+    ///     ];
+    /// # }
+    /// ```
+    pub fn new(color: impl Into<Color>, position: u8) -> ShapeGradientStop {
+        let color = color.into();
+
+        // Check and warn but don't raise error since this is too deeply nested.
+        // It will be rechecked and rejected at use.
+        if !color.is_valid() {
+            eprintln!("Gradient stop color isn't valid.");
+        }
+        if !(0..=100).contains(&position) {
+            eprintln!("Gradient stop '{position}' outside Excel range: 0 <= position <= 100.");
+        }
+
+        ShapeGradientStop { color, position }
+    }
+
+    // Check for valid gradient stop properties.
+    pub(crate) fn is_valid(&self) -> bool {
+        self.color.is_valid() && (0..=100).contains(&self.position)
+    }
+}
+
+// -----------------------------------------------------------------------
+// ShapeText
+// -----------------------------------------------------------------------
+
+/// The `ShapeText` struct represents a the solid fill for a shape element.
+///
+/// The [`ShapeText`] struct represents the formatting properties for the
+/// solid fill of a Shape element. In Excel a solid fill is a single color fill
+/// without a pattern or gradient.
+///
+/// `ShapeText` is a sub property of the [`ShapeFormat`] struct and is used
+/// with the [`ShapeFormat::set_solid_fill()`] method.
+///
+/// It is used in conjunction with the [`Shape`] struct.
+///
+/// # Examples
+///
+#[derive(Clone, PartialEq)]
+pub struct ShapeText {
+    pub(crate) horizontal_alignment: ShapeTextHorizontalAlignment,
+    pub(crate) vertical_alignment: ShapeTextVerticalAlignment,
+    pub(crate) direction: ShapeTextDirection,
+}
+
+impl Default for ShapeText {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ShapeText {
+    /// Create a new `ShapeText` object to represent a Shape solid fill.
+    ///
+    pub fn new() -> ShapeText {
+        ShapeText {
+            horizontal_alignment: ShapeTextHorizontalAlignment::Default,
+            vertical_alignment: ShapeTextVerticalAlignment::Top,
+            direction: ShapeTextDirection::Horizontal,
+        }
+    }
+
+    /// Set the TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `alignment`: TODO
+    ///
+    /// # Examples
+    ///
+    pub fn set_horizontal_alignment(
+        mut self,
+        alignment: ShapeTextHorizontalAlignment,
+    ) -> ShapeText {
+        self.horizontal_alignment = alignment;
+
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `alignment`: TODO
+    ///
+    /// # Examples
+    ///
+    pub fn set_vertical_alignment(mut self, alignment: ShapeTextVerticalAlignment) -> ShapeText {
+        self.vertical_alignment = alignment;
+
+        self
+    }
+
+    /// Set the TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `color`: TODO
+    ///
+    /// # Examples
+    ///
+    pub fn set_direction(mut self, direction: ShapeTextDirection) -> ShapeText {
+        self.direction = direction;
+
+        self
+    }
+}
+
+// -----------------------------------------------------------------------
+// Shape enums
+// -----------------------------------------------------------------------
+
+// TODO
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) enum ShapeType {
+    // TODO
+    TextBox,
+}
+
 /// The `ShapeLineDashType` enum defines the [`Shape`] line dash types.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ShapeLineDashType {
     /// Solid - shape line/border dash type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_dash_solid.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_solid.png">
     Solid,
 
     /// Round dot - shape line/border dash type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_dash_round_dot.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_round_dot.png">
     RoundDot,
 
     /// Square dot - shape line/border dash type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_dash_square_dot.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_square_dot.png">
     SquareDot,
 
     /// Dash - shape line/border dash type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_dash_dash.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_dash.png">
     Dash,
 
     /// Dash dot - shape line/border dash type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_dash_dash_dot.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_dash_dot.png">
     DashDot,
 
     /// Long dash - shape line/border dash type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_dash_longdash.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_longdash.png">
     LongDash,
 
     /// Long dash dot - shape line/border dash type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_dash_longdash_dot.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_longdash_dot.png">
     LongDashDot,
 
     /// Long dash dot dot - shape line/border dash type.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_dash_longdash_dot_dot.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_dash_longdash_dot_dot.png">
     LongDashDotDot,
 }
 
@@ -1850,242 +2364,242 @@ impl fmt::Display for ShapeLineDashType {
 pub enum ShapePatternFillType {
     /// Dotted 5 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_5_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_5_percent.png">
     Dotted5Percent,
 
     /// Dotted 10 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_10_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_10_percent.png">
     Dotted10Percent,
 
     /// Dotted 20 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_20_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_20_percent.png">
     Dotted20Percent,
 
     /// Dotted 25 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_25_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_25_percent.png">
     Dotted25Percent,
 
     /// Dotted 30 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_30_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_30_percent.png">
     Dotted30Percent,
 
     /// Dotted 40 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_40_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_40_percent.png">
     Dotted40Percent,
 
     /// Dotted 50 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_50_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_50_percent.png">
     Dotted50Percent,
 
     /// Dotted 60 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_60_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_60_percent.png">
     Dotted60Percent,
 
     /// Dotted 70 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_70_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_70_percent.png">
     Dotted70Percent,
 
     /// Dotted 75 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_75_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_75_percent.png">
     Dotted75Percent,
 
     /// Dotted 80 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_80_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_80_percent.png">
     Dotted80Percent,
 
     /// Dotted 90 percent - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_90_percent.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_90_percent.png">
     Dotted90Percent,
 
     /// Diagonal stripes light downwards - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_diagonal_stripes_light_downwards.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_light_downwards.png">
     DiagonalStripesLightDownwards,
 
     /// Diagonal stripes light upwards - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_diagonal_stripes_light_upwards.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_light_upwards.png">
     DiagonalStripesLightUpwards,
 
     /// Diagonal stripes dark downwards - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_diagonal_stripes_dark_downwards.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_dark_downwards.png">
     DiagonalStripesDarkDownwards,
 
     /// Diagonal stripes dark upwards - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_diagonal_stripes_dark_upwards.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_dark_upwards.png">
     DiagonalStripesDarkUpwards,
 
     /// Diagonal stripes wide downwards - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_diagonal_stripes_wide_downwards.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_wide_downwards.png">
     DiagonalStripesWideDownwards,
 
     /// Diagonal stripes wide upwards - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_diagonal_stripes_wide_upwards.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_stripes_wide_upwards.png">
     DiagonalStripesWideUpwards,
 
     /// Vertical stripes light - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_vertical_stripes_light.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_vertical_stripes_light.png">
     VerticalStripesLight,
 
     /// Horizontal stripes light - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_horizontal_stripes_light.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_stripes_light.png">
     HorizontalStripesLight,
 
     /// Vertical stripes narrow - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_vertical_stripes_narrow.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_vertical_stripes_narrow.png">
     VerticalStripesNarrow,
 
     /// Horizontal stripes narrow - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_horizontal_stripes_narrow.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_stripes_narrow.png">
     HorizontalStripesNarrow,
 
     /// Vertical stripes dark - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_vertical_stripes_dark.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_vertical_stripes_dark.png">
     VerticalStripesDark,
 
     /// Horizontal stripes dark - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_horizontal_stripes_dark.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_stripes_dark.png">
     HorizontalStripesDark,
 
     /// Stripes backslashes - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_stripes_backslashes.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_stripes_backslashes.png">
     StripesBackslashes,
 
     /// Stripes forward slashes - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_stripes_forward_slashes.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_stripes_forward_slashes.png">
     StripesForwardSlashes,
 
     /// Horizontal stripes alternating - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_horizontal_stripes_alternating.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_stripes_alternating.png">
     HorizontalStripesAlternating,
 
     /// Vertical stripes alternating - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_vertical_stripes_alternating.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_vertical_stripes_alternating.png">
     VerticalStripesAlternating,
 
     /// Small confetti - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_small_confetti.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_small_confetti.png">
     SmallConfetti,
 
     /// Large confetti - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_large_confetti.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_large_confetti.png">
     LargeConfetti,
 
     /// Zigzag - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_zigzag.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_zigzag.png">
     Zigzag,
 
     /// Wave - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_wave.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_wave.png">
     Wave,
 
     /// Diagonal brick - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_diagonal_brick.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_diagonal_brick.png">
     DiagonalBrick,
 
     /// Horizontal brick - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_horizontal_brick.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_horizontal_brick.png">
     HorizontalBrick,
 
     /// Weave - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_weave.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_weave.png">
     Weave,
 
     /// Plaid - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_plaid.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_plaid.png">
     Plaid,
 
     /// Divot - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_divot.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_divot.png">
     Divot,
 
     /// Dotted grid - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_grid.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_grid.png">
     DottedGrid,
 
     /// Dotted diamond - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_dotted_diamond.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_dotted_diamond.png">
     DottedDiamond,
 
     /// Shingle - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_shingle.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_shingle.png">
     Shingle,
 
     /// Trellis - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_trellis.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_trellis.png">
     Trellis,
 
     /// Sphere - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_sphere.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_sphere.png">
     Sphere,
 
     /// Small grid - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_small_grid.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_small_grid.png">
     SmallGrid,
 
     /// Large grid - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_large_grid.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_large_grid.png">
     LargeGrid,
 
     /// Small checkerboard - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_small_checkerboard.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_small_checkerboard.png">
     SmallCheckerboard,
 
     /// Large checkerboard - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_large_checkerboard.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_large_checkerboard.png">
     LargeCheckerboard,
 
     /// Outlined diamond grid - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_outlined_diamond_grid.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_outlined_diamond_grid.png">
     OutlinedDiamondGrid,
 
     /// Solid diamond grid - shape fill pattern.
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_solid_diamond_grid.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_solid_diamond_grid.png">
     SolidDiamondGrid,
 }
 
@@ -2144,6 +2658,66 @@ impl fmt::Display for ShapePatternFillType {
     }
 }
 
+/// TODO
+#[derive(Clone, PartialEq, Eq, Default)]
+pub enum ShapeTextHorizontalAlignment {
+    /// TODO
+    #[default]
+    Default,
+
+    /// TODO
+    Left,
+
+    /// TODO
+    Center,
+
+    /// TODO
+    Right,
+}
+
+/// TODO
+#[derive(Clone, PartialEq, Eq, Default)]
+pub enum ShapeTextVerticalAlignment {
+    /// TODO
+    #[default]
+    Top,
+
+    /// TODO
+    Middle,
+
+    /// TODO
+    Bottom,
+
+    /// TODO
+    TopCentered,
+
+    /// TODO
+    MiddleCentered,
+
+    /// TODO
+    BottomCentered,
+}
+
+/// TODO
+#[derive(Clone, PartialEq, Eq, Default)]
+pub enum ShapeTextDirection {
+    /// TODO
+    #[default]
+    Horizontal,
+
+    /// TODO
+    Rotate90,
+
+    /// TODO
+    Rotate270,
+
+    /// TODO
+    Rotate270EastAsian,
+
+    /// TODO
+    Stacked,
+}
+
 // -----------------------------------------------------------------------
 // ShapeFont
 // -----------------------------------------------------------------------
@@ -2154,7 +2728,7 @@ impl fmt::Display for ShapePatternFillType {
 /// Excel uses a standard font dialog for text elements of a shape such as the
 /// shape title or axes data labels. It looks like this:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/shape_font_dialog.png">
+/// <img src="https://rustxlsxwriter.github.io/images/chart_font_dialog.png">
 ///
 /// The [`ShapeFont`] struct represents many of these font options such as font
 /// type, size, color and properties such as bold and italic. It is generally
@@ -2213,7 +2787,7 @@ impl fmt::Display for ShapePatternFillType {
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/shape_font.png">
+/// <img src="https://rustxlsxwriter.github.io/images/chart_font.png">
 ///
 pub struct ShapeFont {
     // Shape/axis titles have a default bold font so we need to handle that as
@@ -2305,7 +2879,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_bold.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_bold.png">
     ///
     pub fn set_bold(mut self) -> ShapeFont {
         self.bold = true;
@@ -2359,7 +2933,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_italic.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_italic.png">
     ///
     pub fn set_italic(mut self) -> ShapeFont {
         self.italic = true;
@@ -2418,7 +2992,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_color.png">
     ///
     pub fn set_color(mut self, color: impl Into<Color>) -> ShapeFont {
         let color = color.into();
@@ -2485,7 +3059,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_name.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_name.png">
     ///
     pub fn set_name(mut self, font_name: impl Into<String>) -> ShapeFont {
         self.name = font_name.into();
@@ -2543,7 +3117,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_size.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_size.png">
     ///
     pub fn set_size<T>(mut self, font_size: T) -> ShapeFont
     where
@@ -2613,7 +3187,7 @@ impl ShapeFont {
     /// Output file:
     ///
     /// <img
-    /// src="https://rustxlsxwriter.github.io/images/shape_font_set_rotation.png">
+    /// src="https://rustxlsxwriter.github.io/images/chart_font_set_rotation.png">
     ///
     pub fn set_rotation(mut self, rotation: i16) -> ShapeFont {
         match rotation {
@@ -2699,453 +3273,13 @@ impl ShapeFont {
     }
 }
 
-/// The `ShapeGradientFill` struct represents a gradient fill for a shape
-/// element.
-///
-/// The [`ShapeGradientFill`] struct represents the formatting properties for
-/// the gradient fill of a Shape element. In Excel a gradient fill is comprised
-/// of two or more colors that are blended gradually along a gradient.
-///
-/// <img
-/// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
-///
-/// `ShapeGradientFill` is a sub property of the [`ShapeFormat`] struct and is
-/// used with the [`ShapeFormat::set_gradient_fill()`] method.
-///
-/// It is used in conjunction with the [`Shape`] struct.
-///
-///
-/// # Examples
-///
-/// An example of setting a gradient fill for a shape element.
-///
-/// ```
-/// # // This code is available in examples/doc_shape_gradient_fill.rs
-/// #
-/// use rust_xlsxwriter::{
-///     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
-/// };
-///
-/// fn main() -> Result<(), XlsxError> {
-///     let mut workbook = Workbook::new();
-///     let worksheet = workbook.add_worksheet();
-///
-///     // Add some data for the shape.
-///     worksheet.write(0, 0, 10)?;
-///     worksheet.write(1, 0, 40)?;
-///     worksheet.write(2, 0, 50)?;
-///     worksheet.write(3, 0, 20)?;
-///     worksheet.write(4, 0, 10)?;
-///     worksheet.write(5, 0, 50)?;
-///
-///     // Create a new shape.
-///   let mut shape = Shape::new(ShapeType::Column);
-///
-///     // Add a data series with formatting.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$6")
-///         .set_format(ShapeGradientFill::new().set_gradient_stops(&[
-///             ShapeGradientStop::new("#963735", 0),
-///             ShapeGradientStop::new("#F1DCDB", 100),
-///         ]));
-///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
-///
-///     // Save the file.
-///     workbook.save("shape.xlsx")?;
-///
-///     Ok(())
-/// }
-/// ```
-///
-/// Output file:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill.png">
-///
-#[derive(Clone, PartialEq)]
-pub struct ShapeGradientFill {
-    pub(crate) gradient_type: ShapeGradientFillType,
-    pub(crate) gradient_stops: Vec<ShapeGradientStop>,
-    pub(crate) angle: u16,
-}
-
-impl Default for ShapeGradientFill {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-// -----------------------------------------------------------------------
-// ShapeGradientFill
-// -----------------------------------------------------------------------
-
-impl ShapeGradientFill {
-    /// Create a new `ShapeGradientFill` object to represent a Shape gradient fill.
-    ///
-    pub fn new() -> ShapeGradientFill {
-        ShapeGradientFill {
-            gradient_type: ShapeGradientFillType::Linear,
-            gradient_stops: vec![],
-            angle: 90,
-        }
-    }
-
-    /// Set the type of the gradient fill.
-    ///
-    /// Change the default type of the gradient fill to one of the styles
-    /// supported by Excel.
-    ///
-    /// The four gradient types supported by Excel are:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill_types.png">
-    ///
-    /// # Parameters
-    ///
-    /// `gradient_type`: a [`ShapeGradientFillType`] enum value.
-    ///
-    /// # Examples
-    ///
-    /// An example of setting a gradient fill for a shape element with a non-default
-    /// gradient type.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_gradient_fill_set_type.rs
-    /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeGradientFill, ShapeGradientFillType, ShapeGradientStop, ShapeType, Workbook,
-    /// #     XlsxError,
-    /// # };
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeGradientFill::new()
-    ///                 .set_type(ShapeGradientFillType::Rectangular)
-    ///                 .set_gradient_stops(&[
-    ///                     ShapeGradientStop::new("#963735", 0),
-    ///                     ShapeGradientStop::new("#F1DCDB", 100),
-    ///                 ]),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("shape.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill_set_type.png">
-    ///
-    pub fn set_type(mut self, gradient_type: ShapeGradientFillType) -> ShapeGradientFill {
-        self.gradient_type = gradient_type;
-        self
-    }
-
-    /// Set the gradient stops (data points) for a shape gradient fill.
-    ///
-    /// A gradient stop, encapsulated by the [`ShapeGradientStop`] struct,
-    /// represents the properties of a data point that is used to generate a
-    /// gradient fill.
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
-    ///
-    /// Excel supports between 2 and 10 gradient stops which define the a color
-    /// and its position in the gradient as a percentage. These colors and
-    /// positions are used to interpolate a gradient fill.
-    ///
-    /// # Parameters
-    ///
-    /// `gradient_stops`: A slice ref of [`ShapeGradientStop`] values. As in
-    /// Excel there must be between 2 and 10 valid gradient stops.
-    ///
-    /// # Examples
-    ///
-    /// An example of setting a gradient fill for a shape element.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_gradient_stops.rs
-    /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
-    /// # };
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Set the properties of the gradient stops.
-    ///     let gradient_stops = [
-    ///         ShapeGradientStop::new("#156B13", 0),
-    ///         ShapeGradientStop::new("#9CB86E", 50),
-    ///         ShapeGradientStop::new("#DDEBCF", 100),
-    ///     ];
-    ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("shape.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/shape_gradient_stops.png">
-    ///
-    /// Note, it can be clearer to add the gradient stops directly to the format
-    /// as follows. This gives the same output as above.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_gradient_stops2.rs
-    /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
-    /// # };
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeGradientFill::new().set_gradient_stops(&[
-    ///             ShapeGradientStop::new("#156B13", 0),
-    ///             ShapeGradientStop::new("#9CB86E", 50),
-    ///             ShapeGradientStop::new("#DDEBCF", 100),
-    ///         ]));
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("shape.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    pub fn set_gradient_stops(mut self, gradient_stops: &[ShapeGradientStop]) -> ShapeGradientFill {
-        let mut valid_gradient_stops = vec![];
-
-        for gradient_stop in gradient_stops {
-            if gradient_stop.is_valid() {
-                valid_gradient_stops.push(gradient_stop.clone());
-            }
-        }
-
-        if (2..=10).contains(&valid_gradient_stops.len()) {
-            self.gradient_stops = valid_gradient_stops;
-        } else {
-            eprintln!("Gradient stops must contain between 2 and 10 valid entries.");
-        }
-
-        self
-    }
-
-    /// Set the angle of the linear gradient fill type.
-    ///
-    /// # Parameters
-    ///
-    /// - `angle`: The angle of the linear gradient fill in the range `0 <=
-    ///   angle < 360`. The default angle is 90 degrees.
-    ///
-    pub fn set_angle(mut self, angle: u16) -> ShapeGradientFill {
-        if (0..360).contains(&angle) {
-            self.angle = angle;
-        } else {
-            eprintln!("Gradient angle '{angle}' must be in the Excel range 0 <= angle < 360");
-        }
-        self
-    }
-}
-
-/// The `ShapeGradientStop` struct represents a gradient fill data point.
-///
-/// The [`ShapeGradientStop`] struct represents the properties of a data point
-/// (a stop) that is used to generate a gradient fill.
-///
-/// <img
-/// src="https://rustxlsxwriter.github.io/images/gradient_fill_options.png">
-///
-/// Excel supports between 2 and 10 gradient stops which define the a color and
-/// its position in the gradient as a percentage. These colors and positions
-/// are used to interpolate a gradient fill.
-///
-/// Gradient formats are generally used with the
-/// [`ShapeGradientFill::set_gradient_stops()`] method and
-/// [`ShapeGradientFill`].
-///
-/// # Examples
-///
-/// An example of setting a gradient fill for a shape element.
-///
-/// ```
-/// # // This code is available in examples/doc_shape_gradient_stops.rs
-/// #
-/// # use rust_xlsxwriter::{
-/// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
-/// # };
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     let mut workbook = Workbook::new();
-/// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Add some data for the shape.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(3, 0, 20)?;
-/// #     worksheet.write(4, 0, 10)?;
-/// #     worksheet.write(5, 0, 50)?;
-/// #
-/// #     // Create a new shape.
-///     let mut shape = Shape::new(ShapeType::Column);
-///
-///     // Set the properties of the gradient stops.
-///     let gradient_stops = [
-///         ShapeGradientStop::new("#156B13", 0),
-///         ShapeGradientStop::new("#9CB86E", 50),
-///         ShapeGradientStop::new("#DDEBCF", 100),
-///     ];
-///
-///     // Add a data series with formatting.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$6")
-///         .set_format(ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
-///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
-///
-/// #     // Save the file.
-/// #     workbook.save("shape.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
-/// ```
-///
-/// Output file:
-///
-/// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_stops.png">
-///
-///
-#[derive(Clone, PartialEq)]
-pub struct ShapeGradientStop {
-    pub(crate) color: Color,
-    pub(crate) position: u8,
-}
-
-impl ShapeGradientStop {
-    /// Create a new `ShapeGradientStop` object to represent a Shape gradient fill stop.
-    ///
-    /// # Parameters
-    ///
-    /// - `color`: The gradient stop color property defined by a [`Color`] enum
-    ///   value.
-    /// - `position`: The gradient stop position in the range 0-100.
-    ///
-    /// # Examples
-    ///
-    /// An example of creating gradient stops for a gradient fill for a shape element.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_gradient_stops_new.rs
-    /// #
-    /// # use rust_xlsxwriter::ShapeGradientStop;
-    /// #
-    /// # #[allow(unused_variables)]
-    /// # fn main() {
-    ///     let gradient_stops = [
-    ///         ShapeGradientStop::new("#156B13", 0),
-    ///         ShapeGradientStop::new("#9CB86E", 50),
-    ///         ShapeGradientStop::new("#DDEBCF", 100),
-    ///     ];
-    /// # }
-    /// ```
-    pub fn new(color: impl Into<Color>, position: u8) -> ShapeGradientStop {
-        let color = color.into();
-
-        // Check and warn but don't raise error since this is too deeply nested.
-        // It will be rechecked and rejected at use.
-        if !color.is_valid() {
-            eprintln!("Gradient stop color isn't valid.");
-        }
-        if !(0..=100).contains(&position) {
-            eprintln!("Gradient stop '{position}' outside Excel range: 0 <= position <= 100.");
-        }
-
-        ShapeGradientStop { color, position }
-    }
-
-    // Check for valid gradient stop properties.
-    pub(crate) fn is_valid(&self) -> bool {
-        self.color.is_valid() && (0..=100).contains(&self.position)
-    }
-}
-
 #[derive(Clone, Copy, PartialEq, Eq)]
 /// The `ShapeGradientFillType` enum defines the gradient types of a
 /// [`ShapeGradientFill`].
 ///
 /// The four gradient types supported by Excel are:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill_types.png">
+/// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill_types.png">
 ///
 pub enum ShapeGradientFillType {
     /// The gradient runs linearly from the top of the area vertically to the
@@ -3163,6 +3297,51 @@ pub enum ShapeGradientFillType {
     /// The gradient runs in a rectangular pattern from the center of the area
     /// to the outer vertices.
     Path,
+}
+
+// -----------------------------------------------------------------------
+// Traits
+// -----------------------------------------------------------------------
+
+// Trait for objects that have a component stored in the drawing.xml file.
+impl DrawingObject for Shape {
+    #[allow(clippy::if_same_then_else)]
+    fn x_offset(&self) -> u32 {
+        self.x_offset
+    }
+
+    #[allow(clippy::if_same_then_else)]
+    fn y_offset(&self) -> u32 {
+        self.y_offset
+    }
+
+    fn width_scaled(&self) -> f64 {
+        self.width
+    }
+
+    fn height_scaled(&self) -> f64 {
+        self.height
+    }
+
+    fn object_movement(&self) -> ObjectMovement {
+        self.object_movement
+    }
+
+    fn name(&self) -> String {
+        self.text.clone()
+    }
+
+    fn alt_text(&self) -> String {
+        self.alt_text.clone()
+    }
+
+    fn decorative(&self) -> bool {
+        self.decorative
+    }
+
+    fn drawing_type(&self) -> DrawingType {
+        DrawingType::Shape
+    }
 }
 
 // -----------------------------------------------------------------------
