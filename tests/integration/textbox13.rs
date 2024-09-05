@@ -15,8 +15,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
 
     let textbox = Shape::textbox().set_text("This is some text").set_format(
-        ShapeFormat::new().set_border(
-            ShapeLine::new()
+        &ShapeFormat::new().set_border(
+            &ShapeLine::new()
                 .set_color("#FF0000")
                 .set_width(2)
                 .set_dash_type(ShapeLineDashType::RoundDot),

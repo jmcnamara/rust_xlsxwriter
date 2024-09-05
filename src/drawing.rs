@@ -538,21 +538,10 @@ impl Drawing {
             // Write the a:ln element.
             self.write_a_ln(line);
         } else {
-            // Write the default a:ln element. // Todo. replace?
-            self.write_default_ln();
+            // Write the default a:ln element.
+            let line = ShapeLine::new().set_width(0.75);
+            self.write_a_ln(&line);
         }
-    }
-
-    // Write the default <a:ln> element.
-    fn write_default_ln(&mut self) {
-        let attributes = [("w", "9525"), ("cmpd", "sng")];
-
-        self.writer.xml_start_tag("a:ln", &attributes);
-
-        // Write the a:solidFill element.
-        self.write_line_solid_fill();
-
-        self.writer.xml_end_tag("a:ln");
     }
 
     // Write the <a:ln> element.

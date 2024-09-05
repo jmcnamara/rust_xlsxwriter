@@ -110,7 +110,7 @@ impl Shape {
     /// TODO
     ///
     pub fn set_width(mut self, width: u32) -> Shape {
-        if width == 0 {
+        if width < 5 {
             return self;
         }
 
@@ -127,7 +127,7 @@ impl Shape {
     /// - `height`: The shape height in pixels.
     ///
     pub fn set_height(mut self, height: u32) -> Shape {
-        if height == 0 {
+        if height < 5 {
             return self;
         }
         self.height = f64::from(height);
@@ -462,7 +462,7 @@ impl ShapeFormat {
     ///
     /// - `line`: A [`ShapeLine`] struct reference.
     ///
-    pub fn set_line(&mut self, line: &ShapeLine) -> &mut ShapeFormat {
+    pub fn set_line(mut self, line: &ShapeLine) -> ShapeFormat {
         self.line = Some(line.clone());
         self
     }
@@ -534,7 +534,7 @@ impl ShapeFormat {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_border_formatting.png">
     ///
-    pub fn set_border(&mut self, line: &ShapeLine) -> &mut ShapeFormat {
+    pub fn set_border(self, line: &ShapeLine) -> ShapeFormat {
         self.set_line(line)
     }
 
@@ -594,7 +594,7 @@ impl ShapeFormat {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_format_set_no_line.png">
     ///
-    pub fn set_no_line(&mut self) -> &mut ShapeFormat {
+    pub fn set_no_line(mut self) -> ShapeFormat {
         self.no_line = true;
         self
     }
@@ -648,7 +648,7 @@ impl ShapeFormat {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_format_set_no_border.png">
     ///
-    pub fn set_no_border(&mut self) -> &mut ShapeFormat {
+    pub fn set_no_border(self) -> ShapeFormat {
         self.set_no_line()
     }
 
@@ -705,7 +705,7 @@ impl ShapeFormat {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_format_set_no_fill.png">
     ///
-    pub fn set_no_fill(&mut self) -> &mut ShapeFormat {
+    pub fn set_no_fill(mut self) -> ShapeFormat {
         self.no_fill = true;
         self
     }
@@ -769,7 +769,7 @@ impl ShapeFormat {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill.png">
     ///
-    pub fn set_solid_fill(&mut self, fill: &ShapeSolidFill) -> &mut ShapeFormat {
+    pub fn set_solid_fill(mut self, fill: &ShapeSolidFill) -> ShapeFormat {
         self.solid_fill = Some(fill.clone());
         self
     }
@@ -837,7 +837,7 @@ impl ShapeFormat {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill.png">
     ///
-    pub fn set_pattern_fill(&mut self, fill: &ShapePatternFill) -> &mut ShapeFormat {
+    pub fn set_pattern_fill(mut self, fill: &ShapePatternFill) -> ShapeFormat {
         self.pattern_fill = Some(fill.clone());
         self
     }
@@ -902,7 +902,7 @@ impl ShapeFormat {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill.png">
     ///
-    pub fn set_gradient_fill(&mut self, fill: &ShapeGradientFill) -> &mut ShapeFormat {
+    pub fn set_gradient_fill(mut self, fill: &ShapeGradientFill) -> ShapeFormat {
         self.gradient_fill = Some(fill.clone());
         self
     }
@@ -1054,7 +1054,7 @@ impl ShapeLine {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_color.png">
     ///
-    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut ShapeLine {
+    pub fn set_color(mut self, color: impl Into<Color>) -> ShapeLine {
         let color = color.into();
         if color.is_valid() {
             self.color = color;
@@ -1116,7 +1116,7 @@ impl ShapeLine {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/shape_line_set_width.png">
     ///
-    pub fn set_width<T>(&mut self, width: T) -> &mut ShapeLine
+    pub fn set_width<T>(mut self, width: T) -> ShapeLine
     where
         T: Into<f64>,
     {
@@ -1184,7 +1184,7 @@ impl ShapeLine {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_dash_type.png">
     ///
-    pub fn set_dash_type(&mut self, dash_type: ShapeLineDashType) -> &mut ShapeLine {
+    pub fn set_dash_type(mut self, dash_type: ShapeLineDashType) -> ShapeLine {
         self.dash_type = dash_type;
         self
     }
@@ -1246,7 +1246,7 @@ impl ShapeLine {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_transparency.png">
     ///
-    pub fn set_transparency(&mut self, transparency: u8) -> &mut ShapeLine {
+    pub fn set_transparency(mut self, transparency: u8) -> ShapeLine {
         if transparency <= 100 {
             self.transparency = transparency;
         }
@@ -1264,7 +1264,7 @@ impl ShapeLine {
     /// - `enable`: Turn the property on/off. It is off (not hidden) by
     ///   default.
     ///
-    pub fn set_hidden(&mut self, enable: bool) -> &mut ShapeLine {
+    pub fn set_hidden(mut self, enable: bool) -> ShapeLine {
         self.hidden = enable;
         self
     }
@@ -1471,7 +1471,7 @@ impl ShapeSolidFill {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill_set_color.png">
     ///
-    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut ShapeSolidFill {
+    pub fn set_color(mut self, color: impl Into<Color>) -> ShapeSolidFill {
         let color = color.into();
         if color.is_valid() {
             self.color = color;
@@ -1540,7 +1540,7 @@ impl ShapeSolidFill {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill.png">
     ///
-    pub fn set_transparency(&mut self, transparency: u8) -> &mut ShapeSolidFill {
+    pub fn set_transparency(mut self, transparency: u8) -> ShapeSolidFill {
         if transparency <= 100 {
             self.transparency = transparency;
         }
@@ -1690,7 +1690,7 @@ impl ShapePatternFill {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill_set_pattern.png">
     ///
-    pub fn set_pattern(&mut self, pattern: ShapePatternFillType) -> &mut ShapePatternFill {
+    pub fn set_pattern(mut self, pattern: ShapePatternFillType) -> ShapePatternFill {
         self.pattern = pattern;
         self
     }
@@ -1758,7 +1758,7 @@ impl ShapePatternFill {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill.png">
     ///
-    pub fn set_background_color(&mut self, color: impl Into<Color>) -> &mut ShapePatternFill {
+    pub fn set_background_color(mut self, color: impl Into<Color>) -> ShapePatternFill {
         let color = color.into();
         if color.is_valid() {
             self.background_color = color;
@@ -1776,7 +1776,7 @@ impl ShapePatternFill {
     /// - `color`: The color property defined by a [`Color`] enum value or
     ///   a type that can convert [`Into`] a [`Color`].
     ///
-    pub fn set_foreground_color(&mut self, color: impl Into<Color>) -> &mut ShapePatternFill {
+    pub fn set_foreground_color(mut self, color: impl Into<Color>) -> ShapePatternFill {
         let color = color.into();
         if color.is_valid() {
             self.foreground_color = color;
@@ -2307,7 +2307,7 @@ impl ShapeFont {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_bold.png">
     ///
-    pub fn set_bold(&mut self) -> &mut ShapeFont {
+    pub fn set_bold(mut self) -> ShapeFont {
         self.bold = true;
         self
     }
@@ -2361,7 +2361,7 @@ impl ShapeFont {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_italic.png">
     ///
-    pub fn set_italic(&mut self) -> &mut ShapeFont {
+    pub fn set_italic(mut self) -> ShapeFont {
         self.italic = true;
         self
     }
@@ -2420,7 +2420,7 @@ impl ShapeFont {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_color.png">
     ///
-    pub fn set_color(&mut self, color: impl Into<Color>) -> &mut ShapeFont {
+    pub fn set_color(mut self, color: impl Into<Color>) -> ShapeFont {
         let color = color.into();
         if color.is_valid() {
             self.color = color;
@@ -2487,7 +2487,7 @@ impl ShapeFont {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_name.png">
     ///
-    pub fn set_name(&mut self, font_name: impl Into<String>) -> &mut ShapeFont {
+    pub fn set_name(mut self, font_name: impl Into<String>) -> ShapeFont {
         self.name = font_name.into();
         self
     }
@@ -2545,7 +2545,7 @@ impl ShapeFont {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_size.png">
     ///
-    pub fn set_size<T>(&mut self, font_size: T) -> &mut ShapeFont
+    pub fn set_size<T>(mut self, font_size: T) -> ShapeFont
     where
         T: Into<f64>,
     {
@@ -2615,7 +2615,7 @@ impl ShapeFont {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/shape_font_set_rotation.png">
     ///
-    pub fn set_rotation(&mut self, rotation: i16) -> &mut ShapeFont {
+    pub fn set_rotation(mut self, rotation: i16) -> ShapeFont {
         match rotation {
             270..=271 | -90..=90 => self.rotation = Some(rotation),
             _ => eprintln!("Rotation '{rotation}' outside range: -90 <= angle <= 90."),
@@ -2628,14 +2628,14 @@ impl ShapeFont {
     ///
     /// The default underline type is the only type supported.
     ///
-    pub fn set_underline(&mut self) -> &mut ShapeFont {
+    pub fn set_underline(mut self) -> ShapeFont {
         self.underline = true;
         self
     }
 
     /// Set the strikethrough property for the font of a shape element.
     ///
-    pub fn set_strikethrough(&mut self) -> &mut ShapeFont {
+    pub fn set_strikethrough(mut self) -> ShapeFont {
         self.strikethrough = true;
         self
     }
@@ -2645,7 +2645,7 @@ impl ShapeFont {
     /// Some shape elements such as titles have a default bold property in
     /// Excel. This method can be used to turn it off.
     ///
-    pub fn unset_bold(&mut self) -> &mut ShapeFont {
+    pub fn unset_bold(mut self) -> ShapeFont {
         self.bold = false;
         self
     }
@@ -2660,7 +2660,7 @@ impl ShapeFont {
     ///
     /// - `enable`: Turn the property on/off. It is off by default.
     ///
-    pub fn set_right_to_left(&mut self, enable: bool) -> &mut ShapeFont {
+    pub fn set_right_to_left(mut self, enable: bool) -> ShapeFont {
         self.right_to_left = Some(enable);
         self
     }
@@ -2674,7 +2674,7 @@ impl ShapeFont {
     ///
     /// - `family`: The font family property.
     ///
-    pub fn set_pitch_family(&mut self, family: u8) -> &mut ShapeFont {
+    pub fn set_pitch_family(mut self, family: u8) -> ShapeFont {
         self.pitch_family = family;
         self
     }
@@ -2688,7 +2688,7 @@ impl ShapeFont {
     ///
     /// - `character_set`: The font character set property.
     ///
-    pub fn set_character_set(&mut self, character_set: u8) -> &mut ShapeFont {
+    pub fn set_character_set(mut self, character_set: u8) -> ShapeFont {
         self.character_set = character_set;
         self
     }
@@ -2860,7 +2860,7 @@ impl ShapeGradientFill {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill_set_type.png">
     ///
-    pub fn set_type(&mut self, gradient_type: ShapeGradientFillType) -> &mut ShapeGradientFill {
+    pub fn set_type(mut self, gradient_type: ShapeGradientFillType) -> ShapeGradientFill {
         self.gradient_type = gradient_type;
         self
     }
@@ -2980,10 +2980,7 @@ impl ShapeGradientFill {
     /// #
     /// #     Ok(())
     /// # }
-    pub fn set_gradient_stops(
-        &mut self,
-        gradient_stops: &[ShapeGradientStop],
-    ) -> &mut ShapeGradientFill {
+    pub fn set_gradient_stops(mut self, gradient_stops: &[ShapeGradientStop]) -> ShapeGradientFill {
         let mut valid_gradient_stops = vec![];
 
         for gradient_stop in gradient_stops {
@@ -3008,7 +3005,7 @@ impl ShapeGradientFill {
     /// - `angle`: The angle of the linear gradient fill in the range `0 <=
     ///   angle < 360`. The default angle is 90 degrees.
     ///
-    pub fn set_angle(&mut self, angle: u16) -> &mut ShapeGradientFill {
+    pub fn set_angle(mut self, angle: u16) -> ShapeGradientFill {
         if (0..360).contains(&angle) {
             self.angle = angle;
         } else {
@@ -3248,31 +3245,31 @@ pub trait IntoShapeFormat {
     fn new_shape_format(&self) -> ShapeFormat;
 }
 
-impl IntoShapeFormat for &mut ShapeFormat {
+impl IntoShapeFormat for &ShapeFormat {
     fn new_shape_format(&self) -> ShapeFormat {
         (*self).clone()
     }
 }
 
-impl IntoShapeFormat for &mut ShapeLine {
+impl IntoShapeFormat for &ShapeLine {
     fn new_shape_format(&self) -> ShapeFormat {
         ShapeFormat::new().set_line(self).clone()
     }
 }
 
-impl IntoShapeFormat for &mut ShapeSolidFill {
+impl IntoShapeFormat for &ShapeSolidFill {
     fn new_shape_format(&self) -> ShapeFormat {
         ShapeFormat::new().set_solid_fill(self).clone()
     }
 }
 
-impl IntoShapeFormat for &mut ShapePatternFill {
+impl IntoShapeFormat for &ShapePatternFill {
     fn new_shape_format(&self) -> ShapeFormat {
         ShapeFormat::new().set_pattern_fill(self).clone()
     }
 }
 
-impl IntoShapeFormat for &mut ShapeGradientFill {
+impl IntoShapeFormat for &ShapeGradientFill {
     fn new_shape_format(&self) -> ShapeFormat {
         ShapeFormat::new().set_gradient_fill(self).clone()
     }

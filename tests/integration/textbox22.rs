@@ -14,8 +14,8 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut font = ShapeFont::new();
-    font.set_name("Arial")
+    let font = ShapeFont::new()
+        .set_name("Arial")
         .set_pitch_family(34)
         .set_character_set(0);
 

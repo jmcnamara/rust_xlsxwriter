@@ -16,7 +16,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let textbox = Shape::textbox()
         .set_text("This is some text")
-        .set_format(ShapeFormat::new().set_no_fill());
+        .set_format(&ShapeFormat::new().set_no_fill());
 
     worksheet.insert_textbox(8, 4, &textbox)?;
 

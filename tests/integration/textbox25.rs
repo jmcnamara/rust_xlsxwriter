@@ -14,12 +14,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut border = ShapeBorder::new();
-    border.set_width(3.35);
+    let border = ShapeBorder::new().set_width(3.35);
 
     let textbox = Shape::textbox()
         .set_text("This is some text")
-        .set_format(&mut border);
+        .set_format(&border);
 
     worksheet.insert_textbox(8, 4, &textbox)?;
 

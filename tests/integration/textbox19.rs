@@ -22,7 +22,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let textbox = Shape::textbox()
         .set_text("This is some text")
-        .set_format(ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
+        .set_format(&ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
 
     worksheet.insert_textbox(8, 4, &textbox)?;
 

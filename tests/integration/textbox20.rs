@@ -14,8 +14,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet();
 
-    let mut font = ShapeFont::new();
-    font.set_bold();
+    let font = ShapeFont::new().set_bold();
 
     let textbox = Shape::textbox()
         .set_text("This is some text")
