@@ -29,6 +29,7 @@ const YEAR_DAYS: u64 = 365;
 const YEAR_DAYS_4: u64 = YEAR_DAYS * 4 + 1;
 const YEAR_DAYS_100: u64 = YEAR_DAYS * 100 + 25;
 const YEAR_DAYS_400: u64 = YEAR_DAYS * 400 + 97;
+const UNIX_EPOCH_PLUS_400: i64 = 12_622_780_800;
 
 /// The `ExcelDateTime` struct is used to represent an Excel date and/or time.
 ///
@@ -838,7 +839,6 @@ impl ExcelDateTime {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/datetime_from_timestamp.png">
     ///
-    #[allow(clippy::cast_precision_loss)]
     pub fn from_timestamp(timestamp: i64) -> Result<ExcelDateTime, XlsxError> {
         if !(-2_209_075_200..253_402_300_800).contains(&timestamp) {
             return Err(XlsxError::DateTimeRangeError(format!(
@@ -846,16 +846,30 @@ impl ExcelDateTime {
             )));
         }
 
-        let days = (timestamp / (24 * 60 * 60)) as f64;
-        let time = ((timestamp % (24 * 60 * 60)) as f64) / (24.0 * 60.0 * 60.0);
-        let mut datetime = 25568.0 + days + time;
+        // In order to handle negative timestamps in the Excel date range we
+        // shift the epoch forward 400 years to get a non-negative timestamp and
+        // then subtract 400 years. The 400 years is to get similar leap ranges.
+        let timestamp = (UNIX_EPOCH_PLUS_400 + timestamp) as u64;
+        let (year, month, day, hour, min, sec) = Self::unix_time_to_date_parts(timestamp);
+        let year = year - 400;
 
-        if datetime >= 60.0 {
-            datetime += 1.0;
+        // Validate the date components.
+        if let Some(err) = Self::validate_ymd(year, month, day).err() {
+            return Err(err);
+        }
+        if let Some(err) = Self::validate_hms(min, sec).err() {
+            return Err(err);
         }
 
+        // Create the new datetime.
         let dt = ExcelDateTime {
-            serial_datetime: Some(datetime),
+            year,
+            month,
+            day,
+            hour,
+            min,
+            sec,
+            datetime_type: ExcelDateTimeType::DateAndTime,
             ..ExcelDateTime::default()
         };
 
@@ -1096,6 +1110,14 @@ impl ExcelDateTime {
     //
     // Convert a Unix time (seconds from 1970) to a human readable date in
     // ISO 8601 format.
+    pub(crate) fn unix_time_to_rfc3339(timestamp: u64) -> String {
+        let (year, month, day, hour, min, sec) = Self::unix_time_to_date_parts(timestamp);
+
+        // Return the ISO 8601 date.
+        format!("{year}-{month:02}-{day:02}T{hour:02}:{min:02}:{sec:02}Z",)
+    }
+
+    // Convert a Unix time to it date components.
     //
     // The calculation is deceptively tricky since simple division doesn't work
     // due to the 4/100/400 year leap day changes. The basic approach is to
@@ -1107,7 +1129,8 @@ impl ExcelDateTime {
     //
     // Leap seconds and the time zone aren't taken into account.
     //
-    pub(crate) fn unix_time_to_rfc3339(timestamp: u64) -> String {
+    #[allow(clippy::cast_precision_loss)]
+    pub(crate) fn unix_time_to_date_parts(timestamp: u64) -> (u16, u8, u8, u16, u8, f64) {
         let mut months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
         // Convert the seconds to a whole number of days.
@@ -1205,8 +1228,15 @@ impl ExcelDateTime {
         let min = (seconds - hour * HOUR_SECONDS) / MINUTE_SECONDS;
         let sec = (seconds - hour * HOUR_SECONDS - min * MINUTE_SECONDS) % MINUTE_SECONDS;
 
-        // Return the ISO 8601 date.
-        format!("{year}-{month:02}-{day:02}T{hour:02}:{min:02}:{sec:02}Z",)
+        // Return the date components.
+        (
+            year as u16,
+            month as u8,
+            day as u8,
+            hour as u16,
+            min as u8,
+            sec as f64,
+        )
     }
 
     // Check if a year is a leap year.
