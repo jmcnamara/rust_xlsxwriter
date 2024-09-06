@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_text_link("=$A$1");
 
     worksheet.write(0, 0, "This is some text")?;
-    worksheet.insert_textbox(8, 4, &textbox)?;
+    worksheet.insert_shape(8, 4, &textbox)?;
 
     workbook.save(filename)?;
 

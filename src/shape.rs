@@ -14,7 +14,69 @@ use crate::{Color, Formula, ObjectMovement, Url, XlsxError};
 #[derive(Clone)]
 /// The `Shape` struct represents an worksheet shape object.
 ///
-/// A Shape is TODO
+/// Currently the only Excel shape type that is implemented is the `Textbox`
+/// shape:
+///
+/// ```
+/// # // This code is available in examples/app_textbox.rs
+/// #
+/// use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
+///
+///     // Some text to add to the text box.
+///     let text = "This is an example of adding a textbox with some text in it";
+///
+///     // Create a textbox shape and add the text.
+///     let textbox = Shape::textbox().set_text(text);
+///
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
+///
+///     // Save the file to disk.
+///     workbook.save("textbox.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/app_textbox.png">
+///
+/// See also the [`Worksheet::insert_shape()`](crate::Worksheet::insert_shape)
+/// and
+/// [`Worksheet::insert_shape_with_offset()`](crate::Worksheet::insert_shape_with_offset)
+/// methods. Note, it isn't possible to insert textboxes into other
+/// `rust_xlsxwriter` objects such as [`Chart`](crate::Chart).
+///
+/// ## Support for other Excel shape types
+///
+/// Currently the only Excel shape type that is supported is the `Textbox`
+/// shape.
+///
+/// The internal structure of [`Shape`] and the associated XML generating code
+/// is structured to support other shape types but none are currently
+/// implemented. The rationale for this is:
+///
+/// - Unlike applications like `PowerPoint` the shape object is not widely used
+///   in Excel.
+/// - The most common shape used in Excel is the Textbox/Rectangle.
+/// - Alternative ways of displaying information such as [`Image`](crate::Image)
+///   or [`Note`](crate::Note) are already supported.
+/// - Each shape or connector type requires a significant number of test cases
+///   to verify their functionality and interaction.
+///
+/// The last is the main reason that I don't wish to support other shape types.
+/// The implementation burden is small but the test and maintenance burden is
+/// large. As such I won't accept Pull Requests to add more shape types.
+/// However, I will leave the door open for feature requests that provide a
+/// justification.
 ///
 pub struct Shape {
     height: f64,
@@ -38,13 +100,50 @@ impl Shape {
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    /// Create a new Shape object to represent an Excel cell shape.
+    /// Create a new Shape object to represent an Excel Textbox shape.
     ///
-    /// The text of the Shape is added in the constructor.
+    /// See also the
+    /// [`Worksheet::insert_shape()`](crate::Worksheet::insert_shape) and
+    /// [`Worksheet::insert_shape_with_offset()`](crate::Worksheet::insert_shape_with_offset)
+    /// methods. Note, it isn't possible to insert textboxes into other
+    /// `rust_xlsxwriter` objects such as [`Chart`](crate::Chart).
     ///
     /// # Examples
     ///
-    /// TODO
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// text option properties.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_text_options_set_direction.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, ShapeText, ShapeTextDirection, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape and add some text.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("古池や\n蛙飛び込む\n水の音")
+    ///         .set_text_options(&ShapeText::new()
+    ///             .set_direction(ShapeTextDirection::Rotate90EastAsian));
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_options_set_direction.png">
     ///
     pub fn textbox() -> Shape {
         Shape {
@@ -68,7 +167,10 @@ impl Shape {
 
     /// Set the text in the shape.
     ///
-    /// TODO
+    /// This only applies to shapes that have a textbox option.
+    ///
+    /// See also [`Shape::set_font()`] and [`Shape::set_text_options()`] for
+    /// formatting options for text.
     ///
     /// # Parameters
     ///
@@ -76,22 +178,91 @@ impl Shape {
     ///
     /// # Examples
     ///
+    /// This example demonstrates adding a Textbox shape with text to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_set_text.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape and add some text.
+    ///     let textbox = Shape::textbox().set_text("This is some text");
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_set_text.png">
     ///
     pub fn set_text(mut self, text: impl Into<String>) -> Shape {
         self.text = text.into();
         self
     }
 
-    /// Set the text link in the shape.
+    /// Set the text in the shape from a worksheet cell.
     ///
-    /// TODO
+    /// Set the textbox text from a link to a worksheet cell like `=A1` or
+    /// `=Sheet2!A1`.
+    ///
+    /// This only applies to shapes that have a textbox option.
     ///
     /// # Parameters
     ///
-    /// - `text`: The text for the shape.
+    /// - `cell`: The cell from which the text is linked. Should be a simple
+    ///   string or a [`Formula`].
     ///
     /// # Examples
     ///
+    /// This example demonstrates adding a Textbox shape with text from a cell
+    /// to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_set_text_link.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write some text to a cell.
+    ///     worksheet.write(1, 5, "This is some text")?;
+    ///
+    ///     // Create a textbox shape and add some text from a cell.
+    ///     let textbox = Shape::textbox().set_text_link("=F2");
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/shape_set_text_link.png">
     ///
     pub fn set_text_link(mut self, cell: impl Into<Formula>) -> Shape {
         self.text_link = Some(cell.into());
@@ -100,16 +271,49 @@ impl Shape {
 
     /// Set the width of the shape in pixels.
     ///
-    /// The default width of an Excel shape is 128 pixels.
+    /// The default width for an Excel shape created by `rust_xlsxwriter` is 192
+    /// pixels.
     ///
     /// # Parameters
     ///
-    /// - `width`: The shape width in pixels.
+    /// - `width`: The shape width in pixels. Values less than 5 pixels are
+    ///   ignored.
     ///
     /// # Examples
     ///
+    /// This example demonstrates adding a resized Textbox shape to a worksheet.
     ///
-    /// TODO
+    /// ```
+    /// # // This code is available in examples/doc_shape_set_width.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #   // Create a textbox shape.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_width(100)
+    ///         .set_height(100);
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_set_width.png">
     ///
     pub fn set_width(mut self, width: u32) -> Shape {
         if width < 5 {
@@ -122,11 +326,15 @@ impl Shape {
 
     /// Set the height of the shape in pixels.
     ///
-    /// The default height of an Excel shape is 74 pixels. See the example above.
+    /// The default height for an Excel shape created by `rust_xlsxwriter` is
+    /// 120 pixels.
+    ///
+    /// See the example above.
     ///
     /// # Parameters
     ///
-    /// - `height`: The shape height in pixels.
+    /// - `height`: The shape height in pixels. Values less than 5 pixels are
+    ///   ignored.
     ///
     pub fn set_height(mut self, height: u32) -> Shape {
         if height < 5 {
@@ -136,16 +344,74 @@ impl Shape {
         self
     }
 
-    /// Set the format properties of the shape.
+    /// Set the formatting properties for a shape.
     ///
-    /// Set the font or background properties of a shape using a [`ShapeFormat`]
-    /// object. TODO
+    /// Set the formatting properties for a shape via a [`ShapeFormat`]
+    /// object or a sub-struct that implements [`IntoShapeFormat`].
     ///
-    /// This API is currently experimental and may go away in the future.
+    /// The formatting that can be applied via a [`ShapeFormat`] object are:
+    ///
+    /// - [`ShapeFormat::set_solid_fill()`]: Set the [`ShapeSolidFill`] properties.
+    /// - [`ShapeFormat::set_pattern_fill()`]: Set the [`ShapePatternFill`] properties.
+    /// - [`ShapeFormat::set_gradient_fill()`]: Set the [`ShapeGradientFill`] properties.
+    /// - [`ShapeFormat::set_no_fill()`]: Turn off the fill for the shape object.
+    /// - [`ShapeFormat::set_line()`]: Set the [`ShapeLine`] properties.
+    ///   A synonym for [`ShapeLine`] depending on context.
+    /// - [`ShapeFormat::set_no_line()`]: Turn off the line for the shape object.
     ///
     /// # Parameters
     ///
-    /// - `format`: The [`ShapeFormat`] property for the shape.
+    /// `format`: A [`ShapeFormat`] struct reference or a sub-struct that will
+    /// convert into a `ShapeFormat` instance. See the docs for
+    /// [`IntoShapeFormat`] for details.
+    ///
+    /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape and setting some of its
+    /// properties.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Shape, ShapeFormat, ShapeLine, ShapeLineDashType, ShapeSolidFill, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+    ///         &ShapeFormat::new()
+    ///             .set_solid_fill(
+    ///                 &ShapeSolidFill::new()
+    ///                     .set_color("#8ED154")
+    ///                     .set_transparency(50),
+    ///             )
+    ///             .set_line(
+    ///                 &ShapeLine::new()
+    ///                     .set_color("#FF0000")
+    ///                     .set_dash_type(ShapeLineDashType::DashDot),
+    ///             ),
+    ///     );
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_format.png">
     ///
     pub fn set_format<T>(mut self, format: T) -> Shape
     where
@@ -157,14 +423,17 @@ impl Shape {
 
     /// Set the font properties of of the shape.
     ///
-    /// Set the font properties of a shape title using a [`ShapeFont`]
-    /// reference. Example font properties that can be set are:
+    /// Set the font properties of a shape text using a [`ShapeFont`] reference.
+    /// Example font properties that can be set are:
     ///
     /// - [`ShapeFont::set_bold()`]
     /// - [`ShapeFont::set_italic()`]
+    /// - [`ShapeFont::set_color()`]
     /// - [`ShapeFont::set_name()`]
     /// - [`ShapeFont::set_size()`]
-    /// - [`ShapeFont::set_rotation()`]
+    /// - [`ShapeFont::set_underline()`]
+    /// - [`ShapeFont::set_strikethrough()`]
+    /// - [`ShapeFont::set_right_to_left()`]
     ///
     /// See [`ShapeFont`] for full details.
     ///
@@ -175,12 +444,93 @@ impl Shape {
     ///
     /// # Examples
     ///
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// font properties.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_set_font.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, ShapeFont, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_font(
+    ///         &ShapeFont::new()
+    ///             .set_bold()
+    ///             .set_italic()
+    ///             .set_name("American Typewriter")
+    ///             .set_color("#0000FF")
+    ///             .set_size(15),
+    ///     );
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_set_font.png">
+    ///
     pub fn set_font(mut self, font: &ShapeFont) -> Shape {
         self.font = font.clone();
         self
     }
 
-    /// TODO
+    /// Set the text option properties of of the shape.
+    ///
+    /// # Parameters
+    ///
+    /// - `text_options`: The [`ShapeText`] options.
+    ///
+    /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// text option properties.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_text_options_set_direction.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, ShapeText, ShapeTextDirection, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape and add some text.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("古池や\n蛙飛び込む\n水の音")
+    ///         .set_text_options(&ShapeText::new()
+    ///             .set_direction(ShapeTextDirection::Rotate90EastAsian));
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_options_set_direction.png">
+    ///
     pub fn set_text_options(mut self, text_options: &ShapeText) -> Shape {
         self.text_options = text_options.clone();
         self
@@ -188,7 +538,7 @@ impl Shape {
 
     /// Set a Url/Hyperlink for a shape.
     ///
-    /// Set a Url/Hyperlink for an image so that when the user clicks on it they
+    /// Set a Url/Hyperlink for an shape so that when the user clicks on it they
     /// are redirected to an internal or external location.
     ///
     /// See [`Url`] for an explanation of the URIs supported by Excel and for
@@ -196,7 +546,7 @@ impl Shape {
     ///
     /// # Parameters
     ///
-    /// - `link`: The url/hyperlink associate with the image as a string or
+    /// - `link`: The url/hyperlink associate with the shape as a string or
     ///   [`Url`].
     ///
     /// # Errors
@@ -277,11 +627,10 @@ impl Shape {
 #[derive(Clone, PartialEq)]
 /// The `ShapeFormat` struct represents formatting for various shape objects.
 ///
-/// Excel uses a standard formatting dialog for the elements of a shape such as
-/// data series, the plot area, the shape area, the legend or individual points.
-/// It looks like this:
+/// Excel uses a standard formatting dialog for the shape elements which
+/// generally looks like this:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_format_dialog.png">
+/// <img src="https://rustxlsxwriter.github.io/images/shape_format_dialog.png">
 ///
 /// The [`ShapeFormat`] struct represents many of these format options and just
 /// like Excel it offers a similar formatting interface for a number of the
@@ -299,90 +648,56 @@ impl Shape {
 ///   properties.
 /// - [`ShapeFormat::set_no_fill()`]: Turn off the fill for the shape object.
 /// - [`ShapeFormat::set_line()`]: Set the [`ShapeLine`] properties.
-/// - [`ShapeFormat::set_border()`]: Set the [`ShapeBorder`] properties. A
-///   synonym for [`ShapeLine`] depending on context.
 /// - [`ShapeFormat::set_no_line()`]: Turn off the line for the shape object.
-/// - [`ShapeFormat::set_no_border()`]: Turn off the border for the shape
-///   object.
+///
 ///
 /// # Examples
 ///
-/// An example of accessing the [`ShapeFormat`] for data series in a shape and
-/// using them to apply formatting.
+/// This example demonstrates adding a Textbox shape and setting some of its
+/// properties.
 ///
 /// ```
-/// # // This code is available in examples/app_shape_pattern.rs
+/// # // This code is available in examples/doc_shape_format.rs
 /// #
-/// # use rust_xlsxwriter::*;
+/// # use rust_xlsxwriter::{
+/// #     Shape, ShapeFormat, ShapeLine, ShapeLineDashType, ShapeSolidFill, Workbook, XlsxError,
+/// # };
 /// #
 /// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
 /// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
 /// #     let worksheet = workbook.add_worksheet();
-/// #     let bold = Format::new().set_bold();
 /// #
-/// #     // Add the worksheet data that the shapes will refer to.
-/// #     worksheet.write_with_format(0, 0, "Shingle", &bold)?;
-/// #     worksheet.write_with_format(0, 1, "Brick", &bold)?;
+///     // Create a textbox shape with formatting.
+///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+///         &ShapeFormat::new()
+///             .set_solid_fill(
+///                 &ShapeSolidFill::new()
+///                     .set_color("#8ED154")
+///                     .set_transparency(50),
+///             )
+///             .set_line(
+///                 &ShapeLine::new()
+///                     .set_color("#FF0000")
+///                     .set_dash_type(ShapeLineDashType::DashDot),
+///             ),
+///     );
+///
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
 /// #
-/// #     let data = [[105, 150, 130, 90], [50, 120, 100, 110]];
-/// #     for (col_num, col_data) in data.iter().enumerate() {
-/// #         for (row_num, row_data) in col_data.iter().enumerate() {
-/// #             worksheet.write(row_num as u32 + 1, col_num as u16, *row_data)?;
-/// #         }
-/// #     }
+/// #     // Save the file to disk.
+/// #     workbook.save("shape.xlsx")?;
 /// #
-/// #     // Create a new column shape.
-///     let mut shape = Shape::new(ShapeType::Column);
-///
-///     // Configure the first data series and add fill patterns.
-///     shape
-///         .add_series()
-///         .set_name("Sheet1!$A$1")
-///         .set_values("Sheet1!$A$2:$A$5")
-///         .set_gap(70)
-///         .set_format(
-///             ShapeFormat::new()
-///                 .set_pattern_fill(
-///                     ShapePatternFill::new()
-///                         .set_pattern(ShapePatternFillType::Shingle)
-///                         .set_foreground_color("#804000")
-///                         .set_background_color("#C68C53"),
-///                 )
-///                 .set_border(ShapeLine::new().set_color("#804000")),
-///         );
-///
-///     shape
-///         .add_series()
-///         .set_name("Sheet1!$B$1")
-///         .set_values("Sheet1!$B$2:$B$5")
-///         .set_format(
-///             ShapeFormat::new()
-///                 .set_pattern_fill(
-///                     ShapePatternFill::new()
-///                         .set_pattern(ShapePatternFillType::HorizontalBrick)
-///                         .set_foreground_color("#B30000")
-///                         .set_background_color("#FF6666"),
-///                 )
-///                 .set_border(ShapeLine::new().set_color("#B30000")),
-///         );
-///
-///     // Add a shape title and some axis labels.
-///     shape.title().set_name("Cladding types");
-///     shape.x_axis().set_name("Region");
-///     shape.y_axis().set_name("Number of houses");
-///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(1, 3, &shape)?;
-///
-///     workbook.save("shape_pattern.xlsx")?;
-///
-///     Ok(())
-/// }
+/// #     Ok(())
+/// # }
 /// ```
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/app_shape_pattern.png">
+/// <img src="https://rustxlsxwriter.github.io/images/shape_format.png">
 ///
 pub struct ShapeFormat {
     pub(crate) no_fill: bool,
@@ -422,68 +737,36 @@ impl ShapeFormat {
     ///
     /// - `line`: A [`ShapeLine`] struct reference.
     ///
-    pub fn set_line(mut self, line: &ShapeLine) -> ShapeFormat {
-        self.line = Some(line.clone());
-        self
-    }
-
-    /// Set the border formatting for a shape element.
-    ///
-    /// See the [`ShapeLine`] struct for details on the border properties that
-    /// can be set. As a syntactic shortcut you can use the type alias
-    /// [`ShapeBorder`] instead
-    /// of `ShapeLine`.
-    ///
-    /// # Parameters
-    ///
-    /// - `line`: A [`ShapeLine`] struct reference.
-    ///
     /// # Examples
     ///
-    /// An example of formatting the border in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// line properties.
     ///
     /// ```
-    /// # // This code is available in examples/doc_shape_border_formatting.rs
+    /// # // This code is available in examples/doc_shape_format_set_line.rs
     /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeBorder, ShapeFormat, ShapeLineDashType, ShapeType, Workbook, XlsxError,
-    /// # };
+    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeLine, ShapeLineDashType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+    ///         &ShapeFormat::new().set_line(
+    ///             &ShapeLine::new()
+    ///                 .set_color("#FF0000")
+    ///                 .set_dash_type(ShapeLineDashType::DashDot),
+    ///         ),
+    ///     );
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeFormat::new()
-    ///                 .set_border(
-    ///                     ShapeBorder::new()
-    ///                         .set_color("#FF9900")
-    ///                         .set_width(5.25)
-    ///                         .set_dash_type(ShapeLineDashType::SquareDot)
-    ///                         .set_transparency(70),
-    ///                 )
-    ///                 .set_no_fill(),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -492,10 +775,11 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_line.png">
     ///
-    pub fn set_border(self, line: &ShapeLine) -> ShapeFormat {
-        self.set_line(line)
+    pub fn set_line(mut self, line: &ShapeLine) -> ShapeFormat {
+        self.line = Some(line.clone());
+        self
     }
 
     /// Turn off the line property for a shape element.
@@ -505,45 +789,30 @@ impl ShapeFormat {
     ///
     /// # Examples
     ///
-    /// An example of turning off a default line in a shape format.
+    /// This example demonstrates adding a Textbox shape and turning off its
+    /// border.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_format_set_no_line.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeFormat, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 1)?;
-    /// #     worksheet.write(1, 0, 2)?;
-    /// #     worksheet.write(2, 0, 3)?;
-    /// #     worksheet.write(3, 0, 4)?;
-    /// #     worksheet.write(4, 0, 5)?;
-    /// #     worksheet.write(5, 0, 6)?;
-    /// #     worksheet.write(0, 1, 10)?;
-    /// #     worksheet.write(1, 1, 40)?;
-    /// #     worksheet.write(2, 1, 50)?;
-    /// #     worksheet.write(3, 1, 20)?;
-    /// #     worksheet.write(4, 1, 10)?;
-    /// #     worksheet.write(5, 1, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::ScatterStraightWithMarkers);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeFormat::new().set_no_line());
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_categories("Sheet1!$A$1:$A$6")
-    ///         .set_values("Sheet1!$B$1:$B$6")
-    ///         .set_format(ShapeFormat::new().set_no_line());
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -552,121 +821,10 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_line.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_hidden.png">
     ///
     pub fn set_no_line(mut self) -> ShapeFormat {
         self.no_line = true;
-        self
-    }
-
-    /// Turn off the border property for a shape element.
-    ///
-    /// The border property for a shape element can be turned off if you wish to
-    /// hide it.
-    ///
-    /// # Examples
-    ///
-    /// An example of turning off the border of a shape element.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_format_set_no_border.rs
-    /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeType, Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeFormat::new().set_no_border());
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("shape.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_border.png">
-    ///
-    pub fn set_no_border(self) -> ShapeFormat {
-        self.set_no_line()
-    }
-
-    /// Turn off the fill property for a shape element.
-    ///
-    /// The fill property for a shape element can be turned off if you wish to
-    /// hide it and display only the border (if set).
-    ///
-    /// # Examples
-    ///
-    /// An example of turning off the fill of a shape element.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_format_set_no_fill.rs
-    /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeLine, ShapeType, Workbook, Color, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeFormat::new()
-    ///                 .set_border(ShapeLine::new().set_color(Color::Black))
-    ///                 .set_no_fill(),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("shape.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_format_set_no_fill.png">
-    ///
-    pub fn set_no_fill(mut self) -> ShapeFormat {
-        self.no_fill = true;
         self
     }
 
@@ -681,44 +839,32 @@ impl ShapeFormat {
     ///
     /// # Examples
     ///
-    /// An example of setting a solid fill for a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// solid fill properties.
     ///
     /// ```
-    /// # // This code is available in examples/doc_shape_solid_fill.rs
+    /// # // This code is available in examples/doc_shape_solid_fill_set_transparency.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeSolidFill, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeSolidFill, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+    ///         &ShapeSolidFill::new()
+    ///             .set_color("#8ED154")
+    ///             .set_transparency(50),
+    ///     );
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeFormat::new().set_solid_fill(
-    ///                 ShapeSolidFill::new()
-    ///                     .set_color("#FF9900")
-    ///                     .set_transparency(60),
-    ///             ),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -727,10 +873,56 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill_set_transparency.png">
     ///
     pub fn set_solid_fill(mut self, fill: &ShapeSolidFill) -> ShapeFormat {
         self.solid_fill = Some(fill.clone());
+        self
+    }
+
+    /// Turn off the fill property for a shape element.
+    ///
+    /// The fill property for a shape element can be turned off if you wish to
+    /// hide it and display only the border line.
+    ///
+    /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape and turning off its
+    /// border.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_format_set_no_fill.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, ShapeFormat, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeFormat::new().set_no_fill());
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_format_set_no_fill.png">
+    ///
+    pub fn set_no_fill(mut self) -> ShapeFormat {
+        self.no_fill = true;
         self
     }
 
@@ -745,48 +937,33 @@ impl ShapeFormat {
     ///
     /// # Examples
     ///
-    /// An example of setting a pattern fill for a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// pattern fill properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_pattern_fill.rs
     /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeFormat, ShapePatternFill, ShapePatternFillType, ShapeType, Workbook, Color,
-    /// #     XlsxError,
-    /// # };
+    /// # use rust_xlsxwriter::{Color, Shape, ShapePatternFill, ShapePatternFillType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+    ///         &ShapePatternFill::new()
+    ///             .set_pattern(ShapePatternFillType::Dotted20Percent)
+    ///             .set_background_color(Color::Yellow)
+    ///             .set_foreground_color(Color::Red),
+    ///     );
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeFormat::new().set_pattern_fill(
-    ///                 ShapePatternFill::new()
-    ///                     .set_pattern(ShapePatternFillType::Dotted20Percent)
-    ///                     .set_background_color(Color::Yellow)
-    ///                     .set_foreground_color(Color::Red),
-    ///             ),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -795,7 +972,7 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill.png">
     ///
     pub fn set_pattern_fill(mut self, fill: &ShapePatternFill) -> ShapeFormat {
         self.pattern_fill = Some(fill.clone());
@@ -813,45 +990,35 @@ impl ShapeFormat {
     ///
     /// # Examples
     ///
-    /// An example of setting a gradient fill for a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of its
+    /// properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_format_set_gradient_fill.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeFormat, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
+    /// #     Shape, ShapeFormat, ShapeGradientFill, ShapeGradientStop, Workbook, XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+    ///         &ShapeFormat::new().set_gradient_fill(&ShapeGradientFill::new().set_gradient_stops(&[
+    ///             ShapeGradientStop::new("#F1DCDB", 0),
+    ///             ShapeGradientStop::new("#963735", 100),
+    ///         ])),
+    ///     );
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeFormat::new().set_gradient_fill(
-    ///             ShapeGradientFill::new().set_gradient_stops(&[
-    ///                 ShapeGradientStop::new("#963735", 0),
-    ///                 ShapeGradientStop::new("#F1DCDB", 100),
-    ///             ]),
-    ///         ));
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -860,7 +1027,7 @@ impl ShapeFormat {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_format_set_gradient_fill.png">
     ///
     pub fn set_gradient_fill(mut self, fill: &ShapeGradientFill) -> ShapeFormat {
         self.gradient_fill = Some(fill.clone());
@@ -874,80 +1041,56 @@ impl ShapeFormat {
 
 /// The `ShapeLine` struct represents a shape line/border.
 ///
-/// The [`ShapeLine`] struct represents the formatting properties for a line or
-/// border for a Shape element. It is a sub property of the [`ShapeFormat`]
-/// struct and is used with the [`ShapeFormat::set_line()`] or
-/// [`ShapeFormat::set_border()`] methods.
+/// The [`ShapeLine`] struct represents the formatting properties for the line
+/// of a Shape element. It is a sub property of the [`ShapeFormat`] struct and
+/// is used with the [`ShapeFormat::set_line()`] method.
 ///
-/// Excel uses the element names "Line" and "Border" depending on the context.
-/// For a Line shape the line is represented by a line property but for a Column
-/// shape the line becomes the border. Both of these share the same properties
-/// and are both represented in `rust_xlsxwriter` by the [`ShapeLine`] struct.
-///
-/// As a syntactic shortcut you can use the type alias [`ShapeBorder`] instead
-/// of `ShapeLine`.
+/// For 2D shapes the line property usually represents the border.
 ///
 /// It is used in conjunction with the [`Shape`] struct.
 ///
 /// # Examples
 ///
-/// An example of formatting a line/border in a shape element.
+/// This example demonstrates adding a Textbox shape and setting some of the
+/// line properties.
 ///
 /// ```
-/// # // This code is available in examples/doc_shape_line_formatting.rs
+/// # // This code is available in examples/doc_shape_line.rs
 /// #
-/// # use rust_xlsxwriter::{
-/// #     Shape, ShapeFormat, ShapeLine, ShapeLineDashType, ShapeType, Workbook, XlsxError,
-/// # };
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     let mut workbook = Workbook::new();
-/// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Add some data for the shape.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(3, 0, 20)?;
-/// #     worksheet.write(4, 0, 10)?;
-/// #     worksheet.write(5, 0, 50)?;
-/// #
-/// #     // Create a new shape.
-///     let mut shape = Shape::new(ShapeType::Line);
+/// use rust_xlsxwriter::{Shape, ShapeLine, ShapeLineDashType, Workbook, XlsxError};
 ///
-///     // Add a data series with formatting.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$6")
-///         .set_format(
-///             ShapeFormat::new().set_line(
-///                 ShapeLine::new()
-///                     .set_color("#FF9900")
-///                     .set_width(5.25)
-///                     .set_dash_type(ShapeLineDashType::SquareDot)
-///                     .set_transparency(70),
-///             ),
-///         );
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
 ///
-/// #     // Save the file.
-/// #     workbook.save("shape.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
+///     // Create a textbox shape with formatting.
+///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+///         &ShapeLine::new()
+///             .set_color("#FF0000")
+///             .set_dash_type(ShapeLineDashType::DashDot),
+///     );
+///
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
+///
+///     // Save the file to disk.
+///     workbook.save("shape.xlsx")?;
+///
+///     Ok(())
+/// }
 /// ```
 ///
 /// Output file:
 ///
-/// <img
-/// src="https://rustxlsxwriter.github.io/images/chart_line_formatting.png">
+/// <img src="https://rustxlsxwriter.github.io/images/shape_line.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapeLine {
     pub(crate) color: Color,
-    pub(crate) width: Option<f64>,
+    pub(crate) width: f64,
     pub(crate) transparency: u8,
     pub(crate) dash_type: ShapeLineDashType,
     pub(crate) hidden: bool,
@@ -960,7 +1103,7 @@ impl ShapeLine {
     pub fn new() -> ShapeLine {
         ShapeLine {
             color: Color::Default,
-            width: None,
+            width: 0.75,
             transparency: 0,
             dash_type: ShapeLineDashType::Solid,
             hidden: false,
@@ -971,43 +1114,35 @@ impl ShapeLine {
     ///
     /// # Parameters
     ///
-    /// - `color`: The color property defined by a [`Color`] enum value or
-    ///   a type that can convert [`Into`] a [`Color`].
+    /// - `color`: The color property defined by a [`Color`] enum value or a
+    ///   type that can convert [`Into`] a [`Color`] such as html like string.
     ///
     /// # Examples
     ///
-    /// An example of formatting the line color in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// line properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_line_set_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeLine, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeLine, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Line);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeLine::new().set_color("#FF0000"));
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeFormat::new().set_line(ShapeLine::new().set_color("#FF9900")));
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1016,7 +1151,8 @@ impl ShapeLine {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_color.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/shape_line_set_color.png">
     ///
     pub fn set_color(mut self, color: impl Into<Color>) -> ShapeLine {
         let color = color.into();
@@ -1033,42 +1169,34 @@ impl ShapeLine {
     ///
     /// - `width`: The width should be specified in increments of 0.25 of a
     ///   point as in Excel. The width can be an number type that convert
-    ///   [`Into`] [`f64`].
+    ///   [`Into`] [`f64`]. The default width is 0.75.
     ///
     /// # Examples
     ///
-    /// An example of formatting the line width in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// line properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_line_set_width.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeLine, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeLine, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Line);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeLine::new().set_width(10));
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeFormat::new().set_line(ShapeLine::new().set_width(10.0)));
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1077,8 +1205,7 @@ impl ShapeLine {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_line_set_width.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_width.png">
     ///
     pub fn set_width<T>(mut self, width: T) -> ShapeLine
     where
@@ -1086,7 +1213,7 @@ impl ShapeLine {
     {
         let width = width.into();
         if width <= 1584.0 {
-            self.width = Some(width);
+            self.width = width;
         }
 
         self
@@ -1100,44 +1227,30 @@ impl ShapeLine {
     ///
     /// # Examples
     ///
-    /// An example of formatting the line dash type in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// line properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_line_set_dash_type.rs
     /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeFormat, ShapeLine, ShapeLineDashType, ShapeType, Workbook, XlsxError,
-    /// # };
+    /// # use rust_xlsxwriter::{Shape, ShapeLine, ShapeLineDashType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Line);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeLine::new().set_dash_type(ShapeLineDashType::DashDot));
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeFormat::new()
-    ///                 .set_line(ShapeLine::new()
-    ///                 .set_dash_type(ShapeLineDashType::DashDot)),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1146,7 +1259,7 @@ impl ShapeLine {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_dash_type.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_dash_type.png">
     ///
     pub fn set_dash_type(mut self, dash_type: ShapeLineDashType) -> ShapeLine {
         self.dash_type = dash_type;
@@ -1165,41 +1278,30 @@ impl ShapeLine {
     ///
     /// # Examples
     ///
-    /// An example of formatting the line transparency in a shape element. Note, you
-    /// must set also set a color in order to set the transparency.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// line properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_line_set_transparency.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeLine, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeLine, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Line);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeLine::new().set_color("#FF9900").set_transparency(50));
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeFormat::new().set_line(ShapeLine::new().set_color("#FF9900").set_transparency(50)),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1208,7 +1310,7 @@ impl ShapeLine {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_line_set_transparency.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_line_set_transparency.png">
     ///
     pub fn set_transparency(mut self, transparency: u8) -> ShapeLine {
         if transparency <= 100 {
@@ -1221,90 +1323,56 @@ impl ShapeLine {
     /// Set the shape line as hidden.
     ///
     /// The method is sometimes required to turn off a default line type in
-    /// order to highlight some other element such as the line markers.
+    /// order to highlight some other part of the line. This can also be
+    /// achieved more succinctly using the [`ShapeFormat::set_no_line()`]
+    /// method.
     ///
     /// # Parameters
     ///
-    /// - `enable`: Turn the property on/off. It is off (not hidden) by
-    ///   default.
+    /// - `enable`: Turn the property on/off. It is off (not hidden) by default.
+    ///
+    /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// line properties.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_line_set_hidden.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, ShapeLine, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeLine::new().set_hidden(true));
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/shape_line_set_hidden.png">
     ///
     pub fn set_hidden(mut self, enable: bool) -> ShapeLine {
         self.hidden = enable;
         self
     }
 }
-
-/// A type to represent a Shape border. It can be used interchangeably with
-/// [`ShapeLine`].
-///
-/// Excel uses the shape element names "Line" and "Border" depending on the
-/// context. For a Line shape the line is represented by a line property but for
-/// a Column shape the line becomes the border. Both of these share the same
-/// properties and are both represented in `rust_xlsxwriter` by the
-/// [`ShapeLine`] struct.
-///
-/// The `ShapeBorder` type is a type alias of [`ShapeLine`] for use as a
-/// syntactic shortcut where you would expect to write `ShapeBorder` instead of
-/// `ShapeLine`.
-///
-/// # Examples
-///
-/// An example of formatting the border in a shape element.
-///
-/// ```
-/// # // This code is available in examples/doc_shape_border_formatting.rs
-/// #
-/// # use rust_xlsxwriter::{
-/// #     Shape, ShapeBorder, ShapeFormat, ShapeLineDashType, ShapeType, Workbook, XlsxError,
-/// # };
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     let mut workbook = Workbook::new();
-/// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Add some data for the shape.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(3, 0, 20)?;
-/// #     worksheet.write(4, 0, 10)?;
-/// #     worksheet.write(5, 0, 50)?;
-/// #
-/// #     // Create a new shape.
-///     let mut shape = Shape::new(ShapeType::Column);
-///
-///     // Add a data series with formatting.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$6")
-///         .set_format(
-///             ShapeFormat::new()
-///                 .set_border(
-///                     ShapeBorder::new()
-///                         .set_color("#FF9900")
-///                         .set_width(5.25)
-///                         .set_dash_type(ShapeLineDashType::SquareDot)
-///                         .set_transparency(70),
-///                 )
-///                 .set_no_fill(),
-///         );
-///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
-///
-/// #     // Save the file.
-/// #     workbook.save("shape.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
-/// ```
-///
-/// Output file:
-///
-/// <img
-/// src="https://rustxlsxwriter.github.io/images/chart_border_formatting.png">
-///
-pub type ShapeBorder = ShapeLine;
 
 // -----------------------------------------------------------------------
 // ShapeSolidFill
@@ -1323,44 +1391,32 @@ pub type ShapeBorder = ShapeLine;
 ///
 /// # Examples
 ///
-/// An example of setting a solid fill for a shape element.
+/// This example demonstrates adding a Textbox shape and setting some of the
+/// solid fill properties.
 ///
 /// ```
-/// # // This code is available in examples/doc_shape_solid_fill.rs
+/// # // This code is available in examples/doc_shape_solid_fill_set_transparency.rs
 /// #
-/// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeSolidFill, ShapeType, Workbook, XlsxError};
+/// # use rust_xlsxwriter::{Shape, ShapeSolidFill, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
 /// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
 /// #     let worksheet = workbook.add_worksheet();
 /// #
-/// #     // Add some data for the shape.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(3, 0, 20)?;
-/// #     worksheet.write(4, 0, 10)?;
-/// #     worksheet.write(5, 0, 50)?;
+///     // Create a textbox shape with formatting.
+///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+///         &ShapeSolidFill::new()
+///             .set_color("#8ED154")
+///             .set_transparency(50),
+///     );
+///
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
 /// #
-/// #     // Create a new shape.
-///     let mut shape = Shape::new(ShapeType::Column);
-///
-///     // Add a data series with formatting.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$6")
-///         .set_format(
-///             ShapeFormat::new().set_solid_fill(
-///                 ShapeSolidFill::new()
-///                     .set_color("#FF9900")
-///                     .set_transparency(60),
-///             ),
-///         );
-///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
-///
-/// #     // Save the file.
+/// #     // Save the file to disk.
 /// #     workbook.save("shape.xlsx")?;
 /// #
 /// #     Ok(())
@@ -1369,7 +1425,7 @@ pub type ShapeBorder = ShapeLine;
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
+/// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill_set_transparency.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapeSolidFill {
@@ -1397,38 +1453,30 @@ impl ShapeSolidFill {
     ///
     /// # Examples
     ///
-    /// An example of setting a solid fill color for a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// solid fill properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_solid_fill_set_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeSolidFill, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeSolidFill, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeSolidFill::new().set_color("#8ED154"));
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeFormat::new().set_solid_fill(ShapeSolidFill::new().set_color("#B5A401")));
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1437,7 +1485,7 @@ impl ShapeSolidFill {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill_set_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill_set_color.png">
     ///
     pub fn set_color(mut self, color: impl Into<Color>) -> ShapeSolidFill {
         let color = color.into();
@@ -1460,44 +1508,32 @@ impl ShapeSolidFill {
     ///
     /// # Examples
     ///
-    /// An example of setting a solid fill for a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// solid fill properties.
     ///
     /// ```
-    /// # // This code is available in examples/doc_shape_solid_fill.rs
+    /// # // This code is available in examples/doc_shape_solid_fill_set_transparency.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeSolidFill, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeSolidFill, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+    ///         &ShapeSolidFill::new()
+    ///             .set_color("#8ED154")
+    ///             .set_transparency(50),
+    ///     );
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeFormat::new().set_solid_fill(
-    ///                 ShapeSolidFill::new()
-    ///                     .set_color("#FF9900")
-    ///                     .set_transparency(60),
-    ///             ),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1506,7 +1542,7 @@ impl ShapeSolidFill {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_solid_fill.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_solid_fill_set_transparency.png">
     ///
     pub fn set_transparency(mut self, transparency: u8) -> ShapeSolidFill {
         if transparency <= 100 {
@@ -1535,56 +1571,43 @@ impl ShapeSolidFill {
 ///
 /// # Examples
 ///
-/// An example of setting a pattern fill for a shape element.
+/// This example demonstrates adding a Textbox shape and setting some of the
+/// pattern fill properties.
 ///
 /// ```
 /// # // This code is available in examples/doc_shape_pattern_fill.rs
 /// #
-/// # use rust_xlsxwriter::{
-/// #     Shape, ShapeFormat, ShapePatternFill, ShapePatternFillType, ShapeType, Workbook, Color, XlsxError,
-/// # };
-/// #
-/// # fn main() -> Result<(), XlsxError> {
-/// #     let mut workbook = Workbook::new();
-/// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Add some data for the shape.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(3, 0, 20)?;
-/// #     worksheet.write(4, 0, 10)?;
-/// #     worksheet.write(5, 0, 50)?;
-/// #
-/// #     // Create a new shape.
-///     let mut shape = Shape::new(ShapeType::Column);
+/// use rust_xlsxwriter::{Color, Shape, ShapePatternFill,
+///                       ShapePatternFillType, Workbook, XlsxError};
 ///
-///     // Add a data series with formatting.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$6")
-///         .set_format(
-///             ShapeFormat::new().set_pattern_fill(
-///                 ShapePatternFill::new()
-///                     .set_pattern(ShapePatternFillType::Dotted20Percent)
-///                     .set_background_color(Color::Yellow)
-///                     .set_foreground_color(Color::Red),
-///             ),
-///         );
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
 ///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
+///     // Add a worksheet to the workbook.
+///     let worksheet = workbook.add_worksheet();
 ///
-/// #     // Save the file.
-/// #     workbook.save("shape.xlsx")?;
-/// #
-/// #     Ok(())
-/// # }
+///     // Create a textbox shape with formatting.
+///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+///         &ShapePatternFill::new()
+///             .set_pattern(ShapePatternFillType::Dotted20Percent)
+///             .set_background_color(Color::Yellow)
+///             .set_foreground_color(Color::Red),
+///     );
+///
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
+///
+///     // Save the file to disk.
+///     workbook.save("shape.xlsx")?;
+///
+///     Ok(())
+/// }
 /// ```
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
+/// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapePatternFill {
@@ -1613,45 +1636,35 @@ impl ShapePatternFill {
     ///
     /// - `pattern`: The pattern property defined by a [`ShapePatternFillType`] enum value.
     ///
-    ///
     /// # Examples
     ///
-    /// An example of setting a pattern fill for a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// pattern fill properties.
     ///
     /// ```
-    /// # // This code is available in examples/doc_shape_pattern_fill_set_pattern.rs
+    /// # // This code is available in examples/doc_shape_pattern_fill.rs
     /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeFormat, ShapePatternFill, ShapePatternFillType, ShapeType, Workbook, XlsxError,
-    /// # };
+    /// # use rust_xlsxwriter::{Color, Shape, ShapePatternFill, ShapePatternFillType, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+    ///         &ShapePatternFill::new()
+    ///             .set_pattern(ShapePatternFillType::Dotted20Percent)
+    ///             .set_background_color(Color::Yellow)
+    ///             .set_foreground_color(Color::Red),
+    ///     );
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeFormat::new().set_pattern_fill(
-    ///             ShapePatternFill::new().set_pattern(ShapePatternFillType::DiagonalBrick),
-    ///         ));
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1660,7 +1673,7 @@ impl ShapePatternFill {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill_set_pattern.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_pattern_fill.png">
     ///
     pub fn set_pattern(mut self, pattern: ShapePatternFillType) -> ShapePatternFill {
         self.pattern = pattern;
@@ -1675,60 +1688,6 @@ impl ShapePatternFill {
     ///
     /// - `color`: The color property defined by a [`Color`] enum value or
     ///   a type that can convert [`Into`] a [`Color`].
-    ///
-    /// # Examples
-    ///
-    /// An example of setting a pattern fill for a shape element.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_pattern_fill.rs
-    /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeFormat, ShapePatternFill, ShapePatternFillType, ShapeType, Workbook, Color,
-    /// #     XlsxError,
-    /// # };
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeFormat::new().set_pattern_fill(
-    ///                 ShapePatternFill::new()
-    ///                     .set_pattern(ShapePatternFillType::Dotted20Percent)
-    ///                     .set_background_color(Color::Yellow)
-    ///                     .set_foreground_color(Color::Red),
-    ///             ),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("shape.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_pattern_fill.png">
     ///
     pub fn set_background_color(mut self, color: impl Into<Color>) -> ShapePatternFill {
         let color = color.into();
@@ -1777,46 +1736,35 @@ impl ShapePatternFill {
 ///
 /// It is used in conjunction with the [`Shape`] struct.
 ///
-///
 /// # Examples
 ///
-/// An example of setting a gradient fill for a shape element.
+/// This example demonstrates adding a Textbox shape and setting some of the
+/// gradient fill properties.
 ///
 /// ```
 /// # // This code is available in examples/doc_shape_gradient_fill.rs
 /// #
-/// use rust_xlsxwriter::{
-///     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
-/// };
+/// use rust_xlsxwriter::{Shape, ShapeGradientFill, ShapeGradientStop, Workbook, XlsxError};
 ///
 /// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
 ///     let mut workbook = Workbook::new();
+///
+///     // Add a worksheet to the workbook.
 ///     let worksheet = workbook.add_worksheet();
 ///
-///     // Add some data for the shape.
-///     worksheet.write(0, 0, 10)?;
-///     worksheet.write(1, 0, 40)?;
-///     worksheet.write(2, 0, 50)?;
-///     worksheet.write(3, 0, 20)?;
-///     worksheet.write(4, 0, 10)?;
-///     worksheet.write(5, 0, 50)?;
+///     // Create a textbox shape with formatting.
+///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+///         &ShapeGradientFill::new().set_gradient_stops(&[
+///             ShapeGradientStop::new("#F1DCDB", 0),
+///             ShapeGradientStop::new("#963735", 100),
+///         ]),
+///     );
 ///
-///     // Create a new shape.
-///   let mut shape = Shape::new(ShapeType::Column);
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
 ///
-///     // Add a data series with formatting.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$6")
-///         .set_format(ShapeGradientFill::new().set_gradient_stops(&[
-///             ShapeGradientStop::new("#963735", 0),
-///             ShapeGradientStop::new("#F1DCDB", 100),
-///         ]));
-///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
-///
-///     // Save the file.
+///     // Save the file to disk.
 ///     workbook.save("shape.xlsx")?;
 ///
 ///     Ok(())
@@ -1825,7 +1773,7 @@ impl ShapePatternFill {
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill.png">
+/// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapeGradientFill {
@@ -1866,49 +1814,37 @@ impl ShapeGradientFill {
     ///
     /// # Examples
     ///
-    /// An example of setting a gradient fill for a shape element with a non-default
-    /// gradient type.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// gradient fill properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_gradient_fill_set_type.rs
     /// #
     /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeGradientFill, ShapeGradientFillType, ShapeGradientStop, ShapeType, Workbook,
-    /// #     XlsxError,
+    /// #     Shape, ShapeGradientFill, ShapeGradientFillType, ShapeGradientStop, Workbook, XlsxError,
     /// # };
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox().set_text("This is some text").set_format(
+    ///         &ShapeGradientFill::new()
+    ///             .set_type(ShapeGradientFillType::Rectangular)
+    ///             .set_gradient_stops(&[
+    ///                 ShapeGradientStop::new("#963735", 0),
+    ///                 ShapeGradientStop::new("#F1DCDB", 100),
+    ///             ]),
+    ///     );
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(
-    ///             ShapeGradientFill::new()
-    ///                 .set_type(ShapeGradientFillType::Rectangular)
-    ///                 .set_gradient_stops(&[
-    ///                     ShapeGradientStop::new("#963735", 0),
-    ///                     ShapeGradientStop::new("#F1DCDB", 100),
-    ///                 ]),
-    ///         );
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1917,7 +1853,7 @@ impl ShapeGradientFill {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_fill_set_type.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill_set_type.png">
     ///
     pub fn set_type(mut self, gradient_type: ShapeGradientFillType) -> ShapeGradientFill {
         self.gradient_type = gradient_type;
@@ -1944,47 +1880,37 @@ impl ShapeGradientFill {
     ///
     /// # Examples
     ///
-    /// An example of setting a gradient fill for a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// gradient fill properties.
     ///
     /// ```
-    /// # // This code is available in examples/doc_shape_gradient_stops.rs
+    /// # // This code is available in examples/doc_shape_gradient_fill_set_gradient_stops.rs
     /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
-    /// # };
+    /// # use rust_xlsxwriter::{Shape, ShapeGradientFill, ShapeGradientStop, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
     ///     // Set the properties of the gradient stops.
     ///     let gradient_stops = [
-    ///         ShapeGradientStop::new("#156B13", 0),
+    ///         ShapeGradientStop::new("#DDEBCF", 0),
     ///         ShapeGradientStop::new("#9CB86E", 50),
-    ///         ShapeGradientStop::new("#DDEBCF", 100),
+    ///         ShapeGradientStop::new("#156B13", 100),
     ///     ];
     ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_format(&ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
     ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -1993,52 +1919,8 @@ impl ShapeGradientFill {
     ///
     /// Output file:
     ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_gradient_stops.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill_set_gradient_stops.png">
     ///
-    /// Note, it can be clearer to add the gradient stops directly to the format
-    /// as follows. This gives the same output as above.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_gradient_stops2.rs
-    /// #
-    /// # use rust_xlsxwriter::{
-    /// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
-    /// # };
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series with formatting.
-    ///     shape
-    ///         .add_series()
-    ///         .set_values("Sheet1!$A$1:$A$6")
-    ///         .set_format(ShapeGradientFill::new().set_gradient_stops(&[
-    ///             ShapeGradientStop::new("#156B13", 0),
-    ///             ShapeGradientStop::new("#9CB86E", 50),
-    ///             ShapeGradientStop::new("#DDEBCF", 100),
-    ///         ]));
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("shape.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
     pub fn set_gradient_stops(mut self, gradient_stops: &[ShapeGradientStop]) -> ShapeGradientFill {
         let mut valid_gradient_stops = vec![];
 
@@ -2096,47 +1978,37 @@ impl ShapeGradientFill {
 ///
 /// # Examples
 ///
-/// An example of setting a gradient fill for a shape element.
+/// This example demonstrates adding a Textbox shape and setting some of the
+/// gradient fill properties.
 ///
 /// ```
-/// # // This code is available in examples/doc_shape_gradient_stops.rs
+/// # // This code is available in examples/doc_shape_gradient_fill_set_gradient_stops.rs
 /// #
-/// # use rust_xlsxwriter::{
-/// #     Shape, ShapeGradientFill, ShapeGradientStop, ShapeType, Workbook, XlsxError,
-/// # };
+/// # use rust_xlsxwriter::{Shape, ShapeGradientFill, ShapeGradientStop, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
 /// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
 /// #     let worksheet = workbook.add_worksheet();
-/// #
-/// #     // Add some data for the shape.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(3, 0, 20)?;
-/// #     worksheet.write(4, 0, 10)?;
-/// #     worksheet.write(5, 0, 50)?;
-/// #
-/// #     // Create a new shape.
-///     let mut shape = Shape::new(ShapeType::Column);
 ///
 ///     // Set the properties of the gradient stops.
 ///     let gradient_stops = [
-///         ShapeGradientStop::new("#156B13", 0),
+///         ShapeGradientStop::new("#DDEBCF", 0),
 ///         ShapeGradientStop::new("#9CB86E", 50),
-///         ShapeGradientStop::new("#DDEBCF", 100),
+///         ShapeGradientStop::new("#156B13", 100),
 ///     ];
 ///
-///     // Add a data series with formatting.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$6")
-///         .set_format(ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
+///     // Create a textbox shape with formatting.
+///     let textbox = Shape::textbox()
+///         .set_text("This is some text")
+///         .set_format(&ShapeGradientFill::new().set_gradient_stops(&gradient_stops));
 ///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
-///
-/// #     // Save the file.
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
+/// #
+/// #     // Save the file to disk.
 /// #     workbook.save("shape.xlsx")?;
 /// #
 /// #     Ok(())
@@ -2145,8 +2017,7 @@ impl ShapeGradientFill {
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_gradient_stops.png">
-///
+/// <img src="https://rustxlsxwriter.github.io/images/shape_gradient_fill_set_gradient_stops.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapeGradientStop {
@@ -2206,18 +2077,60 @@ impl ShapeGradientStop {
 // ShapeText
 // -----------------------------------------------------------------------
 
-/// The `ShapeText` struct represents a the solid fill for a shape element.
+/// The `ShapeText` struct represents the text options for a shape element.
 ///
-/// The [`ShapeText`] struct represents the formatting properties for the
-/// solid fill of a Shape element. In Excel a solid fill is a single color fill
-/// without a pattern or gradient.
+/// The [`ShapeText`] struct represents the text option properties for a Shape
+///  element:
 ///
-/// `ShapeText` is a sub property of the [`ShapeFormat`] struct and is used
-/// with the [`ShapeFormat::set_solid_fill()`] method.
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/shape_text_options_dialog.png">
+///
+/// Currently only the vertical, horizontal and text direction properties are
+/// supported.
+///
+/// `ShapeText` is a sub property of the [`ShapeFormat`] struct and is used with
+/// the [`Shape::set_text_options()`] method. See also [`ShapeFont`].
 ///
 /// It is used in conjunction with the [`Shape`] struct.
 ///
 /// # Examples
+///
+/// This example demonstrates adding a Textbox shape and setting some of the
+/// text option properties.
+///
+///
+/// ```
+/// # // This code is available in examples/doc_shape_text_options_set_direction.rs
+/// #
+/// # use rust_xlsxwriter::{Shape, ShapeText, ShapeTextDirection, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
+/// #     let worksheet = workbook.add_worksheet();
+///
+///     // Create a textbox shape and add some text.
+///     let textbox = Shape::textbox()
+///         .set_text("古池や\n蛙飛び込む\n水の音")
+///         .set_text_options(
+///             &ShapeText::new().set_direction(ShapeTextDirection::Rotate90EastAsian)
+///         );
+///
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
+/// #
+/// #     // Save the file to disk.
+/// #     workbook.save("shape.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/shape_text_options_set_direction.png">
 ///
 #[derive(Clone, PartialEq)]
 pub struct ShapeText {
@@ -2233,7 +2146,8 @@ impl Default for ShapeText {
 }
 
 impl ShapeText {
-    /// Create a new `ShapeText` object to represent a Shape solid fill.
+    /// Create a new `ShapeText` object to represent the text options for a
+    /// Shape element.
     ///
     pub fn new() -> ShapeText {
         ShapeText {
@@ -2243,13 +2157,66 @@ impl ShapeText {
         }
     }
 
-    /// Set the TODO
+    /// Set the horizontal alignment for the text in a shape textbox.
+    ///
+    /// This method sets the horizontal alignment for the text in a shape while
+    /// [`ShapeText::set_vertical_alignment()`] sets the alignment for the text
+    /// bounding box. See the example below.
     ///
     /// # Parameters
     ///
-    /// - `alignment`: TODO
+    /// - `alignment`: A [`ShapeTextHorizontalAlignment`] enum value.
     ///
     /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// text option properties. This highlights the difference between
+    /// horizontal and vertical centering.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_text_options_set_horizontal_alignment.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Shape, ShapeText, ShapeTextHorizontalAlignment, ShapeTextVerticalAlignment, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Some text for the textbox.
+    ///     let text = ["Some text", "on", "several lines"].join("\n");
+    ///
+    ///     // Create a textbox shape and add some text with horizontal alignment.
+    ///     let textbox = Shape::textbox().set_text(&text).set_text_options(
+    ///         &ShapeText::new().set_horizontal_alignment(ShapeTextHorizontalAlignment::Center),
+    ///     );
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    ///
+    ///     // Create a textbox shape and add some text with vertical alignment.
+    ///     let textbox = Shape::textbox().set_text(&text).set_text_options(
+    ///         &ShapeText::new().set_vertical_alignment(ShapeTextVerticalAlignment::TopCentered),
+    ///     );
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 5, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/shape_text_set_horizontal_alignment.png">
     ///
     pub fn set_horizontal_alignment(
         mut self,
@@ -2260,13 +2227,15 @@ impl ShapeText {
         self
     }
 
-    /// Set the TODO
+    /// Set the vertical alignment for the textbox in a shape.
+    ///
+    /// This method sets the vertical alignment of the textbox in a shape while
+    /// [`ShapeText::set_horizontal_alignment()`] sets the alignment for the
+    /// text within the textbox. See the example above.
     ///
     /// # Parameters
     ///
-    /// - `alignment`: TODO
-    ///
-    /// # Examples
+    /// - `alignment`: A [`ShapeTextVerticalAlignment`] enum value.
     ///
     pub fn set_vertical_alignment(mut self, alignment: ShapeTextVerticalAlignment) -> ShapeText {
         self.vertical_alignment = alignment;
@@ -2274,13 +2243,52 @@ impl ShapeText {
         self
     }
 
-    /// Set the TODO
+    /// Set the text direction of the text in the text box.
+    ///
+    /// This is useful for languages that display text vertically.
     ///
     /// # Parameters
     ///
-    /// - `color`: TODO
+    /// - `direction`: The [`ShapeTextDirection`] of the text.
     ///
     /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// text option properties.
+    ///
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_shape_text_options_set_direction.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, ShapeText, ShapeTextDirection, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape and add some text.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("古池や\n蛙飛び込む\n水の音")
+    ///         .set_text_options(
+    ///             &ShapeText::new().set_direction(ShapeTextDirection::Rotate90EastAsian)
+    ///         );
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("shape.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_options_set_direction.png">
     ///
     pub fn set_direction(mut self, direction: ShapeTextDirection) -> ShapeText {
         self.direction = direction;
@@ -2293,10 +2301,14 @@ impl ShapeText {
 // Shape enums
 // -----------------------------------------------------------------------
 
-// TODO
+// The `ShapeType` enum defines the [`Shape`] types.
+//
+// Note, currently only the type supported is TextBox. See the explanation at
+// the start of this document.
+//
 #[derive(Clone, PartialEq, Eq)]
 pub(crate) enum ShapeType {
-    // TODO
+    // The Textbox shape.
     TextBox,
 }
 
@@ -2658,63 +2670,101 @@ impl fmt::Display for ShapePatternFillType {
     }
 }
 
-/// TODO
+/// The `ShapeTextHorizontalAlignment` enum defines the horizontal alignment for
+/// [`Shape`] text.
+///
+/// See [`ShapeText::set_horizontal_alignment()`].
 #[derive(Clone, PartialEq, Eq, Default)]
 pub enum ShapeTextHorizontalAlignment {
-    /// TODO
+    /// Horizontally align text in the default position (usually to the left).
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_horizontal_alignment_default.png">
     #[default]
     Default,
 
-    /// TODO
+    /// Horizontally align text to the left of the shape.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_horizontal_alignment_default.png">
     Left,
 
-    /// TODO
+    /// Horizontally align text to the center of the shape.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_horizontal_alignment_center.png">
     Center,
 
-    /// TODO
+    /// Horizontally align text to the right of the shape.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_horizontal_alignment_right.png">
     Right,
 }
 
-/// TODO
+/// The `ShapeTextVerticalAlignment` enum defines the vertical alignment for
+/// [`Shape`] text.
+///
+/// See [`ShapeText::set_horizontal_alignment()`].
 #[derive(Clone, PartialEq, Eq, Default)]
 pub enum ShapeTextVerticalAlignment {
-    /// TODO
+    /// Vertically align text to the top of the shape. This is the default.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_horizontal_alignment_default.png">
     #[default]
     Top,
 
-    /// TODO
+    /// Vertically align text to the middle of the shape.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_vertical_alignment_middle.png">
     Middle,
 
-    /// TODO
+    /// Vertically align text to the bottom of the shape.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_vertical_alignment_bottom.png">
     Bottom,
 
-    /// TODO
+    /// Vertically align text to the top center of the shape.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_vertical_alignment_top_centered.png">
     TopCentered,
 
-    /// TODO
+    /// Vertically align text to the middle center of the shape.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_vertical_alignment_middle_centered.png">
     MiddleCentered,
 
-    /// TODO
+    /// Vertically align text to the bottom center of the shape.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_vertical_alignment_bottom_centered.png">
     BottomCentered,
 }
 
-/// TODO
+/// The `ShapeTextDirection` enum defines the text direction for [`Shape`] text.
+///
+/// See [`ShapeText::set_direction()`].
 #[derive(Clone, PartialEq, Eq, Default)]
 pub enum ShapeTextDirection {
-    /// TODO
+    /// Text is horizontal. This is the Excel default.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_direction_horizontal.png">
     #[default]
     Horizontal,
 
-    /// TODO
-    Rotate90,
-
-    /// TODO
+    /// Text is rotated 270 degrees.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_direction_rotate_270.png">
     Rotate270,
 
-    /// TODO
-    Rotate270EastAsian,
+    /// Text is rotated 90 degrees.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_direction_rotate_90.png">
+    Rotate90,
 
-    /// TODO
+    /// Text direction is rotated 90 degrees but the characters aren't rotated. Suitable for East Asian text.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_direction_rotate_90_east_asian.png">
+    Rotate90EastAsian,
+
+    /// Text is stacked vertically.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_text_direction_stacked.png">
     Stacked,
 }
 
@@ -2723,7 +2773,7 @@ pub enum ShapeTextDirection {
 // -----------------------------------------------------------------------
 
 #[derive(Clone, PartialEq)]
-/// The `ShapeFont` struct represents the font format for various shape objects.
+/// The `ShapeFont` struct represents the font format for shape objects.
 ///
 /// Excel uses a standard font dialog for text elements of a shape such as the
 /// shape title or axes data labels. It looks like this:
@@ -2731,54 +2781,42 @@ pub enum ShapeTextDirection {
 /// <img src="https://rustxlsxwriter.github.io/images/chart_font_dialog.png">
 ///
 /// The [`ShapeFont`] struct represents many of these font options such as font
-/// type, size, color and properties such as bold and italic. It is generally
-/// used in conjunction with a `set_font()` method for a shape element.
+/// type, size, color and properties such as bold and italic. It is used in
+/// conjunction with the [`Shape::set_font()`] method.
 ///
 /// It is used in conjunction with the [`Shape`] struct.
 ///
 /// # Examples
 ///
-/// An example of setting the font for a shape element.
+/// This example demonstrates adding a Textbox shape and setting some of the
+/// font properties.
 ///
 /// ```
-/// # // This code is available in examples/doc_shape_font.rs
+/// # // This code is available in examples/doc_shape_set_font.rs
 /// #
-/// # use rust_xlsxwriter::{Shape, ShapeFont, ShapeType, Workbook, XlsxError};
+/// # use rust_xlsxwriter::{Shape, ShapeFont, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
 /// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
 /// #     let worksheet = workbook.add_worksheet();
 /// #
-/// #     // Add some data for the shape.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(3, 0, 20)?;
-/// #     worksheet.write(4, 0, 10)?;
-/// #     worksheet.write(5, 0, 50)?;
-/// #
-/// #     // Create a new shape.
-///     let mut shape = Shape::new(ShapeType::Column);
-///
-///     // Add a data series.
-///     shape.add_series().set_values("Sheet1!$A$1:$A$6");
-///
-///     // Set the font for an axis.
-///     shape.x_axis().set_font(
-///         ShapeFont::new()
+///     // Create a textbox shape with formatting.
+///     let textbox = Shape::textbox().set_text("This is some text").set_font(
+///         &ShapeFont::new()
 ///             .set_bold()
 ///             .set_italic()
-///             .set_name("Consolas")
-///             .set_color("#FF0000"),
+///             .set_name("American Typewriter")
+///             .set_color("#0000FF")
+///             .set_size(15),
 ///     );
 ///
-///     // Hide legend for clarity.
-///     shape.legend().set_hidden();
-///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
-///
-/// #     // Save the file.
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
+/// #
+/// #     // Save the file to disk.
 /// #     workbook.save("shape.xlsx")?;
 /// #
 /// #     Ok(())
@@ -2787,7 +2825,7 @@ pub enum ShapeTextDirection {
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/chart_font.png">
+/// <img src="https://rustxlsxwriter.github.io/images/shape_set_font.png">
 ///
 pub struct ShapeFont {
     // Shape/axis titles have a default bold font so we need to handle that as
@@ -2836,41 +2874,30 @@ impl ShapeFont {
     ///
     /// # Examples
     ///
-    /// An example of setting the bold property for the font in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// font properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_font_set_bold.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFont, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeFont, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_font(&ShapeFont::new().set_bold());
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series.
-    ///     shape.add_series().set_values("Sheet1!$A$1:$A$6");
-    ///
-    ///     // Set the font for an axis.
-    ///     shape.x_axis().set_font(ShapeFont::new().set_bold());
-    ///
-    ///     // Hide legend for clarity.
-    ///     shape.legend().set_hidden();
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2879,7 +2906,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_bold.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_bold.png">
     ///
     pub fn set_bold(mut self) -> ShapeFont {
         self.bold = true;
@@ -2890,41 +2917,30 @@ impl ShapeFont {
     ///
     /// # Examples
     ///
-    /// An example of setting the italic property for the font in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// font properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_font_set_italic.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFont, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeFont, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_font(&ShapeFont::new().set_italic());
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series.
-    ///     shape.add_series().set_values("Sheet1!$A$1:$A$6");
-    ///
-    ///     // Set the font for an axis.
-    ///     shape.x_axis().set_font(ShapeFont::new().set_italic());
-    ///
-    ///     // Hide legend for clarity.
-    ///     shape.legend().set_hidden();
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2933,7 +2949,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_italic.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_italic.png">
     ///
     pub fn set_italic(mut self) -> ShapeFont {
         self.italic = true;
@@ -2949,41 +2965,30 @@ impl ShapeFont {
     ///
     /// # Examples
     ///
-    /// An example of setting the color property for the font in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// font properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_font_set_color.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFont, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeFont, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_font(&ShapeFont::new().set_color("#FF0000"));
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series.
-    ///     shape.add_series().set_values("Sheet1!$A$1:$A$6");
-    ///
-    ///     // Set the font for an axis.
-    ///     shape.x_axis().set_font(ShapeFont::new().set_color("#FF0000"));
-    ///
-    ///     // Hide legend for clarity.
-    ///     shape.legend().set_hidden();
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -2992,7 +2997,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_color.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_color.png">
     ///
     pub fn set_color(mut self, color: impl Into<Color>) -> ShapeFont {
         let color = color.into();
@@ -3011,46 +3016,32 @@ impl ShapeFont {
     ///
     /// - `font_name`: The font name property.
     ///
-    ///
     /// # Examples
     ///
-    /// An example of setting the font name property for the font in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// font properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_font_set_name.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFont, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeFont, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_font(&ShapeFont::new().set_name("American Typewriter"));
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series.
-    ///     shape.add_series().set_values("Sheet1!$A$1:$A$6");
-    ///
-    ///     // Set the font for an axis.
-    ///     shape
-    ///         .x_axis()
-    ///         .set_font(ShapeFont::new().set_name("American Typewriter"));
-    ///
-    ///     // Hide legend for clarity.
-    ///     shape.legend().set_hidden();
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -3059,7 +3050,7 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_name.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_name.png">
     ///
     pub fn set_name(mut self, font_name: impl Into<String>) -> ShapeFont {
         self.name = font_name.into();
@@ -3074,41 +3065,30 @@ impl ShapeFont {
     ///
     /// # Examples
     ///
-    /// An example of setting the font size property for the font in a shape element.
+    /// This example demonstrates adding a Textbox shape and setting some of the
+    /// font properties.
     ///
     /// ```
     /// # // This code is available in examples/doc_shape_font_set_size.rs
     /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFont, ShapeType, Workbook, XlsxError};
+    /// # use rust_xlsxwriter::{Shape, ShapeFont, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
     /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
+    ///     // Create a textbox shape with formatting.
+    ///     let textbox = Shape::textbox()
+    ///         .set_text("This is some text")
+    ///         .set_font(&ShapeFont::new().set_size(20));
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
     /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series.
-    ///     shape.add_series().set_values("Sheet1!$A$1:$A$6");
-    ///
-    ///     // Set the font for an axis.
-    ///     shape.x_axis().set_font(ShapeFont::new().set_size(20));
-    ///
-    ///     // Hide legend for clarity.
-    ///     shape.legend().set_hidden();
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
+    /// #     // Save the file to disk.
     /// #     workbook.save("shape.xlsx")?;
     /// #
     /// #     Ok(())
@@ -3117,84 +3097,13 @@ impl ShapeFont {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/chart_font_set_size.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/shape_font_set_size.png">
     ///
     pub fn set_size<T>(mut self, font_size: T) -> ShapeFont
     where
         T: Into<f64>,
     {
         self.size = font_size.into() * 100.0;
-        self
-    }
-
-    /// Set the text rotation property for the font of a shape element.
-    ///
-    /// Set the rotation angle of the text in a cell. The rotation can be any
-    /// angle in the range -90 to 90 degrees, or 270-271 to indicate text where
-    /// the letters run from top to bottom, see below.
-    ///
-    /// # Parameters
-    ///
-    /// - `rotation`: The rotation angle in the range `-90 <= rotation <= 90`.
-    ///   Two special case values are supported:
-    ///   - `270`: Stacked text, where the text runs from top to bottom.
-    ///   - `271`: A special variant of stacked text for East Asian fonts.
-    ///
-    /// # Examples
-    ///
-    /// An example of setting the font text rotation for the font in a shape
-    /// element.
-    ///
-    /// ```
-    /// # // This code is available in examples/doc_shape_font_set_rotation.rs
-    /// #
-    /// # use rust_xlsxwriter::{Shape, ShapeFont, ShapeType, Workbook, XlsxError};
-    /// #
-    /// # fn main() -> Result<(), XlsxError> {
-    /// #     let mut workbook = Workbook::new();
-    /// #     let worksheet = workbook.add_worksheet();
-    /// #
-    /// #     // Add some data for the shape.
-    /// #     worksheet.write(0, 0, 10)?;
-    /// #     worksheet.write(1, 0, 40)?;
-    /// #     worksheet.write(2, 0, 50)?;
-    /// #     worksheet.write(3, 0, 20)?;
-    /// #     worksheet.write(4, 0, 10)?;
-    /// #     worksheet.write(5, 0, 50)?;
-    /// #
-    /// #     // Create a new shape.
-    ///     let mut shape = Shape::new(ShapeType::Column);
-    ///
-    ///     // Add a data series.
-    ///     shape.add_series().set_values("Sheet1!$A$1:$A$6");
-    ///
-    ///     // Set the font for an axis.
-    ///     shape.x_axis().set_font(ShapeFont::new().set_rotation(45));
-    ///
-    ///     // Hide legend for clarity.
-    ///     shape.legend().set_hidden();
-    ///
-    ///     // Add the shape to the worksheet.
-    ///     worksheet.insert_shape(0, 2, &shape)?;
-    /// #
-    /// #     // Save the file.
-    /// #     workbook.save("shape.xlsx")?;
-    /// #
-    /// #     Ok(())
-    /// # }
-    /// ```
-    ///
-    /// Output file:
-    ///
-    /// <img
-    /// src="https://rustxlsxwriter.github.io/images/chart_font_set_rotation.png">
-    ///
-    pub fn set_rotation(mut self, rotation: i16) -> ShapeFont {
-        match rotation {
-            270..=271 | -90..=90 => self.rotation = Some(rotation),
-            _ => eprintln!("Rotation '{rotation}' outside range: -90 <= angle <= 90."),
-        }
-
         self
     }
 
@@ -3351,64 +3260,56 @@ impl DrawingObject for Shape {
 /// Trait to map types into a `ShapeFormat`.
 ///
 /// The `IntoShapeFormat` trait provides a syntactic shortcut for the
-/// `shape.*.set_format()` methods that take [`ShapeFormat`] as a parameter.
-///
-/// The [`ShapeFormat`] struct mirrors the Excel Shape element formatting dialog
-/// and has several sub-structs such as:
+/// [`Shape::set_format()`] method to allow it to handle sub-structs such as:
 ///
 /// - [`ShapeLine`]
 /// - [`ShapeSolidFill`]
+/// - [`ShapeGradientFill`]
 /// - [`ShapePatternFill`]
 ///
 /// In order to pass one of these sub-structs as a parameter you would normally
-/// have to create a [`ShapeFormat`] first and then add the sub-struct, as shown
-/// in the first part of the example below. However, since this is a little
-/// verbose if you just want to format one of the sub-properties the
-/// `IntoShapeFormat` trait will accept the sub-structs listed above and create
-/// a parent [`ShapeFormat`] instance to wrap it in, see the second part of the
-/// example below.
+/// have to create a [`ShapeFormat`] and then add the sub-struct, as shown in
+/// the first part of the example below. However, this can be a little verbose
+/// if you just want to format one of the sub-properties. The `IntoShapeFormat`
+/// trait will accept the sub-structs listed above and create a parent
+/// [`ShapeFormat`] instance to wrap it in, see the second part of the example
+/// below.
 ///
 /// # Examples
 ///
 /// An example of passing shape formatting parameters via the
-/// [`IntoShapeFormat`] trait
+/// [`IntoShapeFormat`] trait.
 ///
 /// ```
 /// # // This code is available in examples/doc_into_shape_format.rs
 /// #
-/// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeSolidFill, ShapeType, Workbook, XlsxError};
+/// # use rust_xlsxwriter::{Shape, ShapeFormat, ShapeSolidFill, Workbook, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
 /// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
 /// #     let worksheet = workbook.add_worksheet();
+///
+///     // Create a formatted shape via ShapeFormat and ShapeSolidFill.
+///     let textbox = Shape::textbox()
+///         .set_text("This is some text").set_format(
+///             &ShapeFormat::new().set_solid_fill(&ShapeSolidFill::new().set_color("#8ED154")),
+///     );
+///
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 1, &textbox)?;
+///
+///     // Create a formatted shape via ShapeSolidFill directly.
+///     let textbox = Shape::textbox()
+///         .set_text("This is some text")
+///         .set_format(&ShapeSolidFill::new().set_color("#8ED154"));
+///
+///     // Insert a textbox in a cell.
+///     worksheet.insert_shape(1, 5, &textbox)?;
 /// #
-/// #     // Add some data for the shape.
-/// #     worksheet.write(0, 0, 10)?;
-/// #     worksheet.write(1, 0, 40)?;
-/// #     worksheet.write(2, 0, 50)?;
-/// #     worksheet.write(0, 1, 20)?;
-/// #     worksheet.write(1, 1, 10)?;
-/// #     worksheet.write(2, 1, 50)?;
-/// #
-/// #     // Create a new shape.
-///     let mut shape = Shape::new(ShapeType::Column);
-///
-///     // Add formatting via ShapeFormat and a ShapeSolidFill sub struct.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$A$1:$A$3")
-///         .set_format(ShapeFormat::new().set_solid_fill(ShapeSolidFill::new().set_color("#40EABB")));
-///
-///     // Add formatting using a ShapeSolidFill struct directly.
-///     shape
-///         .add_series()
-///         .set_values("Sheet1!$B$1:$B$3")
-///         .set_format(ShapeSolidFill::new().set_color("#AAC3F2"));
-///
-///     // Add the shape to the worksheet.
-///     worksheet.insert_shape(0, 2, &shape)?;
-///
-/// #     // Save the file.
+/// #     // Save the file to disk.
 /// #     workbook.save("shape.xlsx")?;
 /// #
 /// #     Ok(())

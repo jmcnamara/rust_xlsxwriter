@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_width(256)
         .set_height(100);
 
-    worksheet.insert_textbox(8, 4, &textbox)?;
+    worksheet.insert_shape(8, 4, &textbox)?;
 
     workbook.save(filename)?;
 

@@ -540,7 +540,7 @@ impl Drawing {
             self.write_a_ln(line);
         } else {
             // Write the default a:ln element.
-            let line = ShapeLine::new().set_width(0.75);
+            let line = ShapeLine::new();
             self.write_a_ln(&line);
         }
     }
@@ -549,17 +549,15 @@ impl Drawing {
     fn write_a_ln(&mut self, line: &ShapeLine) {
         let mut attributes = vec![];
 
-        if let Some(width) = &line.width {
-            // Round width to nearest 0.25, like Excel.
-            let width = ((*width + 0.125) * 4.0).floor() / 4.0;
+        // Round width to nearest 0.25, like Excel.
+        let width = ((line.width + 0.125) * 4.0).floor() / 4.0;
 
-            // Convert to Excel internal units.
-            let width = (12700.0 * width).ceil() as u32;
+        // Convert to Excel internal units.
+        let width = (12700.0 * width).ceil() as u32;
 
-            attributes.push(("w", width.to_string()));
-        }
-
+        attributes.push(("w", width.to_string()));
         attributes.push(("cmpd", "sng".to_string()));
+
         self.writer.xml_start_tag("a:ln", &attributes);
 
         if line.color != Color::Default || line.dash_type != ShapeLineDashType::Solid || line.hidden
@@ -568,7 +566,10 @@ impl Drawing {
                 // Write the a:noFill element.
                 self.write_a_no_fill();
             } else {
-                if line.color != Color::Default {
+                if line.color == Color::Default {
+                    // Write the a:solidFill element.
+                    self.write_line_solid_fill();
+                } else {
                     // Write the a:solidFill element.
                     self.write_a_solid_fill(line.color, line.transparency);
                 }
@@ -988,7 +989,7 @@ impl Drawing {
             ShapeTextDirection::Stacked => attributes.push(("vert", "wordArtVert".to_string())),
             ShapeTextDirection::Rotate90 => attributes.push(("vert", "vert".to_string())),
             ShapeTextDirection::Rotate270 => attributes.push(("vert", "vert270".to_string())),
-            ShapeTextDirection::Rotate270EastAsian => {
+            ShapeTextDirection::Rotate90EastAsian => {
                 attributes.push(("vert", "eaVert".to_string()));
             }
         }

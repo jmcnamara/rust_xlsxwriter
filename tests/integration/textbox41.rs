@@ -18,7 +18,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let textbox = Shape::textbox().set_text("This is some text");
 
-    worksheet.insert_textbox(8, 4, &textbox)?;
+    worksheet.insert_shape(8, 4, &textbox)?;
 
     let textbox = Shape::textbox()
         .set_text("This is some text")
@@ -28,7 +28,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_horizontal_alignment(ShapeTextHorizontalAlignment::Left),
         );
 
-    worksheet.insert_textbox(18, 4, &textbox)?;
+    worksheet.insert_shape(18, 4, &textbox)?;
 
     let textbox = Shape::textbox()
         .set_text("This is some text")
@@ -38,7 +38,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_horizontal_alignment(ShapeTextHorizontalAlignment::Center),
         );
 
-    worksheet.insert_textbox(28, 4, &textbox)?;
+    worksheet.insert_shape(28, 4, &textbox)?;
 
     let textbox = Shape::textbox()
         .set_text("This is some text")
@@ -48,7 +48,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
                 .set_horizontal_alignment(ShapeTextHorizontalAlignment::Right),
         );
 
-    worksheet.insert_textbox(38, 4, &textbox)?;
+    worksheet.insert_shape(38, 4, &textbox)?;
 
     workbook.save(filename)?;
 

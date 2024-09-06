@@ -35,7 +35,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let textbox = Shape::textbox().set_text("This is some text");
 
-    worksheet.insert_textbox(24, 6, &textbox)?;
+    worksheet.insert_shape(24, 6, &textbox)?;
 
     workbook.save(filename)?;
 

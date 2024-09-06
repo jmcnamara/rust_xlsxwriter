@@ -5385,30 +5385,125 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// TODO
+    /// Insert a textbox shape into a worksheet.
+    ///
+    /// This method can be used to insert an Excel Textbox shape with text into
+    /// a worksheet.
+    ///
+    /// See the [`Shape`] documentation for a detailed description of the
+    /// methods that can be used to configure the size and appearance of the
+    /// textbox.
+    ///
+    /// Note, no Excel shape other than Textbox is supported. See [Support for
+    /// other Excel shape
+    /// types](crate::Shape#support-for-other-excel-shape-types).
     ///
     /// # Errors
     ///
-    pub fn insert_textbox(
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape to a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_shape.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape and add some text.
+    ///     let textbox = Shape::textbox().set_text("This is some text");
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape(1, 1, &textbox)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_insert_shape.png">
+    ///
+    pub fn insert_shape(
         &mut self,
         row: RowNum,
         col: ColNum,
-        textbox: &Shape,
+        shape: &Shape,
     ) -> Result<&mut Worksheet, XlsxError> {
-        self.insert_textbox_with_offset(row, col, textbox, 0, 0)?;
+        self.insert_shape_with_offset(row, col, shape, 0, 0)?;
 
         Ok(self)
     }
 
-    /// TODO
+    /// Insert a textbox shape into a worksheet cell at an offset.
+    ///
+    /// This method can be used to insert an Excel Textbox shape with text into
+    /// a worksheet cell at a pixel offset.
+    ///
+    /// See the [`Shape`] documentation for a detailed description of the
+    /// methods that can be used to configure the size and appearance of the
+    /// textbox.
+    ///
+    /// Note, no Excel shape other than Textbox is supported. See [Support for
+    /// other Excel shape
+    /// types](crate::Shape#support-for-other-excel-shape-types).
     ///
     /// # Errors
     ///
-    pub fn insert_textbox_with_offset(
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// # Examples
+    ///
+    /// This example demonstrates adding a Textbox shape to a worksheet cell at
+    /// an offset.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_shape_with_offset.rs
+    /// #
+    /// # use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create a textbox shape and add some text.
+    ///     let textbox = Shape::textbox().set_text("This is some text");
+    ///
+    ///     // Insert a textbox in a cell.
+    ///     worksheet.insert_shape_with_offset(1, 1, &textbox, 10, 5)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_insert_shape_with_offset.png">
+    ///
+    pub fn insert_shape_with_offset(
         &mut self,
         row: RowNum,
         col: ColNum,
-        textbox: &Shape,
+        shape: &Shape,
         x_offset: u32,
         y_offset: u32,
     ) -> Result<&mut Worksheet, XlsxError> {
@@ -5417,11 +5512,11 @@ impl Worksheet {
             return Err(XlsxError::RowColumnLimitError);
         }
 
-        let mut textbox = textbox.clone();
-        textbox.x_offset = x_offset;
-        textbox.y_offset = y_offset;
+        let mut shape = shape.clone();
+        shape.x_offset = x_offset;
+        shape.y_offset = y_offset;
 
-        self.shapes.insert((row, col), textbox);
+        self.shapes.insert((row, col), shape);
 
         Ok(self)
     }

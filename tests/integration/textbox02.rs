@@ -17,11 +17,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     // Use longer syntax.
     let textbox = Shape::textbox().set_text("This is some text");
 
-    worksheet.insert_textbox(8, 4, &textbox)?;
+    worksheet.insert_shape(8, 4, &textbox)?;
 
     let textbox = Shape::textbox().set_text("Some more text");
 
-    worksheet.insert_textbox(17, 7, &textbox)?;
+    worksheet.insert_shape(17, 7, &textbox)?;
 
     workbook.save(filename)?;
 
