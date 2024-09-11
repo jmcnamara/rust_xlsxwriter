@@ -3214,12 +3214,10 @@ pub enum ShapeGradientFillType {
 
 // Trait for objects that have a component stored in the drawing.xml file.
 impl DrawingObject for Shape {
-    #[allow(clippy::if_same_then_else)]
     fn x_offset(&self) -> u32 {
         self.x_offset
     }
 
-    #[allow(clippy::if_same_then_else)]
     fn y_offset(&self) -> u32 {
         self.y_offset
     }

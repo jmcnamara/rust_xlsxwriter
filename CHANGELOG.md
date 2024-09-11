@@ -5,6 +5,19 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.76.0] - 2024-09-11
+
+### Added
+
+  - Added support for adding Textbox shapes to worksheets. See the documentation
+    for [`Shape`].
+
+    <img src="https://rustxlsxwriter.github.io/images/app_textbox.png">
+
+
+    [`Shape`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Shape.html
+
+
 ## [0.75.0] - 2024-09-02
 
 ### Removed
@@ -41,6 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`Worksheet::set_range_format()`] and
   [`Worksheet::set_range_format_with_border()`].
 
+  <img src="https://rustxlsxwriter.github.io/images/worksheet_set_range_format_with_border.png">
+
   [`Worksheet::set_cell_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_cell_format
   [`Worksheet::set_range_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_range_format
   [`Worksheet::write_with_format()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.write_with_format
@@ -62,6 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for setting the default worksheet row height and also hiding all
   unused rows.
 
+  <img src="https://rustxlsxwriter.github.io/images/worksheet_hide_unused_rows.png">
+
   See [`Worksheet::set_default_row_height()`] and  [`Worksheet::hide_unused_rows()`].
 
   [`Worksheet::hide_unused_rows()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.hide_unused_rows
@@ -78,6 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     A Note is a post-it style message that is revealed when the user mouses over
     a worksheet cell. The presence of a Note is indicated by a small red
     triangle in the upper right-hand corner of the cell.
+
+    <img src="https://rustxlsxwriter.github.io/images/app_notes.png">
 
     In versions of Excel prior to Office 365 Notes were referred to as
     "Comments". The name Comment is now used for a newer style threaded comment
@@ -108,7 +127,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     extract `vbaProject.bin` files from existing xlsm files which can then be
     added to `rust_xlsxwriter` files.
 
-     See [Working with VBA Macros].
+    See [Working with VBA Macros].
+
+    <img src="https://rustxlsxwriter.github.io/images/app_macros.png">
 
     [`vba_extract`]: https://crates.io/crates/vba_extract
     [Working with VBA Macros]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/macros/index.html
@@ -125,6 +146,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     messages. It also allows you to restrict input to values in a dropdown list.
 
     See [`DataValidation`] for details.
+
+    <img src="https://rustxlsxwriter.github.io/images/data_validation_intro1.png">
+
 
     [`DataValidation`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.DataValidation.html
 
@@ -220,8 +244,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - Added support for [Chart Secondary Axes] and [Combined Charts].
 
-  [Chart Secondary Axes]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#secondary-axes
-  [Combined Charts]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#combined-charts
+    <img src="https://rustxlsxwriter.github.io/images/chart_series_set_secondary_axis.png">
+
+    [Chart Secondary Axes]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#secondary-axes
+    [Combined Charts]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/index.html#combined-charts
 
 
 ## [0.64.2] - 2024-04-13
@@ -254,6 +280,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   showing data trends in a compact visual format.
 
   See [Working with Sparklines].
+
+  <img src="https://rustxlsxwriter.github.io/images/sparklines1.png">
 
   [Working with Sparklines]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/sparkline/index.html
 

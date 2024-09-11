@@ -216,6 +216,9 @@ documentation and generally show how an individual function works.
   columns of data into a single structure that can be referenced in a
   formula or formatted collectively.
 
+* `app_textbox.rs` - Demonstrate adding a Textbox to a worksheet using the
+  rust_xlsxwriter library.
+
 * `app_tutorial1.rs` - A simple program to write some data to an Excel
   spreadsheet using rust_xlsxwriter. Part 1 of a tutorial.
 
@@ -994,6 +997,9 @@ documentation and generally show how an individual function works.
 * `doc_into_color.rs` - An example of the different types of color syntax
   that is supported by the [`Into`] [`Color`] trait.
 
+* `doc_into_shape_format.rs` - An example of passing shape formatting
+  parameters via the [`IntoShapeFormat`] trait.
+
 * `doc_macros_add.rs` - Demonstrates a simple example of adding a vba
   project to an xlsm file.
 
@@ -1040,6 +1046,93 @@ documentation and generally show how an individual function works.
 
 * `doc_properties_custom.rs` - An example of setting custom/user defined
   workbook document properties.
+
+* `doc_shape_font_set_bold.rs` - This example demonstrates adding a Textbox
+  shape and setting some of the font properties.
+
+* `doc_shape_font_set_color.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the font properties.
+
+* `doc_shape_font_set_italic.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the font properties.
+
+* `doc_shape_font_set_name.rs` - This example demonstrates adding a Textbox
+  shape and setting some of the font properties.
+
+* `doc_shape_font_set_size.rs` - This example demonstrates adding a Textbox
+  shape and setting some of the font properties.
+
+* `doc_shape_format.rs` - This example demonstrates adding a Textbox shape
+  and setting some of its properties.
+
+* `doc_shape_format_set_gradient_fill.rs` - This example demonstrates
+  adding a Textbox shape and setting some of its properties.
+
+* `doc_shape_format_set_line.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the line properties.
+
+* `doc_shape_format_set_no_fill.rs` - This example demonstrates adding a
+  Textbox shape and turning off its border.
+
+* `doc_shape_format_set_no_line.rs` - This example demonstrates adding a
+  Textbox shape and turning off its border.
+
+* `doc_shape_gradient_fill.rs` - This example demonstrates adding a Textbox
+  shape and setting some of the gradient fill properties.
+
+* `doc_shape_gradient_fill_set_gradient_stops.rs` - This example
+  demonstrates adding a Textbox shape and setting some of the gradient fill
+  properties.
+
+* `doc_shape_gradient_fill_set_type.rs` - This example demonstrates adding
+  a Textbox shape and setting some of the gradient fill properties.
+
+* `doc_shape_line.rs` - This example demonstrates adding a Textbox shape
+  and setting some of the line properties.
+
+* `doc_shape_line_set_color.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the line properties.
+
+* `doc_shape_line_set_dash_type.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the line properties.
+
+* `doc_shape_line_set_hidden.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the line properties.
+
+* `doc_shape_line_set_transparency.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the line properties.
+
+* `doc_shape_line_set_width.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the line properties.
+
+* `doc_shape_pattern_fill.rs` - This example demonstrates adding a Textbox
+  shape and setting some of the pattern fill properties.
+
+* `doc_shape_set_font.rs` - This example demonstrates adding a Textbox
+  shape and setting some of the font properties.
+
+* `doc_shape_set_text.rs` - This example demonstrates adding a Textbox
+  shape with text to a worksheet.
+
+* `doc_shape_set_text_link.rs` - This example demonstrates adding a Textbox
+  shape with text from a cell to a worksheet.
+
+* `doc_shape_set_width.rs` - This example demonstrates adding a resized
+  Textbox shape to a worksheet.
+
+* `doc_shape_solid_fill_set_color.rs` - This example demonstrates adding a
+  Textbox shape and setting some of the solid fill properties.
+
+* `doc_shape_solid_fill_set_transparency.rs` - This example demonstrates
+  adding a Textbox shape and setting some of the solid fill properties.
+
+* `doc_shape_text_options_set_direction.rs` - This example demonstrates
+  adding a Textbox shape and setting some of the text option properties.
+
+* `doc_shape_text_options_set_horizontal_alignment.rs` - This example
+  demonstrates adding a Textbox shape and setting some of the text option
+  properties. This highlights the difference between horizontal and
+  vertical centering.
 
 * `doc_sparkline_set_sparkline_color.rs` - Demonstrates adding a sparkline
   to a worksheet.
@@ -1219,6 +1312,12 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_insert_image_with_offset.rs` - This example shows how to
   add an image to a worksheet at an offset within the cell.
+
+* `doc_worksheet_insert_shape.rs` - This example demonstrates adding a
+  Textbox shape to a worksheet.
+
+* `doc_worksheet_insert_shape_with_offset.rs` - This example demonstrates
+  adding a Textbox shape to a worksheet cell at an offset.
 
 * `doc_worksheet_name.rs` - Demonstrates getting a worksheet name.
 

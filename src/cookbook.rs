@@ -49,19 +49,20 @@ cargo run --example app_demo  # or any other example
 34. [Chart: Chart data table](#chart-chart-data-table)
 35. [Chart: Chart data tools](#chart-chart-data-tools)
 36. [Chart: Gauge Chart](#chart-gauge-chart)
-37. [Sparklines: simple example](#sparklines-simple-example)
-38. [Sparklines: advanced example](#sparklines-advanced-example)
-39. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
-40. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-41. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-42. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-43. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-44. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-45. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-46. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-47. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-48. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-49. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+37. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
+38. [Sparklines: simple example](#sparklines-simple-example)
+39. [Sparklines: advanced example](#sparklines-advanced-example)
+40. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
+41. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+42. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+43. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+44. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+45. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+46. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+47. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+48. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+49. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+50. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -5234,6 +5235,46 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
+
+
+# Textbox: Inserting Textboxes in worksheets
+
+Example of inserting a textbox shape into a worksheet.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_textbox.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_textbox.rs
+
+use rust_xlsxwriter::{Shape, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Some text to add to the text box.
+    let text = "This is an example of adding a textbox with some text in it";
+
+    // Create a textbox shape and add the text.
+    let textbox = Shape::textbox().set_text(text);
+
+    // Insert a textbox in a cell.
+    worksheet.insert_shape(1, 1, &textbox)?;
+
+    // Save the file to disk.
+    workbook.save("textbox.xlsx")?;
+
+    Ok(())
+}
+```
 
 
 # Sparklines: simple example
