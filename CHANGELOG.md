@@ -196,7 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
     [ryu]: https://docs.rs/ryu/latest/ryu/index.html
     [zip-rs/zip2#100]: https://github.com/zip-rs/zip2/issues/100
-    [Sensitivity Label]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#setting-the-sensitivity-label
+    [Sensitivity Label]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#document-properties-setting-the-sensitivity-label
     [Feature Request #24]: https://github.com/jmcnamara/rust_xlsxwriter/issues/24
     [performance analysis]: https://github.com/jmcnamara/rust_xlsxwriter/issues/93
 
