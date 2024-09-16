@@ -36,7 +36,9 @@ impl App {
 
     // Add a non-default heading pair to the file.
     pub(crate) fn add_heading_pair(&mut self, key: &str, value: u16) {
-        self.heading_pairs.push((key.to_string(), value));
+        if value > 0 {
+            self.heading_pairs.push((key.to_string(), value));
+        }
     }
 
     // Add a non-default part name to the file.

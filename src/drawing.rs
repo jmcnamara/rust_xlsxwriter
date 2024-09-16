@@ -47,9 +47,16 @@ impl Drawing {
         // Write the xdr:wsDr element.
         self.write_ws_dr();
 
-        for (index, drawing) in self.drawings.clone().iter().enumerate() {
-            // Write the xdr:twoCellAnchor element.
-            self.write_two_cell_anchor((index + 1) as u32, drawing);
+        let mut index = 1;
+        for drawing in &self.drawings.clone() {
+            if drawing.drawing_type == DrawingType::ChartSheet {
+                // Write the xdr:absoluteAnchor element.
+                self.write_absolute_anchor(drawing);
+            } else {
+                // Write the xdr:twoCellAnchor element.
+                self.write_two_cell_anchor(index, drawing);
+                index += 1;
+            }
         }
 
         // Close the end tag.
@@ -101,7 +108,7 @@ impl Drawing {
 
                 self.write_sp(index, drawing_info, &shape);
             }
-            DrawingType::Vml => {}
+            DrawingType::ChartSheet | DrawingType::Vml => {}
         }
 
         self.writer.xml_empty_tag_only("xdr:clientData");
@@ -385,14 +392,23 @@ impl Drawing {
         self.write_c_nv_pr(index, drawing_info, "Chart");
 
         // Write the xdr:cNvGraphicFramePr element.
-        self.write_c_nv_graphic_frame_pr();
+        self.write_c_nv_graphic_frame_pr(drawing_info.drawing_type);
 
         self.writer.xml_end_tag("xdr:nvGraphicFramePr");
     }
 
     // Write the <xdr:cNvGraphicFramePr> element.
-    fn write_c_nv_graphic_frame_pr(&mut self) {
-        self.writer.xml_empty_tag_only("xdr:cNvGraphicFramePr");
+    fn write_c_nv_graphic_frame_pr(&mut self, drawing_type: DrawingType) {
+        if drawing_type == DrawingType::ChartSheet {
+            self.writer.xml_start_tag_only("xdr:cNvGraphicFramePr");
+
+            self.writer
+                .xml_empty_tag("a:graphicFrameLocks", &[("noGrp", "1")]);
+
+            self.writer.xml_end_tag("xdr:cNvGraphicFramePr");
+        } else {
+            self.writer.xml_empty_tag_only("xdr:cNvGraphicFramePr");
+        }
     }
 
     // Write the <xdr:xfrm> element.
@@ -1151,6 +1167,52 @@ impl Drawing {
             }
         }
     }
+
+    // Write the <xdr:absoluteAnchor> element.
+    fn write_absolute_anchor(&mut self, drawing_info: &DrawingInfo) {
+        self.writer.xml_start_tag_only("xdr:absoluteAnchor");
+
+        // Write the xdr:pos element.
+        self.write_pos(drawing_info);
+
+        // Write the xdr:ext element.
+        self.write_ext(drawing_info);
+
+        self.write_graphic_frame(1, drawing_info);
+
+        self.writer.xml_empty_tag_only("xdr:clientData");
+        self.writer.xml_end_tag("xdr:absoluteAnchor");
+    }
+
+    // Write the <xdr:pos> element.
+    fn write_pos(&mut self, drawing_info: &DrawingInfo) {
+        let mut attributes = vec![];
+
+        if drawing_info.is_portrait {
+            attributes.push(("x", "0"));
+            attributes.push(("y", "-47625"));
+        } else {
+            attributes.push(("x", "0"));
+            attributes.push(("y", "0"));
+        }
+
+        self.writer.xml_empty_tag("xdr:pos", &attributes);
+    }
+
+    // Write the <xdr:ext> element.
+    fn write_ext(&mut self, drawing_info: &DrawingInfo) {
+        let mut attributes = vec![];
+
+        if drawing_info.is_portrait {
+            attributes.push(("cx", "6162675"));
+            attributes.push(("cy", "6124575"));
+        } else {
+            attributes.push(("cx", "9308969"));
+            attributes.push(("cy", "6078325"));
+        }
+
+        self.writer.xml_empty_tag("xdr:ext", &attributes);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -1194,6 +1256,7 @@ impl Default for DrawingInfo {
             object_movement: ObjectMovement::MoveButDontSizeWithCells,
             drawing_type: DrawingType::Image,
             url: None,
+            is_portrait: false,
         }
     }
 }
@@ -1213,11 +1276,13 @@ pub(crate) struct DrawingInfo {
     pub(crate) rel_id: u32,
     pub(crate) drawing_type: DrawingType,
     pub(crate) url: Option<Url>,
+    pub(crate) is_portrait: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum DrawingType {
     Chart,
+    ChartSheet,
     Image,
     Shape,
     Vml,

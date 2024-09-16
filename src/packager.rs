@@ -67,7 +67,7 @@ use crate::theme::Theme;
 use crate::vml::Vml;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
-use crate::{Comment, DocProperties, NUM_IMAGE_FORMATS};
+use crate::{Comment, DocProperties, Visible, NUM_IMAGE_FORMATS};
 
 // Packager struct to assembler the xlsx file.
 pub struct Packager<W: Write + Seek> {
@@ -110,7 +110,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         // Write the sub-component files.
         self.write_content_types_file(options)?;
         self.write_root_rels_file(options)?;
-        self.write_workbook_rels_file(options)?;
+        self.write_workbook_rels_file(workbook, options)?;
         self.write_theme_file()?;
         self.write_styles_file(workbook)?;
         self.write_workbook_file(workbook)?;
@@ -139,12 +139,34 @@ impl<W: Write + Seek + Send> Packager<W> {
             worksheet.assemble_xml_file();
         }
 
-        // Write the worksheet file and and associated rel files.
-        for (index, worksheet) in workbook.worksheets.iter_mut().enumerate() {
-            self.write_worksheet_file(worksheet, index + 1)?;
-            if worksheet.has_relationships() {
-                self.write_worksheet_rels_file(worksheet, index + 1)?;
+        // Write the worksheet files and and associated rel files.
+        let mut index = 1;
+        for worksheet in &mut workbook.worksheets {
+            if worksheet.is_chartsheet {
+                continue;
             }
+
+            self.write_worksheet_file(worksheet, index)?;
+            if worksheet.has_relationships() {
+                self.write_worksheet_rels_file(worksheet, index)?;
+            }
+
+            index += 1;
+        }
+
+        // Write the chartsheet files and and associated rel files.
+        let mut index = 1;
+        for worksheet in &mut workbook.worksheets {
+            if !worksheet.is_chartsheet {
+                continue;
+            }
+
+            self.write_chartsheet_file(worksheet, index)?;
+            if worksheet.has_relationships() {
+                self.write_chartsheet_rels_file(worksheet, index)?;
+            }
+
+            index += 1;
         }
 
         if options.has_sst_table {
@@ -152,7 +174,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         }
 
         self.write_core_file(options)?;
-        self.write_app_file(options)?;
+        self.write_app_file(workbook, options)?;
         self.write_custom_file(options)?;
 
         self.write_drawing_files(workbook)?;
@@ -163,12 +185,15 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.write_table_files(workbook)?;
         self.write_vba_project(workbook)?;
 
-        let mut image_index = 1;
+        let mut rel_index = 0;
 
         for worksheet in &mut workbook.worksheets {
+            if !worksheet.drawing.drawings.is_empty() {
+                rel_index += 1;
+            }
+
             if !worksheet.drawing_relationships.is_empty() {
-                self.write_drawing_rels_file(&worksheet.drawing_relationships, image_index)?;
-                image_index += 1;
+                self.write_drawing_rels_file(&worksheet.drawing_relationships, rel_index)?;
             }
         }
 
@@ -218,6 +243,10 @@ impl<W: Write + Seek + Send> Packager<W> {
 
         for i in 0..options.num_worksheets {
             content_types.add_worksheet_name(i + 1);
+        }
+
+        for i in 0..options.num_chartsheets {
+            content_types.add_chartsheet_name(i + 1);
         }
 
         for i in 0..options.num_drawings {
@@ -307,15 +336,33 @@ impl<W: Write + Seek + Send> Packager<W> {
     }
 
     // Write the workbook level workbook.xml.rels xml file.
-    fn write_workbook_rels_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
+    fn write_workbook_rels_file(
+        &mut self,
+        workbook: &mut Workbook,
+        options: &PackagerOptions,
+    ) -> Result<(), XlsxError> {
+        let mut worksheet_index = 1;
+        let mut chartsheet_index = 1;
         let mut rels = Relationship::new();
 
-        for worksheet_index in 1..=options.num_worksheets {
-            rels.add_document_relationship(
-                "worksheet",
-                format!("worksheets/sheet{worksheet_index}.xml").as_str(),
-                "",
-            );
+        for worksheet in &workbook.worksheets {
+            if worksheet.is_chartsheet {
+                rels.add_document_relationship(
+                    "chartsheet",
+                    format!("chartsheets/sheet{chartsheet_index}.xml").as_str(),
+                    "",
+                );
+
+                chartsheet_index += 1;
+            } else {
+                rels.add_document_relationship(
+                    "worksheet",
+                    format!("worksheets/sheet{worksheet_index}.xml").as_str(),
+                    "",
+                );
+
+                worksheet_index += 1;
+            }
         }
 
         rels.add_document_relationship("theme", "theme/theme1.xml", "");
@@ -380,6 +427,19 @@ impl<W: Write + Seek + Send> Packager<W> {
         Ok(())
     }
 
+    // Write a chartsheet xml file.
+    pub(crate) fn write_chartsheet_file(
+        &mut self,
+        worksheet: &mut Worksheet,
+        index: usize,
+    ) -> Result<(), XlsxError> {
+        let filename = format!("xl/chartsheets/sheet{index}.xml");
+        self.zip.start_file(filename, self.zip_options)?;
+        self.zip.write_all(worksheet.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
     // Write a worksheet rels file.
     pub(crate) fn write_worksheet_rels_file(
         &mut self,
@@ -405,6 +465,28 @@ impl<W: Write + Seek + Send> Packager<W> {
         }
 
         let filename = format!("xl/worksheets/_rels/sheet{index}.xml.rels");
+
+        self.zip.start_file(filename, self.zip_options)?;
+
+        rels.assemble_xml_file();
+        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+
+        Ok(())
+    }
+
+    // Write a chartsheet rels file.
+    pub(crate) fn write_chartsheet_rels_file(
+        &mut self,
+        worksheet: &Worksheet,
+        index: usize,
+    ) -> Result<(), XlsxError> {
+        let mut rels = Relationship::new();
+
+        for relationship in &worksheet.drawing_object_relationships {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
+        let filename = format!("xl/chartsheets/_rels/sheet{index}.xml.rels");
 
         self.zip.start_file(filename, self.zip_options)?;
 
@@ -592,22 +674,40 @@ impl<W: Write + Seek + Send> Packager<W> {
     }
 
     // Write the app.xml file.
-    fn write_app_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
+    fn write_app_file(
+        &mut self,
+        workbook: &mut Workbook,
+        options: &PackagerOptions,
+    ) -> Result<(), XlsxError> {
         let mut app = App::new();
         app.properties = options.properties.clone();
         app.doc_security = options.doc_security;
 
+        // Add worksheet names.
         let mut num_worksheets = 0;
+        for worksheet in &workbook.worksheets {
+            let sheet_name = &worksheet.name;
 
-        for sheet_name in &options.worksheet_names {
-            // Ignore veryHidden worksheets
-            if !sheet_name.is_empty() {
+            if !worksheet.is_chartsheet && worksheet.visible != Visible::VeryHidden {
                 app.add_part_name(sheet_name);
+
                 num_worksheets += 1;
             }
         }
-
         app.add_heading_pair("Worksheets", num_worksheets);
+
+        // Add chartsheet names.
+        let mut num_chartsheets = 0;
+        for worksheet in &workbook.worksheets {
+            let sheet_name = &worksheet.name;
+
+            if worksheet.is_chartsheet && worksheet.visible != Visible::VeryHidden {
+                app.add_part_name(sheet_name);
+
+                num_chartsheets += 1;
+            }
+        }
+        app.add_heading_pair("Charts", num_chartsheets);
 
         if !options.defined_names.is_empty() {
             app.add_heading_pair("Named Ranges", options.defined_names.len() as u16);
@@ -928,6 +1028,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) is_xlsm_file: bool,
     pub(crate) has_vba_signature: bool,
     pub(crate) num_worksheets: u16,
+    pub(crate) num_chartsheets: u16,
     pub(crate) num_drawings: u16,
     pub(crate) num_charts: u16,
     pub(crate) num_tables: u16,
@@ -953,6 +1054,7 @@ impl PackagerOptions {
             is_xlsm_file: false,
             has_vba_signature: false,
             num_worksheets: 0,
+            num_chartsheets: 0,
             num_drawings: 0,
             num_charts: 0,
             num_tables: 0,

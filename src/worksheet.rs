@@ -1209,7 +1209,7 @@ use crate::{
     SerializationHeaderConfig, SerializeFieldOptions, SerializerHeader, TableData, XlsxSerialize,
 };
 
-use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject};
+use crate::drawing::{Drawing, DrawingCoordinates, DrawingInfo, DrawingObject, DrawingType};
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::formula::Formula;
@@ -1349,6 +1349,7 @@ pub struct Worksheet {
     pub(crate) note_authors: BTreeMap<String, usize>,
     pub(crate) vml_data_id: String,
     pub(crate) vml_shape_id: u32,
+    pub(crate) is_chartsheet: bool,
 
     // These collections need to be reset on resave.
     drawing_rel_ids: HashMap<String, u32>,
@@ -1381,7 +1382,7 @@ pub struct Worksheet {
     paper_size: u8,
     default_page_order: bool,
     right_to_left: bool,
-    portrait: bool,
+    is_portrait: bool,
     page_view: PageView,
     zoom: u16,
     print_scale: u16,
@@ -1564,7 +1565,7 @@ impl Worksheet {
             paper_size: 0,
             default_page_order: true,
             right_to_left: false,
-            portrait: true,
+            is_portrait: true,
             page_view: PageView::Normal,
             zoom: 100,
             print_scale: 100,
@@ -1643,9 +1644,25 @@ impl Worksheet {
             hyperlink_relationships: vec![],
             table_relationships: vec![],
             vml_drawing_relationships: vec![],
+            is_chartsheet: false,
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
+        }
+    }
+
+    /// TODO
+    pub fn new_chartsheet() -> Worksheet {
+        let protection_options = ProtectionOptions {
+            edit_objects: true,
+            ..Default::default()
+        };
+
+        Worksheet {
+            is_chartsheet: true,
+            is_portrait: false,
+            protection_options,
+            ..Default::default()
         }
     }
 
@@ -5250,12 +5267,23 @@ impl Worksheet {
         }
 
         let mut chart = chart.clone();
+        chart.is_chartsheet = self.is_chartsheet;
 
         // Check that the chart has been set up correctly.
         chart.validate()?;
 
         chart.x_offset = x_offset;
         chart.y_offset = y_offset;
+
+        // Limit chartsheets to one chart in position (0, 0).
+        let mut row = row;
+        let mut col = col;
+        if self.is_chartsheet {
+            row = 0;
+            col = 0;
+            chart.x_offset = 0;
+            chart.y_offset = 0;
+        }
 
         self.charts.insert((row, col), chart);
 
@@ -11063,7 +11091,7 @@ impl Worksheet {
     /// ```
     ///
     pub fn set_landscape(&mut self) -> &mut Worksheet {
-        self.portrait = false;
+        self.is_portrait = false;
         self.page_setup_changed = true;
         self
     }
@@ -11075,7 +11103,7 @@ impl Worksheet {
     ///  is portrait, so this function is rarely required.
     ///
     pub fn set_portrait(&mut self) -> &mut Worksheet {
-        self.portrait = true;
+        self.is_portrait = true;
         self.page_setup_changed = true;
         self
     }
@@ -14395,7 +14423,20 @@ impl Worksheet {
             let mut drawing_info = self.position_object_emus(row, col, chart);
             rel_id += 1;
             drawing_info.rel_id = rel_id;
+
+            if self.is_chartsheet {
+                drawing_info.drawing_type = DrawingType::ChartSheet;
+                drawing_info.is_portrait = self.is_portrait;
+            }
+
             self.drawing.drawings.push(drawing_info);
+        }
+
+        // Set the chartsheet chart protection.
+        if self.is_chartsheet && self.protection_on {
+            if let Some(chart) = self.charts.get_mut(&(0, 0)) {
+                chart.protection_on = true;
+            }
         }
 
         // Store the linkage to the worksheets rels file, if it hasn't already
@@ -14613,6 +14654,7 @@ impl Worksheet {
             drawing_type: object.drawing_type(),
             rel_id: 0,
             url: None,
+            is_portrait: false,
         }
     }
 
@@ -14861,6 +14903,10 @@ impl Worksheet {
     pub(crate) fn assemble_xml_file(&mut self) {
         self.writer.xml_declaration();
 
+        if self.is_chartsheet {
+            return self.assemble_chartsheet();
+        }
+
         // Write the worksheet element.
         self.write_worksheet();
 
@@ -14974,6 +15020,59 @@ impl Worksheet {
         self.writer.xml_end_tag("worksheet");
     }
 
+    // Assemble and write the XML file for chartsheets.
+    pub(crate) fn assemble_chartsheet(&mut self) {
+        // Write the chartsheet element.
+        self.write_chartsheet();
+
+        // Write the sheetPr element.
+        self.write_sheet_pr();
+
+        // Write the sheetViews element.
+        self.write_sheet_views();
+
+        // Write the sheetProtection element.
+        if self.protection_on {
+            self.write_sheet_protection();
+        }
+
+        // Write the protectedRange element.
+        if !self.unprotected_ranges.is_empty() {
+            self.write_protected_ranges();
+        }
+
+        // Write the printOptions element.
+        if self.print_options_changed {
+            self.write_print_options();
+        }
+
+        // Write the pageMargins element.
+        self.write_page_margins();
+
+        // Write the pageSetup element.
+        if self.page_setup_changed {
+            self.write_page_setup();
+        }
+
+        // Write the headerFooter element.
+        if self.head_footer_changed {
+            self.write_header_footer();
+        }
+
+        // Write the drawing element.
+        if !self.drawing.drawings.is_empty() {
+            self.write_drawing();
+        }
+
+        // Write the legacyDrawingHF element.
+        if self.has_header_footer_images() {
+            self.write_legacy_drawing_hf();
+        }
+
+        // Close the worksheet tag.
+        self.writer.xml_end_tag("chartsheet");
+    }
+
     // Write the <worksheet> element.
     fn write_worksheet(&mut self) {
         let mut attributes = vec![
@@ -15002,12 +15101,29 @@ impl Worksheet {
         self.writer.xml_start_tag("worksheet", &attributes);
     }
 
+    // Write the <chartsheet> element.
+    fn write_chartsheet(&mut self) {
+        let attributes = [
+            (
+                "xmlns",
+                "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+            ),
+            (
+                "xmlns:r",
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+            ),
+        ];
+
+        self.writer.xml_start_tag("chartsheet", &attributes);
+    }
+
     // Write the <sheetPr> element.
     fn write_sheet_pr(&mut self) {
         if self.filter_conditions.is_empty()
             && !self.fit_to_page
             && (self.tab_color == Color::Default || self.tab_color == Color::Automatic)
             && self.vba_codename.is_none()
+            && !self.is_chartsheet
         {
             return;
         }
@@ -15142,7 +15258,9 @@ impl Worksheet {
                     attributes.push(("zoomScaleSheetLayoutView", self.zoom.to_string()));
                 }
                 PageView::Normal => {
-                    attributes.push(("zoomScaleNormal", self.zoom.to_string()));
+                    if !self.is_chartsheet {
+                        attributes.push(("zoomScaleNormal", self.zoom.to_string()));
+                    }
                 }
             }
         }
@@ -15653,7 +15771,7 @@ impl Worksheet {
             attributes.push(("pageOrder", "overThenDown".to_string()));
         }
 
-        if self.portrait {
+        if self.is_portrait {
             attributes.push(("orientation", "portrait".to_string()));
         } else {
             attributes.push(("orientation", "landscape".to_string()));
@@ -16431,66 +16549,76 @@ impl Worksheet {
             attributes.push(("password", format!("{:04X}", self.protection_hash)));
         }
 
-        attributes.push(("sheet", "1".to_string()));
+        if self.is_chartsheet {
+            if self.protection_options.contents {
+                attributes.push(("content", "1".to_string()));
+            }
 
-        if !self.protection_options.edit_objects {
-            attributes.push(("objects", "1".to_string()));
-        }
+            if self.protection_options.edit_objects {
+                attributes.push(("objects", "1".to_string()));
+            }
+        } else {
+            attributes.push(("sheet", "1".to_string()));
 
-        if !self.protection_options.edit_scenarios {
-            attributes.push(("scenarios", "1".to_string()));
-        }
+            if !self.protection_options.edit_objects {
+                attributes.push(("objects", "1".to_string()));
+            }
 
-        if self.protection_options.format_cells {
-            attributes.push(("formatCells", "0".to_string()));
-        }
+            if !self.protection_options.edit_scenarios {
+                attributes.push(("scenarios", "1".to_string()));
+            }
 
-        if self.protection_options.format_columns {
-            attributes.push(("formatColumns", "0".to_string()));
-        }
+            if self.protection_options.format_cells {
+                attributes.push(("formatCells", "0".to_string()));
+            }
 
-        if self.protection_options.format_rows {
-            attributes.push(("formatRows", "0".to_string()));
-        }
+            if self.protection_options.format_columns {
+                attributes.push(("formatColumns", "0".to_string()));
+            }
 
-        if self.protection_options.insert_columns {
-            attributes.push(("insertColumns", "0".to_string()));
-        }
+            if self.protection_options.format_rows {
+                attributes.push(("formatRows", "0".to_string()));
+            }
 
-        if self.protection_options.insert_rows {
-            attributes.push(("insertRows", "0".to_string()));
-        }
+            if self.protection_options.insert_columns {
+                attributes.push(("insertColumns", "0".to_string()));
+            }
 
-        if self.protection_options.insert_links {
-            attributes.push(("insertHyperlinks", "0".to_string()));
-        }
+            if self.protection_options.insert_rows {
+                attributes.push(("insertRows", "0".to_string()));
+            }
 
-        if self.protection_options.delete_columns {
-            attributes.push(("deleteColumns", "0".to_string()));
-        }
+            if self.protection_options.insert_links {
+                attributes.push(("insertHyperlinks", "0".to_string()));
+            }
 
-        if self.protection_options.delete_rows {
-            attributes.push(("deleteRows", "0".to_string()));
-        }
+            if self.protection_options.delete_columns {
+                attributes.push(("deleteColumns", "0".to_string()));
+            }
 
-        if !self.protection_options.select_locked_cells {
-            attributes.push(("selectLockedCells", "1".to_string()));
-        }
+            if self.protection_options.delete_rows {
+                attributes.push(("deleteRows", "0".to_string()));
+            }
 
-        if self.protection_options.sort {
-            attributes.push(("sort", "0".to_string()));
-        }
+            if !self.protection_options.select_locked_cells {
+                attributes.push(("selectLockedCells", "1".to_string()));
+            }
 
-        if self.protection_options.use_autofilter {
-            attributes.push(("autoFilter", "0".to_string()));
-        }
+            if self.protection_options.sort {
+                attributes.push(("sort", "0".to_string()));
+            }
 
-        if self.protection_options.use_pivot_tables {
-            attributes.push(("pivotTables", "0".to_string()));
-        }
+            if self.protection_options.use_autofilter {
+                attributes.push(("autoFilter", "0".to_string()));
+            }
 
-        if !self.protection_options.select_unlocked_cells {
-            attributes.push(("selectUnlockedCells", "1".to_string()));
+            if self.protection_options.use_pivot_tables {
+                attributes.push(("pivotTables", "0".to_string()));
+            }
+
+            if !self.protection_options.select_unlocked_cells {
+                attributes.push(("selectUnlockedCells", "1".to_string()));
+            }
         }
 
         self.writer.xml_empty_tag("sheetProtection", &attributes);

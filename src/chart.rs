@@ -826,6 +826,7 @@ pub struct Chart {
     pub(crate) drawing_type: DrawingType,
     pub(crate) series: Vec<ChartSeries>,
     pub(crate) default_label_position: ChartDataLabelPosition,
+
     height: f64,
     width: f64,
     scale_width: f64,
@@ -835,6 +836,7 @@ pub struct Chart {
     category_has_num_format: bool,
     chart_type: ChartType,
     chart_group_type: ChartType,
+
     pub(crate) title: ChartTitle,
     pub(crate) x_axis: ChartAxis,
     pub(crate) y_axis: ChartAxis,
@@ -843,6 +845,9 @@ pub struct Chart {
     pub(crate) combined_chart: Option<Box<Chart>>,
     pub(crate) chart_area: ChartArea,
     pub(crate) plot_area: ChartPlotArea,
+    pub(crate) is_chartsheet: bool,
+    pub(crate) protection_on: bool,
+
     legend: ChartLegend,
     grouping: ChartGrouping,
     show_empty_cells_as: Option<ChartEmptyCells>,
@@ -983,6 +988,8 @@ impl Chart {
             series_index: 0,
             has_secondary_axis: false,
             has_crosses: true,
+            is_chartsheet: false,
+            protection_on: false,
         };
 
         match chart_type {
@@ -3409,6 +3416,11 @@ impl Chart {
             self.write_style();
         }
 
+        // Write the c:protection element.
+        if self.protection_on {
+            self.write_protection();
+        }
+
         // Write the c:chart element.
         self.write_chart();
 
@@ -3416,7 +3428,9 @@ impl Chart {
         self.write_sp_pr(&self.chart_area.format.clone());
 
         // Write the c:printSettings element.
-        self.write_print_settings();
+        if !self.is_chartsheet {
+            self.write_print_settings();
+        }
 
         // Close the c:chartSpace tag.
         self.writer.xml_end_tag("c:chartSpace");
@@ -6401,6 +6415,10 @@ impl Chart {
         self.writer.xml_end_tag("c16r3:dataDisplayOptions16");
         self.writer.xml_end_tag("c:ext");
         self.writer.xml_end_tag("c:extLst");
+    }
+
+    fn write_protection(&mut self) {
+        self.writer.xml_empty_tag_only("c:protection");
     }
 }
 

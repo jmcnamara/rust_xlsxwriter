@@ -77,6 +77,15 @@ impl ContentTypes {
         self.add_override(&part_name, content_type);
     }
 
+    // Add the name of a chartsheet to the ContentTypes overrides.
+    pub(crate) fn add_chartsheet_name(&mut self, index: u16) {
+        let content_type =
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.chartsheet+xml";
+        let part_name = format!("/xl/chartsheets/sheet{index}.xml");
+
+        self.add_override(&part_name, content_type);
+    }
+
     // Add the name of a drawing to the ContentTypes overrides.
     pub(crate) fn add_drawing_name(&mut self, index: u16) {
         let content_type = "application/vnd.openxmlformats-officedocument.drawing+xml";

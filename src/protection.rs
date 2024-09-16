@@ -118,6 +118,10 @@ pub struct ProtectionOptions {
     /// When `false` (the default) the user cannot edit objects such as images,
     /// charts or textboxes in a protected worksheet.
     pub edit_objects: bool,
+
+    /// When `true` (the default) the user can edit the contents of a protected
+    /// chartsheet. Applies to chartsheets only.
+    pub contents: bool,
 }
 
 impl Default for ProtectionOptions {
@@ -148,6 +152,7 @@ impl ProtectionOptions {
             use_pivot_tables: false,
             edit_scenarios: false,
             edit_objects: false,
+            contents: true,
         }
     }
 }

@@ -479,6 +479,19 @@ impl Workbook {
         worksheet
     }
 
+    /// TODO
+    pub fn add_chartsheet(&mut self) -> &mut Worksheet {
+        let name = format!("Chart{}", self.worksheets.len() + 1);
+
+        let mut worksheet = Worksheet::new_chartsheet();
+        worksheet.set_name(&name).unwrap();
+
+        self.worksheets.push(worksheet);
+        let worksheet = self.worksheets.last_mut().unwrap();
+
+        worksheet
+    }
+
     /// Get a worksheet reference by index.
     ///
     /// Get a reference to a worksheet created via [`Workbook::add_worksheet()`]
@@ -1594,6 +1607,8 @@ impl Workbook {
             unique_worksheet_names.insert(worksheet_name);
         }
 
+        // TODO. Check that chartsheets have one chart.
+
         // Write any Tables associated with serialization areas.
         #[cfg(feature = "serde")]
         for worksheet in &mut self.worksheets {
@@ -2176,7 +2191,6 @@ impl Workbook {
         &mut self,
         mut package_options: PackagerOptions,
     ) -> Result<PackagerOptions, XlsxError> {
-        package_options.num_worksheets = self.worksheets.len() as u16;
         package_options.doc_security = self.read_only_mode;
         package_options.num_embedded_images = self.embedded_images.len() as u32;
 
@@ -2192,6 +2206,12 @@ impl Workbook {
             let sheet_name = worksheet.name.clone();
             let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
             sheet_names.insert(sheet_name.clone(), sheet_index as u16);
+
+            if worksheet.is_chartsheet {
+                package_options.num_chartsheets += 1;
+            } else {
+                package_options.num_worksheets += 1;
+            }
 
             if worksheet.visible == Visible::VeryHidden {
                 package_options.worksheet_names.push(String::new());

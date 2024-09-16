@@ -31,6 +31,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         use_pivot_tables: true,
         edit_scenarios: true,
         edit_objects: true,
+        contents: true,
     };
 
     worksheet.protect_with_options(&options);
