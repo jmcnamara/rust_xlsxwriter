@@ -49,7 +49,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart3.add_series().set_values(("Sheet2", 0, 1, 4, 1));
     chart3.add_series().set_values(("Sheet2", 0, 2, 4, 2));
 
-    let chartsheet = workbook.add_chartsheet().set_name("Chart1")?;
+    let chartsheet = workbook.add_chartsheet();
     chartsheet.insert_chart(8, 4, &chart3)?;
 
     workbook.save(filename)?;

@@ -49,20 +49,21 @@ cargo run --example app_demo  # or any other example
 34. [Chart: Chart data table](#chart-chart-data-table)
 35. [Chart: Chart data tools](#chart-chart-data-tools)
 36. [Chart: Gauge Chart](#chart-gauge-chart)
-37. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
-38. [Sparklines: simple example](#sparklines-simple-example)
-39. [Sparklines: advanced example](#sparklines-advanced-example)
-40. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
-41. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-42. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-43. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-44. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-45. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-46. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-47. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-48. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-49. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-50. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+37. [Chart: Chartsheet](#chart-chartsheet)
+38. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
+39. [Sparklines: simple example](#sparklines-simple-example)
+40. [Sparklines: advanced example](#sparklines-advanced-example)
+41. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
+42. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+43. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+44. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+45. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+46. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+47. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+48. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+49. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+50. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+51. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -5230,6 +5231,85 @@ fn main() -> Result<(), XlsxError> {
     worksheet.insert_chart(0, 0, &chart_doughnut)?;
 
     workbook.save("chart_gauge.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+
+# Chart: Chartsheet
+
+In Excel a chartsheet is a type of worksheet that it used primarily to display
+one chart. It also supports some other worksheet display options such as headers
+and footers, margins, tab selection and print properties
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_chartsheet.png">
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_chartsheet.rs
+
+use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+    let bold = Format::new().set_bold();
+
+    // Add the worksheet data that the chart will refer to.
+    worksheet.write_with_format(0, 0, "Number", &bold)?;
+    worksheet.write_with_format(0, 1, "Batch 1", &bold)?;
+    worksheet.write_with_format(0, 2, "Batch 2", &bold)?;
+
+    let data = [
+        [2, 3, 4, 5, 6, 7],
+        [10, 40, 50, 20, 10, 50],
+        [30, 60, 70, 50, 40, 30],
+    ];
+    for (col_num, col_data) in data.iter().enumerate() {
+        for (row_num, row_data) in col_data.iter().enumerate() {
+            worksheet.write(row_num as u32 + 1, col_num as u16, *row_data)?;
+        }
+    }
+
+    // Create a new bar chart.
+    let mut chart = Chart::new(ChartType::Bar);
+
+    // Configure the data series for the chart.
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$B$2:$B$7")
+        .set_name("Sheet1!$B$1");
+
+    chart
+        .add_series()
+        .set_categories("Sheet1!$A$2:$A$7")
+        .set_values("Sheet1!$C$2:$C$7")
+        .set_name("Sheet1!$C$1");
+
+    // Add a chart title and some axis labels.
+    chart.title().set_name("Results of sample analysis");
+    chart.x_axis().set_name("Test number");
+    chart.y_axis().set_name("Sample length (mm)");
+
+    // Set an Excel chart style.
+    chart.set_style(11);
+
+    // Create a chartsheet.
+    let chartsheet = workbook.add_chartsheet();
+
+    // Add the chart to the chartsheet. The row/col position is ignored.
+    chartsheet.insert_chart(0, 0, &chart)?;
+
+    // Make the chartsheet the first sheet visible in the workbook.
+    chartsheet.set_active(true);
+
+    workbook.save("chartsheet.xlsx")?;
 
     Ok(())
 }

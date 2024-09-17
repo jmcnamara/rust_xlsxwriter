@@ -329,6 +329,8 @@ pub struct Workbook {
     defined_names: Vec<DefinedName>,
     user_defined_names: Vec<DefinedName>,
     read_only_mode: u8,
+    num_worksheets: u16,
+    num_chartsheets: u16,
 }
 
 impl Default for Workbook {
@@ -404,6 +406,8 @@ impl Workbook {
             vba_signature: vec![],
             vba_codename: None,
             has_comments: false,
+            num_worksheets: 0,
+            num_chartsheets: 0,
         };
 
         // Initialize the workbook with the same function used to reset it.
@@ -414,13 +418,12 @@ impl Workbook {
 
     /// Add a new worksheet to a workbook.
     ///
-    /// The `add_worksheet()` method adds a new [`worksheet`](Worksheet) to a
-    /// workbook.
+    /// The `add_worksheet()` method adds a new [`Worksheet`] to a workbook.
     ///
     /// The worksheets will be given standard Excel name like `Sheet1`,
     /// `Sheet2`, etc. Alternatively, the name can be set using
     /// `worksheet.set_name()`, see the example below and the docs for
-    /// [`Worksheet::set_name()`](Worksheet::set_name).
+    /// [`Worksheet::set_name()`].
     ///
     /// The `add_worksheet()` method returns a borrowed mutable reference to a
     /// Worksheet instance owned by the Workbook so only one worksheet can be in
@@ -468,7 +471,8 @@ impl Workbook {
     /// src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet.png">
     ///
     pub fn add_worksheet(&mut self) -> &mut Worksheet {
-        let name = format!("Sheet{}", self.worksheets.len() + 1);
+        let name = format!("Sheet{}", self.num_worksheets + 1);
+        self.num_worksheets += 1;
 
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
@@ -479,9 +483,78 @@ impl Workbook {
         worksheet
     }
 
-    /// TODO
+    /// Add a new chartsheet to a workbook.
+    ///
+    /// The `add_chartsheet()` method adds a new "chartsheet" [`Worksheet`] to a
+    /// workbook.
+    ///
+    /// Chartsheets in Excel are a specialized type of worksheet that doesn't
+    /// have cells but instead is used to display a single chart. It supports
+    /// worksheet display options such as headers and footers, margins, tab
+    /// selection and print properties.
+    ///
+    /// The chartsheets will be given standard Excel name like `Chart1`,
+    /// `Chart2`, etc. Alternatively, the name can be set using
+    /// [`Worksheet::set_name()`].
+    ///
+    /// The `add_worksheet()` method returns a borrowed mutable reference to a
+    /// Worksheet instance owned by the Workbook so only one worksheet can be in
+    /// existence at a time. This limitation can be avoided, if necessary, by
+    /// creating standalone Worksheet objects via [`Worksheet::new()`] and then
+    /// later adding them to the workbook with [`Workbook::push_worksheet`].
+    ///
+    /// See also the documentation on [Creating worksheets] and working with the
+    /// borrow checker.
+    ///
+    /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
+    ///
+    /// # Examples
+    ///
+    /// A simple chartsheet example. A chart is placed on it own dedicated
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chartsheet.rs
+    /// #
+    /// # use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 10)?;
+    /// #     worksheet.write(1, 0, 60)?;
+    /// #     worksheet.write(2, 0, 30)?;
+    /// #     worksheet.write(3, 0, 10)?;
+    /// #     worksheet.write(4, 0, 50)?;
+    /// #
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Create a new chartsheet.
+    ///     let chartsheet = workbook.add_chartsheet();
+    ///
+    ///     // Add the chart to the chartsheet.
+    ///     chartsheet.insert_chart(0, 0, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chartsheet.png">
+    ///
     pub fn add_chartsheet(&mut self) -> &mut Worksheet {
-        let name = format!("Chart{}", self.worksheets.len() + 1);
+        let name = format!("Chart{}", self.num_chartsheets + 1);
+        self.num_chartsheets += 1;
 
         let mut worksheet = Worksheet::new_chartsheet();
         worksheet.set_name(&name).unwrap();
@@ -588,9 +661,8 @@ impl Workbook {
     /// reference prior to calling this method. See the example below.
     ///
     /// Worksheet names are usually "Sheet1", "Sheet2", etc., or else a user
-    /// define name that was set using
-    /// [`Worksheet::set_name()`](Worksheet::set_name). You can also use the
-    /// [`Worksheet::name()`](Worksheet::name) method to get the name.
+    /// define name that was set using [`Worksheet::set_name()`]. You can also
+    /// use the [`Worksheet::name()`] method to get the name.
     ///
     /// See also [`Workbook::worksheet_from_index()`] and the documentation on
     /// [Creating worksheets] and working with the borrow checker.
@@ -845,6 +917,7 @@ impl Workbook {
     ///   the workbook.
     /// - [`XlsxError::TableNameReused`] - Worksheet Table name is already in
     ///   use in the workbook.
+    /// - [`XlsxError::ChartError`] - A Chartsheet doesn't contain a chart.
     /// - [`XlsxError::IoError`] - A wrapper for various IO errors when creating
     ///   the xlsx file, or its sub-files.
     /// - [`XlsxError::ZipError`] - A wrapper for various zip errors when
@@ -1607,7 +1680,15 @@ impl Workbook {
             unique_worksheet_names.insert(worksheet_name);
         }
 
-        // TODO. Check that chartsheets have one chart.
+        // Check that chartsheets have a chart.
+        for worksheet in &self.worksheets {
+            if worksheet.is_chartsheet && worksheet.charts.is_empty() {
+                return Err(XlsxError::ChartError(format!(
+                    "Chartsheet '{}' doesn't contain a chart",
+                    worksheet.name
+                )));
+            }
+        }
 
         // Write any Tables associated with serialization areas.
         #[cfg(feature = "serde")]

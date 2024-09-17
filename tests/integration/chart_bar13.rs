@@ -31,13 +31,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
     // Create a chartsheet and add the chart.
-    let chartsheet = workbook.add_chartsheet().set_name("Chart1")?;
+    let chartsheet = workbook.add_chartsheet();
     chartsheet.insert_chart(8, 4, &chart)?;
 
     let _ = workbook.add_worksheet().set_name("Sheet2")?;
     let _ = workbook.add_worksheet().set_name("Sheet3")?;
 
-    let chartsheet = workbook.add_chartsheet().set_name("Chart2")?;
+    let chartsheet = workbook.add_chartsheet();
     chart.set_axis_ids(62356096, 62366080);
     chartsheet.insert_chart(0, 0, &chart)?;
 

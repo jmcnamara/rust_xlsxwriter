@@ -33,7 +33,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.show_empty_cells_as(ChartEmptyCells::Connected);
 
     // Create a chartsheet and add the chart.
-    let chartsheet = workbook.add_chartsheet().set_name("Chart1")?;
+    let chartsheet = workbook.add_chartsheet();
 
     chartsheet.insert_chart(8, 4, &chart)?;
 

@@ -86,6 +86,7 @@
 //!     checker](#working-with-worksheetnew-and-the-borrow-checker)
 //!   - [Using `add_worksheet()` versus
 //!     `Worksheet::new()`](#using-add_worksheet-versus--worksheetnew)
+//! - [Chartsheets](#chartsheets)
 //! - [Page Setup](#page-setup)
 //!   - [Page Setup - Page](#page-setup---page)
 //!   - [Page Setup - Margins](#page-setup---margins)
@@ -318,6 +319,57 @@
 //! [`Workbook::worksheet_from_name()`]: crate::Workbook::worksheet_from_name
 //! [`Workbook::worksheet_from_index()`]: crate::Workbook::worksheet_from_index
 //!
+//!
+//! # Chartsheets
+//!
+//! Chartsheets in Excel are a specialized type of worksheet that doesn't have
+//! cells but instead is used to display a single chart. It supports worksheet
+//! display options such as headers and footers, margins, tab selection and
+//! print properties but its primary function is to display a chart.
+//!
+//! <img src="https://rustxlsxwriter.github.io/images/chartsheet.png">
+//!
+//! A chartsheet can be created using the
+//! [`Workbook::add_chartsheet()`](crate::Workbook::add_chartsheet) of
+//! [`Worksheet::new_chartsheet()`] methods.
+//!
+//! The following is a simple chartsheet example that creates a workbook with a
+//! worksheet and a chartsheet as shown in the image above.
+//!
+//! ```
+//! # // This code is available in examples/doc_chartsheet.rs
+//! #
+//! use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+//!
+//! fn main() -> Result<(), XlsxError> {
+//!     let mut workbook = Workbook::new();
+//!     let worksheet = workbook.add_worksheet();
+//!
+//!     // Add some data for the chart.
+//!     worksheet.write(0, 0, 10)?;
+//!     worksheet.write(1, 0, 60)?;
+//!     worksheet.write(2, 0, 30)?;
+//!     worksheet.write(3, 0, 10)?;
+//!     worksheet.write(4, 0, 50)?;
+//!
+//!     // Create a new chart.
+//!     let mut chart = Chart::new(ChartType::Column);
+//!
+//!     // Add a data series using Excel formula syntax to describe the range.
+//!     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+//!
+//!     // Create a new chartsheet.
+//!     let chartsheet = workbook.add_chartsheet();
+//!
+//!     // Add the chart to the chartsheet.
+//!     chartsheet.insert_chart(0, 0, &chart)?;
+//!
+//!     // Save the file.
+//!     workbook.save("chart.xlsx")?;
+//!
+//!     Ok(())
+//! }
+//! ```
 //!
 //! # Page Setup
 //!
@@ -1651,7 +1703,61 @@ impl Worksheet {
         }
     }
 
-    /// TODO
+    /// Create a new Worksheet object to represent an Excel chartsheet
+    ///
+    /// The `Worksheet::new_chartsheet()` constructor is used to create a new
+    /// Excel "chartsheet" object. Chartsheets in Excel are a specialized type
+    /// of worksheet that doesn't have cells but instead is used to display a
+    /// single chart. It supports worksheet display options such as headers and
+    /// footers, margins, tab selection and print properties.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chartsheet.png">
+    ///
+    /// The `Worksheet::new_chartsheet()` method returns a standard
+    /// [`Worksheet`] that can be used as a chartsheet by adding a chart using
+    /// the [`Worksheet::insert_image()`] method. It supports most other
+    /// worksheet functions apart from those that  are cell based such as
+    /// `Worksheet::write()` and the other `Worksheet::insert*()` methods.
+    ///
+    /// # Examples
+    ///
+    /// A simple chartsheet example that creates a workbook with a worksheet and
+    /// a chartsheet as shown in the image above.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chartsheet.rs
+    /// #
+    /// use rust_xlsxwriter::{Chart, ChartType, Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     let mut workbook = Workbook::new();
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Add some data for the chart.
+    ///     worksheet.write(0, 0, 10)?;
+    ///     worksheet.write(1, 0, 60)?;
+    ///     worksheet.write(2, 0, 30)?;
+    ///     worksheet.write(3, 0, 10)?;
+    ///     worksheet.write(4, 0, 50)?;
+    ///
+    ///     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$5");
+    ///
+    ///     // Create a new chartsheet.
+    ///     let chartsheet = workbook.add_chartsheet();
+    ///
+    ///     // Add the chart to the chartsheet.
+    ///     chartsheet.insert_chart(0, 0, &chart)?;
+    ///
+    ///     // Save the file.
+    ///     workbook.save("chart.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     pub fn new_chartsheet() -> Worksheet {
         let protection_options = ProtectionOptions {
             edit_objects: true,
@@ -4756,7 +4862,6 @@ impl Worksheet {
     /// since a conversion to the PNG format would be required and that format
     /// is already supported.
     ///
-    ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
@@ -5136,6 +5241,9 @@ impl Worksheet {
     /// - `row`: The zero indexed row number.
     /// - `col`: The zero indexed column number.
     /// - `chart`: The [`Chart`] to insert into the cell.
+    ///
+    /// When used with a [Chartsheet](Worksheet::new_chartsheet) the row/column
+    /// arguments are ignored but it is best to use `(0, 0)` for clarity.
     ///
     /// # Errors
     ///

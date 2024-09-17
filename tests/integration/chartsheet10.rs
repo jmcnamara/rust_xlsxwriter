@@ -33,7 +33,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let image = Image::new("tests/input/images/watermark.png")?;
 
     // Create a chartsheet and add the chart.
-    let chartsheet = workbook.add_chartsheet().set_name("Chart1")?;
+    let chartsheet = workbook.add_chartsheet();
     chartsheet.set_active(true);
     chartsheet.set_header("&C&G");
     chartsheet.set_header_image(&image, HeaderImagePosition::Center)?;

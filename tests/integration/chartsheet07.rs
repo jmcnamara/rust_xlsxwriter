@@ -31,7 +31,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
     // Create a chartsheet and add the chart.
-    let chartsheet = workbook.add_chartsheet().set_name("Chart1")?;
+    let chartsheet = workbook.add_chartsheet();
     chartsheet.set_portrait();
     chartsheet.set_paper_size(9);
 

@@ -97,6 +97,9 @@ documentation and generally show how an individual function works.
 * `app_chart_tutorial4.rs` - An example of creating a simple chart using
   the rust_xlsxwriter library.
 
+* `app_chartsheet.rs` - An example of creating a chartsheet style chart
+  using the rust_xlsxwriter library.
+
 * `app_colors.rs` - A demonstration of the RGB and Theme colors palettes
   available in the rust_xlsxwriter library.
 
@@ -616,6 +619,9 @@ documentation and generally show how an individual function works.
 
 * `doc_chartrange_new_from_string.rs` - Demonstrates creating a new chart
   range.
+
+* `doc_chartsheet.rs` - A simple chartsheet example. A chart is placed on
+  it own dedicated worksheet.
 
 * `doc_conditional_format_2color.rs` - Example of adding a 2 color scale
   type conditional formatting to a worksheet. Note, the colors in the fifth
