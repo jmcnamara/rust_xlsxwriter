@@ -322,7 +322,7 @@
 //!
 //! # Chartsheets
 //!
-//! Chartsheets in Excel are a specialized type of worksheet that doesn't have
+//! A Chartsheet in Excel is a specialized type of worksheet that doesn't have
 //! cells but instead is used to display a single chart. It supports worksheet
 //! display options such as headers and footers, margins, tab selection and
 //! print properties but its primary function is to display a chart.
@@ -1706,7 +1706,7 @@ impl Worksheet {
     /// Create a new Worksheet object to represent an Excel chartsheet
     ///
     /// The `Worksheet::new_chartsheet()` constructor is used to create a new
-    /// Excel "chartsheet" object. Chartsheets in Excel are a specialized type
+    /// Excel "chartsheet" object. A Chartsheet in Excel is a specialized type
     /// of worksheet that doesn't have cells but instead is used to display a
     /// single chart. It supports worksheet display options such as headers and
     /// footers, margins, tab selection and print properties.

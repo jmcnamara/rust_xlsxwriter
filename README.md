@@ -132,9 +132,9 @@ frequently.
 
 Recent changes:
 
+- Added support for Chartsheets.
 - Added support for adding Textbox shapes to worksheets.
 - Removed requirement on `regex` crate.
-- Added support for data validation.
 
 See the full [Release Notes and Changelog].
 

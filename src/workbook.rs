@@ -488,7 +488,7 @@ impl Workbook {
     /// The `add_chartsheet()` method adds a new "chartsheet" [`Worksheet`] to a
     /// workbook.
     ///
-    /// Chartsheets in Excel are a specialized type of worksheet that doesn't
+    /// A Chartsheet in Excel is a specialized type of worksheet that doesn't
     /// have cells but instead is used to display a single chart. It supports
     /// worksheet display options such as headers and footers, margins, tab
     /// selection and print properties.

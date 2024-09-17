@@ -5,6 +5,27 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.77.0] - 2024-09-18
+
+### Added
+
+- Added support for [Chartsheets].
+
+  A Chartsheet in Excel is a specialized type of worksheet that doesn't have
+  cells but instead is used to display a single chart. It supports worksheet
+  display options such as headers and footers, margins, tab selection and
+  print properties.
+
+  <img src="https://rustxlsxwriter.github.io/images/chartsheet.png">
+
+  [Chartsheets]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/index.html#chartsheets
+
+
+- Updated polars dependency to 0.43 to pick up latest Polars additions for
+  [`polars_excel_writer`].
+
+
 ## [0.76.0] - 2024-09-11
 
 ### Added
