@@ -909,9 +909,13 @@ mod tests;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-use std::{borrow::Cow, fmt};
+use std::{borrow::Cow, fmt, io::Cursor};
 
-use crate::{xmlwriter::XMLWriter, Color, ExcelDateTime, Format, Formula, XlsxError};
+use crate::xmlwriter::{
+    cursor_to_string, xml_data_element_only, xml_empty_tag, xml_end_tag, xml_start_tag,
+    xml_start_tag_only,
+};
+use crate::{Color, ExcelDateTime, Format, Formula, XlsxError};
 
 // -----------------------------------------------------------------------
 // ConditionalFormat trait
@@ -1403,7 +1407,7 @@ impl ConditionalFormatCell {
             return String::new();
         };
 
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![("type", "cellIs".to_string())];
 
         // Set the format index if present.
@@ -1422,7 +1426,7 @@ impl ConditionalFormatCell {
         attributes.push(("operator", rule.to_string()));
 
         // Write the rule.
-        writer.xml_start_tag("cfRule", &attributes);
+        xml_start_tag(&mut writer, "cfRule", &attributes);
 
         match rule {
             ConditionalFormatCellRule::EqualTo(value)
@@ -1431,18 +1435,18 @@ impl ConditionalFormatCell {
             | ConditionalFormatCellRule::LessThanOrEqualTo(value)
             | ConditionalFormatCellRule::GreaterThan(value)
             | ConditionalFormatCellRule::GreaterThanOrEqualTo(value) => {
-                writer.xml_data_element_only("formula", &value.value);
+                xml_data_element_only(&mut writer, "formula", &value.value);
             }
             ConditionalFormatCellRule::Between(min, max)
             | ConditionalFormatCellRule::NotBetween(min, max) => {
-                writer.xml_data_element_only("formula", &min.value);
-                writer.xml_data_element_only("formula", &max.value);
+                xml_data_element_only(&mut writer, "formula", &min.value);
+                xml_data_element_only(&mut writer, "formula", &max.value);
             }
         }
 
-        writer.xml_end_tag("cfRule");
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -1599,7 +1603,7 @@ impl ConditionalFormatBlank {
         range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![];
         let anchor = &range_to_anchor(range);
 
@@ -1631,11 +1635,11 @@ impl ConditionalFormatBlank {
         };
 
         // Write the rule.
-        writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_data_element_only("formula", &formula);
-        writer.xml_end_tag("cfRule");
+        xml_start_tag(&mut writer, "cfRule", &attributes);
+        xml_data_element_only(&mut writer, "formula", &formula);
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -1800,7 +1804,7 @@ impl ConditionalFormatError {
         range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![];
         let anchor = &range_to_anchor(range);
 
@@ -1832,11 +1836,11 @@ impl ConditionalFormatError {
         };
 
         // Write the rule.
-        writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_data_element_only("formula", &formula);
-        writer.xml_end_tag("cfRule");
+        xml_start_tag(&mut writer, "cfRule", &attributes);
+        xml_data_element_only(&mut writer, "formula", &formula);
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -2002,7 +2006,7 @@ impl ConditionalFormatDuplicate {
         _range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![];
 
         if self.is_inverted {
@@ -2025,9 +2029,9 @@ impl ConditionalFormatDuplicate {
         }
 
         // Write the rule.
-        writer.xml_empty_tag("cfRule", &attributes);
+        xml_empty_tag(&mut writer, "cfRule", &attributes);
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -2285,7 +2289,7 @@ impl ConditionalFormatFormula {
         _range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![];
 
         // Write the type.
@@ -2305,11 +2309,11 @@ impl ConditionalFormatFormula {
         }
 
         // Write the rule.
-        writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_data_element_only("formula", &self.formula.formula_string);
-        writer.xml_end_tag("cfRule");
+        xml_start_tag(&mut writer, "cfRule", &attributes);
+        xml_data_element_only(&mut writer, "formula", &self.formula.formula_string);
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -2478,7 +2482,7 @@ impl ConditionalFormatAverage {
         _range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![("type", "aboveAverage".to_string())];
 
         // Set the format index if present.
@@ -2544,9 +2548,9 @@ impl ConditionalFormatAverage {
         }
 
         // Write the rule.
-        writer.xml_empty_tag("cfRule", &attributes);
+        xml_empty_tag(&mut writer, "cfRule", &attributes);
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -2739,7 +2743,7 @@ impl ConditionalFormatTop {
         _range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![("type", "top10".to_string())];
 
         // Set the format index if present.
@@ -2783,9 +2787,9 @@ impl ConditionalFormatTop {
         }
 
         // Write the rule.
-        writer.xml_empty_tag("cfRule", &attributes);
+        xml_empty_tag(&mut writer, "cfRule", &attributes);
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -2984,7 +2988,7 @@ impl ConditionalFormatText {
             return String::new();
         };
 
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![];
         let anchor = &range_to_anchor(range);
 
@@ -3035,11 +3039,11 @@ impl ConditionalFormatText {
             }
         };
 
-        writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_data_element_only("formula", &formula);
-        writer.xml_end_tag("cfRule");
+        xml_start_tag(&mut writer, "cfRule", &attributes);
+        xml_data_element_only(&mut writer, "formula", &formula);
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -3241,7 +3245,7 @@ impl ConditionalFormatDate {
         range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![("type", "timePeriod".to_string())];
         let anchor = &range_to_anchor(range);
 
@@ -3301,11 +3305,11 @@ impl ConditionalFormatDate {
         // Add the attributes.
         attributes.push(("timePeriod", self.rule.to_string()));
 
-        writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_data_element_only("formula", &formula);
-        writer.xml_end_tag("cfRule");
+        xml_start_tag(&mut writer, "cfRule", &attributes);
+        xml_data_element_only(&mut writer, "formula", &formula);
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -3696,7 +3700,7 @@ impl ConditionalFormat2ColorScale {
         _range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![("type", "colorScale".to_string())];
 
         // Set the rule priority order.
@@ -3708,8 +3712,8 @@ impl ConditionalFormat2ColorScale {
         }
 
         // Write the rule.
-        writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_start_tag_only("colorScale");
+        xml_start_tag(&mut writer, "cfRule", &attributes);
+        xml_start_tag_only(&mut writer, "colorScale");
 
         Self::write_type(&mut writer, self.min_type, &self.min_value.value);
         Self::write_type(&mut writer, self.max_type, &self.max_value.value);
@@ -3717,15 +3721,15 @@ impl ConditionalFormat2ColorScale {
         Self::write_color(&mut writer, self.min_color);
         Self::write_color(&mut writer, self.max_color);
 
-        writer.xml_end_tag("colorScale");
+        xml_end_tag(&mut writer, "colorScale");
 
-        writer.xml_end_tag("cfRule");
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Write the <cfvo> element.
-    fn write_type(writer: &mut XMLWriter, rule_type: ConditionalFormatType, value: &str) {
+    fn write_type(writer: &mut Cursor<Vec<u8>>, rule_type: ConditionalFormatType, value: &str) {
         let mut attributes = vec![];
 
         match rule_type {
@@ -3752,14 +3756,14 @@ impl ConditionalFormat2ColorScale {
 
         attributes.push(("val", value.to_string()));
 
-        writer.xml_empty_tag("cfvo", &attributes);
+        xml_empty_tag(writer, "cfvo", &attributes);
     }
 
     // Write the <color> element.
-    fn write_color(writer: &mut XMLWriter, color: Color) {
+    fn write_color(writer: &mut Cursor<Vec<u8>>, color: Color) {
         let attributes = [("rgb", color.argb_hex_value())];
 
-        writer.xml_empty_tag("color", &attributes);
+        xml_empty_tag(writer, "color", &attributes);
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -4231,7 +4235,7 @@ impl ConditionalFormat3ColorScale {
         _range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![("type", "colorScale".to_string())];
 
         // Set the rule priority order.
@@ -4243,8 +4247,8 @@ impl ConditionalFormat3ColorScale {
         }
 
         // Write the rule.
-        writer.xml_start_tag("cfRule", &attributes);
-        writer.xml_start_tag_only("colorScale");
+        xml_start_tag(&mut writer, "cfRule", &attributes);
+        xml_start_tag_only(&mut writer, "colorScale");
 
         Self::write_type(&mut writer, self.min_type, &self.min_value.value);
         Self::write_type(&mut writer, self.mid_type, &self.mid_value.value);
@@ -4254,15 +4258,15 @@ impl ConditionalFormat3ColorScale {
         Self::write_color(&mut writer, self.mid_color);
         Self::write_color(&mut writer, self.max_color);
 
-        writer.xml_end_tag("colorScale");
+        xml_end_tag(&mut writer, "colorScale");
 
-        writer.xml_end_tag("cfRule");
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Write the <cfvo> element.
-    fn write_type(writer: &mut XMLWriter, rule_type: ConditionalFormatType, value: &str) {
+    fn write_type(writer: &mut Cursor<Vec<u8>>, rule_type: ConditionalFormatType, value: &str) {
         let mut attributes = vec![];
 
         match rule_type {
@@ -4289,14 +4293,14 @@ impl ConditionalFormat3ColorScale {
 
         attributes.push(("val", value.to_string()));
 
-        writer.xml_empty_tag("cfvo", &attributes);
+        xml_empty_tag(writer, "cfvo", &attributes);
     }
 
     // Write the <color> element.
-    fn write_color(writer: &mut XMLWriter, color: Color) {
+    fn write_color(writer: &mut Cursor<Vec<u8>>, color: Color) {
         let attributes = [("rgb", color.argb_hex_value())];
 
-        writer.xml_empty_tag("color", &attributes);
+        xml_empty_tag(writer, "color", &attributes);
     }
 
     // Return an extended x14 rule for conditional formats that support it.
@@ -5242,7 +5246,7 @@ impl ConditionalFormatDataBar {
         _range: &str,
         guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![("type", "dataBar".to_string())];
 
         // Set the rule priority order.
@@ -5254,14 +5258,14 @@ impl ConditionalFormatDataBar {
         }
 
         // Write the rule.
-        writer.xml_start_tag("cfRule", &attributes);
+        xml_start_tag(&mut writer, "cfRule", &attributes);
 
         // Set the bar attributes, if any.
         let mut attributes = vec![];
         if self.bar_only {
             attributes.push(("showValue", "0".to_string()));
         }
-        writer.xml_start_tag("dataBar", &attributes);
+        xml_start_tag(&mut writer, "dataBar", &attributes);
 
         // Write the min type/value.
         Self::write_type(
@@ -5284,7 +5288,7 @@ impl ConditionalFormatDataBar {
         // Write the bar/fill color.
         Self::write_color(&mut writer, "color", self.fill_color);
 
-        writer.xml_end_tag("dataBar");
+        xml_end_tag(&mut writer, "dataBar");
 
         // Write the extLst element to indicate x14 extensions for Excel 2010+
         // data bars.
@@ -5292,13 +5296,13 @@ impl ConditionalFormatDataBar {
             Self::write_extension_list(&mut writer, guid);
         }
 
-        writer.xml_end_tag("cfRule");
-        writer.read_to_string()
+        xml_end_tag(&mut writer, "cfRule");
+        cursor_to_string(&writer)
     }
 
     // Write the <cfvo> element.
     fn write_type(
-        writer: &mut XMLWriter,
+        writer: &mut Cursor<Vec<u8>>,
         rule_type: ConditionalFormatType,
         value: &str,
         has_x14_extensions: bool,
@@ -5344,19 +5348,19 @@ impl ConditionalFormatDataBar {
             }
         }
 
-        writer.xml_empty_tag("cfvo", &attributes);
+        xml_empty_tag(writer, "cfvo", &attributes);
     }
 
     // Write the <color> element.
-    fn write_color(writer: &mut XMLWriter, color_tag: &str, color: Color) {
+    fn write_color(writer: &mut Cursor<Vec<u8>>, color_tag: &str, color: Color) {
         let attributes = [("rgb", color.argb_hex_value())];
 
-        writer.xml_empty_tag(color_tag, &attributes);
+        xml_empty_tag(writer, color_tag, &attributes);
     }
 
     // Write the <extLst> element.
-    fn write_extension_list(writer: &mut XMLWriter, guid: &str) {
-        writer.xml_start_tag_only("extLst");
+    fn write_extension_list(writer: &mut Cursor<Vec<u8>>, guid: &str) {
+        xml_start_tag_only(writer, "extLst");
 
         let attributes = [
             (
@@ -5366,19 +5370,19 @@ impl ConditionalFormatDataBar {
             ("uri", "{B025F937-C7B1-47D3-B67F-A62EFF666E3E}"),
         ];
 
-        writer.xml_start_tag("ext", &attributes);
-        writer.xml_data_element_only("x14:id", guid);
-        writer.xml_end_tag("ext");
-        writer.xml_end_tag("extLst");
+        xml_start_tag(writer, "ext", &attributes);
+        xml_data_element_only(writer, "x14:id", guid);
+        xml_end_tag(writer, "ext");
+        xml_end_tag(writer, "extLst");
     }
 
     // Return an extended x14 rule for conditional formats that support it.
     pub(crate) fn x14_rule(&self, _priority: u32, guid: &str) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let attributes = [("type", "dataBar".to_string()), ("id", guid.to_string())];
 
         // Write the rule.
-        writer.xml_start_tag("x14:cfRule", &attributes);
+        xml_start_tag(&mut writer, "x14:cfRule", &attributes);
         Self::write_data_bar(&mut writer, self.clone());
 
         Self::write_x14_type(&mut writer, self.min_type, &self.min_value.value, false);
@@ -5410,14 +5414,14 @@ impl ConditionalFormatDataBar {
             Self::write_color(&mut writer, "x14:axisColor", self.axis_color);
         }
 
-        writer.xml_end_tag("x14:dataBar");
-        writer.xml_end_tag("x14:cfRule");
+        xml_end_tag(&mut writer, "x14:dataBar");
+        xml_end_tag(&mut writer, "x14:cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Write the <x14:dataBar> element.
-    fn write_data_bar(writer: &mut XMLWriter, data_bar: ConditionalFormatDataBar) {
+    fn write_data_bar(writer: &mut Cursor<Vec<u8>>, data_bar: ConditionalFormatDataBar) {
         let mut attributes = vec![
             ("minLength", "0".to_string()),
             ("maxLength", "100".to_string()),
@@ -5459,12 +5463,12 @@ impl ConditionalFormatDataBar {
             ConditionalFormatDataBarAxisPosition::Automatic => {}
         }
 
-        writer.xml_start_tag("x14:dataBar", &attributes);
+        xml_start_tag(writer, "x14:dataBar", &attributes);
     }
 
     // Write the <x14:cfvo> element.
     fn write_x14_type(
-        writer: &mut XMLWriter,
+        writer: &mut Cursor<Vec<u8>>,
         rule_type: ConditionalFormatType,
         value: &str,
         is_max: bool,
@@ -5478,39 +5482,39 @@ impl ConditionalFormatDataBar {
                 } else {
                     attributes.push(("type", "autoMin".to_string()));
                 }
-                writer.xml_empty_tag("x14:cfvo", &attributes);
+                xml_empty_tag(writer, "x14:cfvo", &attributes);
             }
             ConditionalFormatType::Lowest => {
                 attributes.push(("type", "min".to_string()));
-                writer.xml_empty_tag("x14:cfvo", &attributes);
+                xml_empty_tag(writer, "x14:cfvo", &attributes);
             }
             ConditionalFormatType::Highest => {
                 attributes.push(("type", "max".to_string()));
-                writer.xml_empty_tag("x14:cfvo", &attributes);
+                xml_empty_tag(writer, "x14:cfvo", &attributes);
             }
             ConditionalFormatType::Number => {
                 attributes.push(("type", "num".to_string()));
-                writer.xml_start_tag("x14:cfvo", &attributes);
-                writer.xml_data_element_only("xm:f", value);
-                writer.xml_end_tag("x14:cfvo");
+                xml_start_tag(writer, "x14:cfvo", &attributes);
+                xml_data_element_only(writer, "xm:f", value);
+                xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Percent => {
                 attributes.push(("type", "percent".to_string()));
-                writer.xml_start_tag("x14:cfvo", &attributes);
-                writer.xml_data_element_only("xm:f", value);
-                writer.xml_end_tag("x14:cfvo");
+                xml_start_tag(writer, "x14:cfvo", &attributes);
+                xml_data_element_only(writer, "xm:f", value);
+                xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Formula => {
                 attributes.push(("type", "formula".to_string()));
-                writer.xml_start_tag("x14:cfvo", &attributes);
-                writer.xml_data_element_only("xm:f", value);
-                writer.xml_end_tag("x14:cfvo");
+                xml_start_tag(writer, "x14:cfvo", &attributes);
+                xml_data_element_only(writer, "xm:f", value);
+                xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Percentile => {
                 attributes.push(("type", "percentile".to_string()));
-                writer.xml_start_tag("x14:cfvo", &attributes);
-                writer.xml_data_element_only("xm:f", value);
-                writer.xml_end_tag("x14:cfvo");
+                xml_start_tag(writer, "x14:cfvo", &attributes);
+                xml_data_element_only(writer, "xm:f", value);
+                xml_end_tag(writer, "x14:cfvo");
             }
         }
     }
@@ -6092,7 +6096,7 @@ impl ConditionalFormatIconSet {
         _range: &str,
         _guid: &str,
     ) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let mut attributes = vec![("type", "iconSet".to_string())];
 
         // Set the rule priority order.
@@ -6104,7 +6108,7 @@ impl ConditionalFormatIconSet {
         }
 
         // Write the rule.
-        writer.xml_start_tag("cfRule", &attributes);
+        xml_start_tag(&mut writer, "cfRule", &attributes);
 
         // Write the <iconSet> element.
         let mut attributes = vec![];
@@ -6120,21 +6124,21 @@ impl ConditionalFormatIconSet {
             attributes.push(("reverse", "1".to_string()));
         }
 
-        writer.xml_start_tag("iconSet", &attributes);
+        xml_start_tag(&mut writer, "iconSet", &attributes);
 
         for icon in &self.icons {
             Self::write_type(&mut writer, icon);
         }
 
-        writer.xml_end_tag("iconSet");
-        writer.xml_end_tag("cfRule");
+        xml_end_tag(&mut writer, "iconSet");
+        xml_end_tag(&mut writer, "cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Return an extended x14 rule for conditional formats that support it.
     pub(crate) fn x14_rule(&self, priority: u32, guid: &str) -> String {
-        let mut writer = XMLWriter::new();
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
         let attributes = [
             ("type", "iconSet".to_string()),
             ("priority", priority.to_string()),
@@ -6142,7 +6146,7 @@ impl ConditionalFormatIconSet {
         ];
 
         // Write the rule.
-        writer.xml_start_tag("x14:cfRule", &attributes);
+        xml_start_tag(&mut writer, "x14:cfRule", &attributes);
 
         // Write the <x14:iconSet> element.
         let mut attributes = vec![];
@@ -6154,7 +6158,7 @@ impl ConditionalFormatIconSet {
             attributes.push(("custom", "1".to_string()));
         }
 
-        writer.xml_start_tag("x14:iconSet", &attributes);
+        xml_start_tag(&mut writer, "x14:iconSet", &attributes);
 
         for icon in &self.icons {
             Self::write_x14_type(&mut writer, icon);
@@ -6176,18 +6180,18 @@ impl ConditionalFormatIconSet {
                     attributes.push(("iconId", index.to_string()));
                 }
 
-                writer.xml_empty_tag("x14:cfIcon", &attributes);
+                xml_empty_tag(&mut writer, "x14:cfIcon", &attributes);
             }
         }
 
-        writer.xml_end_tag("x14:iconSet");
-        writer.xml_end_tag("x14:cfRule");
+        xml_end_tag(&mut writer, "x14:iconSet");
+        xml_end_tag(&mut writer, "x14:cfRule");
 
-        writer.read_to_string()
+        cursor_to_string(&writer)
     }
 
     // Write the <cfvo> element.
-    fn write_type(writer: &mut XMLWriter, icon: &ConditionalFormatCustomIcon) {
+    fn write_type(writer: &mut Cursor<Vec<u8>>, icon: &ConditionalFormatCustomIcon) {
         let mut attributes = vec![];
 
         match icon.rule_type {
@@ -6213,11 +6217,11 @@ impl ConditionalFormatIconSet {
         if icon.greater_than {
             attributes.push(("gte", "0".to_string()));
         }
-        writer.xml_empty_tag("cfvo", &attributes);
+        xml_empty_tag(writer, "cfvo", &attributes);
     }
 
     // Write the <x14:cfvo> element.
-    fn write_x14_type(writer: &mut XMLWriter, icon: &ConditionalFormatCustomIcon) {
+    fn write_x14_type(writer: &mut Cursor<Vec<u8>>, icon: &ConditionalFormatCustomIcon) {
         let mut attributes = vec![];
         let value = icon.value.value.as_ref();
 
@@ -6227,27 +6231,27 @@ impl ConditionalFormatIconSet {
             | ConditionalFormatType::Highest => {}
             ConditionalFormatType::Number => {
                 attributes.push(("type", "num".to_string()));
-                writer.xml_start_tag("x14:cfvo", &attributes);
-                writer.xml_data_element_only("xm:f", value);
-                writer.xml_end_tag("x14:cfvo");
+                xml_start_tag(writer, "x14:cfvo", &attributes);
+                xml_data_element_only(writer, "xm:f", value);
+                xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Percent => {
                 attributes.push(("type", "percent".to_string()));
-                writer.xml_start_tag("x14:cfvo", &attributes);
-                writer.xml_data_element_only("xm:f", value);
-                writer.xml_end_tag("x14:cfvo");
+                xml_start_tag(writer, "x14:cfvo", &attributes);
+                xml_data_element_only(writer, "xm:f", value);
+                xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Formula => {
                 attributes.push(("type", "formula".to_string()));
-                writer.xml_start_tag("x14:cfvo", &attributes);
-                writer.xml_data_element_only("xm:f", value);
-                writer.xml_end_tag("x14:cfvo");
+                xml_start_tag(writer, "x14:cfvo", &attributes);
+                xml_data_element_only(writer, "xm:f", value);
+                xml_end_tag(writer, "x14:cfvo");
             }
             ConditionalFormatType::Percentile => {
                 attributes.push(("type", "percentile".to_string()));
-                writer.xml_start_tag("x14:cfvo", &attributes);
-                writer.xml_data_element_only("xm:f", value);
-                writer.xml_end_tag("x14:cfvo");
+                xml_start_tag(writer, "x14:cfvo", &attributes);
+                xml_data_element_only(writer, "xm:f", value);
+                xml_end_tag(writer, "x14:cfvo");
             }
         }
     }

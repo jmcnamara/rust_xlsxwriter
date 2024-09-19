@@ -7,15 +7,20 @@
 #![warn(missing_docs)]
 
 use std::collections::BTreeMap;
+use std::io::Cursor;
 
-use crate::{utility, xmlwriter::XMLWriter, ColNum, Note, RowNum};
+use crate::xmlwriter::{
+    xml_data_element, xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only,
+    xml_end_tag, xml_start_tag, xml_start_tag_only,
+};
+use crate::{utility, ColNum, Note, RowNum};
 
 /// A struct to represent a Comment.
 ///
 /// Comments is the older name for Notes.
 ///
 pub struct Comment {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) notes: BTreeMap<RowNum, BTreeMap<ColNum, Note>>,
     pub(crate) note_authors: Vec<String>,
 }
@@ -27,7 +32,7 @@ impl Comment {
 
     // Create a new Comment struct.
     pub(crate) fn new() -> Comment {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         Comment {
             writer,
@@ -42,7 +47,7 @@ impl Comment {
 
     //  Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the comments element.
         self.write_comments();
@@ -54,7 +59,7 @@ impl Comment {
         self.write_comment_list();
 
         // Close the comments tag.
-        self.writer.xml_end_tag("comments");
+        xml_end_tag(&mut self.writer, "comments");
     }
 
     // Write the <comments> element.
@@ -64,7 +69,7 @@ impl Comment {
             "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
         )];
 
-        self.writer.xml_start_tag("comments", &attributes);
+        xml_start_tag(&mut self.writer, "comments", &attributes);
     }
 
     // Write the <authors> element.
@@ -73,7 +78,7 @@ impl Comment {
             return;
         }
 
-        self.writer.xml_start_tag_only("authors");
+        xml_start_tag_only(&mut self.writer, "authors");
 
         //let authors: Vec<String> = self.note_authors.keys().cloned().collect();
         for author in &self.note_authors.clone() {
@@ -81,17 +86,17 @@ impl Comment {
             self.write_author(author);
         }
 
-        self.writer.xml_end_tag("authors");
+        xml_end_tag(&mut self.writer, "authors");
     }
 
     // Write the <author> element.
     fn write_author(&mut self, author: &str) {
-        self.writer.xml_data_element_only("author", author);
+        xml_data_element_only(&mut self.writer, "author", author);
     }
 
     // Write the <commentList> element.
     fn write_comment_list(&mut self) {
-        self.writer.xml_start_tag_only("commentList");
+        xml_start_tag_only(&mut self.writer, "commentList");
 
         for (row, columns) in &self.notes.clone() {
             for (col, note) in columns {
@@ -100,7 +105,7 @@ impl Comment {
             }
         }
 
-        self.writer.xml_end_tag("commentList");
+        xml_end_tag(&mut self.writer, "commentList");
     }
 
     // Write the <comment> element.
@@ -108,22 +113,22 @@ impl Comment {
         let cell = utility::row_col_to_cell(row, col);
         let attributes = vec![("ref", cell), ("authorId", note.author_id.to_string())];
 
-        self.writer.xml_start_tag("comment", &attributes);
+        xml_start_tag(&mut self.writer, "comment", &attributes);
 
         // Write the text element.
         self.write_text_block(note);
 
-        self.writer.xml_end_tag("comment");
+        xml_end_tag(&mut self.writer, "comment");
     }
 
     // Write the <text> element.
     fn write_text_block(&mut self, note: &Note) {
-        self.writer.xml_start_tag_only("text");
+        xml_start_tag_only(&mut self.writer, "text");
 
         // Write the rPr element.
         if note.has_author_prefix {
             // Write the bold author run.
-            self.writer.xml_start_tag_only("r");
+            xml_start_tag_only(&mut self.writer, "r");
             self.write_paragraph_run(note, true);
 
             let author = match &self.note_authors.get(note.author_id) {
@@ -132,32 +137,32 @@ impl Comment {
             };
 
             self.write_text(&author);
-            self.writer.xml_end_tag("r");
+            xml_end_tag(&mut self.writer, "r");
 
             // Write the text on a new line.
-            self.writer.xml_start_tag_only("r");
+            xml_start_tag_only(&mut self.writer, "r");
             self.write_paragraph_run(note, false);
 
             let text = format!("\n{}", note.text);
             self.write_text(&text);
 
-            self.writer.xml_end_tag("r");
+            xml_end_tag(&mut self.writer, "r");
         } else {
-            self.writer.xml_start_tag_only("r");
+            xml_start_tag_only(&mut self.writer, "r");
             self.write_paragraph_run(note, false);
             self.write_text(&note.text);
-            self.writer.xml_end_tag("r");
+            xml_end_tag(&mut self.writer, "r");
         }
 
-        self.writer.xml_end_tag("text");
+        xml_end_tag(&mut self.writer, "text");
     }
 
     // Write the <rPr> element.
     fn write_paragraph_run(&mut self, note: &Note, has_bold: bool) {
-        self.writer.xml_start_tag_only("rPr");
+        xml_start_tag_only(&mut self.writer, "rPr");
 
         if has_bold {
-            self.writer.xml_empty_tag_only("b");
+            xml_empty_tag_only(&mut self.writer, "b");
         }
 
         // Write the sz element.
@@ -172,35 +177,35 @@ impl Comment {
         // Write the family element.
         self.write_font_family(note);
 
-        self.writer.xml_end_tag("rPr");
+        xml_end_tag(&mut self.writer, "rPr");
     }
 
     // Write the <sz> element.
     fn write_font_size(&mut self, note: &Note) {
         let attributes = [("val", note.format.font.size.to_string())];
 
-        self.writer.xml_empty_tag("sz", &attributes);
+        xml_empty_tag(&mut self.writer, "sz", &attributes);
     }
 
     // Write the <color> element.
     fn write_font_color(&mut self) {
         let attributes = [("indexed", "81".to_string())];
 
-        self.writer.xml_empty_tag("color", &attributes);
+        xml_empty_tag(&mut self.writer, "color", &attributes);
     }
 
     // Write the <rFont> element.
     fn write_font_name(&mut self, note: &Note) {
         let attributes = [("val", note.format.font.name.clone())];
 
-        self.writer.xml_empty_tag("rFont", &attributes);
+        xml_empty_tag(&mut self.writer, "rFont", &attributes);
     }
 
     // Write the <family> element.
     fn write_font_family(&mut self, note: &Note) {
         let attributes = [("val", note.format.font.family.to_string())];
 
-        self.writer.xml_empty_tag("family", &attributes);
+        xml_empty_tag(&mut self.writer, "family", &attributes);
     }
 
     // Write the <t> element.
@@ -212,6 +217,6 @@ impl Comment {
             vec![]
         };
 
-        self.writer.xml_data_element("t", text, &attributes);
+        xml_data_element(&mut self.writer, "t", text, &attributes);
     }
 }

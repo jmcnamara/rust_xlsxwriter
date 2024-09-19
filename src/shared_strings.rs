@@ -6,11 +6,16 @@
 
 mod tests;
 
+use std::io::Cursor;
+
 use crate::shared_strings_table::SharedStringsTable;
-use crate::xmlwriter::XMLWriter;
+
+use crate::xmlwriter::{
+    xml_declaration, xml_end_tag, xml_rich_si_element, xml_si_element, xml_start_tag,
+};
 
 pub struct SharedStrings {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
 }
 
 impl SharedStrings {
@@ -20,7 +25,7 @@ impl SharedStrings {
 
     // Create a new SharedStrings struct.
     pub(crate) fn new() -> SharedStrings {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         SharedStrings { writer }
     }
@@ -31,7 +36,7 @@ impl SharedStrings {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self, string_table: &SharedStringsTable) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the sst element.
         self.write_sst(string_table);
@@ -40,7 +45,7 @@ impl SharedStrings {
         self.write_sst_strings(string_table);
 
         // Close the sst tag.
-        self.writer.xml_end_tag("sst");
+        xml_end_tag(&mut self.writer, "sst");
     }
 
     // Write the <sst> element.
@@ -50,7 +55,7 @@ impl SharedStrings {
         let unique = string_table.unique_count.to_string();
         let attributes = [("xmlns", xmls), ("count", count), ("uniqueCount", unique)];
 
-        self.writer.xml_start_tag("sst", &attributes);
+        xml_start_tag(&mut self.writer, "sst", &attributes);
     }
 
     // Write the sst string elements.
@@ -65,9 +70,9 @@ impl SharedStrings {
                 string.starts_with(whitespace) || string.ends_with(whitespace);
 
             if string.starts_with("<r>") && string.ends_with("</r>") {
-                self.writer.xml_rich_si_element(string);
+                xml_rich_si_element(&mut self.writer, string);
             } else {
-                self.writer.xml_si_element(string, preserve_whitespace);
+                xml_si_element(&mut self.writer, string, preserve_whitespace);
             }
         }
     }

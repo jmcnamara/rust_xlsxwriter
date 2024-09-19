@@ -6,11 +6,18 @@
 
 mod tests;
 
-use crate::{drawing::DrawingInfo, xmlwriter::XMLWriter, ColNum, RowNum};
+use std::io::Cursor;
+
+use crate::{drawing::DrawingInfo, ColNum, RowNum};
+
+use crate::xmlwriter::{
+    xml_data_element, xml_data_element_only, xml_empty_tag, xml_empty_tag_only, xml_end_tag,
+    xml_start_tag, xml_start_tag_only,
+};
 
 pub struct Vml {
     pub(crate) comments: Vec<VmlInfo>,
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) buttons: Vec<VmlInfo>,
     pub(crate) header_images: Vec<VmlInfo>,
     pub(crate) data_id: String,
@@ -24,7 +31,7 @@ impl Vml {
 
     // Create a new Vml struct.
     pub fn new() -> Vml {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         Vml {
             writer,
@@ -95,7 +102,7 @@ impl Vml {
         }
 
         // Close the xml tag.
-        self.writer.xml_end_tag("xml");
+        xml_end_tag(&mut self.writer, "xml");
     }
 
     // Write the <xml> element.
@@ -106,19 +113,19 @@ impl Vml {
             ("xmlns:x", "urn:schemas-microsoft-com:office:excel"),
         ];
 
-        self.writer.xml_start_tag("xml", &attributes);
+        xml_start_tag(&mut self.writer, "xml", &attributes);
     }
 
     // Write the <o:shapelayout> element.
     fn write_shapelayout(&mut self) {
         let attributes = [("v:ext", "edit")];
 
-        self.writer.xml_start_tag("o:shapelayout", &attributes);
+        xml_start_tag(&mut self.writer, "o:shapelayout", &attributes);
 
         // Write the o:idmap element.
         self.write_idmap();
 
-        self.writer.xml_end_tag("o:shapelayout");
+        xml_end_tag(&mut self.writer, "o:shapelayout");
     }
 
     // Write the <o:idmap> element.
@@ -128,7 +135,7 @@ impl Vml {
             ("data", self.data_id.to_string()),
         ];
 
-        self.writer.xml_empty_tag("o:idmap", &attributes);
+        xml_empty_tag(&mut self.writer, "o:idmap", &attributes);
     }
 
     // Write the <v:shapetype> element for button.
@@ -140,7 +147,7 @@ impl Vml {
             ("path", "m,l,21600r21600,l21600,xe"),
         ];
 
-        self.writer.xml_start_tag("v:shapetype", &attributes);
+        xml_start_tag(&mut self.writer, "v:shapetype", &attributes);
 
         // Write the v:stroke element.
         self.write_stroke();
@@ -151,7 +158,7 @@ impl Vml {
         // Write the o:lock element.
         self.write_shapetype_lock();
 
-        self.writer.xml_end_tag("v:shapetype");
+        xml_end_tag(&mut self.writer, "v:shapetype");
     }
 
     // Write the <v:shapetype> element for button.
@@ -163,7 +170,7 @@ impl Vml {
             ("path", "m,l,21600r21600,l21600,xe"),
         ];
 
-        self.writer.xml_start_tag("v:shapetype", &attributes);
+        xml_start_tag(&mut self.writer, "v:shapetype", &attributes);
 
         // Write the v:stroke element.
         self.write_stroke();
@@ -171,7 +178,7 @@ impl Vml {
         // Write the v:path element.
         self.write_comment_path();
 
-        self.writer.xml_end_tag("v:shapetype");
+        xml_end_tag(&mut self.writer, "v:shapetype");
     }
 
     // Write the <v:shapetype> element for header images.
@@ -186,7 +193,7 @@ impl Vml {
             ("stroked", "f"),
         ];
 
-        self.writer.xml_start_tag("v:shapetype", &attributes);
+        xml_start_tag(&mut self.writer, "v:shapetype", &attributes);
 
         // Write the v:stroke element.
         self.write_stroke();
@@ -200,19 +207,19 @@ impl Vml {
         // Write the o:lock element.
         self.write_aspect_ratio_lock();
 
-        self.writer.xml_end_tag("v:shapetype");
+        xml_end_tag(&mut self.writer, "v:shapetype");
     }
 
     // Write the <v:stroke> element.
     fn write_stroke(&mut self) {
         let attributes = [("joinstyle", "miter")];
 
-        self.writer.xml_empty_tag("v:stroke", &attributes);
+        xml_empty_tag(&mut self.writer, "v:stroke", &attributes);
     }
 
     // Write the <v:formulas> element.
     fn write_formulas(&mut self) {
-        self.writer.xml_start_tag_only("v:formulas");
+        xml_start_tag_only(&mut self.writer, "v:formulas");
 
         self.write_formula("if lineDrawn pixelLineWidth 0");
         self.write_formula("sum @0 1 0");
@@ -227,13 +234,13 @@ impl Vml {
         self.write_formula("prod @7 21600 pixelHeight");
         self.write_formula("sum @10 21600 0");
 
-        self.writer.xml_end_tag("v:formulas");
+        xml_end_tag(&mut self.writer, "v:formulas");
     }
     // Write the <v:f> element.
     fn write_formula(&mut self, equation: &str) {
         let attributes = [("eqn", equation.to_string())];
 
-        self.writer.xml_empty_tag("v:f", &attributes);
+        xml_empty_tag(&mut self.writer, "v:f", &attributes);
     }
 
     // Write the <v:path> element for buttons.
@@ -246,7 +253,7 @@ impl Vml {
             ("o:connecttype", "rect"),
         ];
 
-        self.writer.xml_empty_tag("v:path", &attributes);
+        xml_empty_tag(&mut self.writer, "v:path", &attributes);
     }
 
     // Write the <v:path> element for header images.
@@ -257,35 +264,35 @@ impl Vml {
             ("o:connecttype", "rect"),
         ];
 
-        self.writer.xml_empty_tag("v:path", &attributes);
+        xml_empty_tag(&mut self.writer, "v:path", &attributes);
     }
 
     // Write the <v:path> element for comments.
     fn write_comment_path(&mut self) {
         let attributes = [("gradientshapeok", "t"), ("o:connecttype", "rect")];
 
-        self.writer.xml_empty_tag("v:path", &attributes);
+        xml_empty_tag(&mut self.writer, "v:path", &attributes);
     }
 
     // Write the <v:path> element for comments.
     fn write_comment_path2(&mut self) {
         let attributes = [("o:connecttype", "none")];
 
-        self.writer.xml_empty_tag("v:path", &attributes);
+        xml_empty_tag(&mut self.writer, "v:path", &attributes);
     }
 
     // Write the <o:lock> element.
     fn write_shapetype_lock(&mut self) {
         let attributes = [("v:ext", "edit"), ("shapetype", "t")];
 
-        self.writer.xml_empty_tag("o:lock", &attributes);
+        xml_empty_tag(&mut self.writer, "o:lock", &attributes);
     }
 
     // Write the <o:lock> element.
     fn write_aspect_ratio_lock(&mut self) {
         let attributes = [("v:ext", "edit"), ("aspectratio", "t")];
 
-        self.writer.xml_empty_tag("o:lock", &attributes);
+        xml_empty_tag(&mut self.writer, "o:lock", &attributes);
     }
 
     // Write the <v:shape> element for buttons.
@@ -320,7 +327,7 @@ impl Vml {
         attributes.push(("strokecolor", "windowText [64]".to_string()));
         attributes.push(("o:insetmode", "auto".to_string()));
 
-        self.writer.xml_start_tag("v:shape", &attributes);
+        xml_start_tag(&mut self.writer, "v:shape", &attributes);
 
         // Write the v:fill element.
         self.write_button_fill();
@@ -334,7 +341,7 @@ impl Vml {
         // Write the x:ClientData element.
         self.write_button_client_data(vml_info);
 
-        self.writer.xml_end_tag("v:shape");
+        xml_end_tag(&mut self.writer, "v:shape");
     }
 
     // Write the <v:shape> element for comments.
@@ -372,7 +379,7 @@ impl Vml {
         attributes.push(("fillcolor", vml_info.fill_color.clone()));
         attributes.push(("o:insetmode", "auto".to_string()));
 
-        self.writer.xml_start_tag("v:shape", &attributes);
+        xml_start_tag(&mut self.writer, "v:shape", &attributes);
 
         // Write the v:fill element.
         self.write_comment_fill();
@@ -389,7 +396,7 @@ impl Vml {
         // Write the x:ClientData element.
         self.write_comment_client_data(vml_info);
 
-        self.writer.xml_end_tag("v:shape");
+        xml_end_tag(&mut self.writer, "v:shape");
     }
 
     // Write the <v:shape> element for header images.
@@ -415,7 +422,7 @@ impl Vml {
             ("style", style),
         ];
 
-        self.writer.xml_start_tag("v:shape", &attributes);
+        xml_start_tag(&mut self.writer, "v:shape", &attributes);
 
         // Write the v:imagedata element.
         self.write_imagedata(vml_info);
@@ -423,7 +430,7 @@ impl Vml {
         // Write the o:lock element.
         self.write_rotation_lock(vml_info);
 
-        self.writer.xml_end_tag("v:shape");
+        xml_end_tag(&mut self.writer, "v:shape");
     }
 
     // Write the <v:imagedata> element.
@@ -433,7 +440,7 @@ impl Vml {
             ("o:title", vml_info.text.to_string()),
         ];
 
-        self.writer.xml_empty_tag("v:imagedata", &attributes);
+        xml_empty_tag(&mut self.writer, "v:imagedata", &attributes);
     }
 
     // Write the <o:lock> element.
@@ -444,7 +451,7 @@ impl Vml {
             attributes.push(("aspectratio", "f".to_string()));
         }
 
-        self.writer.xml_empty_tag("o:lock", &attributes);
+        xml_empty_tag(&mut self.writer, "o:lock", &attributes);
     }
 
     // Write the <v:fill> element.
@@ -454,38 +461,38 @@ impl Vml {
             ("o:detectmouseclick", "t".to_string()),
         ];
 
-        self.writer.xml_empty_tag("v:fill", &attributes);
+        xml_empty_tag(&mut self.writer, "v:fill", &attributes);
     }
 
     // Write the <v:fill> element.
     fn write_comment_fill(&mut self) {
         let attributes = [("color2", "#ffffe1".to_string())];
 
-        self.writer.xml_empty_tag("v:fill", &attributes);
+        xml_empty_tag(&mut self.writer, "v:fill", &attributes);
     }
 
     // Write the <v:textbox> element.
     fn write_button_textbox(&mut self, vml_info: &VmlInfo) {
         let attributes = [("style", "mso-direction-alt:auto"), ("o:singleclick", "f")];
 
-        self.writer.xml_start_tag("v:textbox", &attributes);
+        xml_start_tag(&mut self.writer, "v:textbox", &attributes);
 
         // Write the div element.
         self.write_button_div(vml_info);
 
-        self.writer.xml_end_tag("v:textbox");
+        xml_end_tag(&mut self.writer, "v:textbox");
     }
 
     // Write the <div> element.
     fn write_button_div(&mut self, vml_info: &VmlInfo) {
         let attributes = [("style", "text-align:center")];
 
-        self.writer.xml_start_tag("div", &attributes);
+        xml_start_tag(&mut self.writer, "div", &attributes);
 
         // Write the font element.
         self.write_button_font(vml_info);
 
-        self.writer.xml_end_tag("div");
+        xml_end_tag(&mut self.writer, "div");
     }
 
     // Write the <font> element.
@@ -496,15 +503,14 @@ impl Vml {
             ("color", "#000000".to_string()),
         ];
 
-        self.writer
-            .xml_data_element("font", &vml_info.text, &attributes);
+        xml_data_element(&mut self.writer, "font", &vml_info.text, &attributes);
     }
 
     // Write the <x:ClientData> element.
     fn write_button_client_data(&mut self, vml_info: &VmlInfo) {
         let attributes = [("ObjectType", "Button")];
 
-        self.writer.xml_start_tag("x:ClientData", &attributes);
+        xml_start_tag(&mut self.writer, "x:ClientData", &attributes);
 
         // Write the x:Anchor element.
         self.write_anchor(vml_info);
@@ -524,37 +530,37 @@ impl Vml {
         // Write the x:TextVAlign element.
         self.write_text_valign();
 
-        self.writer.xml_end_tag("x:ClientData");
+        xml_end_tag(&mut self.writer, "x:ClientData");
     }
 
     // Write the <v:textbox> element.
     fn write_comment_textbox(&mut self) {
         let attributes = [("style", "mso-direction-alt:auto")];
 
-        self.writer.xml_start_tag("v:textbox", &attributes);
+        xml_start_tag(&mut self.writer, "v:textbox", &attributes);
 
         // Write the div element.
         self.write_comment_div();
 
-        self.writer.xml_end_tag("v:textbox");
+        xml_end_tag(&mut self.writer, "v:textbox");
     }
 
     // Write the <div> element.
     fn write_comment_div(&mut self) {
         let attributes = [("style", "text-align:left")];
 
-        self.writer.xml_start_tag("div", &attributes);
+        xml_start_tag(&mut self.writer, "div", &attributes);
 
-        self.writer.xml_end_tag("div");
+        xml_end_tag(&mut self.writer, "div");
     }
 
     // Write the <x:ClientData> element.
     fn write_comment_client_data(&mut self, vml_info: &VmlInfo) {
         let attributes = [("ObjectType", "Note")];
 
-        self.writer.xml_start_tag("x:ClientData", &attributes);
-        self.writer.xml_empty_tag_only("x:MoveWithCells");
-        self.writer.xml_empty_tag_only("x:SizeWithCells");
+        xml_start_tag(&mut self.writer, "x:ClientData", &attributes);
+        xml_empty_tag_only(&mut self.writer, "x:MoveWithCells");
+        xml_empty_tag_only(&mut self.writer, "x:SizeWithCells");
 
         // Write the x:Anchor element.
         self.write_anchor(vml_info);
@@ -570,10 +576,10 @@ impl Vml {
 
         // Write the <x:Visible> element.
         if vml_info.is_visible {
-            self.writer.xml_empty_tag_only("x:Visible");
+            xml_empty_tag_only(&mut self.writer, "x:Visible");
         }
 
-        self.writer.xml_end_tag("x:ClientData");
+        xml_end_tag(&mut self.writer, "x:ClientData");
     }
 
     // Write the <x:Anchor> element.
@@ -590,51 +596,49 @@ impl Vml {
             vml_info.drawing_info.to.row_offset,
         );
 
-        self.writer.xml_data_element_only("x:Anchor", &anchor);
+        xml_data_element_only(&mut self.writer, "x:Anchor", &anchor);
     }
 
     // Write the <x:PrintObject> element.
     fn write_print_object(&mut self) {
-        self.writer.xml_data_element_only("x:PrintObject", "False");
+        xml_data_element_only(&mut self.writer, "x:PrintObject", "False");
     }
 
     // Write the <x:AutoFill> element.
     fn write_auto_fill(&mut self) {
-        self.writer.xml_data_element_only("x:AutoFill", "False");
+        xml_data_element_only(&mut self.writer, "x:AutoFill", "False");
     }
 
     // Write the <x:FmlaMacro> element.
     fn write_fmla_macro(&mut self, vml_info: &VmlInfo) {
-        self.writer
-            .xml_data_element_only("x:FmlaMacro", &vml_info.macro_name);
+        xml_data_element_only(&mut self.writer, "x:FmlaMacro", &vml_info.macro_name);
     }
 
     // Write the <x:TextHAlign> element.
     fn write_text_halign(&mut self) {
-        self.writer.xml_data_element_only("x:TextHAlign", "Center");
+        xml_data_element_only(&mut self.writer, "x:TextHAlign", "Center");
     }
 
     // Write the <x:TextVAlign> element.
     fn write_text_valign(&mut self) {
-        self.writer.xml_data_element_only("x:TextVAlign", "Center");
+        xml_data_element_only(&mut self.writer, "x:TextVAlign", "Center");
     }
 
     // Write the <v:shadow> element.
     fn write_shadow(&mut self) {
         let attributes = [("on", "t"), ("color", "black"), ("obscured", "t")];
 
-        self.writer.xml_empty_tag("v:shadow", &attributes);
+        xml_empty_tag(&mut self.writer, "v:shadow", &attributes);
     }
 
     // Write the <x:Row> element.
     fn write_row(&mut self, row: RowNum) {
-        self.writer.xml_data_element_only("x:Row", &row.to_string());
+        xml_data_element_only(&mut self.writer, "x:Row", &row.to_string());
     }
 
     // Write the <x:Column> element.
     fn write_column(&mut self, col: ColNum) {
-        self.writer
-            .xml_data_element_only("x:Column", &col.to_string());
+        xml_data_element_only(&mut self.writer, "x:Column", &col.to_string());
     }
 }
 

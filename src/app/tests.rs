@@ -9,6 +9,7 @@ mod app_tests {
 
     use crate::app::App;
     use crate::test_functions::xml_to_vec;
+    use crate::xmlwriter;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -20,7 +21,7 @@ mod app_tests {
 
         app.assemble_xml_file();
 
-        let got = app.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&app.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -68,7 +69,7 @@ mod app_tests {
 
         app.assemble_xml_file();
 
-        let got = app.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&app.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -118,7 +119,7 @@ mod app_tests {
 
         app.assemble_xml_file();
 
-        let got = app.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&app.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

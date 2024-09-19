@@ -4,10 +4,12 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
-use crate::xmlwriter::XMLWriter;
+use std::io::Cursor;
+
+use crate::xmlwriter::{xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag};
 
 pub struct RichValueStructure {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) has_embedded_image_descriptions: bool,
 }
 
@@ -18,7 +20,7 @@ impl RichValueStructure {
 
     // Create a new RichValueStructure struct.
     pub(crate) fn new() -> RichValueStructure {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         RichValueStructure {
             writer,
@@ -32,13 +34,13 @@ impl RichValueStructure {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the rvStructures element.
         self.write_rv_structures();
 
         // Close the final tag.
-        self.writer.xml_end_tag("rvStructures");
+        xml_end_tag(&mut self.writer, "rvStructures");
     }
 
     // Write the <rvStructures> element.
@@ -51,7 +53,7 @@ impl RichValueStructure {
             ("count", "1"),
         ];
 
-        self.writer.xml_start_tag("rvStructures", &attributes);
+        xml_start_tag(&mut self.writer, "rvStructures", &attributes);
 
         // Write the s element.
         self.write_s();
@@ -61,7 +63,7 @@ impl RichValueStructure {
     fn write_s(&mut self) {
         let attributes = [("t", "_localImage")];
 
-        self.writer.xml_start_tag("s", &attributes);
+        xml_start_tag(&mut self.writer, "s", &attributes);
 
         // Write the k elements.
         self.write_k("_rvRel:LocalImageIdentifier", "i");
@@ -71,13 +73,13 @@ impl RichValueStructure {
             self.write_k("Text", "s");
         }
 
-        self.writer.xml_end_tag("s");
+        xml_end_tag(&mut self.writer, "s");
     }
 
     // Write the <k> element.
     fn write_k(&mut self, name: &str, name_type: &str) {
         let attributes = [("n", name), ("t", name_type)];
 
-        self.writer.xml_empty_tag("k", &attributes);
+        xml_empty_tag(&mut self.writer, "k", &attributes);
     }
 }

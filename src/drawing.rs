@@ -6,14 +6,20 @@
 
 mod tests;
 
+use std::io::Cursor;
+
+use crate::xmlwriter::{
+    xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only, xml_end_tag,
+    xml_start_tag, xml_start_tag_only,
+};
 use crate::{
-    xmlwriter::XMLWriter, Color, ObjectMovement, Shape, ShapeFont, ShapeFormat, ShapeGradientFill,
-    ShapeGradientFillType, ShapeGradientStop, ShapeLine, ShapeLineDashType, ShapePatternFill,
-    ShapeTextDirection, ShapeTextHorizontalAlignment, Url,
+    Color, ObjectMovement, Shape, ShapeFont, ShapeFormat, ShapeGradientFill, ShapeGradientFillType,
+    ShapeGradientStop, ShapeLine, ShapeLineDashType, ShapePatternFill, ShapeTextDirection,
+    ShapeTextHorizontalAlignment, Url,
 };
 
 pub struct Drawing {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) drawings: Vec<DrawingInfo>,
     pub(crate) shapes: Vec<Shape>,
     shape_id: usize,
@@ -26,7 +32,7 @@ impl Drawing {
 
     // Create a new Drawing struct.
     pub fn new() -> Drawing {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         Drawing {
             writer,
@@ -42,7 +48,7 @@ impl Drawing {
 
     // Assemble and write the XML file.
     pub fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the xdr:wsDr element.
         self.write_ws_dr();
@@ -60,7 +66,7 @@ impl Drawing {
         }
 
         // Close the end tag.
-        self.writer.xml_end_tag("xdr:wsDr");
+        xml_end_tag(&mut self.writer, "xdr:wsDr");
     }
 
     // Write the <xdr:wsDr> element.
@@ -76,7 +82,7 @@ impl Drawing {
             ),
         ];
 
-        self.writer.xml_start_tag("xdr:wsDr", &attributes);
+        xml_start_tag(&mut self.writer, "xdr:wsDr", &attributes);
     }
 
     // Write the <xdr:twoCellAnchor> element.
@@ -93,7 +99,7 @@ impl Drawing {
             ObjectMovement::MoveAndSizeWithCells | ObjectMovement::MoveAndSizeWithCellsAfter => (),
         }
 
-        self.writer.xml_start_tag("xdr:twoCellAnchor", &attributes);
+        xml_start_tag(&mut self.writer, "xdr:twoCellAnchor", &attributes);
 
         // Write the xdr:from and xdr:to elements
         self.write_from(&drawing_info.from);
@@ -111,45 +117,53 @@ impl Drawing {
             DrawingType::ChartSheet | DrawingType::Vml => {}
         }
 
-        self.writer.xml_empty_tag_only("xdr:clientData");
-        self.writer.xml_end_tag("xdr:twoCellAnchor");
+        xml_empty_tag_only(&mut self.writer, "xdr:clientData");
+        xml_end_tag(&mut self.writer, "xdr:twoCellAnchor");
     }
 
     // Write the <xdr:from> element.
     fn write_from(&mut self, coords: &DrawingCoordinates) {
-        self.writer.xml_start_tag_only("xdr:from");
+        xml_start_tag_only(&mut self.writer, "xdr:from");
 
-        self.writer
-            .xml_data_element_only("xdr:col", &coords.col.to_string());
-        self.writer
-            .xml_data_element_only("xdr:colOff", &coords.col_offset.to_string());
-        self.writer
-            .xml_data_element_only("xdr:row", &coords.row.to_string());
-        self.writer
-            .xml_data_element_only("xdr:rowOff", &coords.row_offset.to_string());
+        xml_data_element_only(&mut self.writer, "xdr:col", &coords.col.to_string());
+        xml_data_element_only(
+            &mut self.writer,
+            "xdr:colOff",
+            &coords.col_offset.to_string(),
+        );
+        xml_data_element_only(&mut self.writer, "xdr:row", &coords.row.to_string());
+        xml_data_element_only(
+            &mut self.writer,
+            "xdr:rowOff",
+            &coords.row_offset.to_string(),
+        );
 
-        self.writer.xml_end_tag("xdr:from");
+        xml_end_tag(&mut self.writer, "xdr:from");
     }
 
     // Write the <xdr:to> element.
     fn write_to(&mut self, coords: &DrawingCoordinates) {
-        self.writer.xml_start_tag_only("xdr:to");
+        xml_start_tag_only(&mut self.writer, "xdr:to");
 
-        self.writer
-            .xml_data_element_only("xdr:col", &coords.col.to_string());
-        self.writer
-            .xml_data_element_only("xdr:colOff", &coords.col_offset.to_string());
-        self.writer
-            .xml_data_element_only("xdr:row", &coords.row.to_string());
-        self.writer
-            .xml_data_element_only("xdr:rowOff", &coords.row_offset.to_string());
+        xml_data_element_only(&mut self.writer, "xdr:col", &coords.col.to_string());
+        xml_data_element_only(
+            &mut self.writer,
+            "xdr:colOff",
+            &coords.col_offset.to_string(),
+        );
+        xml_data_element_only(&mut self.writer, "xdr:row", &coords.row.to_string());
+        xml_data_element_only(
+            &mut self.writer,
+            "xdr:rowOff",
+            &coords.row_offset.to_string(),
+        );
 
-        self.writer.xml_end_tag("xdr:to");
+        xml_end_tag(&mut self.writer, "xdr:to");
     }
 
     // Write the <xdr:pic> element.
     fn write_pic(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag_only("xdr:pic");
+        xml_start_tag_only(&mut self.writer, "xdr:pic");
 
         // Write the xdr:nvPicPr element.
         self.write_nv_pic_pr(index, drawing_info);
@@ -160,22 +174,22 @@ impl Drawing {
         // Write the xdr:spPr element.
         self.write_sp_pr(drawing_info);
 
-        self.writer.xml_end_tag("xdr:pic");
+        xml_end_tag(&mut self.writer, "xdr:pic");
     }
 
     // Write the <xdr:nvPicPr> element.
     fn write_nv_pic_pr(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag_only("xdr:nvPicPr");
+        xml_start_tag_only(&mut self.writer, "xdr:nvPicPr");
 
         // Write the xdr:cNvPr element.
         self.write_c_nv_pr(index, drawing_info, "Picture");
 
         // Write the xdr:cNvPicPr element.
-        self.writer.xml_start_tag_only("xdr:cNvPicPr");
+        xml_start_tag_only(&mut self.writer, "xdr:cNvPicPr");
         self.write_a_pic_locks();
-        self.writer.xml_end_tag("xdr:cNvPicPr");
+        xml_end_tag(&mut self.writer, "xdr:cNvPicPr");
 
-        self.writer.xml_end_tag("xdr:nvPicPr");
+        xml_end_tag(&mut self.writer, "xdr:nvPicPr");
     }
 
     // Write the <xdr:cNvPr> element.
@@ -194,7 +208,7 @@ impl Drawing {
         }
 
         if drawing_info.decorative || drawing_info.url.is_some() {
-            self.writer.xml_start_tag("xdr:cNvPr", &attributes);
+            xml_start_tag(&mut self.writer, "xdr:cNvPr", &attributes);
 
             if let Some(hyperlink) = &drawing_info.url {
                 // Write the a:hlinkClick element.
@@ -205,18 +219,18 @@ impl Drawing {
                 self.write_decorative();
             }
 
-            self.writer.xml_end_tag("xdr:cNvPr");
+            xml_end_tag(&mut self.writer, "xdr:cNvPr");
         } else {
-            self.writer.xml_empty_tag("xdr:cNvPr", &attributes);
+            xml_empty_tag(&mut self.writer, "xdr:cNvPr", &attributes);
         }
     }
 
     // Write the decorative sub elements.
     fn write_decorative(&mut self) {
-        self.writer.xml_start_tag_only("a:extLst");
+        xml_start_tag_only(&mut self.writer, "a:extLst");
 
         let attributes = [("uri", "{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}")];
-        self.writer.xml_start_tag("a:ext", &attributes);
+        xml_start_tag(&mut self.writer, "a:ext", &attributes);
 
         let attributes = [
             (
@@ -225,12 +239,12 @@ impl Drawing {
             ),
             ("id", "{00000000-0008-0000-0000-000002000000}"),
         ];
-        self.writer.xml_empty_tag("a16:creationId", &attributes);
+        xml_empty_tag(&mut self.writer, "a16:creationId", &attributes);
 
-        self.writer.xml_end_tag("a:ext");
+        xml_end_tag(&mut self.writer, "a:ext");
 
         let attributes = [("uri", "{C183D7F6-B498-43B3-948B-1728B52AA6E4}")];
-        self.writer.xml_start_tag("a:ext", &attributes);
+        xml_start_tag(&mut self.writer, "a:ext", &attributes);
 
         let attributes = [
             (
@@ -239,10 +253,10 @@ impl Drawing {
             ),
             ("val", "1"),
         ];
-        self.writer.xml_empty_tag("adec:decorative", &attributes);
+        xml_empty_tag(&mut self.writer, "adec:decorative", &attributes);
 
-        self.writer.xml_end_tag("a:ext");
-        self.writer.xml_end_tag("a:extLst");
+        xml_end_tag(&mut self.writer, "a:ext");
+        xml_end_tag(&mut self.writer, "a:extLst");
     }
 
     // Write the <a:hlinkClick> element.
@@ -259,28 +273,28 @@ impl Drawing {
             attributes.push(("tooltip", hyperlink.tool_tip.clone()));
         }
 
-        self.writer.xml_empty_tag("a:hlinkClick", &attributes);
+        xml_empty_tag(&mut self.writer, "a:hlinkClick", &attributes);
     }
 
     // Write the <a:picLocks> element.
     fn write_a_pic_locks(&mut self) {
         let attributes = [("noChangeAspect", "1")];
 
-        self.writer.xml_empty_tag("a:picLocks", &attributes);
+        xml_empty_tag(&mut self.writer, "a:picLocks", &attributes);
     }
 
     // Write the <xdr:blipFill> element.
     fn write_blip_fill(&mut self, index: u32) {
-        self.writer.xml_start_tag_only("xdr:blipFill");
+        xml_start_tag_only(&mut self.writer, "xdr:blipFill");
 
         // Write the a:blip element.
         self.write_a_blip(index);
 
-        self.writer.xml_start_tag_only("a:stretch");
-        self.writer.xml_empty_tag_only("a:fillRect");
-        self.writer.xml_end_tag("a:stretch");
+        xml_start_tag_only(&mut self.writer, "a:stretch");
+        xml_empty_tag_only(&mut self.writer, "a:fillRect");
+        xml_end_tag(&mut self.writer, "a:stretch");
 
-        self.writer.xml_end_tag("xdr:blipFill");
+        xml_end_tag(&mut self.writer, "xdr:blipFill");
     }
 
     // Write the <a:blip> element.
@@ -293,13 +307,13 @@ impl Drawing {
             ("r:embed", format!("rId{index}")),
         ];
 
-        self.writer.xml_empty_tag("a:blip", &attributes);
+        xml_empty_tag(&mut self.writer, "a:blip", &attributes);
     }
 
     // Write the <xdr:spPr> element.
     fn write_sp_pr(&mut self, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag_only("xdr:spPr");
-        self.writer.xml_start_tag_only("a:xfrm");
+        xml_start_tag_only(&mut self.writer, "xdr:spPr");
+        xml_start_tag_only(&mut self.writer, "a:xfrm");
 
         // Write the a:off element.
         self.write_a_off(drawing_info);
@@ -307,18 +321,18 @@ impl Drawing {
         // Write the a:ext element.
         self.write_a_ext(drawing_info);
 
-        self.writer.xml_end_tag("a:xfrm");
+        xml_end_tag(&mut self.writer, "a:xfrm");
 
         // Write the a:prstGeom element.
         self.write_a_prst_geom();
 
-        self.writer.xml_end_tag("xdr:spPr");
+        xml_end_tag(&mut self.writer, "xdr:spPr");
     }
 
     // Write the <xdr:spPr> element.
     fn write_shape_sp_pr(&mut self, drawing_info: &DrawingInfo, shape: &Shape) {
-        self.writer.xml_start_tag_only("xdr:spPr");
-        self.writer.xml_start_tag_only("a:xfrm");
+        xml_start_tag_only(&mut self.writer, "xdr:spPr");
+        xml_start_tag_only(&mut self.writer, "a:xfrm");
 
         // Write the a:off element.
         self.write_a_off(drawing_info);
@@ -326,7 +340,7 @@ impl Drawing {
         // Write the a:ext element.
         self.write_a_ext(drawing_info);
 
-        self.writer.xml_end_tag("a:xfrm");
+        xml_end_tag(&mut self.writer, "a:xfrm");
 
         // Write the a:prstGeom element.
         self.write_a_prst_geom();
@@ -334,7 +348,7 @@ impl Drawing {
         // Write the a:solidFill element.
         self.write_shape_formatting(&shape.format);
 
-        self.writer.xml_end_tag("xdr:spPr");
+        xml_end_tag(&mut self.writer, "xdr:spPr");
     }
 
     // Write the <a:off> element.
@@ -344,7 +358,7 @@ impl Drawing {
             ("y", drawing_info.row_absolute.to_string()),
         ];
 
-        self.writer.xml_empty_tag("a:off", &attributes);
+        xml_empty_tag(&mut self.writer, "a:off", &attributes);
     }
 
     // Write the <a:ext> element.
@@ -354,23 +368,23 @@ impl Drawing {
             ("cy", drawing_info.height.to_string()),
         ];
 
-        self.writer.xml_empty_tag("a:ext", &attributes);
+        xml_empty_tag(&mut self.writer, "a:ext", &attributes);
     }
 
     // Write the <a:prstGeom> element.
     fn write_a_prst_geom(&mut self) {
         let attributes = [("prst", "rect")];
 
-        self.writer.xml_start_tag("a:prstGeom", &attributes);
-        self.writer.xml_empty_tag_only("a:avLst");
-        self.writer.xml_end_tag("a:prstGeom");
+        xml_start_tag(&mut self.writer, "a:prstGeom", &attributes);
+        xml_empty_tag_only(&mut self.writer, "a:avLst");
+        xml_end_tag(&mut self.writer, "a:prstGeom");
     }
 
     // Write the <xdr:graphicFrame> element.
     fn write_graphic_frame(&mut self, index: u32, drawing_info: &DrawingInfo) {
         let attributes = [("macro", "")];
 
-        self.writer.xml_start_tag("xdr:graphicFrame", &attributes);
+        xml_start_tag(&mut self.writer, "xdr:graphicFrame", &attributes);
 
         // Write the xdr:nvGraphicFramePr element.
         self.write_nv_graphic_frame_pr(index, drawing_info);
@@ -381,12 +395,12 @@ impl Drawing {
         // Write the a:graphic element.
         self.write_a_graphic(drawing_info.rel_id);
 
-        self.writer.xml_end_tag("xdr:graphicFrame");
+        xml_end_tag(&mut self.writer, "xdr:graphicFrame");
     }
 
     // Write the <xdr:nvGraphicFramePr> element.
     fn write_nv_graphic_frame_pr(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag_only("xdr:nvGraphicFramePr");
+        xml_start_tag_only(&mut self.writer, "xdr:nvGraphicFramePr");
 
         // Write the xdr:cNvPr element.
         self.write_c_nv_pr(index, drawing_info, "Chart");
@@ -394,26 +408,25 @@ impl Drawing {
         // Write the xdr:cNvGraphicFramePr element.
         self.write_c_nv_graphic_frame_pr(drawing_info.drawing_type);
 
-        self.writer.xml_end_tag("xdr:nvGraphicFramePr");
+        xml_end_tag(&mut self.writer, "xdr:nvGraphicFramePr");
     }
 
     // Write the <xdr:cNvGraphicFramePr> element.
     fn write_c_nv_graphic_frame_pr(&mut self, drawing_type: DrawingType) {
         if drawing_type == DrawingType::ChartSheet {
-            self.writer.xml_start_tag_only("xdr:cNvGraphicFramePr");
+            xml_start_tag_only(&mut self.writer, "xdr:cNvGraphicFramePr");
 
-            self.writer
-                .xml_empty_tag("a:graphicFrameLocks", &[("noGrp", "1")]);
+            xml_empty_tag(&mut self.writer, "a:graphicFrameLocks", &[("noGrp", "1")]);
 
-            self.writer.xml_end_tag("xdr:cNvGraphicFramePr");
+            xml_end_tag(&mut self.writer, "xdr:cNvGraphicFramePr");
         } else {
-            self.writer.xml_empty_tag_only("xdr:cNvGraphicFramePr");
+            xml_empty_tag_only(&mut self.writer, "xdr:cNvGraphicFramePr");
         }
     }
 
     // Write the <xdr:xfrm> element.
     fn write_xfrm(&mut self) {
-        self.writer.xml_start_tag_only("xdr:xfrm");
+        xml_start_tag_only(&mut self.writer, "xdr:xfrm");
 
         // Write the a:off element.
         self.write_chart_a_off();
@@ -421,31 +434,31 @@ impl Drawing {
         // Write the a:ext element.
         self.write_chart_a_ext();
 
-        self.writer.xml_end_tag("xdr:xfrm");
+        xml_end_tag(&mut self.writer, "xdr:xfrm");
     }
 
     // Write the <a:off> element.
     fn write_chart_a_off(&mut self) {
         let attributes = [("x", "0"), ("y", "0")];
 
-        self.writer.xml_empty_tag("a:off", &attributes);
+        xml_empty_tag(&mut self.writer, "a:off", &attributes);
     }
 
     // Write the <a:ext> element.
     fn write_chart_a_ext(&mut self) {
         let attributes = [("cx", "0"), ("cy", "0")];
 
-        self.writer.xml_empty_tag("a:ext", &attributes);
+        xml_empty_tag(&mut self.writer, "a:ext", &attributes);
     }
 
     // Write the <a:graphic> element.
     fn write_a_graphic(&mut self, index: u32) {
-        self.writer.xml_start_tag_only("a:graphic");
+        xml_start_tag_only(&mut self.writer, "a:graphic");
 
         // Write the a:graphicData element.
         self.write_a_graphic_data(index);
 
-        self.writer.xml_end_tag("a:graphic");
+        xml_end_tag(&mut self.writer, "a:graphic");
     }
 
     // Write the <a:graphicData> element.
@@ -455,12 +468,12 @@ impl Drawing {
             "http://schemas.openxmlformats.org/drawingml/2006/chart",
         )];
 
-        self.writer.xml_start_tag("a:graphicData", &attributes);
+        xml_start_tag(&mut self.writer, "a:graphicData", &attributes);
 
         // Write the c:chart element.
         self.write_chart(index);
 
-        self.writer.xml_end_tag("a:graphicData");
+        xml_end_tag(&mut self.writer, "a:graphicData");
     }
 
     // Write the <c:chart> element.
@@ -477,7 +490,7 @@ impl Drawing {
             ("r:id", format!("rId{index}")),
         ];
 
-        self.writer.xml_empty_tag("c:chart", &attributes);
+        xml_empty_tag(&mut self.writer, "c:chart", &attributes);
     }
 
     // Write the <xdr:sp> element.
@@ -493,7 +506,7 @@ impl Drawing {
             }
         }
 
-        self.writer.xml_start_tag("xdr:sp", &attributes);
+        xml_start_tag(&mut self.writer, "xdr:sp", &attributes);
 
         // Write the xdr:nvSpPr element.
         self.write_nv_sp_pr(index, drawing_info);
@@ -507,12 +520,12 @@ impl Drawing {
         // Write the xdr:txBody element.
         self.write_tx_body(drawing_info, shape);
 
-        self.writer.xml_end_tag("xdr:sp");
+        xml_end_tag(&mut self.writer, "xdr:sp");
     }
 
     // Write the <xdr:nvSpPr> element.
     fn write_nv_sp_pr(&mut self, index: u32, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag_only("xdr:nvSpPr");
+        xml_start_tag_only(&mut self.writer, "xdr:nvSpPr");
 
         // Write the xdr:cNvPr element.
         self.write_c_nv_pr(index, drawing_info, "TextBox");
@@ -520,20 +533,20 @@ impl Drawing {
         // Write the xdr:cNvSpPr element.
         self.write_c_nv_sp_pr();
 
-        self.writer.xml_end_tag("xdr:nvSpPr");
+        xml_end_tag(&mut self.writer, "xdr:nvSpPr");
     }
 
     // Write the <xdr:cNvSpPr> element.
     fn write_c_nv_sp_pr(&mut self) {
         let attributes = [("txBox", "1")];
 
-        self.writer.xml_empty_tag("xdr:cNvSpPr", &attributes);
+        xml_empty_tag(&mut self.writer, "xdr:cNvSpPr", &attributes);
     }
 
     // Write the formatting elements for shapes.
     fn write_shape_formatting(&mut self, format: &ShapeFormat) {
         if format.no_fill {
-            self.writer.xml_empty_tag_only("a:noFill");
+            xml_empty_tag_only(&mut self.writer, "a:noFill");
         } else if let Some(solid_fill) = &format.solid_fill {
             // Write the a:solidFill element.
             self.write_a_solid_fill(solid_fill.color, solid_fill.transparency);
@@ -574,7 +587,7 @@ impl Drawing {
         attributes.push(("w", width.to_string()));
         attributes.push(("cmpd", "sng".to_string()));
 
-        self.writer.xml_start_tag("a:ln", &attributes);
+        xml_start_tag(&mut self.writer, "a:ln", &attributes);
 
         if line.color != Color::Default || line.dash_type != ShapeLineDashType::Solid || line.hidden
         {
@@ -600,78 +613,78 @@ impl Drawing {
             self.write_line_solid_fill();
         }
 
-        self.writer.xml_end_tag("a:ln");
+        xml_end_tag(&mut self.writer, "a:ln");
     }
 
     // Write the <a:ln> element.
     fn write_a_ln_none(&mut self) {
         let attributes = [("w", "9525"), ("cmpd", "sng")];
 
-        self.writer.xml_start_tag("a:ln", &attributes);
+        xml_start_tag(&mut self.writer, "a:ln", &attributes);
 
         // Write the a:noFill element.
         self.write_a_no_fill();
 
-        self.writer.xml_end_tag("a:ln");
+        xml_end_tag(&mut self.writer, "a:ln");
     }
 
     // Write the <a:solidFill> element for the ln element.
     fn write_line_solid_fill(&mut self) {
-        self.writer.xml_start_tag_only("a:solidFill");
+        xml_start_tag_only(&mut self.writer, "a:solidFill");
 
         // Write the a:schemeClr element.
         self.write_default_scheme_clr("lt1", true);
 
-        self.writer.xml_end_tag("a:solidFill");
+        xml_end_tag(&mut self.writer, "a:solidFill");
     }
 
     // Write the default <a:solidFill> element.
     fn write_default_solid_fill(&mut self) {
-        self.writer.xml_start_tag_only("a:solidFill");
+        xml_start_tag_only(&mut self.writer, "a:solidFill");
 
         self.write_default_scheme_clr("lt1", false);
 
-        self.writer.xml_end_tag("a:solidFill");
+        xml_end_tag(&mut self.writer, "a:solidFill");
     }
 
     // Write the <a:solidFill> element.
     fn write_a_solid_fill(&mut self, color: Color, transparency: u8) {
-        self.writer.xml_start_tag_only("a:solidFill");
+        xml_start_tag_only(&mut self.writer, "a:solidFill");
 
         // Write the color element.
         self.write_color(color, transparency);
 
-        self.writer.xml_end_tag("a:solidFill");
+        xml_end_tag(&mut self.writer, "a:solidFill");
     }
 
     // Write the <a:pattFill> element.
     fn write_a_patt_fill(&mut self, fill: &ShapePatternFill) {
         let attributes = [("prst", fill.pattern.to_string())];
 
-        self.writer.xml_start_tag("a:pattFill", &attributes);
+        xml_start_tag(&mut self.writer, "a:pattFill", &attributes);
 
         if fill.foreground_color != Color::Default {
             // Write the <a:fgClr> element.
-            self.writer.xml_start_tag_only("a:fgClr");
+            xml_start_tag_only(&mut self.writer, "a:fgClr");
             self.write_color(fill.foreground_color, 0);
-            self.writer.xml_end_tag("a:fgClr");
+            xml_end_tag(&mut self.writer, "a:fgClr");
         }
 
         if fill.background_color != Color::Default {
             // Write the <a:bgClr> element.
-            self.writer.xml_start_tag_only("a:bgClr");
+            xml_start_tag_only(&mut self.writer, "a:bgClr");
             self.write_color(fill.background_color, 0);
-            self.writer.xml_end_tag("a:bgClr");
+            xml_end_tag(&mut self.writer, "a:bgClr");
         } else if fill.background_color == Color::Default && fill.foreground_color != Color::Default
         {
             // If there is a foreground color but no background color then we
             // need to write a default background color.
-            self.writer.xml_start_tag_only("a:bgClr");
+            xml_start_tag_only(&mut self.writer, "a:bgClr");
             self.write_color(Color::White, 0);
-            self.writer.xml_end_tag("a:bgClr");
+            xml_end_tag(&mut self.writer, "a:bgClr");
         }
 
-        self.writer.xml_end_tag("a:pattFill");
+        xml_end_tag(&mut self.writer, "a:pattFill");
     }
 
     // Write the <a:gradFill> element.
@@ -683,15 +696,15 @@ impl Drawing {
             attributes.push(("rotWithShape", "1"));
         }
 
-        self.writer.xml_start_tag("a:gradFill", &attributes);
-        self.writer.xml_start_tag_only("a:gsLst");
+        xml_start_tag(&mut self.writer, "a:gradFill", &attributes);
+        xml_start_tag_only(&mut self.writer, "a:gsLst");
 
         for gradient_stop in &fill.gradient_stops {
             // Write the a:gs element.
             self.write_gradient_stop(gradient_stop);
         }
 
-        self.writer.xml_end_tag("a:gsLst");
+        xml_end_tag(&mut self.writer, "a:gsLst");
 
         if fill.gradient_type == ShapeGradientFillType::Linear {
             // Write the a:lin element.
@@ -701,7 +714,7 @@ impl Drawing {
             self.write_gradient_path(fill.gradient_type);
         }
 
-        self.writer.xml_end_tag("a:gradFill");
+        xml_end_tag(&mut self.writer, "a:gradFill");
     }
 
     // Write the <a:gs> element.
@@ -709,10 +722,10 @@ impl Drawing {
         let position = 1000 * u32::from(gradient_stop.position);
         let attributes = [("pos", position.to_string())];
 
-        self.writer.xml_start_tag("a:gs", &attributes);
+        xml_start_tag(&mut self.writer, "a:gs", &attributes);
         self.write_color(gradient_stop.color, 0);
 
-        self.writer.xml_end_tag("a:gs");
+        xml_end_tag(&mut self.writer, "a:gs");
     }
 
     // Write the <a:lin> element.
@@ -720,7 +733,7 @@ impl Drawing {
         let angle = 60_000 * u32::from(angle);
         let attributes = [("ang", angle.to_string()), ("scaled", "0".to_string())];
 
-        self.writer.xml_empty_tag("a:lin", &attributes);
+        xml_empty_tag(&mut self.writer, "a:lin", &attributes);
     }
 
     // Write the <a:path> element.
@@ -734,12 +747,12 @@ impl Drawing {
             ShapeGradientFillType::Linear => {}
         }
 
-        self.writer.xml_start_tag("a:path", &attributes);
+        xml_start_tag(&mut self.writer, "a:path", &attributes);
 
         // Write the a:fillToRect element.
         self.write_a_fill_to_rect(gradient_type);
 
-        self.writer.xml_end_tag("a:path");
+        xml_end_tag(&mut self.writer, "a:path");
 
         // Write the a:tileRect element.
         self.write_a_tile_rect(gradient_type);
@@ -762,7 +775,7 @@ impl Drawing {
             }
         }
 
-        self.writer.xml_empty_tag("a:fillToRect", &attributes);
+        xml_empty_tag(&mut self.writer, "a:fillToRect", &attributes);
     }
 
     // Write the <a:tileRect> element.
@@ -777,7 +790,7 @@ impl Drawing {
             _ => {}
         }
 
-        self.writer.xml_empty_tag("a:tileRect", &attributes);
+        xml_empty_tag(&mut self.writer, "a:tileRect", &attributes);
     }
 
     // Write the <a:srgbClr> element.
@@ -793,20 +806,20 @@ impl Drawing {
             Color::Automatic => {
                 let attributes = [("val", "window"), ("lastClr", "FFFFFF")];
 
-                self.writer.xml_empty_tag("a:sysClr", &attributes);
+                xml_empty_tag(&mut self.writer, "a:sysClr", &attributes);
             }
             _ => {
                 let attributes = [("val", color.rgb_hex_value())];
 
                 if transparency > 0 {
-                    self.writer.xml_start_tag("a:srgbClr", &attributes);
+                    xml_start_tag(&mut self.writer, "a:srgbClr", &attributes);
 
                     // Write the a:alpha element.
                     self.write_a_alpha(transparency);
 
-                    self.writer.xml_end_tag("a:srgbClr");
+                    xml_end_tag(&mut self.writer, "a:srgbClr");
                 } else {
-                    self.writer.xml_empty_tag("a:srgbClr", &attributes);
+                    xml_empty_tag(&mut self.writer, "a:srgbClr", &attributes);
                 }
             }
         }
@@ -817,7 +830,7 @@ impl Drawing {
         let attributes = [("val", scheme)];
 
         if lum_mod > 0 || lum_off > 0 || transparency > 0 {
-            self.writer.xml_start_tag("a:schemeClr", &attributes);
+            xml_start_tag(&mut self.writer, "a:schemeClr", &attributes);
 
             if lum_mod > 0 {
                 // Write the a:lumMod element.
@@ -834,9 +847,9 @@ impl Drawing {
                 self.write_a_alpha(transparency);
             }
 
-            self.writer.xml_end_tag("a:schemeClr");
+            xml_end_tag(&mut self.writer, "a:schemeClr");
         } else {
-            self.writer.xml_empty_tag("a:schemeClr", &attributes);
+            xml_empty_tag(&mut self.writer, "a:schemeClr", &attributes);
         }
     }
 
@@ -844,14 +857,14 @@ impl Drawing {
     fn write_a_lum_mod(&mut self, lum_mod: u32) {
         let attributes = [("val", lum_mod.to_string())];
 
-        self.writer.xml_empty_tag("a:lumMod", &attributes);
+        xml_empty_tag(&mut self.writer, "a:lumMod", &attributes);
     }
 
     // Write the <a:lumOff> element.
     fn write_a_lum_off(&mut self, lum_off: u32) {
         let attributes = [("val", lum_off.to_string())];
 
-        self.writer.xml_empty_tag("a:lumOff", &attributes);
+        xml_empty_tag(&mut self.writer, "a:lumOff", &attributes);
     }
 
     // Write the <a:alpha> element.
@@ -860,19 +873,19 @@ impl Drawing {
 
         let attributes = [("val", transparency.to_string())];
 
-        self.writer.xml_empty_tag("a:alpha", &attributes);
+        xml_empty_tag(&mut self.writer, "a:alpha", &attributes);
     }
 
     // Write the <a:noFill> element.
     fn write_a_no_fill(&mut self) {
-        self.writer.xml_empty_tag_only("a:noFill");
+        xml_empty_tag_only(&mut self.writer, "a:noFill");
     }
 
     // Write the <a:prstDash> element.
     fn write_a_prst_dash(&mut self, line: &ShapeLine) {
         let attributes = [("val", line.dash_type.to_string())];
 
-        self.writer.xml_empty_tag("a:prstDash", &attributes);
+        xml_empty_tag(&mut self.writer, "a:prstDash", &attributes);
     }
 
     // Write the default <a:schemeClr> element for textboxes.
@@ -882,11 +895,11 @@ impl Drawing {
         attributes.push(("val", tone.to_string()));
 
         if is_line {
-            self.writer.xml_start_tag("a:schemeClr", &attributes);
+            xml_start_tag(&mut self.writer, "a:schemeClr", &attributes);
             self.write_a_shade();
-            self.writer.xml_end_tag("a:schemeClr");
+            xml_end_tag(&mut self.writer, "a:schemeClr");
         } else {
-            self.writer.xml_empty_tag("a:schemeClr", &attributes);
+            xml_empty_tag(&mut self.writer, "a:schemeClr", &attributes);
         }
     }
 
@@ -894,12 +907,12 @@ impl Drawing {
     fn write_a_shade(&mut self) {
         let attributes = [("val", "50000")];
 
-        self.writer.xml_empty_tag("a:shade", &attributes);
+        xml_empty_tag(&mut self.writer, "a:shade", &attributes);
     }
 
     // Write the <xdr:style> element.
     fn write_style(&mut self) {
-        self.writer.xml_start_tag_only("xdr:style");
+        xml_start_tag_only(&mut self.writer, "xdr:style");
 
         // Write the a:lnRef element.
         self.write_a_ln_ref();
@@ -913,67 +926,67 @@ impl Drawing {
         // Write the a:fontRef element.
         self.write_a_font_ref();
 
-        self.writer.xml_end_tag("xdr:style");
+        xml_end_tag(&mut self.writer, "xdr:style");
     }
 
     // Write the <a:scrgbClr> element.
     fn write_a_scrgb_clr(&mut self) {
         let attributes = [("r", "0"), ("g", "0"), ("b", "0")];
 
-        self.writer.xml_empty_tag("a:scrgbClr", &attributes);
+        xml_empty_tag(&mut self.writer, "a:scrgbClr", &attributes);
     }
 
     // Write the <a:lnRef> element.
     fn write_a_ln_ref(&mut self) {
         let attributes = [("idx", "0")];
 
-        self.writer.xml_start_tag("a:lnRef", &attributes);
+        xml_start_tag(&mut self.writer, "a:lnRef", &attributes);
 
         // Write the a:scrgbClr element.
         self.write_a_scrgb_clr();
 
-        self.writer.xml_end_tag("a:lnRef");
+        xml_end_tag(&mut self.writer, "a:lnRef");
     }
 
     // Write the <a:fillRef> element.
     fn write_a_fill_ref(&mut self) {
         let attributes = [("idx", "0")];
 
-        self.writer.xml_start_tag("a:fillRef", &attributes);
+        xml_start_tag(&mut self.writer, "a:fillRef", &attributes);
 
         // Write the a:scrgbClr element.
         self.write_a_scrgb_clr();
 
-        self.writer.xml_end_tag("a:fillRef");
+        xml_end_tag(&mut self.writer, "a:fillRef");
     }
 
     // Write the <a:effectRef> element.
     fn write_a_effect_ref(&mut self) {
         let attributes = [("idx", "0")];
 
-        self.writer.xml_start_tag("a:effectRef", &attributes);
+        xml_start_tag(&mut self.writer, "a:effectRef", &attributes);
 
         // Write the a:scrgbClr element.
         self.write_a_scrgb_clr();
 
-        self.writer.xml_end_tag("a:effectRef");
+        xml_end_tag(&mut self.writer, "a:effectRef");
     }
 
     // Write the <a:fontRef> element.
     fn write_a_font_ref(&mut self) {
         let attributes = [("idx", "minor")];
 
-        self.writer.xml_start_tag("a:fontRef", &attributes);
+        xml_start_tag(&mut self.writer, "a:fontRef", &attributes);
 
         // Write the a:schemeClr element.
         self.write_default_scheme_clr("dk1", false);
 
-        self.writer.xml_end_tag("a:fontRef");
+        xml_end_tag(&mut self.writer, "a:fontRef");
     }
 
     // Write the <xdr:txBody> element.
     fn write_tx_body(&mut self, drawing_info: &DrawingInfo, shape: &Shape) {
-        self.writer.xml_start_tag_only("xdr:txBody");
+        xml_start_tag_only(&mut self.writer, "xdr:txBody");
 
         // Write the a:bodyPr element.
         self.write_a_body_pr(shape);
@@ -993,7 +1006,7 @@ impl Drawing {
             self.write_a_p(text, shape);
         }
 
-        self.writer.xml_end_tag("xdr:txBody");
+        xml_end_tag(&mut self.writer, "xdr:txBody");
     }
 
     // Write the <a:bodyPr> element.
@@ -1039,12 +1052,12 @@ impl Drawing {
             }
         }
 
-        self.writer.xml_empty_tag("a:bodyPr", &attributes);
+        xml_empty_tag(&mut self.writer, "a:bodyPr", &attributes);
     }
 
     // Write the <a:lstStyle> element.
     fn write_a_lst_style(&mut self) {
-        self.writer.xml_empty_tag_only("a:lstStyle");
+        xml_empty_tag_only(&mut self.writer, "a:lstStyle");
     }
 
     // Write the <a:p> element.
@@ -1052,7 +1065,7 @@ impl Drawing {
         let font = &shape.font;
         let has_text_link = shape.text_link.is_some();
 
-        self.writer.xml_start_tag_only("a:p");
+        xml_start_tag_only(&mut self.writer, "a:p");
         self.write_text_alignment(shape);
 
         if has_text_link {
@@ -1060,26 +1073,26 @@ impl Drawing {
 
             if text.is_empty() {
                 self.write_font_elements("a:rPr", font);
-                self.writer.xml_data_element_only("a:t", " ");
-                self.writer.xml_end_tag("a:fld");
+                xml_data_element_only(&mut self.writer, "a:t", " ");
+                xml_end_tag(&mut self.writer, "a:fld");
                 self.write_font_elements("a:endParaRPr", font);
             } else {
                 self.write_font_elements("a:rPr", font);
-                self.writer.xml_empty_tag_only("a:pPr");
-                self.writer.xml_data_element_only("a:t", text);
-                self.writer.xml_end_tag("a:fld");
+                xml_empty_tag_only(&mut self.writer, "a:pPr");
+                xml_data_element_only(&mut self.writer, "a:t", text);
+                xml_end_tag(&mut self.writer, "a:fld");
                 self.write_font_elements("a:endParaRPr", font);
             }
         } else if text.is_empty() {
             self.write_font_elements("a:endParaRPr", font);
         } else {
-            self.writer.xml_start_tag_only("a:r");
+            xml_start_tag_only(&mut self.writer, "a:r");
             self.write_font_elements("a:rPr", font);
-            self.writer.xml_data_element_only("a:t", text);
-            self.writer.xml_end_tag("a:r");
+            xml_data_element_only(&mut self.writer, "a:t", text);
+            xml_end_tag(&mut self.writer, "a:r");
         }
 
-        self.writer.xml_end_tag("a:p");
+        xml_end_tag(&mut self.writer, "a:p");
     }
 
     // Write font sub-elements shared between <a:defRPr> and <a:rPr> elements.
@@ -1106,7 +1119,7 @@ impl Drawing {
         }
 
         if font.is_latin() || !font.color.is_auto_or_default() {
-            self.writer.xml_start_tag(tag, &attributes);
+            xml_start_tag(&mut self.writer, tag, &attributes);
 
             if !font.color.is_auto_or_default() {
                 self.write_a_solid_fill(font.color, 0);
@@ -1117,9 +1130,9 @@ impl Drawing {
                 self.write_a_latin("a:cs", font);
             }
 
-            self.writer.xml_end_tag(tag);
+            xml_end_tag(&mut self.writer, tag);
         } else {
-            self.writer.xml_empty_tag(tag, &attributes);
+            xml_empty_tag(&mut self.writer, tag, &attributes);
         }
     }
 
@@ -1139,7 +1152,7 @@ impl Drawing {
             attributes.push(("charset", font.character_set.to_string()));
         }
 
-        self.writer.xml_empty_tag(tag, &attributes);
+        xml_empty_tag(&mut self.writer, tag, &attributes);
     }
 
     // Write the <a:fld> element.
@@ -1149,7 +1162,7 @@ impl Drawing {
             ("type", "TxLink"),
         ];
 
-        self.writer.xml_start_tag("a:fld", &attributes);
+        xml_start_tag(&mut self.writer, "a:fld", &attributes);
     }
 
     // Write the <a:rPr> element for horizontal text alignment.
@@ -1157,20 +1170,20 @@ impl Drawing {
         match shape.text_options.horizontal_alignment {
             ShapeTextHorizontalAlignment::Default => {}
             ShapeTextHorizontalAlignment::Left => {
-                self.writer.xml_empty_tag("a:pPr", &[("algn", "l")]);
+                xml_empty_tag(&mut self.writer, "a:pPr", &[("algn", "l")]);
             }
             ShapeTextHorizontalAlignment::Center => {
-                self.writer.xml_empty_tag("a:pPr", &[("algn", "ctr")]);
+                xml_empty_tag(&mut self.writer, "a:pPr", &[("algn", "ctr")]);
             }
             ShapeTextHorizontalAlignment::Right => {
-                self.writer.xml_empty_tag("a:pPr", &[("algn", "r")]);
+                xml_empty_tag(&mut self.writer, "a:pPr", &[("algn", "r")]);
             }
         }
     }
 
     // Write the <xdr:absoluteAnchor> element.
     fn write_absolute_anchor(&mut self, drawing_info: &DrawingInfo) {
-        self.writer.xml_start_tag_only("xdr:absoluteAnchor");
+        xml_start_tag_only(&mut self.writer, "xdr:absoluteAnchor");
 
         // Write the xdr:pos element.
         self.write_pos(drawing_info);
@@ -1180,8 +1193,8 @@ impl Drawing {
 
         self.write_graphic_frame(1, drawing_info);
 
-        self.writer.xml_empty_tag_only("xdr:clientData");
-        self.writer.xml_end_tag("xdr:absoluteAnchor");
+        xml_empty_tag_only(&mut self.writer, "xdr:clientData");
+        xml_end_tag(&mut self.writer, "xdr:absoluteAnchor");
     }
 
     // Write the <xdr:pos> element.
@@ -1196,7 +1209,7 @@ impl Drawing {
             attributes.push(("y", "0"));
         }
 
-        self.writer.xml_empty_tag("xdr:pos", &attributes);
+        xml_empty_tag(&mut self.writer, "xdr:pos", &attributes);
     }
 
     // Write the <xdr:ext> element.
@@ -1211,7 +1224,7 @@ impl Drawing {
             attributes.push(("cy", "6078325"));
         }
 
-        self.writer.xml_empty_tag("xdr:ext", &attributes);
+        xml_empty_tag(&mut self.writer, "xdr:ext", &attributes);
     }
 }
 

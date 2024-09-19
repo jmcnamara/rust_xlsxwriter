@@ -1245,6 +1245,7 @@ use std::borrow::Cow;
 use std::cmp;
 use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::io::Cursor;
 use std::io::Write;
 use std::mem;
 use std::sync::Arc;
@@ -1268,13 +1269,16 @@ use crate::formula::Formula;
 use crate::shared_strings_table::SharedStringsTable;
 use crate::styles::Styles;
 use crate::vml::VmlInfo;
-use crate::xmlwriter::{XMLWriter, XML_WRITE_ERROR};
+use crate::xmlwriter::{
+    xml_data_element, xml_data_element_only, xml_declaration, xml_empty_tag, xml_empty_tag_only,
+    xml_end_tag, xml_raw_string, xml_start_tag, xml_start_tag_only, XML_WRITE_ERROR,
+};
 use crate::{
-    utility, Button, Chart, ChartEmptyCells, ChartRangeCacheData, ChartRangeCacheDataType, Color,
-    ConditionalFormat, DataValidation, DataValidationErrorStyle, DataValidationRuleInternal,
-    DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria, FilterData, FilterDataType,
-    HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note, ObjectMovement,
-    ProtectionOptions, Shape, Sparkline, SparklineType, Table, TableFunction, Url,
+    utility, xmlwriter, Button, Chart, ChartEmptyCells, ChartRangeCacheData,
+    ChartRangeCacheDataType, Color, ConditionalFormat, DataValidation, DataValidationErrorStyle,
+    DataValidationRuleInternal, DataValidationType, ExcelDateTime, FilterCondition, FilterCriteria,
+    FilterData, FilterDataType, HeaderImagePosition, HyperlinkType, Image, IntoExcelDateTime, Note,
+    ObjectMovement, ProtectionOptions, Shape, Sparkline, SparklineType, Table, TableFunction, Url,
 };
 
 /// Integer type to represent a zero indexed row number. Excel's limit for rows
@@ -1366,7 +1370,7 @@ const COLUMN_LETTERS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 /// }
 /// ```
 pub struct Worksheet {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) name: String,
     pub(crate) sheet_index: usize,
     pub(crate) active: bool,
@@ -1568,7 +1572,7 @@ impl Worksheet {
     ///
     #[allow(clippy::too_many_lines)]
     pub fn new() -> Worksheet {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         // Initialize the min and max dimensions with their opposite value.
         let dimensions = CellRange::default();
@@ -13666,19 +13670,21 @@ impl Worksheet {
 
             // First segment doesn't require a font run for the default format.
             if format.is_default() && first_segment {
-                styler.writer.xml_start_tag_only("r");
-                styler.writer.xml_data_element("t", string, &attributes);
-                styler.writer.xml_end_tag("r");
+                xml_start_tag_only(&mut styler.writer, "r");
+                xml_data_element(&mut styler.writer, "t", string, &attributes);
+                xml_end_tag(&mut styler.writer, "r");
             } else {
-                styler.writer.xml_start_tag_only("r");
+                xml_start_tag_only(&mut styler.writer, "r");
                 styler.write_font(&format.font, false);
-                styler.writer.xml_data_element("t", string, &attributes);
-                styler.writer.xml_end_tag("r");
+                xml_data_element(&mut styler.writer, "t", string, &attributes);
+                xml_end_tag(&mut styler.writer, "r");
             }
             first_segment = false;
         }
 
-        Ok((styler.writer.read_to_string(), raw_string))
+        let got = xmlwriter::cursor_to_string(&styler.writer);
+
+        Ok((got, raw_string))
     }
 
     // Insert a cell value into the worksheet data table structure.
@@ -14813,15 +14819,15 @@ impl Worksheet {
 
     // Reset an worksheet global data or structures between saves.
     pub(crate) fn reset(&mut self) {
-        self.writer.reset();
-        self.drawing.writer.reset();
+        xmlwriter::reset(&mut self.writer);
+        xmlwriter::reset(&mut self.drawing.writer);
 
         for chart in self.charts.values_mut() {
-            chart.writer.reset();
+            xmlwriter::reset(&mut chart.writer);
         }
 
         for table in &mut self.tables {
-            table.writer.reset();
+            xmlwriter::reset(&mut table.writer);
         }
 
         self.rel_count = 0;
@@ -15009,7 +15015,7 @@ impl Worksheet {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         if self.is_chartsheet {
             return self.assemble_chartsheet();
@@ -15125,7 +15131,7 @@ impl Worksheet {
         }
 
         // Close the worksheet tag.
-        self.writer.xml_end_tag("worksheet");
+        xml_end_tag(&mut self.writer, "worksheet");
     }
 
     // Assemble and write the XML file for chartsheets.
@@ -15178,7 +15184,7 @@ impl Worksheet {
         }
 
         // Close the worksheet tag.
-        self.writer.xml_end_tag("chartsheet");
+        xml_end_tag(&mut self.writer, "chartsheet");
     }
 
     // Write the <worksheet> element.
@@ -15206,7 +15212,7 @@ impl Worksheet {
             attributes.push(("mc:Ignorable", "x14ac"));
         }
 
-        self.writer.xml_start_tag("worksheet", &attributes);
+        xml_start_tag(&mut self.writer, "worksheet", &attributes);
     }
 
     // Write the <chartsheet> element.
@@ -15222,7 +15228,7 @@ impl Worksheet {
             ),
         ];
 
-        self.writer.xml_start_tag("chartsheet", &attributes);
+        xml_start_tag(&mut self.writer, "chartsheet", &attributes);
     }
 
     // Write the <sheetPr> element.
@@ -15247,7 +15253,7 @@ impl Worksheet {
         if self.fit_to_page
             || (self.tab_color != Color::Default && self.tab_color != Color::Automatic)
         {
-            self.writer.xml_start_tag("sheetPr", &attributes);
+            xml_start_tag(&mut self.writer, "sheetPr", &attributes);
 
             // Write the pageSetUpPr element.
             self.write_page_set_up_pr();
@@ -15255,9 +15261,9 @@ impl Worksheet {
             // Write the tabColor element.
             self.write_tab_color();
 
-            self.writer.xml_end_tag("sheetPr");
+            xml_end_tag(&mut self.writer, "sheetPr");
         } else {
-            self.writer.xml_empty_tag("sheetPr", &attributes);
+            xml_empty_tag(&mut self.writer, "sheetPr", &attributes);
         }
     }
 
@@ -15269,7 +15275,7 @@ impl Worksheet {
 
         let attributes = [("fitToPage", "1")];
 
-        self.writer.xml_empty_tag("pageSetUpPr", &attributes);
+        xml_empty_tag(&mut self.writer, "pageSetUpPr", &attributes);
     }
 
     // Write the <tabColor> element.
@@ -15280,7 +15286,7 @@ impl Worksheet {
 
         let attributes = self.tab_color.attributes();
 
-        self.writer.xml_empty_tag("tabColor", &attributes);
+        xml_empty_tag(&mut self.writer, "tabColor", &attributes);
     }
 
     // Write the <dimension> element.
@@ -15312,17 +15318,17 @@ impl Worksheet {
 
         attributes.push(("ref", range));
 
-        self.writer.xml_empty_tag("dimension", &attributes);
+        xml_empty_tag(&mut self.writer, "dimension", &attributes);
     }
 
     // Write the <sheetViews> element.
     fn write_sheet_views(&mut self) {
-        self.writer.xml_start_tag_only("sheetViews");
+        xml_start_tag_only(&mut self.writer, "sheetViews");
 
         // Write the sheetView element.
         self.write_sheet_view();
 
-        self.writer.xml_end_tag("sheetViews");
+        xml_end_tag(&mut self.writer, "sheetViews");
     }
 
     // Write the <sheetView> element.
@@ -15376,12 +15382,12 @@ impl Worksheet {
         attributes.push(("workbookViewId", "0".to_string()));
 
         if self.panes.is_empty() && self.selected_range.0.is_empty() {
-            self.writer.xml_empty_tag("sheetView", &attributes);
+            xml_empty_tag(&mut self.writer, "sheetView", &attributes);
         } else {
-            self.writer.xml_start_tag("sheetView", &attributes);
+            xml_start_tag(&mut self.writer, "sheetView", &attributes);
             self.write_panes();
             self.write_selections();
-            self.writer.xml_end_tag("sheetView");
+            xml_end_tag(&mut self.writer, "sheetView");
         }
     }
 
@@ -15447,7 +15453,7 @@ impl Worksheet {
         attributes.push(("activePane", active_pane.to_string()));
         attributes.push(("state", "frozen".to_string()));
 
-        self.writer.xml_empty_tag("pane", &attributes);
+        xml_empty_tag(&mut self.writer, "pane", &attributes);
     }
 
     // Write the <selection> element.
@@ -15466,7 +15472,7 @@ impl Worksheet {
             attributes.push(("sqref", range.to_string()));
         }
 
-        self.writer.xml_empty_tag("selection", &attributes);
+        xml_empty_tag(&mut self.writer, "selection", &attributes);
     }
 
     // Write the <sheetFormatPr> element.
@@ -15485,17 +15491,17 @@ impl Worksheet {
             attributes.push(("x14ac:dyDescent", "0.25".to_string()));
         }
 
-        self.writer.xml_empty_tag("sheetFormatPr", &attributes);
+        xml_empty_tag(&mut self.writer, "sheetFormatPr", &attributes);
     }
 
     // Write the <sheetData> element.
     fn write_sheet_data(&mut self) {
         if self.data_table.is_empty() && self.notes.is_empty() && self.changed_rows.is_empty() {
-            self.writer.xml_empty_tag_only("sheetData");
+            xml_empty_tag_only(&mut self.writer, "sheetData");
         } else {
-            self.writer.xml_start_tag_only("sheetData");
+            xml_start_tag_only(&mut self.writer, "sheetData");
             self.write_data_table();
-            self.writer.xml_end_tag("sheetData");
+            xml_end_tag(&mut self.writer, "sheetData");
         }
     }
 
@@ -15503,26 +15509,26 @@ impl Worksheet {
     fn write_merge_cells(&mut self) {
         let attributes = [("count", self.merged_ranges.len().to_string())];
 
-        self.writer.xml_start_tag("mergeCells", &attributes);
+        xml_start_tag(&mut self.writer, "mergeCells", &attributes);
 
         for merge_range in &self.merged_ranges.clone() {
             // Write the mergeCell element.
             self.write_merge_cell(merge_range);
         }
 
-        self.writer.xml_end_tag("mergeCells");
+        xml_end_tag(&mut self.writer, "mergeCells");
     }
 
     // Write the <mergeCell> element.
     fn write_merge_cell(&mut self, merge_range: &CellRange) {
         let attributes = [("ref", merge_range.to_range_string())];
 
-        self.writer.xml_empty_tag("mergeCell", &attributes);
+        xml_empty_tag(&mut self.writer, "mergeCell", &attributes);
     }
 
     // Write the <hyperlinks> element.
     fn write_hyperlinks(&mut self) {
-        self.writer.xml_start_tag_only("hyperlinks");
+        xml_start_tag_only(&mut self.writer, "hyperlinks");
 
         let mut rel_id = 1u32;
         for (cell, hyperlink) in &mut self.hyperlinks.clone() {
@@ -15532,7 +15538,7 @@ impl Worksheet {
 
         self.rel_count = rel_id - 1;
 
-        self.writer.xml_end_tag("hyperlinks");
+        xml_end_tag(&mut self.writer, "hyperlinks");
     }
 
     // Write the <conditionalFormatting> element.
@@ -15548,8 +15554,7 @@ impl Worksheet {
             // Don't write classic CFs if range only contains new style x14 CFs.
             if !has_x14_only {
                 let attributes = [("sqref", cell_range.as_str())];
-                self.writer
-                    .xml_start_tag("conditionalFormatting", &attributes);
+                xml_start_tag(&mut self.writer, "conditionalFormatting", &attributes);
             }
 
             for conditional_format in conditionals_for_range {
@@ -15572,14 +15577,14 @@ impl Worksheet {
 
                 if !conditional_format.has_x14_only() {
                     let rule = conditional_format.rule(dxf_index, priority, cell_range, &guid);
-                    self.writer.xml_raw_string(&rule);
+                    xml_raw_string(&mut self.writer, &rule);
                 }
 
                 priority += 1;
             }
 
             if !has_x14_only {
-                self.writer.xml_end_tag("conditionalFormatting");
+                xml_end_tag(&mut self.writer, "conditionalFormatting");
             }
         }
     }
@@ -15587,7 +15592,7 @@ impl Worksheet {
     // Write the <x14:conditionalFormattings> element. This is used for new
     // style conditional formats added after the original spec.
     fn write_conditional_formattings(&mut self) {
-        self.writer.xml_start_tag_only("x14:conditionalFormattings");
+        xml_start_tag_only(&mut self.writer, "x14:conditionalFormattings");
 
         let mut guid_index = 1;
         let mut priority = 1;
@@ -15606,8 +15611,7 @@ impl Worksheet {
                 "http://schemas.microsoft.com/office/excel/2006/main",
             )];
 
-            self.writer
-                .xml_start_tag("x14:conditionalFormatting", &attributes);
+            xml_start_tag(&mut self.writer, "x14:conditionalFormatting", &attributes);
 
             for conditional_format in conditionals_for_range {
                 if conditional_format.has_x14_extensions() {
@@ -15620,30 +15624,30 @@ impl Worksheet {
                     guid_index += 1;
 
                     let rule = conditional_format.x14_rule(priority, &guid);
-                    self.writer.xml_raw_string(&rule);
+                    xml_raw_string(&mut self.writer, &rule);
                 }
                 priority += 1;
             }
 
-            self.writer.xml_data_element_only("xm:sqref", cell_range);
-            self.writer.xml_end_tag("x14:conditionalFormatting");
+            xml_data_element_only(&mut self.writer, "xm:sqref", cell_range);
+            xml_end_tag(&mut self.writer, "x14:conditionalFormatting");
         }
 
-        self.writer.xml_end_tag("x14:conditionalFormattings");
+        xml_end_tag(&mut self.writer, "x14:conditionalFormattings");
     }
 
     // Write the <dataValidations> element.
     fn write_data_validations(&mut self) {
         let attributes = [("count", self.data_validations.len().to_string())];
 
-        self.writer.xml_start_tag("dataValidations", &attributes);
+        xml_start_tag(&mut self.writer, "dataValidations", &attributes);
 
         for (range, data_validation) in &self.data_validations.clone() {
             // Write the dataValidation element.
             self.write_data_validation(range, data_validation);
         }
 
-        self.writer.xml_end_tag("dataValidations");
+        xml_end_tag(&mut self.writer, "dataValidations");
     }
 
     // Write the <dataValidation> element.
@@ -15709,7 +15713,7 @@ impl Worksheet {
 
         attributes.push(("sqref", range.to_string()));
 
-        self.writer.xml_start_tag("dataValidation", &attributes);
+        xml_start_tag(&mut self.writer, "dataValidation", &attributes);
 
         // Write the <formula1>/<formula2> elements.
         match &data_validation.rule {
@@ -15721,15 +15725,15 @@ impl Worksheet {
             | DataValidationRuleInternal::GreaterThanOrEqualTo(value)
             | DataValidationRuleInternal::ListSource(value)
             | DataValidationRuleInternal::CustomFormula(value) => {
-                self.writer.xml_data_element_only("formula1", value);
+                xml_data_element_only(&mut self.writer, "formula1", value);
             }
             DataValidationRuleInternal::Between(min, max)
             | DataValidationRuleInternal::NotBetween(min, max) => {
-                self.writer.xml_data_element_only("formula1", min);
-                self.writer.xml_data_element_only("formula2", max);
+                xml_data_element_only(&mut self.writer, "formula1", min);
+                xml_data_element_only(&mut self.writer, "formula2", max);
             }
         }
-        self.writer.xml_end_tag("dataValidation");
+        xml_end_tag(&mut self.writer, "dataValidation");
     }
 
     // Write the <dataValidation> element.
@@ -15770,7 +15774,7 @@ impl Worksheet {
 
         attributes.push(("sqref", range.to_string()));
 
-        self.writer.xml_empty_tag("dataValidation", &attributes);
+        xml_empty_tag(&mut self.writer, "dataValidation", &attributes);
     }
 
     // Write the <hyperlink> element.
@@ -15814,7 +15818,7 @@ impl Worksheet {
             HyperlinkType::Unknown => {}
         }
 
-        self.writer.xml_empty_tag("hyperlink", &attributes);
+        xml_empty_tag(&mut self.writer, "hyperlink", &attributes);
     }
 
     // Write the <printOptions> element.
@@ -15837,7 +15841,7 @@ impl Worksheet {
             attributes.push(("gridLines", "1".to_string()));
         }
 
-        self.writer.xml_empty_tag("printOptions", &attributes);
+        xml_empty_tag(&mut self.writer, "printOptions", &attributes);
     }
 
     // Write the <pageMargins> element.
@@ -15851,7 +15855,7 @@ impl Worksheet {
             ("footer", self.margin_footer.to_string()),
         ];
 
-        self.writer.xml_empty_tag("pageMargins", &attributes);
+        xml_empty_tag(&mut self.writer, "pageMargins", &attributes);
     }
 
     // Write the <pageSetup> element.
@@ -15900,7 +15904,7 @@ impl Worksheet {
         attributes.push(("horizontalDpi", "200".to_string()));
         attributes.push(("verticalDpi", "200".to_string()));
 
-        self.writer.xml_empty_tag("pageSetup", &attributes);
+        xml_empty_tag(&mut self.writer, "pageSetup", &attributes);
     }
 
     // Write the <autoFilter> element.
@@ -15908,9 +15912,9 @@ impl Worksheet {
         let attributes = [("ref", self.autofilter_area.clone())];
 
         if self.filter_conditions.is_empty() {
-            self.writer.xml_empty_tag("autoFilter", &attributes);
+            xml_empty_tag(&mut self.writer, "autoFilter", &attributes);
         } else {
-            self.writer.xml_start_tag("autoFilter", &attributes);
+            xml_start_tag(&mut self.writer, "autoFilter", &attributes);
             let col_offset = self.autofilter_defined_name.first_col;
 
             for col in self.filter_conditions.clone().keys() {
@@ -15919,7 +15923,7 @@ impl Worksheet {
                 self.write_filter_column(*col - col_offset, &filter_condition);
             }
 
-            self.writer.xml_end_tag("autoFilter");
+            xml_end_tag(&mut self.writer, "autoFilter");
         }
     }
 
@@ -15927,7 +15931,7 @@ impl Worksheet {
     fn write_filter_column(&mut self, col: ColNum, filter_condition: &FilterCondition) {
         let attributes = [("colId", col.to_string())];
 
-        self.writer.xml_start_tag("filterColumn", &attributes);
+        xml_start_tag(&mut self.writer, "filterColumn", &attributes);
 
         if filter_condition.is_list_filter {
             self.write_list_filters(filter_condition);
@@ -15935,7 +15939,7 @@ impl Worksheet {
             self.write_custom_filters(filter_condition);
         }
 
-        self.writer.xml_end_tag("filterColumn");
+        xml_end_tag(&mut self.writer, "filterColumn");
     }
 
     // Write the <filters> element.
@@ -15947,16 +15951,16 @@ impl Worksheet {
         }
 
         if filter_condition.list.is_empty() {
-            self.writer.xml_empty_tag("filters", &attributes);
+            xml_empty_tag(&mut self.writer, "filters", &attributes);
         } else {
-            self.writer.xml_start_tag("filters", &attributes);
+            xml_start_tag(&mut self.writer, "filters", &attributes);
 
             for data in &filter_condition.list {
                 // Write the filter element.
                 self.write_filter(data.string.clone());
             }
 
-            self.writer.xml_end_tag("filters");
+            xml_end_tag(&mut self.writer, "filters");
         }
     }
 
@@ -15964,7 +15968,7 @@ impl Worksheet {
     fn write_filter(&mut self, value: String) {
         let attributes = [("val", value)];
 
-        self.writer.xml_empty_tag("filter", &attributes);
+        xml_empty_tag(&mut self.writer, "filter", &attributes);
     }
 
     // Write the <customFilters> element.
@@ -15975,7 +15979,7 @@ impl Worksheet {
             attributes.push(("and", "1".to_string()));
         }
 
-        self.writer.xml_start_tag("customFilters", &attributes);
+        xml_start_tag(&mut self.writer, "customFilters", &attributes);
 
         if let Some(data) = filter_condition.custom1.as_ref() {
             self.write_custom_filter(data);
@@ -15984,7 +15988,7 @@ impl Worksheet {
             self.write_custom_filter(data);
         }
 
-        self.writer.xml_end_tag("customFilters");
+        xml_end_tag(&mut self.writer, "customFilters");
     }
 
     // Write the <customFilter> element.
@@ -15997,7 +16001,7 @@ impl Worksheet {
 
         attributes.push(("val", data.value()));
 
-        self.writer.xml_empty_tag("customFilter", &attributes);
+        xml_empty_tag(&mut self.writer, "customFilter", &attributes);
     }
 
     // Store unique strings in the SST table and convert them to a string id
@@ -16114,7 +16118,7 @@ impl Worksheet {
                     }
                 }
             }
-            self.writer.xml_end_tag("row");
+            xml_end_tag(&mut self.writer, "row");
         }
 
         // Swap back in data.
@@ -16216,9 +16220,9 @@ impl Worksheet {
         }
 
         if has_data {
-            self.writer.xml_start_tag("row", &attributes);
+            xml_start_tag(&mut self.writer, "row", &attributes);
         } else {
-            self.writer.xml_empty_tag("row", &attributes);
+            xml_empty_tag(&mut self.writer, "row", &attributes);
         }
     }
 
@@ -16237,7 +16241,7 @@ impl Worksheet {
 
         if xf_index > 0 {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}" s="{}"><v>{}</v></c>"#,
                 col_name,
                 row + 1,
@@ -16247,7 +16251,7 @@ impl Worksheet {
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}"><v>{}</v></c>"#,
                 col_name,
                 row + 1,
@@ -16263,7 +16267,7 @@ impl Worksheet {
 
         if xf_index > 0 {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}" s="{}" t="s"><v>{}</v></c>"#,
                 col_name,
                 row + 1,
@@ -16273,7 +16277,7 @@ impl Worksheet {
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}" t="s"><v>{}</v></c>"#,
                 col_name,
                 row + 1,
@@ -16307,7 +16311,7 @@ impl Worksheet {
         };
 
         write!(
-            &mut self.writer.xmlfile,
+            &mut self.writer,
             r#"<c r="{}{}"{}{}><f>{}</f><v>{}</v></c>"#,
             col_name,
             row + 1,
@@ -16348,7 +16352,7 @@ impl Worksheet {
         };
 
         write!(
-            &mut self.writer.xmlfile,
+            &mut self.writer,
             r#"<c r="{}{}"{}{}{}><f t="array" ref="{}">{}</f><v>{}</v></c>"#,
             col_name,
             row + 1,
@@ -16370,7 +16374,7 @@ impl Worksheet {
         // Excel does).
         if xf_index > 0 {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}" s="{}"/>"#,
                 col_name,
                 row + 1,
@@ -16387,7 +16391,7 @@ impl Worksheet {
 
         if xf_index > 0 {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}" s="{}" t="b"><v>{}</v></c>"#,
                 col_name,
                 row + 1,
@@ -16397,7 +16401,7 @@ impl Worksheet {
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}" t="b"><v>{}</v></c>"#,
                 col_name,
                 row + 1,
@@ -16414,7 +16418,7 @@ impl Worksheet {
 
         if xf_index > 0 {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}" s="{}" t="e" vm="{}"><v>#VALUE!</v></c>"#,
                 col_name,
                 row + 1,
@@ -16424,7 +16428,7 @@ impl Worksheet {
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
-                &mut self.writer.xmlfile,
+                &mut self.writer,
                 r#"<c r="{}{}" t="e" vm="{}"><v>#VALUE!</v></c>"#,
                 col_name,
                 row + 1,
@@ -16440,7 +16444,7 @@ impl Worksheet {
             return;
         }
 
-        self.writer.xml_start_tag_only("cols");
+        xml_start_tag_only(&mut self.writer, "cols");
 
         // We need to write contiguous equivalent columns as a range with first
         // and last columns, so we convert the HashMap to a sorted vector and
@@ -16477,7 +16481,7 @@ impl Worksheet {
         // We will exit the previous loop with one unhandled column range.
         self.write_col_element(first_col, last_col, &prev_col_options);
 
-        self.writer.xml_end_tag("cols");
+        xml_end_tag(&mut self.writer, "cols");
     }
 
     // Write the <col> element.
@@ -16534,7 +16538,7 @@ impl Worksheet {
             attributes.push(("customWidth", "1".to_string()));
         }
 
-        self.writer.xml_empty_tag("col", &attributes);
+        xml_empty_tag(&mut self.writer, "col", &attributes);
     }
 
     // Write the <headerFooter> element.
@@ -16550,9 +16554,9 @@ impl Worksheet {
         }
 
         if self.header.is_empty() && self.footer.is_empty() {
-            self.writer.xml_empty_tag("headerFooter", &attributes);
+            xml_empty_tag(&mut self.writer, "headerFooter", &attributes);
         } else {
-            self.writer.xml_start_tag("headerFooter", &attributes);
+            xml_start_tag(&mut self.writer, "headerFooter", &attributes);
 
             // Write the oddHeader element.
             if !self.header.is_empty() {
@@ -16564,7 +16568,7 @@ impl Worksheet {
                 self.write_odd_footer();
             }
 
-            self.writer.xml_end_tag("headerFooter");
+            xml_end_tag(&mut self.writer, "headerFooter");
         }
     }
 
@@ -16581,7 +16585,7 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        self.writer.xml_data_element_only("oddHeader", &header);
+        xml_data_element_only(&mut self.writer, "oddHeader", &header);
     }
 
     // Write the <oddFooter> element.
@@ -16597,7 +16601,7 @@ impl Worksheet {
             .replace("&[Pages]", "&N")
             .replace("&[Picture]", "&G");
 
-        self.writer.xml_data_element_only("oddFooter", &footer);
+        xml_data_element_only(&mut self.writer, "oddFooter", &footer);
     }
 
     // Write the <drawing> element.
@@ -16605,7 +16609,7 @@ impl Worksheet {
         self.rel_count += 1;
         let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
-        self.writer.xml_empty_tag("drawing", &attributes);
+        xml_empty_tag(&mut self.writer, "drawing", &attributes);
     }
 
     // Write the <legacyDrawing> element.
@@ -16613,7 +16617,7 @@ impl Worksheet {
         self.rel_count += 1;
         let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
-        self.writer.xml_empty_tag("legacyDrawing", &attributes);
+        xml_empty_tag(&mut self.writer, "legacyDrawing", &attributes);
     }
 
     // Write the <legacyDrawingHF> element.
@@ -16621,7 +16625,7 @@ impl Worksheet {
         self.rel_count += 1;
         let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
-        self.writer.xml_empty_tag("legacyDrawingHF", &attributes);
+        xml_empty_tag(&mut self.writer, "legacyDrawingHF", &attributes);
     }
 
     // Write the <tableParts> element.
@@ -16630,7 +16634,7 @@ impl Worksheet {
 
         let attributes = [("count", num_tables.to_string())];
 
-        self.writer.xml_start_tag("tableParts", &attributes);
+        xml_start_tag(&mut self.writer, "tableParts", &attributes);
 
         for _ in 1..=num_tables {
             self.rel_count += 1;
@@ -16639,14 +16643,14 @@ impl Worksheet {
             self.write_table_part(self.rel_count);
         }
 
-        self.writer.xml_end_tag("tableParts");
+        xml_end_tag(&mut self.writer, "tableParts");
     }
 
     // Write the <tablePart> element.
     fn write_table_part(&mut self, index: u32) {
         let attributes = [("r:id", format!("rId{index}"))];
 
-        self.writer.xml_empty_tag("tablePart", &attributes);
+        xml_empty_tag(&mut self.writer, "tablePart", &attributes);
     }
 
     // Write the <sheetProtection> element.
@@ -16729,18 +16733,18 @@ impl Worksheet {
             }
         }
 
-        self.writer.xml_empty_tag("sheetProtection", &attributes);
+        xml_empty_tag(&mut self.writer, "sheetProtection", &attributes);
     }
 
     // Write the <protectedRanges> element.
     fn write_protected_ranges(&mut self) {
-        self.writer.xml_start_tag_only("protectedRanges");
+        xml_start_tag_only(&mut self.writer, "protectedRanges");
 
         for (range, name, hash) in self.unprotected_ranges.clone() {
             self.write_protected_range(range, name, hash);
         }
 
-        self.writer.xml_end_tag("protectedRanges");
+        xml_end_tag(&mut self.writer, "protectedRanges");
     }
 
     // Write the <protectedRange> element.
@@ -16754,7 +16758,7 @@ impl Worksheet {
         attributes.push(("sqref", range));
         attributes.push(("name", name));
 
-        self.writer.xml_empty_tag("protectedRange", &attributes);
+        xml_empty_tag(&mut self.writer, "protectedRange", &attributes);
     }
 
     // Write the <rowBreaks> element.
@@ -16764,14 +16768,14 @@ impl Worksheet {
             ("manualBreakCount", self.horizontal_breaks.len().to_string()),
         ];
 
-        self.writer.xml_start_tag("rowBreaks", &attributes);
+        xml_start_tag(&mut self.writer, "rowBreaks", &attributes);
 
         for row_num in self.horizontal_breaks.clone() {
             // Write the brk element.
             self.write_row_brk(row_num);
         }
 
-        self.writer.xml_end_tag("rowBreaks");
+        xml_end_tag(&mut self.writer, "rowBreaks");
     }
 
     // Write the row <brk> element.
@@ -16782,7 +16786,7 @@ impl Worksheet {
             ("man", "1".to_string()),
         ];
 
-        self.writer.xml_empty_tag("brk", &attributes);
+        xml_empty_tag(&mut self.writer, "brk", &attributes);
     }
 
     // Write the <colBreaks> element.
@@ -16792,14 +16796,14 @@ impl Worksheet {
             ("manualBreakCount", self.vertical_breaks.len().to_string()),
         ];
 
-        self.writer.xml_start_tag("colBreaks", &attributes);
+        xml_start_tag(&mut self.writer, "colBreaks", &attributes);
 
         for col_num in self.vertical_breaks.clone() {
             // Write the brk element.
             self.write_col_brk(col_num);
         }
 
-        self.writer.xml_end_tag("colBreaks");
+        xml_end_tag(&mut self.writer, "colBreaks");
     }
 
     // Write the col <brk> element.
@@ -16810,12 +16814,12 @@ impl Worksheet {
             ("man", "1".to_string()),
         ];
 
-        self.writer.xml_empty_tag("brk", &attributes);
+        xml_empty_tag(&mut self.writer, "brk", &attributes);
     }
 
     // Write the <extLst> element.
     fn write_extensions(&mut self) {
-        self.writer.xml_start_tag_only("extLst");
+        xml_start_tag_only(&mut self.writer, "extLst");
 
         // Write the x14:conditionalFormattings element.
         if self.has_x14_conditional_formats {
@@ -16826,7 +16830,7 @@ impl Worksheet {
                 ),
                 ("uri", "{78C0D931-6437-407d-A8EE-F0AAD7539E65}"),
             ];
-            self.writer.xml_start_tag("ext", &attributes);
+            xml_start_tag(&mut self.writer, "ext", &attributes);
             self.write_conditional_formattings();
         }
 
@@ -16839,13 +16843,13 @@ impl Worksheet {
                 ),
                 ("uri", "{05C60535-1F16-4fd2-B633-F4F36F0B64E0}"),
             ];
-            self.writer.xml_start_tag("ext", &attributes);
+            xml_start_tag(&mut self.writer, "ext", &attributes);
             self.write_sparkline_groups();
         }
 
-        self.writer.xml_end_tag("ext");
+        xml_end_tag(&mut self.writer, "ext");
 
-        self.writer.xml_end_tag("extLst");
+        xml_end_tag(&mut self.writer, "extLst");
     }
 
     // Write the <x14:sparklineGroups> element.
@@ -16855,8 +16859,7 @@ impl Worksheet {
             "http://schemas.microsoft.com/office/excel/2006/main",
         )];
 
-        self.writer
-            .xml_start_tag("x14:sparklineGroups", &attributes);
+        xml_start_tag(&mut self.writer, "x14:sparklineGroups", &attributes);
 
         let sparklines = self.sparklines.clone();
         for sparkline in sparklines.into_iter().rev() {
@@ -16864,7 +16867,7 @@ impl Worksheet {
             self.write_sparkline_group(&sparkline);
         }
 
-        self.writer.xml_end_tag("x14:sparklineGroups");
+        xml_end_tag(&mut self.writer, "x14:sparklineGroups");
     }
 
     // Write the <x14:sparklineGroup> element.
@@ -16955,7 +16958,7 @@ impl Worksheet {
             attributes.push(("rightToLeft", "1".to_string()));
         }
 
-        self.writer.xml_start_tag("x14:sparklineGroup", &attributes);
+        xml_start_tag(&mut self.writer, "x14:sparklineGroup", &attributes);
 
         // Write the sparkline color elements.
         self.write_sparkline_color("x14:colorSeries", sparkline.series_color);
@@ -16968,34 +16971,33 @@ impl Worksheet {
         self.write_sparkline_color("x14:colorLow", sparkline.low_point_color);
 
         if sparkline.date_range.has_data() {
-            self.writer
-                .xml_data_element_only("xm:f", &sparkline.date_range.formula());
+            xml_data_element_only(&mut self.writer, "xm:f", &sparkline.date_range.formula());
         }
 
         // Write the x14:sparklines element.
         self.write_sparklines(sparkline);
 
-        self.writer.xml_end_tag("x14:sparklineGroup");
+        xml_end_tag(&mut self.writer, "x14:sparklineGroup");
     }
 
     // Write a sparkline <x14:color*> element.
     fn write_sparkline_color(&mut self, name: &str, color: Color) {
-        self.writer.xml_empty_tag(name, &color.attributes());
+        xml_empty_tag(&mut self.writer, name, &color.attributes());
     }
 
     // Write the <x14:sparklines> element.
     fn write_sparklines(&mut self, sparkline: &Sparkline) {
-        self.writer.xml_start_tag_only("x14:sparklines");
+        xml_start_tag_only(&mut self.writer, "x14:sparklines");
 
         for range in &sparkline.ranges {
-            self.writer.xml_start_tag_only("x14:sparkline");
+            xml_start_tag_only(&mut self.writer, "x14:sparkline");
 
-            self.writer.xml_data_element_only("xm:f", &range.1);
-            self.writer.xml_data_element_only("xm:sqref", &range.0);
+            xml_data_element_only(&mut self.writer, "xm:f", &range.1);
+            xml_data_element_only(&mut self.writer, "xm:sqref", &range.0);
 
-            self.writer.xml_end_tag("x14:sparkline");
+            xml_end_tag(&mut self.writer, "x14:sparkline");
         }
-        self.writer.xml_end_tag("x14:sparklines");
+        xml_end_tag(&mut self.writer, "x14:sparklines");
     }
 }
 

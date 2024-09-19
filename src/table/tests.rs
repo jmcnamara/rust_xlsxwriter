@@ -9,7 +9,7 @@ mod table_tests {
 
     use crate::table::Table;
     use crate::test_functions::xml_to_vec;
-    use crate::{TableColumn, TableFunction, Worksheet, XlsxError};
+    use crate::{xmlwriter, TableColumn, TableFunction, Worksheet, XlsxError};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -93,7 +93,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -136,7 +136,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -186,7 +186,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -227,7 +227,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -269,7 +269,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -320,7 +320,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -371,7 +371,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         assert_eq!(expected, got);
@@ -398,7 +398,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -450,7 +450,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -510,7 +510,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -559,7 +559,7 @@ mod table_tests {
         table.initialize_columns(&default_headers).unwrap();
         table.assemble_xml_file();
 
-        let got = table.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&table.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

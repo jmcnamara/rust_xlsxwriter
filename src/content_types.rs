@@ -6,10 +6,12 @@
 
 mod tests;
 
-use crate::xmlwriter::XMLWriter;
+use std::io::Cursor;
+
+use crate::xmlwriter::{xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag};
 
 pub struct ContentTypes {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     defaults: Vec<(String, String)>,
     overrides: Vec<(String, String)>,
 }
@@ -21,7 +23,7 @@ impl ContentTypes {
 
     // Create a new ContentTypes struct.
     pub(crate) fn new() -> ContentTypes {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         ContentTypes {
             writer,
@@ -169,7 +171,7 @@ impl ContentTypes {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the Types element.
         self.write_types();
@@ -181,7 +183,7 @@ impl ContentTypes {
         self.write_overrides();
 
         // Close the Types tag.
-        self.writer.xml_end_tag("Types");
+        xml_end_tag(&mut self.writer, "Types");
     }
 
     // Write the <Types> element.
@@ -189,7 +191,7 @@ impl ContentTypes {
         let xmlns = "http://schemas.openxmlformats.org/package/2006/content-types";
         let attributes = [("xmlns", xmlns)];
 
-        self.writer.xml_start_tag("Types", &attributes);
+        xml_start_tag(&mut self.writer, "Types", &attributes);
     }
     // Write all the <Default> elements.
     fn write_defaults(&mut self) {
@@ -202,7 +204,7 @@ impl ContentTypes {
     fn write_default(&mut self, extension: String, content_type: String) {
         let attributes = [("Extension", extension), ("ContentType", content_type)];
 
-        self.writer.xml_empty_tag("Default", &attributes);
+        xml_empty_tag(&mut self.writer, "Default", &attributes);
     }
 
     // Write all the <Default> elements.
@@ -216,6 +218,6 @@ impl ContentTypes {
     fn write_override(&mut self, part_name: String, content_type: String) {
         let attributes = [("PartName", part_name), ("ContentType", content_type)];
 
-        self.writer.xml_empty_tag("Override", &attributes);
+        xml_empty_tag(&mut self.writer, "Override", &attributes);
     }
 }

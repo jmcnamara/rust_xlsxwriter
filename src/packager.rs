@@ -310,7 +310,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("[Content_Types].xml", self.zip_options)?;
 
         content_types.assemble_xml_file();
-        self.zip.write_all(content_types.writer.xmlfile.get_ref())?;
+        self.zip.write_all(content_types.writer.get_ref())?;
 
         Ok(())
     }
@@ -330,7 +330,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file("_rels/.rels", self.zip_options)?;
 
         rels.assemble_xml_file();
-        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -409,7 +409,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("xl/_rels/workbook.xml.rels", self.zip_options)?;
 
         rels.assemble_xml_file();
-        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -422,7 +422,7 @@ impl<W: Write + Seek + Send> Packager<W> {
     ) -> Result<(), XlsxError> {
         let filename = format!("xl/worksheets/sheet{index}.xml");
         self.zip.start_file(filename, self.zip_options)?;
-        self.zip.write_all(worksheet.writer.xmlfile.get_ref())?;
+        self.zip.write_all(worksheet.writer.get_ref())?;
 
         Ok(())
     }
@@ -435,7 +435,7 @@ impl<W: Write + Seek + Send> Packager<W> {
     ) -> Result<(), XlsxError> {
         let filename = format!("xl/chartsheets/sheet{index}.xml");
         self.zip.start_file(filename, self.zip_options)?;
-        self.zip.write_all(worksheet.writer.xmlfile.get_ref())?;
+        self.zip.write_all(worksheet.writer.get_ref())?;
 
         Ok(())
     }
@@ -469,7 +469,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file(filename, self.zip_options)?;
 
         rels.assemble_xml_file();
-        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -491,7 +491,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file(filename, self.zip_options)?;
 
         rels.assemble_xml_file();
-        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -513,7 +513,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file(filename, self.zip_options)?;
 
         rels.assemble_xml_file();
-        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -535,7 +535,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file(filename, self.zip_options)?;
 
         rels.assemble_xml_file();
-        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -559,7 +559,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file(filename, self.zip_options)?;
 
         rels.assemble_xml_file();
-        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -575,7 +575,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file(filename, self.zip_options)?;
 
         rels.assemble_xml_file();
-        self.zip.write_all(rels.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rels.writer.get_ref())?;
 
         Ok(())
     }
@@ -585,7 +585,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file("xl/workbook.xml", self.zip_options)?;
 
         workbook.assemble_xml_file();
-        self.zip.write_all(workbook.writer.xmlfile.get_ref())?;
+        self.zip.write_all(workbook.writer.get_ref())?;
 
         Ok(())
     }
@@ -601,8 +601,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("xl/sharedStrings.xml", self.zip_options)?;
 
         shared_strings.assemble_xml_file(string_table);
-        self.zip
-            .write_all(shared_strings.writer.xmlfile.get_ref())?;
+        self.zip.write_all(shared_strings.writer.get_ref())?;
 
         Ok(())
     }
@@ -624,7 +623,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file("xl/styles.xml", self.zip_options)?;
 
         styles.assemble_xml_file();
-        self.zip.write_all(styles.writer.xmlfile.get_ref())?;
+        self.zip.write_all(styles.writer.get_ref())?;
 
         Ok(())
     }
@@ -637,7 +636,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("xl/theme/theme1.xml", self.zip_options)?;
 
         theme.assemble_xml_file();
-        self.zip.write_all(theme.writer.xmlfile.get_ref())?;
+        self.zip.write_all(theme.writer.get_ref())?;
 
         Ok(())
     }
@@ -650,7 +649,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file("docProps/core.xml", self.zip_options)?;
 
         core.assemble_xml_file();
-        self.zip.write_all(core.writer.xmlfile.get_ref())?;
+        self.zip.write_all(core.writer.get_ref())?;
 
         Ok(())
     }
@@ -668,7 +667,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("docProps/custom.xml", self.zip_options)?;
 
         custom.assemble_xml_file();
-        self.zip.write_all(custom.writer.xmlfile.get_ref())?;
+        self.zip.write_all(custom.writer.get_ref())?;
 
         Ok(())
     }
@@ -720,7 +719,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file("docProps/app.xml", self.zip_options)?;
 
         app.assemble_xml_file();
-        self.zip.write_all(app.writer.xmlfile.get_ref())?;
+        self.zip.write_all(app.writer.get_ref())?;
 
         Ok(())
     }
@@ -735,7 +734,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file("xl/metadata.xml", self.zip_options)?;
 
         metadata.assemble_xml_file();
-        self.zip.write_all(metadata.writer.xmlfile.get_ref())?;
+        self.zip.write_all(metadata.writer.get_ref())?;
 
         Ok(())
     }
@@ -762,7 +761,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("xl/richData/rdrichvalue.xml", self.zip_options)?;
 
         rich_value.assemble_xml_file();
-        self.zip.write_all(rich_value.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rich_value.writer.get_ref())?;
 
         Ok(())
     }
@@ -775,8 +774,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("xl/richData/rdRichValueTypes.xml", self.zip_options)?;
 
         rich_value_types.assemble_xml_file();
-        self.zip
-            .write_all(rich_value_types.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rich_value_types.writer.get_ref())?;
 
         Ok(())
     }
@@ -794,8 +792,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("xl/richData/rdrichvaluestructure.xml", self.zip_options)?;
 
         rich_value_structure.assemble_xml_file();
-        self.zip
-            .write_all(rich_value_structure.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rich_value_structure.writer.get_ref())?;
 
         Ok(())
     }
@@ -809,8 +806,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             .start_file("xl/richData/richValueRel.xml", self.zip_options)?;
 
         rich_value_rel.assemble_xml_file();
-        self.zip
-            .write_all(rich_value_rel.writer.xmlfile.get_ref())?;
+        self.zip.write_all(rich_value_rel.writer.get_ref())?;
 
         Ok(())
     }
@@ -824,8 +820,7 @@ impl<W: Write + Seek + Send> Packager<W> {
                 self.zip.start_file(filename, self.zip_options)?;
 
                 worksheet.drawing.assemble_xml_file();
-                self.zip
-                    .write_all(worksheet.drawing.writer.xmlfile.get_ref())?;
+                self.zip.write_all(worksheet.drawing.writer.get_ref())?;
                 index += 1;
             }
         }
@@ -847,7 +842,7 @@ impl<W: Write + Seek + Send> Packager<W> {
 
                 comment.assemble_xml_file();
 
-                self.zip.write_all(comment.writer.xmlfile.get_ref())?;
+                self.zip.write_all(comment.writer.get_ref())?;
                 index += 1;
             }
         }
@@ -874,7 +869,7 @@ impl<W: Write + Seek + Send> Packager<W> {
                     vml.shape_id = worksheet.vml_shape_id;
                     vml.assemble_xml_file();
 
-                    self.zip.write_all(vml.writer.xmlfile.get_ref())?;
+                    self.zip.write_all(vml.writer.get_ref())?;
                     index += 1;
                 }
 
@@ -892,7 +887,7 @@ impl<W: Write + Seek + Send> Packager<W> {
 
                     vml.assemble_xml_file();
 
-                    self.zip.write_all(vml.writer.xmlfile.get_ref())?;
+                    self.zip.write_all(vml.writer.get_ref())?;
 
                     // The rels file index must match the vmlDrawing file index.
                     self.write_vml_drawing_rels_file(&worksheet.vml_drawing_relationships, index)?;
@@ -960,7 +955,7 @@ impl<W: Write + Seek + Send> Packager<W> {
                 let filename = format!("xl/charts/chart{index}.xml");
                 self.zip.start_file(filename, self.zip_options)?;
                 chart.assemble_xml_file();
-                self.zip.write_all(chart.writer.xmlfile.get_ref())?;
+                self.zip.write_all(chart.writer.get_ref())?;
                 index += 1;
             }
         }
@@ -977,7 +972,7 @@ impl<W: Write + Seek + Send> Packager<W> {
                 let filename = format!("xl/tables/table{index}.xml");
                 self.zip.start_file(filename, self.zip_options)?;
                 table.assemble_xml_file();
-                self.zip.write_all(table.writer.xmlfile.get_ref())?;
+                self.zip.write_all(table.writer.get_ref())?;
                 index += 1;
             }
         }

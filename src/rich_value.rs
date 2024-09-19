@@ -4,10 +4,14 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
-use crate::{xmlwriter::XMLWriter, Image};
+use std::io::Cursor;
+
+use crate::Image;
+
+use crate::xmlwriter::{xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag};
 
 pub struct RichValue<'a> {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) embedded_images: &'a Vec<Image>,
 }
 
@@ -18,7 +22,7 @@ impl<'a> RichValue<'a> {
 
     // Create a new RichValue struct.
     pub(crate) fn new(embedded_images: &Vec<Image>) -> RichValue {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         RichValue {
             writer,
@@ -32,13 +36,13 @@ impl<'a> RichValue<'a> {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the rvData element.
         self.write_rv_data();
 
         // Close the final tag.
-        self.writer.xml_end_tag("rvData");
+        xml_end_tag(&mut self.writer, "rvData");
     }
 
     // Write the <rvData> element.
@@ -51,7 +55,7 @@ impl<'a> RichValue<'a> {
             ("count", self.embedded_images.len().to_string()),
         ];
 
-        self.writer.xml_start_tag("rvData", &attributes);
+        xml_start_tag(&mut self.writer, "rvData", &attributes);
 
         for (index, image) in self.embedded_images.iter().enumerate() {
             // Write the rv element.
@@ -68,7 +72,7 @@ impl<'a> RichValue<'a> {
             value = "6";
         }
 
-        self.writer.xml_start_tag("rv", &attributes);
+        xml_start_tag(&mut self.writer, "rv", &attributes);
 
         // Write the v element.
         self.write_v(&index.to_string());
@@ -78,11 +82,11 @@ impl<'a> RichValue<'a> {
             self.write_v(&image.alt_text);
         }
 
-        self.writer.xml_end_tag("rv");
+        xml_end_tag(&mut self.writer, "rv");
     }
 
     // Write the <v> element.
     fn write_v(&mut self, value: &str) {
-        self.writer.xml_data_element_only("v", value);
+        xml_data_element_only(&mut self.writer, "v", value);
     }
 }

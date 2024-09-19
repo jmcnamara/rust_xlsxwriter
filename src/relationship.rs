@@ -6,10 +6,12 @@
 
 mod tests;
 
-use crate::xmlwriter::XMLWriter;
+use std::io::Cursor;
+
+use crate::xmlwriter::{xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag};
 
 pub struct Relationship {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     relationships: Vec<(String, String, String)>,
     id_num: u16,
 }
@@ -21,7 +23,7 @@ impl Relationship {
 
     // Create a new struct to to track Excel shared strings between worksheets.
     pub(crate) fn new() -> Relationship {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         Relationship {
             writer,
@@ -80,13 +82,13 @@ impl Relationship {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the Relationships element.
         self.write_relationships();
 
         // Close the Relationships tag.
-        self.writer.xml_end_tag("Relationships");
+        xml_end_tag(&mut self.writer, "Relationships");
     }
 
     // Write the <Relationships> element.
@@ -94,7 +96,7 @@ impl Relationship {
         let xmlns = "http://schemas.openxmlformats.org/package/2006/relationships";
         let attributes = [("xmlns", xmlns)];
 
-        self.writer.xml_start_tag("Relationships", &attributes);
+        xml_start_tag(&mut self.writer, "Relationships", &attributes);
 
         for relationship in self.relationships.clone() {
             // Write the Relationship element.
@@ -115,6 +117,6 @@ impl Relationship {
             attributes.push(("TargetMode", target_mode));
         }
 
-        self.writer.xml_empty_tag("Relationship", &attributes);
+        xml_empty_tag(&mut self.writer, "Relationship", &attributes);
     }
 }

@@ -4,10 +4,14 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
-use crate::xmlwriter::XMLWriter;
+use std::io::Cursor;
+
+use crate::xmlwriter::{
+    xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag, xml_start_tag_only,
+};
 
 pub struct RichValueTypes {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
 }
 
 impl RichValueTypes {
@@ -17,7 +21,7 @@ impl RichValueTypes {
 
     // Create a new RichValueTypes struct.
     pub(crate) fn new() -> RichValueTypes {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         RichValueTypes { writer }
     }
@@ -28,7 +32,7 @@ impl RichValueTypes {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the rvTypesInfo element.
         self.write_rv_types_info();
@@ -37,7 +41,7 @@ impl RichValueTypes {
         self.write_global();
 
         // Close the final tag.
-        self.writer.xml_end_tag("rvTypesInfo");
+        xml_end_tag(&mut self.writer, "rvTypesInfo");
     }
 
     // Write the <rvTypesInfo> element.
@@ -58,7 +62,7 @@ impl RichValueTypes {
             ),
         ];
 
-        self.writer.xml_start_tag("rvTypesInfo", &attributes);
+        xml_start_tag(&mut self.writer, "rvTypesInfo", &attributes);
     }
 
     // Write the <global> element.
@@ -76,8 +80,8 @@ impl RichValueTypes {
             ("_ClassificationId", "ExcludeFromCalcComparison", ""),
         ];
 
-        self.writer.xml_start_tag_only("global");
-        self.writer.xml_start_tag_only("keyFlags");
+        xml_start_tag_only(&mut self.writer, "global");
+        xml_start_tag_only(&mut self.writer, "keyFlags");
 
         for (key, flag1, flag2) in key_flags {
             self.write_key(key);
@@ -87,24 +91,24 @@ impl RichValueTypes {
                 self.write_flag(flag2);
             }
 
-            self.writer.xml_end_tag("key");
+            xml_end_tag(&mut self.writer, "key");
         }
 
-        self.writer.xml_end_tag("keyFlags");
-        self.writer.xml_end_tag("global");
+        xml_end_tag(&mut self.writer, "keyFlags");
+        xml_end_tag(&mut self.writer, "global");
     }
 
     // Write the <key> element.
     fn write_key(&mut self, name: &str) {
         let attributes = [("name", name)];
 
-        self.writer.xml_start_tag("key", &attributes);
+        xml_start_tag(&mut self.writer, "key", &attributes);
     }
 
     // Write the <flag> element.
     fn write_flag(&mut self, name: &str) {
         let attributes = [("name", name), ("value", "1")];
 
-        self.writer.xml_empty_tag("flag", &attributes);
+        xml_empty_tag(&mut self.writer, "flag", &attributes);
     }
 }

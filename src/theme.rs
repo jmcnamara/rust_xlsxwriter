@@ -6,16 +6,18 @@
 
 mod tests;
 
-use crate::xmlwriter::XMLWriter;
+use std::io::Cursor;
+
+use crate::xmlwriter::xml_theme;
 
 pub struct Theme {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
 }
 
 impl Theme {
     // Create a new Theme struct.
     pub(crate) fn new() -> Theme {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         Theme { writer }
     }
@@ -23,7 +25,7 @@ impl Theme {
     // Assemble and write the XML file.
     #[allow(clippy::too_many_lines)]
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.write_theme(
+        xml_theme(&mut self.writer,
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n\
              <a:theme xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" name=\"Office Theme\">\
              <a:themeElements>\

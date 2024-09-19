@@ -223,12 +223,16 @@ use std::io::{BufReader, Cursor, Read, Seek, Write};
 use std::mem;
 use std::path::{Path, PathBuf};
 
+use crate::xmlwriter::{
+    self, xml_data_element, xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag,
+    xml_start_tag_only,
+};
+
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
 use crate::worksheet::Worksheet;
-use crate::xmlwriter::XMLWriter;
 use crate::{
     utility, Border, Chart, ChartRange, ChartRangeCacheData, ColNum, Color, DefinedName,
     DefinedNameType, DocProperties, Fill, Font, FormatPattern, Image, RowNum, Visible,
@@ -305,7 +309,7 @@ use crate::{
 /// }
 /// ```
 pub struct Workbook {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) properties: DocProperties,
     pub(crate) worksheets: Vec<Worksheet>,
     pub(crate) xf_formats: Vec<Format>,
@@ -380,7 +384,7 @@ impl Workbook {
     /// <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
     ///
     pub fn new() -> Workbook {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         let mut workbook = Workbook {
             writer,
@@ -1627,7 +1631,7 @@ impl Workbook {
 
     // Reset workbook between saves.
     fn reset(&mut self) {
-        self.writer.reset();
+        xmlwriter::reset(&mut self.writer);
 
         self.xf_indices = HashMap::from([(Format::default(), 0)]);
         self.xf_formats = vec![Format::default()];
@@ -2410,7 +2414,7 @@ impl Workbook {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the workbook element.
         self.write_workbook();
@@ -2441,7 +2445,7 @@ impl Workbook {
         self.write_calc_pr();
 
         // Close the workbook tag.
-        self.writer.xml_end_tag("workbook");
+        xml_end_tag(&mut self.writer, "workbook");
     }
 
     // Write the <workbook> element.
@@ -2451,7 +2455,7 @@ impl Workbook {
 
         let attributes = [("xmlns", xmlns), ("xmlns:r", xmlns_r)];
 
-        self.writer.xml_start_tag("workbook", &attributes);
+        xml_start_tag(&mut self.writer, "workbook", &attributes);
     }
 
     // Write the <fileVersion> element.
@@ -2467,14 +2471,14 @@ impl Workbook {
             attributes.push(("codeName", "{37E998C4-C9E5-D4B9-71C8-EB1FF731991C}"));
         }
 
-        self.writer.xml_empty_tag("fileVersion", &attributes);
+        xml_empty_tag(&mut self.writer, "fileVersion", &attributes);
     }
 
     // Write the <fileSharing> element.
     fn write_file_sharing(&mut self) {
         let attributes = [("readOnlyRecommended", "1")];
 
-        self.writer.xml_empty_tag("fileSharing", &attributes);
+        xml_empty_tag(&mut self.writer, "fileSharing", &attributes);
     }
 
     // Write the <workbookPr> element.
@@ -2487,17 +2491,17 @@ impl Workbook {
 
         attributes.push(("defaultThemeVersion", "124226".to_string()));
 
-        self.writer.xml_empty_tag("workbookPr", &attributes);
+        xml_empty_tag(&mut self.writer, "workbookPr", &attributes);
     }
 
     // Write the <bookViews> element.
     fn write_book_views(&mut self) {
-        self.writer.xml_start_tag_only("bookViews");
+        xml_start_tag_only(&mut self.writer, "bookViews");
 
         // Write the workbookView element.
         self.write_workbook_view();
 
-        self.writer.xml_end_tag("bookViews");
+        xml_end_tag(&mut self.writer, "bookViews");
     }
 
     // Write the <workbookView> element.
@@ -2520,12 +2524,12 @@ impl Workbook {
             attributes.push(("activeTab", self.active_tab.to_string()));
         }
 
-        self.writer.xml_empty_tag("workbookView", &attributes);
+        xml_empty_tag(&mut self.writer, "workbookView", &attributes);
     }
 
     // Write the <sheets> element.
     fn write_sheets(&mut self) {
-        self.writer.xml_start_tag_only("sheets");
+        xml_start_tag_only(&mut self.writer, "sheets");
 
         let mut worksheet_data = vec![];
         for worksheet in &self.worksheets {
@@ -2537,7 +2541,7 @@ impl Workbook {
             self.write_sheet(&data.0, data.1, (index + 1) as u16);
         }
 
-        self.writer.xml_end_tag("sheets");
+        xml_end_tag(&mut self.writer, "sheets");
     }
 
     // Write the <sheet> element.
@@ -2555,12 +2559,12 @@ impl Workbook {
 
         attributes.push(("r:id", rel_id));
 
-        self.writer.xml_empty_tag("sheet", &attributes);
+        xml_empty_tag(&mut self.writer, "sheet", &attributes);
     }
 
     // Write the <definedNames> element.
     fn write_defined_names(&mut self) {
-        self.writer.xml_start_tag_only("definedNames");
+        xml_start_tag_only(&mut self.writer, "definedNames");
 
         for defined_name in &self.defined_names {
             let mut attributes = vec![("name", defined_name.name())];
@@ -2576,17 +2580,21 @@ impl Workbook {
                 attributes.push(("hidden", "1".to_string()));
             }
 
-            self.writer
-                .xml_data_element("definedName", &defined_name.range, &attributes);
+            xml_data_element(
+                &mut self.writer,
+                "definedName",
+                &defined_name.range,
+                &attributes,
+            );
         }
 
-        self.writer.xml_end_tag("definedNames");
+        xml_end_tag(&mut self.writer, "definedNames");
     }
 
     // Write the <calcPr> element.
     fn write_calc_pr(&mut self) {
         let attributes = [("calcId", "124519"), ("fullCalcOnLoad", "1")];
 
-        self.writer.xml_empty_tag("calcPr", &attributes);
+        xml_empty_tag(&mut self.writer, "calcPr", &attributes);
     }
 }

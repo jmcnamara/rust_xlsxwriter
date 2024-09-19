@@ -1,5 +1,5 @@
 // xmlwriter - a module for writing XML in the same format and with the same
-// escaping as used by Excel in xlsx xml files. This is a base "class" or set of
+// escaping as used by Excel in xlsx xml files. This is a base set of
 // functionality for all of the other xml writing structs.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
@@ -14,153 +14,114 @@ use std::str;
 
 pub(crate) const XML_WRITE_ERROR: &str = "Couldn't write to xml file";
 
-#[derive(Clone)]
-pub struct XMLWriter {
-    pub(crate) xmlfile: Cursor<Vec<u8>>,
+// -----------------------------------------------------------------------
+// XML Writing functions.
+// -----------------------------------------------------------------------
+
+// Write an XML file declaration.
+pub(crate) fn xml_declaration<W: Write>(mut writer: W) {
+    writer
+        .write_all(b"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n")
+        .expect(XML_WRITE_ERROR);
 }
 
-impl Default for XMLWriter {
-    fn default() -> Self {
-        Self::new()
-    }
+// Write an XML start tag without attributes.
+pub(crate) fn xml_start_tag_only<W: Write>(writer: &mut W, tag: &str) {
+    write!(writer, "<{tag}>").expect(XML_WRITE_ERROR);
 }
 
-// Base XML writing struct used to write xlsx sub-component xml file.
-impl XMLWriter {
-    pub(crate) fn new() -> XMLWriter {
-        let buf: Vec<u8> = Vec::with_capacity(2048);
-        let xmlfile = Cursor::new(buf);
+// Write an XML start tag with attributes.
+pub(crate) fn xml_start_tag<W, T>(writer: &mut W, tag: &str, attributes: &[T])
+where
+    W: Write,
+    T: IntoAttribute,
+{
+    write!(writer, "<{tag}").expect(XML_WRITE_ERROR);
 
-        XMLWriter { xmlfile }
+    for attribute in attributes {
+        attribute.write_to(writer);
     }
 
-    // Helper function to read back stored xml data for tests.
-    #[allow(dead_code)]
-    pub(crate) fn read_to_str(&mut self) -> &str {
-        str::from_utf8(self.xmlfile.get_ref()).unwrap()
+    writer.write_all(b">").expect(XML_WRITE_ERROR);
+}
+
+// Write an XML end tag.
+pub(crate) fn xml_end_tag<W: Write>(writer: &mut W, tag: &str) {
+    write!(writer, "</{tag}>").expect(XML_WRITE_ERROR);
+}
+
+// Write an empty XML tag without attributes.
+pub(crate) fn xml_empty_tag_only<W: Write>(writer: &mut W, tag: &str) {
+    write!(writer, "<{tag}/>").expect(XML_WRITE_ERROR);
+}
+
+// Write an empty XML tag with attributes.
+pub(crate) fn xml_empty_tag<W, T>(writer: &mut W, tag: &str, attributes: &[T])
+where
+    W: Write,
+    T: IntoAttribute,
+{
+    write!(writer, "<{tag}").expect(XML_WRITE_ERROR);
+
+    for attribute in attributes {
+        attribute.write_to(writer);
     }
 
-    pub(crate) fn read_to_string(&mut self) -> String {
-        str::from_utf8(self.xmlfile.get_ref()).unwrap().to_string()
+    writer.write_all(b"/>").expect(XML_WRITE_ERROR);
+}
+
+// Write an XML element containing data without attributes.
+pub(crate) fn xml_data_element_only<W: Write>(writer: &mut W, tag: &str, data: &str) {
+    write!(writer, "<{}>{}</{}>", tag, escape_xml_data(data), tag).expect(XML_WRITE_ERROR);
+}
+
+// Write an XML element containing data with attributes.
+pub(crate) fn xml_data_element<W, T>(writer: &mut W, tag: &str, data: &str, attributes: &[T])
+where
+    W: Write,
+    T: IntoAttribute,
+{
+    write!(writer, "<{tag}").expect(XML_WRITE_ERROR);
+
+    for attribute in attributes {
+        attribute.write_to(writer);
     }
 
-    // Reset the memory buffer, usually between saves.
-    pub(crate) fn reset(&mut self) {
-        self.xmlfile.get_mut().clear();
-        self.xmlfile.set_position(0);
-    }
+    write!(writer, ">{}</{}>", escape_xml_data(data), tag).expect(XML_WRITE_ERROR);
+}
 
-    // Write an XML file declaration.
-    pub(crate) fn xml_declaration(&mut self) {
-        self.xmlfile
-            .write_all(b"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n")
-            .expect(XML_WRITE_ERROR);
-    }
-
-    // Write an XML start tag without attributes.
-    pub(crate) fn xml_start_tag_only(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, "<{tag}>").expect(XML_WRITE_ERROR);
-    }
-
-    // Write an XML start tag with attributes.
-    pub(crate) fn xml_start_tag<T>(&mut self, tag: &str, attributes: &[T])
-    where
-        T: IntoAttribute,
-    {
-        write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
-
-        for attribute in attributes {
-            attribute.write_to(&mut self.xmlfile);
-        }
-
-        self.xmlfile.write_all(b">").expect(XML_WRITE_ERROR);
-    }
-
-    // Write an XML end tag.
-    pub(crate) fn xml_end_tag(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, "</{tag}>").expect(XML_WRITE_ERROR);
-    }
-
-    // Write an empty XML tag without attributes.
-    pub(crate) fn xml_empty_tag_only(&mut self, tag: &str) {
-        write!(&mut self.xmlfile, "<{tag}/>").expect(XML_WRITE_ERROR);
-    }
-
-    // Write an empty XML tag with attributes.
-    pub(crate) fn xml_empty_tag<T>(&mut self, tag: &str, attributes: &[T])
-    where
-        T: IntoAttribute,
-    {
-        write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
-
-        for attribute in attributes {
-            attribute.write_to(&mut self.xmlfile);
-        }
-
-        self.xmlfile.write_all(b"/>").expect(XML_WRITE_ERROR);
-    }
-
-    // Write an XML element containing data without attributes.
-    pub(crate) fn xml_data_element_only(&mut self, tag: &str, data: &str) {
+// Optimized tag writer for shared strings <si> elements.
+pub(crate) fn xml_si_element<W: Write>(writer: &mut W, string: &str, preserve_whitespace: bool) {
+    if preserve_whitespace {
         write!(
-            &mut self.xmlfile,
-            "<{}>{}</{}>",
-            tag,
-            escape_xml_data(data),
-            tag
+            writer,
+            r#"<si><t xml:space="preserve">{}</t></si>"#,
+            escape_xml_data(&escape_xml_escapes(string))
+        )
+        .expect(XML_WRITE_ERROR);
+    } else {
+        write!(
+            writer,
+            "<si><t>{}</t></si>",
+            escape_xml_data(&escape_xml_escapes(string))
         )
         .expect(XML_WRITE_ERROR);
     }
+}
 
-    // Write an XML element containing data with attributes.
-    pub(crate) fn xml_data_element<T>(&mut self, tag: &str, data: &str, attributes: &[T])
-    where
-        T: IntoAttribute,
-    {
-        write!(&mut self.xmlfile, "<{tag}").expect(XML_WRITE_ERROR);
+// Write <si> element for rich strings.
+pub(crate) fn xml_rich_si_element<W: Write>(writer: &mut W, string: &str) {
+    write!(writer, r#"<si>{string}</si>"#).expect(XML_WRITE_ERROR);
+}
 
-        for attribute in attributes {
-            attribute.write_to(&mut self.xmlfile);
-        }
+// Write the theme string to the theme file.
+pub(crate) fn xml_theme<W: Write>(writer: &mut W, theme: &str) {
+    writeln!(writer, "{theme}").expect(XML_WRITE_ERROR);
+}
 
-        write!(&mut self.xmlfile, ">{}</{}>", escape_xml_data(data), tag).expect(XML_WRITE_ERROR);
-    }
-
-    // Optimized tag writer for shared strings <si> elements.
-    pub(crate) fn xml_si_element(&mut self, string: &str, preserve_whitespace: bool) {
-        if preserve_whitespace {
-            write!(
-                &mut self.xmlfile,
-                r#"<si><t xml:space="preserve">{}</t></si>"#,
-                escape_xml_data(&escape_xml_escapes(string))
-            )
-            .expect(XML_WRITE_ERROR);
-        } else {
-            write!(
-                &mut self.xmlfile,
-                "<si><t>{}</t></si>",
-                escape_xml_data(&escape_xml_escapes(string))
-            )
-            .expect(XML_WRITE_ERROR);
-        }
-    }
-
-    // Write <si> element for rich strings.
-    pub(crate) fn xml_rich_si_element(&mut self, string: &str) {
-        write!(&mut self.xmlfile, r#"<si>{string}</si>"#).expect(XML_WRITE_ERROR);
-    }
-
-    // Write the theme string to the theme file.
-    pub(crate) fn write_theme(&mut self, theme: &str) {
-        writeln!(&mut self.xmlfile, "{theme}").expect(XML_WRITE_ERROR);
-    }
-
-    // Write a string with escaped XML data.
-    pub(crate) fn xml_raw_string(&mut self, data: &str) {
-        self.xmlfile
-            .write_all(data.as_bytes())
-            .expect(XML_WRITE_ERROR);
-    }
+// Write a string with escaped XML data.
+pub(crate) fn xml_raw_string<W: Write>(writer: &mut W, data: &str) {
+    writer.write_all(data.as_bytes()).expect(XML_WRITE_ERROR);
 }
 
 // Escape XML characters in attributes.
@@ -179,8 +140,24 @@ pub(crate) fn escape_url(data: &str) -> Cow<str> {
 }
 
 // -----------------------------------------------------------------------
-// Helper functions. Mainly for string escaping.
+// XML helper functions. Mainly for string escaping.
 // -----------------------------------------------------------------------
+
+// Helper function to read xml data in cursor for tests.
+#[allow(dead_code)]
+pub(crate) fn cursor_to_str(cursor: &Cursor<Vec<u8>>) -> &str {
+    str::from_utf8(cursor.get_ref()).unwrap()
+}
+
+pub(crate) fn cursor_to_string(cursor: &Cursor<Vec<u8>>) -> String {
+    str::from_utf8(cursor.get_ref()).unwrap().to_string()
+}
+
+// Reset the memory cursor buffer, usually between saves.
+pub(crate) fn reset(cursor: &mut Cursor<Vec<u8>>) {
+    cursor.get_mut().clear();
+    cursor.set_position(0);
+}
 
 // Match function for escape_attributes().
 fn match_attribute_html_char(ch: char) -> Option<&'static str> {
@@ -326,19 +303,30 @@ fn escape_xml_escapes(original: &str) -> Cow<str> {
     Cow::Owned(escaped_string)
 }
 
+// -----------------------------------------------------------------------
 // Trait to write attribute tuple values to an XML file.
+// -----------------------------------------------------------------------
+
 pub(crate) trait IntoAttribute {
-    fn write_to(&self, xmlfile: &mut Cursor<Vec<u8>>);
+    fn write_to<W>(&self, writer: &mut W)
+    where
+        W: Write;
 }
 
 impl IntoAttribute for (&str, &str) {
-    fn write_to(&self, xmlfile: &mut Cursor<Vec<u8>>) {
-        write!(xmlfile, r#" {}="{}""#, self.0, escape_attributes(self.1)).expect(XML_WRITE_ERROR);
+    fn write_to<W>(&self, writer: &mut W)
+    where
+        W: Write,
+    {
+        write!(writer, r#" {}="{}""#, self.0, escape_attributes(self.1)).expect(XML_WRITE_ERROR);
     }
 }
 
 impl IntoAttribute for (&str, String) {
-    fn write_to(&self, xmlfile: &mut Cursor<Vec<u8>>) {
-        write!(xmlfile, r#" {}="{}""#, self.0, escape_attributes(&self.1)).expect(XML_WRITE_ERROR);
+    fn write_to<W>(&self, writer: &mut W)
+    where
+        W: Write,
+    {
+        write!(writer, r#" {}="{}""#, self.0, escape_attributes(&self.1)).expect(XML_WRITE_ERROR);
     }
 }

@@ -7,8 +7,8 @@
 #[cfg(test)]
 mod drawing_tests {
 
-    use crate::drawing::*;
     use crate::test_functions::xml_to_vec;
+    use crate::{drawing::*, xmlwriter};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -50,7 +50,7 @@ mod drawing_tests {
 
         drawing.assemble_xml_file();
 
-        let got = drawing.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&drawing.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

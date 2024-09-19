@@ -8,8 +8,8 @@
 mod core_tests {
 
     use crate::core::Core;
-    use crate::ExcelDateTime;
     use crate::{test_functions::xml_to_vec, DocProperties};
+    use crate::{xmlwriter, ExcelDateTime};
 
     use pretty_assertions::assert_eq;
 
@@ -25,7 +25,7 @@ mod core_tests {
 
         core.assemble_xml_file();
 
-        let got = core.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&core.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

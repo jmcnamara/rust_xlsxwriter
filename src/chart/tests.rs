@@ -9,7 +9,7 @@ mod chart_tests {
 
     use crate::chart::{Chart, ChartRange, ChartSeries, ChartType, XlsxError};
     use crate::test_functions::xml_to_vec;
-    use crate::ChartRangeCacheDataType;
+    use crate::{xmlwriter, ChartRangeCacheDataType};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -109,7 +109,7 @@ mod chart_tests {
 
         chart.assemble_xml_file();
 
-        let got = chart.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&chart.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

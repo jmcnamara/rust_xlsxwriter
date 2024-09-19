@@ -8,7 +8,7 @@
 mod workbook_tests {
 
     use crate::{test_functions::xml_to_vec, XlsxError};
-    use crate::{Table, Workbook};
+    use crate::{xmlwriter, Table, Workbook};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -18,7 +18,7 @@ mod workbook_tests {
 
         workbook.assemble_xml_file();
 
-        let got = workbook.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&workbook.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

@@ -9,6 +9,7 @@ mod content_types_tests {
 
     use crate::content_types::ContentTypes;
     use crate::test_functions::xml_to_vec;
+    use crate::xmlwriter;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -25,7 +26,7 @@ mod content_types_tests {
 
         content_types.assemble_xml_file();
 
-        let got = content_types.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&content_types.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

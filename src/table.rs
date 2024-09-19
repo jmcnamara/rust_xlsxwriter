@@ -8,11 +8,13 @@
 
 mod tests;
 
+use std::io::Cursor;
 use std::{collections::HashSet, fmt};
 
-use crate::{
-    utility::ToXmlBoolean, xmlwriter::XMLWriter, CellRange, Format, Formula, RowNum, XlsxError,
+use crate::xmlwriter::{
+    xml_data_element_only, xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag,
 };
+use crate::{utility::ToXmlBoolean, CellRange, Format, Formula, RowNum, XlsxError};
 
 /// The `Table` struct represents a worksheet Table.
 ///
@@ -107,7 +109,7 @@ use crate::{
 ///
 #[derive(Clone)]
 pub struct Table {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
 
     pub(crate) columns: Vec<TableColumn>,
 
@@ -192,7 +194,7 @@ impl Table {
     ///
     #[allow(clippy::new_without_default)]
     pub fn new() -> Table {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         Table {
             writer,
@@ -1185,7 +1187,7 @@ impl Table {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the table element.
         self.write_table();
@@ -1202,7 +1204,7 @@ impl Table {
         self.write_table_style_info();
 
         // Close the table tag.
-        self.writer.xml_end_tag("table");
+        xml_end_tag(&mut self.writer, "table");
     }
 
     // Write the <table> element.
@@ -1233,7 +1235,7 @@ impl Table {
             attributes.push(("totalsRowShown", "0".to_string()));
         }
 
-        self.writer.xml_start_tag("table", &attributes);
+        xml_start_tag(&mut self.writer, "table", &attributes);
     }
 
     // Write the <autoFilter> element.
@@ -1246,21 +1248,21 @@ impl Table {
 
         let attributes = vec![("ref", autofilter_range.to_range_string())];
 
-        self.writer.xml_empty_tag("autoFilter", &attributes);
+        xml_empty_tag(&mut self.writer, "autoFilter", &attributes);
     }
 
     // Write the <tableColumns> element.
     fn write_columns(&mut self) {
         let attributes = vec![("count", self.columns.len().to_string())];
 
-        self.writer.xml_start_tag("tableColumns", &attributes);
+        xml_start_tag(&mut self.writer, "tableColumns", &attributes);
 
         for (index, column) in self.columns.clone().iter().enumerate() {
             // Write the tableColumn element.
             self.write_column(index + 1, column);
         }
 
-        self.writer.xml_end_tag("tableColumns");
+        xml_end_tag(&mut self.writer, "tableColumns");
     }
 
     // Write the <tableColumn> element.
@@ -1278,7 +1280,7 @@ impl Table {
         }
 
         if column.formula.is_some() || matches!(&column.total_function, TableFunction::Custom(_)) {
-            self.writer.xml_start_tag("tableColumn", &attributes);
+            xml_start_tag(&mut self.writer, "tableColumn", &attributes);
 
             if let Some(formula) = &column.formula {
                 // Write the calculatedColumnFormula element.
@@ -1290,22 +1292,20 @@ impl Table {
                 self.write_totals_row_formula(&formula.formula_string);
             }
 
-            self.writer.xml_end_tag("tableColumn");
+            xml_end_tag(&mut self.writer, "tableColumn");
         } else {
-            self.writer.xml_empty_tag("tableColumn", &attributes);
+            xml_empty_tag(&mut self.writer, "tableColumn", &attributes);
         }
     }
 
     // Write the <calculatedColumnFormula> element.
     fn write_calculated_column_formula(&mut self, formula: &str) {
-        self.writer
-            .xml_data_element_only("calculatedColumnFormula", formula);
+        xml_data_element_only(&mut self.writer, "calculatedColumnFormula", formula);
     }
 
     // Write the <totalsRowFormula> element.
     fn write_totals_row_formula(&mut self, formula: &str) {
-        self.writer
-            .xml_data_element_only("totalsRowFormula", formula);
+        xml_data_element_only(&mut self.writer, "totalsRowFormula", formula);
     }
 
     // Write the <tableStyleInfo> element.
@@ -1321,7 +1321,7 @@ impl Table {
         attributes.push(("showRowStripes", self.show_banded_rows.to_xml_bool()));
         attributes.push(("showColumnStripes", self.show_banded_columns.to_xml_bool()));
 
-        self.writer.xml_empty_tag("tableStyleInfo", &attributes);
+        xml_empty_tag(&mut self.writer, "tableStyleInfo", &attributes);
     }
 }
 

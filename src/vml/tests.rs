@@ -8,6 +8,7 @@
 mod theme_tests {
 
     use crate::vml::Vml;
+    use crate::xmlwriter;
     use crate::{test_functions::vml_to_vec, vml::VmlInfo};
 
     use pretty_assertions::assert_eq;
@@ -32,7 +33,7 @@ mod theme_tests {
 
         vml.assemble_xml_file();
 
-        let got = vml.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&vml.writer);
         let got = vml_to_vec(got);
 
         let expected = vml_to_vec(
@@ -102,7 +103,7 @@ mod theme_tests {
 
         vml.assemble_xml_file();
 
-        let got = vml.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&vml.writer);
         let got = vml_to_vec(got);
 
         let expected = vml_to_vec(

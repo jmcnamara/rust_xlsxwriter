@@ -6,10 +6,13 @@
 
 mod tests;
 
-use crate::{xmlwriter::XMLWriter, CustomProperty, CustomPropertyType, DocProperties};
+use std::io::Cursor;
+
+use crate::xmlwriter::{xml_data_element_only, xml_declaration, xml_end_tag, xml_start_tag};
+use crate::{CustomProperty, CustomPropertyType, DocProperties};
 
 pub struct Custom {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) properties: DocProperties,
 }
 
@@ -20,7 +23,7 @@ impl Custom {
 
     // Create a new Custom struct.
     pub(crate) fn new() -> Custom {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         Custom {
             writer,
@@ -35,7 +38,7 @@ impl Custom {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the Properties element.
         self.write_properties();
@@ -46,7 +49,7 @@ impl Custom {
         }
 
         // Close the final tag.
-        self.writer.xml_end_tag("Properties");
+        xml_end_tag(&mut self.writer, "Properties");
     }
 
     // Write the <Properties> element.
@@ -57,7 +60,7 @@ impl Custom {
 
         let attributes = [("xmlns", xmlns), ("xmlns:vt", xmlns_vt)];
 
-        self.writer.xml_start_tag("Properties", &attributes);
+        xml_start_tag(&mut self.writer, "Properties", &attributes);
     }
 
     // Write the <property> element.
@@ -69,7 +72,7 @@ impl Custom {
             ("name", property.name.to_string()),
         ];
 
-        self.writer.xml_start_tag("property", &attributes);
+        xml_start_tag(&mut self.writer, "property", &attributes);
 
         match property.property_type {
             CustomPropertyType::Int => self.write_vt_i_4(property.number_int),
@@ -79,35 +82,31 @@ impl Custom {
             CustomPropertyType::DateTime => self.write_vt_filetime(&property.datetime),
         }
 
-        self.writer.xml_end_tag("property");
+        xml_end_tag(&mut self.writer, "property");
     }
 
     // Write the <vt:lpwstr> element.
     fn write_vt_lpwstr(&mut self, text: &str) {
-        self.writer.xml_data_element_only("vt:lpwstr", text);
+        xml_data_element_only(&mut self.writer, "vt:lpwstr", text);
     }
 
     // Write the <vt:filetime> element.
     fn write_vt_filetime(&mut self, utc_datetime: &str) {
-        self.writer
-            .xml_data_element_only("vt:filetime", utc_datetime);
+        xml_data_element_only(&mut self.writer, "vt:filetime", utc_datetime);
     }
 
     // Write the <vt:i4> element.
     fn write_vt_i_4(&mut self, number: i32) {
-        self.writer
-            .xml_data_element_only("vt:i4", &number.to_string());
+        xml_data_element_only(&mut self.writer, "vt:i4", &number.to_string());
     }
 
     // Write the <vt:r8> element.
     fn write_vt_r_8(&mut self, number: f64) {
-        self.writer
-            .xml_data_element_only("vt:r8", &number.to_string());
+        xml_data_element_only(&mut self.writer, "vt:r8", &number.to_string());
     }
 
     // Write the <vt:bool> element.
     fn write_vt_bool(&mut self, boolean: bool) {
-        self.writer
-            .xml_data_element_only("vt:bool", &boolean.to_string());
+        xml_data_element_only(&mut self.writer, "vt:bool", &boolean.to_string());
     }
 }

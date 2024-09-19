@@ -4,10 +4,12 @@
 //
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
-use crate::xmlwriter::XMLWriter;
+use std::io::Cursor;
+
+use crate::xmlwriter::{xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag};
 
 pub struct RichValueRel {
-    pub(crate) writer: XMLWriter,
+    pub(crate) writer: Cursor<Vec<u8>>,
     pub(crate) num_embedded_images: u32,
 }
 
@@ -18,7 +20,7 @@ impl RichValueRel {
 
     // Create a new RichValueRel struct.
     pub(crate) fn new() -> RichValueRel {
-        let writer = XMLWriter::new();
+        let writer = Cursor::new(Vec::with_capacity(2048));
 
         RichValueRel {
             writer,
@@ -32,13 +34,13 @@ impl RichValueRel {
 
     // Assemble and write the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
-        self.writer.xml_declaration();
+        xml_declaration(&mut self.writer);
 
         // Write the richValueRels element.
         self.write_rich_value_rels();
 
         // Close the final tag.
-        self.writer.xml_end_tag("richValueRels");
+        xml_end_tag(&mut self.writer, "richValueRels");
     }
 
     // Write the <richValueRels> element.
@@ -54,7 +56,7 @@ impl RichValueRel {
             ),
         ];
 
-        self.writer.xml_start_tag("richValueRels", &attributes);
+        xml_start_tag(&mut self.writer, "richValueRels", &attributes);
 
         for index in 1..=self.num_embedded_images {
             // Write the rel element.
@@ -66,6 +68,6 @@ impl RichValueRel {
     fn write_rel(&mut self, index: u32) {
         let attributes = [("r:id", format!("rId{index}"))];
 
-        self.writer.xml_empty_tag("rel", &attributes);
+        xml_empty_tag(&mut self.writer, "rel", &attributes);
     }
 }

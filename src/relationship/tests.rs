@@ -9,6 +9,7 @@ mod relationship_tests {
 
     use crate::relationship::Relationship;
     use crate::test_functions::xml_to_vec;
+    use crate::xmlwriter;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -23,7 +24,7 @@ mod relationship_tests {
 
         rels.assemble_xml_file();
 
-        let got = rels.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&rels.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

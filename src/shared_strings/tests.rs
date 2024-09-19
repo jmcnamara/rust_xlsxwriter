@@ -10,6 +10,7 @@ mod shared_strings_tests {
     use crate::shared_strings::SharedStrings;
     use crate::shared_strings_table::SharedStringsTable;
     use crate::test_functions::xml_to_vec;
+    use crate::xmlwriter;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -28,7 +29,7 @@ mod shared_strings_tests {
 
         shared_strings.assemble_xml_file(&string_table);
 
-        let got = shared_strings.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&shared_strings.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
@@ -63,7 +64,7 @@ mod shared_strings_tests {
 
         shared_strings.assemble_xml_file(&string_table);
 
-        let got = shared_strings.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&shared_strings.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(

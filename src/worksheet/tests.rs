@@ -22,7 +22,7 @@ mod worksheet_tests {
 
         worksheet.assemble_xml_file();
 
-        let got = worksheet.writer.read_to_str();
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
         let got = xml_to_vec(got);
 
         let expected = xml_to_vec(
