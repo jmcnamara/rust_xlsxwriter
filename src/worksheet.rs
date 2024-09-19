@@ -1406,6 +1406,8 @@ pub struct Worksheet {
     pub(crate) vml_data_id: String,
     pub(crate) vml_shape_id: u32,
     pub(crate) is_chartsheet: bool,
+    pub(crate) use_constant_memory: bool,
+    pub(crate) file_writer: Cursor<Vec<u8>>, // TODO. replace with filehandle.
 
     // These collections need to be reset on resave.
     drawing_rel_ids: HashMap<String, u32>,
@@ -1422,7 +1424,6 @@ pub struct Worksheet {
     merged_cells: HashMap<(RowNum, ColNum), usize>,
     table_ranges: Vec<CellRange>,
     table_cells: HashMap<(RowNum, ColNum), usize>,
-    col_names: HashMap<ColNum, String>,
     dimensions: CellRange,
     xf_indices: HashMap<Format, u32>,
     dxf_indices: HashMap<Format, u32>,
@@ -1489,6 +1490,8 @@ pub struct Worksheet {
     show_all_notes: bool,
     user_default_row_height: f64,
     hide_unused_rows: bool,
+    current_row: RowNum,
+    has_sheet_data: bool,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -1598,7 +1601,6 @@ impl Worksheet {
             autofilter_defined_name: DefinedName::new(),
             autofilter_area: String::new(),
             data_table: BTreeMap::new(),
-            col_names: HashMap::new(),
             dimensions,
             merged_ranges: vec![],
             merged_cells: HashMap::new(),
@@ -1701,6 +1703,10 @@ impl Worksheet {
             table_relationships: vec![],
             vml_drawing_relationships: vec![],
             is_chartsheet: false,
+            use_constant_memory: false,
+            has_sheet_data: false,
+            current_row: 0,
+            file_writer: Cursor::new(Vec::with_capacity(2048)),
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -1893,6 +1899,17 @@ impl Worksheet {
     ///
     pub fn name(&self) -> String {
         self.name.clone()
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    pub fn set_constant_memory_mode(&mut self, enable: bool) -> Result<&mut Worksheet, XlsxError> {
+        // TODO. Add error?
+        self.use_constant_memory = enable;
+
+        Ok(self)
     }
 
     /// Write generic data to a cell.
@@ -12811,6 +12828,7 @@ impl Worksheet {
                             // split multi-line strings and handle each part
                             // separately.
                             CellType::String { string, .. }
+                            | CellType::InlineString { string, .. }
                             | CellType::RichString {
                                 raw_string: string, ..
                             } => {
@@ -13302,14 +13320,24 @@ impl Worksheet {
         };
 
         // Create the appropriate cell type to hold the data.
-        let cell = CellType::String {
-            string: Arc::from(string),
-            xf_index,
-            string_id: 0,
+        let cell = if self.use_constant_memory {
+            CellType::InlineString {
+                string: Arc::from(string),
+                xf_index,
+            }
+        } else {
+            CellType::String {
+                string: Arc::from(string),
+                xf_index,
+                string_id: 0,
+            }
         };
 
+        if !self.use_constant_memory {
+            self.uses_string_table = true;
+        }
+
         self.insert_cell(row, col, cell);
-        self.uses_string_table = true;
 
         Ok(self)
     }
@@ -13689,17 +13717,40 @@ impl Worksheet {
 
     // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
-        match self.data_table.entry(row) {
-            Entry::Occupied(mut entry) => {
-                // The row already exists. Insert/replace column value.
-                let columns = entry.get_mut();
-                columns.insert(col, cell);
+        if self.use_constant_memory {
+            // This is the constant-memory mode. Only one row of data is stored.
+            if row > self.current_row {
+                self.flush_data_row();
+                self.current_row = row;
             }
-            Entry::Vacant(entry) => {
-                // The row doesn't exist, create a new row with columns and insert
-                // the cell value.
-                let columns = BTreeMap::from([(col, cell)]);
-                entry.insert(columns);
+
+            // Store all data in row 0.
+            match self.data_table.entry(0) {
+                Entry::Occupied(mut entry) => {
+                    // The row already exists. Insert/replace column value.
+                    let columns = entry.get_mut();
+                    columns.insert(col, cell);
+                }
+                Entry::Vacant(entry) => {
+                    // The row doesn't exist yet.
+                    let columns = BTreeMap::from([(col, cell)]);
+                    entry.insert(columns);
+                }
+            }
+        } else {
+            // This is the in-memory mode. All cell data is stored.
+            match self.data_table.entry(row) {
+                Entry::Occupied(mut entry) => {
+                    // The row already exists. Insert/replace column value.
+                    let columns = entry.get_mut();
+                    columns.insert(col, cell);
+                }
+                Entry::Vacant(entry) => {
+                    // The row doesn't exist, create a new row with columns and insert
+                    // the cell value.
+                    let columns = BTreeMap::from([(col, cell)]);
+                    entry.insert(columns);
+                }
             }
         }
     }
@@ -13723,6 +13774,7 @@ impl Worksheet {
                         | CellType::Formula { xf_index, .. }
                         | CellType::DateTime { xf_index, .. }
                         | CellType::RichString { xf_index, .. }
+                        | CellType::InlineString { xf_index, .. }
                         | CellType::ArrayFormula { xf_index, .. } => {
                             *xf_index = format_id;
                         }
@@ -13773,6 +13825,7 @@ impl Worksheet {
             | CellType::Formula { xf_index, .. }
             | CellType::DateTime { xf_index, .. }
             | CellType::RichString { xf_index, .. }
+            | CellType::InlineString { xf_index, .. }
             | CellType::ArrayFormula { xf_index, .. } => {
                 *xf_index = format_id;
             }
@@ -14084,17 +14137,6 @@ impl Worksheet {
         }
 
         true
-    }
-
-    // Cached/faster version of utility.col_to_name() to use in the inner loop.
-    fn col_to_name(col_names: &mut HashMap<u16, String>, col_num: ColNum) -> &str {
-        if col_num < 26 {
-            &COLUMN_LETTERS[col_num as usize..(col_num + 1) as usize]
-        } else {
-            col_names
-                .entry(col_num)
-                .or_insert_with(|| utility::column_number_to_name(col_num))
-        }
     }
 
     // Store local copies of unique formats passed to the write methods. These
@@ -15013,13 +15055,28 @@ impl Worksheet {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and write the XML file. It is split into sections that are
+    // before, during and after <sheetData> to allow those sections to be
+    // written separately, and to different in-memory and file based buffers, in
+    // constant memory mode.
     pub(crate) fn assemble_xml_file(&mut self) {
-        xml_declaration(&mut self.writer);
-
         if self.is_chartsheet {
             return self.assemble_chartsheet();
         }
+
+        // Write worksheet up to <sheetData>
+        self.assemble_xml_file_start();
+
+        // Write the sheetData data.
+        self.write_data_table();
+
+        // Write worksheet after <sheetData>
+        self.assemble_xml_file_end();
+    }
+
+    // Assemble and write the XML file up to the <sheetData> section.
+    pub(crate) fn assemble_xml_file_start(&mut self) {
+        xml_declaration(&mut self.writer);
 
         // Write the worksheet element.
         self.write_worksheet();
@@ -15039,8 +15096,21 @@ impl Worksheet {
         // Write the cols element.
         self.write_cols();
 
-        // Write the sheetData element.
-        self.write_sheet_data();
+        // Write the <sheetData> element.
+        if self.data_table.is_empty() && self.notes.is_empty() && self.changed_rows.is_empty() {
+            xml_empty_tag_only(&mut self.writer, "sheetData");
+        } else {
+            xml_start_tag_only(&mut self.writer, "sheetData");
+            self.has_sheet_data = true;
+        }
+    }
+
+    // Assemble and write the XML file after the <sheetData> section.
+    pub(crate) fn assemble_xml_file_end(&mut self) {
+        // Write the <sheetData> element.
+        if self.has_sheet_data {
+            xml_end_tag(&mut self.writer, "sheetData");
+        }
 
         // Write the sheetProtection element.
         if self.protection_on {
@@ -15136,6 +15206,8 @@ impl Worksheet {
 
     // Assemble and write the XML file for chartsheets.
     pub(crate) fn assemble_chartsheet(&mut self) {
+        xml_declaration(&mut self.writer);
+
         // Write the chartsheet element.
         self.write_chartsheet();
 
@@ -15492,17 +15564,6 @@ impl Worksheet {
         }
 
         xml_empty_tag(&mut self.writer, "sheetFormatPr", &attributes);
-    }
-
-    // Write the <sheetData> element.
-    fn write_sheet_data(&mut self) {
-        if self.data_table.is_empty() && self.notes.is_empty() && self.changed_rows.is_empty() {
-            xml_empty_tag_only(&mut self.writer, "sheetData");
-        } else {
-            xml_start_tag_only(&mut self.writer, "sheetData");
-            self.write_data_table();
-            xml_end_tag(&mut self.writer, "sheetData");
-        }
     }
 
     // Write the <mergeCells> element.
@@ -16030,11 +16091,13 @@ impl Worksheet {
     }
 
     // Write out all the row and cell data in the worksheet data table.
+    #[allow(clippy::too_many_lines)]
     fn write_data_table(&mut self) {
         let spans = self.calculate_spans();
+        let mut col_names = HashMap::new();
 
         // Swap out the worksheet data structures so we can iterate over them and
-        // still call self.write_xml() methods.
+        // still call self.write_*() methods.
         let mut temp_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>> = BTreeMap::new();
         let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
         mem::swap(&mut temp_table, &mut self.data_table);
@@ -16058,12 +16121,28 @@ impl Worksheet {
             // The row has data. Write it out cell by cell.
             self.write_table_row(row_num, span, row_options, true);
             for (&col_num, cell) in columns {
+                // Faster column name lookup for inner loop.
+                let col_name = if col_num < 26 {
+                    &COLUMN_LETTERS[col_num as usize..(col_num + 1) as usize]
+                } else {
+                    col_names
+                        .entry(col_num)
+                        .or_insert_with(|| utility::column_number_to_name(col_num))
+                };
+
                 match cell {
                     CellType::Number { number, xf_index }
                     | CellType::DateTime { number, xf_index } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        self.write_number_cell(row_num, col_num, *number, xf_index);
+                        Self::write_number_cell(
+                            &mut self.writer,
+                            row_num + 1,
+                            col_name,
+                            *number,
+                            xf_index,
+                        );
                     }
+
                     CellType::String {
                         string_id,
                         xf_index,
@@ -16075,16 +16154,43 @@ impl Worksheet {
                         ..
                     } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        self.write_string_cell(row_num, col_num, *string_id, xf_index);
+                        Self::write_string_cell(
+                            &mut self.writer,
+                            row_num + 1,
+                            col_name,
+                            *string_id,
+                            xf_index,
+                        );
                     }
+
+                    CellType::InlineString {
+                        string, xf_index, ..
+                    } => {
+                        Self::write_inline_string_cell(
+                            &mut self.writer,
+                            row_num + 1,
+                            col_name,
+                            string,
+                            *xf_index,
+                        );
+                    }
+
                     CellType::Formula {
                         formula,
                         xf_index,
                         result,
                     } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        self.write_formula_cell(row_num, col_num, formula, xf_index, result);
+                        Self::write_formula_cell(
+                            &mut self.writer,
+                            row_num + 1,
+                            col_name,
+                            formula,
+                            xf_index,
+                            result,
+                        );
                     }
+
                     CellType::ArrayFormula {
                         formula,
                         xf_index,
@@ -16093,9 +16199,10 @@ impl Worksheet {
                         range,
                     } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        self.write_array_formula_cell(
-                            row_num,
-                            col_num,
+                        Self::write_array_formula_cell(
+                            &mut self.writer,
+                            row_num + 1,
+                            col_name,
                             formula,
                             xf_index,
                             result,
@@ -16103,18 +16210,33 @@ impl Worksheet {
                             range,
                         );
                     }
+
                     CellType::Blank { xf_index } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        self.write_blank_cell(row_num, col_num, xf_index);
+                        Self::write_blank_cell(&mut self.writer, row_num + 1, col_name, xf_index);
                     }
+
                     CellType::Boolean { boolean, xf_index } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        self.write_boolean_cell(row_num, col_num, *boolean, xf_index);
+                        Self::write_boolean_cell(
+                            &mut self.writer,
+                            row_num + 1,
+                            col_name,
+                            *boolean,
+                            xf_index,
+                        );
                     }
+
                     CellType::Error { value, xf_index } => {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                         let image_id = self.global_embedded_image_indices[*value as usize];
-                        self.write_error_cell(row_num, col_num, image_id, xf_index);
+                        Self::write_error_cell(
+                            &mut self.writer,
+                            row_num + 1,
+                            col_name,
+                            image_id,
+                            xf_index,
+                        );
                     }
                 }
             }
@@ -16123,6 +16245,153 @@ impl Worksheet {
 
         // Swap back in data.
         mem::swap(&mut temp_table, &mut self.data_table);
+        mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
+    }
+
+    // Write out all the row and cell data in the worksheet data table.
+    #[allow(clippy::too_many_lines)]
+    pub(crate) fn flush_data_row(&mut self) {
+        let mut col_names = HashMap::new(); // TODO make staic.
+        let row_num = self.current_row;
+
+        // Swap out the worksheet data structures so we can iterate over them and
+        // still call self.write_*() methods.
+        let mut temp_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>> = BTreeMap::new();
+        let mut temp_changed_rows: HashMap<RowNum, RowOptions> = HashMap::new();
+        mem::swap(&mut temp_table, &mut self.data_table);
+        mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
+
+        let row_options = temp_changed_rows.get(&row_num);
+        let row_has_notes = self.notes.contains_key(&row_num);
+
+        // If there is no column data then only the <row> metadata needs updating.
+        let Some(columns) = temp_table.get(&0) else {
+            if row_options.is_some() || row_has_notes {
+                self.write_constant_table_row(row_num, row_options, false);
+            }
+
+            mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
+            return;
+        };
+
+        // The row has data. Write it out cell by cell.
+        self.write_constant_table_row(row_num, row_options, true);
+        for (&col_num, cell) in columns {
+            // Faster column name lookup for inner loop.
+            let col_name = if col_num < 26 {
+                &COLUMN_LETTERS[col_num as usize..(col_num + 1) as usize]
+            } else {
+                col_names
+                    .entry(col_num)
+                    .or_insert_with(|| utility::column_number_to_name(col_num))
+            };
+
+            match cell {
+                CellType::Number { number, xf_index } | CellType::DateTime { number, xf_index } => {
+                    Self::write_number_cell(
+                        &mut self.file_writer,
+                        row_num + 1,
+                        col_name,
+                        *number,
+                        *xf_index,
+                    );
+                }
+
+                CellType::String {
+                    string_id,
+                    xf_index,
+                    ..
+                }
+                | CellType::RichString {
+                    string_id,
+                    xf_index,
+                    ..
+                } => {
+                    Self::write_string_cell(
+                        &mut self.file_writer,
+                        row_num + 1,
+                        col_name,
+                        *string_id,
+                        *xf_index,
+                    );
+                }
+
+                CellType::InlineString {
+                    string, xf_index, ..
+                } => {
+                    Self::write_inline_string_cell(
+                        &mut self.file_writer,
+                        row_num + 1,
+                        col_name,
+                        string,
+                        *xf_index,
+                    );
+                }
+
+                CellType::Formula {
+                    formula,
+                    xf_index,
+                    result,
+                } => {
+                    Self::write_formula_cell(
+                        &mut self.file_writer,
+                        row_num + 1,
+                        col_name,
+                        formula,
+                        *xf_index,
+                        result,
+                    );
+                }
+
+                CellType::ArrayFormula {
+                    formula,
+                    xf_index,
+                    result,
+                    is_dynamic,
+                    range,
+                } => {
+                    Self::write_array_formula_cell(
+                        &mut self.file_writer,
+                        row_num + 1,
+                        col_name,
+                        formula,
+                        *xf_index,
+                        result,
+                        *is_dynamic,
+                        range,
+                    );
+                }
+
+                CellType::Blank { xf_index } => {
+                    Self::write_blank_cell(&mut self.file_writer, row_num + 1, col_name, *xf_index);
+                }
+
+                CellType::Boolean { boolean, xf_index } => {
+                    Self::write_boolean_cell(
+                        &mut self.file_writer,
+                        row_num + 1,
+                        col_name,
+                        *boolean,
+                        *xf_index,
+                    );
+                }
+
+                CellType::Error { value, xf_index } => {
+                    let image_id = self.global_embedded_image_indices[*value as usize];
+                    Self::write_error_cell(
+                        &mut self.file_writer,
+                        row_num + 1,
+                        col_name,
+                        image_id,
+                        *xf_index,
+                    );
+                }
+            }
+        }
+        xml_end_tag(&mut self.file_writer, "row");
+
+        // Swap back in data, except for the self.data_table since we want to
+        // reset it after flushing the row data.
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
     }
 
@@ -16226,10 +16495,63 @@ impl Worksheet {
         }
     }
 
-    // Write the <c> element for a number.
-    fn write_number_cell(&mut self, row: RowNum, col: ColNum, number: f64, xf_index: u32) {
-        let col_name = Self::col_to_name(&mut self.col_names, col);
+    // Write the <row> element in constant memory mode.
+    fn write_constant_table_row(
+        &mut self,
+        row_num: RowNum,
+        row_options: Option<&RowOptions>,
+        has_data: bool,
+    ) {
+        let row_num = (row_num + 1).to_string();
+        let mut attributes = vec![("r", row_num)];
 
+        if self.use_x14_extensions {
+            attributes.push(("x14ac:dyDescent", "0.25".to_string()));
+        }
+
+        if let Some(row_options) = row_options {
+            let xf_index = row_options.xf_index;
+
+            if xf_index != 0 {
+                let xf_index = self.global_xf_indices[xf_index as usize];
+                attributes.push(("s", xf_index.to_string()));
+                attributes.push(("customFormat", "1".to_string()));
+            }
+
+            if row_options.height != DEFAULT_ROW_HEIGHT {
+                attributes.push(("ht", row_options.height.to_string()));
+            }
+
+            if row_options.hidden {
+                attributes.push(("hidden", "1".to_string()));
+            }
+
+            if row_options.height != DEFAULT_ROW_HEIGHT {
+                attributes.push(("customHeight", "1".to_string()));
+            }
+        } else if self.user_default_row_height != DEFAULT_ROW_HEIGHT {
+            attributes.push(("ht", self.user_default_row_height.to_string()));
+            attributes.push(("customHeight", "1".to_string()));
+        }
+
+        if has_data {
+            xml_start_tag(&mut self.file_writer, "row", &attributes);
+        } else {
+            xml_empty_tag(&mut self.file_writer, "row", &attributes);
+        }
+    }
+
+    // Note the following write_*_cell() functions are optimized for minimum
+    // overhead since they are in the inner loop for all worksheet data.
+
+    // Write the <c> element for a number.
+    fn write_number_cell<W: Write>(
+        writer: &mut W,
+        row: RowNum,
+        col_name: &str,
+        number: f64,
+        xf_index: u32,
+    ) {
         // Use the optional ryu crate to format f64 cell number data as a
         // string. Note, the the slightly faster `format_finite()` buffer
         // function is safe to use here since nan/inf numbers are filtered out
@@ -16241,63 +16563,71 @@ impl Worksheet {
 
         if xf_index > 0 {
             write!(
-                &mut self.writer,
-                r#"<c r="{}{}" s="{}"><v>{}</v></c>"#,
-                col_name,
-                row + 1,
-                xf_index,
-                number
+                writer,
+                r#"<c r="{col_name}{row}" s="{xf_index}"><v>{number}</v></c>"#
+            )
+            .expect(XML_WRITE_ERROR);
+        } else {
+            write!(writer, r#"<c r="{col_name}{row}"><v>{number}</v></c>"#,)
+                .expect(XML_WRITE_ERROR);
+        }
+    }
+
+    // Write the <c> element for a string.
+    fn write_string_cell<W: Write>(
+        writer: &mut W,
+        row: RowNum,
+        col_name: &str,
+        string_index: u32,
+        xf_index: u32,
+    ) {
+        if xf_index > 0 {
+            write!(
+                writer,
+                r#"<c r="{col_name}{row}" s="{xf_index}" t="s"><v>{string_index}</v></c>"#
             )
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
-                &mut self.writer,
-                r#"<c r="{}{}"><v>{}</v></c>"#,
-                col_name,
-                row + 1,
-                number
+                writer,
+                r#"<c r="{col_name}{row}" t="s"><v>{string_index}</v></c>"#
             )
             .expect(XML_WRITE_ERROR);
         }
     }
 
-    // Write the <c> element for a string.
-    fn write_string_cell(&mut self, row: RowNum, col: ColNum, string_index: u32, xf_index: u32) {
-        let col_name = Self::col_to_name(&mut self.col_names, col);
-
+    // Write the <c> element for an inline string.
+    fn write_inline_string_cell<W: Write>(
+        writer: &mut W,
+        row: RowNum,
+        col_name: &str,
+        string: &str,
+        xf_index: u32,
+    ) {
         if xf_index > 0 {
             write!(
-                &mut self.writer,
-                r#"<c r="{}{}" s="{}" t="s"><v>{}</v></c>"#,
-                col_name,
-                row + 1,
-                xf_index,
-                string_index
+                writer,
+                r#"<c r="{col_name}{row}" s="{xf_index}" t="inlineStr"><is><t>{string}</t></is></c>"#
             )
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
-                &mut self.writer,
-                r#"<c r="{}{}" t="s"><v>{}</v></c>"#,
-                col_name,
-                row + 1,
-                string_index
+                writer,
+                r#"<c r="{col_name}{row}" t="inlineStr"><is><t>{string}</t></is></c>"#
             )
             .expect(XML_WRITE_ERROR);
         }
     }
 
     // Write the <c> element for a formula.
-    fn write_formula_cell(
-        &mut self,
+    fn write_formula_cell<W: Write>(
+        writer: &mut W,
         row: RowNum,
-        col: ColNum,
+        col_name: &str,
         formula: &str,
         xf_index: u32,
         result: &str,
     ) {
-        let col_name = Self::col_to_name(&mut self.col_names, col);
-
         let style = if xf_index > 0 {
             format!(r#" s="{xf_index}""#)
         } else {
@@ -16310,33 +16640,28 @@ impl Worksheet {
             ""
         };
 
+        let formula = crate::xmlwriter::escape_xml_data(formula);
+        let result = crate::xmlwriter::escape_xml_data(result);
+
         write!(
-            &mut self.writer,
-            r#"<c r="{}{}"{}{}><f>{}</f><v>{}</v></c>"#,
-            col_name,
-            row + 1,
-            style,
-            result_type,
-            crate::xmlwriter::escape_xml_data(formula),
-            crate::xmlwriter::escape_xml_data(result),
+            writer,
+            r#"<c r="{col_name}{row}"{style}{result_type}><f>{formula}</f><v>{result}</v></c>"#
         )
         .expect(XML_WRITE_ERROR);
     }
 
     // Write the <c> element for an array formula.
     #[allow(clippy::too_many_arguments)]
-    fn write_array_formula_cell(
-        &mut self,
+    fn write_array_formula_cell<W: Write>(
+        writer: &mut W,
         row: RowNum,
-        col: ColNum,
+        col_name: &str,
         formula: &str,
         xf_index: u32,
         result: &str,
         is_dynamic: bool,
         range: &str,
     ) {
-        let col_name = Self::col_to_name(&mut self.col_names, col);
-
         let style = if xf_index > 0 {
             format!(r#" s="{xf_index}""#)
         } else {
@@ -16351,61 +16676,45 @@ impl Worksheet {
             ""
         };
 
+        let formula = crate::xmlwriter::escape_xml_data(formula);
+        let result = crate::xmlwriter::escape_xml_data(result);
+
         write!(
-            &mut self.writer,
-            r#"<c r="{}{}"{}{}{}><f t="array" ref="{}">{}</f><v>{}</v></c>"#,
-            col_name,
-            row + 1,
-            style,
-            cm,
-            result_type,
-            range,
-            crate::xmlwriter::escape_xml_data(formula),
-            crate::xmlwriter::escape_xml_data(result),
+            writer,
+            r#"<c r="{col_name}{row}"{style}{cm}{result_type}><f t="array" ref="{range}">{formula}</f><v>{result}</v></c>"#
         )
         .expect(XML_WRITE_ERROR);
     }
 
     // Write the <c> element for a blank cell.
-    fn write_blank_cell(&mut self, row: RowNum, col: ColNum, xf_index: u32) {
-        let col_name = Self::col_to_name(&mut self.col_names, col);
-
+    fn write_blank_cell<W: Write>(writer: &mut W, row: RowNum, col_name: &str, xf_index: u32) {
         // Write formatted blank cells and ignore unformatted blank cells (like
         // Excel does).
         if xf_index > 0 {
-            write!(
-                &mut self.writer,
-                r#"<c r="{}{}" s="{}"/>"#,
-                col_name,
-                row + 1,
-                xf_index
-            )
-            .expect(XML_WRITE_ERROR);
+            write!(writer, r#"<c r="{col_name}{row}" s="{xf_index}"/>"#).expect(XML_WRITE_ERROR);
         }
     }
 
     // Write the <c> element for a boolean cell.
-    fn write_boolean_cell(&mut self, row: RowNum, col: ColNum, boolean: bool, xf_index: u32) {
-        let col_name = Self::col_to_name(&mut self.col_names, col);
+    fn write_boolean_cell<W: Write>(
+        writer: &mut W,
+        row: RowNum,
+        col_name: &str,
+        boolean: bool,
+        xf_index: u32,
+    ) {
         let boolean = i32::from(boolean);
 
         if xf_index > 0 {
             write!(
-                &mut self.writer,
-                r#"<c r="{}{}" s="{}" t="b"><v>{}</v></c>"#,
-                col_name,
-                row + 1,
-                xf_index,
-                boolean
+                writer,
+                r#"<c r="{col_name}{row}" s="{xf_index}" t="b"><v>{boolean}</v></c>"#
             )
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
-                &mut self.writer,
-                r#"<c r="{}{}" t="b"><v>{}</v></c>"#,
-                col_name,
-                row + 1,
-                boolean
+                writer,
+                r#"<c r="{col_name}{row}" t="b"><v>{boolean}</v></c>"#
             )
             .expect(XML_WRITE_ERROR);
         }
@@ -16413,26 +16722,23 @@ impl Worksheet {
 
     // Write the <c> element for an error cell. We currently only support the
     // #VALUE! error type which is used for embedded images.
-    fn write_error_cell(&mut self, row: RowNum, col: ColNum, value: u32, xf_index: u32) {
-        let col_name = Self::col_to_name(&mut self.col_names, col);
-
+    fn write_error_cell<W: Write>(
+        writer: &mut W,
+        row: RowNum,
+        col_name: &str,
+        value: u32,
+        xf_index: u32,
+    ) {
         if xf_index > 0 {
             write!(
-                &mut self.writer,
-                r#"<c r="{}{}" s="{}" t="e" vm="{}"><v>#VALUE!</v></c>"#,
-                col_name,
-                row + 1,
-                xf_index,
-                value
+                writer,
+                r#"<c r="{col_name}{row}" s="{xf_index}" t="e" vm="{value}"><v>#VALUE!</v></c>"#
             )
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
-                &mut self.writer,
-                r#"<c r="{}{}" t="e" vm="{}"><v>#VALUE!</v></c>"#,
-                col_name,
-                row + 1,
-                value
+                writer,
+                r#"<c r="{col_name}{row}" t="e" vm="{value}"><v>#VALUE!</v></c>"#
             )
             .expect(XML_WRITE_ERROR);
         }
@@ -17616,6 +17922,10 @@ enum CellType {
         string: Arc<str>,
         xf_index: u32,
         string_id: u32,
+    },
+    InlineString {
+        string: Arc<str>,
+        xf_index: u32,
     },
     RichString {
         string: Arc<str>,

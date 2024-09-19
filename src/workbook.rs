@@ -1753,6 +1753,11 @@ impl Workbook {
                     worksheet.vba_codename = Some(codename);
                 }
             }
+
+            // Chartsheets shouldn't use constant memory mode.
+            if worksheet.is_chartsheet {
+                worksheet.use_constant_memory = false;
+            }
         }
 
         // Generate a global array of embedded images from the worksheets.

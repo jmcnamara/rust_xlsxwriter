@@ -67,7 +67,7 @@ use crate::theme::Theme;
 use crate::vml::Vml;
 use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
-use crate::{Comment, DocProperties, Visible, NUM_IMAGE_FORMATS};
+use crate::{xmlwriter, Comment, DocProperties, Visible, NUM_IMAGE_FORMATS};
 
 // Packager struct to assembler the xlsx file.
 pub struct Packager<W: Write + Seek> {
@@ -123,20 +123,25 @@ impl<W: Write + Seek + Send> Packager<W> {
 
         // Assemble, but don't write, the worksheet files in parallel. These are
         // generally the largest files and the threading can help performance if
-        // there are multiple large worksheets.
+        // there are multiple large worksheets. We don't do this in "constant
+        // memory" mode because the cell data is already written to disk.
         #[cfg(not(target_arch = "wasm32"))]
         thread::scope(|scope| {
             for worksheet in &mut workbook.worksheets {
-                scope.spawn(|| {
-                    worksheet.assemble_xml_file();
-                });
+                if !worksheet.use_constant_memory {
+                    scope.spawn(|| {
+                        worksheet.assemble_xml_file();
+                    });
+                }
             }
         });
 
-        // For wasm targets don't use threading.
+        // For wasm targets  we don't use threading.
         #[cfg(target_arch = "wasm32")]
         for worksheet in &mut workbook.worksheets {
-            worksheet.assemble_xml_file();
+            if !worksheet.use_constant_memory {
+                worksheet.assemble_xml_file();
+            }
         }
 
         // Write the worksheet files and and associated rel files.
@@ -422,7 +427,23 @@ impl<W: Write + Seek + Send> Packager<W> {
     ) -> Result<(), XlsxError> {
         let filename = format!("xl/worksheets/sheet{index}.xml");
         self.zip.start_file(filename, self.zip_options)?;
-        self.zip.write_all(worksheet.writer.get_ref())?;
+
+        if worksheet.use_constant_memory {
+            // We write the constant memory style worksheet in 3 sections. The
+            // start and end are in-memory. The data is on disk.
+            worksheet.assemble_xml_file_start();
+            self.zip.write_all(worksheet.writer.get_ref())?;
+
+            // Flush the last remaining row.
+            worksheet.flush_data_row();
+            self.zip.write_all(worksheet.file_writer.get_ref())?;
+
+            xmlwriter::reset(&mut worksheet.writer);
+            worksheet.assemble_xml_file_end();
+            self.zip.write_all(worksheet.writer.get_ref())?;
+        } else {
+            self.zip.write_all(worksheet.writer.get_ref())?;
+        }
 
         Ok(())
     }
