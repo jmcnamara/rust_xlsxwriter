@@ -17,15 +17,18 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(0, 0, "Hello")?;
     worksheet.write_number(1, 0, 123)?;
 
+    // This should be ignored since later row has already been written.
+    worksheet.write_string(0, 6, "Foo")?;
+
     workbook.save(filename)?;
 
     Ok(())
 }
 
 #[test]
-fn test_optimize01() {
+fn test_optimize02() {
     let test_runner = common::TestRunner::new()
-        .set_name("optimize01")
+        .set_name("optimize02")
         .set_function(create_new_xlsx_file)
         .initialize();
 

@@ -1245,10 +1245,13 @@ use std::borrow::Cow;
 use std::cmp;
 use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::io::Cursor;
+use std::fs::File;
 use std::io::Write;
+use std::io::{BufWriter, Cursor};
 use std::mem;
 use std::sync::Arc;
+
+use tempfile::tempfile;
 
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
@@ -1407,7 +1410,7 @@ pub struct Worksheet {
     pub(crate) vml_shape_id: u32,
     pub(crate) is_chartsheet: bool,
     pub(crate) use_constant_memory: bool,
-    pub(crate) file_writer: Cursor<Vec<u8>>, // TODO. replace with filehandle.
+    pub(crate) file_writer: BufWriter<File>,
 
     // These collections need to be reset on resave.
     drawing_rel_ids: HashMap<String, u32>,
@@ -1585,6 +1588,9 @@ impl Worksheet {
             top_cell: (0, 0),
         };
 
+        let tempfile = tempfile().unwrap();
+        let file_writer = BufWriter::new(tempfile);
+
         Worksheet {
             writer,
             name: String::new(),
@@ -1706,7 +1712,7 @@ impl Worksheet {
             use_constant_memory: false,
             has_sheet_data: false,
             current_row: 0,
-            file_writer: Cursor::new(Vec::with_capacity(2048)),
+            file_writer,
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -1901,7 +1907,7 @@ impl Worksheet {
         self.name.clone()
     }
 
-    /// TODO
+    /// TODO doc
     ///
     /// # Errors
     ///
@@ -2941,6 +2947,7 @@ impl Worksheet {
     /// Output file:
     ///
     /// <img
+    ///
     /// src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string.png">
     ///
     pub fn write_rich_string(
@@ -13719,6 +13726,13 @@ impl Worksheet {
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
         if self.use_constant_memory {
             // This is the constant-memory mode. Only one row of data is stored.
+
+            // Ignore already flushed/written rows.
+            if row < self.current_row {
+                return;
+            }
+
+            // If this is a new row then flush the previous row.
             if row > self.current_row {
                 self.flush_data_row();
                 self.current_row = row;
@@ -14118,8 +14132,17 @@ impl Worksheet {
         // Store any changes in worksheet dimensions.
         self.dimensions.first_row = cmp::min(self.dimensions.first_row, row);
         self.dimensions.first_col = cmp::min(self.dimensions.first_col, col);
-        self.dimensions.last_row = cmp::max(self.dimensions.last_row, row);
-        self.dimensions.last_col = cmp::max(self.dimensions.last_col, col);
+
+        // In constant memory mode we also need to ensure the row is valid.
+        if self.use_constant_memory {
+            if row >= self.current_row {
+                self.dimensions.last_row = cmp::max(self.dimensions.last_row, row);
+                self.dimensions.last_col = cmp::max(self.dimensions.last_col, col);
+            }
+        } else {
+            self.dimensions.last_row = cmp::max(self.dimensions.last_row, row);
+            self.dimensions.last_col = cmp::max(self.dimensions.last_col, col);
+        }
 
         true
     }

@@ -41,7 +41,7 @@
 // the package and writes them into the xlsx file.
 
 use std::collections::HashSet;
-use std::io::{Seek, Write};
+use std::io::{Read, Seek, Write};
 
 #[cfg(not(target_arch = "wasm32"))]
 use std::thread;
@@ -436,7 +436,15 @@ impl<W: Write + Seek + Send> Packager<W> {
 
             // Flush the last remaining row.
             worksheet.flush_data_row();
-            self.zip.write_all(worksheet.file_writer.get_ref())?;
+
+            let mut buffer = Vec::new();
+            worksheet.file_writer.rewind().unwrap();
+            worksheet
+                .file_writer
+                .get_ref()
+                .read_to_end(&mut buffer)
+                .unwrap();
+            self.zip.write_all(&mut buffer)?;
 
             xmlwriter::reset(&mut worksheet.writer);
             worksheet.assemble_xml_file_end();
