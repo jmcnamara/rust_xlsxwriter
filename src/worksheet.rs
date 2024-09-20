@@ -2946,9 +2946,7 @@ impl Worksheet {
     ///
     /// Output file:
     ///
-    /// <img
-    ///
-    /// src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string.png">
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_write_rich_string.png">
     ///
     pub fn write_rich_string(
         &mut self,

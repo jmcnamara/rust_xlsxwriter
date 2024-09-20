@@ -444,7 +444,7 @@ impl<W: Write + Seek + Send> Packager<W> {
                 .get_ref()
                 .read_to_end(&mut buffer)
                 .unwrap();
-            self.zip.write_all(&mut buffer)?;
+            self.zip.write_all(&buffer)?;
 
             xmlwriter::reset(&mut worksheet.writer);
             worksheet.assemble_xml_file_end();
