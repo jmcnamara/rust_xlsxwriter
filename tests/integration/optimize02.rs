@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet().set_constant_memory_mode(true)?;
@@ -18,18 +18,52 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_number(1, 0, 123)?;
 
     // This should be ignored since later row has already been written.
-    worksheet.write_string(0, 6, "Foo")?;
+    worksheet.write_string(0, 0, "Foo")?;
 
     workbook.save(filename)?;
 
     Ok(())
 }
 
+// Test intermediate saves.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let mut worksheet = workbook.add_worksheet().set_constant_memory_mode(true)?;
+
+    worksheet.write_string(0, 0, "Hello")?;
+    workbook.save(filename)?;
+
+    // Row 0 should be ignored now.
+    worksheet = workbook.worksheet_from_index(0)?;
+    worksheet.write_string(0, 0, "World")?;
+    workbook.save(filename)?;
+
+    worksheet = workbook.worksheet_from_index(0)?;
+    worksheet.write_number(1, 0, 123)?;
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_optimize02() {
+fn test_optimize02_1() {
     let test_runner = common::TestRunner::new()
         .set_name("optimize02")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_optimize02_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("optimize02")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

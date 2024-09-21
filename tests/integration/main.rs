@@ -728,6 +728,8 @@ mod object_position19;
 mod object_position20;
 mod optimize01;
 mod optimize02;
+mod optimize20;
+mod optimize21;
 mod overlay01;
 mod overlay02;
 mod overlay03;

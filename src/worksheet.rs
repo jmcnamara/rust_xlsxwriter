@@ -1411,6 +1411,7 @@ pub struct Worksheet {
     pub(crate) is_chartsheet: bool,
     pub(crate) use_constant_memory: bool,
     pub(crate) file_writer: BufWriter<File>,
+    pub(crate) current_row: RowNum,
 
     // These collections need to be reset on resave.
     drawing_rel_ids: HashMap<String, u32>,
@@ -1493,7 +1494,6 @@ pub struct Worksheet {
     show_all_notes: bool,
     user_default_row_height: f64,
     hide_unused_rows: bool,
-    current_row: RowNum,
     has_sheet_data: bool,
 
     #[cfg(feature = "serde")]
@@ -13723,7 +13723,7 @@ impl Worksheet {
     // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
         if self.use_constant_memory {
-            // This is the constant-memory mode. Only one row of data is stored.
+            // This is the constant-memory mode. Only one row of data is stored. TODO
 
             // Ignore already flushed/written rows.
             if row < self.current_row {
@@ -14164,6 +14164,11 @@ impl Worksheet {
     // indexes will be replaced by global/workbook indices before the worksheet
     // is saved. XF indexed are used for cell formats.
     fn format_xf_index(&mut self, format: &Format) -> u32 {
+        // TODO
+        if self.use_constant_memory && format.is_registered {
+            return format.xf_index;
+        }
+
         match self.xf_indices.get_mut(format) {
             Some(xf_index) => *xf_index,
             None => {
@@ -15118,7 +15123,11 @@ impl Worksheet {
         self.write_cols();
 
         // Write the <sheetData> element.
-        if self.data_table.is_empty() && self.notes.is_empty() && self.changed_rows.is_empty() {
+        if !self.has_sheet_data
+            && self.data_table.is_empty()
+            && self.notes.is_empty()
+            && self.changed_rows.is_empty()
+        {
             xml_empty_tag_only(&mut self.writer, "sheetData");
         } else {
             xml_start_tag_only(&mut self.writer, "sheetData");
@@ -16269,10 +16278,24 @@ impl Worksheet {
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
     }
 
+    // Flush the last row of constant memory data when assembling the file.
+    pub(crate) fn flush_last_row(&mut self) {
+        let row_num = self.current_row;
+
+        let has_data = self.data_table.contains_key(&0);
+        let has_row_notes = self.notes.contains_key(&row_num);
+        let has_row_options = self.changed_rows.contains_key(&row_num);
+
+        if has_data || has_row_options || has_row_notes {
+            self.flush_data_row();
+            self.current_row += 1;
+        }
+    }
+
     // Write out all the row and cell data in the worksheet data table.
     #[allow(clippy::too_many_lines)]
-    pub(crate) fn flush_data_row(&mut self) {
-        let mut col_names = HashMap::new(); // TODO make staic.
+    fn flush_data_row(&mut self) {
+        let mut col_names = HashMap::new(); // TODO make static.
         let row_num = self.current_row;
 
         // Swap out the worksheet data structures so we can iterate over them and

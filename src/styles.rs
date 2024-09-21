@@ -7,6 +7,7 @@
 mod tests;
 
 use std::io::Cursor;
+use std::mem;
 
 use crate::format::Format;
 use crate::xmlwriter::{
@@ -236,7 +237,7 @@ impl<'a> Styles<'a> {
 
     // Write the <name> element.
     fn write_font_name(&mut self, font: &Font) {
-        let attributes = [("val", font.name.clone())];
+        let attributes = [("val", font.name.as_ref())];
 
         if self.is_rich_string_style {
             xml_empty_tag(&mut self.writer, "rFont", &attributes);
@@ -361,6 +362,21 @@ impl<'a> Styles<'a> {
             return;
         }
 
+        // Excel reverses the role of foreground and background colors for a
+        // solid fill in an XF format.
+        let mut foreground_color_attributes = fill.foreground_color.attributes();
+        let mut background_color_attributes = fill.background_color.attributes();
+        if !dxf_format
+            && fill.pattern == FormatPattern::Solid
+            && fill.background_color != Color::Default
+            && fill.foreground_color != Color::Default
+        {
+            mem::swap(
+                &mut foreground_color_attributes,
+                &mut background_color_attributes,
+            );
+        }
+
         // Start the "fill" element.
         xml_start_tag_only(&mut self.writer, "fill");
 
@@ -377,8 +393,7 @@ impl<'a> Styles<'a> {
 
         // Write the foreground color.
         if fill.foreground_color != Color::Default && fill.foreground_color != Color::Automatic {
-            let attributes = fill.foreground_color.attributes();
-            xml_empty_tag(&mut self.writer, "fgColor", &attributes);
+            xml_empty_tag(&mut self.writer, "fgColor", &foreground_color_attributes);
         }
 
         // Write the background color.
@@ -386,8 +401,7 @@ impl<'a> Styles<'a> {
             let attributes = [("indexed", "64")];
             xml_empty_tag(&mut self.writer, "bgColor", &attributes);
         } else {
-            let attributes = fill.background_color.attributes();
-            xml_empty_tag(&mut self.writer, "bgColor", &attributes);
+            xml_empty_tag(&mut self.writer, "bgColor", &background_color_attributes);
         }
 
         xml_end_tag(&mut self.writer, "patternFill");

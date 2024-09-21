@@ -220,7 +220,6 @@ mod tests;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{BufReader, Cursor, Read, Seek, Write};
-use std::mem;
 use std::path::{Path, PathBuf};
 
 use crate::xmlwriter::{
@@ -386,7 +385,7 @@ impl Workbook {
     pub fn new() -> Workbook {
         let writer = Cursor::new(Vec::with_capacity(2048));
 
-        let mut workbook = Workbook {
+        Workbook {
             writer,
             properties: DocProperties::new(),
             font_count: 0,
@@ -398,11 +397,11 @@ impl Workbook {
             read_only_mode: 0,
             has_hyperlink_style: false,
             worksheets: vec![],
-            xf_formats: vec![],
+            xf_formats: vec![Format::default()],
             dxf_formats: vec![],
             defined_names: vec![],
             user_defined_names: vec![],
-            xf_indices: HashMap::new(),
+            xf_indices: HashMap::from([(Format::default(), 0)]),
             dxf_indices: HashMap::new(),
             embedded_images: vec![],
             is_xlsm_file: false,
@@ -412,12 +411,7 @@ impl Workbook {
             has_comments: false,
             num_worksheets: 0,
             num_chartsheets: 0,
-        };
-
-        // Initialize the workbook with the same function used to reset it.
-        Self::reset(&mut workbook);
-
-        workbook
+        }
     }
 
     /// Add a new worksheet to a workbook.
@@ -1625,6 +1619,18 @@ impl Workbook {
         self
     }
 
+    /// Set the index for the format. This is currently only used in testing but
+    /// may be used publicly at a later stage. TODO
+    ///
+    /// # Parameters
+    ///
+    /// `format` - The [`Format`] instance to register.
+    ///
+    pub fn register_format(&mut self, format: &mut Format) {
+        format.xf_index = self.format_xf_index(format);
+        format.is_registered = true;
+    }
+
     // -----------------------------------------------------------------------
     // Internal function/methods.
     // -----------------------------------------------------------------------
@@ -1632,15 +1638,6 @@ impl Workbook {
     // Reset workbook between saves.
     fn reset(&mut self) {
         xmlwriter::reset(&mut self.writer);
-
-        self.xf_indices = HashMap::from([(Format::default(), 0)]);
-        self.xf_formats = vec![Format::default()];
-        self.dxf_indices = HashMap::new();
-        self.dxf_formats = vec![];
-        self.font_count = 0;
-        self.fill_count = 0;
-        self.border_count = 0;
-        self.num_formats = vec![];
 
         for worksheet in &mut self.worksheets {
             worksheet.reset();
@@ -1666,8 +1663,7 @@ impl Workbook {
         for worksheet in &self.worksheets {
             if worksheet.has_hyperlink_style {
                 let format = Format::new().set_hyperlink();
-                self.xf_indices.insert(format.clone(), 1);
-                self.xf_formats.push(format);
+                self.format_xf_index(&format);
                 self.has_hyperlink_style = true;
                 break;
             }
@@ -2167,14 +2163,15 @@ impl Workbook {
 
         for xf_format in &mut self.xf_formats {
             let fill = &mut xf_format.fill;
+            // TODO
             // For a solid fill (pattern == "solid") Excel reverses the role of
-            // foreground and background colors, and
-            if fill.pattern == FormatPattern::Solid
-                && fill.background_color != Color::Default
-                && fill.foreground_color != Color::Default
-            {
-                mem::swap(&mut fill.foreground_color, &mut fill.background_color);
-            }
+            // foreground and background colors.
+            // if fill.pattern == FormatPattern::Solid
+            //     && fill.background_color != Color::Default
+            //     && fill.foreground_color != Color::Default
+            // {
+            //     mem::swap(&mut fill.foreground_color, &mut fill.background_color);
+            // }
 
             // If the user specifies a foreground or background color without a
             // pattern they probably wanted a solid fill, so we fill in the
@@ -2241,7 +2238,6 @@ impl Workbook {
         let mut unique_num_formats: HashMap<String, u16> = HashMap::new();
         // User defined number formats in Excel start from index 164.
         let mut index = 164;
-        let mut num_formats = vec![];
         let xf_formats = [&mut self.xf_formats, &mut self.dxf_formats];
 
         for xf_format in xf_formats.into_iter().flatten() {
@@ -2266,13 +2262,11 @@ impl Workbook {
 
                     // Only store XF formats (not DXF formats).
                     if !xf_format.is_dxf_format {
-                        num_formats.push(num_format_string);
+                        self.num_formats.push(num_format_string);
                     }
                 }
             }
         }
-
-        self.num_formats = num_formats;
     }
 
     // Collect some workbook level metadata to help generate the xlsx
