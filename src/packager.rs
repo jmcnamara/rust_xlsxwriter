@@ -429,12 +429,14 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.zip.start_file(filename, self.zip_options)?;
 
         if worksheet.use_constant_memory {
-            // We write the constant memory style worksheet in 3 sections. The
-            // start and end are in-memory. The data is on disk. TODO
+            // Write the constant memory style worksheet in 3 sections.
+
+            // Section 1. In memory metadata at start of the file.
             worksheet.assemble_xml_file_start();
             self.zip.write_all(worksheet.writer.get_ref())?;
 
-            // Flush the last remaining row.
+            // Section 2. On disk cell data.
+            // We also need to flush the last remaining row.
             worksheet.flush_last_row();
 
             let mut buffer = Vec::new();
@@ -446,11 +448,12 @@ impl<W: Write + Seek + Send> Packager<W> {
                 .unwrap();
             self.zip.write_all(&buffer)?;
 
-            // Writer the remaining sections of the worksheet file.
+            // Section 3. In memory metadata at end of the file.
             xmlwriter::reset(&mut worksheet.writer);
             worksheet.assemble_xml_file_end();
             self.zip.write_all(worksheet.writer.get_ref())?;
         } else {
+            // Non "constant memory" mode is all in memory.
             self.zip.write_all(worksheet.writer.get_ref())?;
         }
 

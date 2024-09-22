@@ -69,9 +69,11 @@ fn main() -> Result<(), XlsxError> {
 
     // Create the workbook and fill in the required cell data.
     let mut workbook = Workbook::new();
-    let worksheet = workbook
-        .add_worksheet()
-        .set_constant_memory_mode(constant_memory)?;
+    let worksheet = if constant_memory {
+        workbook.add_worksheet_with_constant_memory()
+    } else {
+        workbook.add_worksheet()
+    };
 
     for row in 0..row_max {
         for col in 0..col_max {

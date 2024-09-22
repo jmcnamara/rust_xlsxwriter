@@ -221,6 +221,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{BufReader, Cursor, Read, Seek, Write};
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, RwLock};
 
 use crate::xmlwriter::{
     self, xml_data_element, xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag,
@@ -325,7 +326,7 @@ pub struct Workbook {
     pub(crate) is_xlsm_file: bool,
     pub(crate) has_comments: bool,
 
-    xf_indices: HashMap<Format, u32>,
+    xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
     dxf_indices: HashMap<Format, u32>,
     active_tab: u16,
     first_sheet: u16,
@@ -397,11 +398,11 @@ impl Workbook {
             read_only_mode: 0,
             has_hyperlink_style: false,
             worksheets: vec![],
-            xf_formats: vec![Format::default()],
+            xf_formats: vec![],
             dxf_formats: vec![],
             defined_names: vec![],
             user_defined_names: vec![],
-            xf_indices: HashMap::from([(Format::default(), 0)]),
+            xf_indices: Arc::new(RwLock::new(HashMap::from([(Format::default(), 0)]))),
             dxf_indices: HashMap::new(),
             embedded_images: vec![],
             is_xlsm_file: false,
@@ -474,6 +475,24 @@ impl Workbook {
 
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
+
+        self.worksheets.push(worksheet);
+        let worksheet = self.worksheets.last_mut().unwrap();
+
+        worksheet
+    }
+
+    /// TODO
+    pub fn add_worksheet_with_constant_memory(&mut self) -> &mut Worksheet {
+        let name = format!("Sheet{}", self.num_worksheets + 1);
+        self.num_worksheets += 1;
+
+        let mut worksheet = Worksheet::new();
+        worksheet.set_name(&name).unwrap();
+
+        worksheet.workbook_xf_indices = Arc::clone(&self.xf_indices);
+        worksheet.use_constant_memory = true;
+        worksheet.has_workbook_globals = true;
 
         self.worksheets.push(worksheet);
         let worksheet = self.worksheets.last_mut().unwrap();
@@ -1620,15 +1639,19 @@ impl Workbook {
     }
 
     /// Set the index for the format. This is currently only used in testing but
-    /// may be used publicly at a later stage. TODO
+    /// may be used publicly at a later stage. TODO make this internal/undocumented?
     ///
     /// # Parameters
     ///
     /// `format` - The [`Format`] instance to register.
     ///
     pub fn register_format(&mut self, format: &mut Format) {
-        format.xf_index = self.format_xf_index(format);
-        format.is_registered = true;
+        self.format_xf_index(format);
+    }
+
+    /// TODO - make this internal/undocumented?
+    pub fn shared_formats(&self) -> Arc<RwLock<HashMap<Format, u32>>> {
+        Arc::clone(&self.xf_indices)
     }
 
     // -----------------------------------------------------------------------
@@ -1729,8 +1752,20 @@ impl Workbook {
             worksheet_dxf_indices.push(indices);
         }
 
+        // We extract the XF Formats used as keys in the index lookup to a
+        // vector of formats sorted by their index number.
+        let xf_indices = self.xf_indices.read().expect("RwLock poisoned");
+
+        let mut xf_indices_vec: Vec<(&Format, &u32)> = xf_indices.iter().collect();
+        xf_indices_vec.sort_by(|a, b| a.1.cmp(b.1));
+
+        let xf_formats: Vec<Format> = xf_indices_vec.iter().map(|x| x.0.clone()).collect();
+        self.xf_formats = xf_formats;
+
+        drop(xf_indices);
+
+        // Map worksheet/local format indices to the workbook/global values.
         for (i, worksheet) in self.worksheets.iter_mut().enumerate() {
-            // Map worksheet/local format indices to the workbook/global values.
             worksheet.set_global_xf_indices(&worksheet_xf_indices[i]);
             worksheet.set_global_dxf_indices(&worksheet_dxf_indices[i]);
 
@@ -2080,19 +2115,26 @@ impl Workbook {
         }
     }
 
-    // Evaluate and clone formats from worksheets into a workbook level vector
-    // of unique formats. Also return the index for use in remapping worksheet
-    // format indices.
+    // Evaluate a format and return its index number if already seen/used or
+    // store it and return a new index.
     fn format_xf_index(&mut self, format: &Format) -> u32 {
-        match self.xf_indices.get_mut(format) {
-            Some(xf_index) => *xf_index,
-            None => {
-                let xf_index = self.xf_formats.len() as u32;
-                self.xf_formats.push(format.clone());
-                self.xf_indices.insert(format.clone(), xf_index);
-                xf_index
-            }
+        // Try a read() lock first to check if the format is known.
+        let xf_indices = self.xf_indices.read().expect("RwLock poisoned");
+
+        if let Some(xf_index) = xf_indices.get(format) {
+            return *xf_index;
         }
+
+        // Index wasn't found, so drop the read() lock and get a write() lock to
+        // add the format and create a new index.
+        drop(xf_indices);
+
+        // Add the new format and give it an index.
+        let mut xf_indices = self.xf_indices.write().expect("RwLock poisoned");
+        let xf_index = xf_indices.len() as u32;
+        xf_indices.insert(format.clone(), xf_index);
+
+        xf_index
     }
 
     fn format_dxf_index(&mut self, format: &Format) -> u32 {

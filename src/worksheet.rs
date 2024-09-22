@@ -1249,7 +1249,7 @@ use std::fs::File;
 use std::io::Write;
 use std::io::{BufWriter, Cursor};
 use std::mem;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use tempfile::tempfile;
 
@@ -1412,6 +1412,8 @@ pub struct Worksheet {
     pub(crate) use_constant_memory: bool,
     pub(crate) file_writer: BufWriter<File>,
     pub(crate) current_row: RowNum,
+    pub(crate) workbook_xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
+    pub(crate) has_workbook_globals: bool,
 
     // These collections need to be reset on resave.
     drawing_rel_ids: HashMap<String, u32>,
@@ -1430,6 +1432,7 @@ pub struct Worksheet {
     table_cells: HashMap<(RowNum, ColNum), usize>,
     dimensions: CellRange,
     xf_indices: HashMap<Format, u32>,
+
     dxf_indices: HashMap<Format, u32>,
     global_xf_indices: Vec<u32>,
     global_dxf_indices: Vec<u32>,
@@ -1713,6 +1716,8 @@ impl Worksheet {
             has_sheet_data: false,
             current_row: 0,
             file_writer,
+            workbook_xf_indices: Arc::new(RwLock::new(HashMap::new())),
+            has_workbook_globals: false,
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -1905,17 +1910,6 @@ impl Worksheet {
     ///
     pub fn name(&self) -> String {
         self.name.clone()
-    }
-
-    /// TODO doc
-    ///
-    /// # Errors
-    ///
-    pub fn set_constant_memory_mode(&mut self, enable: bool) -> Result<&mut Worksheet, XlsxError> {
-        // TODO. Add error?
-        self.use_constant_memory = enable;
-
-        Ok(self)
     }
 
     /// Write generic data to a cell.
@@ -13723,7 +13717,7 @@ impl Worksheet {
     // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
         if self.use_constant_memory {
-            // This is the constant-memory mode. Only one row of data is stored. TODO
+            // In constant-memory mode only one row of data is stored.
 
             // Ignore already flushed/written rows.
             if row < self.current_row {
@@ -13750,7 +13744,7 @@ impl Worksheet {
                 }
             }
         } else {
-            // This is the in-memory mode. All cell data is stored.
+            // In standard-memory mode all cell data is stored.
             match self.data_table.entry(row) {
                 Entry::Occupied(mut entry) => {
                     // The row already exists. Insert/replace column value.
@@ -14160,15 +14154,43 @@ impl Worksheet {
         true
     }
 
-    // Store local copies of unique formats passed to the write methods. These
-    // indexes will be replaced by global/workbook indices before the worksheet
-    // is saved. XF indexed are used for cell formats.
+    // Lookup a Format to get a unique index that identies it based on its
+    // properties. This is either done from the global lookup table (if we have
+    // a copy) or from a local lookup that we will reconcile with the parent
+    // workbook later.
     fn format_xf_index(&mut self, format: &Format) -> u32 {
-        // TODO
-        if self.use_constant_memory && format.is_registered {
-            return format.xf_index;
+        if self.has_workbook_globals {
+            self.format_xf_index_global(format)
+        } else {
+            self.format_xf_index_local(format)
+        }
+    }
+
+    // Look up the Format index from the workbook/global format index table via
+    // the worksheet's Arc<RwLock<HashMap>> clone.
+    fn format_xf_index_global(&mut self, format: &Format) -> u32 {
+        // Try a read() lock first to see if the format is known.
+        let xf_indices = self.workbook_xf_indices.read().expect("RwLock poisoned");
+
+        if let Some(xf_index) = xf_indices.get(format) {
+            return *xf_index;
         }
 
+        // Index wasn't found, so drop the read() lock and get a write() lock to
+        // add the format and create a new index.
+        drop(xf_indices);
+
+        // Add the new format and give it an index.
+        let mut xf_indices = self.workbook_xf_indices.write().expect("RwLock poisoned");
+        let xf_index = xf_indices.len() as u32;
+        xf_indices.insert(format.clone(), xf_index);
+
+        xf_index
+    }
+
+    // Look up the Format index from the worksheet/local format index table.
+    // This will be reconciled with the parent workbook when the file is saved.
+    fn format_xf_index_local(&mut self, format: &Format) -> u32 {
         match self.xf_indices.get_mut(format) {
             Some(xf_index) => *xf_index,
             None => {

@@ -11,17 +11,16 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let format = Format::new().set_bold().set_italic();
+    let bold = Format::new().set_bold();
+    let italic = Format::new().set_italic();
 
     // Constant memory worksheet.
     let worksheet = workbook.add_worksheet_with_constant_memory();
-    worksheet.write_number_with_format(0, 0, 123, &format)?;
-    worksheet.set_portrait();
+    worksheet.write_number_with_format(0, 0, 123, &bold)?;
 
-    // Standard in-memory worksheet.
-    let worksheet = workbook.add_worksheet();
-    worksheet.write_number_with_format(0, 0, 123, &format)?;
-    worksheet.set_portrait();
+    // Constant memory worksheet.
+    let worksheet = workbook.add_worksheet_with_constant_memory();
+    worksheet.write_number_with_format(0, 0, 123, &italic)?;
 
     workbook.save(filename)?;
 
@@ -29,9 +28,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_optimize21() {
+fn test_optimize22() {
     let test_runner = common::TestRunner::new()
-        .set_name("optimize21")
+        .set_name("optimize22")
         .set_function(create_new_xlsx_file)
         .initialize();
 

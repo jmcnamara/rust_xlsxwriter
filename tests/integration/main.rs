@@ -730,6 +730,7 @@ mod optimize01;
 mod optimize02;
 mod optimize20;
 mod optimize21;
+mod optimize22;
 mod overlay01;
 mod overlay02;
 mod overlay03;

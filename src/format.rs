@@ -416,7 +416,6 @@ use crate::Color;
 #[derive(Debug, Clone, Eq)]
 
 pub struct Format {
-    pub(crate) xf_index: u32,
     pub(crate) dxf_index: u32,
     pub(crate) font_index: u16,
     pub(crate) fill_index: u16,
@@ -450,7 +449,6 @@ pub struct Format {
     // Non-UI properties.
     pub(crate) quote_prefix: bool,
     pub(crate) is_dxf_format: bool,
-    pub(crate) is_registered: bool,
 }
 
 impl Hash for Format {
@@ -512,7 +510,6 @@ impl Format {
     /// ```
     pub fn new() -> Format {
         Format {
-            xf_index: 0,
             dxf_index: 0,
             font_index: 0,
             fill_index: 0,
@@ -532,7 +529,6 @@ impl Format {
             num_format_index: 0,
             quote_prefix: false,
             is_dxf_format: false,
-            is_registered: false,
         }
     }
 

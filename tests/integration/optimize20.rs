@@ -12,14 +12,10 @@ use rust_xlsxwriter::{Format, Workbook, XlsxError};
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let mut bold = Format::new().set_bold();
-    let mut num_format = Format::new().set_num_format("0.00");
+    let bold = Format::new().set_bold();
+    let num_format = Format::new().set_num_format("0.00");
 
-    // Register the formats.
-    workbook.register_format(&mut num_format);
-    workbook.register_format(&mut bold);
-
-    let worksheet = workbook.add_worksheet().set_constant_memory_mode(true)?;
+    let worksheet = workbook.add_worksheet_with_constant_memory();
 
     worksheet.write(1, 1, "Apple")?;
     worksheet.write(1, 3, 1.23456)?;
