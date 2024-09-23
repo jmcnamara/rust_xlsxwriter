@@ -30,6 +30,7 @@ pub struct Styles<'a> {
     has_hyperlink_style: bool,
     has_comments: bool,
     is_rich_string_style: bool,
+    hyperlink_font_id: u16,
 }
 
 impl<'a> Styles<'a> {
@@ -64,6 +65,7 @@ impl<'a> Styles<'a> {
             has_hyperlink_style,
             has_comments,
             is_rich_string_style,
+            hyperlink_font_id: 0,
         }
     }
 
@@ -131,10 +133,17 @@ impl<'a> Styles<'a> {
         xml_start_tag(&mut self.writer, "fonts", &attributes);
 
         // Write the cell font elements.
+        let mut font_id = 0;
         for xf_format in self.xf_formats {
             // Write the font element.
             if xf_format.has_font {
                 self.write_font(&xf_format.font, false);
+
+                if xf_format.font.is_hyperlink {
+                    self.hyperlink_font_id = font_id;
+                }
+
+                font_id += 1;
             }
         }
 
@@ -525,15 +534,15 @@ impl<'a> Styles<'a> {
     // Write the style <xf> element for the "Hyperlink" style.
     fn write_hyperlink_style_xf(&mut self) {
         let attributes = [
-            ("numFmtId", "0"),
-            ("fontId", "1"),
-            ("fillId", "0"),
-            ("borderId", "0"),
-            ("applyNumberFormat", "0"),
-            ("applyFill", "0"),
-            ("applyBorder", "0"),
-            ("applyAlignment", "0"),
-            ("applyProtection", "0"),
+            ("numFmtId", "0".to_string()),
+            ("fontId", self.hyperlink_font_id.to_string()),
+            ("fillId", "0".to_string()),
+            ("borderId", "0".to_string()),
+            ("applyNumberFormat", "0".to_string()),
+            ("applyFill", "0".to_string()),
+            ("applyBorder", "0".to_string()),
+            ("applyAlignment", "0".to_string()),
+            ("applyProtection", "0".to_string()),
         ];
 
         xml_start_tag(&mut self.writer, "xf", &attributes);

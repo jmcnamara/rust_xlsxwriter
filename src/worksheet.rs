@@ -13384,7 +13384,10 @@ impl Worksheet {
         };
 
         self.insert_cell(row, col, cell);
-        self.uses_string_table = true;
+
+        if !self.use_constant_memory {
+            self.uses_string_table = true;
+        }
 
         Ok(self)
     }
@@ -14205,6 +14208,15 @@ impl Worksheet {
         }
     }
 
+    // Get the remapped local to global format index.
+    fn get_global_xf_index(&self, xf_index: u32) -> u32 {
+        if self.has_workbook_globals {
+            xf_index
+        } else {
+            self.global_xf_indices[xf_index as usize]
+        }
+    }
+
     /// Get the local instance DXF id for a format.
     ///
     /// Get the local instance DXF id for a format. These indexes will be
@@ -14279,7 +14291,7 @@ impl Worksheet {
 
         // Finally convert the local format index into a global/workbook index.
         if xf_index != 0 {
-            xf_index = self.global_xf_indices[xf_index as usize];
+            xf_index = self.get_global_xf_index(xf_index);
         }
 
         xf_index
@@ -16354,12 +16366,13 @@ impl Worksheet {
 
             match cell {
                 CellType::Number { number, xf_index } | CellType::DateTime { number, xf_index } => {
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_number_cell(
                         &mut self.file_writer,
                         row_num + 1,
                         col_name,
                         *number,
-                        *xf_index,
+                        xf_index,
                     );
                 }
 
@@ -16367,30 +16380,40 @@ impl Worksheet {
                     string_id,
                     xf_index,
                     ..
-                }
-                | CellType::RichString {
-                    string_id,
-                    xf_index,
-                    ..
                 } => {
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_string_cell(
                         &mut self.file_writer,
                         row_num + 1,
                         col_name,
                         *string_id,
-                        *xf_index,
+                        xf_index,
+                    );
+                }
+
+                CellType::RichString {
+                    string, xf_index, ..
+                } => {
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                    Self::write_inline_rich_string_cell(
+                        &mut self.file_writer,
+                        row_num + 1,
+                        col_name,
+                        string,
+                        xf_index,
                     );
                 }
 
                 CellType::InlineString {
                     string, xf_index, ..
                 } => {
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_inline_string_cell(
                         &mut self.file_writer,
                         row_num + 1,
                         col_name,
                         string,
-                        *xf_index,
+                        xf_index,
                     );
                 }
 
@@ -16399,12 +16422,13 @@ impl Worksheet {
                     xf_index,
                     result,
                 } => {
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_formula_cell(
                         &mut self.file_writer,
                         row_num + 1,
                         col_name,
                         formula,
-                        *xf_index,
+                        xf_index,
                         result,
                     );
                 }
@@ -16416,12 +16440,13 @@ impl Worksheet {
                     is_dynamic,
                     range,
                 } => {
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_array_formula_cell(
                         &mut self.file_writer,
                         row_num + 1,
                         col_name,
                         formula,
-                        *xf_index,
+                        xf_index,
                         result,
                         *is_dynamic,
                         range,
@@ -16429,27 +16454,31 @@ impl Worksheet {
                 }
 
                 CellType::Blank { xf_index } => {
-                    Self::write_blank_cell(&mut self.file_writer, row_num + 1, col_name, *xf_index);
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                    Self::write_blank_cell(&mut self.file_writer, row_num + 1, col_name, xf_index);
                 }
 
                 CellType::Boolean { boolean, xf_index } => {
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+
                     Self::write_boolean_cell(
                         &mut self.file_writer,
                         row_num + 1,
                         col_name,
                         *boolean,
-                        *xf_index,
+                        xf_index,
                     );
                 }
 
                 CellType::Error { value, xf_index } => {
+                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     let image_id = self.global_embedded_image_indices[*value as usize];
                     Self::write_error_cell(
                         &mut self.file_writer,
                         row_num + 1,
                         col_name,
                         image_id,
-                        *xf_index,
+                        xf_index,
                     );
                 }
             }
@@ -16533,7 +16562,7 @@ impl Worksheet {
             let xf_index = row_options.xf_index;
 
             if xf_index != 0 {
-                let xf_index = self.global_xf_indices[xf_index as usize];
+                let xf_index = self.get_global_xf_index(xf_index);
                 attributes.push(("s", xf_index.to_string()));
                 attributes.push(("customFormat", "1".to_string()));
             }
@@ -16579,7 +16608,6 @@ impl Worksheet {
             let xf_index = row_options.xf_index;
 
             if xf_index != 0 {
-                let xf_index = self.global_xf_indices[xf_index as usize];
                 attributes.push(("s", xf_index.to_string()));
                 attributes.push(("customFormat", "1".to_string()));
             }
@@ -16670,16 +16698,51 @@ impl Worksheet {
         string: &str,
         xf_index: u32,
     ) {
+        let whitespace = ['\t', '\n', ' '];
+        let preserve_whitespace = string.starts_with(whitespace) || string.ends_with(whitespace);
+        let preserve = if preserve_whitespace {
+            " xml:space=\"preserve\""
+        } else {
+            ""
+        };
+
+        dbg!(&preserve);
+
+        let string = crate::xmlwriter::escape_xml_data(string);
+
         if xf_index > 0 {
             write!(
                 writer,
-                r#"<c r="{col_name}{row}" s="{xf_index}" t="inlineStr"><is><t>{string}</t></is></c>"#
+                r#"<c r="{col_name}{row}" s="{xf_index}" t="inlineStr"><is><t{preserve}>{string}</t></is></c>"#
             )
             .expect(XML_WRITE_ERROR);
         } else {
             write!(
                 writer,
-                r#"<c r="{col_name}{row}" t="inlineStr"><is><t>{string}</t></is></c>"#
+                r#"<c r="{col_name}{row}" t="inlineStr"><is><t{preserve}>{string}</t></is></c>"#
+            )
+            .expect(XML_WRITE_ERROR);
+        }
+    }
+
+    // Write the <c> element for an inline rich string.
+    fn write_inline_rich_string_cell<W: Write>(
+        writer: &mut W,
+        row: RowNum,
+        col_name: &str,
+        string: &str,
+        xf_index: u32,
+    ) {
+        if xf_index > 0 {
+            write!(
+                writer,
+                r#"<c r="{col_name}{row}" s="{xf_index}" t="inlineStr"><is>{string}</is></c>"#
+            )
+            .expect(XML_WRITE_ERROR);
+        } else {
+            write!(
+                writer,
+                r#"<c r="{col_name}{row}" t="inlineStr"><is>{string}</is></c>"#
             )
             .expect(XML_WRITE_ERROR);
         }
@@ -16894,7 +16957,7 @@ impl Worksheet {
         ];
 
         if xf_index > 0 {
-            let xf_index = self.global_xf_indices[xf_index as usize];
+            let xf_index = self.get_global_xf_index(xf_index);
             attributes.push(("style", xf_index.to_string()));
         }
 

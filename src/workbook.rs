@@ -1638,20 +1638,20 @@ impl Workbook {
         self
     }
 
-    /// Set the index for the format. This is currently only used in testing but
-    /// may be used publicly at a later stage. TODO make this internal/undocumented?
+    /// Set the order/index for the format.
+    ///
+    /// This is currently only used in testing to ensure the same format order
+    /// as target Excel files. It can also be used in multithreaded constant
+    /// memory programs to pre-compute the format index so that all uses of the
+    /// format only involve a `RwLock` `read()` and not a `write()`.
     ///
     /// # Parameters
     ///
     /// `format` - The [`Format`] instance to register.
     ///
-    pub fn register_format(&mut self, format: &mut Format) {
+    #[doc(hidden)]
+    pub fn register_format(&mut self, format: &Format) {
         self.format_xf_index(format);
-    }
-
-    /// TODO - make this internal/undocumented?
-    pub fn shared_formats(&self) -> Arc<RwLock<HashMap<Format, u32>>> {
-        Arc::clone(&self.xf_indices)
     }
 
     // -----------------------------------------------------------------------
@@ -1691,6 +1691,16 @@ impl Workbook {
                 break;
             }
         }
+
+        // Also check for hyperlinks in the global format table.
+        let xf_indices = self.xf_indices.read().expect("RwLock poisoned");
+        for format in xf_indices.keys() {
+            if format.font.is_hyperlink {
+                self.has_hyperlink_style = true;
+                break;
+            }
+        }
+        drop(xf_indices);
 
         // Check for duplicate sheet names, which aren't allowed by Excel.
         let mut unique_worksheet_names = HashSet::new();
