@@ -2291,6 +2291,7 @@ impl Workbook {
         // User defined number formats in Excel start from index 164.
         let mut index = 164;
         let xf_formats = [&mut self.xf_formats, &mut self.dxf_formats];
+        self.num_formats = vec![];
 
         for xf_format in xf_formats.into_iter().flatten() {
             if xf_format.num_format_index > 0 {

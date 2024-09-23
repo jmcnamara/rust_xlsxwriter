@@ -1426,6 +1426,8 @@ pub struct Worksheet {
     pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
+    write_ahead: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
+    is_writing_ahead: bool,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
     table_ranges: Vec<CellRange>,
@@ -1610,6 +1612,8 @@ impl Worksheet {
             autofilter_defined_name: DefinedName::new(),
             autofilter_area: String::new(),
             data_table: BTreeMap::new(),
+            write_ahead: BTreeMap::new(),
+            is_writing_ahead: false,
             dimensions,
             merged_ranges: vec![],
             merged_cells: HashMap::new(),
@@ -4816,16 +4820,20 @@ impl Worksheet {
         // Write the first cell in the range.
         self.write_string_with_format(first_row, first_col, string, format)?;
 
-        // Pad out the rest of the range with formatted blanks cells.
-        for row in first_row..=last_row {
+        // Pad out the rest of the range with formatted blanks cells. We split
+        // this into the first row and subsequent rows to allow us to handle
+        // "constant mode" write-ahead.
+        for col in first_col + 1..=last_col {
+            self.write_blank(first_row, col, format)?;
+        }
+
+        self.is_writing_ahead = true;
+        for row in first_row + 1..=last_row {
             for col in first_col..=last_col {
-                // Skip the first cell which was written above.
-                if row == first_row && col == first_col {
-                    continue;
-                }
                 self.write_blank(row, col, format)?;
             }
         }
+        self.is_writing_ahead = false;
 
         // Create a cell range for storage and range testing.
         let cell_range = CellRange::new(first_row, first_col, last_row, last_col);
@@ -13720,46 +13728,52 @@ impl Worksheet {
     // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
         if self.use_constant_memory {
-            // In constant-memory mode only one row of data is stored.
-
             // Ignore already flushed/written rows.
             if row < self.current_row {
+                eprintln!(
+                    "Ignoring write to previously written row {row} in 'constant memory' mode."
+                );
                 return;
             }
 
-            // If this is a new row then flush the previous row.
+            // If this is a new row then either buffer the data when writing
+            // ahead or flush the previous row.
             if row > self.current_row {
-                self.flush_data_row();
-                self.current_row = row;
+                if self.is_writing_ahead {
+                    // Store cell in the write-ahead buffer.
+                    Self::insert_cell_to_table(row, col, cell, &mut self.write_ahead);
+                    return;
+                }
+
+                self.flush_data_row(row);
             }
 
-            // Store all data in row 0.
-            match self.data_table.entry(0) {
-                Entry::Occupied(mut entry) => {
-                    // The row already exists. Insert/replace column value.
-                    let columns = entry.get_mut();
-                    columns.insert(col, cell);
-                }
-                Entry::Vacant(entry) => {
-                    // The row doesn't exist yet.
-                    let columns = BTreeMap::from([(col, cell)]);
-                    entry.insert(columns);
-                }
-            }
+            // Store new constant memory data in row 0 of the data table.
+            Self::insert_cell_to_table(0, col, cell, &mut self.data_table);
         } else {
             // In standard-memory mode all cell data is stored.
-            match self.data_table.entry(row) {
-                Entry::Occupied(mut entry) => {
-                    // The row already exists. Insert/replace column value.
-                    let columns = entry.get_mut();
-                    columns.insert(col, cell);
-                }
-                Entry::Vacant(entry) => {
-                    // The row doesn't exist, create a new row with columns and insert
-                    // the cell value.
-                    let columns = BTreeMap::from([(col, cell)]);
-                    entry.insert(columns);
-                }
+            Self::insert_cell_to_table(row, col, cell, &mut self.data_table);
+        }
+    }
+
+    // Add a cell to one of the data tables.
+    fn insert_cell_to_table(
+        row: RowNum,
+        col: ColNum,
+        cell: CellType,
+        data_table: &mut BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
+    ) {
+        match data_table.entry(row) {
+            Entry::Occupied(mut entry) => {
+                // The row already exists. Insert/replace column value.
+                let columns = entry.get_mut();
+                columns.insert(col, cell);
+            }
+            Entry::Vacant(entry) => {
+                // The row doesn't exist, create a new row with columns and insert
+                // the cell value.
+                let columns = BTreeMap::from([(col, cell)]);
+                entry.insert(columns);
             }
         }
     }
@@ -16312,23 +16326,31 @@ impl Worksheet {
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
     }
 
-    // Flush the last row of constant memory data when assembling the file.
+    // Flush the last row of constant memory data and the write-ahead cache a
+    // when assembling the file.
     pub(crate) fn flush_last_row(&mut self) {
         let row_num = self.current_row;
 
         let has_data = self.data_table.contains_key(&0);
-        let has_row_notes = self.notes.contains_key(&row_num);
+        let has_write_ahead = !self.write_ahead.is_empty();
         let has_row_options = self.changed_rows.contains_key(&row_num);
 
-        if has_data || has_row_options || has_row_notes {
-            self.flush_data_row();
-            self.current_row += 1;
+        dbg!(has_write_ahead);
+
+        if has_data || has_write_ahead || has_row_options {
+            if has_write_ahead {
+                for row in self.write_ahead.clone().keys() {
+                    self.flush_data_row(*row);
+                }
+            }
+
+            self.flush_data_row(self.current_row + 1);
         }
     }
 
     // Write out all the row and cell data in the worksheet data table.
     #[allow(clippy::too_many_lines)]
-    fn flush_data_row(&mut self) {
+    fn flush_data_row(&mut self, next_row: RowNum) {
         let mut col_names = HashMap::new(); // TODO make static.
         let row_num = self.current_row;
 
@@ -16340,15 +16362,23 @@ impl Worksheet {
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
 
         let row_options = temp_changed_rows.get(&row_num);
-        let row_has_notes = self.notes.contains_key(&row_num);
 
         // If there is no column data then only the <row> metadata needs updating.
         let Some(columns) = temp_table.get(&0) else {
-            if row_options.is_some() || row_has_notes {
+            if row_options.is_some() {
                 self.write_constant_table_row(row_num, row_options, false);
             }
 
             mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
+
+            // Replace the "current" row with one from the write ahead buffer.
+            // Or else it defaults to the new clean buffer created above.
+            if let Some(columns) = self.write_ahead.remove(&next_row) {
+                self.data_table.insert(0, columns);
+            }
+
+            self.current_row = next_row;
+
             return;
         };
 
@@ -16485,9 +16515,16 @@ impl Worksheet {
         }
         xml_end_tag(&mut self.file_writer, "row");
 
-        // Swap back in data, except for the self.data_table since we want to
-        // reset it after flushing the row data.
+        // Swap back in changed rows data.
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
+
+        // Replace the "current" row with one from the write ahead buffer. Or
+        // else it defaults to the new clean buffer created above.
+        if let Some(columns) = self.write_ahead.remove(&next_row) {
+            self.data_table.insert(0, columns);
+        }
+
+        self.current_row = next_row;
     }
 
     // Calculate the "spans" attribute of the <row> tag. This is an xlsx

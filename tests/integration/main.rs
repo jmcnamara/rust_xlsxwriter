@@ -741,6 +741,8 @@ mod optimize22;
 mod optimize23;
 mod optimize24;
 mod optimize25;
+mod optimize26;
+mod optimize27;
 mod overlay01;
 mod overlay02;
 mod overlay03;
