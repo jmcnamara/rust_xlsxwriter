@@ -6,24 +6,27 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Note, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet_with_constant_memory();
+    worksheet.set_default_note_author("John");
 
-    // Test that control characters and any other single byte characters are
-    // handled correctly by the SharedStrings module. We skip chr 34 = " in
-    // this test since it isn't encoded by Excel as &quot;.
-    for i in 0u8..128 {
-        if i == 34 {
-            continue;
-        }
+    worksheet.write(0, 0, "Foo")?;
+    worksheet.write(6, 2, "Bar")?;
+    worksheet.write(13, 6, "Baz")?;
 
-        worksheet.write_string(i as u32, 0, (i as char).to_string())?;
-    }
+    let note = Note::new("Some text").add_author_prefix(false);
+    worksheet.insert_note(0, 0, &note)?;
+    worksheet.insert_note(0, 3, &note)?;
+    worksheet.insert_note(6, 2, &note)?;
+    worksheet.insert_note(9, 4, &note)?;
+    worksheet.insert_note(13, 6, &note)?;
+
+    workbook.save(filename)?;
 
     workbook.save(filename)?;
 
@@ -31,9 +34,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_optimize06() {
+fn test_optimize14() {
     let test_runner = common::TestRunner::new()
-        .set_name("optimize06")
+        .set_name("optimize14")
         .set_function(create_new_xlsx_file)
         .initialize();
 

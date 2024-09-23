@@ -16699,16 +16699,14 @@ impl Worksheet {
         xf_index: u32,
     ) {
         let whitespace = ['\t', '\n', ' '];
-        let preserve_whitespace = string.starts_with(whitespace) || string.ends_with(whitespace);
-        let preserve = if preserve_whitespace {
+        let preserve = if string.starts_with(whitespace) || string.ends_with(whitespace) {
             " xml:space=\"preserve\""
         } else {
             ""
         };
 
-        dbg!(&preserve);
-
-        let string = crate::xmlwriter::escape_xml_data(string);
+        let string = crate::xmlwriter::escape_xml_escapes(string);
+        let string = crate::xmlwriter::escape_xml_data(&string);
 
         if xf_index > 0 {
             write!(

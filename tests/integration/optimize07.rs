@@ -14,16 +14,24 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let worksheet = workbook.add_worksheet_with_constant_memory();
 
-    // Test that control characters and any other single byte characters are
-    // handled correctly by the SharedStrings module. We skip chr 34 = " in
-    // this test since it isn't encoded by Excel as &quot;.
-    for i in 0u8..128 {
-        if i == 34 {
-            continue;
-        }
+    let strings = [
+        "_",
+        "_x",
+        "_x0",
+        "_x00",
+        "_x000",
+        "_x0000",
+        "_x0000_",
+        "_x005F_",
+        "_x000G_",
+        "_X0000_",
+        "_x000a_",
+        "_x000A_",
+        "_x0000__x0000_",
+        "__x0000__",
+    ];
 
-        worksheet.write_string(i as u32, 0, (i as char).to_string())?;
-    }
+    worksheet.write_column(0, 0, strings)?;
 
     workbook.save(filename)?;
 
@@ -31,9 +39,9 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_optimize06() {
+fn test_optimize07() {
     let test_runner = common::TestRunner::new()
-        .set_name("optimize06")
+        .set_name("optimize07")
         .set_function(create_new_xlsx_file)
         .initialize();
 

@@ -270,7 +270,7 @@ where
 // Excel escapes control characters with _xHHHH_, see match_xml_char() above. As
 // a result it also escapes any literal strings of that type by encoding the
 // leading underscore. So  "_x0000_" -> _x005F_x0000_.
-fn escape_xml_escapes(original: &str) -> Cow<str> {
+pub(crate) fn escape_xml_escapes(original: &str) -> Cow<str> {
     if !original.contains("_x") {
         return Cow::Borrowed(original);
     }
