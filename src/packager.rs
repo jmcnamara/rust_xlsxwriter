@@ -43,6 +43,7 @@
 use std::collections::HashSet;
 use std::io::{Read, Seek, Write};
 
+use std::sync::{Arc, Mutex};
 #[cfg(not(target_arch = "wasm32"))]
 use std::thread;
 
@@ -115,12 +116,6 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.write_styles_file(workbook)?;
         self.write_workbook_file(workbook)?;
 
-        // Update the shared string table in each worksheet.
-        let mut string_table = SharedStringsTable::new();
-        for worksheet in &mut workbook.worksheets {
-            worksheet.update_string_table_ids(&mut string_table);
-        }
-
         // Assemble, but don't write, the worksheet files in parallel. These are
         // generally the largest files and the threading can help performance if
         // there are multiple large worksheets. We don't do this in "constant
@@ -175,7 +170,8 @@ impl<W: Write + Seek + Send> Packager<W> {
         }
 
         if options.has_sst_table {
-            self.write_shared_strings_file(&string_table)?;
+            let string_table = workbook.string_table.clone();
+            self.write_shared_strings_file(string_table)?;
         }
 
         self.write_core_file(options)?;
@@ -626,7 +622,7 @@ impl<W: Write + Seek + Send> Packager<W> {
     // Write the sharedStrings.xml file.
     pub(crate) fn write_shared_strings_file(
         &mut self,
-        string_table: &SharedStringsTable,
+        string_table: Arc<Mutex<SharedStringsTable>>,
     ) -> Result<(), XlsxError> {
         let mut shared_strings = SharedStrings::new();
 

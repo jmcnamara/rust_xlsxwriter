@@ -7,6 +7,7 @@
 mod tests;
 
 use std::io::Cursor;
+use std::sync::{Arc, Mutex};
 
 use crate::shared_strings_table::SharedStringsTable;
 
@@ -35,11 +36,11 @@ impl SharedStrings {
     // -----------------------------------------------------------------------
 
     // Assemble and write the XML file.
-    pub(crate) fn assemble_xml_file(&mut self, string_table: &SharedStringsTable) {
+    pub(crate) fn assemble_xml_file(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
         xml_declaration(&mut self.writer);
 
         // Write the sst element.
-        self.write_sst(string_table);
+        self.write_sst(string_table.clone());
 
         // Write the sst strings.
         self.write_sst_strings(string_table);
@@ -49,7 +50,9 @@ impl SharedStrings {
     }
 
     // Write the <sst> element.
-    fn write_sst(&mut self, string_table: &SharedStringsTable) {
+    fn write_sst(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
+        let string_table = string_table.lock().unwrap();
+
         let xmls = "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string();
         let count = string_table.count.to_string();
         let unique = string_table.unique_count.to_string();
@@ -60,7 +63,9 @@ impl SharedStrings {
 
     // Write the sst string elements.
     #[allow(clippy::from_iter_instead_of_collect)] // from_iter() is faster than collect() here.
-    fn write_sst_strings(&mut self, string_table: &SharedStringsTable) {
+    fn write_sst_strings(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
+        let string_table = string_table.lock().unwrap();
+
         let mut insertion_order_strings = Vec::from_iter(string_table.strings.iter());
         insertion_order_strings.sort_by_key(|x| x.1);
         let whitespace = ['\t', '\n', ' '];

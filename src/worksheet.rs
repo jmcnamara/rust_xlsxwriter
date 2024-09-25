@@ -1249,7 +1249,7 @@ use std::fs::File;
 use std::io::Write;
 use std::io::{BufWriter, Cursor};
 use std::mem;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 
 use tempfile::tempfile;
 
@@ -13336,7 +13336,7 @@ impl Worksheet {
             CellType::String {
                 string: Arc::from(string),
                 xf_index,
-                string_id: 0,
+                string_id: None,
             }
         };
 
@@ -13388,7 +13388,7 @@ impl Worksheet {
             string: Arc::from(string),
             xf_index,
             raw_string: Arc::from(raw_string),
-            string_id: 0,
+            string_id: None,
         };
 
         self.insert_cell(row, col, cell);
@@ -16153,10 +16153,12 @@ impl Worksheet {
 
     // Store unique strings in the SST table and convert them to a string id
     // which is used when writing out the string cells.
-    pub(crate) fn update_string_table_ids(&mut self, string_table: &mut SharedStringsTable) {
+    pub(crate) fn update_string_table_ids(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
         if !self.uses_string_table {
             return;
         }
+
+        let mut string_table = string_table.lock().unwrap();
 
         for columns in self.data_table.values_mut() {
             for cell in columns.values_mut() {
@@ -16167,8 +16169,10 @@ impl Worksheet {
                     | CellType::RichString {
                         string, string_id, ..
                     } => {
-                        let string_index = string_table.shared_string_index(Arc::clone(string));
-                        *string_id = string_index;
+                        if string_id.is_none() {
+                            let string_index = string_table.shared_string_index(Arc::clone(string));
+                            *string_id = Some(string_index);
+                        }
                     }
                     _ => {}
                 }
@@ -16239,14 +16243,16 @@ impl Worksheet {
                         xf_index,
                         ..
                     } => {
-                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                        Self::write_string_cell(
-                            &mut self.writer,
-                            row_num + 1,
-                            col_name,
-                            *string_id,
-                            xf_index,
-                        );
+                        if let Some(string_id) = string_id {
+                            let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                            Self::write_string_cell(
+                                &mut self.writer,
+                                row_num + 1,
+                                col_name,
+                                *string_id,
+                                xf_index,
+                            );
+                        }
                     }
 
                     CellType::InlineString {
@@ -16461,14 +16467,16 @@ impl Worksheet {
                     xf_index,
                     ..
                 } => {
-                    let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                    Self::write_string_cell(
-                        &mut self.file_writer,
-                        row_num + 1,
-                        col_name,
-                        *string_id,
-                        xf_index,
-                    );
+                    if let Some(string_id) = string_id {
+                        let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
+                        Self::write_string_cell(
+                            &mut self.writer,
+                            row_num + 1,
+                            col_name,
+                            *string_id,
+                            xf_index,
+                        );
+                    }
                 }
 
                 CellType::RichString {
@@ -18135,17 +18143,17 @@ enum CellType {
     String {
         string: Arc<str>,
         xf_index: u32,
-        string_id: u32,
-    },
-    InlineString {
-        string: Arc<str>,
-        xf_index: u32,
+        string_id: Option<u32>,
     },
     RichString {
         string: Arc<str>,
         xf_index: u32,
         raw_string: Arc<str>,
-        string_id: u32,
+        string_id: Option<u32>,
+    },
+    InlineString {
+        string: Arc<str>,
+        xf_index: u32,
     },
 }
 

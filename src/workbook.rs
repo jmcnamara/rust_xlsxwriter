@@ -221,22 +221,24 @@ use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{BufReader, Cursor, Read, Seek, Write};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, RwLock};
-
-use crate::xmlwriter::{
-    self, xml_data_element, xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag,
-    xml_start_tag_only,
-};
+use std::sync::{Arc, Mutex, RwLock};
 
 use crate::error::XlsxError;
 use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
+use crate::shared_strings_table::SharedStringsTable;
 use crate::worksheet::Worksheet;
+
 use crate::{
     utility, Border, Chart, ChartRange, ChartRangeCacheData, ColNum, Color, DefinedName,
     DefinedNameType, DocProperties, Fill, Font, FormatPattern, Image, RowNum, Visible,
     NUM_IMAGE_FORMATS,
+};
+
+use crate::xmlwriter::{
+    self, xml_data_element, xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag,
+    xml_start_tag_only,
 };
 
 /// The `Workbook` struct represents an Excel file in its entirety. It is the
@@ -325,6 +327,7 @@ pub struct Workbook {
     pub(crate) vba_codename: Option<String>,
     pub(crate) is_xlsm_file: bool,
     pub(crate) has_comments: bool,
+    pub(crate) string_table: Arc<Mutex<SharedStringsTable>>,
 
     xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
     dxf_indices: HashMap<Format, u32>,
@@ -403,6 +406,7 @@ impl Workbook {
             defined_names: vec![],
             user_defined_names: vec![],
             xf_indices: Arc::new(RwLock::new(HashMap::from([(Format::default(), 0)]))),
+            string_table: Arc::new(Mutex::new(SharedStringsTable::new())),
             dxf_indices: HashMap::new(),
             embedded_images: vec![],
             is_xlsm_file: false,
@@ -1670,6 +1674,7 @@ impl Workbook {
     // Internal function to prepare the workbook and other component files for
     // writing to the xlsx file.
     #[allow(clippy::similar_names)]
+    #[allow(clippy::too_many_lines)]
     fn save_internal<W: Write + Seek + Send>(&mut self, writer: W) -> Result<(), XlsxError> {
         // Reset workbook and worksheet state data between saves.
         self.reset();
@@ -1690,6 +1695,12 @@ impl Workbook {
                 self.has_hyperlink_style = true;
                 break;
             }
+        }
+
+        // Update the shared string table in each worksheet.
+        for worksheet in &mut self.worksheets {
+            let string_table = self.string_table.clone();
+            worksheet.update_string_table_ids(string_table);
         }
 
         // Also check for hyperlinks in the global format table.
@@ -2358,9 +2369,7 @@ impl Workbook {
 
             package_options.properties = self.properties.clone();
 
-            if worksheet.uses_string_table {
-                package_options.has_sst_table = true;
-            }
+            package_options.has_sst_table = self.string_table.lock().unwrap().count > 0;
 
             if worksheet.has_dynamic_arrays {
                 package_options.has_metadata = true;
