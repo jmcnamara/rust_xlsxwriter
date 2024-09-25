@@ -13745,7 +13745,7 @@ impl Worksheet {
                     return;
                 }
 
-                self.flush_data_row(row);
+                self.flush_to_row(row);
             }
 
             // Store new constant memory data in row 0 of the data table.
@@ -16326,29 +16326,71 @@ impl Worksheet {
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
     }
 
-    // Flush the last row of constant memory data and the write-ahead cache a
-    // when assembling the file.
+    // Flush the last row of constant memory data, the write-ahead cache and any
+    // modified rows.
     pub(crate) fn flush_last_row(&mut self) {
-        let row_num = self.current_row;
+        // First find any write ahead cached rows.
+        let mut remaining_rows: Vec<_> = self.write_ahead.keys().copied().collect();
 
-        let has_data = self.data_table.contains_key(&0);
-        let has_write_ahead = !self.write_ahead.is_empty();
-        let has_row_options = self.changed_rows.contains_key(&row_num);
-
-        dbg!(has_write_ahead);
-
-        if has_data || has_write_ahead || has_row_options {
-            if has_write_ahead {
-                for row in self.write_ahead.clone().keys() {
-                    self.flush_data_row(*row);
+        // Add any changed row elements.
+        let max_changed_row = self.changed_rows.keys().max().unwrap_or(&0);
+        if *max_changed_row > self.current_row {
+            for row_num in self.current_row..=*max_changed_row {
+                if self.changed_rows.contains_key(&row_num) {
+                    remaining_rows.push(row_num);
                 }
             }
+        }
 
-            self.flush_data_row(self.current_row + 1);
+        // Add the current row.
+        remaining_rows.push(self.current_row);
+
+        // Remove any duplicate rows.
+        remaining_rows.sort_unstable();
+        remaining_rows.dedup();
+
+        // If there is data to write (and not just write-ahead or rows) we move
+        // the final row ahead by one. This will start any subsequent write() on
+        // the next row, after a resave.
+        if self.data_table.contains_key(&0) {
+            remaining_rows.push(1 + *remaining_rows.last().unwrap());
+        }
+
+        // Flush all the remaining rows.
+        for remaining_row in remaining_rows {
+            self.flush_data_row(remaining_row);
         }
     }
 
-    // Write out all the row and cell data in the worksheet data table.
+    // Flush all constant memory data up to the next target row.
+    fn flush_to_row(&mut self, next_row: RowNum) {
+        // First find any write ahead cached rows.
+        let mut intemediate_rows: Vec<_> = self
+            .write_ahead
+            .keys()
+            .filter(|x| **x < next_row)
+            .copied()
+            .collect();
+
+        // Add any changed row elements.
+        for row_num in self.current_row + 1..next_row {
+            if self.changed_rows.contains_key(&row_num) {
+                intemediate_rows.push(row_num);
+            }
+        }
+
+        // Remove any duplicate rows.
+        intemediate_rows.sort_unstable();
+        intemediate_rows.dedup();
+
+        for intermediate_row in intemediate_rows {
+            self.flush_data_row(intermediate_row);
+        }
+
+        self.flush_data_row(next_row);
+    }
+
+    // Write out all the row and cell data in the constant memory data table.
     #[allow(clippy::too_many_lines)]
     fn flush_data_row(&mut self, next_row: RowNum) {
         let mut col_names = HashMap::new(); // TODO make static.

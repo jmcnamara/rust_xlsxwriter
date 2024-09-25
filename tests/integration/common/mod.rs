@@ -378,7 +378,6 @@ fn compare_xlsx_files(
             exp_xml_string = spans.replace_all(&exp_xml_string, "").to_string();
         }
 
-
         // Convert the xml strings to vectors for easier comparison.
         let mut exp_xml_vec;
         let mut got_xml_vec;
