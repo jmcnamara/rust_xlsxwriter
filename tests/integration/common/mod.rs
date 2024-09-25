@@ -46,6 +46,7 @@ where
     test_function: Option<F>,
     unique: &'a str,
     has_macros: bool,
+    ignore_spans: bool,
     input_filename: String,
     output_filename: String,
     ignore_files: HashSet<&'a str>,
@@ -62,6 +63,7 @@ where
             test_function: None,
             unique: "",
             has_macros: false,
+            ignore_spans: false,
             input_filename: String::new(),
             output_filename: String::new(),
             ignore_files: HashSet::new(),
@@ -119,6 +121,13 @@ where
         self
     }
 
+    // Ignore row span attributes in sheet.xml files, in "constant memory" mode.
+    #[allow(dead_code)]
+    pub fn ignore_spans(mut self) -> TestRunner<'a, F> {
+        self.ignore_spans = true;
+        self
+    }
+
     // Initialize the in/out filenames once other properties have been set.
     pub fn initialize(mut self) -> TestRunner<'a, F> {
         let extension = if self.has_macros { ".xlsm" } else { ".xlsx" };
@@ -154,6 +163,7 @@ where
             &self.output_filename,
             &self.ignore_files,
             &self.ignore_elements,
+            self.ignore_spans,
         );
 
         assert_eq!(exp, got);
@@ -174,6 +184,7 @@ fn compare_xlsx_files(
     got_file: &str,
     ignore_files: &HashSet<&str>,
     ignore_elements: &HashMap<&str, &str>,
+    ignore_spans: bool,
 ) -> (Vec<String>, Vec<String>) {
     // Open the xlsx files.
     let exp_fh = match File::open(exp_file) {
@@ -360,6 +371,13 @@ fn compare_xlsx_files(
         if filename.starts_with("xl/worksheets/sheet") {
             got_xml_string = got_xml_string.replace(".0</v>", "</v>");
         }
+
+        // Ignore/remove span elements for "constant mode" comparison.
+        if ignore_spans && filename.starts_with("xl/worksheets/sheet") {
+            let spans = static_regex!(r#" spans="\d+:\d+""#);
+            exp_xml_string = spans.replace_all(&exp_xml_string, "").to_string();
+        }
+
 
         // Convert the xml strings to vectors for easier comparison.
         let mut exp_xml_vec;
