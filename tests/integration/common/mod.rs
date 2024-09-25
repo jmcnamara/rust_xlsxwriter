@@ -123,7 +123,7 @@ where
 
     // Ignore row span attributes in sheet.xml files, in "constant memory" mode.
     #[allow(dead_code)]
-    pub fn ignore_spans(mut self) -> TestRunner<'a, F> {
+    pub fn ignore_worksheet_spans(mut self) -> TestRunner<'a, F> {
         self.ignore_spans = true;
         self
     }

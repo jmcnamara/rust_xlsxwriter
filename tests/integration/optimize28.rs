@@ -44,7 +44,7 @@ fn test_optimize28() {
     let test_runner = common::TestRunner::new()
         .set_name("optimize28")
         .set_function(create_new_xlsx_file)
-        .ignore_spans()
+        .ignore_worksheet_spans()
         .initialize();
 
     test_runner.assert_eq();

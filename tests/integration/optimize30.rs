@@ -6,23 +6,22 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let bold = Format::new().set_bold();
 
-    // Constant memory worksheet.
     let worksheet = workbook.add_worksheet_with_constant_memory();
 
-    worksheet.set_row_format(0, &bold)?;
-    worksheet.set_row_format(1, &bold)?;
-    worksheet.set_row_format(2, &bold)?;
-    worksheet.set_row_format(4, &bold)?;
+    worksheet.write_array_formula(0, 0, 2, 0, "=SUM(B1:C1*B2:C2)")?;
 
-    worksheet.write_number(1, 0, 123)?;
-    worksheet.write_number(3, 0, 123)?;
+    worksheet.write_number(0, 1, 0)?;
+    worksheet.write_number(0, 2, 0)?;
+    worksheet.write_number(1, 1, 0)?;
+    worksheet.write_number(1, 2, 0)?;
+    worksheet.write_number(2, 1, 0)?;
+    worksheet.write_number(2, 2, 0)?;
 
     workbook.save(filename)?;
 
@@ -30,10 +29,11 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_optimize29() {
+fn test_optimize30() {
     let test_runner = common::TestRunner::new()
-        .set_name("optimize29")
+        .set_name("optimize30")
         .set_function(create_new_xlsx_file)
+        .ignore_calc_chain()
         .ignore_worksheet_spans()
         .initialize();
 

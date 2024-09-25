@@ -13504,17 +13504,25 @@ impl Worksheet {
 
         self.insert_cell(first_row, first_col, cell);
 
-        // Pad out the rest of the area with formatted zeroes.
-        for row in first_row..=last_row {
+        // Pad out the rest of the range with 0 result cells. We split this into
+        // the first row and subsequent rows to allow us to handle "constant
+        // mode" write-ahead.
+        for col in first_col + 1..=last_col {
+            match format {
+                Some(format) => self.write_number_with_format(first_row, col, 0, format)?,
+                None => self.write_number(first_row, col, 0)?,
+            };
+        }
+        self.is_writing_ahead = true;
+        for row in first_row + 1..=last_row {
             for col in first_col..=last_col {
-                if !(row == first_row && col == first_col) {
-                    match format {
-                        Some(format) => self.write_number_with_format(row, col, 0, format).unwrap(),
-                        None => self.write_number(row, col, 0).unwrap(),
-                    };
-                }
+                match format {
+                    Some(format) => self.write_number_with_format(row, col, 0, format)?,
+                    None => self.write_number(row, col, 0)?,
+                };
             }
         }
+        self.is_writing_ahead = false;
 
         Ok(self)
     }
