@@ -494,9 +494,34 @@ impl Workbook {
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
 
-        worksheet.workbook_xf_indices = Arc::clone(&self.xf_indices);
+        worksheet.use_inline_strings = true;
         worksheet.use_constant_memory = true;
-        worksheet.has_workbook_globals = true;
+
+        worksheet.workbook_xf_indices = Arc::clone(&self.xf_indices);
+        worksheet.has_workbook_global_xfs = true;
+
+        self.worksheets.push(worksheet);
+        let worksheet = self.worksheets.last_mut().unwrap();
+
+        worksheet
+    }
+
+    /// TODO
+    pub fn add_worksheet_with_low_memory(&mut self) -> &mut Worksheet {
+        let name = format!("Sheet{}", self.num_worksheets + 1);
+        self.num_worksheets += 1;
+
+        let mut worksheet = Worksheet::new();
+        worksheet.set_name(&name).unwrap();
+
+        worksheet.use_inline_strings = false;
+        worksheet.use_constant_memory = true;
+
+        worksheet.workbook_xf_indices = Arc::clone(&self.xf_indices);
+        worksheet.has_workbook_global_xfs = true;
+
+        worksheet.string_table = Arc::clone(&self.string_table);
+        worksheet.has_workbook_global_sst = true;
 
         self.worksheets.push(worksheet);
         let worksheet = self.worksheets.last_mut().unwrap();
@@ -1699,8 +1724,10 @@ impl Workbook {
 
         // Update the shared string table in each worksheet.
         for worksheet in &mut self.worksheets {
-            let string_table = self.string_table.clone();
-            worksheet.update_string_table_ids(string_table);
+            if !worksheet.has_workbook_global_sst {
+                let string_table = self.string_table.clone();
+                worksheet.update_string_table_ids(string_table);
+            }
         }
 
         // Also check for hyperlinks in the global format table.

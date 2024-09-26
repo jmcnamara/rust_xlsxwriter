@@ -376,6 +376,7 @@ fn compare_xlsx_files(
         if ignore_spans && filename.starts_with("xl/worksheets/sheet") {
             let spans = static_regex!(r#" spans="\d+:\d+""#);
             exp_xml_string = spans.replace_all(&exp_xml_string, "").to_string();
+            got_xml_string = spans.replace_all(&got_xml_string, "").to_string();
         }
 
         // Convert the xml strings to vectors for easier comparison.

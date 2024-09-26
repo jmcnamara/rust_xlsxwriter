@@ -40,17 +40,17 @@ impl SharedStrings {
         xml_declaration(&mut self.writer);
 
         // Write the sst element.
-        self.write_sst(string_table.clone());
+        self.write_sst(&string_table);
 
         // Write the sst strings.
-        self.write_sst_strings(string_table);
+        self.write_sst_strings(&string_table);
 
         // Close the sst tag.
         xml_end_tag(&mut self.writer, "sst");
     }
 
     // Write the <sst> element.
-    fn write_sst(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
+    fn write_sst(&mut self, string_table: &Arc<Mutex<SharedStringsTable>>) {
         let string_table = string_table.lock().unwrap();
 
         let xmls = "http://schemas.openxmlformats.org/spreadsheetml/2006/main".to_string();
@@ -63,7 +63,7 @@ impl SharedStrings {
 
     // Write the sst string elements.
     #[allow(clippy::from_iter_instead_of_collect)] // from_iter() is faster than collect() here.
-    fn write_sst_strings(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
+    fn write_sst_strings(&mut self, string_table: &Arc<Mutex<SharedStringsTable>>) {
         let string_table = string_table.lock().unwrap();
 
         let mut insertion_order_strings = Vec::from_iter(string_table.strings.iter());

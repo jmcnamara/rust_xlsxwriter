@@ -1380,7 +1380,7 @@ pub struct Worksheet {
     pub(crate) selected: bool,
     pub(crate) visible: Visible,
     pub(crate) first_sheet: bool,
-    pub(crate) uses_string_table: bool,
+    pub(crate) has_local_string_table: bool,
     pub(crate) has_dynamic_arrays: bool,
     pub(crate) print_area_defined_name: DefinedName,
     pub(crate) repeat_row_cols_defined_name: DefinedName,
@@ -1410,10 +1410,14 @@ pub struct Worksheet {
     pub(crate) vml_shape_id: u32,
     pub(crate) is_chartsheet: bool,
     pub(crate) use_constant_memory: bool,
+    pub(crate) use_inline_strings: bool,
     pub(crate) file_writer: BufWriter<File>,
     pub(crate) current_row: RowNum,
     pub(crate) workbook_xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
-    pub(crate) has_workbook_globals: bool,
+    pub(crate) string_table: Arc<Mutex<SharedStringsTable>>,
+
+    pub(crate) has_workbook_global_xfs: bool,
+    pub(crate) has_workbook_global_sst: bool,
 
     // These collections need to be reset on resave.
     drawing_rel_ids: HashMap<String, u32>,
@@ -1604,7 +1608,7 @@ impl Worksheet {
             selected: false,
             visible: Visible::Default,
             first_sheet: false,
-            uses_string_table: false,
+            has_local_string_table: false,
             has_vml: false,
             has_dynamic_arrays: false,
             print_area_defined_name: DefinedName::new(),
@@ -1717,11 +1721,14 @@ impl Worksheet {
             vml_drawing_relationships: vec![],
             is_chartsheet: false,
             use_constant_memory: false,
+            use_inline_strings: false,
             has_sheet_data: false,
             current_row: 0,
             file_writer,
             workbook_xf_indices: Arc::new(RwLock::new(HashMap::new())),
-            has_workbook_globals: false,
+            string_table: Arc::new(Mutex::new(SharedStringsTable::new())),
+            has_workbook_global_xfs: false,
+            has_workbook_global_sst: false,
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -13327,21 +13334,29 @@ impl Worksheet {
         };
 
         // Create the appropriate cell type to hold the data.
-        let cell = if self.use_constant_memory {
+        let cell = if self.use_inline_strings {
             CellType::InlineString {
                 string: Arc::from(string),
                 xf_index,
             }
         } else {
+            let mut string_id = None;
+            let string = Arc::from(string);
+
+            if self.has_workbook_global_sst {
+                let mut string_table = self.string_table.lock().unwrap();
+                string_id = Some(string_table.shared_string_index(Arc::clone(&string)));
+            }
+
             CellType::String {
-                string: Arc::from(string),
+                string,
                 xf_index,
-                string_id: None,
+                string_id,
             }
         };
 
-        if !self.use_constant_memory {
-            self.uses_string_table = true;
+        if !self.use_inline_strings {
+            self.has_local_string_table = true;
         }
 
         self.insert_cell(row, col, cell);
@@ -13384,17 +13399,26 @@ impl Worksheet {
         };
 
         // Create the appropriate cell type to hold the data.
+        let mut string_id = None;
+        let string = Arc::from(string);
+        let raw_string = Arc::from(raw_string);
+
+        if self.has_workbook_global_sst {
+            let mut string_table = self.string_table.lock().unwrap();
+            string_id = Some(string_table.shared_string_index(Arc::clone(&string)));
+        }
+
         let cell = CellType::RichString {
-            string: Arc::from(string),
+            string,
             xf_index,
-            raw_string: Arc::from(raw_string),
-            string_id: None,
+            raw_string,
+            string_id,
         };
 
         self.insert_cell(row, col, cell);
 
-        if !self.use_constant_memory {
-            self.uses_string_table = true;
+        if !self.use_inline_strings {
+            self.has_local_string_table = true;
         }
 
         Ok(self)
@@ -14184,7 +14208,7 @@ impl Worksheet {
     // a copy) or from a local lookup that we will reconcile with the parent
     // workbook later.
     fn format_xf_index(&mut self, format: &Format) -> u32 {
-        if self.has_workbook_globals {
+        if self.has_workbook_global_xfs {
             self.format_xf_index_global(format)
         } else {
             self.format_xf_index_local(format)
@@ -14232,7 +14256,7 @@ impl Worksheet {
 
     // Get the remapped local to global format index.
     fn get_global_xf_index(&self, xf_index: u32) -> u32 {
-        if self.has_workbook_globals {
+        if self.has_workbook_global_xfs {
             xf_index
         } else {
             self.global_xf_indices[xf_index as usize]
@@ -16154,7 +16178,7 @@ impl Worksheet {
     // Store unique strings in the SST table and convert them to a string id
     // which is used when writing out the string cells.
     pub(crate) fn update_string_table_ids(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
-        if !self.uses_string_table {
+        if !self.has_local_string_table {
             return;
         }
 
@@ -16470,7 +16494,7 @@ impl Worksheet {
                     if let Some(string_id) = string_id {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                         Self::write_string_cell(
-                            &mut self.writer,
+                            &mut self.file_writer,
                             row_num + 1,
                             col_name,
                             *string_id,
