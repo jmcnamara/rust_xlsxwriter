@@ -294,7 +294,7 @@ where
 // a result it also escapes any literal strings of that type by encoding the
 // leading underscore. So  "_x0000_" -> _x005F_x0000_.
 fn escape_xml_escapes(original: &str) -> Cow<str> {
-    if !original.contains("_x00") {
+    if !original.contains("_x") {
         return Cow::Borrowed(original);
     }
 
@@ -303,7 +303,7 @@ fn escape_xml_escapes(original: &str) -> Cow<str> {
     let mut escaped_string = original.to_string();
 
     // Match from right so we can escape target string at the same indices.
-    let matches: Vec<_> = original.rmatch_indices("_x00").collect();
+    let matches: Vec<_> = original.rmatch_indices("_x").collect();
 
     for (index, _) in matches {
         if index + escape_length > string_end {

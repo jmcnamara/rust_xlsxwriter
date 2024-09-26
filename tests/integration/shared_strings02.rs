@@ -28,6 +28,10 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(11, 0, "_x000A_")?;
     worksheet.write_string(12, 0, "_x0000__x0000_")?;
     worksheet.write_string(13, 0, "__x0000__")?;
+    worksheet.write_string(14, 0, "_x597D_")?;
+    worksheet.write_string(15, 0, "_x597d_")?;
+    worksheet.write_string(16, 0, "_x597G_")?;
+    worksheet.write_string(17, 0, "_x_x_x")?;
 
     workbook.save(filename)?;
 
