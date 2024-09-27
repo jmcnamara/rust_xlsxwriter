@@ -5061,6 +5061,9 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// - [`XlsxError::ParameterError`] - Embedded images can only be added to
+    ///   the current row in "constant memory" mode. They cannot be added to a
+    ///   previously written row.
     ///
     /// # Examples
     ///
@@ -7371,20 +7374,32 @@ impl Worksheet {
                 }
             }
 
+            // In constant memory mode add any formulas or totals to the
+            // write-ahead buffer.
+            self.is_writing_ahead = true;
+
+            // Get a copy of the column format or use the default format. This
+            // is mainly to workaround constant memory cases which can't use the
+            // update_cell_format() approach below.
+            let col_format = match &column.format {
+                Some(format) => format.clone(),
+                None => Format::default(),
+            };
+
             // Write the total row strings or formulas.
             if table.show_total_row {
                 if !column.total_label.is_empty() {
-                    self.write_string(last_row, col, &column.total_label)?;
+                    self.write_string_with_format(last_row, col, &column.total_label, &col_format)?;
                 } else if column.total_function != TableFunction::None {
                     let formula = column.total_function();
-                    self.write_formula(last_row, col, formula)?;
+                    self.write_formula_with_format(last_row, col, formula, &col_format)?;
                 }
             }
 
             // Write the column formula as worksheet formulas.
             if let Some(formula) = &column.formula {
                 for row in first_data_row..=last_data_row {
-                    self.write_formula(row, col, formula)?;
+                    self.write_formula_with_format(row, col, formula, &col_format)?;
                 }
             }
 
@@ -7400,6 +7415,9 @@ impl Worksheet {
                     self.update_cell_format(last_row, col, format_index);
                 }
             }
+
+            // Stop writing ahead in constant memory mode.
+            self.is_writing_ahead = false;
         }
 
         // Create a cell range for storage and range testing.
@@ -8604,7 +8622,9 @@ impl Worksheet {
         col: ColNum,
         result: impl Into<String>,
     ) -> &mut Worksheet {
-        if let Some(columns) = self.data_table.get_mut(&row) {
+        let lookup_row = if self.use_constant_memory { 0 } else { row };
+
+        if let Some(columns) = self.data_table.get_mut(&lookup_row) {
             if let Some(cell) = columns.get_mut(&col) {
                 match cell {
                     CellType::Formula {
@@ -12829,9 +12849,15 @@ impl Worksheet {
     pub fn autofit(&mut self) -> &mut Worksheet {
         let mut max_widths: HashMap<ColNum, u16> = HashMap::new();
 
+        let (first_row, last_row) = if self.use_constant_memory {
+            (0, 0)
+        } else {
+            (self.dimensions.first_row, self.dimensions.last_row)
+        };
+
         // Iterate over all of the data in the worksheet and find the max data
         // width for each column.
-        for row_num in self.dimensions.first_row..=self.dimensions.last_row {
+        for row_num in first_row..=last_row {
             if let Some(columns) = self.data_table.get(&row_num) {
                 for col_num in self.dimensions.first_col..=self.dimensions.last_col {
                     if let Some(cell) = columns.get(&col_num) {
@@ -12895,9 +12921,14 @@ impl Worksheet {
 
                         // If the cell is in an autofilter header we add an
                         // additional 16 pixels for the dropdown arrow.
-                        if pixel_width > 0
-                            && self.cells_with_autofilter.contains(&(row_num, col_num))
-                        {
+                        let is_autofilter_row = if self.use_constant_memory {
+                            self.cells_with_autofilter
+                                .contains(&(self.current_row, col_num))
+                        } else {
+                            self.cells_with_autofilter.contains(&(row_num, col_num))
+                        };
+
+                        if pixel_width > 0 && is_autofilter_row {
                             pixel_width += 16;
                         }
 
@@ -13641,6 +13672,14 @@ impl Worksheet {
         // Check row and columns are in the allowed range.
         if !self.check_dimensions(row, col) {
             return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Since embedded images need to have an associated cell error type they
+        // can only be written in the current row for constant memory mode.
+        if self.use_constant_memory && row < self.current_row {
+            return Err(XlsxError::ParameterError(format!(
+                "Cannot embed image to previously written row {row} in 'constant memory' mode."
+            )));
         }
 
         let image_id = match self.embedded_image_ids.get(&image.hash) {
@@ -15138,6 +15177,12 @@ impl Worksheet {
     ) -> Vec<String> {
         let mut headers = vec![];
 
+        let mut lookup_row = first_row;
+
+        if self.use_constant_memory && self.current_row == first_row {
+            lookup_row = 0;
+        }
+
         for col_num in first_col..=last_col {
             headers.push(format!("Column{}", col_num - first_col + 1));
         }
@@ -15146,9 +15191,11 @@ impl Worksheet {
             return headers;
         }
 
-        if let Some(columns) = self.data_table.get(&first_row) {
+        if let Some(columns) = self.data_table.get(&lookup_row) {
             for col_num in first_col..=last_col {
                 if let Some(CellType::String { string, .. }) = columns.get(&col_num) {
+                    headers[(col_num - first_col) as usize] = string.to_string();
+                } else if let Some(CellType::InlineString { string, .. }) = columns.get(&col_num) {
                     headers[(col_num - first_col) as usize] = string.to_string();
                 }
             }

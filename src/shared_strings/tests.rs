@@ -7,6 +7,8 @@
 #[cfg(test)]
 mod shared_strings_tests {
 
+    use std::sync::{Arc, Mutex};
+
     use crate::shared_strings::SharedStrings;
     use crate::shared_strings_table::SharedStringsTable;
     use crate::test_functions::xml_to_vec;
@@ -27,7 +29,9 @@ mod shared_strings_tests {
         string_table.shared_string_index("venus".into());
         string_table.shared_string_index("mars".into());
 
-        shared_strings.assemble_xml_file(&string_table);
+        let string_table = Arc::new(Mutex::new(string_table));
+
+        shared_strings.assemble_xml_file(string_table);
 
         let got = xmlwriter::cursor_to_str(&shared_strings.writer);
         let got = xml_to_vec(got);
@@ -62,7 +66,9 @@ mod shared_strings_tests {
         string_table.shared_string_index("   abcdefg".into());
         string_table.shared_string_index("abcdefg   ".into());
 
-        shared_strings.assemble_xml_file(&string_table);
+        let string_table = Arc::new(Mutex::new(string_table));
+
+        shared_strings.assemble_xml_file(string_table);
 
         let got = xmlwriter::cursor_to_str(&shared_strings.writer);
         let got = xml_to_vec(got);

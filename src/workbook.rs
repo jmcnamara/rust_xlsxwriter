@@ -1683,6 +1683,14 @@ impl Workbook {
         self.format_xf_index(format);
     }
 
+    /// TODO for testing SST
+    #[doc(hidden)]
+    pub fn populate_string_table(&mut self, string: &str, index: u32) {
+        let mut string_table = self.string_table.lock().unwrap();
+
+        string_table.populate_string_index(Arc::from(string), index);
+    }
+
     // -----------------------------------------------------------------------
     // Internal function/methods.
     // -----------------------------------------------------------------------
