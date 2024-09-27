@@ -8622,7 +8622,11 @@ impl Worksheet {
         col: ColNum,
         result: impl Into<String>,
     ) -> &mut Worksheet {
-        let lookup_row = if self.use_constant_memory { 0 } else { row };
+        let lookup_row = if self.use_constant_memory {
+            self.current_row
+        } else {
+            row
+        };
 
         if let Some(columns) = self.data_table.get_mut(&lookup_row) {
             if let Some(cell) = columns.get_mut(&col) {
@@ -12850,7 +12854,7 @@ impl Worksheet {
         let mut max_widths: HashMap<ColNum, u16> = HashMap::new();
 
         let (first_row, last_row) = if self.use_constant_memory {
-            (0, 0)
+            (self.current_row, self.current_row)
         } else {
             (self.dimensions.first_row, self.dimensions.last_row)
         };
@@ -13819,8 +13823,8 @@ impl Worksheet {
                 self.flush_to_row(row);
             }
 
-            // Store new constant memory data in row 0 of the data table.
-            Self::insert_cell_to_table(0, col, cell, &mut self.data_table);
+            // Store new constant memory data in the current row of the data table.
+            Self::insert_cell_to_table(row, col, cell, &mut self.data_table);
         } else {
             // In standard-memory mode all cell data is stored.
             Self::insert_cell_to_table(row, col, cell, &mut self.data_table);
@@ -15177,12 +15181,6 @@ impl Worksheet {
     ) -> Vec<String> {
         let mut headers = vec![];
 
-        let mut lookup_row = first_row;
-
-        if self.use_constant_memory && self.current_row == first_row {
-            lookup_row = 0;
-        }
-
         for col_num in first_col..=last_col {
             headers.push(format!("Column{}", col_num - first_col + 1));
         }
@@ -15191,7 +15189,7 @@ impl Worksheet {
             return headers;
         }
 
-        if let Some(columns) = self.data_table.get(&lookup_row) {
+        if let Some(columns) = self.data_table.get(&first_row) {
             for col_num in first_col..=last_col {
                 if let Some(CellType::String { string, .. }) = columns.get(&col_num) {
                     headers[(col_num - first_col) as usize] = string.to_string();
@@ -16437,7 +16435,7 @@ impl Worksheet {
         // If there is data to write (and not just write-ahead or rows) we move
         // the final row ahead by one. This will start any subsequent write() on
         // the next row, after a resave.
-        if self.data_table.contains_key(&0) {
+        if self.data_table.contains_key(&self.current_row) {
             remaining_rows.push(1 + *remaining_rows.last().unwrap());
         }
 
@@ -16479,7 +16477,7 @@ impl Worksheet {
     #[allow(clippy::too_many_lines)]
     fn flush_data_row(&mut self, next_row: RowNum) {
         let mut col_names = HashMap::new(); // TODO make static.
-        let row_num = self.current_row;
+        let current_row = self.current_row;
 
         // Swap out the worksheet data structures so we can iterate over them and
         // still call self.write_*() methods.
@@ -16488,12 +16486,12 @@ impl Worksheet {
         mem::swap(&mut temp_table, &mut self.data_table);
         mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
 
-        let row_options = temp_changed_rows.get(&row_num);
+        let row_options = temp_changed_rows.get(&current_row);
 
         // If there is no column data then only the <row> metadata needs updating.
-        let Some(columns) = temp_table.get(&0) else {
+        let Some(columns) = temp_table.get(&current_row) else {
             if row_options.is_some() {
-                self.write_constant_table_row(row_num, row_options, false);
+                self.write_constant_table_row(current_row, row_options, false);
             }
 
             mem::swap(&mut temp_changed_rows, &mut self.changed_rows);
@@ -16501,16 +16499,15 @@ impl Worksheet {
             // Replace the "current" row with one from the write ahead buffer.
             // Or else it defaults to the new clean buffer created above.
             if let Some(columns) = self.write_ahead.remove(&next_row) {
-                self.data_table.insert(0, columns);
+                self.data_table.insert(next_row, columns);
             }
-
             self.current_row = next_row;
 
             return;
         };
 
         // The row has data. Write it out cell by cell.
-        self.write_constant_table_row(row_num, row_options, true);
+        self.write_constant_table_row(current_row, row_options, true);
         for (&col_num, cell) in columns {
             // Faster column name lookup for inner loop.
             let col_name = if col_num < 26 {
@@ -16526,7 +16523,7 @@ impl Worksheet {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_number_cell(
                         &mut self.file_writer,
-                        row_num + 1,
+                        current_row + 1,
                         col_name,
                         *number,
                         xf_index,
@@ -16542,7 +16539,7 @@ impl Worksheet {
                         let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                         Self::write_string_cell(
                             &mut self.file_writer,
-                            row_num + 1,
+                            current_row + 1,
                             col_name,
                             *string_id,
                             xf_index,
@@ -16556,7 +16553,7 @@ impl Worksheet {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_inline_rich_string_cell(
                         &mut self.file_writer,
-                        row_num + 1,
+                        current_row + 1,
                         col_name,
                         string,
                         xf_index,
@@ -16569,7 +16566,7 @@ impl Worksheet {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_inline_string_cell(
                         &mut self.file_writer,
-                        row_num + 1,
+                        current_row + 1,
                         col_name,
                         string,
                         xf_index,
@@ -16584,7 +16581,7 @@ impl Worksheet {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_formula_cell(
                         &mut self.file_writer,
-                        row_num + 1,
+                        current_row + 1,
                         col_name,
                         formula,
                         xf_index,
@@ -16602,7 +16599,7 @@ impl Worksheet {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
                     Self::write_array_formula_cell(
                         &mut self.file_writer,
-                        row_num + 1,
+                        current_row + 1,
                         col_name,
                         formula,
                         xf_index,
@@ -16614,7 +16611,12 @@ impl Worksheet {
 
                 CellType::Blank { xf_index } => {
                     let xf_index = self.get_cell_xf_index(*xf_index, row_options, col_num);
-                    Self::write_blank_cell(&mut self.file_writer, row_num + 1, col_name, xf_index);
+                    Self::write_blank_cell(
+                        &mut self.file_writer,
+                        current_row + 1,
+                        col_name,
+                        xf_index,
+                    );
                 }
 
                 CellType::Boolean { boolean, xf_index } => {
@@ -16622,7 +16624,7 @@ impl Worksheet {
 
                     Self::write_boolean_cell(
                         &mut self.file_writer,
-                        row_num + 1,
+                        current_row + 1,
                         col_name,
                         *boolean,
                         xf_index,
@@ -16634,7 +16636,7 @@ impl Worksheet {
                     let image_id = self.global_embedded_image_indices[*value as usize];
                     Self::write_error_cell(
                         &mut self.file_writer,
-                        row_num + 1,
+                        current_row + 1,
                         col_name,
                         image_id,
                         xf_index,
@@ -16650,9 +16652,8 @@ impl Worksheet {
         // Replace the "current" row with one from the write ahead buffer. Or
         // else it defaults to the new clean buffer created above.
         if let Some(columns) = self.write_ahead.remove(&next_row) {
-            self.data_table.insert(0, columns);
+            self.data_table.insert(next_row, columns);
         }
-
         self.current_row = next_row;
     }
 
