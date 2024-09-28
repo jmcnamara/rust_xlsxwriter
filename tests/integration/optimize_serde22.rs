@@ -16,7 +16,7 @@ use serde::Serialize;
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet();
+    let worksheet = workbook.add_worksheet_with_low_memory();
 
     worksheet.set_column_width(1, 10.288)?;
     worksheet.set_column_width(2, 10.288)?;
@@ -41,23 +41,6 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     worksheet.write(0, 9, "Column10")?;
     worksheet.write(0, 10, "Total")?;
 
-    worksheet.write(3, 1, 0)?;
-    worksheet.write(3, 2, 0)?;
-    worksheet.write(3, 3, 0)?;
-    worksheet.write(3, 6, 0)?;
-    worksheet.write(3, 7, 0)?;
-    worksheet.write(3, 8, 0)?;
-    worksheet.write(3, 9, 0)?;
-    worksheet.write(3, 10, 0)?;
-    worksheet.write(4, 1, 0)?;
-    worksheet.write(4, 2, 0)?;
-    worksheet.write(4, 3, 0)?;
-    worksheet.write(4, 6, 0)?;
-    worksheet.write(4, 7, 0)?;
-    worksheet.write(4, 8, 0)?;
-    worksheet.write(4, 9, 0)?;
-    worksheet.write(4, 10, 0)?;
-
     let columns = vec![
         TableColumn::new().set_total_label("Total"),
         TableColumn::default(),
@@ -75,6 +58,23 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     worksheet.add_table(2, 1, 5, 10, &table)?;
 
+    worksheet.write(3, 1, 0)?;
+    worksheet.write(3, 2, 0)?;
+    worksheet.write(3, 3, 0)?;
+    worksheet.write(3, 6, 0)?;
+    worksheet.write(3, 7, 0)?;
+    worksheet.write(3, 8, 0)?;
+    worksheet.write(3, 9, 0)?;
+    worksheet.write(3, 10, 0)?;
+    worksheet.write(4, 1, 0)?;
+    worksheet.write(4, 2, 0)?;
+    worksheet.write(4, 3, 0)?;
+    worksheet.write(4, 6, 0)?;
+    worksheet.write(4, 7, 0)?;
+    worksheet.write(4, 8, 0)?;
+    worksheet.write(4, 9, 0)?;
+    worksheet.write(4, 10, 0)?;
+
     workbook.save(filename)?;
 
     Ok(())
@@ -83,7 +83,7 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Test Worksheet table.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet();
+    let worksheet = workbook.add_worksheet_with_low_memory();
 
     worksheet.write(0, 0, "Column1")?;
     worksheet.write(0, 1, "Column2")?;
@@ -167,12 +167,13 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_serde22_1() {
+fn test_optimize_serde22_1() {
     let test_runner = common::TestRunner::new()
         .set_name("table09")
         .set_function(create_new_xlsx_file_1)
         .ignore_calc_chain()
-        .unique("serde22_1")
+        .unique("optimize_serde22_1")
+        .ignore_worksheet_spans()
         .initialize();
 
     test_runner.assert_eq();
@@ -180,12 +181,13 @@ fn test_serde22_1() {
 }
 
 #[test]
-fn test_serde22_2() {
+fn test_optimize_serde22_2() {
     let test_runner = common::TestRunner::new()
         .set_name("table09")
         .set_function(create_new_xlsx_file_2)
         .ignore_calc_chain()
-        .unique("serde22_2")
+        .unique("optimize_serde22_2")
+        .ignore_worksheet_spans()
         .initialize();
 
     test_runner.assert_eq();

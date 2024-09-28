@@ -16,7 +16,13 @@ use serde::Serialize;
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet();
+    // Pre-populate the string table to get the same order as Excel.
+    workbook.populate_string_table("Column1", 0);
+    workbook.populate_string_table("Column2", 1);
+    workbook.populate_string_table("Column3", 2);
+    workbook.populate_string_table("Column4", 3);
+
+    let worksheet = workbook.add_worksheet_with_low_memory();
 
     worksheet.set_column_width(2, 10.288)?;
     worksheet.set_column_width(3, 10.288)?;
@@ -42,7 +48,8 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 // Test case for Serde serialization. Test Worksheet table.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
-    let worksheet = workbook.add_worksheet();
+
+    let worksheet = workbook.add_worksheet_with_low_memory();
 
     #[derive(Serialize)]
     #[serde(rename_all = "PascalCase")]
@@ -91,12 +98,13 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_serde21_1() {
+fn test_optimize_serde21_1() {
     let test_runner = common::TestRunner::new()
         .set_name("table08")
         .set_function(create_new_xlsx_file_1)
         .ignore_calc_chain()
-        .unique("serde21_1")
+        .unique("optimize_serde21_1")
+        .ignore_worksheet_spans()
         .initialize();
 
     test_runner.assert_eq();
@@ -104,12 +112,13 @@ fn test_serde21_1() {
 }
 
 #[test]
-fn test_serde21_2() {
+fn test_optimize_serde21_2() {
     let test_runner = common::TestRunner::new()
         .set_name("table08")
         .set_function(create_new_xlsx_file_2)
         .ignore_calc_chain()
-        .unique("serde21_2")
+        .unique("optimize_serde21_2")
+        .ignore_worksheet_spans()
         .initialize();
 
     test_runner.assert_eq();

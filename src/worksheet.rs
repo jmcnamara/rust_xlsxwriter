@@ -7362,8 +7362,8 @@ impl Worksheet {
         for (offset, column) in table.columns.iter_mut().enumerate() {
             let col = first_col + offset as u16;
 
-            // Write the header.
-            if table.show_header_row {
+            // Write the header. We skip this when writing serde headers. todo
+            if table.show_header_row && !table.is_serde_table {
                 match &column.header_format {
                     Some(header_format) => {
                         self.write_string_with_format(first_row, col, &column.name, header_format)?;
@@ -10641,6 +10641,7 @@ impl Worksheet {
                 if !header_options.has_headers {
                     table.show_header_row = false;
                 }
+                table.is_serde_table = true;
                 Some(table)
             }
             None => None,

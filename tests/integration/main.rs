@@ -755,6 +755,54 @@ mod optimize_autofit04;
 mod optimize_autofit08;
 mod optimize_embed_image01;
 mod optimize_embed_image02;
+#[cfg(feature = "serde")]
+mod optimize_serde01;
+#[cfg(feature = "serde")]
+mod optimize_serde02;
+#[cfg(feature = "serde")]
+mod optimize_serde03;
+#[cfg(feature = "serde")]
+mod optimize_serde04;
+#[cfg(feature = "serde")]
+mod optimize_serde05;
+#[cfg(feature = "serde")]
+mod optimize_serde06;
+#[cfg(feature = "serde")]
+mod optimize_serde07;
+#[cfg(feature = "serde")]
+mod optimize_serde08;
+#[cfg(feature = "serde")]
+mod optimize_serde09;
+#[cfg(feature = "serde")]
+mod optimize_serde10;
+#[cfg(feature = "serde")]
+mod optimize_serde11;
+#[cfg(feature = "serde")]
+mod optimize_serde12;
+#[cfg(feature = "serde")]
+mod optimize_serde13;
+#[cfg(feature = "serde")]
+mod optimize_serde14;
+#[cfg(feature = "serde")]
+mod optimize_serde15;
+#[cfg(feature = "serde")]
+mod optimize_serde16;
+#[cfg(feature = "serde")]
+mod optimize_serde17;
+#[cfg(feature = "serde")]
+mod optimize_serde18;
+#[cfg(feature = "serde")]
+mod optimize_serde20;
+#[cfg(feature = "serde")]
+mod optimize_serde21;
+#[cfg(feature = "serde")]
+mod optimize_serde22;
+#[cfg(feature = "serde")]
+mod optimize_serde23;
+#[cfg(feature = "serde")]
+mod optimize_serde24;
+#[cfg(feature = "serde")]
+mod optimize_serde25;
 mod optimize_table01;
 mod optimize_table02;
 mod optimize_table03;

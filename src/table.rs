@@ -126,6 +126,7 @@ pub struct Table {
     pub(crate) show_banded_rows: bool,
     pub(crate) show_banded_columns: bool,
     pub(crate) show_autofilter: bool,
+    pub(crate) is_serde_table: bool,
 }
 
 impl Table {
@@ -210,6 +211,7 @@ impl Table {
             show_autofilter: true,
             show_header_row: true,
             show_total_row: false,
+            is_serde_table: false,
         }
     }
 
