@@ -1730,14 +1730,6 @@ impl Workbook {
             }
         }
 
-        // Update the shared string table in each worksheet.
-        for worksheet in &mut self.worksheets {
-            if !worksheet.has_workbook_global_sst {
-                let string_table = self.string_table.clone();
-                worksheet.update_string_table_ids(string_table);
-            }
-        }
-
         // Also check for hyperlinks in the global format table.
         let xf_indices = self.xf_indices.read().expect("RwLock poisoned");
         for format in xf_indices.keys() {
@@ -1864,6 +1856,14 @@ impl Workbook {
 
         // Prepare worksheet tables.
         self.prepare_tables()?;
+
+        // Update the shared string table in each worksheet.
+        for worksheet in &mut self.worksheets {
+            if !worksheet.has_workbook_global_sst {
+                let string_table = self.string_table.clone();
+                worksheet.update_string_table_ids(string_table);
+            }
+        }
 
         // Collect workbook level metadata to help generate the xlsx file.
         let mut package_options = PackagerOptions::new();

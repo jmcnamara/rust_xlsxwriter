@@ -4834,13 +4834,13 @@ impl Worksheet {
             self.write_blank(first_row, col, format)?;
         }
 
-        self.is_writing_ahead = true;
+        self.set_writing_ahead(true);
         for row in first_row + 1..=last_row {
             for col in first_col..=last_col {
                 self.write_blank(row, col, format)?;
             }
         }
-        self.is_writing_ahead = false;
+        self.set_writing_ahead(false);
 
         // Create a cell range for storage and range testing.
         let cell_range = CellRange::new(first_row, first_col, last_row, last_col);
@@ -7376,7 +7376,7 @@ impl Worksheet {
 
             // In constant memory mode add any formulas or totals to the
             // write-ahead buffer.
-            self.is_writing_ahead = true;
+            self.set_writing_ahead(true);
 
             // Get a copy of the column format or use the default format. This
             // is mainly to workaround constant memory cases which can't use the
@@ -7417,7 +7417,7 @@ impl Worksheet {
             }
 
             // Stop writing ahead in constant memory mode.
-            self.is_writing_ahead = false;
+            self.set_writing_ahead(false);
         }
 
         // Create a cell range for storage and range testing.
@@ -10477,7 +10477,7 @@ impl Worksheet {
 
         // Clone the header options to modify it and store it internally.
         let mut header_options = header_options.clone();
-        header_options.struct_name = headers.struct_name.clone();
+        header_options.struct_name.clone_from(&headers.struct_name);
 
         // Create a "custom" header for default fields or replace them with user
         // specified custom fields. The "use_custom_headers_only" overrides the
@@ -10596,11 +10596,21 @@ impl Worksheet {
             // without a format.
             if write_headers {
                 if let Some(format) = &custom_header.header_format {
-                    self.write_with_format(max_row, col, &custom_header.header_name, format)?;
+                    self.write_string_with_format(
+                        max_row,
+                        col,
+                        &custom_header.header_name,
+                        format,
+                    )?;
                 } else if let Some(format) = &header_options.header_format {
-                    self.write_with_format(max_row, col, &custom_header.header_name, format)?;
+                    self.write_string_with_format(
+                        max_row,
+                        col,
+                        &custom_header.header_name,
+                        format,
+                    )?;
                 } else {
-                    self.write(max_row, col, &custom_header.header_name)?;
+                    self.write_string(max_row, col, &custom_header.header_name)?;
                 };
             }
 
@@ -13009,6 +13019,13 @@ impl Worksheet {
     // Crate level helper methods.
     // -----------------------------------------------------------------------
 
+    // Set the write ahead mode when using constant memory.
+    fn set_writing_ahead(&mut self, enable: bool) {
+        if self.use_constant_memory {
+            self.is_writing_ahead = enable;
+        }
+    }
+
     // Get the minimum row number for the dimension check/set.
     fn get_min_row(&self) -> RowNum {
         if self.dimensions.first_row == ROW_MAX {
@@ -13572,7 +13589,7 @@ impl Worksheet {
                 None => self.write_number(first_row, col, 0)?,
             };
         }
-        self.is_writing_ahead = true;
+        self.set_writing_ahead(true);
         for row in first_row + 1..=last_row {
             for col in first_col..=last_col {
                 match format {
@@ -13581,7 +13598,7 @@ impl Worksheet {
                 };
             }
         }
-        self.is_writing_ahead = false;
+        self.set_writing_ahead(false);
 
         Ok(self)
     }
