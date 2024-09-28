@@ -21,9 +21,9 @@ serde = {version = "1.0.203", features = ["derive"], optional = true}
 chrono = {version = "0.4.38", default-features = false, features = ["clock", "wasmbind", "serde"], optional = true}
 js-sys = {version = "0.3.69", optional = true}
 polars = {version = "0.43", default-features = false, features = [], optional = true}
+tempfile =  {version = "3.12.0", optional = true}
 wasm-bindgen = {version = "0.2.92", optional = true}
 rust_xlsxwriter_derive = {version = "0.2.0", optional = true}
-tempfile = "3.12.0"
 
 [dev-dependencies]
 regex = "1.10.5"
@@ -40,6 +40,9 @@ zlib = ["zip/deflate-zlib"]
 # `chrono`: Add support for Chrono dates/times in addition to the native
 # ExcelDateTime types.
 chrono = ["dep:chrono"]
+
+# Enable "constant memory" when writing worksheet data. See TODO.
+constant_memory = ["dep:tempfile"]
 
 # `polars`: Add support for mapping between `PolarsError` and
 # `rust_xlsxwriter::XlsxError` to make code that handles both types of error

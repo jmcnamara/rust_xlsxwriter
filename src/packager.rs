@@ -41,7 +41,10 @@
 // the package and writes them into the xlsx file.
 
 use std::collections::HashSet;
-use std::io::{Read, Seek, Write};
+use std::io::{Seek, Write};
+
+#[cfg(feature = "constant_memory")]
+use std::io::Read;
 
 use std::sync::{Arc, Mutex};
 #[cfg(not(target_arch = "wasm32"))]
@@ -431,18 +434,22 @@ impl<W: Write + Seek + Send> Packager<W> {
             worksheet.assemble_xml_file_start();
             self.zip.write_all(worksheet.writer.get_ref())?;
 
-            // Section 2. On disk cell data.
-            // We also need to flush the last remaining row.
-            worksheet.flush_last_row();
+            #[cfg(feature = "constant_memory")]
+            {
+                // Section 2. On disk cell data.
+                // We also need to flush the last remaining row.
+                worksheet.flush_last_row();
 
-            let mut buffer = Vec::new();
-            worksheet.file_writer.rewind().unwrap();
-            worksheet
-                .file_writer
-                .get_ref()
-                .read_to_end(&mut buffer)
-                .unwrap();
-            self.zip.write_all(&buffer)?;
+                let mut buffer = Vec::new();
+                worksheet.file_writer.rewind().unwrap();
+                worksheet
+                    .file_writer
+                    .get_ref()
+                    .read_to_end(&mut buffer)
+                    .unwrap();
+
+                self.zip.write_all(&buffer)?;
+            }
 
             // Section 3. In memory metadata at end of the file.
             xmlwriter::reset(&mut worksheet.writer);

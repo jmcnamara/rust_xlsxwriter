@@ -487,6 +487,8 @@ impl Workbook {
     }
 
     /// TODO
+    #[cfg(feature = "constant_memory")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
     pub fn add_worksheet_with_constant_memory(&mut self) -> &mut Worksheet {
         let name = format!("Sheet{}", self.num_worksheets + 1);
         self.num_worksheets += 1;
@@ -507,6 +509,8 @@ impl Workbook {
     }
 
     /// TODO
+    #[cfg(feature = "constant_memory")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
     pub fn add_worksheet_with_low_memory(&mut self) -> &mut Worksheet {
         let name = format!("Sheet{}", self.num_worksheets + 1);
         self.num_worksheets += 1;

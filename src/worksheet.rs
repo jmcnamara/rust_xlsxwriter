@@ -1245,13 +1245,19 @@ use std::borrow::Cow;
 use std::cmp;
 use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
-use std::fs::File;
+use std::io::Cursor;
 use std::io::Write;
-use std::io::{BufWriter, Cursor};
 use std::mem;
 use std::sync::{Arc, Mutex, RwLock};
 
+#[cfg(feature = "constant_memory")]
 use tempfile::tempfile;
+
+#[cfg(feature = "constant_memory")]
+use std::io::BufWriter;
+
+#[cfg(feature = "constant_memory")]
+use std::fs::File;
 
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
@@ -1411,7 +1417,6 @@ pub struct Worksheet {
     pub(crate) is_chartsheet: bool,
     pub(crate) use_constant_memory: bool,
     pub(crate) use_inline_strings: bool,
-    pub(crate) file_writer: BufWriter<File>,
     pub(crate) current_row: RowNum,
     pub(crate) workbook_xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
     pub(crate) string_table: Arc<Mutex<SharedStringsTable>>,
@@ -1430,7 +1435,6 @@ pub struct Worksheet {
     pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
-    write_ahead: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     is_writing_ahead: bool,
     merged_ranges: Vec<CellRange>,
     merged_cells: HashMap<(RowNum, ColNum), usize>,
@@ -1504,6 +1508,12 @@ pub struct Worksheet {
     user_default_row_height: f64,
     hide_unused_rows: bool,
     has_sheet_data: bool,
+
+    #[cfg(feature = "constant_memory")]
+    pub(crate) file_writer: BufWriter<File>,
+
+    #[cfg(feature = "constant_memory")]
+    write_ahead: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
 
     #[cfg(feature = "serde")]
     pub(crate) serializer_state: SerializerState,
@@ -1597,8 +1607,8 @@ impl Worksheet {
             top_cell: (0, 0),
         };
 
-        let tempfile = tempfile().unwrap();
-        let file_writer = BufWriter::new(tempfile);
+        #[cfg(feature = "constant_memory")]
+        let file_writer = BufWriter::new(tempfile().unwrap());
 
         Worksheet {
             writer,
@@ -1616,7 +1626,6 @@ impl Worksheet {
             autofilter_defined_name: DefinedName::new(),
             autofilter_area: String::new(),
             data_table: BTreeMap::new(),
-            write_ahead: BTreeMap::new(),
             is_writing_ahead: false,
             dimensions,
             merged_ranges: vec![],
@@ -1724,11 +1733,16 @@ impl Worksheet {
             use_inline_strings: false,
             has_sheet_data: false,
             current_row: 0,
-            file_writer,
             workbook_xf_indices: Arc::new(RwLock::new(HashMap::new())),
             string_table: Arc::new(Mutex::new(SharedStringsTable::new())),
             has_workbook_global_xfs: false,
             has_workbook_global_sst: false,
+
+            #[cfg(feature = "constant_memory")]
+            file_writer,
+
+            #[cfg(feature = "constant_memory")]
+            write_ahead: BTreeMap::new(),
 
             #[cfg(feature = "serde")]
             serializer_state: SerializerState::new(),
@@ -7362,7 +7376,7 @@ impl Worksheet {
         for (offset, column) in table.columns.iter_mut().enumerate() {
             let col = first_col + offset as u16;
 
-            // Write the header. We skip this when writing serde headers. todo
+            // Write the header. We skip this when writing serde headers.
             if table.show_header_row && !table.is_serde_table {
                 match &column.header_format {
                     Some(header_format) => {
@@ -13821,28 +13835,31 @@ impl Worksheet {
     // Insert a cell value into the worksheet data table structure.
     fn insert_cell(&mut self, row: RowNum, col: ColNum, cell: CellType) {
         if self.use_constant_memory {
-            // Ignore already flushed/written rows.
-            if row < self.current_row {
-                eprintln!(
-                    "Ignoring write to previously written row {row} in 'constant memory' mode."
-                );
-                return;
-            }
-
-            // If this is a new row then either buffer the data when writing
-            // ahead or flush the previous row.
-            if row > self.current_row {
-                if self.is_writing_ahead {
-                    // Store cell in the write-ahead buffer.
-                    Self::insert_cell_to_table(row, col, cell, &mut self.write_ahead);
+            #[cfg(feature = "constant_memory")]
+            {
+                // Ignore already flushed/written rows.
+                if row < self.current_row {
+                    eprintln!(
+                        "Ignoring write to previously written row {row} in 'constant memory' mode."
+                    );
                     return;
                 }
 
-                self.flush_to_row(row);
-            }
+                // If this is a new row then either buffer the data when writing
+                // ahead or flush the previous row.
+                if row > self.current_row {
+                    if self.is_writing_ahead {
+                        // Store cell in the write-ahead buffer.
+                        Self::insert_cell_to_table(row, col, cell, &mut self.write_ahead);
+                        return;
+                    }
 
-            // Store new constant memory data in the current row of the data table.
-            Self::insert_cell_to_table(row, col, cell, &mut self.data_table);
+                    self.flush_to_row(row);
+                }
+
+                // Store new constant memory data in the current row of the data table.
+                Self::insert_cell_to_table(row, col, cell, &mut self.data_table);
+            }
         } else {
             // In standard-memory mode all cell data is stored.
             Self::insert_cell_to_table(row, col, cell, &mut self.data_table);
@@ -16429,6 +16446,7 @@ impl Worksheet {
 
     // Flush the last row of constant memory data, the write-ahead cache and any
     // modified rows.
+    #[cfg(feature = "constant_memory")]
     pub(crate) fn flush_last_row(&mut self) {
         // First find any write ahead cached rows.
         let mut remaining_rows: Vec<_> = self.write_ahead.keys().copied().collect();
@@ -16464,6 +16482,7 @@ impl Worksheet {
     }
 
     // Flush all constant memory data up to the next target row.
+    #[cfg(feature = "constant_memory")]
     fn flush_to_row(&mut self, next_row: RowNum) {
         // First find any write ahead cached rows.
         let mut intemediate_rows: Vec<_> = self
@@ -16493,6 +16512,7 @@ impl Worksheet {
 
     // Write out all the row and cell data in the constant memory data table.
     #[allow(clippy::too_many_lines)]
+    #[cfg(feature = "constant_memory")]
     fn flush_data_row(&mut self, next_row: RowNum) {
         let mut col_names = HashMap::new(); // TODO make static.
         let current_row = self.current_row;
@@ -16776,6 +16796,7 @@ impl Worksheet {
     }
 
     // Write the <row> element in constant memory mode.
+    #[cfg(feature = "constant_memory")]
     fn write_constant_table_row(
         &mut self,
         row_num: RowNum,
@@ -16909,6 +16930,7 @@ impl Worksheet {
     }
 
     // Write the <c> element for an inline rich string.
+    #[cfg(feature = "constant_memory")]
     fn write_inline_rich_string_cell<W: Write>(
         writer: &mut W,
         row: RowNum,

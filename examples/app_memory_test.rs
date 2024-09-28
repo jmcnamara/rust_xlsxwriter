@@ -9,8 +9,7 @@
 //!
 //! The number of rows and the "constant memory" mode can be optionally set.
 //!
-//! usage: ./target/release/examples/app_perf_test [num_rows]
-//! [--constant-memory]
+//! usage: ./target/release/examples/app_perf_test [num_rows] [--constant-memory]
 //!
 
 use rust_xlsxwriter::{Workbook, XlsxError};
@@ -62,15 +61,26 @@ fn main() -> Result<(), XlsxError> {
         Some(arg) => arg.parse::<u32>().unwrap_or(4_000),
         None => 4_000,
     };
+
+    #[cfg(feature = "constant_memory")]
     let constant_memory = args.get(2).is_some();
+    #[cfg(not(feature = "constant_memory"))]
+    let constant_memory = false;
 
     GLOBAL.reset();
     let start_time = Instant::now();
 
     // Create the workbook and fill in the required cell data.
     let mut workbook = Workbook::new();
+
     let worksheet = if constant_memory {
-        workbook.add_worksheet_with_constant_memory()
+        #[cfg(feature = "constant_memory")]
+        let worksheet = workbook.add_worksheet_with_constant_memory();
+
+        #[cfg(not(feature = "constant_memory"))]
+        let worksheet = workbook.add_worksheet();
+
+        worksheet
     } else {
         workbook.add_worksheet()
     };

@@ -726,115 +726,201 @@ mod object_position17;
 mod object_position18;
 mod object_position19;
 mod object_position20;
+#[cfg(feature = "constant_memory")]
 mod optimize01;
+#[cfg(feature = "constant_memory")]
 mod optimize02;
+#[cfg(feature = "constant_memory")]
 mod optimize04;
+#[cfg(feature = "constant_memory")]
 mod optimize05;
+#[cfg(feature = "constant_memory")]
 mod optimize06;
+#[cfg(feature = "constant_memory")]
 mod optimize07;
+#[cfg(feature = "constant_memory")]
 mod optimize08;
+#[cfg(feature = "constant_memory")]
 mod optimize13;
+#[cfg(feature = "constant_memory")]
 mod optimize14;
+#[cfg(feature = "constant_memory")]
 mod optimize20;
+#[cfg(feature = "constant_memory")]
 mod optimize21;
+#[cfg(feature = "constant_memory")]
 mod optimize22;
+#[cfg(feature = "constant_memory")]
 mod optimize23;
+#[cfg(feature = "constant_memory")]
 mod optimize24;
+#[cfg(feature = "constant_memory")]
 mod optimize25;
+#[cfg(feature = "constant_memory")]
 mod optimize26;
+#[cfg(feature = "constant_memory")]
 mod optimize27;
+#[cfg(feature = "constant_memory")]
 mod optimize28;
+#[cfg(feature = "constant_memory")]
 mod optimize29;
+#[cfg(feature = "constant_memory")]
 mod optimize30;
+#[cfg(feature = "constant_memory")]
 mod optimize31;
+#[cfg(feature = "constant_memory")]
 mod optimize32;
+#[cfg(feature = "constant_memory")]
 mod optimize33;
+#[cfg(feature = "constant_memory")]
 mod optimize34;
+#[cfg(feature = "constant_memory")]
 mod optimize_autofit02;
+#[cfg(feature = "constant_memory")]
 mod optimize_autofit04;
+#[cfg(feature = "constant_memory")]
 mod optimize_autofit08;
+#[cfg(feature = "constant_memory")]
 mod optimize_embed_image01;
+#[cfg(feature = "constant_memory")]
 mod optimize_embed_image02;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde01;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde02;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde03;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde04;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde05;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde06;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde07;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde08;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde09;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde10;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde11;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde12;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde13;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde14;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde15;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde16;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde17;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde18;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde20;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde21;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde22;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde23;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde24;
 #[cfg(feature = "serde")]
+#[cfg(feature = "constant_memory")]
 mod optimize_serde25;
+#[cfg(feature = "constant_memory")]
 mod optimize_table01;
+#[cfg(feature = "constant_memory")]
 mod optimize_table02;
+#[cfg(feature = "constant_memory")]
 mod optimize_table03;
+#[cfg(feature = "constant_memory")]
 mod optimize_table04;
+#[cfg(feature = "constant_memory")]
 mod optimize_table05;
+#[cfg(feature = "constant_memory")]
 mod optimize_table06;
+#[cfg(feature = "constant_memory")]
 mod optimize_table07;
+#[cfg(feature = "constant_memory")]
 mod optimize_table08;
+#[cfg(feature = "constant_memory")]
 mod optimize_table09;
+#[cfg(feature = "constant_memory")]
 mod optimize_table10;
+#[cfg(feature = "constant_memory")]
 mod optimize_table11;
+#[cfg(feature = "constant_memory")]
 mod optimize_table12;
+#[cfg(feature = "constant_memory")]
 mod optimize_table14;
+#[cfg(feature = "constant_memory")]
 mod optimize_table15;
+#[cfg(feature = "constant_memory")]
 mod optimize_table16;
+#[cfg(feature = "constant_memory")]
 mod optimize_table17;
+#[cfg(feature = "constant_memory")]
 mod optimize_table18;
+#[cfg(feature = "constant_memory")]
 mod optimize_table19;
+#[cfg(feature = "constant_memory")]
 mod optimize_table21;
+#[cfg(feature = "constant_memory")]
 mod optimize_table22;
+#[cfg(feature = "constant_memory")]
 mod optimize_table23;
+#[cfg(feature = "constant_memory")]
 mod optimize_table24;
+#[cfg(feature = "constant_memory")]
 mod optimize_table25;
+#[cfg(feature = "constant_memory")]
 mod optimize_table26;
+#[cfg(feature = "constant_memory")]
 mod optimize_table27;
+#[cfg(feature = "constant_memory")]
 mod optimize_table28;
+#[cfg(feature = "constant_memory")]
 mod optimize_table29;
+#[cfg(feature = "constant_memory")]
 mod optimize_table31;
+#[cfg(feature = "constant_memory")]
 mod optimize_table32;
+#[cfg(feature = "constant_memory")]
 mod optimize_table33;
+#[cfg(feature = "constant_memory")]
 mod optimize_table34;
+#[cfg(feature = "constant_memory")]
 mod optimize_table35;
+#[cfg(feature = "constant_memory")]
 mod optimize_table36;
 mod overlay01;
 mod overlay02;
