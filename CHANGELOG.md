@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.78.0] - 2024-10-01
 
-- Added support for ["constant memory"] mode to reduce memory usage when writing
+- Added support for [constant memory] mode to reduce memory usage when writing
   large worksheets.
 
   The `constant_memory` mode works by flushing the current row of data to disk
@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   <img src="https://rustxlsxwriter.github.io/images/performance_memory1.png">
 
-  ["constant memory"]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html#constant-memory-mode
+  [constant memory]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html#constant-memory-mode
 
 
 
