@@ -108,6 +108,9 @@ frequently.
 - `default`: Includes all the standard functionality. This has a dependency on
   the `zip` crate only.
 
+- `constant_memory`: This keeps memory usage to a minimum when writing
+  writing large files.
+
 - `serde`: Adds supports for Serde serialization. This is off by default.
 
 - `chrono`: Adds supports for Chrono date/time types to the API. This is off by
@@ -132,8 +135,7 @@ frequently.
 
 Recent changes:
 
-- Added support for Chartsheets.
-- Added support for adding Textbox shapes to worksheets.
+- Added `constant_memory` mode.
 - Removed requirement on `regex` crate.
 
 See the full [Release Notes and Changelog].

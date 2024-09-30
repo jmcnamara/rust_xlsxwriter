@@ -486,7 +486,53 @@ impl Workbook {
         worksheet
     }
 
-    /// TODO
+    /// Add a new worksheet that supports "constant memory" mode.
+    ///
+    /// This method returns a new [`Worksheet`] that is optimizes to reduce
+    /// memory usage when writing large files. See the documentation on
+    /// [Constant memory mode](../performance/index.html#constant-memory-mode).
+    ///
+    /// Constant memory mode requires the `rust_xlsxwriter` `constant_memory`
+    /// feature flag.
+    ///
+    /// The [`Worksheet`] returned by this method behaves like any other
+    /// worksheet, see [`Workbook::add_worksheet()`] above. However there are
+    /// some
+    /// [restrictions](../performance/index.html#restrictions-when-using-constant-memory-mode)
+    /// on its usage.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding worksheets in "standard" and
+    /// "constant memory" modes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_add_worksheet_with_constant_memory.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet in standard mode.
+    ///     let worksheet = workbook.add_worksheet();
+    ///     worksheet.write(0, 0, "Standard")?;
+    ///
+    ///     // Add a worksheet in "constant memory" mode.
+    ///     let worksheet = workbook.add_worksheet_with_constant_memory();
+    ///     worksheet.write(0, 0, "Constant memory")?;
+    ///
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet_with_constant_memory.png">
+    ///
     #[cfg(feature = "constant_memory")]
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
     pub fn add_worksheet_with_constant_memory(&mut self) -> &mut Worksheet {
@@ -508,7 +554,53 @@ impl Workbook {
         worksheet
     }
 
-    /// TODO
+    /// Add a new worksheet that supports "low memory" mode.
+    ///
+    /// This method returns a new [`Worksheet`] that is optimizes to reduce
+    /// memory usage when writing large files. See the documentation on
+    /// [Constant memory mode](../performance/index.html#constant-memory-mode).
+    ///
+    /// Constant memory mode requires the `rust_xlsxwriter` `constant_memory`
+    /// feature flag.
+    ///
+    /// The [`Worksheet`] returned by this method behaves like any other
+    /// worksheet, see [`Workbook::add_worksheet()`] above. However there are
+    /// some
+    /// [restrictions](../performance/index.html#restrictions-when-using-constant-memory-mode)
+    /// on its usage.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates adding worksheets in "standard" and
+    /// "low memory" modes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_add_worksheet_with_low_memory.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet in standard mode.
+    ///     let worksheet = workbook.add_worksheet();
+    ///     worksheet.write(0, 0, "Standard")?;
+    ///
+    ///     // Add a worksheet in "low memory" mode.
+    ///     let worksheet = workbook.add_worksheet_with_low_memory();
+    ///     worksheet.write(0, 0, "Low memory")?;
+    ///
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet_with_low_memory.png">
+    ///
     #[cfg(feature = "constant_memory")]
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
     pub fn add_worksheet_with_low_memory(&mut self) -> &mut Worksheet {
@@ -1674,7 +1766,7 @@ impl Workbook {
     /// Set the order/index for the format.
     ///
     /// This is currently only used in testing to ensure the same format order
-    /// as target Excel files. It can also be used in multithreaded constant
+    /// as target Excel files. It can also be used in multi-threaded constant
     /// memory programs to pre-compute the format index so that all uses of the
     /// format only involve a `RwLock` `read()` and not a `write()`.
     ///
@@ -1687,7 +1779,16 @@ impl Workbook {
         self.format_xf_index(format);
     }
 
-    /// TODO for testing SST
+    /// Set the order/index for shared string table strings.
+    ///
+    /// This is currently only used in testing to ensure the same string order
+    /// as target Excel files.
+    ///
+    /// # Parameters
+    ///
+    /// `string` - The string to add to the shared string table.
+    /// `index` - The index in the shared string table.
+    ///
     #[doc(hidden)]
     pub fn populate_string_table(&mut self, string: &str, index: u32) {
         let mut string_table = self.string_table.lock().unwrap();
@@ -2265,16 +2366,6 @@ impl Workbook {
 
         for xf_format in &mut self.xf_formats {
             let fill = &mut xf_format.fill;
-            // TODO
-            // For a solid fill (pattern == "solid") Excel reverses the role of
-            // foreground and background colors.
-            // if fill.pattern == FormatPattern::Solid
-            //     && fill.background_color != Color::Default
-            //     && fill.foreground_color != Color::Default
-            // {
-            //     mem::swap(&mut fill.foreground_color, &mut fill.background_color);
-            // }
-
             // If the user specifies a foreground or background color without a
             // pattern they probably wanted a solid fill, so we fill in the
             // defaults.

@@ -14281,7 +14281,7 @@ impl Worksheet {
         true
     }
 
-    // Lookup a Format to get a unique index that identies it based on its
+    // Lookup a Format to get a unique index that identifies it based on its
     // properties. This is either done from the global lookup table (if we have
     // a copy) or from a local lookup that we will reconcile with the parent
     // workbook later.
@@ -16485,7 +16485,7 @@ impl Worksheet {
     #[cfg(feature = "constant_memory")]
     fn flush_to_row(&mut self, next_row: RowNum) {
         // First find any write ahead cached rows.
-        let mut intemediate_rows: Vec<_> = self
+        let mut intermediate_rows: Vec<_> = self
             .write_ahead
             .keys()
             .filter(|x| **x < next_row)
@@ -16495,15 +16495,15 @@ impl Worksheet {
         // Add any changed row elements.
         for row_num in self.current_row + 1..next_row {
             if self.changed_rows.contains_key(&row_num) {
-                intemediate_rows.push(row_num);
+                intermediate_rows.push(row_num);
             }
         }
 
         // Remove any duplicate rows.
-        intemediate_rows.sort_unstable();
-        intemediate_rows.dedup();
+        intermediate_rows.sort_unstable();
+        intermediate_rows.dedup();
 
-        for intermediate_row in intemediate_rows {
+        for intermediate_row in intermediate_rows {
             self.flush_data_row(intermediate_row);
         }
 
@@ -16514,7 +16514,6 @@ impl Worksheet {
     #[allow(clippy::too_many_lines)]
     #[cfg(feature = "constant_memory")]
     fn flush_data_row(&mut self, next_row: RowNum) {
-        let mut col_names = HashMap::new(); // TODO make static.
         let current_row = self.current_row;
 
         // Swap out the worksheet data structures so we can iterate over them and
@@ -16547,13 +16546,10 @@ impl Worksheet {
         // The row has data. Write it out cell by cell.
         self.write_constant_table_row(current_row, row_options, true);
         for (&col_num, cell) in columns {
-            // Faster column name lookup for inner loop.
             let col_name = if col_num < 26 {
                 &COLUMN_LETTERS[col_num as usize..(col_num + 1) as usize]
             } else {
-                col_names
-                    .entry(col_num)
-                    .or_insert_with(|| utility::column_number_to_name(col_num))
+                &utility::column_number_to_name(col_num)
             };
 
             match cell {

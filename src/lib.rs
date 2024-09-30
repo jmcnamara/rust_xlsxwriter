@@ -91,6 +91,8 @@
 //! </p>
 //!
 //! - [`Changelog`](crate::changelog): Release notes and changelog.
+//! - [`Performance`](crate::performance): Performance characteristics of
+//!   `rust_xlsxwriter`.
 //!
 //! Other external documentation:
 //!
@@ -175,6 +177,9 @@
 //!
 //! - `default`: Includes all the standard functionality. This has a dependency
 //!   on the `zip` crate only.
+//! - `constant_memory`: This keeps memory usage to a minimum when writing
+//!   writing large files. See [Constant memory
+//!   mode](performance/index.html#constant-memory-mode).
 //! - `serde`: Adds supports for Serde serialization. This is off by default.
 //! - `chrono`: Adds supports for Chrono date/time types to the API. This is off
 //!   by default.
@@ -234,6 +239,7 @@ pub mod chart;
 pub mod conditional_format;
 pub mod cookbook;
 pub mod macros;
+pub mod performance;
 pub mod sparkline;
 pub mod tutorial;
 pub mod utility;

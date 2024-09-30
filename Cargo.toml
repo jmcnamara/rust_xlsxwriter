@@ -41,7 +41,8 @@ zlib = ["zip/deflate-zlib"]
 # ExcelDateTime types.
 chrono = ["dep:chrono"]
 
-# Enable "constant memory" when writing worksheet data. See TODO.
+# Enable "constant memory" when writing worksheet data. This keeps memory usage
+# to a minimum when writing large files.
 constant_memory = ["dep:tempfile"]
 
 # `polars`: Add support for mapping between `PolarsError` and
@@ -348,6 +349,25 @@ required-features = ["serde", "chrono"]
 name = "doc_worksheet_serialize_datetime5"
 path = "examples/doc_worksheet_serialize_datetime5.rs"
 required-features = ["serde", "chrono"]
+
+
+#
+# Examples to run only when `constant_memory` is enabled.
+#
+[[example]]
+name = "doc_worksheet_constant"
+path = "examples/doc_worksheet_constant.rs"
+required-features = ["constant_memory"]
+
+[[example]]
+name = "doc_workbook_add_worksheet_with_low_memory"
+path = "examples/doc_workbook_add_worksheet_with_low_memory.rs"
+required-features = ["constant_memory"]
+
+[[example]]
+name = "doc_workbook_add_worksheet_with_constant_memory"
+path = "examples/doc_workbook_add_worksheet_with_constant_memory.rs"
+required-features = ["constant_memory"]
 
 
 # Workaround to display feature specific docs.
