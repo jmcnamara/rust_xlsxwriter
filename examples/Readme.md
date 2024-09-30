@@ -174,6 +174,12 @@ documentation and generally show how an individual function works.
   The `vba_extract` utility (https://crates.io/crates/vba_extract) can be
   used to extract the `vbaProject.bin` file.
 
+* `app_memory_test.rs` - Simple performance test and memory usage program
+  for rust_xlsxwriter. It writes alternate cells of strings and numbers. It
+  defaults to 4,000 rows x 40 columns. The number of rows and the "constant
+  memory" mode can be optionally set. usage:
+  ./target/release/examples/app_perf_test [num_rows] [--constant-memory]
+
 * `app_merge_range.rs` - An example of creating merged ranges in a
   worksheet using the rust_xlsxwriter library.
 
@@ -183,11 +189,10 @@ documentation and generally show how an individual function works.
 * `app_panes.rs` - A simple example of setting some "freeze" panes in
   worksheets using the rust_xlsxwriter library.
 
-* `app_perf_test.rs` - Simple performance test for rust_xlsxwriter.
-
-* `app_perf_test2.rs` - Simple performance test for rust_xlsxwriter.
-
-* `app_perf_test3.rs` - Simple performance test for rust_xlsxwriter.
+* `app_perf_test.rs` - Simple performance test program for rust_xlsxwriter.
+  It writes alternate cells of strings and numbers. It defaults to 4,000
+  rows x 40 columns. usage: ./target/release/examples/app_perf_test
+  [num_rows]
 
 * `app_rich_strings.rs` - An example of using the rust_xlsxwriter library
   to write "rich" multi-format strings in worksheet cells.
@@ -1208,6 +1213,12 @@ documentation and generally show how an individual function works.
 * `doc_workbook_add_worksheet.rs` - Demonstrates creating adding worksheets
   to a workbook.
 
+* `doc_workbook_add_worksheet_with_constant_memory.rs` - Demonstrates
+  adding worksheets in "standard" and "constant memory" modes.
+
+* `doc_workbook_add_worksheet_with_low_memory.rs` - Demonstrates adding
+  worksheets in "standard" and "low memory" modes.
+
 * `doc_workbook_new.rs` - Demonstrates creating a simple workbook, with one
   unused worksheet.
 
@@ -1281,6 +1292,9 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_clear_cell_format.rs` - Demonstrates clearing the
   formatting from some previously written cells in a worksheet.
+
+* `doc_worksheet_constant.rs` - Demonstrates adding worksheets in
+  "standard", "low memory" and "constant memory" modes.
 
 * `doc_worksheet_deserialize_headers1.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet.

@@ -5,6 +5,24 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.78.0] - 2024-10-01
+
+- Added support for ["constant memory"] mode to reduce memory usage when writing
+  large worksheets.
+
+  The `constant_memory` mode works by flushing the current row of data to disk
+  when the user writes to a new row of data. This limits the overhead to one row
+  of data stored in memory. Once this happens it is no longer possible to write
+  to a previous row since the data in the Excel file must be in row order. As
+  such this imposes the limitation of having to structure your code to write in
+  row by row order. The benefit is that the required memory usage is very low,
+  and effectively constant, regardless of the amount of data written.
+
+  <img src="https://rustxlsxwriter.github.io/images/performance_memory1.png">
+
+  ["constant memory"]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html#constant-memory-mode
+
+
 
 ## [0.77.0] - 2024-09-18
 
