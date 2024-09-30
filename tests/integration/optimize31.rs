@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet_with_low_memory();
@@ -25,11 +25,44 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test with standalone worksheet.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let mut worksheet = workbook.new_worksheet_with_low_memory();
+
+    worksheet.write_string(0, 0, "Apple")?;
+    worksheet.write_string(1, 0, "Pear")?;
+    worksheet.write_string(2, 0, "Orange")?;
+    worksheet.write_string(3, 0, "Pear")?;
+    worksheet.write_string(4, 0, "Apple")?;
+
+    workbook.push_worksheet(worksheet);
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_optimize31() {
+fn test_optimize31_1() {
     let test_runner = common::TestRunner::new()
         .set_name("optimize31")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .ignore_worksheet_spans()
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_optimize31_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("optimize31")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .ignore_worksheet_spans()
         .initialize();
 

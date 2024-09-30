@@ -488,16 +488,16 @@ impl Workbook {
 
     /// Add a new worksheet that supports "constant memory" mode.
     ///
-    /// This method returns a new [`Worksheet`] that is optimizes to reduce
-    /// memory usage when writing large files. See the documentation on
-    /// [Constant memory mode](../performance/index.html#constant-memory-mode).
+    /// This method adds a new [`Worksheet`] that is optimizes to reduce memory
+    /// usage when writing large files. See the documentation on [Constant
+    /// memory mode](../performance/index.html#constant-memory-mode).
     ///
     /// Constant memory mode requires the `rust_xlsxwriter` `constant_memory`
     /// feature flag.
     ///
-    /// The [`Worksheet`] returned by this method behaves like any other
-    /// worksheet, see [`Workbook::add_worksheet()`] above. However there are
-    /// some
+    /// The [`Worksheet`] reference returned by this method behaves like any
+    /// other worksheet, see [`Workbook::add_worksheet()`] above. However there
+    /// are some
     /// [restrictions](../performance/index.html#restrictions-when-using-constant-memory-mode)
     /// on its usage.
     ///
@@ -531,7 +531,8 @@ impl Workbook {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet_with_constant_memory.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet_with_constant_memory.png">
     ///
     #[cfg(feature = "constant_memory")]
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
@@ -556,16 +557,16 @@ impl Workbook {
 
     /// Add a new worksheet that supports "low memory" mode.
     ///
-    /// This method returns a new [`Worksheet`] that is optimizes to reduce
-    /// memory usage when writing large files. See the documentation on
-    /// [Constant memory mode](../performance/index.html#constant-memory-mode).
+    /// This method adds a new [`Worksheet`] that is optimizes to reduce memory
+    /// usage when writing large files. See the documentation on [Constant
+    /// memory mode](../performance/index.html#constant-memory-mode).
     ///
     /// Constant memory mode requires the `rust_xlsxwriter` `constant_memory`
     /// feature flag.
     ///
-    /// The [`Worksheet`] returned by this method behaves like any other
-    /// worksheet, see [`Workbook::add_worksheet()`] above. However there are
-    /// some
+    /// The [`Worksheet`] reference returned by this method behaves like any
+    /// other worksheet, see [`Workbook::add_worksheet()`] above. However there
+    /// are some
     /// [restrictions](../performance/index.html#restrictions-when-using-constant-memory-mode)
     /// on its usage.
     ///
@@ -599,7 +600,8 @@ impl Workbook {
     ///
     /// Output file:
     ///
-    /// <img src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet_with_low_memory.png">
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_add_worksheet_with_low_memory.png">
     ///
     #[cfg(feature = "constant_memory")]
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
@@ -621,6 +623,85 @@ impl Workbook {
 
         self.worksheets.push(worksheet);
         let worksheet = self.worksheets.last_mut().unwrap();
+
+        worksheet
+    }
+
+    /// Create a new worksheet that supports "constant memory" mode.
+    ///
+    /// This method returns a new standalone [`Worksheet`] that is optimizes to
+    /// reduce memory usage when writing large files. See the documentation on
+    /// [Constant memory mode](../performance/index.html#constant-memory-mode).
+    ///
+    /// The `add_worksheet_with_constant_memory()` method above returns a
+    /// borrowed mutable reference to a Worksheet instance owned by the Workbook
+    /// so only one worksheet can be in existence at a time. This limitation can
+    /// be avoided, if necessary, by creating standalone Worksheet objects and
+    /// then later adding them to the workbook with
+    /// [`Workbook::push_worksheet`]. The "constant memory" [`Worksheet`] object
+    /// is create via a [`Workbook`] in order to link it to a parent workbook.
+    /// This restriction is required so that formats can be written in "constant
+    /// memory" mode.
+    ///
+    /// See also the documentation on [Creating worksheets] and working with the
+    /// borrow checker.
+    ///
+    /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
+    ///
+    /// Constant memory mode requires the `rust_xlsxwriter` `constant_memory`
+    /// feature flag.
+    ///
+    #[cfg(feature = "constant_memory")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
+    pub fn new_worksheet_with_constant_memory(&mut self) -> Worksheet {
+        let mut worksheet = Worksheet::new();
+
+        worksheet.use_inline_strings = true;
+        worksheet.use_constant_memory = true;
+
+        worksheet.workbook_xf_indices = Arc::clone(&self.xf_indices);
+        worksheet.has_workbook_global_xfs = true;
+
+        worksheet
+    }
+
+    /// Create a new worksheet that supports "low memory" mode.
+    ///
+    /// This method returns a new standalone [`Worksheet`] that is optimizes to
+    /// reduce memory usage when writing large files. See the documentation on
+    /// [Constant memory mode](../performance/index.html#constant-memory-mode).
+    ///
+    /// The `add_worksheet_with_constant_memory()` method above returns a
+    /// borrowed mutable reference to a Worksheet instance owned by the Workbook
+    /// so only one worksheet can be in existence at a time. This limitation can
+    /// be avoided, if necessary, by creating standalone Worksheet objects and
+    /// then later adding them to the workbook with
+    /// [`Workbook::push_worksheet`]. The "low memory" [`Worksheet`] object is
+    /// create via a [`Workbook`] in order to link it to a parent workbook. This
+    /// restriction is required so that formats and strings can be written in
+    /// "constant memory" mode.
+    ///
+    /// See also the documentation on [Creating worksheets] and working with the
+    /// borrow checker.
+    ///
+    /// [Creating worksheets]: ../worksheet/index.html#creating-worksheets
+    ///
+    /// Constant memory mode requires the `rust_xlsxwriter` `constant_memory`
+    /// feature flag.
+    ///
+    #[cfg(feature = "constant_memory")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
+    pub fn new_worksheet_with_low_memory(&mut self) -> Worksheet {
+        let mut worksheet = Worksheet::new();
+
+        worksheet.use_inline_strings = false;
+        worksheet.use_constant_memory = true;
+
+        worksheet.workbook_xf_indices = Arc::clone(&self.xf_indices);
+        worksheet.has_workbook_global_xfs = true;
+
+        worksheet.string_table = Arc::clone(&self.string_table);
+        worksheet.has_workbook_global_sst = true;
 
         worksheet
     }
