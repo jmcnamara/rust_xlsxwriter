@@ -338,6 +338,7 @@ pub struct Workbook {
     read_only_mode: u8,
     num_worksheets: u16,
     num_chartsheets: u16,
+    use_large_file: bool,
 }
 
 impl Default for Workbook {
@@ -416,6 +417,7 @@ impl Workbook {
             has_comments: false,
             num_worksheets: 0,
             num_chartsheets: 0,
+            use_large_file: false,
         }
     }
 
@@ -1688,6 +1690,31 @@ impl Workbook {
         Ok(self)
     }
 
+    /// Use zip large file/ZIP64 extensions.
+    ///
+    /// The `rust_xlsxwriter` library uses the [zip] crate to provide the zip
+    /// container for the xlsx file that it generates.
+    ///
+    /// This option instructs the zip library to use [large file/ZIP64]
+    /// extensions when writing very large xlsx files to allow the zip
+    /// container, or individual XML files within it, to be greater than 4 GB.
+    /// See [ZIP64] on Wikipedia for more information.
+    ///
+    /// [zip]: https://crates.io/crates/zip/2.2.0
+    /// [ZIP64]: https://en.wikipedia.org/wiki/ZIP_(file_format)#ZIP64
+    /// [large file/ZIP64]:
+    ///     https://docs.rs/zip/latest/zip/write/type.SimpleFileOptions.html#method.large_file
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    pub fn use_zip_large_file(&mut self, enable: bool) -> &mut Workbook {
+        self.use_large_file = enable;
+
+        self
+    }
+
     /// Add a signed vba macro file to the workbook.
     ///
     /// The `add_vba_project_with_signature()` method can be used to add signed
@@ -2056,7 +2083,7 @@ impl Workbook {
         package_options = self.set_package_options(package_options)?;
 
         // Create the Packager object that will assemble the zip/xlsx file.
-        let packager = Packager::new(writer);
+        let packager = Packager::new(writer, self.use_large_file);
         packager.assemble_file(self, &package_options)?;
 
         Ok(())
