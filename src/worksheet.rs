@@ -6434,7 +6434,7 @@ impl Worksheet {
     /// The `set_column_width()` method is used to change the default width of a
     /// worksheet column.
     ///
-    /// The ``width`` parameter sets the column width in the same units used by
+    /// The `width` parameter sets the column width in the same units used by
     /// Excel which is: the number of characters in the default font. The
     /// default width is 8.43 in the default font of Calibri 11. The actual
     /// relationship between a string width and a column width in Excel is

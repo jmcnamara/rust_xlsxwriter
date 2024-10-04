@@ -96,6 +96,8 @@ currently supported features are:
 - Worksheet Tables.
 - Serde serialization support.
 - Support for macros.
+- Memory optimization mode for writing large files.
+
 
 `rust_xlsxwriter` is under active development and new features will be added
 frequently.

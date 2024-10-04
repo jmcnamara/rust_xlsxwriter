@@ -1692,17 +1692,30 @@ impl Workbook {
 
     /// Use zip large file/ZIP64 extensions.
     ///
-    /// The `rust_xlsxwriter` library uses the [zip] crate to provide the zip
-    /// container for the xlsx file that it generates.
+    /// The `rust_xlsxwriter` library uses the [zip.rs] crate to provide the zip
+    /// container for the xlsx file that it generates. The size limit for a
+    /// standard zip file is 4GB for the overall container or for any of the
+    /// uncompressed files within it.  Anything greater than that requires
+    /// [ZIP64] support. In practice this would apply to worksheets with
+    /// approximately 150 million cells, or more.
     ///
-    /// This option instructs the zip library to use [large file/ZIP64]
-    /// extensions when writing very large xlsx files to allow the zip
-    /// container, or individual XML files within it, to be greater than 4 GB.
-    /// See [ZIP64] on Wikipedia for more information.
+    /// The `use_zip_large_file()` option enables ZIP64/large file support by
+    /// enabling the `zip.rs` [`large_file()`] option. Here is what the `zip.rs`
+    /// library says about the `large_file()` option:
     ///
-    /// [zip]: https://crates.io/crates/zip/2.2.0
+    /// > If `large_file()` is set to false and the file exceeds the limit, an
+    /// > I/O error is thrown and the file is aborted. If set to true, readers
+    /// > will require ZIP64 support and if the file does not exceed the limit,
+    /// > 20 B are wasted. The default is false.
+    ///
+    /// You can interpret this to mean that it is safe/efficient to turn on
+    /// large file mode by default if you anticipate that your application may
+    /// generate files that exceed the 4GB limit. At least for Excel. Other
+    /// applications may have issues if they don't support ZIP64 extensions.
+    ///
+    /// [zip.rs]: https://crates.io/crates/zip/2.2.0
     /// [ZIP64]: https://en.wikipedia.org/wiki/ZIP_(file_format)#ZIP64
-    /// [large file/ZIP64]:
+    /// [`large_file()`]:
     ///     https://docs.rs/zip/latest/zip/write/type.SimpleFileOptions.html#method.large_file
     ///
     /// # Parameters

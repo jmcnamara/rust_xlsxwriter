@@ -39,6 +39,7 @@
 //! - Autofilters.
 //! - Worksheet Tables.
 //! - Support for macros.
+//! - Memory optimization mode for writing large files.
 //!
 //! [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
 //!

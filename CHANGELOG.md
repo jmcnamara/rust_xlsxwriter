@@ -5,6 +5,24 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.79.0] - 2024-10-04
+
+- Added support for files larger than 4GB.
+
+  The `rust_xlsxwriter` library uses the [zip.rs] crate to provide the zip
+  container for the xlsx file that it generates. The size limit for a standard
+  zip file is 4GB for the overall container or for any of the uncompressed files
+  within it.  Anything greater than that requires [ZIP64] support. In practice
+  this would apply to worksheets with approximately 150 million cells, or more.
+
+  See [`Workbook::use_zip_large_file()`].
+
+  [`Workbook::use_zip_large_file()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.use_zip_large_file
+
+  [zip.rs]: https://crates.io/crates/zip/2.2.0
+  [ZIP64]: https://en.wikipedia.org/wiki/ZIP_(file_format)#ZIP64
+
+
 ## [0.78.0] - 2024-10-01
 
 - Added support for [constant memory] mode to reduce memory usage when writing

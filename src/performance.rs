@@ -36,7 +36,7 @@ been omitted.
 |-------------------------------|-----------------------|---------------|------------------|
 | `rust_xlsxwriter` with `zlib` | 1.00                  |               |                  |
 | C/libxlswriter                | 1.38                  | 1.00          |                  |
-| `rust_xlsxwriter``            | 1.58                  | 1.14          | 1.00             |
+| `rust_xlsxwriter`             | 1.58                  | 1.14          | 1.00             |
 | Python/XlsxWriter             | 6.02                  | 4.36          | 3.81             |
 
 <br>
