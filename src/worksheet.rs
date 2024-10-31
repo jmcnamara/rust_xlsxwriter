@@ -1497,6 +1497,7 @@ pub struct Worksheet {
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashSet<(RowNum, ColNum)>,
     conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Send>>>,
+    conditional_format_order: Vec<String>,
     data_validations: BTreeMap<String, DataValidation>,
     has_conditional_formats: bool,
     use_x14_extensions: bool,
@@ -1701,6 +1702,7 @@ impl Worksheet {
             has_drawing_object_linkage: false,
             cells_with_autofilter: HashSet::new(),
             conditional_formats: BTreeMap::new(),
+            conditional_format_order: vec![],
             data_validations: BTreeMap::new(),
             has_conditional_formats: false,
             use_x14_extensions: false,
@@ -7623,7 +7625,7 @@ impl Worksheet {
             format.dxf_index = self.format_dxf_index(format);
         }
 
-        match self.conditional_formats.entry(cell_range) {
+        match self.conditional_formats.entry(cell_range.clone()) {
             Entry::Occupied(mut entry) => {
                 // The conditional format range already exists. Append the rule.
                 let rules = entry.get_mut();
@@ -7634,6 +7636,9 @@ impl Worksheet {
                 // the cell value.
                 let rules = vec![conditional_format];
                 entry.insert(rules);
+
+                // Also store the order that the ranges are added in.
+                self.conditional_format_order.push(cell_range);
             }
         }
 
@@ -15797,7 +15802,9 @@ impl Worksheet {
         let mut guid_index = 1;
         let mut priority = 1;
 
-        for (cell_range, conditionals_for_range) in &self.conditional_formats {
+        for cell_range in &self.conditional_format_order {
+            let conditionals_for_range = self.conditional_formats.get(cell_range).unwrap();
+
             let has_x14_only = conditionals_for_range
                 .iter()
                 .all(|rule| rule.has_x14_only());
