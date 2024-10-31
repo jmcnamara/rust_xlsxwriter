@@ -7481,8 +7481,12 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/conditional_format_cell_intro.png">
     ///
-    /// The [`ConditionalFormat`](crate::conditional_format) variants are used to represent the types of
-    /// conditional format that can be applied in Excel.
+    /// The [`ConditionalFormat`](crate::conditional_format) variants are used
+    /// to represent the types of conditional format that can be applied in
+    /// Excel.
+    ///
+    /// Multiple formatting rules that affect the same range or overlapping
+    /// ranges are applied in the order that they are added to the worksheet.
     ///
     /// # Errors
     ///

@@ -5,7 +5,22 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.79.1] - 2024-10-31
+
+### Fixed
+
+- Fixed issue where the precedence order of conditional formats wasn't being
+  preserved and the rules were being sorted into row/column order instead of
+  insertion order. This issue would only be visible with nested conditional
+  formats and shouldn't affect most users.
+
+  [Issue #113]: https://github.com/jmcnamara/rust_xlsxwriter/issues/113
+
+
+
 ## [0.79.0] - 2024-10-04
+
+### Added
 
 - Added support for files larger than 4GB.
 
@@ -24,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [0.78.0] - 2024-10-01
+
+### Added
 
 - Added support for [constant memory] mode to reduce memory usage when writing
   large worksheets.
