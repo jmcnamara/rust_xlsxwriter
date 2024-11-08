@@ -1396,16 +1396,16 @@ pub struct Worksheet {
     pub(crate) dxf_formats: Vec<Format>,
     pub(crate) has_vml: bool,
     pub(crate) has_hyperlink_style: bool,
-    pub(crate) images: BTreeMap<(RowNum, ColNum), Image>,
+    pub(crate) images: BTreeMap<(RowNum, ColNum, u32, u32), Image>,
     pub(crate) buttons_vml_info: Vec<VmlInfo>,
     pub(crate) comments_vml_info: Vec<VmlInfo>,
     pub(crate) drawing: Drawing,
     pub(crate) image_types: [bool; NUM_IMAGE_FORMATS],
     pub(crate) header_footer_images: [Option<Image>; 6],
-    pub(crate) charts: BTreeMap<(RowNum, ColNum), Chart>,
-    pub(crate) buttons: BTreeMap<(RowNum, ColNum), Button>,
+    pub(crate) charts: BTreeMap<(RowNum, ColNum, u32, u32), Chart>,
+    pub(crate) buttons: BTreeMap<(RowNum, ColNum, u32, u32), Button>,
     pub(crate) notes: BTreeMap<RowNum, BTreeMap<ColNum, Note>>,
-    pub(crate) shapes: BTreeMap<(RowNum, ColNum), Shape>,
+    pub(crate) shapes: BTreeMap<(RowNum, ColNum, u32, u32), Shape>,
     pub(crate) tables: Vec<Table>,
     pub(crate) has_embedded_image_descriptions: bool,
     pub(crate) embedded_images: Vec<Image>,
@@ -5045,7 +5045,8 @@ impl Worksheet {
         image.x_offset = x_offset;
         image.y_offset = y_offset;
 
-        self.images.insert((row, col), image);
+        // Store workbook objects in row by column position order.
+        self.images.insert((row, col, y_offset, x_offset), image);
 
         Ok(self)
     }
@@ -5281,7 +5282,7 @@ impl Worksheet {
             .clone()
             .set_scale_to_size(width, height, keep_aspect_ratio);
 
-        self.images.insert((row, col), image);
+        self.images.insert((row, col, 0, 0), image);
 
         Ok(self)
     }
@@ -5447,7 +5448,8 @@ impl Worksheet {
             chart.y_offset = 0;
         }
 
-        self.charts.insert((row, col), chart);
+        // Store workbook objects in row by column position order.
+        self.charts.insert((row, col, y_offset, x_offset), chart);
 
         Ok(self)
     }
@@ -5706,7 +5708,8 @@ impl Worksheet {
         shape.x_offset = x_offset;
         shape.y_offset = y_offset;
 
-        self.shapes.insert((row, col), shape);
+        // Store workbook objects in row by column position order.
+        self.shapes.insert((row, col, y_offset, x_offset), shape);
 
         Ok(self)
     }
@@ -5945,7 +5948,8 @@ impl Worksheet {
         button.x_offset = x_offset;
         button.y_offset = y_offset;
 
-        self.buttons.insert((row, col), button);
+        // Store workbook objects in row by column position order.
+        self.buttons.insert((row, col, y_offset, x_offset), button);
         self.has_vml = true;
 
         Ok(self)
@@ -14700,7 +14704,7 @@ impl Worksheet {
         }
 
         // Convert the Button objects to VmlInfo objects, along with their dimensions.
-        for ((row, col), button) in self.buttons.clone() {
+        for ((row, col, _, _), button) in self.buttons.clone() {
             let mut button = button.clone();
             if button.name.is_empty() {
                 button.name = format!("Button {button_id}");
@@ -14783,7 +14787,7 @@ impl Worksheet {
 
         // Set the chartsheet chart protection.
         if self.is_chartsheet && self.protection_on {
-            if let Some(chart) = self.charts.get_mut(&(0, 0)) {
+            if let Some(chart) = self.charts.get_mut(&(0, 0, 0, 0)) {
                 chart.protection_on = true;
             }
         }

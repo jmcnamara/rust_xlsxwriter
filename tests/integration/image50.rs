@@ -9,7 +9,7 @@ use crate::common;
 use rust_xlsxwriter::{Image, Workbook, XlsxError};
 
 // Test to demonstrate adding images to worksheets.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -26,11 +26,40 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test inserting objects with offsets from a single cell.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    let image = Image::new("tests/input/images/red.png")?.set_alt_text("red.png");
+
+    worksheet.insert_image_with_offset(0, 0, &image, 256, 160)?;
+    worksheet.insert_image_with_offset(0, 0, &image, 256, 240)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_image50() {
+fn test_image50_1() {
     let test_runner = common::TestRunner::new()
         .set_name("image50")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_image50_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("image50")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

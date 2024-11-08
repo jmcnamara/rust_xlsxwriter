@@ -16,7 +16,6 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
 
     let image = Image::new("tests/input/images/logo.png")?.set_alt_text("logo.png");
 
-    worksheet.insert_image(1, 2, &image)?; // Test double adding.
     worksheet.insert_image_with_offset(1, 2, &image, 8, 5)?;
 
     workbook.save(filename)?;
