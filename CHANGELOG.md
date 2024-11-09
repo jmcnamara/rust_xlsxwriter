@@ -5,6 +5,19 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.79.2] - 2024-11-09
+
+### Added
+
+- Added support for adding multiple objects (charts, images, shapes and buttons)
+  of the same type in the same cell, but with unique offset values. This allows
+  the user to position multiple objects using the same cell reference and
+  different offset values when using functions like
+  [`Worksheet::insert_chart_with_offset()`].
+
+  [`Worksheet::insert_chart_with_offset()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_chart_with_offset
+
+
 ## [0.79.1] - 2024-10-31
 
 ### Fixed
