@@ -1304,6 +1304,7 @@ pub(crate) const NUM_IMAGE_FORMATS: usize = 5;
 pub(crate) const MAX_PARAMETER_LEN: usize = 255;
 pub(crate) const DEFAULT_COL_WIDTH_PIXELS: u32 = 64;
 pub(crate) const DEFAULT_ROW_HEIGHT_PIXELS: u32 = 20;
+pub(crate) const MAX_AUTOFIT_WIDTH_PIXELS: u16 = 1790;
 const DEFAULT_COL_WIDTH: f64 = 8.43;
 const DEFAULT_ROW_HEIGHT: f64 = 15.0;
 const MAX_STRING_LEN: usize = 32_767;
@@ -12973,6 +12974,9 @@ impl Worksheet {
                         if pixel_width > 0 && is_autofilter_row {
                             pixel_width += 16;
                         }
+
+                        // Limit the autofit width to Excel's limit of 1790 pixels.
+                        let pixel_width = std::cmp::min(pixel_width, MAX_AUTOFIT_WIDTH_PIXELS);
 
                         // Update the max column width.
                         if pixel_width > 0 {

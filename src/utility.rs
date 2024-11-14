@@ -27,10 +27,13 @@
 #![warn(missing_docs)]
 mod tests;
 
+use crate::COL_MAX;
+use crate::MAX_AUTOFIT_WIDTH_PIXELS;
+use crate::ROW_MAX;
+
 #[cfg(feature = "serde")]
 use crate::IntoExcelDateTime;
-use crate::COL_MAX;
-use crate::ROW_MAX;
+
 #[cfg(feature = "serde")]
 use serde::Serializer;
 
@@ -772,6 +775,11 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
 pub(crate) fn pixel_width(string: &str) -> u16 {
     let mut length = 0;
 
+    // Limit the autofit width to Excel's limit of 1790 pixels.
+    if string.chars().count() > 233 {
+        return MAX_AUTOFIT_WIDTH_PIXELS;
+    }
+
     for char in string.chars() {
         match char {
             ' ' | '\'' => length += 3,
@@ -803,7 +811,7 @@ pub(crate) fn pixel_width(string: &str) -> u16 {
         }
     }
 
-    length
+    std::cmp::min(length, MAX_AUTOFIT_WIDTH_PIXELS)
 }
 
 // Hash a worksheet password. Based on the algorithm in ECMA-376-4:2016, Office
