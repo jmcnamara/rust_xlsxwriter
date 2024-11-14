@@ -796,12 +796,11 @@ impl FilterCriteria {
     }
 }
 
-/// The FilterData struct represents data types used in Excel's filters.
+/// The `FilterData` struct represents data types used in Excel's filters.
 ///
-/// The FilterData struct is a simple data type to allow a generic mapping
+/// The `FilterData` struct is a simple data type to allow a generic mapping
 /// between Rust's string and number types and similar types used in Excel's
 /// filters.
-#[doc(hidden)]
 #[derive(Clone)]
 pub struct FilterData {
     pub(crate) data_type: FilterDataType,
@@ -811,7 +810,12 @@ pub struct FilterData {
 }
 
 impl FilterData {
-    fn new_string_and_criteria(value: &str, criteria: FilterCriteria) -> FilterData {
+    /// Function to turn a string reference and [`FilterCriteria`] into a
+    /// [`FilterData`] instance.
+    ///
+    /// This is used in conjunction with the [`IntoFilterData`] trait.
+    ///
+    pub fn new_string_and_criteria(value: &str, criteria: FilterCriteria) -> FilterData {
         FilterData {
             data_type: FilterDataType::String,
             string: value.to_string(),
@@ -820,7 +824,12 @@ impl FilterData {
         }
     }
 
-    fn new_number_and_criteria(value: f64, criteria: FilterCriteria) -> FilterData {
+    /// Function to turn a [`f64`] value and [`FilterCriteria`] into a
+    /// [`FilterData`] instance.
+    ///
+    /// This is used in conjunction with the [`IntoFilterData`] trait.
+    ///
+    pub fn new_number_and_criteria(value: f64, criteria: FilterCriteria) -> FilterData {
         // Store number but also convert it to a string since Excel makes string
         // comparisons to "numbers stored as strings".
         FilterData {
@@ -852,9 +861,14 @@ impl FilterData {
 /// Trait to map different Rust types into Excel data types used in filters.
 ///
 /// Currently only string and number like types are supported.
+///
+/// See the [`FilterData::new_string_and_criteria()`] and
+/// [`FilterData::new_number_and_criteria()`] functions for constructing
+///
 pub trait IntoFilterData {
-    /// Types/objects supporting this trait must be able to convert to a
-    /// `FilterData` struct.
+    /// Types/objects supporting this trait must be able to convert to
+    /// [`FilterData`] instances in `new_filter_data()`. `FilterData` struct.
+    ///
     fn new_filter_data(&self, criteria: FilterCriteria) -> FilterData;
 }
 
