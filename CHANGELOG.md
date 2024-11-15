@@ -5,6 +5,30 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.79.3] - 2024-11-15
+
+### Added
+
+- Made the `FilterData::new_string_and_criteria()` and
+  `FilterData::new_number_and_criteria()` functions public to allows users to
+  implement the [`IntoFilterData`] trait.
+
+  [Request #115]
+
+  [`IntoFilterData`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoFilterData.html
+  [Request #115]: https://github.com/jmcnamara/rust_xlsxwriter/issues/115
+
+
+### Fixed
+
+- Fixed maximum cell width when autofitting columns. The maximum width is now
+  constrained to the Excel limit of 255 characters/1790 pixels.
+
+  [Issue #114]
+
+  [Issue #114]: https://github.com/jmcnamara/rust_xlsxwriter/issues/114
+
+
 ## [0.79.2] - 2024-11-09
 
 ### Added
@@ -26,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   preserved and the rules were being sorted into row/column order instead of
   insertion order. This issue would only be visible with nested conditional
   formats and shouldn't affect most users.
+
+  [Issue #113]
 
   [Issue #113]: https://github.com/jmcnamara/rust_xlsxwriter/issues/113
 

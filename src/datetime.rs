@@ -93,7 +93,7 @@ const UNIX_EPOCH_PLUS_400: i64 = 12_622_780_800;
 /// example, 2023/01/01 12:00:00 is stored as 44927.5.
 ///
 /// Datetimes in Excel must also be formatted with a number format like
-/// `"yyyy/mm/dd hh:mm"` or otherwise they will appear as a number (which
+/// `"yyyy/mm/dd hh:mm"` or otherwise they will appear as numbers (which
 /// technically they are).
 ///
 /// Excel doesn't use timezones or try to convert or encode timezone information
