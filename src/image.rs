@@ -958,7 +958,7 @@ impl Image {
                 let x_density = unpack_u32_from_be_bytes(data, offset + 8);
                 let y_density = unpack_u32_from_be_bytes(data, offset + 12);
 
-                if *units == 1 {
+                if *units == 1 && x_density > 0 && y_density > 0 {
                     width_dpi = f64::from(x_density) * 0.0254;
                     height_dpi = f64::from(y_density) * 0.0254;
                     self.has_default_dpi = false;
