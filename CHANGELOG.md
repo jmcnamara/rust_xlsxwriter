@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.79.4] - 2024-11-18
+
+### Fixed
+
+- Fixed issue when handling PNG images with 0 DPI but with DPI units set.
+
+  [Issue #117]
+
+  [Issue #117]: https://github.com/jmcnamara/rust_xlsxwriter/issues/117
+
+
 ## [0.79.3] - 2024-11-15
 
 ### Added
