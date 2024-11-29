@@ -17199,7 +17199,6 @@ impl ChartDataTable {
     /// `font`: A [`ChartFont`] struct reference to represent the font
     /// properties.
     ///
-
     ///
     pub fn set_font(mut self, font: &ChartFont) -> ChartDataTable {
         self.font = Some(font.clone());

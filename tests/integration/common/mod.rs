@@ -72,7 +72,7 @@ where
     }
 
     // Set the testcase name.
-    pub fn set_name(mut self, testcase: &'a str) -> TestRunner<F> {
+    pub fn set_name(mut self, testcase: &'a str) -> TestRunner<'a, F> {
         self.test_name = testcase;
         self
     }
@@ -86,7 +86,7 @@ where
     // Set string to add to the default output filename to make it unique so
     // that the multiple tests can be run in parallel.
     #[allow(dead_code)]
-    pub fn unique(mut self, unique_string: &'a str) -> TestRunner<F> {
+    pub fn unique(mut self, unique_string: &'a str) -> TestRunner<'a, F> {
         self.unique = unique_string;
         self
     }

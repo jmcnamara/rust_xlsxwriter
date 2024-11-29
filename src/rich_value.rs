@@ -15,7 +15,7 @@ pub struct RichValue<'a> {
     pub(crate) embedded_images: &'a Vec<Image>,
 }
 
-impl<'a> RichValue<'a> {
+impl RichValue<'_> {
     // -----------------------------------------------------------------------
     // Crate public methods.
     // -----------------------------------------------------------------------

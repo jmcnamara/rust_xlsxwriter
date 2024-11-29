@@ -715,7 +715,6 @@ impl Sparkline {
 
     /// Display data from hidden rows or columns in a sparkline.
     ///
-
     /// # Parameters
     ///
     /// - `enable`: Turn the property on/off. It is off by default.
