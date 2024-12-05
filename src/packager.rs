@@ -44,7 +44,7 @@ use std::collections::HashSet;
 use std::io::{Seek, Write};
 
 #[cfg(feature = "constant_memory")]
-use std::io::Read;
+use std::io::{BufRead, BufReader};
 
 use std::sync::{Arc, Mutex};
 #[cfg(not(target_arch = "wasm32"))]
@@ -440,15 +440,17 @@ impl<W: Write + Seek + Send> Packager<W> {
                 // We also need to flush the last remaining row.
                 worksheet.flush_last_row();
 
-                let mut buffer = Vec::new();
                 worksheet.file_writer.rewind().unwrap();
-                worksheet
-                    .file_writer
-                    .get_ref()
-                    .read_to_end(&mut buffer)
-                    .unwrap();
-
-                self.zip.write_all(&buffer)?;
+                let mut reader = BufReader::new(worksheet.file_writer.get_ref());
+                loop {
+                    let buffer = reader.fill_buf().unwrap();
+                    let length = buffer.len();
+                    if length == 0 {
+                        break;
+                    }
+                    self.zip.write_all(&buffer).unwrap();
+                    reader.consume(length);
+                }
             }
 
             // Section 3. In memory metadata at end of the file.
