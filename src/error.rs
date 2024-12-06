@@ -356,7 +356,7 @@ impl From<std::io::Error> for XlsxError {
     }
 }
 
-// Convert from Polars to Polars errors to allow easier interoperability.
+// Convert from Polars errors to XlsxError to allow easier interoperability.
 #[cfg(feature = "polars")]
 impl From<PolarsError> for XlsxError {
     fn from(e: PolarsError) -> XlsxError {
