@@ -6504,23 +6504,7 @@ impl Worksheet {
         col: ColNum,
         width: impl Into<f64>,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let width = width.into();
-
-        // If the width is 0 then the Excel treats the column as hidden with
-        // default width.
-        if width == 0.0 {
-            return self.set_column_hidden(col);
-        }
-
-        // Check if column is in the allowed range without updating dimensions.
-        if col >= COL_MAX {
-            return Err(XlsxError::RowColumnLimitError);
-        }
-
-        // Store the column width.
-        self.store_column_width(col, width, false);
-
-        Ok(self)
+        self.set_column_width_internal(col, width, false)
     }
 
     /// Set the width for a worksheet column in pixels.
@@ -6585,18 +6569,41 @@ impl Worksheet {
         col: ColNum,
         width: u16,
     ) -> Result<&mut Worksheet, XlsxError> {
-        // Properties for Calibri 11.
-        let max_digit_width = 7.0_f64;
-        let padding = 5.0_f64;
-        let mut width = f64::from(width);
+        self.set_column_width_internal(col, Self::pixels_to_width(width), false)
+    }
 
-        if width < 12.0 {
-            width /= max_digit_width + padding;
-        } else {
-            width = (width - padding) / max_digit_width;
-        }
-
-        self.set_column_width(col, width)
+    /// Set the column pixel width in auto-fit mode.
+    ///
+    /// In Excel the width of an auto-fitted column will increase if the user
+    /// edits a number and increases the number of digits past the previous
+    /// maximum width. This behavior doesn't apply to strings or when the number
+    /// of digits is decreased. It also doesn't apply to columns that have been
+    /// set manually.
+    ///
+    /// The `Worksheet::set_column_auto_width()` method emulates this auto-fit
+    /// behavior whereas the [`Worksheet::set_column_width_pixels()`] method,
+    /// see above, is equivalent to setting the width manually.
+    ///
+    /// The distinction is subtle and most users are unaware of this behavior in
+    /// Excel. However, it is supported for users who wish to implement their
+    /// own version of auto-fit.
+    ///
+    /// # Parameters
+    ///
+    /// - `col`: The zero indexed column number.
+    /// - `width`: The column width in pixels.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
+    ///   limits.
+    ///
+    pub fn set_column_auto_width(
+        &mut self,
+        col: ColNum,
+        width: u16,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.set_column_width_internal(col, Self::pixels_to_width(width), true)
     }
 
     /// Set the format for a column of cells.
@@ -14215,6 +14222,33 @@ impl Worksheet {
         }
 
         cell_format
+    }
+
+    // Set the column width in character units. This also takes into account
+    // whether the column width is auto-fitted or manually set.
+    fn set_column_width_internal(
+        &mut self,
+        col: ColNum,
+        width: impl Into<f64>,
+        autofit: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let width = width.into();
+
+        // If the width is 0 then the Excel treats the column as hidden with
+        // default width.
+        if width == 0.0 {
+            return self.set_column_hidden(col);
+        }
+
+        // Check if column is in the allowed range without updating dimensions.
+        if col >= COL_MAX {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Store the column width.
+        self.store_column_width(col, width, autofit);
+
+        Ok(self)
     }
 
     // Store the column width in Excel character units. Updates to the width can

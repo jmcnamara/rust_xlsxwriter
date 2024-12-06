@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{autofit_cell_width, Workbook, XlsxError};
 
 // Test to demonstrate autofit.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -45,6 +45,25 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test with the Utility::autofix_cell_width() function.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write_string(0, 0, "A")?;
+    worksheet.write_string(0, 1, "A")?;
+
+    let max_col_width = autofit_cell_width("A");
+    worksheet.set_column_auto_width(0, max_col_width)?;
+
+    worksheet.set_column_width(1, 1.57143)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_autofit03_1() {
     let test_runner = common::TestRunner::new()
@@ -63,6 +82,18 @@ fn test_autofit03_2() {
         .set_name("autofit03")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_autofit03_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("autofit03")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

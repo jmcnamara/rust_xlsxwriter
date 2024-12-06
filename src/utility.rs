@@ -769,6 +769,87 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+/// Calculate the width required to auto-fit a string in a cell.
+///
+/// The [`Worksheet::autofit()`](crate::Worksheet::autofit) method can be used
+/// to auto-fit cell data to the optimal column width. However, in some cases
+/// you may wish to handle auto-fitting yourself and apply additional logic to
+/// limit the maximum and minimum ranges.
+///
+/// The `autofit_cell_width()` function can be used to perform the required
+/// calculation. It works by estimating the pixel width of a string based on the
+/// width of each character. It also adds a 7 pixel padding for the cell
+/// boundary in the same way that Excel does.
+///
+/// You can use the  calculated width in conjunction with the
+/// [`Worksheet::set_column_auto_width()`](crate::Worksheet::set_column_auto_width)
+/// method, see the example below.
+///
+/// Notes:
+///
+/// - The width calculation is based on the default Excel font type of Calibri
+///   and character size of 11. It will not give correct results for other fonts
+///   or font sizes.
+///
+/// - If you are autofitting a header with an autofilter dropdown you should add
+///   an additional 6 pixels to account for the dropdown symbol.
+///
+/// - When dealing with large data sets you can use `autofit_cell_width()` with
+///   just 50 or 100 rows of data as a performance optimization . This will
+///   produce a reasonably accurate autofit for the first visible page of data
+///   without incurring the performance penalty of calculating widths for
+///   thousands of non-visible strings.
+///
+/// # Parameter
+///
+/// - `string`: The string reference to calculate the cell width.
+///
+/// # Examples
+///
+/// The following example demonstrates "auto"-fitting the the width of a column
+/// in Excel based on the maximum string width. See also the
+/// [`Worksheet::autofit()`](crate::Worksheet::autofit) command.
+///
+/// ```
+/// # // This code is available in examples/doc_worksheet_set_column_auto_width.rs
+/// #
+/// # use rust_xlsxwriter::{Workbook, XlsxError, autofit_cell_width};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet to the workbook.
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+///     // Some string data to write.
+///     let cities = ["Addis Ababa", "Buenos Aires", "Cairo", "Dhaka"];
+///
+///     // Write the strings:
+///     worksheet.write_column(0, 0, cities)?;
+///
+///     // Find the maximum column width in pixels.
+///     let max_width = cities.iter().map(|s| autofit_cell_width(s)).max().unwrap();
+///
+///     // Set the column width as if it was auto-fitted.
+///     worksheet.set_column_auto_width(0, max_width)?;
+/// #
+/// #     workbook.save("worksheet.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_auto_width.png">
+///
+pub fn autofit_cell_width(string: &str) -> u16 {
+    let cell_padding = 7;
+
+    pixel_width(string) + cell_padding
+}
+
 // Get the pixel width of a string based on character widths taken from Excel.
 // Non-ascii characters are given a default width of 8 pixels.
 #[allow(clippy::match_same_arms)]
