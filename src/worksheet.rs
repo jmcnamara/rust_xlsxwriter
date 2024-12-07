@@ -6580,7 +6580,7 @@ impl Worksheet {
     /// of digits is decreased. It also doesn't apply to columns that have been
     /// set manually.
     ///
-    /// The `Worksheet::set_column_auto_width()` method emulates this auto-fit
+    /// The `Worksheet::set_column_autofit_width()` method emulates this auto-fit
     /// behavior whereas the [`Worksheet::set_column_width_pixels()`] method,
     /// see above, is equivalent to setting the width manually.
     ///
@@ -6598,7 +6598,7 @@ impl Worksheet {
     /// - [`XlsxError::RowColumnLimitError`] - Column exceeds Excel's worksheet
     ///   limits.
     ///
-    pub fn set_column_auto_width(
+    pub fn set_column_autofit_width(
         &mut self,
         col: ColNum,
         width: u16,

@@ -6,7 +6,7 @@
 // Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{autofit_cell_width, Workbook, XlsxError};
+use rust_xlsxwriter::{cell_autofit_width, Workbook, XlsxError};
 
 // Test to demonstrate autofit.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -54,8 +54,8 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     worksheet.write_string(0, 0, "A")?;
     worksheet.write_string(0, 1, "A")?;
 
-    let max_col_width = autofit_cell_width("A");
-    worksheet.set_column_auto_width(0, max_col_width)?;
+    let max_col_width = cell_autofit_width("A");
+    worksheet.set_column_autofit_width(0, max_col_width)?;
 
     worksheet.set_column_width(1, 1.57143)?;
 

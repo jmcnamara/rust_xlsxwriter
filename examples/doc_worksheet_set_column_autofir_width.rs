@@ -5,7 +5,7 @@
 //! The following example demonstrates "auto"-fitting the the width of a column
 //! in Excel based on the maximum string width. See also the
 //! [`Worksheet::autofit()`] command.
-use rust_xlsxwriter::{autofit_cell_width, Workbook, XlsxError};
+use rust_xlsxwriter::{cell_autofit_width, Workbook, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -20,10 +20,10 @@ fn main() -> Result<(), XlsxError> {
     worksheet.write_column(0, 0, cities)?;
 
     // Find the maximum column width in pixels.
-    let max_width = cities.iter().map(|s| autofit_cell_width(s)).max().unwrap();
+    let max_width = cities.iter().map(|s| cell_autofit_width(s)).max().unwrap();
 
     // Set the column width as if it was auto-fitted.
-    worksheet.set_column_auto_width(0, max_width)?;
+    worksheet.set_column_autofit_width(0, max_width)?;
 
     workbook.save("worksheet.xlsx")?;
 

@@ -9,7 +9,6 @@ A getting started tutorial for `rust_xlsxwriter`.
   - [Modify main.rs](#modify-mainrs)
   - [Run the application](#run-the-application)
 - [Tutorial](#tutorial)
-  - [Reading ahead](#reading-ahead)
   - [Tutorial Part 1: Adding data to a worksheet](#tutorial-part-1-adding-data-to-a-worksheet)
   - [Tutorial Part 2: Adding some formatting](#tutorial-part-2-adding-some-formatting)
   - [Tutorial Part 3: Adding dates and more formatting](#tutorial-part-3-adding-dates-and-more-formatting)
@@ -120,16 +119,11 @@ To look at some of the basic but more useful features of the
 `rust_xlsxwriter` library we will create an application to summarize some
 monthly expenses into a spreadsheet.
 
-## Reading ahead
-
-The tutorial presents a simple direct approach so as not to confuse the reader
-with information that isn't required for an initial understanding. If there is
+The tutorial presents a direct approach so as not to confuse the reader
+with information that isn't initially relevant. If there is
 more advanced information that might be interesting at a later stage it will be
-highlighted in a "Reading ahead" section like this:
+highlighted as "Extra information".
 
-> **Reading ahead**:
->
-> Some more advanced information.
 
 ## Tutorial Part 1: Adding data to a worksheet
 
@@ -218,7 +212,7 @@ location in the worksheet:
     }
 ```
 
-> **Reading ahead**:
+> **Extra information**:
 >
 > There are other type specific write methods such as
 > [`Worksheet::write_string()`](crate::Worksheet::write_string) and
@@ -255,7 +249,7 @@ spreadsheet shown in the image above.:
     workbook.save("tutorial1.xlsx")?;
 ```
 
-> **Reading ahead**:
+> **Extra information**:
 >
 > The [`Workbook::save()`](crate::Workbook::save) method takes a [`std::path`]
 > argument which can be a `Path`, `PathBuf` or a filename string. It is also
@@ -444,7 +438,7 @@ to display them in the desired way. To handle dates and times with
 `rust_xlsxwriter` we create them using a [`ExcelDateTime`](crate::ExcelDateTime)
 instance and format them with an Excel number format.
 
-> **Reading ahead**:
+> **Extra information**:
 
 > If you enable the `chrono` feature in `rust_xlsxwriter`  you can also use
 > [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or [`chrono::NaiveTime`]
@@ -626,7 +620,7 @@ numbers and converts them to a string range like `B2:B5`:
 ```
 
 
-> **Reading ahead**:
+> **Extra information**:
 >
 > The `cell_range()` function and other similar functions are detailed in the
 > [`utility`](crate::utility) documentation.

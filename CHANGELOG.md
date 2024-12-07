@@ -5,6 +5,31 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.80.0] - 2024-12-07
+
+### Fixed
+
+- Fixed issue where unnecessary heap memory was being used to zip worksheets in
+  `constant_memory` mode. This version is a recommended upgrade for anyone using
+  that mode/feature.
+
+  [Issue #120]
+
+  [Issue #120]: https://github.com/jmcnamara/rust_xlsxwriter/issues/120
+
+### Added
+
+- Added the [`utility::cell_autofit_width()`] function to allow users to
+  calculate a string auto-fit width so that they can implement their own
+  auto-fit functionality with additional logic.
+
+  [`utility::cell_autofit_width()`]:
+      https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.cell_autofit_width.html
+
+- Updated polars dependency to 0.44 to pick up latest Polars additions for
+  [`polars_excel_writer`].
+
+
 ## [0.79.4] - 2024-11-18
 
 ### Fixed

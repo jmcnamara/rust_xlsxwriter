@@ -776,13 +776,13 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
 /// you may wish to handle auto-fitting yourself and apply additional logic to
 /// limit the maximum and minimum ranges.
 ///
-/// The `autofit_cell_width()` function can be used to perform the required
+/// The `cell_autofit_width()` function can be used to perform the required
 /// calculation. It works by estimating the pixel width of a string based on the
 /// width of each character. It also adds a 7 pixel padding for the cell
 /// boundary in the same way that Excel does.
 ///
 /// You can use the  calculated width in conjunction with the
-/// [`Worksheet::set_column_auto_width()`](crate::Worksheet::set_column_auto_width)
+/// [`Worksheet::set_column_autofit_width()`](crate::Worksheet::set_column_autofit_width)
 /// method, see the example below.
 ///
 /// Notes:
@@ -794,7 +794,7 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
 /// - If you are autofitting a header with an autofilter dropdown you should add
 ///   an additional 6 pixels to account for the dropdown symbol.
 ///
-/// - When dealing with large data sets you can use `autofit_cell_width()` with
+/// - When dealing with large data sets you can use `cell_autofit_width()` with
 ///   just 50 or 100 rows of data as a performance optimization . This will
 ///   produce a reasonably accurate autofit for the first visible page of data
 ///   without incurring the performance penalty of calculating widths for
@@ -811,9 +811,9 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
 /// [`Worksheet::autofit()`](crate::Worksheet::autofit) command.
 ///
 /// ```
-/// # // This code is available in examples/doc_worksheet_set_column_auto_width.rs
+/// # // This code is available in examples/doc_worksheet_set_column_autofit_width.rs
 /// #
-/// # use rust_xlsxwriter::{Workbook, XlsxError, autofit_cell_width};
+/// # use rust_xlsxwriter::{Workbook, XlsxError, cell_autofit_width};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
 /// #     let mut workbook = Workbook::new();
@@ -828,10 +828,10 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
 ///     worksheet.write_column(0, 0, cities)?;
 ///
 ///     // Find the maximum column width in pixels.
-///     let max_width = cities.iter().map(|s| autofit_cell_width(s)).max().unwrap();
+///     let max_width = cities.iter().map(|s| cell_autofit_width(s)).max().unwrap();
 ///
 ///     // Set the column width as if it was auto-fitted.
-///     worksheet.set_column_auto_width(0, max_width)?;
+///     worksheet.set_column_autofit_width(0, max_width)?;
 /// #
 /// #     workbook.save("worksheet.xlsx")?;
 /// #
@@ -842,9 +842,9 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
 /// Output file:
 ///
 /// <img
-/// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_auto_width.png">
+/// src="https://rustxlsxwriter.github.io/images/worksheet_set_column_autofit_width.png">
 ///
-pub fn autofit_cell_width(string: &str) -> u16 {
+pub fn cell_autofit_width(string: &str) -> u16 {
     let cell_padding = 7;
 
     pixel_width(string) + cell_padding
