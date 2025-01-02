@@ -1496,7 +1496,7 @@ pub struct Worksheet {
     filter_conditions: BTreeMap<ColNum, FilterCondition>,
     filter_automatic_off: bool,
     has_drawing_object_linkage: bool,
-    cells_with_autofilter: HashSet<(RowNum, ColNum)>,
+    cells_with_autofilter: HashMap<(RowNum, ColNum), (FilterType, CellRange)>,
     conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Send>>>,
     conditional_format_order: Vec<String>,
     data_validations: BTreeMap<String, DataValidation>,
@@ -1701,7 +1701,7 @@ impl Worksheet {
             buttons: BTreeMap::new(),
             notes: BTreeMap::new(),
             has_drawing_object_linkage: false,
-            cells_with_autofilter: HashSet::new(),
+            cells_with_autofilter: HashMap::new(),
             conditional_formats: BTreeMap::new(),
             conditional_format_order: vec![],
             data_validations: BTreeMap::new(),
@@ -6986,6 +6986,8 @@ impl Worksheet {
     ///   worksheet limits.
     /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
     ///   row.
+    /// - [`XlsxError::AutofilterRangeOverlaps`] - The autofilter range overlaps
+    ///   a table autofilter range.
     ///
     /// # Examples
     ///
@@ -7059,15 +7061,32 @@ impl Worksheet {
         self.autofilter_defined_name.last_row = last_row;
         self.autofilter_defined_name.last_col = last_col;
 
-        self.autofilter_area = utility::cell_range(first_row, first_col, last_row, last_col);
+        let autofilter_area = CellRange::new(first_row, first_col, last_row, last_col);
 
         // Clear any previous filters.
         self.filter_conditions = BTreeMap::new();
 
         // Store the cells with the autofilter dropdown for the autofit calc.
         for col in first_col..=last_col {
-            self.cells_with_autofilter.insert((first_row, col));
+            // Check that the worksheet autofilter doesn't overlap a table
+            // autofilter.
+            let filter_data = self.cells_with_autofilter.get(&(first_row, col));
+            if let Some((filter_type, filter_range)) = filter_data {
+                if *filter_type == FilterType::Table {
+                    return Err(XlsxError::AutofilterRangeOverlaps(
+                        autofilter_area.to_error_string(),
+                        filter_range.to_error_string(),
+                    ));
+                }
+            }
+
+            self.cells_with_autofilter.insert(
+                (first_row, col),
+                (FilterType::Worksheet, autofilter_area.clone()),
+            );
         }
+
+        self.autofilter_area = autofilter_area.to_range_string();
 
         Ok(self)
     }
@@ -7278,6 +7297,10 @@ impl Worksheet {
     ///   row.
     /// - [`XlsxError::TableError`] - A general error that is raised when a
     ///   table parameter is incorrect or a table is configured incorrectly.
+    /// - [`XlsxError::TableRangeOverlaps`] - The table range overlaps a
+    ///   previous table range.
+    /// - [`XlsxError::AutofilterRangeOverlaps`] - The table autofilter range
+    ///   overlaps the worksheet autofilter range.
     ///
     /// # Examples
     ///
@@ -7473,7 +7496,22 @@ impl Worksheet {
         // Store the cells with the autofilter dropdown for the autofit calc.
         if table.show_autofilter {
             for col in first_col..=last_col {
-                self.cells_with_autofilter.insert((first_row, col));
+                // Check that the table autofilter doesn't overlap the worksheet
+                // autofilter.
+                let filter_data = self.cells_with_autofilter.get(&(first_row, col));
+                if let Some((filter_type, filter_range)) = filter_data {
+                    if *filter_type == FilterType::Worksheet {
+                        return Err(XlsxError::AutofilterRangeOverlaps(
+                            table.cell_range.to_error_string(),
+                            filter_range.to_error_string(),
+                        ));
+                    }
+                }
+
+                self.cells_with_autofilter.insert(
+                    (first_row, col),
+                    (FilterType::Table, table.cell_range.clone()),
+                );
             }
         }
 
@@ -12973,9 +13011,9 @@ impl Worksheet {
                         // additional 16 pixels for the dropdown arrow.
                         let is_autofilter_row = if self.use_constant_memory {
                             self.cells_with_autofilter
-                                .contains(&(self.current_row, col_num))
+                                .contains_key(&(self.current_row, col_num))
                         } else {
-                            self.cells_with_autofilter.contains(&(row_num, col_num))
+                            self.cells_with_autofilter.contains_key(&(row_num, col_num))
                         };
 
                         if pixel_width > 0 && is_autofilter_row {
@@ -18323,6 +18361,12 @@ enum PageView {
     Normal,
     PageLayout,
     PageBreaks,
+}
+
+#[derive(PartialEq)]
+enum FilterType {
+    Table,
+    Worksheet,
 }
 
 #[derive(Clone)]

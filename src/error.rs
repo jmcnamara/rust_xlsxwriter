@@ -139,6 +139,10 @@ pub enum XlsxError {
     /// Table name is already in use in the workbook.
     TableNameReused(String),
 
+    /// A Worksheet and Table autofilter range overlap. This is a strictly
+    /// prohibited by Excel.
+    AutofilterRangeOverlaps(String, String),
+
     /// A general error that is raised when a conditional format parameter is
     /// incorrect or missing.
     ConditionalFormatError(String),
@@ -259,6 +263,13 @@ impl fmt::Display for XlsxError {
                 write!(
                     f,
                     "Table range {current} overlaps with previous table range {previous}."
+                )
+            }
+
+            XlsxError::AutofilterRangeOverlaps(current, previous) => {
+                write!(
+                    f,
+                    "Autofilter range {current} overlaps with previous table/worksheet range {previous}."
                 )
             }
 
