@@ -8312,6 +8312,14 @@ impl Default for ChartRange {
 impl ChartRange {
     /// Create a new `ChartRange` from a worksheet 5 tuple.
     ///
+    /// # Parameters
+    ///
+    /// - `sheet_name`: The worksheet name that the range refers to.
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    ///
     /// # Examples
     ///
     /// The following example demonstrates creating a new chart range.
@@ -8348,6 +8356,9 @@ impl ChartRange {
 
     /// Create a new `ChartRange` from an Excel range formula.
     ///
+    /// # Parameters
+    ///
+    /// - `range_string`: A range string ref like `"Sheet1!$A$1:$A$5"`.
     ///
     /// # Examples
     ///

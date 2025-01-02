@@ -2249,13 +2249,6 @@ impl Worksheet {
     /// See also [`Worksheet::write_row()`] for a similar function that works in
     /// an orthogonal direction.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
-    ///   of 32,767 characters.
-    ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
@@ -2263,6 +2256,13 @@ impl Worksheet {
     /// - `data`: Arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
     ///
     /// # Examples
     ///
@@ -2373,13 +2373,6 @@ impl Worksheet {
     /// See also [`Worksheet::write_column_matrix()`] for a similar function
     /// that works in an orthogonal direction.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
-    ///   of 32,767 characters.
-    ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
@@ -2387,6 +2380,13 @@ impl Worksheet {
     /// - `data`: 2D arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
     ///
     /// # Examples
     ///
@@ -2458,13 +2458,6 @@ impl Worksheet {
     /// See also [`Worksheet::write_row_matrix()`] for a similar function that
     /// works in an orthogonal direction.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
-    ///   of 32,767 characters.
-    ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
@@ -2472,6 +2465,13 @@ impl Worksheet {
     /// - `data`: 2D arrays or array-like data structures that implement
     ///   [`IntoIterator`] and that contain a data type that implements
     ///   [`IntoExcelData`].
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::MaxStringLengthExceeded`] - String exceeds Excel's limit
+    ///   of 32,767 characters.
     ///
     /// # Examples
     ///
@@ -5362,13 +5362,6 @@ impl Worksheet {
     /// Add a [`Chart`] to a worksheet  at a pixel offset within a cell
     /// location.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// - [`XlsxError::ChartError`] - A general error that is raised when a
-    ///   chart parameter is incorrect or a chart is configured incorrectly.
-    ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
@@ -5376,6 +5369,13 @@ impl Worksheet {
     /// - `chart`: The [`Chart`] to insert into the cell.
     /// - `x_offset`: The horizontal offset within the cell in pixels.
     /// - `y_offset`: The vertical offset within the cell in pixels.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::ChartError`] - A general error that is raised when a
+    ///   chart parameter is incorrect or a chart is configured incorrectly.
     ///
     /// # Examples
     ///
@@ -5473,18 +5473,18 @@ impl Worksheet {
     ///
     /// See [`Note`] for details on the properties of Notes.
     ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `note`: The [`Note`] to insert into the cell.
+    ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
     /// - [`XlsxError::MaxStringLengthExceeded`] - Text exceeds Excel's limit of
     ///   32,713 characters.
-    ///
-    /// # Parameters
-    ///
-    /// - `row`: The zero indexed row number.
-    /// - `col`: The zero indexed column number.
-    /// - `note`: The [`Note`] to insert into the cell.
     ///
     /// # Examples
     ///
@@ -5591,6 +5591,12 @@ impl Worksheet {
     /// other Excel shape
     /// types](crate::Shape#support-for-other-excel-shape-types).
     ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `shape`: The [`Shape`] to insert into the cell.
+    ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
@@ -5652,6 +5658,14 @@ impl Worksheet {
     /// Note, no Excel shape other than Textbox is supported. See [Support for
     /// other Excel shape
     /// types](crate::Shape#support-for-other-excel-shape-types).
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `shape`: The [`Shape`] to insert into the cell.
+    /// - `x_offset`: The horizontal offset within the cell in pixels.
+    /// - `y_offset`: The vertical offset within the cell in pixels.
     ///
     /// # Errors
     ///
@@ -5919,11 +5933,6 @@ impl Worksheet {
     /// Add a [`Button`] to a worksheet  at a pixel offset within a cell
     /// location. See [`Worksheet::insert_button()`] above
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    ///
     /// # Parameters
     ///
     /// - `row`: The zero indexed row number.
@@ -5931,6 +5940,11 @@ impl Worksheet {
     /// - `button`: The [`Button`] to insert into the cell.
     /// - `x_offset`: The horizontal offset within the cell in pixels.
     /// - `y_offset`: The vertical offset within the cell in pixels.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
     ///
     pub fn insert_button_with_offset(
         &mut self,
@@ -7538,15 +7552,6 @@ impl Worksheet {
     /// Multiple formatting rules that affect the same range or overlapping
     /// ranges are applied in the order that they are added to the worksheet.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
-    ///   row.
-    /// - [`XlsxError::ConditionalFormatError`] - A general error that is raised
-    ///   when a conditional formatting parameter is incorrect or missing.
-    ///
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
@@ -7555,6 +7560,15 @@ impl Worksheet {
     /// - `last_col`: The last row of the range.
     /// - `conditional_format`: A conditional format instance that implements
     ///   the [`ConditionalFormat`] trait.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
+    /// - [`XlsxError::ConditionalFormatError`] - A general error that is raised
+    ///   when a conditional formatting parameter is incorrect or missing.
     ///
     /// # Examples
     ///
@@ -7709,13 +7723,6 @@ impl Worksheet {
     ///
     /// See [`DataValidation`] for more information and examples.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
-    ///   row.
-    ///
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
@@ -7723,6 +7730,13 @@ impl Worksheet {
     /// - `last_row`: The last row of the range.
     /// - `last_col`: The last row of the range.
     /// - `data_validation`: A [`DataValidation`] data validation instance.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    ///   row.
     ///
     /// # Examples
     ///

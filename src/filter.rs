@@ -815,6 +815,12 @@ impl FilterData {
     ///
     /// This is used in conjunction with the [`IntoFilterData`] trait.
     ///
+    /// # Parameters
+    ///
+    /// - `value`: The value as a string ref.
+    /// - `criteria`: The criteria/operator to use in the filter as defined by
+    ///   the [`FilterCriteria`] struct.
+    ///
     pub fn new_string_and_criteria(value: &str, criteria: FilterCriteria) -> FilterData {
         FilterData {
             data_type: FilterDataType::String,
@@ -828,6 +834,12 @@ impl FilterData {
     /// [`FilterData`] instance.
     ///
     /// This is used in conjunction with the [`IntoFilterData`] trait.
+    ///
+    /// # Parameters
+    ///
+    /// - `value`: The `f64` number value.
+    /// - `criteria`: The criteria/operator to use in the filter as defined by
+    ///   the [`FilterCriteria`] struct.
     ///
     pub fn new_number_and_criteria(value: f64, criteria: FilterCriteria) -> FilterData {
         // Store number but also convert it to a string since Excel makes string

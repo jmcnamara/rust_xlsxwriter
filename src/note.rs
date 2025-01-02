@@ -105,6 +105,10 @@ impl Note {
     ///
     /// The text of the Note is added in the constructor.
     ///
+    /// # Parameters
+    ///
+    /// - `text`: The text that will appear in the note.
+    ///
     /// # Examples
     ///
     /// The following example demonstrates adding a note to a worksheet cell.

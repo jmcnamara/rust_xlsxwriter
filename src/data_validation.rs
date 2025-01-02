@@ -1039,15 +1039,15 @@ impl DataValidation {
     /// The title is only visible if there is also an input message. See the
     /// [`DataValidation::set_input_message()`] example below.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::DataValidationError`] - The length of the title exceeds
-    ///   Excel's limit of 32 characters.
-    ///
     /// # Parameters
     ///
     /// - `text`: Title string. Must be less than or equal to the Excel limit
     ///   of 32 characters.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::DataValidationError`] - The length of the title exceeds
+    ///   Excel's limit of 32 characters.
     ///
     pub fn set_input_title(mut self, text: impl Into<String>) -> Result<DataValidation, XlsxError> {
         let text = text.into();
@@ -1069,16 +1069,16 @@ impl DataValidation {
     /// is entered. This can we used to explain to the user what the data
     /// validation rules are for the cell.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::DataValidationError`] - The length of the message exceeds
-    ///   Excel's limit of 255 characters.
-    ///
     /// # Parameters
     ///
     /// - `text`: Message string. Must be less than or equal to the Excel limit
     ///   of 255 characters. The string can contain newlines to split it over
     ///   several lines.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::DataValidationError`] - The length of the message exceeds
+    ///   Excel's limit of 255 characters.
     ///
     /// # Examples
     ///
@@ -1157,15 +1157,15 @@ impl DataValidation {
     /// This option is used to set a title in bold for the error message when
     /// there is a validation error.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::DataValidationError`] - The length of the title exceeds
-    ///   Excel's limit of 32 characters.
-    ///
     /// # Parameters
     ///
     /// - `text`: Title string. Must be less than or equal to the Excel limit
     ///   of 32 characters.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::DataValidationError`] - The length of the title exceeds
+    ///   Excel's limit of 32 characters.
     ///
     /// # Examples
     ///
@@ -1221,16 +1221,16 @@ impl DataValidation {
     /// error. This can we used to explain to the user what the data validation
     /// rules are for the cell.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::DataValidationError`] - The length of the message exceeds
-    ///   Excel's limit of 255 characters.
-    ///
     /// # Parameters
     ///
     /// - `text`: Message string. Must be less than or equal to the Excel limit
     ///   of 255 characters. The string can contain newlines to split it over
     ///   several lines.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::DataValidationError`] - The length of the message exceeds
+    ///   Excel's limit of 255 characters.
     ///
     /// # Examples
     ///
