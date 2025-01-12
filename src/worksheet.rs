@@ -1262,10 +1262,8 @@ use std::fs::File;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
-#[cfg(feature = "rusty_money")]
-use rusty_money::{FormattableCurrency, Money};
-#[cfg(feature = "rusty_money")]
-use rust_decimal::prelude::ToPrimitive;
+#[cfg(feature = "rust_decimal")]
+use rust_decimal::prelude::{ToPrimitive, Decimal};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -18112,16 +18110,16 @@ impl IntoExcelData for &NaiveTime {
     }
 }
 
-#[cfg(feature = "rusty_money")]
-impl<'b, T: FormattableCurrency> IntoExcelData for Money<'_, T> {
+#[cfg(feature = "rust_decimal")]
+impl IntoExcelData for Decimal {
     fn write(
         self,
         worksheet: &mut Worksheet,
         row: RowNum,
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
-        let Some(number) = self.amount().to_f64() else {
-            return Err(XlsxError::ParameterError(format!("Cannot represent {:?} in excel", self.amount())));
+        let Some(number) = self.to_f64() else {
+            return Err(XlsxError::ParameterError(format!("Cannot represent {:?} in a single cell", self)));
         };
         worksheet.store_number(row, col, number, None)
     }
@@ -18133,8 +18131,8 @@ impl<'b, T: FormattableCurrency> IntoExcelData for Money<'_, T> {
         col: ColNum,
         format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
-        let Some(number) = self.amount().to_f64() else {
-            return Err(XlsxError::ParameterError(format!("Cannot represent {:?} in excel", self.amount())));
+        let Some(number) = self.to_f64() else {
+            return Err(XlsxError::ParameterError(format!("Cannot represent {:?} in a single cell", self)));
         };
         worksheet.store_number(row, col, number, Some(format))
     }

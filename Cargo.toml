@@ -24,7 +24,6 @@ polars = {version = "0.45", default-features = false, features = [], optional = 
 tempfile =  {version = "3.14.0", optional = true}
 wasm-bindgen = {version = "0.2.99", optional = true}
 rust_xlsxwriter_derive = {version = "0.2.0", optional = true}
-rusty-money = {version = "0.4.1", optional = true}
 rust_decimal = {version = "1.36.0", optional = true}
 
 [dev-dependencies]
@@ -52,9 +51,9 @@ constant_memory = ["dep:tempfile"]
 # easier to write.
 polars = ["dep:polars"]
 
-# `rusty_money`: Add support for writing rusty_money Money type with
-# `Worksheet.write()`
-rusty_money = ["dep:rusty-money", "dep:rust_decimal"]
+# `rust_decimal`: Add support for writing rust_decimal Decimal type with
+# `Worksheet.write()`, provided it can be represented by f64
+rust_decimal = ["dep:rust_decimal"]
 
 # `serde`: Adds supports for Serde serialization.
 serde = ["dep:serde", "dep:rust_xlsxwriter_derive"]
