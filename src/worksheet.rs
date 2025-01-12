@@ -18120,7 +18120,7 @@ impl IntoExcelData for Decimal {
     ) -> Result<&mut Worksheet, XlsxError> {
         let Some(number) = self.to_f64() else {
             return Err(XlsxError::ParameterError(format!(
-                "Cannot represent {:?} in a single cell",
+                "Cannot represent Decimal {:?} as an Excel f64 value.",
                 self
             )));
         };
@@ -18136,7 +18136,7 @@ impl IntoExcelData for Decimal {
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let Some(number) = self.to_f64() else {
             return Err(XlsxError::ParameterError(format!(
-                "Cannot represent {:?} in a single cell",
+                "Cannot represent Decimal {:?} as an Excel f64 value.",
                 self
             )));
         };
