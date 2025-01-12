@@ -1263,7 +1263,7 @@ use std::fs::File;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 #[cfg(feature = "rust_decimal")]
-use rust_decimal::prelude::{ToPrimitive, Decimal};
+use rust_decimal::prelude::{Decimal, ToPrimitive};
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -18119,12 +18119,15 @@ impl IntoExcelData for Decimal {
         col: ColNum,
     ) -> Result<&mut Worksheet, XlsxError> {
         let Some(number) = self.to_f64() else {
-            return Err(XlsxError::ParameterError(format!("Cannot represent {:?} in a single cell", self)));
+            return Err(XlsxError::ParameterError(format!(
+                "Cannot represent {:?} in a single cell",
+                self
+            )));
         };
         worksheet.store_number(row, col, number, None)
     }
 
-    fn write_with_format<'a> (
+    fn write_with_format<'a>(
         self,
         worksheet: &'a mut Worksheet,
         row: RowNum,
@@ -18132,7 +18135,10 @@ impl IntoExcelData for Decimal {
         format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let Some(number) = self.to_f64() else {
-            return Err(XlsxError::ParameterError(format!("Cannot represent {:?} in a single cell", self)));
+            return Err(XlsxError::ParameterError(format!(
+                "Cannot represent {:?} in a single cell",
+                self
+            )));
         };
         worksheet.store_number(row, col, number, Some(format))
     }
