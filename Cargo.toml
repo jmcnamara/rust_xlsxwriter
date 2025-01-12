@@ -51,8 +51,8 @@ constant_memory = ["dep:tempfile"]
 # easier to write.
 polars = ["dep:polars"]
 
-# `rust_decimal`: Add support for writing rust_decimal Decimal type with
-# `Worksheet.write()`, provided it can be represented by f64
+# `rust_decimal`: Add support for writing `rust_decimal` `Decimal` type with
+# `Worksheet::write()`, provided it can be represented by f64.
 rust_decimal = ["dep:rust_decimal"]
 
 # `serde`: Adds supports for Serde serialization.
