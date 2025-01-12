@@ -1262,6 +1262,11 @@ use std::fs::File;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
+#[cfg(feature = "rusty_money")]
+use rusty_money::{FormattableCurrency, Money};
+#[cfg(feature = "rusty_money")]
+use rust_decimal::prelude::ToPrimitive;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -18104,6 +18109,34 @@ impl IntoExcelData for &NaiveTime {
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_time_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
+#[cfg(feature = "rusty_money")]
+impl<'b, T: FormattableCurrency> IntoExcelData for Money<'_, T> {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let Some(number) = self.amount().to_f64() else {
+            return Err(XlsxError::ParameterError(format!("Cannot represent {:?} in excel", self.amount())));
+        };
+        worksheet.store_number(row, col, number, None)
+    }
+
+    fn write_with_format<'a> (
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let Some(number) = self.amount().to_f64() else {
+            return Err(XlsxError::ParameterError(format!("Cannot represent {:?} in excel", self.amount())));
+        };
+        worksheet.store_number(row, col, number, Some(format))
     }
 }
 
