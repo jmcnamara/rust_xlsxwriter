@@ -1262,6 +1262,9 @@ use std::fs::File;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
+#[cfg(feature = "rust_decimal")]
+use rust_decimal::prelude::{Decimal, ToPrimitive};
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -18104,6 +18107,40 @@ impl IntoExcelData for &NaiveTime {
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_time_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
+#[cfg(feature = "rust_decimal")]
+impl IntoExcelData for Decimal {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let Some(number) = self.to_f64() else {
+            return Err(XlsxError::ParameterError(format!(
+                "Cannot represent Decimal {:?} as an Excel f64 value.",
+                self
+            )));
+        };
+        worksheet.store_number(row, col, number, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let Some(number) = self.to_f64() else {
+            return Err(XlsxError::ParameterError(format!(
+                "Cannot represent Decimal {:?} as an Excel f64 value.",
+                self
+            )));
+        };
+        worksheet.store_number(row, col, number, Some(format))
     }
 }
 
