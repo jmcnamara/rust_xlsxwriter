@@ -536,6 +536,8 @@ mod cond_format22;
 mod data_validation01;
 mod data_validation02;
 mod data_validation03;
+#[cfg(feature = "rust_decimal")]
+mod decimal01;
 mod default_row01;
 mod default_row02;
 mod default_row03;

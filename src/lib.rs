@@ -191,6 +191,10 @@
 //!   easier to write.
 //! - `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow
 //!   compilation for wasm/JavaScript targets.
+//! - `rust_decimal`: Adds support for writing the
+//!    [`rust_decimal`](https://crates.io/crates/rust_decimal) `Decimal` type
+//!    with `Worksheet::write_number()`, provided it can be represented by
+//!    [`f64`].
 //! - `ryu`: Adds a dependency on `ryu`. This speeds up writing numeric
 //!   worksheet cells for large data files. It gives a performance boost above
 //!   300,000 numeric cells and can be up to 30% faster than the default number
