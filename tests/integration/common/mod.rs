@@ -7,7 +7,7 @@
 
 #[macro_export]
 macro_rules! assert_result {
-    ( $x:expr ) => {
+    ( $x:expr_2021 ) => {
         match $x {
             Ok(result) => result,
             Err(e) => panic!("\n!\n! XlsxError:\n! {:?}\n!\n", e),

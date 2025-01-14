@@ -862,10 +862,9 @@ impl Workbook {
     /// src="https://rustxlsxwriter.github.io/images/workbook_worksheet_from_index.png">
     ///
     pub fn worksheet_from_index(&mut self, index: usize) -> Result<&mut Worksheet, XlsxError> {
-        if let Some(worksheet) = self.worksheets.get_mut(index) {
-            Ok(worksheet)
-        } else {
-            Err(XlsxError::UnknownWorksheetNameOrIndex(index.to_string()))
+        match self.worksheets.get_mut(index) {
+            Some(worksheet) => Ok(worksheet),
+            _ => Err(XlsxError::UnknownWorksheetNameOrIndex(index.to_string())),
         }
     }
 

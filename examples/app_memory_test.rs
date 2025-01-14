@@ -26,12 +26,16 @@ pub struct Trallocator<A: GlobalAlloc>(pub A, AtomicU64);
 
 unsafe impl<A: GlobalAlloc> GlobalAlloc for Trallocator<A> {
     unsafe fn alloc(&self, l: Layout) -> *mut u8 {
-        self.1.fetch_add(l.size() as u64, Ordering::SeqCst);
-        self.0.alloc(l)
+        unsafe {
+            self.1.fetch_add(l.size() as u64, Ordering::SeqCst);
+            self.0.alloc(l)
+        }
     }
     unsafe fn dealloc(&self, ptr: *mut u8, l: Layout) {
-        self.0.dealloc(ptr, l);
-        self.1.fetch_sub(l.size() as u64, Ordering::SeqCst);
+        unsafe {
+            self.0.dealloc(ptr, l);
+            self.1.fetch_sub(l.size() as u64, Ordering::SeqCst);
+        }
     }
 }
 
