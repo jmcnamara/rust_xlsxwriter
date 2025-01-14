@@ -111,7 +111,7 @@ pub(crate) fn xml_si_element<W: Write>(writer: &mut W, string: &str, preserve_wh
 
 // Write <si> element for rich strings.
 pub(crate) fn xml_rich_si_element<W: Write>(writer: &mut W, string: &str) {
-    write!(writer, r#"<si>{string}</si>"#).expect(XML_WRITE_ERROR);
+    write!(writer, "<si>{string}</si>").expect(XML_WRITE_ERROR);
 }
 
 // Write the theme string to the theme file.

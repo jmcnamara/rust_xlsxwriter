@@ -186,6 +186,15 @@ fn compare_xlsx_files(
     ignore_elements: &HashMap<&str, &str>,
     ignore_spans: bool,
 ) -> (Vec<String>, Vec<String>) {
+    // Regexes used in the text cleaning.
+    let spans = static_regex!(r#" spans="\d+:\d+""#);
+    let digits = static_regex!(r"000000000000\d+");
+    let utc_date = static_regex!(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z");
+    let calc_para = static_regex!(r"<calcPr[^>]*>");
+    let workbook_view = static_regex!(
+        r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#
+    );
+
     // Open the xlsx files.
     let exp_fh = match File::open(exp_file) {
         Ok(fh) => fh,
@@ -333,7 +342,6 @@ fn compare_xlsx_files(
             exp_xml_string = exp_xml_string.replace("John", "");
 
             // Remove creation date from core.xml file.
-            let utc_date = static_regex!(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z");
             exp_xml_string = utc_date.replace_all(&exp_xml_string, "").to_string();
             got_xml_string = utc_date.replace_all(&got_xml_string, "").to_string();
         }
@@ -341,9 +349,6 @@ fn compare_xlsx_files(
         // Remove workbookView dimensions which are almost always different and
         // calcPr which can have different Excel version ids.
         if filename == "xl/workbook.xml" {
-            let workbook_view = static_regex!(
-                r#"<workbookView xWindow="\d+" yWindow="\d+" windowWidth="\d+" windowHeight="\d+""#
-            );
             exp_xml_string = workbook_view
                 .replace(&exp_xml_string, "<workbookView")
                 .to_string();
@@ -351,7 +356,6 @@ fn compare_xlsx_files(
                 .replace(&got_xml_string, "<workbookView")
                 .to_string();
 
-            let calc_para = static_regex!(r"<calcPr[^>]*>");
             exp_xml_string = calc_para.replace(&exp_xml_string, "<calcPr/>").to_string();
             got_xml_string = calc_para.replace(&got_xml_string, "<calcPr/>").to_string();
         }
@@ -360,7 +364,6 @@ fn compare_xlsx_files(
         // "0.75000000000000011" instead of "0.75". We simplify/round these to
         // make comparison easier.
         if filename.starts_with("xl/charts/chart") {
-            let digits = static_regex!(r"000000000000\d+");
             exp_xml_string = digits.replace_all(&exp_xml_string, "").to_string();
         }
 
@@ -374,7 +377,6 @@ fn compare_xlsx_files(
 
         // Ignore/remove span elements for "constant mode" comparison.
         if ignore_spans && filename.starts_with("xl/worksheets/sheet") {
-            let spans = static_regex!(r#" spans="\d+:\d+""#);
             exp_xml_string = spans.replace_all(&exp_xml_string, "").to_string();
             got_xml_string = spans.replace_all(&got_xml_string, "").to_string();
         }
