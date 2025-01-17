@@ -2150,8 +2150,8 @@ impl Workbook {
     }
 
     // Convert any embedded images in the worksheets to a global reference. Each
-    // worksheet like have a local index to an embedded cell image. We need to
-    // map these local references to a worksheet/global id that takes into
+    // worksheet will have a local index to an embedded cell image. We need to
+    // map these local references to a workbook/global id that takes into
     // account duplicate images.
     fn prepare_embedded_images(&mut self) {
         let mut embedded_images = vec![];

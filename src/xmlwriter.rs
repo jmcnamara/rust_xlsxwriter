@@ -1,5 +1,5 @@
 // xmlwriter - a module for writing XML in the same format and with the same
-// escaping as used by Excel in xlsx xml files. This is a base set of
+// escaping as used by Excel in xlsx xml files. This is a common set of
 // functionality for all of the other xml writing structs.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
