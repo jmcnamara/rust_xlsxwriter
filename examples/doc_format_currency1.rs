@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! The following example demonstrates setting a currency format for a worksheet
 //! cell. This example doesn't actually set a currency format, for that see the

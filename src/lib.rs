@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 #![doc(html_logo_url = "https://rustxlsxwriter.github.io/images/rust_xlsxwriter_logo.png")]
 #![cfg_attr(docsrs, feature(doc_cfg))]

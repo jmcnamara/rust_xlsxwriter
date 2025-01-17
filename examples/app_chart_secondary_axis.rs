@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! An example of creating an Excel Line chart with a secondary axis using the
 //! rust_xlsxwriter library.

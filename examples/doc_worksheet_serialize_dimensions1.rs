@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! Example of getting the dimensions of some serialized data. In this example
 //! we use the dimensions to set a conditional format range.

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! The `rust_xlsxwriter_derive` crate provides the `XlsxSerialize` derived
 //! trait which is used in conjunction with `rust_xlsxwriter` serialization.

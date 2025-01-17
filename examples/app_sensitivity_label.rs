@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! An example adding a Sensitivity Label to an Excel file using custom document
 //! properties. See the main docs for an explanation of how to extract the

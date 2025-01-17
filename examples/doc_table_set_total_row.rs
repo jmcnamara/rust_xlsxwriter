@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2024, John McNamara, jmcnamara@cpan.org
+// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! Example of turning on the "totals" row at the bottom of a worksheet table.
 //! Note, this just turns on the total run it doesn't add captions or subtotal
