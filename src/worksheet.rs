@@ -12870,45 +12870,44 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// Autofit the worksheet column widths, approximately.
+    /// Autofit the worksheet column widths to the widest data in the column,
+    /// approximately.
     ///
-    /// There is no option in the xlsx file format that can be used to say
-    /// "autofit columns on loading". Auto-fitting of columns is something that
-    /// Excel does at runtime when it has access to all of the worksheet
-    /// information as well as the Windows functions for calculating display
-    /// areas based on fonts and formatting.
+    /// Excel autofits columns at runtime when it has access to all of the
+    /// required worksheet information as well as the Windows functions for
+    /// calculating display areas based on fonts and formatting.
     ///
-    /// The `rust_xlsxwriter` library doesn't have access to the Windows
-    /// functions that Excel has so it simulates autofit by calculating string
-    /// widths using metrics taken from Excel.
+    /// The `rust_xlsxwriter` library doesn't have access to these Windows
+    /// functions so it simulates autofit by calculating string widths based on
+    /// metrics taken from Excel.
     ///
-    /// As such, there are some limitations to be aware of when using this
-    /// method:
+    /// This isn't perfect but for most cases it should be sufficient and
+    /// indistinguishable from the output of Excel. However there are some
+    /// limitations to be aware of when using this method:
     ///
-    /// - It is a simulated method and may not be accurate in all cases.
     /// - It is based on the default Excel font type and size of Calibri 11. It
     ///   will not give accurate results for other fonts or font sizes.
-    /// - It doesn't take number or date formatting into account, although it
-    ///   may try to in a later version.
-    /// - It iterates over all the cells in a worksheet that have been populated
-    ///   with data and performs a length calculation on each one, so it can
-    ///   have a performance overhead for larger worksheets. See Note 1 below.
+    /// - It doesn't take formatting of numbers or dates account, although this
+    ///   may be addressed in a later version.
+    /// - Autofit is a relatively expensive operation since it performs a
+    ///   calculation for all the populated cells in a worksheet. See the note
+    ///   on performance below.
     ///
-    /// This isn't perfect but for most cases it should be sufficient and if not
-    /// you can adjust or prompt it by setting your own column widths via
-    /// [`Worksheet::set_column_width()`] or
-    /// [`Worksheet::set_column_width_pixels()`].
+    /// For cases that don't match your desired output you can set explicit
+    /// column widths via [`Worksheet::set_column_width()`] or
+    /// [`Worksheet::set_column_width_pixels()`]. The `autofit()` method ignores
+    /// columns that have already been explicitly set if the width is greater
+    /// than the calculated autofit width. Alternatively, setting the column
+    /// width explicitly after calling `autofit()` will override the autofit
+    /// value. See also [`Worksheet::autofit_to_max_width()`] below.
     ///
-    /// The `autofit()` method ignores columns that have already been explicitly
-    /// set if the width is greater than the calculated autofit width.
-    /// Alternatively, setting the column width explicitly after calling
-    /// `autofit()` will override the autofit value.
-    ///
-    /// **Note 1**: As a performance optimization when dealing with large data
-    /// sets you can call `autofit()` after writing the first 50 or 100 rows.
-    /// This will produce a reasonably accurate autofit for the first visible
-    /// page of data without incurring the performance penalty of autofitting
-    /// thousands of non-visible rows.
+    /// **Performance**: By default `autofit()` performs a length calculation
+    /// for each populated cell in a worksheet. For very large worksheets this
+    /// could be slow. However, it is possible to mitigate this by calling
+    /// `autofit()` after writing the first 100 or 200 rows. This will produce a
+    /// reasonably accurate autofit for the first visible page of data without
+    /// incurring the performance penalty of autofitting thousands of
+    /// non-visible rows.
     ///
     /// # Examples
     ///
@@ -12930,7 +12929,7 @@ impl Worksheet {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    ///     // Add some data
+    ///     // Add some data to the worksheet.
     ///     worksheet.write_string(0, 0, "Hello")?;
     ///     worksheet.write_string(0, 1, "Hello")?;
     ///     worksheet.write_string(1, 1, "Hello World")?;
@@ -12951,122 +12950,31 @@ impl Worksheet {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/worksheet_autofit.png">
     ///
+    ///
+    ///
     pub fn autofit(&mut self) -> &mut Worksheet {
-        let mut max_widths: HashMap<ColNum, u16> = HashMap::new();
+        self.autofit_worksheet(MAX_AUTOFIT_WIDTH_PIXELS)
+    }
 
-        let (first_row, last_row) = if self.use_constant_memory {
-            (self.current_row, self.current_row)
-        } else {
-            (self.dimensions.first_row, self.dimensions.last_row)
-        };
-
-        // Iterate over all of the data in the worksheet and find the max data
-        // width for each column.
-        for row_num in first_row..=last_row {
-            if let Some(columns) = self.data_table.get(&row_num) {
-                for col_num in self.dimensions.first_col..=self.dimensions.last_col {
-                    if let Some(cell) = columns.get(&col_num) {
-                        let mut pixel_width = match cell {
-                            // For strings we do a calculation based on
-                            // character widths taken from Excel. For rich
-                            // strings we use the unformatted string. We also
-                            // split multi-line strings and handle each part
-                            // separately.
-                            CellType::String { string, .. }
-                            | CellType::InlineString { string, .. }
-                            | CellType::RichString {
-                                raw_string: string, ..
-                            } => {
-                                let mut max = 0;
-                                for segment in string.lines() {
-                                    let length = utility::pixel_width(segment);
-                                    max = cmp::max(max, length);
-                                }
-                                max
-                            }
-
-                            // For numbers we use a workaround/optimization
-                            // since digits all have a pixel width of 7. This
-                            // gives a slightly greater width for the decimal
-                            // place and minus sign but only by a few pixels and
-                            // over-estimation is okay.
-                            CellType::Number { number, .. } => 7 * number.to_string().len() as u16,
-
-                            // For Boolean types we use the Excel standard
-                            // widths for TRUE and FALSE.
-                            CellType::Boolean { boolean, .. } => {
-                                if *boolean {
-                                    31
-                                } else {
-                                    36
-                                }
-                            }
-
-                            // For formulas we autofit the result of the formula
-                            // if it has a non-zero/default value.
-                            CellType::Formula { result, .. }
-                            | CellType::ArrayFormula { result, .. } => {
-                                if result.as_ref() == "0" || result.is_empty() {
-                                    0
-                                } else {
-                                    utility::pixel_width(result)
-                                }
-                            }
-
-                            // Datetimes are just numbers but they also have an
-                            // Excel format. It isn't feasible to parse the
-                            // number format to get the actual string width for
-                            // all format types so we use a width based on the
-                            // Excel's default format: mm/dd/yyyy.
-                            CellType::DateTime { .. } => 68,
-
-                            // Ignore the following types which don't add to the width.
-                            CellType::Blank { .. } | CellType::Error { .. } => 0,
-                        };
-
-                        // If the cell is in an autofilter header we add an
-                        // additional 16 pixels for the dropdown arrow.
-                        let is_autofilter_row = if self.use_constant_memory {
-                            self.cells_with_autofilter
-                                .contains_key(&(self.current_row, col_num))
-                        } else {
-                            self.cells_with_autofilter.contains_key(&(row_num, col_num))
-                        };
-
-                        if pixel_width > 0 && is_autofilter_row {
-                            pixel_width += 16;
-                        }
-
-                        // Limit the autofit width to Excel's limit of 1790 pixels.
-                        let pixel_width = std::cmp::min(pixel_width, MAX_AUTOFIT_WIDTH_PIXELS);
-
-                        // Update the max column width.
-                        if pixel_width > 0 {
-                            match max_widths.get_mut(&col_num) {
-                                // Update the max for the column.
-                                Some(max) => {
-                                    if pixel_width > *max {
-                                        *max = pixel_width;
-                                    };
-                                }
-                                None => {
-                                    // Add a new column entry and maximum.
-                                    max_widths.insert(col_num, pixel_width);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Set the max character width for each column.
-        for (col, pixels) in &max_widths {
-            let width = Self::pixels_to_width(*pixels + 7);
-            self.store_column_width(*col, width, true);
-        }
-
-        self
+    /// Autofit the worksheet columns up to a maximum width.
+    ///
+    /// The [`Worksheet::autofit()`] method above simulates Excel's column
+    /// autofit. On undesirable side-effect of this is that Excel autofits very
+    /// long strings up to limit of 255 characters/1790 pixels. This is often
+    /// too wide to display on a single screen at normal zoom. As such the
+    /// `autofit_to_max_width()` method is provided to enable a smaller upper
+    /// limit for autofitting long strings. A value of 300 pixels is recommended
+    /// as a good compromise between column width and readability.
+    ///
+    /// # Parameters
+    ///
+    /// - `max_autofit_width`: The maximum column width, in pixels, to use for
+    ///   autofitting.
+    ///
+    ///
+    pub fn autofit_to_max_width(&mut self, max_autofit_width: u16) -> &mut Worksheet {
+        let max_autofit_width = std::cmp::min(max_autofit_width, MAX_AUTOFIT_WIDTH_PIXELS);
+        self.autofit_worksheet(max_autofit_width)
     }
 
     /// Set the worksheet name used in VBA macros.
@@ -15341,6 +15249,143 @@ impl Worksheet {
         }
 
         headers
+    }
+
+    // Autofit the worksheet column widths, approximately.
+    //
+    // Auto-fitting of columns is something that Excel does at runtime when it
+    // has access to all of the worksheet information as well as the Windows
+    // functions for calculating display areas based on fonts and formatting.
+    //
+    // The `rust_xlsxwriter` library doesn't have access to the Windows
+    // functions that Excel has so it simulates autofit by calculating string
+    // widths using metrics taken from Excel.
+    //
+    // This internal function supports autofitting to Excel's maximum cell width
+    // or to a user defined value.
+    fn autofit_worksheet(&mut self, max_autofit_width: u16) -> &mut Worksheet {
+        let mut max_widths: HashMap<ColNum, u16> = HashMap::new();
+
+        let (first_row, last_row) = if self.use_constant_memory {
+            (self.current_row, self.current_row)
+        } else {
+            (self.dimensions.first_row, self.dimensions.last_row)
+        };
+
+        // Iterate over all of the data in the worksheet and find the max data
+        // width for each column.
+        for row_num in first_row..=last_row {
+            if let Some(columns) = self.data_table.get(&row_num) {
+                for col_num in self.dimensions.first_col..=self.dimensions.last_col {
+                    if let Some(cell) = columns.get(&col_num) {
+                        let mut pixel_width = match cell {
+                            // For strings we do a calculation based on
+                            // character widths taken from Excel. For rich
+                            // strings we use the unformatted string. We also
+                            // split multi-line strings and handle each part
+                            // separately.
+                            CellType::String { string, .. }
+                            | CellType::InlineString { string, .. }
+                            | CellType::RichString {
+                                raw_string: string, ..
+                            } => {
+                                let mut max = 0;
+                                for segment in string.lines() {
+                                    let length = utility::pixel_width(segment);
+                                    max = cmp::max(max, length);
+                                }
+                                max
+                            }
+
+                            // For numbers we use a workaround/optimization
+                            // since digits all have a pixel width of 7. This
+                            // gives a slightly greater width for the decimal
+                            // place and minus sign but only by a few pixels and
+                            // over-estimation is okay.
+                            CellType::Number { number, .. } => 7 * number.to_string().len() as u16,
+
+                            // For Boolean types we use the Excel standard
+                            // widths for TRUE and FALSE.
+                            CellType::Boolean { boolean, .. } => {
+                                if *boolean {
+                                    31
+                                } else {
+                                    36
+                                }
+                            }
+
+                            // For formulas we autofit the result of the formula
+                            // if it has a non-zero/default value.
+                            CellType::Formula { result, .. }
+                            | CellType::ArrayFormula { result, .. } => {
+                                if result.as_ref() == "0" || result.is_empty() {
+                                    0
+                                } else {
+                                    utility::pixel_width(result)
+                                }
+                            }
+
+                            // Datetimes are just numbers but they also have an
+                            // Excel format. It isn't feasible to parse the
+                            // number format to get the actual string width for
+                            // all format types so we use a width based on the
+                            // Excel's default format: mm/dd/yyyy.
+                            CellType::DateTime { .. } => 68,
+
+                            // Ignore the following types which don't add to the width.
+                            CellType::Blank { .. } | CellType::Error { .. } => 0,
+                        };
+
+                        // If the cell is in an autofilter header we add an
+                        // additional 16 pixels for the dropdown arrow.
+                        let is_autofilter_row = if self.use_constant_memory {
+                            self.cells_with_autofilter
+                                .contains_key(&(self.current_row, col_num))
+                        } else {
+                            self.cells_with_autofilter.contains_key(&(row_num, col_num))
+                        };
+
+                        // Add autofilter dropdown padding.
+                        if pixel_width > 0 && is_autofilter_row {
+                            pixel_width += 16;
+                        }
+
+                        // Add standard cell 7 pixel padding.
+                        if pixel_width > 0 {
+                            pixel_width += 7;
+                        }
+
+                        // Limit the autofit width to Excel's limit for `autofit()`
+                        // or to a user defined value for `autofit_to_max_width()`.
+                        pixel_width = std::cmp::min(pixel_width, max_autofit_width);
+
+                        // Update the max column width.
+                        if pixel_width > 0 {
+                            match max_widths.get_mut(&col_num) {
+                                // Update the max for the column.
+                                Some(max) => {
+                                    if pixel_width > *max {
+                                        *max = pixel_width;
+                                    };
+                                }
+                                None => {
+                                    // Add a new column entry and maximum.
+                                    max_widths.insert(col_num, pixel_width);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Set the max character width for each column.
+        for (col, pixels) in &max_widths {
+            let width = Self::pixels_to_width(*pixels);
+            self.store_column_width(*col, width, true);
+        }
+
+        self
     }
 
     // -----------------------------------------------------------------------

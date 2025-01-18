@@ -1484,7 +1484,7 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_cell_format.rs` - Demonstrates setting the format of a
   worksheet cell separately from writing the cell data.
 
-* `doc_worksheet_set_column_autofir_width.rs` - Demonstrates "auto"-fitting
+* `doc_worksheet_set_column_autofit_width.rs` - Demonstrates "auto"-fitting
   the the width of a column in Excel based on the maximum string width. See
   also the [`Worksheet::autofit()`] command.
 

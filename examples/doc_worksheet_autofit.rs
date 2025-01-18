@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Add some data
+    // Add some data to the worksheet.
     worksheet.write_string(0, 0, "Hello")?;
     worksheet.write_string(0, 1, "Hello")?;
     worksheet.write_string(1, 1, "Hello World")?;

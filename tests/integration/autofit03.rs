@@ -64,6 +64,24 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test with the autofit_to_max_width() above Excel max.
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.write_string(0, 0, "A")?;
+    worksheet.write_string(0, 1, "A")?;
+
+    worksheet.set_column_width(1, 1.57143)?;
+
+    worksheet.autofit_to_max_width(2000);
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_autofit03_1() {
     let test_runner = common::TestRunner::new()
@@ -94,6 +112,18 @@ fn test_autofit03_3() {
         .set_name("autofit03")
         .set_function(create_new_xlsx_file_3)
         .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_autofit03_4() {
+    let test_runner = common::TestRunner::new()
+        .set_name("autofit03")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();
