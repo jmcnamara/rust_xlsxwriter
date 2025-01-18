@@ -1973,6 +1973,12 @@ impl Worksheet {
     /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
     /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
     ///
+    /// If the `rust_decimal` feature is enabled you can write the [`Decimal`] type via [`rust_decimal`].
+    /// This requires that the `Decimal` can be represented as a `f64` in Excel.
+    ///
+    /// [`Decimal`]: https://docs.rs/rust_decimal/latest/rust_decimal/struct.Decimal.html
+    /// [`rust_decimal`]: https://docs.rs/rust_decimal/latest/rust_decimal
+    ///
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
     ///

@@ -5,6 +5,31 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.81.0] - 2025-01-18
+
+### Added
+
+- Added the optional crate feature `rust_decimal`  to allow writing the
+  [`Decimal`] type in [`Worksheet::write()`] via [`rust_decimal`]. This requires
+  that the `Decimal` can be represented as a `f64` in Excel.
+
+  [Request #127]
+
+- Added the [`Worksheet::autofit_to_max_width()`] method to enable autofitting
+  long strings with an upper limit for readability.
+
+- Updated polars dependency to 0.45 to pick up latest Polars additions for
+  [`polars_excel_writer`].
+
+- Added some code changes to prepare for Rust edition 2024.
+
+
+  [`Decimal`]: https://docs.rs/rust_decimal/latest/rust_decimal/struct.Decimal.html
+  [Request #127]: https://github.com/jmcnamara/rust_xlsxwriter/issues/127
+  [`rust_decimal`]: https://docs.rs/rust_decimal/latest/rust_decimal
+  [`Worksheet::autofit_to_max_width()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.autofit_to_max_width
+
+
 ## [0.80.0] - 2024-12-07
 
 ### Fixed
