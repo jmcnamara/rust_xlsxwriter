@@ -544,6 +544,7 @@ mod default_row02;
 mod default_row03;
 mod default_row04;
 mod default_row05;
+mod default_row06;
 mod defined_name01;
 mod defined_name02;
 mod defined_name03;

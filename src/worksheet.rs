@@ -16927,7 +16927,11 @@ impl Worksheet {
                 attributes.push(("customFormat", "1".to_string()));
             }
 
-            if row_options.height != DEFAULT_ROW_HEIGHT {
+            // Only add ht parameter if the height is non-default.
+            if row_options.height != DEFAULT_ROW_HEIGHT
+                || (row_options.height == DEFAULT_ROW_HEIGHT
+                    && self.user_default_row_height != DEFAULT_ROW_HEIGHT)
+            {
                 attributes.push(("ht", row_options.height.to_string()));
             }
 
@@ -16935,7 +16939,11 @@ impl Worksheet {
                 attributes.push(("hidden", "1".to_string()));
             }
 
-            if row_options.height != DEFAULT_ROW_HEIGHT {
+            // Only add customHeight parameter if the height is non-default.
+            if row_options.height != DEFAULT_ROW_HEIGHT
+                || (row_options.height == DEFAULT_ROW_HEIGHT
+                    && self.user_default_row_height != DEFAULT_ROW_HEIGHT)
+            {
                 attributes.push(("customHeight", "1".to_string()));
             }
         } else if self.user_default_row_height != DEFAULT_ROW_HEIGHT {
@@ -16973,7 +16981,11 @@ impl Worksheet {
                 attributes.push(("customFormat", "1".to_string()));
             }
 
-            if row_options.height != DEFAULT_ROW_HEIGHT {
+            // Only add ht parameter if the height is non-default.
+            if row_options.height != DEFAULT_ROW_HEIGHT
+                || (row_options.height == DEFAULT_ROW_HEIGHT
+                    && self.user_default_row_height != DEFAULT_ROW_HEIGHT)
+            {
                 attributes.push(("ht", row_options.height.to_string()));
             }
 
@@ -16981,7 +16993,11 @@ impl Worksheet {
                 attributes.push(("hidden", "1".to_string()));
             }
 
-            if row_options.height != DEFAULT_ROW_HEIGHT {
+            // Only add customHeight parameter if the height is non-default.
+            if row_options.height != DEFAULT_ROW_HEIGHT
+                || (row_options.height == DEFAULT_ROW_HEIGHT
+                    && self.user_default_row_height != DEFAULT_ROW_HEIGHT)
+            {
                 attributes.push(("customHeight", "1".to_string()));
             }
         } else if self.user_default_row_height != DEFAULT_ROW_HEIGHT {
