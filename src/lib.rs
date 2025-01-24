@@ -210,6 +210,7 @@ mod data_validation;
 mod datetime;
 mod drawing;
 mod error;
+mod feature_property_bag;
 mod filter;
 mod format;
 mod formula;

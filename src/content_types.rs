@@ -165,6 +165,14 @@ impl ContentTypes {
         );
     }
 
+    // Add the featurePropertyBag to the ContentTypes overrides.
+    pub(crate) fn add_feature_bag_property(&mut self) {
+        self.add_override(
+            "/xl/featurePropertyBag/featurePropertyBag.xml",
+            "application/vnd.ms-excel.featurepropertybag+xml",
+        );
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------

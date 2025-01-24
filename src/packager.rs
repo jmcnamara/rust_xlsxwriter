@@ -58,6 +58,7 @@ use crate::content_types::ContentTypes;
 use crate::core::Core;
 use crate::custom::Custom;
 use crate::error::XlsxError;
+use crate::feature_property_bag::FeaturePropertyBag;
 use crate::metadata::Metadata;
 use crate::relationship::Relationship;
 use crate::rich_value::RichValue;
@@ -210,6 +211,10 @@ impl<W: Write + Seek + Send> Packager<W> {
             self.write_rich_value_files(workbook, options)?;
         }
 
+        if options.has_checkboxes {
+            self.write_feature_property_bag()?;
+        }
+
         // Close the zip file.
         self.zip.finish()?;
 
@@ -281,6 +286,10 @@ impl<W: Write + Seek + Send> Packager<W> {
             content_types.add_rich_value();
         }
 
+        if options.has_checkboxes {
+            content_types.add_feature_bag_property();
+        }
+
         if options.has_vml {
             content_types.add_default(
                 "vml",
@@ -330,7 +339,6 @@ impl<W: Write + Seek + Send> Packager<W> {
         if !options.properties.custom_properties.is_empty() {
             rels.add_document_relationship("custom-properties", "docProps/custom.xml", "");
         }
-
         self.zip.start_file("_rels/.rels", self.zip_options)?;
 
         rels.assemble_xml_file();
@@ -405,6 +413,15 @@ impl<W: Write + Seek + Send> Packager<W> {
                 "2017/06",
                 "rdRichValueTypes",
                 "richData/rdRichValueTypes.xml",
+                "",
+            );
+        }
+
+        if options.has_checkboxes {
+            rels.add_office_relationship(
+                "2022/11",
+                "FeaturePropertyBag",
+                "featurePropertyBag/featurePropertyBag.xml",
                 "",
             );
         }
@@ -1049,6 +1066,21 @@ impl<W: Write + Seek + Send> Packager<W> {
 
         Ok(())
     }
+
+    // Write the vba project file.
+    fn write_feature_property_bag(&mut self) -> Result<(), XlsxError> {
+        let mut property_bag = FeaturePropertyBag::new();
+
+        self.zip.start_file(
+            "xl/featurePropertyBag/featurePropertyBag.xml",
+            self.zip_options,
+        )?;
+
+        property_bag.assemble_xml_file();
+        self.zip.write_all(property_bag.writer.get_ref())?;
+
+        Ok(())
+    }
 }
 
 // Internal struct to pass options to the Packager struct.
@@ -1073,6 +1105,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) properties: DocProperties,
     pub(crate) num_embedded_images: u32,
     pub(crate) has_embedded_image_descriptions: bool,
+    pub(crate) has_checkboxes: bool,
 }
 
 impl PackagerOptions {
@@ -1099,6 +1132,7 @@ impl PackagerOptions {
             properties: DocProperties::new(),
             num_embedded_images: 0,
             has_embedded_image_descriptions: false,
+            has_checkboxes: false,
         }
     }
 }

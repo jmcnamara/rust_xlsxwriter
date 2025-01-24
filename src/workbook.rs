@@ -2583,6 +2583,16 @@ impl Workbook {
         }
     }
 
+    // Check if any of the formats has a checkbox property.
+    fn has_checkboxes(&mut self) -> bool {
+        for xf_format in &self.xf_formats {
+            if xf_format.has_checkbox() {
+                return true;
+            }
+        }
+        false
+    }
+
     // Collect some workbook level metadata to help generate the xlsx
     // package/file.
     fn set_package_options(
@@ -2597,6 +2607,7 @@ impl Workbook {
 
         package_options.is_xlsm_file = self.is_xlsm_file;
         package_options.has_vba_signature = !self.vba_signature.is_empty();
+        package_options.has_checkboxes = self.has_checkboxes();
 
         // Iterate over the worksheets to capture workbook and update the
         // package options metadata.

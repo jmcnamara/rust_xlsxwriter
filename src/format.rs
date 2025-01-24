@@ -448,6 +448,7 @@ pub struct Format {
 
     // Non-UI properties.
     pub(crate) quote_prefix: bool,
+    pub(crate) checkbox: bool,
     pub(crate) is_dxf_format: bool,
 }
 
@@ -462,6 +463,7 @@ impl Hash for Format {
         self.num_format_index.hash(state);
         self.hidden.hash(state);
         self.locked.hash(state);
+        self.checkbox.hash(state);
         self.quote_prefix.hash(state);
     }
 }
@@ -476,6 +478,7 @@ impl PartialEq for Format {
             && self.num_format_index == other.num_format_index
             && self.hidden == other.hidden
             && self.locked == other.locked
+            && self.checkbox == other.checkbox
             && self.quote_prefix == other.quote_prefix
     }
 }
@@ -528,6 +531,7 @@ impl Format {
             num_format: String::new(),
             num_format_index: 0,
             quote_prefix: false,
+            checkbox: false,
             is_dxf_format: false,
         }
     }
@@ -600,6 +604,11 @@ impl Format {
     // Check if the format has protection properties set.
     pub(crate) fn has_protection(&self) -> bool {
         self.hidden || !self.locked
+    }
+
+    // Check if the format has checkbox formatting.
+    pub(crate) fn has_checkbox(&self) -> bool {
+        self.checkbox
     }
 
     // Check if the format is in the default/unmodified condition.
@@ -2189,6 +2198,16 @@ impl Format {
     ///
     pub fn set_quote_prefix(mut self) -> Format {
         self.quote_prefix = true;
+        self
+    }
+
+    /// Set the Format property to show a checkbox in a cell.
+    ///
+    /// This method is set automatically when required and generally isn't
+    /// needed by the end user.
+    #[doc(hidden)]
+    pub fn set_checkbox(mut self) -> Format {
+        self.checkbox = true;
         self
     }
 

@@ -582,10 +582,11 @@ impl<'a> Styles<'a> {
 
     // Write the cell <xf> element.
     fn write_cell_xf(&mut self, xf_format: &Format) {
-        let has_protection = xf_format.has_protection();
-        let has_alignment = xf_format.has_alignment();
-        let apply_alignment = xf_format.apply_alignment();
+        let has_checkbox = xf_format.has_checkbox();
         let is_hyperlink = xf_format.font.is_hyperlink;
+        let has_alignment = xf_format.has_alignment();
+        let has_protection = xf_format.has_protection();
+        let apply_alignment = xf_format.apply_alignment();
         let xf_id = i32::from(is_hyperlink);
 
         let mut attributes = vec![
@@ -624,7 +625,7 @@ impl<'a> Styles<'a> {
             attributes.push(("applyProtection", "1".to_string()));
         }
 
-        if has_alignment || has_protection {
+        if has_alignment || has_protection || has_checkbox {
             xml_start_tag(&mut self.writer, "xf", &attributes);
 
             if has_alignment {
@@ -635,6 +636,11 @@ impl<'a> Styles<'a> {
             if has_protection {
                 // Write the protection element.
                 self.write_protection(xf_format);
+            }
+
+            if has_checkbox {
+                // Write the checkbox extLst element.
+                self.write_checkbox_ext();
             }
 
             xml_end_tag(&mut self.writer, "xf");
@@ -859,5 +865,24 @@ impl<'a> Styles<'a> {
         ];
 
         xml_empty_tag(&mut self.writer, "numFmt", &attributes);
+    }
+
+    // Write the Checkbox <extLst> element.
+    fn write_checkbox_ext(&mut self) {
+        let attributes = [
+            ("uri", "{C7286773-470A-42A8-94C5-96B5CB345126}"),
+            (
+                "xmlns:xfpb",
+                "http://schemas.microsoft.com/office/spreadsheetml/2022/featurepropertybag",
+            ),
+        ];
+
+        xml_start_tag_only(&mut self.writer, "extLst");
+        xml_start_tag(&mut self.writer, "ext", &attributes);
+
+        xml_empty_tag(&mut self.writer, "xfpb:xfComplement", &[("i", "0")]);
+
+        xml_end_tag(&mut self.writer, "ext");
+        xml_end_tag(&mut self.writer, "extLst");
     }
 }

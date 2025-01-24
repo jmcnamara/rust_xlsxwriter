@@ -4739,6 +4739,68 @@ impl Worksheet {
         self.store_boolean(row, col, boolean, Some(format))
     }
 
+    /// Write a boolean value to a worksheet cell as a checkbox.
+    ///
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `boolean`: The boolean value to display as a checkbox.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    pub fn write_checkbox(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        boolean: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Create a checkbox format.
+        let format = Format::new().set_checkbox();
+
+        // Store the cell data.
+        self.store_boolean(row, col, boolean, Some(&format))
+    }
+
+    /// Write a boolean value to a formatted worksheet cell as a checkbox.
+    ///
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `boolean`: The boolean value to display as a checkbox.
+    /// - `format`: The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    pub fn write_checkbox_with_format(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        boolean: bool,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Add the checkbox format to the user format.
+        let format = format.clone().set_checkbox();
+
+        // Store the cell data.
+        self.store_boolean(row, col, boolean, Some(&format))
+    }
+
     /// Merge a range of cells.
     ///
     /// The `merge_range()` method allows cells to be merged together so that
