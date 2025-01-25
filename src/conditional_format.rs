@@ -6575,6 +6575,7 @@ impl ConditionalFormatCustomIcon {
 /// - Numbers: Any Rust number that can convert [`Into`] [`f64`].
 /// - Strings: Any Rust string type that can convert into String such as
 ///   [`&str`], [`String`], `&String` and `Cow<'_, str>`.
+/// - Booleans: Any Rust [`bool`] value.
 /// - Dates/times: [`ExcelDateTime`] values and if the `chrono` feature is
 ///   enabled [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] and
 ///   [`chrono::NaiveTime`].
@@ -6665,6 +6666,12 @@ impl From<&ExcelDateTime> for ConditionalFormatValue {
     }
 }
 
+impl From<bool> for ConditionalFormatValue {
+    fn from(value: bool) -> ConditionalFormatValue {
+        ConditionalFormatValue::new_from_string(value.to_string().to_uppercase())
+    }
+}
+
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 impl From<&NaiveDate> for ConditionalFormatValue {
@@ -6722,6 +6729,7 @@ macro_rules! conditional_format_value_from_type {
 }
 
 conditional_format_value_from_type!(
+    bool
     &str &String String Cow<'_, str>
     u8 i8 u16 i16 u32 i32 f32 f64
     Formula
