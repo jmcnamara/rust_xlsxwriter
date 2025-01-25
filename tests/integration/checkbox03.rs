@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
-// Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
+// Copyright 2032-2035, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
@@ -13,7 +13,13 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
+    worksheet.insert_checkbox(0, 0, false)?;
+    worksheet.insert_checkbox(2, 2, true)?;
     worksheet.insert_checkbox(8, 4, false)?;
+    worksheet.insert_checkbox(9, 4, true)?;
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.insert_checkbox(0, 0, false)?;
 
     workbook.save(filename)?;
 
@@ -26,7 +32,13 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let worksheet = workbook.add_worksheet();
     let format = Format::new().set_checkbox();
 
+    worksheet.write_boolean_with_format(0, 0, false, &format)?;
+    worksheet.write_boolean_with_format(2, 2, true, &format)?;
     worksheet.write_boolean_with_format(8, 4, false, &format)?;
+    worksheet.write_boolean_with_format(9, 4, true, &format)?;
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.write_boolean_with_format(0, 0, false, &format)?;
 
     workbook.save(filename)?;
 
@@ -34,9 +46,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_checkbox01_1() {
+fn test_checkbox03_1() {
     let test_runner = common::TestRunner::new()
-        .set_name("checkbox01")
+        .set_name("checkbox03")
         .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
@@ -46,9 +58,9 @@ fn test_checkbox01_1() {
 }
 
 #[test]
-fn test_checkbox01_2() {
+fn test_checkbox03_2() {
     let test_runner = common::TestRunner::new()
-        .set_name("checkbox01")
+        .set_name("checkbox03")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();

@@ -2585,12 +2585,7 @@ impl Workbook {
 
     // Check if any of the formats has a checkbox property.
     fn has_checkboxes(&mut self) -> bool {
-        for xf_format in &self.xf_formats {
-            if xf_format.has_checkbox() {
-                return true;
-            }
-        }
-        false
+        self.xf_formats.iter().any(Format::has_checkbox)
     }
 
     // Collect some workbook level metadata to help generate the xlsx

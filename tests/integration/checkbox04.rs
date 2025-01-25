@@ -6,14 +6,16 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 use crate::common;
-use rust_xlsxwriter::{Format, Workbook, XlsxError};
+use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
 
 // Create rust_xlsxwriter file to compare against Excel file.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
-    worksheet.insert_checkbox(8, 4, false)?;
+    let format = Format::new().set_background_color(Color::Red);
+
+    worksheet.insert_checkbox_with_format(8, 4, false, &format)?;
 
     workbook.save(filename)?;
 
@@ -24,7 +26,9 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
-    let format = Format::new().set_checkbox();
+    let format = Format::new()
+        .set_checkbox()
+        .set_background_color(Color::Red);
 
     worksheet.write_boolean_with_format(8, 4, false, &format)?;
 
@@ -34,9 +38,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_checkbox01_1() {
+fn test_checkbox04_1() {
     let test_runner = common::TestRunner::new()
-        .set_name("checkbox01")
+        .set_name("checkbox04")
         .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
@@ -46,9 +50,9 @@ fn test_checkbox01_1() {
 }
 
 #[test]
-fn test_checkbox01_2() {
+fn test_checkbox04_2() {
     let test_runner = common::TestRunner::new()
-        .set_name("checkbox01")
+        .set_name("checkbox04")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();

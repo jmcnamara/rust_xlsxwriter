@@ -50,20 +50,21 @@ cargo run --example app_demo  # or any other example
 35. [Chart: Chart data tools](#chart-chart-data-tools)
 36. [Chart: Gauge Chart](#chart-gauge-chart)
 37. [Chart: Chartsheet](#chart-chartsheet)
-38. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
-39. [Sparklines: simple example](#sparklines-simple-example)
-40. [Sparklines: advanced example](#sparklines-advanced-example)
-41. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
-42. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-43. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-44. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-45. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-46. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-47. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-48. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-49. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-50. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-51. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+38. [Textbox: Inserting Checkboxes in worksheets](#textbox-inserting-checkboxes-in-worksheets)
+39. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
+40. [Sparklines: simple example](#sparklines-simple-example)
+41. [Sparklines: advanced example](#sparklines-advanced-example)
+42. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
+43. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+44. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+45. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+46. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+47. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+48. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+49. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+50. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+51. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+52. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -5315,6 +5316,57 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
+
+
+# Textbox: Inserting Checkboxes in worksheets
+
+Example of inserting boolean checkboxes into a worksheet.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_checkbox.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_checkbox.rs
+
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Create some formats to use in the worksheet.
+    let bold = Format::new().set_bold();
+    let light_red = Format::new().set_background_color("FFC7CE");
+    let light_green = Format::new().set_background_color("C6EFCE");
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Set the column width for clarity.
+    worksheet.set_column_width(0, 30)?;
+
+    // Write some descriptions.
+    worksheet.write_with_format(1, 0, "Some simple checkboxes:", &bold)?;
+    worksheet.write_with_format(4, 0, "Some checkboxes with cell formats:", &bold)?;
+
+    // Insert some boolean checkboxes to the worksheet.
+    worksheet.insert_checkbox(1, 1, false)?;
+    worksheet.insert_checkbox(2, 1, true)?;
+
+    // Insert some checkboxes with cell formats.
+    worksheet.insert_checkbox_with_format(4, 1, false, &light_red)?;
+    worksheet.insert_checkbox_with_format(5, 1, true, &light_green)?;
+
+    // Save the file to disk.
+    workbook.save("checkbox.xlsx")?;
+
+    Ok(())
+}
+```
 
 
 # Textbox: Inserting Textboxes in worksheets

@@ -2203,9 +2203,11 @@ impl Format {
 
     /// Set the Format property to show a checkbox in a cell.
     ///
-    /// This method is set automatically when required and generally isn't
-    /// needed by the end user.
-    #[doc(hidden)]
+    /// This format property can be use with a cell that contains a boolean
+    /// value to display it as a checkbox. This property isn't required very
+    /// often and it is generally easier to create a checkbox using the
+    /// [`Worksheet::insert_checkbox()`](crate::Worksheet::insert_checkbox)
+    /// method.
     pub fn set_checkbox(mut self) -> Format {
         self.checkbox = true;
         self
@@ -2287,6 +2289,15 @@ impl Format {
     ///
     pub fn unset_quote_prefix(mut self) -> Format {
         self.quote_prefix = false;
+        self
+    }
+
+    /// Unset the `checkbox` Format property back to its default "off" state.
+    ///
+    /// The opposite of [`Format::set_checkbox()`].
+    ///
+    pub fn unset_checkbox(mut self) -> Format {
+        self.checkbox = false;
         self
     }
 }

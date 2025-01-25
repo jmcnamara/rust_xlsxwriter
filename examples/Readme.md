@@ -100,6 +100,9 @@ documentation and generally show how an individual function works.
 * `app_chartsheet.rs` - An example of creating a chartsheet style chart
   using the rust_xlsxwriter library.
 
+* `app_checkbox.rs` - An example of adding checkbox boolean values to a
+  worksheet using the rust_xlsxwriter library.
+
 * `app_colors.rs` - A demonstration of the RGB and Theme colors palettes
   available in the rust_xlsxwriter library.
 
@@ -1329,6 +1332,18 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_insert_chart_with_offset.rs` - Example of adding a chart
   to a worksheet with a pixel offset within the cell.
+
+* `doc_worksheet_insert_checkbox1.rs` - This example demonstrates adding
+  adding checkbox boolean values to a worksheet.
+
+* `doc_worksheet_insert_checkbox2.rs` - This example demonstrates adding
+  adding checkbox boolean values to a worksheet by making use of the Excel
+  feature that a checkbox is actually a boolean value with a special
+  format.
+
+* `doc_worksheet_insert_checkbox_with_format.rs` - This example
+  demonstrates adding adding a checkbox boolean value to a worksheet along
+  with a cell format.
 
 * `doc_worksheet_insert_image_with_offset.rs` - This example shows how to
   add an image to a worksheet at an offset within the cell.

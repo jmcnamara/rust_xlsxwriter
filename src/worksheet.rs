@@ -4739,68 +4739,6 @@ impl Worksheet {
         self.store_boolean(row, col, boolean, Some(format))
     }
 
-    /// Write a boolean value to a worksheet cell as a checkbox.
-    ///
-    /// TODO
-    ///
-    /// # Parameters
-    ///
-    /// - `row`: The zero indexed row number.
-    /// - `col`: The zero indexed column number.
-    /// - `boolean`: The boolean value to display as a checkbox.
-    ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    ///
-    /// # Examples
-    ///
-    pub fn write_checkbox(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        boolean: bool,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Create a checkbox format.
-        let format = Format::new().set_checkbox();
-
-        // Store the cell data.
-        self.store_boolean(row, col, boolean, Some(&format))
-    }
-
-    /// Write a boolean value to a formatted worksheet cell as a checkbox.
-    ///
-    /// TODO
-    ///
-    /// # Parameters
-    ///
-    /// - `row`: The zero indexed row number.
-    /// - `col`: The zero indexed column number.
-    /// - `boolean`: The boolean value to display as a checkbox.
-    /// - `format`: The [`Format`] property for the cell.
-    ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
-    ///   worksheet limits.
-    ///
-    /// # Examples
-    ///
-    pub fn write_checkbox_with_format(
-        &mut self,
-        row: RowNum,
-        col: ColNum,
-        boolean: bool,
-        format: &Format,
-    ) -> Result<&mut Worksheet, XlsxError> {
-        // Add the checkbox format to the user format.
-        let format = format.clone().set_checkbox();
-
-        // Store the cell data.
-        self.store_boolean(row, col, boolean, Some(&format))
-    }
-
     /// Merge a range of cells.
     ///
     /// The `merge_range()` method allows cells to be merged together so that
@@ -6039,6 +5977,190 @@ impl Worksheet {
         self.has_vml = true;
 
         Ok(self)
+    }
+
+    /// Insert a boolean checkbox in a worksheet cell.
+    ///
+    /// Checkboxes are a [new feature] added to Excel in 2024. They are a way of
+    /// displaying a boolean value as a checkbox in a cell. The underlying value
+    /// is still an Excel `TRUE/FALSE` boolean value and can be used in formulas
+    /// and in references.
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/checkbox.png">
+    ///
+    /// [new feature]:
+    ///     https://techcommunity.microsoft.com/blog/excelblog/introducing-checkboxes-in-excel/4173561
+    ///
+    /// The `insert_checkbox()` method can be used to replicate this behavior,
+    /// see the examples below.
+    ///
+    /// The checkbox feature is only available in Excel versions from 2024 and
+    /// later. In older versions the value will be displayed as a standard Excel
+    /// `TRUE` or`FALSE` boolean. In fact Excel actually stores a checkbox as a
+    /// normal boolean but with a special format. If required you can make use
+    /// of this property to create a checkbox with
+    /// [`Worksheet::write_boolean_with_format()`] and a cell format that has
+    /// the [`Format::set_checkbox()`] property set, see the second example
+    /// below.
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `boolean`: The boolean value to display as a checkbox.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    /// This example demonstrates adding adding checkbox boolean values to a
+    /// worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_checkbox1.rs
+    /// #
+    /// use rust_xlsxwriter::{Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Insert some boolean checkboxes to the worksheet.
+    ///     worksheet.insert_checkbox(2, 2, false)?;
+    ///     worksheet.insert_checkbox(3, 2, true)?;
+    ///
+    ///     // Save the file to disk.
+    ///     workbook.save("worksheet.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_insert_checkbox1.png">
+    ///
+    /// This example demonstrates adding adding checkboxes by making use of the
+    /// Excel feature that a checkbox is actually a boolean value with a special
+    /// format.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_checkbox2.rs
+    /// #
+    /// use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    ///
+    /// fn main() -> Result<(), XlsxError> {
+    ///     // Create a new Excel file object.
+    ///     let mut workbook = Workbook::new();
+    ///
+    ///     // Add a worksheet to the workbook.
+    ///     let worksheet = workbook.add_worksheet();
+    ///
+    ///     // Create a checkbox format.
+    ///     let format = Format::new().set_checkbox();
+    ///
+    ///     // Insert some boolean checkboxes to the worksheet.
+    ///     worksheet.write_boolean_with_format(2, 2, false, &format)?;
+    ///     worksheet.write_boolean_with_format(3, 2, true, &format)?;
+    ///
+    ///     // Save the file to disk.
+    ///     workbook.save("worksheet.xlsx")?;
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
+    /// The produces the same output as the previous example.
+    ///
+    pub fn insert_checkbox(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        boolean: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Create a checkbox format.
+        let format = Format::new().set_checkbox();
+
+        // Store the cell data.
+        self.store_boolean(row, col, boolean, Some(&format))
+    }
+
+    /// Insert a boolean checkbox in a worksheet cell with a cell format.
+    ///
+    /// This method allow you to insert a boolean checkbox in a worksheet cell
+    /// with a background color or other cell format property.
+    ///
+    /// See the [`Worksheet::insert_checkbox()`] method above for more details.
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `boolean`: The boolean value to display as a checkbox.
+    /// - `format`: The [`Format`] property for the cell.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    /// # Examples
+    ///
+    ///
+    /// # Examples
+    ///
+    /// This example demonstrates adding adding a checkbox boolean value to a
+    /// worksheet along with a cell format.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_insert_checkbox_with_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Create some cell formats with different colors.
+    ///     let format1 = Format::new().set_background_color("FFC7CE");
+    ///     let format2 = Format::new().set_background_color("C6EFCE");
+    ///
+    ///     // Insert some boolean checkboxes to the worksheet.
+    ///     worksheet.insert_checkbox_with_format(2, 2, false, &format1)?;
+    ///     worksheet.insert_checkbox_with_format(3, 2, true, &format2)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_insert_checkbox_with_format.png">
+    ///
+    pub fn insert_checkbox_with_format(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        boolean: bool,
+        format: &Format,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Add the checkbox format to the user format.
+        let format = format.clone().set_checkbox();
+
+        // Store the cell data.
+        self.store_boolean(row, col, boolean, Some(&format))
     }
 
     /// Set the height for a row of cells.
