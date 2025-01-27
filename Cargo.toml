@@ -58,7 +58,7 @@ rust_decimal = ["dep:rust_decimal"]
 # `serde`: Adds supports for Serde serialization.
 serde = ["dep:serde", "dep:rust_xlsxwriter_derive"]
 
-# `wasm`: Enable wasm/Javascript compilation.
+# `wasm`: Enable wasm/Javascript compilation. See also `wasm-xlsxwriter`.
 wasm = ["js-sys", "wasm-bindgen"]
 
 # `ryu`: Adds a dependency on `ryu`. This speeds up writing numeric worksheet

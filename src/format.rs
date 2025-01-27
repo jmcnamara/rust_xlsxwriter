@@ -2203,7 +2203,7 @@ impl Format {
 
     /// Set the Format property to show a checkbox in a cell.
     ///
-    /// This format property can be use with a cell that contains a boolean
+    /// This format property can be used with a cell that contains a boolean
     /// value to display it as a checkbox. This property isn't required very
     /// often and it is generally easier to create a checkbox using the
     /// [`Worksheet::insert_checkbox()`](crate::Worksheet::insert_checkbox)

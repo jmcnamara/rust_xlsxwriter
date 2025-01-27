@@ -126,7 +126,8 @@ frequently.
   easier to write.
 
 - `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow compilation
-  for wasm/JavaScript targets.
+  for wasm/JavaScript targets. See also
+  [wasm-xlsxwriter](https://github.com/estie-inc/wasm-xlsxwriter).
 
 - `rust_decimal`: Adds support for writing the [`rust_decimal`](
    https://docs.rs/rust_decimal/latest/rust_decimal) `Decimal` type with

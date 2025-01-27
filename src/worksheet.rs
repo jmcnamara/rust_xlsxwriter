@@ -5996,7 +5996,7 @@ impl Worksheet {
     ///
     /// The checkbox feature is only available in Excel versions from 2024 and
     /// later. In older versions the value will be displayed as a standard Excel
-    /// `TRUE` or`FALSE` boolean. In fact Excel actually stores a checkbox as a
+    /// `TRUE` or `FALSE` boolean. In fact Excel actually stores a checkbox as a
     /// normal boolean but with a special format. If required you can make use
     /// of this property to create a checkbox with
     /// [`Worksheet::write_boolean_with_format()`] and a cell format that has
