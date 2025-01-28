@@ -58,7 +58,7 @@ use crate::content_types::ContentTypes;
 use crate::core::Core;
 use crate::custom::Custom;
 use crate::error::XlsxError;
-use crate::feature_property_bag::FeaturePropertyBag;
+use crate::feature_property_bag::{FeaturePropertyBag, FeaturePropertyBagTypes};
 use crate::metadata::Metadata;
 use crate::relationship::Relationship;
 use crate::rich_value::RichValue;
@@ -211,8 +211,8 @@ impl<W: Write + Seek + Send> Packager<W> {
             self.write_rich_value_files(workbook, options)?;
         }
 
-        if options.has_checkboxes {
-            self.write_feature_property_bag()?;
+        if !options.feature_property_bags.is_empty() {
+            self.write_feature_property_bag(&options.feature_property_bags)?;
         }
 
         // Close the zip file.
@@ -286,7 +286,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             content_types.add_rich_value();
         }
 
-        if options.has_checkboxes {
+        if !options.feature_property_bags.is_empty() {
             content_types.add_feature_bag_property();
         }
 
@@ -417,7 +417,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             );
         }
 
-        if options.has_checkboxes {
+        if !options.feature_property_bags.is_empty() {
             rels.add_office_relationship(
                 "2022/11",
                 "FeaturePropertyBag",
@@ -1068,8 +1068,14 @@ impl<W: Write + Seek + Send> Packager<W> {
     }
 
     // Write the vba project file.
-    fn write_feature_property_bag(&mut self) -> Result<(), XlsxError> {
+    fn write_feature_property_bag(
+        &mut self,
+        feature_property_bags: &HashSet<FeaturePropertyBagTypes>,
+    ) -> Result<(), XlsxError> {
         let mut property_bag = FeaturePropertyBag::new();
+        property_bag
+            .feature_property_bags
+            .clone_from(feature_property_bags);
 
         self.zip.start_file(
             "xl/featurePropertyBag/featurePropertyBag.xml",
@@ -1105,7 +1111,7 @@ pub(crate) struct PackagerOptions {
     pub(crate) properties: DocProperties,
     pub(crate) num_embedded_images: u32,
     pub(crate) has_embedded_image_descriptions: bool,
-    pub(crate) has_checkboxes: bool,
+    pub(crate) feature_property_bags: HashSet<FeaturePropertyBagTypes>,
 }
 
 impl PackagerOptions {
@@ -1132,7 +1138,7 @@ impl PackagerOptions {
             properties: DocProperties::new(),
             num_embedded_images: 0,
             has_embedded_image_descriptions: false,
-            has_checkboxes: false,
+            feature_property_bags: HashSet::new(),
         }
     }
 }

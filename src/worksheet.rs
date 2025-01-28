@@ -7637,7 +7637,7 @@ impl Worksheet {
             self.set_writing_ahead(true);
 
             // Get a copy of the column format or use the default format. This
-            // is mainly to workaround constant memory cases which can't use the
+            // is mainly to work around constant memory cases which can't use the
             // update_cell_format() approach below.
             let col_format = match &column.format {
                 Some(format) => format.clone(),

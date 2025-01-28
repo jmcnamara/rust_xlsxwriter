@@ -502,6 +502,8 @@ mod checkbox02;
 mod checkbox03;
 mod checkbox04;
 mod checkbox05;
+mod checkbox06;
+mod checkbox07;
 mod comment01;
 mod comment02;
 mod comment03;

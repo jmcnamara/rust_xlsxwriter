@@ -224,6 +224,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, RwLock};
 
 use crate::error::XlsxError;
+use crate::feature_property_bag::FeaturePropertyBagTypes;
 use crate::format::Format;
 use crate::packager::Packager;
 use crate::packager::PackagerOptions;
@@ -328,6 +329,7 @@ pub struct Workbook {
     pub(crate) is_xlsm_file: bool,
     pub(crate) has_comments: bool,
     pub(crate) string_table: Arc<Mutex<SharedStringsTable>>,
+    pub(crate) feature_property_bags: HashSet<FeaturePropertyBagTypes>,
 
     xf_indices: Arc<RwLock<HashMap<Format, u32>>>,
     dxf_indices: HashMap<Format, u32>,
@@ -418,6 +420,7 @@ impl Workbook {
             num_worksheets: 0,
             num_chartsheets: 0,
             use_large_file: false,
+            feature_property_bags: HashSet::new(),
         }
     }
 
@@ -2443,6 +2446,9 @@ impl Workbook {
 
         // Set the number format index for the format objects.
         self.prepare_num_formats();
+
+        // Check for any format properties that require a feature bag.
+        self.prepare_feature_property_bags();
     }
 
     // Set the font index for the format objects. This only needs to be done for
@@ -2583,9 +2589,24 @@ impl Workbook {
         }
     }
 
-    // Check if any of the formats has a checkbox property.
-    fn has_checkboxes(&mut self) -> bool {
-        self.xf_formats.iter().any(Format::has_checkbox)
+    // Check for any format properties that require a feature bag. Currently
+    // this only applies to checkboxes.
+    fn prepare_feature_property_bags(&mut self) {
+        for xf_format in &self.xf_formats {
+            if xf_format.has_checkbox() {
+                self.feature_property_bags
+                    .insert(FeaturePropertyBagTypes::XFComplements);
+                break;
+            }
+        }
+
+        for dxf_format in &self.dxf_formats {
+            if dxf_format.has_checkbox() {
+                self.feature_property_bags
+                    .insert(FeaturePropertyBagTypes::DXFComplements);
+                break;
+            }
+        }
     }
 
     // Collect some workbook level metadata to help generate the xlsx
@@ -2602,7 +2623,9 @@ impl Workbook {
 
         package_options.is_xlsm_file = self.is_xlsm_file;
         package_options.has_vba_signature = !self.vba_signature.is_empty();
-        package_options.has_checkboxes = self.has_checkboxes();
+        package_options
+            .feature_property_bags
+            .clone_from(&self.feature_property_bags);
 
         // Iterate over the worksheets to capture workbook and update the
         // package options metadata.

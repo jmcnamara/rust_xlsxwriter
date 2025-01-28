@@ -640,7 +640,7 @@ impl<'a> Styles<'a> {
 
             if has_checkbox {
                 // Write the checkbox extLst element.
-                self.write_checkbox_ext();
+                self.write_xf_format_extensions();
             }
 
             xml_end_tag(&mut self.writer, "xf");
@@ -803,23 +803,27 @@ impl<'a> Styles<'a> {
         } else {
             xml_start_tag(&mut self.writer, "dxfs", &attributes);
 
-            for xf_format in self.dxf_formats {
+            for dxf_format in self.dxf_formats {
                 xml_start_tag_only(&mut self.writer, "dxf");
 
-                if xf_format.has_dxf_font() {
-                    self.write_font(&xf_format.font, true);
+                if dxf_format.has_dxf_font() {
+                    self.write_font(&dxf_format.font, true);
                 }
 
-                if xf_format.num_format_index > 0 {
-                    self.write_num_fmt(xf_format.num_format_index, &xf_format.num_format);
+                if dxf_format.num_format_index > 0 {
+                    self.write_num_fmt(dxf_format.num_format_index, &dxf_format.num_format);
                 }
 
-                if xf_format.has_dxf_fill() {
-                    self.write_fill(&xf_format.fill, true);
+                if dxf_format.has_dxf_fill() {
+                    self.write_fill(&dxf_format.fill, true);
                 }
 
-                if xf_format.has_border {
-                    self.write_border(&xf_format.borders, true);
+                if dxf_format.has_border {
+                    self.write_border(&dxf_format.borders, true);
+                }
+
+                if dxf_format.has_checkbox() {
+                    self.write_dxf_format_extensions();
                 }
 
                 xml_end_tag(&mut self.writer, "dxf");
@@ -867,8 +871,8 @@ impl<'a> Styles<'a> {
         xml_empty_tag(&mut self.writer, "numFmt", &attributes);
     }
 
-    // Write the Checkbox <extLst> element.
-    fn write_checkbox_ext(&mut self) {
+    // Write the xfComplement <extLst> elements.
+    fn write_xf_format_extensions(&mut self) {
         let attributes = [
             ("uri", "{C7286773-470A-42A8-94C5-96B5CB345126}"),
             (
@@ -881,6 +885,25 @@ impl<'a> Styles<'a> {
         xml_start_tag(&mut self.writer, "ext", &attributes);
 
         xml_empty_tag(&mut self.writer, "xfpb:xfComplement", &[("i", "0")]);
+
+        xml_end_tag(&mut self.writer, "ext");
+        xml_end_tag(&mut self.writer, "extLst");
+    }
+
+    // Write the DXFfComplement <extLst> elements.
+    fn write_dxf_format_extensions(&mut self) {
+        let attributes = [
+            ("uri", "{0417FA29-78FA-4A13-93AC-8FF0FAFDF519}"),
+            (
+                "xmlns:xfpb",
+                "http://schemas.microsoft.com/office/spreadsheetml/2022/featurepropertybag",
+            ),
+        ];
+
+        xml_start_tag_only(&mut self.writer, "extLst");
+        xml_start_tag(&mut self.writer, "ext", &attributes);
+
+        xml_empty_tag(&mut self.writer, "xfpb:DXFComplement", &[("i", "0")]);
 
         xml_end_tag(&mut self.writer, "ext");
         xml_end_tag(&mut self.writer, "extLst");

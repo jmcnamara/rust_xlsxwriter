@@ -5,7 +5,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-use std::io::Cursor;
+use std::{collections::HashSet, io::Cursor};
 
 use crate::xmlwriter::{
     xml_data_element, xml_declaration, xml_empty_tag, xml_end_tag, xml_start_tag,
@@ -13,6 +13,7 @@ use crate::xmlwriter::{
 
 pub struct FeaturePropertyBag {
     pub(crate) writer: Cursor<Vec<u8>>,
+    pub(crate) feature_property_bags: HashSet<FeaturePropertyBagTypes>,
 }
 
 impl FeaturePropertyBag {
@@ -24,7 +25,10 @@ impl FeaturePropertyBag {
     pub(crate) fn new() -> FeaturePropertyBag {
         let writer = Cursor::new(Vec::with_capacity(2048));
 
-        FeaturePropertyBag { writer }
+        FeaturePropertyBag {
+            writer,
+            feature_property_bags: HashSet::new(),
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -49,6 +53,14 @@ impl FeaturePropertyBag {
 
         // Write the XFComplements <bag> element.
         self.write_xf_compliments_bag();
+
+        // Write the DXFComplements <bag> element.
+        if self
+            .feature_property_bags
+            .contains(&FeaturePropertyBagTypes::DXFComplements)
+        {
+            self.write_dxf_compliments_bag();
+        }
 
         // Close the feature_property_bagProperties tag.
         xml_end_tag(&mut self.writer, "FeaturePropertyBags");
@@ -111,6 +123,22 @@ impl FeaturePropertyBag {
         xml_end_tag(&mut self.writer, "bag");
     }
 
+    // Write the DXFComplements <bag> element.
+    fn write_dxf_compliments_bag(&mut self) {
+        let attributes = [
+            ("type", "DXFComplements"),
+            ("extRef", "DXFComplementsMapperExtRef"),
+        ];
+
+        xml_start_tag(&mut self.writer, "bag", &attributes);
+        xml_start_tag(&mut self.writer, "a", &[("k", "MappedFeaturePropertyBags")]);
+
+        self.write_bag_id("", "2");
+
+        xml_end_tag(&mut self.writer, "a");
+        xml_end_tag(&mut self.writer, "bag");
+    }
+
     // Write the <bagId> element.
     fn write_bag_id(&mut self, key: &str, id: &str) {
         let mut attributes = vec![];
@@ -121,4 +149,10 @@ impl FeaturePropertyBag {
 
         xml_data_element(&mut self.writer, "bagId", id, &attributes);
     }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+pub(crate) enum FeaturePropertyBagTypes {
+    XFComplements,
+    DXFComplements,
 }
