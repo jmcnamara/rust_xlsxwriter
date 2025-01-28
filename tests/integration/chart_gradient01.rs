@@ -10,7 +10,7 @@ use rust_xlsxwriter::{
     Chart, ChartFormat, ChartGradientFill, ChartGradientStop, ChartType, Workbook, XlsxError,
 };
 
-// Create rust_xlsxwriter file to compare against Excel file.
+// Create a rust_xlsxwriter file to compare against an Excel file.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
