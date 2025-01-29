@@ -1513,6 +1513,9 @@ pub struct Worksheet {
     user_default_row_height: f64,
     hide_unused_rows: bool,
     has_sheet_data: bool,
+    nan: String,
+    infinity: String,
+    neg_infinity: String,
 
     #[cfg(feature = "constant_memory")]
     pub(crate) file_writer: BufWriter<File>,
@@ -1724,6 +1727,9 @@ impl Worksheet {
             vml_shape_id: 0,
             user_default_row_height: DEFAULT_ROW_HEIGHT,
             hide_unused_rows: false,
+            nan: "NAN".to_string(),
+            infinity: "INF".to_string(),
+            neg_infinity: "-INF".to_string(),
 
             // These collections need to be reset on resave.
             comment_relationships: vec![],
@@ -2563,7 +2569,7 @@ impl Worksheet {
     /// of +/- 999,999,999,999,999 (15 digits).
     ///
     /// Excel doesn't have handling for NaN or INF floating point numbers.
-    /// These will be stored as the strings "Nan", "INF", and "-INF" strings
+    /// These will be stored as the strings "NAN", "INF", and "-INF" strings
     /// instead.
     ///
     /// # Parameters
@@ -2652,7 +2658,7 @@ impl Worksheet {
     /// of +/- 999,999,999,999,999 (15 digits).
     ///
     /// Excel doesn't have handling for NaN or INF floating point numbers. These
-    /// will be stored as the strings "Nan", "INF", and "-INF" strings instead.
+    /// will be stored as the strings "NAN", "INF", and "-INF" strings instead.
     ///
     /// # Parameters
     ///
@@ -13207,6 +13213,114 @@ impl Worksheet {
         Ok(self)
     }
 
+    /// Set the default string used for NaN values.
+    ///
+    /// Excel doesn't support storing `NaN` (Not a Number) values. If a `NAN` is
+    /// generated as the result of a calculation Excel stores and displays the
+    /// error `#NUM!`. However, this error isn't usually used outside of a
+    /// formula result and it isn't stored as a number.
+    ///
+    /// In order to deal with [`f64::NAN`] in a reasonable way `rust_xlsxwriter`
+    /// writes it as the string "NAN". The `set_nan_value()` method allows you
+    /// to override this default value.
+    ///
+    /// # Parameters
+    ///
+    /// - `value`: The string to use for NaN values.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates handling NaN and Infinity values and
+    /// also setting custom string representations.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_set_nan_string.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write NaN and Infinity default values.
+    ///     worksheet.write(0, 0, "Default:")?;
+    ///     worksheet.write(0, 1, f64::NAN)?;
+    ///     worksheet.write(1, 1, f64::INFINITY)?;
+    ///     worksheet.write(2, 1, f64::NEG_INFINITY)?;
+    ///
+    ///     // Overwrite the default values.
+    ///     worksheet.set_nan_value("Nan");
+    ///     worksheet.set_infinity_value("Infinity");
+    ///     worksheet.set_neg_infinity_value("NegInfinity");
+    ///
+    ///     // Write NaN and Infinity custom values.
+    ///     worksheet.write(4, 0, "Custom:")?;
+    ///     worksheet.write(4, 1, f64::NAN)?;
+    ///     worksheet.write(5, 1, f64::INFINITY)?;
+    ///     worksheet.write(6, 1, f64::NEG_INFINITY)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_set_nan_string.png">
+    ///
+    pub fn set_nan_value(&mut self, value: impl Into<String>) -> &mut Worksheet {
+        self.nan = value.into();
+        self
+    }
+
+    /// Set the default string used for Infinite values.
+    ///
+    /// Excel doesn't support storing `Inf` (infinity) values. If an `Inf` is
+    /// generated as the result of a calculation Excel stores and displays the
+    /// error `#DIV/0`. However, this error isn't usually used outside of a
+    /// formula result and it isn't stored as a number.
+    ///
+    /// In order to deal with [`f64::INFINITY`] in a reasonable way
+    /// `rust_xlsxwriter` writes it as the string "INF". The
+    /// `set_infinite_value()` method allows you to override this default value.
+    ///
+    /// See the example for [`Worksheet::set_nan_value()`] above.
+    ///
+    /// # Parameters
+    ///
+    /// - `value`: The string to use for `Inf` values.
+    ///
+    pub fn set_infinity_value(&mut self, value: impl Into<String>) -> &mut Worksheet {
+        self.infinity = value.into();
+        self
+    }
+
+    /// Set the default string used for negative Infinite values.
+    ///
+    /// Excel doesn't support storing `-Inf` (negative infinity) values. If a
+    /// `-Inf` is generated as the result of a calculation Excel stores and
+    /// displays the error `#DIV/0`. However, this error isn't usually used
+    /// outside of a formula result and it isn't stored as a number.
+    ///
+    ///
+    /// In order to deal with [`f64::NEG_INFINITY`] in a reasonable way
+    /// `rust_xlsxwriter` writes it as the string "-INF". The
+    /// `set_infinite_value()` method method allows you to override this default
+    /// value.
+    ///
+    /// See the example for [`Worksheet::set_nan_value()`] above.
+    ///
+    /// # Parameters
+    ///
+    /// - `value`: The string to use for `-Inf` values.
+    ///
+    pub fn set_neg_infinity_value(&mut self, value: impl Into<String>) -> &mut Worksheet {
+        self.neg_infinity = value.into();
+        self
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -13518,12 +13632,16 @@ impl Worksheet {
 
         // Excel doesn't have a NAN type/value so write a string instead.
         if number.is_nan() {
-            return self.store_string(row, col, "#NUM!".to_string(), None);
+            return self.store_string(row, col, self.nan.clone(), format);
         }
 
         // Excel doesn't have an Infinity type/value so write a string instead.
         if number.is_infinite() {
-            self.store_string(row, col, "#DIV/0".to_string(), None)?;
+            if number == f64::INFINITY {
+                return self.store_string(row, col, self.infinity.clone(), format);
+            }
+
+            return self.store_string(row, col, self.neg_infinity.clone(), format);
         }
 
         // Get the index of the format object, if any.

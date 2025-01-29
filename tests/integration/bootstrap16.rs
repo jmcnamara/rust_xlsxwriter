@@ -15,12 +15,13 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet();
 
+    worksheet.set_nan_value("#NUM!");
+    worksheet.set_infinity_value("#DIV/0!");
+    worksheet.set_neg_infinity_value("#DIV/0!");
+
     worksheet.write_number(0, 0, f64::NAN)?;
     worksheet.write_number(1, 0, f64::INFINITY)?;
     worksheet.write_number(2, 0, f64::NEG_INFINITY)?;
-
-    worksheet.write_string(1, 0, "#DIV/0!")?;
-    worksheet.write_string(2, 0, "#DIV/0!")?;
 
     workbook.save(filename)?;
 
