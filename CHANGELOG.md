@@ -5,6 +5,39 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.82.0] - 2025-01-29
+
+### Added
+
+- Added support for checkboxes via the [`Worksheet::insert_checkbox()`] method.
+
+  Checkboxes are [a new feature added to Excel] in the last year. They are a way
+  of displaying a boolean value as a checkbox in a cell. The underlying value is
+  still an Excel `TRUE/FALSE` boolean value and can be used in formulas and in
+  references.
+
+  <img src="https://rustxlsxwriter.github.io/images/checkbox.png">
+
+  [a new feature added to Excel]: https://techcommunity.microsoft.com/blog/excelblog/introducing-checkboxes-in-excel/4173561
+  [`Worksheet::insert_checkbox()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_checkbox
+
+- Added support for overriding the default handling of NaN and Infinity numbers.
+  These aren't supported by Excel so they are replaced with default or custom
+  string values. See:
+
+  - [`Worksheet::set_nan_value()`]
+  - [`Worksheet::set_infinity_value()`]
+  - [`Worksheet::set_neg_infinity_value()`]
+
+  [`Worksheet::set_nan_value()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_nan_value
+  [`Worksheet::set_infinity_value()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_infinity_value
+  [`Worksheet::set_neg_infinity_value()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_neg_infinity_value
+
+
+- Updated `polars` dependency to 0.46 to pick up latest Polars additions for
+  [`polars_excel_writer`].
+
+
 ## [0.81.0] - 2025-01-18
 
 ### Added
@@ -18,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the [`Worksheet::autofit_to_max_width()`] method to enable autofitting
   long strings with an upper limit for readability.
 
-- Updated polars dependency to 0.45 to pick up latest Polars additions for
+- Updated `polars` dependency to 0.45 to pick up latest Polars additions for
   [`polars_excel_writer`].
 
 - Added some code changes to prepare for Rust edition 2024.
@@ -51,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`utility::cell_autofit_width()`]:
       https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.cell_autofit_width.html
 
-- Updated polars dependency to 0.44 to pick up latest Polars additions for
+- Updated `polars` dependency to 0.44 to pick up latest Polars additions for
   [`polars_excel_writer`].
 
 
@@ -175,7 +208,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Chartsheets]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/index.html#chartsheets
 
 
-- Updated polars dependency to 0.43 to pick up latest Polars additions for
+- Updated `polars` dependency to 0.43 to pick up latest Polars additions for
   [`polars_excel_writer`].
 
 
@@ -239,7 +272,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   require a change by the end user (unless they implemented `IntoColor` for
   their own type).
 
-- Updated polars dependency to 0.42.0 to pick up latest Polars additions for
+- Updated `polars` dependency to 0.42.0 to pick up latest Polars additions for
   [`polars_excel_writer`].
 
 
@@ -483,7 +516,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Embedded Images]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/cookbook/index.html#insert-images-embedding-an-image-in-a-cell
 
 
-- Updated polars dependency to 0.37.2 to pick up latest Polars additions for
+- Updated `polars` dependency to 0.37.2 to pick up latest Polars additions for
   [`polars_excel_writer`].
 
 
@@ -517,7 +550,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`Worksheet::get_serialize_column_dimensions()`] methods to get dimensions
   from a serialized range.
 
-- Updated polars dependency to 0.36.2 to pick up Polars `AnyData` changes for
+- Updated `polars` dependency to 0.36.2 to pick up Polars `AnyData` changes for
   [`polars_excel_writer`].
 
 

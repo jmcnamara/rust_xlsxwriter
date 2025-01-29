@@ -88,6 +88,7 @@ currently supported features are:
 - Data validation.
 - Cell Notes.
 - Textboxes.
+- Checkboxes.
 - Sparklines.
 - Worksheet PNG/JPEG/GIF/BMP images.
 - Rich multi-format strings.
@@ -142,8 +143,8 @@ frequently.
 
 Recent changes:
 
+- Added support for Worksheet checkboxes.
 - Added `constant_memory` mode.
-- Removed requirement on `regex` crate.
 
 See the full [Release Notes and Changelog].
 

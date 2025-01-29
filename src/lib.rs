@@ -32,6 +32,7 @@
 //! - Data validation.
 //! - Cell Notes.
 //! - Textboxes.
+//! - Checkboxes.
 //! - Sparklines.
 //! - Worksheet PNG/JPEG/GIF/BMP images.
 //! - Rich multi-format strings.
@@ -188,7 +189,8 @@
 //!   features as `default` but is 1.5x faster for large files.
 //! - `polars`: Add support for mapping between `PolarsError` and
 //!   `rust_xlsxwriter::XlsxError` to make code that handles both types of error
-//!   easier to write.
+//!   easier to write. See also
+//!   [`polars_excel_writer`](https://crates.io/crates/polars_excel_writer).
 //! - `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow
 //!   compilation for wasm/JavaScript targets. See also
 //!   [wasm-xlsxwriter](https://github.com/estie-inc/wasm-xlsxwriter).

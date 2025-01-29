@@ -1557,6 +1557,9 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_name.rs` - Demonstrates setting user defined worksheet
   names and the default values when a name isn't set.
 
+* `doc_worksheet_set_nan_string.rs` - Demonstrates handling NaN and
+  Infinity values and also setting custom string representations.
+
 * `doc_worksheet_set_page_breaks.rs` - Demonstrates setting page breaks for
   a worksheet.
 
