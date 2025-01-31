@@ -5,6 +5,28 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.83.0] - 2025-02-XX
+
+### Added
+
+- Added support for ignoring Excel worksheet cell errors.
+
+  Excel flags a number of data errors and inconsistencies with a a small
+  green triangle in the top left hand corner of the cell:
+
+  <img
+  src="https://rustxlsxwriter.github.io/images/worksheet_ignore_error1.png">
+
+  These warnings can be useful indicators that there is an issue in the
+  spreadsheet but sometimes it is preferable to turn them off. At the file level
+  these errors can be ignored by using [`Worksheet::ignore_error()`] and
+  [`Worksheet::ignore_error_range()`].
+
+  [`Worksheet::ignore_error()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.ignore_error
+  [`Worksheet::ignore_error_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.ignore_error_range
+
+
 ## [0.82.0] - 2025-01-29
 
 ### Added

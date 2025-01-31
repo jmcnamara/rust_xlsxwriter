@@ -1517,6 +1517,7 @@ pub struct Worksheet {
     infinity: String,
     neg_infinity: String,
     ignored_errors: HashMap<IgnoreError, String>,
+    ignored_error_cells: HashSet<(RowNum, ColNum, RowNum, ColNum)>,
 
     #[cfg(feature = "constant_memory")]
     pub(crate) file_writer: BufWriter<File>,
@@ -1732,6 +1733,7 @@ impl Worksheet {
             infinity: "INF".to_string(),
             neg_infinity: "-INF".to_string(),
             ignored_errors: HashMap::new(),
+            ignored_error_cells: HashSet::new(),
 
             // These collections need to be reset on resave.
             comment_relationships: vec![],
@@ -13323,12 +13325,129 @@ impl Worksheet {
         self
     }
 
-    /// TODO
+    /// Ignore an Excel error or warning in a worksheet cell.
+    ///
+    /// Excel flags a number of data errors and inconsistencies with a a small
+    /// green triangle in the top left hand corner of the cell. For example the
+    /// following causes a warning of "Number Stored as Text":
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_ignore_error1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Write a string that looks like a number.
+    ///     worksheet.write_string(1, 2, "123")?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_ignore_error1.png">
+    ///
+    /// These warnings can be useful indicators that there is an issue in the
+    /// spreadsheet but sometimes it is preferable to turn them off. At the file
+    /// level these errors can be ignored for a cell or cell range using
+    /// `Worksheet::ignore_error()` and [`Worksheet::ignore_error_range()`] (see
+    /// below).
+    ///
+    /// The errors and warnings that can be turned off at the file level are
+    /// represented by the [`IgnoreError`] enum values. These equate, with some
+    /// minor exceptions, to the error categories shown in the Excel Error
+    /// Checking dialog:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/ignore_errors_dialog.png">
+    ///
+    /// (Note: some of the items shown in the above dialog such as "Misleading
+    /// Number Formats" aren't saved in the output file by Excel and can't be
+    /// turned off permanently.)
+    ///
+    /// <br>
+    ///
+    /// The `Worksheet::ignore_error()` method can be called repeatedly to
+    /// ignore errors in different cells but **Excel only allows one ignored
+    /// error per cell**.
+    ///
+    /// An error can be turned off for a range of cells using the
+    /// [`Worksheet::ignore_error_range()`] method (see below).
+    ///
+    /// # Parameters
+    ///
+    /// - `row`: The zero indexed row number.
+    /// - `col`: The zero indexed column number.
+    /// - `error_type`: An [`IgnoreError`] enum value.
     ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
+    /// - [`XlsxError::ParameterError`] - Parameter error if more than one rule
+    ///   is added to the same cell.
+    ///
+    /// # Examples
+    ///
+    /// An example of turning off worksheet cells errors/warnings using using
+    /// the `rust_xlsxwriter` library.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_ignore_errors.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, IgnoreError, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Create a format to use in descriptions.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Make the column wider for clarity.
+    /// #     worksheet.set_column_width(1, 16)?;
+    /// #
+    /// #     // Write some descriptions for the cells.
+    /// #     worksheet.write_with_format(1, 1, "Warning:", &bold)?;
+    /// #     worksheet.write_with_format(2, 1, "Warning turned off:", &bold)?;
+    /// #     worksheet.write_with_format(4, 1, "Warning:", &bold)?;
+    /// #     worksheet.write_with_format(5, 1, "Warning turned off:", &bold)?;
+    /// #
+    ///     // Write strings that looks like numbers. This will cause an Excel warning.
+    ///     worksheet.write_string(1, 2, "123")?;
+    ///     worksheet.write_string(2, 2, "123")?;
+    ///
+    ///     // Write a divide by zero formula. This will also cause an Excel warning.
+    ///     worksheet.write_formula(4, 2, "=1/0")?;
+    ///     worksheet.write_formula(5, 2, "=1/0")?;
+    ///
+    ///     // Turn off some of the warnings:
+    ///     worksheet.ignore_error(2, 2, IgnoreError::NumberStoredAsText)?;
+    ///     worksheet.ignore_error(5, 2, IgnoreError::FormulaError)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("ignore_errors.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/app_ignore_errors.png">
     ///
     pub fn ignore_error(
         &mut self,
@@ -13339,7 +13458,28 @@ impl Worksheet {
         self.ignore_error_range(row, col, row, col, error_type)
     }
 
-    /// TODO
+    /// Ignore an Excel error or warning in a range of worksheet cells.
+    ///
+    /// See [`Worksheet::ignore_error()`] above for a detailed explanation of
+    /// Excel worksheet errors.
+    ///
+    /// The `Worksheet::ignore_error_range()` method can be used to ignore an
+    /// error in a range, a row, a column, or the entire worksheet and it can be
+    /// called repeatedly to ignore errors in different cells ranges. It should
+    /// be noted however that **Excel only allows one ignored error per cell**.
+    /// The `rust_xlsxwriter` library verifies that multiple rules aren't added
+    /// to the same cell or cell range and will raise an error if this occurs.
+    /// However it doesn't currently verify whether cells within ranges overlap.
+    /// It is up to the user to ensure that this doesn't happen when using
+    /// ranges.
+    ///
+    /// # Parameters
+    ///
+    /// - `first_row`: The first row of the range. (All zero indexed.)
+    /// - `first_col`: The first row of the range.
+    /// - `last_row`: The last row of the range.
+    /// - `last_col`: The last row of the range.
+    /// - `error_type`: An [`IgnoreError`] enum value.
     ///
     /// # Errors
     ///
@@ -13347,7 +13487,8 @@ impl Worksheet {
     ///   worksheet limits.
     /// - [`XlsxError::RowColumnOrderError`] - First row or column is larger
     ///   than the last row or column.
-    ///
+    /// - [`XlsxError::ParameterError`] - Parameter error if more than one rule
+    ///   is added to the same range.
     ///
     pub fn ignore_error_range(
         &mut self,
@@ -13371,6 +13512,19 @@ impl Worksheet {
 
         let range = utility::cell_range(first_row, first_col, last_row, last_col);
 
+        // Check if the range was used previously. Note, that this doesn't
+        // current check for range overlaps. One of the rules in an overlap will
+        // be ignored since Excel only allows one rule per cell.
+        if !self
+            .ignored_error_cells
+            .insert((first_row, first_col, last_row, last_col))
+        {
+            return Err(XlsxError::ParameterError(format!(
+                "Excel only allows on rule per cell. Cell/Range '{range}' was previously used."
+            )));
+        }
+
+        // Store the range or append it to an existing range.
         self.ignored_errors
             .entry(error_type)
             .and_modify(|sqref| *sqref = format!("{sqref} {range}"))
@@ -19066,10 +19220,16 @@ impl DefinedName {
 /// The `IgnoreError` enum defines the Excel cell error types that can be
 /// ignored.
 ///
-/// Used with the [`Worksheet::ignore_error()`](crate::Worksheet::ignore_error)
-/// and
-/// [`Worksheet::ignore_error_range()`](crate::Worksheet::ignore_error_range)
-/// methods.
+/// The equivalent options in Excel are:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/ignore_errors_dialog.png">
+///
+/// Note, some of the items shown in the above dialog such as "Misleading Number
+/// Formats" aren't saved in the output file by Excel and can't be turned off
+/// permanently.
+///
+/// The enum values are used with the [`Worksheet::ignore_error()`] and
+/// [`Worksheet::ignore_error_range()`] methods.
 ///
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Copy)]
 pub enum IgnoreError {
@@ -19078,32 +19238,32 @@ pub enum IgnoreError {
 
     /// Ignore errors/warnings for formula evaluation errors (such as divide by
     /// zero).
-    EvalError,
+    FormulaError,
 
     /// Ignore errors/warnings for formulas that differ from surrounding
     /// formulas.
     FormulaDiffers,
 
     /// Ignore errors/warnings for formulas that refer to empty cells.
-    EmptyCellReference,
+    FormulaRefersToEmptyCells,
 
     /// Ignore errors/warnings for formulas that omit cells in a range.
-    FormulaRange,
+    FormulaOmitsCells,
 
     /// Ignore errors/warnings for cells in a table that do not comply with
     /// applicable data validation rules.
-    ListDataValidation,
+    DataValidationError,
 
     /// Ignore errors/warnings for formulas that contain a two digit text
     /// representation of a year.
     TwoDigitTextYear,
 
     /// Ignore  errors/warnings for unlocked cells that contain formulas.
-    UnlockedFormula,
+    UnlockedCellsWithFormula,
 
     /// Ignore errors/warnings for cell formulas that differ from the column
     /// formula.
-    CalculatedColumn,
+    InconsistentColumnFormula,
 }
 
 impl IgnoreError {
@@ -19111,13 +19271,13 @@ impl IgnoreError {
     pub fn iterator() -> impl Iterator<Item = IgnoreError> {
         [
             Self::NumberStoredAsText,
-            Self::EvalError,
+            Self::FormulaError,
             Self::FormulaDiffers,
-            Self::FormulaRange,
-            Self::UnlockedFormula,
-            Self::CalculatedColumn,
-            Self::EmptyCellReference,
-            Self::ListDataValidation,
+            Self::FormulaOmitsCells,
+            Self::UnlockedCellsWithFormula,
+            Self::InconsistentColumnFormula,
+            Self::FormulaRefersToEmptyCells,
+            Self::DataValidationError,
             Self::TwoDigitTextYear,
         ]
         .iter()
@@ -19128,15 +19288,15 @@ impl IgnoreError {
 impl fmt::Display for IgnoreError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::EvalError => write!(f, "evalError"),
-            Self::FormulaRange => write!(f, "formulaRange"),
+            Self::FormulaError => write!(f, "evalError"),
             Self::FormulaDiffers => write!(f, "formula"),
-            Self::UnlockedFormula => write!(f, "unlockedFormula"),
-            Self::CalculatedColumn => write!(f, "calculatedColumn"),
             Self::TwoDigitTextYear => write!(f, "TwoDigitTextYear"),
-            Self::EmptyCellReference => write!(f, "emptyCellReference"),
-            Self::ListDataValidation => write!(f, "listDataValidation"),
+            Self::FormulaOmitsCells => write!(f, "formulaRange"),
+            Self::DataValidationError => write!(f, "listDataValidation"),
             Self::NumberStoredAsText => write!(f, "numberStoredAsText"),
+            Self::UnlockedCellsWithFormula => write!(f, "unlockedFormula"),
+            Self::InconsistentColumnFormula => write!(f, "calculatedColumn"),
+            Self::FormulaRefersToEmptyCells => write!(f, "emptyCellReference"),
         }
     }
 }

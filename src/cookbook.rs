@@ -52,19 +52,20 @@ cargo run --example app_demo  # or any other example
 37. [Chart: Chartsheet](#chart-chartsheet)
 38. [Textbox: Inserting Checkboxes in worksheets](#textbox-inserting-checkboxes-in-worksheets)
 39. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
-40. [Sparklines: simple example](#sparklines-simple-example)
-41. [Sparklines: advanced example](#sparklines-advanced-example)
-42. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
-43. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-44. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-45. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-46. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-47. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-48. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-49. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-50. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-51. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-52. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+40. [Textbox: Ignore Excel cell errors](#textbox-ignore-excel-cell-errors)
+41. [Sparklines: simple example](#sparklines-simple-example)
+42. [Sparklines: advanced example](#sparklines-advanced-example)
+43. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
+44. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+45. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+46. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+47. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+48. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+49. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+50. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+51. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+52. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+53. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -5403,6 +5404,62 @@ fn main() -> Result<(), XlsxError> {
 
     // Save the file to disk.
     workbook.save("textbox.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Textbox: Ignore Excel cell errors
+
+An example of turning off worksheet cells errors/warnings.
+
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_ignore_errors.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_ignore_errors.rs
+
+use rust_xlsxwriter::{Format, IgnoreError, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a worksheet to the workbook.
+    let worksheet = workbook.add_worksheet();
+
+    // Create a format to use in descriptions.gs
+    let bold = Format::new().set_bold();
+
+    // Make the column wider for clarity.
+    worksheet.set_column_width(1, 16)?;
+
+    // Write some descriptions for the cells.
+    worksheet.write_with_format(1, 1, "Warning:", &bold)?;
+    worksheet.write_with_format(2, 1, "Warning turned off:", &bold)?;
+    worksheet.write_with_format(4, 1, "Warning:", &bold)?;
+    worksheet.write_with_format(5, 1, "Warning turned off:", &bold)?;
+
+    // Write strings that looks like numbers. This will cause an Excel warning.
+    worksheet.write_string(1, 2, "123")?;
+    worksheet.write_string(2, 2, "123")?;
+
+    // Write a divide by zero formula. This will also cause an Excel warning.
+    worksheet.write_formula(4, 2, "=1/0")?;
+    worksheet.write_formula(5, 2, "=1/0")?;
+
+    // Turn off some of the warnings:
+    worksheet.ignore_error(2, 2, IgnoreError::NumberStoredAsText)?;
+    worksheet.ignore_error(5, 2, IgnoreError::FormulaError)?;
+
+    // Save the file to disk.
+    workbook.save("ignore_errors.xlsx")?;
 
     Ok(())
 }

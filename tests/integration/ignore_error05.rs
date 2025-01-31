@@ -19,7 +19,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         .set_formula_result(1, 0, "#DIV/0!");
 
     worksheet.ignore_error(0, 0, IgnoreError::NumberStoredAsText)?;
-    worksheet.ignore_error(1, 0, IgnoreError::EvalError)?;
+    worksheet.ignore_error(1, 0, IgnoreError::FormulaError)?;
 
     workbook.save(filename)?;
 

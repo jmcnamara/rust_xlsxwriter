@@ -159,6 +159,9 @@ documentation and generally show how an individual function works.
 * `app_hyperlinks.rs` - A simple, getting started, example of some of the
   features of the rust_xlsxwriter library.
 
+* `app_ignore_errors.rs` - An example of turning off worksheet cells
+  errors/warnings using using the `rust_xlsxwriter` library.
+
 * `app_images.rs` - An example of inserting images into a worksheet using
   rust_xlsxwriter.
 
@@ -1329,6 +1332,9 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_hide_unused_rows.rs` - Demonstrates efficiently hiding the
   unused rows in a worksheet.
+
+* `doc_worksheet_ignore_error1.rs` - This example demonstrates an Excel
+  cell warning.
 
 * `doc_worksheet_insert_chart_with_offset.rs` - Example of adding a chart
   to a worksheet with a pixel offset within the cell.

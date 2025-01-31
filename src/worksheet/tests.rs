@@ -701,4 +701,17 @@ mod worksheet_tests {
         let result = worksheet.write_string(0, 0, long_string.unwrap());
         assert!(matches!(result, Err(XlsxError::MaxStringLengthExceeded)));
     }
+
+    #[test]
+    fn ignored_cells_reuse() {
+        let mut worksheet = Worksheet::new();
+
+        // Insert a rule.
+        let result = worksheet.ignore_error(2, 1, IgnoreError::NumberStoredAsText);
+        assert!(result.is_ok());
+
+        // Test reuse of the same cell.
+        let result = worksheet.ignore_error(2, 1, IgnoreError::NumberStoredAsText);
+        assert!(matches!(result, Err(XlsxError::ParameterError(_))));
+    }
 }
