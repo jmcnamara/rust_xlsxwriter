@@ -1242,13 +1242,13 @@
 mod tests;
 
 use std::borrow::Cow;
-use std::cmp;
 use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::io::Cursor;
 use std::io::Write;
 use std::mem;
 use std::sync::{Arc, Mutex, RwLock};
+use std::{cmp, fmt};
 
 #[cfg(feature = "constant_memory")]
 use tempfile::tempfile;
@@ -1516,6 +1516,7 @@ pub struct Worksheet {
     nan: String,
     infinity: String,
     neg_infinity: String,
+    ignored_errors: HashMap<IgnoreError, String>,
 
     #[cfg(feature = "constant_memory")]
     pub(crate) file_writer: BufWriter<File>,
@@ -1730,6 +1731,7 @@ impl Worksheet {
             nan: "NAN".to_string(),
             infinity: "INF".to_string(),
             neg_infinity: "-INF".to_string(),
+            ignored_errors: HashMap::new(),
 
             // These collections need to be reset on resave.
             comment_relationships: vec![],
@@ -13321,6 +13323,62 @@ impl Worksheet {
         self
     }
 
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    ///
+    pub fn ignore_error(
+        &mut self,
+        row: RowNum,
+        col: ColNum,
+        error_type: IgnoreError,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.ignore_error_range(row, col, row, col, error_type)
+    }
+
+    /// TODO
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
+    ///   worksheet limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First row or column is larger
+    ///   than the last row or column.
+    ///
+    ///
+    pub fn ignore_error_range(
+        &mut self,
+        first_row: RowNum,
+        first_col: ColNum,
+        last_row: RowNum,
+        last_col: ColNum,
+        error_type: IgnoreError,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows and cols are in the allowed range.
+        if !self.check_dimensions_only(first_row, first_col)
+            || !self.check_dimensions_only(last_row, last_col)
+        {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row || first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        let range = utility::cell_range(first_row, first_col, last_row, last_col);
+
+        self.ignored_errors
+            .entry(error_type)
+            .and_modify(|sqref| *sqref = format!("{sqref} {range}"))
+            .or_insert(range);
+
+        Ok(self)
+    }
+
     // -----------------------------------------------------------------------
     // Crate level helper methods.
     // -----------------------------------------------------------------------
@@ -15824,6 +15882,11 @@ impl Worksheet {
             self.write_col_breaks();
         }
 
+        // Write the ignoredErrors element.
+        if !self.ignored_errors.is_empty() {
+            self.write_ignored_errors();
+        }
+
         // Write the drawing element.
         if !self.drawing.drawings.is_empty() {
             self.write_drawing();
@@ -17441,9 +17504,21 @@ impl Worksheet {
             String::new()
         };
 
+        // Get the result type attribute.
         let result_type = if result.parse::<f64>().is_err() {
-            r#" t="str""#
+            match result {
+                // Handle error results.
+                "#DIV/0!" | "#N/A" | "#NAME?" | "#NULL!" | "#NUM!" | "#REF!" | "#VALUE!"
+                | "#GETTING_DATA" => r#" t="e""#,
+
+                // Handle boolean results.
+                "TRUE" | "FALSE" => r#" t="b""#,
+
+                // Handle string results.
+                _ => r#" t="str""#,
+            }
         } else {
+            // Handle/ignore for numeric results.
             ""
         };
 
@@ -17477,9 +17552,21 @@ impl Worksheet {
 
         let cm = if is_dynamic { r#" cm="1""# } else { "" };
 
+        // Get the result type attribute.
         let result_type = if result.parse::<f64>().is_err() {
-            r#" t="str""#
+            match result {
+                // Handle error results.
+                "#DIV/0!" | "#N/A" | "#NAME?" | "#NULL!" | "#NUM!" | "#REF!" | "#VALUE!"
+                | "#GETTING_DATA" => r#" t="e""#,
+
+                // Handle boolean results.
+                "TRUE" | "FALSE" => r#" t="b""#,
+
+                // Handle string results.
+                _ => r#" t="str""#,
+            }
         } else {
+            // Handle/ignore for numeric results.
             ""
         };
 
@@ -18111,6 +18198,25 @@ impl Worksheet {
             xml_end_tag(&mut self.writer, "x14:sparkline");
         }
         xml_end_tag(&mut self.writer, "x14:sparklines");
+    }
+
+    // Write the <ignoredErrors> element.
+    fn write_ignored_errors(&mut self) {
+        xml_start_tag_only(&mut self.writer, "ignoredErrors");
+
+        for error_type in IgnoreError::iterator() {
+            let error_name = error_type.to_string();
+
+            if let Some(error_range) = self.ignored_errors.get(&error_type) {
+                let attributes = [
+                    ("sqref", error_range.clone()),
+                    (&error_name, "1".to_string()),
+                ];
+                xml_empty_tag(&mut self.writer, "ignoredError", &attributes);
+            }
+        }
+
+        xml_end_tag(&mut self.writer, "ignoredErrors");
     }
 }
 
@@ -18953,6 +19059,84 @@ impl DefinedName {
                 self.range = range;
             }
             _ => {}
+        }
+    }
+}
+
+/// The `IgnoreError` enum defines the Excel cell error types that can be
+/// ignored.
+///
+/// Used with the [`Worksheet::ignore_error()`](crate::Worksheet::ignore_error)
+/// and
+/// [`Worksheet::ignore_error_range()`](crate::Worksheet::ignore_error_range)
+/// methods.
+///
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Copy)]
+pub enum IgnoreError {
+    /// Ignore errors/warnings for numbers stored as text.
+    NumberStoredAsText,
+
+    /// Ignore errors/warnings for formula evaluation errors (such as divide by
+    /// zero).
+    EvalError,
+
+    /// Ignore errors/warnings for formulas that differ from surrounding
+    /// formulas.
+    FormulaDiffers,
+
+    /// Ignore errors/warnings for formulas that refer to empty cells.
+    EmptyCellReference,
+
+    /// Ignore errors/warnings for formulas that omit cells in a range.
+    FormulaRange,
+
+    /// Ignore errors/warnings for cells in a table that do not comply with
+    /// applicable data validation rules.
+    ListDataValidation,
+
+    /// Ignore errors/warnings for formulas that contain a two digit text
+    /// representation of a year.
+    TwoDigitTextYear,
+
+    /// Ignore  errors/warnings for unlocked cells that contain formulas.
+    UnlockedFormula,
+
+    /// Ignore errors/warnings for cell formulas that differ from the column
+    /// formula.
+    CalculatedColumn,
+}
+
+impl IgnoreError {
+    /// Simple iterator for `IgnoreError`.
+    pub fn iterator() -> impl Iterator<Item = IgnoreError> {
+        [
+            Self::NumberStoredAsText,
+            Self::EvalError,
+            Self::FormulaDiffers,
+            Self::FormulaRange,
+            Self::UnlockedFormula,
+            Self::CalculatedColumn,
+            Self::EmptyCellReference,
+            Self::ListDataValidation,
+            Self::TwoDigitTextYear,
+        ]
+        .iter()
+        .copied()
+    }
+}
+
+impl fmt::Display for IgnoreError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::EvalError => write!(f, "evalError"),
+            Self::FormulaRange => write!(f, "formulaRange"),
+            Self::FormulaDiffers => write!(f, "formula"),
+            Self::UnlockedFormula => write!(f, "unlockedFormula"),
+            Self::CalculatedColumn => write!(f, "calculatedColumn"),
+            Self::TwoDigitTextYear => write!(f, "TwoDigitTextYear"),
+            Self::EmptyCellReference => write!(f, "emptyCellReference"),
+            Self::ListDataValidation => write!(f, "listDataValidation"),
+            Self::NumberStoredAsText => write!(f, "numberStoredAsText"),
         }
     }
 }
