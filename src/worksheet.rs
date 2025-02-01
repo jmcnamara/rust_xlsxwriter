@@ -17677,7 +17677,14 @@ impl Worksheet {
         };
 
         let formula = crate::xmlwriter::escape_xml_data(formula);
-        let result = crate::xmlwriter::escape_xml_data(result);
+        let mut result = crate::xmlwriter::escape_xml_data(result);
+
+        if result == "TRUE" {
+            result = Cow::Owned("1".to_string());
+        }
+        if result == "FALSE" {
+            result = Cow::Owned("0".to_string());
+        }
 
         write!(
             writer,
@@ -17725,7 +17732,14 @@ impl Worksheet {
         };
 
         let formula = crate::xmlwriter::escape_xml_data(formula);
-        let result = crate::xmlwriter::escape_xml_data(result);
+        let mut result = crate::xmlwriter::escape_xml_data(result);
+
+        if result == "TRUE" {
+            result = Cow::Owned("1".to_string());
+        }
+        if result == "FALSE" {
+            result = Cow::Owned("0".to_string());
+        }
 
         write!(
             writer,
