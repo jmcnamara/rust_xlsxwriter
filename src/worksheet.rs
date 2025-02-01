@@ -1518,6 +1518,10 @@ pub struct Worksheet {
     neg_infinity: String,
     ignored_errors: HashMap<IgnoreError, String>,
     ignored_error_cells: HashSet<(RowNum, ColNum, RowNum, ColNum)>,
+    max_outline_row_level: u8,
+    max_outline_col_level: u8,
+    outline_symbols_above: bool,
+    outline_symbols_left: bool,
 
     #[cfg(feature = "constant_memory")]
     pub(crate) file_writer: BufWriter<File>,
@@ -1734,6 +1738,10 @@ impl Worksheet {
             neg_infinity: "-INF".to_string(),
             ignored_errors: HashMap::new(),
             ignored_error_cells: HashSet::new(),
+            max_outline_row_level: 0,
+            max_outline_col_level: 0,
+            outline_symbols_above: false,
+            outline_symbols_left: false,
 
             // These collections need to be reset on resave.
             comment_relationships: vec![],
@@ -3253,9 +3261,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `formula`: The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
@@ -3349,9 +3357,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `formula`: The formula to write to the cell as a string or [`Formula`].
     /// - `format`: The [`Format`] property for the cell.
     ///
@@ -3359,7 +3367,7 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     ///
     /// # Examples
@@ -3450,16 +3458,16 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `formula`: The formula to write to the cell as a string or [`Formula`].
     ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     ///
     /// # Examples
@@ -3553,9 +3561,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `formula`: The formula to write to the cell as a string or
     ///   [`Formula`].
     /// - `format`: The [`Format`] property for the cell.
@@ -4763,9 +4771,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `string`: The string to write to the cell. Other types can also be
     ///   handled. See the documentation above and the example below.
     /// - `format`: The [`Format`] property for the cell.
@@ -4774,7 +4782,7 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     /// - [`XlsxError::MergeRangeSingleCell`] - A merge range cannot be a single
     ///   cell in Excel.
@@ -6252,6 +6260,8 @@ impl Worksheet {
                     height,
                     xf_index: 0,
                     hidden: false,
+                    level: 0,
+                    collapsed: false,
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -6380,7 +6390,7 @@ impl Worksheet {
         row: RowNum,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        // Set a suitable column range for the row dimension check/set.
+        // Get a suitable minimum value for the dimension check/set.
         let min_col = self.get_min_col();
 
         // Check row is in the allowed range.
@@ -6399,12 +6409,150 @@ impl Worksheet {
                     height: self.user_default_row_height,
                     xf_index,
                     hidden: false,
+                    level: 0,
+                    collapsed: false,
                 };
                 self.changed_rows.insert(row, row_options);
             }
         }
 
         Ok(self)
+    }
+
+    /// Group a range of rows into a worksheet outline group.
+    ///
+    /// Todo
+    ///
+    /// # Parameters
+    ///
+    /// - `first_row`: The first row of the range. Zero indexed.
+    /// - `last_row`: The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
+    ///   row. Note, to reverse the group direction see the Todo method.
+    /// - [`XlsxError::MaxGroupLevelExceeded`] - Group depth level exceeds
+    ///   Excel's limit of 7 levels.
+    ///
+    pub fn group_rows(
+        &mut self,
+        first_row: RowNum,
+        last_row: RowNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.set_grouped_rows(first_row, last_row, false)
+    }
+
+    /// Group a range of rows into a collapsed worksheet outline group.
+    ///
+    /// Todo
+    ///
+    /// # Parameters
+    ///
+    /// - `first_row`: The first row of the range. Zero indexed.
+    /// - `last_row`: The last row of the range.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    /// - [`XlsxError::RowColumnOrderError`] - It is an error for the first row
+    ///   to be greater than the last row. Note, to reverse the group direction
+    ///   see the Todo method.
+    /// - [`XlsxError::MaxGroupLevelExceeded`] - Group depth level exceeds
+    ///   Excel's limit of 7 levels.
+    ///
+    ///
+    pub fn group_rows_collapsed(
+        &mut self,
+        first_row: RowNum,
+        last_row: RowNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Set the collapsed property to the row after the collapsed group.
+        self.set_collapsed_row(last_row + 1)?;
+
+        self.set_grouped_rows(first_row, last_row, true)
+    }
+
+    /// Group a range of columns into a worksheet outline group.
+    ///
+    /// Todo
+    ///
+    /// # Parameters
+    ///
+    /// - `first_col`: The first column of the range. Zero indexed.
+    /// - `last_col`: The last column of the range.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    /// - [`XlsxError::RowColumnOrderError`] - First column greater than the last
+    ///   column. Note, to reverse the group direction see the Todo method.
+    /// - [`XlsxError::MaxGroupLevelExceeded`] - Group depth level exceeds
+    ///   Excel's limit of 7 levels.
+    ///
+    pub fn group_columns(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        self.set_grouped_columns(first_col, last_col, false)
+    }
+
+    /// Group a range of columns into a collapsed worksheet outline group.
+    ///
+    /// Todo
+    ///
+    /// # Parameters
+    ///
+    /// - `first_col`: The first column of the range. Zero indexed.
+    /// - `last_col`: The last column of the range.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
+    ///   limits.
+    /// - [`XlsxError::RowColumnOrderError`] - It is an error for the first column
+    ///   to be greater than the last column. Note, to reverse the group direction
+    ///   see the Todo method.
+    /// - [`XlsxError::MaxGroupLevelExceeded`] - Group depth level exceeds
+    ///   Excel's limit of 7 levels.
+    ///
+    ///
+    pub fn group_columns_collapsed(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Set the collapsed property to the column after the collapsed group.
+        self.set_collapsed_column(last_col + 1)?;
+
+        self.set_grouped_columns(first_col, last_col, true)
+    }
+
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    pub fn group_symbols_on_top(&mut self, enable: bool) -> &mut Worksheet {
+        self.outline_symbols_above = enable;
+        self
+    }
+
+    /// TODO
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    pub fn group_symbols_to_left(&mut self, enable: bool) -> &mut Worksheet {
+        self.outline_symbols_left = enable;
+        self
     }
 
     /// Hide a worksheet row.
@@ -6453,7 +6601,7 @@ impl Worksheet {
     /// <img src="https://rustxlsxwriter.github.io/images/worksheet_set_row_hidden.png">
     ///
     pub fn set_row_hidden(&mut self, row: RowNum) -> Result<&mut Worksheet, XlsxError> {
-        // Set a suitable column range for the row dimension check/set.
+        // Get a suitable minimum value for the dimension check/set.
         let min_col = self.get_min_col();
 
         // Check row is in the allowed range.
@@ -6469,6 +6617,8 @@ impl Worksheet {
                     height: self.user_default_row_height,
                     xf_index: 0,
                     hidden: true,
+                    level: 0,
+                    collapsed: false,
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -6493,7 +6643,7 @@ impl Worksheet {
     ///   limits.
     ///
     pub fn set_row_unhidden(&mut self, row: RowNum) -> Result<&mut Worksheet, XlsxError> {
-        // Set a suitable column range for the row dimension check/set.
+        // Get a suitable minimum value for the dimension check/set.
         let min_col = self.get_min_col();
 
         // Check row is in the allowed range.
@@ -6887,7 +7037,7 @@ impl Worksheet {
         col: ColNum,
         format: &Format,
     ) -> Result<&mut Worksheet, XlsxError> {
-        // Set a suitable row range for the dimension check/set.
+        // Get a suitable minimum value for the dimension check/set.
         let min_row = self.get_min_row();
 
         // Check column is in the allowed range.
@@ -6906,6 +7056,8 @@ impl Worksheet {
                     width: DEFAULT_COL_WIDTH,
                     xf_index,
                     hidden: false,
+                    level: 0,
+                    collapsed: false,
                     autofit: false,
                 };
                 self.changed_cols.insert(col, col_options);
@@ -6974,6 +7126,10 @@ impl Worksheet {
                     width: DEFAULT_COL_WIDTH,
                     xf_index: 0,
                     hidden: true,
+
+                    level: 0,
+                    collapsed: false,
+
                     autofit: false,
                 };
                 self.changed_cols.insert(col, col_options);
@@ -6991,8 +7147,8 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// - `first_col`: The first row of the range. Zero indexed.
-    /// - `last_col`: The last row of the range.
+    /// - `first_col`: The first column of the range. Zero indexed.
+    /// - `last_col`: The last column of the range.
     /// - `width`: The column width in character units.
     ///
     /// # Errors
@@ -7029,8 +7185,8 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// - `first_col`: The first row of the range. Zero indexed.
-    /// - `last_col`: The last row of the range.
+    /// - `first_col`: The first column of the range. Zero indexed.
+    /// - `last_col`: The last column of the range.
     /// - `width`: The column width in pixels.
     ///
     /// # Errors
@@ -7072,8 +7228,8 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// - `first_col`: The first row of the range. Zero indexed.
-    /// - `last_col`: The last row of the range.
+    /// - `first_col`: The first column of the range. Zero indexed.
+    /// - `last_col`: The last column of the range.
     /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
@@ -7149,8 +7305,8 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// - `first_col`: The first row of the range. Zero indexed.
-    /// - `last_col`: The last row of the range.
+    /// - `first_col`: The first column of the range. Zero indexed.
+    /// - `last_col`: The last column of the range.
     ///
     /// # Errors
     ///
@@ -7193,15 +7349,15 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     /// - [`XlsxError::AutofilterRangeOverlaps`] - The autofilter range overlaps
     ///   a table autofilter range.
@@ -7497,9 +7653,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     ///
     /// Note, you need to ensure that the `first_row` and `last_row` range
     /// includes all the rows for the table including the header and the total
@@ -7510,7 +7666,7 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     /// - [`XlsxError::TableError`] - A general error that is raised when a
     ///   table parameter is incorrect or a table is configured incorrectly.
@@ -7758,9 +7914,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `conditional_format`: A conditional format instance that implements
     ///   the [`ConditionalFormat`] trait.
     ///
@@ -7768,7 +7924,7 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     /// - [`XlsxError::ConditionalFormatError`] - A general error that is raised
     ///   when a conditional formatting parameter is incorrect or missing.
@@ -7929,16 +8085,16 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `data_validation`: A [`DataValidation`] data validation instance.
     ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     ///
     /// # Examples
@@ -8185,9 +8341,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `sparkline`: The [`Sparkline`] to insert into the cell.
     ///
     /// # Errors
@@ -8533,15 +8689,15 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     ///
     /// # Examples
@@ -8602,9 +8758,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `name`: The name of the range instead of `RangeN`. Can be blank if not
     ///   required.
     /// - `password`: The password to prevent modification of the range. Can be
@@ -8614,7 +8770,7 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     ///
     /// # Examples
@@ -8700,9 +8856,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     ///
     /// # Errors
     ///
@@ -9117,16 +9273,16 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `format`: The [`Format`] property for the cell.
     ///
     /// # Errors
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     ///
     /// # Examples
@@ -9231,9 +9387,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `cell_format`: The [`Format`] property for the cells in the range. If
     ///   you don't require internal formatting you can use `Format::default()`.
     /// - `border_format`: The [`Format`] property for the border. Only the
@@ -9244,7 +9400,7 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     ///
     /// # Examples
@@ -12831,9 +12987,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     ///
     /// # Errors
     ///
@@ -12932,7 +13088,7 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row or column exceeds Excel's
     ///   worksheet limits.
-    /// - [`XlsxError::RowColumnOrderError`] - First row larger than the last
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
     ///   row.
     ///
     /// # Examples
@@ -13003,8 +13159,8 @@ impl Worksheet {
     ///
     /// # Parameters
     ///
-    /// - `first_col`: The first row of the range. (Zero indexed.)
-    /// - `last_col`: The last row of the range.
+    /// - `first_col`: The first column of the range. (Zero indexed.)
+    /// - `last_col`: The last column of the range.
     ///
     /// # Errors
     ///
@@ -13476,9 +13632,9 @@ impl Worksheet {
     /// # Parameters
     ///
     /// - `first_row`: The first row of the range. (All zero indexed.)
-    /// - `first_col`: The first row of the range.
+    /// - `first_col`: The first column of the range.
     /// - `last_row`: The last row of the range.
-    /// - `last_col`: The last row of the range.
+    /// - `last_col`: The last column of the range.
     /// - `error_type`: An [`IgnoreError`] enum value.
     ///
     /// # Errors
@@ -14764,6 +14920,9 @@ impl Worksheet {
                     width,
                     xf_index: 0,
                     hidden: false,
+                    level: 0,
+                    collapsed: false,
+
                     autofit,
                 };
                 self.changed_cols.insert(col, col_options);
@@ -15908,6 +16067,200 @@ impl Worksheet {
         self
     }
 
+    /// Set the row properties (outline level and hidden) for a range of grouped
+    /// rows in an outline.
+    fn set_grouped_rows(
+        &mut self,
+        first_row: RowNum,
+        last_row: RowNum,
+        collapsed: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Get a suitable minimum value for the dimension check/set.
+        let min_col = self.get_min_col();
+
+        // Check rows are in the allowed range.
+        if !self.check_dimensions(first_row, min_col) || !self.check_dimensions(last_row, min_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_row > last_row {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Write group outline for each row.
+        for row in first_row..=last_row {
+            self.set_grouped_row(row, collapsed)?;
+        }
+
+        Ok(self)
+    }
+
+    // Set the row properties (outline level and hidden) for a single row in an
+    // outline group. Rows are hidden if they are part of a collapsed group.
+    fn set_grouped_row(
+        &mut self,
+        row: RowNum,
+        collapsed: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Update an existing row metadata object or create a new one.
+        match self.changed_rows.get_mut(&row) {
+            Some(row_options) => {
+                let next_level = row_options.level + 1;
+
+                // Check the outline level is within Excel's limits.
+                if next_level > 7 {
+                    return Err(XlsxError::MaxGroupLevelExceeded);
+                }
+
+                // Store max worksheet outline row level.
+                self.max_outline_row_level = std::cmp::max(next_level, self.max_outline_row_level);
+
+                row_options.level = next_level;
+
+                if collapsed {
+                    row_options.hidden = true;
+                }
+            }
+            None => {
+                let row_options = RowOptions {
+                    height: self.user_default_row_height,
+                    xf_index: 0,
+                    hidden: collapsed,
+                    level: 1,
+                    collapsed: false,
+                };
+                self.changed_rows.insert(row, row_options);
+            }
+        }
+
+        Ok(self)
+    }
+
+    // Set the collapsed property to the row after the collapse group.
+    fn set_collapsed_row(&mut self, row: RowNum) -> Result<&mut Worksheet, XlsxError> {
+        // Check rows are in the allowed range.
+        let min_col = self.get_min_col();
+        if !self.check_dimensions(row, min_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Update an existing row metadata object or create a new one.
+        match self.changed_rows.get_mut(&row) {
+            Some(row_options) => row_options.collapsed = true,
+            None => {
+                let row_options = RowOptions {
+                    height: self.user_default_row_height,
+                    xf_index: 0,
+                    hidden: false,
+                    level: 0,
+                    collapsed: true,
+                };
+                self.changed_rows.insert(row, row_options);
+            }
+        }
+
+        Ok(self)
+    }
+
+    /// Set the column properties (outline level and hidden) for a range of grouped
+    /// columns in an outline.
+    fn set_grouped_columns(
+        &mut self,
+        first_col: ColNum,
+        last_col: ColNum,
+        collapsed: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Get a suitable minimum value for the dimension check/set.
+        let min_row = self.get_min_row();
+
+        // Check columns are in the allowed range.
+        if !self.check_dimensions(min_row, first_col) || !self.check_dimensions(min_row, last_col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Check order of first/last values.
+        if first_col > last_col {
+            return Err(XlsxError::RowColumnOrderError);
+        }
+
+        // Write group outline for each column.
+        for col in first_col..=last_col {
+            self.set_grouped_column(col, collapsed)?;
+        }
+
+        Ok(self)
+    }
+
+    // Set the column properties (outline level and hidden) for a single column in an
+    // outline group. Rows are hidden if they are part of a collapsed group.
+    fn set_grouped_column(
+        &mut self,
+        column: ColNum,
+        collapsed: bool,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        // Update an existing column metadata object or create a new one.
+        match self.changed_cols.get_mut(&column) {
+            Some(column_options) => {
+                let next_level = column_options.level + 1;
+
+                // Check the outline level is within Excel's limits.
+                if next_level > 7 {
+                    return Err(XlsxError::MaxGroupLevelExceeded);
+                }
+
+                // Store max worksheet outline column level.
+                self.max_outline_col_level = std::cmp::max(next_level, self.max_outline_col_level);
+
+                column_options.level = next_level;
+
+                if collapsed {
+                    column_options.hidden = true;
+                }
+            }
+            None => {
+                let col_options = ColOptions {
+                    width: DEFAULT_COL_WIDTH,
+                    xf_index: 0,
+                    hidden: collapsed,
+                    level: 1,
+                    collapsed: false,
+                    autofit: false,
+                };
+                self.changed_cols.insert(column, col_options);
+            }
+        }
+
+        Ok(self)
+    }
+
+    // Set the collapsed property to the column after the collapse group.
+    fn set_collapsed_column(&mut self, col: ColNum) -> Result<&mut Worksheet, XlsxError> {
+        // Check columns are in the allowed range.
+        let min_row = self.get_min_row();
+        if !self.check_dimensions(min_row, col) {
+            return Err(XlsxError::RowColumnLimitError);
+        }
+
+        // Update an existing column metadata object or create a new one.
+        match self.changed_cols.get_mut(&col) {
+            Some(column_options) => column_options.collapsed = true,
+            None => {
+                let column_options = ColOptions {
+                    width: DEFAULT_COL_WIDTH,
+                    xf_index: 0,
+                    hidden: false,
+                    level: 0,
+                    collapsed: true,
+                    autofit: false,
+                };
+                self.changed_cols.insert(col, column_options);
+            }
+        }
+
+        Ok(self)
+    }
+
     // -----------------------------------------------------------------------
     // XML assembly methods.
     // -----------------------------------------------------------------------
@@ -16176,6 +16529,8 @@ impl Worksheet {
             && (self.tab_color == Color::Default || self.tab_color == Color::Automatic)
             && self.vba_codename.is_none()
             && !self.is_chartsheet
+            && !self.outline_symbols_above
+            && !self.outline_symbols_left
         {
             return;
         }
@@ -16189,6 +16544,8 @@ impl Worksheet {
         }
 
         if self.fit_to_page
+            || self.outline_symbols_above
+            || self.outline_symbols_left
             || (self.tab_color != Color::Default && self.tab_color != Color::Automatic)
         {
             xml_start_tag(&mut self.writer, "sheetPr", &attributes);
@@ -16198,6 +16555,9 @@ impl Worksheet {
 
             // Write the tabColor element.
             self.write_tab_color();
+
+            // Write the outlinePr element.
+            self.write_outline_pr();
 
             xml_end_tag(&mut self.writer, "sheetPr");
         } else {
@@ -16225,6 +16585,25 @@ impl Worksheet {
         let attributes = self.tab_color.attributes();
 
         xml_empty_tag(&mut self.writer, "tabColor", &attributes);
+    }
+
+    // Write the <outlinePr> element.
+    fn write_outline_pr(&mut self) {
+        if !self.outline_symbols_above && !self.outline_symbols_left {
+            return;
+        }
+
+        let mut attributes = vec![];
+
+        if self.outline_symbols_above {
+            attributes.push(("summaryBelow", "0".to_string()));
+        }
+
+        if self.outline_symbols_left {
+            attributes.push(("summaryRight", "0".to_string()));
+        }
+
+        xml_empty_tag(&mut self.writer, "outlinePr", &attributes);
     }
 
     // Write the <dimension> element.
@@ -16423,6 +16802,14 @@ impl Worksheet {
 
         if self.hide_unused_rows {
             attributes.push(("zeroHeight", "1".to_string()));
+        }
+
+        if self.max_outline_row_level > 0 {
+            attributes.push(("outlineLevelRow", self.max_outline_row_level.to_string()));
+        }
+
+        if self.max_outline_col_level > 0 {
+            attributes.push(("outlineLevelCol", self.max_outline_col_level.to_string()));
         }
 
         if self.use_x14_extensions {
@@ -17465,6 +17852,14 @@ impl Worksheet {
             {
                 attributes.push(("customHeight", "1".to_string()));
             }
+
+            if row_options.level > 0 {
+                attributes.push(("outlineLevel", row_options.level.to_string()));
+            }
+
+            if row_options.collapsed {
+                attributes.push(("collapsed", "1".to_string()));
+            }
         } else if self.user_default_row_height != DEFAULT_ROW_HEIGHT {
             attributes.push(("ht", self.user_default_row_height.to_string()));
             attributes.push(("customHeight", "1".to_string()));
@@ -17904,6 +18299,14 @@ impl Worksheet {
 
         if has_custom_width || hidden {
             attributes.push(("customWidth", "1".to_string()));
+        }
+
+        if col_options.level > 0 {
+            attributes.push(("outlineLevel", col_options.level.to_string()));
+        }
+
+        if col_options.collapsed {
+            attributes.push(("collapsed", "1".to_string()));
         }
 
         xml_empty_tag(&mut self.writer, "col", &attributes);
@@ -18989,14 +19392,18 @@ impl Default for CellRange {
 struct RowOptions {
     height: f64,
     xf_index: u32,
+    level: u8,
     hidden: bool,
+    collapsed: bool,
 }
 
 #[derive(Clone, PartialEq)]
 struct ColOptions {
     width: f64,
     xf_index: u32,
+    level: u8,
     hidden: bool,
+    collapsed: bool,
     autofit: bool,
 }
 

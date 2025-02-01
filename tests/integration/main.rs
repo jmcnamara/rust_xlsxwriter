@@ -944,6 +944,12 @@ mod optimize_table34;
 mod optimize_table35;
 #[cfg(feature = "constant_memory")]
 mod optimize_table36;
+mod outline01;
+mod outline02;
+mod outline03;
+mod outline04;
+mod outline05;
+mod outline06;
 mod overlay01;
 mod overlay02;
 mod overlay03;
