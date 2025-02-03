@@ -101,6 +101,7 @@
 //!   - [Setting worksheet tab colors](#setting-worksheet-tab-colors)
 //!   - [Hiding worksheets](#hiding-worksheets)
 //!   - [Selecting worksheets](#selecting-worksheets)
+//! - [Grouping and outlining data](#grouping-and-outlining-data)
 //! - [Worksheet protection](#worksheet-protection)
 //!   - [Setting a protection password](#setting-a-protection-password)
 //!   - [Choosing which worksheet elements to
@@ -1026,6 +1027,111 @@
 //! [`Color`]: crate::Color
 //! [Microsoft Office documentation]:
 //!     https://support.office.com/en-ie/article/rename-a-worksheet-3f1f7148-ee83-404d-8ef0-9ff99fbad1f9
+//!
+//!
+//!
+//! # Grouping and outlining data
+//!
+//! In Excel an outline is a group of rows or columns that can be collapsed or
+//! expanded to simplify hierarchical data. It is often used with the
+//! `SUBTOTAL()` function. For example:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_group_rows2.png">
+//!
+//! Pressing the `[-]` symbol collapses and hides the grouped rows. For example
+//! the following is the result of collapsing the two inner groups in the
+//! previous worksheet:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_group_rows_collapsed2.png">
+//!
+//! Outlines can be also be applied to columns:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_group_columns2.png">
+//!
+//! In `rust_xlsxwriter` outline groups can be created using the following
+//! worksheet methods:
+//!
+//! - [`Worksheet::group_rows()`]
+//! - [`Worksheet::group_rows_collapsed()`]
+//! - [`Worksheet::group_columns()`]
+//! - [`Worksheet::group_columns_collapsed()`]
+//!
+//! A grouping is created as follows:
+//!
+//! ```rust
+//! # // This code is available in examples/doc_worksheet_group_rows_intro1.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//! #     // Add grouping over the sub-total range.
+//!     worksheet.group_rows(1, 10)?;
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! Which creates a grouping at level 1:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_group_rows_intro1.png">
+//!
+//! Hierarchical sub-groups are created by repeating the method calls for a
+//! sub-range of an upper level group:
+//!
+//! ```rust
+//! # // This code is available in examples/doc_worksheet_group_rows_intro2.rs
+//! #
+//! # use rust_xlsxwriter::{Workbook, XlsxError};
+//! #
+//! # fn main() -> Result<(), XlsxError> {
+//! #     let mut workbook = Workbook::new();
+//! #     let worksheet = workbook.add_worksheet();
+//! #
+//!     // Add Level 1 grouping over the sub-total range.
+//!     worksheet.group_rows(1, 10)?;
+//!
+//!     // Add secondary groups within the first range.
+//!     worksheet.group_rows(1, 4)?;
+//!     worksheet.group_rows(6, 9)?;
+//! #
+//! #     workbook.save("worksheet.xlsx")?;
+//! #
+//! #     Ok(())
+//! # }
+//! ```
+//!
+//! This creates the following grouping and sub-grouping at levels 1 and 2:
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_group_rows_intro2.png">
+//!
+//! It should be noted that Excel requires outline groups at the same level to
+//! be separated by at least one row (or column) or else it will merge them into
+//! a single group. This is generally to allow a subtotal row/column.
+//!
+//! Excel allows a maximum of 8 outline levels (including a final display
+//! level). However, in practice it is rare to require more than 2 levels. All
+//! available row levels are shown below.
+//!
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/worksheet_group_rows_intro3.png">
+//!
+//! By default Excel displays the expand and collapse `[+]` and `[-]` group
+//! symbols below a row group and to the right of a column group. If required
+//! the default directions can be changed using the following methods. These
+//! apply to the entire worksheet:
+//!
+//! - [`Worksheet::group_symbols_above()`]
+//! - [`Worksheet::group_symbols_to_left()`]
 //!
 //!
 //! # Worksheet protection
@@ -6421,7 +6527,71 @@ impl Worksheet {
 
     /// Group a range of rows into a worksheet outline group.
     ///
-    /// Todo
+    /// In Excel an outline is a group of rows or columns that can be collapsed
+    /// or expanded to simplify hierarchical data. It is most often used with
+    /// the `SUBTOTAL()` function. See the examples below and the the
+    /// documentation on [Grouping and outlining
+    /// data](../worksheet/index.html#grouping-and-outlining-data).
+    ///
+    /// A grouping is created as follows:
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_rows_intro1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add grouping over the sub-total range.
+    ///     worksheet.group_rows(1, 10)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Which creates a grouping at level 1:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_rows_intro1.png">
+    ///
+    /// Hierarchical sub-groups are created by repeating the method calls for a
+    /// sub-range of an upper level group:
+    ///
+    /// ```rust
+    /// # // This code is available in examples/doc_worksheet_group_rows_intro2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add Level 1 grouping over the sub-total range.
+    ///     worksheet.group_rows(1, 10)?;
+    ///
+    ///     // Add secondary groups within the first range.
+    ///     worksheet.group_rows(1, 4)?;
+    ///     worksheet.group_rows(6, 9)?;
+    /// #
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// This creates the following grouping and sub-grouping at levels 1 and 2:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_rows_intro2.png">
+    ///
+    /// It should be noted that Excel requires outline groups at the same level
+    /// to be separated by at least one row (or column) or else it will merge
+    /// them into a single group. This is generally to allow a subtotal
+    /// row/column.
     ///
     /// # Parameters
     ///
@@ -6433,9 +6603,134 @@ impl Worksheet {
     /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
     /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
-    ///   row. Note, to reverse the group direction see the Todo method.
+    ///   row. Note, to reverse the group direction see the
+    ///   [`Worksheet::group_symbols_above()`] method.
     /// - [`XlsxError::MaxGroupLevelExceeded`] - Group depth level exceeds
-    ///   Excel's limit of 7 levels.
+    ///   Excel's limit of 8 levels.
+    ///
+    /// # Examples
+    ///
+    /// An example of how to group worksheet rows into outlines.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_rows1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     worksheet.write_with_format(0, 0, "Region", &bold)?;
+    ///     worksheet.write(1, 0, "North 1")?;
+    ///     worksheet.write(2, 0, "North 2")?;
+    ///     worksheet.write(3, 0, "North 3")?;
+    ///     worksheet.write(4, 0, "North 4")?;
+    ///     worksheet.write_with_format(5, 0, "North Total", &bold)?;
+    ///
+    ///     worksheet.write_with_format(0, 1, "Sales", &bold)?;
+    ///     worksheet.write(1, 1, 1000)?;
+    ///     worksheet.write(2, 1, 1200)?;
+    ///     worksheet.write(3, 1, 900)?;
+    ///     worksheet.write(4, 1, 1200)?;
+    ///     worksheet.write_formula_with_format(5, 1, "=SUBTOTAL(9,B2:B5)", &bold)?;
+    ///
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add grouping over the sub-total range.
+    ///     worksheet.group_rows(1, 4)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_rows1.png">
+    ///
+    /// An example of how to group worksheet rows into outlines. This example
+    /// shows hows to add secondary groups within a primary grouping. Excel
+    /// requires at least one row between each outline grouping at the same
+    /// level.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_rows2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.write_with_format(0, 0, "Region", &bold)?;
+    /// #     worksheet.write(1, 0, "North 1")?;
+    /// #     worksheet.write(2, 0, "North 2")?;
+    /// #     worksheet.write(3, 0, "North 3")?;
+    /// #     worksheet.write(4, 0, "North 4")?;
+    /// #     worksheet.write_with_format(5, 0, "North Total", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 1, "Sales", &bold)?;
+    /// #     worksheet.write(1, 1, 1000)?;
+    /// #     worksheet.write(2, 1, 1200)?;
+    /// #     worksheet.write(3, 1, 900)?;
+    /// #     worksheet.write(4, 1, 1200)?;
+    /// #     worksheet.write_formula_with_format(5, 1, "=SUBTOTAL(9,B2:B5)", &bold)?;
+    /// #
+    /// #     worksheet.write(6, 0, "South 1")?;
+    /// #     worksheet.write(7, 0, "South 2")?;
+    /// #     worksheet.write(8, 0, "South 3")?;
+    /// #     worksheet.write(9, 0, "South 4")?;
+    /// #     worksheet.write_with_format(10, 0, "South Total", &bold)?;
+    /// #
+    /// #     worksheet.write(6, 1, 400)?;
+    /// #     worksheet.write(7, 1, 600)?;
+    /// #     worksheet.write(8, 1, 500)?;
+    /// #     worksheet.write(9, 1, 600)?;
+    /// #     worksheet.write_formula_with_format(10, 1, "=SUBTOTAL(9,B7:B10)", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(11, 0, "Grand Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(11, 1, "=SUBTOTAL(9,B2:B11)", &bold)?;
+    /// #
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add grouping over the sub-total range.
+    ///     worksheet.group_rows(1, 10)?;
+    ///
+    ///     // Add secondary groups within the first range.
+    ///     worksheet.group_rows(1, 4)?;
+    ///     worksheet.group_rows(6, 9)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_rows2.png">
+    ///
+    ///
     ///
     pub fn group_rows(
         &mut self,
@@ -6447,7 +6742,15 @@ impl Worksheet {
 
     /// Group a range of rows into a collapsed worksheet outline group.
     ///
-    /// Todo
+    /// In Excel an outline is a group of rows or columns that can be collapsed
+    /// or expanded to simplify hierarchical data. It is most often used with
+    /// the `SUBTOTAL()` function. See the examples below and the the
+    /// documentation on [Grouping and outlining
+    /// data](../worksheet/index.html#grouping-and-outlining-data).
+    ///
+    /// See [`Worksheet::group_rows()`] above for an explanation on how to create
+    /// sub-groupings.
+    ///
     ///
     /// # Parameters
     ///
@@ -6458,12 +6761,144 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
-    /// - [`XlsxError::RowColumnOrderError`] - It is an error for the first row
-    ///   to be greater than the last row. Note, to reverse the group direction
-    ///   see the Todo method.
+    /// - [`XlsxError::RowColumnOrderError`] - First row greater than the last
+    ///   row. Note, to reverse the group direction see the
+    ///   [`Worksheet::group_symbols_above()`] method.
     /// - [`XlsxError::MaxGroupLevelExceeded`] - Group depth level exceeds
-    ///   Excel's limit of 7 levels.
+    ///   Excel's limit of 8 levels.
     ///
+    /// # Examples
+    ///
+    /// An example of how to group worksheet rows into outlines with
+    /// collapsed/hidden rows.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_rows_collapsed1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     worksheet.write_with_format(0, 0, "Region", &bold)?;
+    ///     worksheet.write(1, 0, "North 1")?;
+    ///     worksheet.write(2, 0, "North 2")?;
+    ///     worksheet.write(3, 0, "North 3")?;
+    ///     worksheet.write(4, 0, "North 4")?;
+    ///     worksheet.write_with_format(5, 0, "North Total", &bold)?;
+    ///
+    ///     worksheet.write_with_format(0, 1, "Sales", &bold)?;
+    ///     worksheet.write(1, 1, 1000)?;
+    ///     worksheet.write(2, 1, 1200)?;
+    ///     worksheet.write(3, 1, 900)?;
+    ///     worksheet.write(4, 1, 1200)?;
+    ///     worksheet.write_formula_with_format(5, 1, "=SUBTOTAL(9,B2:B5)", &bold)?;
+    ///
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add collapse grouping over the sub-total range.
+    ///     worksheet.group_rows_collapsed(1, 4)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_rows_collapsed1.png">
+    ///
+    /// For comparison here is the expanded output:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_rows1.png">
+    ///
+    /// An example of how to group worksheet rows into outlines with
+    /// collapsed/hidden rows. This example shows hows to add secondary groups
+    /// within a primary grouping. Excel requires at least one row between each
+    /// outline grouping at the same level.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_rows_collapsed2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.write_with_format(0, 0, "Region", &bold)?;
+    /// #     worksheet.write(1, 0, "North 1")?;
+    /// #     worksheet.write(2, 0, "North 2")?;
+    /// #     worksheet.write(3, 0, "North 3")?;
+    /// #     worksheet.write(4, 0, "North 4")?;
+    /// #     worksheet.write_with_format(5, 0, "North Total", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 1, "Sales", &bold)?;
+    /// #     worksheet.write(1, 1, 1000)?;
+    /// #     worksheet.write(2, 1, 1200)?;
+    /// #     worksheet.write(3, 1, 900)?;
+    /// #     worksheet.write(4, 1, 1200)?;
+    /// #     worksheet.write_formula_with_format(5, 1, "=SUBTOTAL(9,B2:B5)", &bold)?;
+    /// #
+    /// #     worksheet.write(6, 0, "South 1")?;
+    /// #     worksheet.write(7, 0, "South 2")?;
+    /// #     worksheet.write(8, 0, "South 3")?;
+    /// #     worksheet.write(9, 0, "South 4")?;
+    /// #     worksheet.write_with_format(10, 0, "South Total", &bold)?;
+    /// #
+    /// #     worksheet.write(6, 1, 400)?;
+    /// #     worksheet.write(7, 1, 600)?;
+    /// #     worksheet.write(8, 1, 500)?;
+    /// #     worksheet.write(9, 1, 600)?;
+    /// #     worksheet.write_formula_with_format(10, 1, "=SUBTOTAL(9,B7:B10)", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(11, 0, "Grand Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(11, 1, "=SUBTOTAL(9,B2:B11)", &bold)?;
+    /// #
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add grouping over the sub-total range.
+    ///     worksheet.group_rows(1, 10)?;
+    ///
+    ///     // Add secondary collapsed groups within the first range.
+    ///     worksheet.group_rows_collapsed(1, 4)?;
+    ///     worksheet.group_rows_collapsed(6, 9)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_rows_collapsed2.png">
+    ///
+    /// For comparison here is the expanded output:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_rows2.png">
     ///
     pub fn group_rows_collapsed(
         &mut self,
@@ -6478,7 +6913,14 @@ impl Worksheet {
 
     /// Group a range of columns into a worksheet outline group.
     ///
-    /// Todo
+    /// In Excel an outline is a group of rows or columns that can be collapsed
+    /// or expanded to simplify hierarchical data. It is most often used with
+    /// the `SUBTOTAL()` function. See the examples below and the the
+    /// documentation on [Grouping and outlining
+    /// data](../worksheet/index.html#grouping-and-outlining-data).
+    ///
+    /// See [`Worksheet::group_rows()`] above for an explanation on how to create
+    /// sub-groupings.
     ///
     /// # Parameters
     ///
@@ -6490,9 +6932,154 @@ impl Worksheet {
     /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
     /// - [`XlsxError::RowColumnOrderError`] - First column greater than the last
-    ///   column. Note, to reverse the group direction see the Todo method.
+    ///   column. Note, to reverse the group direction see the
+    ///   [`Worksheet::group_symbols_to_left()`] method.
     /// - [`XlsxError::MaxGroupLevelExceeded`] - Group depth level exceeds
-    ///   Excel's limit of 7 levels.
+    ///   Excel's limit of 8 levels.
+    ///
+    ///
+    /// # Examples
+    ///
+    /// An example of how to group worksheet columns into outlines.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_columns1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let data = [50, 20, 15, 25, 65, 80];
+    ///     let headings = ["Month", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Total"];
+    ///
+    ///     worksheet.write_row_with_format(0, 0, headings, &bold)?;
+    ///     worksheet.write_row(1, 1, data)?;
+    ///     worksheet.write_formula_with_format(1, 7, "=SUBTOTAL(9,B2:G2)", &bold)?;
+    /// #
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    ///
+    ///     // Add grouping for the over the sub-total range.
+    ///     worksheet.group_columns(1, 6)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_group_columns1.png">
+    ///
+    /// An example of how to group worksheet columns into outlines. This example
+    /// shows hows to add secondary groups within a primary grouping. Excel requires
+    /// at least one column between each outline grouping at the same level.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_columns2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.write_with_format(0, 0, "Region", &bold)?;
+    /// #     worksheet.write_with_format(1, 0, "North", &bold)?;
+    /// #     worksheet.write_with_format(2, 0, "South", &bold)?;
+    /// #     worksheet.write_with_format(3, 0, "East", &bold)?;
+    /// #     worksheet.write_with_format(4, 0, "West", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 1, "Jan", &bold)?;
+    /// #     worksheet.write(1, 1, 50)?;
+    /// #     worksheet.write(2, 1, 10)?;
+    /// #     worksheet.write(3, 1, 45)?;
+    /// #     worksheet.write(4, 1, 15)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 2, "Feb", &bold)?;
+    /// #     worksheet.write(1, 2, 20)?;
+    /// #     worksheet.write(2, 2, 20)?;
+    /// #     worksheet.write(3, 2, 75)?;
+    /// #     worksheet.write(4, 2, 15)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 3, "Mar", &bold)?;
+    /// #     worksheet.write(1, 3, 15)?;
+    /// #     worksheet.write(2, 3, 30)?;
+    /// #     worksheet.write(3, 3, 50)?;
+    /// #     worksheet.write(4, 3, 35)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 4, "Q1 Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(1, 4, "=SUBTOTAL(9,B2:D2)", &bold)?;
+    /// #     worksheet.write_formula_with_format(2, 4, "=SUBTOTAL(9,B3:D3)", &bold)?;
+    /// #     worksheet.write_formula_with_format(3, 4, "=SUBTOTAL(9,B4:D4)", &bold)?;
+    /// #     worksheet.write_formula_with_format(4, 4, "=SUBTOTAL(9,B5:D5)", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 5, "Apr", &bold)?;
+    /// #     worksheet.write(1, 5, 25)?;
+    /// #     worksheet.write(2, 5, 50)?;
+    /// #     worksheet.write(3, 5, 15)?;
+    /// #     worksheet.write(4, 5, 35)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 6, "May", &bold)?;
+    /// #     worksheet.write(1, 6, 65)?;
+    /// #     worksheet.write(2, 6, 50)?;
+    /// #     worksheet.write(3, 6, 75)?;
+    /// #     worksheet.write(4, 6, 70)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 7, "Jun", &bold)?;
+    /// #     worksheet.write(1, 7, 80)?;
+    /// #     worksheet.write(2, 7, 50)?;
+    /// #     worksheet.write(3, 7, 90)?;
+    /// #     worksheet.write(4, 7, 50)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 8, "Q2 Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(1, 8, "=SUBTOTAL(9,F2:H2)", &bold)?;
+    /// #     worksheet.write_formula_with_format(2, 8, "=SUBTOTAL(9,F3:H3)", &bold)?;
+    /// #     worksheet.write_formula_with_format(3, 8, "=SUBTOTAL(9,F4:H4)", &bold)?;
+    /// #     worksheet.write_formula_with_format(4, 8, "=SUBTOTAL(9,F5:H5)", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 9, "H1 Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(1, 9, "=SUBTOTAL(9,B2:I2)", &bold)?;
+    /// #     worksheet.write_formula_with_format(2, 9, "=SUBTOTAL(9,B3:I3)", &bold)?;
+    /// #     worksheet.write_formula_with_format(3, 9, "=SUBTOTAL(9,B4:I4)", &bold)?;
+    /// #     worksheet.write_formula_with_format(4, 9, "=SUBTOTAL(9,B5:I5)", &bold)?;
+    /// #
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add grouping for the over the sub-total range.
+    ///     worksheet.group_columns(1, 8)?;
+    ///
+    ///     // Add secondary groups within the first range.
+    ///     worksheet.group_columns(1, 3)?;
+    ///     worksheet.group_columns(5, 7)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_group_columns2.png">
     ///
     pub fn group_columns(
         &mut self,
@@ -6504,7 +7091,14 @@ impl Worksheet {
 
     /// Group a range of columns into a collapsed worksheet outline group.
     ///
-    /// Todo
+    /// In Excel an outline is a group of rows or columns that can be collapsed
+    /// or expanded to simplify hierarchical data. It is most often used with
+    /// the `SUBTOTAL()` function. See the examples below and the the
+    /// documentation on [Grouping and outlining
+    /// data](../worksheet/index.html#grouping-and-outlining-data).
+    ///
+    /// See [`Worksheet::group_rows()`] above for an explanation on how to
+    /// create sub-groupings.
     ///
     /// # Parameters
     ///
@@ -6515,12 +7109,170 @@ impl Worksheet {
     ///
     /// - [`XlsxError::RowColumnLimitError`] - Row exceeds Excel's worksheet
     ///   limits.
-    /// - [`XlsxError::RowColumnOrderError`] - It is an error for the first column
-    ///   to be greater than the last column. Note, to reverse the group direction
-    ///   see the Todo method.
+    /// - [`XlsxError::RowColumnOrderError`] - First column greater than the
+    ///   last column. Note, to reverse the group direction see the
+    ///   [`Worksheet::group_symbols_to_left()`] method.
     /// - [`XlsxError::MaxGroupLevelExceeded`] - Group depth level exceeds
     ///   Excel's limit of 7 levels.
     ///
+    ///
+    /// # Examples
+    ///
+    /// An example of how to group worksheet columns into outlines with
+    /// collapsed/hidden rows.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_columns_collapsed1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     let data = [50, 20, 15, 25, 65, 80];
+    ///     let headings = ["Month", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Total"];
+    ///
+    ///     worksheet.write_row_with_format(0, 0, headings, &bold)?;
+    ///     worksheet.write_row(1, 1, data)?;
+    ///     worksheet.write_formula_with_format(1, 7, "=SUBTOTAL(9,B2:G2)", &bold)?;
+    ///
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add collapse grouping over the sub-total range.
+    ///     worksheet.group_columns_collapsed(1, 6)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_columns_collapsed1.png">
+    ///
+    /// For comparison here is the expanded output:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_columns1.png">
+    ///
+    ///
+    /// An example of how to group worksheet columns into outlines with
+    /// collapsed/hidden rows. This example shows hows to add secondary groups
+    /// within a primary grouping. Excel requires at least one column between
+    /// each outline grouping at the same level.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_columns_collapsed2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.write_with_format(0, 0, "Region", &bold)?;
+    /// #     worksheet.write_with_format(1, 0, "North", &bold)?;
+    /// #     worksheet.write_with_format(2, 0, "South", &bold)?;
+    /// #     worksheet.write_with_format(3, 0, "East", &bold)?;
+    /// #     worksheet.write_with_format(4, 0, "West", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 1, "Jan", &bold)?;
+    /// #     worksheet.write(1, 1, 50)?;
+    /// #     worksheet.write(2, 1, 10)?;
+    /// #     worksheet.write(3, 1, 45)?;
+    /// #     worksheet.write(4, 1, 15)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 2, "Feb", &bold)?;
+    /// #     worksheet.write(1, 2, 20)?;
+    /// #     worksheet.write(2, 2, 20)?;
+    /// #     worksheet.write(3, 2, 75)?;
+    /// #     worksheet.write(4, 2, 15)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 3, "Mar", &bold)?;
+    /// #     worksheet.write(1, 3, 15)?;
+    /// #     worksheet.write(2, 3, 30)?;
+    /// #     worksheet.write(3, 3, 50)?;
+    /// #     worksheet.write(4, 3, 35)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 4, "Q1 Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(1, 4, "=SUBTOTAL(9,B2:D2)", &bold)?;
+    /// #     worksheet.write_formula_with_format(2, 4, "=SUBTOTAL(9,B3:D3)", &bold)?;
+    /// #     worksheet.write_formula_with_format(3, 4, "=SUBTOTAL(9,B4:D4)", &bold)?;
+    /// #     worksheet.write_formula_with_format(4, 4, "=SUBTOTAL(9,B5:D5)", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 5, "Apr", &bold)?;
+    /// #     worksheet.write(1, 5, 25)?;
+    /// #     worksheet.write(2, 5, 50)?;
+    /// #     worksheet.write(3, 5, 15)?;
+    /// #     worksheet.write(4, 5, 35)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 6, "May", &bold)?;
+    /// #     worksheet.write(1, 6, 65)?;
+    /// #     worksheet.write(2, 6, 50)?;
+    /// #     worksheet.write(3, 6, 75)?;
+    /// #     worksheet.write(4, 6, 70)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 7, "Jun", &bold)?;
+    /// #     worksheet.write(1, 7, 80)?;
+    /// #     worksheet.write(2, 7, 50)?;
+    /// #     worksheet.write(3, 7, 90)?;
+    /// #     worksheet.write(4, 7, 50)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 8, "Q2 Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(1, 8, "=SUBTOTAL(9,F2:H2)", &bold)?;
+    /// #     worksheet.write_formula_with_format(2, 8, "=SUBTOTAL(9,F3:H3)", &bold)?;
+    /// #     worksheet.write_formula_with_format(3, 8, "=SUBTOTAL(9,F4:H4)", &bold)?;
+    /// #     worksheet.write_formula_with_format(4, 8, "=SUBTOTAL(9,F5:H5)", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 9, "H1 Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(1, 9, "=SUBTOTAL(9,B2:I2)", &bold)?;
+    /// #     worksheet.write_formula_with_format(2, 9, "=SUBTOTAL(9,B3:I3)", &bold)?;
+    /// #     worksheet.write_formula_with_format(3, 9, "=SUBTOTAL(9,B4:I4)", &bold)?;
+    /// #     worksheet.write_formula_with_format(4, 9, "=SUBTOTAL(9,B5:I5)", &bold)?;
+    /// #
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add grouping for the over the sub-total range.
+    ///     worksheet.group_columns(1, 8)?;
+    ///
+    ///     // Add secondary collapsed groups within the first range.
+    ///     worksheet.group_columns_collapsed(1, 3)?;
+    ///     worksheet.group_columns_collapsed(5, 7)?;
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_columns_collapsed2.png">
+    ///
+    /// For comparison here is the expanded output:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_columns2.png">
     ///
     pub fn group_columns_collapsed(
         &mut self,
@@ -6533,22 +7285,190 @@ impl Worksheet {
         self.set_grouped_columns(first_col, last_col, true)
     }
 
-    /// TODO
+    /// Place the row outline group expand/collapse symbols above the range.
+    ///
+    /// This method toggles the Excel worksheet option to place the outline
+    /// group expand/collapse symbols `[+]` and `[-]` above the group ranges
+    /// instead of below for row ranges.
+    ///
+    /// In Excel this is a worksheet wide option and will apply to all row
+    /// outlines in the worksheet.
     ///
     /// # Parameters
     ///
     /// - `enable`: Turn the property on/off. It is off by default.
     ///
-    pub fn group_symbols_on_top(&mut self, enable: bool) -> &mut Worksheet {
+    /// # Examples
+    ///
+    /// An example of how to group worksheet rows into outlines. This example
+    /// puts the expand/collapse symbol above the range for all row groups in
+    /// the worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_symbols_above.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.write_with_format(0, 0, "Region", &bold)?;
+    /// #     worksheet.write(1, 0, "North 1")?;
+    /// #     worksheet.write(2, 0, "North 2")?;
+    /// #     worksheet.write(3, 0, "North 3")?;
+    /// #     worksheet.write(4, 0, "North 4")?;
+    /// #     worksheet.write_with_format(5, 0, "North Total", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 1, "Sales", &bold)?;
+    /// #     worksheet.write(1, 1, 1000)?;
+    /// #     worksheet.write(2, 1, 1200)?;
+    /// #     worksheet.write(3, 1, 900)?;
+    /// #     worksheet.write(4, 1, 1200)?;
+    /// #     worksheet.write_formula_with_format(5, 1, "=SUBTOTAL(9,B2:B5)", &bold)?;
+    /// #
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add grouping over the sub-total range.
+    ///     worksheet.group_rows(1, 4)?;
+    ///
+    ///     // Display the expand/collapse symbol above the range.
+    ///     worksheet.group_symbols_above(true);
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/worksheet_group_symbols_above.png">
+    ///
+    pub fn group_symbols_above(&mut self, enable: bool) -> &mut Worksheet {
         self.outline_symbols_above = enable;
         self
     }
 
-    /// TODO
+    /// Place the column outline group expand/collapse symbols to the left of
+    /// the range.
+    ///
+    /// This method toggles the Excel worksheet option to place the outline
+    /// group expand/collapse symbols `[+]` and `[-]` to the left of the group
+    /// ranges instead of to the right, for column ranges.
+    ///
+    /// In Excel this is a worksheet wide option and will apply to all column
+    /// outlines in the worksheet.
     ///
     /// # Parameters
     ///
     /// - `enable`: Turn the property on/off. It is off by default.
+    ///
+    /// # Examples
+    ///
+    /// An example of how to group worksheet columns into outlines. This example
+    /// puts the expand/collapse symbol to the left of the range for all row groups
+    /// in the worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_worksheet_group_symbols_to_left.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a format to use in headings.
+    /// #     let bold = Format::new().set_bold();
+    /// #
+    /// #     // Add a worksheet with some sample data.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     worksheet.write_with_format(0, 0, "Region", &bold)?;
+    /// #     worksheet.write_with_format(1, 0, "North", &bold)?;
+    /// #     worksheet.write_with_format(2, 0, "South", &bold)?;
+    /// #     worksheet.write_with_format(3, 0, "East", &bold)?;
+    /// #     worksheet.write_with_format(4, 0, "West", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 1, "Jan", &bold)?;
+    /// #     worksheet.write(1, 1, 50)?;
+    /// #     worksheet.write(2, 1, 10)?;
+    /// #     worksheet.write(3, 1, 45)?;
+    /// #     worksheet.write(4, 1, 15)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 2, "Feb", &bold)?;
+    /// #     worksheet.write(1, 2, 20)?;
+    /// #     worksheet.write(2, 2, 20)?;
+    /// #     worksheet.write(3, 2, 75)?;
+    /// #     worksheet.write(4, 2, 15)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 3, "Mar", &bold)?;
+    /// #     worksheet.write(1, 3, 15)?;
+    /// #     worksheet.write(2, 3, 30)?;
+    /// #     worksheet.write(3, 3, 50)?;
+    /// #     worksheet.write(4, 3, 35)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 4, "Q1 Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(1, 4, "=SUBTOTAL(9,B2:D2)", &bold)?;
+    /// #     worksheet.write_formula_with_format(2, 4, "=SUBTOTAL(9,B3:D3)", &bold)?;
+    /// #     worksheet.write_formula_with_format(3, 4, "=SUBTOTAL(9,B4:D4)", &bold)?;
+    /// #     worksheet.write_formula_with_format(4, 4, "=SUBTOTAL(9,B5:D5)", &bold)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 5, "Apr", &bold)?;
+    /// #     worksheet.write(1, 5, 25)?;
+    /// #     worksheet.write(2, 5, 50)?;
+    /// #     worksheet.write(3, 5, 15)?;
+    /// #     worksheet.write(4, 5, 35)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 6, "May", &bold)?;
+    /// #     worksheet.write(1, 6, 65)?;
+    /// #     worksheet.write(2, 6, 50)?;
+    /// #     worksheet.write(3, 6, 75)?;
+    /// #     worksheet.write(4, 6, 70)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 7, "Jun", &bold)?;
+    /// #     worksheet.write(1, 7, 80)?;
+    /// #     worksheet.write(2, 7, 50)?;
+    /// #     worksheet.write(3, 7, 90)?;
+    /// #     worksheet.write(4, 7, 50)?;
+    /// #
+    /// #     worksheet.write_with_format(0, 8, "Q2 Total", &bold)?;
+    /// #     worksheet.write_formula_with_format(1, 8, "=SUBTOTAL(9,F2:H2)", &bold)?;
+    /// #     worksheet.write_formula_with_format(2, 8, "=SUBTOTAL(9,F3:H3)", &bold)?;
+    /// #     worksheet.write_formula_with_format(3, 8, "=SUBTOTAL(9,F4:H4)", &bold)?;
+    /// #     worksheet.write_formula_with_format(4, 8, "=SUBTOTAL(9,F5:H5)", &bold)?;
+    /// #
+    /// #     // Autofit the columns for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    ///     // Add groupings for the over the sub-total ranges.
+    ///     worksheet.group_columns(1, 3)?;
+    ///     worksheet.group_columns(5, 7)?;
+    ///
+    ///     // Display the expand/collapse symbol to the left of the range.
+    ///     worksheet.group_symbols_to_left(true);
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("worksheet.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/worksheet_group_symbols_to_left.png">
+    ///
     ///
     pub fn group_symbols_to_left(&mut self, enable: bool) -> &mut Worksheet {
         self.outline_symbols_left = enable;

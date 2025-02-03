@@ -50,22 +50,24 @@ cargo run --example app_demo  # or any other example
 35. [Chart: Chart data tools](#chart-chart-data-tools)
 36. [Chart: Gauge Chart](#chart-gauge-chart)
 37. [Chart: Chartsheet](#chart-chartsheet)
-38. [Textbox: Inserting Checkboxes in worksheets](#textbox-inserting-checkboxes-in-worksheets)
-39. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
-40. [Textbox: Ignore Excel cell errors](#textbox-ignore-excel-cell-errors)
-41. [Sparklines: simple example](#sparklines-simple-example)
-42. [Sparklines: advanced example](#sparklines-advanced-example)
-43. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
-44. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
-45. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
-46. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
-47. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
-48. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-49. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-50. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-51. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-52. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-53. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+38. [Grouped Rows: Create a grouped row outline](#grouped-rows-create-a-grouped-row-outline)
+39. [Grouped Columns: Create a grouped column outline](#grouped-columns-create-a-grouped-column-outline)
+40. [Textbox: Inserting Checkboxes in worksheets](#textbox-inserting-checkboxes-in-worksheets)
+41. [Textbox: Inserting Textboxes in worksheets](#textbox-inserting-textboxes-in-worksheets)
+42. [Textbox: Ignore Excel cell errors](#textbox-ignore-excel-cell-errors)
+43. [Sparklines: simple example](#sparklines-simple-example)
+44. [Sparklines: advanced example](#sparklines-advanced-example)
+45. [Traits: Extending generic `write()` to handle user data types](#traits-extending-generic-write-to-handle-user-data-types)
+46. [Macros: Adding macros to a workbook](#macros-adding-macros-to-a-workbook)
+47. [Defined names: using user defined variable names in worksheets](#defined-names-using-user-defined-variable-names-in-worksheets)
+48. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
+49. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
+50. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
+51. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+52. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+53. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+54. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+55. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -5317,6 +5319,397 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
+
+
+# Grouped Rows: Create a grouped row outline
+
+An example of how to group rows into outlines with the `rust_xlsxwriter`
+library.
+
+In Excel an outline is a group of rows or columns that can be collapsed or
+expanded to simplify hierarchical data. It is often used with the `SUBTOTAL()`
+function.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_grouped_rows.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_grouped_rows.rs
+
+use rust_xlsxwriter::{Format, Workbook, Worksheet, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a format to use in headings.
+    let bold = Format::new().set_bold();
+
+    // -----------------------------------------------------------------------
+    // 1. Add an outline row group with sub-total.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Simple outline row grouping.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add grouping for the over the sub-total range.
+    worksheet.group_rows(1, 10)?;
+
+    // -----------------------------------------------------------------------
+    // 2. Add nested outline row groups with sub-totals.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Nested outline row grouping.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add grouping for the over the sub-total range.
+    worksheet.group_rows(1, 10)?;
+
+    // Add secondary groups within the first range.
+    worksheet.group_rows(1, 4)?;
+    worksheet.group_rows(6, 9)?;
+
+    // -----------------------------------------------------------------------
+    // 3. Add a collapsed inner outline row groups.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Collapsed inner row grouping.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add grouping for the over the sub-total range.
+    worksheet.group_rows(1, 10)?;
+
+    // Add collapsed secondary groups within the first range.
+    worksheet.group_rows_collapsed(1, 4)?;
+    worksheet.group_rows_collapsed(6, 9)?;
+
+    // -----------------------------------------------------------------------
+    // 4. Add a collapsed outer row group.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Collapsed outer row grouping.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add collapsed grouping for the over the sub-total range.
+    worksheet.group_rows_collapsed(1, 10)?;
+
+    // Add secondary groups within the first range.
+    worksheet.group_rows(1, 4)?;
+    worksheet.group_rows(6, 9)?;
+
+    // -----------------------------------------------------------------------
+    // 5. Row groups with outline symbols on top.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Outline row grouping symbols on top.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add outline row groups.
+    worksheet.group_rows(1, 4)?;
+    worksheet.group_rows(6, 9)?;
+
+    // Change the worksheet group setting so the outline symbols are on top.
+    worksheet.group_symbols_above(true);
+
+    // -----------------------------------------------------------------------
+    // 6. Demonstrate all group levels.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Excel outline levels.";
+    let levels = [
+        "Level 1", "Level 2", "Level 3", "Level 4", //
+        "Level 5", "Level 6", "Level 7", "Level 6", //
+        "Level 5", "Level 4", "Level 3", "Level 2", //
+        "Level 1",
+    ];
+    worksheet.write_column(0, 0, levels)?;
+    worksheet.write_with_format(0, 3, description, &bold)?;
+
+    // Add outline row groups from outer to inner.
+    worksheet.group_rows(0, 12)?;
+    worksheet.group_rows(1, 11)?;
+    worksheet.group_rows(2, 10)?;
+    worksheet.group_rows(3, 9)?;
+    worksheet.group_rows(4, 8)?;
+    worksheet.group_rows(5, 7)?;
+    worksheet.group_rows(6, 6)?;
+
+    // Save the file to disk.
+    workbook.save("grouped_rows.xlsx")?;
+
+    Ok(())
+}
+
+// Generate worksheet data.
+pub fn populate_worksheet_data(
+    worksheet: &mut Worksheet,
+    description: &str,
+    bold: &Format,
+) -> Result<(), XlsxError> {
+    worksheet.write_with_format(0, 3, description, bold)?;
+
+    worksheet.write_with_format(0, 0, "Region", bold)?;
+    worksheet.write(1, 0, "North 1")?;
+    worksheet.write(2, 0, "North 2")?;
+    worksheet.write(3, 0, "North 3")?;
+    worksheet.write(4, 0, "North 4")?;
+    worksheet.write_with_format(5, 0, "North Total", bold)?;
+
+    worksheet.write_with_format(0, 1, "Sales", bold)?;
+    worksheet.write(1, 1, 1000)?;
+    worksheet.write(2, 1, 1200)?;
+    worksheet.write(3, 1, 900)?;
+    worksheet.write(4, 1, 1200)?;
+    worksheet.write_formula_with_format(5, 1, "=SUBTOTAL(9,B2:B5)", bold)?;
+
+    worksheet.write(6, 0, "South 1")?;
+    worksheet.write(7, 0, "South 2")?;
+    worksheet.write(8, 0, "South 3")?;
+    worksheet.write(9, 0, "South 4")?;
+    worksheet.write_with_format(10, 0, "South Total", bold)?;
+
+    worksheet.write(6, 1, 400)?;
+    worksheet.write(7, 1, 600)?;
+    worksheet.write(8, 1, 500)?;
+    worksheet.write(9, 1, 600)?;
+    worksheet.write_formula_with_format(10, 1, "=SUBTOTAL(9,B7:B10)", bold)?;
+
+    worksheet.write_with_format(11, 0, "Grand Total", bold)?;
+    worksheet.write_formula_with_format(11, 1, "=SUBTOTAL(9,B2:B11)", bold)?;
+
+    // Autofit the columns for clarity.
+    worksheet.autofit();
+
+    Ok(())
+}
+```
+
+
+# Grouped Columns: Create a grouped column outline
+
+An example of how to group columns into outlines with the `rust_xlsxwriter`
+library.
+
+In Excel an outline is a group of rows or columns that can be collapsed or
+expanded to simplify hierarchical data. It is often used with the `SUBTOTAL()`
+function.
+
+**Image of the output file:**
+
+<img src="https://rustxlsxwriter.github.io/images/app_grouped_columns.png">
+
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_grouped_columns.rs
+
+use rust_xlsxwriter::{Format, Workbook, Worksheet, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Add a format to use in headings.
+    let bold = Format::new().set_bold();
+
+    // -----------------------------------------------------------------------
+    // 1. Add an outline column group with sub-total.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Simple outline column grouping.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add grouping for the over the sub-total range.
+    worksheet.group_columns(1, 8)?;
+
+    // -----------------------------------------------------------------------
+    // 2. Add nested outline column groups with sub-totals.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Nested outline column grouping.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add grouping for the over the sub-total range.
+    worksheet.group_columns(1, 8)?;
+
+    // Add secondary groups within the first range.
+    worksheet.group_columns(1, 3)?;
+    worksheet.group_columns(5, 7)?;
+
+    // -----------------------------------------------------------------------
+    // 3. Add a collapsed inner outline column groups.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Collapsed inner column grouping.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add grouping for the over the sub-total range.
+    worksheet.group_columns(1, 8)?;
+
+    // Add collapsed secondary groups within the first range.
+    worksheet.group_columns_collapsed(1, 3)?;
+    worksheet.group_columns_collapsed(5, 7)?;
+
+    // -----------------------------------------------------------------------
+    // 4. Add a collapsed outer column group.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Collapsed outer column grouping.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add collapsed grouping for the over the sub-total range.
+    worksheet.group_columns_collapsed(1, 8)?;
+
+    // Add secondary groups within the first range.
+    worksheet.group_columns(1, 3)?;
+    worksheet.group_columns(5, 7)?;
+
+    // -----------------------------------------------------------------------
+    // 5. Column groups with outline symbols on top.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Outline column grouping symbols to the left.";
+    populate_worksheet_data(worksheet, description, &bold)?;
+
+    // Add outline column groups.
+    worksheet.group_columns(1, 3)?;
+    worksheet.group_columns(5, 7)?;
+
+    // Change the worksheet group setting so outline symbols are to the left.
+    worksheet.group_symbols_to_left(true);
+
+    // -----------------------------------------------------------------------
+    // 6. Demonstrate all group levels.
+    // -----------------------------------------------------------------------
+
+    // Add a worksheet with some sample data.
+    let worksheet = workbook.add_worksheet();
+    let description = "Excel outline levels.";
+    let levels = [
+        "Level 1", "Level 2", "Level 3", "Level 4", //
+        "Level 5", "Level 6", "Level 7", "Level 6", //
+        "Level 5", "Level 4", "Level 3", "Level 2", //
+        "Level 1",
+    ];
+    worksheet.write_row(0, 0, levels)?;
+    worksheet.write_with_format(2, 0, description, &bold)?;
+
+    // Add outline column groups from outer to inner.
+    worksheet.group_columns(0, 12)?;
+    worksheet.group_columns(1, 11)?;
+    worksheet.group_columns(2, 10)?;
+    worksheet.group_columns(3, 9)?;
+    worksheet.group_columns(4, 8)?;
+    worksheet.group_columns(5, 7)?;
+    worksheet.group_columns(6, 6)?;
+
+    // Save the file to disk.
+    workbook.save("grouped_columns.xlsx")?;
+
+    Ok(())
+}
+
+// Generate worksheet data.
+pub fn populate_worksheet_data(
+    worksheet: &mut Worksheet,
+    description: &str,
+    bold: &Format,
+) -> Result<(), XlsxError> {
+    worksheet.write_with_format(0, 0, "Region", bold)?;
+    worksheet.write_with_format(1, 0, "North", bold)?;
+    worksheet.write_with_format(2, 0, "South", bold)?;
+    worksheet.write_with_format(3, 0, "East", bold)?;
+    worksheet.write_with_format(4, 0, "West", bold)?;
+
+    worksheet.write_with_format(0, 1, "Jan", bold)?;
+    worksheet.write(1, 1, 50)?;
+    worksheet.write(2, 1, 10)?;
+    worksheet.write(3, 1, 45)?;
+    worksheet.write(4, 1, 15)?;
+
+    worksheet.write_with_format(0, 2, "Feb", bold)?;
+    worksheet.write(1, 2, 20)?;
+    worksheet.write(2, 2, 20)?;
+    worksheet.write(3, 2, 75)?;
+    worksheet.write(4, 2, 15)?;
+
+    worksheet.write_with_format(0, 3, "Mar", bold)?;
+    worksheet.write(1, 3, 15)?;
+    worksheet.write(2, 3, 30)?;
+    worksheet.write(3, 3, 50)?;
+    worksheet.write(4, 3, 35)?;
+
+    worksheet.write_with_format(0, 4, "Q1 Total", bold)?;
+    worksheet.write_formula_with_format(1, 4, "=SUBTOTAL(9,B2:D2)", bold)?;
+    worksheet.write_formula_with_format(2, 4, "=SUBTOTAL(9,B3:D3)", bold)?;
+    worksheet.write_formula_with_format(3, 4, "=SUBTOTAL(9,B4:D4)", bold)?;
+    worksheet.write_formula_with_format(4, 4, "=SUBTOTAL(9,B5:D5)", bold)?;
+
+    worksheet.write_with_format(0, 5, "Apr", bold)?;
+    worksheet.write(1, 5, 25)?;
+    worksheet.write(2, 5, 50)?;
+    worksheet.write(3, 5, 15)?;
+    worksheet.write(4, 5, 35)?;
+
+    worksheet.write_with_format(0, 6, "May", bold)?;
+    worksheet.write(1, 6, 65)?;
+    worksheet.write(2, 6, 50)?;
+    worksheet.write(3, 6, 75)?;
+    worksheet.write(4, 6, 70)?;
+
+    worksheet.write_with_format(0, 7, "Jun", bold)?;
+    worksheet.write(1, 7, 80)?;
+    worksheet.write(2, 7, 50)?;
+    worksheet.write(3, 7, 90)?;
+    worksheet.write(4, 7, 50)?;
+
+    worksheet.write_with_format(0, 8, "Q2 Total", bold)?;
+    worksheet.write_formula_with_format(1, 8, "=SUBTOTAL(9,F2:H2)", bold)?;
+    worksheet.write_formula_with_format(2, 8, "=SUBTOTAL(9,F3:H3)", bold)?;
+    worksheet.write_formula_with_format(3, 8, "=SUBTOTAL(9,F4:H4)", bold)?;
+    worksheet.write_formula_with_format(4, 8, "=SUBTOTAL(9,F5:H5)", bold)?;
+
+    worksheet.write_with_format(0, 9, "H1 Total", bold)?;
+    worksheet.write_formula_with_format(1, 9, "=SUBTOTAL(9,B2:I2)", bold)?;
+    worksheet.write_formula_with_format(2, 9, "=SUBTOTAL(9,B3:I3)", bold)?;
+    worksheet.write_formula_with_format(3, 9, "=SUBTOTAL(9,B4:I4)", bold)?;
+    worksheet.write_formula_with_format(4, 9, "=SUBTOTAL(9,B5:I5)", bold)?;
+
+    // Autofit the columns for clarity.
+    worksheet.autofit();
+
+    worksheet.write_with_format(6, 0, description, bold)?;
+
+    Ok(())
+}
+```
 
 
 # Textbox: Inserting Checkboxes in worksheets

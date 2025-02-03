@@ -36,6 +36,7 @@
 //! - Sparklines.
 //! - Worksheet PNG/JPEG/GIF/BMP images.
 //! - Rich multi-format strings.
+//! - Outline groupings.
 //! - Defined names.
 //! - Autofilters.
 //! - Worksheet Tables.

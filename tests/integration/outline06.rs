@@ -28,7 +28,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     worksheet.group_rows(1, 4)?;
     worksheet.group_rows(6, 9)?;
 
-    worksheet.group_symbols_on_top(true);
+    worksheet.group_symbols_above(true);
     worksheet.group_symbols_to_left(true);
 
     worksheet.set_column_width(0, 20)?;

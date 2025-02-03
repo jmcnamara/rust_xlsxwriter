@@ -10,6 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for worksheet outline groupings.
+
+  In Excel an outline is a group of rows or columns that can be collapsed or
+  expanded to simplify hierarchical data. It is often used with the
+  `SUBTOTAL()` function. For example:
+
+  <img src="https://rustxlsxwriter.github.io/images/worksheet_group_rows2.png">
+
+  See [Grouping and outlining data].
+
+  [Grouping and outlining data]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/index.html#grouping-and-outlining-data
+
+
 - Added support for ignoring Excel worksheet cell errors.
 
   Excel flags a number of data errors and inconsistencies with a a small

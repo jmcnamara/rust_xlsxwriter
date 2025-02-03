@@ -150,6 +150,16 @@ documentation and generally show how an individual function works.
   worksheets that correspond to the sections of the Excel "Format Cells"
   dialog.
 
+* `app_grouped_columns.rs` - An example of how to group columns into
+  outlines with the `rust_xlsxwriter` library. In Excel an outline is a
+  group of rows or columns that can be collapsed or expanded to simplify
+  hierarchical data. It is often used with the `SUBTOTAL()` function.
+
+* `app_grouped_rows.rs` - An example of how to group rows into outlines
+  with the `rust_xlsxwriter` library. In Excel an outline is a group of
+  rows or columns that can be collapsed or expanded to simplify
+  hierarchical data. It is often used with the `SUBTOTAL()` function.
+
 * `app_headers_footers.rs` - An example of setting headers and footers in
   worksheets using the rust_xlsxwriter library.
 
@@ -1329,6 +1339,54 @@ documentation and generally show how an individual function works.
   that may be difficult to figure out programmatically you can set a custom
   filter. Excel uses both of these methods depending on the data being
   filtered.
+
+* `doc_worksheet_group_columns1.rs` - An example of how to group worksheet
+  columns into outlines.
+
+* `doc_worksheet_group_columns2.rs` - An example of how to group worksheet
+  columns into outlines. This example shows hows to add secondary groups
+  within a primary grouping. Excel requires at least one column between
+  each outline grouping at the same level.
+
+* `doc_worksheet_group_columns_collapsed1.rs` - An example of how to group
+  worksheet columns into outlines with collapsed/hidden rows.
+
+* `doc_worksheet_group_columns_collapsed2.rs` - An example of how to group
+  worksheet columns into outlines with collapsed/hidden rows. This example
+  shows hows to add secondary groups within a primary grouping. Excel
+  requires at least one column between each outline grouping at the same
+  level.
+
+* `doc_worksheet_group_rows1.rs` - An example of how to group worksheet
+  rows into outlines.
+
+* `doc_worksheet_group_rows2.rs` - An example of how to group worksheet
+  rows into outlines. This example shows hows to add secondary groups
+  within a primary grouping. Excel requires at least one row between each
+  outline grouping at the same level.
+
+* `doc_worksheet_group_rows_collapsed1.rs` - An example of how to group
+  worksheet rows into outlines with collapsed/hidden rows.
+
+* `doc_worksheet_group_rows_collapsed2.rs` - An example of how to group
+  worksheet rows into outlines with collapsed/hidden rows. This example
+  shows hows to add secondary groups within a primary grouping. Excel
+  requires at least one row between each outline grouping at the same
+  level.
+
+* `doc_worksheet_group_rows_intro1.rs` - An example of how to group
+  worksheet rows into outlines.
+
+* `doc_worksheet_group_rows_intro2.rs` - An example of how to group
+  worksheet rows into outlines.
+
+* `doc_worksheet_group_symbols_above.rs` - An example of how to group
+  worksheet rows into outlines. This example puts the expand/collapse
+  symbol above the range for all row groups in the worksheet.
+
+* `doc_worksheet_group_symbols_to_left.rs` - An example of how to group
+  worksheet columns into outlines. This example puts the expand/collapse
+  symbol to the left of the range for all row groups in the worksheet.
 
 * `doc_worksheet_hide_unused_rows.rs` - Demonstrates efficiently hiding the
   unused rows in a worksheet.

@@ -92,6 +92,7 @@ currently supported features are:
 - Sparklines.
 - Worksheet PNG/JPEG/GIF/BMP images.
 - Rich multi-format strings.
+- Outline groupings.
 - Defined names.
 - Autofilters.
 - Worksheet Tables.
@@ -143,6 +144,7 @@ frequently.
 
 Recent changes:
 
+- Added worksheet outline groupings.
 - Added support for Worksheet checkboxes.
 - Added `constant_memory` mode.
 

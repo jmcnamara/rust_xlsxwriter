@@ -162,7 +162,7 @@ pub enum XlsxError {
     ///
     VbaNameError(String),
 
-    /// Excel limits the maximum worksheet group level to 7 levels.
+    /// Excel limits the maximum worksheet group level to 8 levels.
     MaxGroupLevelExceeded,
 
     /// A customizable error that can be used by third parties to raise errors
@@ -334,7 +334,7 @@ impl fmt::Display for XlsxError {
             XlsxError::MaxGroupLevelExceeded => {
                 write!(
                     f,
-                    "Worksheet group level exceeds Excel's limit of 7 levels."
+                    "Worksheet group level exceeds Excel's limit of 8 levels."
                 )
             }
 
