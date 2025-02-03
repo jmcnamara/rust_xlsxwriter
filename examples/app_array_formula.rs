@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! Example of how to use the rust_xlsxwriter to write simple array formulas.
+//! Example of how to use the `rust_xlsxwriter` to write simple array formulas.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 

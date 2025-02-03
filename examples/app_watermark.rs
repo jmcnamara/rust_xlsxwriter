@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of adding a worksheet watermark image using the rust_xlsxwriter
+//! An example of adding a worksheet watermark image using the `rust_xlsxwriter`
 //! library. This is based on the method of putting an image in the worksheet
 //! header as suggested in the Microsoft documentation.
 

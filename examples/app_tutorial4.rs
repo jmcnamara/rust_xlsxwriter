@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! A simple program to write some data to an Excel spreadsheet using
-//! rust_xlsxwriter. Part 4 of a tutorial.
+//! `rust_xlsxwriter`. Part 4 of a tutorial.
 
 use rust_xlsxwriter::{Chart, ExcelDateTime, Format, Formula, Workbook, XlsxError};
 

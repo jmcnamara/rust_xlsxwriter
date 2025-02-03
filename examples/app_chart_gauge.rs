@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of creating a Gauge Chart in Excel using the rust_xlsxwriter
+//! An example of creating a Gauge Chart in Excel using the `rust_xlsxwriter`
 //! library.
 //!
 //! A Gauge Chart isn't a native chart type in Excel. It is constructed by

@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of how to use the rust_xlsxwriter library to write formulas and
+//! An example of how to use the `rust_xlsxwriter` library to write formulas and
 //! functions that create dynamic arrays. These functions are new to Excel
 //! 365. The examples mirror the examples in the Excel documentation for these
 //! functions.

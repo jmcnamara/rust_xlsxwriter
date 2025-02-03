@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! Demonstrate adding a Textbox to a worksheet using the rust_xlsxwriter
+//! Demonstrate adding a Textbox to a worksheet using the `rust_xlsxwriter`
 //! library.
 
 use rust_xlsxwriter::{Shape, Workbook, XlsxError};

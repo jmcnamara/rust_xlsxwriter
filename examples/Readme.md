@@ -9,11 +9,11 @@ collection of features.
 The `doc_{struct}_{function}.rs` examples are more specific examples from the
 documentation and generally show how an individual function works.
 
-* `app_array_formula.rs` - Example of how to use the rust_xlsxwriter to
+* `app_array_formula.rs` - Example of how to use the `rust_xlsxwriter` to
   write simple array formulas.
 
 * `app_autofilter.rs` - An example of how to create autofilters with the
-  rust_xlsxwriter library. An autofilter is a way of adding drop down lists
+  `rust_xlsxwriter` library. An autofilter is a way of adding drop down lists
   to the headers of a 2D range of worksheet data. This allows users to
   filter the data based on simple criteria so that some data is shown and
   some is hidden.
@@ -21,32 +21,32 @@ documentation and generally show how an individual function works.
 * `app_autofit.rs` - An example of using simulated autofit to automatically
   adjust the width of worksheet columns based on the data in the cells.
 
-* `app_chart.rs` - A simple chart example using the rust_xlsxwriter
+* `app_chart.rs` - A simple chart example using the `rust_xlsxwriter`
   library.
 
 * `app_chart_area.rs` - An example of creating area charts using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_chart_bar.rs` - An example of creating bar charts using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_chart_column.rs` - An example of creating column charts using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_chart_combined.rs` - An example of creating combined charts using
-  the rust_xlsxwriter library.
+  the `rust_xlsxwriter` library.
 
 * `app_chart_data_table.rs` - An example of creating Excel Column charts
-  with data tables using the rust_xlsxwriter library.
+  with data tables using the `rust_xlsxwriter` library.
 
 * `app_chart_data_tools.rs` - A demo of the various Excel chart data tools
-  that are available via the rust_xlsxwriter library.
+  that are available via the `rust_xlsxwriter` library.
 
 * `app_chart_doughnut.rs` - An example of creating doughnut charts using
-  the rust_xlsxwriter library.
+  the `rust_xlsxwriter` library.
 
 * `app_chart_gauge.rs` - An example of creating a Gauge Chart in Excel
-  using the rust_xlsxwriter library. A Gauge Chart isn't a native chart
+  using the `rust_xlsxwriter` library. A Gauge Chart isn't a native chart
   type in Excel. It is constructed by combining a doughnut chart and a pie
   chart and by using some non-filled elements to hide parts of the default
   charts. This example follows the following online example of how to
@@ -54,87 +54,87 @@ documentation and generally show how an individual function works.
   https://www.excel-easy.com/examples/gauge-chart.html
 
 * `app_chart_gradient.rs` - An example of creating a chart with gradient
-  fills using the rust_xlsxwriter library.
+  fills using the `rust_xlsxwriter` library.
 
 * `app_chart_line.rs` - An example of creating line charts using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_chart_pareto.rs` - An example of creating a Pareto chart using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_chart_pattern.rs` - An example of creating column charts with fill
-  patterns using the rust_xlsxwriter library.
+  patterns using the `rust_xlsxwriter` library.
 
 * `app_chart_pie.rs` - An example of creating pie charts using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_chart_radar.rs` - An example of creating radar charts using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_chart_scatter.rs` - An example of creating scatter charts using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_chart_secondary_axis.rs` - An example of creating an Excel Line
-  chart with a secondary axis using the rust_xlsxwriter library.
+  chart with a secondary axis using the `rust_xlsxwriter` library.
 
 * `app_chart_stock.rs` - An example of creating Stock charts using the
-  rust_xlsxwriter library. Note, Volume variants of the Excel stock charts
+  `rust_xlsxwriter` library. Note, Volume variants of the Excel stock charts
   aren't currently supported but will be in a future release.
 
 * `app_chart_styles.rs` - An example showing all 48 default chart styles
-  available in Excel 2007 using rust_xlsxwriter. Note, these styles are not
+  available in Excel 2007 using `rust_xlsxwriter`. Note, these styles are not
   the same as the styles available in Excel 2013 and later.
 
 * `app_chart_tutorial1.rs` - An example of creating a simple chart using
-  the rust_xlsxwriter library.
+  the `rust_xlsxwriter` library.
 
 * `app_chart_tutorial2.rs` - An example of creating a simple chart using
-  the rust_xlsxwriter library.
+  the `rust_xlsxwriter` library.
 
 * `app_chart_tutorial3.rs` - An example of creating a simple chart using
-  the rust_xlsxwriter library.
+  the `rust_xlsxwriter` library.
 
 * `app_chart_tutorial4.rs` - An example of creating a simple chart using
-  the rust_xlsxwriter library.
+  the `rust_xlsxwriter` library.
 
 * `app_chartsheet.rs` - An example of creating a chartsheet style chart
-  using the rust_xlsxwriter library.
+  using the `rust_xlsxwriter` library.
 
 * `app_checkbox.rs` - An example of adding checkbox boolean values to a
-  worksheet using the rust_xlsxwriter library.
+  worksheet using the `rust_xlsxwriter` library.
 
 * `app_colors.rs` - A demonstration of the RGB and Theme colors palettes
-  available in the rust_xlsxwriter library.
+  available in the `rust_xlsxwriter` library.
 
 * `app_conditional_formatting.rs` - Example of how to add conditional
-  formatting to a worksheet using the rust_xlsxwriter library. Conditional
+  formatting to a worksheet using the `rust_xlsxwriter` library. Conditional
   formatting allows you to apply a format to a cell or a range of cells
   based on user defined rule.
 
 * `app_data_validation.rs` - Example of how to add data validation and
-  dropdown lists using the rust_xlsxwriter library. Data validation is a
+  dropdown lists using the `rust_xlsxwriter` library. Data validation is a
   feature of Excel which allows you to restrict the data that a user enters
   in a cell and to display help and warning messages. It also allows you to
   restrict input to values in a drop down list.
 
 * `app_defined_name.rs` - Example of how to create defined names using the
-  rust_xlsxwriter library. This functionality is used to define user
+  `rust_xlsxwriter` library. This functionality is used to define user
   friendly variable names to represent a value, a single cell,	or a range
   of cells in a workbook.
 
 * `app_demo.rs` - A simple, getting started, example of some of the
-  features of the rust_xlsxwriter library.
+  features of the `rust_xlsxwriter` library.
 
 * `app_doc_properties.rs` - An example of setting workbook document
-  properties for a file created using the rust_xlsxwriter library.
+  properties for a file created using the `rust_xlsxwriter` library.
 
-* `app_dynamic_arrays.rs` - An example of how to use the rust_xlsxwriter
+* `app_dynamic_arrays.rs` - An example of how to use the `rust_xlsxwriter`
   library to write formulas and functions that create dynamic arrays. These
   functions are new to Excel 365. The examples mirror the examples in the
   Excel documentation for these functions.
 
 * `app_embedded_images.rs` - An example of embedding images into a
-  worksheet cells using rust_xlsxwriter. This image scales to size of the
+  worksheet cells using `rust_xlsxwriter`. This image scales to size of the
   cell and moves with it. This approach can be useful if you are building
   up a spreadsheet of products with a column of images for each product.
   This is the equivalent of Excel's menu option to insert an image using
@@ -143,10 +143,10 @@ documentation and generally show how an individual function works.
   is displayed.
 
 * `app_file_to_memory.rs` - An example of creating a simple Excel xlsx file
-  in an in memory Vec<u8> buffer using the rust_xlsxwriter library.
+  in an in memory Vec<u8> buffer using the `rust_xlsxwriter` library.
 
 * `app_formatting.rs` - An example of the various cell formatting options
-  that are available in the rust_xlsxwriter library. These are laid out on
+  that are available in the `rust_xlsxwriter` library. These are laid out on
   worksheets that correspond to the sections of the Excel "Format Cells"
   dialog.
 
@@ -161,29 +161,29 @@ documentation and generally show how an individual function works.
   hierarchical data. It is often used with the `SUBTOTAL()` function.
 
 * `app_headers_footers.rs` - An example of setting headers and footers in
-  worksheets using the rust_xlsxwriter library.
+  worksheets using the `rust_xlsxwriter` library.
 
 * `app_hello_world.rs` - Create a simple Hello World style Excel
-  spreadsheet using the rust_xlsxwriter library.
+  spreadsheet using the `rust_xlsxwriter` library.
 
 * `app_hyperlinks.rs` - A simple, getting started, example of some of the
-  features of the rust_xlsxwriter library.
+  features of the `rust_xlsxwriter` library.
 
 * `app_ignore_errors.rs` - An example of turning off worksheet cells
   errors/warnings using using the `rust_xlsxwriter` library.
 
 * `app_images.rs` - An example of inserting images into a worksheet using
-  rust_xlsxwriter.
+  `rust_xlsxwriter`.
 
 * `app_images_fit_to_cell.rs` - An example of inserting images into a
-  worksheet using rust_xlsxwriter so that they are scaled to a cell. This
+  worksheet using `rust_xlsxwriter` so that they are scaled to a cell. This
   approach can be useful if you are building up a spreadsheet of products
   with a column of images for each product. See also the
   `app_embedded_image.rs` example that shows a better approach for newer
   versions of Excel.
 
 * `app_lambda.rs` - An example of using the new Excel LAMBDA() function
-  with the rust_xlsxwriter library.
+  with the `rust_xlsxwriter` library.
 
 * `app_macros.rs` - An example of adding macros to an `rust_xlsxwriter`
   file using a VBA macros file extracted from an existing Excel xlsm file.
@@ -191,29 +191,29 @@ documentation and generally show how an individual function works.
   used to extract the `vbaProject.bin` file.
 
 * `app_memory_test.rs` - Simple performance test and memory usage program
-  for rust_xlsxwriter. It writes alternate cells of strings and numbers. It
+  for `rust_xlsxwriter`. It writes alternate cells of strings and numbers. It
   defaults to 4,000 rows x 40 columns. The number of rows and the "constant
   memory" mode can be optionally set. usage:
   ./target/release/examples/app_perf_test [num_rows] [--constant-memory]
 
 * `app_merge_range.rs` - An example of creating merged ranges in a
-  worksheet using the rust_xlsxwriter library.
+  worksheet using the `rust_xlsxwriter` library.
 
 * `app_notes.rs` - An example of writing cell Notes to a worksheet using
-  the rust_xlsxwriter library.
+  the `rust_xlsxwriter` library.
 
 * `app_panes.rs` - A simple example of setting some "freeze" panes in
-  worksheets using the rust_xlsxwriter library.
+  worksheets using the `rust_xlsxwriter` library.
 
-* `app_perf_test.rs` - Simple performance test program for rust_xlsxwriter.
+* `app_perf_test.rs` - Simple performance test program for `rust_xlsxwriter`.
   It writes alternate cells of strings and numbers. It defaults to 4,000
   rows x 40 columns. usage: ./target/release/examples/app_perf_test
   [num_rows]
 
-* `app_rich_strings.rs` - An example of using the rust_xlsxwriter library
+* `app_rich_strings.rs` - An example of using the `rust_xlsxwriter` library
   to write "rich" multi-format strings in worksheet cells.
 
-* `app_right_to_left.rs` - Example of using rust_xlsxwriter to create a
+* `app_right_to_left.rs` - Example of using `rust_xlsxwriter` to create a
   workbook with the default worksheet and cell text direction changed from
   left-to-right to right-to-left, as required by some middle eastern
   versions of Excel.
@@ -226,45 +226,45 @@ documentation and generally show how an individual function works.
   Excel worksheet using `rust_xlsxwriter`.
 
 * `app_sparklines1.rs` - Example of adding sparklines to an Excel
-  spreadsheet using the rust_xlsxwriter library. Sparklines are small
+  spreadsheet using the `rust_xlsxwriter` library. Sparklines are small
   charts that fit in a single cell and are used to show trends in data.
 
 * `app_sparklines2.rs` - Example of adding sparklines to an Excel
-  spreadsheet using the rust_xlsxwriter library. Sparklines are small
+  spreadsheet using the `rust_xlsxwriter` library. Sparklines are small
   charts that fit in a single cell and are used to show trends in data.
   This example shows the majority of the properties that can applied to
   sparklines.
 
 * `app_tables.rs` - Example of how to add tables to a worksheet using the
-  rust_xlsxwriter library. Tables in Excel are used to group rows and
+  `rust_xlsxwriter` library. Tables in Excel are used to group rows and
   columns of data into a single structure that can be referenced in a
   formula or formatted collectively.
 
 * `app_textbox.rs` - Demonstrate adding a Textbox to a worksheet using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `app_tutorial1.rs` - A simple program to write some data to an Excel
-  spreadsheet using rust_xlsxwriter. Part 1 of a tutorial.
+  spreadsheet using `rust_xlsxwriter`. Part 1 of a tutorial.
 
 * `app_tutorial2.rs` - A simple program to write some data to an Excel
-  spreadsheet using rust_xlsxwriter. Part 2 of a tutorial.
+  spreadsheet using `rust_xlsxwriter`. Part 2 of a tutorial.
 
 * `app_tutorial3.rs` - A simple program to write some data to an Excel
-  spreadsheet using rust_xlsxwriter. Part 3 of a tutorial.
+  spreadsheet using `rust_xlsxwriter`. Part 3 of a tutorial.
 
 * `app_tutorial4.rs` - A simple program to write some data to an Excel
-  spreadsheet using rust_xlsxwriter. Part 4 of a tutorial.
+  spreadsheet using `rust_xlsxwriter`. Part 4 of a tutorial.
 
 * `app_tutorial5.rs` - A simple program to write some data to an Excel
-  spreadsheet using rust_xlsxwriter. Part 5 of a tutorial.
+  spreadsheet using `rust_xlsxwriter`. Part 5 of a tutorial.
 
 * `app_watermark.rs` - An example of adding a worksheet watermark image
-  using the rust_xlsxwriter library. This is based on the method of putting
+  using the `rust_xlsxwriter` library. This is based on the method of putting
   an image in the worksheet header as suggested in the Microsoft
   documentation.
 
 * `app_worksheet_protection.rs` - Example of cell locking and formula
-  hiding in an Excel worksheet rust_xlsxwriter library.
+  hiding in an Excel worksheet `rust_xlsxwriter` library.
 
 * `app_write_arrays.rs` - An example of writing arrays of data using the
   `rust_xlsxwriter` library. Array in this context means Rust arrays or
@@ -437,7 +437,7 @@ documentation and generally show how an individual function works.
 * `doc_chart_gradient_stops_new.rs` - An example of creating gradient stops
   for a gradient fill for a chart element.
 
-* `doc_chart_intro.rs` - A simple chart example using the rust_xlsxwriter
+* `doc_chart_intro.rs` - A simple chart example using the `rust_xlsxwriter`
   library.
 
 * `doc_chart_legend.rs` - An example of getting the chart legend object and
@@ -595,9 +595,9 @@ documentation and generally show how an individual function works.
   bars for a chart, with formatting.
 
 * `doc_chart_set_width.rs` - A simple chart example using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
-* `doc_chart_simple.rs` - A simple chart example using the rust_xlsxwriter
+* `doc_chart_simple.rs` - A simple chart example using the `rust_xlsxwriter`
   library.
 
 * `doc_chart_solid_fill.rs` - An example of setting a solid fill for a
@@ -610,7 +610,7 @@ documentation and generally show how an individual function works.
   chart title.
 
 * `doc_chart_title_set_hidden.rs` - A simple chart example using the
-  rust_xlsxwriter library.
+  `rust_xlsxwriter` library.
 
 * `doc_chart_title_set_name.rs` - A chart example demonstrating setting the
   chart title.

@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! Example of using rust_xlsxwriter to create a workbook with the default
+//! Example of using `rust_xlsxwriter` to create a workbook with the default
 //! worksheet and cell text direction changed from left-to-right to
 //! right-to-left, as required by some middle eastern versions of Excel.
 

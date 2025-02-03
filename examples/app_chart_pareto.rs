@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of creating a Pareto chart using the rust_xlsxwriter library.
+//! An example of creating a Pareto chart using the `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
 

@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! Example of how to add conditional formatting to a worksheet using the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 //!
 //! Conditional formatting allows you to apply a format to a cell or a range of
 //! cells based on user defined rule.

@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of creating Stock charts using the rust_xlsxwriter library.
+//! An example of creating Stock charts using the `rust_xlsxwriter` library.
 //!
 //! Note, Volume variants of the Excel stock charts aren't currently supported
 //! but will be in a future release.

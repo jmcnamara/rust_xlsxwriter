@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! Example of how to add tables to a worksheet using the rust_xlsxwriter
+//! Example of how to add tables to a worksheet using the `rust_xlsxwriter`
 //! library.
 //!
 //! Tables in Excel are used to group rows and columns of data into a single

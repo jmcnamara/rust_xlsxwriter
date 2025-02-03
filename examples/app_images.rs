@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of inserting images into a worksheet using rust_xlsxwriter.
+//! An example of inserting images into a worksheet using `rust_xlsxwriter`.
 
 use rust_xlsxwriter::{Image, Workbook, XlsxError};
 

@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of creating a chart with gradient fills using the rust_xlsxwriter
+//! An example of creating a chart with gradient fills using the `rust_xlsxwriter`
 //! library.
 
 use rust_xlsxwriter::{

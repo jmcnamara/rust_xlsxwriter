@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of embedding images into a worksheet cells using rust_xlsxwriter.
+//! An example of embedding images into a worksheet cells using `rust_xlsxwriter`.
 //! This image scales to size of the cell and moves with it.
 //!
 //! This approach can be useful if you are building up a spreadsheet of products

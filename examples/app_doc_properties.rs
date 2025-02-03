@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! An example of setting workbook document properties for a file created using
-//! the rust_xlsxwriter library.
+//! the `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{DocProperties, Workbook, XlsxError};
 
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
         .set_company("Rust Solutions Inc")
         .set_category("Sample spreadsheets")
         .set_keywords("Sample, Example, Properties")
-        .set_comment("Created with Rust and rust_xlsxwriter");
+        .set_comment("Created with Rust and `rust_xlsxwriter`");
 
     workbook.set_properties(&properties);
 

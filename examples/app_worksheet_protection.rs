@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! Example of cell locking and formula hiding in an Excel worksheet
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 

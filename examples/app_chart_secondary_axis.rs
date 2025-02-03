@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! An example of creating an Excel Line chart with a secondary axis using the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{Chart, ChartType, Format, Workbook, XlsxError};
 

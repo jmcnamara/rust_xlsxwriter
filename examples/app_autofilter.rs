@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! An example of how to create autofilters with the rust_xlsxwriter library.
+//! An example of how to create autofilters with the `rust_xlsxwriter` library.
 //!
 //! An autofilter is a way of adding drop down lists to the headers of a 2D
 //! range of worksheet data. This allows users to filter the data based on

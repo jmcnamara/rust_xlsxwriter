@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! A simple example of setting some "freeze" panes in worksheets using the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{Color, Format, FormatAlign, FormatBorder, Workbook, XlsxError};
 

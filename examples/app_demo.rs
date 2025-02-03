@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! A simple, getting started, example of some of the features of the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::*;
 

@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! An example of setting headers and footers in worksheets using the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{HeaderImagePosition, Image, Workbook, XlsxError};
 

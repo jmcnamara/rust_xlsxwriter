@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! Example of how to add data validation and dropdown lists using the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 //!
 //! Data validation is a feature of Excel which allows you to restrict the data
 //! that a user enters in a cell and to display help and warning messages. It

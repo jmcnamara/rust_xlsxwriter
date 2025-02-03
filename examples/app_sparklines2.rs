@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! Example of adding sparklines to an Excel spreadsheet using the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 //!
 //! Sparklines are small charts that fit in a single cell and are used to show
 //! trends in data. This example shows the majority of the properties that can

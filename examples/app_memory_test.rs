@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! Simple performance test and memory usage program for rust_xlsxwriter.
+//! Simple performance test and memory usage program for `rust_xlsxwriter`.
 //!
 //! It writes alternate cells of strings and numbers.
 //! It defaults to 4,000 rows x 40 columns.

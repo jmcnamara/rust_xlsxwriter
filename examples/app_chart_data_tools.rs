@@ -3,7 +3,7 @@
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
 //! A demo of the various Excel chart data tools that are available via the
-//! rust_xlsxwriter library.
+//! `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{
     Chart, ChartDataLabel, ChartErrorBars, ChartErrorBarsType, ChartMarker, ChartSolidFill,
