@@ -5425,7 +5425,62 @@ impl Worksheet {
         Ok(self)
     }
 
-    /// Todo
+    /// Insert a background image into a worksheet.
+    ///
+    /// A background image can be added to a worksheet to add a watermark or
+    /// display a company logo. Excel repeats the image for the entirety of the
+    /// worksheet.
+    ///
+    /// The image should be encapsulated in an [`Image`] object. See
+    /// [`Worksheet::insert_image()`] above for details on the supported image
+    /// types.
+    ///
+    /// As an alternative to background images, it should be noted that the
+    /// Microsoft Excel documentation recommends setting a watermark via an
+    /// image in the worksheet header. An example of that technique is shown in
+    /// the [`Worksheet::set_header_image()`] examples.
+    ///
+    /// # Parameters
+    ///
+    /// - `image`: The [`Image`] to use as the worksheet background.
+    ///
+    /// # Examples
+    ///
+    /// An example of inserting a background image into a worksheet.
+    ///
+    /// ```
+    /// # // This code is available in examples/app_background_image.rs
+    /// #
+    /// # use rust_xlsxwriter::{Image, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet to the workbook.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // The image may not be visible unless the view is large.
+    /// #     worksheet.write(0, 0, "Scroll down and right to see the background image")?;
+    /// #
+    ///     // Create a new image object.
+    ///     let image = Image::new("examples/watermark.png")?;
+    ///
+    ///     // Insert the background image.
+    ///     worksheet.insert_background_image(&image);
+    /// #
+    /// #     // Save the file to disk.
+    /// #     workbook.save("background_image.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/app_background_image.png">
+    ///
     pub fn insert_background_image(&mut self, image: &Image) -> &mut Worksheet {
         self.background_image = Some(image.clone());
         self

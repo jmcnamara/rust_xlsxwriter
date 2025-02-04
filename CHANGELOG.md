@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   See [Grouping and outlining data].
 
   [Grouping and outlining data]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/index.html#grouping-and-outlining-data
-
+  <br>
+  <br>
 
 - Added support for ignoring Excel worksheet cell errors.
 
@@ -38,6 +39,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [`Worksheet::ignore_error()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.ignore_error
   [`Worksheet::ignore_error_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.ignore_error_range
+  <br>
+  <br>
+
+- Added support for worksheet background images via the [`Worksheet::insert_background_image()`] method.
+
+  <img src="https://rustxlsxwriter.github.io/images/app_background_image.png">
+
+  [`Worksheet::insert_background_image()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.insert_background_image
+
 
 
 ## [0.82.0] - 2025-01-29

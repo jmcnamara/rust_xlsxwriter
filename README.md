@@ -145,7 +145,8 @@ frequently.
 Recent changes:
 
 - Added worksheet outline groupings.
-- Added support for Worksheet checkboxes.
+- Added worksheet background images.
+- Added support for worksheet checkboxes.
 - Added `constant_memory` mode.
 
 See the full [Release Notes and Changelog].

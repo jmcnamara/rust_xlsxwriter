@@ -13,13 +13,19 @@ documentation and generally show how an individual function works.
   write simple array formulas.
 
 * `app_autofilter.rs` - An example of how to create autofilters with the
-  `rust_xlsxwriter` library. An autofilter is a way of adding drop down lists
-  to the headers of a 2D range of worksheet data. This allows users to
-  filter the data based on simple criteria so that some data is shown and
-  some is hidden.
+  `rust_xlsxwriter` library. An autofilter is a way of adding drop down
+  lists to the headers of a 2D range of worksheet data. This allows users
+  to filter the data based on simple criteria so that some data is shown
+  and some is hidden.
 
 * `app_autofit.rs` - An example of using simulated autofit to automatically
   adjust the width of worksheet columns based on the data in the cells.
+
+* `app_background_image.rs` - An example of inserting a background image
+  into a worksheet using `rust_xlsxwriter`. See also the `app_watermark.rs`
+  example which shows how to set a watermark via the header image of a
+  worksheet. That is the way that the Microsoft documentation recommends to
+  set a watermark in Excel.
 
 * `app_chart.rs` - A simple chart example using the `rust_xlsxwriter`
   library.
@@ -78,12 +84,12 @@ documentation and generally show how an individual function works.
   chart with a secondary axis using the `rust_xlsxwriter` library.
 
 * `app_chart_stock.rs` - An example of creating Stock charts using the
-  `rust_xlsxwriter` library. Note, Volume variants of the Excel stock charts
-  aren't currently supported but will be in a future release.
+  `rust_xlsxwriter` library. Note, Volume variants of the Excel stock
+  charts aren't currently supported but will be in a future release.
 
 * `app_chart_styles.rs` - An example showing all 48 default chart styles
-  available in Excel 2007 using `rust_xlsxwriter`. Note, these styles are not
-  the same as the styles available in Excel 2013 and later.
+  available in Excel 2007 using `rust_xlsxwriter`. Note, these styles are
+  not the same as the styles available in Excel 2013 and later.
 
 * `app_chart_tutorial1.rs` - An example of creating a simple chart using
   the `rust_xlsxwriter` library.
@@ -107,9 +113,9 @@ documentation and generally show how an individual function works.
   available in the `rust_xlsxwriter` library.
 
 * `app_conditional_formatting.rs` - Example of how to add conditional
-  formatting to a worksheet using the `rust_xlsxwriter` library. Conditional
-  formatting allows you to apply a format to a cell or a range of cells
-  based on user defined rule.
+  formatting to a worksheet using the `rust_xlsxwriter` library.
+  Conditional formatting allows you to apply a format to a cell or a range
+  of cells based on user defined rule.
 
 * `app_data_validation.rs` - Example of how to add data validation and
   dropdown lists using the `rust_xlsxwriter` library. Data validation is a
@@ -146,8 +152,8 @@ documentation and generally show how an individual function works.
   in an in memory Vec<u8> buffer using the `rust_xlsxwriter` library.
 
 * `app_formatting.rs` - An example of the various cell formatting options
-  that are available in the `rust_xlsxwriter` library. These are laid out on
-  worksheets that correspond to the sections of the Excel "Format Cells"
+  that are available in the `rust_xlsxwriter` library. These are laid out
+  on worksheets that correspond to the sections of the Excel "Format Cells"
   dialog.
 
 * `app_grouped_columns.rs` - An example of how to group columns into
@@ -191,9 +197,9 @@ documentation and generally show how an individual function works.
   used to extract the `vbaProject.bin` file.
 
 * `app_memory_test.rs` - Simple performance test and memory usage program
-  for `rust_xlsxwriter`. It writes alternate cells of strings and numbers. It
-  defaults to 4,000 rows x 40 columns. The number of rows and the "constant
-  memory" mode can be optionally set. usage:
+  for `rust_xlsxwriter`. It writes alternate cells of strings and numbers.
+  It defaults to 4,000 rows x 40 columns. The number of rows and the
+  "constant memory" mode can be optionally set. usage:
   ./target/release/examples/app_perf_test [num_rows] [--constant-memory]
 
 * `app_merge_range.rs` - An example of creating merged ranges in a
@@ -205,10 +211,10 @@ documentation and generally show how an individual function works.
 * `app_panes.rs` - A simple example of setting some "freeze" panes in
   worksheets using the `rust_xlsxwriter` library.
 
-* `app_perf_test.rs` - Simple performance test program for `rust_xlsxwriter`.
-  It writes alternate cells of strings and numbers. It defaults to 4,000
-  rows x 40 columns. usage: ./target/release/examples/app_perf_test
-  [num_rows]
+* `app_perf_test.rs` - Simple performance test program for
+  `rust_xlsxwriter`. It writes alternate cells of strings and numbers. It
+  defaults to 4,000 rows x 40 columns. usage:
+  ./target/release/examples/app_perf_test [num_rows]
 
 * `app_rich_strings.rs` - An example of using the `rust_xlsxwriter` library
   to write "rich" multi-format strings in worksheet cells.
@@ -259,8 +265,8 @@ documentation and generally show how an individual function works.
   spreadsheet using `rust_xlsxwriter`. Part 5 of a tutorial.
 
 * `app_watermark.rs` - An example of adding a worksheet watermark image
-  using the `rust_xlsxwriter` library. This is based on the method of putting
-  an image in the worksheet header as suggested in the Microsoft
+  using the `rust_xlsxwriter` library. This is based on the method of
+  putting an image in the worksheet header as suggested in the Microsoft
   documentation.
 
 * `app_worksheet_protection.rs` - Example of cell locking and formula
@@ -597,8 +603,8 @@ documentation and generally show how an individual function works.
 * `doc_chart_set_width.rs` - A simple chart example using the
   `rust_xlsxwriter` library.
 
-* `doc_chart_simple.rs` - A simple chart example using the `rust_xlsxwriter`
-  library.
+* `doc_chart_simple.rs` - A simple chart example using the
+  `rust_xlsxwriter` library.
 
 * `doc_chart_solid_fill.rs` - An example of setting a solid fill for a
   chart element.
