@@ -2197,8 +2197,24 @@ impl Workbook {
         // These are the image ids for each unique image file.
         let mut worksheet_image_ids: HashMap<String, u32> = HashMap::new();
         let mut header_footer_image_ids: HashMap<String, u32> = HashMap::new();
+        let mut background_image_ids: HashMap<String, u32> = HashMap::new();
 
         for worksheet in &mut self.worksheets {
+            if let Some(image) = &worksheet.background_image {
+                let image = image.clone();
+
+                let background_image_id = match background_image_ids.get(&image.hash) {
+                    Some(image_id) => *image_id,
+                    None => {
+                        image_id += 1;
+                        background_image_ids.insert(image.hash.clone(), image_id);
+                        image_id
+                    }
+                };
+
+                worksheet.prepare_background_image(background_image_id, &image);
+            }
+
             if !worksheet.images.is_empty() {
                 worksheet.prepare_worksheet_images(
                     &mut worksheet_image_ids,
@@ -2227,7 +2243,8 @@ impl Workbook {
 
             if worksheet.has_header_footer_images() {
                 // The header/footer images are counted from the last worksheet id.
-                let base_image_id = worksheet_image_ids.len() as u32;
+                let base_image_id =
+                    background_image_ids.len() as u32 + worksheet_image_ids.len() as u32;
 
                 worksheet.prepare_header_footer_images(&mut header_footer_image_ids, base_image_id);
             }

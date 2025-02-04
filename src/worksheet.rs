@@ -1533,6 +1533,7 @@ pub struct Worksheet {
 
     pub(crate) has_workbook_global_xfs: bool,
     pub(crate) has_workbook_global_sst: bool,
+    pub(crate) background_image: Option<Image>,
 
     // These collections need to be reset on resave.
     drawing_rel_ids: HashMap<String, u32>,
@@ -1543,6 +1544,7 @@ pub struct Worksheet {
     pub(crate) hyperlink_relationships: Vec<(String, String, String)>,
     pub(crate) table_relationships: Vec<(String, String, String)>,
     pub(crate) vml_drawing_relationships: Vec<(String, String, String)>,
+    pub(crate) background_relationships: Vec<(String, String, String)>,
 
     data_table: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
     is_writing_ahead: bool,
@@ -1848,6 +1850,7 @@ impl Worksheet {
             max_outline_col_level: 0,
             outline_symbols_above: false,
             outline_symbols_left: false,
+            background_image: None,
 
             // These collections need to be reset on resave.
             comment_relationships: vec![],
@@ -1858,6 +1861,7 @@ impl Worksheet {
             hyperlink_relationships: vec![],
             table_relationships: vec![],
             vml_drawing_relationships: vec![],
+            background_relationships: vec![],
             is_chartsheet: false,
             use_constant_memory: false,
             use_inline_strings: false,
@@ -5419,6 +5423,12 @@ impl Worksheet {
         self.images.insert((row, col, 0, 0), image);
 
         Ok(self)
+    }
+
+    /// Todo
+    pub fn insert_background_image(&mut self, image: &Image) -> &mut Worksheet {
+        self.background_image = Some(image.clone());
+        self
     }
 
     /// Add a chart to a worksheet.
@@ -16128,6 +16138,16 @@ impl Worksheet {
         self.has_drawing_object_linkage = true;
     }
 
+    // Set the relationship for the background image.
+    pub(crate) fn prepare_background_image(&mut self, image_id: u32, image: &Image) {
+        let image_name = format!("../media/image{image_id}.{}", image.image_type.extension());
+
+        self.image_types[image.image_type.clone() as usize] = true;
+
+        self.background_relationships
+            .push(("image".to_string(), image_name, String::new()));
+    }
+
     // Convert the shape dimensions into drawing dimensions and add them to
     // the Drawing object. Also set the rel linkages between the files.
     pub(crate) fn prepare_worksheet_shapes(&mut self, shape_id: u32, drawing_id: u32) {
@@ -16679,6 +16699,7 @@ impl Worksheet {
         self.hyperlink_relationships.clear();
         self.table_relationships.clear();
         self.vml_drawing_relationships.clear();
+        self.background_relationships.clear();
     }
 
     // Check if any external relationships are required.
@@ -16686,6 +16707,7 @@ impl Worksheet {
         !self.hyperlink_relationships.is_empty()
             || !self.drawing_object_relationships.is_empty()
             || !self.table_relationships.is_empty()
+            || !self.background_relationships.is_empty()
     }
 
     // Check if there is a header image.
@@ -17327,6 +17349,11 @@ impl Worksheet {
         // Write the legacyDrawingHF element.
         if self.has_header_footer_images() {
             self.write_legacy_drawing_hf();
+        }
+
+        // Write the picture element.
+        if self.background_image.is_some() {
+            self.write_picture();
         }
 
         // Write the tableParts element.
@@ -19317,6 +19344,14 @@ impl Worksheet {
         let attributes = [("r:id", format!("rId{}", self.rel_count))];
 
         xml_empty_tag(&mut self.writer, "legacyDrawingHF", &attributes);
+    }
+
+    // Write the <picture> element.
+    fn write_picture(&mut self) {
+        self.rel_count += 1;
+        let attributes = [("r:id", format!("rId{}", self.rel_count))];
+
+        xml_empty_tag(&mut self.writer, "picture", &attributes);
     }
 
     // Write the <tableParts> element.

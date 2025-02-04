@@ -511,6 +511,10 @@ impl<W: Write + Seek + Send> Packager<W> {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
 
+        for relationship in &worksheet.background_relationships {
+            rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
+        }
+
         for relationship in &worksheet.table_relationships {
             rels.add_document_relationship(&relationship.0, &relationship.1, &relationship.2);
         }
@@ -960,6 +964,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         let mut index = 1;
         let mut unique_worksheet_images = HashSet::new();
         let mut unique_header_footer_images = HashSet::new();
+        let mut unique_background_images = HashSet::new();
 
         for image in &workbook.embedded_images {
             let filename = format!("xl/media/image{index}.{}", image.image_type.extension());
@@ -971,6 +976,19 @@ impl<W: Write + Seek + Send> Packager<W> {
         }
 
         for worksheet in &mut workbook.worksheets {
+            if let Some(image) = &worksheet.background_image {
+                if !unique_background_images.contains(&image.hash) {
+                    let filename =
+                        format!("xl/media/image{index}.{}", image.image_type.extension());
+                    self.zip
+                        .start_file(filename, self.zip_options_for_binary_files)?;
+
+                    self.zip.write_all(&image.data)?;
+                    unique_background_images.insert(image.hash.clone());
+                    index += 1;
+                }
+            }
+
             for image in worksheet.images.values() {
                 if !unique_worksheet_images.contains(&image.hash) {
                     let filename =
