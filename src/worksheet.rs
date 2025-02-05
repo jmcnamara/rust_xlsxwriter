@@ -2712,6 +2712,8 @@ impl Worksheet {
     /// transferred to Excel.
     ///
     /// ```
+    /// # // This code is available in examples/doc_worksheet_write_number.rs
+    /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -2721,7 +2723,6 @@ impl Worksheet {
     ///     let worksheet = workbook.add_worksheet();
     ///
     ///     // Write some different Rust number types to a worksheet.
-    ///     // Note, u64 isn't supported by Excel.
     ///     worksheet.write_number(0, 0, 1_u8)?;
     ///     worksheet.write_number(1, 0, 2_i16)?;
     ///     worksheet.write_number(2, 0, 3_u32)?;
@@ -2800,6 +2801,8 @@ impl Worksheet {
     /// numbers in an Excel worksheet.
     ///
     /// ```
+    /// # // This code is available in examples/doc_worksheet_write_number_with_format.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -2874,6 +2877,8 @@ impl Worksheet {
     ///     https://doc.rust-lang.org/book/ch08-02-strings.html#creating-a-new-string
     ///
     /// ```
+    /// # // This code is available in examples/doc_worksheet_write_string.rs
+    /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -2947,6 +2952,8 @@ impl Worksheet {
     /// numbers in an Excel worksheet.
     ///
     /// ```
+    /// # // This code is available in examples/doc_worksheet_write_string_with_format.rs
+    /// #
     /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -6377,6 +6384,8 @@ impl Worksheet {
     /// Excel.
     ///
     /// ```
+    /// # // This code is available in examples/doc_worksheet_set_row_height.rs
+    /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -6465,6 +6474,8 @@ impl Worksheet {
     /// The following example demonstrates setting the height for a row in Excel.
     ///
     /// ```
+    /// # // This code is available in examples/doc_worksheet_set_row_height_pixels.rs
+    /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
@@ -6525,7 +6536,9 @@ impl Worksheet {
     /// The following example demonstrates setting the format for a row in Excel.
     ///
     /// ```
-    /// # use rust_xlsxwriter::{Format, Workbook, Color, XlsxError};
+    /// # // This code is available in examples/doc_worksheet_set_row_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{Color, Format, Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
