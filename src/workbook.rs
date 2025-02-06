@@ -908,33 +908,35 @@ impl Workbook {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates getting worksheet reference by index.
+    /// The following example demonstrates getting worksheet reference by name.
     ///
     /// ```
-    /// # // This code is available in examples/doc_workbook_worksheet_from_index.rs
+    /// # // This code is available in examples/doc_workbook_worksheet_from_name.rs
     /// #
     /// # use rust_xlsxwriter::{Workbook, XlsxError};
     /// #
     /// # fn main() -> Result<(), XlsxError> {
     /// #     let mut workbook = Workbook::new();
-    /// #
+    ///
     ///     // Start with a reference to worksheet1.
     ///     let mut worksheet1 = workbook.add_worksheet();
+    ///     let name1 = worksheet1.name(); // "Sheet1"
     ///     worksheet1.write_string(0, 0, "Hello")?;
     ///
     ///     // If we don't try to use the workbook1 reference again we can switch to
     ///     // using a reference to worksheet2.
-    ///     let mut worksheet2 = workbook.add_worksheet();
+    ///     let mut worksheet2 = workbook.add_worksheet().set_name("Data")?;
+    ///     let name2 = worksheet2.name();
     ///     worksheet2.write_string(0, 0, "Hello")?;
     ///
     ///     // Stop using worksheet2 and move back to worksheet1.
-    ///     worksheet1 = workbook.worksheet_from_index(0)?;
+    ///     worksheet1 = workbook.worksheet_from_name(&name1)?;
     ///     worksheet1.write_string(1, 0, "Sheet1")?;
     ///
     ///     // Stop using worksheet1 and move back to worksheet2.
-    ///     worksheet2 = workbook.worksheet_from_index(1)?;
+    ///     worksheet2 = workbook.worksheet_from_name(&name2)?;
     ///     worksheet2.write_string(1, 0, "Sheet2")?;
-    /// #
+    ///
     /// #     workbook.save("workbook.xlsx")?;
     /// #
     /// #     Ok(())

@@ -18941,7 +18941,7 @@ impl Worksheet {
         }
     }
 
-    // Note the following write_*_cell() functions are optimized for minimum
+    // Note: the following write_*_cell() functions are optimized for minimum
     // overhead since they are in the inner loop for all worksheet data.
 
     // Write the <c> element for a number.
