@@ -447,8 +447,8 @@ pub struct Format {
     pub(crate) locked: bool,
 
     // Non-UI properties.
-    pub(crate) quote_prefix: bool,
     pub(crate) checkbox: bool,
+    pub(crate) quote_prefix: bool,
     pub(crate) is_dxf_format: bool,
 }
 
@@ -520,108 +520,34 @@ impl Format {
             has_font: false,
             has_fill: false,
             has_border: false,
+            is_dxf_format: false,
 
-            font: Font::default(),
-            alignment: Alignment::default(),
-            fill: Fill::default(),
-            borders: Border::default(),
-
-            hidden: false,
-            locked: true,
             num_format: String::new(),
             num_format_index: 0,
-            quote_prefix: false,
+
+            fill: Fill::default(),
+            font: Font::default(),
+            borders: Border::default(),
+            alignment: Alignment::default(),
+
+            locked: true,
+            hidden: false,
             checkbox: false,
-            is_dxf_format: false,
+            quote_prefix: false,
         }
-    }
-
-    // -----------------------------------------------------------------------
-    // Crate private methods.
-    // -----------------------------------------------------------------------
-
-    pub(crate) fn set_font_index(&mut self, font_index: u16, has_font: bool) {
-        self.font_index = font_index;
-        self.has_font = has_font;
-    }
-
-    // For DXF formats (Table and Conditional) check if the font has changed.
-    pub(crate) fn has_dxf_font(&self) -> bool {
-        self.font.bold
-            || self.font.italic
-            || self.font.underline != FormatUnderline::None
-            || self.font.strikethrough
-            || !self.font.color.is_auto_or_default()
-    }
-
-    // For DXF formats (Table and Conditional) check if the fill has changed.
-    pub(crate) fn has_dxf_fill(&self) -> bool {
-        self.fill.pattern != FormatPattern::None
-            || !self.fill.background_color.is_auto_or_default()
-            || !self.fill.foreground_color.is_auto_or_default()
-    }
-
-    pub(crate) fn set_fill_index(&mut self, fill_index: u16, has_fill: bool) {
-        self.fill_index = fill_index;
-        self.has_fill = has_fill;
-    }
-
-    pub(crate) fn set_border_index(&mut self, border_index: u16, has_border: bool) {
-        self.border_index = border_index;
-        self.has_border = has_border;
-    }
-
-    pub(crate) fn set_num_format_index_u16(&mut self, num_format_index: u16) {
-        self.num_format_index = num_format_index;
-    }
-
-    // Check if the format has an alignment property set and requires a Styles
-    // <alignment> element. This also handles a special case where Excel ignores
-    // Bottom as a default.
-    pub(crate) fn has_alignment(&self) -> bool {
-        self.alignment.horizontal != FormatAlign::General
-            || !(self.alignment.vertical == FormatAlign::General
-                || self.alignment.vertical == FormatAlign::Bottom)
-            || self.alignment.indent != 0
-            || self.alignment.rotation != 0
-            || self.alignment.text_wrap
-            || self.alignment.shrink
-            || self.alignment.reading_direction != 0
-    }
-
-    // Check if the format has an alignment property set and requires a Styles
-    // "applyAlignment" attribute.
-    pub(crate) fn apply_alignment(&self) -> bool {
-        self.alignment.horizontal != FormatAlign::General
-            || self.alignment.vertical != FormatAlign::General
-            || self.alignment.indent != 0
-            || self.alignment.rotation != 0
-            || self.alignment.text_wrap
-            || self.alignment.shrink
-            || self.alignment.reading_direction != 0
-    }
-
-    // Check if the format has protection properties set.
-    pub(crate) fn has_protection(&self) -> bool {
-        self.hidden || !self.locked
-    }
-
-    // Check if the format has checkbox formatting.
-    pub(crate) fn has_checkbox(&self) -> bool {
-        self.checkbox
-    }
-
-    // Check if the format is in the default/unmodified condition.
-    pub(crate) fn is_default(&self) -> bool {
-        static DEFAULT_STATE: OnceLock<Format> = OnceLock::new();
-        let default_state = DEFAULT_STATE.get_or_init(Format::default);
-
-        self == default_state
     }
 
     // -----------------------------------------------------------------------
     // Public methods.
     // -----------------------------------------------------------------------
+
+    /// TODO
+    pub fn merge(&self, other: &Format) -> Format {
+        let mut copy = self.clone();
+        copy.merge_with(other);
+
+        copy
+    }
 
     /// Set the number format for a Format.
     ///
@@ -2276,7 +2202,7 @@ impl Format {
         self
     }
 
-    /// Unset the hyperlink style.
+    /// Unset the hyperlink style. Doesn't reset the other properties.
     pub fn unset_hyperlink_style(mut self) -> Format {
         self.font.is_hyperlink = true;
 
@@ -2300,6 +2226,249 @@ impl Format {
         self.checkbox = false;
         self
     }
+
+    // -----------------------------------------------------------------------
+    // Crate private methods.
+    // -----------------------------------------------------------------------
+
+    pub(crate) fn set_font_index(&mut self, font_index: u16, has_font: bool) {
+        self.font_index = font_index;
+        self.has_font = has_font;
+    }
+
+    // For DXF formats (Table and Conditional) check if the font has changed.
+    pub(crate) fn has_dxf_font(&self) -> bool {
+        self.font.bold
+            || self.font.italic
+            || self.font.underline != FormatUnderline::None
+            || self.font.strikethrough
+            || !self.font.color.is_auto_or_default()
+    }
+
+    // For DXF formats (Table and Conditional) check if the fill has changed.
+    pub(crate) fn has_dxf_fill(&self) -> bool {
+        self.fill.pattern != FormatPattern::None
+            || !self.fill.background_color.is_auto_or_default()
+            || !self.fill.foreground_color.is_auto_or_default()
+    }
+
+    pub(crate) fn set_fill_index(&mut self, fill_index: u16, has_fill: bool) {
+        self.fill_index = fill_index;
+        self.has_fill = has_fill;
+    }
+
+    pub(crate) fn set_border_index(&mut self, border_index: u16, has_border: bool) {
+        self.border_index = border_index;
+        self.has_border = has_border;
+    }
+
+    pub(crate) fn set_num_format_index_u16(&mut self, num_format_index: u16) {
+        self.num_format_index = num_format_index;
+    }
+
+    // Check if the format has an alignment property set and requires a Styles
+    // <alignment> element. This also handles a special case where Excel ignores
+    // Bottom as a default.
+    pub(crate) fn has_alignment(&self) -> bool {
+        self.alignment.horizontal != FormatAlign::General
+            || !(self.alignment.vertical == FormatAlign::General
+                || self.alignment.vertical == FormatAlign::Bottom)
+            || self.alignment.indent != 0
+            || self.alignment.rotation != 0
+            || self.alignment.text_wrap
+            || self.alignment.shrink
+            || self.alignment.reading_direction != 0
+    }
+
+    // Check if the format has an alignment property set and requires a Styles
+    // "applyAlignment" attribute.
+    pub(crate) fn apply_alignment(&self) -> bool {
+        self.alignment.horizontal != FormatAlign::General
+            || self.alignment.vertical != FormatAlign::General
+            || self.alignment.indent != 0
+            || self.alignment.rotation != 0
+            || self.alignment.text_wrap
+            || self.alignment.shrink
+            || self.alignment.reading_direction != 0
+    }
+
+    // Check if the format has protection properties set.
+    pub(crate) fn has_protection(&self) -> bool {
+        self.hidden || !self.locked
+    }
+
+    // Check if the format has checkbox formatting.
+    pub(crate) fn has_checkbox(&self) -> bool {
+        self.checkbox
+    }
+
+    // Check if the format is in the default/unmodified condition.
+    pub(crate) fn is_default(&self) -> bool {
+        static DEFAULT_STATE: OnceLock<Format> = OnceLock::new();
+        let default_state = DEFAULT_STATE.get_or_init(Format::default);
+
+        self == default_state
+    }
+
+    // Merge the properties of two formats into a new format.
+    fn merge_with(&mut self, other: &Format) {
+        self.hidden |= other.hidden;
+        self.checkbox |= other.checkbox;
+        self.quote_prefix |= other.quote_prefix;
+        self.locked &= other.locked;
+
+        if !other.num_format.is_empty() {
+            self.num_format.clone_from(&other.num_format);
+        }
+
+        if other.num_format_index != 0 {
+            self.num_format_index = other.num_format_index;
+        }
+
+        self.merge_fill(&other.fill);
+        self.merge_font(&other.font);
+        self.merge_border(&other.borders);
+        self.merge_alignment(other.alignment);
+    }
+
+    // Merge the fill properties of two formats.
+    fn merge_fill(&mut self, other: &Fill) {
+        if other.foreground_color != Color::Default {
+            self.fill.foreground_color = other.foreground_color;
+        }
+
+        if other.background_color != Color::Default {
+            self.fill.background_color = other.background_color;
+        }
+
+        if other.pattern != FormatPattern::None {
+            self.fill.pattern = other.pattern;
+        }
+    }
+
+    // Merge the font properties of two formats.
+    fn merge_font(&mut self, other: &Font) {
+        let default = Font::default();
+
+        self.font.bold |= other.bold;
+        self.font.italic |= other.italic;
+        self.font.extend |= other.extend;
+        self.font.condense |= other.condense;
+        self.font.strikethrough |= other.strikethrough;
+
+        if other.family != default.family {
+            self.font.family = other.family;
+        }
+
+        if other.charset != default.charset {
+            self.font.charset = other.charset;
+        }
+
+        if other.name != default.name {
+            self.font.name.clone_from(&other.name);
+        }
+
+        if other.size != default.size {
+            self.font.size.clone_from(&other.size);
+        }
+
+        if other.scheme != default.scheme {
+            self.font.scheme.clone_from(&other.scheme);
+        }
+
+        if other.color != Color::Default {
+            self.font.color = other.color;
+        }
+
+        if other.script != FormatScript::None {
+            self.font.script = other.script;
+        }
+
+        if other.underline != FormatUnderline::None {
+            self.font.underline = other.underline;
+        }
+    }
+
+    // Merge the border properties of two formats.
+    fn merge_border(&mut self, other: &Border) {
+        if other.is_default() {
+            return;
+        }
+
+        let default = Border::default();
+
+        if other.bottom_style != default.bottom_style {
+            self.borders.bottom_style = other.bottom_style;
+        }
+
+        if other.top_style != default.top_style {
+            self.borders.top_style = other.top_style;
+        }
+
+        if other.left_style != default.left_style {
+            self.borders.left_style = other.left_style;
+        }
+
+        if other.right_style != default.right_style {
+            self.borders.right_style = other.right_style;
+        }
+
+        if other.diagonal_style != default.diagonal_style {
+            self.borders.diagonal_style = other.diagonal_style;
+        }
+
+        if other.bottom_color != Color::Default {
+            self.borders.bottom_color = other.bottom_color;
+        }
+
+        if other.top_color != Color::Default {
+            self.borders.top_color = other.top_color;
+        }
+
+        if other.left_color != Color::Default {
+            self.borders.left_color = other.left_color;
+        }
+
+        if other.right_color != Color::Default {
+            self.borders.right_color = other.right_color;
+        }
+
+        if other.diagonal_color != Color::Default {
+            self.borders.diagonal_color = other.diagonal_color;
+        }
+
+        if other.diagonal_type != FormatDiagonalBorder::None {
+            self.borders.diagonal_type = other.diagonal_type;
+        }
+    }
+
+    // Merge the alignment properties of two formats.
+    fn merge_alignment(&mut self, other: Alignment) {
+        let default = Alignment::default();
+
+        self.alignment.shrink |= other.shrink;
+        self.alignment.text_wrap |= other.text_wrap;
+
+        if other.indent != default.indent {
+            self.alignment.indent = other.indent;
+        }
+
+        if other.rotation != default.rotation {
+            self.alignment.rotation = other.rotation;
+        }
+
+        if other.reading_direction != default.reading_direction {
+            self.alignment.reading_direction = other.reading_direction;
+        }
+
+        if other.horizontal != FormatAlign::General {
+            self.alignment.horizontal = other.horizontal;
+        }
+
+        if other.vertical != FormatAlign::General {
+            self.alignment.vertical = other.vertical;
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Default)]
@@ -2307,7 +2476,6 @@ pub(crate) struct Alignment {
     pub(crate) horizontal: FormatAlign,
     pub(crate) vertical: FormatAlign,
     pub(crate) text_wrap: bool,
-    pub(crate) justify_last: bool,
     pub(crate) rotation: i16,
     pub(crate) indent: u8,
     pub(crate) shrink: bool,
