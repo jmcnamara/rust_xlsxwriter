@@ -8,10 +8,17 @@ use rust_xlsxwriter::{utility, XlsxError};
 
 fn main() -> Result<(), XlsxError> {
     // This worksheet name is valid.
-    utility::check_sheet_name("2030-01-01")?;
+    let result = utility::check_sheet_name("2030-01-01")?;
+
+    assert!(matches!(result, ()));
 
     // This worksheet name isn't valid due to the forward slashes.
-    utility::check_sheet_name("2030/01/01")?;
+    let result = utility::check_sheet_name("2030/01/01");
+
+    assert!(matches!(
+        result,
+        Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+    ));
 
     Ok(())
 }

@@ -687,20 +687,27 @@ pub(crate) fn is_valid_range(range: &str) -> bool {
 ///
 /// The following example demonstrates testing for a valid worksheet name.
 ///
-/// ```fail
+/// ```
 /// # // This code is available in examples/doc_utility_check_sheet_name.rs
 /// #
 /// # use rust_xlsxwriter::{utility, XlsxError};
 /// #
-/// fn main() -> Result<(), XlsxError> {
+/// # fn main() -> Result<(), XlsxError> {
 ///     // This worksheet name is valid.
-///     utility::check_sheet_name("2030-01-01")?;
+///     let result = utility::check_sheet_name("2030-01-01")?;
+///
+///     assert!(matches!(result, ()));
 ///
 ///     // This worksheet name isn't valid due to the forward slashes.
-///     utility::check_sheet_name("2030/01/01")?;
+///     let result = utility::check_sheet_name("2030/01/01");
 ///
-///     Ok(())
-/// }
+///     assert!(matches!(
+///         result,
+///         Err(XlsxError::SheetnameContainsInvalidCharacter(_))
+/// #     ));
+/// #
+/// #     Ok(())
+/// # }
 ///
 pub fn check_sheet_name(name: &str) -> Result<(), XlsxError> {
     let error_message = format!("Invalid Excel worksheet name '{name}'");
