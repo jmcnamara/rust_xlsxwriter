@@ -141,6 +141,124 @@ const MAX_URL_LEN: usize = 2_080;
 /// Excel has a limit of around 2080 characters in the url string. Urls beyond
 /// this limit will raise an error when written.
 ///
+/// # Examples
+///
+/// An example of some of the features of URLs/hyperlinks.
+///
+/// ```
+/// # // This code is available in examples/app_hyperlinks.rs
+/// #
+/// use rust_xlsxwriter::{Color, Format, FormatUnderline, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Create a format to use in the worksheet.
+///     let link_format = Format::new()
+///         .set_font_color(Color::Red)
+///         .set_underline(FormatUnderline::Single);
+///
+///     // Add a worksheet to the workbook.
+///     let worksheet1 = workbook.add_worksheet();
+///
+///     // Set the column width for clarity.
+///     worksheet1.set_column_width(0, 26)?;
+///
+///     // Write some url links.
+///     worksheet1.write_url(0, 0, "https://www.rust-lang.org")?;
+///     worksheet1.write_url_with_text(1, 0, "https://www.rust-lang.org", "Learn Rust")?;
+///     worksheet1.write_url_with_format(2, 0, "https://www.rust-lang.org", &link_format)?;
+///
+///     // Write some internal links.
+///     worksheet1.write_url(4, 0, "internal:Sheet1!A1")?;
+///     worksheet1.write_url(5, 0, "internal:Sheet2!C4")?;
+///
+///     // Write some external links.
+///     worksheet1.write_url(7, 0, r"file:///C:\Temp\Book1.xlsx")?;
+///     worksheet1.write_url(8, 0, r"file:///C:\Temp\Book1.xlsx#Sheet1!C4")?;
+///
+///     // Add another sheet to link to.
+///     let worksheet2 = workbook.add_worksheet();
+///     worksheet2.write_string(3, 2, "Here I am")?;
+///     worksheet2.write_url_with_text(4, 2, "internal:Sheet1!A6", "Go back")?;
+///
+///     // Save the file to disk.
+///     workbook.save("hyperlinks.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/app_hyperlinks.png">
+///
+/// This is an example of creating a "Table of Contents" worksheet with links to
+/// other worksheets in the workbook.
+///
+/// ```
+/// # // This code is available in examples/app_table_of_contents.rs
+/// #
+/// use rust_xlsxwriter::{utility::quote_sheet_name, Format, Url, Workbook, XlsxError};
+///
+/// fn main() -> Result<(), XlsxError> {
+///     // Create a new Excel file object.
+///     let mut workbook = Workbook::new();
+///
+///     // Create a table of contents worksheet at the start. If the worksheet names
+///     // are known in advance you can do add them here. For the sake of this
+///     // example we will assume that they aren't known and/or are created
+///     // dynamically.
+///     let _ = workbook.add_worksheet().set_name("Overview")?;
+///
+///     // Add some worksheets.
+///     let _ = workbook.add_worksheet().set_name("Pricing")?;
+///     let _ = workbook.add_worksheet().set_name("Sales")?;
+///     let _ = workbook.add_worksheet().set_name("Revenue")?;
+///     let _ = workbook.add_worksheet().set_name("Analytics")?;
+///
+///     // If the sheet names aren't known in advance we can find them as follows:
+///     let mut worksheet_names = workbook
+///         .worksheets()
+///         .iter()
+///         .map(|worksheet| worksheet.name())
+///         .collect::<Vec<_>>();
+///
+///     // Remove the "Overview" worksheet name.
+///     worksheet_names.remove(0);
+///
+///     // Get the "Overview" worksheet to add the table of contents.
+///     let worksheet = workbook.worksheet_from_name("Overview")?;
+///
+///     // Write a header.
+///     let header = Format::new().set_bold().set_background_color("C6EFCE");
+///     worksheet.write_string_with_format(0, 0, "Table of Contents", &header)?;
+///
+///     // Write the worksheet names with links.
+///     for (i, name) in worksheet_names.iter().enumerate() {
+///         let sheet_name = quote_sheet_name(name);
+///         let link = format!("internal:{sheet_name}!A1");
+///         let url = Url::new(link).set_text(name);
+///
+///         worksheet.write_url(i as u32 + 1, 0, &url)?;
+///     }
+///
+///     // Autofit the data for clarity.
+///     worksheet.autofit();
+///
+///     // Save the file to disk.
+///     workbook.save("table_of_contents.xlsx")?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/app_table_of_contents.png">
+///
+///
 #[derive(Clone, Debug)]
 pub struct Url {
     pub(crate) url_link: String,

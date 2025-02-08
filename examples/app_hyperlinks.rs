@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! A simple, getting started, example of some of the features of the
+//! An example of some of the features of URLs/hyperlinks using the
 //! `rust_xlsxwriter` library.
 
 use rust_xlsxwriter::{Color, Format, FormatUnderline, Workbook, XlsxError};

@@ -241,6 +241,9 @@ documentation and generally show how an individual function works.
   This example shows the majority of the properties that can applied to
   sparklines.
 
+* `app_table_of_contents.rs` - This is an example of creating a "Table of
+  Contents" worksheet with links to other worksheets in the workbook.
+
 * `app_tables.rs` - Example of how to add tables to a worksheet using the
   `rust_xlsxwriter` library. Tables in Excel are used to group rows and
   columns of data into a single structure that can be referenced in a
@@ -1231,6 +1234,8 @@ documentation and generally show how an individual function works.
 
 * `doc_utility_check_sheet_name.rs` - Demonstrates testing for a valid
   worksheet name.
+
+* `doc_utility_quote_sheet_name.rs` - Demonstrates quoting worksheet names.
 
 * `doc_workbook_add_worksheet.rs` - Demonstrates creating adding worksheets
   to a workbook.

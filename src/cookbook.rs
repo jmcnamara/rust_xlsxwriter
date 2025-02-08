@@ -64,11 +64,12 @@ cargo run --example app_demo  # or any other example
 49. [Cell Protection: Setting cell protection in a worksheet](#cell-protection-setting-cell-protection-in-a-worksheet)
 50. [Document Properties: Setting document metadata properties for a workbook](#document-properties-setting-document-metadata-properties-for-a-workbook)
 51. [Document Properties: Setting the Sensitivity Label](#document-properties-setting-the-sensitivity-label)
-52. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
-53. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
-54. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
-55. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
-56. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
+52. [Internal links: Creating a Table of Contents](#internal-links-creating-a-table-of-contents)
+53. [Headers and Footers: Shows how to set headers and footers](#headers-and-footers-shows-how-to-set-headers-and-footers)
+54. [Hyperlinks: Add hyperlinks to a worksheet](#hyperlinks-add-hyperlinks-to-a-worksheet)
+55. [Freeze Panes: Example of setting freeze panes in worksheets](#freeze-panes-example-of-setting-freeze-panes-in-worksheets)
+56. [Dynamic array formulas: Examples of dynamic arrays and formulas](#dynamic-array-formulas-examples-of-dynamic-arrays-and-formulas)
+57. [Excel `LAMBDA()` function: Example of using the Excel 365 `LAMBDA()` function](#excel-lambda-function-example-of-using-the-excel-365-lambda-function)
 
 
 # Hello World: Simple getting started example
@@ -6777,6 +6778,76 @@ fn main() -> Result<(), XlsxError> {
     workbook.set_properties(&properties);
 
     workbook.save("sensitivity_label.xlsx")?;
+
+    Ok(())
+}
+```
+
+
+# Internal links: Creating a Table of Contents
+
+This is an example of creating a "Table of Contents" worksheet with links to
+other worksheets in the workbook.
+
+**Image of the output file:**
+
+
+<img src="https://rustxlsxwriter.github.io/images/app_table_of_contents.png">
+
+**Code to generate the output file:**
+
+```rust
+// Sample code from examples/app_table_of_contents.rs
+
+use rust_xlsxwriter::{utility::quote_sheet_name, Format, Url, Workbook, XlsxError};
+
+fn main() -> Result<(), XlsxError> {
+    // Create a new Excel file object.
+    let mut workbook = Workbook::new();
+
+    // Create a table of contents worksheet at the start. If the worksheet names
+    // are known in advance you can do add them here. For the sake of this
+    // example we will assume that they aren't known and/or are created
+    // dynamically.
+    let _ = workbook.add_worksheet().set_name("Overview")?;
+
+    // Add some worksheets.
+    let _ = workbook.add_worksheet().set_name("Pricing")?;
+    let _ = workbook.add_worksheet().set_name("Sales")?;
+    let _ = workbook.add_worksheet().set_name("Revenue")?;
+    let _ = workbook.add_worksheet().set_name("Analytics")?;
+
+    // If the sheet names aren't known in advance we can find them as follows:
+    let mut worksheet_names = workbook
+        .worksheets()
+        .iter()
+        .map(|worksheet| worksheet.name())
+        .collect::<Vec<_>>();
+
+    // Remove the "Overview" worksheet name.
+    worksheet_names.remove(0);
+
+    // Get the "Overview" worksheet to add the table of contents.
+    let worksheet = workbook.worksheet_from_name("Overview")?;
+
+    // Write a header.
+    let header = Format::new().set_bold().set_background_color("C6EFCE");
+    worksheet.write_string_with_format(0, 0, "Table of Contents", &header)?;
+
+    // Write the worksheet names with links.
+    for (i, name) in worksheet_names.iter().enumerate() {
+        let sheet_name = quote_sheet_name(name);
+        let link = format!("internal:{sheet_name}!A1");
+        let url = Url::new(link).set_text(name);
+
+        worksheet.write_url(i as u32 + 1, 0, &url)?;
+    }
+
+    // Autofit the data for clarity.
+    worksheet.autofit();
+
+    // Save the file to disk.
+    workbook.save("table_of_contents.xlsx")?;
 
     Ok(())
 }
