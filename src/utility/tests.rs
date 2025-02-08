@@ -284,7 +284,7 @@ mod utility_tests {
         ];
 
         for (sheetname, exp) in tests {
-            assert_eq!(exp, utility::quote_sheetname(sheetname));
+            assert_eq!(exp, utility::quote_sheet_name(sheetname));
         }
     }
 

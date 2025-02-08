@@ -6,8 +6,9 @@
 //! function.
 
 use chrono::NaiveDate;
-use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
 use serde::Serialize;
+
+use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
 
 fn main() {
     #[derive(Serialize)]

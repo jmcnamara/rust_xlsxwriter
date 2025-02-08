@@ -43,8 +43,14 @@ use crate::XlsxError;
 
 /// Convert a zero indexed column cell reference to a string like `"A"`.
 ///
-/// Utility function to convert a zero based column reference to a string
-/// representation. This can be useful when constructing ranges for formulas.
+/// This is a utility function to convert a zero based column reference to a
+/// string representation. This can be useful when constructing ranges for
+/// formulas.
+///
+/// # Parameters
+///
+/// - `col_num`: The zero indexed column number.
+///
 ///
 /// # Examples:
 ///
@@ -84,8 +90,12 @@ pub fn column_number_to_name(col_num: ColNum) -> String {
 
 /// Convert a column string such as `"A"` to a zero indexed column reference.
 ///
-/// Utility function to convert a column string representation to a zero based
-/// column reference.
+/// This is a utility function to convert a column string representation to a
+/// zero based column reference.
+///
+/// # Parameters
+///
+/// - `column`: A string representing a column reference.
 ///
 /// # Examples:
 ///
@@ -112,9 +122,14 @@ pub fn column_name_to_number(column: &str) -> ColNum {
 
 /// Convert zero indexed row and column cell numbers to a `A1` style string.
 ///
-/// Utility function to convert zero indexed row and column cell values to an
-/// `A1` cell reference. This can be useful when constructing ranges for
-/// formulas.
+/// This is a utility function to convert zero indexed row and column cell
+/// values to an `A1` cell reference. This can be useful when constructing
+/// ranges for formulas.
+///
+/// # Parameters
+///
+/// - `row`: The zero indexed row number.
+/// - `col`: The zero indexed column number.
 ///
 /// # Examples:
 ///
@@ -126,16 +141,21 @@ pub fn column_name_to_number(column: &str) -> ColNum {
 /// assert_eq!(row_col_to_cell(1, 1), "B2");
 /// ```
 ///
-pub fn row_col_to_cell(row_num: RowNum, col_num: ColNum) -> String {
-    format!("{}{}", column_number_to_name(col_num), row_num + 1)
+pub fn row_col_to_cell(row: RowNum, col: ColNum) -> String {
+    format!("{}{}", column_number_to_name(col), row + 1)
 }
 
-/// Convert zero indexed row and column cell numbers to an absolute `$A$1`
-/// style range string.
+/// Convert zero indexed row and column cell numbers to an absolute `$A$1` style
+/// range string.
 ///
-/// Utility function to convert zero indexed row and column cell values to an
-/// absolute `$A$1` cell reference. This can be useful when constructing ranges
-/// for formulas.
+/// This is a utility function to convert zero indexed row and column cell
+/// values to an absolute `$A$1` cell reference. This can be useful when
+/// constructing ranges for formulas.
+///
+/// # Parameters
+///
+/// - `row`: The zero indexed row number.
+/// - `col`: The zero indexed column number.
 ///
 /// # Examples:
 ///
@@ -147,18 +167,25 @@ pub fn row_col_to_cell(row_num: RowNum, col_num: ColNum) -> String {
 /// assert_eq!(row_col_to_cell_absolute(1, 1), "$B$2");
 /// ```
 ///
-pub fn row_col_to_cell_absolute(row_num: RowNum, col_num: ColNum) -> String {
-    format!("${}${}", column_number_to_name(col_num), row_num + 1)
+pub fn row_col_to_cell_absolute(row: RowNum, col: ColNum) -> String {
+    format!("${}${}", column_number_to_name(col), row + 1)
 }
 
 /// Convert zero indexed row and col cell numbers to a `A1:B1` style range
 /// string.
 ///
-/// Utility function to convert zero based row and column cell values to an
-/// `A1:B1` style range reference.
+/// This is a utility function to convert zero based row and column cell values
+/// to an `A1:B1` style range reference.
 ///
 /// Note, this function should not be used to create a chart range. Use the
 /// 5-tuple version of [`IntoChartRange`](crate::IntoChartRange) instead.
+///
+/// # Parameters
+///
+/// - `first_row`: The first row of the range. (All zero indexed.)
+/// - `first_col`: The first row of the range.
+/// - `last_row`: The last row of the range.
+/// - `last_col`: The last row of the range.
 ///
 /// # Examples:
 ///
@@ -197,11 +224,18 @@ pub fn cell_range(
 /// Convert zero indexed row and col cell numbers to an absolute `$A$1:$B$1`
 /// style range string.
 ///
-/// Utility function to convert zero based row and column cell values to an
-/// absolute `$A$1:$B$1` style range reference.
+/// This is a utility function to convert zero based row and column cell values
+/// to an absolute `$A$1:$B$1` style range reference.
 ///
 /// Note, this function should not be used to create a chart range. Use the
 /// 5-tuple version of [`IntoChartRange`](crate::IntoChartRange) instead.
+///
+/// # Parameters
+///
+/// - `first_row`: The first row of the range. (All zero indexed.)
+/// - `first_col`: The first row of the range.
+/// - `last_row`: The last row of the range.
+/// - `last_col`: The last row of the range.
 ///
 /// # Examples:
 ///
@@ -237,6 +271,98 @@ pub fn cell_range_absolute(
     }
 }
 
+/// Convert a worksheet name and cell reference to an Excel "Sheet1!A1:B1" style
+/// range string.
+///
+/// This is a utility function to convert a worksheet name zero based column
+/// reference to a string representation. This can be useful when constructing
+/// ranges for formulas.
+///
+/// Note, this function should not be used to create a chart range. Use the
+/// 5-tuple version of [`IntoChartRange`](crate::IntoChartRange) instead.
+///
+/// # Parameters
+///
+/// - `sheet_name`: The worksheet name that the range refers to.
+/// - `first_row`: The first row of the range. (All zero indexed.)
+/// - `first_col`: The first row of the range.
+/// - `last_row`: The last row of the range.
+/// - `last_col`: The last row of the range.
+///
+/// # Examples:
+///
+/// ```
+/// use rust_xlsxwriter::worksheet_range;
+///
+/// // Single cell range.
+/// let range = worksheet_range("Sheet1", 0, 0, 0, 0);
+/// assert_eq!(range, "Sheet1!A1");
+///
+/// // Cell range.
+/// let range = worksheet_range("Sheet1", 0, 0, 9, 0);
+/// assert_eq!(range, "Sheet1!A1:A10");
+///
+/// // Sheetname that requires quoting.
+/// let range = worksheet_range("Sheet 1", 0, 0, 9, 0);
+/// assert_eq!(range, "'Sheet 1'!A1:A10");
+/// ```
+///
+pub fn worksheet_range(
+    sheet_name: &str,
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
+) -> String {
+    chart_range(sheet_name, first_row, first_col, last_row, last_col)
+}
+
+/// Convert a worksheet name and cell reference to an Excel "Sheet1!$A$1:$B$1"
+/// style absolute range string.
+///
+/// This is a utility function to convert a worksheet name zero based column
+/// reference to a string representation. This can be useful when constructing
+/// ranges for formulas.
+///
+/// Note, this function should not be used to create a chart range. Use the
+/// 5-tuple version of [`IntoChartRange`](crate::IntoChartRange) instead.
+///
+/// # Parameters
+///
+/// - `sheet_name`: The worksheet name that the range refers to.
+/// - `first_row`: The first row of the range. (All zero indexed.)
+/// - `first_col`: The first row of the range.
+/// - `last_row`: The last row of the range.
+/// - `last_col`: The last row of the range.
+///
+/// # Examples:
+///
+/// ```
+/// use rust_xlsxwriter::worksheet_range_absolute;
+///
+/// // Single cell range.
+/// let range = worksheet_range_absolute("Sheet1", 0, 0, 0, 0);
+/// assert_eq!(range, "Sheet1!$A$1");
+///
+/// // Cell range.
+/// let range = worksheet_range_absolute("Sheet1", 0, 0, 9, 0);
+/// assert_eq!(range, "Sheet1!$A$1:$A$10");
+///
+/// // Sheetname that requires quoting.
+/// let range = worksheet_range_absolute("Sheet 1", 0, 0, 9, 0);
+/// assert_eq!(range, "'Sheet 1'!$A$1:$A$10");
+/// ```
+///
+pub fn worksheet_range_absolute(
+    sheet_name: &str,
+    first_row: RowNum,
+    first_col: ColNum,
+    last_row: RowNum,
+    last_col: ColNum,
+) -> String {
+    chart_range_abs(sheet_name, first_row, first_col, last_row, last_col)
+}
+
 /// Serialize a Chrono naive date/time to an Excel value.
 ///
 /// This is a helper function for serializing [`Chrono`] naive date/time fields
@@ -262,6 +388,12 @@ pub fn cell_range_absolute(
 /// See [Working with Serde](crate::serializer#working-with-serde) for more
 /// information about serialization with `rust_xlsxwriter`.
 ///
+/// # Parameters
+///
+/// - `datetime`: A date/time instance that implements [`IntoExcelDateTime`].
+/// - `serializer`: A type/instance that implements the [`serde`] `Serializer`
+///   trait.
+///
 /// # Errors
 ///
 /// - [`XlsxError::SerdeError`] - A wrapped serialization error.
@@ -274,8 +406,10 @@ pub fn cell_range_absolute(
 /// ```
 /// # // This code is available in examples/doc_worksheet_serialize_datetime3.rs
 /// #
-/// use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+/// use chrono::NaiveDate;
 /// use serde::Serialize;
+///
+/// use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
 ///
 /// fn main() {
 ///     #[derive(Serialize)]
@@ -332,6 +466,13 @@ where
 /// See [Working with Serde](crate::serializer#working-with-serde) for more
 /// information about serialization with `rust_xlsxwriter`.
 ///
+/// # Parameters
+///
+/// - `datetime`: A date/time instance that implements [`IntoExcelDateTime`]
+///   wrapped in an [`Option`].
+/// - `serializer`: A type/instance that implements the [`serde`] `Serializer`
+///   trait.
+///
 /// # Errors
 ///
 /// - [`XlsxError::SerdeError`] - A wrapped serialization error.
@@ -345,8 +486,10 @@ where
 /// ```
 /// # // This code is available in examples/doc_worksheet_serialize_datetime5.rs
 /// #
-/// use rust_xlsxwriter::utility::serialize_chrono_option_naive_to_excel;
+/// use chrono::NaiveDate;
 /// use serde::Serialize;
+///
+/// use rust_xlsxwriter::utility::serialize_chrono_option_naive_to_excel;
 ///
 /// fn main() {
 ///     #[derive(Serialize)]
@@ -385,7 +528,7 @@ pub(crate) fn chart_range(
     last_row: RowNum,
     last_col: ColNum,
 ) -> String {
-    let sheet_name = quote_sheetname(sheet_name);
+    let sheet_name = quote_sheet_name(sheet_name);
     let range1 = row_col_to_cell(first_row, first_col);
     let range2 = row_col_to_cell(last_row, last_col);
 
@@ -405,7 +548,7 @@ pub(crate) fn chart_range_abs(
     last_row: RowNum,
     last_col: ColNum,
 ) -> String {
-    let sheet_name = quote_sheetname(sheet_name);
+    let sheet_name = quote_sheet_name(sheet_name);
     let range1 = row_col_to_cell_absolute(first_row, first_col);
     let range2 = row_col_to_cell_absolute(last_row, last_col);
 
@@ -425,7 +568,7 @@ pub(crate) fn chart_error_range(
     last_row: RowNum,
     last_col: ColNum,
 ) -> String {
-    let sheet_name = quote_sheetname(sheet_name);
+    let sheet_name = quote_sheet_name(sheet_name);
     let range1 = row_col_to_cell(first_row, first_col);
     let range2 = row_col_to_cell(last_row, last_col);
 
@@ -436,11 +579,56 @@ pub(crate) fn chart_error_range(
     }
 }
 
-// Sheetnames used in references should be quoted if they contain any spaces,
-// special characters or if they look like a A1 or RC cell reference. The rules
-// are shown inline below.
+/// Enclose a worksheet name in single quotes as required by Excel.
+///
+/// Worksheet names that are used in Excel range references must be single
+/// quoted if they contain non-word characters or if they look like cell
+/// references. The most common instance of this is when the worksheet name
+/// contains spaces. For example `Sheet1` would be represented without
+/// change in a formula as `=Sheet1!A1` whereas `Sheet 1` would be represented
+/// as `='Sheet 1'!A1`.
+///
+/// # Parameters
+///
+/// - `sheetname`: The worksheet name to quote.
+///
+/// # Examples
+///
+/// The following example demonstrates quoting worksheet names.
+///
+/// ```
+/// use rust_xlsxwriter::utility::quote_sheet_name;
+///
+/// // Doesn't need to be quoted.
+/// let result = quote_sheet_name("Sheet1");
+/// assert_eq!(result, "Sheet1");
+///
+/// // Spaces need to be quoted.
+/// let result = quote_sheet_name("Sheet 1");
+/// assert_eq!(result, "'Sheet 1'");
+///
+/// // Special characters need to be quoted.
+/// let result = quote_sheet_name("Sheet-1");
+/// assert_eq!(result, "'Sheet-1'");
+///
+/// // Single quotes need to be escaped with a quote.
+/// let result = quote_sheet_name("Sheet'1");
+/// assert_eq!(result, "'Sheet''1'");
+///
+/// // A1 style cell references don't need to be quoted.
+/// let result = quote_sheet_name("A1");
+/// assert_eq!(result, "'A1'");
+///
+/// // R1C1 style cell references need to be quoted.
+/// let result = quote_sheet_name("RC1");
+/// assert_eq!(result, "'RC1'");
+/// ```
+///
 #[allow(clippy::if_same_then_else)]
-pub(crate) fn quote_sheetname(sheetname: &str) -> String {
+pub fn quote_sheet_name(sheetname: &str) -> String {
+    // Sheetnames used in references should be quoted if they contain any
+    // spaces, special characters or if they look like a A1 or RC cell
+    // reference. The rules are shown inline below.
     let mut sheetname = sheetname.to_string();
     let uppercase_sheetname = sheetname.to_uppercase();
     let mut requires_quoting = false;
@@ -556,9 +744,9 @@ pub(crate) fn unquote_sheetname(sheetname: &str) -> String {
 //
 pub(crate) fn is_emoji(c: char) -> bool {
     if c < '\u{203C}' {
-        // Shortcut for most chars in the lower range. We ignore chars '#', '*',
-        // '0-9', '©️' and '®️' which are in the range and which are, strictly
-        // speaking, emoji symbols, but they are not treated so by Excel in the
+        // Shortcut for most chars in the lower range. We ignore '#', '*',
+        // '0-9', '©️' and '®️' which are in this range and which are, strictly
+        // speaking, emoji symbols but they are not treated so by Excel in the
         // context of this check.
         return false;
     }
@@ -693,10 +881,8 @@ pub(crate) fn is_valid_range(range: &str) -> bool {
 /// # use rust_xlsxwriter::{utility, XlsxError};
 /// #
 /// # fn main() -> Result<(), XlsxError> {
-///     // This worksheet name is valid.
-///     let result = utility::check_sheet_name("2030-01-01")?;
-///
-///     assert!(matches!(result, ()));
+///     // This worksheet name is valid and doesn't raise an error.
+///     utility::check_sheet_name("2030-01-01")?;
 ///
 ///     // This worksheet name isn't valid due to the forward slashes.
 ///     let result = utility::check_sheet_name("2030/01/01");
@@ -704,7 +890,7 @@ pub(crate) fn is_valid_range(range: &str) -> bool {
 ///     assert!(matches!(
 ///         result,
 ///         Err(XlsxError::SheetnameContainsInvalidCharacter(_))
-/// #     ));
+///     ));
 /// #
 /// #     Ok(())
 /// # }
@@ -807,7 +993,7 @@ pub(crate) fn validate_vba_name(name: &str) -> Result<(), XlsxError> {
 ///   without incurring the performance penalty of calculating widths for
 ///   thousands of non-visible strings.
 ///
-/// # Parameter
+/// # Parameters
 ///
 /// - `string`: The string reference to calculate the cell width.
 ///

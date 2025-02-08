@@ -2650,7 +2650,7 @@ impl Workbook {
         // package options metadata.
         for (sheet_index, worksheet) in self.worksheets.iter().enumerate() {
             let sheet_name = worksheet.name.clone();
-            let quoted_sheet_name = utility::quote_sheetname(&sheet_name);
+            let quoted_sheet_name = utility::quote_sheet_name(&sheet_name);
             sheet_names.insert(sheet_name.clone(), sheet_index as u16);
 
             if worksheet.is_chartsheet {
