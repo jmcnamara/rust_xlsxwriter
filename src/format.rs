@@ -541,11 +541,108 @@ impl Format {
     // Public methods.
     // -----------------------------------------------------------------------
 
-    /// TODO
+    /// Merge two formats into a new combined Format.
+    ///
+    /// The method returns a new Format object that is a combination of two
+    /// formats.
+    ///
+    /// Precedence is given to the properties of the primary format that have
+    /// been set. The primary format is the calling format. The order of
+    /// precedence can be reversed by reversing the order of the primary and
+    /// secondary formats, see the second example below.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates creating a format that is a
+    /// combination of two formats.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_merge1.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add a format. Green fill with dark green text.
+    ///     let format1 = Format::new()
+    ///         .set_font_color("006100")
+    ///         .set_background_color("C6EFCE");
+    ///
+    ///     // Add a format. Bold and italic.
+    ///     let format2 = Format::new().set_bold().set_italic();
+    ///
+    ///     // Create a new format based on a merge of two formats.
+    ///     let merged = format1.merge(&format2);
+    ///
+    ///     // Write some strings with the formats.
+    ///     worksheet.write_string_with_format(0, 0, "Format 1", &format1)?;
+    ///     worksheet.write_string_with_format(2, 0, "Format 2", &format2)?;
+    ///     worksheet.write_string_with_format(4, 0, "Merged", &merged)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("formats.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/format_merge1.png">
+    ///
+    /// The following example demonstrates creating a format that is a
+    /// combination of two formats. This example demonstrates that
+    /// properties in the primary format take precedence.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_format_merge2.rs
+    /// #
+    /// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    /// #     // Add a worksheet.
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    ///     // Add some formats.
+    ///     let format1 = Format::new().set_font_color("006100").set_bold();
+    ///     let format2 = Format::new().set_font_color("9C0006").set_italic();
+    ///
+    ///     // Create a new format based on a merge of two formats.
+    ///     let merged1 = format1.merge(&format2);
+    ///     let merged2 = format2.merge(&format1);
+    ///
+    ///     // Write some strings with the formats.
+    ///     worksheet.write_string_with_format(0, 0, "Format 1: green and bold", &format1)?;
+    ///     worksheet.write_string_with_format(1, 0, "Format 2: red and italic", &format2)?;
+    ///     worksheet.write_string_with_format(3, 0, "Merged 2 into 1", &merged1)?;
+    ///     worksheet.write_string_with_format(4, 0, "Merged 1 into 2", &merged2)?;
+    /// #
+    /// #     // Autofit for clarity.
+    /// #     worksheet.autofit();
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("formats.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/format_merge2.png">
+    ///
+    ///
     pub fn merge(&self, other: &Format) -> Format {
         let mut copy = self.clone();
         copy.merge_with(other);
-
         copy
     }
 
@@ -2317,11 +2414,11 @@ impl Format {
         self.quote_prefix |= other.quote_prefix;
         self.locked &= other.locked;
 
-        if !other.num_format.is_empty() {
+        if self.num_format.is_empty() {
             self.num_format.clone_from(&other.num_format);
         }
 
-        if other.num_format_index != 0 {
+        if self.num_format_index == 0 {
             self.num_format_index = other.num_format_index;
         }
 
@@ -2333,15 +2430,15 @@ impl Format {
 
     // Merge the fill properties of two formats.
     fn merge_fill(&mut self, other: &Fill) {
-        if other.foreground_color != Color::Default {
+        if self.fill.foreground_color == Color::Default {
             self.fill.foreground_color = other.foreground_color;
         }
 
-        if other.background_color != Color::Default {
+        if self.fill.background_color == Color::Default {
             self.fill.background_color = other.background_color;
         }
 
-        if other.pattern != FormatPattern::None {
+        if self.fill.pattern == FormatPattern::None {
             self.fill.pattern = other.pattern;
         }
     }
@@ -2356,35 +2453,35 @@ impl Format {
         self.font.condense |= other.condense;
         self.font.strikethrough |= other.strikethrough;
 
-        if other.family != default.family {
+        if self.font.family == default.family {
             self.font.family = other.family;
         }
 
-        if other.charset != default.charset {
+        if self.font.charset == default.charset {
             self.font.charset = other.charset;
         }
 
-        if other.name != default.name {
+        if self.font.name == default.name {
             self.font.name.clone_from(&other.name);
         }
 
-        if other.size != default.size {
+        if self.font.size == default.size {
             self.font.size.clone_from(&other.size);
         }
 
-        if other.scheme != default.scheme {
+        if self.font.scheme == default.scheme {
             self.font.scheme.clone_from(&other.scheme);
         }
 
-        if other.color != Color::Default {
+        if self.font.color == Color::Default {
             self.font.color = other.color;
         }
 
-        if other.script != FormatScript::None {
+        if self.font.script == FormatScript::None {
             self.font.script = other.script;
         }
 
-        if other.underline != FormatUnderline::None {
+        if self.font.underline == FormatUnderline::None {
             self.font.underline = other.underline;
         }
     }
@@ -2397,47 +2494,47 @@ impl Format {
 
         let default = Border::default();
 
-        if other.bottom_style != default.bottom_style {
+        if self.borders.bottom_style == default.bottom_style {
             self.borders.bottom_style = other.bottom_style;
         }
 
-        if other.top_style != default.top_style {
+        if self.borders.top_style == default.top_style {
             self.borders.top_style = other.top_style;
         }
 
-        if other.left_style != default.left_style {
+        if self.borders.left_style == default.left_style {
             self.borders.left_style = other.left_style;
         }
 
-        if other.right_style != default.right_style {
+        if self.borders.right_style == default.right_style {
             self.borders.right_style = other.right_style;
         }
 
-        if other.diagonal_style != default.diagonal_style {
+        if self.borders.diagonal_style == default.diagonal_style {
             self.borders.diagonal_style = other.diagonal_style;
         }
 
-        if other.bottom_color != Color::Default {
+        if self.borders.bottom_color == Color::Default {
             self.borders.bottom_color = other.bottom_color;
         }
 
-        if other.top_color != Color::Default {
+        if self.borders.top_color == Color::Default {
             self.borders.top_color = other.top_color;
         }
 
-        if other.left_color != Color::Default {
+        if self.borders.left_color == Color::Default {
             self.borders.left_color = other.left_color;
         }
 
-        if other.right_color != Color::Default {
+        if self.borders.right_color == Color::Default {
             self.borders.right_color = other.right_color;
         }
 
-        if other.diagonal_color != Color::Default {
+        if self.borders.diagonal_color == Color::Default {
             self.borders.diagonal_color = other.diagonal_color;
         }
 
-        if other.diagonal_type != FormatDiagonalBorder::None {
+        if self.borders.diagonal_type == FormatDiagonalBorder::None {
             self.borders.diagonal_type = other.diagonal_type;
         }
     }
@@ -2449,23 +2546,23 @@ impl Format {
         self.alignment.shrink |= other.shrink;
         self.alignment.text_wrap |= other.text_wrap;
 
-        if other.indent != default.indent {
+        if self.alignment.indent == default.indent {
             self.alignment.indent = other.indent;
         }
 
-        if other.rotation != default.rotation {
+        if self.alignment.rotation == default.rotation {
             self.alignment.rotation = other.rotation;
         }
 
-        if other.reading_direction != default.reading_direction {
+        if self.alignment.reading_direction == default.reading_direction {
             self.alignment.reading_direction = other.reading_direction;
         }
 
-        if other.horizontal != FormatAlign::General {
+        if self.alignment.horizontal == FormatAlign::General {
             self.alignment.horizontal = other.horizontal;
         }
 
-        if other.vertical != FormatAlign::General {
+        if self.alignment.vertical == FormatAlign::General {
             self.alignment.vertical = other.vertical;
         }
     }
