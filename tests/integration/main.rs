@@ -1044,6 +1044,7 @@ mod row_col_format11;
 mod row_col_format12;
 mod row_col_format13;
 mod row_col_format14;
+mod row_col_format15;
 #[cfg(feature = "serde")]
 mod serde01;
 #[cfg(feature = "serde")]

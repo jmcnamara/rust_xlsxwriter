@@ -74,6 +74,16 @@ use crate::Color;
 /// }
 /// ```
 ///
+/// # Contents
+///
+/// - [Creating and using a Format object](#creating-and-using-a-format-object)
+/// - [Format methods and Format properties](#format-methods-and-format-properties)
+/// - [Format Colors](#format-colors)
+/// - [Format Defaults](#format-defaults)
+/// - [Row and Column Formats](#row-and-column-formats)
+/// - [Number Format Categories](#number-format-categories)
+/// - [Number Formats in different locales](#number-formats-in-different-locales)
+/// - [API](#implementations)
 ///
 /// # Creating and using a Format object
 ///
@@ -143,6 +153,52 @@ use crate::Color;
 /// ```
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/format_clone.png">
+///
+/// You can also merge two formats into a new combined format using the
+/// [`Format::merge()`] method, as shown in the example below. The example also
+/// demonstrates that properties in the primary format take precedence.
+///
+/// ```
+/// # // This code is available in examples/doc_format_merge2.rs
+/// #
+/// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet.
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+///     // Add some formats.
+///     let format1 = Format::new().set_font_color("006100").set_bold();
+///     let format2 = Format::new().set_font_color("9C0006").set_italic();
+///
+///     // Create new formats based on a merge of two formats.
+///     let merged1 = format1.merge(&format2);
+///     let merged2 = format2.merge(&format1);
+///
+///     // Write some strings with the formats.
+///     worksheet.write_string_with_format(0, 0, "Format 1: green and bold", &format1)?;
+///     worksheet.write_string_with_format(1, 0, "Format 2: red and italic", &format2)?;
+///     worksheet.write_string_with_format(3, 0, "Merged 2 into 1", &merged1)?;
+///     worksheet.write_string_with_format(4, 0, "Merged 1 into 2", &merged2)?;
+/// #
+/// #     // Autofit for clarity.
+/// #     worksheet.autofit();
+/// #
+/// #     // Save the file.
+/// #     workbook.save("formats.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// Output file:
+///
+/// <img src="https://rustxlsxwriter.github.io/images/format_merge2.png">
+///
+///
 ///
 ///
 /// # Format methods and Format properties
@@ -260,6 +316,57 @@ use crate::Color;
 /// ```
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/format_default.png">
+///
+///
+/// # Row and Column Formats
+///
+/// Formatting can be applied to rows and columns in a worksheet using the
+/// [`Worksheet::set_row_format()`](crate::Worksheet::set_row_format) and
+/// [`Worksheet::set_column_format()`](crate::Worksheet::set_column_format)
+/// methods. The `rust_xlsxwriter` library ensures that the row and column
+/// formats are applied to any cells in the row or column that contain data but
+/// don't have an explicit format. It also ensures that the cell at the
+/// intersection of a row and column format inherits the properties of both
+/// formats, like in Excel:
+///
+/// ```
+/// # // This code is available in examples/doc_format_merge3.rs
+/// #
+/// # use rust_xlsxwriter::{Format, Workbook, XlsxError};
+/// #
+/// # fn main() -> Result<(), XlsxError> {
+/// #     // Create a new Excel file object.
+/// #     let mut workbook = Workbook::new();
+/// #
+/// #     // Add a worksheet.
+/// #     let worksheet = workbook.add_worksheet();
+/// #
+///     // Add some formats.
+///     let red = Format::new().set_font_color("9C0006");
+///     let bold = Format::new().set_bold();
+///
+///     // Set some row and column formats.
+///     worksheet.set_row_format(2, &bold)?;
+///     worksheet.set_column_format(2, &red)?;
+///
+///     // Write some strings without explicit formats.
+///     worksheet.write(0, 2, "C1")?; // Red.
+///     worksheet.write(2, 0, "A3")?; // Bold.
+///     worksheet.write(2, 2, "C3")?; // Bold and red.
+/// #
+/// #     // Save the file.
+/// #     workbook.save("formats.xlsx")?;
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+///
+/// <img src="https://rustxlsxwriter.github.io/images/format_merge3.png">
+///
+/// It should be noted that the intersection format (in cell C3 in the example
+/// above) requires that the row and column formats are set before data is
+/// written to the intersection cell. This restriction doesn't apply to
+/// non-intersection row and column cells.
 ///
 ///
 /// # Number Format Categories
@@ -494,7 +601,6 @@ impl Format {
     ///
     /// Create a new Format object to use with worksheet formatting.
     ///
-    ///
     /// # Examples
     ///
     /// The following example demonstrates creating a new format.
@@ -550,6 +656,10 @@ impl Format {
     /// been set. The primary format is the calling format. The order of
     /// precedence can be reversed by reversing the order of the primary and
     /// secondary formats, see the second example below.
+    ///
+    /// # Parameters
+    ///
+    /// - `other`: A Format object to merge with the primary Format.
     ///
     /// # Examples
     ///
@@ -615,7 +725,7 @@ impl Format {
     ///     let format1 = Format::new().set_font_color("006100").set_bold();
     ///     let format2 = Format::new().set_font_color("9C0006").set_italic();
     ///
-    ///     // Create a new format based on a merge of two formats.
+    ///     // Create new formats based on a merge of two formats.
     ///     let merged1 = format1.merge(&format2);
     ///     let merged2 = format2.merge(&format1);
     ///

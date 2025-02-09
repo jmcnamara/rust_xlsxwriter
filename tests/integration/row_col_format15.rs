@@ -8,55 +8,46 @@
 use crate::common;
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
-// Create a rust_xlsxwriter file to compare against an Excel file.
+// Test to demonstrate row or column formatting. This test has an explicit
+// format for the row/col intersection.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
+
     let bold = Format::new().set_bold();
+    let mixed = Format::new().set_bold().set_italic();
     let italic = Format::new().set_italic();
-    let both = Format::new().set_bold().set_italic();
 
-    // Set the order of the formats.
-    workbook.register_format(&bold);
-    workbook.register_format(&both);
+    let worksheet = workbook.add_worksheet();
 
-    // Constant memory worksheet.
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    worksheet.write(0, 0, "Foo")?;
 
-    worksheet.set_row_format(1, &bold)?;
+    worksheet.set_row_format(2, &bold)?;
     worksheet.set_column_format(2, &italic)?;
 
-    worksheet.write_number(0, 0, 123)?;
-    worksheet.write_number(1, 1, 123)?;
-    worksheet.write_blank(1, 2, &both)?;
-    worksheet.write_number(2, 2, 123)?;
+    worksheet.write_blank(2, 2, &mixed)?;
 
     workbook.save(filename)?;
 
     Ok(())
 }
 
-// With implicit intersection format.
+// Test to demonstrate row or column formatting. This test has an implicit
+// format for the row/col intersection.
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
+
     let bold = Format::new().set_bold();
     let italic = Format::new().set_italic();
-    let both = Format::new().set_bold().set_italic();
     let default = Format::default();
 
-    // Set the order of the formats.
-    workbook.register_format(&bold);
-    workbook.register_format(&both);
+    let worksheet = workbook.add_worksheet();
 
-    // Constant memory worksheet.
-    let worksheet = workbook.add_worksheet_with_constant_memory();
+    worksheet.write(0, 0, "Foo")?;
 
-    worksheet.set_row_format(1, &bold)?;
+    worksheet.set_row_format(2, &bold)?;
     worksheet.set_column_format(2, &italic)?;
 
-    worksheet.write_number(0, 0, 123)?;
-    worksheet.write_number(1, 1, 123)?;
-    worksheet.write_blank(1, 2, &default)?;
-    worksheet.write_number(2, 2, 123)?;
+    worksheet.write_blank(2, 2, &default)?;
 
     workbook.save(filename)?;
 
@@ -64,9 +55,9 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 }
 
 #[test]
-fn test_optimize23_1() {
+fn test_row_col_format15_1() {
     let test_runner = common::TestRunner::new()
-        .set_name("optimize23")
+        .set_name("row_col_format15")
         .set_function(create_new_xlsx_file_1)
         .unique("1")
         .initialize();
@@ -76,9 +67,9 @@ fn test_optimize23_1() {
 }
 
 #[test]
-fn test_optimize23_2() {
+fn test_row_col_format15_2() {
     let test_runner = common::TestRunner::new()
-        .set_name("optimize23")
+        .set_name("row_col_format15")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
         .initialize();

@@ -6442,6 +6442,7 @@ impl Worksheet {
                     hidden: false,
                     level: 0,
                     collapsed: false,
+                    format: None,
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -6595,6 +6596,7 @@ impl Worksheet {
                     hidden: false,
                     level: 0,
                     collapsed: false,
+                    format: Some(format.clone()),
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -7617,6 +7619,7 @@ impl Worksheet {
                     hidden: true,
                     level: 0,
                     collapsed: false,
+                    format: None,
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -8057,6 +8060,7 @@ impl Worksheet {
                     level: 0,
                     collapsed: false,
                     autofit: false,
+                    format: Some(format.clone()),
                 };
                 self.changed_cols.insert(col, col_options);
             }
@@ -8124,11 +8128,10 @@ impl Worksheet {
                     width: DEFAULT_COL_WIDTH,
                     xf_index: 0,
                     hidden: true,
-
                     level: 0,
                     collapsed: false,
-
                     autofit: false,
+                    format: None,
                 };
                 self.changed_cols.insert(col, col_options);
             }
@@ -15013,7 +15016,7 @@ impl Worksheet {
         // Get the index of the format object, if any.
         let xf_index = match format {
             Some(format) => self.format_xf_index(format),
-            None => 0,
+            None => self.row_col_format(row, col),
         };
 
         // Create the appropriate cell type to hold the data.
@@ -15058,7 +15061,7 @@ impl Worksheet {
         // Get the index of the format object, if any.
         let xf_index = match format {
             Some(format) => self.format_xf_index(format),
-            None => 0,
+            None => self.row_col_format(row, col),
         };
 
         // Create the appropriate cell type to hold the data.
@@ -15123,7 +15126,7 @@ impl Worksheet {
         // Get the index of the format object, if any.
         let xf_index = match format {
             Some(format) => self.format_xf_index(format),
-            None => 0,
+            None => self.row_col_format(row, col),
         };
 
         // Create the appropriate cell type to hold the data.
@@ -15173,7 +15176,7 @@ impl Worksheet {
         // Get the index of the format object, if any.
         let xf_index = match format {
             Some(format) => self.format_xf_index(format),
-            None => 0,
+            None => self.row_col_format(row, col),
         };
 
         // Set the formula result to the default or user defined
@@ -15222,7 +15225,7 @@ impl Worksheet {
         // Get the index of the format object, if any.
         let xf_index = match format {
             Some(format) => self.format_xf_index(format),
-            None => 0,
+            None => self.row_col_format(first_row, first_col),
         };
 
         // Create the array range reference.
@@ -15292,7 +15295,13 @@ impl Worksheet {
         }
 
         // Get the index of the format object.
-        let xf_index = self.format_xf_index(format);
+        let mut xf_index = self.format_xf_index(format);
+
+        // If the cell has the default format we need to check if it should have
+        // a row/col intersection format.
+        if xf_index == 0 {
+            xf_index = self.row_col_format(row, col);
+        }
 
         // Create the appropriate cell type to hold the data.
         let cell = CellType::Blank { xf_index };
@@ -15318,7 +15327,7 @@ impl Worksheet {
         // Get the index of the format object, if any.
         let xf_index = match format {
             Some(format) => self.format_xf_index(format),
-            None => 0,
+            None => self.row_col_format(row, col),
         };
 
         // Create the appropriate cell type to hold the data.
@@ -15413,7 +15422,7 @@ impl Worksheet {
                     let format = Format::new().set_hyperlink();
                     self.format_xf_index(&format)
                 }
-                None => 0,
+                None => self.row_col_format(row, col),
             },
         };
 
@@ -15920,8 +15929,8 @@ impl Worksheet {
                     hidden: false,
                     level: 0,
                     collapsed: false,
-
                     autofit,
+                    format: None,
                 };
                 self.changed_cols.insert(col, col_options);
             }
@@ -16030,6 +16039,40 @@ impl Worksheet {
         } else {
             self.global_xf_indices[xf_index as usize]
         }
+    }
+
+    // This method emulates Excel's behavior when an unformatted cell occurs at
+    // the intersection of a row and column format. Excel handles this case by
+    // creating and applying a new format that is a combination of the row and
+    // column formats.
+    //
+    // Cells that only have a row format or a column format are handled by the
+    // get_cell_xf_index() method.
+    //
+    // The method is called for all unformatted cells so we try to exit early to
+    // keep it as efficient as possible.
+    //
+    fn row_col_format(&mut self, row: RowNum, col: ColNum) -> u32 {
+        // Check for both a row and column format and exit is one of them
+        // doesn't exist.
+        let Some(col_option) = self.changed_cols.get(&col) else {
+            return 0;
+        };
+        let Some(col_format) = &col_option.format else {
+            return 0;
+        };
+        let Some(row_option) = self.changed_rows.get(&row) else {
+            return 0;
+        };
+        let Some(row_format) = &row_option.format else {
+            return 0;
+        };
+
+        // Combine the row and column formats into a new format.
+        let combined_format = Format::merge(row_format, col_format);
+
+        // Return the index of the combined format.
+        self.format_xf_index(&combined_format)
     }
 
     /// Get the local instance DXF id for a format.
@@ -17139,6 +17182,7 @@ impl Worksheet {
                     hidden: collapsed,
                     level: 1,
                     collapsed: false,
+                    format: None,
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -17165,6 +17209,7 @@ impl Worksheet {
                     hidden: false,
                     level: 0,
                     collapsed: true,
+                    format: None,
                 };
                 self.changed_rows.insert(row, row_options);
             }
@@ -17236,6 +17281,7 @@ impl Worksheet {
                     level: 1,
                     collapsed: false,
                     autofit: false,
+                    format: None,
                 };
                 self.changed_cols.insert(column, col_options);
             }
@@ -17263,6 +17309,7 @@ impl Worksheet {
                     level: 0,
                     collapsed: true,
                     autofit: false,
+                    format: None,
                 };
                 self.changed_cols.insert(col, column_options);
             }
@@ -20418,6 +20465,7 @@ struct RowOptions {
     level: u8,
     hidden: bool,
     collapsed: bool,
+    format: Option<Format>,
 }
 
 #[derive(Clone, PartialEq)]
@@ -20428,6 +20476,7 @@ struct ColOptions {
     hidden: bool,
     collapsed: bool,
     autofit: bool,
+    format: Option<Format>,
 }
 
 #[derive(Clone)]

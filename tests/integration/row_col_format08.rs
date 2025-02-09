@@ -8,8 +8,9 @@
 use crate::common;
 use rust_xlsxwriter::{Format, Workbook, XlsxError};
 
-// Test to demonstrate row or column formatting.
-fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
+// Test to demonstrate row or column formatting. This test has an explicit
+// format for the row/col intersection.
+fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
     let worksheet = workbook.add_worksheet();
@@ -30,11 +31,52 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test to demonstrate row or column formatting. This test has an implicit
+// format for the row/col intersection.
+fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let bold = Format::new().set_bold();
+    let mixed = Format::new().set_bold().set_italic();
+    let italic = Format::new().set_italic();
+
+    // Set the order of the formats.
+    workbook.register_format(&bold);
+    workbook.register_format(&mixed);
+
+    let worksheet = workbook.add_worksheet();
+
+    worksheet.set_row_format(0, &bold)?;
+    worksheet.set_column_format(0, &italic)?;
+
+    worksheet.write_string(0, 0, "Foo")?;
+    worksheet.write_string(0, 1, "Foo")?;
+    worksheet.write_string(1, 0, "Foo")?;
+    worksheet.write_string(1, 1, "Foo")?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
-fn test_row_col_format08() {
+fn test_row_col_format08_1() {
     let test_runner = common::TestRunner::new()
         .set_name("row_col_format08")
-        .set_function(create_new_xlsx_file)
+        .set_function(create_new_xlsx_file_1)
+        .unique("1")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_row_col_format08_2() {
+    let test_runner = common::TestRunner::new()
+        .set_name("row_col_format08")
+        .set_function(create_new_xlsx_file_2)
+        .unique("2")
         .initialize();
 
     test_runner.assert_eq();

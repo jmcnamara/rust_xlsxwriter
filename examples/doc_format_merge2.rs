@@ -19,7 +19,7 @@ fn main() -> Result<(), XlsxError> {
     let format1 = Format::new().set_font_color("006100").set_bold();
     let format2 = Format::new().set_font_color("9C0006").set_italic();
 
-    // Create a new format based on a merge of two formats.
+    // Create new formats based on a merge of two formats.
     let merged1 = format1.merge(&format2);
     let merged2 = format2.merge(&format1);
 

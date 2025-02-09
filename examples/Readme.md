@@ -172,8 +172,8 @@ documentation and generally show how an individual function works.
 * `app_hello_world.rs` - Create a simple Hello World style Excel
   spreadsheet using the `rust_xlsxwriter` library.
 
-* `app_hyperlinks.rs` - A simple, getting started, example of some of the
-  features of the `rust_xlsxwriter` library.
+* `app_hyperlinks.rs` - An example of some of the features of
+  URLs/hyperlinks using the `rust_xlsxwriter` library.
 
 * `app_ignore_errors.rs` - An example of turning off worksheet cells
   errors/warnings using using the `rust_xlsxwriter` library.
@@ -926,6 +926,18 @@ documentation and generally show how an individual function works.
 
 * `doc_format_locale.rs` - Demonstrates setting a number format that
   appears differently in different locales.
+
+* `doc_format_merge1.rs` - Demonstrates creating a format that is a
+  combination of two formats.
+
+* `doc_format_merge2.rs` - Demonstrates creating a format that is a
+  combination of two formats. This example demonstrates that properties in
+  the primary format take precedence.
+
+* `doc_format_merge3.rs` - This example demonstrates how cells without
+  explicit formats inherit the formats from the row and column that they
+  are in. Note the output: - Cell C1 has a green font color. - Cell A3 has
+  a bold format. - Cell C3 has both a bold format and a green font color.
 
 * `doc_format_new.rs` - Demonstrates creating a new format.
 
