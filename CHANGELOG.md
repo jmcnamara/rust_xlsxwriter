@@ -5,6 +5,30 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.84.0] - 2025-02-10
+
+- Added support for merging Formats via the [`Format::merge()`] method.
+
+  This also enables the automatic handling of implicit formats at the
+  intersection of row and column formats, see [Row and Column Formats].
+
+  <img src="https://rustxlsxwriter.github.io/images/format_merge3.png">
+
+- Added additional utility/helper functions:
+
+  - [`utility::quote_sheet_name()`] - Enclose a worksheet name in single quotes
+    as required by Excel.
+  - [`utility::worksheet_range()`] - Convert a worksheet name and cell reference
+    to an Excel "Sheet1!A1:B1" style range string.
+  - [`utility::worksheet_range_absolute()`] - Convert a worksheet name and cell
+    reference to an Excel "Sheet1!$A$1:$B$1" style absolute range string.
+
+  [`Format::merge()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#method.merge
+  [Row and Column Formats]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#row-and-column-formats
+  [`utility::quote_sheet_name()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.quote_sheet_name.html
+  [`utility::worksheet_range()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.worksheet_range.html
+  [`utility::worksheet_range_absolute()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.worksheet_range_absolute.html
+
 
 ## [0.83.0] - 2025-02-04
 
