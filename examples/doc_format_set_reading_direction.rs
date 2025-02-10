@@ -17,9 +17,9 @@ fn main() -> Result<(), XlsxError> {
     let format1 = Format::new().set_reading_direction(1);
     let format2 = Format::new().set_reading_direction(2);
 
-    worksheet.write_string(0, 0, "نص عربي / English text")?;
-    worksheet.write_string_with_format(1, 0, "نص عربي / English text", &format1)?;
-    worksheet.write_string_with_format(2, 0, "نص عربي / English text", &format2)?;
+    worksheet.write(0, 0, "نص عربي / English text")?;
+    worksheet.write_with_format(1, 0, "نص عربي / English text", &format1)?;
+    worksheet.write_with_format(2, 0, "نص عربي / English text", &format2)?;
 
     workbook.save("formats.xlsx")?;
 

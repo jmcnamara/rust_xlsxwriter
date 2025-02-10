@@ -21,9 +21,9 @@ fn main() -> Result<(), XlsxError> {
     let format2 = Format::new().set_rotation(-30);
     let format3 = Format::new().set_rotation(270);
 
-    worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
-    worksheet.write_string_with_format(1, 0, "Rust", &format2)?;
-    worksheet.write_string_with_format(2, 0, "Rust", &format3)?;
+    worksheet.write_with_format(0, 0, "Rust", &format1)?;
+    worksheet.write_with_format(1, 0, "Rust", &format2)?;
+    worksheet.write_with_format(2, 0, "Rust", &format3)?;
 
     workbook.save("formats.xlsx")?;
 

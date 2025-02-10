@@ -24,10 +24,10 @@ fn main() -> Result<(), XlsxError> {
     let merged2 = format2.merge(&format1);
 
     // Write some strings with the formats.
-    worksheet.write_string_with_format(0, 0, "Format 1: green and bold", &format1)?;
-    worksheet.write_string_with_format(1, 0, "Format 2: red and italic", &format2)?;
-    worksheet.write_string_with_format(3, 0, "Merged 2 into 1", &merged1)?;
-    worksheet.write_string_with_format(4, 0, "Merged 1 into 2", &merged2)?;
+    worksheet.write_with_format(0, 0, "Format 1: green and bold", &format1)?;
+    worksheet.write_with_format(1, 0, "Format 2: red and italic", &format2)?;
+    worksheet.write_with_format(3, 0, "Merged 2 into 1", &merged1)?;
+    worksheet.write_with_format(4, 0, "Merged 1 into 2", &merged2)?;
 
     // Autofit for clarity.
     worksheet.autofit();

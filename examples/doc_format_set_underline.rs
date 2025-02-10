@@ -18,11 +18,11 @@ fn main() -> Result<(), XlsxError> {
     let format4 = Format::new().set_underline(FormatUnderline::SingleAccounting);
     let format5 = Format::new().set_underline(FormatUnderline::DoubleAccounting);
 
-    worksheet.write_string_with_format(0, 0, "None", &format1)?;
-    worksheet.write_string_with_format(1, 0, "Single", &format2)?;
-    worksheet.write_string_with_format(2, 0, "Double", &format3)?;
-    worksheet.write_string_with_format(3, 0, "Single Accounting", &format4)?;
-    worksheet.write_string_with_format(4, 0, "Double Accounting", &format5)?;
+    worksheet.write_with_format(0, 0, "None", &format1)?;
+    worksheet.write_with_format(1, 0, "Single", &format2)?;
+    worksheet.write_with_format(2, 0, "Double", &format3)?;
+    worksheet.write_with_format(3, 0, "Single Accounting", &format4)?;
+    worksheet.write_with_format(4, 0, "Double Accounting", &format5)?;
 
     workbook.save("formats.xlsx")?;
 

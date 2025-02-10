@@ -39,34 +39,34 @@ use crate::Color;
 ///
 ///     // Create some sample formats to display
 ///     let format1 = Format::new().set_font_name("Arial");
-///     worksheet.write_string_with_format(0, 0, "Fonts", &format1)?;
+///     worksheet.write_with_format(0, 0, "Fonts", &format1)?;
 ///
 ///     let format2 = Format::new().set_font_name("Algerian").set_font_size(14);
-///     worksheet.write_string_with_format(1, 0, "Fonts", &format2)?;
+///     worksheet.write_with_format(1, 0, "Fonts", &format2)?;
 ///
 ///     let format3 = Format::new().set_font_name("Comic Sans MS");
-///     worksheet.write_string_with_format(2, 0, "Fonts", &format3)?;
+///     worksheet.write_with_format(2, 0, "Fonts", &format3)?;
 ///
 ///     let format4 = Format::new().set_font_name("Edwardian Script ITC");
-///     worksheet.write_string_with_format(3, 0, "Fonts", &format4)?;
+///     worksheet.write_with_format(3, 0, "Fonts", &format4)?;
 ///
 ///     let format5 = Format::new().set_font_color(Color::Red);
-///     worksheet.write_string_with_format(4, 0, "Font color", &format5)?;
+///     worksheet.write_with_format(4, 0, "Font color", &format5)?;
 ///
 ///     let format6 = Format::new().set_background_color(Color::RGB(0xDAA520));
-///     worksheet.write_string_with_format(5, 0, "Fills", &format6)?;
+///     worksheet.write_with_format(5, 0, "Fills", &format6)?;
 ///
 ///     let format7 = Format::new().set_border(FormatBorder::Thin);
-///     worksheet.write_string_with_format(6, 0, "Borders", &format7)?;
+///     worksheet.write_with_format(6, 0, "Borders", &format7)?;
 ///
 ///     let format8 = Format::new().set_bold();
-///     worksheet.write_string_with_format(7, 0, "Bold", &format8)?;
+///     worksheet.write_with_format(7, 0, "Bold", &format8)?;
 ///
 ///     let format9 = Format::new().set_italic();
-///     worksheet.write_string_with_format(8, 0, "Italic", &format9)?;
+///     worksheet.write_with_format(8, 0, "Italic", &format9)?;
 ///
 ///     let format10 = Format::new().set_bold().set_italic();
-///     worksheet.write_string_with_format(9, 0, "Bold and Italic", &format10)?;
+///     worksheet.write_with_format(9, 0, "Bold and Italic", &format10)?;
 ///
 ///      workbook.save("formats.xlsx")?;
 ///
@@ -77,12 +77,14 @@ use crate::Color;
 /// # Contents
 ///
 /// - [Creating and using a Format object](#creating-and-using-a-format-object)
-/// - [Format methods and Format properties](#format-methods-and-format-properties)
+/// - [Format methods and Format
+///   properties](#format-methods-and-format-properties)
 /// - [Format Colors](#format-colors)
 /// - [Format Defaults](#format-defaults)
 /// - [Row and Column Formats](#row-and-column-formats)
 /// - [Number Format Categories](#number-format-categories)
-/// - [Number Formats in different locales](#number-formats-in-different-locales)
+/// - [Number Formats in different
+///   locales](#number-formats-in-different-locales)
 /// - [API](#implementations)
 ///
 /// # Creating and using a Format object
@@ -111,7 +113,7 @@ use crate::Color;
 ///         .set_italic()
 ///         .set_font_color(Color::Red);
 ///
-///     worksheet.write_string_with_format(0, 0, "Hello", &format)?;
+///     worksheet.write_with_format(0, 0, "Hello", &format)?;
 ///
 /// #     workbook.save("formats.xlsx")?;
 /// #
@@ -143,8 +145,8 @@ use crate::Color;
 ///     let format2 = format1.clone()
 ///         .set_font_color(Color::Blue);
 ///
-///     worksheet.write_string_with_format(0, 0, "Hello", &format1)?;
-///     worksheet.write_string_with_format(1, 0, "Hello", &format2)?;
+///     worksheet.write_with_format(0, 0, "Hello", &format1)?;
+///     worksheet.write_with_format(1, 0, "Hello", &format2)?;
 ///
 /// #     workbook.save("formats.xlsx")?;
 /// #
@@ -179,10 +181,10 @@ use crate::Color;
 ///     let merged2 = format2.merge(&format1);
 ///
 ///     // Write some strings with the formats.
-///     worksheet.write_string_with_format(0, 0, "Format 1: green and bold", &format1)?;
-///     worksheet.write_string_with_format(1, 0, "Format 2: red and italic", &format2)?;
-///     worksheet.write_string_with_format(3, 0, "Merged 2 into 1", &merged1)?;
-///     worksheet.write_string_with_format(4, 0, "Merged 1 into 2", &merged2)?;
+///     worksheet.write_with_format(0, 0, "Format 1: green and bold", &format1)?;
+///     worksheet.write_with_format(1, 0, "Format 2: red and italic", &format2)?;
+///     worksheet.write_with_format(3, 0, "Merged 2 into 1", &merged1)?;
+///     worksheet.write_with_format(4, 0, "Merged 1 into 2", &merged2)?;
 /// #
 /// #     // Autofit for clarity.
 /// #     worksheet.autofit();
@@ -266,12 +268,12 @@ use crate::Color;
 ///     let format6 = Format::new().set_font_color(Color::RGB(0xCC7E16));
 ///
 ///     let worksheet = workbook.add_worksheet();
-///     worksheet.write_string_with_format(0, 0, "Red", &format1)?;
-///     worksheet.write_string_with_format(1, 0, "Green", &format2)?;
-///     worksheet.write_string_with_format(2, 0, "#4F026A", &format3)?;
-///     worksheet.write_string_with_format(3, 0, "#73CC5F", &format4)?;
-///     worksheet.write_string_with_format(4, 0, "#FFACFF", &format5)?;
-///     worksheet.write_string_with_format(5, 0, "#CC7E16", &format6)?;
+///     worksheet.write_with_format(0, 0, "Red", &format1)?;
+///     worksheet.write_with_format(1, 0, "Green", &format2)?;
+///     worksheet.write_with_format(2, 0, "#4F026A", &format3)?;
+///     worksheet.write_with_format(3, 0, "#73CC5F", &format4)?;
+///     worksheet.write_with_format(4, 0, "#FFACFF", &format5)?;
+///     worksheet.write_with_format(5, 0, "#CC7E16", &format6)?;
 ///
 /// #     workbook.save("colors.xlsx")?;
 /// #
@@ -306,8 +308,8 @@ use crate::Color;
 ///      let format = Format::default();
 ///
 ///      // These methods calls are equivalent.
-///      worksheet.write_string(0, 0, "Hello")?;
-///      worksheet.write_string_with_format(1, 0, "Hello", &format)?;
+///      worksheet.write(0, 0, "Hello")?;
+///      worksheet.write_with_format(1, 0, "Hello", &format)?;
 /// #
 /// #     workbook.save("formats.xlsx")?;
 /// #
@@ -373,6 +375,8 @@ use crate::Color;
 ///
 /// The [`Format::set_num_format()`] method is used to set the number format for
 /// numbers used with
+/// [`Worksheet::write_with_format()`](crate::Worksheet::write_with_format())
+/// and
 /// [`Worksheet::write_number_with_format()`](crate::Worksheet::write_number_with_format()):
 ///
 /// ```
@@ -390,7 +394,7 @@ use crate::Color;
 ///     // Add a format.
 ///     let currency_format = Format::new().set_num_format("$#,##0.00");
 ///
-///     worksheet.write_number_with_format(0, 0, 1234.56, &currency_format)?;
+///     worksheet.write_with_format(0, 0, 1234.56, &currency_format)?;
 ///
 ///     workbook.save("currency_format.xlsx")?;
 ///
@@ -449,7 +453,7 @@ use crate::Color;
 /// #    // Add a format.
 ///     let currency_format = Format::new().set_num_format("[$$-409]#,##0.00");
 ///
-///     worksheet.write_number_with_format(0, 0, 1234.56, &currency_format)?;
+///     worksheet.write_with_format(0, 0, 1234.56, &currency_format)?;
 ///
 /// #   workbook.save("currency_format.xlsx")?;
 /// #
@@ -488,7 +492,7 @@ use crate::Color;
 ///     // Add a format.
 ///     let currency_format = Format::new().set_num_format("#,##0.00");
 ///
-///     worksheet.write_number_with_format(0, 0, 1234.56, &currency_format)?;
+///     worksheet.write_with_format(0, 0, 1234.56, &currency_format)?;
 ///
 ///     workbook.save("number_format.xlsx")?;
 ///
@@ -690,9 +694,9 @@ impl Format {
     ///     let merged = format1.merge(&format2);
     ///
     ///     // Write some strings with the formats.
-    ///     worksheet.write_string_with_format(0, 0, "Format 1", &format1)?;
-    ///     worksheet.write_string_with_format(2, 0, "Format 2", &format2)?;
-    ///     worksheet.write_string_with_format(4, 0, "Merged", &merged)?;
+    ///     worksheet.write_with_format(0, 0, "Format 1", &format1)?;
+    ///     worksheet.write_with_format(2, 0, "Format 2", &format2)?;
+    ///     worksheet.write_with_format(4, 0, "Merged", &merged)?;
     /// #
     /// #     // Save the file.
     /// #     workbook.save("formats.xlsx")?;
@@ -730,10 +734,10 @@ impl Format {
     ///     let merged2 = format2.merge(&format1);
     ///
     ///     // Write some strings with the formats.
-    ///     worksheet.write_string_with_format(0, 0, "Format 1: green and bold", &format1)?;
-    ///     worksheet.write_string_with_format(1, 0, "Format 2: red and italic", &format2)?;
-    ///     worksheet.write_string_with_format(3, 0, "Merged 2 into 1", &merged1)?;
-    ///     worksheet.write_string_with_format(4, 0, "Merged 1 into 2", &merged2)?;
+    ///     worksheet.write_with_format(0, 0, "Format 1: green and bold", &format1)?;
+    ///     worksheet.write_with_format(1, 0, "Format 2: red and italic", &format2)?;
+    ///     worksheet.write_with_format(3, 0, "Merged 2 into 1", &merged1)?;
+    ///     worksheet.write_with_format(4, 0, "Merged 1 into 2", &merged2)?;
     /// #
     /// #     // Autofit for clarity.
     /// #     worksheet.autofit();
@@ -801,14 +805,14 @@ impl Format {
     ///     let format7 = Format::new().set_num_format("d mmmm yyyy");
     ///     let format8 = Format::new().set_num_format("dd/mm/yyyy hh:mm AM/PM");
     ///
-    ///     worksheet.write_number_with_format(0, 0, 1.23456,   &format1)?;
-    ///     worksheet.write_number_with_format(1, 0, 1.23456  , &format2)?;
-    ///     worksheet.write_number_with_format(2, 0, 1234.56,   &format3)?;
-    ///     worksheet.write_number_with_format(3, 0, 1234.56,   &format4)?;
-    ///     worksheet.write_number_with_format(4, 0, 44927.521, &format5)?;
-    ///     worksheet.write_number_with_format(5, 0, 44927.521, &format6)?;
-    ///     worksheet.write_number_with_format(6, 0, 44927.521, &format7)?;
-    ///     worksheet.write_number_with_format(7, 0, 44927.521, &format8)?;
+    ///     worksheet.write_with_format(0, 0, 1.23456,   &format1)?;
+    ///     worksheet.write_with_format(1, 0, 1.23456  , &format2)?;
+    ///     worksheet.write_with_format(2, 0, 1234.56,   &format3)?;
+    ///     worksheet.write_with_format(3, 0, 1234.56,   &format4)?;
+    ///     worksheet.write_with_format(4, 0, 44927.521, &format5)?;
+    ///     worksheet.write_with_format(5, 0, 44927.521, &format6)?;
+    ///     worksheet.write_with_format(6, 0, 44927.521, &format7)?;
+    ///     worksheet.write_with_format(7, 0, 44927.521, &format8)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -911,7 +915,7 @@ impl Format {
     /// #
     ///     let format = Format::new().set_num_format_index(15);
     ///
-    ///     worksheet.write_number_with_format(0, 0, 44927.521, &format)?;
+    ///     worksheet.write_with_format(0, 0, 44927.521, &format)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -991,7 +995,7 @@ impl Format {
     /// #
     ///     let format = Format::new().set_bold();
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Hello", &format)?;
+    ///     worksheet.write_with_format(0, 0, "Hello", &format)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1026,7 +1030,7 @@ impl Format {
     /// #
     ///     let format = Format::new().set_italic();
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Hello", &format)?;
+    ///     worksheet.write_with_format(0, 0, "Hello", &format)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1071,7 +1075,7 @@ impl Format {
     /// #
     ///     let format = Format::new().set_font_color(Color::Red);
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Wheelbarrow", &format)?;
+    ///     worksheet.write_with_format(0, 0, "Wheelbarrow", &format)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1120,7 +1124,7 @@ impl Format {
     /// #
     ///     let format = Format::new().set_font_name("Avenir Black Oblique");
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Avenir Black Oblique", &format)?;
+    ///     worksheet.write_with_format(0, 0, "Avenir Black Oblique", &format)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1170,7 +1174,7 @@ impl Format {
     /// #
     ///     let format = Format::new().set_font_size(30);
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Font Size 30", &format)?;
+    ///     worksheet.write_with_format(0, 0, "Font Size 30", &format)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1263,11 +1267,11 @@ impl Format {
     ///     let format4 = Format::new().set_underline(FormatUnderline::SingleAccounting);
     ///     let format5 = Format::new().set_underline(FormatUnderline::DoubleAccounting);
     ///
-    ///     worksheet.write_string_with_format(0, 0, "None",              &format1)?;
-    ///     worksheet.write_string_with_format(1, 0, "Single",            &format2)?;
-    ///     worksheet.write_string_with_format(2, 0, "Double",            &format3)?;
-    ///     worksheet.write_string_with_format(3, 0, "Single Accounting", &format4)?;
-    ///     worksheet.write_string_with_format(4, 0, "Double Accounting", &format5)?;
+    ///     worksheet.write_with_format(0, 0, "None",              &format1)?;
+    ///     worksheet.write_with_format(1, 0, "Single",            &format2)?;
+    ///     worksheet.write_with_format(2, 0, "Double",            &format3)?;
+    ///     worksheet.write_with_format(3, 0, "Single Accounting", &format4)?;
+    ///     worksheet.write_with_format(4, 0, "Double Accounting", &format5)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1303,7 +1307,7 @@ impl Format {
     /// #
     ///     let format = Format::new().set_font_strikethrough();
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Strikethrough Text", &format)?;
+    ///     worksheet.write_with_format(0, 0, "Strikethrough Text", &format)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1384,10 +1388,10 @@ impl Format {
     ///         .set_align(FormatAlign::Bottom)
     ///         .set_align(FormatAlign::Right);
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Center", &format1)?;
-    ///     worksheet.write_string_with_format(1, 0, "Top - Left", &format2)?;
-    ///     worksheet.write_string_with_format(2, 0, "Center - Center", &format3)?;
-    ///     worksheet.write_string_with_format(3, 0, "Bottom - Right", &format4)?;
+    ///     worksheet.write_with_format(0, 0, "Center", &format1)?;
+    ///     worksheet.write_with_format(1, 0, "Top - Left", &format2)?;
+    ///     worksheet.write_with_format(2, 0, "Center - Center", &format3)?;
+    ///     worksheet.write_with_format(3, 0, "Bottom - Right", &format4)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1452,9 +1456,9 @@ impl Format {
     /// #
     ///     let format1 = Format::new().set_text_wrap();
     ///
-    ///     worksheet.write_string(0, 0, "Some text that isn't wrapped")?;
-    ///     worksheet.write_string_with_format(1, 0, "Some text that is wrapped", &format1)?;
-    ///     worksheet.write_string_with_format(2, 0, "Some text\nthat is\nwrapped\nat newlines", &format1)?;
+    ///     worksheet.write(0, 0, "Some text that isn't wrapped")?;
+    ///     worksheet.write_with_format(1, 0, "Some text that is wrapped", &format1)?;
+    ///     worksheet.write_with_format(2, 0, "Some text\nthat is\nwrapped\nat newlines", &format1)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1502,9 +1506,9 @@ impl Format {
     ///     let format1 = Format::new().set_indent(1);
     ///     let format2 = Format::new().set_indent(2);
     ///
-    ///     worksheet.write_string(0, 0, "Indent 0")?;
-    ///     worksheet.write_string_with_format(1, 0, "Indent 1", &format1)?;
-    ///     worksheet.write_string_with_format(2, 0, "Indent 2", &format2)?;
+    ///     worksheet.write(0, 0, "Indent 0")?;
+    ///     worksheet.write_with_format(1, 0, "Indent 1", &format1)?;
+    ///     worksheet.write_with_format(2, 0, "Indent 2", &format2)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1556,9 +1560,9 @@ impl Format {
     ///     let format2 = Format::new().set_rotation(-30);
     ///     let format3 = Format::new().set_rotation(270);
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
-    ///     worksheet.write_string_with_format(1, 0, "Rust", &format2)?;
-    ///     worksheet.write_string_with_format(2, 0, "Rust", &format3)?;
+    ///     worksheet.write_with_format(0, 0, "Rust", &format1)?;
+    ///     worksheet.write_with_format(1, 0, "Rust", &format2)?;
+    ///     worksheet.write_with_format(2, 0, "Rust", &format3)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1619,9 +1623,9 @@ impl Format {
     ///     let format1 = Format::new().set_reading_direction(1);
     ///     let format2 = Format::new().set_reading_direction(2);
     ///
-    ///     worksheet.write_string(0, 0, "نص عربي / English text")?;
-    ///     worksheet.write_string_with_format(1, 0, "نص عربي / English text", &format1)?;
-    ///     worksheet.write_string_with_format(2, 0, "نص عربي / English text", &format2)?;
+    ///     worksheet.write(0, 0, "نص عربي / English text")?;
+    ///     worksheet.write_with_format(1, 0, "نص عربي / English text", &format1)?;
+    ///     worksheet.write_with_format(2, 0, "نص عربي / English text", &format2)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1664,7 +1668,7 @@ impl Format {
     /// #
     ///     let format1 = Format::new().set_shrink();
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Shrink text to fit", &format1)?;
+    ///     worksheet.write_with_format(0, 0, "Shrink text to fit", &format1)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -1720,7 +1724,7 @@ impl Format {
     ///         .set_foreground_color(Color::Red)
     ///         .set_pattern(FormatPattern::DarkVertical);
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
+    ///     worksheet.write_with_format(0, 0, "Rust", &format1)?;
     ///     worksheet.write_blank(1, 0, &format2)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
@@ -1770,7 +1774,7 @@ impl Format {
     /// #
     ///     let format1 = Format::new().set_background_color(Color::Green);
     ///
-    ///     worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
+    ///     worksheet.write_with_format(0, 0, "Rust", &format1)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -2244,17 +2248,17 @@ impl Format {
     ///     worksheet.protect();
     ///
     ///     // Examples of cell locking and hiding.
-    ///     worksheet.write_string(0, 0, "Cell B1 is locked. It cannot be edited.")?;
+    ///     worksheet.write(0, 0, "Cell B1 is locked. It cannot be edited.")?;
     ///     worksheet.write_formula(0, 1, "=1+2")?; // Locked by default.
     ///
-    ///     worksheet.write_string(1, 0, "Cell B2 is unlocked. It can be edited.")?;
+    ///     worksheet.write(1, 0, "Cell B2 is unlocked. It can be edited.")?;
     ///     worksheet.write_formula_with_format(1, 1, "=1+2", &unlocked)?;
     ///
-    ///     worksheet.write_string(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
+    ///     worksheet.write(2, 0, "Cell B3 is hidden. The formula isn't visible.")?;
     ///     worksheet.write_formula_with_format(2, 1, "=1+2", &hidden)?;
     /// #
-    /// #     worksheet.write_string(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
-    /// #     worksheet.write_string(5, 0, "to remove the worksheet protection.")?;
+    /// #     worksheet.write(4, 0, "Use Menu -> Review -> Unprotect Sheet")?;
+    /// #     worksheet.write(5, 0, "to remove the worksheet protection.")?;
     /// #
     /// #     worksheet.autofit();
     /// #
@@ -2317,7 +2321,7 @@ impl Format {
     ///     // If the "=Hello" string was edited in Excel it would change into an
     ///     // invalid formula and raise an error. The quote prefix adds a virtual quote
     ///     // to the start of the string and prevents this from happening.
-    ///     worksheet.write_string_with_format(0, 0, "=Hello", &format)?;
+    ///     worksheet.write_with_format(0, 0, "=Hello", &format)?;
     /// #
     /// #     workbook.save("formats.xlsx")?;
     /// #
@@ -3005,11 +3009,11 @@ pub enum FormatDiagonalBorder {
 ///     let format4 = Format::new().set_underline(FormatUnderline::SingleAccounting);
 ///     let format5 = Format::new().set_underline(FormatUnderline::DoubleAccounting);
 ///
-///     worksheet.write_string_with_format(0, 0, "None",              &format1)?;
-///     worksheet.write_string_with_format(1, 0, "Single",            &format2)?;
-///     worksheet.write_string_with_format(2, 0, "Double",            &format3)?;
-///     worksheet.write_string_with_format(3, 0, "Single Accounting", &format4)?;
-///     worksheet.write_string_with_format(4, 0, "Double Accounting", &format5)?;
+///     worksheet.write_with_format(0, 0, "None",              &format1)?;
+///     worksheet.write_with_format(1, 0, "Single",            &format2)?;
+///     worksheet.write_with_format(2, 0, "Double",            &format3)?;
+///     worksheet.write_with_format(3, 0, "Single Accounting", &format4)?;
+///     worksheet.write_with_format(4, 0, "Double Accounting", &format5)?;
 ///
 /// #     workbook.save("formats.xlsx")?;
 /// #

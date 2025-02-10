@@ -26,9 +26,9 @@ fn main() -> Result<(), XlsxError> {
     let merged = format1.merge(&format2);
 
     // Write some strings with the formats.
-    worksheet.write_string_with_format(0, 0, "Format 1", &format1)?;
-    worksheet.write_string_with_format(2, 0, "Format 2", &format2)?;
-    worksheet.write_string_with_format(4, 0, "Merged", &merged)?;
+    worksheet.write_with_format(0, 0, "Format 1", &format1)?;
+    worksheet.write_with_format(2, 0, "Format 2", &format2)?;
+    worksheet.write_with_format(4, 0, "Merged", &merged)?;
 
     // Save the file.
     workbook.save("formats.xlsx")?;

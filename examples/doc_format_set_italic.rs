@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
 
     let format = Format::new().set_italic();
 
-    worksheet.write_string_with_format(0, 0, "Hello", &format)?;
+    worksheet.write_with_format(0, 0, "Hello", &format)?;
 
     workbook.save("formats.xlsx")?;
 

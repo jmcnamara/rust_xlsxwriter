@@ -16,7 +16,7 @@ fn main() -> Result<(), XlsxError> {
 
     let format1 = Format::new().set_background_color(Color::Green);
 
-    worksheet.write_string_with_format(0, 0, "Rust", &format1)?;
+    worksheet.write_with_format(0, 0, "Rust", &format1)?;
 
     workbook.save("formats.xlsx")?;
 

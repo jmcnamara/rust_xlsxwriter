@@ -14,14 +14,9 @@ fn main() -> Result<(), XlsxError> {
 
     let format1 = Format::new().set_text_wrap();
 
-    worksheet.write_string(0, 0, "Some text that isn't wrapped")?;
-    worksheet.write_string_with_format(1, 0, "Some text that is wrapped", &format1)?;
-    worksheet.write_string_with_format(
-        2,
-        0,
-        "Some text\nthat is\nwrapped\nat newlines",
-        &format1,
-    )?;
+    worksheet.write(0, 0, "Some text that isn't wrapped")?;
+    worksheet.write_with_format(1, 0, "Some text that is wrapped", &format1)?;
+    worksheet.write_with_format(2, 0, "Some text\nthat is\nwrapped\nat newlines", &format1)?;
 
     workbook.save("formats.xlsx")?;
 

@@ -17,7 +17,7 @@ fn main() -> Result<(), XlsxError> {
     // If the "=Hello" string was edited in Excel it would change into an
     // invalid formula and raise an error. The quote prefix adds a virtual quote
     // to the start of the string and prevents this from happening.
-    worksheet.write_string_with_format(0, 0, "=Hello", &format)?;
+    worksheet.write_with_format(0, 0, "=Hello", &format)?;
 
     workbook.save("formats.xlsx")?;
 

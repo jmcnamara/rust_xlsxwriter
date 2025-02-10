@@ -15,7 +15,7 @@ fn main() -> Result<(), XlsxError> {
 
     let format = Format::new().set_font_color(Color::Red);
 
-    worksheet.write_string_with_format(0, 0, "Wheelbarrow", &format)?;
+    worksheet.write_with_format(0, 0, "Wheelbarrow", &format)?;
 
     workbook.save("formats.xlsx")?;
 
