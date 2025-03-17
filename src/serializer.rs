@@ -3642,7 +3642,7 @@ impl ser::Serializer for &mut Worksheet {
         self.serialize_none()
     }
 
-    // Excel doesn't have an equivalent for the structure so we ignore it.
+    // Serialize enum style unit variants.
     #[doc(hidden)]
     fn serialize_unit_variant(
         self,
@@ -3650,7 +3650,7 @@ impl ser::Serializer for &mut Worksheet {
         _variant_index: u32,
         variant: &'static str,
     ) -> Result<(), XlsxError> {
-        Ok(())
+        variant.serialize(self)
     }
 
     // Try to handle this as a single value.
@@ -3662,7 +3662,7 @@ impl ser::Serializer for &mut Worksheet {
         value.serialize(self)
     }
 
-    // Excel doesn't have an equivalent for the structure so we ignore it.
+    // Serialize the value of enum style newtype variants.
     #[doc(hidden)]
     fn serialize_newtype_variant<T>(
         self,
@@ -3674,8 +3674,7 @@ impl ser::Serializer for &mut Worksheet {
     where
         T: ?Sized + Serialize,
     {
-        value.serialize(&mut *self)?;
-        Ok(())
+        value.serialize(&mut *self)
     }
 
     // Compound types.

@@ -655,6 +655,50 @@ fn create_new_xlsx_file_16(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test case for Serde serialization with enum values.
+fn create_new_xlsx_file_17(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet();
+
+    // Define an enum for the test.
+    #[derive(Serialize)]
+    #[serde(rename_all = "lowercase")]
+    enum MyEnum {
+        Aaa,
+        Bbb,
+        Ccc,
+    }
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: u8,
+        col2: MyEnum,
+    }
+
+    let data = [
+        MyStruct {
+            col1: 1,
+            col2: MyEnum::Aaa,
+        },
+        MyStruct {
+            col1: 2,
+            col2: MyEnum::Bbb,
+        },
+        MyStruct {
+            col1: 3,
+            col2: MyEnum::Ccc,
+        },
+    ];
+
+    worksheet.serialize_headers(0, 0, &data.get(0).unwrap())?;
+    worksheet.serialize(&data)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_serde07_1() {
     let test_runner = common::TestRunner::new()
@@ -840,6 +884,18 @@ fn test_serde07_16() {
         .set_name("serde07")
         .set_function(create_new_xlsx_file_16)
         .unique("16")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_serde07_17() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde07")
+        .set_function(create_new_xlsx_file_17)
+        .unique("17")
         .initialize();
 
     test_runner.assert_eq();
