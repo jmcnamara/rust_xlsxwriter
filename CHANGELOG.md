@@ -5,7 +5,24 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.84.1] - 2025-03-17
+
+### Added
+
+- Added `serde` serialization support for enum values.
+
+  Added serialization support for unit variant enum types like `enum Direction
+  {Forward, Reverse, Park}` and newtype variant enum types like `enum State
+  {Temperature(i16), Pressure(u32)}`.
+
+  [Request #139].
+
+  [Request #139]: https://github.com/jmcnamara/rust_xlsxwriter/issues/139
+
+
 ## [0.84.0] - 2025-02-10
+
+### Added
 
 - Added support for merging Formats via the [`Format::merge()`] method.
 
