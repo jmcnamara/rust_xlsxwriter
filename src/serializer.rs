@@ -3518,7 +3518,7 @@ impl CustomSerializeField {
 // serialized a serde derived struct to an Excel worksheet.
 // -----------------------------------------------------------------------
 #[allow(unused_variables)]
-impl<'a> ser::Serializer for &'a mut Worksheet {
+impl ser::Serializer for &mut Worksheet {
     #[doc(hidden)]
     type Ok = ();
     #[doc(hidden)]
@@ -3754,7 +3754,7 @@ impl<'a> ser::Serializer for &'a mut Worksheet {
 
 // Structs are the main sequence type used by `rust_xlsxwriter`.
 #[doc(hidden)]
-impl<'a> ser::SerializeStruct for &'a mut Worksheet {
+impl ser::SerializeStruct for &mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
 
@@ -3775,7 +3775,7 @@ impl<'a> ser::SerializeStruct for &'a mut Worksheet {
 
 // We also serialize sequences to map vectors/arrays to Excel.
 #[doc(hidden)]
-impl<'a> ser::SerializeSeq for &'a mut Worksheet {
+impl ser::SerializeSeq for &mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
 
@@ -3794,7 +3794,7 @@ impl<'a> ser::SerializeSeq for &'a mut Worksheet {
 
 // Serialize tuple sequences.
 #[doc(hidden)]
-impl<'a> ser::SerializeTuple for &'a mut Worksheet {
+impl ser::SerializeTuple for &mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
 
@@ -3812,7 +3812,7 @@ impl<'a> ser::SerializeTuple for &'a mut Worksheet {
 
 // Serialize tuple struct sequences.
 #[doc(hidden)]
-impl<'a> ser::SerializeTupleStruct for &'a mut Worksheet {
+impl ser::SerializeTupleStruct for &mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
 
@@ -3830,7 +3830,7 @@ impl<'a> ser::SerializeTupleStruct for &'a mut Worksheet {
 
 // Serialize tuple variant sequences.
 #[doc(hidden)]
-impl<'a> ser::SerializeTupleVariant for &'a mut Worksheet {
+impl ser::SerializeTupleVariant for &mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
 
@@ -3848,7 +3848,7 @@ impl<'a> ser::SerializeTupleVariant for &'a mut Worksheet {
 
 // Serialize tuple map sequences.
 #[doc(hidden)]
-impl<'a> ser::SerializeMap for &'a mut Worksheet {
+impl ser::SerializeMap for &mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
 
@@ -3873,7 +3873,7 @@ impl<'a> ser::SerializeMap for &'a mut Worksheet {
 
 // Serialize struct variant sequences.
 #[doc(hidden)]
-impl<'a> ser::SerializeStructVariant for &'a mut Worksheet {
+impl ser::SerializeStructVariant for &mut Worksheet {
     type Ok = ();
     type Error = XlsxError;
 
@@ -3904,7 +3904,7 @@ pub(crate) struct SerializerHeader {
 // trait to capture the headers/field names only.
 // -----------------------------------------------------------------------
 #[allow(unused_variables)]
-impl<'a> ser::Serializer for &'a mut SerializerHeader {
+impl ser::Serializer for &mut SerializerHeader {
     type Ok = ();
     type Error = XlsxError;
     type SerializeSeq = Self;
@@ -4077,7 +4077,7 @@ impl<'a> ser::Serializer for &'a mut SerializerHeader {
 }
 
 // We are only interested in Struct fields. Other compound types are ignored.
-impl<'a> ser::SerializeStruct for &'a mut SerializerHeader {
+impl ser::SerializeStruct for &mut SerializerHeader {
     type Ok = ();
     type Error = XlsxError;
 
@@ -4094,7 +4094,7 @@ impl<'a> ser::SerializeStruct for &'a mut SerializerHeader {
     }
 }
 
-impl<'a> ser::SerializeSeq for &'a mut SerializerHeader {
+impl ser::SerializeSeq for &mut SerializerHeader {
     type Ok = ();
     type Error = XlsxError;
 
@@ -4110,7 +4110,7 @@ impl<'a> ser::SerializeSeq for &'a mut SerializerHeader {
     }
 }
 
-impl<'a> ser::SerializeTuple for &'a mut SerializerHeader {
+impl ser::SerializeTuple for &mut SerializerHeader {
     type Ok = ();
     type Error = XlsxError;
 
@@ -4126,7 +4126,7 @@ impl<'a> ser::SerializeTuple for &'a mut SerializerHeader {
     }
 }
 
-impl<'a> ser::SerializeTupleStruct for &'a mut SerializerHeader {
+impl ser::SerializeTupleStruct for &mut SerializerHeader {
     type Ok = ();
     type Error = XlsxError;
 
@@ -4142,7 +4142,7 @@ impl<'a> ser::SerializeTupleStruct for &'a mut SerializerHeader {
     }
 }
 
-impl<'a> ser::SerializeTupleVariant for &'a mut SerializerHeader {
+impl ser::SerializeTupleVariant for &mut SerializerHeader {
     type Ok = ();
     type Error = XlsxError;
 
@@ -4158,7 +4158,7 @@ impl<'a> ser::SerializeTupleVariant for &'a mut SerializerHeader {
     }
 }
 
-impl<'a> ser::SerializeMap for &'a mut SerializerHeader {
+impl ser::SerializeMap for &mut SerializerHeader {
     type Ok = ();
     type Error = XlsxError;
 
@@ -4181,7 +4181,7 @@ impl<'a> ser::SerializeMap for &'a mut SerializerHeader {
     }
 }
 
-impl<'a> ser::SerializeStructVariant for &'a mut SerializerHeader {
+impl ser::SerializeStructVariant for &mut SerializerHeader {
     type Ok = ();
     type Error = XlsxError;
 
@@ -4206,7 +4206,7 @@ pub(crate) struct DeSerializerHeader<'a> {
     pub(crate) field_names: &'a mut &'static [&'static str],
 }
 
-impl<'de, 'a> Deserializer<'de> for DeSerializerHeader<'a> {
+impl<'de> Deserializer<'de> for DeSerializerHeader<'_> {
     type Error = XlsxError;
 
     fn deserialize_struct<V>(
