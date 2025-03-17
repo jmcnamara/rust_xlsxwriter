@@ -2671,9 +2671,7 @@ impl Worksheet {
     /// Write an unformatted number to a cell.
     ///
     /// Write an unformatted number to a worksheet cell. To write a formatted
-    /// number see the
-    /// [`Worksheet::write_number_with_format()`]
-    /// method below.
+    /// number see the [`Worksheet::write_number_with_format()`] method below.
     ///
     /// All numerical values in Excel are stored as [IEEE 754] Doubles which are
     /// the equivalent of rust's [`f64`] type. This method will accept any rust
@@ -2690,9 +2688,11 @@ impl Worksheet {
     /// store the number with a loss of precision outside Excel's integer range
     /// of +/- 999,999,999,999,999 (15 digits).
     ///
-    /// Excel doesn't have handling for NaN or INF floating point numbers.
-    /// These will be stored as the strings "NAN", "INF", and "-INF" strings
-    /// instead.
+    /// Excel doesn't have handling for NaN or INF floating point numbers. These
+    /// will be stored as the strings "NAN", "INF", and "-INF" strings or the
+    /// values set with [`Worksheet::set_nan_value()`],
+    /// [`Worksheet::set_infinity_value()`] or
+    /// [`Worksheet::set_neg_infinity_value()`].
     ///
     /// # Parameters
     ///
@@ -2781,7 +2781,10 @@ impl Worksheet {
     /// of +/- 999,999,999,999,999 (15 digits).
     ///
     /// Excel doesn't have handling for NaN or INF floating point numbers. These
-    /// will be stored as the strings "NAN", "INF", and "-INF" strings instead.
+    /// will be stored as the strings "NAN", "INF", and "-INF" strings or the
+    /// values set with [`Worksheet::set_nan_value()`],
+    /// [`Worksheet::set_infinity_value()`] or
+    /// [`Worksheet::set_neg_infinity_value()`].
     ///
     /// # Parameters
     ///
@@ -18999,7 +19002,7 @@ impl Worksheet {
         number: f64,
         xf_index: u32,
     ) {
-        // Use the optional ryu crate to format f64 cell number data as a
+        // Use the optional `ryu` crate to format f64 cell number data as a
         // string. Note, the the slightly faster `format_finite()` buffer
         // function is safe to use here since nan/inf numbers are filtered out
         // at the `store_number()` level and written as strings.
