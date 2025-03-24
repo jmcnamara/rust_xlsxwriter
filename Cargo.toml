@@ -13,7 +13,7 @@ rust-version = "1.73.0" # For zip.rs compatibility.
 
 [dependencies]
 # Default/non-optional dependencies.
-zip = { version = "2.2.2", default-features = false, features = ["deflate"] }
+zip = { version = "2.5", default-features = false, features = ["deflate"] }
 
 # Optional dependencies.
 ryu = {version = "1.0.18", optional = true}
