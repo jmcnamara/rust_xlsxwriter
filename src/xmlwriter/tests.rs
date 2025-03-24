@@ -177,4 +177,16 @@ mod xmlwriter_tests {
         let got = xmlwriter::cursor_to_str(&writer);
         assert_eq!(expected, got);
     }
+
+    #[test]
+    fn test_xml_si_escape_with_unicode() {
+        let expected = "<si><t>_x_1_½</t></si>";
+
+        let mut writer = Cursor::new(Vec::with_capacity(2048));
+
+        xml_si_element(&mut writer, "_x_1_½", false);
+
+        let got = xmlwriter::cursor_to_str(&writer);
+        assert_eq!(expected, got);
+    }
 }
