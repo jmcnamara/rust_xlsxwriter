@@ -13,6 +13,7 @@ use std::io::{Cursor, Write};
 use std::str;
 
 pub(crate) const XML_WRITE_ERROR: &str = "Couldn't write to xml file";
+const UNICODE_ESCAPE_LENGTH: usize = 7; // Length of _xHHHH_.
 
 // -----------------------------------------------------------------------
 // XML Writing functions.
@@ -276,17 +277,17 @@ pub(crate) fn escape_xml_escapes(original: &str) -> Cow<str> {
     }
 
     let string_end = original.len();
-    let escape_length = "_x0000_".len();
     let mut escaped_string = original.to_string();
 
     // Match from right so we can escape target string at the same indices.
     let matches: Vec<_> = original.rmatch_indices("_x").collect();
 
     for (index, _) in matches {
-        if index + escape_length > string_end {
+        if index + UNICODE_ESCAPE_LENGTH > string_end {
             continue;
         }
 
+        // Ensure that the end index is at a character boundary.
         if !original.is_char_boundary(index + 6) {
             continue;
         }
