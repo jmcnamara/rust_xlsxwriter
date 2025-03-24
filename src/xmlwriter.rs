@@ -287,6 +287,10 @@ pub(crate) fn escape_xml_escapes(original: &str) -> Cow<str> {
             continue;
         }
 
+        if !original.is_char_boundary(index + 6) {
+            continue;
+        }
+
         // Check that the digits in _xABCD_ are a valid hex code.
         if original[index + 2..index + 6]
             .chars()
