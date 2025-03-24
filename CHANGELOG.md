@@ -5,6 +5,23 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.84.2] - 2025-03-24
+
+### Fixed
+
+- Fixed issue when handling Unicode escapes in strings that don't occur at
+  character boundaries.
+
+  [Issue #141].
+
+  [Issue #141]: https://github.com/jmcnamara/rust_xlsxwriter/issues/141
+
+### Added
+
+  - Updated `zip.rs` version to v2.5.x.
+
+
 ## [0.84.1] - 2025-03-17
 
 ### Added
