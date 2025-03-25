@@ -204,7 +204,8 @@ There are some limitations and restrictions when using "constant memory" mode.
 - Constant memory mode uses a [tempfile] filehandle for each worksheet created
   using `Worksheet::add_worksheet_with_constant_memory()` and
   `Worksheet::add_worksheet_with_low_memory()`. This won't save memory if your
-  temp directory is also mounted in memory.
+  temp directory is also mounted in memory, however, you can set the temp
+  directory to a custom location using `Workbook::set_tempdir()`.
 - Functions that set formatting separately from data, such as
   [`Worksheet::set_cell_format()`](crate::Worksheet::set_cell_format),  will
   only work on the current row.

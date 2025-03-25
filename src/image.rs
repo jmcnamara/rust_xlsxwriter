@@ -14,7 +14,6 @@ use std::hash::{Hash, Hasher};
 use std::io::BufReader;
 use std::io::Read;
 use std::path::Path;
-use std::path::PathBuf;
 
 use crate::drawing::{DrawingObject, DrawingType};
 use crate::vml::VmlInfo;
@@ -156,8 +155,7 @@ impl Image {
     /// <img src="https://rustxlsxwriter.github.io/images/image_intro.png">
     ///
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Image, XlsxError> {
-        let mut path_buf = PathBuf::new();
-        path_buf.push(path);
+        let path_buf = path.as_ref().to_path_buf();
 
         let vml_name = match path_buf.file_stem() {
             Some(file_stem) => file_stem.to_string_lossy().to_string(),

@@ -1357,7 +1357,7 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::{cmp, fmt};
 
 #[cfg(feature = "constant_memory")]
-use tempfile::tempfile;
+use tempfile::tempfile_in;
 
 #[cfg(feature = "constant_memory")]
 use std::io::BufWriter;
@@ -1730,7 +1730,7 @@ impl Worksheet {
         };
 
         #[cfg(feature = "constant_memory")]
-        let file_writer = BufWriter::new(tempfile().unwrap());
+        let file_writer = BufWriter::new(tempfile_in(std::env::temp_dir()).unwrap());
 
         Worksheet {
             writer,

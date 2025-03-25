@@ -46,6 +46,22 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
+// Test setting a custom directory for temporary files.
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    workbook.set_tempdir(".")?;
+
+    let worksheet = workbook.add_worksheet_with_constant_memory();
+
+    worksheet.write_string(0, 0, "Hello")?;
+    worksheet.write_number(1, 0, 123)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
 #[test]
 fn test_optimize02_1() {
     let test_runner = common::TestRunner::new()
@@ -64,6 +80,18 @@ fn test_optimize02_2() {
         .set_name("optimize02")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_optimize02_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("optimize02")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

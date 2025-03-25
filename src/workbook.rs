@@ -220,8 +220,17 @@ mod tests;
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{BufReader, Cursor, Read, Seek, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
+
+#[cfg(feature = "constant_memory")]
+use tempfile::tempfile_in;
+
+#[cfg(feature = "constant_memory")]
+use std::io::BufWriter;
+
+#[cfg(feature = "constant_memory")]
+use std::path::PathBuf;
 
 use crate::error::XlsxError;
 use crate::feature_property_bag::FeaturePropertyBagTypes;
@@ -341,6 +350,9 @@ pub struct Workbook {
     num_worksheets: u16,
     num_chartsheets: u16,
     use_large_file: bool,
+
+    #[cfg(feature = "constant_memory")]
+    tempdir: Option<PathBuf>,
 }
 
 impl Default for Workbook {
@@ -421,6 +433,9 @@ impl Workbook {
             num_chartsheets: 0,
             use_large_file: false,
             feature_property_bags: HashSet::new(),
+
+            #[cfg(feature = "constant_memory")]
+            tempdir: None,
         }
     }
 
@@ -548,6 +563,10 @@ impl Workbook {
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
 
+        if let Some(tempdir) = &self.tempdir {
+            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
+        }
+
         worksheet.use_inline_strings = true;
         worksheet.use_constant_memory = true;
 
@@ -617,6 +636,10 @@ impl Workbook {
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
 
+        if let Some(tempdir) = &self.tempdir {
+            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
+        }
+
         worksheet.use_inline_strings = false;
         worksheet.use_constant_memory = true;
 
@@ -661,6 +684,10 @@ impl Workbook {
     pub fn new_worksheet_with_constant_memory(&mut self) -> Worksheet {
         let mut worksheet = Worksheet::new();
 
+        if let Some(tempdir) = &self.tempdir {
+            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
+        }
+
         worksheet.use_inline_strings = true;
         worksheet.use_constant_memory = true;
 
@@ -699,6 +726,10 @@ impl Workbook {
     pub fn new_worksheet_with_low_memory(&mut self) -> Worksheet {
         let mut worksheet = Worksheet::new();
 
+        if let Some(tempdir) = &self.tempdir {
+            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
+        }
+
         worksheet.use_inline_strings = false;
         worksheet.use_constant_memory = true;
 
@@ -709,6 +740,74 @@ impl Workbook {
         worksheet.has_workbook_global_sst = true;
 
         worksheet
+    }
+
+    /// Set the temporary directory used in "constant memory" and "low memory"
+    /// mode.
+    ///
+    /// In "constant" and "low" memory" mode `rust_xlsxwriter` uses temporary
+    /// files to reduce memory usage when writing large files (see [Constant
+    /// memory mode](../performance/index.html#constant-memory-mode) for
+    /// details).
+    ///
+    /// By default these files are created in the [`std::env::temp_dir()`]
+    /// directory by the [`tempfile`] crate. However, in cases where the default
+    /// temporary directory isn't accessible to your application, doesn't
+    /// contain enough space, or is mounted in memory you can set a custom
+    /// temporary directory using the `set_tempdir()` method.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    ///   a temporary file in the custom temporary directory.
+    ///
+    /// # Parameters
+    ///
+    /// - `dir`: The path/directory to use for temporary files. It must exist
+    ///   and be writeable. You can pass the path as a `&str` or as a
+    ///   [`std::path`] `Path` or `PathBuf` instance.
+    ///
+    /// # Examples
+    ///
+    /// The following example demonstrates setting a custom directory for
+    /// temporary files when creating a file in "constant memory" mode.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_workbook_set_tempdir.rs
+    /// #
+    /// # use rust_xlsxwriter::{Workbook, XlsxError};
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     // Create a new Excel file object.
+    /// #     let mut workbook = Workbook::new();
+    /// #
+    ///     // Set a custom directory for temporary files before adding worksheets.
+    ///     workbook.set_tempdir(".")?;
+    ///
+    ///     // Add a worksheet in "constant memory" mode.
+    ///     let worksheet = workbook.add_worksheet_with_constant_memory();
+    ///     worksheet.write(0, 0, "Hello")?;
+    /// #
+    /// #     workbook.save("workbook.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img
+    /// src="https://rustxlsxwriter.github.io/images/workbook_set_tempdir.png">
+    ///
+    #[cfg(feature = "constant_memory")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
+    pub fn set_tempdir<P: AsRef<Path>>(&mut self, dir: P) -> Result<&mut Workbook, XlsxError> {
+        // Check that the directory exists and is writable.
+        tempfile_in(&dir)?;
+
+        self.tempdir = Some(dir.as_ref().to_path_buf());
+
+        Ok(self)
     }
 
     /// Add a new chartsheet to a workbook.
@@ -1676,9 +1775,7 @@ impl Workbook {
     /// <img src="https://rustxlsxwriter.github.io/images/app_macros.png">
     ///
     pub fn add_vba_project<P: AsRef<Path>>(&mut self, path: P) -> Result<&mut Workbook, XlsxError> {
-        let mut path_buf = PathBuf::new();
-        path_buf.push(path);
-
+        let path_buf = path.as_ref().to_path_buf();
         let file = File::open(path_buf)?;
         let mut reader = BufReader::new(file);
         let mut data = vec![];
@@ -1798,9 +1895,7 @@ impl Workbook {
         self.add_vba_project(project)?;
 
         // Add the signature binary file.
-        let mut path_buf = PathBuf::new();
-        path_buf.push(signature);
-
+        let path_buf = signature.as_ref().to_path_buf();
         let file = File::open(path_buf)?;
         let mut reader = BufReader::new(file);
         let mut data = vec![];

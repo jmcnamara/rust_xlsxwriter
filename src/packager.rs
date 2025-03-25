@@ -465,7 +465,7 @@ impl<W: Write + Seek + Send> Packager<W> {
                     if length == 0 {
                         break;
                     }
-                    self.zip.write_all(&buffer).unwrap();
+                    self.zip.write_all(buffer).unwrap();
                     reader.consume(length);
                 }
             }

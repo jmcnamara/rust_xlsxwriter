@@ -374,6 +374,11 @@ name = "doc_workbook_add_worksheet_with_constant_memory"
 path = "examples/doc_workbook_add_worksheet_with_constant_memory.rs"
 required-features = ["constant_memory"]
 
+[[example]]
+name = "doc_workbook_set_tempdir"
+path = "examples/doc_workbook_set_tempdir.rs"
+required-features = ["constant_memory"]
+
 
 # Workaround to display feature specific docs.
 [package.metadata.docs.rs]
