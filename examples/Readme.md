@@ -1281,6 +1281,9 @@ documentation and generally show how an individual function works.
   workbook to some types that implement the `Write` trait like a file and a
   buffer.
 
+* `doc_workbook_set_tempdir.rs` - Demonstrates setting a custom directory
+  for temporary files when creating a file in "constant memory" mode.
+
 * `doc_workbook_worksheet_from_index.rs` - Demonstrates getting worksheet
   reference by index.
 

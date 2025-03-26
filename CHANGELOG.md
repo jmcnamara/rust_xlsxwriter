@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.85.0] - 2025-03-26
+
+### Added
+
+- Added support for setting a custom temp file directory when using the
+  `constant_memory` feature. This can be useful if the default temp directory
+  isn't accessible or if it is loaded in memory (which would negate the effect
+  of `constant_memory` mode).
+
+  See [`Workbook::set_tempfile()`].
+
+  [`Workbook::set_tempfile()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.set_tempfile
+
+
 ## [0.84.2] - 2025-03-24
 
 ### Fixed
@@ -19,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-  - Updated `zip.rs` version to v2.5.x.
+- Updated `zip.rs` version to v2.5.x.
 
 
 ## [0.84.1] - 2025-03-17
@@ -53,9 +67,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - [`utility::quote_sheet_name()`] - Enclose a worksheet name in single quotes
     as required by Excel.
   - [`utility::worksheet_range()`] - Convert a worksheet name and cell reference
-    to an Excel "Sheet1!A1:B1" style range string.
+    to an Excel "`Sheet1!A1:B1`" style range string.
   - [`utility::worksheet_range_absolute()`] - Convert a worksheet name and cell
-    reference to an Excel "Sheet1!$A$1:$B$1" style absolute range string.
+    reference to an Excel "`Sheet1!$A$1:$B$1`" style absolute range string.
 
   [`Format::merge()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#method.merge
   [Row and Column Formats]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Format.html#row-and-column-formats
