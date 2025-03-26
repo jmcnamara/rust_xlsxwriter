@@ -16,19 +16,19 @@ rust-version = "1.73.0" # For zip.rs compatibility.
 zip = { version = "2.5", default-features = false, features = ["deflate"] }
 
 # Optional dependencies.
-ryu = {version = "1.0.18", optional = true}
-serde = {version = "1.0.217", features = ["derive"], optional = true}
-chrono = {version = "0.4.39", default-features = false, features = ["clock", "wasmbind", "serde"], optional = true}
-js-sys = {version = "0.3.77", optional = true}
+ryu = {version = "1.0", optional = true}
+serde = {version = "1.0", features = ["derive"], optional = true}
+chrono = {version = "0.4", default-features = false, features = ["clock", "wasmbind", "serde"], optional = true}
+js-sys = {version = "0.3", optional = true}
 polars = {version = "0.46", default-features = false, features = [], optional = true}
-tempfile =  {version = "3.15.0", optional = true}
-wasm-bindgen = {version = "0.2.100", optional = true}
-rust_decimal = {version = "1.36.0", optional = true}
-rust_xlsxwriter_derive = {version = "0.2.0", optional = true}
+tempfile =  {version = "3.19", optional = true}
+wasm-bindgen = {version = "0.2", optional = true}
+rust_decimal = {version = "1.37", optional = true}
+rust_xlsxwriter_derive = {version = "0.2", optional = true}
 
 [dev-dependencies]
-regex = "1.11.1"
-pretty_assertions = "1.4.1"
+regex = "1.11"
+pretty_assertions = "1.4"
 
 [features]
 # `default`: Includes all the standard functionality.
