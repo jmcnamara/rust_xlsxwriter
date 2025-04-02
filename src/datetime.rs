@@ -105,7 +105,7 @@ const UNIX_EPOCH_PLUS_400: i64 = 12_622_780_800;
 ///
 /// ## Chrono vs. native `ExcelDateTime`
 ///
-/// The `rust_xlsxwriter` native `ExcelDateTime` provided most of the
+/// The `rust_xlsxwriter` native `ExcelDateTime` provides most of the
 /// functionality that you will need to work with Excel dates and times.
 ///
 /// For anything more advanced you can use the Naive Date/Time variants of
@@ -1453,7 +1453,7 @@ impl Serialize for ExcelDateTime {
 
 /// Implementation of the `serde::Deserialize` trait for `ExcelDateTime`.
 ///
-/// This is a non-functional implementation o allow `ExcelDateTime` types to be
+/// This is a non-functional implementation to allow `ExcelDateTime` types to be
 /// included in a struct that derives `Deserialize`.
 ///
 #[cfg(feature = "serde")]

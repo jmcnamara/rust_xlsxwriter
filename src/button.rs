@@ -11,15 +11,15 @@ use crate::vml::VmlInfo;
 use crate::{ObjectMovement, DEFAULT_COL_WIDTH_PIXELS, DEFAULT_ROW_HEIGHT_PIXELS};
 
 #[derive(Clone)]
-/// The `Button` struct represents an worksheet button object.
+/// The `Button` struct represents a worksheet button object.
 ///
 /// The `Button` struct is used to create an Excel "Form Control" button object
 /// to represent a button on a worksheet.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/doc_button_intro.png">
 ///
-/// The worksheet button object is mainly provided as a way of triggering a VBA
-/// macro, see [Working with VBA macros](crate::macros) for more details. It is
+/// The worksheet button object is mainly provided as a way to trigger a VBA
+/// macro. See [Working with VBA macros](crate::macros) for more details. It is
 /// used in conjunction with the
 /// [`Worksheet::insert_button()`](crate::Worksheet::insert_button) method.
 ///
@@ -59,7 +59,7 @@ use crate::{ObjectMovement, DEFAULT_COL_WIDTH_PIXELS, DEFAULT_ROW_HEIGHT_PIXELS}
 ///     worksheet.insert_button(2, 1, &button)?;
 ///
 ///     // Save the file to disk. Note the `.xlsm` extension. This is required by
-///     // Excel or it raise a warning.
+///     // Excel or it will raise a warning.
 ///     workbook.save("macros.xlsm")?;
 ///
 ///     Ok(())
@@ -139,7 +139,7 @@ impl Button {
     ///     let button = Button::new();
     ///     worksheet.insert_button(2, 1, &button)?;
     ///
-    ///     // Add a button with a user defined caption.
+    ///     // Add a button with a user-defined caption.
     ///     let button = Button::new().set_caption("Press Me");
     ///     worksheet.insert_button(4, 1, &button)?;
     /// #
@@ -179,7 +179,6 @@ impl Button {
     ///
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/button_macro_dialog.png">
-    ///
     ///
     /// # Examples
     ///
@@ -273,7 +272,7 @@ impl Button {
 
     /// Set the object movement options for a worksheet button.
     ///
-    /// Set the option to define how an button will behave in Excel if the cells
+    /// Set the option to define how a button will behave in Excel if the cells
     /// under the button are moved, deleted, or have their size changed. In
     /// Excel the options are:
     ///
@@ -292,7 +291,7 @@ impl Button {
     ///
     /// # Parameters
     ///
-    /// - `option`: An button/object positioning behavior defined by the
+    /// - `option`: A button/object positioning behavior defined by the
     ///   [`ObjectMovement`] enum.
     pub fn set_object_movement(mut self, option: ObjectMovement) -> Button {
         self.object_movement = option;

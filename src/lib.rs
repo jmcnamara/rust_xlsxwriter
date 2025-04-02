@@ -1,4 +1,4 @@
-// Entry point for `rust_xlsxwriter` library.
+// Entry point for the `rust_xlsxwriter` library.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
@@ -12,13 +12,13 @@
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/demo.png">
 //!
-//! The `rust_xlsxwriter` crate can be used to write text, numbers, dates and
-//! formulas to multiple worksheets in a new Excel 2007+ xlsx file. It has a
-//! focus on performance and on fidelity with the file format created by Excel.
-//! It cannot be used to modify an existing file.
+//! The `rust_xlsxwriter` crate can be used to write text, numbers, dates, and
+//! formulas to multiple worksheets in a new Excel 2007+ `.xlsx` file. It focuses
+//! on performance and fidelity with the file format created by Excel. It cannot
+//! be used to modify an existing file.
 //!
 //! `rust_xlsxwriter` is a rewrite of the Python [`XlsxWriter`] library in Rust
-//! by the same author and with some additional Rust-like features and APIs. The
+//! by the same author, with additional Rust-like features and APIs. The
 //! currently supported features are:
 //!
 //! - Support for writing all basic Excel data types.
@@ -45,16 +45,16 @@
 //!
 //! [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
 //!
-//! # Table of contents
+//! # Table of Contents
 //!
 //! - [`Tutorial`](crate::tutorial): A getting started and tutorial guide.
 //! - [`Cookbook`](crate::cookbook): Examples of using `rust_xlsxwriter`.
 //!
 //! <p>
 //!
-//! - [`Workbook`]: The entry point for creating an Excel workbook of
+//! - [`Workbook`]: The entry point for creating an Excel workbook with
 //!   worksheets.
-//! - [`Working with Workbooks`](crate::workbook): A higher level introduction
+//! - [`Working with Workbooks`](crate::workbook): A higher-level introduction
 //!   to creating and working with workbooks.
 //! </p>
 //!
@@ -62,14 +62,14 @@
 //!
 //! - [`Worksheet`]: The main spreadsheet canvas for writing data and objects to
 //!   a worksheet.
-//! - [`Working with Worksheets`](crate::worksheet): A higher level introduction
+//! - [`Working with Worksheets`](crate::worksheet): A higher-level introduction
 //!    to creating and working with worksheets.
 //! </p>
 //!
 //! <p>
 //!
 //! - [`Chart`] struct: The interface for creating worksheet charts.
-//! - [`Working with charts`](crate::chart): A higher level introduction to
+//! - [`Working with Charts`](crate::chart): A higher-level introduction to
 //!   creating and using charts.
 //! </p>
 //!
@@ -77,7 +77,7 @@
 //!
 //! - [`Format`]: The interface for adding formatting to worksheets and other
 //!   objects.
-//!  - [`Table`]: The interface for worksheet tables.
+//! - [`Table`]: The interface for worksheet tables.
 //! - [`Image`]: The interface for images used in worksheets.
 //! - [`Conditional Formats`](crate::conditional_format): Working with
 //!   conditional formatting in worksheets.
@@ -100,10 +100,10 @@
 //! Other external documentation:
 //!
 //! - [User Guide]: Working with the `rust_xlsxwriter` library.
-//! - [Roadmap of planned features].
+//! - [Roadmap of Planned Features].
 //!
 //! [User Guide]: https://rustxlsxwriter.github.io/index.html
-//! [Roadmap of planned features]:
+//! [Roadmap of Planned Features]:
 //!     https://github.com/jmcnamara/rust_xlsxwriter/issues/1
 //!
 //! # Example
@@ -175,21 +175,21 @@
 //!
 //! ## Crate Features
 //!
-//! The following is a list of the features supports by the `rust_xlsxwriter`
+//! The following is a list of the features supported by the `rust_xlsxwriter`
 //! crate:
 //!
 //! - `default`: Includes all the standard functionality. This has a dependency
 //!   on the `zip` crate only.
-//! - `constant_memory`: This keeps memory usage to a minimum when writing
-//!   writing large files. See [Constant memory
-//!   mode](performance/index.html#constant-memory-mode).
-//! - `serde`: Adds supports for Serde serialization. This is off by default.
-//! - `chrono`: Adds supports for Chrono date/time types to the API. This is off
+//! - `constant_memory`: Keeps memory usage to a minimum when writing
+//!   large files. See [Constant Memory
+//!   Mode](performance/index.html#constant-memory-mode).
+//! - `serde`: Adds support for Serde serialization. This is off by default.
+//! - `chrono`: Adds support for Chrono date/time types to the API. This is off
 //!   by default.
 //! - `zlib`: Adds a dependency on zlib and a C compiler. This includes the same
 //!   features as `default` but is 1.5x faster for large files.
-//! - `polars`: Add support for mapping between `PolarsError` and
-//!   `rust_xlsxwriter::XlsxError` to make code that handles both types of error
+//! - `polars`: Adds support for mapping between `PolarsError` and
+//!   `rust_xlsxwriter::XlsxError` to make code that handles both types of errors
 //!   easier to write. See also
 //!   [`polars_excel_writer`](https://crates.io/crates/polars_excel_writer).
 //! - `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow

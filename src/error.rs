@@ -35,7 +35,7 @@ pub enum XlsxError {
     /// 16,384 columns for a worksheet.
     RowColumnLimitError,
 
-    /// First row or column is greater than last row or column in a range
+    /// The first row or column is greater than the last row or column in a range
     /// specification, i.e., the order is reversed.
     RowColumnOrderError,
 
@@ -63,16 +63,16 @@ pub enum XlsxError {
     /// A merge range cannot be a single cell in Excel.
     MergeRangeSingleCell,
 
-    /// The merge range overlaps a previous merge range. This is a strictly
+    /// The merge range overlaps a previous merge range. This is strictly
     /// prohibited by Excel.
     MergeRangeOverlaps(String, String),
 
-    /// URL string exceeds Excel's url of 2080 characters.
+    /// URL string exceeds Excel's limit of 2080 characters.
     MaxUrlLengthExceeded,
 
-    /// Unknown url type. The URL/URIs supported by Excel are `http://`,
-    /// `https://`, `ftp://`, `ftps://`, `mailto:`, `file://` and the
-    /// pseudo-uri `internal:`.
+    /// Unknown URL type. The URL/URIs supported by Excel are `http://`,
+    /// `https://`, `ftp://`, `ftps://`, `mailto:`, `file://`, and the
+    /// pseudo-URI `internal:`.
     UnknownUrlType(String),
 
     /// Unknown image type. The supported image formats are PNG, JPG, GIF and
@@ -94,9 +94,9 @@ pub enum XlsxError {
     /// [`ExcelDateTime`](crate::ExcelDateTime) method is outside Excel's
     /// allowable ranges.
     ///
-    /// Excel restricts dates to the range 1899-12-31 to 9999-12-31. For hours
-    /// the range is generally 0-24 although larger ranges can be used to
-    /// indicate durations. Minutes should be in the range 0-60 and seconds
+    /// Excel restricts dates to the range 1899-12-31 to 9999-12-31. For hours,
+    /// the range is generally 0-24, although larger ranges can be used to
+    /// indicate durations. Minutes should be in the range 0-60, and seconds
     /// should be in the range 0.0-59.999. Excel only supports millisecond
     /// resolution.
     DateTimeRangeError(String),
@@ -124,11 +124,11 @@ pub enum XlsxError {
     ///
     /// The time part of `DateTimes` can contain optional or fractional seconds
     /// like the time examples. Timezone information is not supported by Excel
-    /// and ignored in the parsing.
+    /// and is ignored in the parsing.
     ///
     DateTimeParseError(String),
 
-    /// The table range overlaps a previous table range. This is a strictly
+    /// The table range overlaps a previous table range. This is strictly
     /// prohibited by Excel.
     TableRangeOverlaps(String, String),
 
@@ -139,7 +139,7 @@ pub enum XlsxError {
     /// Table name is already in use in the workbook.
     TableNameReused(String),
 
-    /// A Worksheet and Table autofilter range overlap. This is a strictly
+    /// A Worksheet and Table autofilter range overlap. This is strictly
     /// prohibited by Excel.
     AutofilterRangeOverlaps(String, String),
 
@@ -166,7 +166,7 @@ pub enum XlsxError {
     MaxGroupLevelExceeded,
 
     /// A customizable error that can be used by third parties to raise errors
-    /// or as a conversion target for other Error types.
+    /// or as a conversion target for other error types.
     CustomError(String),
 
     /// Wrapper for a variety of [`std::io::Error`] errors such as file
@@ -187,7 +187,7 @@ pub enum XlsxError {
     SerdeError(String),
 
     /// Wrapper for a variety of [polars::prelude::PolarsError] errors. This is
-    /// mainly used by the `polars_excel_writer` crate but it can also be useful
+    /// mainly used by the `polars_excel_writer` crate, but it can also be useful
     /// for code that uses `polars` functions in an `XlsxError` error scope.
     /// This requires the `polars` feature to be enabled.
     #[cfg(feature = "polars")]

@@ -35,20 +35,20 @@ impl FeaturePropertyBag {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
-        // Write the FeaturePropertyBags element.
+        // Write the <FeaturePropertyBags> element.
         self.write_feature_property_bags();
 
-        // Write the Checkbox bag element.
+        // Write the Checkbox <bag> element.
         self.write_checkbox_bag();
 
-        // Write the XFControls bag element.
+        // Write the XFControls <bag> element.
         self.write_xf_controls_bag();
 
-        // Write the XFComplement bag element.
+        // Write the XFComplement <bag> element.
         self.write_xf_compliment_bag();
 
         // Write the XFComplements <bag> element.
@@ -62,7 +62,7 @@ impl FeaturePropertyBag {
             self.write_dxf_compliments_bag();
         }
 
-        // Close the feature_property_bagProperties tag.
+        // Close the <FeaturePropertyBags> tag.
         xml_end_tag(&mut self.writer, "FeaturePropertyBags");
     }
 
@@ -89,7 +89,7 @@ impl FeaturePropertyBag {
 
         xml_start_tag(&mut self.writer, "bag", &attributes);
 
-        // Write the bagId element.
+        // Write a <bagId> element.
         self.write_bag_id("CellControl", "0");
 
         xml_end_tag(&mut self.writer, "bag");
@@ -101,7 +101,7 @@ impl FeaturePropertyBag {
 
         xml_start_tag(&mut self.writer, "bag", &attributes);
 
-        // Write the bagId element.
+        // Write a <bagId> element.
         self.write_bag_id("XFControls", "1");
 
         xml_end_tag(&mut self.writer, "bag");
@@ -139,7 +139,7 @@ impl FeaturePropertyBag {
         xml_end_tag(&mut self.writer, "bag");
     }
 
-    // Write the <bagId> element.
+    // Write a <bagId> element.
     fn write_bag_id(&mut self, key: &str, id: &str) {
         let mut attributes = vec![];
 

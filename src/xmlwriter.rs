@@ -19,19 +19,19 @@ const UNICODE_ESCAPE_LENGTH: usize = 7; // Length of _xHHHH_.
 // XML Writing functions.
 // -----------------------------------------------------------------------
 
-// Write an XML file declaration.
+// Write the XML declaration for a file.
 pub(crate) fn xml_declaration<W: Write>(mut writer: W) {
     writer
         .write_all(b"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n")
         .expect(XML_WRITE_ERROR);
 }
 
-// Write an XML start tag without attributes.
+// Write an XML start tag that has no attributes.
 pub(crate) fn xml_start_tag_only<W: Write>(writer: &mut W, tag: &str) {
     write!(writer, "<{tag}>").expect(XML_WRITE_ERROR);
 }
 
-// Write an XML start tag with attributes.
+// Write an XML start tag with specified attributes.
 pub(crate) fn xml_start_tag<W, T>(writer: &mut W, tag: &str, attributes: &[T])
 where
     W: Write,
@@ -46,17 +46,17 @@ where
     writer.write_all(b">").expect(XML_WRITE_ERROR);
 }
 
-// Write an XML end tag.
+// Write the closing tag for an XML element.
 pub(crate) fn xml_end_tag<W: Write>(writer: &mut W, tag: &str) {
     write!(writer, "</{tag}>").expect(XML_WRITE_ERROR);
 }
 
-// Write an empty XML tag without attributes.
+// Write an empty XML tag that has no attributes.
 pub(crate) fn xml_empty_tag_only<W: Write>(writer: &mut W, tag: &str) {
     write!(writer, "<{tag}/>").expect(XML_WRITE_ERROR);
 }
 
-// Write an empty XML tag with attributes.
+// Write an empty XML tag with specified attributes.
 pub(crate) fn xml_empty_tag<W, T>(writer: &mut W, tag: &str, attributes: &[T])
 where
     W: Write,
@@ -71,12 +71,12 @@ where
     writer.write_all(b"/>").expect(XML_WRITE_ERROR);
 }
 
-// Write an XML element containing data without attributes.
+// Write an XML element with data but no attributes.
 pub(crate) fn xml_data_element_only<W: Write>(writer: &mut W, tag: &str, data: &str) {
     write!(writer, "<{}>{}</{}>", tag, escape_xml_data(data), tag).expect(XML_WRITE_ERROR);
 }
 
-// Write an XML element containing data with attributes.
+// Write an XML element with data and specified attributes.
 pub(crate) fn xml_data_element<W, T>(writer: &mut W, tag: &str, data: &str, attributes: &[T])
 where
     W: Write,
@@ -91,7 +91,7 @@ where
     write!(writer, ">{}</{}>", escape_xml_data(data), tag).expect(XML_WRITE_ERROR);
 }
 
-// Optimized tag writer for shared strings <si> elements.
+// Optimized writer for <si> elements in shared strings.
 pub(crate) fn xml_si_element<W: Write>(writer: &mut W, string: &str, preserve_whitespace: bool) {
     if preserve_whitespace {
         write!(
@@ -110,41 +110,41 @@ pub(crate) fn xml_si_element<W: Write>(writer: &mut W, string: &str, preserve_wh
     }
 }
 
-// Write <si> element for rich strings.
+// Write an <si> element for rich strings.
 pub(crate) fn xml_rich_si_element<W: Write>(writer: &mut W, string: &str) {
     write!(writer, "<si>{string}</si>").expect(XML_WRITE_ERROR);
 }
 
-// Write the theme string to the theme file.
+// Write the theme string into the theme file.
 pub(crate) fn xml_theme<W: Write>(writer: &mut W, theme: &str) {
     writeln!(writer, "{theme}").expect(XML_WRITE_ERROR);
 }
 
-// Write a string with escaped XML data.
+// Write a string after escaping XML characters.
 pub(crate) fn xml_raw_string<W: Write>(writer: &mut W, data: &str) {
     writer.write_all(data.as_bytes()).expect(XML_WRITE_ERROR);
 }
 
-// Escape XML characters in attributes.
+// Escape special characters in XML attributes.
 pub(crate) fn escape_attributes(attribute: &str) -> Cow<str> {
     escape_string(attribute, match_attribute_html_char)
 }
 
-// Escape XML characters in data sections of tags.
+// Escape special characters in the data sections of XML tags.
 pub(crate) fn escape_xml_data(data: &str) -> Cow<str> {
     escape_string(data, match_xml_char)
 }
 
-// Escape non-url characters in a hyperlink/url.
+// Escape non-URL-safe characters in a hyperlink or URL.
 pub(crate) fn escape_url(data: &str) -> Cow<str> {
     escape_string(data, match_url_char)
 }
 
 // -----------------------------------------------------------------------
-// XML helper functions. Mainly for string escaping.
+// Helper functions for XML, primarily for string escaping.
 // -----------------------------------------------------------------------
 
-// Helper function to read xml data in cursor for tests.
+// Helper function to read XML data from a cursor for testing.
 #[allow(dead_code)]
 pub(crate) fn cursor_to_str(cursor: &Cursor<Vec<u8>>) -> &str {
     str::from_utf8(cursor.get_ref()).unwrap()
@@ -154,13 +154,13 @@ pub(crate) fn cursor_to_string(cursor: &Cursor<Vec<u8>>) -> String {
     str::from_utf8(cursor.get_ref()).unwrap().to_string()
 }
 
-// Reset the memory cursor buffer, usually between saves.
+// Reset the memory cursor buffer, typically used between saves.
 pub(crate) fn reset(cursor: &mut Cursor<Vec<u8>>) {
     cursor.get_mut().clear();
     cursor.set_position(0);
 }
 
-// Match function for escape_attributes().
+// Matching function used by escape_attributes().
 fn match_attribute_html_char(ch: char) -> Option<&'static str> {
     match ch {
         '&' => Some("&amp;"),
@@ -172,13 +172,13 @@ fn match_attribute_html_char(ch: char) -> Option<&'static str> {
     }
 }
 
-// Match function for escape_xml_data().
+// Matching function used by escape_xml_data().
 //
-// Note, this is different from match_attribute_html_char() because double
-// quotes and newline are not escaped by Excel.
+// Note: This differs from match_attribute_html_char() because Excel does not
+// escape double quotes or newlines.
 //
-// We need to mimic Excel by escaping control and non-printing characters in the
-// range '\x00' - '\x1F'.
+// To mimic Excel, escape control and non-printing characters in the range
+// '\x00' - '\x1F'.
 fn match_xml_char(ch: char) -> Option<&'static str> {
     match ch {
         // Standard XML escapes.
@@ -225,7 +225,7 @@ fn match_xml_char(ch: char) -> Option<&'static str> {
     }
 }
 
-// Match the url characters that Excel escapes.
+// Match the URL characters that Excel escapes.
 fn match_url_char(ch: char) -> Option<&'static str> {
     match ch {
         '%' => Some("%25"),
@@ -243,7 +243,7 @@ fn match_url_char(ch: char) -> Option<&'static str> {
     }
 }
 
-// Generic escape function with function pointer for the required handler.
+// Generic escape function that uses a function pointer for the required handler.
 fn escape_string<F>(original: &str, char_handler: F) -> Cow<str>
 where
     F: FnOnce(char) -> Option<&'static str> + Copy,
@@ -268,9 +268,9 @@ where
     Cow::Borrowed(original)
 }
 
-// Excel escapes control characters with _xHHHH_, see match_xml_char() above. As
-// a result it also escapes any literal strings of that type by encoding the
-// leading underscore. So  "_x0000_" -> _x005F_x0000_.
+// Excel escapes control characters with _xHHHH_ (see match_xml_char() above).
+// As a result, it also escapes any literal strings of that type by encoding the
+// leading underscore. For example, "_x0000_" becomes "_x005F_x0000_".
 pub(crate) fn escape_xml_escapes(original: &str) -> Cow<str> {
     if !original.contains("_x") {
         return Cow::Borrowed(original);

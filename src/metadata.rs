@@ -38,17 +38,17 @@ impl Metadata {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
-        // Write the metadata element.
+        // Write the <metadata> element.
         self.write_metadata();
 
-        // Write the metadataTypes element.
+        // Write the <metadataTypes> element.
         self.write_metadata_types();
 
-        // Write the futureMetadata element.
+        // Write the <futureMetadata> element.
         if self.has_dynamic_functions {
             self.write_cell_future_metadata();
         }
@@ -56,7 +56,7 @@ impl Metadata {
             self.write_value_future_metadata();
         }
 
-        // Write the cellMetadata element.
+        // Write the <cellMetadata> element.
         if self.has_dynamic_functions {
             self.write_cell_metadata();
         }
@@ -64,7 +64,7 @@ impl Metadata {
             self.write_value_metadata();
         }
 
-        // Close the metadata tag.
+        // Close the <metadata> tag.
         xml_end_tag(&mut self.writer, "metadata");
     }
 
@@ -108,7 +108,7 @@ impl Metadata {
 
         xml_start_tag(&mut self.writer, "metadataTypes", &attributes);
 
-        // Write the metadataType element.
+        // Write the <metadataType> element.
         if self.has_dynamic_functions {
             self.write_cell_metadata_type();
         }
@@ -116,6 +116,7 @@ impl Metadata {
             self.write_value_metadata_type();
         }
 
+        // Close the <metadataTypes> tag.
         xml_end_tag(&mut self.writer, "metadataTypes");
     }
 
@@ -168,7 +169,7 @@ impl Metadata {
         xml_start_tag_only(&mut self.writer, "bk");
         xml_start_tag_only(&mut self.writer, "extLst");
 
-        // Write the ext element.
+        // Write the <ext> element.
         self.write_cell_ext();
 
         xml_end_tag(&mut self.writer, "extLst");
@@ -185,7 +186,7 @@ impl Metadata {
 
         xml_start_tag(&mut self.writer, "futureMetadata", &attributes);
 
-        // Write the ext element.
+        // Write the <ext> element for each embedded image.
         for index in 0..self.num_embedded_images {
             xml_start_tag_only(&mut self.writer, "bk");
             xml_start_tag_only(&mut self.writer, "extLst");
@@ -197,25 +198,25 @@ impl Metadata {
         xml_end_tag(&mut self.writer, "futureMetadata");
     }
 
-    // Write the <ext> element.
+    // Write the <ext> element for cell metadata.
     fn write_cell_ext(&mut self) {
         let attributes = [("uri", "{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}")];
 
         xml_start_tag(&mut self.writer, "ext", &attributes);
 
-        // Write the xda:dynamicArrayProperties element.
+        // Write the <xda:dynamicArrayProperties> element.
         self.write_xda_dynamic_array_properties();
 
         xml_end_tag(&mut self.writer, "ext");
     }
 
-    // Write the <ext> element.
+    // Write the <ext> element for value metadata.
     fn write_value_ext(&mut self, index: u32) {
         let attributes = [("uri", "{3e2802c4-a4d2-4d8b-9148-e3be6c30e623}")];
 
         xml_start_tag(&mut self.writer, "ext", &attributes);
 
-        // Write the xlrd:rvb element.
+        // Write the <xlrd:rvb> element.
         self.write_xlrd_rvb(index);
 
         xml_end_tag(&mut self.writer, "ext");
@@ -242,7 +243,7 @@ impl Metadata {
         xml_start_tag(&mut self.writer, "cellMetadata", &attributes);
         xml_start_tag_only(&mut self.writer, "bk");
 
-        // Write the rc element.
+        // Write the <rc> element.
         self.write_rc(1, 0);
 
         xml_end_tag(&mut self.writer, "bk");
@@ -256,6 +257,7 @@ impl Metadata {
 
         xml_start_tag(&mut self.writer, "valueMetadata", &attributes);
 
+        // Write the <rc> element for each embedded image.
         for index in 0..self.num_embedded_images {
             xml_start_tag_only(&mut self.writer, "bk");
             self.write_rc(rc_type, index);

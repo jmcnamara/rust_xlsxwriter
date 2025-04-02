@@ -17,7 +17,7 @@ use crate::{utility, ColNum, Note, RowNum};
 
 /// A struct to represent a Comment.
 ///
-/// Comments is the older name for Notes.
+/// Comment is the older name for Note.
 ///
 pub struct Comment {
     pub(crate) writer: Cursor<Vec<u8>>,
@@ -45,7 +45,7 @@ impl Comment {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    //  Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
@@ -80,7 +80,6 @@ impl Comment {
 
         xml_start_tag_only(&mut self.writer, "authors");
 
-        //let authors: Vec<String> = self.note_authors.keys().cloned().collect();
         for author in &self.note_authors.clone() {
             // Write the author element.
             self.write_author(author);

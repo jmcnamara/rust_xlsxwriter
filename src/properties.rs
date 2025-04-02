@@ -340,7 +340,6 @@ use crate::ExcelDateTime;
 /// $ sum properties.xlsx
 /// 8914 6 properties.xlsx # Same as previous
 /// ```
-///
 #[derive(Clone)]
 pub struct DocProperties {
     pub(crate) author: String,
@@ -505,7 +504,7 @@ impl DocProperties {
 
     /// Set the Status field of the document properties.
     ///
-    /// Set the "Status" field of the document properties such as "Draft" or
+    /// Set the "Status" field of the document properties, such as "Draft" or
     /// "Final".
     ///
     /// # Parameters
@@ -521,7 +520,7 @@ impl DocProperties {
     /// Set the hyperlink base field of the document properties.
     ///
     /// Set the "Hyperlink base" field of the document properties to have a
-    /// default base url.
+    /// default base URL.
     ///
     /// # Parameters
     ///

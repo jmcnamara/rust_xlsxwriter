@@ -83,8 +83,8 @@ use crate::Color;
 /// - [Format Defaults](#format-defaults)
 /// - [Row and Column Formats](#row-and-column-formats)
 /// - [Number Format Categories](#number-format-categories)
-/// - [Number Formats in different
-///   locales](#number-formats-in-different-locales)
+/// - [Number Formats in Different
+///   Locales](#number-formats-in-different-locales)
 /// - [API](#implementations)
 ///
 /// # Creating and using a Format object
@@ -469,7 +469,7 @@ use crate::Color;
 /// The same process can be used to find format strings for "Date" or
 /// "Accountancy" formats.
 ///
-/// # Number Formats in different locales
+/// # Number Formats in Different Locales
 ///
 /// As shown in the previous section the `format.set_num_format()` method is
 /// used to set the number format for `rust_xlsxwriter` formats. A common use
@@ -711,7 +711,7 @@ impl Format {
     ///
     /// The following example demonstrates creating a format that is a
     /// combination of two formats. This example demonstrates that
-    /// properties in the primary format take precedence.
+    /// the properties in the primary format take precedence.
     ///
     /// ```
     /// # // This code is available in examples/doc_format_merge2.rs
@@ -763,15 +763,15 @@ impl Format {
     /// Set the number format for a Format.
     ///
     /// This method is used to define the numerical format of a number in Excel.
-    /// It controls whether a number is displayed as an integer, a floating
-    /// point number, a date, a currency value or some other user defined
+    /// It controls whether a number is displayed as an integer, a floating-point
+    /// number, a date, a currency value, or some other user-defined
     /// format.
     ///
-    /// See also [Number Format Categories] and [Number Formats in different
-    /// locales].
+    /// See also [Number Format Categories] and [Number Formats in Different
+    /// Locales].
     ///
     /// [Number Format Categories]: crate::Format#number-format-categories
-    /// [Number Formats in different locales]:
+    /// [Number Formats in Different Locales]:
     ///     crate::Format#number-formats-in-different-locales
     ///
     /// # Parameters

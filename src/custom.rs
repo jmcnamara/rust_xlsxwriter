@@ -36,15 +36,15 @@ impl Custom {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
-        // Write the Properties element.
+        // Write the <Properties> element.
         self.write_properties();
 
         for (pid, property) in self.properties.custom_properties.clone().iter().enumerate() {
-            // Write the property element.
+            // Write the <property> element.
             self.write_property(property, pid + 2);
         }
 

@@ -6,7 +6,7 @@
 
 //! # Working with Workbooks
 //!
-//! The [`Workbook`] struct represents an Excel file in it's entirety. It is the
+//! The [`Workbook`] struct represents an Excel file in its entirety. It is the
 //! starting point for creating a new Excel xlsx file.
 //!
 //!
@@ -29,7 +29,7 @@
 //! <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
 //!
 //!
-//! For more details on the Worksheet APIs for see the [`Worksheet`]
+//! For more details on the Worksheet APIs, see the [`Worksheet`]
 //! documentation and the sections below.
 //!
 //! # Contents
@@ -79,7 +79,7 @@
 //! }
 //! ```
 //!
-//! This will you a simple output file like the following.
+//! This will give you a simple output file like the following.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/workbook_new.png">
 //!
@@ -169,7 +169,7 @@
 //! </cp:coreProperties>
 //! ```
 //!
-//! If required this can be avoided by setting a constant creation date in the
+//! If required, this can be avoided by setting a constant creation date in the
 //! document properties metadata:
 //!
 //!
@@ -443,13 +443,13 @@ impl Workbook {
     ///
     /// The `add_worksheet()` method adds a new [`Worksheet`] to a workbook.
     ///
-    /// The worksheets will be given standard Excel name like `Sheet1`,
+    /// The worksheets will be given standard Excel names like `Sheet1`,
     /// `Sheet2`, etc. Alternatively, the name can be set using
     /// `worksheet.set_name()`, see the example below and the docs for
     /// [`Worksheet::set_name()`].
     ///
     /// The `add_worksheet()` method returns a borrowed mutable reference to a
-    /// Worksheet instance owned by the Workbook so only one worksheet can be in
+    /// Worksheet instance owned by the Workbook, so only one worksheet can be in
     /// existence at a time, see the example below. This limitation can be
     /// avoided, if necessary, by creating standalone Worksheet objects via
     /// [`Worksheet::new()`] and then later adding them to the workbook with
@@ -818,7 +818,7 @@ impl Workbook {
     /// A Chartsheet in Excel is a specialized type of worksheet that doesn't
     /// have cells but instead is used to display a single chart. It supports
     /// worksheet display options such as headers and footers, margins, tab
-    /// selection and print properties.
+    /// selection, and print properties.
     ///
     /// The chartsheets will be given standard Excel name like `Chart1`,
     /// `Chart2`, etc. Alternatively, the name can be set using
@@ -1417,9 +1417,9 @@ impl Workbook {
 
     /// Create a defined name in the workbook to use as a variable.
     ///
-    /// The `define_name()` method is used to defined a variable name that can
-    /// be used to represent a value, a single cell or a range of cells in a
-    /// workbook. These are sometimes referred to as a "Named Ranges".
+    /// The `define_name()` method is used to define a variable name that can
+    /// be used to represent a value, a single cell, or a range of cells in a
+    /// workbook. These are sometimes referred to as "Named Ranges."
     ///
     /// Defined names are generally used to simplify or clarify formulas by
     /// using descriptive variable names. For example:
@@ -1442,10 +1442,10 @@ impl Workbook {
     ///
     /// See the full example below.
     ///
-    /// Note, Excel has limitations on names used in defined names. For example
+    /// Note, Excel has limitations on names used in defined names. For example,
     /// it must start with a letter or underscore and cannot contain a space or
     /// any of the characters: `,/*[]:\"'`. It also cannot look like an Excel
-    /// range such as `A1`, `XFD12345` or `R1C1`. If in doubt it best to test
+    /// range such as `A1`, `XFD12345`, or `R1C1`. If in doubt, it is best to test
     /// the name in Excel first.
     ///
     /// For local defined names sheet name must exist (at the time of saving)
@@ -1763,7 +1763,7 @@ impl Workbook {
     ///     worksheet.insert_button(2, 1, &button)?;
     ///
     ///     // Save the file to disk. Note the `.xlsm` extension. This is required by
-    ///     // Excel or it raise a warning.
+    ///     // Excel or it will raise a warning.
     ///     workbook.save("macros.xlsm")?;
     ///
     ///     Ok(())
@@ -2201,8 +2201,8 @@ impl Workbook {
         Ok(())
     }
 
-    // Iterates through the worksheets and find which is the user defined Active
-    // sheet. If none has been set then default to the first sheet, like Excel.
+    // Iterates through the worksheets and finds which is the user-defined Active
+    // sheet. If none has been set, then defaults to the first sheet, like Excel.
     fn set_active_worksheets(&mut self) {
         let mut active_index = 0;
 
@@ -2376,7 +2376,7 @@ impl Workbook {
     }
 
     // Add worksheet number/string cache data to chart ranges. This isn't
-    // strictly necessary but it helps non-Excel apps to render charts
+    // strictly necessary, but it helps non-Excel apps to render charts
     // correctly.
     fn prepare_chart_cache_data(&mut self) -> Result<(), XlsxError> {
         // First build up a hash of the chart data ranges. The data may not be
@@ -2561,7 +2561,8 @@ impl Workbook {
         // Set the number format index for the format objects.
         self.prepare_num_formats();
 
-        // Check for any format properties that require a feature bag.
+        // Check for any format properties that require a feature bag. Currently,
+        // this only applies to checkboxes.
         self.prepare_feature_property_bags();
     }
 
@@ -2703,7 +2704,7 @@ impl Workbook {
         }
     }
 
-    // Check for any format properties that require a feature bag. Currently
+    // Check for any format properties that require a feature bag. Currently,
     // this only applies to checkboxes.
     fn prepare_feature_property_bags(&mut self) {
         for xf_format in &self.xf_formats {
@@ -2723,7 +2724,7 @@ impl Workbook {
         }
     }
 
-    // Collect some workbook level metadata to help generate the xlsx
+    // Collect some workbook-level metadata to help generate the xlsx
     // package/file.
     fn set_package_options(
         &mut self,
@@ -2866,7 +2867,7 @@ impl Workbook {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 

@@ -30,7 +30,7 @@ impl RichValueTypes {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 

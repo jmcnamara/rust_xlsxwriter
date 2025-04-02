@@ -6478,7 +6478,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.insert_button(2, 1, &button)?;
 
     // Save the file to disk. Note the `.xlsm` extension. This is required by
-    // Excel or it raise a warning.
+    // Excel or it will raise a warning.
     workbook.save("macros.xlsm")?;
 
     Ok(())
@@ -6624,7 +6624,7 @@ fn main() -> Result<(), XlsxError> {
         .set_company("Rust Solutions Inc")
         .set_category("Sample spreadsheets")
         .set_keywords("Sample, Example, Properties")
-        .set_comment("Created with Rust and `rust_xlsxwriter`");
+        .set_comment("Created with Rust and rust_xlsxwriter");
 
     workbook.set_properties(&properties);
 

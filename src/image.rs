@@ -81,20 +81,20 @@ impl Image {
     // Public (and crate public) methods.
     // -----------------------------------------------------------------------
 
-    /// Create a new Image object from an image file.
+    /// Create a new `Image` object from an image file.
     ///
-    /// Create an Image object from a path to an image file. The image can then
+    /// Create an `Image` object from a path to an image file. The image can then
     /// be inserted into a worksheet.
     ///
     /// The supported image formats are:
     ///
     /// - PNG
     /// - JPG
-    /// - GIF: The image can be an animated gif in more recent versions of
+    /// - GIF: The image can be an animated GIF in more recent versions of
     ///   Excel.
     /// - BMP: BMP images are only supported for backward compatibility. In
-    ///   general it is best to avoid BMP images since they are not compressed.
-    ///   If used, BMP images must be 24 bit, true color, bitmaps.
+    ///   general, it is best to avoid BMP images since they are not compressed.
+    ///   If used, BMP images must be 24-bit, true color, bitmaps.
     ///
     /// EMF and WMF file formats will be supported in an upcoming version of the
     /// library.
@@ -104,25 +104,25 @@ impl Image {
     /// a worksheet but converts them to, and displays them as, PNG files. It
     /// stores the original SVG image in the file so the original format can be
     /// retrieved. This removes the file size and resolution advantage of using
-    /// SVG files. As such SVG files are not supported by `rust_xlsxwriter`
-    /// since a conversion to the PNG format would be required and that format
+    /// SVG files. As such, SVG files are not supported by `rust_xlsxwriter`
+    /// since a conversion to the PNG format would be required, and that format
     /// is already supported.
     ///
     /// # Parameters
     ///
-    /// - `path`: The path of the image file to read e as a `&str` or as a
+    /// - `path`: The path of the image file to read as a `&str` or as a
     ///   [`std::path`] `Path` or `PathBuf` instance.
     ///
     /// # Errors
     ///
     /// - [`XlsxError::UnknownImageType`] - Unknown image type. The supported
-    ///   image formats are PNG, JPG, GIF and BMP.
-    /// - [`XlsxError::ImageDimensionError`] - Image has 0 width or height, or
+    ///   image formats are PNG, JPG, GIF, and BMP.
+    /// - [`XlsxError::ImageDimensionError`] - The image has 0 width or height, or
     ///   the dimensions couldn't be read.
     ///
     /// # Examples
     ///
-    /// The following example demonstrates creating a new Image object and
+    /// The following example demonstrates creating a new `Image` object and
     /// adding it to a worksheet.
     ///
     /// ```
@@ -173,7 +173,7 @@ impl Image {
         Ok(image)
     }
 
-    /// Create an Image object from a u8 buffer. The image can then be inserted
+    /// Create an `Image` object from a `u8` buffer. The image can then be inserted
     /// into a worksheet.
     ///
     /// This method is similar to [`Image::new`], see above, except the image
@@ -181,13 +181,13 @@ impl Image {
     ///
     /// # Parameters
     ///
-    /// - `buffer`: The image data as a u8 array or vector.
+    /// - `buffer`: The image data as a `u8` array or vector.
     ///
     /// # Errors
     ///
     /// - [`XlsxError::UnknownImageType`] - Unknown image type. The supported
-    ///   image formats are PNG, JPG, GIF and BMP.
-    /// - [`XlsxError::ImageDimensionError`] - Image has 0 width or height, or
+    ///   image formats are PNG, JPG, GIF, and BMP.
+    /// - [`XlsxError::ImageDimensionError`] - The image has 0 width or height, or
     ///   the dimensions couldn't be read.
     ///
     /// # Examples

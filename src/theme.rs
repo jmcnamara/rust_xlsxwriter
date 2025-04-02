@@ -22,7 +22,7 @@ impl Theme {
         Theme { writer }
     }
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     #[allow(clippy::too_many_lines)]
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_theme(&mut self.writer,

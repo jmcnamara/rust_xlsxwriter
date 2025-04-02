@@ -15,7 +15,7 @@ use std::{collections::HashMap, sync::OnceLock};
 /// The `Formula` struct creates a formula type that can be used to write
 /// worksheet formulas.
 ///
-/// In general you would use the
+/// In general, you would use the
 /// [`Worksheet::write_formula()`](crate::Worksheet::write_formula) with a
 /// string representation of the formula, like this:
 ///
@@ -44,8 +44,8 @@ use std::{collections::HashMap, sync::OnceLock};
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/working_with_formulas1.png">
 ///
-/// In order to differentiate a formula from an ordinary string (for example
-/// when storing it in a data structure) you can also represent the formula with
+/// To differentiate a formula from an ordinary string (for example,
+/// when storing it in a data structure), you can also represent the formula with
 /// a [`Formula`] struct:
 ///
 /// ```
@@ -91,7 +91,7 @@ use std::{collections::HashMap, sync::OnceLock};
 /// # }
 /// ```
 ///
-/// As shown in the examples above you can write a formula and expect to have
+/// As shown in the examples above, you can write a formula and expect to have
 /// the result appear in Excel. However, there are a few potential issues and
 /// differences that the user of `rust_xlsxwriter` should be aware of. These are
 /// explained in the sections below.
@@ -100,7 +100,7 @@ use std::{collections::HashMap, sync::OnceLock};
 ///
 /// The `rust_xlsxwriter` library doesn't calculate the result of a formula and
 /// instead stores the value "0" as the formula result. It then sets a global
-/// flag in the XLSX file to say that all formulas and functions should be
+/// flag in the XLSX file to indicate that all formulas and functions should be
 /// recalculated when the file is opened.
 ///
 /// This works fine with Excel and the majority of spreadsheet applications.

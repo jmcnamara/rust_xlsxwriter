@@ -1,4 +1,4 @@
-// packager - A library for assembling xml files into an Excel xlsx file.
+// packager - A library for assembling XML files into an Excel xlsx file.
 
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
@@ -9,11 +9,11 @@
 //
 // From Wikipedia: The Open Packaging Conventions (OPC) is a container-file
 // technology initially created by Microsoft to store a combination of XML and
-// non-XML files that together form a single entity such as an Open XML Paper
+// non-XML files that together form a single entity, such as an Open XML Paper
 // Specification (OpenXPS) document.
 // http://en.wikipedia.org/wiki/Open_Packaging_Conventions.
 //
-// At its simplest an Excel xlsx file contains the following elements:
+// At its simplest, an Excel xlsx file contains the following elements:
 //
 //      ____ [Content_Types].xml
 //     |
@@ -74,7 +74,7 @@ use crate::workbook::Workbook;
 use crate::worksheet::Worksheet;
 use crate::{xmlwriter, Comment, DocProperties, Visible, NUM_IMAGE_FORMATS};
 
-// Packager struct to assembler the xlsx file.
+// Packager struct to assemble the xlsx file.
 pub struct Packager<W: Write + Seek> {
     zip: ZipWriter<W>,
     zip_options: SimpleFileOptions,
@@ -106,7 +106,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         }
     }
 
-    // Write the xml files that make up the xlsx OPC package.
+    // Write the XML files that make up the xlsx OPC package.
     pub(crate) fn assemble_file(
         mut self,
         workbook: &mut Workbook,
@@ -121,7 +121,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.write_workbook_file(workbook)?;
 
         // Assemble, but don't write, the worksheet files in parallel. These are
-        // generally the largest files and the threading can help performance if
+        // generally the largest files, and threading can help performance if
         // there are multiple large worksheets. We don't do this in "constant
         // memory" mode because the cell data is already written to disk.
         #[cfg(not(target_arch = "wasm32"))]
@@ -143,7 +143,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             }
         }
 
-        // Write the worksheet files and and associated rel files.
+        // Write the worksheet files and associated rel files.
         let mut index = 1;
         for worksheet in &mut workbook.worksheets {
             if worksheet.is_chartsheet {
@@ -158,7 +158,7 @@ impl<W: Write + Seek + Send> Packager<W> {
             index += 1;
         }
 
-        // Write the chartsheet files and and associated rel files.
+        // Write the chartsheet files and associated rel files.
         let mut index = 1;
         for worksheet in &mut workbook.worksheets {
             if !worksheet.is_chartsheet {
@@ -222,10 +222,10 @@ impl<W: Write + Seek + Send> Packager<W> {
     }
 
     // -----------------------------------------------------------------------
-    // Internal function/methods.
+    // Internal functions/methods.
     // -----------------------------------------------------------------------
 
-    // Write the [ContentTypes].xml file.
+    // Write the [Content_Types].xml file.
     fn write_content_types_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut content_types = ContentTypes::new();
 
@@ -328,7 +328,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         Ok(())
     }
 
-    // Write the root level _rels/.rels xml file.
+    // Write the root-level _rels/.rels XML file.
     fn write_root_rels_file(&mut self, options: &PackagerOptions) -> Result<(), XlsxError> {
         let mut rels = Relationship::new();
 
@@ -347,7 +347,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         Ok(())
     }
 
-    // Write the workbook level workbook.xml.rels xml file.
+    // Write the workbook-level workbook.xml.rels XML file.
     fn write_workbook_rels_file(
         &mut self,
         workbook: &mut Workbook,
@@ -435,7 +435,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         Ok(())
     }
 
-    // Write a worksheet xml file.
+    // Write a worksheet XML file.
     pub(crate) fn write_worksheet_file(
         &mut self,
         worksheet: &mut Worksheet,
@@ -482,7 +482,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         Ok(())
     }
 
-    // Write a chartsheet xml file.
+    // Write a chartsheet XML file.
     pub(crate) fn write_chartsheet_file(
         &mut self,
         worksheet: &mut Worksheet,
@@ -1053,7 +1053,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         Ok(())
     }
 
-    // Write the vba project file.
+    // Write the VBA project file.
     fn write_vba_project(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         if !workbook.is_xlsm_file {
             return Ok(());
@@ -1068,7 +1068,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         self.write_vba_signature(workbook)
     }
 
-    // Write the vba signature file.
+    // Write the VBA signature file.
     fn write_vba_signature(&mut self, workbook: &mut Workbook) -> Result<(), XlsxError> {
         if workbook.vba_signature.is_empty() {
             return Ok(());
@@ -1085,7 +1085,7 @@ impl<W: Write + Seek + Send> Packager<W> {
         Ok(())
     }
 
-    // Write the vba project file.
+    // Write the feature property bag file.
     fn write_feature_property_bag(
         &mut self,
         feature_property_bags: &HashSet<FeaturePropertyBagTypes>,

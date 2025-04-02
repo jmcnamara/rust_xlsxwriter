@@ -32,11 +32,11 @@ impl RichValueRel {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
-        // Write the richValueRels element.
+        // Write the <richValueRels> element.
         self.write_rich_value_rels();
 
         // Close the final tag.
@@ -59,7 +59,7 @@ impl RichValueRel {
         xml_start_tag(&mut self.writer, "richValueRels", &attributes);
 
         for index in 1..=self.num_embedded_images {
-            // Write the rel element.
+            // Write the <rel> element.
             self.write_rel(index);
         }
     }

@@ -482,7 +482,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
   - Added support for adjusting the layout position of chart elements: plot
-    area, legend, title and axis labels. See [`ChartLayout`].
+    area, legend, title, and axis labels. See [`ChartLayout`].
 
    [`ChartLayout`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartLayout.html
 
@@ -618,7 +618,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`worksheet::embed_image()`] and [`worksheet::embed_image_with_format()`] and
   the [`Image`] struct. See the [Embedded Images] example.
 
-  This can be useful if you are building up a spreadsheet of products with a
+  This can be useful if you are building a spreadsheet of products with a
   column of images for each product. Embedded images move with the cell so they
   can be used in worksheet tables or data ranges that will be sorted or
   filtered.
@@ -830,9 +830,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Up-Down bars via the [`Chart::set_up_down_bars()`] struct and methods.
   - High-Low lines via the [`Chart::set_high_low_lines()`] struct and methods.
   - Drop lines via the [`Chart::set_high_low_lines()`] struct and methods.
-  - Chart axis support for Date, Text and Automatic axes via the
-    [`ChartAxis::set_date_axis()`], [`ChartAxis::set_text_axis()`]
-    and[`ChartAxis::set_automatic_axis()`] methods.
+  - Chart axis support for Date, Text, and Automatic axes via the
+    [`ChartAxis::set_date_axis()`], [`ChartAxis::set_text_axis()`],
+    and [`ChartAxis::set_automatic_axis()`] methods.
   - Chart axis support for minimum and maximum date values via the
     [`ChartAxis::set_min_date()`] and [`ChartAxis::set_max_date()`] methods.
 
@@ -882,8 +882,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added support for chart gradient fill formatting via the [`ChartGradientFill`] struct and methods.
 
-- Added support for formatting the chart trendlines data labels via the
-  [`ChartTrendline::set_label_font`] and [`ChartTrendline::set_label_format`].
+- Added support for formatting the chart trendlines' data labels via the
+  [`ChartTrendline::set_label_font`] and [`ChartTrendline::set_label_format`] methods.
 
 
 [`ChartGradientFill`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/chart/struct.ChartGradientFill.html
@@ -1439,7 +1439,7 @@ Performance improvement release.
 
 - Added support for hiding rows and columns (to hide intermediate calculations)
   via the [`Worksheet::set_column_hidden()`] and[`Worksheet::set_row_hidden()`]
-  method. This is also a required precursor to adding autofilter conditions.
+  methods. This is also a required precursor to adding autofilter conditions.
 - Added the [ObjectMovement] enum to control how a worksheet object, such a
   an image, moves when the cells underneath it are moved, resized or deleted.
 
@@ -1540,7 +1540,7 @@ Added more page setup methods.
 
 - Added support for "rich" strings with multiple font formats via
   [`Worksheet::write_rich_string()`] and [`Worksheet::write_rich_string_with_format()`].
-  For example strings like "This is **bold** and this is *italic*".
+  For example, strings like "This is **bold** and this is *italic*".
 
   See also the [Rich strings example] in the user guide.
 

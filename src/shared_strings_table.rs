@@ -26,7 +26,7 @@ impl SharedStringsTable {
     // Crate public methods.
     // -----------------------------------------------------------------------
 
-    // Create a new struct to to track Excel shared strings between worksheets.
+    // Create a new struct to track Excel shared strings between worksheets.
     pub(crate) fn new() -> SharedStringsTable {
         SharedStringsTable {
             count: 0,

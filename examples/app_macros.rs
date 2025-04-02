@@ -35,7 +35,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.insert_button(2, 1, &button)?;
 
     // Save the file to disk. Note the `.xlsm` extension. This is required by
-    // Excel or it raise a warning.
+    // Excel or it will raise a warning.
     workbook.save("macros.xlsm")?;
 
     Ok(())

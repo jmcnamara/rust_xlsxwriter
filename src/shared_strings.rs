@@ -35,17 +35,17 @@ impl SharedStrings {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self, string_table: Arc<Mutex<SharedStringsTable>>) {
         xml_declaration(&mut self.writer);
 
-        // Write the sst element.
+        // Write the <sst> element.
         self.write_sst(&string_table);
 
-        // Write the sst strings.
+        // Write the <sst> strings.
         self.write_sst_strings(&string_table);
 
-        // Close the sst tag.
+        // Close the <sst> tag.
         xml_end_tag(&mut self.writer, "sst");
     }
 
@@ -61,7 +61,7 @@ impl SharedStrings {
         xml_start_tag(&mut self.writer, "sst", &attributes);
     }
 
-    // Write the sst string elements.
+    // Write the <sst> string elements.
     #[allow(clippy::from_iter_instead_of_collect)] // from_iter() is faster than collect() here.
     fn write_sst_strings(&mut self, string_table: &Arc<Mutex<SharedStringsTable>>) {
         let string_table = string_table.lock().unwrap();
@@ -74,6 +74,7 @@ impl SharedStrings {
             let preserve_whitespace =
                 string.starts_with(whitespace) || string.ends_with(whitespace);
 
+            // Check if the string is a rich text element.
             if string.starts_with("<r>") && string.ends_with("</r>") {
                 xml_rich_si_element(&mut self.writer, string);
             } else {

@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates writing a url with alternative format.
+//! The following example demonstrates writing a URL with alternative format.
 
 use rust_xlsxwriter::{Color, Format, FormatUnderline, Workbook, XlsxError};
 
@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
         .set_font_color(Color::Red)
         .set_underline(FormatUnderline::Single);
 
-    // Write a url with an alternative format.
+    // Write a URL with an alternative format.
     worksheet.write_url_with_format(0, 0, "https://www.rust-lang.org", &link_format)?;
 
     // Save the file to disk.

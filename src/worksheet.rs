@@ -6,8 +6,8 @@
 
 //! # Working with Worksheets
 //!
-//! The [`Worksheet`] struct struct represents an Excel worksheet. It handles
-//! operations such as writing data to cells or formatting worksheet layout.
+//! The [`Worksheet`] struct represents an Excel worksheet. It handles
+//! operations such as writing data to cells or formatting the worksheet layout.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/demo.png">
 //!
@@ -74,7 +74,7 @@
 //! }
 //! ```
 //!
-//! For more details on the Worksheet APIs for see the [`Worksheet`]
+//! For more details on the Worksheet APIs, see the [`Worksheet`]
 //! documentation and the sections below.
 //!
 //! # Contents
@@ -112,8 +112,8 @@
 //!
 //! # Creating worksheets
 //!
-//! There are two ways of creating a worksheet object with `rust_xlsxwriter`:
-//! via the [`Workbook::add_worksheet()`] method and via the
+//! There are two ways to create a Worksheet object with `rust_xlsxwriter`:
+//! using the [`Workbook::add_worksheet()`] method or the
 //! [`Worksheet::new()`] constructor.
 //!
 //! The first method ties the worksheet to a workbook object that will
@@ -133,7 +133,7 @@
 //! workable if you can create and use the worksheets sequentially since you
 //! will only need to have one reference at any one time.
 //!
-//! However, if you can’t structure your code to work sequentially then you can
+//! However, if you can’t structure your code to work sequentially, you can
 //! get a reference to a previously created worksheet using
 //! [`Workbook::worksheet_from_index()`]. The standard borrow checking rules
 //! still apply so you will have to give up ownership of any other worksheet
@@ -208,9 +208,9 @@
 //! # }
 //! ```
 //!
-//! Additionally can use [`Workbook::worksheets_mut()`] to get a reference to
-//! the the vector that holds the worksheets. This can be used, for instance, to
-//! iterate over all the worksheets in a workbook:
+//! Additionally, you can use [`Workbook::worksheets_mut()`] to get a reference
+//! to the vector that holds the worksheets. This can be used, for example, to
+//! iterate over all the worksheets in the workbook:
 //!
 //! ```
 //! # // This code is available in examples/doc_workbook_worksheets_mut.rs
@@ -298,7 +298,7 @@
 //!
 //! The author mainly uses `add_worksheet()` and most of the library and
 //! documentation examples are structured to work with that method. In addition,
-//! the Excel xlsx file format has very tight coupling between it's
+//! the Excel xlsx file format has very tight coupling between its
 //! sub-components and it is possible that some future `rust_xlsxwriter`
 //! functionality will require Worksheets and other Workbook objects to be
 //! `registered` with a parent Workbook in order for them to work. However,
@@ -6114,7 +6114,7 @@ impl Worksheet {
     ///     worksheet.insert_button(2, 1, &button)?;
     ///
     ///     // Save the file to disk. Note the `.xlsm` extension. This is required by
-    ///     // Excel or it raise a warning.
+    ///     // Excel or it will raise a warning.
     ///     workbook.save("macros.xlsm")?;
     ///
     ///     Ok(())
@@ -17325,7 +17325,7 @@ impl Worksheet {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file. It is split into sections that are
+    // Assemble and generate the XML file. It is split into sections that are
     // before, during and after <sheetData> to allow those sections to be
     // written separately, and to different in-memory and file based buffers, in
     // constant memory mode.

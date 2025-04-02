@@ -35,10 +35,10 @@ pretty_assertions = "1.4"
 default = []
 
 # `zlib`: Adds a dependency on zlib and a C compiler. This includes the same
-#  features as `default` but is 1.5x faster for large files.
+# features as `default` but is 1.5x faster for large files.
 zlib = ["zip/deflate-zlib"]
 
-# `chrono`: Add support for Chrono dates/times in addition to the native
+# `chrono`: Adds support for Chrono dates/times in addition to the native
 # ExcelDateTime types.
 chrono = ["dep:chrono"]
 
@@ -46,18 +46,18 @@ chrono = ["dep:chrono"]
 # to a minimum when writing large files.
 constant_memory = ["dep:tempfile"]
 
-# `polars`: Add support for mapping between `PolarsError` and
-# `rust_xlsxwriter::XlsxError` to make code that handles both types of error
-# easier to write. See also `polars_write_excel`
+# `polars`: Adds support for mapping between `PolarsError` and
+# `rust_xlsxwriter::XlsxError` to make code that handles both types of errors
+# easier to write. See also `polars_write_excel`.
 polars = ["dep:polars"]
 
-# `serde`: Adds supports for Serde serialization.
+# `serde`: Adds support for Serde serialization.
 serde = ["dep:serde", "dep:rust_xlsxwriter_derive"]
 
-# `wasm`: Enable wasm/Javascript compilation. See also `wasm-xlsxwriter`.
+# `wasm`: Enables wasm/JavaScript compilation. See also `wasm-xlsxwriter`.
 wasm = ["js-sys", "wasm-bindgen"]
 
-# `rust_decimal`: Add support for writing `rust_decimal` `Decimal` type with
+# `rust_decimal`: Adds support for writing the `rust_decimal` `Decimal` type with
 # `Worksheet::write()`, provided it can be represented by f64.
 rust_decimal = ["dep:rust_decimal"]
 
@@ -67,7 +67,7 @@ rust_decimal = ["dep:rust_decimal"]
 # 5,000,000 numeric cells.
 ryu = ["dep:ryu"]
 
-# `test-resave`: Developer only testing feature.
+# `test-resave`: Developer-only testing feature.
 test-resave = []
 
 #

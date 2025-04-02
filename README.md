@@ -5,9 +5,9 @@ the xlsx format.
 
 <img src="https://rustxlsxwriter.github.io/images/demo.png">
 
-The `rust_xlsxwriter` library can be used to write text, numbers, dates and
-formulas to multiple worksheets in a new Excel 2007+ xlsx file. It has a focus
-on performance and on fidelity with the file format created by Excel. It cannot
+The `rust_xlsxwriter` library can be used to write text, numbers, dates, and
+formulas to multiple worksheets in a new Excel 2007+ xlsx file. It focuses
+on performance and fidelity with the file format created by Excel. It cannot
 be used to modify an existing file.
 
 ## Example
@@ -82,7 +82,7 @@ currently supported features are:
 - Formula support, including new Excel 365 dynamic functions.
 - Charts.
 - Hyperlink support.
-- Page/Printing Setup support.
+- Page/Printing setup support.
 - Merged ranges.
 - Conditional formatting.
 - Data validation.
@@ -101,9 +101,6 @@ currently supported features are:
 - Memory optimization mode for writing large files.
 
 
-`rust_xlsxwriter` is under active development and new features will be added
-frequently.
-
 [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
 [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 
@@ -113,18 +110,18 @@ frequently.
   the `zip` crate only.
 
 - `constant_memory`: This keeps memory usage to a minimum when writing
-  writing large files.
+  large files.
 
-- `serde`: Adds supports for Serde serialization. This is off by default.
+- `serde`: Adds support for Serde serialization. This is off by default.
 
-- `chrono`: Adds supports for Chrono date/time types to the API. This is off by
+- `chrono`: Adds support for Chrono date/time types to the API. This is off by
   default.
 
 - `zlib`: Adds a dependency on `zlib` and a C compiler. This includes the same
   features as `default` but is 1.5x faster for large files.
 
-- `polars`: Add support for mapping between `PolarsError` and
-  `rust_xlsxwriter::XlsxError` to make code that handles both types of error
+- `polars`: Adds support for mapping between `PolarsError` and
+  `rust_xlsxwriter::XlsxError` to make code that handles both types of errors
   easier to write.
 
 - `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow compilation

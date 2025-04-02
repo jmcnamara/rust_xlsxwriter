@@ -1006,7 +1006,7 @@ impl Sparkline {
     /// # Parameters
     ///
     /// - `range`: A 1D range that contains the dates used to plot the
-    ///   sparkline. This can specified in different ways, see
+    ///   sparkline. This can be specified in different ways; see
     ///   [`IntoChartRange`] for details.
     ///
     pub fn set_date_range<T>(mut self, range: T) -> Sparkline
@@ -1021,8 +1021,8 @@ impl Sparkline {
     ///
     /// When creating grouped sparklines via the
     /// [`Worksheet::add_sparkline_group()`](crate::Worksheet::add_sparkline_group())
-    /// method the data range that the sparkline is applied to is in row major
-    /// order, i.e., row by row. If required you can change this to column major
+    /// method, the data range that the sparkline is applied to is in row-major
+    /// order, i.e., row by row. If required, you can change this to column-major
     /// order using this method.
     ///
     /// # Parameters
@@ -1045,7 +1045,7 @@ impl Sparkline {
     ///
     /// # Parameters
     ///
-    /// - `style`: A integer value in the range 1-36.
+    /// - `style`: An integer value in the range 1-36.
     ///
     #[allow(clippy::too_many_lines)]
     #[allow(clippy::unreadable_literal)]

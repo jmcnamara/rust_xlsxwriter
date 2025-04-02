@@ -177,7 +177,7 @@ impl ContentTypes {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
@@ -215,7 +215,7 @@ impl ContentTypes {
         xml_empty_tag(&mut self.writer, "Default", &attributes);
     }
 
-    // Write all the <Default> elements.
+    // Write all the <Override> elements.
     fn write_overrides(&mut self) {
         for pair in self.overrides.clone() {
             self.write_override(pair.0, pair.1);

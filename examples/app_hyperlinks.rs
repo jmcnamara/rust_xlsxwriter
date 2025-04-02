@@ -22,7 +22,7 @@ fn main() -> Result<(), XlsxError> {
     // Set the column width for clarity.
     worksheet1.set_column_width(0, 26)?;
 
-    // Write some url links.
+    // Write some URL links.
     worksheet1.write_url(0, 0, "https://www.rust-lang.org")?;
     worksheet1.write_url_with_text(1, 0, "https://www.rust-lang.org", "Learn Rust")?;
     worksheet1.write_url_with_format(2, 0, "https://www.rust-lang.org", &link_format)?;

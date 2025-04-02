@@ -34,11 +34,11 @@ impl RichValue<'_> {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
-        // Write the rvData element.
+        // Write the <rvData> element.
         self.write_rv_data();
 
         // Close the final tag.
@@ -58,7 +58,7 @@ impl RichValue<'_> {
         xml_start_tag(&mut self.writer, "rvData", &attributes);
 
         for (index, image) in self.embedded_images.iter().enumerate() {
-            // Write the rv element.
+            // Write the <rv> element.
             self.write_rv(index, image);
         }
     }
@@ -74,7 +74,7 @@ impl RichValue<'_> {
 
         xml_start_tag(&mut self.writer, "rv", &attributes);
 
-        // Write the v element.
+        // Write the <v> element.
         self.write_v(&index.to_string());
         self.write_v(value);
 

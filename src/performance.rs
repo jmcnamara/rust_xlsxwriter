@@ -11,7 +11,7 @@ Contents:
 - [Constant memory mode](#constant-memory-mode)
   - [Enabling "constant memory" mode](#enabling-constant-memory-mode)
   - [Restrictions when using "constant memory" mode](#restrictions-when-using-constant-memory-mode)
-- [RYU - faster floating point conversion](#ryu---faster-floating-point-conversion)
+- [RYU - faster floating-point conversion](#ryu---faster-floating-point-conversion)
 - [Performance testing](#performance-testing)
 - [Programs used to generate the test results](#programs-used-to-generate-the-test-results)
   - [Rust performance test program](#rust-performance-test-program)
@@ -21,15 +21,15 @@ Contents:
 ## Relative performance of `rust_xlsxwriter`
 
 The `rust_xlsxwriter` library has sister libraries written in C
-([libxlsxwriter]), Python ([XlsxWriter]) and Perl ([Excel::Writer::XLSX]).
+([libxlsxwriter]), Python ([XlsxWriter]), and Perl ([Excel::Writer::XLSX]).
 
 It also has an optional compilation "feature" called `zlib` which allows it, via
 [ZipWriter], to use compression from a native C library. This improves the
-performance on large files significantly and even beats the C/libxlsxwriter
+performance on large files significantly and even surpasses the C/libxlsxwriter
 version.
 
-A relative performance comparison between the C, Rust and Python versions is
-shown below. The Perl performance is similar to the Python library so it has
+A relative performance comparison between the C, Rust, and Python versions is
+shown below. The Perl performance is similar to the Python library, so it has
 been omitted.
 
 | Library                       | Relative to rust+zlib | Relative to C | Relative to rust |
@@ -41,11 +41,11 @@ been omitted.
 
 <br>
 
-The way to interpret this is that relative to the Python version the
+The way to interpret this is that, relative to the Python version, the
 `rust_xlsxwriter with zlib` library is 6 times faster, the C version is 4.4 times
-faster and the standard `rust_xlsxwriter` version is 3.8 times faster.
+faster, and the standard `rust_xlsxwriter` version is 3.8 times faster.
 
-The programs and methodology to generate this data is shown in the section below
+The programs and methodology to generate this data are shown in the section below
 on [Performance testing](#performance-testing).
 
 [ZipWriter]: https://docs.rs/zip/latest/zip/write/struct.ZipWriter.html
@@ -57,9 +57,9 @@ on [Performance testing](#performance-testing).
 ## Performance profile
 
 The `rust_xlsxwriter` crate has a linear performance and memory profile relative
-to the number of cells written, so in general it will take twice as long, and
-use twice as much memory, to write twice as many cells. Here is a sample speed
-performance profile from 100,000-1,000,00 cells:
+to the number of cells written. In general, it will take twice as long and
+use twice as much memory to write twice as many cells. Here is a sample speed
+performance profile from 100,000-1,000,000 cells:
 
 <img src="https://rustxlsxwriter.github.io/images/performance_speed1.png">
 
@@ -68,24 +68,24 @@ The equivalent memory profile is shown in the next section.
 ## Constant memory mode
 
 The `rust_xlsxwriter` library maintains an in-memory structure that represents
-the cells of a worksheet. This has a lot of usability benefits such as allowing
+the cells of a worksheet. This has many usability benefits, such as allowing
 the user to apply formatting separately from the data with methods like
 [`Worksheet::set_cell_format()`](crate::Worksheet::set_cell_format), or to
 perform actions such as [`Worksheet::autofit()`](crate::Worksheet::autofit). The
 downside is that memory usage increases (more or less linearly) with the number
 of cells that are written.
 
-For most applications you will be able to deal with hundreds of millions of
+For most applications you will be able to handle hundreds of millions of
 cells before this becomes noticeable at a system level. However, if required, it
 is possible to limit the amount of memory used by `rust_xlsxwriter` by using the
-`constant_memory` crate level feature.
+`constant_memory` crate-level feature.
 
 The `constant_memory` mode works by flushing the current row of data to disk
 when the user writes to a new row of data. This limits the overhead to one row
-of data stored in memory. Once this happens it is no longer possible to write to
-a previous row since the data in the Excel file must be in row order. As such
-this imposes the limitation of having to structure your code to write in row by
-row order. The benefit is that the required memory usage is very low, and
+of data stored in memory. Once this happens, it is no longer possible to write
+to a previous row since the data in the Excel file must be in row order. As
+such, this imposes the limitation of having to structure your code to write in
+row-by-row order. The benefit is that the required memory usage is very low and
 effectively constant, regardless of the amount of data written.
 
 | Cells   | Standard Memory | Constant memory |
@@ -101,13 +101,13 @@ effectively constant, regardless of the amount of data written.
 | 900000  | 157.7           | 0.0215          |
 | 1000000 | 216.8           | 0.0215          |
 
-The  `constant_memory` mode also uses an Excel optimization to store string data
+The `constant_memory` mode also uses an Excel optimization to store string data
 "inline" in the cell data rather than in a "shared string table" where only
 unique string references are stored (similar to a hash table). This can increase
-the final file size if it contains a lot of string data. As a compromise
+the final file size if it contains a lot of string data. As a compromise,
 `rust_xlsxwriter` also supports a "low memory" mode where only one row of data
 is kept in memory and the "shared string table" is used to store unique strings
-in memory until the file is written. This keep memory usage as low as possible
+in memory until the file is written. This keeps memory usage as low as possible
 but maintains smaller file sizes and compatibility with standard Excel output.
 
 The table below shows the memory profile when generating a worksheet with 50%
@@ -127,7 +127,7 @@ unique string and 50% numerical data in "low memory" mode.
 | 1000000 | 216.8           | 41.7       |
 
 The memory usage of "low memory" mode will approach the memory usage level of
-"constant memory" mode as the percentage of unique sting data decreases.
+"constant memory" mode as the percentage of unique string data decreases.
 
 The graphs below show the memory usage and speed for "standard", "low memory"
 and "constant memory" modes:
@@ -145,7 +145,7 @@ The speed performance is similar in all modes but slightly better (5-10%) in
 
 ### Enabling "constant memory" mode
 
-To enable "constant memory" mode you need to add `rust_xlsxwriter` to your
+To enable "constant memory" mode, you need to add `rust_xlsxwriter` to your
 project with the `constant_memory` feature enabled.
 
 ```bash
@@ -183,11 +183,13 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
- The output file looks like the following:
+The output file looks like the following:
 
- <img src="https://rustxlsxwriter.github.io/images/worksheet_constant.png">
+<img src="https://rustxlsxwriter.github.io/images/worksheet_constant.png">
 
-The ability to add different types/modes of worksheets means that you can mix smaller random access worksheets with larger row by row worksheets. See the following for more information:
+The ability to add different types/modes of worksheets means that you can mix
+smaller random-access worksheets with larger row-by-row worksheets. See the
+following for more information:
 
 - [`Worksheet::add_worksheet()`]
 - `Worksheet::add_worksheet_with_constant_memory()`
@@ -199,25 +201,25 @@ The ability to add different types/modes of worksheets means that you can mix sm
 
 There are some limitations and restrictions when using "constant memory" mode.
 
-- Data must be written in row by row order and when you write to row `n` you can
+- Data must be written in row-by-row order, and when you write to row `n`, you can
   no longer write to any row `< n`.
 - Constant memory mode uses a [tempfile] filehandle for each worksheet created
   using `Worksheet::add_worksheet_with_constant_memory()` and
   `Worksheet::add_worksheet_with_low_memory()`. This won't save memory if your
-  temp directory is also mounted in memory, however, you can set the temp
+  temp directory is also mounted in memory. However, you can set the temp
   directory to a custom location using `Workbook::set_tempdir()`.
 - Functions that set formatting separately from data, such as
-  [`Worksheet::set_cell_format()`](crate::Worksheet::set_cell_format),  will
+  [`Worksheet::set_cell_format()`](crate::Worksheet::set_cell_format), will
   only work on the current row.
 
 [tempfile]: https://crates.io/crates/tempfile
 
 
-## RYU - faster floating point conversion
+## RYU - faster floating-point conversion
 
-The `rust_xlsxwriter` `ryu` feature flag enables the [ryu] crate which provides
-a "pure Rust implementation of Ryū, an algorithm to quickly convert floating
-point numbers to decimal strings".
+The `rust_xlsxwriter` `ryu` feature flag enables the [ryu] crate, which provides
+a "pure Rust implementation of Ryū, an algorithm to quickly convert
+floating-point numbers to decimal strings".
 
 This speeds up writing numeric worksheet cells for large data files. It gives a
 performance boost above 300,000 numeric cells and can be up to 20% faster than
@@ -231,8 +233,8 @@ the default number formatting for 1,000,000 numeric cells:
 
 ## Performance testing
 
-The [hyperfine] application was used to do the performance comparison between
-the C, Rust and Python versions discussed above in [Relative performance of
+The [hyperfine] application was used to run the performance comparison between
+the C, Rust, and Python versions discussed above in [Relative performance of
 `rust_xlsxwriter`](#relative-performance-of-rust_xlsxwriter).
 
 
@@ -274,10 +276,10 @@ Relative speed comparison
 
 This shows that the `rust_xlsxwriter` with `zlib` version is the fastest version
 and that it is 1.38 times faster than the C version, 1.58 times faster than the
-standard `rust_xlsxwriter` version and 6 times faster than the Python version.
+standard `rust_xlsxwriter` version, and 6 times faster than the Python version.
 
-As with any performance test there are a lot of factors that may affect the
-results, however these results are indicative of the relative performance.
+As with any performance test, there are many factors that may affect the
+results. However, these results are indicative of the relative performance.
 
 The programs used to generate these results are shown below.
 

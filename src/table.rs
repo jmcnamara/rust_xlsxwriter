@@ -16,22 +16,22 @@ use crate::xmlwriter::{
 };
 use crate::{utility::ToXmlBoolean, CellRange, Format, Formula, RowNum, XlsxError};
 
-/// The `Table` struct represents a worksheet Table.
+/// The `Table` struct represents a worksheet table.
 ///
 /// Tables in Excel are a way of grouping a range of cells into a single entity
-/// that has common formatting or that can be referenced from formulas. Tables
-/// can have column headers, autofilters, total rows, column formulas and
+/// that has common formatting or that can be referenced in formulas. Tables
+/// can have column headers, autofilters, total rows, column formulas, and
 /// different formatting styles.
 ///
 /// The image below shows a default table in Excel with the default properties
-/// shown in the ribbon bar.
+/// displayed in the ribbon bar.
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/table_intro.png">
 ///
 /// A table is added to a worksheet via the
 /// [`Worksheet::add_table()`](crate::Worksheet::add_table) method. The headers
-/// and total row of a table should be configured via a `Table` struct but the
-/// table data can be added via standard
+/// and total row of a table should be configured via a `Table` struct, but the
+/// table data can be added using standard
 /// [`Worksheet::write()`](crate::Worksheet::write) methods:
 ///
 /// ```
@@ -137,7 +137,7 @@ impl Table {
     /// Create a new Table struct instance.
     ///
     /// Create a table that can be added to a data range of a worksheet. The
-    /// headers, totals, formulas and other properties can be set via the
+    /// headers, totals, formulas, and other properties can be set via the
     /// `Table::*` methods shown below. The data should be added to the table
     /// region using the standard
     /// [`Worksheet::write()`](crate::Worksheet::write) methods.
@@ -215,16 +215,16 @@ impl Table {
         }
     }
 
-    /// Turn on/off the header row as a table.
+    /// Turn on/off the header row for a table.
     ///
-    /// Turn on or off the header row in the table.  The header row displays the
+    /// Turn on or off the header row in the table. The header row displays the
     /// column names and, unless it is turned off, an autofilter. It is on by
     /// default.
     ///
     /// The header row will display default captions such as `Column 1`, `Column
     /// 2`, etc. These captions can be overridden using the
     /// [`Table::set_columns()`] method, see the examples below. They shouldn't
-    /// be written, or overwritten using standard
+    /// be written or overwritten using standard
     /// [`Worksheet::write()`](crate::Worksheet::write) methods since that will
     /// cause a warning when the file is loaded in Excel.
     ///
@@ -534,15 +534,15 @@ impl Table {
         self
     }
 
-    /// Turn on/off banded for a table.
+    /// Turn on/off banded rows for a table.
     ///
-    /// By default Excel uses "banded" rows of alternating colors in a table to
+    /// By default, Excel uses "banded" rows of alternating colors in a table to
     /// distinguish each data row, like this:
     ///
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/table_set_header_row2.png">
     ///
-    /// If you prefer not to have this type of formatting you can turn it off,
+    /// If you prefer not to have this type of formatting, you can turn it off,
     /// see the example below.
     ///
     /// Note, you can also select a table style without banded rows using the
@@ -608,8 +608,8 @@ impl Table {
 
     /// Turn on/off banded columns for a table.
     ///
-    /// By default Excel uses the same format color for each data column in a
-    /// table but alternates the color of rows. If you wish you can set "banded"
+    /// By default, Excel uses the same format color for each data column in a
+    /// table but alternates the color of rows. If you wish, you can set "banded"
     /// columns of alternating colors in a table to distinguish each data column.
     ///
     /// # Parameters
@@ -674,9 +674,9 @@ impl Table {
 
     /// Turn on/off the first column highlighting for a table.
     ///
-    /// The first column of a worksheet table is often used for a list of items
+    /// The first column of a worksheet table is often used for a list of items,
     /// whereas the other columns are more commonly used for data. In these
-    /// cases it is sometimes desirable to highlight the first column differently.
+    /// cases, it is sometimes desirable to highlight the first column differently.
     ///
     /// # Parameters
     ///
@@ -741,8 +741,8 @@ impl Table {
     /// Turn on/off the last column highlighting for a table.
     ///
     /// The last column of a worksheet table is often used for a `SUM()` or
-    /// other formula operating on the  data in the other columns. In these
-    /// cases it is sometimes required to highlight the last column differently.
+    /// other formula operating on the data in the other columns. In these
+    /// cases, it is sometimes required to highlight the last column differently.
     ///
     /// # Parameters
     ///
@@ -820,7 +820,7 @@ impl Table {
 
     /// Turn on/off the autofilter for a table.
     ///
-    /// By default Excel adds an autofilter to the header of a table. This
+    /// By default, Excel adds an autofilter to the header of a table. This
     /// method can be used to turn it off if necessary.
     ///
     /// # Parameters
@@ -979,14 +979,14 @@ impl Table {
     /// Set the name for a table.
     ///
     /// The name of a worksheet table in Excel is similar to a defined name
-    /// representing a data region and it can be used in structured reference
+    /// representing a data region, and it can be used in structured reference
     /// formulas.
     ///
-    /// By default Excel, and `rust_xlsxwriter` uses a `Table1` .. `TableN`
-    /// naming for tables in a workbook. If required you can set a user defined
-    /// name. However, you need to ensure that this name is unique across the
-    /// workbook, otherwise you will get a warning when you load the file in
-    /// Excel.
+    /// By default, Excel and `rust_xlsxwriter` use a `Table1` .. `TableN`
+    /// naming convention for tables in a workbook. If required, you can set a
+    /// user-defined name. However, you need to ensure that this name is unique
+    /// across the workbook; otherwise, you will get a warning when you load the
+    /// file in Excel.
     ///
     /// # Parameters
     ///
@@ -1048,7 +1048,7 @@ impl Table {
 
     /// Set the style for a table.
     ///
-    /// Excel supports 61 different styles for tables divided into Light, Medium
+    /// Excel supports 61 different styles for tables divided into Light, Medium,
     /// and Dark categories.
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/table_styles.png">
@@ -1187,7 +1187,7 @@ impl Table {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
@@ -1439,7 +1439,7 @@ impl TableColumn {
     /// Set the header caption for a table column.
     ///
     /// Excel uses default captions such as `Column 1`, `Column 2`, etc., for
-    /// the headers on a worksheet table. These can be set to a user defined
+    /// the headers on a worksheet table. These can be set to a user-defined
     /// value using the `set_header()` method.
     ///
     /// The column header names in a table must be different from each other.
@@ -1530,7 +1530,7 @@ impl TableColumn {
     /// - Sum
     /// - Standard Deviation
     /// - Variance
-    /// - Custom - User defined function or formula
+    /// - Custom - User-defined function or formula
     ///
     /// Note, overwriting the total row cells with `worksheet.write()` calls
     /// will cause Excel to warn that the table is corrupt when loading the
@@ -1612,7 +1612,7 @@ impl TableColumn {
     ///
     /// It is possible to set a label for the totals row of a column instead of
     /// a subtotal function. This is most often used to set a caption like
-    /// "Totals", as in the example above.
+    /// "Totals," as in the example above.
     ///
     /// Note, overwriting the total row cells with `worksheet.write()` calls
     /// will cause Excel to warn that the table is corrupt when loading the
@@ -1631,9 +1631,9 @@ impl TableColumn {
     ///
     /// It is a common use case to add a summation column as the last column in a
     /// table. These are constructed with a special class of Excel formulas
-    /// called [Structured References] which can refer to an entire table or
-    /// rows or columns of data within the table. For example to sum the data
-    /// for several columns in a single row might you might use a formula like
+    /// called [Structured References], which can refer to an entire table or
+    /// rows or columns of data within the table. For example, to sum the data
+    /// for several columns in a single row, you might use a formula like
     /// this: `SUM(Table1[@[Quarter 1]:[Quarter 4]])`.
     ///
     /// [Structured References]:
@@ -1718,8 +1718,8 @@ impl TableColumn {
     ///
     /// It is sometimes required to format the data in the columns of a table.
     /// This can be done using the standard
-    /// [`Worksheet::write_with_format()`](crate::Worksheet::write_with_format)) method
-    /// but format can also be applied separately using
+    /// [`Worksheet::write_with_format()`](crate::Worksheet::write_with_format) method,
+    /// but the format can also be applied separately using
     /// `TableColumn.set_format()`.
     ///
     /// The most common format property to set for a table column is the [number

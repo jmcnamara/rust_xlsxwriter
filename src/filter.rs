@@ -13,7 +13,7 @@
 ///
 /// Excel supports two main types of filter conditions. The first, and most
 /// common, is a list filter where the user selects the items to filter from a
-/// list of all the values in the the column range:
+/// list of all the values in the column range:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/autofilter_list.png">
 ///
@@ -499,9 +499,9 @@ impl FilterCondition {
         self
     }
 
-    /// Add a list filter to filter on Blanks.
+    /// Add a list filter to filter on blanks.
     ///
-    /// Add a filter condition to a list filter to show Blank cells. For
+    /// Add a filter condition to a list filter to show blank cells. For
     /// autofilters Excel treats empty or whitespace only cells as "Blank".
     ///
     /// Filtering non-blanks can be done in two ways. See the second example
@@ -630,10 +630,10 @@ impl FilterCondition {
     /// Add a custom filter condition.
     ///
     /// Add a custom filter to a column in an autofilter range. Excel only
-    /// allows two custom conditions so this method can only be called twice.
+    /// allows two custom conditions, so this method can only be called twice.
     ///
     /// When two conditions are specified, like the example below, the logical
-    /// operator defaults to "and", like in Excel. However you can use the
+    /// operator defaults to "and", as in Excel. However, you can use the
     /// [`add_custom_boolean_or`](FilterCondition::add_custom_boolean_or) method
     /// below to get an "or" logical condition.
     ///
@@ -715,7 +715,7 @@ impl FilterCondition {
     /// Add an "or" logical condition for two custom filters.
     ///
     /// When two conditions are specified, like the example above, the logical
-    /// operator defaults to "and", as in Excel. However you can use the
+    /// operator defaults to "and", as in Excel. However, you can use the
     /// [`add_custom_boolean_or`](FilterCondition::add_custom_boolean_or) method
     /// to get an "or" logical condition.
     ///

@@ -1,6 +1,6 @@
 /*!
 
-A getting started tutorial for `rust_xlsxwriter`.
+A getting-started tutorial for `rust_xlsxwriter`.
 
 - [Introduction](#introduction)
 - [Getting started](#getting-started)
@@ -28,15 +28,15 @@ It can be used to write text, numbers, dates and formulas to multiple worksheets
 in a new Excel 2007+ xlsx file. It has a focus on performance and on fidelity
 with the file format created by Excel.
 
-This document is a tutorial on getting started with `rust_xlsxwriter` and for
-using it to write Excel xlsx files.
+This document is a tutorial on getting started with `rust_xlsxwriter` and using
+it to write Excel xlsx files.
 
 # Getting started
 
-To use the `rust_xlsxwriter` in an application or in another library you
-will need add it as a dependency to the `Cargo.toml` file of your project.
+To use `rust_xlsxwriter` in an application or another library, you
+will need to add it as a dependency to the `Cargo.toml` file of your project.
 
-To demonstrate the steps required we will start with a small sample application.
+To demonstrate the steps required, we will start with a small sample application.
 
 ## Create a sample project
 
@@ -63,7 +63,7 @@ hello-xlsx/
 
 ## Add `rust_xlsxwriter` to Cargo.toml
 
-Add the `rust_xlsxwriter` dependency to the project `Cargo.toml` file:
+Add the `rust_xlsxwriter` dependency to the project's `Cargo.toml` file:
 
 ```bash
 $ cargo add rust_xlsxwriter
@@ -105,29 +105,29 @@ Run the application as follows:
 $ cargo run
 ```
 
-This will create an output file called `hello.xlsx` which should look something
+This will create an output file called `hello.xlsx`, which should look something
 like this:
 
 <img src="https://rustxlsxwriter.github.io/images/hello.png">
 
-Once you have the "hello world" application working you can move on to a
+Once you have the "hello world" application working, you can move on to a
 slightly more realistic tutorial example.
 
 # Tutorial
 
 To look at some of the basic but more useful features of the
-`rust_xlsxwriter` library we will create an application to summarize some
+`rust_xlsxwriter` library, we will create an application to summarize some
 monthly expenses into a spreadsheet.
 
 The tutorial presents a direct approach so as not to confuse the reader
 with information that isn't initially relevant. If there is
-more advanced information that might be interesting at a later stage it will be
+more advanced information that might be interesting at a later stage, it will be
 highlighted as "Extra information".
 
 
 ## Tutorial Part 1: Adding data to a worksheet
 
-To add some sample expense data to a worksheet we could start with a simple
+To add some sample expense data to a worksheet, we could start with a simple
 program like the following:
 
 ```rust
@@ -168,11 +168,11 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-If we run this program we should get a spreadsheet that looks like this:
+If we run this program, we should get a spreadsheet that looks like this:
 
 <img src="https://rustxlsxwriter.github.io/images/tutorial1.png">
 
-This is a simple program but it demonstrates some of the steps that would apply
+This is a simple program, but it demonstrates some of the steps that would apply
 to any `rust_xlsxwriter` program.
 
 
@@ -214,10 +214,10 @@ location in the worksheet:
 
 > **Extra information**:
 >
-> There are other type specific write methods such as
+> There are other type-specific write methods such as
 > [`Worksheet::write_string()`](crate::Worksheet::write_string) and
 > [`Worksheet::write_number()`](crate::Worksheet::write_number). However, these
-> aren't generally required and thanks to Rust's monomorphization the
+> aren't generally required, and thanks to Rust's monomorphization, the
 > performance of the generic `write()` method is just as fast.
 >
 > There are also worksheet methods for writing arrays of data or arrays of
@@ -231,10 +231,10 @@ location in the worksheet:
 > - [`Worksheet::write_row_with_format()`](crate::Worksheet::write_row_with_format)
 > - [`Worksheet::write_column_with_format()`](crate::Worksheet::write_column_with_format)
 
-Throughout `rust_xlsxwriter` rows and columns are zero indexed. So the first
+Throughout `rust_xlsxwriter`, rows and columns are zero-indexed. So the first
 cell in a worksheet `(0, 0)` is equivalent to the Excel notation of `A1`.
 
-To calculate the total of the items in the second column we add a
+To calculate the total of the items in the second column, we add a
 [`Formula`](crate::Formula):
 
 ```text
@@ -252,25 +252,25 @@ spreadsheet shown in the image above.:
 > **Extra information**:
 >
 > The [`Workbook::save()`](crate::Workbook::save) method takes a [`std::path`]
-> argument which can be a `Path`, `PathBuf` or a filename string. It is also
+> argument, which can be a `Path`, `PathBuf`, or a filename string. It is also
 > possible to save to a byte vector using
 > [`Workbook::save_to_buffer()`](crate::Workbook::save_to_buffer).
 
 
 ## Tutorial Part 2: Adding some formatting
 
-The previous example converted the required data into an Excel file but it
-looked a little bare. To make the information clearer we can add some
+The previous example converted the required data into an Excel file, but it
+looked a little bare. To make the information clearer, we can add some
 simple formatting, like this:
 
 <img src="https://rustxlsxwriter.github.io/images/tutorial2.png">
 
 
 The differences here are that we have added "Item" and "Cost" column headers in
-a bold font, we have formatted the currency in the second column and we have
+a bold font, we have formatted the currency in the second column, and we have
 made the "Total" string bold.
 
-To do this programmatically we can extend our code as follows:
+To do this programmatically, we can extend our code as follows:
 
 
 ```rust
@@ -326,11 +326,11 @@ two [`Format`](crate::Format) objects that we can use to format cells in the
 spreadsheet.
 
 `Format` objects represent all the formatting properties that can be applied
-to a cell in Excel such as fonts, number formatting, colors and borders. This is
+to a cell in Excel, such as fonts, number formatting, colors, and borders. This is
 explained in more detail in the [`Format`](crate::Format) struct documentation.
 
-For now we will avoid getting into the details of `Format` and just use a
-limited amount of the its functionality to add some simple formatting:
+For now, we will avoid getting into the details of `Format` and just use a
+limited amount of its functionality to add some simple formatting:
 
 ```text
     // Add a bold format to use to highlight cells.
@@ -372,7 +372,7 @@ The corresponding spreadsheet will look like this:
 The differences here are that we have added a "Date" column with formatting and
 made that column a little wider to accommodate the dates.
 
-To do this we can extend our program as follows:
+To do this, we can extend our program as follows:
 
 ```rust
 // This code is available in examples/app_tutorial3.rs
@@ -435,12 +435,12 @@ fn main() -> Result<(), XlsxError> {
 
 Dates and times in Excel are floating point numbers that have a format applied
 to display them in the desired way. To handle dates and times with
-`rust_xlsxwriter` we create them using a [`ExcelDateTime`](crate::ExcelDateTime)
+`rust_xlsxwriter`, we create them using a [`ExcelDateTime`](crate::ExcelDateTime)
 instance and format them with an Excel number format.
 
 > **Extra information**:
 
-> If you enable the `chrono` feature in `rust_xlsxwriter`  you can also use
+> If you enable the `chrono` feature in `rust_xlsxwriter`, you can also use
 > [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or [`chrono::NaiveTime`]
 > instances.
 
@@ -451,7 +451,7 @@ instance and format them with an Excel number format.
 [`chrono::NaiveDateTime`]:
     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
 
-In the example above we create the `ExcelDateTime` instance from the date
+In the example above, we create the `ExcelDateTime` instance from the date
 strings in our input data and then add a number format it so that it appears
 correctly in Excel:
 
@@ -460,7 +460,7 @@ correctly in Excel:
         worksheet.write_with_format(row, 2, &date, &date_format)?;
 ```
 
-Another addition to our program is the make the "Date" column wider for
+Another addition to our program is to make the "Date" column wider for
 clarity using the
 [`Worksheet::set_column_width()`](crate::Worksheet.set_column_width) method.
 
@@ -472,7 +472,7 @@ clarity using the
 
 ## Tutorial Part 4: Adding a chart
 
-To extend our example a little further let's add a Pie chart to show the
+To extend our example a little further, let's add a Pie chart to show the
 relative sizes of the outgoing expenses to get a spreadsheet that will look like
 this:
 
@@ -481,7 +481,7 @@ this:
 We use the [`Chart`](crate::Chart) struct to represent the chart.
 
 The [`Chart`](crate::Chart) struct has a lot of configuration options and
-sub-structs to replicate Excel's chart features but as an initial demonstration
+sub-structs to replicate Excel's chart features, but as an initial demonstration,
 we will just add the data series to which the chart refers. Here is the updated
 code with the chart addition at the end.
 
@@ -561,12 +561,12 @@ See the documentation for [`Chart`](crate::Chart) for more information.
 
 ## Tutorial Part 5: Making the code more programmatic
 
-The previous example worked as expected but it it contained some hard-coded cell
+The previous example worked as expected, but it contained some hard-coded cell
 ranges like `set_values("Sheet1!$B$2:$B$5")` and `Formula::new("=SUM(B2:B5)")`.
-If our example changed to have a different number of data items then we would
+If our example changed to have a different number of data items, then we would
 have to manually change the code to adjust for the new ranges.
 
-Fortunately, these hard-coded values are only used for the sake of a tutorial and
+Fortunately, these hard-coded values are only used for the sake of a tutorial, and
 `rust_xlsxwriter` provides APIs to handle these more programmatically.
 
 Let's start by looking at the chart ranges:
@@ -578,10 +578,10 @@ Let's start by looking at the chart ranges:
         .set_values("Sheet1!$B$2:$B$5");
 ```
 
-In general `rust_xlsxwriter` always provides numeric APIs for any ranges in
-Excel but when it makes ergonomic sense it also provides **secondary** string
+In general, `rust_xlsxwriter` always provides numeric APIs for any ranges in
+Excel, but when it makes ergonomic sense, it also provides **secondary** string
 based APIs. The previous example uses one of these secondary string based APIs
-for demonstration purposes but for real applications you would set the chart
+for demonstration purposes, but for real applications, you would set the chart
 ranges using 5-tuple values like this:
 
 ```text
@@ -607,9 +607,9 @@ required).
 
 The other section of the code that had a hard-coded string is the formula
 `"=SUM(B2:B5)"`. There isn't a single API change that can be applied to ranges
-in formulas but `rust_xlsxwriter` provides several utility functions that can
-convert numbers to string ranges. For example the
-[`cell_range()`](crate::utility::cell_range) function which takes zero indexed
+in formulas, but `rust_xlsxwriter` provides several utility functions that can
+convert numbers to string ranges. For example, the
+[`cell_range()`](crate::utility::cell_range) function, which takes zero-indexed
 numbers and converts them to a string range like `B2:B5`:
 
 
@@ -625,7 +625,7 @@ numbers and converts them to a string range like `B2:B5`:
 > The `cell_range()` function and other similar functions are detailed in the
 > [`utility`](crate::utility) documentation.
 
-Adding these improvements our application changes to the following:
+Adding these improvements, our application changes to the following:
 
 ```rust
 // This code is available in examples/app_tutorial5.rs
@@ -708,7 +708,7 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-This gives the same output to the previous version, but it is now future proof
+This gives the same output as the previous version, but it is now future-proof
 for any changes to our input data:
 
 <img src="https://rustxlsxwriter.github.io/images/tutorial5.png">
@@ -716,7 +716,7 @@ for any changes to our input data:
 
 # Next steps
 
-Once you have completed this simple application you can looks through the
+Once you have completed this simple application, you can look through the
 following resources for more information:
 
 - The main API [documentation for the library](../index.html). Click on the

@@ -29,7 +29,7 @@ fn main() -> Result<(), XlsxError> {
 
     worksheet.add_sparkline(0, 5, &sparkline1)?;
 
-    // Add a column sparkline with non-default style.
+    // Add a column sparkline with a non-default style.
     let sparkline2 = Sparkline::new()
         .set_range(("Sheet1", 1, 0, 1, 4))
         .set_type(SparklineType::Column)

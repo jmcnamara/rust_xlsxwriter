@@ -137,15 +137,15 @@ mod tests;
 ///
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq, Default)]
 pub enum Color {
-    /// A user defined RGB color in the range 0x000000 (black) to 0xFFFFFF
-    /// (white). Any values outside this range will be ignored with a a warning.
+    /// A user-defined RGB color in the range 0x000000 (black) to 0xFFFFFF
+    /// (white). Any values outside this range will be ignored with a warning.
     RGB(u32),
 
     /// A theme color on the default palette (see the image above). The syntax
     /// for theme colors is `Theme(color, shade)` where `color` is one of the
     /// 0-9 values on the top row and `shade` is the variant in the associated
     /// column from 0-5. Any values outside these ranges will be ignored with a
-    /// a warning.
+    /// warning.
     Theme(u8, u8),
 
     /// The default color for an Excel property.
@@ -156,52 +156,52 @@ pub enum Color {
     /// the `Default` color but can vary according to system settings.
     Automatic,
 
-    /// The color Black with a RGB value of 0x000000.
+    /// The color Black with an RGB value of 0x000000.
     Black,
 
-    /// The color Blue with a RGB value of 0x0000FF.
+    /// The color Blue with an RGB value of 0x0000FF.
     Blue,
 
-    /// The color Brown with a RGB value of 0x800000.
+    /// The color Brown with an RGB value of 0x800000.
     Brown,
 
-    /// The color Cyan with a RGB value of 0x00FFFF.
+    /// The color Cyan with an RGB value of 0x00FFFF.
     Cyan,
 
-    /// The color Gray with a RGB value of 0x808080.
+    /// The color Gray with an RGB value of 0x808080.
     Gray,
 
-    /// The color Green with a RGB value of 0x008000.
+    /// The color Green with an RGB value of 0x008000.
     Green,
 
-    /// The color Lime with a RGB value of 0x00FF00.
+    /// The color Lime with an RGB value of 0x00FF00.
     Lime,
 
-    /// The color Magenta with a RGB value of 0xFF00FF.
+    /// The color Magenta with an RGB value of 0xFF00FF.
     Magenta,
 
-    /// The color Navy with a RGB value of 0x000080.
+    /// The color Navy with an RGB value of 0x000080.
     Navy,
 
-    /// The color Orange with a RGB value of 0xFF6600.
+    /// The color Orange with an RGB value of 0xFF6600.
     Orange,
 
-    /// The color Pink with a RGB value of 0xFFC0CB.
+    /// The color Pink with an RGB value of 0xFFC0CB.
     Pink,
 
-    /// The color Purple with a RGB value of 0x800080.
+    /// The color Purple with an RGB value of 0x800080.
     Purple,
 
-    /// The color Red with a RGB value of 0xFF0000.
+    /// The color Red with an RGB value of 0xFF0000.
     Red,
 
-    /// The color Silver with a RGB value of 0xC0C0C0.
+    /// The color Silver with an RGB value of 0xC0C0C0.
     Silver,
 
-    /// The color White with a RGB value of 0xFFFFFF.
+    /// The color White with an RGB value of 0xFFFFFF.
     White,
 
-    /// The color Yellow with a RGB value of 0xFFFF00
+    /// The color Yellow with an RGB value of 0xFFFF00.
     Yellow,
 }
 

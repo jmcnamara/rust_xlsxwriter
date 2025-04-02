@@ -12,9 +12,9 @@ use crate::drawing::{DrawingObject, DrawingType};
 use crate::{Color, Formula, ObjectMovement, Url, XlsxError};
 
 #[derive(Clone)]
-/// The `Shape` struct represents an worksheet shape object.
+/// The `Shape` struct represents a worksheet shape object.
 ///
-/// Currently the only Excel shape type that is implemented is the `Textbox`
+/// Currently, the only Excel shape type that is implemented is the `Textbox`
 /// shape:
 ///
 /// ```
@@ -52,29 +52,29 @@ use crate::{Color, Formula, ObjectMovement, Url, XlsxError};
 /// See also the [`Worksheet::insert_shape()`](crate::Worksheet::insert_shape)
 /// and
 /// [`Worksheet::insert_shape_with_offset()`](crate::Worksheet::insert_shape_with_offset)
-/// methods. Note, it isn't possible to insert textboxes into other
+/// methods. Note that it isn't possible to insert textboxes into other
 /// `rust_xlsxwriter` objects such as [`Chart`](crate::Chart).
 ///
 /// ## Support for other Excel shape types
 ///
-/// Currently the only Excel shape type that is supported is the `Textbox`
+/// Currently, the only Excel shape type that is supported is the `Textbox`
 /// shape.
 ///
-/// The internal structure of [`Shape`] and the associated XML generating code
-/// is structured to support other shape types but none are currently
+/// The internal structure of [`Shape`] and the associated XML-generating code
+/// is structured to support other shape types, but none are currently
 /// implemented. The rationale for this is:
 ///
-/// - Unlike applications like `PowerPoint` the shape object is not widely used
+/// - Unlike applications like `PowerPoint`, the shape object is not widely used
 ///   in Excel.
 /// - The most common shape used in Excel is the Textbox/Rectangle.
-/// - Alternative ways of displaying information such as [`Image`](crate::Image)
-///   or [`Note`](crate::Note) are already supported.
+/// - Alternative ways of displaying information, such as [`Image`](crate::Image)
+///   or [`Note`](crate::Note), are already supported.
 /// - Each shape or connector type requires a significant number of test cases
 ///   to verify their functionality and interaction.
 ///
 /// The last is the main reason that I don't wish to support other shape types.
-/// The implementation burden is small but the test and maintenance burden is
-/// large. As such I won't accept Pull Requests to add more shape types.
+/// The implementation burden is small, but the test and maintenance burden is
+/// large. As such, I won't accept Pull Requests to add more shape types.
 /// However, I will leave the door open for feature requests that provide a
 /// justification.
 ///

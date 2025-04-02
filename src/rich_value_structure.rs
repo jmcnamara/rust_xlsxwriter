@@ -32,11 +32,11 @@ impl RichValueStructure {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
-        // Write the rvStructures element.
+        // Write the <rvStructures> element.
         self.write_rv_structures();
 
         // Close the final tag.
@@ -55,7 +55,7 @@ impl RichValueStructure {
 
         xml_start_tag(&mut self.writer, "rvStructures", &attributes);
 
-        // Write the s element.
+        // Write the <s> element.
         self.write_s();
     }
 
@@ -65,11 +65,12 @@ impl RichValueStructure {
 
         xml_start_tag(&mut self.writer, "s", &attributes);
 
-        // Write the k elements.
+        // Write the <k> elements.
         self.write_k("_rvRel:LocalImageIdentifier", "i");
         self.write_k("CalcOrigin", "i");
 
         if self.has_embedded_image_descriptions {
+            // Write the <k> element for embedded image descriptions.
             self.write_k("Text", "s");
         }
 

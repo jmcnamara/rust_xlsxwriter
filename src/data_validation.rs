@@ -68,7 +68,7 @@ use std::fmt;
 /// }
 /// ```
 ///
-/// Another common data validation task is to limit input to values on a
+/// Another common data validation task is to limit input to values in a
 /// dropdown list.
 ///
 /// <img
@@ -171,9 +171,9 @@ use std::fmt;
 ///
 /// APIs that use [`Formula`] can also take Excel formulas, where appropriate.
 ///
-/// **Note**: the contents of the `Formula` aren't validated by
-/// `rust_xlsxwriter` so if you are using anything other than a simple cell
-/// reference you should take care to ensure that the ranges or formulas are
+/// **Note**: The contents of the `Formula` aren't validated by
+/// `rust_xlsxwriter`, so if you are using anything other than a simple cell
+/// reference, you should take care to ensure that the ranges or formulas are
 /// valid in Excel.
 ///
 #[derive(Clone)]
@@ -464,16 +464,16 @@ impl DataValidation {
     /// This type of validation presents the user with a list of allowed strings
     /// via a dropdown menu similar to online forms.
     ///
-    /// Excel has a 255 character limit to the the string used to store the
+    /// Excel has a 255 character limit to the string used to store the
     /// comma-separated list of strings, including the commas. This limit makes
     /// it unsuitable for long lists such as a list of provinces or states. For
-    /// longer lists it is better to place the string values somewhere in the
+    /// longer lists, it is better to place the string values somewhere in the
     /// Excel workbook and refer to them using a range formula via the
     /// [`DataValidation::allow_list_formula()`] method shown below.
     ///
     /// # Parameters
     ///
-    /// - `list`: A list of string like objects.
+    /// - `list`: A list of string-like objects.
     ///
     /// # Errors
     ///
@@ -970,7 +970,7 @@ impl DataValidation {
 
     /// Set the data validation option that defines how blank cells are handled.
     ///
-    /// By default Excel data validations have an "Ignore blank" option turned
+    /// By default, Excel data validations have an "Ignore blank" option turned
     /// on. This allows the user to optionally leave the cell blank and not
     /// enter any value. This is generally the best default option since it
     /// allows users to exit the cell without inputting any data.
@@ -978,7 +978,7 @@ impl DataValidation {
     /// <img
     /// src="https://rustxlsxwriter.github.io/images/data_validation_allow_whole_number_dialog.png">
     ///
-    /// If you need to ensure that the user inserts some information then you
+    /// If you need to ensure that the user inserts some information, then you
     /// can use `ignore_blank()` to turn this option off.
     ///
     /// # Parameters
@@ -992,8 +992,8 @@ impl DataValidation {
 
     /// Turn on/off the in-cell dropdown for list data validations.
     ///
-    /// By default the Excel list data validation has an "In-cell drop-down"
-    /// option turned on. This shows a dropdown arrow for list style data
+    /// By default, the Excel list data validation has an "In-cell drop-down"
+    /// option turned on. This shows a dropdown arrow for list-style data
     /// validations and displays the list items.
     ///
     /// <img
@@ -1066,7 +1066,7 @@ impl DataValidation {
     /// Set the input message when a data validation cell is entered.
     ///
     /// This option is used to set an input message when a data validation cell
-    /// is entered. This can we used to explain to the user what the data
+    /// is entered. This can be used to explain to the user what the data
     /// validation rules are for the cell.
     ///
     /// # Parameters
@@ -1218,7 +1218,7 @@ impl DataValidation {
     /// Set the error message when there is a validation error.
     ///
     /// This option is used to set an error message when there is a validation
-    /// error. This can we used to explain to the user what the data validation
+    /// error. This can be used to explain to the user what the data validation
     /// rules are for the cell.
     ///
     /// # Parameters
@@ -1306,7 +1306,7 @@ impl DataValidation {
     ///
     /// # Parameters
     ///
-    /// - `range`: A string like type representing an Excel range.
+    /// - `range`: A string-like type representing an Excel range.
     ///
     pub fn set_multi_range(mut self, range: impl Into<String>) -> DataValidation {
         self.multi_range = range.into().replace('$', "").replace(',', " ");

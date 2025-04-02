@@ -14,7 +14,7 @@
 //!
 //! ## Creating a chart with `rust_xlsxwriter`
 //!
-//! The basis steps for creating a chart in `rust_xlsxwriter` are:
+//! The basic steps for creating a chart in `rust_xlsxwriter` are:
 //!
 //! - Create a new [`Chart`] object of the chart type you want.
 //! - Add one or more series to the chart via [`Chart::add_series()`] to define
@@ -108,18 +108,18 @@
 //! #     Ok(())
 //! # }
 //! ```
-//! (Note, the section of the program where we write the worksheet data is the
+//! (Note: The section of the program where we write the worksheet data is the
 //! same as the previous example and is omitted in this example. You can view it
 //! in the source or the examples folder.)
 //!
-//! The updated file like this (the chart data range is highlighted):
+//! The updated file looks like this (the chart data range is highlighted):
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/chart_tutorial2.png">
 //!
-//! The previous example works fine but it it contained some hard-coded cell
-//! ranges like  `set_values("Sheet1!$B$2:$B$6")`. This is okay for simple
-//! programs but if our example changed to have a different number of data items
-//! then we would have to manually change the code to adjust for the new ranges.
+//! The previous example works fine but it contained some hard-coded cell ranges
+//! like `set_values("Sheet1!$B$2:$B$6")`. This is okay for simple programs but
+//! if our example changed to have a different number of data items then we
+//! would have to manually change the code to adjust for the new ranges.
 //!
 //! Fortunately, these hard-coded values are only used for the sake of the
 //! example and `rust_xlsxwriter` provides APIs to handle these more
@@ -127,9 +127,9 @@
 //!
 //! In general `rust_xlsxwriter` always provides numeric APIs for any ranges in
 //! Excel but when it makes ergonomic sense it also provides **secondary**
-//! string based APIs. The previous example uses one of these secondary string
-//! based APIs for demonstration purposes but for real applications you would
-//! set the chart ranges using 5-tuple values like this:
+//! string-based APIs. The previous example uses one of these secondary string-
+//! based APIs for demonstration purposes. For real applications you would set
+//! the chart ranges using 5-tuple values like this:
 //!
 //! ```rust
 //! # // This code is available in examples/app_chart_tutorial3.rs
@@ -312,53 +312,53 @@
 //! The majority of Excel charts types have a "Category" X-axis axis where each
 //! of the values is evenly spaced and sequential. The category values can be
 //! strings, like in the example below, or they can be numbers. When the
-//! categories are numbers Excel treats them as if they were strings which is
+//! categories are numbers, Excel treats them as if they were strings, which is
 //! why you can't set a minimum or maximum limit in Category axes.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/chart_axes01.png">
 //!
 //! <p style="text-align: center;"><b>Column chart with Category X-axis and Value Y-axis</b></p>
 //!
-//! The Y axis of Excel charts are generally a "Value" axis where points are
+//! The Y-axis of Excel charts is generally a "Value" axis where points are
 //! displayed according to their value. This type of axis does support minimum
 //! and maximum limits.
 //!
 //! Scatter charts are an exception to the general rule since they have two
-//! value axes in order to plot `(x, y)` data that doesn't necessarily lie on
+//! value axes to plot `(x, y)` data that doesn't necessarily lie on
 //! fixed X-axis divisions, as shown in the chart below:
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/chart_axes02.png">
 //!
 //! <p style="text-align: center;"><b>Scatter chart with Value X-axis and Value Y-axis</b></p>
 //!
-//! One other variation is a category style chart with date or time values for
+//! Another variation is a category-style chart with date or time values for
 //! the X-axis. This type of "Date" axis shares properties of Category and Value
-//! axes. Date axes are used in Stock charts, or if you provide date/time data
+//! axes. Date axes are used in Stock charts or if you provide date/time data
 //! and use the [`ChartAxis::set_date_axis()`] method.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/chart_axes03.png">
 //!
 //! <p style="text-align: center;"><b>Column chart with Date X-axis and Value Y-axis</b></p>
 //!
-//! Finally, one other variant is a Bar chart where the Category and Value axes
+//! Finally, another variant is a Bar chart where the Category and Value axes
 //! positions are reversed:
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/chart_axes04.png">
 //!
 //! <p style="text-align: center;"><b>Bar chart with Category Y-axis and Value X-axis</b></p>
 //!
-//! In Excel category and values axes expose different properties as can be seen
-//! in the dialogs for a each type of axis, shown below. Note that for Category
-//! axes there is no minimum and maximum "Bounds" option:
+//! In Excel, category and value axes expose different properties, as can be seen
+//! in the dialogs for each type of axis, shown below. Note that for Category
+//! axes, there is no minimum and maximum "Bounds" option:
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/chart_axes05.png">
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/chart_axes06.png">
 //!
-//! Due to Excel's distinction between axes type some `rust_xlsxwriter`
+//! Due to Excel's distinction between axis types, some `rust_xlsxwriter`
 //! [`ChartAxis`] properties can be set for a value axis, some can be set for a
-//! category axis and some properties can be set for both. For example `reverse`
-//! can be set for either category or value axes while the `min` and `max`
+//! category axis, and some properties can be set for both. For example, `reverse`
+//! can be set for either category or value axes, while the `min` and `max`
 //! properties can only be set for value axes (and date axes). The documentation
 //! calls out the type of axis to which properties apply.
 //!
@@ -499,7 +499,7 @@
 //! then create a secondary chart of a different type and combine it with the
 //! primary chart using the [`Chart::combine()`] method.
 //!
-//! The combined secondary chart can share the same Y axis as the primary chart
+//! The combined secondary chart can share the same Y axis as the primary chart,
 //! or it can use a secondary Y2 axis. An example of each is shown below.
 //!
 //! Combined Column and Line chart with the same Y axis.
@@ -736,19 +736,6 @@
 //! - Bar charts can only combine secondary charts on a secondary axis. This is
 //!   an Excel limitation.
 //!
-//!
-//! ## Future work
-//!
-//! Future additions to chart support in `rust_xlsxwriter` include:
-//!
-//! - Chartsheets - Worksheets that only display a chart.
-//! - Some chart element layout options.
-//!
-//! See the [Chart Roadmap] on the `rust_xlsxwriter` GitHub for more
-//! information.
-//!
-//! [Chart Roadmap]: https://github.com/jmcnamara/rust_xlsxwriter/issues/19
-//!
 #![warn(missing_docs)]
 
 mod tests;
@@ -777,7 +764,7 @@ use crate::{
 /// configure the chart such as [`ChartSeries`], [`ChartAxis`] and
 /// [`ChartTitle`].
 ///
-/// Charts are added to the worksheets using the the
+/// Charts are added to the worksheets using the
 /// [`Worksheet::insert_chart()`](crate::Worksheet::insert_chart) or
 /// [`Worksheet::insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
 /// methods.
@@ -785,7 +772,7 @@ use crate::{
 /// See also [Working with Charts](crate::chart) for a general introduction to
 /// working with charts in `rust_xlsxwriter`.
 ///
-/// Code the generate the above file:
+/// Code to generate the above file:
 ///
 /// ```
 /// # // This code is available in examples/doc_chart_intro.rs
@@ -887,7 +874,7 @@ impl Chart {
     /// worksheet using the
     /// [`Worksheet::insert_chart()`][crate::Worksheet::insert_chart].
     ///
-    /// Once you have create a chart you will need to add at least one data
+    /// Once you have created a chart you will need to add at least one data
     /// series via [`Chart::add_series()`] and set a value range for that series
     /// using [`ChartSeries::set_values()`]. See the example below.
     ///
@@ -1764,8 +1751,8 @@ impl Chart {
     /// later versions they have been replaced with "layouts" on the "Chart
     /// Design" tab. These layouts are not defined in the file format. They are
     /// a collection of modifications to the base chart type. They can be
-    /// replicated using the Chart APIs (when complete) but they cannot be defined by
-    /// the `set_style()` method.
+    /// replicated using the Chart APIs but they cannot be defined by the
+    /// `set_style()` method.
     ///
     /// # Parameters
     ///
@@ -2684,7 +2671,8 @@ impl Chart {
     /// worksheet using the
     /// [`Worksheet::insert_chart()`](crate::Worksheet::insert_chart) or
     /// [`Worksheet::insert_chart_with_offset()`](crate::Worksheet::insert_chart_with_offset)
-    /// methods. However, you can also call `chart.validate()` directly.
+    /// methods. However, you can also call `Chart::validate()` directly if you
+    /// wish to do your own error handling.
     ///
     /// # Errors
     ///
@@ -3405,7 +3393,7 @@ impl Chart {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
@@ -17806,12 +17794,12 @@ impl ChartPlotArea {
 ///
 /// The second method Excel supports is manual positioning of elements such as
 /// the chart axis labels, the chart legend, the chart plot area and the chart
-/// title. The `rust_xlsxwriter` library replicates this type of positing via
+/// title. The `rust_xlsxwriter` library replicates this type of positioning via
 /// the `ChartLayout` struct.
 ///
 /// The layout units used by Excel are relative units expressed as a percentage
 /// of the chart dimensions and are `f64` values in the range `0.0 < x <= 1.0`.
-/// The process Excel uses to calculate these dimensions is shown below:
+/// Excel calculates these dimensions as shown below:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/chart_layout.png">
 ///
@@ -17829,7 +17817,7 @@ impl ChartPlotArea {
 /// required.
 ///
 /// For [`ChartPlotArea`] and [`ChartLegend`] you can also set the width and
-/// height based on the following calculation.
+/// height based on the following calculation:
 ///
 /// ```text
 ///     width  = w / W

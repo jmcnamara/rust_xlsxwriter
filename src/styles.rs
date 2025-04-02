@@ -73,7 +73,7 @@ impl<'a> Styles<'a> {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
@@ -183,12 +183,12 @@ impl<'a> Styles<'a> {
         if font.script != FormatScript::None {
             self.write_vert_align(font);
         }
-        // Write the sz element.
+        // Write the <sz> element.
         if !dxf_format {
             self.write_font_size(font);
         }
 
-        // Write the color element.
+        // Write the <color> element.
         self.write_font_color(font, dxf_format);
 
         if !dxf_format {
@@ -358,7 +358,7 @@ impl<'a> Styles<'a> {
         xml_end_tag(&mut self.writer, "fill");
     }
 
-    // Write the user defined <fill> element.
+    // Write the user-defined <fill> element.
     fn write_fill(&mut self, fill: &Fill, dxf_format: bool) {
         // Special handling for pattern only case.
         if fill.pattern != FormatPattern::None
@@ -472,7 +472,7 @@ impl<'a> Styles<'a> {
         xml_end_tag(&mut self.writer, "border");
     }
 
-    // Write the <border> sub elements such as <right>, <top>, etc.
+    // Write the <border> sub-elements such as <right>, <top>, etc.
     fn write_sub_border(
         &mut self,
         border_type: &str,
@@ -890,7 +890,7 @@ impl<'a> Styles<'a> {
         xml_end_tag(&mut self.writer, "extLst");
     }
 
-    // Write the DXFfComplement <extLst> elements.
+    // Write the DXFComplement <extLst> elements.
     fn write_dxf_format_extensions(&mut self) {
         let attributes = [
             ("uri", "{0417FA29-78FA-4A13-93AC-8FF0FAFDF519}"),

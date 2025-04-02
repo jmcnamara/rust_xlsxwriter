@@ -18,7 +18,7 @@ fn main() -> Result<(), XlsxError> {
         .set_company("Rust Solutions Inc")
         .set_category("Sample spreadsheets")
         .set_keywords("Sample, Example, Properties")
-        .set_comment("Created with Rust and `rust_xlsxwriter`");
+        .set_comment("Created with Rust and rust_xlsxwriter");
 
     workbook.set_properties(&properties);
 

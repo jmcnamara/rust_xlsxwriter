@@ -2,7 +2,7 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-//! The following example demonstrates writing a url with alternative text.
+//! The following example demonstrates writing a URL with alternative text.
 
 use rust_xlsxwriter::{Workbook, XlsxError};
 
@@ -13,7 +13,7 @@ fn main() -> Result<(), XlsxError> {
     // Add a worksheet to the workbook.
     let worksheet = workbook.add_worksheet();
 
-    // Write a url and alternative text.
+    // Write a URL and alternative text.
     worksheet.write_url_with_text(0, 0, "https://www.rust-lang.org", "Learn Rust")?;
 
     // Save the file to disk.

@@ -37,48 +37,50 @@ impl Core {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
-        // Write the cp:coreProperties element.
+        // Write the <cp:coreProperties> element.
         self.write_cp_core_properties();
 
-        // Write the dc:title element.
+        // Write the <dc:title> element.
         self.write_dc_title();
 
-        // Write the dc:subject element.
+        // Write the <dc:subject> element.
         self.write_dc_subject();
-        // Write the dc:creator element.
+
+        // Write the <dc:creator> element.
         self.write_dc_creator();
 
-        // Write the cp:keywords element.
+        // Write the <cp:keywords> element.
         self.write_cp_keywords();
 
-        // Write the dc:description element.
+        // Write the <dc:description> element.
         self.write_dc_description();
 
-        // Write the cp:lastModifiedBy element.
+        // Write the <cp:lastModifiedBy> element.
         self.write_cp_last_modified_by();
 
-        // Write the dcterms:created element.
+        // Write the <dcterms:created> element.
         self.write_dcterms_created();
 
-        // Write the dcterms:modified element.
+        // Write the <dcterms:modified> element.
         self.write_dcterms_modified();
 
-        // Write the cp:category element.
+        // Write the <cp:category> element.
         self.write_cp_category();
 
-        // Write the cp:contentStatus element.
+        // Write the <cp:contentStatus> element.
         self.write_cp_content_status();
 
-        // Close the coreProperties tag.
+        // Close the <cp:coreProperties> tag.
         xml_end_tag(&mut self.writer, "cp:coreProperties");
     }
 
     // Write the <cp:coreProperties> element.
     fn write_cp_core_properties(&mut self) {
+        // Define the XML namespaces for the core properties.
         let xmlns_cp =
             "http://schemas.openxmlformats.org/package/2006/metadata/core-properties".to_string();
         let xmlns_dc = "http://purl.org/dc/elements/1.1/".to_string();

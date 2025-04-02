@@ -584,8 +584,8 @@ pub(crate) fn chart_error_range(
 /// Worksheet names that are used in Excel range references must be single
 /// quoted if they contain non-word characters or if they look like cell
 /// references. The most common instance of this is when the worksheet name
-/// contains spaces. For example `Sheet1` would be represented without
-/// change in a formula as `=Sheet1!A1` whereas `Sheet 1` would be represented
+/// contains spaces. For example, `Sheet1` would be represented without
+/// change in a formula as `=Sheet1!A1`, whereas `Sheet 1` would be represented
 /// as `='Sheet 1'!A1`.
 ///
 /// # Parameters
@@ -912,14 +912,14 @@ pub(crate) fn validate_sheetname(name: &str, message: &str) -> Result<(), XlsxEr
         return Err(XlsxError::SheetnameLengthExceeded(message.to_string()));
     }
 
-    // Check that sheetname doesn't contain any invalid characters.
+    // Check that the sheet name doesn't contain any invalid characters.
     if name.contains(['*', '?', ':', '[', ']', '\\', '/']) {
         return Err(XlsxError::SheetnameContainsInvalidCharacter(
             message.to_string(),
         ));
     }
 
-    // Check that sheetname doesn't start or end with an apostrophe.
+    // Check that the sheet name doesn't start or end with an apostrophe.
     if name.starts_with('\'') || name.ends_with('\'') {
         return Err(XlsxError::SheetnameStartsOrEndsWithApostrophe(
             message.to_string(),

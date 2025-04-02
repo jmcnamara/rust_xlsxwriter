@@ -11,9 +11,9 @@ use crate::vml::VmlInfo;
 use crate::{ColNum, Color, Format, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
 
 #[derive(Clone)]
-/// The `Note` struct represents an worksheet note object.
+/// The `Note` struct represents a worksheet note object.
 ///
-/// A Note is a post-it style message that is revealed when the user mouses over
+/// A Note is a post-it style message that is revealed when the user hovers over
 /// a worksheet cell. The presence of a Note is indicated by a small red
 /// triangle in the upper right-hand corner of the cell.
 ///
@@ -63,9 +63,9 @@ use crate::{ColNum, Color, Format, ObjectMovement, RowNum, COL_MAX, ROW_MAX};
 /// Notes are used in conjunction with the
 /// [`Worksheet::insert_note()`](crate::Worksheet::insert_note) method.
 ///
-/// In versions of Excel prior to Office 365 Notes were referred to as
-/// "Comments". The name Comment is now used for a newer style threaded comment
-/// and Note is used for the older non threaded version. See the Microsoft docs
+/// In versions of Excel prior to Office 365, Notes were referred to as
+/// "Comments". The name "Comment" is now used for a newer style threaded comment,
+/// and "Note" is used for the older non-threaded version. See the Microsoft docs
 /// on [The difference between threaded comments and notes].
 ///
 /// [The difference between threaded comments and notes]:
@@ -174,7 +174,7 @@ impl Note {
     /// The author name appears in two places: at the start of the note text in
     /// bold and at the bottom of the worksheet in the status bar.
     ///
-    /// If no name is specified the default name "Author" will be applied to the
+    /// If no name is specified, the default name "Author" will be applied to the
     /// note.
     ///
     /// You can also set the default author name for all notes in a worksheet
@@ -282,8 +282,8 @@ impl Note {
 
     /// Reset the text in the note.
     ///
-    /// In general the text of the note is set in the the [`Note::new()`]
-    /// constructor but if required you can use the `reset_text()` method to
+    /// In general, the text of the note is set in the [`Note::new()`]
+    /// constructor, but if required, you can use the `reset_text()` method to
     /// reset the text for a note. This allows a single `Note` instance to be
     /// used multiple times and avoids the small overhead of creating a new
     /// instance each time.
@@ -295,7 +295,7 @@ impl Note {
     /// # Examples
     ///
     /// The following example demonstrates adding a note to a worksheet cell.
-    /// This example reuses the Note object and reset the test.
+    /// This example reuses the Note object and resets the text.
     ///
     /// ```
     /// # // This code is available in examples/doc_note_reset_text.rs
@@ -329,7 +329,6 @@ impl Note {
     /// Output file:
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/note_reset_text.png">
-    ///
     ///
     pub fn reset_text(&mut self, text: impl Into<String>) -> &mut Note {
         self.text = text.into();

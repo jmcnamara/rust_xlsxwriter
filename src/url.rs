@@ -1,4 +1,4 @@
-// url - A module for representing Excel worksheet Urls.
+// url - A module for representing Excel worksheet URLs.
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 //
@@ -10,14 +10,14 @@ use crate::{XlsxError, MAX_PARAMETER_LEN};
 
 const MAX_URL_LEN: usize = 2_080;
 
-/// The `Url` struct is used to define a worksheet url.
+/// The `Url` struct is used to define a worksheet URL.
 ///
-/// The `Url` struct creates a url type that can be used to write worksheet
-/// urls.
+/// The `Url` struct creates a URL type that can be used to write worksheet
+/// URLs.
 ///
-/// In general you would use the
+/// In general, you would use the
 /// [`Worksheet::write_url()`](crate::Worksheet::write_url) with a string
-/// representation of the url, like this:
+/// representation of the URL, like this:
 ///
 /// ```
 /// # // This code is available in examples/doc_url_intro1.rs
@@ -31,7 +31,7 @@ const MAX_URL_LEN: usize = 2_080;
 /// #     // Add a worksheet to the workbook.
 /// #     let worksheet = workbook.add_worksheet();
 /// #
-/// #     // Write a url with a simple string argument.
+/// #     // Write a URL with a simple string argument.
 ///     worksheet.write_url(0, 0, "https://www.rust-lang.org")?;
 /// #
 /// #     // Save the file to disk.
@@ -41,12 +41,12 @@ const MAX_URL_LEN: usize = 2_080;
 /// # }
 /// ```
 ///
-/// The url will then be displayed as expected in Excel:
+/// The URL will then be displayed as expected in Excel:
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/url_intro1.png">
 ///
-/// In order to differentiate a url from an ordinary string (for example when
-/// storing it in a data structure) you can also represent the url with a
+/// To differentiate a URL from an ordinary string (for example, when
+/// storing it in a data structure), you can also represent the URL with a
 /// [`Url`] struct:
 ///
 /// ```
@@ -61,7 +61,7 @@ const MAX_URL_LEN: usize = 2_080;
 /// #     // Add a worksheet to the workbook.
 /// #     let worksheet = workbook.add_worksheet();
 /// #
-/// #     // Write a url with a Url struct.
+/// #     // Write a URL with a Url struct.
 ///     worksheet.write_url(0, 0, Url::new("https://www.rust-lang.org"))?;
 /// #
 /// #     // Save the file to disk.
@@ -71,7 +71,7 @@ const MAX_URL_LEN: usize = 2_080;
 /// # }
 /// ```
 ///
-/// Using a `Url` struct also allows you to write a url using the generic
+/// Using a `Url` struct also allows you to write a URL using the generic
 /// [`Worksheet::write()`](crate::Worksheet::write) method:
 ///
 /// ```
@@ -86,7 +86,7 @@ const MAX_URL_LEN: usize = 2_080;
 /// #     // Add a worksheet to the workbook.
 /// #     let worksheet = workbook.add_worksheet();
 /// #
-/// #     // Write a url with a Url struct and generic write().
+/// #     // Write a URL with a Url struct and generic write().
 ///     worksheet.write(0, 0, Url::new("https://www.rust-lang.org"))?;
 /// #
 /// #     // Save the file to disk.
@@ -96,12 +96,12 @@ const MAX_URL_LEN: usize = 2_080;
 /// # }
 /// ```
 ///
-/// There are 3 types of url/link supported by Excel and the `rust_xlsxwriter`
+/// There are three types of URLs/links supported by Excel and the `rust_xlsxwriter`
 /// library:
 ///
-/// 1. Web based URIs like:
+/// 1. Web-based URIs like:
 ///
-///    * `http://`, `https://`, `ftp://`, `ftps://` and `mailto:`.
+///    * `http://`, `https://`, `ftp://`, `ftps://`, and `mailto:`.
 ///
 /// 2. Local file links using the `file://` URI.
 ///
@@ -113,32 +113,32 @@ const MAX_URL_LEN: usize = 2_080;
 ///
 ///    Most paths will be relative to the root folder, following the Windows
 ///    convention, so most paths should start with `file:///`. For links to
-///    other Excel files the url string can include a sheet and cell reference
-///    after the `"#"` anchor, as shown in the last 2 examples above. When using
+///    other Excel files, the URL string can include a sheet and cell reference
+///    after the `"#"` anchor, as shown in the last two examples above. When using
 ///    Windows paths, like in the examples above, it is best to use a Rust raw
 ///    string to avoid issues with the backslashes:
 ///    `r"file:///C:\Temp\Book1.xlsx"`.
 ///
 /// 3. Internal links to a cell or range of cells in the workbook using the
-///    pseudo-uri `internal:`:
+///    pseudo-URI `internal:`:
 ///
 ///    * `internal:Sheet2!A1`
 ///    * `internal:Sheet2!A1:G5`
 ///    * `internal:'Sales Data'!A1`
 ///
-///    Worksheet references are typically of the form `Sheet1!A1` where a
+///    Worksheet references are typically of the form `Sheet1!A1`, where a
 ///    worksheet and target cell should be specified. You can also link to a
 ///    worksheet range using the standard Excel range notation like
 ///    `Sheet1!A1:B2`. Excel requires that worksheet names containing spaces or
-///    non alphanumeric characters are single quoted as follows `'Sales
+///    non-alphanumeric characters are single-quoted as follows: `'Sales
 ///    Data'!A1`.
 ///
 /// The library will escape the following characters in URLs as required by
-/// Excel, ``\s " < > \ [ ] ` ^ { }``, unless the URL already contains `%xx`
-/// style escapes. In which case it is assumed that the URL was escaped
-/// correctly by the user and will by passed directly to Excel.
+/// Excel: ``\s " < > \ [ ] ` ^ { }``, unless the URL already contains `%xx`
+/// style escapes. In that case, it is assumed that the URL was escaped
+/// correctly by the user and will be passed directly to Excel.
 ///
-/// Excel has a limit of around 2080 characters in the url string. Urls beyond
+/// Excel has a limit of around 2080 characters in the URL string. URLs beyond
 /// this limit will raise an error when written.
 ///
 /// # Examples
@@ -165,7 +165,7 @@ const MAX_URL_LEN: usize = 2_080;
 ///     // Set the column width for clarity.
 ///     worksheet1.set_column_width(0, 26)?;
 ///
-///     // Write some url links.
+///     // Write some URL links.
 ///     worksheet1.write_url(0, 0, "https://www.rust-lang.org")?;
 ///     worksheet1.write_url_with_text(1, 0, "https://www.rust-lang.org", "Learn Rust")?;
 ///     worksheet1.write_url_with_format(2, 0, "https://www.rust-lang.org", &link_format)?;
@@ -282,10 +282,10 @@ impl Url {
         let link = link.into();
 
         Url {
-            url_link: link.clone(),            // The worksheet hyperlink url.
-            user_text: String::new(),          // Text the user sees. May be the same as the url.
-            rel_link: link.clone(),            // The url as it appears in a relationship file.
-            rel_anchor: String::new(),         // Equivalent to a url anchor_fragment.
+            url_link: link.clone(),            // The worksheet hyperlink URL.
+            user_text: String::new(),          // Text the user sees. May be the same as the URL.
+            rel_link: link.clone(),            // The URL as it appears in a relationship file.
+            rel_anchor: String::new(),         // Equivalent to a URL anchor_fragment.
             rel_display: false,                // Relationship display setting.
             rel_id: 0,                         // Relationship id.
             tool_tip: String::new(),           // The mouseover tool tip.
@@ -293,9 +293,9 @@ impl Url {
         }
     }
 
-    /// Set the alternative text for the url.
+    /// Set the alternative text for the URL.
     ///
-    /// Set an alternative, user friendly, text for the url.
+    /// Set an alternative, user friendly, text for the URL.
     ///
     /// # Parameters
     ///
@@ -303,7 +303,7 @@ impl Url {
     ///
     /// # Examples
     ///
-    /// The following example demonstrates writing a url to a worksheet with
+    /// The following example demonstrates writing a URL to a worksheet with
     /// alternative text.
     ///
     /// ```
@@ -318,7 +318,7 @@ impl Url {
     /// #     // Add a worksheet to the workbook.
     /// #     let worksheet = workbook.add_worksheet();
     /// #
-    /// #     // Write a url with a Url struct and alternative text.
+    /// #     // Write a URL with a Url struct and alternative text.
     ///     worksheet.write(0, 0, Url::new("https://www.rust-lang.org").set_text("Learn Rust"))?;
     /// #
     /// #     // Save the file to disk.
@@ -337,13 +337,13 @@ impl Url {
         self
     }
 
-    /// Set the screen tip for the url.
+    /// Set the screen tip for the URL.
     ///
-    /// Set a screen tip when the user does a mouseover of the url.
+    /// Set a screen tip when the user does a mouseover of the URL.
     ///
     /// # Parameters
     ///
-    /// `tip` - The url tip, as a string or string like type.
+    /// `tip` - The URL tip, as a string or string like type.
     ///
     pub fn set_tip(mut self, tip: impl Into<String>) -> Url {
         self.tool_tip = tip.into();
@@ -357,7 +357,7 @@ impl Url {
     pub(crate) fn initialize(&mut self) -> Result<(), XlsxError> {
         self.parse_url()?;
 
-        // Check the url string lengths are within Excel's limits. The user text
+        // Check the URL string lengths are within Excel's limits. The user text
         // length is checked by write_string_with_format().
         if self.url_link.chars().count() > MAX_URL_LEN
             || self.rel_anchor.chars().count() > MAX_URL_LEN
@@ -395,7 +395,7 @@ impl Url {
                 self.user_text.clone_from(&self.url_link);
             }
 
-            // Split the url into url + #anchor if that exists.
+            // Split the URL into URL + #anchor if that exists.
             let parts: Vec<&str> = self.url_link.splitn(2, '#').collect();
             if parts.len() == 2 {
                 self.rel_anchor = parts[1].to_string();
@@ -439,7 +439,7 @@ impl Url {
                 self.user_text = link_path;
             }
 
-            // Split the url into url + #anchor if that exists.
+            // Split the URL into URL + #anchor if that exists.
             let parts: Vec<&str> = self.url_link.splitn(2, '#').collect();
             if parts.len() == 2 {
                 self.rel_anchor = parts[1].to_string();
@@ -454,7 +454,7 @@ impl Url {
 
     // Escape hyperlink string variants.
     pub(crate) fn escape_strings(&mut self) {
-        // Escape any url characters in the url string.
+        // Escape any URL characters in the URL string.
         if !Self::is_escaped(&self.url_link) {
             self.url_link = crate::xmlwriter::escape_url(&self.url_link).into();
         }

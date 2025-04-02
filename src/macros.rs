@@ -2,19 +2,18 @@
 
 # Working with VBA Macros
 
-
-This section explains how to add a VBA file containing functions or macros to an
+This section explains how to add a VBA file containing functions or macros to a
 `rust_xlsxwriter` file.
 
 <img src="https://rustxlsxwriter.github.io/images/app_macros.png">
 
-# The Excel XLSM file format
+# The Excel XLSM File Format
 
-An Excel `xlsm` file is structurally the same as an `xlsx` file except that it
+An Excel `xlsm` file is structurally the same as an `xlsx` file, except that it
 contains an additional `vbaProject.bin` binary file containing VBA functions
 and/or macros.
 
-Excel `xlsm` files are subject to additional security checks and warning when
+Excel `xlsm` files are subject to additional security checks and warnings when
 loaded:
 
 <img src="https://rustxlsxwriter.github.io/images/doc_macros_warning.png">
@@ -24,17 +23,16 @@ loaded:
 
 The `vbaProject.bin` in a `xlsm` file is a binary OLE COM container. This was
 the format used in older `xls` versions of Excel prior to Excel 2007. Unlike
-other components of an xlsx/xlsm file the data isn't stored in XML format.
-Instead the functions and macros as stored as a pre-parsed binary format. As
-such it wouldn't be feasible to programmatically define macros and create a
-`vbaProject.bin` file from scratch (at least not in the remaining lifespan and
-interest levels of the author).
+other components of an `xlsx`/`xlsm` file, the data isn't stored in XML format.
+Instead, the functions and macros are stored in a pre-parsed binary format. As
+such, it wouldn't be feasible to programmatically define macros and create a
+`vbaProject.bin` file from scratch (at least not in the remaining lifespan
+and interest levels of the author).
 
 Instead, as a workaround, a utility is used to extract `vbaProject.bin` files
-from existing xlsm files which you can then add to `rust_xlsxwriter` files.
+from existing `xlsm` files, which you can then add to `rust_xlsxwriter` files.
 
-
-# The `vba_extract` utility
+# The `vba_extract` Utility
 
 The Rust [`vba_extract`](https://crates.io/crates/vba_extract) utility is used
 to extract the `vbaProject.bin` binary from an Excel `xlsm` file. The utility
@@ -44,7 +42,7 @@ can be installed via `cargo`:
 $ cargo install vba_extract
 ```
 
-Once `vba_extract` is installed it can be used as follows:
+Once `vba_extract` is installed, it can be used as follows:
 
 ```bash
 $ vba_extract macro_file.xlsm
@@ -53,15 +51,15 @@ Extracted: vbaProject.bin
 ```
 
 If the VBA project is signed, `vba_extract` also extracts the
-`vbaProjectSignature.bin` file from the xlsm file (see below).
+`vbaProjectSignature.bin` file from the `xlsm` file (see below).
 
 The syntax and options for `vba_extract` are:
 
 ```text
 $ vba_extract --help
 
-Utility to extract a `vbaProject.bin` binary from an Excel xlsm macro file
-for insertion into an `rust_xlsxwriter` file. If the macros are digitally
+Utility to extract a `vbaProject.bin` binary from an Excel `xlsm` macro file
+for insertion into a `rust_xlsxwriter` file. If the macros are digitally
 signed, it also extracts a `vbaProjectSignature.bin` file.
 
 Usage: vba_extract [OPTIONS] <FILENAME_XLSM>
@@ -88,10 +86,9 @@ Options:
           Print version
 ```
 
+# Adding VBA Macros to a `rust_xlsxwriter` File
 
-# Adding VBA macros to a `rust_xlsxwriter` file
-
-Once the `vbaProject.bin` file has been extracted it can be added to the
+Once the `vbaProject.bin` file has been extracted, it can be added to the
 `rust_xlsxwriter` workbook using the
 [`Workbook::add_vba_project()`](crate::Workbook::add_vba_project()) method:
 
@@ -108,7 +105,6 @@ Once the `vbaProject.bin` file has been extracted it can be added to the
 #     Ok(())
 # }
 ```
-
 
 Here is a complete example which adds a macro file with a dialog. It also uses a
 button, via [`Worksheet::insert_button()`](crate::Worksheet::insert_button), to
@@ -143,7 +139,7 @@ fn main() -> Result<(), XlsxError> {
     worksheet.insert_button(2, 1, &button)?;
 
     // Save the file to disk. Note the `.xlsm` extension. This is required by
-    // Excel or it raise a warning.
+    // Excel or it will raise a warning.
     workbook.save("macros.xlsm")?;
 
     Ok(())
@@ -211,13 +207,12 @@ Here is the dialog that appears when a valid `xlsm` file is incorrectly given a
 
 <img src="https://rustxlsxwriter.github.io/images/doc_macros_wrong_extension.png">
 
-
-# Setting the VBA object names
+# Setting the VBA Object Names
 
 VBA macros generally refer to workbook and worksheet objects via names such as
 `ThisWorkbook` and `Sheet1`, `Sheet2` etc.
 
-If the imported macro uses other names you can set them using the
+If the imported macro uses other names, you can set them using the
 [`Workbook::set_vba_name()`](crate::Workbook::set_vba_name()) and
 [`Worksheet::set_vba_name()`](crate::Worksheet::set_vba_name()) methods as
 follows.
@@ -261,7 +256,7 @@ $ xmllint --format `find myfile -name "*.xml" | xargs` | grep "Pr.*codeName"
     <sheetPr codeName="MySheet"/>
 ```
 
-# Adding a VBA macro signature file to an `rust_xlsxwriter` file
+# Adding a VBA Macro Signature File to a `rust_xlsxwriter` File
 
 VBA macros can be signed in Excel to allow for further control over execution.
 The signature part is added to the `xlsm` file in another binary called `vbaProjectSignature.bin`.

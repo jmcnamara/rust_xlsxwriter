@@ -379,22 +379,26 @@
 //! # }
 //! ```
 //!
-//! Output for the formula `=ISEVEN(B3)`:
+//! Output for the formula `=ISEVEN(B3)`, note that each cell in the range is
+//! evaluated individually:
 //!
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor1.png">
 //!
-//! Output for the formula `=ISEVEN($B3)`:
+//! Output for the formula `=ISEVEN($B3)`, note that the first cell in the row
+//! is evaluated and the row is formatted appropriately:
 //!
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor2.png">
 //!
-//! Output for the formula `=ISEVEN(B$3)`:
+//! Output for the formula `=ISEVEN(B$3)`, note that the first cell in the
+//! column is evaluated and the column is formatted appropriately:
 //!
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor3.png">
 //!
-//! Output for the formula `=ISEVEN($B$3)`:
+//! Output for the formula `=ISEVEN($B$3)`, note that the first cell in the
+//! range is evaluated and the entire range is formatted appropriately:
 //!
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/conditional_format_anchor4.png">
@@ -403,14 +407,16 @@
 //!
 //! # Examples
 //!
-//! Conditional formatting is a feature of Excel which allows you to apply a format
-//! to a cell or a range of cells based on user defined rules. For example you might
-//! apply rules like the following to highlight cells in different ranges.
+//! Conditional formatting is a feature of Excel which allows you to apply a
+//! format to a cell or a range of cells based on user defined rules. For
+//! example you might apply rules like the following to highlight cells in
+//! different ranges.
 //!
-//! <img src="https://rustxlsxwriter.github.io/images/conditional_format_dialog.png">
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_format_dialog.png">
 //!
-//! The examples below show how to use the various types of conditional formatting
-//! with `rust_xlsxwriter`.
+//! The examples below show how to use the various types of conditional
+//! formatting with `rust_xlsxwriter`.
 //!
 //! ## Some examples:
 //!
@@ -444,8 +450,9 @@
 //! ```
 //!
 //!
-//! **Example 2.** Cell conditional formatting with between ranges. Values between
-//! 30 and 70 are in light red. Values outside that range are in light green.
+//! **Example 2.** Cell conditional formatting with between ranges. Values
+//! between 30 and 70 are in light red. Values outside that range are in light
+//! green.
 //!
 //! See [`ConditionalFormatCell`] for more details.
 //!
@@ -474,8 +481,8 @@
 //! ```
 //!
 //!
-//! **Example 3.** Duplicate and Unique conditional formats. Duplicate values are
-//! in light red. Unique values are in light green.
+//! **Example 3.** Duplicate and Unique conditional formats. Duplicate values
+//! are in light red. Unique values are in light green.
 //!
 //! See [`ConditionalFormatDuplicate`] for more details.
 //!
@@ -531,8 +538,8 @@
 //! ```
 //!
 //!
-//! **Example 5.** Top and Bottom range conditional formats. Top 10 values are in
-//! light red. Bottom 10 values are in light green.
+//! **Example 5.** Top and Bottom range conditional formats. Top 10 values are
+//! in light red. Bottom 10 values are in light green.
 //!
 //! See [`ConditionalFormatTop`] for more details.
 //!
@@ -561,9 +568,9 @@
 //! ```
 //!
 //!
-//! **Example 6.** Cell conditional formatting in non-contiguous range. Cells with
-//! values >= 50 are in light red. Values < 50 are in light green. Non-contiguous
-//! ranges.
+//! **Example 6.** Cell conditional formatting in non-contiguous range. Cells
+//! with values >= 50 are in light red. Values < 50 are in light green.
+//! Non-contiguous ranges.
 //!
 //! <img src="https://rustxlsxwriter.github.io/images/conditional_formats6.png">
 //!
@@ -724,7 +731,8 @@
 //!
 //! [`ConditionalFormat3ColorScale`]: crate::ConditionalFormat3ColorScale
 //!
-//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats10.png">
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_formats10.png">
 //!
 //! Code to generate the above example:
 //!
@@ -782,7 +790,8 @@
 //!
 //! [`ConditionalFormatDataBar`]: crate::ConditionalFormatDataBar
 //!
-//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats11.png">
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_formats11.png">
 //!
 //! Code to generate the above example:
 //!
@@ -819,7 +828,8 @@
 //!
 //! [`ConditionalFormatIconSet`]: crate::ConditionalFormatIconSet
 //!
-//! <img src="https://rustxlsxwriter.github.io/images/conditional_formats12.png">
+//! <img
+//! src="https://rustxlsxwriter.github.io/images/conditional_formats12.png">
 //!
 //! Code to generate the above example:
 //!
@@ -5528,8 +5538,8 @@ impl ConditionalFormatDataBar {
 /// conditional format.
 ///
 /// `ConditionalFormatIconSet` is used to represent an Icon Set style
-/// conditional format in Excel. A Icon Set conditional format highlights items with
-/// with groups of 3-5 symbols such as traffic lights, arrows or flags.
+/// conditional format in Excel. An Icon Set conditional format highlights items
+/// with groups of 3-5 symbols such as traffic lights, arrows, or flags.
 ///
 /// <img
 /// src="https://rustxlsxwriter.github.io/images/conditional_format_icon_intro.png">
@@ -5539,7 +5549,7 @@ impl ConditionalFormatDataBar {
 ///
 /// # Examples
 ///
-/// Example of adding icon style conditional formatting to a worksheet.
+/// Example of adding icon-style conditional formatting to a worksheet.
 ///
 /// ```
 /// # // This code is available in examples/doc_conditional_format_icon.rs
@@ -5962,8 +5972,8 @@ impl ConditionalFormatIconSet {
     ///
     /// # Examples
     ///
-    /// Example of adding icon style conditional formatting to a worksheet. In the
-    /// second example the default rules are changed.
+    /// Example of adding icon-style conditional formatting to a worksheet. In the
+    /// second example, the default rules are changed.
     ///
     /// ```
     /// # // This code is available in examples/doc_conditional_format_icon_set_icons.rs
@@ -6015,7 +6025,7 @@ impl ConditionalFormatIconSet {
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_icon_set_icons1.png">
     ///
-    /// The user defined rules in the output file look like this:
+    /// The user-defined rules in the output file look like this:
     ///
     /// <img src="https://rustxlsxwriter.github.io/images/conditional_format_icon_set_icons2.png">
     ///
@@ -6702,7 +6712,7 @@ impl From<&NaiveTime> for ConditionalFormatValue {
 /// Trait to map rust types into an [`ConditionalFormatValue`] value.
 ///
 /// The `IntoConditionalFormatValue` trait is used to map Rust types like
-/// strings, numbers, dates, times and formulas into a generic type that can be
+/// strings, numbers, dates, times, and formulas into a generic type that can be
 /// used to replicate Excel data types used in Conditional Formats.
 ///
 /// See [`ConditionalFormatValue`] for more information.

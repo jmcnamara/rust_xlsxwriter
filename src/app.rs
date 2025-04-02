@@ -55,7 +55,7 @@ impl App {
     // XML assembly methods.
     // -----------------------------------------------------------------------
 
-    // Assemble and write the XML file.
+    // Assemble and generate the XML file.
     pub(crate) fn assemble_xml_file(&mut self) {
         xml_declaration(&mut self.writer);
 
@@ -137,13 +137,13 @@ impl App {
     fn write_heading_pairs(&mut self) {
         xml_start_tag_only(&mut self.writer, "HeadingPairs");
 
-        // Write the vt:vector element for headings.
+        // Write the vt:vector element for heading pairs.
         self.write_heading_vector();
 
         xml_end_tag(&mut self.writer, "HeadingPairs");
     }
 
-    // Write the <vt:vector> element.
+    // Write the <vt:vector> element for heading pairs.
     fn write_heading_vector(&mut self) {
         let size = self.heading_pairs.len() * 2;
         let size = size.to_string();
@@ -168,12 +168,13 @@ impl App {
     fn write_titles_of_parts(&mut self) {
         xml_start_tag_only(&mut self.writer, "TitlesOfParts");
 
+        // Write the vt:vector element for title parts.
         self.write_title_parts_vector();
 
         xml_end_tag(&mut self.writer, "TitlesOfParts");
     }
 
-    // Write the <vt:vector> element.
+    // Write the <vt:vector> element for title parts.
     fn write_title_parts_vector(&mut self) {
         let size = self.table_parts.len();
         let size = size.to_string();
