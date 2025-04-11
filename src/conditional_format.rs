@@ -965,7 +965,7 @@ pub trait ConditionalFormat {
     fn has_x14_only(&self) -> bool;
 
     /// Clone a reference into a concrete Box type.
-    fn box_clone(&self) -> Box<dyn ConditionalFormat + Send>;
+    fn box_clone(&self) -> Box<dyn ConditionalFormat + Sync + Send>;
 }
 
 macro_rules! generate_conditional_format_impls {
@@ -1006,7 +1006,7 @@ macro_rules! generate_conditional_format_impls {
             }
 
 
-            fn box_clone(&self) -> Box<dyn ConditionalFormat + Send> {
+            fn box_clone(&self) -> Box<dyn ConditionalFormat + Sync + Send> {
                 Box::new(self.clone())
             }
         }
