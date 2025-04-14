@@ -4893,7 +4893,7 @@ impl Chart {
                     font.set_right_to_left(false);
                     self.legend.font = Some(font);
                 }
-            };
+            }
         }
 
         if let Some(font) = &self.legend.font {
@@ -17635,8 +17635,8 @@ impl ChartPlotArea {
     /// # Parameters
     ///
     /// - `format`: A [`ChartFormat`] struct reference or a sub struct that will
-    ///    convert into a `ChartFormat` instance. See the docs for
-    ///    [`IntoChartFormat`] for details.
+    ///   convert into a `ChartFormat` instance. See the docs for
+    ///   [`IntoChartFormat`] for details.
     ///
     /// # Examples
     ///

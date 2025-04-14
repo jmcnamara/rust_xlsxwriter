@@ -14806,7 +14806,7 @@ impl Worksheet {
                     }
                     // We don't currently try to handle matching any other data types.
                     _ => {}
-                };
+                }
             }
         }
 
@@ -14935,7 +14935,7 @@ impl Worksheet {
                             return true;
                         }
                     }
-                };
+                }
             }
         }
 
@@ -17094,7 +17094,7 @@ impl Worksheet {
                                 Some(max) => {
                                     if pixel_width > *max {
                                         *max = pixel_width;
-                                    };
+                                    }
                                 }
                                 None => {
                                     // Add a new column entry and maximum.
@@ -18051,7 +18051,7 @@ impl Worksheet {
             _ => {
                 attributes.push(("operator", data_validation.rule.to_string()));
             }
-        };
+        }
 
         if data_validation.ignore_blank {
             attributes.push(("allowBlank", "1".to_string()));

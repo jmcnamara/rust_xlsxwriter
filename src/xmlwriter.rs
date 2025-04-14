@@ -258,7 +258,7 @@ where
                 match char_handler(ch) {
                     Some(escaped_char) => escaped_string.push_str(escaped_char),
                     None => escaped_string.push(ch),
-                };
+                }
             }
 
             return Cow::Owned(escaped_string);

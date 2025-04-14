@@ -1376,7 +1376,7 @@ impl Sparkline {
                 self.series_color = Color::Theme(1, 0);
             }
             _ => eprintln!("Sparkline style '{style}' outside the Excel range 1-36."),
-        };
+        }
 
         self
     }

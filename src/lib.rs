@@ -63,7 +63,7 @@
 //! - [`Worksheet`]: The main spreadsheet canvas for writing data and objects to
 //!   a worksheet.
 //! - [`Working with Worksheets`](crate::worksheet): A higher-level introduction
-//!    to creating and working with worksheets.
+//!   to creating and working with worksheets.
 //! </p>
 //!
 //! <p>
@@ -196,8 +196,8 @@
 //!   compilation for wasm/JavaScript targets. See also
 //!   [wasm-xlsxwriter](https://github.com/estie-inc/wasm-xlsxwriter).
 //! - `rust_decimal`: Adds support for writing the
-//!    [`rust_decimal`](https://crates.io/crates/rust_decimal) `Decimal` type
-//!    with `Worksheet::write()`, provided it can be represented by [`f64`].
+//!   [`rust_decimal`](https://crates.io/crates/rust_decimal) `Decimal` type
+//!   with `Worksheet::write()`, provided it can be represented by [`f64`].
 //! - `ryu`: Adds a dependency on `ryu`. This speeds up writing numeric
 //!   worksheet cells for large data files. It gives a performance boost above
 //!   300,000 numeric cells and can be up to 30% faster than the default number

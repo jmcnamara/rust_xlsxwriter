@@ -3047,7 +3047,7 @@ impl ConditionalFormatText {
             | ConditionalFormatTextRule::EndsWith(text) => {
                 attributes.push(("text", text.clone()));
             }
-        };
+        }
 
         xml_start_tag(&mut writer, "cfRule", &attributes);
         xml_data_element_only(&mut writer, "formula", &formula);
