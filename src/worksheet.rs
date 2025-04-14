@@ -15356,12 +15356,10 @@ impl Worksheet {
         hyperlink.initialize()?;
 
         match format {
-            Some(format) => {
-                self.write_string_with_format(row, col, &hyperlink.user_text, format)?
-            }
+            Some(format) => self.write_string_with_format(row, col, &hyperlink.text, format)?,
             None => {
                 let hyperlink_format = Format::new().set_hyperlink();
-                self.write_string_with_format(row, col, &hyperlink.user_text, &hyperlink_format)?
+                self.write_string_with_format(row, col, &hyperlink.text, &hyperlink_format)?
             }
         };
 
@@ -15411,10 +15409,7 @@ impl Worksheet {
 
         // Store the image hyperlink, if any.
         if let Some(url) = &image.url {
-            let mut hyperlink = url.clone();
-            hyperlink.rel_display = true;
-
-            self.hyperlinks.insert((row, col), hyperlink);
+            self.hyperlinks.insert((row, col), url.clone());
         }
 
         // Get the index of the format object, if any.
@@ -16187,12 +16182,11 @@ impl Worksheet {
                 let target = hyperlink.target();
                 let target_mode = hyperlink.target_mode();
 
-                let rel_id = match self.drawing_rel_ids.get(&hyperlink.url_link) {
+                let rel_id = match self.drawing_rel_ids.get(&hyperlink.link) {
                     Some(rel_id) => *rel_id,
                     None => {
                         let rel_id = 1 + self.drawing_rel_ids.len() as u32;
-                        self.drawing_rel_ids
-                            .insert(hyperlink.url_link.clone(), rel_id);
+                        self.drawing_rel_ids.insert(hyperlink.link.clone(), rel_id);
 
                         // Store the linkage to the drawings rels file.
                         self.drawing_relationships.push((
@@ -16279,12 +16273,11 @@ impl Worksheet {
                 let target = hyperlink.target();
                 let target_mode = hyperlink.target_mode();
 
-                let rel_id = match self.drawing_rel_ids.get(&hyperlink.url_link) {
+                let rel_id = match self.drawing_rel_ids.get(&hyperlink.link) {
                     Some(rel_id) => *rel_id,
                     None => {
                         let rel_id = 1 + self.drawing_rel_ids.len() as u32;
-                        self.drawing_rel_ids
-                            .insert(hyperlink.url_link.clone(), rel_id);
+                        self.drawing_rel_ids.insert(hyperlink.link.clone(), rel_id);
 
                         // Store the linkage to the drawings rels file.
                         self.drawing_relationships.push((
@@ -18159,20 +18152,33 @@ impl Worksheet {
     }
 
     // Write the <hyperlink> element.
-    fn write_hyperlink(&mut self, row: RowNum, col: ColNum, hyperlink: &Url) {
+    fn write_hyperlink(&mut self, row: RowNum, col: ColNum, hyperlink: &mut Url) {
         let mut attributes = vec![("ref", utility::row_col_to_cell(row, col))];
+
+        // If the cell was overwritten by the user and isn't a string then we
+        // have to add the url as the string to display.
+        if let Some(columns) = self.data_table.get(&row) {
+            if let Some(cell) = columns.get(&col) {
+                match cell {
+                    CellType::String { .. } => {}
+                    _ => {
+                        hyperlink.is_object_link = true;
+                    }
+                }
+            }
+        }
 
         match hyperlink.link_type {
             HyperlinkType::Url | HyperlinkType::File => {
                 let rel_id = hyperlink.rel_id;
                 attributes.push(("r:id", format!("rId{rel_id}")));
 
-                if !hyperlink.rel_anchor.is_empty() {
-                    attributes.push(("location", hyperlink.rel_anchor.to_string()));
+                if !hyperlink.anchor.is_empty() {
+                    attributes.push(("location", hyperlink.anchor.to_string()));
                 }
 
-                if hyperlink.rel_display {
-                    attributes.push(("display", hyperlink.url_link.to_string()));
+                if hyperlink.is_object_link {
+                    attributes.push(("display", hyperlink.link.to_string()));
                 }
 
                 if !hyperlink.tool_tip.is_empty() {
@@ -18182,19 +18188,19 @@ impl Worksheet {
                 // Store the linkage to the worksheets rels file.
                 self.hyperlink_relationships.push((
                     "hyperlink".to_string(),
-                    hyperlink.url_link.to_string(),
-                    "External".to_string(),
+                    hyperlink.target(),
+                    hyperlink.target_mode(),
                 ));
             }
             HyperlinkType::Internal => {
                 // Internal links don't use the rel file reference id.
-                attributes.push(("location", hyperlink.rel_anchor.to_string()));
+                attributes.push(("location", hyperlink.anchor.to_string()));
 
                 if !hyperlink.tool_tip.is_empty() {
                     attributes.push(("tooltip", hyperlink.tool_tip.to_string()));
                 }
 
-                attributes.push(("display", hyperlink.user_text.to_string()));
+                attributes.push(("display", hyperlink.text.to_string()));
             }
             HyperlinkType::Unknown => {}
         }

@@ -754,6 +754,7 @@ impl Image {
     ///
     pub fn set_url(mut self, link: impl Into<Url>) -> Result<Image, XlsxError> {
         let mut url = link.into();
+        url.is_object_link = true;
         url.initialize()?;
 
         self.url = Some(url);

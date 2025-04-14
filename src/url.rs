@@ -261,13 +261,14 @@ const MAX_URL_LEN: usize = 2_080;
 ///
 #[derive(Clone, Debug)]
 pub struct Url {
-    pub(crate) url_link: String,
-    pub(crate) rel_link: String,
-    pub(crate) user_text: String,
+    pub(crate) original_url: String,
+    pub(crate) link: String,
+    pub(crate) relationship_link: String,
+    pub(crate) text: String,
     pub(crate) tool_tip: String,
-    pub(crate) rel_anchor: String,
-    pub(crate) rel_display: bool,
+    pub(crate) anchor: String,
     pub(crate) link_type: HyperlinkType,
+    pub(crate) is_object_link: bool,
     pub(crate) rel_id: u32,
 }
 
@@ -282,14 +283,15 @@ impl Url {
         let link = link.into();
 
         Url {
-            url_link: link.clone(),            // The worksheet hyperlink URL.
-            user_text: String::new(),          // Text the user sees. May be the same as the URL.
-            rel_link: link.clone(),            // The URL as it appears in a relationship file.
-            rel_anchor: String::new(),         // Equivalent to a URL anchor_fragment.
-            rel_display: false,                // Relationship display setting.
-            rel_id: 0,                         // Relationship id.
+            link_type: HyperlinkType::Unknown, // Types: Url, File, Internal.
+            original_url: link.clone(),        // The unmodified URL passed by the user.
+            link: link.clone(),                // The worksheet hyperlink URL.
+            relationship_link: link.clone(),   // The URL as it appears in a relationship file.
+            text: String::new(),               // Text the user sees. May be the same as the URL.
+            anchor: String::new(),             // Equivalent to a URL anchor_fragment.
             tool_tip: String::new(),           // The mouseover tool tip.
-            link_type: HyperlinkType::Unknown, // Url, file, internal.
+            is_object_link: false,             // Link from an object such as an image.
+            rel_id: 0,                         // Relationship id.
         }
     }
 
@@ -333,7 +335,7 @@ impl Url {
     /// <img src="https://rustxlsxwriter.github.io/images/url_set_text.png">
     ///
     pub fn set_text(mut self, text: impl Into<String>) -> Url {
-        self.user_text = text.into();
+        self.text = text.into();
         self
     }
 
@@ -359,9 +361,7 @@ impl Url {
 
         // Check the URL string lengths are within Excel's limits. The user text
         // length is checked by write_string_with_format().
-        if self.url_link.chars().count() > MAX_URL_LEN
-            || self.rel_anchor.chars().count() > MAX_URL_LEN
-        {
+        if self.link.chars().count() > MAX_URL_LEN || self.anchor.chars().count() > MAX_URL_LEN {
             return Err(XlsxError::MaxUrlLengthExceeded);
         }
 
@@ -381,72 +381,84 @@ impl Url {
     // This method handles a variety of different string processing required for
     // links and targets associated with Excel's urls/hyperlinks.
     pub(crate) fn parse_url(&mut self) -> Result<(), XlsxError> {
-        let original_url = self.url_link.clone();
-
-        if self.url_link.starts_with("http://")
-            || self.url_link.starts_with("https://")
-            || self.url_link.starts_with("ftp://")
-            || self.url_link.starts_with("ftps://")
+        if self.link.starts_with("http://")
+            || self.link.starts_with("https://")
+            || self.link.starts_with("ftp://")
+            || self.link.starts_with("ftps://")
         {
             // Handle web links like https://.
             self.link_type = HyperlinkType::Url;
 
-            if self.user_text.is_empty() {
-                self.user_text.clone_from(&self.url_link);
+            if self.text.is_empty() {
+                self.text.clone_from(&self.link);
             }
 
             // Split the URL into URL + #anchor if that exists.
-            let parts: Vec<&str> = self.url_link.splitn(2, '#').collect();
+            let parts: Vec<&str> = self.link.splitn(2, '#').collect();
             if parts.len() == 2 {
-                self.rel_anchor = parts[1].to_string();
-                self.url_link = parts[0].to_string();
+                self.anchor = parts[1].to_string();
+                self.link = parts[0].to_string();
             }
-        } else if self.url_link.starts_with("mailto:") {
+
+            // Set up the relationship link. This doesn't usually contain the
+            // anchor unless it is a link from an object like an image.
+            if self.is_object_link {
+                self.relationship_link.clone_from(&self.original_url);
+            } else {
+                self.relationship_link.clone_from(&self.link);
+            }
+        } else if self.link.starts_with("mailto:") {
             // Handle mail address links.
             self.link_type = HyperlinkType::Url;
 
-            if self.user_text.is_empty() {
-                self.user_text = self.url_link.replacen("mailto:", "", 1);
+            if self.text.is_empty() {
+                self.text = self.link.replacen("mailto:", "", 1);
             }
-        } else if self.url_link.starts_with("internal:") {
+        } else if self.link.starts_with("internal:") {
             // Handle links to cells within the workbook.
             self.link_type = HyperlinkType::Internal;
-            self.rel_anchor = self.url_link.replacen("internal:", "", 1);
+            self.anchor = self.link.replacen("internal:", "", 1);
+            self.relationship_link = self.link.replacen("internal:", "#", 1);
 
-            if self.user_text.is_empty() {
-                self.user_text.clone_from(&self.rel_anchor);
+            if self.text.is_empty() {
+                self.text.clone_from(&self.anchor);
             }
-        } else if self.url_link.starts_with("file://") {
+        } else if self.link.starts_with("file://") {
             // Handle links to other files or cells in other Excel files.
             self.link_type = HyperlinkType::File;
-            let link_path = self.url_link.replacen("file:///", "", 1);
+            let link_path = self.link.replacen("file:///", "", 1);
             let link_path = link_path.replacen("file://", "", 1);
 
             // Links to relative file paths should be stored without file:///.
             let is_relative_path = Self::relative_path(&link_path);
             if is_relative_path {
-                self.url_link.clone_from(&link_path);
+                self.link.clone_from(&link_path);
             }
 
-            // Links to relative file paths should continue to use Windows "\"
-            // path separator. Other paths should use "/".
-            self.rel_link.clone_from(&self.url_link);
-            if is_relative_path {
-                self.rel_link = self.rel_link.replace('\\', "/");
-            }
-
-            if self.user_text.is_empty() {
-                self.user_text = link_path;
+            if self.text.is_empty() {
+                self.text = link_path;
             }
 
             // Split the URL into URL + #anchor if that exists.
-            let parts: Vec<&str> = self.url_link.splitn(2, '#').collect();
+            let parts: Vec<&str> = self.link.splitn(2, '#').collect();
             if parts.len() == 2 {
-                self.rel_anchor = parts[1].to_string();
-                self.url_link = parts[0].to_string();
+                self.anchor = parts[1].to_string();
+                self.link = parts[0].to_string();
+            }
+
+            // Set up the relationship link. This doesn't usually contain the
+            // anchor unless it is a link from an object like an image.
+            if self.is_object_link {
+                if is_relative_path {
+                    self.relationship_link = self.link.replace('\\', "/");
+                } else {
+                    self.relationship_link.clone_from(&self.original_url);
+                }
+            } else {
+                self.relationship_link.clone_from(&self.link);
             }
         } else {
-            return Err(XlsxError::UnknownUrlType(original_url));
+            return Err(XlsxError::UnknownUrlType(self.original_url.clone()));
         }
 
         Ok(())
@@ -455,19 +467,19 @@ impl Url {
     // Escape hyperlink string variants.
     pub(crate) fn escape_strings(&mut self) {
         // Escape any URL characters in the URL string.
-        if !Self::is_escaped(&self.url_link) {
-            self.url_link = crate::xmlwriter::escape_url(&self.url_link).into();
+        if !Self::is_escaped(&self.link) {
+            self.link = crate::xmlwriter::escape_url(&self.link).into();
         }
 
         // Escape the link used in the relationship file, except for internal
         // links which are generally sheet/cell locations.
-        if self.link_type != HyperlinkType::Internal && !Self::is_escaped(&self.rel_link) {
-            self.rel_link = crate::xmlwriter::escape_url(&self.rel_link).into();
+        if self.link_type != HyperlinkType::Internal && !Self::is_escaped(&self.relationship_link) {
+            self.relationship_link = crate::xmlwriter::escape_url(&self.relationship_link).into();
         }
 
         // Excel additionally escapes # to %23 in file paths.
         if self.link_type == HyperlinkType::File {
-            self.rel_link = self.rel_link.replace('#', "%23");
+            self.relationship_link = self.relationship_link.replace('#', "%23");
         }
     }
 
@@ -483,25 +495,17 @@ impl Url {
     }
 
     // Get the target for relationship ids.
-    pub(crate) fn target(&mut self) -> String {
-        let mut target = self.rel_link.clone();
-
-        if self.link_type == HyperlinkType::Internal {
-            target = target.replace("internal:", "#");
-        }
-
-        target
+    pub(crate) fn target(&self) -> String {
+        self.relationship_link.clone()
     }
 
     // Get the target mode for relationship ids.
-    pub(crate) fn target_mode(&mut self) -> String {
-        let mut target_mode = String::from("External");
-
+    pub(crate) fn target_mode(&self) -> String {
         if self.link_type == HyperlinkType::Internal {
-            target_mode = String::new();
+            String::new()
+        } else {
+            String::from("External")
         }
-
-        target_mode
     }
 
     // Check for relative paths like "file.xlsx" or "../file.xlsx" as anything that
