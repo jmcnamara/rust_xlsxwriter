@@ -35,12 +35,6 @@ use pretty_assertions::assert_eq;
 use regex::Regex;
 use rust_xlsxwriter::XlsxError;
 
-const _: () = {
-    const fn assert_worksheet_sync<S: Sync>() {}
-
-    assert_worksheet_sync::<rust_xlsxwriter::Worksheet>();
-};
-
 // Simple test runner struct and methods to create a new xlsx output file and
 // compare it with an input xlsx file created by Excel.
 #[allow(dead_code)]
