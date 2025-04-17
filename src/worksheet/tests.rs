@@ -714,4 +714,12 @@ mod worksheet_tests {
         let result = worksheet.ignore_error(2, 1, IgnoreError::NumberStoredAsText);
         assert!(matches!(result, Err(XlsxError::ParameterError(_))));
     }
+
+    #[test]
+    fn assert_sync() {
+        const _: () = {
+            const fn assert_worksheet_sync<S: Sync>() {}
+            assert_worksheet_sync::<Worksheet>();
+        };
+    }
 }

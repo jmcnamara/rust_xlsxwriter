@@ -1608,7 +1608,7 @@ pub struct Worksheet {
     filter_automatic_off: bool,
     has_drawing_object_linkage: bool,
     cells_with_autofilter: HashMap<(RowNum, ColNum), (FilterType, CellRange)>,
-    conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Send>>>,
+    conditional_formats: BTreeMap<String, Vec<Box<dyn ConditionalFormat + Sync + Send>>>,
     conditional_format_order: Vec<String>,
     data_validations: BTreeMap<String, DataValidation>,
     has_conditional_formats: bool,
@@ -9014,7 +9014,7 @@ impl Worksheet {
         conditional_format: &T,
     ) -> Result<&mut Worksheet, XlsxError>
     where
-        T: ConditionalFormat + Send,
+        T: ConditionalFormat + Send + Sync,
     {
         // Check rows and cols are in the allowed range.
         if !self.check_dimensions_only(first_row, first_col)
