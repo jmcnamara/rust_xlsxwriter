@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.86.0] - 2025-04-17
+
+### Added
+
+- Enabled `sync` for the internal components of `Worksheet` to allow it to by
+  `sync` when required.
+
+  [Request #144].
+
+  [Request #144]: https://github.com/jmcnamara/rust_xlsxwriter/issues/144
+
 
 ## [0.85.0] - 2025-03-26
 

@@ -27,9 +27,6 @@ documentation and generally show how an individual function works.
   worksheet. That is the way that the Microsoft documentation recommends to
   set a watermark in Excel.
 
-* `app_chart.rs` - A simple chart example using the `rust_xlsxwriter`
-  library.
-
 * `app_chart_area.rs` - An example of creating area charts using the
   `rust_xlsxwriter` library.
 
@@ -102,6 +99,9 @@ documentation and generally show how an individual function works.
 
 * `app_chart_tutorial4.rs` - An example of creating a simple chart using
   the `rust_xlsxwriter` library.
+
+* `app_chart.rs` - A simple chart example using the `rust_xlsxwriter`
+  library.
 
 * `app_chartsheet.rs` - An example of creating a chartsheet style chart
   using the `rust_xlsxwriter` library.
@@ -178,15 +178,15 @@ documentation and generally show how an individual function works.
 * `app_ignore_errors.rs` - An example of turning off worksheet cells
   errors/warnings using using the `rust_xlsxwriter` library.
 
-* `app_images.rs` - An example of inserting images into a worksheet using
-  `rust_xlsxwriter`.
-
 * `app_images_fit_to_cell.rs` - An example of inserting images into a
   worksheet using `rust_xlsxwriter` so that they are scaled to a cell. This
   approach can be useful if you are building up a spreadsheet of products
   with a column of images for each product. See also the
   `app_embedded_image.rs` example that shows a better approach for newer
   versions of Excel.
+
+* `app_images.rs` - An example of inserting images into a worksheet using
+  `rust_xlsxwriter`.
 
 * `app_lambda.rs` - An example of using the new Excel LAMBDA() function
   with the `rust_xlsxwriter` library.
@@ -317,11 +317,11 @@ documentation and generally show how an individual function works.
 * `doc_chart_axis_set_log_base.rs` - A chart example demonstrating setting
   the logarithm base for chart axes.
 
-* `doc_chart_axis_set_major_gridlines.rs` - A chart example demonstrating
-  turning off the major gridlines for chart axes.
-
 * `doc_chart_axis_set_major_gridlines_line.rs` - A chart example
   demonstrating formatting the major gridlines for chart axes.
+
+* `doc_chart_axis_set_major_gridlines.rs` - A chart example demonstrating
+  turning off the major gridlines for chart axes.
 
 * `doc_chart_axis_set_major_tick_type.rs` - A chart example demonstrating
   setting the tick types for chart axes.
@@ -329,23 +329,23 @@ documentation and generally show how an individual function works.
 * `doc_chart_axis_set_major_unit.rs` - A chart example demonstrating
   setting the units for chart axes.
 
-* `doc_chart_axis_set_max.rs` - A chart example demonstrating setting the
-  axes bounds for chart axes.
-
 * `doc_chart_axis_set_max_date.rs` - A chart example demonstrating setting
   the maximum and minimum values for a date axis.
 
-* `doc_chart_axis_set_minor_gridlines.rs` - A chart example demonstrating
-  turning on the minor gridlines for chart axes.
+* `doc_chart_axis_set_max.rs` - A chart example demonstrating setting the
+  axes bounds for chart axes.
 
 * `doc_chart_axis_set_minor_gridlines_line.rs` - A chart example
   demonstrating formatting the minor gridlines for chart axes.
 
-* `doc_chart_axis_set_name.rs` - A chart example demonstrating setting the
-  title of chart axes.
+* `doc_chart_axis_set_minor_gridlines.rs` - A chart example demonstrating
+  turning on the minor gridlines for chart axes.
 
 * `doc_chart_axis_set_name_font.rs` - An example of setting the font for a
   chart axis title.
+
+* `doc_chart_axis_set_name.rs` - A chart example demonstrating setting the
+  title of chart axes.
 
 * `doc_chart_axis_set_num_format.rs` - A chart example demonstrating
   setting the number format a chart axes.
@@ -371,9 +371,6 @@ documentation and generally show how an individual function works.
   Line chart. In this example the Column values are on the primary Y axis
   and the Line chart values are on the secondary Y2 axis.
 
-* `doc_chart_data_labels.rs` - An example of adding data labels to a chart
-  series.
-
 * `doc_chart_data_labels_set_font.rs` - An example of adding data labels to
   a chart series with font formatting.
 
@@ -393,10 +390,11 @@ documentation and generally show how an individual function works.
   percentage for the data labels of a chart series. Usually this only
   applies to a Pie or Doughnut chart.
 
+* `doc_chart_data_labels.rs` - An example of adding data labels to a chart
+  series.
+
 * `doc_chart_error_bars_intro.rs` - An example of adding error bars to a
   chart data series.
-
-* `doc_chart_font.rs` - An example of setting the font for a chart element.
 
 * `doc_chart_font_set_bold.rs` - An example of setting the bold property
   for the font in a chart element.
@@ -416,6 +414,8 @@ documentation and generally show how an individual function works.
 * `doc_chart_font_set_size.rs` - An example of setting the font size
   property for the font in a chart element.
 
+* `doc_chart_font.rs` - An example of setting the font for a chart element.
+
 * `doc_chart_format_set_gradient_fill.rs` - An example of setting a
   gradient fill for a chart element.
 
@@ -431,11 +431,14 @@ documentation and generally show how an individual function works.
 * `doc_chart_formatting.rs` - An example of formatting the chart border
   element.
 
+* `doc_chart_gradient_fill_set_type.rs` - An example of setting a gradient
+  fill for a chart element with a non-default gradient type.
+
 * `doc_chart_gradient_fill.rs` - An example of setting a gradient fill for
   a chart element.
 
-* `doc_chart_gradient_fill_set_type.rs` - An example of setting a gradient
-  fill for a chart element with a non-default gradient type.
+* `doc_chart_gradient_stops_new.rs` - An example of creating gradient stops
+  for a gradient fill for a chart element.
 
 * `doc_chart_gradient_stops.rs` - An example of setting a gradient fill for
   a chart element.
@@ -443,14 +446,8 @@ documentation and generally show how an individual function works.
 * `doc_chart_gradient_stops2.rs` - An example of setting a gradient fill
   for a chart element.
 
-* `doc_chart_gradient_stops_new.rs` - An example of creating gradient stops
-  for a gradient fill for a chart element.
-
 * `doc_chart_intro.rs` - A simple chart example using the `rust_xlsxwriter`
   library.
-
-* `doc_chart_legend.rs` - An example of getting the chart legend object and
-  setting some of its properties.
 
 * `doc_chart_legend_delete_entries.rs` - A chart example demonstrating
   deleting/hiding a series name from the chart legend.
@@ -463,6 +460,9 @@ documentation and generally show how an individual function works.
 
 * `doc_chart_legend_set_overlay.rs` - An example of overlaying the chart
   legend on the plot area.
+
+* `doc_chart_legend.rs` - An example of getting the chart legend object and
+  setting some of its properties.
 
 * `doc_chart_line_formatting.rs` - An example of formatting a line/border
   in a chart element.
@@ -480,8 +480,6 @@ documentation and generally show how an individual function works.
 * `doc_chart_line_set_width.rs` - An example of formatting the line width
   in a chart element.
 
-* `doc_chart_marker.rs` - An example of adding markers to a line chart.
-
 * `doc_chart_marker_set_automatic.rs` - An example of adding automatic
   markers to a line chart.
 
@@ -491,11 +489,13 @@ documentation and generally show how an individual function works.
 * `doc_chart_marker_set_type.rs` - An example of adding markers to a line
   chart with user defined marker types.
 
-* `doc_chart_pattern_fill.rs` - An example of setting a pattern fill for a
-  chart element.
+* `doc_chart_marker.rs` - An example of adding markers to a line chart.
 
 * `doc_chart_pattern_fill_set_pattern.rs` - An example of setting a pattern
   fill for a chart element.
+
+* `doc_chart_pattern_fill.rs` - An example of setting a pattern fill for a
+  chart element.
 
 * `doc_chart_plot_area_set_layout.rs` - An example of setting the layout of
   a chart element, in this case the chart plot area.
@@ -510,14 +510,14 @@ documentation and generally show how an individual function works.
 * `doc_chart_series_set_categories.rs` - A chart example demonstrating
   setting the chart series categories and values.
 
-* `doc_chart_series_set_invert_if_negative.rs` - A chart example
-  demonstrating setting the "Invert if negative" property for a chart
-  series.
-
 * `doc_chart_series_set_invert_if_negative_color.rs` - A chart example
   demonstrating setting the "Invert if negative" property and associated
   color for a chart series. This also requires that you set a solid fill
   color for the series.
+
+* `doc_chart_series_set_invert_if_negative.rs` - A chart example
+  demonstrating setting the "Invert if negative" property for a chart
+  series.
 
 * `doc_chart_series_set_name.rs` - A chart example demonstrating setting
   the chart series name.
@@ -569,17 +569,17 @@ documentation and generally show how an individual function works.
 * `doc_chart_set_data_table.rs` - An example of adding a data table to a
   chart.
 
-* `doc_chart_set_drop_lines.rs` - An example of setting drop lines for a
-  chart.
-
 * `doc_chart_set_drop_lines_format.rs` - An example of setting drop lines
   for a chart, with formatting.
 
-* `doc_chart_set_high_low_lines.rs` - An example of setting high-low lines
-  for a chart.
+* `doc_chart_set_drop_lines.rs` - An example of setting drop lines for a
+  chart.
 
 * `doc_chart_set_high_low_lines_format.rs` - An example of setting high-low
   lines for a chart, with formatting.
+
+* `doc_chart_set_high_low_lines.rs` - An example of setting high-low lines
+  for a chart.
 
 * `doc_chart_set_hole_size.rs` - An example of formatting the chart hole
   size for doughnut charts.
@@ -597,11 +597,11 @@ documentation and generally show how an individual function works.
 * `doc_chart_set_rotation.rs` - An example of formatting the chart rotation
   for pie and doughnut charts.
 
-* `doc_chart_set_up_down_bars.rs` - An example of setting up-down bars for
-  a chart.
-
 * `doc_chart_set_up_down_bars_format.rs` - An example of setting up-down
   bars for a chart, with formatting.
+
+* `doc_chart_set_up_down_bars.rs` - An example of setting up-down bars for
+  a chart.
 
 * `doc_chart_set_width.rs` - A simple chart example using the
   `rust_xlsxwriter` library.
@@ -609,11 +609,11 @@ documentation and generally show how an individual function works.
 * `doc_chart_simple.rs` - A simple chart example using the
   `rust_xlsxwriter` library.
 
-* `doc_chart_solid_fill.rs` - An example of setting a solid fill for a
-  chart element.
-
 * `doc_chart_solid_fill_set_color.rs` - An example of setting a solid fill
   color for a chart element.
+
+* `doc_chart_solid_fill.rs` - An example of setting a solid fill for a
+  chart element.
 
 * `doc_chart_title_set_font.rs` - An example of setting the font for a
   chart title.
@@ -653,10 +653,6 @@ documentation and generally show how an individual function works.
 * `doc_chartsheet.rs` - A simple chartsheet example. A chart is placed on
   it own dedicated worksheet.
 
-* `doc_conditional_format_2color.rs` - Example of adding a 2 color scale
-  type conditional formatting to a worksheet. Note, the colors in the fifth
-  example (yellow to green) are the default colors and could be omitted.
-
 * `doc_conditional_format_2color_set_color.rs` - Example of adding a 2
   color scale type conditional formatting to a worksheet with user defined
   minimum and maximum colors.
@@ -665,10 +661,9 @@ documentation and generally show how an individual function works.
   color scale type conditional formatting to a worksheet with user defined
   minimum and maximum values.
 
-* `doc_conditional_format_3color.rs` - Example of adding 3 color scale type
-  conditional formatting to a worksheet. Note, the colors in the first
-  example (red to yellow to green) are the default colors and could be
-  omitted.
+* `doc_conditional_format_2color.rs` - Example of adding a 2 color scale
+  type conditional formatting to a worksheet. Note, the colors in the fifth
+  example (yellow to green) are the default colors and could be omitted.
 
 * `doc_conditional_format_3color_set_color.rs` - Example of adding 3 color
   scale type conditional formatting to a worksheet with user defined
@@ -677,6 +672,11 @@ documentation and generally show how an individual function works.
 * `doc_conditional_format_3color_set_minimum.rs` - Example of adding 3
   color scale type conditional formatting to a worksheet with user defined
   minimum and maximum values.
+
+* `doc_conditional_format_3color.rs` - Example of adding 3 color scale type
+  conditional formatting to a worksheet. Note, the colors in the first
+  example (red to yellow to green) are the default colors and could be
+  omitted.
 
 * `doc_conditional_format_anchor.rs` - Example of adding a Formula type
   conditional formatting to a worksheet. This example demonstrate the
@@ -691,14 +691,6 @@ documentation and generally show how an individual function works.
   in light red. Non-blank values are in light green. Note, that we invert
   the Blank rule to get Non-blank values.
 
-* `doc_conditional_format_cell1.rs` - Example of adding a cell type
-  conditional formatting to a worksheet. Cells with values >= 50 are in
-  light red. Values < 50 are in light green.
-
-* `doc_conditional_format_cell2.rs` - Example of adding a cell type
-  conditional formatting to a worksheet. Values between 30 and 70 are
-  highlighted in light red. Values outside that range are in light green.
-
 * `doc_conditional_format_cell_set_minimum.rs` - Example of adding a cell
   type conditional formatting to a worksheet. Values between 40 and 60 are
   highlighted in light green.
@@ -707,8 +699,13 @@ documentation and generally show how an individual function works.
   type conditional formatting to a worksheet. Cells with values >= 50 are
   in light green.
 
-* `doc_conditional_format_databar.rs` - Example of adding data bar type
-  conditional formatting to a worksheet.
+* `doc_conditional_format_cell1.rs` - Example of adding a cell type
+  conditional formatting to a worksheet. Cells with values >= 50 are in
+  light red. Values < 50 are in light green.
+
+* `doc_conditional_format_cell2.rs` - Example of adding a cell type
+  conditional formatting to a worksheet. Values between 30 and 70 are
+  highlighted in light red. Values outside that range are in light green.
 
 * `doc_conditional_format_databar_set_axis_color.rs` - Example of adding a
   data bar type conditional formatting to a worksheet with a user defined
@@ -752,6 +749,9 @@ documentation and generally show how an individual function works.
   data bar type conditional formatting to a worksheet with a solid
   (non-gradient) style bar.
 
+* `doc_conditional_format_databar.rs` - Example of adding data bar type
+  conditional formatting to a worksheet.
+
 * `doc_conditional_format_date.rs` - Example of adding a Dates Occurring
   type conditional formatting to a worksheet. Note, the rules in this
   example such as "Last month", "This month" and "Next month" are applied
@@ -772,9 +772,6 @@ documentation and generally show how an individual function works.
   conditional formatting to a worksheet. Cells with odd numbered values are
   in light red while even numbered values are in light green.
 
-* `doc_conditional_format_icon.rs` - Example of adding icon style
-  conditional formatting to a worksheet.
-
 * `doc_conditional_format_icon_default_icons.rs` - The following example
   shows Excels default icon settings expressed as `rust_xlsxwriter` rules.
 
@@ -793,6 +790,9 @@ documentation and generally show how an individual function works.
 * `doc_conditional_format_icon_show_icons_only.rs` - Example of adding icon
   style conditional formatting to a worksheet. In the second example the
   icons are shown without the cell data.
+
+* `doc_conditional_format_icon.rs` - Example of adding icon style
+  conditional formatting to a worksheet.
 
 * `doc_conditional_format_multi_range.rs` - Example of adding a cell type
   conditional formatting to a worksheet over a non-contiguous range. Cells
@@ -815,13 +815,13 @@ documentation and generally show how an individual function works.
   to a worksheet cell. This validation restricts input to date values in a
   fixed range.
 
-* `doc_data_validation_allow_decimal_number.rs` - Example of adding a data
-  validation to a worksheet cell. This validation restricts input to
-  floating point values in a fixed range.
-
 * `doc_data_validation_allow_decimal_number_formula.rs` - Example of adding
   a data validation to a worksheet cell. This validation restricts input to
   floating point values based on a value from another cell.
+
+* `doc_data_validation_allow_decimal_number.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts input to
+  floating point values in a fixed range.
 
 * `doc_data_validation_allow_list_formula.rs` - Example of adding a data
   validation to a worksheet cell. This validation restricts users to a
@@ -845,10 +845,6 @@ documentation and generally show how an individual function works.
   to a worksheet cell. This validation restricts input to time values in a
   fixed range.
 
-* `doc_data_validation_allow_whole_number.rs` - Example of adding a data
-  validation to a worksheet cell. This validation restricts input to
-  integer values in a fixed range.
-
 * `doc_data_validation_allow_whole_number_formula.rs` - Example of adding a
   data validation to a worksheet cell. This validation restricts input to
   integer values based on a value from another cell.
@@ -856,6 +852,10 @@ documentation and generally show how an individual function works.
 * `doc_data_validation_allow_whole_number_formula2.rs` - Example of adding
   a data validation to a worksheet cell. This validation restricts input to
   integer values based on a value from another cell.
+
+* `doc_data_validation_allow_whole_number.rs` - Example of adding a data
+  validation to a worksheet cell. This validation restricts input to
+  integer values in a fixed range.
 
 * `doc_data_validation_intro1.rs` - Example of adding a data validation to
   a worksheet cell. This validation uses an input message to explain to the
@@ -873,17 +873,17 @@ documentation and generally show how an individual function works.
   validation to a worksheet cell. This validation uses an input message to
   explain to the user what type of input is required.
 
-* `doc_datetime_and_hms.rs` - Demonstrates writing formatted datetimes in
-  an Excel worksheet.
-
 * `doc_datetime_and_hms_milli.rs` - Demonstrates writing formatted
   datetimes in an Excel worksheet.
 
-* `doc_datetime_from_hms.rs` - Demonstrates writing formatted times in an
-  Excel worksheet.
+* `doc_datetime_and_hms.rs` - Demonstrates writing formatted datetimes in
+  an Excel worksheet.
 
 * `doc_datetime_from_hms_milli.rs` - Demonstrates writing formatted times
   in an Excel worksheet.
+
+* `doc_datetime_from_hms.rs` - Demonstrates writing formatted times in an
+  Excel worksheet.
 
 * `doc_datetime_from_serial_datetime.rs` - Demonstrates writing formatted
   datetimes in an Excel worksheet.
@@ -950,13 +950,13 @@ documentation and generally show how an individual function works.
 * `doc_format_set_bold.rs` - Demonstrates setting the bold property for a
   format.
 
-* `doc_format_set_border.rs` - Demonstrates setting a cell border.
-
 * `doc_format_set_border_color.rs` - Demonstrates setting a cell border and
   color.
 
 * `doc_format_set_border_diagonal.rs` - Demonstrates setting cell diagonal
   borders.
+
+* `doc_format_set_border.rs` - Demonstrates setting a cell border.
 
 * `doc_format_set_font_color.rs` - Demonstrates setting the italic property
   for a format.
@@ -979,11 +979,11 @@ documentation and generally show how an individual function works.
 * `doc_format_set_italic.rs` - Demonstrates setting the italic property for
   a format.
 
-* `doc_format_set_num_format.rs` - Demonstrates setting different types of
-  Excel number formatting.
-
 * `doc_format_set_num_format_index.rs` - Demonstrates setting one of the
   inbuilt format indices for a format.
+
+* `doc_format_set_num_format.rs` - Demonstrates setting different types of
+  Excel number formatting.
 
 * `doc_format_set_pattern.rs` - Demonstrates setting the cell pattern (with
   colors).
@@ -1005,9 +1005,6 @@ documentation and generally show how an individual function works.
 
 * `doc_format_set_underline.rs` - Demonstrates setting underline properties
   for a format.
-
-* `doc_image.rs` - This example shows how to create an image object and use
-  it to insert the image into a worksheet.
 
 * `doc_image_dimensions.rs` - This example shows how to get some of the
   properties of an Image that will be used in an Excel worksheet.
@@ -1038,6 +1035,9 @@ documentation and generally show how an individual function works.
 * `doc_image_set_width.rs` - This example shows how to create an image
   object and use it to insert the image into a worksheet. The image in this
   case is scaled by setting the height and width.
+
+* `doc_image.rs` - This example shows how to create an image object and use
+  it to insert the image into a worksheet.
 
 * `doc_into_chart_format.rs` - An example of passing chart formatting
   parameters via the [`IntoChartFormat`] trait.
@@ -1086,11 +1086,11 @@ documentation and generally show how an individual function works.
 * `doc_properties_checksum1.rs` - Create a simple workbook to demonstrate
   the changing checksum due to the changing creation date.
 
-* `doc_properties_checksum2.rs` - Create a simple workbook to demonstrate a
-  constant checksum due to the a constant creation date.
-
 * `doc_properties_checksum2_chrono.rs` - Create a simple workbook to
   demonstrate a constant checksum due to the a constant creation date.
+
+* `doc_properties_checksum2.rs` - Create a simple workbook to demonstrate a
+  constant checksum due to the a constant creation date.
 
 * `doc_properties_custom.rs` - An example of setting custom/user defined
   workbook document properties.
@@ -1110,9 +1110,6 @@ documentation and generally show how an individual function works.
 * `doc_shape_font_set_size.rs` - This example demonstrates adding a Textbox
   shape and setting some of the font properties.
 
-* `doc_shape_format.rs` - This example demonstrates adding a Textbox shape
-  and setting some of its properties.
-
 * `doc_shape_format_set_gradient_fill.rs` - This example demonstrates
   adding a Textbox shape and setting some of its properties.
 
@@ -1125,8 +1122,8 @@ documentation and generally show how an individual function works.
 * `doc_shape_format_set_no_line.rs` - This example demonstrates adding a
   Textbox shape and turning off its border.
 
-* `doc_shape_gradient_fill.rs` - This example demonstrates adding a Textbox
-  shape and setting some of the gradient fill properties.
+* `doc_shape_format.rs` - This example demonstrates adding a Textbox shape
+  and setting some of its properties.
 
 * `doc_shape_gradient_fill_set_gradient_stops.rs` - This example
   demonstrates adding a Textbox shape and setting some of the gradient fill
@@ -1135,8 +1132,8 @@ documentation and generally show how an individual function works.
 * `doc_shape_gradient_fill_set_type.rs` - This example demonstrates adding
   a Textbox shape and setting some of the gradient fill properties.
 
-* `doc_shape_line.rs` - This example demonstrates adding a Textbox shape
-  and setting some of the line properties.
+* `doc_shape_gradient_fill.rs` - This example demonstrates adding a Textbox
+  shape and setting some of the gradient fill properties.
 
 * `doc_shape_line_set_color.rs` - This example demonstrates adding a
   Textbox shape and setting some of the line properties.
@@ -1153,17 +1150,20 @@ documentation and generally show how an individual function works.
 * `doc_shape_line_set_width.rs` - This example demonstrates adding a
   Textbox shape and setting some of the line properties.
 
+* `doc_shape_line.rs` - This example demonstrates adding a Textbox shape
+  and setting some of the line properties.
+
 * `doc_shape_pattern_fill.rs` - This example demonstrates adding a Textbox
   shape and setting some of the pattern fill properties.
 
 * `doc_shape_set_font.rs` - This example demonstrates adding a Textbox
   shape and setting some of the font properties.
 
-* `doc_shape_set_text.rs` - This example demonstrates adding a Textbox
-  shape with text to a worksheet.
-
 * `doc_shape_set_text_link.rs` - This example demonstrates adding a Textbox
   shape with text from a cell to a worksheet.
+
+* `doc_shape_set_text.rs` - This example demonstrates adding a Textbox
+  shape with text to a worksheet.
 
 * `doc_shape_set_width.rs` - This example demonstrates adding a resized
   Textbox shape to a worksheet.
@@ -1235,13 +1235,13 @@ documentation and generally show how an individual function works.
 * `doc_tablecolumn_set_header_format.rs` - Example of adding a header
   format to a column in a worksheet table.
 
-* `doc_url_intro1.rs` - Demonstrates writing a url to a worksheet.
+* `doc_url_intro1.rs` - Demonstrates writing a URL to a worksheet.
 
-* `doc_url_intro2.rs` - Demonstrates writing a url to a worksheet.
+* `doc_url_intro2.rs` - Demonstrates writing a URL to a worksheet.
 
-* `doc_url_intro3.rs` - Demonstrates writing a url to a worksheet.
+* `doc_url_intro3.rs` - Demonstrates writing a URL to a worksheet.
 
-* `doc_url_set_text.rs` - Demonstrates writing a url to a worksheet with
+* `doc_url_set_text.rs` - Demonstrates writing a URL to a worksheet with
   alternative text.
 
 * `doc_utility_check_sheet_name.rs` - Demonstrates testing for a valid
@@ -1249,14 +1249,14 @@ documentation and generally show how an individual function works.
 
 * `doc_utility_quote_sheet_name.rs` - Demonstrates quoting worksheet names.
 
-* `doc_workbook_add_worksheet.rs` - Demonstrates creating adding worksheets
-  to a workbook.
-
 * `doc_workbook_add_worksheet_with_constant_memory.rs` - Demonstrates
   adding worksheets in "standard" and "constant memory" modes.
 
 * `doc_workbook_add_worksheet_with_low_memory.rs` - Demonstrates adding
   worksheets in "standard" and "low memory" modes.
+
+* `doc_workbook_add_worksheet.rs` - Demonstrates creating adding worksheets
+  to a workbook.
 
 * `doc_workbook_new.rs` - Demonstrates creating a simple workbook, with one
   unused worksheet.
@@ -1268,9 +1268,6 @@ documentation and generally show how an individual function works.
   workbook which opens with a recommendation that the file should be opened
   in read only mode.
 
-* `doc_workbook_save.rs` - Demonstrates creating a simple workbook, with
-  one unused worksheet.
-
 * `doc_workbook_save_to_buffer.rs` - Demonstrates creating a simple
   workbook to a Vec<u8> buffer.
 
@@ -1281,6 +1278,9 @@ documentation and generally show how an individual function works.
   workbook to some types that implement the `Write` trait like a file and a
   buffer.
 
+* `doc_workbook_save.rs` - Demonstrates creating a simple workbook, with
+  one unused worksheet.
+
 * `doc_workbook_set_tempdir.rs` - Demonstrates setting a custom directory
   for temporary files when creating a file in "constant memory" mode.
 
@@ -1290,12 +1290,12 @@ documentation and generally show how an individual function works.
 * `doc_workbook_worksheet_from_name.rs` - Demonstrates getting worksheet
   reference by name.
 
+* `doc_workbook_worksheets_mut.rs` - Demonstrates operating on the vector
+  of all the worksheets in a workbook.
+
 * `doc_workbook_worksheets.rs` - Demonstrates operating on the vector of
   all the worksheets in a workbook. The non mutable version of this method
   is less useful than `workbook.worksheets_mut()`.
-
-* `doc_workbook_worksheets_mut.rs` - Demonstrates operating on the vector
-  of all the worksheets in a workbook.
 
 * `doc_working_with_formulas_dynamic_len.rs` - Demonstrates a static
   function which generally returns one value turned into a dynamic function
@@ -1317,11 +1317,11 @@ documentation and generally show how an individual function works.
 * `doc_working_with_formulas_syntax.rs` - Demonstrates some common formula
   syntax errors.
 
-* `doc_worksheet_add_sparkline.rs` - Demonstrates adding a sparkline to a
-  worksheet.
-
 * `doc_worksheet_add_sparkline_group.rs` - Demonstrates adding a sparkline
   group to a worksheet.
+
+* `doc_worksheet_add_sparkline.rs` - Demonstrates adding a sparkline to a
+  worksheet.
 
 * `doc_worksheet_autofilter.rs` - Demonstrates setting a simple autofilter
   in a worksheet.
@@ -1329,11 +1329,11 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_autofit.rs` - Demonstrates auto-fitting the worksheet
   column widths based on the data in the columns.
 
-* `doc_worksheet_clear_cell.rs` - Demonstrates clearing some previously
-  written cell data and formatting from a worksheet.
-
 * `doc_worksheet_clear_cell_format.rs` - Demonstrates clearing the
   formatting from some previously written cells in a worksheet.
+
+* `doc_worksheet_clear_cell.rs` - Demonstrates clearing some previously
+  written cell data and formatting from a worksheet.
 
 * `doc_worksheet_constant.rs` - Demonstrates adding worksheets in
   "standard", "low memory" and "constant memory" modes.
@@ -1366,14 +1366,6 @@ documentation and generally show how an individual function works.
   filter. Excel uses both of these methods depending on the data being
   filtered.
 
-* `doc_worksheet_group_columns1.rs` - An example of how to group worksheet
-  columns into outlines.
-
-* `doc_worksheet_group_columns2.rs` - An example of how to group worksheet
-  columns into outlines. This example shows hows to add secondary groups
-  within a primary grouping. Excel requires at least one column between
-  each outline grouping at the same level.
-
 * `doc_worksheet_group_columns_collapsed1.rs` - An example of how to group
   worksheet columns into outlines with collapsed/hidden rows.
 
@@ -1383,13 +1375,13 @@ documentation and generally show how an individual function works.
   requires at least one column between each outline grouping at the same
   level.
 
-* `doc_worksheet_group_rows1.rs` - An example of how to group worksheet
-  rows into outlines.
+* `doc_worksheet_group_columns1.rs` - An example of how to group worksheet
+  columns into outlines.
 
-* `doc_worksheet_group_rows2.rs` - An example of how to group worksheet
-  rows into outlines. This example shows hows to add secondary groups
-  within a primary grouping. Excel requires at least one row between each
-  outline grouping at the same level.
+* `doc_worksheet_group_columns2.rs` - An example of how to group worksheet
+  columns into outlines. This example shows hows to add secondary groups
+  within a primary grouping. Excel requires at least one column between
+  each outline grouping at the same level.
 
 * `doc_worksheet_group_rows_collapsed1.rs` - An example of how to group
   worksheet rows into outlines with collapsed/hidden rows.
@@ -1405,6 +1397,14 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_group_rows_intro2.rs` - An example of how to group
   worksheet rows into outlines.
+
+* `doc_worksheet_group_rows1.rs` - An example of how to group worksheet
+  rows into outlines.
+
+* `doc_worksheet_group_rows2.rs` - An example of how to group worksheet
+  rows into outlines. This example shows hows to add secondary groups
+  within a primary grouping. Excel requires at least one row between each
+  outline grouping at the same level.
 
 * `doc_worksheet_group_symbols_above.rs` - An example of how to group
   worksheet rows into outlines. This example puts the expand/collapse
@@ -1423,6 +1423,10 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_insert_chart_with_offset.rs` - Example of adding a chart
   to a worksheet with a pixel offset within the cell.
 
+* `doc_worksheet_insert_checkbox_with_format.rs` - This example
+  demonstrates adding adding a checkbox boolean value to a worksheet along
+  with a cell format.
+
 * `doc_worksheet_insert_checkbox1.rs` - This example demonstrates adding
   adding checkbox boolean values to a worksheet.
 
@@ -1431,18 +1435,14 @@ documentation and generally show how an individual function works.
   feature that a checkbox is actually a boolean value with a special
   format.
 
-* `doc_worksheet_insert_checkbox_with_format.rs` - This example
-  demonstrates adding adding a checkbox boolean value to a worksheet along
-  with a cell format.
-
 * `doc_worksheet_insert_image_with_offset.rs` - This example shows how to
   add an image to a worksheet at an offset within the cell.
 
-* `doc_worksheet_insert_shape.rs` - This example demonstrates adding a
-  Textbox shape to a worksheet.
-
 * `doc_worksheet_insert_shape_with_offset.rs` - This example demonstrates
   adding a Textbox shape to a worksheet cell at an offset.
+
+* `doc_worksheet_insert_shape.rs` - This example demonstrates adding a
+  Textbox shape to a worksheet.
 
 * `doc_worksheet_name.rs` - Demonstrates getting a worksheet name.
 
@@ -1456,9 +1456,6 @@ documentation and generally show how an individual function works.
 
 * `doc_worksheet_protect_with_password.rs` - Demonstrates protecting a
   worksheet from editing with a password.
-
-* `doc_worksheet_serialize.rs` - Demonstrates serializing instances of a
-  Serde derived data structure to a worksheet.
 
 * `doc_worksheet_serialize_datetime1.rs` - Demonstrates serializing
   instances of a Serde derived data structure, including datetimes, to a
@@ -1485,20 +1482,6 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_serialize_dimensions2.rs` - Example of getting the
   field/column dimensions of some serialized data. In this example we use
   the dimensions to set a conditional format range.
-
-* `doc_worksheet_serialize_headers1.rs` - Demonstrates serializing
-  instances of a Serde derived data structure to a worksheet.
-
-* `doc_worksheet_serialize_headers2.rs` - Demonstrates serializing
-  instances of a Serde derived data structure to a worksheet. This
-  demonstrates starting the serialization in a different position
-
-* `doc_worksheet_serialize_headers3.rs` - Demonstrates serializing
-  instances of a Serde derived data structure to a worksheet using
-  different methods (both serialization and deserialization).
-
-* `doc_worksheet_serialize_headers4.rs` - Demonstrates serializing
-  instances of a Serde derived data structure to a worksheet.
 
 * `doc_worksheet_serialize_headers_custom.rs` - Demonstrates serializing
   instances of a Serde derived data structure to a worksheet with custom
@@ -1561,6 +1544,20 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_serialize_headers_with_options2.rs` - Demonstrates
   serializing instances of a Serde derived data structure to a worksheet.
 
+* `doc_worksheet_serialize_headers1.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet.
+
+* `doc_worksheet_serialize_headers2.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet. This
+  demonstrates starting the serialization in a different position
+
+* `doc_worksheet_serialize_headers3.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet using
+  different methods (both serialization and deserialization).
+
+* `doc_worksheet_serialize_headers4.rs` - Demonstrates serializing
+  instances of a Serde derived data structure to a worksheet.
+
 * `doc_worksheet_serialize_intro.rs` - Demonstrates serializing instances
   of a Serde derived data structure to a worksheet.
 
@@ -1583,6 +1580,9 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_serialize_vectors.rs` - Demonstrates serializing instances
   of a Serde derived data structure with vectors to a worksheet.
 
+* `doc_worksheet_serialize.rs` - Demonstrates serializing instances of a
+  Serde derived data structure to a worksheet.
+
 * `doc_worksheet_set_active.rs` - Demonstrates setting a worksheet as the
   visible worksheet when a file is opened.
 
@@ -1603,11 +1603,11 @@ documentation and generally show how an individual function works.
   format for all the columns in an Excel worksheet. This effectively, and
   efficiently, sets the format for the entire worksheet.
 
-* `doc_worksheet_set_column_width.rs` - Demonstrates setting the width of
-  columns in Excel.
-
 * `doc_worksheet_set_column_width_pixels.rs` - Demonstrates setting the
   width of columns in Excel in pixels.
+
+* `doc_worksheet_set_column_width.rs` - Demonstrates setting the width of
+  columns in Excel.
 
 * `doc_worksheet_set_default_note_author.rs` - Demonstrates adding notes to
   a worksheet and setting the default author name.
@@ -1615,26 +1615,26 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_default_row_height.rs` - Demonstrates setting the
   default row height for all rows in a worksheet.
 
-* `doc_worksheet_set_formula_result.rs` - Demonstrates manually setting the
-  result of a formula. Note, this is only required for non-Excel
-  applications that don't calculate formula results.
-
 * `doc_worksheet_set_formula_result_default.rs` - Demonstrates manually
   setting the default result for all non-calculated formulas in a
   worksheet.
 
-* `doc_worksheet_set_freeze_panes.rs` - Demonstrates setting the worksheet
-  panes.
+* `doc_worksheet_set_formula_result.rs` - Demonstrates manually setting the
+  result of a formula. Note, this is only required for non-Excel
+  applications that don't calculate formula results.
 
 * `doc_worksheet_set_freeze_panes_top_cell.rs` - Demonstrates setting the
   worksheet panes and also setting the topmost visible cell in the scrolled
   area.
 
-* `doc_worksheet_set_header.rs` - Demonstrates setting the worksheet
-  header.
+* `doc_worksheet_set_freeze_panes.rs` - Demonstrates setting the worksheet
+  panes.
 
 * `doc_worksheet_set_header_image.rs` - Demonstrates adding a header image
   to a worksheet.
+
+* `doc_worksheet_set_header.rs` - Demonstrates setting the worksheet
+  header.
 
 * `doc_worksheet_set_hidden.rs` - Demonstrates hiding a worksheet.
 
@@ -1674,14 +1674,14 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_print_scale.rs` - Demonstrates setting the scale of
   the worksheet page when printed.
 
+* `doc_worksheet_set_range_format_with_border.rs` - Demonstrates setting
+  the format for a range of worksheet cells and also adding a border.
+
 * `doc_worksheet_set_range_format.rs` - Demonstrates setting the format of
   worksheet cells separately from writing the cell data.
 
 * `doc_worksheet_set_range_format2.rs` - Demonstrates setting the format of
   worksheet cells when writing the cell data.
-
-* `doc_worksheet_set_range_format_with_border.rs` - Demonstrates setting
-  the format for a range of worksheet cells and also adding a border.
 
 * `doc_worksheet_set_repeat_columns.rs` - Demonstrates setting the columns
   to repeat on each printed page.
@@ -1696,11 +1696,11 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_set_row_format.rs` - Demonstrates setting the format for a
   row in Excel.
 
-* `doc_worksheet_set_row_height.rs` - Demonstrates setting the height for a
-  row in Excel.
-
 * `doc_worksheet_set_row_height_pixels.rs` - Demonstrates setting the
   height for a row in Excel.
+
+* `doc_worksheet_set_row_height.rs` - Demonstrates setting the height for a
+  row in Excel.
 
 * `doc_worksheet_set_row_hidden.rs` - Demonstrates hiding a worksheet row.
 
@@ -1728,41 +1728,38 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_show_all_notes.rs` - Demonstrates adding notes to a
   worksheet and setting the worksheet property to make them all visible.
 
-* `doc_worksheet_unprotect_range.rs` - Demonstrates unprotecting ranges in
-  a protected worksheet.
-
 * `doc_worksheet_unprotect_range_with_options.rs` - Demonstrates
   unprotecting ranges in a protected worksheet, with additional options.
 
-* `doc_worksheet_write_array_formula.rs` - Demonstrates writing an array
-  formulas to a worksheet.
+* `doc_worksheet_unprotect_range.rs` - Demonstrates unprotecting ranges in
+  a protected worksheet.
 
 * `doc_worksheet_write_array_formula_with_format.rs` - Demonstrates writing
   an array formulas with formatting to a worksheet.
 
+* `doc_worksheet_write_array_formula.rs` - Demonstrates writing an array
+  formulas to a worksheet.
+
 * `doc_worksheet_write_blank.rs` - Demonstrates writing a blank cell with
   formatting, i.e., a cell that has no data but does have formatting.
-
-* `doc_worksheet_write_boolean.rs` - Demonstrates writing boolean values to
-  a worksheet.
 
 * `doc_worksheet_write_boolean_with_format.rs` - Demonstrates writing
   formatted boolean values to a worksheet.
 
-* `doc_worksheet_write_column.rs` - Demonstrates writing an array of data
-  as a column to a worksheet.
+* `doc_worksheet_write_boolean.rs` - Demonstrates writing boolean values to
+  a worksheet.
 
 * `doc_worksheet_write_column_matrix.rs` - Demonstrates writing an array of
   column arrays to a worksheet.
 
-* `doc_worksheet_write_date.rs` - Demonstrates writing formatted dates in
-  an Excel worksheet.
+* `doc_worksheet_write_column.rs` - Demonstrates writing an array of data
+  as a column to a worksheet.
 
 * `doc_worksheet_write_date_chrono.rs` - Demonstrates writing formatted
   dates in an Excel worksheet.
 
-* `doc_worksheet_write_datetime.rs` - Demonstrates writing datetimes that
-  take an implicit format from the column formatting.
+* `doc_worksheet_write_date.rs` - Demonstrates writing formatted dates in
+  an Excel worksheet.
 
 * `doc_worksheet_write_datetime_chrono.rs` - Demonstrates writing formatted
   datetimes in an Excel worksheet.
@@ -1770,56 +1767,59 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_write_datetime_with_format.rs` - Demonstrates writing
   formatted datetimes in an Excel worksheet.
 
-* `doc_worksheet_write_dynamic_array_formula.rs` - Demonstrates a static
-  function which generally returns one value turned into a dynamic array
-  function which returns a range of values.
+* `doc_worksheet_write_datetime.rs` - Demonstrates writing datetimes that
+  take an implicit format from the column formatting.
 
 * `doc_worksheet_write_dynamic_array_formula_with_format.rs` - Demonstrates
   a static function which generally returns one value turned into a dynamic
   array function which returns a range of values.
 
-* `doc_worksheet_write_formula.rs` - Demonstrates writing formulas with
-  formatting to a worksheet.
+* `doc_worksheet_write_dynamic_array_formula.rs` - Demonstrates a static
+  function which generally returns one value turned into a dynamic array
+  function which returns a range of values.
 
 * `doc_worksheet_write_formula_with_format.rs` - Demonstrates writing
   formulas with formatting to a worksheet.
+
+* `doc_worksheet_write_formula.rs` - Demonstrates writing formulas with
+  formatting to a worksheet.
+
+* `doc_worksheet_write_number_with_format.rs` - Demonstrates setting
+  different formatting for numbers in an Excel worksheet.
 
 * `doc_worksheet_write_number.rs` - Demonstrates writing unformatted
   numbers to an Excel worksheet. Any numeric type that will convert
   [`Into`] f64 can be transferred to Excel.
 
-* `doc_worksheet_write_number_with_format.rs` - Demonstrates setting
-  different formatting for numbers in an Excel worksheet.
+* `doc_worksheet_write_rich_string_with_format.rs` - Demonstrates writing a
+  "rich" string with multiple formats, and an additional cell format.
 
 * `doc_worksheet_write_rich_string.rs` - Demonstrates writing a "rich"
   string with multiple formats.
 
-* `doc_worksheet_write_rich_string_with_format.rs` - Demonstrates writing a
-  "rich" string with multiple formats, and an additional cell format.
+* `doc_worksheet_write_row_matrix.rs` - Demonstrates writing an array of
+  row arrays to a worksheet.
 
 * `doc_worksheet_write_row.rs` - Demonstrates writing an array of data as a
   row to a worksheet.
 
-* `doc_worksheet_write_row_matrix.rs` - Demonstrates writing an array of
-  row arrays to a worksheet.
+* `doc_worksheet_write_string_with_format.rs` - Demonstrates setting
+  different formatting for numbers in an Excel worksheet.
 
 * `doc_worksheet_write_string.rs` - Demonstrates writing some UTF-8 strings
   to a worksheet. The UTF-8 encoding is the only encoding supported by the
   Excel file format.
 
-* `doc_worksheet_write_string_with_format.rs` - Demonstrates setting
-  different formatting for numbers in an Excel worksheet.
+* `doc_worksheet_write_time_chrono.rs` - Demonstrates writing formatted
+  times in an Excel worksheet.
 
 * `doc_worksheet_write_time.rs` - Demonstrates writing formatted times in
   an Excel worksheet.
 
-* `doc_worksheet_write_time_chrono.rs` - Demonstrates writing formatted
-  times in an Excel worksheet.
-
-* `doc_worksheet_write_url_with_format.rs` - Demonstrates writing a url
+* `doc_worksheet_write_url_with_format.rs` - Demonstrates writing a URL
   with alternative format.
 
-* `doc_worksheet_write_url_with_text.rs` - Demonstrates writing a url with
+* `doc_worksheet_write_url_with_text.rs` - Demonstrates writing a URL with
   alternative text.
 
 * `doc_xlsxserialize_column_width.rs` - Example of serializing Serde
@@ -1830,11 +1830,11 @@ documentation and generally show how an individual function works.
   derived structs to an Excel worksheet using `rust_xlsxwriter` and the
   `XlsxSerialize` trait.
 
-* `doc_xlsxserialize_header_format.rs` - Example of serializing Serde
+* `doc_xlsxserialize_header_format_reuse.rs` - Example of serializing Serde
   derived structs to an Excel worksheet using `rust_xlsxwriter` and the
   `XlsxSerialize` trait.
 
-* `doc_xlsxserialize_header_format_reuse.rs` - Example of serializing Serde
+* `doc_xlsxserialize_header_format.rs` - Example of serializing Serde
   derived structs to an Excel worksheet using `rust_xlsxwriter` and the
   `XlsxSerialize` trait.
 
@@ -1862,15 +1862,15 @@ documentation and generally show how an individual function works.
   structs to an Excel worksheet using `rust_xlsxwriter` and the
   `XlsxSerialize` trait.
 
-* `doc_xlsxserialize_table.rs` - Example of serializing Serde derived
-  structs to an Excel worksheet using `rust_xlsxwriter` and the
-  `XlsxSerialize` trait.
-
 * `doc_xlsxserialize_table_default.rs` - Example of serializing Serde
   derived structs to an Excel worksheet using `rust_xlsxwriter` and the
   `XlsxSerialize` trait.
 
 * `doc_xlsxserialize_table_style.rs` - Example of serializing Serde derived
+  structs to an Excel worksheet using `rust_xlsxwriter` and the
+  `XlsxSerialize` trait.
+
+* `doc_xlsxserialize_table.rs` - Example of serializing Serde derived
   structs to an Excel worksheet using `rust_xlsxwriter` and the
   `XlsxSerialize` trait.
 
