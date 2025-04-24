@@ -2339,11 +2339,7 @@ impl Workbook {
             }
 
             if worksheet.has_header_footer_images() {
-                // The header/footer images are counted from the last worksheet id.
-                let base_image_id =
-                    background_image_ids.len() as u32 + worksheet_image_ids.len() as u32;
-
-                worksheet.prepare_header_footer_images(&mut header_footer_image_ids, base_image_id);
+                worksheet.prepare_header_footer_images(&mut header_footer_image_ids, &mut image_id);
             }
         }
     }

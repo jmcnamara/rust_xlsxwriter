@@ -16325,16 +16325,16 @@ impl Worksheet {
     pub(crate) fn prepare_header_footer_images(
         &mut self,
         image_ids: &mut HashMap<String, u32>,
-        base_image_id: u32,
+        image_id: &mut u32,
     ) {
         let mut rel_ids: HashMap<String, u32> = HashMap::new();
         for image in self.header_footer_images.clone().into_iter().flatten() {
             let image_id = match image_ids.get(&image.hash) {
                 Some(image_id) => *image_id,
                 None => {
-                    let image_id = 1 + base_image_id + image_ids.len() as u32;
-                    image_ids.insert(image.hash.clone(), image_id);
-                    image_id
+                    *image_id += 1;
+                    image_ids.insert(image.hash.clone(), *image_id);
+                    *image_id
                 }
             };
 
