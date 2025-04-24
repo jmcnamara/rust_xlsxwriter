@@ -5,6 +5,18 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.86.1] - 2025-04-25
+
+### Fixed
+
+- Fixed issue where the incorrect image was displayed when images were used in
+  headers and in cells in separate worksheets.
+
+  [Issue #146].
+
+  [Issue #146]: https://github.com/jmcnamara/rust_xlsxwriter/issues/146
+
+
 ## [0.86.0] - 2025-04-17
 
 ### Added
