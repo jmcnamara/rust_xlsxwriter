@@ -685,6 +685,7 @@ mod ignore_error03;
 mod ignore_error04;
 mod ignore_error05;
 mod ignore_error06;
+mod image_scale01;
 mod image01;
 mod image02;
 mod image03;
@@ -729,7 +730,6 @@ mod image55;
 mod image56;
 mod image57;
 mod image58;
-mod image_scale01;
 mod landscape01;
 mod macro01;
 mod macro02;
@@ -756,54 +756,6 @@ mod object_position17;
 mod object_position18;
 mod object_position19;
 mod object_position20;
-#[cfg(feature = "constant_memory")]
-mod optimize01;
-#[cfg(feature = "constant_memory")]
-mod optimize02;
-#[cfg(feature = "constant_memory")]
-mod optimize04;
-#[cfg(feature = "constant_memory")]
-mod optimize05;
-#[cfg(feature = "constant_memory")]
-mod optimize06;
-#[cfg(feature = "constant_memory")]
-mod optimize07;
-#[cfg(feature = "constant_memory")]
-mod optimize08;
-#[cfg(feature = "constant_memory")]
-mod optimize13;
-#[cfg(feature = "constant_memory")]
-mod optimize14;
-#[cfg(feature = "constant_memory")]
-mod optimize20;
-#[cfg(feature = "constant_memory")]
-mod optimize21;
-#[cfg(feature = "constant_memory")]
-mod optimize22;
-#[cfg(feature = "constant_memory")]
-mod optimize23;
-#[cfg(feature = "constant_memory")]
-mod optimize24;
-#[cfg(feature = "constant_memory")]
-mod optimize25;
-#[cfg(feature = "constant_memory")]
-mod optimize26;
-#[cfg(feature = "constant_memory")]
-mod optimize27;
-#[cfg(feature = "constant_memory")]
-mod optimize28;
-#[cfg(feature = "constant_memory")]
-mod optimize29;
-#[cfg(feature = "constant_memory")]
-mod optimize30;
-#[cfg(feature = "constant_memory")]
-mod optimize31;
-#[cfg(feature = "constant_memory")]
-mod optimize32;
-#[cfg(feature = "constant_memory")]
-mod optimize33;
-#[cfg(feature = "constant_memory")]
-mod optimize34;
 #[cfg(feature = "constant_memory")]
 mod optimize_autofit02;
 #[cfg(feature = "constant_memory")]
@@ -952,6 +904,54 @@ mod optimize_table34;
 mod optimize_table35;
 #[cfg(feature = "constant_memory")]
 mod optimize_table36;
+#[cfg(feature = "constant_memory")]
+mod optimize01;
+#[cfg(feature = "constant_memory")]
+mod optimize02;
+#[cfg(feature = "constant_memory")]
+mod optimize04;
+#[cfg(feature = "constant_memory")]
+mod optimize05;
+#[cfg(feature = "constant_memory")]
+mod optimize06;
+#[cfg(feature = "constant_memory")]
+mod optimize07;
+#[cfg(feature = "constant_memory")]
+mod optimize08;
+#[cfg(feature = "constant_memory")]
+mod optimize13;
+#[cfg(feature = "constant_memory")]
+mod optimize14;
+#[cfg(feature = "constant_memory")]
+mod optimize20;
+#[cfg(feature = "constant_memory")]
+mod optimize21;
+#[cfg(feature = "constant_memory")]
+mod optimize22;
+#[cfg(feature = "constant_memory")]
+mod optimize23;
+#[cfg(feature = "constant_memory")]
+mod optimize24;
+#[cfg(feature = "constant_memory")]
+mod optimize25;
+#[cfg(feature = "constant_memory")]
+mod optimize26;
+#[cfg(feature = "constant_memory")]
+mod optimize27;
+#[cfg(feature = "constant_memory")]
+mod optimize28;
+#[cfg(feature = "constant_memory")]
+mod optimize29;
+#[cfg(feature = "constant_memory")]
+mod optimize30;
+#[cfg(feature = "constant_memory")]
+mod optimize31;
+#[cfg(feature = "constant_memory")]
+mod optimize32;
+#[cfg(feature = "constant_memory")]
+mod optimize33;
+#[cfg(feature = "constant_memory")]
+mod optimize34;
 mod outline01;
 mod outline02;
 mod outline03;
@@ -1108,6 +1108,7 @@ mod simple03;
 mod styles01;
 mod styles02;
 mod tab_color01;
+mod tab_color02;
 mod table01;
 mod table02;
 mod table03;
