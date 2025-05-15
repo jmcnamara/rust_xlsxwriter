@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.87.0] - 2025-05-15
+
+# Fixed
+
+- Fixed yanked zip.rs dependency.
+
+  [Issue #149].
+
+  [Issue #149]: https://github.com/jmcnamara/rust_xlsxwriter/issues/149
+
+
 ## [0.86.1] - 2025-04-25
 
 ### Fixed
