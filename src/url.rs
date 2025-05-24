@@ -45,9 +45,8 @@ const MAX_URL_LEN: usize = 2_080;
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/url_intro1.png">
 ///
-/// To differentiate a URL from an ordinary string (for example, when
-/// storing it in a data structure), you can also represent the URL with a
-/// [`Url`] struct:
+/// To differentiate a URL from an ordinary string (for example, when storing it
+/// in a data structure), you can also represent the URL with a [`Url`] struct:
 ///
 /// ```
 /// # // This code is available in examples/doc_url_intro2.rs
@@ -96,12 +95,13 @@ const MAX_URL_LEN: usize = 2_080;
 /// # }
 /// ```
 ///
-/// There are three types of URLs/links supported by Excel and the `rust_xlsxwriter`
-/// library:
+/// There are three types of URLs/links supported by Excel and the
+/// `rust_xlsxwriter` library:
 ///
 /// 1. Web-based URIs like:
 ///
-///    * `http://`, `https://`, `ftp://`, `ftps://`, and `mailto:`.
+///    * `http://`, `https://`, `ftp://`, `ftps://`, `mailto:` and custom user
+///      links like `protocol://domain`.
 ///
 /// 2. Local file links using the `file://` URI.
 ///
@@ -114,9 +114,9 @@ const MAX_URL_LEN: usize = 2_080;
 ///    Most paths will be relative to the root folder, following the Windows
 ///    convention, so most paths should start with `file:///`. For links to
 ///    other Excel files, the URL string can include a sheet and cell reference
-///    after the `"#"` anchor, as shown in the last two examples above. When using
-///    Windows paths, like in the examples above, it is best to use a Rust raw
-///    string to avoid issues with the backslashes:
+///    after the `"#"` anchor, as shown in the last two examples above. When
+///    using Windows paths, like in the examples above, it is best to use a Rust
+///    raw string to avoid issues with the backslashes:
 ///    `r"file:///C:\Temp\Book1.xlsx"`.
 ///
 /// 3. Internal links to a cell or range of cells in the workbook using the
@@ -256,7 +256,8 @@ const MAX_URL_LEN: usize = 2_080;
 ///
 /// Output file:
 ///
-/// <img src="https://rustxlsxwriter.github.io/images/app_table_of_contents.png">
+/// <img
+/// src="https://rustxlsxwriter.github.io/images/app_table_of_contents.png">
 ///
 ///
 #[derive(Clone, Debug)]
@@ -381,33 +382,7 @@ impl Url {
     // This method handles a variety of different string processing required for
     // links and targets associated with Excel's urls/hyperlinks.
     pub(crate) fn parse_url(&mut self) -> Result<(), XlsxError> {
-        if self.link.starts_with("http://")
-            || self.link.starts_with("https://")
-            || self.link.starts_with("ftp://")
-            || self.link.starts_with("ftps://")
-        {
-            // Handle web links like https://.
-            self.link_type = HyperlinkType::Url;
-
-            if self.text.is_empty() {
-                self.text.clone_from(&self.link);
-            }
-
-            // Split the URL into URL + #anchor if that exists.
-            let parts: Vec<&str> = self.link.splitn(2, '#').collect();
-            if parts.len() == 2 {
-                self.anchor = parts[1].to_string();
-                self.link = parts[0].to_string();
-            }
-
-            // Set up the relationship link. This doesn't usually contain the
-            // anchor unless it is a link from an object like an image.
-            if self.is_object_link {
-                self.relationship_link.clone_from(&self.original_url);
-            } else {
-                self.relationship_link.clone_from(&self.link);
-            }
-        } else if self.link.starts_with("mailto:") {
+        if self.link.starts_with("mailto:") {
             // Handle mail address links.
             self.link_type = HyperlinkType::Url;
 
@@ -454,6 +429,29 @@ impl Url {
                 } else {
                     self.relationship_link.clone_from(&self.original_url);
                 }
+            } else {
+                self.relationship_link.clone_from(&self.link);
+            }
+        } else if self.link.contains("://") {
+            // Handle standard Excel links like http(s)://, ftp(s):// and also
+            // custom user URLs/URIs.
+            self.link_type = HyperlinkType::Url;
+
+            if self.text.is_empty() {
+                self.text.clone_from(&self.link);
+            }
+
+            // Split the URL into URL + #anchor if that exists.
+            let parts: Vec<&str> = self.link.splitn(2, '#').collect();
+            if parts.len() == 2 {
+                self.anchor = parts[1].to_string();
+                self.link = parts[0].to_string();
+            }
+
+            // Set up the relationship link. This doesn't usually contain the
+            // anchor unless it is a link from an object like an image.
+            if self.is_object_link {
+                self.relationship_link.clone_from(&self.original_url);
             } else {
                 self.relationship_link.clone_from(&self.link);
             }

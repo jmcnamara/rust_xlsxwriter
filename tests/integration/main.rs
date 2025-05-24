@@ -680,6 +680,7 @@ mod hyperlink48;
 mod hyperlink49;
 mod hyperlink50;
 mod hyperlink51;
+mod hyperlink52;
 mod ignore_error01;
 mod ignore_error02;
 mod ignore_error03;
