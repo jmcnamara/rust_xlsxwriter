@@ -443,6 +443,9 @@ instance and format them with an Excel number format.
 > If you enable the `chrono` feature in `rust_xlsxwriter`, you can also use
 > [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] or [`chrono::NaiveTime`]
 > instances.
+>
+> If you enable the `jiff` feature, you can use [`jiff::civil::Datetime`],
+> [`jiff::civil::Date`] or [`jiff::civil::Time`] instances.
 
 [`chrono::NaiveDate`]:
     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
@@ -450,6 +453,14 @@ instance and format them with an Excel number format.
     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
 [`chrono::NaiveDateTime`]:
     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+
+[`jiff::civil::Datetime`]:
+    https://docs.rs/jiff/latest/jiff/civil/struct.DateTime.html
+[`jiff::civil::Date`]:
+    https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
+[`jiff::civil::Time`]:
+    https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
+
 
 In the example above, we create the `ExcelDateTime` instance from the date
 strings in our input data and then add a number format it so that it appears

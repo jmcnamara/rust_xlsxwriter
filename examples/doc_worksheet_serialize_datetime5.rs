@@ -6,7 +6,7 @@
 //! helper function.
 //!
 use chrono::NaiveDate;
-use rust_xlsxwriter::utility::serialize_chrono_option_naive_to_excel;
+use rust_xlsxwriter::utility::serialize_option_datetime_to_excel;
 use serde::Serialize;
 
 fn main() {
@@ -14,7 +14,7 @@ fn main() {
     struct Student {
         full_name: String,
 
-        #[serde(serialize_with = "serialize_chrono_option_naive_to_excel")]
+        #[serde(serialize_with = "serialize_option_datetime_to_excel")]
         birth_date: Option<NaiveDate>,
 
         id_number: u32,

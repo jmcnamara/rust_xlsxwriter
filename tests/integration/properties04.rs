@@ -5,9 +5,6 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-#[cfg(feature = "chrono")]
-use chrono::{TimeZone, Utc};
-
 use crate::common;
 use rust_xlsxwriter::{DocProperties, ExcelDateTime, Workbook, XlsxError};
 
@@ -42,12 +39,81 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test to demonstrate document properties. With Chrono.
+// Test to demonstrate document properties. With Chrono NaiveDateTime.
 #[cfg(feature = "chrono")]
 fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
 
+    let date = chrono::NaiveDate::from_ymd_opt(2016, 12, 12)
+        .unwrap()
+        .and_hms_opt(23, 0, 0)
+        .unwrap();
+
+    let properties = DocProperties::new()
+        .set_custom_property("Checked by".to_string(), "Adam".to_string())
+        .set_custom_property("Date completed", &date)
+        .set_custom_property("Document number", 12345)
+        .set_custom_property("Reference", 1.2345)
+        .set_custom_property("Source".to_string(), true)
+        .set_custom_property("Status", false)
+        .set_custom_property("Department", "Finance")
+        .set_custom_property("Group", 1.2345678901234);
+
+    workbook.set_properties(&properties);
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_column_width(0, 70)?;
+    worksheet.write_string(
+        0,
+        0,
+        r#"Select 'Office Button -> Prepare -> Properties' to see the file properties."#,
+    )?;
+    workbook.save(filename)?;
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test to demonstrate document properties. With Chrono DateTime<Utc>.
+#[cfg(feature = "chrono")]
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    use chrono::{TimeZone, Utc};
+
+    let mut workbook = Workbook::new();
+
     let date = Utc.with_ymd_and_hms(2016, 12, 12, 23, 0, 0).unwrap();
+
+    let properties = DocProperties::new()
+        .set_custom_property("Checked by".to_string(), "Adam".to_string())
+        .set_custom_property("Date completed", &date)
+        .set_custom_property("Document number", 12345)
+        .set_custom_property("Reference", 1.2345)
+        .set_custom_property("Source".to_string(), true)
+        .set_custom_property("Status", false)
+        .set_custom_property("Department", "Finance")
+        .set_custom_property("Group", 1.2345678901234);
+
+    workbook.set_properties(&properties);
+
+    let worksheet = workbook.add_worksheet();
+    worksheet.set_column_width(0, 70)?;
+    worksheet.write_string(
+        0,
+        0,
+        r#"Select 'Office Button -> Prepare -> Properties' to see the file properties."#,
+    )?;
+    workbook.save(filename)?;
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test to demonstrate document properties. With Jiff Civil DateTime.
+#[cfg(feature = "jiff")]
+fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let date = jiff::civil::datetime(2016, 12, 12, 23, 0, 0, 0);
 
     let properties = DocProperties::new()
         .set_custom_property("Checked by".to_string(), "Adam".to_string())
@@ -93,6 +159,32 @@ fn test_properties04_2() {
         .set_name("properties04")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[cfg(feature = "chrono")]
+#[test]
+fn test_properties04_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("properties04")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[cfg(feature = "jiff")]
+#[test]
+fn test_properties04_4() {
+    let test_runner = common::TestRunner::new()
+        .set_name("properties04")
+        .set_function(create_new_xlsx_file_4)
+        .unique("4")
         .initialize();
 
     test_runner.assert_eq();

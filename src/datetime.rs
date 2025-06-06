@@ -10,9 +10,6 @@ mod tests;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-#[cfg(feature = "chrono")]
-use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime};
-
 #[cfg(not(all(
     feature = "wasm",
     target_arch = "wasm32",
@@ -33,13 +30,14 @@ const UNIX_EPOCH_PLUS_400: i64 = 12_622_780_800;
 
 /// The `ExcelDateTime` struct is used to represent an Excel date and/or time.
 ///
-/// The `rust_xlsxwriter` library supports two ways of converting dates and
-/// times to Excel dates and times. The first is the inbuilt [`ExcelDateTime`]
-/// which has a limited but workable set of conversion methods and which only
-/// targets Excel specific dates and times. The second is via the external
-/// [`Chrono`] library which has a comprehensive sets of types and functions for
-/// dealing with dates and times.
+/// The `rust_xlsxwriter` library supports converting different date and time
+/// types to an Excel serial datetime. The main option is the inbuilt
+/// [`ExcelDateTime`] type which has a limited but workable set of conversion
+/// methods and which only targets Excel specific dates and times. The second is
+/// via the optional external crates [`Chrono`] and [`Jiff`] which have more
+/// comprehensive functionality for dealing with dates and times.
 ///
+/// [`Jiff`]: https://docs.rs/chrono/latest/jiff
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
 ///
 /// Here is an example using `ExcelDateTime` to write some dates and times:
@@ -85,6 +83,7 @@ const UNIX_EPOCH_PLUS_400: i64 = 12_622_780_800;
 ///
 /// <img src="https://rustxlsxwriter.github.io/images/datetime_intro.png">
 ///
+///
 /// ## Datetimes in Excel
 ///
 /// Datetimes in Excel are serial dates with days counted from an epoch (usually
@@ -103,28 +102,72 @@ const UNIX_EPOCH_PLUS_400: i64 = 12_622_780_800;
 /// using the "Strict Open XML Spreadsheet" option in the "Save" dialog. However
 /// this is rarely used in practice and isn't supported by `rust_xlsxwriter`.
 ///
-/// ## Chrono vs. native `ExcelDateTime`
 ///
-/// The `rust_xlsxwriter` native `ExcelDateTime` provides most of the
+/// ## `chrono` and `jiff` vs. `ExcelDateTime`
+///
+/// The `rust_xlsxwriter` native `ExcelDateTime` type provides most of the
 /// functionality that you will need to work with Excel dates and times.
 ///
-/// For anything more advanced you can use the Naive Date/Time variants of
-/// [`Chrono`], particularly if you are interacting with code that already uses
-/// `Chrono`.
+/// For anything more advanced you can use the naive/civil date/time variants of
+/// [`Chrono`] and [`Jiff`], particularly if you are interacting with code that
+/// already uses `Chrono` or `Jiff`.
 ///
-/// All date/time APIs in `rust_xlsxwriter` support both options and the
+/// The supported `Chrono` or `Jiff` date/time types are:
+///
+/// - [`ExcelDateTime`]: The inbuilt `rust_xlsxwriter` datetime type.
+/// - [`Chrono`] naive types:
+///   - [`chrono::NaiveDateTime`]
+///   - [`chrono::NaiveDate`]
+///   - [`chrono::NaiveTime`]
+/// - [`Jiff`] civil types:
+///   - [`jiff::civil::Datetime`]
+///   - [`jiff::civil::Date`]
+///   - [`jiff::civil::Time`]
+///
+/// [`ExcelDateTime`]: crate::ExcelDateTime
+///
+/// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+/// [`chrono::NaiveDate`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+/// [`chrono::NaiveTime`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+/// [`chrono::NaiveDateTime`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+///
+/// [`Jiff`]: https://docs.rs/jiff/latest/jiff
+/// [`jiff::civil::Datetime`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.DateTime.html
+/// [`jiff::civil::Date`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
+/// [`jiff::civil::Time`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
+///
+/// All date/time APIs in `rust_xlsxwriter` support all of these types and the
 /// `ExcelDateTime` method names are similar to `Chrono` method names to allow
-/// easier portability between the two.
+/// easier portability between the two. Only the naive and civil types are
+/// supported since Excel doesn't support timezones.
 ///
-/// In order to use [`Chrono`] with `rust_xlsxwriter` APIs you must enable the
-/// optional `chrono` feature when adding `rust_xlsxwriter` to your
-/// `Cargo.toml`.
+/// In order to use [`Chrono`] or [`Jiff`] with `rust_xlsxwriter` APIs you must
+/// enable the optional `chrono` and `jiff` features when adding
+/// `rust_xlsxwriter` to your `Cargo.toml`.
 ///
 /// ```bash
 /// cargo add rust_xlsxwriter -F chrono
+/// cargo add rust_xlsxwriter -F jiff
 /// ```
 ///
+/// [`Jiff`]: https://docs.rs/jiff/latest/jiff
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+///
+///
+/// # Serializing dates with `serde`
+///
+/// See the [Serializing dates and times] section of the `Working with Serde`
+/// documentation for more information on serializing dates and times with
+/// `rust_xlsxwriter`.
+///
+/// [Serializing dates and times]:
+///     ./serializer/index.html#serializing-dates-and-times
 ///
 #[derive(Clone)]
 pub struct ExcelDateTime {
@@ -174,8 +217,10 @@ impl ExcelDateTime {
     ///    string.
     /// 4. The `parse_to_str()` method is deliberately simple and limited. It
     ///    doesn't implement anything like a `strftime()` method. For more
-    ///    comprehensive date parsing you should use the [`Chrono`] library.
+    ///    comprehensive date parsing you should use the [`Chrono`] or [`Jiff`]
+    ///    libraries.
     ///
+    /// [`Jiff`]: https://docs.rs/jiff/latest/jiff
     /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
     ///
     /// # Parameters
@@ -185,10 +230,10 @@ impl ExcelDateTime {
     ///
     /// # Errors
     ///
-    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create the
-    ///   date or time is outside Excel's allowed ranges.
-    /// - [`XlsxError::DateTimeParseError`] - The input string couldn't be parsed
-    ///   into a date/time.
+    /// - [`XlsxError::DateTimeRangeError`] - One of the values used to create
+    ///   the date or time is outside Excel's allowed ranges.
+    /// - [`XlsxError::DateTimeParseError`] - The input string couldn't be
+    ///   parsed into a date/time.
     ///
     /// # Examples
     ///
@@ -1110,7 +1155,7 @@ impl ExcelDateTime {
     //
     // Convert a Unix time (seconds from 1970) to a human readable date in
     // ISO 8601 format.
-    pub(crate) fn unix_time_to_rfc3339(timestamp: u64) -> String {
+    pub(crate) fn unix_time_to_iso8601(timestamp: u64) -> String {
         let (year, month, day, hour, min, sec) = Self::unix_time_to_date_parts(timestamp);
 
         // Return the ISO 8601 date.
@@ -1248,7 +1293,7 @@ impl ExcelDateTime {
     // timestamps.
     pub(crate) fn utc_now() -> String {
         let timestamp = Self::system_now();
-        Self::unix_time_to_rfc3339(timestamp)
+        Self::unix_time_to_iso8601(timestamp)
     }
 
     // Get the current time from the system time.
@@ -1284,11 +1329,13 @@ impl ExcelDateTime {
         )
     }
 
+    //
     // Chrono date handling functions.
+    //
 
     // Convert a chrono::NaiveTime to an Excel serial datetime.
     #[cfg(feature = "chrono")]
-    pub(crate) fn chrono_datetime_to_excel(datetime: &NaiveDateTime) -> f64 {
+    pub(crate) fn chrono_datetime_to_excel(datetime: &chrono::NaiveDateTime) -> f64 {
         let excel_date = Self::chrono_date_to_excel(&datetime.date());
         let excel_time = Self::chrono_time_to_excel(&datetime.time());
 
@@ -1301,15 +1348,15 @@ impl ExcelDateTime {
     #[cfg(feature = "chrono")]
     #[allow(clippy::cast_precision_loss)]
     #[allow(clippy::trivially_copy_pass_by_ref)]
-    pub(crate) fn chrono_date_to_excel(date: &NaiveDate) -> f64 {
-        let epoch = NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
+    pub(crate) fn chrono_date_to_excel(date: &chrono::NaiveDate) -> f64 {
+        let epoch = chrono::NaiveDate::from_ymd_opt(1899, 12, 31).unwrap();
 
         let duration = *date - epoch;
         let mut excel_date = duration.num_days() as f64;
 
-        // For legacy reasons Excel treats 1900 as a leap year. We add an additional
-        // day for dates after the leapday in the 1899 epoch.
-        if epoch.year() == 1899 && excel_date > 59.0 {
+        // Excel treats 1900 as a leap year so we need to add an additional day
+        // for dates after the leapday.
+        if excel_date > 59.0 {
             excel_date += 1.0;
         }
 
@@ -1322,11 +1369,50 @@ impl ExcelDateTime {
     #[cfg(feature = "chrono")]
     #[allow(clippy::cast_precision_loss)]
     #[allow(clippy::trivially_copy_pass_by_ref)]
-    pub(crate) fn chrono_time_to_excel(time: &NaiveTime) -> f64 {
-        let midnight = NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
+    pub(crate) fn chrono_time_to_excel(time: &chrono::NaiveTime) -> f64 {
+        let midnight = chrono::NaiveTime::from_hms_milli_opt(0, 0, 0, 0).unwrap();
         let duration = *time - midnight;
 
         duration.num_milliseconds() as f64 / (24.0 * 60.0 * 60.0 * 1000.0)
+    }
+
+    //
+    // Jiff date handling functions.
+    //
+
+    // Convert a Jiff civil `DateTime` to an Excel serial datetime.
+    #[cfg(feature = "jiff")]
+    pub(crate) fn jiff_datetime_to_excel(datetime: &jiff::civil::DateTime) -> f64 {
+        let date = Self::jiff_date_to_excel(&datetime.date());
+        let time = Self::jiff_time_to_excel(&datetime.time());
+
+        date + time
+    }
+
+    // Convert a Jiff civil `Date` to an Excel serial datetime.
+    #[cfg(feature = "jiff")]
+    pub(crate) fn jiff_date_to_excel(date: &jiff::civil::Date) -> f64 {
+        let epoch = jiff::civil::date(1899, 12, 31);
+        let duration = *date - epoch;
+
+        let mut excel_date = f64::from(duration.get_days());
+
+        // Excel treats 1900 as a leap year so we need to add an additional day
+        // for dates after the leapday.
+        if excel_date > 59.0 {
+            excel_date += 1.0;
+        }
+
+        excel_date
+    }
+
+    // Convert a Jiff civil `Time` to an Excel serial datetime.
+    #[cfg(feature = "jiff")]
+    pub(crate) fn jiff_time_to_excel(time: &jiff::civil::Time) -> f64 {
+        let midnight = jiff::civil::time(0, 0, 0, 0);
+        let duration = *time - midnight;
+
+        duration.total(jiff::Unit::Millisecond).unwrap() / (24.0 * 60.0 * 60.0 * 1000.0)
     }
 }
 
@@ -1354,20 +1440,56 @@ enum ExcelDateTimeType {
     DateAndTime,
 }
 
-/// Trait to map user date/time types to an Excel serial datetimes.
+/// Trait to map user date/time types to an Excel serial datetime.
 ///
-/// The `rust_xlsxwriter` library supports two ways of converting dates and
-/// times to Excel dates and times. The first is  via the external [`Chrono`]
-/// library which has a comprehensive sets of types and functions for dealing
-/// with dates and times. The second is the inbuilt [`ExcelDateTime`] struct
-/// which provides a more limited set of methods and which only targets Excel
-/// specific dates and times.
+/// The `rust_xlsxwriter` library supports converting different date and time
+/// types to an Excel serial datetime. The main option is the inbuilt
+/// [`ExcelDateTime`] type which has a limited but workable set of conversion
+/// methods and which only targets Excel specific dates and times. The second is
+/// via the optional external crates [`Chrono`] and [`Jiff`] which have more
+/// comprehensive functionality for dealing with dates and times.
 ///
-/// In order to use [`Chrono`] with `rust_xlsxwriter` APIs you must enable the
-/// optional `chrono` feature when adding `rust_xlsxwriter` to your
-/// `Cargo.toml`.
+/// The supported date/time types are:
+///
+/// - [`ExcelDateTime`]: The inbuilt `rust_xlsxwriter` datetime type.
+/// - [`Chrono`] naive types:
+///   - [`chrono::NaiveDateTime`]
+///   - [`chrono::NaiveDate`]
+///   - [`chrono::NaiveTime`]
+/// - [`Jiff`] civil types:
+///   - [`jiff::civil::Datetime`]
+///   - [`jiff::civil::Date`]
+///   - [`jiff::civil::Time`]
+///
+/// [`ExcelDateTime`]: crate::ExcelDateTime
 ///
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+/// [`chrono::NaiveDate`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+/// [`chrono::NaiveTime`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+/// [`chrono::NaiveDateTime`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+///
+/// [`Jiff`]: https://docs.rs/jiff/latest/jiff
+/// [`jiff::civil::Datetime`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.DateTime.html
+/// [`jiff::civil::Date`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
+/// [`jiff::civil::Time`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
+///
+/// Note, that only the naive and civil types are supported since Excel doesn't
+/// support timezones.
+///
+/// In order to use [`Chrono`] or [`Jiff`] with `rust_xlsxwriter` APIs you must
+/// enable the optional `chrono` and `jiff` features when adding
+/// `rust_xlsxwriter` to your `Cargo.toml`.
+///
+/// ```bash
+/// cargo add rust_xlsxwriter -F chrono
+/// cargo add rust_xlsxwriter -F jiff
+/// ```
 ///
 pub trait IntoExcelDateTime {
     /// Trait method to convert a date or time into an Excel serial datetime.
@@ -1389,7 +1511,7 @@ impl IntoExcelDateTime for ExcelDateTime {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelDateTime for &NaiveDateTime {
+impl IntoExcelDateTime for &chrono::NaiveDateTime {
     fn to_excel_serial_date(&self) -> f64 {
         ExcelDateTime::chrono_datetime_to_excel(self)
     }
@@ -1397,7 +1519,7 @@ impl IntoExcelDateTime for &NaiveDateTime {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelDateTime for &NaiveDate {
+impl IntoExcelDateTime for &chrono::NaiveDate {
     fn to_excel_serial_date(&self) -> f64 {
         ExcelDateTime::chrono_date_to_excel(self)
     }
@@ -1405,7 +1527,7 @@ impl IntoExcelDateTime for &NaiveDate {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelDateTime for &NaiveTime {
+impl IntoExcelDateTime for &chrono::NaiveTime {
     fn to_excel_serial_date(&self) -> f64 {
         ExcelDateTime::chrono_time_to_excel(self)
     }
@@ -1413,7 +1535,7 @@ impl IntoExcelDateTime for &NaiveTime {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelDateTime for NaiveDateTime {
+impl IntoExcelDateTime for chrono::NaiveDateTime {
     fn to_excel_serial_date(&self) -> f64 {
         ExcelDateTime::chrono_datetime_to_excel(self)
     }
@@ -1421,7 +1543,7 @@ impl IntoExcelDateTime for NaiveDateTime {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelDateTime for NaiveDate {
+impl IntoExcelDateTime for chrono::NaiveDate {
     fn to_excel_serial_date(&self) -> f64 {
         ExcelDateTime::chrono_date_to_excel(self)
     }
@@ -1429,9 +1551,57 @@ impl IntoExcelDateTime for NaiveDate {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelDateTime for NaiveTime {
+impl IntoExcelDateTime for chrono::NaiveTime {
     fn to_excel_serial_date(&self) -> f64 {
         ExcelDateTime::chrono_time_to_excel(self)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelDateTime for &jiff::civil::DateTime {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::jiff_datetime_to_excel(self)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelDateTime for &jiff::civil::Date {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::jiff_date_to_excel(self)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelDateTime for &jiff::civil::Time {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::jiff_time_to_excel(self)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelDateTime for jiff::civil::DateTime {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::jiff_datetime_to_excel(self)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelDateTime for jiff::civil::Date {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::jiff_date_to_excel(self)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelDateTime for jiff::civil::Time {
+    fn to_excel_serial_date(&self) -> f64 {
+        ExcelDateTime::jiff_time_to_excel(self)
     }
 }
 

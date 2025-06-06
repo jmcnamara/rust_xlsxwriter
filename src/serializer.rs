@@ -46,11 +46,11 @@
 //!
 //! ## How serialization works in `rust_xlsxwriter`
 //!
-//! Serialization with `rust_xlsxwriter` needs to consider
-//! that the target output is a 2D grid of cells into which the data can be
-//! serialized. As such, the focus is on serializing data types that map to this
-//! 2D grid, such as structs or compound collections of structs like vectors
-//! or tuples, and it (currently) ignores compound types like maps.
+//! Serialization with `rust_xlsxwriter` needs to consider that the target
+//! output is a 2D grid of cells into which the data can be serialized. As such,
+//! the focus is on serializing data types that map to this 2D grid, such as
+//! structs or compound collections of structs like vectors or tuples, and it
+//! (currently) ignores compound types like maps.
 //!
 //! The image below shows the basic scheme for mapping a struct to a worksheet:
 //! fields are mapped to a header and values are mapped to sequential cells
@@ -206,9 +206,9 @@
 //! (Approach 3). The [`XlsxSerialize`] approach does, however,  limit you to
 //! having a fixed set of formatting per struct.
 //!
-//! The two examples below should help inform your decision. If not, note
-//! that the author mainly uses [`XlsxSerialize`], but you can use whichever
-//! method works for you without fear of judgment.
+//! The two examples below should help inform your decision. If not, note that
+//! the author mainly uses [`XlsxSerialize`], but you can use whichever method
+//! works for you without fear of judgment.
 //!
 //! The first example below shows the usage of some of the serialization and
 //! deserialization methods.
@@ -396,7 +396,7 @@
 //!
 //! As explained above, serialization converts the field names of structs to
 //! column headers at the top of serialized data. The default field names are
-//! generally lowercase and snake_case and may not be the way you want the
+//! generally `lowercase` and `snake_case` and may not be the way you want the
 //! header names displayed in Excel. In such cases, you can use one of the three
 //! main methods to rename the fields/headers:
 //!
@@ -600,9 +600,8 @@
 //! ## Skipping fields when serializing
 //!
 //! When serializing a struct, you may not want all of the fields to be
-//! serialized. For example, the struct may contain internal fields that
-//! aren't of interest to the end user. There are several ways to skip
-//! fields:
+//! serialized. For example, the struct may contain internal fields that aren't
+//! of interest to the end user. There are several ways to skip fields:
 //!
 //! 1. Using the Serde [field attributes] `#[serde(skip)]`. This is the simplest
 //!    and best method.
@@ -625,8 +624,8 @@
 //! ### Examples of field skipping
 //!
 //! The following example demonstrates skipping fields during serialization by
-//! using Serde field attributes. Since the field is no longer used, we also need
-//! to tell `rustc` not to emit a `dead_code` warning.
+//! using Serde field attributes. Since the field is no longer used, we also
+//! need to tell `rustc` not to emit a `dead_code` warning.
 //!
 //! ```rust
 //! # // This code is available in examples/doc_worksheet_serialize_headers_skip1.rs
@@ -827,8 +826,8 @@
 //! ```
 //!
 //! The following example demonstrates skipping fields during serialization by
-//! using `XlsxSerialize` field attributes. Since the field is no longer used, we
-//! also need to tell `rustc` not to emit a `dead_code` warning.
+//! using `XlsxSerialize` field attributes. Since the field is no longer used,
+//! we also need to tell `rustc` not to emit a `dead_code` warning.
 //!
 //! ```rust
 //! # // This code is available in examples/doc_xlsxserialize_skip2.rs
@@ -892,8 +891,8 @@
 //! Serialization will transfer your data to a worksheet, but it won't format it
 //! without a few additional steps.
 //!
-//! The most common requirement is to format the headers/fields at the top of the
-//! serialized data. The simplest way to do this is to use the
+//! The most common requirement is to format the headers/fields at the top of
+//! the serialized data. The simplest way to do this is to use the
 //! [`Worksheet::deserialize_headers_with_format()`] or
 //! [`Worksheet::serialize_headers_with_format()`] methods, as shown in the
 //! [Setting serialization headers](#setting-serialization-headers) section
@@ -1156,26 +1155,39 @@
 //!
 //! - [`ExcelDateTime`]: The inbuilt `rust_xlsxwriter` datetime type.
 //! - [`Chrono`] naive (i.e., timezone unaware) types:
-//!   - [`NaiveDateTime`]
-//!   - [`NaiveDate`]
-//!   - [`NaiveTime`]
+//!   - [`chrono::NaiveDateTime`]
+//!   - [`chrono::NaiveDate`]
+//!   - [`chrono::NaiveTime`]
+//! - [`Jiff`] civil (i.e., timezone unaware) types:
+//!   - [`jiff::civil::Datetime`]
+//!   - [`jiff::civil::Date`]
+//!   - [`jiff::civil::Time`]
 //!
 //! [`ExcelDateTime`]: crate::ExcelDateTime
+//!
 //! [`Chrono`]: https://docs.rs/chrono/latest/chrono
-//! [`NaiveDate`]:
+//! [`chrono::NaiveDate`]:
 //!     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-//! [`NaiveTime`]:
+//! [`chrono::NaiveTime`]:
 //!     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-//! [`NaiveDateTime`]:
+//! [`chrono::NaiveDateTime`]:
 //!     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
 //!
+//! [`Jiff`]: https://docs.rs/jiff/latest/jiff
+//! [`jiff::civil::Datetime`]:
+//!     https://docs.rs/jiff/latest/jiff/civil/struct.DateTime.html
+//! [`jiff::civil::Date`]:
+//!     https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
+//! [`jiff::civil::Time`]:
+//!     https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
+//!
 //! The [`ExcelDateTime`] type is serialized automatically since it implements
-//! the [`Serialize`] trait. The [`Chrono`] types also implement [`Serialize`]
-//! but they will serialize to an Excel string in RFC3339 format. To serialize
-//! them to an Excel number/datetime format requires a serializing function like
-//! [`Utility::serialize_chrono_naive_to_excel()`](crate::utility::serialize_chrono_naive_to_excel())
+//! the [`Serialize`] trait. The [`Chrono`] and [`Jiff`] types also implement
+//! [`Serialize`] but they will serialize to a string. To serialize them to an
+//! Excel number/datetime format requires a serializing function like
+//! [`Utility::serialize_datetime_to_excel()`](crate::utility::serialize_datetime_to_excel())
 //! (as shown in the example below) or
-//! [`Utility::serialize_chrono_option_naive_to_excel()`](crate::utility::serialize_chrono_option_naive_to_excel()).
+//! [`Utility::serialize_option_datetime_to_excel()`](crate::utility::serialize_option_datetime_to_excel()).
 //!
 //! Excel datetimes also need a number format to display them as a date/time
 //! since they are stored as `f64` values. See [Datetimes in
@@ -1267,13 +1279,13 @@
 //! <img
 //! src="https://rustxlsxwriter.github.io/images/worksheet_serialize_datetime1.png">
 //!
-//! Here is an example which serializes a struct with a [`NaiveDate`] field. The
-//! output is the same as the previous example.
+//! Here is an example which serializes a struct with a [`chrono::NaiveDate`]
+//! field. The output is the same as the previous example.
 //!
 //! ```ignore
 //! # // This code is available in examples/doc_worksheet_serialize_datetime2.rs
 //! #
-//! use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+//! use rust_xlsxwriter::utility::serialize_datetime_to_excel;
 //!
 //! fn main() -> Result<(), XlsxError> {
 //!     let mut workbook = Workbook::new();
@@ -1298,7 +1310,7 @@
 //!         name: &'a str,
 //!
 //!         // Note, we add a `rust_xlsxwriter` function to serialize the date.
-//!         #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+//!         #[serde(serialize_with = "serialize_datetime_to_excel")]
 //!         dob: NaiveDate,
 //!
 //!         id: u32,
@@ -1343,9 +1355,6 @@
 //!     Ok(())
 //! }
 //! ```
-//!
-//!
-//!
 //!
 //!
 //!
@@ -1443,9 +1452,9 @@
 //! container attributes apply to all headers and field attributes apply to the
 //! individual headers and the data below them.
 //!
-//! In order to demonstrate each attribute and its effect, we will use variations
-//! of the following example with the relevant attribute applied in the next
-//! sections.
+//! In order to demonstrate each attribute and its effect, we will use
+//! variations of the following example with the relevant attribute applied in
+//! the next sections.
 //!
 //! ### Base example (without attributes applied)
 //!
@@ -1576,8 +1585,8 @@
 //!
 //! - `#[xlsx(table_style)`
 //!
-//!   The `table_style` container attribute adds a worksheet [`Table`]
-//!   structure with a user specified [`TableStyle`] to the serialized area:
+//!   The `table_style` container attribute adds a worksheet [`Table`] structure
+//!   with a user specified [`TableStyle`] to the serialized area:
 //!
 //!   ```
 //!   # use rust_xlsxwriter::XlsxSerialize;
@@ -1619,10 +1628,10 @@
 //!   <img
 //!   src="https://rustxlsxwriter.github.io/images/xlsxserialize_table_default.png">
 //!
-//!   See the [Working with attribute
-//!   Formats](#working-with-attribute-formats) section below for information on
-//!   how to wrap complex objects like [`Format`] or [`Table`] in a function so
-//!   it can be used as an attribute parameter.
+//!   See the [Working with attribute Formats](#working-with-attribute-formats)
+//!   section below for information on how to wrap complex objects like
+//!   [`Format`] or [`Table`] in a function so it can be used as an attribute
+//!   parameter.
 //!
 //!
 //! ### Field `xlsx` attributes

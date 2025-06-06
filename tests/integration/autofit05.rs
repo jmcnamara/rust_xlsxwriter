@@ -5,9 +5,6 @@
 //
 // Copyright 2022-2025, John McNamara, jmcnamara@cpan.org
 
-#[cfg(feature = "chrono")]
-use chrono::NaiveDate;
-
 use crate::common;
 use rust_xlsxwriter::{ExcelDateTime, Format, Workbook, XlsxError};
 
@@ -41,8 +38,30 @@ fn create_new_xlsx_file_2(filename: &str) -> Result<(), XlsxError> {
 
     let date_format = Format::new().set_num_format_index(14);
 
-    let date1 = NaiveDate::from_ymd_opt(2023, 1, 1).unwrap();
-    let date2 = NaiveDate::from_ymd_opt(2023, 12, 12).unwrap();
+    let date1 = chrono::NaiveDate::from_ymd_opt(2023, 1, 1).unwrap();
+    let date2 = chrono::NaiveDate::from_ymd_opt(2023, 12, 12).unwrap();
+
+    worksheet.write_date_with_format(0, 0, date1, &date_format)?;
+    worksheet.write_date_with_format(0, 1, date2, &date_format)?;
+
+    worksheet.autofit();
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test to demonstrate autofit. With jiff date.
+#[cfg(feature = "jiff")]
+fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+
+    let worksheet = workbook.add_worksheet();
+
+    let date_format = Format::new().set_num_format_index(14);
+
+    let date1 = jiff::civil::date(2023, 1, 1);
+    let date2 = jiff::civil::date(2023, 12, 12);
 
     worksheet.write_date_with_format(0, 0, date1, &date_format)?;
     worksheet.write_date_with_format(0, 1, date2, &date_format)?;
@@ -73,6 +92,19 @@ fn test_autofit05_2() {
         .set_name("autofit05")
         .set_function(create_new_xlsx_file_2)
         .unique("2")
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[cfg(feature = "jiff")]
+#[test]
+fn test_autofit05_3() {
+    let test_runner = common::TestRunner::new()
+        .set_name("autofit05")
+        .set_function(create_new_xlsx_file_3)
+        .unique("3")
         .initialize();
 
     test_runner.assert_eq();

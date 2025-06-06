@@ -11,7 +11,7 @@ use rust_xlsxwriter::{
 };
 use serde::{Deserialize, Serialize};
 
-use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+use rust_xlsxwriter::utility::serialize_datetime_to_excel;
 
 fn main() -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
@@ -36,7 +36,7 @@ fn main() -> Result<(), XlsxError> {
         name: &'a str,
 
         // Note, we add a `rust_xlsxwriter` function to serialize the date.
-        #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+        #[serde(serialize_with = "serialize_datetime_to_excel")]
         dob: NaiveDate,
 
         id: u32,

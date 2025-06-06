@@ -186,6 +186,8 @@
 //! - `serde`: Adds support for Serde serialization. This is off by default.
 //! - `chrono`: Adds support for Chrono date/time types to the API. This is off
 //!   by default.
+//! - `jiff`: Adds support for Jiff date/time types to the API. This is off
+//!   by default.
 //! - `zlib`: Adds a dependency on zlib and a C compiler. This includes the same
 //!   features as `default` but is 1.5x faster for large files.
 //! - `polars`: Adds support for mapping between `PolarsError` and

@@ -15,11 +15,11 @@ use serde::Serialize;
 #[cfg(feature = "chrono")]
 use chrono::{NaiveDate, NaiveDateTime};
 
-#[cfg(feature = "chrono")]
-use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+#[cfg(any(feature = "chrono", feature = "jiff"))]
+use rust_xlsxwriter::utility::serialize_datetime_to_excel;
 
-#[cfg(feature = "chrono")]
-use rust_xlsxwriter::utility::serialize_chrono_option_naive_to_excel;
+#[cfg(any(feature = "chrono", feature = "jiff"))]
+use rust_xlsxwriter::utility::serialize_option_datetime_to_excel;
 
 // Test case for Serde serialization. First test isn't serialized.
 fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
@@ -29,13 +29,16 @@ fn create_new_xlsx_file_1(filename: &str) -> Result<(), XlsxError> {
 
     let format = Format::new().set_num_format_index(14);
 
-    // Not serialized.
+    // Not serialized. In row-col order.
     worksheet.write(0, 0, "col1")?;
     worksheet.write(0, 1, "col2")?;
+
     worksheet.write(1, 0, "aaa")?;
     worksheet.write_with_format(1, 1, ExcelDateTime::parse_from_str("2024-01-01")?, &format)?;
+
     worksheet.write(2, 0, "bbb")?;
     worksheet.write_with_format(2, 1, ExcelDateTime::parse_from_str("2024-01-02")?, &format)?;
+
     worksheet.write(3, 0, "ccc")?;
     worksheet.write_with_format(3, 1, ExcelDateTime::parse_from_str("2024-01-03")?, &format)?;
 
@@ -104,7 +107,7 @@ fn create_new_xlsx_file_3(filename: &str) -> Result<(), XlsxError> {
     #[derive(Serialize)]
     struct MyStruct {
         col1: &'static str,
-        #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+        #[serde(serialize_with = "serialize_datetime_to_excel")]
         col2: NaiveDate,
     }
 
@@ -153,7 +156,7 @@ fn create_new_xlsx_file_4(filename: &str) -> Result<(), XlsxError> {
     #[derive(Serialize)]
     struct MyStruct {
         col1: &'static str,
-        #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+        #[serde(serialize_with = "serialize_datetime_to_excel")]
         col2: NaiveDateTime,
     }
 
@@ -211,7 +214,7 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     #[derive(Serialize)]
     struct MyStruct {
         col1: &'static str,
-        #[serde(serialize_with = "serialize_chrono_option_naive_to_excel")]
+        #[serde(serialize_with = "serialize_option_datetime_to_excel")]
         col2: Option<NaiveDate>,
     }
 
@@ -247,8 +250,155 @@ fn create_new_xlsx_file_5(filename: &str) -> Result<(), XlsxError> {
     Ok(())
 }
 
-// Test case for Serde serialization. With XlsxSerialize.
+// Test case for Serde serialization with jiff.
+#[cfg(feature = "jiff")]
 fn create_new_xlsx_file_6(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet_with_low_memory();
+    worksheet.set_column_width(1, 11)?;
+
+    let format = Format::new().set_num_format_index(14);
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: &'static str,
+        #[serde(serialize_with = "serialize_datetime_to_excel")]
+        col2: jiff::civil::Date,
+    }
+
+    let data1 = MyStruct {
+        col1: "aaa",
+        col2: jiff::civil::date(2024, 1, 1),
+    };
+
+    let data2 = MyStruct {
+        col1: "bbb",
+        col2: jiff::civil::date(2024, 1, 2),
+    };
+
+    let data3 = MyStruct {
+        col1: "ccc",
+        col2: jiff::civil::date(2024, 1, 3),
+    };
+
+    let custom_headers = [
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2").set_value_format(&format),
+    ];
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
+
+    worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
+
+    worksheet.serialize(&data1)?;
+    worksheet.serialize(&data2)?;
+    worksheet.serialize(&data3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde serialization with jiff.
+#[cfg(feature = "jiff")]
+fn create_new_xlsx_file_7(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet_with_low_memory();
+    worksheet.set_column_width(1, 11)?;
+
+    let format = Format::new().set_num_format_index(14);
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: &'static str,
+        #[serde(serialize_with = "serialize_datetime_to_excel")]
+        col2: jiff::civil::DateTime,
+    }
+
+    let data1 = MyStruct {
+        col1: "aaa",
+        col2: jiff::civil::date(2024, 1, 1).at(0, 0, 0, 0),
+    };
+
+    let data2 = MyStruct {
+        col1: "bbb",
+        col2: jiff::civil::date(2024, 1, 2).at(0, 0, 0, 0),
+    };
+
+    let data3 = MyStruct {
+        col1: "ccc",
+        col2: jiff::civil::date(2024, 1, 3).at(0, 0, 0, 0),
+    };
+
+    let custom_headers = [
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2").set_value_format(&format),
+    ];
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
+
+    worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
+
+    worksheet.serialize(&data1)?;
+    worksheet.serialize(&data2)?;
+    worksheet.serialize(&data3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde serialization with jiff Option<>.
+#[cfg(feature = "jiff")]
+fn create_new_xlsx_file_8(filename: &str) -> Result<(), XlsxError> {
+    let mut workbook = Workbook::new();
+    let worksheet = workbook.add_worksheet_with_low_memory();
+    worksheet.set_column_width(1, 11)?;
+
+    let format = Format::new().set_num_format_index(14);
+
+    // Create a serializable test struct.
+    #[derive(Serialize)]
+    struct MyStruct {
+        col1: &'static str,
+        #[serde(serialize_with = "serialize_option_datetime_to_excel")]
+        col2: Option<jiff::civil::Date>,
+    }
+
+    let data1 = MyStruct {
+        col1: "aaa",
+        col2: Some(jiff::civil::date(2024, 1, 1)),
+    };
+
+    let data2 = MyStruct {
+        col1: "bbb",
+        col2: Some(jiff::civil::date(2024, 1, 2)),
+    };
+
+    let data3 = MyStruct {
+        col1: "ccc",
+        col2: Some(jiff::civil::date(2024, 1, 3)),
+    };
+
+    let custom_headers = [
+        CustomSerializeField::new("col1"),
+        CustomSerializeField::new("col2").set_value_format(&format),
+    ];
+    let header_options = SerializeFieldOptions::new().set_custom_headers(&custom_headers);
+
+    worksheet.serialize_headers_with_options(0, 0, &data1, &header_options)?;
+
+    worksheet.serialize(&data1)?;
+    worksheet.serialize(&data2)?;
+    worksheet.serialize(&data3)?;
+
+    workbook.save(filename)?;
+
+    Ok(())
+}
+
+// Test case for Serde serialization. With XlsxSerialize.
+fn create_new_xlsx_file_9(filename: &str) -> Result<(), XlsxError> {
     let mut workbook = Workbook::new();
     let worksheet = workbook.add_worksheet_with_low_memory();
     worksheet.set_column_width(1, 11)?;
@@ -357,11 +507,52 @@ fn test_optimize_serde10_5() {
 }
 
 #[test]
+#[cfg(feature = "jiff")]
 fn test_optimize_serde10_6() {
     let test_runner = common::TestRunner::new()
         .set_name("serde10")
         .set_function(create_new_xlsx_file_6)
         .unique("optimize6")
+        .ignore_worksheet_spans()
+        .initialize();
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+#[cfg(feature = "jiff")]
+fn test_optimize_serde10_7() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde10")
+        .set_function(create_new_xlsx_file_7)
+        .unique("optimize7")
+        .ignore_worksheet_spans()
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+#[cfg(feature = "jiff")]
+fn test_optimize_serde10_8() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde10")
+        .set_function(create_new_xlsx_file_8)
+        .unique("optimize8")
+        .ignore_worksheet_spans()
+        .initialize();
+
+    test_runner.assert_eq();
+    test_runner.cleanup();
+}
+
+#[test]
+fn test_optimize_serde10_9() {
+    let test_runner = common::TestRunner::new()
+        .set_name("serde10")
+        .set_function(create_new_xlsx_file_9)
+        .unique("optimize9")
         .ignore_worksheet_spans()
         .initialize();
 

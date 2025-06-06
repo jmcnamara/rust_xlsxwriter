@@ -6,9 +6,6 @@
 
 #![warn(missing_docs)]
 
-#[cfg(feature = "chrono")]
-use chrono::{DateTime, Utc};
-
 use crate::ExcelDateTime;
 
 /// The `DocProperties` struct is used to create an object to represent document
@@ -541,15 +538,9 @@ impl DocProperties {
     /// # Parameters
     ///
     /// - `datetime`: The creation date property. A type that implements
-    ///   [`IntoCustomDateTimeUtc`].
+    ///   [`IntoCustomDateTime`].
     ///
-    /// [`chrono::DateTime`]:
-    ///     https://docs.rs/chrono/latest/chrono/struct.DateTime.html
-    ///
-    pub fn set_creation_datetime(
-        mut self,
-        create_time: impl IntoCustomDateTimeUtc,
-    ) -> DocProperties {
+    pub fn set_creation_datetime(mut self, create_time: impl IntoCustomDateTime) -> DocProperties {
         self.creation_time = create_time.utc_datetime();
         self
     }
@@ -560,18 +551,15 @@ impl DocProperties {
     /// the document properties.
     ///
     /// Excel support custom data types that are equivalent to the Rust types:
-    /// [`&str`], [`f64`], [`i32`] [`bool`] and `&DateTime<Utc>`
+    /// [`&str`], [`f64`], [`i32`] [`bool`] and dates that support
+    /// [`IntoCustomDateTime`].
     ///
     /// # Parameters
     ///
     /// - `name`: The user defined name of the custom property.
     /// - `value`: The value can be a [`&str`], [`f64`], [`i32`] [`bool`],
-    ///   [`ExcelDateTime`] or [`chrono::DateTime<Utc>`] type for which the
-    ///   `IntoCustomProperty` trait is implemented.
-    ///
-    /// [`chrono::DateTime<Utc>`]:
-    /// https://docs.rs/chrono/latest/chrono/struct.DateTime.html
-    ///
+    ///   [`ExcelDateTime`] or a date type for which the [`IntoCustomDateTime`]
+    ///   trait is implemented.
     ///
     /// # Examples
     ///
@@ -686,7 +674,7 @@ impl CustomProperty {
 
     pub(crate) fn new_property_datetime(
         name: String,
-        value: impl IntoCustomDateTimeUtc,
+        value: impl IntoCustomDateTime,
     ) -> CustomProperty {
         CustomProperty {
             property_type: CustomPropertyType::DateTime,
@@ -706,7 +694,8 @@ pub(crate) enum CustomPropertyType {
     DateTime,
 }
 
-/// Trait to map different Rust types into Excel data types used in custom document properties.
+/// Trait to map different Rust types into Excel data types used in custom
+/// document properties.
 ///
 pub trait IntoCustomProperty {
     /// Types/objects supporting this trait must be able to convert to a
@@ -752,7 +741,39 @@ impl IntoCustomProperty for bool {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoCustomProperty for &DateTime<Utc> {
+impl IntoCustomProperty for &chrono::DateTime<chrono::Utc> {
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_datetime(name.into(), self)
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl IntoCustomProperty for &chrono::NaiveDateTime {
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_datetime(name.into(), self)
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl IntoCustomProperty for &chrono::NaiveDate {
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_datetime(name.into(), self)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoCustomProperty for &jiff::civil::DateTime {
+    fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
+        CustomProperty::new_property_datetime(name.into(), self)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoCustomProperty for &jiff::civil::Date {
     fn new_custom_property(self, name: impl Into<String>) -> CustomProperty {
         CustomProperty::new_property_datetime(name.into(), self)
     }
@@ -764,18 +785,44 @@ impl IntoCustomProperty for &ExcelDateTime {
     }
 }
 
-/// Trait to map user date types to an Excel UTC date.
+/// Trait to map user date types to an Excel custom property date.
 ///
-/// Map a date to the Excel UTC date used in custom document properties.
+/// Map a date to an Excel UTC date used in custom document properties.
 ///
-/// This can be either a [`ExcelDateTime`] date instance or, if the `chrono`
-/// feature is enabled, a [`chrono::DateTime<Utc>`] instance.
+/// This can be either a [`ExcelDateTime`] date instance or one of the
+/// [`Chrono`] or [`Jiff`] date types shown below.
 ///
+/// - [`ExcelDateTime`]: The inbuilt `rust_xlsxwriter` datetime type.
+/// - [`Chrono`] types:
+///   - [`chrono::NaiveDateTime`]
+///   - [`chrono::NaiveDate`]
+///   - [`chrono::DateTime<Utc>`]
+/// - [`Jiff`] types:
+///   - [`jiff::civil::Datetime`]
+///   - [`jiff::civil::Date`]
+///
+/// [`ExcelDateTime`]: crate::ExcelDateTime
+///
+/// [`Chrono`]: https://docs.rs/chrono/latest/chrono
+/// [`chrono::NaiveDate`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+/// [`chrono::NaiveTime`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+/// [`chrono::NaiveDateTime`]:
+///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
 /// [`chrono::DateTime<Utc>`]:
-/// https://docs.rs/chrono/latest/chrono/struct.DateTime.html
+///     https://docs.rs/chrono/latest/chrono/struct.DateTime.html
 ///
 ///
-pub trait IntoCustomDateTimeUtc {
+/// [`Jiff`]: https://docs.rs/jiff/latest/jiff
+/// [`jiff::civil::Datetime`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.DateTime.html
+/// [`jiff::civil::Date`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
+/// [`jiff::civil::Time`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
+///
+pub trait IntoCustomDateTime {
     /// Trait method to convert a date into an Excel UTC date.
     ///
     fn utc_datetime(self) -> String;
@@ -783,13 +830,45 @@ pub trait IntoCustomDateTimeUtc {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoCustomDateTimeUtc for &DateTime<Utc> {
+impl IntoCustomDateTime for &chrono::NaiveDateTime {
+    fn utc_datetime(self) -> String {
+        self.format("%Y-%m-%dT%H:%M:%SZ").to_string()
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl IntoCustomDateTime for &chrono::NaiveDate {
+    fn utc_datetime(self) -> String {
+        self.format("%Y-%m-%dT00:00:00Z").to_string()
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl IntoCustomDateTime for &chrono::DateTime<chrono::Utc> {
     fn utc_datetime(self) -> String {
         self.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)
     }
 }
 
-impl IntoCustomDateTimeUtc for &ExcelDateTime {
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoCustomDateTime for &jiff::civil::DateTime {
+    fn utc_datetime(self) -> String {
+        self.strftime("%Y-%m-%dT%H:%M:%SZ").to_string()
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoCustomDateTime for &jiff::civil::Date {
+    fn utc_datetime(self) -> String {
+        self.strftime("%Y-%m-%dT00:00:00Z").to_string()
+    }
+}
+
+impl IntoCustomDateTime for &ExcelDateTime {
     fn utc_datetime(self) -> String {
         self.to_rfc3339()
     }

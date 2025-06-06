@@ -648,11 +648,12 @@ impl DataValidation {
     /// refers to this data validation type as "Date".
     ///
     /// This method uses date types that implement [`IntoExcelDateTime`]. The
-    /// main date type supported is [`ExcelDateTime`]. If the `chrono` feature
-    /// is enabled you can also use [`chrono::NaiveDate`].
+    /// main date type supported is [`ExcelDateTime`]. If the `chrono` or `jiff`
+    /// features are enabled you can also use [`Chrono`] or [`Jiff`] date types
+    /// for which [`IntoExcelDateTime`] is implemented.
     ///
-    /// [`chrono::NaiveDate`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
+    /// [`Jiff`]: https://docs.rs/jiff/latest/jiff
+    /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
     ///
     /// # Parameters
     ///
@@ -735,12 +736,14 @@ impl DataValidation {
     /// on [`DataValidationRule`] rules such as "between" or "less than". Excel
     /// refers to this data validation type as "Time".
     ///
-    /// This method uses time types that implement [`IntoExcelDateTime`]. The
-    /// main time type supported is [`ExcelDateTime`]. If the `chrono` feature
-    /// is enabled you can also use [`chrono::NaiveTime`].
     ///
-    /// [`chrono::NaiveTime`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
+    /// This method uses time types that implement [`IntoExcelDateTime`]. The
+    /// main date type supported is [`ExcelDateTime`]. If the `chrono` or `jiff`
+    /// features are enabled you can also use [`Chrono`] or [`Jiff`] time types
+    /// for which [`IntoExcelDateTime`] is implemented.
+    ///
+    /// [`Jiff`]: https://docs.rs/jiff/latest/jiff
+    /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
     ///
     /// # Parameters
     ///
@@ -1420,6 +1423,30 @@ impl IntoDataValidationValue for NaiveTime {
 impl IntoDataValidationValue for &NaiveTime {
     fn to_string_value(&self) -> String {
         ExcelDateTime::chrono_time_to_excel(self).to_string()
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoDataValidationValue for jiff::civil::DateTime {
+    fn to_string_value(&self) -> String {
+        ExcelDateTime::jiff_datetime_to_excel(self).to_string()
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoDataValidationValue for jiff::civil::Date {
+    fn to_string_value(&self) -> String {
+        ExcelDateTime::jiff_date_to_excel(self).to_string()
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoDataValidationValue for jiff::civil::Time {
+    fn to_string_value(&self) -> String {
+        ExcelDateTime::jiff_time_to_excel(self).to_string()
     }
 }
 

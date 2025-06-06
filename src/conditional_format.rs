@@ -6586,15 +6586,22 @@ impl ConditionalFormatCustomIcon {
 /// - Strings: Any Rust string type that can convert into String such as
 ///   [`&str`], [`String`], `&String` and `Cow<'_, str>`.
 /// - Booleans: Any Rust [`bool`] value.
-/// - Dates/times: [`ExcelDateTime`] values and if the `chrono` feature is
-///   enabled [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] and
-///   [`chrono::NaiveTime`].
+/// - Dates/times: [`ExcelDateTime`] values. If the `chrono` feature is enabled
+///   [`chrono::NaiveDateTime`], [`chrono::NaiveDate`] and
+///   [`chrono::NaiveTime`]. If the `jiff` feature is enabled
+///   [`jiff::civil::Datetime`], [`jiff::civil::Date`] and
+///   [`jiff::civil::Time`].
 /// - Cell ranges: Use [`Formula`] in order to distinguish from strings. For
 ///   example `Formula::new(=A1)`.
 ///
 /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
 /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-/// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+/// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/impl
+///
+/// [`jiff::civil::Date`]: https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
+/// [`jiff::civil::Time`]: https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
+/// [`jiff::civil::Datetime`]: https://docs.rs/jiff/latest/jiff/civil/struct.DateTime.html
+///
 ///
 #[derive(Clone)]
 pub struct ConditionalFormatValue {
@@ -6709,6 +6716,60 @@ impl From<&NaiveTime> for ConditionalFormatValue {
     }
 }
 
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl From<NaiveDate> for ConditionalFormatValue {
+    fn from(value: NaiveDate) -> ConditionalFormatValue {
+        let value = ExcelDateTime::chrono_date_to_excel(&value).to_string();
+        ConditionalFormatValue::new_from_string(value)
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl From<NaiveDateTime> for ConditionalFormatValue {
+    fn from(value: NaiveDateTime) -> ConditionalFormatValue {
+        let value = ExcelDateTime::chrono_datetime_to_excel(&value).to_string();
+        ConditionalFormatValue::new_from_string(value)
+    }
+}
+
+#[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
+impl From<NaiveTime> for ConditionalFormatValue {
+    fn from(value: NaiveTime) -> ConditionalFormatValue {
+        let value = ExcelDateTime::chrono_time_to_excel(&value).to_string();
+        ConditionalFormatValue::new_from_string(value)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl From<jiff::civil::DateTime> for ConditionalFormatValue {
+    fn from(value: jiff::civil::DateTime) -> ConditionalFormatValue {
+        let value = ExcelDateTime::jiff_datetime_to_excel(&value).to_string();
+        ConditionalFormatValue::new_from_string(value)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl From<jiff::civil::Date> for ConditionalFormatValue {
+    fn from(value: jiff::civil::Date) -> ConditionalFormatValue {
+        let value = ExcelDateTime::jiff_date_to_excel(&value).to_string();
+        ConditionalFormatValue::new_from_string(value)
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl From<jiff::civil::Time> for ConditionalFormatValue {
+    fn from(value: jiff::civil::Time) -> ConditionalFormatValue {
+        let value = ExcelDateTime::jiff_time_to_excel(&value).to_string();
+        ConditionalFormatValue::new_from_string(value)
+    }
+}
+
 /// Trait to map rust types into an [`ConditionalFormatValue`] value.
 ///
 /// The `IntoConditionalFormatValue` trait is used to map Rust types like
@@ -6748,7 +6809,11 @@ conditional_format_value_from_type!(
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-conditional_format_value_from_type!(&NaiveDate & NaiveDateTime & NaiveTime);
+conditional_format_value_from_type!(&NaiveDate &NaiveDateTime &NaiveTime
+                                    NaiveDate NaiveDateTime NaiveTime);
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+conditional_format_value_from_type!(jiff::civil::DateTime jiff::civil::Date jiff::civil::Time);
 
 // -----------------------------------------------------------------------
 // ConditionalFormatCellRule

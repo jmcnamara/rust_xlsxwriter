@@ -7,8 +7,8 @@
 //! Utility functions for `rust_xlsxwriter`.
 //!
 //! The `rust_xlsxwriter` library provides a number of utility functions for
-//! dealing with cell ranges, Chrono Serde serialization, and other helper
-//! method.
+//! dealing with cell ranges, Chrono and Jiff Serde serialization, and other
+//! helper method.
 //!
 //!
 //! # Examples:
@@ -363,27 +363,42 @@ pub fn worksheet_range_absolute(
     chart_range_abs(sheet_name, first_row, first_col, last_row, last_col)
 }
 
-/// Serialize a Chrono naive date/time to an Excel value.
+/// Serialize a naive/civil date/time to an Excel value.
 ///
-/// This is a helper function for serializing [`Chrono`] naive date/time fields
-/// using [Serde](https://serde.rs). "Naive" in the Chrono sense means that the
-/// dates/times don't have timezone information, like Excel.
+/// This is a helper function for serializing [`Chrono`] or [`Jiff`] naive/civil
+/// date/time fields using [Serde](https://serde.rs). "Naive" and "Civil" means
+/// that the dates/times don't have timezone information, like Excel.
 ///
 /// The function works for the following types:
-///   - [`NaiveDateTime`]
-///   - [`NaiveDate`]
-///   - [`NaiveTime`]
+///
+///   - [`chrono::NaiveDateTime`]
+///   - [`chrono::NaiveDate`]
+///   - [`chrono::NaiveTime`]
+///   - [`jiff::civil::Datetime`]
+///   - [`jiff::civil::Date`]
+///   - [`jiff::civil::Time`]
 ///
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
-/// [`NaiveDate`]:
+/// [`chrono::NaiveDate`]:
 ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-/// [`NaiveTime`]:
+/// [`chrono::NaiveTime`]:
 ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-/// [`NaiveDateTime`]:
+/// [`chrono::NaiveDateTime`]:
 ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
 ///
-/// `Option<T>` Chrono types can be handled with
-/// [`serialize_chrono_option_naive_to_excel()`].
+/// [`Jiff`]: https://docs.rs/jiff/latest/jiff
+/// [`jiff::civil::Datetime`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.DateTime.html
+/// [`jiff::civil::Date`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
+/// [`jiff::civil::Time`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
+///
+/// Support for these types is enabled via the `chrono` and `jiff` cargo
+/// features.
+///
+/// `Option<T>` datetime types can be handled with
+/// [`serialize_option_datetime_to_excel()`].
 ///
 /// See [Working with Serde](crate::serializer#working-with-serde) for more
 /// information about serialization with `rust_xlsxwriter`.
@@ -409,14 +424,14 @@ pub fn worksheet_range_absolute(
 /// use chrono::NaiveDate;
 /// use serde::Serialize;
 ///
-/// use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+/// use rust_xlsxwriter::utility::serialize_datetime_to_excel;
 ///
 /// fn main() {
 ///     #[derive(Serialize)]
 ///     struct Student {
 ///         full_name: String,
 ///
-///         #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+///         #[serde(serialize_with = "serialize_datetime_to_excel")]
 ///         birth_date: NaiveDate,
 ///
 ///         id_number: u32,
@@ -426,7 +441,7 @@ pub fn worksheet_range_absolute(
 ///
 #[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
-pub fn serialize_chrono_naive_to_excel<S>(
+pub fn serialize_datetime_to_excel<S>(
     datetime: impl IntoExcelDateTime,
     serializer: S,
 ) -> Result<S::Ok, S::Error>
@@ -436,32 +451,46 @@ where
     serializer.serialize_f64(datetime.to_excel_serial_date())
 }
 
-/// Serialize an `Option` Chrono naive date/time to an Excel value.
+/// Serialize an `Option` naive/civil date/time to an Excel value.
 ///
-/// This is a helper function for serializing [`Chrono`] naive date/time fields
-/// using [Serde](https://serde.rs). "Naive" in the Chrono sense means that the
-/// dates/times don't have timezone information, like Excel.
+/// This is a helper function for serializing [`Chrono`] or [`Jiff`] naive/civil
+/// date/time fields using [Serde](https://serde.rs). "Naive" and "Civil" means
+/// that the dates/times don't have timezone information, like Excel.
 ///
-/// A helper function is provided for [`Option`] Chrono values since it is
-/// common to have `Option<NaiveDate>` values as a result of deserialization. It
-/// also takes care of the use case where you want a `None` value to be written
-/// as a blank cell with the same cell format as other values of the field type.
+/// A helper function is provided for [`Option`] Chrono and Jiff values since it
+/// is common to have `Option<T>` values as a result of deserialization. It also
+/// takes care of the use case where you want a `None` value to be written as a
+/// blank cell with the same cell format as other values of the field type.
 ///
-/// The function works for the following `Option<T>` where T is:
-///   - [`NaiveDateTime`]
-///   - [`NaiveDate`]
-///   - [`NaiveTime`]
+/// The function works for the following `T` types in an `Option<T>`:
+///
+///   - [`chrono::NaiveDateTime`]
+///   - [`chrono::NaiveDate`]
+///   - [`chrono::NaiveTime`]
+///   - [`jiff::civil::Datetime`]
+///   - [`jiff::civil::Date`]
+///   - [`jiff::civil::Time`]
 ///
 /// [`Chrono`]: https://docs.rs/chrono/latest/chrono
-/// [`NaiveDate`]:
+/// [`chrono::NaiveDate`]:
 ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-/// [`NaiveTime`]:
+/// [`chrono::NaiveTime`]:
 ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-/// [`NaiveDateTime`]:
+/// [`chrono::NaiveDateTime`]:
 ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
 ///
-/// Non `Option<T>` Chrono types can be handled with
-/// [`serialize_chrono_naive_to_excel()`].
+/// [`Jiff`]: https://docs.rs/jiff/latest/jiff
+/// [`jiff::civil::Datetime`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.DateTime.html
+/// [`jiff::civil::Date`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Date.html
+/// [`jiff::civil::Time`]:
+///     https://docs.rs/jiff/latest/jiff/civil/struct.Time.html
+///
+/// Support for these types is enabled via the `chrono` and `jiff` cargo
+/// features.
+///
+/// Non `Option<T>` types can be handled with [`serialize_datetime_to_excel()`].
 ///
 /// See [Working with Serde](crate::serializer#working-with-serde) for more
 /// information about serialization with `rust_xlsxwriter`.
@@ -489,14 +518,14 @@ where
 /// use chrono::NaiveDate;
 /// use serde::Serialize;
 ///
-/// use rust_xlsxwriter::utility::serialize_chrono_option_naive_to_excel;
+/// use rust_xlsxwriter::utility::serialize_option_datetime_to_excel;
 ///
 /// fn main() {
 ///     #[derive(Serialize)]
 ///     struct Student {
 ///         full_name: String,
 ///
-///         #[serde(serialize_with = "serialize_chrono_option_naive_to_excel")]
+///         #[serde(serialize_with = "serialize_option_datetime_to_excel")]
 ///         birth_date: Option<NaiveDate>,
 ///
 ///         id_number: u32,
@@ -506,6 +535,46 @@ where
 ///
 #[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+pub fn serialize_option_datetime_to_excel<S>(
+    datetime: &Option<impl IntoExcelDateTime>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match datetime {
+        Some(datetime) => serializer.serialize_f64(datetime.to_excel_serial_date()),
+        None => serializer.serialize_none(),
+    }
+}
+
+/// Serialize a chrono naive date/time to an Excel value.
+///
+/// This is deprecated. Use [`serialize_datetime_to_excel()`] instead.
+///
+#[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+#[deprecated(since = "0.88.0", note = "use `serialize_datetime_to_excel` instead")]
+pub fn serialize_chrono_naive_to_excel<S>(
+    datetime: impl IntoExcelDateTime,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_f64(datetime.to_excel_serial_date())
+}
+
+/// Serialize an `Option` chrono naive date/time to an Excel value.
+///
+/// This is deprecated. Use [`serialize_option_datetime_to_excel()`] instead.
+///
+#[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+#[deprecated(
+    since = "0.88.0",
+    note = "use `serialize_option_datetime_to_excel` instead"
+)]
 pub fn serialize_chrono_option_naive_to_excel<S>(
     datetime: &Option<impl IntoExcelDateTime>,
     serializer: S,

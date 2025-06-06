@@ -773,12 +773,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added [`serialize_chrono_option_naive_to_excel()`] to help serialization of
+- Added [`serialize_option_datetime_to_excel()`] to help serialization of
   `Option` Chrono types. [Feature Request #62].
 
 [Feature Request #62]: https://github.com/jmcnamara/rust_xlsxwriter/issues/62
 
-[`serialize_chrono_option_naive_to_excel()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.serialize_chrono_option_naive_to_excel.html
+[`serialize_option_datetime_to_excel()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/utility/fn.serialize_option_datetime_to_excel.html
 
 
 ## [0.58.0] - 2023-12-11

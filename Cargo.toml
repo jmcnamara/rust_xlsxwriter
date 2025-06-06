@@ -17,6 +17,7 @@ zip = { version = "4.0", default-features = false, features = ["deflate"] }
 
 # Optional dependencies.
 ryu = {version = "1.0", optional = true}
+jiff = {version = "0.2", default-features = false, features = [], optional = true}
 serde = {version = "1.0", features = ["derive"], optional = true}
 chrono = {version = "0.4", default-features = false, features = ["clock", "wasmbind", "serde"], optional = true}
 js-sys = {version = "0.3", optional = true}
@@ -39,8 +40,12 @@ default = []
 zlib = ["zip/deflate"]
 
 # `chrono`: Adds support for Chrono dates/times in addition to the native
-# ExcelDateTime types.
+# `ExcelDateTime` types.
 chrono = ["dep:chrono"]
+
+# `jiff`: Adds support for Jiff dates/times in addition to the native
+# `ExcelDateTime` types.
+jiff = ["dep:jiff"]
 
 # Enable "constant memory" when writing worksheet data. This keeps memory usage
 # to a minimum when writing large files.
@@ -92,6 +97,14 @@ required-features = ["chrono"]
 name = "doc_properties_checksum2_chrono"
 path = "examples/doc_properties_checksum2_chrono.rs"
 required-features = ["chrono"]
+
+#
+# Examples to run only when `jiff` is enabled.
+#
+[[example]]
+name = "doc_worksheet_write_datetime_jiff"
+path = "examples/doc_worksheet_write_datetime_jiff.rs"
+required-features = ["jiff"]
 
 #
 # Examples to run only when `serde` is enabled.

@@ -8,14 +8,14 @@
 use chrono::NaiveDate;
 use serde::Serialize;
 
-use rust_xlsxwriter::utility::serialize_chrono_naive_to_excel;
+use rust_xlsxwriter::utility::serialize_datetime_to_excel;
 
 fn main() {
     #[derive(Serialize)]
     struct Student {
         full_name: String,
 
-        #[serde(serialize_with = "serialize_chrono_naive_to_excel")]
+        #[serde(serialize_with = "serialize_datetime_to_excel")]
         birth_date: NaiveDate,
 
         id_number: u32,

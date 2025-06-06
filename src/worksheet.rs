@@ -1365,9 +1365,6 @@ use std::io::BufWriter;
 #[cfg(feature = "constant_memory")]
 use std::fs::File;
 
-#[cfg(feature = "chrono")]
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
-
 #[cfg(feature = "rust_decimal")]
 use rust_decimal::prelude::{Decimal, ToPrimitive};
 
@@ -2090,16 +2087,19 @@ impl Worksheet {
     /// - [`Result<T, E>`]: If `T` and `E` are supported types then the `T` or
     ///   `E` value is written depending on the result.
     ///
-    /// If the `chrono` feature is enabled you can use the following types:
+    /// If the `chrono` feature is enabled you can use the following types for
+    /// which [`IntoExcelData`] is implemented:
     ///
-    /// - [`chrono::NaiveDateTime`].
-    /// - [`chrono::NaiveDate`].
-    /// - [`chrono::NaiveTime`].
+    /// - [`chrono::NaiveDateTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html).
+    /// - [`chrono::NaiveDate`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html).
+    /// - [`chrono::NaiveTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html).
     ///
-    /// [`Chrono`]: https://docs.rs/chrono/latest/chrono/index.html
-    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    /// If the `jiff` feature is enabled you can use the following types for
+    /// which [`IntoExcelData`] is implemented:
+    ///
+    /// - [`jiff::civil::CivilDateTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDateTime.html).
+    /// - [`jiff::civil::CivilDate`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDate.html).
+    /// - [`jiff::civil::CivilTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilTime.html).
     ///
     /// If the `rust_decimal` feature is enabled you can write the [`Decimal`] type via [`rust_decimal`].
     /// This requires that the `Decimal` can be represented as a `f64` in Excel.
@@ -2152,16 +2152,19 @@ impl Worksheet {
     /// - [`Result<T, E>`]: If `T` and `E` are supported types then the `T` or
     ///   `E` value is written depending on the result.
     ///
-    /// If the `chrono` feature is enabled you can use the following types:
+    /// If the `chrono` feature is enabled you can use the following types for
+    /// which [`IntoExcelData`] is implemented:
     ///
-    /// - [`chrono::NaiveDateTime`].
-    /// - [`chrono::NaiveDate`].
-    /// - [`chrono::NaiveTime`].
+    /// - [`chrono::NaiveDateTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html).
+    /// - [`chrono::NaiveDate`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html).
+    /// - [`chrono::NaiveTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html).
     ///
-    /// [`Chrono`]: https://docs.rs/chrono/latest/chrono/index.html
-    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    /// If the `jiff` feature is enabled you can use the following types for
+    /// which [`IntoExcelData`] is implemented:
+    ///
+    /// - [`jiff::civil::CivilDateTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDateTime.html).
+    /// - [`jiff::civil::CivilDate`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDate.html).
+    /// - [`jiff::civil::CivilTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilTime.html).
     ///
     /// Users can also use this method to write their own data types to Excel by
     /// implementing the [`IntoExcelData`] trait.
@@ -4299,13 +4302,15 @@ impl Worksheet {
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
-    /// - [`chrono::NaiveDateTime`].
-    /// - [`chrono::NaiveDate`].
-    /// - [`chrono::NaiveTime`].
+    /// - [`chrono::NaiveDateTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html).
+    /// - [`chrono::NaiveDate`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html).
+    /// - [`chrono::NaiveTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html).
     ///
-    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    /// If the `jiff` feature is enabled you can use the following types:
+    ///
+    /// - [`jiff::civil::CivilDateTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDateTime.html).
+    /// - [`jiff::civil::CivilDate`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDate.html).
+    /// - [`jiff::civil::CivilTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilTime.html).
     ///
     /// Excel stores dates and times as a floating point number with a number
     /// format to defined how it is displayed. The number format is set via a
@@ -4486,16 +4491,16 @@ impl Worksheet {
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
-    /// - [`chrono::NaiveDateTime`].
-    /// - [`chrono::NaiveDate`].
-    /// - [`chrono::NaiveTime`].
+    /// - [`chrono::NaiveDateTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html).
+    /// - [`chrono::NaiveDate`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html).
+    /// - [`chrono::NaiveTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html).
     ///
-    /// [`chrono::NaiveDate`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]:
-    ///     https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    /// If the `jiff` feature is enabled you can use the following types:
+    ///
+    /// - [`jiff::civil::CivilDateTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDateTime.html).
+    /// - [`jiff::civil::CivilDate`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDate.html).
+    /// - [`jiff::civil::CivilTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilTime.html).
+    ///
     ///
     /// # Parameters
     ///
@@ -4583,13 +4588,15 @@ impl Worksheet {
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
-    /// - [`chrono::NaiveDateTime`].
-    /// - [`chrono::NaiveDate`].
-    /// - [`chrono::NaiveTime`].
+    /// - [`chrono::NaiveDateTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html).
+    /// - [`chrono::NaiveDate`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html).
+    /// - [`chrono::NaiveTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html).
     ///
-    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    /// If the `jiff` feature is enabled you can use the following types:
+    ///
+    /// - [`jiff::civil::CivilDateTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDateTime.html).
+    /// - [`jiff::civil::CivilDate`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDate.html).
+    /// - [`jiff::civil::CivilTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilTime.html).
     ///
     /// Excel stores dates and times as a floating point number with a number
     /// format to defined how it is displayed. The number format is set via a
@@ -4678,13 +4685,15 @@ impl Worksheet {
     ///
     /// If the `chrono` feature is enabled you can use the following types:
     ///
-    /// - [`chrono::NaiveDateTime`].
-    /// - [`chrono::NaiveDate`].
-    /// - [`chrono::NaiveTime`].
+    /// - [`chrono::NaiveDateTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html).
+    /// - [`chrono::NaiveDate`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html).
+    /// - [`chrono::NaiveTime`](https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html).
     ///
-    /// [`chrono::NaiveDate`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDate.html
-    /// [`chrono::NaiveTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveTime.html
-    /// [`chrono::NaiveDateTime`]: https://docs.rs/chrono/latest/chrono/naive/struct.NaiveDateTime.html
+    /// If the `jiff` feature is enabled you can use the following types:
+    ///
+    /// - [`jiff::civil::CivilDateTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDateTime.html).
+    /// - [`jiff::civil::CivilDate`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilDate.html).
+    /// - [`jiff::civil::CivilTime`](https://docs.rs/jiff/latest/jiff/civil/struct.CivilTime.html).
     ///
     /// Excel stores dates and times as a floating point number with a number
     /// format to defined how it is displayed. The number format is set via a
@@ -12061,7 +12070,7 @@ impl Worksheet {
                     )?;
                 } else {
                     self.write_string(max_row, col, &custom_header.header_name)?;
-                };
+                }
             }
 
             fields.insert(custom_header.field_name.clone(), custom_header);
@@ -20162,7 +20171,7 @@ impl IntoExcelData for ExcelDateTime {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelData for &NaiveDateTime {
+impl IntoExcelData for &chrono::NaiveDateTime {
     fn write(
         self,
         worksheet: &mut Worksheet,
@@ -20187,7 +20196,7 @@ impl IntoExcelData for &NaiveDateTime {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelData for &NaiveDate {
+impl IntoExcelData for &chrono::NaiveDate {
     fn write(
         self,
         worksheet: &mut Worksheet,
@@ -20212,7 +20221,7 @@ impl IntoExcelData for &NaiveDate {
 
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-impl IntoExcelData for &NaiveTime {
+impl IntoExcelData for &chrono::NaiveTime {
     fn write(
         self,
         worksheet: &mut Worksheet,
@@ -20231,6 +20240,81 @@ impl IntoExcelData for &NaiveTime {
         format: &Format,
     ) -> Result<&'a mut Worksheet, XlsxError> {
         let number = ExcelDateTime::chrono_time_to_excel(self);
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelData for &jiff::civil::DateTime {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = ExcelDateTime::jiff_datetime_to_excel(self);
+        worksheet.store_datetime(row, col, number, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let number = ExcelDateTime::jiff_datetime_to_excel(self);
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelData for &jiff::civil::Date {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = ExcelDateTime::jiff_date_to_excel(self);
+        worksheet.store_datetime(row, col, number, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let number = ExcelDateTime::jiff_date_to_excel(self);
+        worksheet.store_datetime(row, col, number, Some(format))
+    }
+}
+
+#[cfg(feature = "jiff")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff")))]
+impl IntoExcelData for &jiff::civil::Time {
+    fn write(
+        self,
+        worksheet: &mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+    ) -> Result<&mut Worksheet, XlsxError> {
+        let number = ExcelDateTime::jiff_time_to_excel(self);
+        worksheet.store_datetime(row, col, number, None)
+    }
+
+    fn write_with_format<'a>(
+        self,
+        worksheet: &'a mut Worksheet,
+        row: RowNum,
+        col: ColNum,
+        format: &Format,
+    ) -> Result<&'a mut Worksheet, XlsxError> {
+        let number = ExcelDateTime::jiff_time_to_excel(self);
         worksheet.store_datetime(row, col, number, Some(format))
     }
 }
