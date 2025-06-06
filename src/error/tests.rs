@@ -7,7 +7,7 @@
 #[cfg(test)]
 mod error_tests {
 
-    use std::io::{Error, ErrorKind};
+    use std::io::Error;
 
     use crate::XlsxError;
     use pretty_assertions::assert_eq;
@@ -63,7 +63,7 @@ mod error_tests {
         );
 
         assert_eq!(
-            XlsxError::IoError(Error::new(ErrorKind::Other, "ERROR")).to_string(),
+            XlsxError::IoError(Error::other("ERROR")).to_string(),
             "ERROR"
         );
         assert_eq!(
@@ -98,6 +98,6 @@ mod error_tests {
     }
 
     fn throw_io_error() -> Result<(), std::io::Error> {
-        Err(Error::new(ErrorKind::Other, "ERROR"))
+        Err(Error::other("ERROR"))
     }
 }
