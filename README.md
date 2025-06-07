@@ -1,14 +1,14 @@
 # rust_xlsxwriter
 
-The `rust_xlsxwriter` library is a Rust library for writing Excel files in
-the xlsx format.
+The `rust_xlsxwriter` library is a Rust crate for writing Excel files in the
+xlsx format.
 
 <img src="https://rustxlsxwriter.github.io/images/demo.png">
 
-The `rust_xlsxwriter` library can be used to write text, numbers, dates, and
-formulas to multiple worksheets in a new Excel 2007+ xlsx file. It focuses
-on performance and fidelity with the file format created by Excel. It cannot
-be used to modify an existing file.
+The `rust_xlsxwriter` crate can be used to write text, numbers, dates, and
+formulas to multiple worksheets in a new Excel 2007+ `.xlsx` file. It has a
+focus on performance and fidelity with the file format created by Excel. It
+cannot be used to modify an existing file.
 
 ## Example
 
@@ -73,16 +73,16 @@ fn main() -> Result<(), XlsxError> {
 }
 ```
 
-`rust_xlsxwriter` is a rewrite of the Python [`XlsxWriter`] library in Rust by
-the same author and with some additional Rust-like features and APIs. The
-currently supported features are:
+`rust_xlsxwriter` is a rewrite of the Python [`XlsxWriter`] library in Rust
+by the same author, with additional Rust-like features and APIs. The
+supported features are:
 
 - Support for writing all basic Excel data types.
 - Full cell formatting support.
 - Formula support, including new Excel 365 dynamic functions.
 - Charts.
 - Hyperlink support.
-- Page/Printing setup support.
+- Page/Printing Setup support.
 - Merged ranges.
 - Conditional formatting.
 - Data validation.
@@ -104,38 +104,125 @@ currently supported features are:
 [`XlsxWriter`]: https://xlsxwriter.readthedocs.io/index.html
 [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 
-## Features
 
-- `default`: Includes all the standard functionality. This has a dependency on
-  the `zip` crate only.
+# Rationale
 
-- `constant_memory`: This keeps memory usage to a minimum when writing
-  large files.
+The `rust_xlsxwriter` crate was designed and implemented based around the
+following design considerations:
 
-- `serde`: Adds support for Serde serialization. This is off by default.
+- **Fidelity with the Excel file format**. The library uses its own XML
+  writer module in order to be as close as possible to the format created by
+  Excel. It also contains a test suite of over 1,000 tests that compare
+  generated files with those created by Excel. This has the advantage that
+  it rarely creates a file that isn't compatible with Excel, and also that
+  it is easy to debug and maintain because it can be compared with an Excel
+  sample file using a simple diff.
+- **A family of libraries**. The `rust_xlsxwriter` library has sister
+  libraries written in C ([libxlsxwriter]), Python ([XlsxWriter]), and Perl
+  ([Excel::Writer::XLSX]), by the same author. Bug fixes and improvements in
+  one get transferred to the others.
+- **Performance**. The library is designed to be as fast and efficient as
+  possible. It also supports a constant memory mode for writing large files,
+  which keeps memory usage to a minimum.
+- **Comprehensive documentation**. In addition to the API documentation, the
+  library has extensive user guides, a tutorial, and a cookbook of examples.
+  It also includes images of Excel with the output of most of the example
+  code.
+- **Feature richness**. The library supports a wide range of Excel features,
+  including charts, conditional formatting, data validation, rich text,
+  hyperlinks, images, and even sparklines. It also supports new Excel 365
+  features like dynamic arrays and spill ranges.
+- **Write only**. The library only supports writing Excel files, and not
+  reading or modifying them. This allows it to focus on doing one task as
+  comprehensively as possible.
+- **No FAQ section**. The Rust implementation seeks to avoid some of the
+  required workarounds and API mistakes of the other language variants. For
+  example, it has a `save()` function, automatic handling of dynamic
+  functions, a much more transparent Autofilter implementation, and was the
+  first version to have Autofit.
 
-- `chrono`: Adds support for Chrono date/time types to the API. This is off by
-  default.
+[XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
+[libxlsxwriter]: https://libxlsxwriter.github.io
+[Excel::Writer::XLSX]: https://metacpan.org/dist/Excel-Writer-XLSX/view/lib/Excel/Writer/XLSX.pm
 
-- `zlib`: Adds a dependency on `zlib` and a C compiler. This includes the same
-  features as `default` but is 1.5x faster for large files.
 
+## Performance
+
+As mentioned above the `rust_xlsxwriter` library has sister libraries
+written natively in C, Python, and Perl.
+
+A relative performance comparison between the C, Rust, and Python versions
+is shown below. The Perl performance is similar to the Python library, so it
+has been omitted.
+
+| Library                       | Relative to C | Relative to Rust |
+|-------------------------------|---------------|------------------|
+| C/libxlsxwriter               | 1.00          |                  |
+| `rust_xlsxwriter`             | 1.14          | 1.00             |
+| Python/XlsxWriter             | 4.36          | 3.81             |
+
+<br>
+
+The C version is the fastest: it is 1.14 times faster than the Rust version
+and 4.36 times faster than the Python version. The Rust version is 3.81
+times faster than the Python version.
+
+See the [Performance] section for more details.
+
+[Performance]:  https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html
+[Constant Memory Mode]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/performance/index.html#constant-memory-mode
+
+
+## Crate Features
+
+The following is a list of the features supported by the `rust_xlsxwriter`
+crate.
+
+**Default**
+
+- `default`: This includes all the standard functionality. The only
+  dependency is the `zip` crate.
+
+`rust_xlsxwriter` can be added to a Rust project as follows:
+
+```bash
+cargo add rust_xlsxwriter
+```
+
+**Optional features**
+
+These are all off by default.
+
+- `constant_memory`: Keeps memory usage to a minimum when writing large files.
+  See [Constant Memory Mode].
+- `serde`: Adds support for Serde serialization.
+- `chrono`: Adds support for Chrono date/time types to the API. See
+  [`IntoExcelDateTime`].
+- `jiff`: Adds support for Jiff date/time types to the API. See
+  [`IntoExcelDateTime`].
+- `zlib`: Improves performance of the `zlib` crate but adds a dependency on
+  zlib and a C compiler. This can be up to 1.5 times faster for large files.
 - `polars`: Adds support for mapping between `PolarsError` and
-  `rust_xlsxwriter::XlsxError` to make code that handles both types of errors
-  easier to write.
-
-- `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow compilation
-  for wasm/JavaScript targets. See also
+  `rust_xlsxwriter::XlsxError` to make code that handles both types of
+  errors easier to write. See also
+  [`polars_excel_writer`](https://crates.io/crates/polars_excel_writer).
+- `wasm`: Adds a dependency on `js-sys` and `wasm-bindgen` to allow
+  compilation for wasm/JavaScript targets. See also
   [wasm-xlsxwriter](https://github.com/estie-inc/wasm-xlsxwriter).
-
-- `rust_decimal`: Adds support for writing the [`rust_decimal`](
-   https://docs.rs/rust_decimal/latest/rust_decimal) `Decimal` type with
-   `Worksheet::write()`, provided it can be represented by [`f64`].
-
+- `rust_decimal`: Adds support for writing the
+  [`rust_decimal`](https://crates.io/crates/rust_decimal) `Decimal` type
+  with `Worksheet::write()`, provided it can be represented by [`f64`].
 - `ryu`: Adds a dependency on `ryu`. This speeds up writing numeric
-  worksheet cells for large data files. It gives a performance boost above
-  300,000 numeric cells and can be up to 30% faster than the default number
-  formatting for 5,000,000 numeric cells.
+  worksheet cells for large data files. It gives a performance boost for
+  more than 300,000 numeric cells and can be up to 30% faster than the
+  default number formatting for 5,000,000 numeric cells.
+
+A `rust_xlsxwriter` feature can be enabled in your `Cargo.toml` file as
+follows:
+
+```bash
+cargo add rust_xlsxwriter -F constant_memory
+```
 
 ## Release notes
 

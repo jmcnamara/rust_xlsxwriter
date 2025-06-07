@@ -2074,6 +2074,7 @@ impl Worksheet {
     /// worksheet cell.
     ///
     /// The types currently supported are:
+    ///
     /// - String types: [`&str`], [`String`], `&String` and `Cow<'_, str>`.
     /// - Numbers that convert [`Into`] [`f64`]. Also, u64 and i64 are supported
     ///   with loss of precision outside Excel's integer range of +/-
@@ -2139,6 +2140,7 @@ impl Worksheet {
     /// [`IntoExcelData`] to a worksheet cell.
     ///
     /// The types currently supported are:
+    ///
     /// - String types: [`&str`], [`String`], `&String` and `Cow<'_, str>`.
     /// - Numbers that convert [`Into`] [`f64`]. Also, u64 and i64 are supported
     ///   with loss of precision outside Excel's integer range of +/-

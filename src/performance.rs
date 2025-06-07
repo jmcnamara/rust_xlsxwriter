@@ -32,10 +32,10 @@ A relative performance comparison between the C, Rust, and Python versions is
 shown below. The Perl performance is similar to the Python library, so it has
 been omitted.
 
-| Library                       | Relative to rust+zlib | Relative to C | Relative to rust |
+| Library                       | Relative to rust+zlib | Relative to C | Relative to Rust |
 |-------------------------------|-----------------------|---------------|------------------|
 | `rust_xlsxwriter` with `zlib` | 1.00                  |               |                  |
-| C/libxlswriter                | 1.38                  | 1.00          |                  |
+| C/libxlsxwriter               | 1.38                  | 1.00          |                  |
 | `rust_xlsxwriter`             | 1.58                  | 1.14          | 1.00             |
 | Python/XlsxWriter             | 6.02                  | 4.36          | 3.81             |
 
