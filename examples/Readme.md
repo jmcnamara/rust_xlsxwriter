@@ -1764,6 +1764,9 @@ documentation and generally show how an individual function works.
 * `doc_worksheet_write_datetime_chrono.rs` - Demonstrates writing formatted
   datetimes in an Excel worksheet.
 
+* `doc_worksheet_write_datetime_jiff.rs` - Demonstrates writing formatted
+  datetimes in an Excel worksheet.
+
 * `doc_worksheet_write_datetime_with_format.rs` - Demonstrates writing
   formatted datetimes in an Excel worksheet.
 

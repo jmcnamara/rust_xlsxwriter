@@ -228,10 +228,9 @@ cargo add rust_xlsxwriter -F constant_memory
 
 Recent changes:
 
+- Added support for `Jiff` date/time civil types.
 - Added worksheet outline groupings.
 - Added worksheet background images.
-- Added support for worksheet checkboxes.
-- Added `constant_memory` mode.
 
 See the full [Release Notes and Changelog].
 

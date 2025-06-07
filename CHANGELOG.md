@@ -5,6 +5,30 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.88.0] - 2025-06-07
+
+# Added
+
+- Added `jiff` feature flag to allow support for [`Jiff`] civil date and time
+  types. See [`ExcelDateTime`].
+
+- Update `zip` dependency to v4.0. This requires a MSRV of 1.75.0.
+
+- Update polars dependency to v0.48
+
+[`Jiff`]: https://docs.rs/jiff/latest/jiff
+
+# Deprecated
+
+- The `Utility::serialize_chrono_naive_to_excel()` function has been deprecated
+  and replaced by `Utility::serialize_datetime_to_excel()` which supports both
+  `Chrono` and `Jiff`. It will be removed in a future version.
+
+- The `Utility::serialize_chrono_option_naive_to_excel()` function has been deprecated
+  and replaced by `Utility::serialize_option_datetime_to_excel()` which supports both
+  `Chrono` and `Jiff`. It will be removed in a future version.
+
+
 ## [0.87.0] - 2025-05-15
 
 # Fixed
@@ -14,7 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [Issue #149].
 
   [Issue #149]: https://github.com/jmcnamara/rust_xlsxwriter/issues/149
-
 
 ## [0.86.1] - 2025-04-25
 
@@ -49,9 +72,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   isn't accessible or if it is loaded in memory (which would negate the effect
   of `constant_memory` mode).
 
-  See [`Workbook::set_tempfile()`].
+  See [`Workbook::set_tempdir()`].
 
-  [`Workbook::set_tempfile()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.set_tempfile
+  [`Workbook::set_tempdir()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.set_tempdir
 
 
 ## [0.84.2] - 2025-03-24
@@ -318,7 +341,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   [`Workbook::use_zip_large_file()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/workbook/struct.Workbook.html#method.use_zip_large_file
 
-  [zip.rs]: https://crates.io/crates/zip/2.2.0
+  [zip.rs]: https://crates.io/crates/zip
   [ZIP64]: https://en.wikipedia.org/wiki/ZIP_(file_format)#ZIP64
 
 

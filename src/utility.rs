@@ -552,6 +552,16 @@ where
 ///
 /// This is deprecated. Use [`serialize_datetime_to_excel()`] instead.
 ///
+/// # Parameters
+///
+/// - `datetime`: A date/time instance that implements [`IntoExcelDateTime`].
+/// - `serializer`: A type/instance that implements the [`serde`] `Serializer`
+///   trait.
+///
+/// # Errors
+///
+/// - [`XlsxError::SerdeError`] - A wrapped serialization error.
+///
 #[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 #[deprecated(since = "0.88.0", note = "use `serialize_datetime_to_excel` instead")]
@@ -568,6 +578,17 @@ where
 /// Serialize an `Option` chrono naive date/time to an Excel value.
 ///
 /// This is deprecated. Use [`serialize_option_datetime_to_excel()`] instead.
+///
+/// # Parameters
+///
+/// - `datetime`: A date/time instance that implements [`IntoExcelDateTime`]
+///   wrapped in an [`Option`].
+/// - `serializer`: A type/instance that implements the [`serde`] `Serializer`
+///   trait.
+///
+/// # Errors
+///
+/// - [`XlsxError::SerdeError`] - A wrapped serialization error.
 ///
 #[cfg(feature = "serde")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]

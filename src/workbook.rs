@@ -756,16 +756,16 @@ impl Workbook {
     /// contain enough space, or is mounted in memory you can set a custom
     /// temporary directory using the `set_tempdir()` method.
     ///
-    /// # Errors
-    ///
-    /// - [`XlsxError::IoError`] - A wrapper for various IO errors when creating
-    ///   a temporary file in the custom temporary directory.
-    ///
     /// # Parameters
     ///
     /// - `dir`: The path/directory to use for temporary files. It must exist
     ///   and be writeable. You can pass the path as a `&str` or as a
     ///   [`std::path`] `Path` or `PathBuf` instance.
+    ///
+    /// # Errors
+    ///
+    /// - [`XlsxError::IoError`] - A wrapper for various IO errors when creating
+    ///   a temporary file in the custom temporary directory.
     ///
     /// # Examples
     ///
@@ -1814,7 +1814,7 @@ impl Workbook {
     /// generate files that exceed the 4GB limit. At least for Excel. Other
     /// applications may have issues if they don't support ZIP64 extensions.
     ///
-    /// [zip.rs]: https://crates.io/crates/zip/2.2.0
+    /// [zip.rs]: https://crates.io/crates/zip
     /// [ZIP64]: https://en.wikipedia.org/wiki/ZIP_(file_format)#ZIP64
     /// [`large_file()`]:
     ///     https://docs.rs/zip/latest/zip/write/type.SimpleFileOptions.html#method.large_file
