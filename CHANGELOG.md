@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update `zip` dependency to v4.0. This requires a MSRV of 1.75.0.
 
-- Update polars dependency to v0.48
+- Update polars dependency to v0.48.
 
 [`Jiff`]: https://docs.rs/jiff/latest/jiff
 
