@@ -609,7 +609,6 @@ impl DocProperties {
 
 /// The CustomProperty struct represents data types used in Excel’s custom
 /// document properties.
-#[doc(hidden)]
 #[derive(Clone)]
 pub struct CustomProperty {
     pub(crate) property_type: CustomPropertyType,
