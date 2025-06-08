@@ -211,7 +211,7 @@ These are all off by default.
   [wasm-xlsxwriter](https://github.com/estie-inc/wasm-xlsxwriter).
 - `rust_decimal`: Adds support for writing the
   [`rust_decimal`](https://crates.io/crates/rust_decimal) `Decimal` type
-  with `Worksheet::write()`, provided it can be represented by [`f64`].
+  with `Worksheet::write()`, provided it can be represented by `f64`.
 - `ryu`: Adds a dependency on `ryu`. This speeds up writing numeric
   worksheet cells for large data files. It gives a performance boost for
   more than 300,000 numeric cells and can be up to 30% faster than the
@@ -223,6 +223,8 @@ follows:
 ```bash
 cargo add rust_xlsxwriter -F constant_memory
 ```
+
+ [`IntoExcelDateTime`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/trait.IntoExcelDateTime.html
 
 ## Release notes
 
