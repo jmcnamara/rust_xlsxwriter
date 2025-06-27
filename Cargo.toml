@@ -37,7 +37,7 @@ default = []
 
 # `zlib`: Adds a dependency on zlib and a C compiler. This includes the same
 # features as `default` but is 1.5x faster for large files.
-zlib = ["zip/deflate"]
+zlib = ["zip/deflate-flate2-zlib"]
 
 # `chrono`: Adds support for Chrono dates/times in addition to the native
 # `ExcelDateTime` types.
