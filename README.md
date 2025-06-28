@@ -105,41 +105,30 @@ supported features are:
 [rust_xlsxwriter GitHub]: https://github.com/jmcnamara/rust_xlsxwriter
 
 
-# Rationale
+# Motivation
 
 The `rust_xlsxwriter` crate was designed and implemented based around the
 following design considerations:
 
 - **Fidelity with the Excel file format**. The library uses its own XML
   writer module in order to be as close as possible to the format created by
-  Excel. It also contains a test suite of over 1,000 tests that compare
-  generated files with those created by Excel. This has the advantage that
-  it rarely creates a file that isn't compatible with Excel, and also that
-  it is easy to debug and maintain because it can be compared with an Excel
-  sample file using a simple diff.
-- **A family of libraries**. The `rust_xlsxwriter` library has sister
-  libraries written in C ([libxlsxwriter]), Python ([XlsxWriter]), and Perl
-  ([Excel::Writer::XLSX]), by the same author. Bug fixes and improvements in
-  one get transferred to the others.
+  Excel.
 - **Performance**. The library is designed to be as fast and efficient as
   possible. It also supports a constant memory mode for writing large files,
   which keeps memory usage to a minimum.
 - **Comprehensive documentation**. In addition to the API documentation, the
   library has extensive user guides, a tutorial, and a cookbook of examples.
-  It also includes images of Excel with the output of most of the example
-  code.
 - **Feature richness**. The library supports a wide range of Excel features,
   including charts, conditional formatting, data validation, rich text,
-  hyperlinks, images, and even sparklines. It also supports new Excel 365
-  features like dynamic arrays and spill ranges.
+  hyperlinks, images, and even sparklines.
 - **Write only**. The library only supports writing Excel files, and not
-  reading or modifying them. This allows it to focus on doing one task as
-  comprehensively as possible.
+  reading or modifying them.
+- **A family of libraries**. The `rust_xlsxwriter` library has sister
+  libraries written in C ([libxlsxwriter]), Python ([XlsxWriter]), and Perl
+  ([Excel::Writer::XLSX]), by the same author. Bug fixes and improvements in
+  one get transferred to the others.
 - **No FAQ section**. The Rust implementation seeks to avoid some of the
-  required workarounds and API mistakes of the other language variants. For
-  example, it has a `save()` function, automatic handling of dynamic
-  functions, a much more transparent Autofilter implementation, and was the
-  first version to have Autofit.
+  required workarounds and API mistakes of the other language variants.
 
 [XlsxWriter]: https://xlsxwriter.readthedocs.io/index.html
 [libxlsxwriter]: https://libxlsxwriter.github.io

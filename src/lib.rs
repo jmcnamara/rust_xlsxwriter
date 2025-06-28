@@ -179,7 +179,7 @@
 //! See the [`Cookbook`](crate::cookbook) for more examples.
 //!
 //!
-//! # Rationale
+//! # Motivation
 //!
 //! The `rust_xlsxwriter` crate was designed and implemented based around the
 //! following design considerations:
@@ -191,10 +191,6 @@
 //!   it rarely creates a file that isn't compatible with Excel, and also that
 //!   it is easy to debug and maintain because it can be compared with an Excel
 //!   sample file using a simple diff.
-//! - **A family of libraries**. The `rust_xlsxwriter` library has sister
-//!   libraries written in C ([libxlsxwriter]), Python ([XlsxWriter]), and Perl
-//!   ([Excel::Writer::XLSX]), by the same author. Bug fixes and improvements in
-//!   one get transferred to the others.
 //! - **Performance**. The library is designed to be as fast and efficient as
 //!   possible. It also supports a constant memory mode for writing large files,
 //!   which keeps memory usage to a minimum.
@@ -209,6 +205,10 @@
 //! - **Write only**. The library only supports writing Excel files, and not
 //!   reading or modifying them. This allows it to focus on doing one task as
 //!   comprehensively as possible.
+//! - **A family of libraries**. The `rust_xlsxwriter` library has sister
+//!   libraries written in C ([libxlsxwriter]), Python ([XlsxWriter]), and Perl
+//!   ([Excel::Writer::XLSX]), by the same author. Bug fixes and improvements in
+//!   one get transferred to the others.
 //! - **No FAQ section**. The Rust implementation seeks to avoid some of the
 //!   required workarounds and API mistakes of the other language variants. For
 //!   example, it has a `save()` function, automatic handling of dynamic
