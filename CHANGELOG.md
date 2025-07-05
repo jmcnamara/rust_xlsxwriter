@@ -8,14 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.89.0] - 2025-06-29
 
-# Added
+### Added
 
 - Update polars dependency to v0.49.
 
 
 ## [0.88.1] - 2025-06-28
 
-# Fixed
+### Fixed
 
 - Fixed the way that the `zlib` feature is enabled. This doesn't affect
   `rust_xlsxwriter` but fixes optional enabling via Cargo `[features]` for third
@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.88.0] - 2025-06-07
 
-# Added
+### Added
 
 - Added `jiff` feature flag to allow support for [`Jiff`] civil date and time
   types. See [`ExcelDateTime`].
@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [`Jiff`]: https://docs.rs/jiff/latest/jiff
 
-# Deprecated
+### Deprecated
 
 - The `Utility::serialize_chrono_naive_to_excel()` function has been deprecated
   and replaced by `Utility::serialize_datetime_to_excel()` which supports both
@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.87.0] - 2025-05-15
 
-# Fixed
+### Fixed
 
 - Fixed yanked zip.rs dependency.
 
