@@ -722,4 +722,240 @@ mod worksheet_tests {
             assert_worksheet_sync::<Worksheet>();
         };
     }
+
+    #[test]
+    fn test_sheet_views2_1() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_freeze_panes(1, 0).unwrap();
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0">
+                    <pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>
+                    <selection pane="bottomLeft"/>
+                </sheetView>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_sheet_views2_2() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_freeze_panes(0, 1).unwrap();
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0">
+                    <pane xSplit="1" topLeftCell="B1" activePane="topRight" state="frozen"/>
+                    <selection pane="topRight"/>
+                </sheetView>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_sheet_views2_3() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_freeze_panes(1, 1).unwrap();
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0">
+                    <pane xSplit="1" ySplit="1" topLeftCell="B2" activePane="bottomRight" state="frozen"/>
+                    <selection pane="topRight" activeCell="B1" sqref="B1"/>
+                    <selection pane="bottomLeft" activeCell="A2" sqref="A2"/>
+                    <selection pane="bottomRight"/>
+                </sheetView>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_sheet_views2_4() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_freeze_panes(3, 6).unwrap();
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0">
+                    <pane xSplit="6" ySplit="3" topLeftCell="G4" activePane="bottomRight" state="frozen"/>
+                    <selection pane="topRight" activeCell="G1" sqref="G1"/>
+                    <selection pane="bottomLeft" activeCell="A4" sqref="A4"/>
+                    <selection pane="bottomRight"/>
+                </sheetView>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_sheet_views6_1() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_selection(1, 0, 1, 0).unwrap();
+        worksheet.set_freeze_panes(1, 0).unwrap();
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0">
+                    <pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>
+                    <selection pane="bottomLeft" activeCell="A2" sqref="A2"/>
+                </sheetView>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_sheet_views6_2() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_selection(0, 1, 0, 1).unwrap();
+        worksheet.set_freeze_panes(0, 1).unwrap();
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0">
+                    <pane xSplit="1" topLeftCell="B1" activePane="topRight" state="frozen"/>
+                    <selection pane="topRight" activeCell="B1" sqref="B1"/>
+                </sheetView>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_sheet_views6_3() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_selection(3, 6, 3, 6).unwrap();
+        worksheet.set_freeze_panes(3, 6).unwrap();
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0">
+                    <pane xSplit="6" ySplit="3" topLeftCell="G4" activePane="bottomRight" state="frozen"/>
+                    <selection pane="topRight" activeCell="G1" sqref="G1"/>
+                    <selection pane="bottomLeft" activeCell="A4" sqref="A4"/>
+                    <selection pane="bottomRight" activeCell="G4" sqref="G4"/>
+                </sheetView>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
+
+    #[test]
+    fn test_sheet_views6_4() {
+        let mut worksheet = Worksheet {
+            selected: true,
+            ..Default::default()
+        };
+
+        worksheet.set_selection(4, 8, 4, 8).unwrap();
+        worksheet.set_freeze_panes(3, 6).unwrap();
+
+        worksheet.write_sheet_views();
+
+        let got = xmlwriter::cursor_to_str(&worksheet.writer);
+        let got = xml_to_vec(got);
+
+        let expected = xml_to_vec(
+            r#"
+            <sheetViews>
+                <sheetView tabSelected="1" workbookViewId="0">
+                    <pane xSplit="6" ySplit="3" topLeftCell="G4" activePane="bottomRight" state="frozen"/>
+                    <selection pane="topRight" activeCell="G1" sqref="G1"/>
+                    <selection pane="bottomLeft" activeCell="A4" sqref="A4"/>
+                    <selection pane="bottomRight" activeCell="I5" sqref="I5"/>
+                </sheetView>
+            </sheetViews>
+            "#,
+        );
+
+        assert_eq!(expected, got);
+    }
 }

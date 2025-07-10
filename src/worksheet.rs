@@ -17771,8 +17771,13 @@ impl Worksheet {
             xml_empty_tag(&mut self.writer, "sheetView", &attributes);
         } else {
             xml_start_tag(&mut self.writer, "sheetView", &attributes);
-            self.write_panes();
-            self.write_selections();
+
+            if self.panes.is_empty() {
+                self.write_selections();
+            } else {
+                self.write_panes();
+            }
+
             xml_end_tag(&mut self.writer, "sheetView");
         }
     }
@@ -17797,6 +17802,8 @@ impl Worksheet {
 
         let row = self.panes.freeze_cell.0;
         let col = self.panes.freeze_cell.1;
+        let range = self.selected_range.1.clone();
+        let active_cell = self.selected_range.0.clone();
 
         // Write the pane and selection elements.
         if row > 0 && col > 0 {
@@ -17811,13 +17818,13 @@ impl Worksheet {
                 &utility::row_col_to_cell(row, 0),
                 &utility::row_col_to_cell(row, 0),
             );
-            self.write_selection("bottomRight", "", "");
+            self.write_selection("bottomRight", &active_cell, &range);
         } else if col > 0 {
             self.write_pane("topRight");
-            self.write_selection("topRight", "", "");
+            self.write_selection("topRight", &active_cell, &range);
         } else {
             self.write_pane("bottomLeft");
-            self.write_selection("bottomLeft", "", "");
+            self.write_selection("bottomLeft", &active_cell, &range);
         }
     }
 
