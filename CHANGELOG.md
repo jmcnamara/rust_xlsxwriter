@@ -5,6 +5,17 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.89.1] - 2025-07-10
+
+### Fixed
+
+- Fixed issue where `Worksheet::set_selection()` and
+  `Worksheet::set_freeze_panes()` didn't work together.
+
+  [Issue #154].
+
+  [Issue #154]: https://github.com/jmcnamara/rust_xlsxwriter/issues/154
+
 
 ## [0.89.0] - 2025-06-29
 
