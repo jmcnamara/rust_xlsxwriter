@@ -1356,14 +1356,14 @@ use std::mem;
 use std::sync::{Arc, Mutex, RwLock};
 use std::{cmp, fmt};
 
-#[cfg(feature = "constant_memory")]
-use tempfile::tempfile_in;
+// #[cfg(feature = "constant_memory")]
+// use tempfile::tempfile_in;
 
-#[cfg(feature = "constant_memory")]
-use std::io::BufWriter;
+// #[cfg(feature = "constant_memory")]
+// use std::io::BufWriter;
 
-#[cfg(feature = "constant_memory")]
-use std::fs::File;
+// #[cfg(feature = "constant_memory")]
+// use std::fs::File;
 
 #[cfg(feature = "rust_decimal")]
 use rust_decimal::prelude::{Decimal, ToPrimitive};
@@ -1629,7 +1629,7 @@ pub struct Worksheet {
     outline_symbols_left: bool,
 
     #[cfg(feature = "constant_memory")]
-    pub(crate) file_writer: BufWriter<File>,
+    pub(crate) file_writer: Cursor<Vec<u8>>,
 
     #[cfg(feature = "constant_memory")]
     write_ahead: BTreeMap<RowNum, BTreeMap<ColNum, CellType>>,
@@ -1727,7 +1727,7 @@ impl Worksheet {
         };
 
         #[cfg(feature = "constant_memory")]
-        let file_writer = BufWriter::new(tempfile_in(std::env::temp_dir()).unwrap());
+        let file_writer = Cursor::new(Vec::with_capacity(2048));
 
         Worksheet {
             writer,

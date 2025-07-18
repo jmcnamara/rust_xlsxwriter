@@ -223,11 +223,11 @@ use std::io::{BufReader, Cursor, Read, Seek, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex, RwLock};
 
-#[cfg(feature = "constant_memory")]
-use tempfile::tempfile_in;
+// #[cfg(feature = "constant_memory")]
+// use tempfile::tempfile_in;
 
-#[cfg(feature = "constant_memory")]
-use std::io::BufWriter;
+// #[cfg(feature = "constant_memory")]
+// use std::io::BufWriter;
 
 #[cfg(feature = "constant_memory")]
 use std::path::PathBuf;
@@ -563,9 +563,9 @@ impl Workbook {
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
 
-        if let Some(tempdir) = &self.tempdir {
-            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
-        }
+        // if let Some(tempdir) = &self.tempdir {
+        //     worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
+        // }
 
         worksheet.use_inline_strings = true;
         worksheet.use_constant_memory = true;
@@ -636,9 +636,9 @@ impl Workbook {
         let mut worksheet = Worksheet::new();
         worksheet.set_name(&name).unwrap();
 
-        if let Some(tempdir) = &self.tempdir {
-            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
-        }
+        // if let Some(tempdir) = &self.tempdir {
+        //     worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
+        // }
 
         worksheet.use_inline_strings = false;
         worksheet.use_constant_memory = true;
@@ -684,9 +684,9 @@ impl Workbook {
     pub fn new_worksheet_with_constant_memory(&mut self) -> Worksheet {
         let mut worksheet = Worksheet::new();
 
-        if let Some(tempdir) = &self.tempdir {
-            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
-        }
+        // if let Some(tempdir) = &self.tempdir {
+        //     worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
+        // }
 
         worksheet.use_inline_strings = true;
         worksheet.use_constant_memory = true;
@@ -726,9 +726,9 @@ impl Workbook {
     pub fn new_worksheet_with_low_memory(&mut self) -> Worksheet {
         let mut worksheet = Worksheet::new();
 
-        if let Some(tempdir) = &self.tempdir {
-            worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
-        }
+        // if let Some(tempdir) = &self.tempdir {
+        //     worksheet.file_writer = BufWriter::new(tempfile_in(tempdir).unwrap());
+        // }
 
         worksheet.use_inline_strings = false;
         worksheet.use_constant_memory = true;
@@ -803,7 +803,7 @@ impl Workbook {
     #[cfg_attr(docsrs, doc(cfg(feature = "constant_memory")))]
     pub fn set_tempdir<P: AsRef<Path>>(&mut self, dir: P) -> Result<&mut Workbook, XlsxError> {
         // Check that the directory exists and is writable.
-        tempfile_in(&dir)?;
+        //tempfile_in(&dir)?;
 
         self.tempdir = Some(dir.as_ref().to_path_buf());
 

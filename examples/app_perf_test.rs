@@ -7,10 +7,12 @@
 //! It writes alternate cells of strings and numbers.
 //! It defaults to 4,000 rows x 40 columns.
 //!
-//! usage: ./target/release/examples/app_perf_test [num_rows]
+//! The number of rows and the "constant memory" mode can be optionally set.
+//!
+//! usage: ./target/release/examples/app_perf_test [num_rows] [--constant-memory]
 //!
 
-use rust_xlsxwriter::{Workbook, XlsxError};
+use rust_xlsxwriter::{Format, Workbook, XlsxError};
 use std::{env, time::Instant};
 
 fn main() -> Result<(), XlsxError> {
@@ -22,20 +24,27 @@ fn main() -> Result<(), XlsxError> {
         Some(arg) => arg.parse::<u32>().unwrap_or(4_000),
         None => 4_000,
     };
+    let constant_memory = args.get(2).is_some();
 
     let start_time = Instant::now();
 
     // Create the workbook and fill in the required cell data.
     let mut workbook = Workbook::new();
 
-    let worksheet = workbook.add_worksheet();
+    let format = Format::new().set_bold().set_italic();
+
+    let worksheet = if constant_memory {
+        workbook.add_worksheet_with_low_memory()
+    } else {
+        workbook.add_worksheet()
+    };
 
     for row in 0..row_max {
         for col in 0..col_max {
             if col % 2 == 1 {
-                worksheet.write_string(row, col, "Foo")?;
+                worksheet.write_string_with_format(row, col, "Foo", &format)?;
             } else {
-                worksheet.write_number(row, col, 12345.0)?;
+                worksheet.write_number_with_format(row, col, 12345.0, &format)?;
             }
         }
     }
@@ -44,7 +53,7 @@ fn main() -> Result<(), XlsxError> {
     // Calculate and print the metrics.
     let time = (start_time.elapsed().as_millis() as f64) / 1000.0;
 
-    println!("Wrote:  {row_max} rows x {col_max} cols.");
+    println!("Wrote:  {row_max} rows x {col_max} cols. Constant memory = {constant_memory}.");
     println!("Time:   {time:.3} seconds.");
 
     Ok(())
