@@ -22,7 +22,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    // Cerate a chart.
+    // Create a chart.
     let mut chart = Chart::new(ChartType::Bar);
     chart.set_axis_ids(62576896, 62582784);
 
@@ -44,7 +44,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    // Cerate a chart.
+    // Create a chart.
     let mut chart = Chart::new(ChartType::Column);
     chart.set_axis_ids(65979904, 65981440);
 

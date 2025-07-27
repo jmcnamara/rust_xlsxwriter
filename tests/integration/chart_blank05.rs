@@ -22,7 +22,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    // Cerate a chart.
+    // Create a chart.
     let mut chart = Chart::new(ChartType::Line);
     chart.set_axis_ids(57619968, 57621504);
 

@@ -25,7 +25,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     let textbox = Shape::textbox().set_text("This is some text");
     worksheet.insert_shape(8, 4, &textbox)?;
 
-    // Cerate a chart.
+    // Create a chart.
     let mut chart = Chart::new(ChartType::Bar);
     chart.set_axis_ids(97096064, 97098752);
 

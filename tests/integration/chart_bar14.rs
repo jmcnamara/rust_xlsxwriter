@@ -23,7 +23,7 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
         }
     }
 
-    // Cerate a chart.
+    // Create a chart.
     let mut chart1 = Chart::new(ChartType::Bar);
     chart1.set_axis_ids(40294272, 40295808);
     chart1.add_series().set_values(("Sheet2", 0, 0, 4, 0));

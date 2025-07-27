@@ -1670,7 +1670,7 @@ Added more page setup methods.
 
 - Added support for images in buffers via [`Image::new_from_buffer()`].
 
-- Added image accessability features via [`Image::set_alt_text()`] and[`Image::set_decorative()`].
+- Added image accessibility features via [`Image::set_alt_text()`] and[`Image::set_decorative()`].
 
 [`Image::set_alt_text()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_alt_text
 [`Image::set_decorative()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/struct.Image.html#method.set_decorative
