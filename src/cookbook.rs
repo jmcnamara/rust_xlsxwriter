@@ -564,7 +564,7 @@ fn main() -> Result<(), XlsxError> {
             let color = col as u8;
             let shade = row as u8;
             let theme_color = Color::Theme(color, shade);
-            let text = format!("({}, {})", col, row);
+            let text = format!("({col}, {row})");
 
             let mut font_color = Color::White;
             if col == 0 {
