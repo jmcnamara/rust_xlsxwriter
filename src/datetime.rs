@@ -960,9 +960,11 @@ impl ExcelDateTime {
 
     /// Set the Excel date epoch to 1904.
     ///
-    /// Excel supports two date epochs: 1900-01-01 and 1904-01-01. The 1904 epoch
-    /// has mainly used with Mac for Excel but is a configuration option for
-    /// other Excel versions.
+    /// Excel supports two date epochs: 1900-01-01 and 1904-01-01. The 1904
+    /// epoch was mainly used with older versions of "Excel for Mac" but it is
+    /// still available via a UI configuration option in other Excel versions.
+    /// Excel users occasionally use the 1904 epoch to enable negative time
+    /// values.
     ///
     /// There is some internal support for the 1904 epoch in `ExcelDateTime`
     /// since it was implemented for the Python version of the library. However,
