@@ -6233,13 +6233,11 @@ impl Chart {
             self.write_overlay();
         }
 
-        if title.format.has_formatting() {
-            // Write the c:spPr formatting element.
-            self.write_sp_pr(&title.format.clone());
-        } else {
-            // Write the c:txPr element.
-            self.write_tx_pr(&title.font, title.is_horizontal);
-        }
+        // Write the c:spPr formatting element.
+        self.write_sp_pr(&title.format.clone());
+
+        // Write the c:txPr element.
+        self.write_tx_pr(&title.font, title.is_horizontal);
 
         xml_end_tag(&mut self.writer, "c:title");
     }

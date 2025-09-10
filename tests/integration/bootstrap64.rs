@@ -7,7 +7,7 @@
 
 use crate::common;
 use rust_xlsxwriter::{
-    Chart, ChartFormat, ChartLine, ChartSolidFill, ChartType, Workbook, XlsxError,
+    Chart, ChartFont, ChartFormat, ChartLine, ChartSolidFill, ChartType, Workbook, XlsxError,
 };
 
 // Create a rust_xlsxwriter file to compare against an Excel file.
@@ -25,16 +25,20 @@ fn create_new_xlsx_file(filename: &str) -> Result<(), XlsxError> {
     }
 
     let mut chart = Chart::new(ChartType::Column);
-    chart.set_axis_ids(67991424, 68001152);
+    chart.set_axis_ids(46566016, 46842624);
     chart.add_series().set_values(("Sheet1", 0, 0, 4, 0));
     chart.add_series().set_values(("Sheet1", 0, 1, 4, 1));
     chart.add_series().set_values(("Sheet1", 0, 2, 4, 2));
 
-    chart.title().set_name("=Sheet1!$C$1").set_format(
-        ChartFormat::new()
-            .set_border(ChartLine::new().set_color("#FFFF00"))
-            .set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
-    );
+    chart
+        .title()
+        .set_name("=Sheet1!$C$1")
+        .set_format(
+            ChartFormat::new()
+                .set_border(ChartLine::new().set_color("#FFFF00"))
+                .set_solid_fill(ChartSolidFill::new().set_color("#FF0000")),
+        )
+        .set_font(ChartFont::new().set_color("#FFFF00"));
 
     worksheet.insert_chart(8, 4, &chart)?;
 
