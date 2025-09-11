@@ -21,7 +21,7 @@ impl RichValue<'_> {
     // -----------------------------------------------------------------------
 
     // Create a new RichValue struct.
-    pub(crate) fn new(embedded_images: &Vec<Image>) -> RichValue {
+    pub(crate) fn new(embedded_images: &Vec<Image>) -> RichValue<'_> {
         let writer = Cursor::new(Vec::with_capacity(2048));
 
         RichValue {

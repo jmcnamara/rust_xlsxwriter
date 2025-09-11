@@ -126,17 +126,17 @@ pub(crate) fn xml_raw_string<W: Write>(writer: &mut W, data: &str) {
 }
 
 // Escape special characters in XML attributes.
-pub(crate) fn escape_attributes(attribute: &str) -> Cow<str> {
+pub(crate) fn escape_attributes(attribute: &str) -> Cow<'_, str> {
     escape_string(attribute, match_attribute_html_char)
 }
 
 // Escape special characters in the data sections of XML tags.
-pub(crate) fn escape_xml_data(data: &str) -> Cow<str> {
+pub(crate) fn escape_xml_data(data: &str) -> Cow<'_, str> {
     escape_string(data, match_xml_char)
 }
 
 // Escape non-URL-safe characters in a hyperlink or URL.
-pub(crate) fn escape_url(data: &str) -> Cow<str> {
+pub(crate) fn escape_url(data: &str) -> Cow<'_, str> {
     escape_string(data, match_url_char)
 }
 
@@ -244,7 +244,7 @@ fn match_url_char(ch: char) -> Option<&'static str> {
 }
 
 // Generic escape function that uses a function pointer for the required handler.
-fn escape_string<F>(original: &str, char_handler: F) -> Cow<str>
+fn escape_string<F>(original: &str, char_handler: F) -> Cow<'_, str>
 where
     F: FnOnce(char) -> Option<&'static str> + Copy,
 {
@@ -271,7 +271,7 @@ where
 // Excel escapes control characters with _xHHHH_ (see match_xml_char() above).
 // As a result, it also escapes any literal strings of that type by encoding the
 // leading underscore. For example, "_x0000_" becomes "_x005F_x0000_".
-pub(crate) fn escape_xml_escapes(original: &str) -> Cow<str> {
+pub(crate) fn escape_xml_escapes(original: &str) -> Cow<'_, str> {
     if !original.contains("_x") {
         return Cow::Borrowed(original);
     }
