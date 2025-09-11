@@ -181,6 +181,8 @@ mod chart_axis49;
 mod chart_axis50;
 mod chart_axis51;
 mod chart_axis52;
+mod chart_axis53;
+mod chart_axis54;
 mod chart_bar01;
 mod chart_bar02;
 mod chart_bar03;

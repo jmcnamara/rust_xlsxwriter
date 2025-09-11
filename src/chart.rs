@@ -10759,6 +10759,89 @@ impl ChartAxis {
         self
     }
 
+    /// Set the formatting properties for a chart axis title.
+    ///
+    /// Set the formatting properties for a chart axis name/title via a
+    /// [`ChartFormat`] object or a sub struct that implements
+    /// [`IntoChartFormat`].
+    ///
+    /// The formatting that can be applied via a [`ChartFormat`] object are:
+    ///
+    /// - [`ChartFormat::set_solid_fill()`]: Set the [`ChartSolidFill`] properties.
+    /// - [`ChartFormat::set_pattern_fill()`]: Set the [`ChartPatternFill`] properties.
+    /// - [`ChartFormat::set_gradient_fill()`]: Set the [`ChartGradientFill`] properties.
+    /// - [`ChartFormat::set_no_fill()`]: Turn off the fill for the chart object.
+    /// - [`ChartFormat::set_line()`]: Set the [`ChartLine`] properties.
+    /// - [`ChartFormat::set_border()`]: Set the [`ChartBorder`] properties.
+    ///   A synonym for [`ChartLine`] depending on context.
+    /// - [`ChartFormat::set_no_line()`]: Turn off the line for the chart object.
+    /// - [`ChartFormat::set_no_border()`]: Turn off the border for the chart object.
+    ///
+    /// # Parameters
+    ///
+    /// `format`: A [`ChartFormat`] struct reference or a sub struct that will
+    /// convert into a `ChartFormat` instance. See the docs for
+    /// [`IntoChartFormat`] for details.
+    ///
+    /// # Examples
+    ///
+    /// A chart example demonstrating setting the formatting of the title of chart
+    /// axes.
+    ///
+    /// ```
+    /// # // This code is available in examples/doc_chart_axis_set_name_format.rs
+    /// #
+    /// # use rust_xlsxwriter::{
+    /// #     Chart, ChartFormat, ChartLine, ChartSolidFill, ChartType, Workbook, XlsxError,
+    /// # };
+    /// #
+    /// # fn main() -> Result<(), XlsxError> {
+    /// #     let mut workbook = Workbook::new();
+    /// #     let worksheet = workbook.add_worksheet();
+    /// #
+    /// #     // Add some data for the chart.
+    /// #     worksheet.write(0, 0, 50)?;
+    /// #     worksheet.write(1, 0, 30)?;
+    /// #     worksheet.write(2, 0, 40)?;
+    /// #
+    /// #     // Create a new chart.
+    ///     let mut chart = Chart::new(ChartType::Column);
+    ///
+    ///     // Add a data series using Excel formula syntax to describe the range.
+    ///     chart.add_series().set_values("Sheet1!$A$1:$A$3");
+    ///
+    ///     // Set the chart axis titles.
+    ///     chart
+    ///         .x_axis()
+    ///         .set_name("Formatted axis title")
+    ///         .set_name_format(
+    ///             ChartFormat::new()
+    ///                 .set_border(ChartLine::new().set_color("#FF0000"))
+    ///                 .set_solid_fill(ChartSolidFill::new().set_color("#FFFF00")),
+    ///         );
+    ///
+    ///     // Add the chart to the worksheet.
+    ///     worksheet.insert_chart(0, 2, &chart)?;
+    /// #
+    /// #     // Save the file.
+    /// #     workbook.save("chart.xlsx")?;
+    /// #
+    /// #     Ok(())
+    /// # }
+    /// ```
+    ///
+    /// Output file:
+    ///
+    /// <img src="https://rustxlsxwriter.github.io/images/chart_axis_set_name_format.png">
+    ///
+    pub fn set_name_format<T>(&mut self, format: T) -> &mut ChartAxis
+    where
+        T: IntoChartFormat,
+    {
+        self.title.set_format(format);
+        self
+    }
+
     /// Set the formatting properties for a chart axis.
     ///
     /// Set the formatting properties for a chart axis via a [`ChartFormat`]
