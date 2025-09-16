@@ -1568,6 +1568,7 @@ pub struct Worksheet {
     is_portrait: bool,
     page_view: PageView,
     zoom: u16,
+    zoom_to_fit: bool,
     print_scale: u16,
     print_options_changed: bool,
     center_horizontally: bool,
@@ -1771,6 +1772,7 @@ impl Worksheet {
             is_portrait: true,
             page_view: PageView::Normal,
             zoom: 100,
+            zoom_to_fit: false,
             print_scale: 100,
             print_options_changed: false,
             center_horizontally: false,
@@ -1892,7 +1894,7 @@ impl Worksheet {
     ///
     /// The `Worksheet::new_chartsheet()` method returns a standard
     /// [`Worksheet`] that can be used as a chartsheet by adding a chart using
-    /// the [`Worksheet::insert_image()`] method. It supports most other
+    /// the [`Worksheet::insert_chart()`] method. It supports most other
     /// worksheet functions apart from those that  are cell based such as
     /// `Worksheet::write()` and the other `Worksheet::insert*()` methods.
     ///
@@ -12939,6 +12941,24 @@ impl Worksheet {
         self
     }
 
+    /// Set a chartsheet to automatically zoom to fit the screen.
+    ///
+    /// The `set_zoom_to_fit()` method only has an effect on a
+    /// [Chartsheet](Worksheet::new_chartsheet) object. It ensures that the
+    /// chartsheet is zoomed automatically by Excel to fit the screen even when
+    /// the window is resized.
+    ///
+    /// This method doesn't have an effect on a standard worksheet.
+    ///
+    /// # Parameters
+    ///
+    /// - `enable`: A boolean value to enable or disable the zoom to fit.
+    ///
+    pub fn set_zoom_to_fit(&mut self, enable: bool) -> &mut Worksheet {
+        self.zoom_to_fit = enable;
+        self
+    }
+
     /// Freeze panes in a worksheet.
     ///
     /// The `set_freeze_panes()` method can be used to divide a worksheet into
@@ -17766,6 +17786,10 @@ impl Worksheet {
         }
 
         attributes.push(("workbookViewId", "0".to_string()));
+
+        if self.is_chartsheet && self.zoom_to_fit {
+            attributes.push(("zoomToFit", "1".to_string()));
+        }
 
         if self.panes.is_empty() && self.selected_range.0.is_empty() {
             xml_empty_tag(&mut self.writer, "sheetView", &attributes);
