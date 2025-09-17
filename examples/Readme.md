@@ -344,6 +344,9 @@ documentation and generally show how an individual function works.
 * `doc_chart_axis_set_name_font.rs` - An example of setting the font for a
   chart axis title.
 
+* `doc_chart_axis_set_name_format.rs` - A chart example demonstrating
+  setting the formatting of the title of chart axes.
+
 * `doc_chart_axis_set_name.rs` - A chart example demonstrating setting the
   title of chart axes.
 

@@ -5,11 +5,27 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.90.1] - 2025-09-17
+
+### Added
+
+- Added the [`Worksheet::set_zoom_to_fit()`] method for chartsheets. It ensures
+  that a chartsheet is zoomed automatically by Excel when the window is resized.
+
+  [Request #156].
+
+  [Request #156]: https://github.com/jmcnamara/rust_xlsxwriter/issues/156
+
+[`Worksheet::set_zoom_to_fit()`]: https://docs.rs/rust_xlsxwriter/latest/rust_xlsxwriter/worksheet/struct.Worksheet.html#method.set_zoom_to_fit
+
+- Updated optional `polars` dependency to v0.51.
+
+
 ## [0.90.0] - 2025-08-13
 
 ### Added
 
-- Update optional `polars` dependency to v0.50, mainly for `polar_excel_writer`.
+- Updated optional `polars` dependency to v0.50, mainly for `polar_excel_writer`.
 
 
 ## [0.89.1] - 2025-07-10
@@ -28,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Update optional `polars` dependency to v0.49.
+- Updated optional `polars` dependency to v0.49.
 
 
 ## [0.88.1] - 2025-06-28
