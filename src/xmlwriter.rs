@@ -279,21 +279,21 @@ pub(crate) fn escape_xml_escapes(original: &str) -> Cow<'_, str> {
     let string_end = original.len();
     let mut escaped_string = original.to_string();
 
-    // Match from right so we can escape target string at the same indices.
-    let matches: Vec<_> = original.rmatch_indices("_x").collect();
-
-    for (index, _) in matches {
+    // Match from the right so we can escape the target string from the end.
+    // This allows us to make changes in-place without affecting the indices of
+    // earlier matches.
+    for (index, _) in original.rmatch_indices("_x") {
         if index + UNICODE_ESCAPE_LENGTH > string_end {
             continue;
         }
 
         // Ensure that the end index is at a character boundary.
-        if !original.is_char_boundary(index + 6) {
+        if !original.is_char_boundary(index + (UNICODE_ESCAPE_LENGTH - 1)) {
             continue;
         }
 
         // Check that the digits in _xABCD_ are a valid hex code.
-        if original[index + 2..index + 6]
+        if original[index + 2..index + (UNICODE_ESCAPE_LENGTH - 1)]
             .chars()
             .all(|c| c.is_ascii_hexdigit())
         {
