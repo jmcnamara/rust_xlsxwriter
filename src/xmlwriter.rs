@@ -145,7 +145,7 @@ pub(crate) fn escape_url(data: &str) -> Cow<'_, str> {
 // -----------------------------------------------------------------------
 
 // Helper function to read XML data from a cursor for testing.
-#[allow(dead_code)]
+#[cfg(test)]
 pub(crate) fn cursor_to_str(cursor: &Cursor<Vec<u8>>) -> &str {
     str::from_utf8(cursor.get_ref()).unwrap()
 }
