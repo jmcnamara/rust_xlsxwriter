@@ -110,12 +110,9 @@ supported features are:
 The `rust_xlsxwriter` crate was designed and implemented based around the
 following design considerations:
 
-- **Fidelity with the Excel file format**. The library uses its own XML
-  writer module in order to be as close as possible to the format created by
-  Excel.
-- **Performance**. The library is designed to be as fast and efficient as
-  possible. It also supports a constant memory mode for writing large files,
-  which keeps memory usage to a minimum.
+- **Fidelity with the Excel file format**.
+- **Performance**. It also supports a constant memory mode for writing large
+  files, which keeps memory usage to a minimum.
 - **Comprehensive documentation**. In addition to the API documentation, the
   library has extensive user guides, a tutorial, and a cookbook of examples.
 - **Feature richness**. The library supports a wide range of Excel features,

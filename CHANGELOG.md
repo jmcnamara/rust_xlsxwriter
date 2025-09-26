@@ -5,6 +5,14 @@ This is the changelog/release notes for the `rust_xlsxwriter` crate.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.90.2] - 2025-09-26
+
+### Added
+
+- Made `Formula::escape_table_functions()` method public. This is to allow third
+  party wrappers like `polars_excel_writer` to escape table functions.
+
+
 ## [0.90.1] - 2025-09-17
 
 ### Added
