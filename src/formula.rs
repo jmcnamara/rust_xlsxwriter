@@ -962,10 +962,22 @@ impl Formula {
         (formula.to_string(), has_dynamic_function)
     }
 
-    // Escape/expand table functions. This mainly involves converting Excel 2010
-    // "@" table ref to 2007 "[#This Row],". We parse the string to avoid
-    // replacements in string literals within the formula.
-    pub(crate) fn escape_table_functions(mut self) -> Formula {
+    /// Escape table functions in the formula.
+    ///
+    /// This method is used to escape table functions in a formula. This mainly
+    /// involves converting Excel 2010 `@` table references to the older 2007
+    /// format `[#This Row],`. This is required by Excel for backward
+    /// compatibility.
+    ///
+    /// This function is public but hidden since it is mainly only required by
+    /// `polars_excel_writer` or other third party wrappers.
+    ///
+    #[doc(hidden)]
+    pub fn escape_table_functions(mut self) -> Formula {
+        // Escape/expand table functions. This mainly involves converting Excel
+        // 2010 "@" table ref to 2007 "[#This Row],". We parse the string rather
+        // than using a simple replacement to avoid substitutions within string
+        // literals in the formula.
         if !self.formula_string.contains('@') {
             // No escaping required.
             return self;
